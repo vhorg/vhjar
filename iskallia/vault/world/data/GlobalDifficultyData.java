@@ -8,7 +8,6 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
@@ -49,7 +48,8 @@ public class GlobalDifficultyData extends WorldSavedData {
    }
 
    public void openDifficultySelection(ServerPlayerEntity sPlayer) {
-      if ((ServerLifecycleHooks.getCurrentServer() instanceof IntegratedServer || sPlayer.func_211513_k(sPlayer.func_184102_h().func_110455_j()))
+      if (ServerLifecycleHooks.getCurrentServer() != null
+         && (!ServerLifecycleHooks.getCurrentServer().func_71262_S() || sPlayer.func_211513_k(sPlayer.func_184102_h().func_110455_j()))
          && (this.getVaultDifficulty() == null || this.getCrystalCost() == null)) {
          final CompoundNBT data = new CompoundNBT();
          data.func_74768_a("VaultDifficulty", GlobalDifficultyData.Difficulty.STANDARD.ordinal());
