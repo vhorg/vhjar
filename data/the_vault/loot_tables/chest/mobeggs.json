@@ -1,0 +1,239 @@
+{
+    "pools": [
+      {
+        "name": "EnchantedBooks",
+        "rolls": {
+          "min": 2,
+          "max": 3
+        },
+        "entries": [
+            { "_name": "Creeper",
+                "type": "minecraft:item",
+                "weight": 4,
+                "name": "minecraft:creeper_spawn_egg",
+                "functions": [
+                  {
+                    "function": "minecraft:set_count",
+                    "count": {
+                      "min": 1,
+                      "max": 2
+                    }
+                  }
+                ]
+            },
+            { "_name": "CaveSpider",
+              "type": "minecraft:item",
+              "weight": 5,
+              "name": "minecraft:cave_spider_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Skelly",
+              "type": "minecraft:item",
+              "weight": 8,
+              "name": "minecraft:skeleton_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Piglin",
+              "type": "minecraft:item",
+              "weight": 4,
+              "name": "minecraft:piglin_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Spider",
+              "type": "minecraft:item",
+              "weight": 8,
+              "name": "minecraft:spider_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Slime",
+              "type": "minecraft:item",
+              "weight": 4,
+              "name": "minecraft:slime_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Zombie",
+              "type": "minecraft:item",
+              "weight": 8,
+              "name": "minecraft:zombie_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Enderman",
+              "type": "minecraft:item",
+              "weight": 4,
+              "name": "minecraft:enderman_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Blaze",
+              "type": "minecraft:item",
+              "weight": 4,
+              "name": "minecraft:blaze_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Ghast",
+              "type": "minecraft:item",
+              "weight": 2,
+              "name": "minecraft:ghast_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 1
+                  }
+                }
+              ]
+            },
+            { "_name": "Guardian",
+              "type": "minecraft:item",
+              "weight": 3,
+              "name": "minecraft:guardian_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Ravager",
+              "type": "minecraft:item",
+              "weight": 1,
+              "name": "minecraft:ravager_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 1
+                  }
+                }
+              ]
+            },
+            { "_name": "Wither Skel",
+              "type": "minecraft:item",
+              "weight": 3,
+              "name": "minecraft:wither_skeleton_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Witch",
+              "type": "minecraft:item",
+              "weight": 3,
+              "name": "minecraft:witch_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Vindicator",
+              "type": "minecraft:item",
+              "weight": 5,
+              "name": "minecraft:vindicator_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            },
+            { "_name": "Magmabois",
+              "type": "minecraft:item",
+              "weight": 6,
+              "name": "minecraft:magma_cube_spawn_egg",
+              "functions": [
+                {
+                  "function": "minecraft:set_count",
+                  "count": {
+                    "min": 1,
+                    "max": 2
+                  }
+                }
+              ]
+            }
+
+
+        ]
+      }
+    ]
+}

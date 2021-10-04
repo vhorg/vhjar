@@ -14,10 +14,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
 public class AbilityUpgradeMessage {
-   public String abilityName;
-
-   public AbilityUpgradeMessage() {
-   }
+   private final String abilityName;
 
    public AbilityUpgradeMessage(String abilityName) {
       this.abilityName = abilityName;
@@ -28,9 +25,7 @@ public class AbilityUpgradeMessage {
    }
 
    public static AbilityUpgradeMessage decode(PacketBuffer buffer) {
-      AbilityUpgradeMessage message = new AbilityUpgradeMessage();
-      message.abilityName = buffer.func_150789_c(32767);
-      return message;
+      return new AbilityUpgradeMessage(buffer.func_150789_c(32767));
    }
 
    public static void handle(AbilityUpgradeMessage message, Supplier<Context> contextSupplier) {
@@ -38,17 +33,19 @@ public class AbilityUpgradeMessage {
       context.enqueueWork(() -> {
          ServerPlayerEntity sender = context.getSender();
          if (sender != null) {
-            AbilityGroup<?> abilityGroup = ModConfigs.ABILITIES.getByName(message.abilityName);
+            AbilityGroup<?, ?> abilityGroup = ModConfigs.ABILITIES.getAbilityGroupByName(message.abilityName);
             PlayerVaultStatsData statsData = PlayerVaultStatsData.get((ServerWorld)sender.field_70170_p);
             PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerWorld)sender.field_70170_p);
             AbilityTree abilityTree = abilitiesData.getAbilities(sender);
-            AbilityNode<?> abilityNode = abilityTree.getNodeByName(message.abilityName);
+            AbilityNode<?, ?> abilityNode = abilityTree.getNodeByName(message.abilityName);
             PlayerVaultStats stats = statsData.getVaultStats(sender);
-            if (abilityNode.getLevel() < abilityGroup.getMaxLevel()) {
-               int requiredSkillPts = abilityGroup.cost(abilityNode.getLevel() + 1);
-               if (stats.getUnspentSkillPts() >= requiredSkillPts) {
-                  abilitiesData.upgradeAbility(sender, abilityNode);
-                  statsData.spendSkillPts(sender, requiredSkillPts);
+            if (stats.getVaultLevel() >= abilityNode.getAbilityConfig().getLevelRequirement()) {
+               if (abilityNode.getLevel() < abilityGroup.getMaxLevel()) {
+                  int requiredSkillPts = abilityGroup.levelUpCost(abilityNode.getSpecialization(), abilityNode.getLevel() + 1);
+                  if (stats.getUnspentSkillPts() >= requiredSkillPts) {
+                     abilitiesData.upgradeAbility(sender, abilityNode);
+                     statsData.spendSkillPts(sender, requiredSkillPts);
+                  }
                }
             }
          }

@@ -1,9 +1,7 @@
 package iskallia.vault.block;
 
-import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.world.data.PlayerVaultAltarData;
 import javax.annotation.Nullable;
@@ -16,6 +14,7 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
@@ -58,45 +57,22 @@ public class VaultAltarBlock extends Block {
    }
 
    public ActionResultType func_225533_a_(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-      if (!worldIn.field_72995_K && handIn == Hand.MAIN_HAND) {
+      if (!worldIn.field_72995_K && handIn == Hand.MAIN_HAND && player instanceof ServerPlayerEntity) {
          ItemStack heldItem = player.func_184614_ca();
          VaultAltarTileEntity altar = this.getAltarTileEntity(worldIn, pos);
-         if (altar == null || altar.isInfusing()) {
+         if (altar == null) {
             return ActionResultType.SUCCESS;
-         } else if (player.func_225608_bj_() && altar.containsVaultRock()) {
-            return this.onRemoveVaultRock(player, altar);
-         } else if (heldItem.func_77973_b() != ModItems.VAULT_ROCK) {
-            return ActionResultType.SUCCESS;
+         } else if (altar.getAltarState() == VaultAltarTileEntity.AltarState.IDLE) {
+            return heldItem.func_77973_b() != ModItems.VAULT_ROCK ? ActionResultType.SUCCESS : altar.onAddVaultRock((ServerPlayerEntity)player, heldItem);
          } else {
-            PlayerVaultAltarData data = PlayerVaultAltarData.get((ServerWorld)worldIn);
-            return this.onAddVaultRock((ServerWorld)worldIn, player, altar, heldItem, data);
+            return !player.func_225608_bj_()
+                  || altar.getAltarState() != VaultAltarTileEntity.AltarState.ACCEPTING && altar.getAltarState() != VaultAltarTileEntity.AltarState.COMPLETE
+               ? ActionResultType.SUCCESS
+               : altar.onRemoveVaultRock();
          }
       } else {
          return ActionResultType.SUCCESS;
       }
-   }
-
-   private ActionResultType onAddVaultRock(ServerWorld worldIn, PlayerEntity player, VaultAltarTileEntity altar, ItemStack heldItem, PlayerVaultAltarData data) {
-      if (altar.containsVaultRock()) {
-         return ActionResultType.FAIL;
-      } else {
-         AltarInfusionRecipe recipe = data.getRecipe(worldIn, player);
-         altar.setRecipe(recipe);
-         altar.setContainsVaultRock(true);
-         if (!player.func_184812_l_()) {
-            heldItem.func_190920_e(heldItem.func_190916_E() - 1);
-         }
-
-         altar.sendUpdates();
-         return ActionResultType.SUCCESS;
-      }
-   }
-
-   private ActionResultType onRemoveVaultRock(PlayerEntity player, VaultAltarTileEntity altar) {
-      altar.setContainsVaultRock(false);
-      altar.sendUpdates();
-      player.func_184611_a(Hand.MAIN_HAND, new ItemStack(ModItems.VAULT_ROCK));
-      return ActionResultType.SUCCESS;
    }
 
    public void func_220069_a(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
@@ -104,20 +80,8 @@ public class VaultAltarBlock extends Block {
          boolean powered = worldIn.func_175640_z(pos);
          if (powered != (Boolean)state.func_177229_b(POWERED) && powered) {
             VaultAltarTileEntity altar = this.getAltarTileEntity(worldIn, pos);
-            if (altar != null && altar.containsVaultRock()) {
-               if (altar.isInfusing() || altar.getOwner() == null) {
-                  return;
-               }
-
-               PlayerVaultAltarData data = PlayerVaultAltarData.get((ServerWorld)worldIn);
-               if (data.hasRecipe(altar.getOwner())) {
-                  AltarInfusionRecipe recipe = data.getRecipe(altar.getOwner());
-                  if (recipe.isComplete()) {
-                     data = data.remove(altar.getOwner());
-                     altar.startInfusionTimer(ModConfigs.VAULT_ALTAR.INFUSION_TIME);
-                     altar.setInfusing(true);
-                  }
-               }
+            if (altar != null) {
+               altar.onAltarPowered();
             }
          }
 
@@ -138,13 +102,18 @@ public class VaultAltarBlock extends Block {
       VaultAltarTileEntity altar = this.getAltarTileEntity(world, pos);
       if (altar != null) {
          if (newState.func_177230_c() == Blocks.field_150350_a) {
-            if (altar.containsVaultRock()) {
-               ItemEntity entity = new ItemEntity(world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), new ItemStack(ModItems.VAULT_ROCK));
+            if (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING || altar.getAltarState() == VaultAltarTileEntity.AltarState.COMPLETE) {
+               ItemEntity entity = new ItemEntity(
+                  world, pos.func_177958_n() + 0.5, pos.func_177956_o() + 1.2, pos.func_177952_p() + 0.5, new ItemStack(ModItems.VAULT_ROCK)
+               );
                world.func_217376_c(entity);
             }
 
-            ItemEntity entity = new ItemEntity(world, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), new ItemStack(ModBlocks.VAULT_ALTAR));
+            ItemEntity entity = new ItemEntity(
+               world, pos.func_177958_n() + 0.5, pos.func_177956_o() + 1.2, pos.func_177952_p() + 0.5, new ItemStack(ModBlocks.VAULT_ALTAR)
+            );
             world.func_217376_c(entity);
+            PlayerVaultAltarData.get((ServerWorld)world).removeAltar(altar.getOwner(), pos);
             super.func_196243_a(state, world, pos, newState, isMoving);
          }
       }
@@ -155,6 +124,9 @@ public class VaultAltarBlock extends Block {
          VaultAltarTileEntity altar = (VaultAltarTileEntity)worldIn.func_175625_s(pos);
          if (altar != null && placer instanceof PlayerEntity) {
             altar.setOwner(placer.func_110124_au());
+            altar.setAltarState(VaultAltarTileEntity.AltarState.IDLE);
+            altar.sendUpdates();
+            PlayerVaultAltarData.get((ServerWorld)worldIn).addAltar(placer.func_110124_au(), pos);
             super.func_180633_a(worldIn, pos, state, placer, stack);
          }
       }

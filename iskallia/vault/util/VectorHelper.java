@@ -1,6 +1,8 @@
 package iskallia.vault.util;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class VectorHelper {
@@ -31,5 +33,17 @@ public class VectorHelper {
 
    public static Vector3d getMovementVelocity(Vector3d current, Vector3d target, float speed) {
       return multiply(getDirectionNormalized(target, current), speed);
+   }
+
+   public static Vector2f normalize(Vector2f v) {
+      float length = (float)Math.sqrt(v.field_189982_i * v.field_189982_i + v.field_189983_j * v.field_189983_j);
+      return new Vector2f(v.field_189982_i / length, v.field_189983_j / length);
+   }
+
+   public static Vector2f rotateDegrees(Vector2f v, float angleDeg) {
+      float angle = (float)Math.toRadians(angleDeg);
+      float cosAngle = MathHelper.func_76134_b(angle);
+      float sinAngle = MathHelper.func_76126_a(angle);
+      return new Vector2f(v.field_189982_i * cosAngle - v.field_189983_j * sinAngle, v.field_189982_i * sinAngle + v.field_189983_j * cosAngle);
    }
 }

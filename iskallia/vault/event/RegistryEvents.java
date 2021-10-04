@@ -1,12 +1,15 @@
 package iskallia.vault.event;
 
+import iskallia.vault.init.ModAbilities;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModFeatures;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.init.ModLootModifiers;
 import iskallia.vault.init.ModModels;
 import iskallia.vault.init.ModRecipes;
 import iskallia.vault.init.ModSounds;
@@ -15,6 +18,8 @@ import iskallia.vault.util.RelicSet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.RangedAttribute;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.IRecipeSerializer;
@@ -24,6 +29,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -35,14 +41,17 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 public class RegistryEvents {
    @SubscribeEvent
    public static void onBlockRegister(Register<Block> event) {
+      ModConfigs.registerCompressionConfigs();
       ModBlocks.registerBlocks(event);
    }
 
    @SubscribeEvent
    public static void onItemRegister(Register<Item> event) {
+      ModConfigs.registerCompressionConfigs();
       ModItems.registerItems(event);
       ModBlocks.registerBlockItems(event);
       RelicSet.register();
+      ModAbilities.init();
    }
 
    @SubscribeEvent
@@ -50,6 +59,7 @@ public class RegistryEvents {
       ModModels.setupRenderLayers();
       ModModels.ItemProperty.register();
       ModModels.GearModel.register();
+      ModModels.SpecialGearModel.register();
    }
 
    @SubscribeEvent
@@ -90,12 +100,22 @@ public class RegistryEvents {
    }
 
    @SubscribeEvent
+   public static void registerGlobalLootModifierSerializers(Register<GlobalLootModifierSerializer<?>> event) {
+      ModLootModifiers.registerGlobalModifiers(event);
+   }
+
+   @SubscribeEvent
    public static void onEffectRegister(Register<Effect> event) {
       ModEffects.register(event);
    }
 
    @SubscribeEvent
    public static void onAttributeRegister(Register<Attribute> event) {
+      Attribute attr = Attributes.field_233818_a_;
+      if (attr instanceof RangedAttribute) {
+         ((RangedAttribute)attr).field_111118_b = Double.MAX_VALUE;
+      }
+
       ModAttributes.register(event);
    }
 }

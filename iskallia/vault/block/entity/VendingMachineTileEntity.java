@@ -1,5 +1,6 @@
 package iskallia.vault.block.entity;
 
+import com.google.common.collect.Iterables;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.ItemTraderCore;
 import iskallia.vault.util.SkinProfile;
@@ -49,29 +50,14 @@ public class VendingMachineTileEntity extends SkinnableTileEntity {
       if (lastCore == null) {
          return ItemStack.field_190927_a;
       } else {
-         ItemStack stack = ItemTraderCore.getStackFromCore(lastCore, lastCore.getType());
+         ItemStack stack = ItemTraderCore.getStackFromCore(lastCore);
          this.cores.remove(lastCore);
          return stack;
       }
    }
 
    public TraderCore getRenderCore() {
-      if (this.cores != null && this.cores.size() != 0) {
-         TraderCore renderCore = null;
-
-         for (TraderCore core : this.cores) {
-            if (renderCore == null || renderCore.getValue() < core.getValue()) {
-               renderCore = core;
-               if (core.isMegahead()) {
-                  break;
-               }
-            }
-         }
-
-         return renderCore;
-      } else {
-         return null;
-      }
+      return this.cores == null ? null : (TraderCore)Iterables.getFirst(this.cores, null);
    }
 
    @Override

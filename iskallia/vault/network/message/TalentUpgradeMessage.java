@@ -14,23 +14,18 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
 public class TalentUpgradeMessage {
-   public String talentName;
-
-   public TalentUpgradeMessage() {
-   }
+   private final String talentName;
 
    public TalentUpgradeMessage(String talentName) {
       this.talentName = talentName;
    }
 
    public static void encode(TalentUpgradeMessage message, PacketBuffer buffer) {
-      buffer.func_211400_a(message.talentName, 32767);
+      buffer.func_180714_a(message.talentName);
    }
 
    public static TalentUpgradeMessage decode(PacketBuffer buffer) {
-      TalentUpgradeMessage message = new TalentUpgradeMessage();
-      message.talentName = buffer.func_150789_c(32767);
-      return message;
+      return new TalentUpgradeMessage(buffer.func_150789_c(32767));
    }
 
    public static void handle(TalentUpgradeMessage message, Supplier<Context> contextSupplier) {
@@ -46,10 +41,12 @@ public class TalentUpgradeMessage {
                TalentNode<?> talentNode = talentTree.getNodeByName(message.talentName);
                PlayerVaultStats stats = statsData.getVaultStats(sender);
                if (talentNode.getLevel() < talentGroup.getMaxLevel()) {
-                  int requiredSkillPts = talentGroup.cost(talentNode.getLevel() + 1);
-                  if (stats.getUnspentSkillPts() >= requiredSkillPts) {
-                     abilitiesData.upgradeTalent(sender, talentNode);
-                     statsData.spendSkillPts(sender, requiredSkillPts);
+                  if (stats.getVaultLevel() >= talentNode.getGroup().getTalent(talentNode.getLevel() + 1).getLevelRequirement()) {
+                     int requiredSkillPts = talentGroup.cost(talentNode.getLevel() + 1);
+                     if (stats.getUnspentSkillPts() >= requiredSkillPts) {
+                        abilitiesData.upgradeTalent(sender, talentNode);
+                        statsData.spendSkillPts(sender, requiredSkillPts);
+                     }
                   }
                }
             }

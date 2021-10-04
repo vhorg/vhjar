@@ -99,7 +99,7 @@ public class ArenaStructure extends Structure<ArenaStructure.Config> {
       ) {
          BlockPos blockpos = new BlockPos(chunkX * 16, 32, chunkZ * 16);
          ArenaStructure.Pools.init();
-         JigsawGenerator.func_242837_a(
+         JigsawGeneratorLegacy.func_242837_a(
             registry, config.toVillageConfig(), AbstractVillagePiece::new, gen, manager, blockpos, this.field_75075_a, this.field_214631_d, false, false
          );
          this.func_202500_a();

@@ -1,9 +1,12 @@
 package iskallia.vault.item;
 
 import iskallia.vault.Vault;
+import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.world.data.VaultRaidData;
-import iskallia.vault.world.raid.VaultRaid;
+import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.logic.objective.VaultObjective;
+import iskallia.vault.world.vault.time.extension.FruitExtension;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.client.util.ITooltipFlag;
@@ -31,6 +34,8 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemVaultFruit extends Item {
    public static Food VAULT_FRUIT_FOOD = new Builder().func_221454_a(0.0F).func_221456_a(0).func_221457_c().func_221455_b().func_221453_d();
@@ -40,6 +45,26 @@ public class ItemVaultFruit extends Item {
       super(new Properties().func_200916_a(group).func_221540_a(VAULT_FRUIT_FOOD).func_200917_a(64));
       this.setRegistryName(id);
       this.extraVaultTicks = extraVaultTicks;
+   }
+
+   public boolean addTime(World world, PlayerEntity player) {
+      if (!world.func_201670_d() && world instanceof ServerWorld) {
+         VaultRaid vault = VaultRaidData.get((ServerWorld)world).getActiveFor(player.func_110124_au());
+         if (vault == null) {
+            return false;
+         } else {
+            for (VaultObjective objective : vault.getAllObjectives()) {
+               if (objective.preventsEatingExtensionFruit(world.func_73046_m(), vault)) {
+                  return false;
+               }
+            }
+
+            vault.getPlayers().forEach(vPlayer -> vPlayer.getTimer().addTime(new FruitExtension(this), 0));
+            return true;
+         }
+      } else {
+         return false;
+      }
    }
 
    public int getExtraVaultTicks() {
@@ -53,6 +78,7 @@ public class ItemVaultFruit extends Item {
          : super.func_77659_a(worldIn, playerIn, handIn);
    }
 
+   @OnlyIn(Dist.CLIENT)
    public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
       tooltip.add(new StringTextComponent(""));
       StringTextComponent comp = new StringTextComponent("[!] Only edible inside a Vault");
@@ -76,10 +102,11 @@ public class ItemVaultFruit extends Item {
       public ItemStack func_77654_b(ItemStack stack, World worldIn, LivingEntity entityLiving) {
          if (!worldIn.field_72995_K && entityLiving instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity)entityLiving;
-            VaultRaid raid = VaultRaidData.get((ServerWorld)worldIn).getActiveFor(player);
-            raid.ticksLeft = raid.ticksLeft + this.getExtraVaultTicks();
-            raid.sTickLeft = raid.sTickLeft + this.getExtraVaultTicks();
-            player.func_70097_a(this.damageSource, 6.0F);
+            if (!this.addTime(worldIn, player)) {
+               return stack;
+            }
+
+            EntityHelper.changeHealth(player, -6);
             worldIn.func_184148_a(
                null,
                player.func_226277_ct_(),
@@ -95,6 +122,7 @@ public class ItemVaultFruit extends Item {
          return super.func_77654_b(stack, worldIn, entityLiving);
       }
 
+      @OnlyIn(Dist.CLIENT)
       @Override
       public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
          tooltip.add(new StringTextComponent(""));
@@ -125,10 +153,11 @@ public class ItemVaultFruit extends Item {
       public ItemStack func_77654_b(ItemStack stack, World worldIn, LivingEntity entityLiving) {
          if (!worldIn.field_72995_K && entityLiving instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity)entityLiving;
-            VaultRaid raid = VaultRaidData.get((ServerWorld)worldIn).getActiveFor(player);
-            raid.ticksLeft = raid.ticksLeft + this.getExtraVaultTicks();
-            raid.sTickLeft = raid.sTickLeft + this.getExtraVaultTicks();
-            player.func_70097_a(this.damageSource, MathUtilities.getRandomInt(10, 20));
+            if (!this.addTime(worldIn, player)) {
+               return stack;
+            }
+
+            EntityHelper.changeHealth(player, -MathUtilities.getRandomInt(10, 20));
             if (MathUtilities.randomFloat(0.0F, 100.0F) <= 50.0F) {
                player.func_195064_c(new EffectInstance(Effects.field_76436_u, 600));
             } else {
@@ -150,6 +179,7 @@ public class ItemVaultFruit extends Item {
          return super.func_77654_b(stack, worldIn, entityLiving);
       }
 
+      @OnlyIn(Dist.CLIENT)
       @Override
       public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
          tooltip.add(new StringTextComponent(""));
@@ -183,10 +213,11 @@ public class ItemVaultFruit extends Item {
       public ItemStack func_77654_b(ItemStack stack, World worldIn, LivingEntity entityLiving) {
          if (!worldIn.field_72995_K && entityLiving instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity)entityLiving;
-            VaultRaid raid = VaultRaidData.get((ServerWorld)worldIn).getActiveFor(player);
-            raid.ticksLeft = raid.ticksLeft + this.getExtraVaultTicks();
-            raid.sTickLeft = raid.sTickLeft + this.getExtraVaultTicks();
-            player.func_70097_a(this.damageSource, 10.0F);
+            if (!this.addTime(worldIn, player)) {
+               return stack;
+            }
+
+            EntityHelper.changeHealth(player, -10);
             worldIn.func_184148_a(
                null,
                player.func_226277_ct_(),
@@ -202,6 +233,7 @@ public class ItemVaultFruit extends Item {
          return super.func_77654_b(stack, worldIn, entityLiving);
       }
 
+      @OnlyIn(Dist.CLIENT)
       @Override
       public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
          tooltip.add(new StringTextComponent(""));
@@ -230,9 +262,10 @@ public class ItemVaultFruit extends Item {
       public ItemStack func_77654_b(ItemStack stack, World worldIn, LivingEntity entityLiving) {
          if (!worldIn.field_72995_K && entityLiving instanceof ServerPlayerEntity) {
             ServerPlayerEntity player = (ServerPlayerEntity)entityLiving;
-            VaultRaid raid = VaultRaidData.get((ServerWorld)worldIn).getActiveFor(player);
-            raid.ticksLeft = raid.ticksLeft + this.getExtraVaultTicks();
-            raid.sTickLeft = raid.sTickLeft + this.getExtraVaultTicks();
+            if (!this.addTime(worldIn, player)) {
+               return stack;
+            }
+
             worldIn.func_184148_a(
                null,
                player.func_226277_ct_(),
@@ -248,6 +281,7 @@ public class ItemVaultFruit extends Item {
          return super.func_77654_b(stack, worldIn, entityLiving);
       }
 
+      @OnlyIn(Dist.CLIENT)
       @Override
       public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
          tooltip.add(new StringTextComponent(""));

@@ -1,6 +1,6 @@
 package iskallia.vault.client.gui.widget;
 
-import iskallia.vault.client.gui.helper.Rectangle;
+import java.awt.Rectangle;
 
 public class RaffleEntry {
    protected Rectangle bounds;

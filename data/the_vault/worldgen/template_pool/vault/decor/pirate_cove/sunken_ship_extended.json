@@ -1,0 +1,107 @@
+{
+  "name": "the_vault:vault/decor/pirate_cove/sunken_ship_extended",
+  "fallback": "the_vault:vault/decor/pirate_cove/sunken_ship_extended",
+  "elements": [
+    {
+      "weight": 18,
+      "element": {
+        "element_type": "minecraft:empty_pool_element"
+      }
+    },
+	{
+        "weight": 9,
+        "element": {
+          "processors": [
+              
+              "the_vault:treasure/barrel_half"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+              {
+                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/s1",
+                  "projection": "rigid",
+                  "element_type": "the_vault:paletted_single_pool_element",
+                  "processors": "the_vault:pirate_cove/ship_trap"
+              }
+          ]
+        }
+    },
+	{
+        "weight": 9,
+        "element": {
+          "processors": [
+              
+              "the_vault:treasure/barrel_half"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+              {
+                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/s2",
+                  "projection": "rigid",
+                  "element_type": "the_vault:paletted_single_pool_element",
+                  "processors": "the_vault:pirate_cove/ship_trap"
+              }
+          ]
+        }
+    },
+	{
+        "weight": 9,
+        "element": {
+          "processors": [
+              
+              "the_vault:treasure/barrel_half"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+              {
+                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/s3",
+                  "projection": "rigid",
+                  "element_type": "the_vault:paletted_single_pool_element",
+                  "processors": "the_vault:pirate_cove/ship_trap"
+              }
+          ]
+        }
+    },
+	{
+        "weight": 9,
+        "element": {
+          "processors": [
+              
+              "the_vault:treasure/barrel_half"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+              {
+                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/s4",
+                  "projection": "rigid",
+                  "element_type": "the_vault:paletted_single_pool_element",
+                  "processors": "the_vault:pirate_cove/ship_trap"
+              }
+          ]
+        }
+    },
+    {
+        "weight": 1,
+        "element": {
+          "processors": [
+              
+              "the_vault:treasure/barrel_half"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+              {
+                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/c1",
+                  "projection": "rigid",
+                  "element_type": "the_vault:paletted_single_pool_element",
+                  "processors": "the_vault:pirate_cove/ship_trap"
+              }
+          ]
+        }
+    }
+  ]
+}

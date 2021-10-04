@@ -1,5 +1,6 @@
 package iskallia.vault.network.message;
 
+import iskallia.vault.skill.ability.AbilityGroup;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.function.Supplier;
@@ -14,7 +15,7 @@ public class AbilityKeyMessage {
    public boolean scrollUp;
    public boolean scrollDown;
    public boolean shouldCancelDown;
-   public int abilityIndex = -1;
+   public String selectedAbility = "";
 
    public AbilityKeyMessage() {
    }
@@ -30,8 +31,8 @@ public class AbilityKeyMessage {
       this.shouldCancelDown = shouldCancelDown;
    }
 
-   public AbilityKeyMessage(int selectAbilityIndex) {
-      this.abilityIndex = selectAbilityIndex;
+   public AbilityKeyMessage(AbilityGroup<?, ?> selectAbility) {
+      this.selectedAbility = selectAbility.getParentName();
    }
 
    public static void encode(AbilityKeyMessage message, PacketBuffer buffer) {
@@ -40,7 +41,7 @@ public class AbilityKeyMessage {
       buffer.writeBoolean(message.scrollUp);
       buffer.writeBoolean(message.scrollDown);
       buffer.writeBoolean(message.shouldCancelDown);
-      buffer.writeInt(message.abilityIndex);
+      buffer.func_180714_a(message.selectedAbility);
    }
 
    public static AbilityKeyMessage decode(PacketBuffer buffer) {
@@ -50,7 +51,7 @@ public class AbilityKeyMessage {
       message.scrollUp = buffer.readBoolean();
       message.scrollDown = buffer.readBoolean();
       message.shouldCancelDown = buffer.readBoolean();
-      message.abilityIndex = buffer.readInt();
+      message.selectedAbility = buffer.func_150789_c(32767);
       return message;
    }
 
@@ -71,8 +72,8 @@ public class AbilityKeyMessage {
                abilityTree.keyDown(sender.field_71133_b);
             } else if (message.shouldCancelDown) {
                abilityTree.cancelKeyDown(sender.field_71133_b);
-            } else if (message.abilityIndex != -1) {
-               abilityTree.quickSelectAbility(sender.field_71133_b, message.abilityIndex);
+            } else if (!message.selectedAbility.isEmpty()) {
+               abilityTree.quickSelectAbility(sender.field_71133_b, message.selectedAbility);
             }
          }
       });

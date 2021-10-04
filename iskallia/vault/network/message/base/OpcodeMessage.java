@@ -9,12 +9,12 @@ public class OpcodeMessage<OPC extends Enum<OPC>> {
    public CompoundNBT payload;
 
    public void encodeSelf(OpcodeMessage<OPC> message, PacketBuffer buffer) {
-      buffer.writeInt(message.opcode.ordinal());
+      buffer.func_179249_a(message.opcode);
       buffer.func_150786_a(message.payload);
    }
 
    public void decodeSelf(PacketBuffer buffer, Class<OPC> enumClass) {
-      this.opcode = enumClass.getEnumConstants()[buffer.readInt()];
+      this.opcode = (OPC)buffer.func_179257_a(enumClass);
       this.payload = buffer.func_150793_b();
    }
 

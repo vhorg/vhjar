@@ -1,8 +1,9 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.config.DurabilityConfig;
 import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.gear.VaultGear;
-import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.skill.talent.type.UnbreakableTalent;
 import iskallia.vault.world.data.PlayerTalentsData;
@@ -11,12 +12,13 @@ import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.enchantment.UnbreakingEnchantment;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -48,44 +50,44 @@ public abstract class MixinItemStack {
    public abstract Item func_77973_b();
 
    @Overwrite
-   public boolean func_96631_a(int amount, Random rand, @Nullable ServerPlayerEntity damager) {
+   public boolean func_96631_a(int damage, Random rand, @Nullable ServerPlayerEntity damager) {
       if (!this.func_77984_f()) {
          return false;
       } else {
-         if (amount > 0) {
-            int i = EnchantmentHelper.func_77506_a(Enchantments.field_185307_s, (ItemStack)this);
+         if (damage > 0) {
+            int unbreakingLevel = EnchantmentHelper.func_77506_a(Enchantments.field_185307_s, (ItemStack)this);
             if (damager != null) {
                TalentTree abilities = PlayerTalentsData.get(damager.func_71121_q()).getTalents(damager);
 
-               for (TalentNode<?> node : abilities.getNodes()) {
-                  if (node.getTalent() instanceof UnbreakableTalent) {
-                     UnbreakableTalent talent = (UnbreakableTalent)node.getTalent();
-                     i = (int)(i + talent.getExtraUnbreaking());
-                  }
+               for (UnbreakableTalent talent : abilities.getTalents(UnbreakableTalent.class)) {
+                  unbreakingLevel = (int)(unbreakingLevel + talent.getExtraUnbreaking());
                }
             }
 
-            int j = 0;
+            int damageNegation = 0;
+            boolean isArmor = ((ItemStack)this).func_77973_b() instanceof ArmorItem;
+            DurabilityConfig cfg = ModConfigs.DURBILITY;
+            float chance = isArmor ? cfg.getArmorDurabilityIgnoreChance(unbreakingLevel) : cfg.getDurabilityIgnoreChance(unbreakingLevel);
 
-            for (int k = 0; i > 0 && k < amount; k++) {
-               if (UnbreakingEnchantment.func_92097_a((ItemStack)this, i, rand)) {
-                  j++;
+            for (int k = 0; unbreakingLevel > 0 && k < damage; k++) {
+               if (rand.nextFloat() < chance) {
+                  damageNegation++;
                }
             }
 
-            amount -= j;
-            if (amount <= 0) {
+            damage -= damageNegation;
+            if (damage <= 0) {
                return false;
             }
          }
 
-         if (damager != null && amount != 0) {
-            CriteriaTriggers.field_193132_s.func_193158_a(damager, (ItemStack)this, this.func_77952_i() + amount);
+         if (damager != null && damage != 0) {
+            CriteriaTriggers.field_193132_s.func_193158_a(damager, (ItemStack)this, this.func_77952_i() + damage);
          }
 
-         int l = this.func_77952_i() + amount;
-         this.func_196085_b(l);
-         return l >= this.func_77958_k();
+         int absDamage = this.func_77952_i() + damage;
+         this.func_196085_b(absDamage);
+         return absDamage >= this.func_77958_k();
       }
    }
 
@@ -101,7 +103,8 @@ public abstract class MixinItemStack {
          VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(itemStack, VaultGear.Rarity.COMMON).getValue(itemStack);
          if (state != VaultGear.State.UNIDENTIFIED) {
             IFormattableTextComponent returnValue = (IFormattableTextComponent)ci.getReturnValue();
-            ci.setReturnValue(returnValue.func_240699_a_(rarity.color));
+            Style style = returnValue.func_150256_b().func_240718_a_(rarity.getColor());
+            ci.setReturnValue(returnValue.func_230530_a_(style));
          }
       }
    }

@@ -3,9 +3,9 @@ package iskallia.vault.block;
 import iskallia.vault.block.entity.CryoChamberTileEntity;
 import iskallia.vault.container.RenamingContainer;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.ItemTraderCore;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.RenameType;
 import iskallia.vault.vending.TraderCore;
 import javax.annotation.Nullable;
@@ -25,6 +25,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.DirectionProperty;
@@ -38,6 +39,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -75,12 +77,26 @@ public class CryoChamberBlock extends Block {
       return false;
    }
 
+   public void func_149666_a(ItemGroup group, NonNullList<ItemStack> items) {
+      for (CryoChamberBlock.ChamberState state : CryoChamberBlock.ChamberState.values()) {
+         ItemStack stack = new ItemStack(this);
+         stack.func_196085_b(state.ordinal());
+         items.add(stack);
+      }
+   }
+
    public boolean hasTileEntity(BlockState state) {
       return state.func_177229_b(HALF) == DoubleBlockHalf.LOWER;
    }
 
    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-      return state.func_177229_b(HALF) == DoubleBlockHalf.LOWER ? ModBlocks.CRYO_CHAMBER_TILE_ENTITY.func_200968_a() : null;
+      if (state.func_177229_b(HALF) == DoubleBlockHalf.LOWER) {
+         return state.func_177229_b(CHAMBER_STATE) == CryoChamberBlock.ChamberState.NONE
+            ? ModBlocks.CRYO_CHAMBER_TILE_ENTITY.func_200968_a()
+            : ModBlocks.ANCIENT_CRYO_CHAMBER_TILE_ENTITY.func_200968_a();
+      } else {
+         return null;
+      }
    }
 
    public BlockState func_196258_a(BlockItemUseContext context) {
@@ -89,14 +105,12 @@ public class CryoChamberBlock extends Block {
       return pos.func_177956_o() < 255 && world.func_180495_p(pos.func_177984_a()).func_196953_a(context)
          ? (BlockState)((BlockState)((BlockState)this.func_176223_P().func_206870_a(FACING, context.func_195992_f()))
                .func_206870_a(HALF, DoubleBlockHalf.LOWER))
-            .func_206870_a(CHAMBER_STATE, CryoChamberBlock.ChamberState.NONE)
+            .func_206870_a(CHAMBER_STATE, MiscUtils.getEnumEntry(CryoChamberBlock.ChamberState.class, context.func_195996_i().func_77952_i()))
          : null;
    }
 
    protected void func_206840_a(Builder<Block, BlockState> builder) {
-      builder.func_206894_a(new Property[]{HALF});
-      builder.func_206894_a(new Property[]{FACING});
-      builder.func_206894_a(new Property[]{CHAMBER_STATE});
+      builder.func_206894_a(new Property[]{HALF, FACING, CHAMBER_STATE});
    }
 
    public void func_176208_a(World worldIn, BlockPos pos, BlockState state, PlayerEntity player) {
@@ -133,7 +147,6 @@ public class CryoChamberBlock extends Block {
       if (placer != null) {
          CryoChamberTileEntity te = getCryoChamberTileEntity(worldIn, pos, state);
          te.setOwner(placer.func_110124_au());
-         te.setMaxCores(ModConfigs.CRYO_CHAMBER.getPlayerCoreCount(placer.func_145748_c_().getString()));
       }
    }
 
@@ -143,7 +156,7 @@ public class CryoChamberBlock extends Block {
             CryoChamberTileEntity chamber = getCryoChamberTileEntity(worldIn, pos, state);
             if (chamber != null) {
                if (state.func_177229_b(HALF) == DoubleBlockHalf.LOWER) {
-                  this.dropCryoChamber(worldIn, pos, chamber);
+                  this.dropCryoChamber(worldIn, pos, state, chamber);
                }
 
                super.func_196243_a(state, worldIn, pos, newState, isMoving);
@@ -152,8 +165,9 @@ public class CryoChamberBlock extends Block {
       }
    }
 
-   private void dropCryoChamber(World world, BlockPos pos, CryoChamberTileEntity te) {
+   private void dropCryoChamber(World world, BlockPos pos, BlockState state, CryoChamberTileEntity te) {
       ItemStack chamberStack = new ItemStack(ModBlocks.CRYO_CHAMBER);
+      chamberStack.func_196085_b(((CryoChamberBlock.ChamberState)state.func_177229_b(CHAMBER_STATE)).ordinal());
       CompoundNBT nbt = chamberStack.func_196082_o();
       nbt.func_218657_a("BlockEntityTag", te.serializeNBT());
       chamberStack.func_77982_d(nbt);
@@ -162,52 +176,57 @@ public class CryoChamberBlock extends Block {
    }
 
    public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-      if (!world.field_72995_K) {
+      if (!world.func_201670_d() && player instanceof ServerPlayerEntity) {
          CryoChamberTileEntity chamber = getCryoChamberTileEntity(world, pos, state);
-         ItemStack heldStack = player.func_184586_b(hand);
          if (chamber == null) {
             return ActionResultType.SUCCESS;
-         }
+         } else if (chamber.getOwner() != null && !chamber.getOwner().equals(player.func_110124_au())) {
+            return ActionResultType.SUCCESS;
+         } else {
+            ItemStack heldStack = player.func_184586_b(hand);
+            if (chamber.getEternal() != null) {
+               if (!player.func_225608_bj_()) {
+                  NetworkHooks.openGui((ServerPlayerEntity)player, chamber, buffer -> buffer.func_179255_a(pos));
+                  return ActionResultType.SUCCESS;
+               }
 
-         if (heldStack == ItemStack.field_190927_a && player.func_225608_bj_()) {
-            if (chamber.getEternal() == null) {
-               return ActionResultType.SUCCESS;
+               if (heldStack.func_190926_b()) {
+                  final CompoundNBT nbt = new CompoundNBT();
+                  nbt.func_74768_a("RenameType", RenameType.CRYO_CHAMBER.ordinal());
+                  nbt.func_218657_a("Data", chamber.getRenameNBT());
+                  NetworkHooks.openGui((ServerPlayerEntity)player, new INamedContainerProvider() {
+                     public ITextComponent func_145748_c_() {
+                        return new StringTextComponent("Cryo Chamber");
+                     }
+
+                     @Nullable
+                     public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+                        return new RenamingContainer(windowId, nbt);
+                     }
+                  }, buffer -> buffer.func_150786_a(nbt));
+                  return ActionResultType.SUCCESS;
+               }
+            } else if (!((CryoChamberBlock.ChamberState)state.func_177229_b(CHAMBER_STATE)).containsAncient()
+               && heldStack.func_77973_b() == ModItems.TRADER_CORE) {
+               TraderCore coreToInsert = ItemTraderCore.getCoreFromStack(heldStack);
+               if (chamber.getOwner() == null) {
+                  chamber.setOwner(player.func_110124_au());
+               }
+
+               if (chamber.addTraderCore(coreToInsert)) {
+                  if (!player.func_184812_l_()) {
+                     heldStack.func_190918_g(1);
+                  }
+
+                  chamber.sendUpdates();
+               }
             }
 
-            final CompoundNBT nbt = new CompoundNBT();
-            nbt.func_74768_a("RenameType", RenameType.CRYO_CHAMBER.ordinal());
-            nbt.func_218657_a("Data", chamber.getRenameNBT());
-            NetworkHooks.openGui((ServerPlayerEntity)player, new INamedContainerProvider() {
-               public ITextComponent func_145748_c_() {
-                  return new StringTextComponent("Cryo Chamber");
-               }
-
-               @Nullable
-               public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-                  return new RenamingContainer(windowId, nbt);
-               }
-            }, buffer -> buffer.func_150786_a(nbt));
             return ActionResultType.SUCCESS;
          }
-
-         if (heldStack.func_77973_b() == ModItems.TRADER_CORE) {
-            TraderCore coreToInsert = ItemTraderCore.getCoreFromStack(heldStack);
-            if (chamber.getOwner() == null) {
-               chamber.setOwner(player.func_110124_au());
-               chamber.setMaxCores(ModConfigs.CRYO_CHAMBER.getPlayerCoreCount(player.func_145748_c_().getString()));
-            }
-
-            if (chamber.addTraderCore(coreToInsert)) {
-               heldStack.func_190918_g(1);
-               chamber.sendUpdates();
-            }
-         } else {
-            chamber.onItemClicked(heldStack, player);
-            chamber.sendUpdates();
-         }
+      } else {
+         return ActionResultType.SUCCESS;
       }
-
-      return ActionResultType.SUCCESS;
    }
 
    public static BlockPos getCryoChamberPos(BlockState state, BlockPos pos) {
@@ -222,14 +241,16 @@ public class CryoChamberBlock extends Block {
 
    public static enum ChamberState implements IStringSerializable {
       NONE("none"),
-      GENERATOR("generator"),
-      MINER("miner"),
-      LOOTER("looter");
+      RUSTY("rusty");
 
-      private String name;
+      private final String name;
 
       private ChamberState(String name) {
          this.name = name;
+      }
+
+      public boolean containsAncient() {
+         return this == RUSTY;
       }
 
       public String func_176610_l() {

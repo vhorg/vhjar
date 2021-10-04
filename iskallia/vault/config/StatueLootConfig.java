@@ -2,17 +2,22 @@ package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.SingleItemEntry;
+import iskallia.vault.config.entry.StatueDecay;
 import iskallia.vault.util.StatueType;
+import iskallia.vault.util.data.WeightedList;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.block.Blocks;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class StatueLootConfig extends Config {
@@ -21,25 +26,44 @@ public class StatueLootConfig extends Config {
    @Expose
    private HashMap<Integer, Integer> INTERVAL_DECREASE_PER_CHIP = new HashMap<>();
    @Expose
-   private List<SingleItemEntry> GIFT_NORMAL_STATUE_LOOT;
+   private WeightedList<SingleItemEntry> GIFT_NORMAL_STATUE_LOOT;
    @Expose
    private int GIFT_NORMAL_STATUE_INTERVAL;
    @Expose
-   private List<SingleItemEntry> GIFT_MEGA_STATUE_LOOT;
+   private StatueDecay GIFT_NORMAL_DECAY;
+   @Expose
+   private WeightedList<SingleItemEntry> GIFT_MEGA_STATUE_LOOT;
    @Expose
    private int GIFT_MEGA_STATUE_INTERVAL;
    @Expose
-   private List<SingleItemEntry> VAULT_BOSS_STATUE_LOOT;
+   private StatueDecay GIFT_MEGA_DECAY;
+   @Expose
+   private WeightedList<SingleItemEntry> VAULT_BOSS_STATUE_LOOT;
    @Expose
    private int VAULT_BOSS_STATUE_INTERVAL;
    @Expose
-   private List<SingleItemEntry> ARENA_CHAMPION_STATUE_LOOT;
+   private StatueDecay VAULT_BOSS_DECAY;
    @Expose
-   private int ARENA_CHAMPION_STATUE_INTERVAL;
+   private WeightedList<SingleItemEntry> OMEGA_STATUE_LOOT;
+   @Expose
+   private int OMEGA_STATUE_INTERVAL;
 
    @Override
    public String getName() {
       return "statue_loot";
+   }
+
+   public int getDecay(StatueType type) {
+      switch (type) {
+         case GIFT_NORMAL:
+            return this.GIFT_NORMAL_DECAY.getDecay();
+         case GIFT_MEGA:
+            return this.GIFT_MEGA_DECAY.getDecay();
+         case VAULT_BOSS:
+            return this.VAULT_BOSS_DECAY.getDecay();
+         default:
+            return -1;
+      }
    }
 
    @Override
@@ -49,42 +73,69 @@ public class StatueLootConfig extends Config {
       this.INTERVAL_DECREASE_PER_CHIP.put(2, 100);
       this.INTERVAL_DECREASE_PER_CHIP.put(3, 200);
       this.INTERVAL_DECREASE_PER_CHIP.put(4, 500);
-      this.GIFT_NORMAL_STATUE_LOOT = new LinkedList<>();
-      this.GIFT_NORMAL_STATUE_LOOT.add(new SingleItemEntry("minecraft:apple", "{display:{Name:'{\"text\":\"Fancy Apple\"}'}}"));
-      this.GIFT_NORMAL_STATUE_LOOT.add(new SingleItemEntry("minecraft:wooden_sword", "{Enchantments:[{id:\"minecraft:sharpness\",lvl:10s}]}"));
+      this.GIFT_NORMAL_STATUE_LOOT = new WeightedList<>();
+      ItemStack fancyApple = new ItemStack(Items.field_151034_e);
+      fancyApple.func_200302_a(new StringTextComponent("Fancy Apple"));
+      this.GIFT_NORMAL_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(fancyApple), 1));
+      ItemStack sword = new ItemStack(Items.field_151041_m);
+      sword.func_77966_a(Enchantments.field_185302_k, 10);
+      this.GIFT_NORMAL_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(sword), 1));
       this.GIFT_NORMAL_STATUE_INTERVAL = 500;
-      this.GIFT_MEGA_STATUE_LOOT = new LinkedList<>();
-      this.GIFT_MEGA_STATUE_LOOT.add(new SingleItemEntry("minecraft:golden_apple", "{display:{Name:'{\"text\":\"Fancier Apple\"}'}}"));
-      this.GIFT_MEGA_STATUE_LOOT.add(new SingleItemEntry("minecraft:diamond_sword", "{Enchantments:[{id:\"minecraft:sharpness\",lvl:10s}]}"));
+      this.GIFT_NORMAL_DECAY = new StatueDecay(100, 1000);
+      this.GIFT_MEGA_STATUE_LOOT = new WeightedList<>();
+      ItemStack fancierApple = new ItemStack(Items.field_151153_ao);
+      fancierApple.func_200302_a(new StringTextComponent("Fancier Apple"));
+      this.GIFT_MEGA_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(fancierApple), 1));
+      sword = new ItemStack(Items.field_151048_u);
+      sword.func_77966_a(Enchantments.field_185302_k, 10);
+      this.GIFT_MEGA_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(sword), 1));
       this.GIFT_MEGA_STATUE_INTERVAL = 1000;
-      this.VAULT_BOSS_STATUE_LOOT = new LinkedList<>();
-      this.VAULT_BOSS_STATUE_LOOT.add(new SingleItemEntry("minecraft:enchanted_golden_apple", "{display:{Name:'{\"text\":\"Fanciest Apple\"}'}}"));
-      this.VAULT_BOSS_STATUE_LOOT.add(new SingleItemEntry("minecraft:netherite_sword", "{Enchantments:[{id:\"minecraft:sharpness\",lvl:10s}]}"));
+      this.GIFT_MEGA_DECAY = new StatueDecay(100, 1000);
+      this.VAULT_BOSS_STATUE_LOOT = new WeightedList<>();
+      ItemStack fanciestApple = new ItemStack(Items.field_196100_at);
+      fanciestApple.func_200302_a(new StringTextComponent("Fanciest Apple"));
+      this.VAULT_BOSS_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(fanciestApple), 1));
+      sword = new ItemStack(Items.field_234754_kI_);
+      sword.func_77966_a(Enchantments.field_185302_k, 10);
+      this.VAULT_BOSS_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(sword), 1));
       this.VAULT_BOSS_STATUE_INTERVAL = 500;
-      this.ARENA_CHAMPION_STATUE_LOOT = new LinkedList<>();
-      this.ARENA_CHAMPION_STATUE_LOOT.add(new SingleItemEntry("minecraft:enchanted_golden_apple", "{display:{Name:'{\"text\":\"Fanciestest Apple\"}'}}"));
-      this.ARENA_CHAMPION_STATUE_LOOT
-         .add(
-            new SingleItemEntry(
-               "minecraft:netherite_sword", "{display:{Name:'{\"text\":\"Over 9000!\"}'},Enchantments:[{id:\"minecraft:sharpness\",lvl:9001s}]}"
-            )
-         );
-      this.ARENA_CHAMPION_STATUE_INTERVAL = 500;
+      this.VAULT_BOSS_DECAY = new StatueDecay(100, 1000);
+      this.OMEGA_STATUE_LOOT = new WeightedList<>();
+      this.OMEGA_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(Blocks.field_150348_b), 1));
+      this.OMEGA_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(Blocks.field_150347_e), 1));
+      this.OMEGA_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(Blocks.field_196654_e), 1));
+      this.OMEGA_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(Blocks.field_196656_g), 1));
+      this.OMEGA_STATUE_LOOT.add(new WeightedList.Entry<>(new SingleItemEntry(Blocks.field_196617_K), 1));
+      this.OMEGA_STATUE_INTERVAL = 1000;
    }
 
    public ItemStack randomLoot(StatueType type) {
       switch (type) {
          case GIFT_NORMAL:
-            return this.getRandom(this.GIFT_NORMAL_STATUE_LOOT);
+            return this.getItem(this.GIFT_NORMAL_STATUE_LOOT.getRandom(new Random()));
          case GIFT_MEGA:
-            return this.getRandom(this.GIFT_MEGA_STATUE_LOOT);
+            return this.getItem(this.GIFT_MEGA_STATUE_LOOT.getRandom(new Random()));
          case VAULT_BOSS:
-            return this.getRandom(this.VAULT_BOSS_STATUE_LOOT);
-         case ARENA_CHAMPION:
-            return this.getRandom(this.ARENA_CHAMPION_STATUE_LOOT);
+            return this.getItem(this.VAULT_BOSS_STATUE_LOOT.getRandom(new Random()));
+         case OMEGA:
+         case OMEGA_VARIANT:
+            return this.getItem(this.OMEGA_STATUE_LOOT.getRandom(new Random()));
          default:
             throw new InternalError("Unknown Statue variant: " + type);
       }
+   }
+
+   public List<ItemStack> getOmegaOptions() {
+      List<ItemStack> options = new ArrayList<>();
+      WeightedList<SingleItemEntry> entries = this.OMEGA_STATUE_LOOT;
+
+      for (int i = 0; i < 5; i++) {
+         SingleItemEntry entry = entries.getRandom(new Random());
+         entries.remove(entry);
+         options.add(this.getItem(entry));
+      }
+
+      return options;
    }
 
    public int getInterval(StatueType type) {
@@ -95,56 +146,16 @@ public class StatueLootConfig extends Config {
             return this.GIFT_MEGA_STATUE_INTERVAL;
          case VAULT_BOSS:
             return this.VAULT_BOSS_STATUE_INTERVAL;
-         case ARENA_CHAMPION:
-            return this.ARENA_CHAMPION_STATUE_INTERVAL;
+         case OMEGA:
+         case OMEGA_VARIANT:
+            return this.OMEGA_STATUE_INTERVAL;
          default:
-            throw new InternalError("Unknown Statue variant: " + type);
+            throw new IllegalArgumentException("Unknown Statue variant: " + type);
       }
    }
 
    public int getMaxAccelerationChips() {
       return this.MAX_ACCELERATION_CHIPS;
-   }
-
-   private ItemStack getRandom(List<SingleItemEntry> loottable) {
-      Random rand = new Random();
-      ItemStack stack = ItemStack.field_190927_a;
-      if (loottable != null && !loottable.isEmpty()) {
-         SingleItemEntry randomEntry = loottable.get(rand.nextInt(loottable.size()));
-
-         try {
-            Item item = (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(randomEntry.ITEM));
-            stack = new ItemStack(item);
-            if (randomEntry.NBT != null) {
-               CompoundNBT nbt = JsonToNBT.func_180713_a(randomEntry.NBT);
-               stack.func_77982_d(nbt);
-            }
-         } catch (Exception var7) {
-            var7.printStackTrace();
-         }
-
-         return stack;
-      } else {
-         return stack;
-      }
-   }
-
-   public void dumpAll(PlayerEntity player) {
-      for (SingleItemEntry entry : this.GIFT_NORMAL_STATUE_LOOT) {
-         player.func_71019_a(this.getItem(entry), false);
-      }
-
-      for (SingleItemEntry entry : this.GIFT_MEGA_STATUE_LOOT) {
-         player.func_71019_a(this.getItem(entry), false);
-      }
-
-      for (SingleItemEntry entry : this.ARENA_CHAMPION_STATUE_LOOT) {
-         player.func_71019_a(this.getItem(entry), false);
-      }
-
-      for (SingleItemEntry entry : this.VAULT_BOSS_STATUE_LOOT) {
-         player.func_71019_a(this.getItem(entry), false);
-      }
    }
 
    private ItemStack getItem(SingleItemEntry entry) {
@@ -166,9 +177,5 @@ public class StatueLootConfig extends Config {
 
    public int getIntervalDecrease(int chipCount) {
       return this.INTERVAL_DECREASE_PER_CHIP.get(chipCount);
-   }
-
-   public ItemStack getLoot() {
-      return this.getRandom(this.GIFT_NORMAL_STATUE_LOOT);
    }
 }

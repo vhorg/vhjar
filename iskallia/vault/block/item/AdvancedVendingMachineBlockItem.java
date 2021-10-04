@@ -17,12 +17,15 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class AdvancedVendingMachineBlockItem extends BlockItem {
    public AdvancedVendingMachineBlockItem(Block block) {
       super(block, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(64));
    }
 
+   @OnlyIn(Dist.CLIENT)
    public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
       CompoundNBT nbt = stack.func_77978_p();
       if (nbt != null) {

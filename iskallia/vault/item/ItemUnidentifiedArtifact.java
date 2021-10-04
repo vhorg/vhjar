@@ -1,6 +1,6 @@
 package iskallia.vault.item;
 
-import iskallia.vault.Vault;
+import iskallia.vault.block.VaultArtifactBlock;
 import iskallia.vault.init.ModSounds;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -16,13 +16,14 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemUnidentifiedArtifact extends Item {
    public ItemUnidentifiedArtifact(ItemGroup group, ResourceLocation id) {
@@ -47,9 +48,7 @@ public class ItemUnidentifiedArtifact extends Item {
             );
          ((ServerWorld)world)
             .func_195598_a(ParticleTypes.field_197616_i, position.field_72450_a, position.field_72448_b, position.field_72449_c, 500, 1.0, 1.0, 1.0, 0.5);
-         int randomIndex = world.field_73012_v.nextInt(16) + 1;
-         Item item = (Item)Registry.field_212630_s.func_82594_a(Vault.id("artifact_" + randomIndex));
-         ItemStack artifactStack = new ItemStack(item);
+         ItemStack artifactStack = VaultArtifactBlock.createRandomArtifact();
          player.func_146097_a(artifactStack, false, false);
          heldStack.func_190918_g(1);
       }
@@ -57,6 +56,7 @@ public class ItemUnidentifiedArtifact extends Item {
       return super.func_77659_a(world, player, hand);
    }
 
+   @OnlyIn(Dist.CLIENT)
    public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
       StringTextComponent text = new StringTextComponent("Right click to identify.");
       text.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(-9472)));

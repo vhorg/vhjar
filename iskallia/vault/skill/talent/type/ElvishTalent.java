@@ -1,14 +1,14 @@
 package iskallia.vault.skill.talent.type;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.DamageSource;
 
-public class ElvishTalent extends PlayerTalent {
+public class ElvishTalent extends DamageCancellingTalent {
    public ElvishTalent(int cost) {
       super(cost);
    }
 
    @Override
-   public void tick(PlayerEntity player) {
-      player.field_70143_R = 0.0F;
+   protected boolean shouldCancel(DamageSource src) {
+      return src == DamageSource.field_76379_h;
    }
 }

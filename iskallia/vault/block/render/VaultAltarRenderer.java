@@ -33,7 +33,7 @@ public class VaultAltarRenderer extends TileEntityRenderer<VaultAltarTileEntity>
    }
 
    public void render(VaultAltarTileEntity altar, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedLight, int combinedOverlay) {
-      if (altar.containsVaultRock()) {
+      if (altar.getAltarState() != VaultAltarTileEntity.AltarState.IDLE) {
          ClientPlayerEntity player = this.mc.field_71439_g;
          int lightLevel = this.getLightAtPos(altar.func_145831_w(), altar.func_174877_v().func_177984_a());
          this.renderItem(

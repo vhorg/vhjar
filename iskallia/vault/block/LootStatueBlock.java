@@ -34,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.IBlockReader;
@@ -44,13 +45,20 @@ public class LootStatueBlock extends Block {
    public static final VoxelShape SHAPE_GIFT_NORMAL = Block.func_208617_a(1.0, 0.0, 1.0, 15.0, 5.0, 15.0);
    public static final VoxelShape SHAPE_GIFT_MEGA = Block.func_208617_a(1.0, 0.0, 1.0, 15.0, 13.0, 15.0);
    public static final VoxelShape SHAPE_PLAYER_STATUE = Block.func_208617_a(1.0, 0.0, 1.0, 15.0, 5.0, 15.0);
+   public static final VoxelShape SHAPE_OMEGA_VARIANT = Block.func_208617_a(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
    public static final DirectionProperty FACING = BlockStateProperties.field_208157_J;
    public StatueType type;
 
-   public LootStatueBlock(StatueType type) {
-      super(Properties.func_200949_a(Material.field_151576_e, MaterialColor.field_151665_m).func_200948_a(1.0F, 3600000.0F).func_226896_b_().func_200942_a());
+   protected LootStatueBlock(StatueType type, Properties properties) {
+      super(properties);
       this.func_180632_j((BlockState)((BlockState)this.func_176194_O().func_177621_b()).func_206870_a(FACING, Direction.SOUTH));
       this.type = type;
+   }
+
+   public LootStatueBlock(StatueType type) {
+      this(
+         type, Properties.func_200949_a(Material.field_151576_e, MaterialColor.field_151665_m).func_200948_a(1.0F, 3600000.0F).func_226896_b_().func_200942_a()
+      );
    }
 
    public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
@@ -71,24 +79,27 @@ public class LootStatueBlock extends Block {
                return ActionResultType.SUCCESS;
             } else {
                ItemStack heldItem = player.func_184614_ca();
-               if (heldItem == ItemStack.field_190927_a) {
-                  final CompoundNBT nbt = new CompoundNBT();
-                  nbt.func_74768_a("RenameType", RenameType.PLAYER_STATUE.ordinal());
-                  nbt.func_218657_a("Data", statue.serializeNBT());
-                  NetworkHooks.openGui((ServerPlayerEntity)player, new INamedContainerProvider() {
-                     public ITextComponent func_145748_c_() {
-                        return new StringTextComponent("Player Statue");
-                     }
+               if (heldItem.func_190926_b()) {
+                  if (statue.getStatueType().allowsRenaming()) {
+                     final CompoundNBT nbt = new CompoundNBT();
+                     nbt.func_74768_a("RenameType", RenameType.PLAYER_STATUE.ordinal());
+                     nbt.func_218657_a("Data", statue.serializeNBT());
+                     NetworkHooks.openGui((ServerPlayerEntity)player, new INamedContainerProvider() {
+                        public ITextComponent func_145748_c_() {
+                           return new StringTextComponent("Player Statue");
+                        }
 
-                     @Nullable
-                     public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-                        return new RenamingContainer(windowId, nbt);
-                     }
-                  }, buffer -> buffer.func_150786_a(nbt));
+                        @Nullable
+                        public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity playerEntity) {
+                           return new RenamingContainer(windowId, nbt);
+                        }
+                     }, buffer -> buffer.func_150786_a(nbt));
+                  }
+
                   return ActionResultType.SUCCESS;
                } else if (heldItem.func_77973_b() == ModItems.ACCELERATION_CHIP && statue.addChip()) {
                   if (!player.func_184812_l_()) {
-                     heldItem.func_190920_e(heldItem.func_190916_E() - 1);
+                     heldItem.func_190918_g(1);
                   }
 
                   return ActionResultType.SUCCESS;
@@ -101,23 +112,28 @@ public class LootStatueBlock extends Block {
    }
 
    public void func_180633_a(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-      TileEntity tileEntity = world.func_175625_s(pos);
-      if (tileEntity instanceof LootStatueTileEntity) {
-         LootStatueTileEntity lootStatue = (LootStatueTileEntity)tileEntity;
-         if (stack.func_77942_o()) {
-            CompoundNBT nbt = stack.func_77978_p();
-            CompoundNBT blockEntityTag = nbt.func_74775_l("BlockEntityTag");
-            String playerNickname = blockEntityTag.func_74779_i("PlayerNickname");
-            lootStatue.setInterval(blockEntityTag.func_74762_e("Interval"));
-            lootStatue.setLootItem(ItemStack.func_199557_a(blockEntityTag.func_74775_l("LootItem")));
-            lootStatue.setStatueType(StatueType.values()[blockEntityTag.func_74762_e("StatueType")]);
-            lootStatue.setCurrentTick(blockEntityTag.func_74762_e("CurrentTick"));
-            lootStatue.setHasCrown(blockEntityTag.func_74767_n("HasCrown"));
-            lootStatue.getSkin().updateSkin(playerNickname);
+      if (!world.field_72995_K) {
+         TileEntity tileEntity = world.func_175625_s(pos);
+         if (tileEntity instanceof LootStatueTileEntity) {
+            LootStatueTileEntity lootStatue = (LootStatueTileEntity)tileEntity;
+            if (stack.func_77942_o()) {
+               CompoundNBT nbt = stack.func_196082_o();
+               this.setStatueTileData(lootStatue, nbt.func_74775_l("BlockEntityTag"));
+               lootStatue.func_70296_d();
+            }
          }
       }
+   }
 
-      super.func_180633_a(world, pos, state, placer, stack);
+   protected void setStatueTileData(LootStatueTileEntity lootStatue, CompoundNBT blockEntityTag) {
+      StatueType statueType = StatueType.values()[blockEntityTag.func_74762_e("StatueType")];
+      String playerNickname = blockEntityTag.func_74779_i("PlayerNickname");
+      lootStatue.setStatueType(statueType);
+      lootStatue.setCurrentTick(blockEntityTag.func_74762_e("CurrentTick"));
+      lootStatue.getSkin().updateSkin(playerNickname);
+      lootStatue.setItemsRemaining(blockEntityTag.func_74762_e("ItemsRemaining"));
+      lootStatue.setTotalItems(blockEntityTag.func_74762_e("TotalItems"));
+      lootStatue.setLootItem(ItemStack.func_199557_a(blockEntityTag.func_74775_l("LootItem")));
    }
 
    public void func_176208_a(World world, BlockPos pos, BlockState state, PlayerEntity player) {
@@ -170,12 +186,19 @@ public class LootStatueBlock extends Block {
             return SHAPE_GIFT_MEGA;
          case VAULT_BOSS:
             return SHAPE_PLAYER_STATUE;
+         case OMEGA_VARIANT:
+            return SHAPE_OMEGA_VARIANT;
          default:
-            return Block.func_208617_a(0.0, 0.0, 0.0, 16.0, 16.0, 16.0);
+            return VoxelShapes.func_197868_b();
       }
    }
 
    public StatueType getType() {
       return this.type;
+   }
+
+   protected LootStatueTileEntity getStatueTileEntity(World world, BlockPos pos) {
+      TileEntity tileEntity = world.func_175625_s(pos);
+      return tileEntity instanceof LootStatueTileEntity ? (LootStatueTileEntity)tileEntity : null;
    }
 }

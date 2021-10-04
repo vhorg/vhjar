@@ -3,30 +3,42 @@ package iskallia.vault.item.gear;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
+import iskallia.vault.Vault;
+import iskallia.vault.attribute.DoubleAttribute;
+import iskallia.vault.attribute.EnumAttribute;
+import iskallia.vault.attribute.FloatAttribute;
+import iskallia.vault.attribute.IntegerAttribute;
+import iskallia.vault.attribute.VAttribute;
 import iskallia.vault.config.VaultGearConfig;
+import iskallia.vault.config.VaultGearScalingConfig;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModModels;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.gear.attribute.DoubleAttribute;
-import iskallia.vault.item.gear.attribute.EnumAttribute;
-import iskallia.vault.item.gear.attribute.FloatAttribute;
-import iskallia.vault.item.gear.attribute.IntegerAttribute;
-import iskallia.vault.skill.set.PlayerSet;
+import iskallia.vault.skill.ability.AbilityGroup;
+import iskallia.vault.skill.talent.TalentNode;
+import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.talent.type.ArtisanTalent;
+import iskallia.vault.util.calc.CooldownHelper;
+import iskallia.vault.world.data.PlayerTalentsData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.LinkedList;
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import javax.annotation.Nullable;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.MendingEnchantment;
+import net.minecraft.enchantment.ThornsEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -34,6 +46,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.DyeColor;
@@ -46,20 +59,29 @@ import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.IItemProvider;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.extensions.IForgeItem;
 
-public interface VaultGear<T extends Item> extends IForgeItem {
+public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends IForgeItem {
+   DecimalFormat PERCENT_FORMAT = new DecimalFormat("0.##");
+   int MAX_EXPECTED_TIER = 2;
    UUID[] ARMOR_MODIFIERS = new UUID[]{
       UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"),
       UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"),
@@ -86,6 +108,13 @@ public interface VaultGear<T extends Item> extends IForgeItem {
 
    int getModelsFor(VaultGear.Rarity var1);
 
+   @Nullable
+   EquipmentSlotType getIntendedSlot();
+
+   default boolean isIntendedForSlot(EquipmentSlotType slotType) {
+      return this.getIntendedSlot() == slotType;
+   }
+
    default boolean isDamageable(T item, ItemStack stack) {
       return ModAttributes.DURABILITY.exists(stack);
    }
@@ -95,13 +124,15 @@ public interface VaultGear<T extends Item> extends IForgeItem {
    }
 
    default ITextComponent getDisplayName(T item, ItemStack stack, ITextComponent name) {
-      if (ModAttributes.GEAR_STATE.getOrDefault(stack, VaultGear.State.UNIDENTIFIED).getValue(stack) == VaultGear.State.IDENTIFIED) {
-         if (item == ModItems.ETCHING) {
-            return name;
-         } else {
-            VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(stack, VaultGear.Rarity.COMMON).getValue(stack);
-            return ((IFormattableTextComponent)name).func_240699_a_(rarity.color);
-         }
+      String customName = ModAttributes.GEAR_NAME.getOrDefault(stack, "").getValue(stack);
+      if (!customName.isEmpty()) {
+         VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(stack, VaultGear.Rarity.COMMON).getValue(stack);
+         Style style = name.func_150256_b().func_240718_a_(rarity.getColor());
+         return new StringTextComponent(customName).func_230530_a_(style);
+      } else if (ModAttributes.GEAR_STATE.getOrDefault(stack, VaultGear.State.UNIDENTIFIED).getValue(stack) == VaultGear.State.IDENTIFIED) {
+         VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(stack, VaultGear.Rarity.COMMON).getValue(stack);
+         Style style = name.func_150256_b().func_240718_a_(rarity.getColor());
+         return ((IFormattableTextComponent)name).func_230530_a_(style);
       } else {
          TextComponent prefix = new StringTextComponent("Unidentified ");
          return prefix.func_230530_a_(name.func_150256_b()).func_230529_a_(name);
@@ -109,70 +140,115 @@ public interface VaultGear<T extends Item> extends IForgeItem {
    }
 
    default boolean canApply(ItemStack stack, Enchantment enchantment) {
-      return !(enchantment instanceof MendingEnchantment);
+      return !(enchantment instanceof MendingEnchantment) && !(enchantment instanceof ThornsEnchantment);
    }
 
    default ActionResult<ItemStack> onItemRightClick(T item, World world, PlayerEntity player, Hand hand, ActionResult<ItemStack> result) {
       ItemStack stack = player.func_184586_b(hand);
-      if (world.field_72995_K) {
-         if (stack.func_77973_b() == ModItems.DAGGER && hand == Hand.OFF_HAND) {
-            ((VaultDaggerItem)stack.func_77973_b()).attackOffHand();
-            return ActionResult.func_226248_a_(stack);
-         } else {
-            return result;
-         }
+      if (world.func_201670_d()) {
+         return result;
       } else {
-         Optional<EnumAttribute<VaultGear.State>> attribute = ModAttributes.GEAR_STATE.get(stack);
-         if (attribute.isPresent() && attribute.get().getValue(stack) == VaultGear.State.UNIDENTIFIED) {
-            attribute.get().setBaseValue(VaultGear.State.ROLLING);
-            return ActionResult.func_226251_d_(stack);
-         } else {
-            return result;
+         if (world.func_234923_W_() != Vault.VAULT_KEY) {
+            Optional<EnumAttribute<VaultGear.State>> attribute = ModAttributes.GEAR_STATE.get(stack);
+            if (attribute.isPresent() && attribute.get().getValue(stack) == VaultGear.State.UNIDENTIFIED) {
+               attribute.get().setBaseValue(VaultGear.State.ROLLING);
+               return ActionResult.func_226251_d_(stack);
+            }
          }
+
+         return result;
       }
    }
 
-   default void inventoryTick(T item, ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
-      if (!world.field_72995_K) {
-         if (ModAttributes.GEAR_STATE.getOrCreate(stack, VaultGear.State.UNIDENTIFIED).getValue(stack) == VaultGear.State.ROLLING) {
-            this.tickRoll(item, stack, world, entity, itemSlot, isSelected);
-         }
-
-         if (!ModAttributes.GEAR_ROLL_TYPE.exists(stack)) {
-            ModAttributes.GEAR_ROLL_TYPE.create(stack, VaultGear.RollType.ALL);
-         }
-
-         update(stack, world.func_201674_k());
+   default void fillItemGroup(NonNullList<ItemStack> items) {
+      for (int tier = 0; tier < 2; tier++) {
+         ItemStack stack = new ItemStack((IItemProvider)this);
+         ModAttributes.GEAR_TIER.create(stack, tier);
+         items.add(stack);
       }
    }
 
-   default void tickRoll(T item, ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
+   default void inventoryTick(T item, ItemStack stack, World world, ServerPlayerEntity player, int itemSlot, boolean isSelected) {
+      if (!ModAttributes.GEAR_RANDOM_SEED.exists(stack)) {
+         ModAttributes.GEAR_RANDOM_SEED.create(stack, world.field_73012_v.nextLong());
+      }
+
+      if (ModAttributes.GEAR_STATE.getOrCreate(stack, VaultGear.State.UNIDENTIFIED).getValue(stack) == VaultGear.State.ROLLING) {
+         this.tickRoll(item, stack, world, player, itemSlot, isSelected);
+      }
+
+      if (!ModAttributes.GEAR_ROLL_TYPE.exists(stack) && ModAttributes.GEAR_ROLL_POOL.exists(stack)) {
+         ModAttributes.GEAR_ROLL_POOL.getBase(stack).ifPresent(pool -> {
+            int playerLevel = PlayerVaultStatsData.get(player.func_71121_q()).getVaultStats(player.func_110124_au()).getVaultLevel();
+            VaultGearScalingConfig.GearRarityOutcome outcome = ModConfigs.VAULT_GEAR_SCALING.getGearRollType(pool, playerLevel);
+            if (outcome != null) {
+               ModAttributes.GEAR_TIER.create(stack, outcome.getTier());
+               ModAttributes.GEAR_ROLL_TYPE.create(stack, outcome.getRarity());
+            }
+         });
+      }
+
+      if (!ModAttributes.GEAR_ROLL_TYPE.exists(stack)) {
+         ModAttributes.GEAR_ROLL_TYPE.create(stack, this.getDefaultRoll(player).getName());
+      }
+
+      if (!ModAttributes.GEAR_TIER.exists(stack)) {
+         ModAttributes.GEAR_TIER.create(stack, this.getDefaultGearTier(player));
+      }
+
+      update(stack, world.func_201674_k());
+   }
+
+   default void tickRoll(T item, ItemStack stack, World world, ServerPlayerEntity player, int itemSlot, boolean isSelected) {
       int rollTicks = stack.func_196082_o().func_74762_e("RollTicks");
       int lastModelHit = stack.func_196082_o().func_74762_e("LastModelHit");
       double displacement = this.getDisplacement(rollTicks);
-      if (rollTicks >= 120) {
+      if (player.func_184586_b(Hand.OFF_HAND).func_77973_b() == ModItems.IDENTIFICATION_TOME) {
+         String roll = ModAttributes.GEAR_ROLL_TYPE.getOrCreate(stack, this.getDefaultRoll(player).getName()).getValue(stack);
+         VaultGear.Rarity rarity = ModConfigs.VAULT_GEAR.getRoll(roll).orElse(this.getDefaultRoll(player)).getRandom(world.func_201674_k());
+         ModAttributes.GEAR_RARITY.create(stack, rarity);
+         ModAttributes.GEAR_MODEL.create(stack, world.field_73012_v.nextInt(this.getModelsFor(rarity)));
+         ModAttributes.GEAR_COLOR.create(stack, item instanceof VaultArmorItem ? -1 : randomBaseColor(world.field_73012_v));
          initialize(stack, world.func_201674_k());
          ModAttributes.GEAR_STATE.create(stack, VaultGear.State.IDENTIFIED);
          stack.func_196082_o().func_82580_o("RollTicks");
          stack.func_196082_o().func_82580_o("LastModelHit");
-         world.func_184133_a(null, entity.func_233580_cy_(), ModSounds.CONFETTI_SFX, SoundCategory.PLAYERS, 0.5F, 1.0F);
+         world.func_184133_a(null, player.func_233580_cy_(), ModSounds.CONFETTI_SFX, SoundCategory.PLAYERS, 0.3F, 1.0F);
+      } else if (rollTicks >= 120) {
+         initialize(stack, world.func_201674_k());
+         ModAttributes.GEAR_STATE.create(stack, VaultGear.State.IDENTIFIED);
+         stack.func_196082_o().func_82580_o("RollTicks");
+         stack.func_196082_o().func_82580_o("LastModelHit");
+         world.func_184133_a(null, player.func_233580_cy_(), ModSounds.CONFETTI_SFX, SoundCategory.PLAYERS, 0.5F, 1.0F);
       } else {
          if ((int)displacement != lastModelHit) {
-            VaultGear.Rarity rarity = ModAttributes.GEAR_ROLL_TYPE.getOrCreate(stack, VaultGear.RollType.ALL).getValue(stack).get(world.field_73012_v);
+            String roll = ModAttributes.GEAR_ROLL_TYPE.getOrCreate(stack, this.getDefaultRoll(player).getName()).getValue(stack);
+            VaultGear.Rarity rarity = ModConfigs.VAULT_GEAR.getRoll(roll).orElse(this.getDefaultRoll(player)).getRandom(world.func_201674_k());
             ModAttributes.GEAR_RARITY.create(stack, rarity);
             ModAttributes.GEAR_MODEL.create(stack, world.field_73012_v.nextInt(this.getModelsFor(rarity)));
-            ModAttributes.GEAR_COLOR.create(stack, randomBaseColor(world.func_201674_k()));
-            if (item == ModItems.ETCHING) {
-               VaultGear.Set set = VaultGear.Set.values()[world.field_73012_v.nextInt(VaultGear.Set.values().length)];
-               ModAttributes.GEAR_SET.create(stack, set);
-            }
-
+            ModAttributes.GEAR_COLOR.create(stack, item instanceof VaultArmorItem ? -1 : randomBaseColor(world.field_73012_v));
             stack.func_196082_o().func_74768_a("LastModelHit", (int)displacement);
-            world.func_184133_a(null, entity.func_233580_cy_(), ModSounds.RAFFLE_SFX, SoundCategory.PLAYERS, 1.2F, 1.0F);
+            world.func_184133_a(null, player.func_233580_cy_(), ModSounds.RAFFLE_SFX, SoundCategory.PLAYERS, 0.4F, 1.0F);
          }
 
          stack.func_196082_o().func_74768_a("RollTicks", rollTicks + 1);
       }
+   }
+
+   default VaultGearConfig.General.Roll getDefaultRoll(ServerPlayerEntity player) {
+      TalentTree talents = PlayerTalentsData.get(player.func_71121_q()).getTalents(player);
+      TalentNode<?> artisanNode = talents.getNodeOf(ModConfigs.TALENTS.ARTISAN);
+      VaultGearConfig.General.Roll defaultRoll = ModConfigs.VAULT_GEAR.getDefaultRoll();
+      if (artisanNode.isLearned() && artisanNode.getTalent() instanceof ArtisanTalent) {
+         defaultRoll = ModConfigs.VAULT_GEAR.getRoll(((ArtisanTalent)artisanNode.getTalent()).getDefaultRoll()).orElse(defaultRoll);
+      }
+
+      return defaultRoll;
+   }
+
+   default int getDefaultGearTier(ServerPlayerEntity sPlayer) {
+      int vaultLevel = PlayerVaultStatsData.get(sPlayer.func_71121_q()).getVaultStats(sPlayer).getVaultLevel();
+      return ModConfigs.VAULT_GEAR_CRAFTING_SCALING.getRandomTier(vaultLevel);
    }
 
    default double getDisplacement(int tick) {
@@ -180,7 +256,21 @@ public interface VaultGear<T extends Item> extends IForgeItem {
       return (-tick * tick * tick / 6.0 + c * tick) * 50.0 / (-288000.0 + c * 120.0);
    }
 
+   @OnlyIn(Dist.CLIENT)
    default void addInformation(T item, ItemStack stack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+      ModAttributes.GEAR_CRAFTED_BY
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            crafter -> {
+               if (!crafter.isEmpty()) {
+                  tooltip.add(
+                     new StringTextComponent("Crafted by: ")
+                        .func_230529_a_(new StringTextComponent(crafter).func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16770048))))
+                  );
+               }
+            }
+         );
       ModAttributes.GEAR_STATE
          .get(stack)
          .map(attribute -> attribute.getValue(stack))
@@ -191,47 +281,71 @@ public interface VaultGear<T extends Item> extends IForgeItem {
                      .get(stack)
                      .map(attribute -> attribute.getValue(stack))
                      .ifPresent(
-                        roll -> tooltip.add(
-                           new StringTextComponent("Roll: ").func_230529_a_(new StringTextComponent(roll.name()).func_240699_a_(TextFormatting.GREEN))
-                        )
+                        rollName -> {
+                           Optional<VaultGearConfig.General.Roll> roll = ModConfigs.VAULT_GEAR.getRoll(rollName);
+                           if (roll.isPresent()) {
+                              tooltip.add(
+                                 new StringTextComponent("Roll: ")
+                                    .func_230529_a_(
+                                       new StringTextComponent(roll.get().getName())
+                                          .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(roll.get().getColor())))
+                                    )
+                              );
+                           }
+                        }
                      );
                }
             }
          );
-      ModAttributes.GEAR_RARITY.get(stack).map(attribute -> attribute.getValue(stack)).ifPresent(rarity -> {
-         if (item != ModItems.ETCHING) {
-            tooltip.add(new StringTextComponent("Rarity: ").func_230529_a_(new StringTextComponent(rarity.name()).func_240699_a_(rarity.color)));
+      ModAttributes.GEAR_STATE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(state -> ModAttributes.GEAR_TIER.get(stack).map(attribute -> attribute.getValue(stack)).ifPresent(tierId -> {
+            if (ModConfigs.VAULT_GEAR != null) {
+               ITextComponent displayTxt = ModConfigs.VAULT_GEAR.getTierConfig(tierId).getDisplay();
+               if (!displayTxt.getString().isEmpty()) {
+                  tooltip.add(new StringTextComponent("Tier: ").func_230529_a_(displayTxt));
+               }
+            }
+         }));
+      ModAttributes.IDOL_TYPE.get(stack).map(attribute -> attribute.getValue(stack)).ifPresent(value -> {
+         if (item instanceof IdolItem) {
+            tooltip.add(((IdolItem)item).getType().getIdolDescription());
          }
       });
-      ModAttributes.GEAR_SET.get(stack).map(attribute -> attribute.getValue(stack)).ifPresent(value -> {
-         tooltip.add(new StringTextComponent(""));
-         tooltip.add(new StringTextComponent("Etching: ").func_230529_a_(new StringTextComponent(value.name()).func_240699_a_(TextFormatting.RED)));
-         if (item == ModItems.ETCHING) {
-            tooltip.add(new StringTextComponent(""));
+      ModAttributes.GEAR_RARITY
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            rarityx -> {
+               IFormattableTextComponent rarityText = new StringTextComponent("Rarity: ").func_230529_a_(rarityx.getName());
+               if (Screen.func_231173_s_()) {
+                  ModAttributes.GEAR_MODEL
+                     .get(stack)
+                     .map(attribute -> attribute.getValue(stack))
+                     .ifPresent(
+                        model -> rarityText.func_230529_a_(new StringTextComponent(" | ").func_240699_a_(TextFormatting.BLACK))
+                           .func_230529_a_(new StringTextComponent("" + model).func_240699_a_(TextFormatting.GRAY))
+                     );
+               }
 
-            for (TextComponent descriptionLine : value.getLore()) {
-               tooltip.add(descriptionLine.func_240701_a_(new TextFormatting[]{TextFormatting.ITALIC, TextFormatting.GRAY}));
+               tooltip.add(rarityText);
             }
-
-            tooltip.add(new StringTextComponent(""));
-
-            for (TextComponent descriptionLine : value.getDescription()) {
-               tooltip.add(descriptionLine.func_240699_a_(TextFormatting.GRAY));
-            }
-         }
-      });
+         );
       ModAttributes.MAX_REPAIRS
          .get(stack)
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             value -> {
-               int current = ModAttributes.CURRENT_REPAIRS.getOrDefault(stack, 0).getValue(stack);
-               int unfilled = value - current;
-               tooltip.add(
-                  new StringTextComponent("Repairs: ")
-                     .func_230529_a_(tooltipDots(current, TextFormatting.YELLOW))
-                     .func_230529_a_(tooltipDots(unfilled, TextFormatting.GRAY))
-               );
+               if (value > 0) {
+                  int current = ModAttributes.CURRENT_REPAIRS.getOrDefault(stack, 0).getValue(stack);
+                  int unfilled = value - current;
+                  tooltip.add(
+                     new StringTextComponent("Repairs: ")
+                        .func_230529_a_(tooltipDots(current, TextFormatting.YELLOW))
+                        .func_230529_a_(tooltipDots(unfilled, TextFormatting.GRAY))
+                  );
+               }
             }
          );
       ModAttributes.GEAR_MAX_LEVEL
@@ -239,63 +353,33 @@ public interface VaultGear<T extends Item> extends IForgeItem {
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             value -> {
-               int current = ModAttributes.GEAR_LEVEL.getOrDefault(stack, 0.0F).getValue(stack).intValue();
-               int unfilled = value - current;
-               tooltip.add(
-                  new StringTextComponent("Level: ")
-                     .func_230529_a_(tooltipDots(current, TextFormatting.YELLOW))
-                     .func_230529_a_(tooltipDots(unfilled, TextFormatting.GRAY))
-               );
+               if (value > 0) {
+                  int current = ModAttributes.GEAR_LEVEL.getOrDefault(stack, 0.0F).getValue(stack).intValue();
+                  int unfilled = value - current;
+                  tooltip.add(
+                     new StringTextComponent("Levels: ")
+                        .func_230529_a_(tooltipDots(current, TextFormatting.YELLOW))
+                        .func_230529_a_(tooltipDots(unfilled, TextFormatting.GRAY))
+                  );
+               }
             }
          );
-      ModAttributes.ADD_ARMOR
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + format(value, 5) + " Armor").func_240699_a_(TextFormatting.DARK_GRAY)));
-      ModAttributes.ADD_ARMOR_TOUGHNESS
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + format(value, 5) + " Armor Toughness").func_240699_a_(TextFormatting.DARK_GRAY)));
-      ModAttributes.ADD_KNOCKBACK_RESISTANCE
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + format(value, 5) + " Knockback Resistance").func_240699_a_(TextFormatting.DARK_GRAY)));
-      ModAttributes.ADD_ATTACK_DAMAGE
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + format(value, 5) + " Attack Damage").func_240699_a_(TextFormatting.DARK_GRAY)));
-      ModAttributes.ADD_ATTACK_SPEED
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + format(value, 5) + " Attack Speed").func_240699_a_(TextFormatting.DARK_GRAY)));
-      ModAttributes.ADD_DURABILITY
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + value + " Durability").func_240699_a_(TextFormatting.DARK_GRAY)));
-      ModAttributes.EXTRA_LEECH_RATIO
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + format(value * 100.0F, 5) + "% Leech").func_240699_a_(TextFormatting.RED)));
-      ModAttributes.EXTRA_PARRY_CHANCE
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + format(value * 100.0F, 5) + "% Parry").func_240699_a_(TextFormatting.RED)));
-      ModAttributes.EXTRA_HEALTH
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(value -> tooltip.add(new StringTextComponent("+" + format(value.floatValue(), 5) + " Health").func_240699_a_(TextFormatting.RED)));
-      ModAttributes.EXTRA_EFFECTS
-         .get(stack)
-         .map(attribute -> attribute.getValue(stack))
-         .ifPresent(
-            value -> value.forEach(
-               effect -> tooltip.add(
-                  new StringTextComponent("+" + effect.getAmplifier() + " ")
-                     .func_230529_a_(new TranslationTextComponent(effect.getEffect().func_76393_a()))
-                     .func_240699_a_(TextFormatting.GREEN)
-               )
-            )
-         );
+      if (ModAttributes.GEAR_STATE.getOrDefault(stack, VaultGear.State.UNIDENTIFIED).getValue(stack) == VaultGear.State.IDENTIFIED) {
+         this.addModifierInformation(stack, tooltip, flag);
+      }
+
+      ModAttributes.REFORGED.get(stack).map(attribute -> attribute.getValue(stack)).filter(b -> b).ifPresent(value -> {
+         tooltip.add(new StringTextComponent("Reforged").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14833698))));
+         if (Screen.func_231173_s_()) {
+            tooltip.add(new StringTextComponent(" Has been reforged with Artisan Scroll").func_240699_a_(TextFormatting.DARK_GRAY));
+         }
+      });
+      ModAttributes.IDOL_AUGMENTED.get(stack).map(attribute -> attribute.getValue(stack)).filter(b -> b).ifPresent(value -> {
+         tooltip.add(new StringTextComponent("Hallowed").func_240700_a_(style -> style.func_240718_a_(Color.func_240743_a_(16746496))));
+         if (Screen.func_231173_s_()) {
+            tooltip.add(new StringTextComponent(" Adds +3000 Durability").func_240699_a_(TextFormatting.DARK_GRAY));
+         }
+      });
       Map<Enchantment, Integer> enchantments = EnchantmentHelper.func_82781_a(stack);
       if (enchantments.size() > 0) {
          tooltip.add(new StringTextComponent(""));
@@ -306,9 +390,340 @@ public interface VaultGear<T extends Item> extends IForgeItem {
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             value -> tooltip.add(
-               new StringTextComponent("Requires level: ").func_230529_a_(new StringTextComponent(value + "").func_240699_a_(TextFormatting.YELLOW))
+               new StringTextComponent("Requires level: ")
+                  .func_230529_a_(new StringTextComponent(value + "").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16770048))))
             )
          );
+      if (item instanceof VaultArmorItem) {
+         VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(stack, VaultGear.Rarity.SCRAPPY).getValue(stack);
+         Integer gearModel = ModAttributes.GEAR_MODEL.getOrDefault(stack, -1).getValue(stack);
+         if (rarity != VaultGear.Rarity.SCRAPPY && gearModel == ModModels.GearModel.SCALE_1.getId()) {
+            tooltip.add(new StringTextComponent(""));
+            tooltip.add(new StringTextComponent("Required in \"Grasshopper Ninja\" advancement").func_240699_a_(TextFormatting.GREEN));
+         }
+      }
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   default void addModifierInformation(ItemStack stack, List<ITextComponent> tooltip, ITooltipFlag flag) {
+      ModAttributes.ADD_ARMOR
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value, 5) + " Armor").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(4766456)))
+            )
+         );
+      ModAttributes.ADD_ARMOR_2
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value, 5) + " Armor").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(4766456)))
+            )
+         );
+      ModAttributes.ADD_ARMOR_TOUGHNESS
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value, 5) + " Armor Toughness")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(13302672)))
+            )
+         );
+      ModAttributes.ADD_ARMOR_TOUGHNESS_2
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value, 5) + " Armor Toughness")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(13302672)))
+            )
+         );
+      ModAttributes.THORNS_CHANCE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Thorns Chance")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(7195648)))
+            )
+         );
+      ModAttributes.THORNS_DAMAGE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Thorns Damage")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(3646976)))
+            )
+         );
+      ModAttributes.ADD_KNOCKBACK_RESISTANCE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + formatPercent(value * 100.0) + "% Knockback Resistance")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16756751)))
+            )
+         );
+      ModAttributes.ADD_KNOCKBACK_RESISTANCE_2
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + formatPercent(value * 100.0) + "% Knockback Resistance")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16756751)))
+            )
+         );
+      ModAttributes.ADD_ATTACK_DAMAGE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value, 5) + " Attack Damage")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(13116966)))
+            )
+         );
+      ModAttributes.ADD_ATTACK_DAMAGE_2
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value, 5) + " Attack Damage")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(13116966)))
+            )
+         );
+      ModAttributes.ADD_ATTACK_SPEED
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value, 5) + " Attack Speed")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16767592)))
+            )
+         );
+      ModAttributes.ADD_ATTACK_SPEED_2
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value, 5) + " Attack Speed")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16767592)))
+            )
+         );
+      ModAttributes.ADD_DURABILITY
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + value + " Durability").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14668030)))
+            )
+         );
+      ModAttributes.ADD_DURABILITY_2
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + value + " Durability").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14668030)))
+            )
+         );
+      ModAttributes.ADD_PLATING
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + value + " Plating").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14668030)))
+            )
+         );
+      ModAttributes.ADD_REACH
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + value + " Reach").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(8706047)))
+            )
+         );
+      ModAttributes.ADD_REACH_2
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + value + " Reach").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(8706047)))
+            )
+         );
+      ModAttributes.ADD_FEATHER_FEET
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Feather Feet")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(13499899)))
+            )
+         );
+      ModAttributes.ADD_MIN_VAULT_LEVEL
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent((value < 0 ? "-" : "+") + Math.abs(value) + " Min Vault Level")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(15523772)))
+            )
+         );
+      ModAttributes.ADD_COOLDOWN_REDUCTION
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent((value < 0.0F ? "-" : "+") + format(Math.abs(value) * 100.0F, 5) + "% Cooldown Reduction")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(63668)))
+            )
+         );
+      ModAttributes.ADD_COOLDOWN_REDUCTION_2
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent((value < 0.0F ? "-" : "+") + format(Math.abs(value) * 100.0F, 5) + "% Cooldown Reduction")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(63668)))
+            )
+         );
+      ModAttributes.EXTRA_LEECH_RATIO
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Leech")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16716820)))
+            )
+         );
+      ModAttributes.ADD_EXTRA_LEECH_RATIO
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Leech")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16716820)))
+            )
+         );
+      ModAttributes.FATAL_STRIKE_CHANCE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Fatal Strike Chance")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16523264)))
+            )
+         );
+      ModAttributes.FATAL_STRIKE_DAMAGE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Fatal Strike Damage")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(12520704)))
+            )
+         );
+      ModAttributes.EXTRA_HEALTH
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value.floatValue(), 5) + " Health")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(2293541)))
+            )
+         );
+      ModAttributes.ADD_EXTRA_HEALTH
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value.floatValue(), 5) + " Health")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(2293541)))
+            )
+         );
+      ModAttributes.EXTRA_PARRY_CHANCE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Parry")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(11534098)))
+            )
+         );
+      ModAttributes.ADD_EXTRA_PARRY_CHANCE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Parry")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(11534098)))
+            )
+         );
+      ModAttributes.EXTRA_RESISTANCE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Resistance")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16702720)))
+            )
+         );
+      ModAttributes.ADD_EXTRA_RESISTANCE
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> tooltip.add(
+               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Resistance")
+                  .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16702720)))
+            )
+         );
+      ModAttributes.EFFECT_IMMUNITY
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> value.forEach(
+               effect -> tooltip.add(
+                  new StringTextComponent("+")
+                     .func_230529_a_(new TranslationTextComponent(effect.toEffect().func_76393_a()))
+                     .func_230529_a_(new StringTextComponent(" Immunity"))
+                     .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(10801083)))
+               )
+            )
+         );
+      ModAttributes.EFFECT_CLOUD
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> value.forEach(
+               effect -> tooltip.add(
+                  new StringTextComponent("+" + effect.getName() + " Cloud")
+                     .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(15007916)))
+               )
+            )
+         );
+      ModAttributes.EXTRA_EFFECTS
+         .get(stack)
+         .map(attribute -> attribute.getValue(stack))
+         .ifPresent(
+            value -> value.forEach(
+               effect -> tooltip.add(
+                  new StringTextComponent("+" + effect.getAmplifier() + " ")
+                     .func_230529_a_(new TranslationTextComponent(effect.getEffect().func_76393_a()))
+                     .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14111487)))
+               )
+            )
+         );
+      ModAttributes.SOULBOUND.get(stack).map(attribute -> attribute.getValue(stack)).filter(b -> b).ifPresent(value -> {
+         tooltip.add(new StringTextComponent("Soulbound").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(9856253))));
+         if (Screen.func_231173_s_()) {
+            tooltip.add(new StringTextComponent(" Keep item on death in vault").func_240699_a_(TextFormatting.DARK_GRAY));
+         }
+      });
+   }
+
+   static String formatPercent(double value) {
+      return PERCENT_FORMAT.format(value);
    }
 
    static String format(double value, int scale) {
@@ -316,7 +731,7 @@ public interface VaultGear<T extends Item> extends IForgeItem {
    }
 
    default boolean canElytraFly(T item, ItemStack stack, LivingEntity entity) {
-      return entity instanceof PlayerEntity ? PlayerSet.isActive(VaultGear.Set.DRAGON, (PlayerEntity)entity) : false;
+      return false;
    }
 
    default boolean elytraFlightTick(T item, ItemStack stack, LivingEntity entity, int flightTicks) {
@@ -342,93 +757,111 @@ public interface VaultGear<T extends Item> extends IForgeItem {
 
    @OnlyIn(Dist.CLIENT)
    default <A extends BipedModel<?>> A getArmorModel(T item, LivingEntity entityLiving, ItemStack itemStack, EquipmentSlotType armorSlot, A _default) {
+      Integer specialModelId = ModAttributes.GEAR_SPECIAL_MODEL.getOrDefault(itemStack, -1).getValue(itemStack);
+      if (specialModelId != -1) {
+         ModModels.SpecialGearModel specialGearModel = ModModels.SpecialGearModel.getRegistryForSlot(armorSlot).get(specialModelId);
+         if (specialGearModel != null) {
+            return (A)specialGearModel.getModel();
+         }
+      }
+
       Integer modelId = ModAttributes.GEAR_MODEL.getOrDefault(itemStack, -1).getValue(itemStack);
       VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(itemStack, VaultGear.Rarity.SCRAPPY).getValue(itemStack);
-      if (rarity == VaultGear.Rarity.SCRAPPY) {
-         return null;
-      } else {
-         ModModels.GearModel gearModel = ModModels.GearModel.REGISTRY.get(modelId);
-         return (A)(gearModel == null ? null : gearModel.forSlotType(armorSlot));
-      }
+      ModModels.GearModel gearModel = rarity == VaultGear.Rarity.SCRAPPY
+         ? ModModels.GearModel.SCRAPPY_REGISTRY.get(modelId)
+         : ModModels.GearModel.REGISTRY.get(modelId);
+      return (A)(gearModel == null ? null : gearModel.forSlotType(armorSlot));
    }
 
    @OnlyIn(Dist.CLIENT)
    default String getArmorTexture(T item, ItemStack itemStack, Entity entity, EquipmentSlotType slot, String type) {
+      Integer specialModelId = ModAttributes.GEAR_SPECIAL_MODEL.getOrDefault(itemStack, -1).getValue(itemStack);
+      if (specialModelId != -1) {
+         ModModels.SpecialGearModel specialGearModel = ModModels.SpecialGearModel.getRegistryForSlot(slot).get(specialModelId);
+         if (specialGearModel != null) {
+            return specialGearModel.getTextureName(slot, type);
+         }
+      }
+
       Integer modelId = ModAttributes.GEAR_MODEL.getOrDefault(itemStack, -1).getValue(itemStack);
       VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(itemStack, VaultGear.Rarity.SCRAPPY).getValue(itemStack);
-      if (rarity == VaultGear.Rarity.SCRAPPY) {
-         return ModModels.GearModel.SCRAPPY.getTextureName(slot, type);
-      } else {
-         ModModels.GearModel gearModel = ModModels.GearModel.REGISTRY.get(modelId);
-         return gearModel == null ? null : gearModel.getTextureName(slot, type);
-      }
+      ModModels.GearModel gearModel = rarity == VaultGear.Rarity.SCRAPPY
+         ? ModModels.GearModel.SCRAPPY_REGISTRY.get(modelId)
+         : ModModels.GearModel.REGISTRY.get(modelId);
+      return gearModel == null ? null : gearModel.getTextureName(slot, type);
    }
 
    default Multimap<Attribute, AttributeModifier> getAttributeModifiers(
       T item, EquipmentSlotType slot, ItemStack stack, Multimap<Attribute, AttributeModifier> parent
    ) {
-      Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-      Optional<DoubleAttribute> attackDamage = ModAttributes.ATTACK_DAMAGE.get(stack);
-      Optional<DoubleAttribute> attackSpeed = ModAttributes.ATTACK_SPEED.get(stack);
-      Optional<DoubleAttribute> armor = ModAttributes.ARMOR.get(stack);
-      Optional<DoubleAttribute> armorToughness = ModAttributes.ARMOR_TOUGHNESS.get(stack);
-      Optional<DoubleAttribute> knockbackResistance = ModAttributes.KNOCKBACK_RESISTANCE.get(stack);
-      Optional<FloatAttribute> extraHealth = ModAttributes.EXTRA_HEALTH.get(stack);
-      parent.forEach(
-         (attribute, modifier) -> {
-            if (attribute == Attributes.field_233823_f_ && attackDamage.isPresent()) {
-               builder.put(
-                  Attributes.field_233823_f_,
-                  new AttributeModifier(
-                     UUID.fromString("CB3F55D3-645C-4F38-A497-9C13A33DB5CF"), "Weapon modifier", attackDamage.get().getValue(stack), Operation.ADDITION
-                  )
-               );
-            } else if (attribute == Attributes.field_233825_h_ && attackSpeed.isPresent()) {
-               builder.put(
-                  Attributes.field_233825_h_,
-                  new AttributeModifier(
-                     UUID.fromString("FA233E1C-4180-4865-B01B-BCCE9785ACA3"), "Weapon modifier", attackSpeed.get().getValue(stack), Operation.ADDITION
-                  )
-               );
-            } else if (attribute == Attributes.field_233826_i_ && armor.isPresent()) {
-               builder.put(
-                  Attributes.field_233826_i_,
-                  new AttributeModifier(ARMOR_MODIFIERS[slot.func_188454_b()], "Armor modifier", armor.get().getValue(stack), Operation.ADDITION)
-               );
-            } else if (attribute == Attributes.field_233827_j_ && armorToughness.isPresent()) {
-               builder.put(
-                  Attributes.field_233827_j_,
-                  new AttributeModifier(ARMOR_MODIFIERS[slot.func_188454_b()], "Armor toughness", armorToughness.get().getValue(stack), Operation.ADDITION)
-               );
-            } else if (attribute == Attributes.field_233820_c_ && knockbackResistance.isPresent()) {
-               builder.put(
-                  Attributes.field_233820_c_,
-                  new AttributeModifier(
-                     ARMOR_MODIFIERS[slot.func_188454_b()], "Armor knockback resistance", knockbackResistance.get().getValue(stack), Operation.ADDITION
-                  )
-               );
-            } else {
-               builder.put(attribute, modifier);
+      if (!item.isIntendedForSlot(slot)) {
+         return parent;
+      } else {
+         Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+         Optional<DoubleAttribute> attackDamage = ModAttributes.ATTACK_DAMAGE.get(stack);
+         Optional<DoubleAttribute> attackSpeed = ModAttributes.ATTACK_SPEED.get(stack);
+         Optional<DoubleAttribute> armor = ModAttributes.ARMOR.get(stack);
+         Optional<DoubleAttribute> armorToughness = ModAttributes.ARMOR_TOUGHNESS.get(stack);
+         Optional<DoubleAttribute> knockbackResistance = ModAttributes.KNOCKBACK_RESISTANCE.get(stack);
+         Optional<FloatAttribute> extraHealth = ModAttributes.EXTRA_HEALTH.get(stack);
+         Optional<FloatAttribute> extraHealth2 = ModAttributes.ADD_EXTRA_HEALTH.get(stack);
+         Optional<DoubleAttribute> reach = ModAttributes.REACH.get(stack);
+         parent.forEach(
+            (attribute, modifier) -> {
+               if (attribute == Attributes.field_233823_f_ && attackDamage.isPresent()) {
+                  builder.put(
+                     Attributes.field_233823_f_,
+                     new AttributeModifier(modifier.func_111167_a(), "Weapon modifier", attackDamage.get().getValue(stack), Operation.ADDITION)
+                  );
+               } else if (attribute == Attributes.field_233825_h_ && attackSpeed.isPresent()) {
+                  builder.put(
+                     Attributes.field_233825_h_,
+                     new AttributeModifier(modifier.func_111167_a(), "Weapon modifier", attackSpeed.get().getValue(stack), Operation.ADDITION)
+                  );
+               } else if (attribute == Attributes.field_233826_i_ && armor.isPresent()) {
+                  builder.put(
+                     Attributes.field_233826_i_,
+                     new AttributeModifier(ARMOR_MODIFIERS[slot.func_188454_b()], "Armor modifier", armor.get().getValue(stack), Operation.ADDITION)
+                  );
+               } else if (attribute == Attributes.field_233827_j_ && armorToughness.isPresent()) {
+                  builder.put(
+                     Attributes.field_233827_j_,
+                     new AttributeModifier(ARMOR_MODIFIERS[slot.func_188454_b()], "Armor toughness", armorToughness.get().getValue(stack), Operation.ADDITION)
+                  );
+               } else if (attribute == Attributes.field_233820_c_ && knockbackResistance.isPresent()) {
+                  builder.put(
+                     Attributes.field_233820_c_,
+                     new AttributeModifier(
+                        ARMOR_MODIFIERS[slot.func_188454_b()], "Armor knockback resistance", knockbackResistance.get().getValue(stack), Operation.ADDITION
+                     )
+                  );
+               } else {
+                  builder.put(attribute, modifier);
+               }
             }
+         );
+         float health = extraHealth.<Float>map(attribute -> attribute.getValue(stack)).orElse(0.0F)
+            + extraHealth2.<Float>map(attribute -> attribute.getValue(stack)).orElse(0.0F);
+         if (health != 0.0F) {
+            builder.put(Attributes.field_233818_a_, new AttributeModifier(itemHash(item, 0L), "Extra Health", health, Operation.ADDITION));
          }
-      );
-      if ((item == ModItems.SWORD || item == ModItems.AXE) && slot == EquipmentSlotType.MAINHAND
-         || item == ModItems.DAGGER && (slot == EquipmentSlotType.MAINHAND || slot == EquipmentSlotType.OFFHAND)
-         || item instanceof VaultArmorItem && item.getEquipmentSlot(stack) == slot) {
-         extraHealth.ifPresent(
-            floatAttribute -> builder.put(
-               Attributes.field_233818_a_,
-               new AttributeModifier(
-                  new UUID(1234L, item.getRegistryName().toString().hashCode()),
-                  "Extra Health",
-                  floatAttribute.getValue(stack).floatValue(),
-                  Operation.ADDITION
-               )
+
+         reach.ifPresent(
+            attribute -> builder.put(
+               ForgeMod.REACH_DISTANCE.get(), new AttributeModifier(itemHash(item, 1L), "Reach", attribute.getValue(stack), Operation.ADDITION)
             )
          );
+         return builder.build();
       }
+   }
 
-      return builder.build();
+   static int getCooldownReduction(ServerPlayerEntity player, AbilityGroup<?, ?> abilityGroup, int cooldown) {
+      float totalCooldown = MathHelper.func_76131_a(CooldownHelper.getCooldownMultiplier(player, abilityGroup), 0.0F, 1.0F);
+      return Math.round(cooldown * (1.0F - totalCooldown));
+   }
+
+   static UUID itemHash(Item item, long salt) {
+      return new UUID(salt, item.hashCode());
    }
 
    static void addLevel(ItemStack stack, float amount) {
@@ -447,12 +880,43 @@ public interface VaultGear<T extends Item> extends IForgeItem {
       }
    }
 
+   static void decrementLevel(ItemStack stack, int removed) {
+      float currentLevel = ModAttributes.GEAR_LEVEL.getOrDefault(stack, 0.0F).getValue(stack);
+      ModAttributes.GEAR_LEVEL.create(stack, Math.max(currentLevel - removed, 0.0F));
+   }
+
+   static void incrementRepairs(ItemStack stack) {
+      int curRepairs = ModAttributes.CURRENT_REPAIRS.getOrDefault(stack, 0).getValue(stack);
+      ModAttributes.CURRENT_REPAIRS.create(stack, curRepairs + 1);
+   }
+
    static void initialize(ItemStack stack, Random random) {
-      ModAttributes.GEAR_RARITY.get(stack).ifPresent(attribute -> VaultGearConfig.get(attribute.getValue(stack)).initializeAttributes(stack, random));
+      ModAttributes.GEAR_RARITY.get(stack).map(attribute -> attribute.getValue(stack)).ifPresent(rarity -> {
+         int tier = ModAttributes.GEAR_TIER.getOrDefault(stack, 0).getValue(stack);
+         VaultGearConfig.Tier tierConfig = VaultGearConfig.get(rarity).TIERS.get(tier);
+         tierConfig.getAttributes(stack).ifPresent(modifiers -> modifiers.initialize(stack, random));
+      });
    }
 
    static void update(ItemStack stack, Random random) {
-      ModAttributes.GEAR_RARITY.get(stack).ifPresent(attribute -> VaultGearConfig.get(attribute.getValue(stack)).initializeModifiers(stack, random));
+      ModAttributes.GEAR_RARITY.get(stack).map(attribute -> attribute.getValue(stack)).ifPresent(rarity -> {
+         int tier = ModAttributes.GEAR_TIER.getOrDefault(stack, 0).getValue(stack);
+         VaultGearConfig.Tier tierConfig = VaultGearConfig.get(rarity).TIERS.get(tier);
+         tierConfig.getModifiers(stack).ifPresent(modifiers -> {
+            if (ModAttributes.GEAR_STATE.getOrCreate(stack, VaultGear.State.UNIDENTIFIED).getValue(stack) == VaultGear.State.IDENTIFIED) {
+               ModAttributes.GUARANTEED_MODIFIER.getBase(stack).ifPresent(modifierKey -> {
+                  VAttribute<?, ?> modifier = ModAttributes.REGISTRY.get(new ResourceLocation(modifierKey));
+                  if (modifier != null) {
+                     VaultGearHelper.applyGearModifier(stack, tierConfig, modifier);
+                  }
+
+                  VaultGearHelper.removeAttribute(stack, ModAttributes.GUARANTEED_MODIFIER);
+               });
+            }
+
+            modifiers.initialize(stack, random);
+         });
+      });
    }
 
    static int randomBaseColor(Random rand) {
@@ -518,77 +982,26 @@ public interface VaultGear<T extends Item> extends IForgeItem {
       RARE(TextFormatting.YELLOW),
       EPIC(TextFormatting.LIGHT_PURPLE),
       OMEGA(TextFormatting.GREEN),
+      UNIQUE(Color.func_240743_a_(-1213660)),
       SCRAPPY(TextFormatting.GRAY);
 
-      public final TextFormatting color;
+      private final Color color;
 
       private Rarity(TextFormatting color) {
+         this(Color.func_240744_a_(color));
+      }
+
+      private Rarity(Color color) {
          this.color = color;
       }
-   }
 
-   public static enum RollType {
-      SCRAPPY_ONLY,
-      TREASURE_ONLY,
-      ALL;
-
-      public VaultGear.Rarity get(Random rand) {
-         return ModConfigs.VAULT_GEAR.ROLLS.get(this.name()).getRandom(rand);
-      }
-   }
-
-   public static enum Set {
-      NONE("", ""),
-      PHOENIX(
-         "Reborn from the ashes!",
-         "Next time you take a lethal damage in the Vaults, become invulnerable for 3 seconds and get fully healed. (Can be triggered only once per Vault instance)"
-      ),
-      GOBLIN("Hoard all the way!", "Grants better loot chance (+1 Luck)"),
-      GOLEM("Steady as rock!", "Grants +8% resistance"),
-      ASSASSIN("Fast as wind!", "Increases speed and grants +10% dodge chance"),
-      SLAYER("Slay them all!", "Grants +2 Strength"),
-      RIFT("Become one with the Vault Rifts!", "Reduce all ability cooldowns by 50%"),
-      DRAGON("Breath of the ender!", "Gain elytra and gliding powers without an elytra item"),
-      BRUTE("Angry as the Piglins!", "Grants +1 Strength"),
-      TITAN("Sturdy as a titan!", "Grants +14% resistance"),
-      DRYAD("Touch of the nature!", "Grants +2 Regeneration"),
-      VAMPIRE("Smell the blood!", "Grants 5% life leech"),
-      NINJA("Can't hit me!", "Grants +20% parry chance"),
-      TREASURE_HUNTER("Leave no chest behind!", "Grants better loot chance (+3 Luck)");
-
-      String lore;
-      String description;
-
-      private Set(String lore, String description) {
-         this.lore = lore;
-         this.description = description;
+      public Color getColor() {
+         return this.color;
       }
 
-      public List<TextComponent> getDescription() {
-         return this.getTooltip(this.description);
-      }
-
-      public List<TextComponent> getLore() {
-         return this.getTooltip(this.lore);
-      }
-
-      private List<TextComponent> getTooltip(String text) {
-         LinkedList<TextComponent> tooltip = new LinkedList<>();
-         StringBuilder sb = new StringBuilder();
-
-         for (String word : text.split("\\s+")) {
-            sb.append(word + " ");
-            if (sb.length() >= 30) {
-               tooltip.add(new StringTextComponent(sb.toString().trim()));
-               sb = new StringBuilder();
-            }
-         }
-
-         if (sb.length() > 0) {
-            tooltip.add(new StringTextComponent(sb.toString().trim()));
-         }
-
-         return tooltip;
+      public ITextComponent getName() {
+         Style style = Style.field_240709_b_.func_240718_a_(this.getColor());
+         return new StringTextComponent(this.name()).func_240703_c_(style);
       }
    }
 

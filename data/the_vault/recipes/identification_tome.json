@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "pvp",
+    "pep",
+    "pcp"
+  ],
+  "key": {
+    "p": {
+      "item": "minecraft:paper"
+    },
+    "v": {
+      "item": "the_vault:vault_diamond_block"
+    },
+    "e": {
+      "item": "the_vault:echo_pog"
+    },
+    "c": {
+      "tag": "the_vault:playerchunks"
+    }
+  },
+  "result": {
+    "item": "the_vault:identification_tome",
+    "count": 1
+  }
+}

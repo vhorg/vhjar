@@ -25,7 +25,7 @@ public abstract class VaultGearModel<T extends LivingEntity> extends BipedModel<
    }
 
    public boolean isLayer2() {
-      return this.slotType == EquipmentSlotType.LEGS || this.slotType == EquipmentSlotType.FEET;
+      return this.slotType == EquipmentSlotType.LEGS;
    }
 
    public void func_225598_a_(

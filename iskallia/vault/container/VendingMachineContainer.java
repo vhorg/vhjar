@@ -3,7 +3,7 @@ package iskallia.vault.container;
 import iskallia.vault.block.VendingMachineBlock;
 import iskallia.vault.block.entity.VendingMachineTileEntity;
 import iskallia.vault.container.inventory.VendingInventory;
-import iskallia.vault.container.slot.VendingSellSlot;
+import iskallia.vault.container.slot.SellSlot;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.item.ItemTraderCore;
 import iskallia.vault.util.EntityHelper;
@@ -41,7 +41,7 @@ public class VendingMachineContainer extends Container {
             VendingMachineContainer.this.vendingInventory.updateRecipe();
          }
       });
-      this.func_75146_a(new VendingSellSlot(this.vendingInventory, 2, 268, 43));
+      this.func_75146_a(new SellSlot(this.vendingInventory, 2, 268, 43));
 
       for (int i1 = 0; i1 < 3; i1++) {
          for (int k1 = 0; k1 < 9; k1++) {
@@ -97,7 +97,7 @@ public class VendingMachineContainer extends Container {
       if (index >= 0 && index < cores.size()) {
          this.deselectTrades();
          TraderCore ejectedCore = this.tileEntity.getCores().remove(index);
-         ItemStack itemStack = ItemTraderCore.getStackFromCore(ejectedCore, ejectedCore.getType());
+         ItemStack itemStack = ItemTraderCore.getStackFromCore(ejectedCore);
          this.playerInventory.field_70458_d.func_146097_a(itemStack, false, true);
       }
    }

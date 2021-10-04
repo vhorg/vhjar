@@ -2,11 +2,11 @@ package iskallia.vault.client.gui.widget;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import iskallia.vault.client.gui.helper.Rectangle;
 import iskallia.vault.client.gui.screen.AdvancedVendingMachineScreen;
 import iskallia.vault.container.AdvancedVendingContainer;
 import iskallia.vault.vending.Trade;
 import iskallia.vault.vending.TraderCore;
+import java.awt.Rectangle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.ItemRenderer;
@@ -52,15 +52,15 @@ public class AdvancedTradeWidget extends Widget {
       if (trade.getTradesLeft() == 0) {
          func_238463_a_(matrixStack, this.field_230690_l_, this.field_230691_m_, 277.0F, 96.0F, 88, 27, 512, 256);
          RenderSystem.disableDepthTest();
-         itemRenderer.func_175042_a(buy, 5 + this.field_230690_l_ + tradeBoundaries.x0, 6 + this.field_230691_m_ + tradeBoundaries.y0 - yOFfset);
-         itemRenderer.func_175042_a(sell, 55 + this.field_230690_l_ + tradeBoundaries.x0, 6 + this.field_230691_m_ + tradeBoundaries.y0 - yOFfset);
+         itemRenderer.func_175042_a(buy, 5 + this.field_230690_l_ + tradeBoundaries.x, 6 + this.field_230691_m_ + tradeBoundaries.y - yOFfset);
+         itemRenderer.func_175042_a(sell, 55 + this.field_230690_l_ + tradeBoundaries.x, 6 + this.field_230691_m_ + tradeBoundaries.y - yOFfset);
       } else {
          boolean isHovered = this.isHovered(mouseX, mouseY);
          boolean isSelected = ((AdvancedVendingContainer)this.parentScreen.func_212873_a_()).getSelectedTrade() == this.traderCode;
          func_238463_a_(matrixStack, this.field_230690_l_, this.field_230691_m_, 277.0F, !isHovered && !isSelected ? 40.0F : 68.0F, 88, 27, 512, 256);
          RenderSystem.disableDepthTest();
-         itemRenderer.func_175042_a(buy, 5 + this.field_230690_l_ + tradeBoundaries.x0, 6 + this.field_230691_m_ + tradeBoundaries.y0 - yOFfset);
-         itemRenderer.func_175042_a(sell, 55 + this.field_230690_l_ + tradeBoundaries.x0, 6 + this.field_230691_m_ + tradeBoundaries.y0 - yOFfset);
+         itemRenderer.func_175042_a(buy, 5 + this.field_230690_l_ + tradeBoundaries.x, 6 + this.field_230691_m_ + tradeBoundaries.y - yOFfset);
+         itemRenderer.func_175042_a(sell, 55 + this.field_230690_l_ + tradeBoundaries.x, 6 + this.field_230691_m_ + tradeBoundaries.y - yOFfset);
          minecraft.field_71466_p.func_238421_b_(matrixStack, buy.func_190916_E() + "", this.field_230690_l_ + 23, this.field_230691_m_ + 10, -1);
          minecraft.field_71466_p.func_238421_b_(matrixStack, sell.func_190916_E() + "", this.field_230690_l_ + 73, this.field_230691_m_ + 10, -1);
          RenderSystem.enableDepthTest();

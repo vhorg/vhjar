@@ -2,22 +2,34 @@ package iskallia.vault.client.gui.tab;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import iskallia.vault.client.gui.component.AbilityDialog;
+import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.client.gui.screen.SkillTreeScreen;
 import iskallia.vault.client.gui.widget.AbilityWidget;
+import iskallia.vault.client.gui.widget.connect.ConnectorWidget;
 import iskallia.vault.container.SkillTreeContainer;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.skill.ability.AbilityRegistry;
 import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.ability.effect.AbilityEffect;
+import iskallia.vault.util.MiscUtils;
+import java.awt.Color;
+import java.awt.geom.Point2D.Float;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import net.minecraft.util.math.vector.Vector2f;
+import java.util.Map;
 import net.minecraft.util.text.StringTextComponent;
 
 public class AbilitiesTab extends SkillTab {
-   private List<AbilityWidget> abilityWidgets = new LinkedList<>();
+   private final Map<String, AbilityWidget> abilityWidgets = new HashMap<>();
+   private final List<ConnectorWidget> abilityConnectors = new LinkedList<>();
+   private final AbilityDialog abilityDialog;
    private AbilityWidget selectedWidget;
 
-   public AbilitiesTab(SkillTreeScreen parentScreen) {
+   public AbilitiesTab(AbilityDialog abilityDialog, SkillTreeScreen parentScreen) {
       super(parentScreen, new StringTextComponent("Abilities Tab"));
+      this.abilityDialog = abilityDialog;
    }
 
    @Override
@@ -26,17 +38,39 @@ public class AbilitiesTab extends SkillTab {
       AbilityTree abilityTree = ((SkillTreeContainer)this.parentScreen.func_212873_a_()).getAbilityTree();
       ModConfigs.ABILITIES_GUI
          .getStyles()
-         .forEach((abilityName, style) -> this.abilityWidgets.add(new AbilityWidget(ModConfigs.ABILITIES.getByName(abilityName), abilityTree, style)));
+         .forEach((abilityName, style) -> this.abilityWidgets.put(abilityName, new AbilityWidget(abilityName, abilityTree, style)));
+      ModConfigs.ABILITIES_GUI.getStyles().forEach((abilityName, style) -> {
+         AbilityEffect<?> ability = AbilityRegistry.getAbility(abilityName);
+         if (!abilityName.equals(ability.getAbilityGroupName())) {
+            AbilityWidget abilityGroup = this.abilityWidgets.get(ability.getAbilityGroupName());
+            AbilityWidget thisAbility = this.abilityWidgets.get(abilityName);
+            if (abilityGroup != null && thisAbility != null) {
+               ConnectorWidget widget = new ConnectorWidget(abilityGroup, thisAbility, ConnectorWidget.ConnectorType.LINE);
+               if (abilityName.equals(abilityTree.getNodeOf(ability).getSpecialization())) {
+                  widget.setColor(new Color(13021470));
+               } else {
+                  widget.setColor(new Color(5592405));
+               }
+
+               this.abilityConnectors.add(widget);
+            }
+         }
+      });
+   }
+
+   @Override
+   public String getTabName() {
+      return "Abilities";
    }
 
    @Override
    public boolean func_231044_a_(double mouseX, double mouseY, int button) {
       boolean mouseClicked = super.func_231044_a_(mouseX, mouseY, button);
-      Vector2f midpoint = this.parentScreen.getContainerBounds().midpoint();
-      int containerMouseX = (int)((mouseX - midpoint.field_189982_i) / this.viewportScale - this.viewportTranslation.field_189982_i);
-      int containerMouseY = (int)((mouseY - midpoint.field_189983_j) / this.viewportScale - this.viewportTranslation.field_189983_j);
+      Float midpoint = MiscUtils.getMidpoint(this.parentScreen.getContainerBounds());
+      int containerMouseX = (int)((mouseX - midpoint.x) / this.viewportScale - this.viewportTranslation.field_189982_i);
+      int containerMouseY = (int)((mouseY - midpoint.y) / this.viewportScale - this.viewportTranslation.field_189983_j);
 
-      for (AbilityWidget abilityWidget : this.abilityWidgets) {
+      for (AbilityWidget abilityWidget : this.abilityWidgets.values()) {
          if (abilityWidget.func_231047_b_(containerMouseX, containerMouseY) && abilityWidget.func_231044_a_(containerMouseX, containerMouseY, button)) {
             if (this.selectedWidget != null) {
                this.selectedWidget.deselect();
@@ -44,7 +78,7 @@ public class AbilitiesTab extends SkillTab {
 
             this.selectedWidget = abilityWidget;
             this.selectedWidget.select();
-            this.parentScreen.getAbilityDialog().setAbilityGroup(this.selectedWidget.getAbilityGroup());
+            this.abilityDialog.setAbilityWidget(this.selectedWidget.getAbilityName());
             break;
          }
       }
@@ -52,20 +86,30 @@ public class AbilitiesTab extends SkillTab {
       return mouseClicked;
    }
 
-   public void func_230430_a_(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+   @Override
+   public void renderTabForeground(MatrixStack renderStack, int mouseX, int mouseY, float pTicks, List<Runnable> postContainerRender) {
       RenderSystem.enableBlend();
-      Vector2f midpoint = this.parentScreen.getContainerBounds().midpoint();
-      matrixStack.func_227860_a_();
-      matrixStack.func_227861_a_(midpoint.field_189982_i, midpoint.field_189983_j, 0.0);
-      matrixStack.func_227862_a_(this.viewportScale, this.viewportScale, 1.0F);
-      matrixStack.func_227861_a_(this.viewportTranslation.field_189982_i, this.viewportTranslation.field_189983_j, 0.0);
-      int containerMouseX = (int)((mouseX - midpoint.field_189982_i) / this.viewportScale - this.viewportTranslation.field_189982_i);
-      int containerMouseY = (int)((mouseY - midpoint.field_189983_j) / this.viewportScale - this.viewportTranslation.field_189983_j);
+      Float midpoint = MiscUtils.getMidpoint(this.parentScreen.getContainerBounds());
+      renderStack.func_227860_a_();
+      renderStack.func_227861_a_(midpoint.x, midpoint.y, 0.0);
+      renderStack.func_227862_a_(this.viewportScale, this.viewportScale, 1.0F);
+      renderStack.func_227861_a_(this.viewportTranslation.field_189982_i, this.viewportTranslation.field_189983_j, 0.0);
+      int containerMouseX = (int)((mouseX - midpoint.x) / this.viewportScale - this.viewportTranslation.field_189982_i);
+      int containerMouseY = (int)((mouseY - midpoint.y) / this.viewportScale - this.viewportTranslation.field_189983_j);
+      renderStack.func_227860_a_();
+      renderStack.func_227861_a_(0.0, 10.0, 0.0);
+      renderStack.func_227862_a_(1.6F, 1.6F, 1.6F);
+      UIHelper.drawFacingPlayer(renderStack, containerMouseX, containerMouseY);
+      renderStack.func_227865_b_();
 
-      for (AbilityWidget abilityWidget : this.abilityWidgets) {
-         abilityWidget.func_230430_a_(matrixStack, containerMouseX, containerMouseY, partialTicks);
+      for (ConnectorWidget researchConnector : this.abilityConnectors) {
+         researchConnector.renderConnection(renderStack, containerMouseX, containerMouseY, pTicks, this.viewportScale);
       }
 
-      matrixStack.func_227865_b_();
+      for (AbilityWidget abilityWidget : this.abilityWidgets.values()) {
+         abilityWidget.renderWidget(renderStack, containerMouseX, containerMouseY, pTicks, postContainerRender);
+      }
+
+      renderStack.func_227865_b_();
    }
 }

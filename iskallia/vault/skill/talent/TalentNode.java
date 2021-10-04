@@ -2,7 +2,9 @@ package iskallia.vault.skill.talent;
 
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.talent.type.PlayerTalent;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class TalentNode<T extends PlayerTalent> implements INBTSerializable<CompoundNBT> {
@@ -11,7 +13,7 @@ public class TalentNode<T extends PlayerTalent> implements INBTSerializable<Comp
 
    public TalentNode(TalentGroup<T> group, int level) {
       this.group = group;
-      this.level = level;
+      this.level = MathHelper.func_76125_a(level, 0, group.getMaxLevel());
    }
 
    public TalentGroup<T> getGroup() {
@@ -31,7 +33,7 @@ public class TalentNode<T extends PlayerTalent> implements INBTSerializable<Comp
    }
 
    public boolean isLearned() {
-      return this.level != 0;
+      return this.getLevel() > 0;
    }
 
    public CompoundNBT serializeNBT() {
@@ -59,9 +61,14 @@ public class TalentNode<T extends PlayerTalent> implements INBTSerializable<Comp
       }
    }
 
+   @Nullable
    public static <T extends PlayerTalent> TalentNode<T> fromNBT(CompoundNBT nbt, Class<T> clazz) {
-      TalentGroup<T> group = (TalentGroup<T>)ModConfigs.TALENTS.getByName(nbt.func_74779_i("Name"));
-      int level = nbt.func_74762_e("Level");
-      return new TalentNode<>(group, level);
+      TalentGroup<T> group = (TalentGroup<T>)ModConfigs.TALENTS.getTalent(nbt.func_74779_i("Name")).orElse(null);
+      if (group == null) {
+         return null;
+      } else {
+         int level = nbt.func_74762_e("Level");
+         return new TalentNode<>(group, level);
+      }
    }
 }

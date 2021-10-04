@@ -17,6 +17,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemLegendaryTreasure extends Item {
    private VaultRarity vaultRarity;
@@ -60,6 +62,7 @@ public class ItemLegendaryTreasure extends Item {
       }
    }
 
+   @OnlyIn(Dist.CLIENT)
    public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
       if (stack.func_77973_b() instanceof ItemLegendaryTreasure) {
          ItemLegendaryTreasure item = (ItemLegendaryTreasure)stack.func_77973_b();

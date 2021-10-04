@@ -3,8 +3,10 @@ package iskallia.vault.client.gui.helper;
 import java.util.function.Function;
 
 public enum Easing {
+   CONSTANT_ONE(x -> 1.0F),
    LINEAR_IN(x -> x),
    LINEAR_OUT(x -> 1.0F - x),
+   EASE_IN_OUT_SINE(x -> -((float)Math.cos(Math.PI * x.floatValue()) - 1.0F) / 2.0F),
    EXPO_OUT(x -> x == 1.0F ? 1.0F : 1.0F - (float)Math.pow(2.0, -10.0F * x)),
    EASE_OUT_BOUNCE(x -> {
       float n1 = 7.5625F;

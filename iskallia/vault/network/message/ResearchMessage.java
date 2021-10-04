@@ -42,15 +42,16 @@ public class ResearchMessage {
                PlayerVaultStatsData statsData = PlayerVaultStatsData.get((ServerWorld)sender.field_70170_p);
                PlayerResearchesData researchesData = PlayerResearchesData.get((ServerWorld)sender.field_70170_p);
                ResearchTree researchTree = researchesData.getResearches(sender);
+               int researchCost = researchTree.getResearchCost(research);
                if (!ModConfigs.SKILL_GATES.getGates().isLocked(research.getName(), researchTree)) {
                   PlayerVaultStats stats = statsData.getVaultStats(sender);
                   int currentPoints = research.usesKnowledge() ? stats.getUnspentKnowledgePts() : stats.getUnspentSkillPts();
-                  if (currentPoints >= research.getCost()) {
+                  if (currentPoints >= researchCost) {
                      researchesData.research(sender, research);
                      if (research.usesKnowledge()) {
-                        statsData.spendKnowledgePts(sender, research.getCost());
+                        statsData.spendKnowledgePts(sender, researchCost);
                      } else {
-                        statsData.spendSkillPts(sender, research.getCost());
+                        statsData.spendSkillPts(sender, researchCost);
                      }
                   }
                }

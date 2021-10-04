@@ -1,14 +1,24 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
-import iskallia.vault.util.WeightedList;
+import iskallia.vault.util.NetcodeUtils;
+import iskallia.vault.util.PlayerFilter;
+import iskallia.vault.util.data.WeightedList;
+import iskallia.vault.world.data.GlobalDifficultyData;
+import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.logic.VaultSpawner;
+import iskallia.vault.world.vault.modifier.LevelModifier;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -18,10 +28,15 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.LogicalSidedProvider;
 
 public class VaultMobsConfig extends Config {
    public static final Item[] LEATHER_ARMOR = new Item[]{Items.field_151024_Q, Items.field_151027_R, Items.field_151026_S, Items.field_151021_T};
@@ -49,6 +64,8 @@ public class VaultMobsConfig extends Config {
       Items.field_234754_kI_, Items.field_234757_kL_, Items.field_234756_kK_, Items.field_234755_kJ_, Items.field_234758_kU_
    };
    @Expose
+   private Map<String, List<VaultMobsConfig.Mob.AttributeOverride>> ATTRIBUTE_OVERRIDES = new LinkedHashMap<>();
+   @Expose
    private List<VaultMobsConfig.Level> LEVEL_OVERRIDES = new ArrayList<>();
 
    public VaultMobsConfig.Level getForLevel(int level) {
@@ -75,23 +92,22 @@ public class VaultMobsConfig extends Config {
 
    @Override
    protected void reset() {
+      List<VaultMobsConfig.Mob.AttributeOverride> attributes = new ArrayList<>();
+      attributes.add(new VaultMobsConfig.Mob.AttributeOverride(ModAttributes.CRIT_CHANCE, 0.0, 0.5, "set", 0.8, 0.05));
+      attributes.add(new VaultMobsConfig.Mob.AttributeOverride(ModAttributes.CRIT_MULTIPLIER, 0.0, 0.1, "set", 0.8, 0.1));
+      this.ATTRIBUTE_OVERRIDES.put(EntityType.field_200725_aD.getRegistryName().toString(), attributes);
       this.LEVEL_OVERRIDES
          .add(
-            new VaultMobsConfig.Level(5)
+            new VaultMobsConfig.Level(0)
                .mobAdd(Items.field_151041_m, 1)
                .mobAdd(Items.field_151052_q, 2)
                .bossAdd(Items.field_151052_q, 1)
                .bossAdd(Items.field_151010_B, 2)
                .raffleAdd(Items.field_151048_u, 1)
-               .mob(
-                  EntityType.field_200725_aD,
-                  1,
-                  mob -> mob.attribute(ModAttributes.CRIT_CHANCE, 1.0)
-                     .attribute(ModAttributes.CRIT_MULTIPLIER, 5.0)
-                     .attribute(Attributes.field_233818_a_, 20.0)
-               )
-               .boss(ModEntities.ROBOT, 1, mob -> mob.attribute(ModAttributes.TP_CHANCE, 0.5).attribute(ModAttributes.TP_RANGE, 32.0))
-               .mobMisc(3, 1, 3)
+               .mob(EntityType.field_200725_aD, 1)
+               .boss(ModEntities.ROBOT, 1)
+               .raffle(ModEntities.ARENA_BOSS, 1)
+               .mobMisc(3, 1, new VaultSpawner.Config().withStartMaxMobs(5).withMinDistance(10.0).withMaxDistance(24.0).withDespawnDistance(26.0))
                .bossMisc(3, 1)
                .raffleMisc(3, 1)
          );
@@ -140,7 +156,7 @@ public class VaultMobsConfig extends Config {
          this.MOB_POOL = new WeightedList<>();
          this.BOSS_POOL = new WeightedList<>();
          this.RAFFLE_BOSS_POOL = new WeightedList<>();
-         this.MOB_MISC = new VaultMobsConfig.MobMisc(0, 0, 0);
+         this.MOB_MISC = new VaultMobsConfig.MobMisc(0, 0, new VaultSpawner.Config());
          this.BOSS_MISC = new VaultMobsConfig.BossMisc(0, 0);
          this.RAFFLE_BOSS_MISC = new VaultMobsConfig.BossMisc(0, 0);
       }
@@ -190,8 +206,8 @@ public class VaultMobsConfig extends Config {
          return this;
       }
 
-      public VaultMobsConfig.Level mobMisc(int level, int trials, int maxMobs) {
-         this.MOB_MISC = new VaultMobsConfig.MobMisc(level, trials, maxMobs);
+      public VaultMobsConfig.Level mobMisc(int level, int trials, VaultSpawner.Config spawner) {
+         this.MOB_MISC = new VaultMobsConfig.MobMisc(level, trials, spawner);
          return this;
       }
 
@@ -241,71 +257,144 @@ public class VaultMobsConfig extends Config {
          return this;
       }
 
-      public Item getForMob(EquipmentSlotType slot) {
+      public ItemStack getForMob(EquipmentSlotType slot) {
          if (!this.MOB_LOOT.isEmpty() && this.MOB_LOOT.containsKey(slot.func_188450_d())) {
-            String item = this.MOB_LOOT.get(slot.func_188450_d()).getRandom(new Random());
-            return Registry.field_212630_s.func_241873_b(new ResourceLocation(item)).orElse(Items.field_190931_a);
+            String itemStr = this.MOB_LOOT.get(slot.func_188450_d()).getRandom(new Random());
+            if (itemStr.contains("{")) {
+               int part = itemStr.indexOf(123);
+               String itemName = itemStr.substring(0, part);
+               String nbt = itemStr.substring(part);
+               Item item = Registry.field_212630_s.func_241873_b(new ResourceLocation(itemName)).orElse(Items.field_190931_a);
+               ItemStack itemStack = new ItemStack(item);
+
+               try {
+                  itemStack.func_77982_d(JsonToNBT.func_180713_a(nbt));
+                  return itemStack;
+               } catch (CommandSyntaxException var9) {
+                  return ItemStack.field_190927_a;
+               }
+            } else {
+               Item item = Registry.field_212630_s.func_241873_b(new ResourceLocation(itemStr)).orElse(Items.field_190931_a);
+               return new ItemStack(item);
+            }
          } else {
-            return Items.field_190931_a;
+            return ItemStack.field_190927_a;
          }
       }
 
-      public Item getForBoss(EquipmentSlotType slot) {
+      public ItemStack getForBoss(EquipmentSlotType slot) {
          if (!this.BOSS_LOOT.isEmpty() && this.BOSS_LOOT.containsKey(slot.func_188450_d())) {
-            String item = this.BOSS_LOOT.get(slot.func_188450_d()).getRandom(new Random());
-            return Registry.field_212630_s.func_241873_b(new ResourceLocation(item)).orElse(Items.field_190931_a);
+            String itemStr = this.BOSS_LOOT.get(slot.func_188450_d()).getRandom(new Random());
+            if (itemStr.contains("{")) {
+               int part = itemStr.indexOf(123);
+               String itemName = itemStr.substring(0, part);
+               String nbt = itemStr.substring(part);
+               Item item = Registry.field_212630_s.func_241873_b(new ResourceLocation(itemName)).orElse(Items.field_190931_a);
+               ItemStack itemStack = new ItemStack(item);
+
+               try {
+                  itemStack.func_77982_d(JsonToNBT.func_180713_a(nbt));
+                  return itemStack;
+               } catch (CommandSyntaxException var9) {
+                  return ItemStack.field_190927_a;
+               }
+            } else {
+               Item item = Registry.field_212630_s.func_241873_b(new ResourceLocation(itemStr)).orElse(Items.field_190931_a);
+               return new ItemStack(item);
+            }
          } else {
-            return Items.field_190931_a;
+            return ItemStack.field_190927_a;
          }
       }
 
-      public Item getForRaffle(EquipmentSlotType slot) {
+      public ItemStack getForRaffle(EquipmentSlotType slot) {
          if (!this.RAFFLE_BOSS_LOOT.isEmpty() && this.RAFFLE_BOSS_LOOT.containsKey(slot.func_188450_d())) {
-            String item = this.RAFFLE_BOSS_LOOT.get(slot.func_188450_d()).getRandom(new Random());
-            return Registry.field_212630_s.func_241873_b(new ResourceLocation(item)).orElse(Items.field_190931_a);
+            String itemStr = this.RAFFLE_BOSS_LOOT.get(slot.func_188450_d()).getRandom(new Random());
+            if (itemStr.contains("{")) {
+               int part = itemStr.indexOf(123);
+               String itemName = itemStr.substring(0, part);
+               String nbt = itemStr.substring(part);
+               Item item = Registry.field_212630_s.func_241873_b(new ResourceLocation(itemName)).orElse(Items.field_190931_a);
+               ItemStack itemStack = new ItemStack(item);
+
+               try {
+                  itemStack.func_77982_d(JsonToNBT.func_180713_a(nbt));
+                  return itemStack;
+               } catch (CommandSyntaxException var9) {
+                  return ItemStack.field_190927_a;
+               }
+            } else {
+               Item item = Registry.field_212630_s.func_241873_b(new ResourceLocation(itemStr)).orElse(Items.field_190931_a);
+               return new ItemStack(item);
+            }
          } else {
-            return Items.field_190931_a;
+            return ItemStack.field_190927_a;
          }
+      }
+
+      public Optional<VaultMobsConfig.Mob> getMob(LivingEntity entity) {
+         return this.MOB_POOL
+            .stream()
+            .map(entry -> entry.value)
+            .filter(mob -> mob.NAME.equals(entity.func_200600_R().getRegistryName().toString()))
+            .findFirst();
       }
    }
 
    public static class Mob {
       @Expose
       private String NAME;
-      @Expose
-      private List<VaultMobsConfig.Mob.AttributeOverride> ATTRIBUTES;
 
       public Mob(EntityType<?> type) {
          this.NAME = type.getRegistryName().toString();
-         this.ATTRIBUTES = new ArrayList<>();
-      }
-
-      public VaultMobsConfig.Mob attribute(Attribute attribute, double defaultValue) {
-         this.ATTRIBUTES.add(new VaultMobsConfig.Mob.AttributeOverride(attribute, defaultValue));
-         return this;
       }
 
       public EntityType<?> getType() {
          return Registry.field_212629_r.func_241873_b(new ResourceLocation(this.NAME)).orElse(EntityType.field_200791_e);
       }
 
-      public LivingEntity create(World world) {
-         LivingEntity entity = (LivingEntity)this.getType().func_200721_a(world);
+      public LivingEntity scale(LivingEntity entity, VaultRaid vault, GlobalDifficultyData.Difficulty vaultDifficulty) {
+         int level = vault.getProperties().getValue(VaultRaid.LEVEL);
+         UUID host = vault.getProperties().getValue(VaultRaid.HOST);
+         MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+         if (srv != null) {
+            level += NetcodeUtils.<Integer>runIfPresent(
+                  srv, host, sPlayer -> ModConfigs.PLAYER_SCALING.getMobLevelAdjustment(sPlayer.func_200200_C_().getString())
+               )
+               .orElse(0);
+         }
 
-         for (VaultMobsConfig.Mob.AttributeOverride override : this.ATTRIBUTES) {
-            if (!(world.field_73012_v.nextDouble() >= override.ROLL_CHANCE)) {
-               Attribute attribute = (Attribute)Registry.field_239692_aP_.func_241873_b(new ResourceLocation(override.NAME)).orElse(null);
-               if (attribute != null) {
-                  ModifiableAttributeInstance instance = entity.func_110148_a(attribute);
-                  if (instance != null) {
-                     instance.func_111128_a(override.getValue(instance.func_111125_b(), world.func_201674_k()));
-                  }
+         for (LevelModifier modifier : vault.getActiveModifiersFor(PlayerFilter.any(), LevelModifier.class)) {
+            level += modifier.getLevelAddend();
+         }
+
+         int mobLevel = Math.max(level, 0);
+         List<VaultMobsConfig.Mob.AttributeOverride> attributes = ModConfigs.VAULT_MOBS.ATTRIBUTE_OVERRIDES.get(this.getType().getRegistryName().toString());
+         if (attributes != null) {
+            for (VaultMobsConfig.Mob.AttributeOverride override : attributes) {
+               if (!(entity.field_70170_p.field_73012_v.nextDouble() >= override.ROLL_CHANCE)) {
+                  Registry.field_239692_aP_.func_241873_b(new ResourceLocation(override.NAME)).ifPresent(attribute -> {
+                     ModifiableAttributeInstance instance = entity.func_110148_a(attribute);
+                     if (instance != null) {
+                        double multiplier = 1.0;
+                        if (attribute == Attributes.field_233818_a_ || attribute == Attributes.field_233823_f_) {
+                           multiplier = vaultDifficulty.getMultiplier();
+                        }
+
+                        instance.func_111128_a(override.getValue(instance.func_111125_b(), mobLevel, entity.field_70170_p.func_201674_k()) * multiplier);
+                     }
+                  });
                }
             }
          }
 
+         entity.func_70606_j(1.0F);
          entity.func_70691_i(1000000.0F);
          return entity;
+      }
+
+      public LivingEntity create(World world) {
+         return (LivingEntity)this.getType().func_200721_a(world);
       }
 
       public static class AttributeOverride {
@@ -319,16 +408,29 @@ public class VaultMobsConfig extends Config {
          public String OPERATOR;
          @Expose
          public double ROLL_CHANCE;
+         @Expose
+         public double SCALE_PER_LEVEL;
 
-         public AttributeOverride(Attribute attribute, double defaultValue) {
+         public AttributeOverride(Attribute attribute, double min, double max, String operator, double rollChance, double scalePerLevel) {
             this.NAME = attribute.getRegistryName().toString();
-            this.MIN = defaultValue;
-            this.MAX = defaultValue;
-            this.OPERATOR = "set";
-            this.ROLL_CHANCE = 1.0;
+            this.MIN = min;
+            this.MAX = max;
+            this.OPERATOR = operator;
+            this.ROLL_CHANCE = rollChance;
+            this.SCALE_PER_LEVEL = scalePerLevel;
          }
 
-         public double getValue(double baseValue, Random random) {
+         public double getValue(double baseValue, int level, Random random) {
+            double value = this.getStartValue(baseValue, random);
+
+            for (int i = 0; i < level; i++) {
+               value += this.getStartValue(baseValue, random) * this.SCALE_PER_LEVEL;
+            }
+
+            return value;
+         }
+
+         public double getStartValue(double baseValue, Random random) {
             double value = Math.min(this.MIN, this.MAX) + random.nextFloat() * Math.abs(this.MAX - this.MIN);
             if (this.OPERATOR.equalsIgnoreCase("multiply")) {
                return baseValue * value;
@@ -347,12 +449,12 @@ public class VaultMobsConfig extends Config {
       @Expose
       public int ENCH_TRIALS;
       @Expose
-      public int MAX_MOBS;
+      public VaultSpawner.Config SPAWNER;
 
-      public MobMisc(int level, int trials, int maxMobs) {
+      public MobMisc(int level, int trials, VaultSpawner.Config spawner) {
          this.ENCH_LEVEL = level;
          this.ENCH_TRIALS = trials;
-         this.MAX_MOBS = maxMobs;
+         this.SPAWNER = spawner;
       }
    }
 }

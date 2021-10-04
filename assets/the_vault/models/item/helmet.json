@@ -1,13 +1,14 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "the_vault:item/helmet/helmet"
+    "layer0": "the_vault:item/helmet/helmet",
+    "layer1": "the_vault:item/helmet/helmet_overlay"
   },
   "overrides": [
-    {"predicate": {"the_vault:texture": 0 }, "model": "the_vault:item/helmet/samurai_helmet"},
-    {"predicate": {"the_vault:texture": 1 }, "model": "the_vault:item/helmet/knight_helmet"},
-    {"predicate": {"the_vault:texture": 2 }, "model": "the_vault:item/helmet/guard_helmet"},
-    {"predicate": {"the_vault:texture": 3 }, "model": "the_vault:item/helmet/dragon_helmet"},
+    {"predicate": {"the_vault:texture": 0 }, "model": "the_vault:item/helmet/scale_1_helmet"},
+    {"predicate": {"the_vault:texture": 1 }, "model": "the_vault:item/helmet/scale_2_helmet"},
+    {"predicate": {"the_vault:texture": 2 }, "model": "the_vault:item/helmet/scale_3_helmet"},
+    {"predicate": {"the_vault:texture": 3 }, "model": "the_vault:item/helmet/scale_4_helmet"},
     {"predicate": {"the_vault:texture": 4 }, "model": "the_vault:item/helmet/plated_1_helmet"},
     {"predicate": {"the_vault:texture": 5 }, "model": "the_vault:item/helmet/plated_1_dark_helmet"},
     {"predicate": {"the_vault:texture": 6 }, "model": "the_vault:item/helmet/plated_2_helmet"},
@@ -16,6 +17,30 @@
     {"predicate": {"the_vault:texture": 9 }, "model": "the_vault:item/helmet/plated_3_dark_helmet"},
     {"predicate": {"the_vault:texture": 10 }, "model": "the_vault:item/helmet/plated_4_helmet"},
     {"predicate": {"the_vault:texture": 11 }, "model": "the_vault:item/helmet/plated_4_dark_helmet"},
-    {"predicate": {"the_vault:vault_rarity": 4 }, "model": "the_vault:item/helmet/scrappy_helmet"}
+    {"predicate": {"the_vault:texture": 12 }, "model": "the_vault:item/helmet/fur_1_helmet"},
+    {"predicate": {"the_vault:texture": 13 }, "model": "the_vault:item/helmet/fur_2_helmet"},
+    {"predicate": {"the_vault:texture": 14 }, "model": "the_vault:item/helmet/fur_3_helmet"},
+    {"predicate": {"the_vault:texture": 15 }, "model": "the_vault:item/helmet/fur_4_helmet"},
+    {"predicate": {"the_vault:texture": 16 }, "model": "the_vault:item/helmet/robe_1_helmet"},
+    {"predicate": {"the_vault:texture": 17 }, "model": "the_vault:item/helmet/robe_2_helmet"},
+    {"predicate": {"the_vault:texture": 18 }, "model": "the_vault:item/helmet/robe_3_helmet"},
+    {"predicate": {"the_vault:texture": 19 }, "model": "the_vault:item/helmet/robe_4_helmet"},
+    {"predicate": {"the_vault:texture": 20 }, "model": "the_vault:item/helmet/royal_1_helmet"},
+    {"predicate": {"the_vault:texture": 21 }, "model": "the_vault:item/helmet/royal_2_helmet"},
+    {"predicate": {"the_vault:texture": 22 }, "model": "the_vault:item/helmet/scrappy_1_helmet"},
+    {"predicate": {"the_vault:texture": 23 }, "model": "the_vault:item/helmet/scrappy_2_helmet"},
+    {"predicate": {"the_vault:texture": 24 }, "model": "the_vault:item/helmet/scrappy_3_helmet"},
+    {"predicate": {"the_vault:texture": 25 }, "model": "the_vault:item/helmet/barbarian_1_helmet"},
+    {"predicate": {"the_vault:texture": 26 }, "model": "the_vault:item/helmet/barbarian_2_helmet"},
+    {"predicate": {"the_vault:texture": 27 }, "model": "the_vault:item/helmet/barbarian_3_helmet"},
+    {"predicate": {"the_vault:texture": 28 }, "model": "the_vault:item/helmet/royal_1_dark_helmet"},
+    {"predicate": {"the_vault:texture": 29 }, "model": "the_vault:item/helmet/barbarian_1_dark_helmet"},
+    {"predicate": {"the_vault:texture": 30 }, "model": "the_vault:item/helmet/barbarian_2_dark_helmet"},
+    {"predicate": {"the_vault:texture": 31 }, "model": "the_vault:item/helmet/barbarian_3_dark_helmet"},
+    {"predicate": {"the_vault:texture": 32 }, "model": "the_vault:item/helmet/omarlatif_helmet"},
+    {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 0 }, "model": "the_vault:item/helmet/scrappy_1_helmet"},
+    {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 1 }, "model": "the_vault:item/helmet/scrappy_2_helmet"},
+    {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 2 }, "model": "the_vault:item/helmet/scrappy_3_helmet"},
+    {"predicate": {"the_vault:special_texture": 0 }, "model": "the_vault:item/helmet/special/cheese_helmet"}
   ]
 }

@@ -1,8 +1,8 @@
 package iskallia.vault.item.gear;
 
 import com.google.common.collect.Multimap;
+import iskallia.vault.attribute.EnumAttribute;
 import iskallia.vault.init.ModAttributes;
-import iskallia.vault.item.gear.attribute.EnumAttribute;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -13,12 +13,15 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.DyeableArmorItem;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Item.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.World;
@@ -26,6 +29,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class VaultArmorItem extends DyeableArmorItem implements VaultGear<VaultArmorItem> {
+   public static final int MODEL_VARIANT_COUNT = 33;
+   public static final int SCRAPPY_VARIANT_COUNT = 3;
+   public static final int SPECIAL_HELMET_COUNT = 2;
+   public static final int SPECIAL_CHESTPLATE_COUNT = 0;
+   public static final int SPECIAL_LEGGINGS_COUNT = 0;
+   public static final int SPECIAL_BOOTS_COUNT = 0;
+
    public VaultArmorItem(ResourceLocation id, EquipmentSlotType slot, Properties builder) {
       super(VaultGear.Material.INSTANCE, slot, builder);
       this.setRegistryName(id);
@@ -37,11 +47,27 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGear<VaultA
 
    @Override
    public int getModelsFor(VaultGear.Rarity rarity) {
-      return 11;
+      return rarity == VaultGear.Rarity.SCRAPPY ? 3 : 33;
+   }
+
+   @Nullable
+   @Override
+   public EquipmentSlotType getIntendedSlot() {
+      return this.field_77881_a;
    }
 
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
       return this.getAttributeModifiers(this, slot, stack, super.getAttributeModifiers(slot, stack));
+   }
+
+   public void func_150895_a(ItemGroup group, NonNullList<ItemStack> items) {
+      if (this.func_194125_a(group)) {
+         this.fillItemGroup(items);
+      }
+   }
+
+   public boolean isRepairable(ItemStack stack) {
+      return false;
    }
 
    public boolean isDamageable(ItemStack stack) {
@@ -66,9 +92,12 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGear<VaultA
 
    public void func_77663_a(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
       super.func_77663_a(stack, world, entity, itemSlot, isSelected);
-      this.inventoryTick(this, stack, world, entity, itemSlot, isSelected);
+      if (entity instanceof ServerPlayerEntity) {
+         this.inventoryTick(this, stack, world, (ServerPlayerEntity)entity, itemSlot, isSelected);
+      }
    }
 
+   @OnlyIn(Dist.CLIENT)
    public void func_77624_a(ItemStack itemStack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
       super.func_77624_a(itemStack, world, tooltip, flag);
       this.addInformation(this, itemStack, world, tooltip, flag);

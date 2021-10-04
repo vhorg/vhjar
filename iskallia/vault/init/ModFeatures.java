@@ -1,13 +1,14 @@
 package iskallia.vault.init;
 
 import iskallia.vault.Vault;
+import iskallia.vault.world.gen.decorator.ArchitectEventFeature;
 import iskallia.vault.world.gen.decorator.BreadcrumbFeature;
 import iskallia.vault.world.gen.decorator.OverworldOreFeature;
-import iskallia.vault.world.gen.decorator.RegionOreFeature;
-import iskallia.vault.world.gen.ruletest.VaultRuleTest;
-import iskallia.vault.world.gen.structure.ArenaStructure;
+import iskallia.vault.world.gen.decorator.VaultFeature;
+import iskallia.vault.world.gen.decorator.VaultTroveFeature;
+import iskallia.vault.world.gen.structure.ArchitectEventStructure;
 import iskallia.vault.world.gen.structure.VaultStructure;
-import net.minecraft.block.Blocks;
+import iskallia.vault.world.gen.structure.VaultTroveStructure;
 import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
 import net.minecraft.world.gen.feature.Feature;
@@ -22,29 +23,26 @@ import net.minecraft.world.gen.placement.TopSolidRangeConfig;
 import net.minecraftforge.event.RegistryEvent.Register;
 
 public class ModFeatures {
-   public static StructureFeature<VaultStructure.Config, ? extends Structure<VaultStructure.Config>> VAULT_FEATURE;
-   public static StructureFeature<VaultStructure.Config, ? extends Structure<VaultStructure.Config>> FINAL_VAULT_FEATURE;
-   public static StructureFeature<ArenaStructure.Config, ? extends Structure<ArenaStructure.Config>> ARENA_FEATURE;
-   public static ConfiguredFeature<?, ?> VAULT_ORE;
+   public static VaultFeature VAULT_FEATURE;
+   public static ArchitectEventFeature ARCHITECT_EVENT_FEATURE;
+   public static VaultTroveFeature VAULT_TROVE_FEATURE;
    public static ConfiguredFeature<?, ?> BREADCRUMB_CHEST;
    public static ConfiguredFeature<?, ?> VAULT_ROCK_ORE;
 
    public static void registerStructureFeatures() {
-      VAULT_FEATURE = register("vault", ModStructures.VAULT.func_236391_a_(new VaultStructure.Config(() -> VaultStructure.Pools.START, 6)));
-      FINAL_VAULT_FEATURE = register("final_vault", ModStructures.VAULT.func_236391_a_(new VaultStructure.Config(() -> VaultStructure.Pools.FINAL_START, 6)));
-      ARENA_FEATURE = register("arena", ModStructures.ARENA.func_236391_a_(new ArenaStructure.Config(() -> ArenaStructure.Pools.START, 8)));
+      VAULT_FEATURE = register("vault", new VaultFeature(ModStructures.VAULT_STAR, new VaultStructure.Config(() -> VaultStructure.Pools.FINAL_START, 11)));
+      ARCHITECT_EVENT_FEATURE = register(
+         "architect_event",
+         new ArchitectEventFeature(ModStructures.ARCHITECT_EVENT, new ArchitectEventStructure.Config(() -> ArchitectEventStructure.Pools.START, 1))
+      );
+      VAULT_TROVE_FEATURE = register(
+         "trove", new VaultTroveFeature(ModStructures.VAULT_TROVE, new VaultTroveStructure.Config(() -> VaultTroveStructure.Pools.START, 1))
+      );
    }
 
    public static void registerFeatures(Register<Feature<?>> event) {
-      RegionOreFeature.register(event);
       BreadcrumbFeature.register(event);
       OverworldOreFeature.register(event);
-      VAULT_ORE = register(
-         "vault_ore",
-         (ConfiguredFeature)RegionOreFeature.INSTANCE
-            .func_225566_b_(new OreFeatureConfig(VaultRuleTest.INSTANCE, Blocks.field_196654_e.func_176223_P(), 0))
-            .func_242731_b(1)
-      );
       BREADCRUMB_CHEST = register("breadcrumb_chest", BreadcrumbFeature.INSTANCE.func_225566_b_(NoFeatureConfig.field_236559_b_));
       VAULT_ROCK_ORE = register(
          "vault_rock_ore",
@@ -59,7 +57,7 @@ public class ModFeatures {
       return (ConfiguredFeature<FC, F>)WorldGenRegistries.func_243664_a(WorldGenRegistries.field_243653_e, Vault.id(name), feature);
    }
 
-   private static <FC extends IFeatureConfig, F extends Structure<FC>> StructureFeature<FC, F> register(String name, StructureFeature<FC, F> feature) {
-      return (StructureFeature<FC, F>)WorldGenRegistries.func_243664_a(WorldGenRegistries.field_243654_f, Vault.id(name), feature);
+   private static <SF extends StructureFeature<FC, F>, FC extends IFeatureConfig, F extends Structure<FC>> SF register(String name, SF feature) {
+      return (SF)WorldGenRegistries.func_243664_a(WorldGenRegistries.field_243654_f, Vault.id(name), feature);
    }
 }

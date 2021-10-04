@@ -1,45 +1,69 @@
 package iskallia.vault.block.entity;
 
-import iskallia.vault.block.LootStatueBlock;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.util.SkinProfile;
+import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.StatueType;
-import javax.annotation.Nullable;
+import javax.annotation.Nonnull;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 
-public class LootStatueTileEntity extends TileEntity implements ITickableTileEntity {
-   private int interval = 0;
-   private int currentTick = 0;
-   private ItemStack lootItem;
-   protected SkinProfile skin;
+public class LootStatueTileEntity extends SkinnableTileEntity implements ITickableTileEntity {
    private StatueType statueType;
-   private boolean hasCrown;
+   private int currentTick = 0;
+   private int itemsRemaining = 0;
+   private int totalItems = 0;
+   private ItemStack lootItem = ItemStack.field_190927_a;
+   private boolean master;
+   private BlockPos masterPos;
    private int chipCount = 0;
+   private float playerScale;
+
+   protected LootStatueTileEntity(TileEntityType<?> tileEntityType) {
+      super(tileEntityType);
+   }
 
    public LootStatueTileEntity() {
-      super(ModBlocks.LOOT_STATUE_TILE_ENTITY);
-      this.skin = new SkinProfile();
+      this(ModBlocks.LOOT_STATUE_TILE_ENTITY);
    }
 
-   public int getInterval() {
-      return this.interval;
+   public float getPlayerScale() {
+      return this.playerScale;
    }
 
-   public void setInterval(int interval) {
-      this.interval = interval;
+   public void setPlayerScale(float playerScale) {
+      this.playerScale = playerScale;
+   }
+
+   public boolean isMaster() {
+      return this.master;
+   }
+
+   public void setMaster(boolean master) {
+      this.master = master;
+   }
+
+   public BlockPos getMasterPos() {
+      return this.masterPos;
+   }
+
+   public void setMasterPos(BlockPos masterPos) {
+      this.masterPos = masterPos;
    }
 
    public int getCurrentTick() {
@@ -50,16 +74,19 @@ public class LootStatueTileEntity extends TileEntity implements ITickableTileEnt
       this.currentTick = currentTick;
    }
 
+   @Nonnull
    public ItemStack getLootItem() {
       return this.lootItem;
    }
 
-   public void setLootItem(ItemStack stack) {
+   public void setLootItem(@Nonnull ItemStack stack) {
       this.lootItem = stack;
+      this.func_70296_d();
+      this.sendUpdates();
    }
 
-   public SkinProfile getSkin() {
-      return this.skin;
+   @Override
+   protected void updateSkin() {
    }
 
    public StatueType getStatueType() {
@@ -70,21 +97,13 @@ public class LootStatueTileEntity extends TileEntity implements ITickableTileEnt
       this.statueType = statueType;
    }
 
-   public boolean hasCrown() {
-      return this.hasCrown;
-   }
-
-   public void setHasCrown(boolean hasCrown) {
-      this.hasCrown = hasCrown;
-   }
-
    public boolean addChip() {
-      if (this.chipCount >= ModConfigs.STATUE_LOOT.getMaxAccelerationChips()) {
-         return false;
-      } else {
+      if (this.statueType.isOmega() && this.chipCount < ModConfigs.STATUE_LOOT.getMaxAccelerationChips()) {
          this.chipCount++;
          this.sendUpdates();
          return true;
+      } else {
+         return false;
       }
    }
 
@@ -103,115 +122,171 @@ public class LootStatueTileEntity extends TileEntity implements ITickableTileEnt
       return this.chipCount;
    }
 
+   public int getItemsRemaining() {
+      return this.itemsRemaining;
+   }
+
+   public void setItemsRemaining(int itemsRemaining) {
+      this.itemsRemaining = itemsRemaining;
+   }
+
+   public int getTotalItems() {
+      return this.totalItems;
+   }
+
+   public void setTotalItems(int totalItems) {
+      this.totalItems = totalItems;
+   }
+
    public void func_73660_a() {
-      if (!this.field_145850_b.field_72995_K) {
-         if (this.currentTick++ == this.getModifiedInterval()) {
-            this.currentTick = 0;
-            ItemStack stack = this.lootItem.func_77946_l();
-            if (this.poopItem(stack, true) != ItemStack.field_190927_a) {
-               stack = this.poopItem(stack, false);
-               if (this.lootItem.func_190916_E() + stack.func_190916_E() > this.lootItem.func_77976_d()) {
-                  this.lootItem.func_190920_e(this.lootItem.func_77976_d());
-               } else {
-                  this.lootItem.func_190920_e(stack.func_190916_E());
+      if (this.field_145850_b != null && !this.field_145850_b.field_72995_K && this.itemsRemaining != 0 && this.statueType.dropsItems()) {
+         if (this.statueType != StatueType.OMEGA || this.master) {
+            if (this.currentTick++ >= this.getModifiedInterval()) {
+               this.currentTick = 0;
+               if (!this.lootItem.func_190926_b()) {
+                  ItemStack stack = this.lootItem.func_77946_l();
+                  if (this.poopItem(stack, false)) {
+                     this.func_70296_d();
+                     this.func_145831_w().func_184138_a(this.func_174877_v(), this.func_195044_w(), this.func_195044_w(), 3);
+                  }
                }
-            } else {
-               this.poopItem(stack, false);
             }
          }
       }
    }
 
    private int getModifiedInterval() {
-      return this.getChipCount() == 0 ? this.interval : this.interval - ModConfigs.STATUE_LOOT.getIntervalDecrease(this.getChipCount());
+      int interval = ModConfigs.STATUE_LOOT.getInterval(this.getStatueType());
+      return this.getChipCount() != 0 && this.getStatueType().isOmega() ? interval - ModConfigs.STATUE_LOOT.getIntervalDecrease(this.getChipCount()) : interval;
    }
 
-   public ItemStack poopItem(ItemStack stack, boolean simulate) {
-      TileEntity tileEntity = this.field_145850_b.func_175625_s(this.func_174877_v().func_177977_b());
-      if (tileEntity == null) {
-         return stack;
+   public boolean poopItem(ItemStack stack, boolean simulate) {
+      assert this.field_145850_b != null;
+
+      BlockPos down = this.func_174877_v().func_177977_b();
+      if (this.statueType == StatueType.OMEGA) {
+         for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+               BlockPos offset = down.func_177982_a(x, 0, z);
+               TileEntity tileEntity = this.field_145850_b.func_175625_s(offset);
+               if (tileEntity != null) {
+                  LazyOptional<IItemHandler> handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
+                  if (handler.isPresent()) {
+                     ItemStack remainder = ItemHandlerHelper.insertItemStacked((IItemHandler)handler.orElse(null), stack, true);
+                     if (remainder.func_190926_b()) {
+                        ItemHandlerHelper.insertItemStacked((IItemHandler)handler.orElse(null), stack, false);
+                        if (this.itemsRemaining != -1) {
+                           this.itemsRemaining--;
+                        }
+
+                        return true;
+                     }
+                  }
+               }
+            }
+         }
       } else {
-         LazyOptional<IItemHandler> handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
-         if (handler.isPresent()) {
-            IItemHandler targetHandler = (IItemHandler)handler.orElse(null);
-            return ItemHandlerHelper.insertItemStacked(targetHandler, stack, simulate);
-         } else {
-            return stack;
+         TileEntity tileEntity = this.field_145850_b.func_175625_s(down);
+         if (tileEntity != null) {
+            LazyOptional<IItemHandler> handler = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
+            handler.ifPresent(h -> {
+               ItemHandlerHelper.insertItemStacked(h, stack, simulate);
+               if (this.itemsRemaining != -1) {
+                  this.itemsRemaining--;
+               }
+            });
+            return true;
          }
       }
+
+      return false;
    }
 
-   public void sendUpdates() {
-      this.field_145850_b.func_184138_a(this.field_174879_c, this.func_195044_w(), this.func_195044_w(), 3);
-      this.field_145850_b.func_195593_d(this.field_174879_c, this.func_195044_w().func_177230_c());
-      this.func_70296_d();
+   @OnlyIn(Dist.CLIENT)
+   public AxisAlignedBB getRenderBoundingBox() {
+      return super.getRenderBoundingBox().func_72321_a(0.0, 6.0, 0.0);
    }
 
    public CompoundNBT func_189515_b(CompoundNBT nbt) {
-      String nickname = this.skin.getLatestNickname();
-      nbt.func_74778_a("PlayerNickname", nickname == null ? "" : nickname);
-      if (this.getInterval() == 0) {
-         this.migrate(this.func_195044_w());
-      }
+      if (this.statueType == null) {
+         return super.func_189515_b(nbt);
+      } else {
+         nbt.func_74768_a("StatueType", this.getStatueType().ordinal());
+         if (this.statueType == StatueType.OMEGA) {
+            if (!this.master) {
+               nbt.func_74757_a("Master", false);
+               nbt.func_218657_a("MasterPos", NBTUtil.func_186859_a(this.masterPos));
+               return super.func_189515_b(nbt);
+            }
 
-      nbt.func_74768_a("Interval", this.getInterval());
-      nbt.func_74768_a("CurrentTick", this.getCurrentTick());
-      nbt.func_74768_a("StatueType", this.getStatueType().ordinal());
-      nbt.func_218657_a("LootItem", this.getLootItem().serializeNBT());
-      nbt.func_74757_a("HasCrown", this.hasCrown());
-      nbt.func_74768_a("ChipCount", this.chipCount);
-      return super.func_189515_b(nbt);
+            nbt.func_74757_a("Master", true);
+            nbt.func_218657_a("MasterPos", NBTUtil.func_186859_a(this.func_174877_v()));
+         }
+
+         String nickname = this.skin.getLatestNickname();
+         nbt.func_74778_a("PlayerNickname", nickname == null ? "" : nickname);
+         nbt.func_74768_a("CurrentTick", this.getCurrentTick());
+         nbt.func_218657_a("LootItem", this.getLootItem().serializeNBT());
+         nbt.func_74768_a("ChipCount", this.chipCount);
+         nbt.func_74768_a("ItemsRemaining", this.itemsRemaining);
+         nbt.func_74768_a("TotalItems", this.totalItems);
+         nbt.func_74776_a("playerScale", this.playerScale);
+         return super.func_189515_b(nbt);
+      }
    }
 
    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-      String nickname = nbt.func_74779_i("PlayerNickname");
-      this.skin.updateSkin(nickname);
-      if (!nbt.func_74764_b("Interval")) {
-         this.migrate(state);
+      this.setStatueType(StatueType.values()[nbt.func_74762_e("StatueType")]);
+      if (this.statueType == StatueType.OMEGA) {
+         if (!nbt.func_74767_n("Master")) {
+            this.master = false;
+            this.masterPos = NBTUtil.func_186861_c(nbt.func_74775_l("MasterPos"));
+            super.func_230337_a_(state, nbt);
+            return;
+         }
+
+         this.master = true;
+         this.masterPos = this.func_174877_v();
       }
 
-      this.setLootItem(ItemStack.func_199557_a(nbt.func_74775_l("LootItem")));
+      String nickname = nbt.func_74779_i("PlayerNickname");
+      this.skin.updateSkin(nickname);
+      this.lootItem = ItemStack.func_199557_a(nbt.func_74775_l("LootItem"));
       this.setCurrentTick(nbt.func_74762_e("CurrentTick"));
-      this.setInterval(nbt.func_74762_e("Interval"));
-      this.setStatueType(StatueType.values()[nbt.func_74762_e("StatueType")]);
-      this.hasCrown = nbt.func_74767_n("HasCrown");
       this.chipCount = nbt.func_74762_e("ChipCount");
-      super.func_230337_a_(state, nbt);
-   }
+      this.itemsRemaining = nbt.func_74762_e("ItemsRemaining");
+      this.totalItems = nbt.func_74762_e("TotalItems");
+      if (nbt.func_74764_b("playerScale")) {
+         this.playerScale = nbt.func_74760_g("playerScale");
+      } else {
+         this.playerScale = MathUtilities.randomFloat(2.0F, 4.0F);
+      }
 
-   private void migrate(BlockState state) {
-      LootStatueBlock block = (LootStatueBlock)state.func_177230_c();
-      StatueType type = block.getType();
-      this.setStatueType(type);
-      this.setInterval(ModConfigs.STATUE_LOOT.getInterval(type));
-      this.setLootItem(ModConfigs.STATUE_LOOT.randomLoot(type));
-      this.setCurrentTick(0);
+      super.func_230337_a_(state, nbt);
    }
 
    public CompoundNBT func_189517_E_() {
       CompoundNBT nbt = super.func_189517_E_();
+      nbt.func_74768_a("StatueType", this.getStatueType().ordinal());
+      if (this.statueType == StatueType.OMEGA) {
+         if (!this.master) {
+            nbt.func_74757_a("Master", false);
+            nbt.func_218657_a("MasterPos", NBTUtil.func_186859_a(this.masterPos));
+            return nbt;
+         }
+
+         nbt.func_74757_a("Master", true);
+         nbt.func_218657_a("MasterPos", NBTUtil.func_186859_a(this.func_174877_v()));
+      }
+
       String nickname = this.skin.getLatestNickname();
       nbt.func_74778_a("PlayerNickname", nickname == null ? "" : nickname);
-      nbt.func_74768_a("Interval", this.getInterval());
       nbt.func_74768_a("CurrentTick", this.getCurrentTick());
-      nbt.func_74768_a("StatueType", this.getStatueType().ordinal());
       nbt.func_218657_a("LootItem", this.getLootItem().serializeNBT());
-      nbt.func_74757_a("HasCrown", this.hasCrown());
       nbt.func_74768_a("ChipCount", this.chipCount);
+      nbt.func_74768_a("ItemsRemaining", this.itemsRemaining);
+      nbt.func_74768_a("TotalItems", this.totalItems);
+      nbt.func_74776_a("playerScale", this.playerScale);
       return nbt;
-   }
-
-   public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-      this.func_230337_a_(state, tag);
-   }
-
-   @Nullable
-   public SUpdateTileEntityPacket func_189518_D_() {
-      return new SUpdateTileEntityPacket(this.field_174879_c, 1, this.func_189517_E_());
-   }
-
-   public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-      CompoundNBT nbt = pkt.func_148857_g();
-      this.handleUpdateTag(this.func_195044_w(), nbt);
    }
 }

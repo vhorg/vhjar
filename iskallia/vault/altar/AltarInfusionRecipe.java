@@ -4,10 +4,11 @@ import iskallia.vault.init.ModConfigs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerWorld;
 
 public class AltarInfusionRecipe {
@@ -19,8 +20,8 @@ public class AltarInfusionRecipe {
       this.requiredItems = items;
    }
 
-   public AltarInfusionRecipe(ServerWorld world, PlayerEntity player) {
-      this(player.func_110124_au(), ModConfigs.VAULT_ALTAR.generateItems(world, player));
+   public AltarInfusionRecipe(ServerWorld world, BlockPos pos, ServerPlayerEntity player) {
+      this(player.func_110124_au(), ModConfigs.VAULT_ALTAR.getRequiredItemsFromConfig(world, pos, player));
    }
 
    public AltarInfusionRecipe(UUID player) {

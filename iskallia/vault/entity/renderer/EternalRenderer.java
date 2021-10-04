@@ -2,8 +2,10 @@ package iskallia.vault.entity.renderer;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
+import iskallia.vault.Vault;
 import iskallia.vault.entity.EternalEntity;
 import iskallia.vault.entity.model.EternalModel;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -17,7 +19,9 @@ import net.minecraft.client.renderer.entity.layers.HeadLayer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.BipedModel.ArmPose;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.CrossbowItem;
@@ -26,10 +30,12 @@ import net.minecraft.item.Items;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.ITextComponent;
 
 public class EternalRenderer extends LivingRenderer<EternalEntity, EternalModel> {
@@ -56,6 +62,21 @@ public class EternalRenderer extends LivingRenderer<EternalEntity, EternalModel>
       GlStateManager.func_227702_d_(1.0F, 1.0F, 1.0F, 0.5F);
       this.setModelVisibilities(entity);
       super.func_225623_a_(entity, entityYaw, partialTicks, matrixStack, buffer, packedLightIn);
+   }
+
+   public void renderCrown(EternalEntity entity, MatrixStack matrixStack, IRenderTypeBuffer buffer) {
+      matrixStack.func_227860_a_();
+      float sizeMultiplier = entity.getSizeMultiplier();
+      matrixStack.func_227862_a_(sizeMultiplier, sizeMultiplier, sizeMultiplier);
+      matrixStack.func_227861_a_(0.0, 2.5, 0.0);
+      float scale = 2.5F;
+      matrixStack.func_227862_a_(scale, scale, scale);
+      matrixStack.func_227863_a_(Vector3f.field_229181_d_.func_229187_a_(entity.field_70173_aa));
+      matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(20.0F));
+      ItemStack itemStack = new ItemStack((IItemProvider)Registry.field_212630_s.func_82594_a(Vault.id("mvp_crown")));
+      IBakedModel ibakedmodel = Minecraft.func_71410_x().func_175599_af().func_184393_a(itemStack, null, null);
+      Minecraft.func_71410_x().func_175599_af().func_229111_a_(itemStack, TransformType.GROUND, true, matrixStack, buffer, 15728864, 655360, ibakedmodel);
+      matrixStack.func_227865_b_();
    }
 
    public Vector3d getRenderOffset(EternalEntity entityIn, float partialTicks) {

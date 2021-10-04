@@ -73,9 +73,9 @@ public class KeyPressRecipesConfig extends Config {
    protected void reset() {
       this.RECIPES = new ArrayList<>();
       KeyPressRecipesConfig.Recipe recipe = new KeyPressRecipesConfig.Recipe();
-      recipe.KEY_ITEM = new SingleItemEntry(ModItems.BLANK_KEY.getRegistryName().toString(), "");
-      recipe.CLUSTER_ITEM = new SingleItemEntry(ModItems.SPARKLETINE_CLUSTER.getRegistryName().toString(), "");
-      recipe.RESULT_ITEM = new ItemEntry(ModItems.SPARKLETINE_KEY.getRegistryName().toString(), 1, "");
+      recipe.KEY_ITEM = new SingleItemEntry(ModItems.BLANK_KEY);
+      recipe.CLUSTER_ITEM = new SingleItemEntry(ModItems.SPARKLETINE_CLUSTER);
+      recipe.RESULT_ITEM = new ItemEntry(new ItemStack(ModItems.SPARKLETINE_KEY));
       this.RECIPES.add(recipe);
    }
 

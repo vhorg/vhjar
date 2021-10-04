@@ -1,8 +1,10 @@
 package iskallia.vault.world.gen.structure;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Queues;
 import iskallia.vault.Vault;
+import iskallia.vault.util.data.WeightedList;
+import iskallia.vault.world.gen.VaultJigsawGenerator;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
@@ -32,78 +34,114 @@ import net.minecraft.world.gen.feature.jigsaw.JigsawManager.IPieceFactory;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPattern.PlacementBehaviour;
 import net.minecraft.world.gen.feature.structure.AbstractVillagePiece;
 import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.world.gen.feature.structure.StructurePiece;
 import net.minecraft.world.gen.feature.structure.VillageConfig;
 import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraft.world.gen.feature.template.Template.BlockInfo;
 import org.apache.commons.lang3.mutable.MutableObject;
 
-public class JigsawGenerator {
-   public static void func_242837_a(
-      DynamicRegistries p_242837_0_,
-      VillageConfig p_242837_1_,
-      IPieceFactory p_242837_2_,
-      ChunkGenerator p_242837_3_,
-      TemplateManager p_242837_4_,
-      BlockPos p_242837_5_,
-      List<? super AbstractVillagePiece> p_242837_6_,
-      Random p_242837_7_,
-      boolean p_242837_8_,
-      boolean p_242837_9_
+public class JigsawGenerator implements VaultJigsawGenerator {
+   private final MutableBoundingBox box;
+   private final BlockPos startPos;
+   private final int depth;
+   private List<StructurePiece> pieceList = new ArrayList<>();
+
+   public JigsawGenerator(MutableBoundingBox box, BlockPos pos, int depth) {
+      this.box = box;
+      this.startPos = pos;
+      this.depth = depth;
+   }
+
+   @Override
+   public BlockPos getStartPos() {
+      return this.startPos;
+   }
+
+   @Override
+   public MutableBoundingBox getStructureBox() {
+      return this.box;
+   }
+
+   @Override
+   public int getSize() {
+      return this.depth;
+   }
+
+   @Override
+   public List<StructurePiece> getGeneratedPieces() {
+      return this.pieceList;
+   }
+
+   public void setPieceList(List<StructurePiece> pieceList) {
+      this.pieceList = pieceList;
+   }
+
+   public static JigsawGenerator.Builder builder(MutableBoundingBox box, BlockPos pos) {
+      return new JigsawGenerator.Builder(box, pos);
+   }
+
+   @Override
+   public void generate(
+      DynamicRegistries registries,
+      VillageConfig config,
+      IPieceFactory pieceFactory,
+      ChunkGenerator gen,
+      TemplateManager manager,
+      List<StructurePiece> pieceList,
+      Random random,
+      boolean flag1,
+      boolean flag2
    ) {
       Structure.func_236397_g_();
-      MutableRegistry<JigsawPattern> mutableregistry = p_242837_0_.func_243612_b(Registry.field_243555_ax);
-      Rotation rotation = Rotation.func_222466_a(p_242837_7_);
-      JigsawPattern jigsawpattern = (JigsawPattern)p_242837_1_.func_242810_c().get();
-      JigsawPiece jigsawpiece = jigsawpattern.func_214944_a(p_242837_7_);
-      AbstractVillagePiece abstractvillagepiece = p_242837_2_.create(
-         p_242837_4_, jigsawpiece, p_242837_5_, jigsawpiece.func_214850_d(), rotation, jigsawpiece.func_214852_a(p_242837_4_, p_242837_5_, rotation)
+      MutableRegistry<JigsawPattern> registry = registries.func_243612_b(Registry.field_243555_ax);
+      Rotation rotation = Rotation.func_222466_a(random);
+      JigsawPattern pattern = (JigsawPattern)config.func_242810_c().get();
+      JigsawPiece startJigsaw = pattern.func_214944_a(random);
+      AbstractVillagePiece startPiece = pieceFactory.create(
+         manager, startJigsaw, this.getStartPos(), startJigsaw.func_214850_d(), rotation, startJigsaw.func_214852_a(manager, this.getStartPos(), rotation)
       );
-      MutableBoundingBox mutableboundingbox = abstractvillagepiece.func_74874_b();
-      int i = (mutableboundingbox.field_78893_d + mutableboundingbox.field_78897_a) / 2;
-      int j = (mutableboundingbox.field_78892_f + mutableboundingbox.field_78896_c) / 2;
-      int k;
-      if (p_242837_9_) {
-         k = p_242837_5_.func_177956_o() + p_242837_3_.func_222532_b(i, j, Type.WORLD_SURFACE_WG);
+      MutableBoundingBox startBox = startPiece.func_74874_b();
+      int centerX = (startBox.field_78893_d + startBox.field_78897_a) / 2;
+      int centerZ = (startBox.field_78892_f + startBox.field_78896_c) / 2;
+      int centerY;
+      if (flag2) {
+         centerY = this.getStartPos().func_177956_o() + gen.func_222532_b(centerX, centerZ, Type.WORLD_SURFACE_WG);
       } else {
-         k = p_242837_5_.func_177956_o();
+         centerY = this.getStartPos().func_177956_o();
       }
 
-      int l = mutableboundingbox.field_78895_b + abstractvillagepiece.func_214830_d();
-      abstractvillagepiece.func_181138_a(0, k - l, 0);
-      p_242837_6_.add(abstractvillagepiece);
-      if (p_242837_1_.func_236534_a_() > 0) {
-         int maxRange = 1024;
-         AxisAlignedBB axisalignedbb = new AxisAlignedBB(i - maxRange, k - maxRange, j - maxRange, i + maxRange + 1, k + maxRange + 1, j + maxRange + 1);
-         JigsawGenerator.Assembler jigsawmanager$assembler = new JigsawGenerator.Assembler(
-            mutableregistry, p_242837_1_.func_236534_a_(), p_242837_2_, p_242837_3_, p_242837_4_, p_242837_6_, p_242837_7_
+      int offset = startBox.field_78895_b + startPiece.func_214830_d();
+      startPiece.func_181138_a(0, centerY - offset, 0);
+      pieceList.add(startPiece);
+      int depth = this.getSize() == -1 ? config.func_236534_a_() : this.getSize();
+      if (depth > 0) {
+         AxisAlignedBB boundingBox = new AxisAlignedBB(
+            this.getStructureBox().field_78897_a,
+            this.getStructureBox().field_78895_b,
+            this.getStructureBox().field_78896_c,
+            this.getStructureBox().field_78893_d,
+            this.getStructureBox().field_78894_e,
+            this.getStructureBox().field_78892_f
          );
-         jigsawmanager$assembler.availablePieces
-            .addLast(
-               new JigsawGenerator.Entry(
-                  abstractvillagepiece,
-                  new MutableObject(
-                     VoxelShapes.func_197878_a(
-                        VoxelShapes.func_197881_a(axisalignedbb),
-                        VoxelShapes.func_197881_a(AxisAlignedBB.func_216363_a(mutableboundingbox)),
-                        IBooleanFunction.field_223234_e_
-                     )
-                  ),
-                  k + maxRange,
-                  0
-               )
-            );
+         MutableObject<VoxelShape> mutableBox = new MutableObject(
+            VoxelShapes.func_197878_a(
+               VoxelShapes.func_197881_a(boundingBox), VoxelShapes.func_197881_a(AxisAlignedBB.func_216363_a(startBox)), IBooleanFunction.field_223234_e_
+            )
+         );
+         JigsawGenerator.Assembler assembler = new JigsawGenerator.Assembler(registry, depth, pieceFactory, gen, manager, pieceList, random);
+         assembler.availablePieces.addLast(new JigsawGenerator.Entry(startPiece, mutableBox, this.getStructureBox().field_78894_e, 0));
 
-         while (!jigsawmanager$assembler.availablePieces.isEmpty()) {
-            JigsawGenerator.Entry jigsawmanager$entry = jigsawmanager$assembler.availablePieces.removeFirst();
-            jigsawmanager$assembler.func_236831_a_(
-               jigsawmanager$entry.villagePiece, jigsawmanager$entry.free, jigsawmanager$entry.boundsTop, jigsawmanager$entry.depth, p_242837_8_
-            );
+         while (!assembler.availablePieces.isEmpty()) {
+            JigsawGenerator.Entry entry = assembler.availablePieces.removeFirst();
+            assembler.generate(entry.villagePiece, entry.free, entry.boundsTop, entry.depth, flag1);
          }
       }
+
+      this.pieceList = pieceList;
    }
 
    static final class Assembler {
-      private final Registry<JigsawPattern> field_242839_a;
+      private final Registry<JigsawPattern> registry;
       private final int maxDepth;
       private final IPieceFactory pieceFactory;
       private final ChunkGenerator chunkGenerator;
@@ -113,36 +151,34 @@ public class JigsawGenerator {
       private final Deque<JigsawGenerator.Entry> availablePieces = Queues.newArrayDeque();
 
       private Assembler(
-         Registry<JigsawPattern> p_i242005_1_,
-         int p_i242005_2_,
-         IPieceFactory p_i242005_3_,
-         ChunkGenerator p_i242005_4_,
-         TemplateManager p_i242005_5_,
-         List<? super AbstractVillagePiece> p_i242005_6_,
-         Random p_i242005_7_
+         Registry<JigsawPattern> registry,
+         int maxDepth,
+         IPieceFactory pieceFactory,
+         ChunkGenerator chunkGenerator,
+         TemplateManager templateManager,
+         List<? super AbstractVillagePiece> structurePieces,
+         Random rand
       ) {
-         this.field_242839_a = p_i242005_1_;
-         this.maxDepth = p_i242005_2_;
-         this.pieceFactory = p_i242005_3_;
-         this.chunkGenerator = p_i242005_4_;
-         this.templateManager = p_i242005_5_;
-         this.structurePieces = p_i242005_6_;
-         this.rand = p_i242005_7_;
+         this.registry = registry;
+         this.maxDepth = maxDepth;
+         this.pieceFactory = pieceFactory;
+         this.chunkGenerator = chunkGenerator;
+         this.templateManager = templateManager;
+         this.structurePieces = structurePieces;
+         this.rand = rand;
       }
 
-      private void func_236831_a_(
-         AbstractVillagePiece p_236831_1_, MutableObject<VoxelShape> p_236831_2_, int p_236831_3_, int currentDepth, boolean p_236831_5_
-      ) {
-         JigsawPiece jigsawpiece = p_236831_1_.func_214826_b();
-         BlockPos blockpos = p_236831_1_.func_214828_c();
-         Rotation rotation = p_236831_1_.func_214809_Y_();
+      private void generate(AbstractVillagePiece piece, MutableObject<VoxelShape> shape, int p_236831_3_, int currentDepth, boolean p_236831_5_) {
+         JigsawPiece jigsawpiece = piece.func_214826_b();
+         BlockPos blockpos = piece.func_214828_c();
+         Rotation rotation = piece.func_214809_Y_();
          PlacementBehaviour jigsawpattern$placementbehaviour = jigsawpiece.func_214854_c();
          boolean flag = jigsawpattern$placementbehaviour == PlacementBehaviour.RIGID;
          MutableObject<VoxelShape> mutableobject = new MutableObject();
-         MutableBoundingBox mutableboundingbox = p_236831_1_.func_74874_b();
+         MutableBoundingBox mutableboundingbox = piece.func_74874_b();
          int i = mutableboundingbox.field_78895_b;
 
-         label143:
+         label144:
          for (BlockInfo template$blockinfo : jigsawpiece.func_214849_a(this.templateManager, blockpos, rotation, this.rand)) {
             Direction direction = JigsawBlock.func_235508_h_(template$blockinfo.field_186243_b);
             BlockPos blockpos1 = template$blockinfo.field_186242_a;
@@ -150,11 +186,11 @@ public class JigsawGenerator {
             int j = blockpos1.func_177956_o() - i;
             int k = -1;
             ResourceLocation resourcelocation = new ResourceLocation(template$blockinfo.field_186244_c.func_74779_i("pool"));
-            Optional<JigsawPattern> mainJigsawPattern = this.field_242839_a.func_241873_b(resourcelocation);
+            Optional<JigsawPattern> mainJigsawPattern = this.registry.func_241873_b(resourcelocation);
             if (mainJigsawPattern.isPresent()
                && (mainJigsawPattern.get().func_214946_c() != 0 || Objects.equals(resourcelocation, JigsawPatternRegistry.field_244091_a.func_240901_a_()))) {
                ResourceLocation resourcelocation1 = mainJigsawPattern.get().func_214948_a();
-               Optional<JigsawPattern> fallbackJigsawPattern = this.field_242839_a.func_241873_b(resourcelocation1);
+               Optional<JigsawPattern> fallbackJigsawPattern = this.registry.func_241873_b(resourcelocation1);
                if (fallbackJigsawPattern.isPresent()
                   && (
                      fallbackJigsawPattern.get().func_214946_c() != 0
@@ -170,20 +206,27 @@ public class JigsawGenerator {
                         mutableobject.setValue(VoxelShapes.func_197881_a(AxisAlignedBB.func_216363_a(mutableboundingbox)));
                      }
                   } else {
-                     mutableobject1 = p_236831_2_;
+                     mutableobject1 = shape;
                      l = p_236831_3_;
                   }
 
-                  List<JigsawPiece> list = Lists.newArrayList();
+                  WeightedList<JigsawPiece> weightedPieces = new WeightedList<>();
                   if (currentDepth != this.maxDepth) {
-                     list.addAll(mainJigsawPattern.get().func_214943_b(this.rand));
-                     list.addAll(fallbackJigsawPattern.get().func_214943_b(this.rand));
+                     mainJigsawPattern.get()
+                        .field_214952_d
+                        .forEach(weightedPiece -> weightedPieces.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond()));
+                     fallbackJigsawPattern.get()
+                        .field_214952_d
+                        .forEach(weightedPiece -> weightedPieces.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond()));
                   } else {
-                     list.addAll(fallbackJigsawPattern.get().func_214943_b(this.rand));
+                     fallbackJigsawPattern.get()
+                        .field_214952_d
+                        .forEach(weightedPiece -> weightedPieces.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond()));
                   }
 
-                  for (JigsawPiece jigsawpiece1 : list) {
-                     if (jigsawpiece1 == EmptyJigsawPiece.field_214856_a) {
+                  while (!weightedPieces.isEmpty()) {
+                     JigsawPiece jigsawpiece1 = weightedPieces.removeRandom(this.rand);
+                     if (jigsawpiece1 == null || jigsawpiece1 == EmptyJigsawPiece.field_214856_a) {
                         break;
                      }
 
@@ -201,9 +244,9 @@ public class JigsawGenerator {
                                        return 0;
                                     } else {
                                        ResourceLocation resourcelocation2 = new ResourceLocation(p_242841_2_.field_186244_c.func_74779_i("pool"));
-                                       Optional<JigsawPattern> optional2 = this.field_242839_a.func_241873_b(resourcelocation2);
+                                       Optional<JigsawPattern> optional2 = this.registry.func_241873_b(resourcelocation2);
                                        Optional<JigsawPattern> optional3 = optional2.flatMap(
-                                          p_242843_1_ -> this.field_242839_a.func_241873_b(p_242843_1_.func_214948_a())
+                                          p_242843_1_ -> this.registry.func_241873_b(p_242843_1_.func_214948_a())
                                        );
                                        int k3 = optional2.<Integer>map(p_242842_1_ -> p_242842_1_.func_214945_a(this.templateManager)).orElse(0);
                                        int l3 = optional3.<Integer>map(p_242840_1_ -> p_242840_1_.func_214945_a(this.templateManager)).orElse(0);
@@ -262,7 +305,7 @@ public class JigsawGenerator {
                                        IBooleanFunction.field_223234_e_
                                     )
                                  );
-                                 int j3 = p_236831_1_.func_214830_d();
+                                 int j3 = piece.func_214830_d();
                                  int l2;
                                  if (flag2) {
                                     l2 = j3 - l1;
@@ -285,7 +328,7 @@ public class JigsawGenerator {
                                     i3 = k + l1 / 2;
                                  }
 
-                                 p_236831_1_.func_214831_a(
+                                 piece.func_214831_a(
                                     new JigsawJunction(blockpos2.func_177958_n(), i3 - j + j3, blockpos2.func_177952_p(), l1, jigsawpattern$placementbehaviour1)
                                  );
                                  abstractvillagepiece.func_214831_a(
@@ -299,7 +342,7 @@ public class JigsawGenerator {
                                        this.availablePieces.addLast(new JigsawGenerator.Entry(abstractvillagepiece, mutableobject1, l, currentDepth + 1));
                                     }
                                  }
-                                 continue label143;
+                                 continue label144;
                               }
                            }
                         }
@@ -312,6 +355,26 @@ public class JigsawGenerator {
                Vault.LOGGER.warn("Empty or none existent pool: {}", resourcelocation);
             }
          }
+      }
+   }
+
+   public static class Builder {
+      private final MutableBoundingBox box;
+      private final BlockPos startPos;
+      private int depth = -1;
+
+      protected Builder(MutableBoundingBox box, BlockPos startPos) {
+         this.box = box;
+         this.startPos = startPos;
+      }
+
+      public JigsawGenerator.Builder setDepth(int depth) {
+         this.depth = depth;
+         return this;
+      }
+
+      public JigsawGenerator build() {
+         return new JigsawGenerator(this.box, this.startPos, this.depth);
       }
    }
 

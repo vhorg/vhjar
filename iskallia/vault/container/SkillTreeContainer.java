@@ -8,9 +8,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Container;
 
 public class SkillTreeContainer extends Container {
-   private AbilityTree abilityTree;
-   private TalentTree talentTree;
-   private ResearchTree researchTree;
+   private final AbilityTree abilityTree;
+   private final TalentTree talentTree;
+   private final ResearchTree researchTree;
 
    public SkillTreeContainer(int windowId, AbilityTree abilityTree, TalentTree talentTree, ResearchTree researchTree) {
       super(ModContainers.SKILL_TREE_CONTAINER, windowId);

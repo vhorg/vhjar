@@ -7,9 +7,11 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Random;
 
 public abstract class Config {
-   private static Gson GSON = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
+   protected static final Random rand = new Random();
+   private static final Gson GSON = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
    protected String root = "config/the_vault/";
    protected String extension = ".json";
 
@@ -29,12 +31,12 @@ public abstract class Config {
 
    public abstract String getName();
 
-   public Config readConfig() {
+   public <T extends Config> T readConfig() {
       try {
-         return (Config)GSON.fromJson(new FileReader(this.getConfigFile()), this.getClass());
+         return (T)GSON.fromJson(new FileReader(this.getConfigFile()), this.getClass());
       } catch (FileNotFoundException var2) {
          this.generateConfig();
-         return this;
+         return (T)this;
       }
    }
 

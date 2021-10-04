@@ -15,12 +15,14 @@ public class SkillStyle {
    @Expose
    public int v;
 
-   public SkillStyle() {
+   public SkillStyle(int x, int y, int u, int v) {
+      this(x, y, u, v, SkillFrame.STAR);
    }
 
-   public SkillStyle(int x, int y, int u, int v) {
+   public SkillStyle(int x, int y, int u, int v, SkillFrame skillFrame) {
       this.x = x;
       this.y = y;
+      this.frameType = skillFrame;
       this.u = u;
       this.v = v;
    }

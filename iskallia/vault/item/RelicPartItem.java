@@ -14,6 +14,8 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class RelicPartItem extends Item {
    protected RelicSet relicSet;
@@ -31,6 +33,7 @@ public class RelicPartItem extends Item {
       this.relicSet = relicSet;
    }
 
+   @OnlyIn(Dist.CLIENT)
    public void func_77624_a(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
       StringTextComponent line = new StringTextComponent("Vault Relic - " + this.relicSet.getName());
       line.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(-3755746)));

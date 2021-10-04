@@ -22,12 +22,8 @@ public class ModSounds {
    public static SoundEvent SKILL_TREE_LEARN_SFX;
    public static SoundEvent SKILL_TREE_UPGRADE_SFX;
    public static SoundEvent VENDING_MACHINE_SFX;
-   public static SoundEvent ARENA_HORNS_SFX;
    public static SoundEvent BOOSTER_PACK_SUCCESS_SFX;
    public static SoundEvent BOOSTER_PACK_FAIL_SFX;
-   public static SoundEvent GIFT_BOMB_SFX;
-   public static SoundEvent GIFT_BOMB_GAIN_SFX;
-   public static SoundEvent MEGA_GIFT_BOMB_GAIN_SFX;
    public static SoundEvent BOSS_TP_SFX;
    public static SoundEvent VAULT_GEM_HIT;
    public static SoundEvent VAULT_GEM_BREAK;
@@ -43,7 +39,19 @@ public class ModSounds {
    public static SoundEvent INVISIBILITY_SFX;
    public static SoundEvent NIGHT_VISION_SFX;
    public static SoundEvent RAMPAGE_SFX;
+   public static SoundEvent TANK_SFX;
    public static SoundEvent VAMPIRE_HISSING_SFX;
+   public static SoundEvent CAULDRON_BUBBLES_SFX;
+   public static SoundEvent EXECUTION_SFX;
+   public static SoundEvent GOBLIN_BAIL;
+   public static SoundEvent GOBLIN_DEATH;
+   public static SoundEvent GOBLIN_HURT;
+   public static SoundEvent GOBLIN_IDLE;
+   public static SoundEvent PUZZLE_COMPLETION_MAJOR;
+   public static SoundEvent PUZZLE_COMPLETION_MINOR;
+   public static SoundEvent PUZZLE_COMPLETION_FAIL;
+   public static SoundEvent VAULT_CHEST_EPIC_OPEN;
+   public static SoundEvent VAULT_CHEST_OMEGA_OPEN;
    public static LazySoundType VAULT_GEM = new LazySoundType();
 
    public static void registerSounds(Register<SoundEvent> event) {
@@ -62,12 +70,8 @@ public class ModSounds {
       SKILL_TREE_LEARN_SFX = registerSound(event, "skill_tree_learn");
       SKILL_TREE_UPGRADE_SFX = registerSound(event, "skill_tree_upgrade");
       VENDING_MACHINE_SFX = registerSound(event, "vending_machine");
-      ARENA_HORNS_SFX = registerSound(event, "arena_horns");
       BOOSTER_PACK_SUCCESS_SFX = registerSound(event, "booster_pack");
       BOOSTER_PACK_FAIL_SFX = registerSound(event, "booster_pack_fail");
-      GIFT_BOMB_SFX = registerSound(event, "gift_bomb");
-      GIFT_BOMB_GAIN_SFX = registerSound(event, "sub_bomb_gain");
-      MEGA_GIFT_BOMB_GAIN_SFX = registerSound(event, "sub_bomb_gain_mega");
       BOSS_TP_SFX = registerSound(event, "boss_tp");
       VAULT_GEM_HIT = registerSound(event, "vault_gem_hit");
       VAULT_GEM_BREAK = registerSound(event, "vault_gem_break");
@@ -83,7 +87,19 @@ public class ModSounds {
       INVISIBILITY_SFX = registerSound(event, "invisibility");
       NIGHT_VISION_SFX = registerSound(event, "night_vision");
       RAMPAGE_SFX = registerSound(event, "rampage");
+      TANK_SFX = registerSound(event, "tank");
       VAMPIRE_HISSING_SFX = registerSound(event, "vampire_hissing");
+      CAULDRON_BUBBLES_SFX = registerSound(event, "cauldron_bubbles");
+      EXECUTION_SFX = registerSound(event, "execution");
+      GOBLIN_BAIL = registerSound(event, "goblin_bail");
+      GOBLIN_DEATH = registerSound(event, "goblin_death");
+      GOBLIN_HURT = registerSound(event, "goblin_hurt");
+      GOBLIN_IDLE = registerSound(event, "goblin_idle");
+      PUZZLE_COMPLETION_MAJOR = registerSound(event, "puzzle_completion_major");
+      PUZZLE_COMPLETION_MINOR = registerSound(event, "puzzle_completion_minor");
+      PUZZLE_COMPLETION_FAIL = registerSound(event, "puzzle_completion_fail");
+      VAULT_CHEST_EPIC_OPEN = registerSound(event, "vault_chest_epic_open");
+      VAULT_CHEST_OMEGA_OPEN = registerSound(event, "vault_chest_omega_open");
    }
 
    public static void registerSoundTypes() {

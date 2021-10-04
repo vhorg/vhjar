@@ -1,14 +1,11 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.container.GlobalTraderContainer;
 import iskallia.vault.container.VendingMachineContainer;
-import iskallia.vault.world.data.GlobalTraderData;
 import java.util.function.Supplier;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
 public class VendingUIMessage {
@@ -37,10 +34,6 @@ public class VendingUIMessage {
             if (openContainer instanceof VendingMachineContainer) {
                VendingMachineContainer vendingMachineContainer = (VendingMachineContainer)openContainer;
                vendingMachineContainer.selectTrade(index);
-            } else if (openContainer instanceof GlobalTraderContainer) {
-               GlobalTraderContainer globalTraderContainer = (GlobalTraderContainer)openContainer;
-               globalTraderContainer.selectTrade(index);
-               GlobalTraderData.get((ServerWorld)sender.field_70170_p).func_76185_a();
             }
          } else if (message.opcode == VendingUIMessage.Opcode.EJECT_CORE) {
             int index = message.payload.func_74762_e("Index");

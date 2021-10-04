@@ -5,17 +5,18 @@ import iskallia.vault.skill.ability.AbilityTree;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
@@ -24,7 +25,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 )
 public class PlayerAbilitiesData extends WorldSavedData {
    protected static final String DATA_NAME = "the_vault_PlayerAbilities";
-   private Map<UUID, AbilityTree> playerMap = new HashMap<>();
+   private final Map<UUID, AbilityTree> playerMap = new HashMap<>();
 
    public PlayerAbilitiesData() {
       super("the_vault_PlayerAbilities");
@@ -42,21 +43,37 @@ public class PlayerAbilitiesData extends WorldSavedData {
       return this.playerMap.computeIfAbsent(uuid, AbilityTree::new);
    }
 
-   public PlayerAbilitiesData add(ServerPlayerEntity player, AbilityNode<?>... nodes) {
+   public PlayerAbilitiesData add(ServerPlayerEntity player, AbilityNode<?, ?>... nodes) {
       this.getAbilities(player).add(player.func_184102_h(), nodes);
       this.func_76185_a();
       return this;
    }
 
-   public PlayerAbilitiesData remove(ServerPlayerEntity player, AbilityNode<?>... nodes) {
+   public PlayerAbilitiesData remove(ServerPlayerEntity player, AbilityNode<?, ?>... nodes) {
       this.getAbilities(player).remove(player.func_184102_h(), nodes);
       this.func_76185_a();
       return this;
    }
 
-   public PlayerAbilitiesData upgradeAbility(ServerPlayerEntity player, AbilityNode<?> abilityNode) {
+   public PlayerAbilitiesData upgradeAbility(ServerPlayerEntity player, AbilityNode<?, ?> abilityNode) {
       AbilityTree abilityTree = this.getAbilities(player);
       abilityTree.upgradeAbility(player.func_184102_h(), abilityNode);
+      abilityTree.sync(player.field_71133_b);
+      this.func_76185_a();
+      return this;
+   }
+
+   public PlayerAbilitiesData downgradeAbility(ServerPlayerEntity player, AbilityNode<?, ?> abilityNode) {
+      AbilityTree abilityTree = this.getAbilities(player);
+      abilityTree.downgradeAbility(player.func_184102_h(), abilityNode);
+      abilityTree.sync(player.field_71133_b);
+      this.func_76185_a();
+      return this;
+   }
+
+   public PlayerAbilitiesData selectSpecialization(ServerPlayerEntity player, String ability, @Nullable String specialization) {
+      AbilityTree abilityTree = this.getAbilities(player);
+      abilityTree.selectSpecialization(ability, specialization);
       abilityTree.sync(player.field_71133_b);
       this.func_76185_a();
       return this;
@@ -66,9 +83,9 @@ public class PlayerAbilitiesData extends WorldSavedData {
       UUID uniqueID = player.func_110124_au();
       AbilityTree oldAbilityTree = this.playerMap.get(uniqueID);
       if (oldAbilityTree != null) {
-         for (AbilityNode<?> node : oldAbilityTree.getNodes()) {
+         for (AbilityNode<?, ?> node : oldAbilityTree.getNodes()) {
             if (node.isLearned()) {
-               node.getAbility().onRemoved(player);
+               node.onRemoved(player);
             }
          }
       }
@@ -83,9 +100,9 @@ public class PlayerAbilitiesData extends WorldSavedData {
    @SubscribeEvent
    public static void onTick(PlayerTickEvent event) {
       if (event.phase == Phase.START) {
-         if (event.side == LogicalSide.SERVER) {
-            AbilityTree abilities = get((ServerWorld)event.player.field_70170_p).getAbilities(event.player);
-            abilities.tick(event);
+         if (event.side.isServer() && event.player instanceof ServerPlayerEntity) {
+            ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.player;
+            get(sPlayer.func_71121_q()).getAbilities(sPlayer).tick(sPlayer);
          }
       }
    }
@@ -116,6 +133,10 @@ public class PlayerAbilitiesData extends WorldSavedData {
    }
 
    public static PlayerAbilitiesData get(ServerWorld world) {
-      return (PlayerAbilitiesData)world.func_73046_m().func_241755_D_().func_217481_x().func_215752_a(PlayerAbilitiesData::new, "the_vault_PlayerAbilities");
+      return get(world.func_73046_m());
+   }
+
+   public static PlayerAbilitiesData get(MinecraftServer srv) {
+      return (PlayerAbilitiesData)srv.func_241755_D_().func_217481_x().func_215752_a(PlayerAbilitiesData::new, "the_vault_PlayerAbilities");
    }
 }

@@ -3,11 +3,14 @@ package iskallia.vault.world.gen.structure.pool;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import iskallia.vault.init.ModStructures;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.SharedSeedRandom;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.world.ISeedReader;
@@ -20,6 +23,7 @@ import net.minecraft.world.gen.feature.template.IStructureProcessorType;
 import net.minecraft.world.gen.feature.template.StructureProcessorList;
 import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraft.world.gen.feature.template.Template.BlockInfo;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 public class PalettedListPoolElement extends JigsawPiece {
    public static final Codec<PalettedListPoolElement> CODEC = RecordCodecBuilder.create(
@@ -31,13 +35,17 @@ public class PalettedListPoolElement extends JigsawPiece {
 
    public PalettedListPoolElement(List<JigsawPiece> elements, PlacementBehaviour behaviour, List<Supplier<StructureProcessorList>> processors) {
       super(behaviour);
-      if (elements.isEmpty()) {
+      if (elements.isEmpty() && FMLEnvironment.production) {
          throw new IllegalArgumentException("Elements are empty");
       } else {
          this.elements = elements;
          this.processors = processors;
          this.setProjectionOnEachElement(behaviour);
       }
+   }
+
+   public List<JigsawPiece> getElements() {
+      return this.elements;
    }
 
    protected static <E extends JigsawPiece> RecordCodecBuilder<E, PlacementBehaviour> projection() {
@@ -49,7 +57,7 @@ public class PalettedListPoolElement extends JigsawPiece {
    }
 
    public List<BlockInfo> func_214849_a(TemplateManager templateManager, BlockPos pos, Rotation rotation, Random random) {
-      return this.elements.get(0).func_214849_a(templateManager, pos, rotation, random);
+      return (List<BlockInfo>)(this.elements.isEmpty() ? new ArrayList<>() : this.elements.get(0).func_214849_a(templateManager, pos, rotation, random));
    }
 
    public MutableBoundingBox func_214852_a(TemplateManager templateManager, BlockPos pos, Rotation rotation) {
@@ -70,12 +78,28 @@ public class PalettedListPoolElement extends JigsawPiece {
       Random random,
       boolean keepJigsaws
    ) {
-      Supplier<StructureProcessorList> extra = this.processors.isEmpty() ? null : this.processors.get(random.nextInt(this.processors.size()));
+      return this.generate(templateManager, world, structureManager, chunkGen, pos1, pos2, rotation, box, random, keepJigsaws, 18);
+   }
+
+   public boolean generate(
+      TemplateManager templateManager,
+      ISeedReader world,
+      StructureManager structureManager,
+      ChunkGenerator chunkGen,
+      BlockPos pos1,
+      BlockPos pos2,
+      Rotation rotation,
+      MutableBoundingBox box,
+      Random random,
+      boolean keepJigsaws,
+      int updateFlags
+   ) {
+      Supplier<StructureProcessorList> extra = this.getRandomProcessor(world, pos1);
 
       for (JigsawPiece piece : this.elements) {
          if (piece instanceof PalettedSinglePoolElement) {
             if (!((PalettedSinglePoolElement)piece)
-               .generate(extra, templateManager, world, structureManager, chunkGen, pos1, pos2, rotation, box, random, keepJigsaws)) {
+               .generate(extra, templateManager, world, structureManager, chunkGen, pos1, pos2, rotation, box, random, keepJigsaws, updateFlags)) {
                return false;
             }
          } else if (!piece.func_230378_a_(templateManager, world, structureManager, chunkGen, pos1, pos2, rotation, box, random, keepJigsaws)) {
@@ -84,6 +108,17 @@ public class PalettedListPoolElement extends JigsawPiece {
       }
 
       return true;
+   }
+
+   @Nullable
+   public Supplier<StructureProcessorList> getRandomProcessor(ISeedReader world, BlockPos pos) {
+      if (this.processors.isEmpty()) {
+         return null;
+      } else {
+         SharedSeedRandom seedRand = new SharedSeedRandom();
+         seedRand.func_202425_c(world.func_72905_C(), pos.func_177958_n(), pos.func_177952_p());
+         return this.processors.get(seedRand.nextInt(this.processors.size()));
+      }
    }
 
    public IJigsawDeserializer<?> func_214853_a() {

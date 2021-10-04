@@ -1,20 +1,29 @@
 package iskallia.vault.event;
 
 import iskallia.vault.config.entry.EnchantedBookEntry;
-import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.CrystalData;
-import iskallia.vault.item.ItemVaultCrystal;
-import iskallia.vault.item.gear.VaultArmorItem;
-import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.item.ItemVaultCrystalSeal;
+import iskallia.vault.item.ItemVaultRaffleSeal;
+import iskallia.vault.item.VaultCatalystItem;
+import iskallia.vault.item.VaultMagnetItem;
+import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.item.crystal.VaultCrystalItem;
+import iskallia.vault.item.paxel.VaultPaxelItem;
+import iskallia.vault.item.paxel.enhancement.PaxelEnhancements;
 import iskallia.vault.util.OverlevelEnchantHelper;
+import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.ShieldItem;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -61,24 +70,117 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
-   public static void onUnlockCrystal(AnvilUpdateEvent event) {
-      if (event.getLeft().func_77973_b() instanceof ItemVaultCrystal && event.getRight().func_77973_b() == ModItems.VOID_CORE) {
-         ItemStack output = event.getLeft().func_77946_l();
-         if (ItemVaultCrystal.getData(output).addModifier("Locked", CrystalData.Modifier.Operation.REMOVE, 1.0F)) {
-            event.setOutput(output);
-            event.setCost(1);
+   public static void onApplyPaxelCharm(AnvilUpdateEvent event) {
+      ItemStack paxelStack = event.getLeft();
+      ItemStack charmStack = event.getRight();
+      if (paxelStack.func_77973_b() == ModItems.VAULT_PAXEL) {
+         if (charmStack.func_77973_b() == ModItems.PAXEL_CHARM) {
+            if (PaxelEnhancements.getEnhancement(paxelStack) == null) {
+               ItemStack enhancedStack = paxelStack.func_77946_l();
+               PaxelEnhancements.markShouldEnhance(enhancedStack);
+               event.setCost(5);
+               event.setOutput(enhancedStack);
+            }
          }
       }
    }
 
    @SubscribeEvent
-   public static void onApplyEtching(AnvilUpdateEvent event) {
-      if (event.getLeft().func_77973_b() instanceof VaultArmorItem && event.getRight().func_77973_b() == ModItems.ETCHING) {
+   public static void onApplySeal(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof ItemVaultCrystalSeal) {
          ItemStack output = event.getLeft().func_77946_l();
-         VaultGear.Set set = ModAttributes.GEAR_SET.getOrDefault(event.getRight(), VaultGear.Set.NONE).getValue(event.getRight());
-         ModAttributes.GEAR_SET.create(output, set);
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (!data.getModifiers().isEmpty() || data.getSelectedObjective() != null) {
+            return;
+         }
+
+         if (event.getRight().func_77973_b() == ModItems.CRYSTAL_SEAL_ANCIENTS && data.getType() == CrystalData.Type.COOP) {
+            return;
+         }
+
+         ResourceLocation objectiveKey = ((ItemVaultCrystalSeal)event.getRight().func_77973_b()).getObjectiveId();
+         VaultObjective objective = VaultObjective.getObjective(objectiveKey);
+         if (objective != null) {
+            data.setSelectedObjective(objectiveKey);
+            VaultCrystalItem.setRandomSeed(output);
+            event.setOutput(output);
+            event.setMaterialCost(1);
+            event.setCost(8);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyRaffleSeal(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof ItemVaultRaffleSeal) {
+         ItemStack output = event.getLeft().func_77946_l();
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (!data.getModifiers().isEmpty() || data.getSelectedObjective() != null) {
+            return;
+         }
+
+         String playerName = ItemVaultRaffleSeal.getPlayerName(event.getRight());
+         if (playerName.isEmpty()) {
+            return;
+         }
+
+         data.setPlayerBossName(playerName);
          event.setOutput(output);
-         event.setCost(1);
+         event.setMaterialCost(1);
+         event.setCost(8);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyCatalyst(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof VaultCatalystItem) {
+         ItemStack output = event.getLeft().func_77946_l();
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (!data.canCraftCatalysts()) {
+            return;
+         }
+
+         List<String> modifiers = VaultCatalystItem.getCrystalCombinationModifiers(event.getRight(), event.getLeft());
+         if (modifiers == null || modifiers.isEmpty()) {
+            return;
+         }
+
+         modifiers.forEach(modifier -> data.addCatalystModifier(modifier, true, CrystalData.Modifier.Operation.ADD));
+         event.setOutput(output);
+         event.setCost(modifiers.size() * 8);
+         event.setMaterialCost(1);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onRepairDeny(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultPaxelItem && event.getRight().func_77973_b() instanceof VaultPaxelItem) {
+         event.setCanceled(true);
+      }
+
+      if (event.getLeft().func_77973_b() instanceof VaultMagnetItem && event.getRight().func_77973_b() instanceof VaultMagnetItem) {
+         event.setCanceled(true);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplySoulFlame(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() == ModItems.SOUL_FLAME) {
+         ItemStack output = event.getLeft().func_77946_l();
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (!data.getModifiers().isEmpty()) {
+            return;
+         }
+
+         if (!data.canAddModifier("Afterlife", CrystalData.Modifier.Operation.ADD)) {
+            return;
+         }
+
+         if (data.addCatalystModifier("Afterlife", false, CrystalData.Modifier.Operation.ADD)) {
+            event.setOutput(output);
+            event.setMaterialCost(1);
+            event.setCost(10);
+         }
       }
    }
 
@@ -86,23 +188,55 @@ public class AnvilEvents {
    public static void onApplyPog(AnvilUpdateEvent event) {
       if (event.getRight().func_77973_b() == ModItems.OMEGA_POG) {
          ResourceLocation name = event.getLeft().func_77973_b().getRegistryName();
-         if (event.getLeft().func_77973_b() instanceof VaultGear) {
-            ItemStack output = event.getLeft().func_77946_l();
-            int maxRepairs = ModAttributes.MAX_REPAIRS.getOrDefault(output, -1).getValue(output);
-            int curRepairs = ModAttributes.CURRENT_REPAIRS.getOrDefault(output, 0).getValue(output);
-            if (maxRepairs != -1 && curRepairs >= maxRepairs) {
-               return;
-            }
-
-            ModAttributes.CURRENT_REPAIRS.create(output, curRepairs + 1);
-            output.func_196085_b(0);
-            event.setOutput(output);
-            event.setMaterialCost(1);
-            event.setCost(1);
-         } else if (name.func_110624_b().equals("the_vault") && name.func_110623_a().startsWith("artifact")) {
+         if (name.equals(ModBlocks.VAULT_ARTIFACT.getRegistryName())) {
             event.setOutput(new ItemStack(ModItems.UNIDENTIFIED_ARTIFACT));
             event.setMaterialCost(1);
             event.setCost(1);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyMending(AnvilUpdateEvent event) {
+      ItemStack out = event.getOutput();
+      if (out.func_77973_b() instanceof ShieldItem) {
+         if (EnchantmentHelper.func_77506_a(Enchantments.field_185296_A, out) > 0) {
+            event.setCanceled(true);
+         }
+
+         if (EnchantmentHelper.func_77506_a(Enchantments.field_92091_k, out) > 0) {
+            event.setCanceled(true);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onRepairMagnet(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultMagnetItem) {
+         if (event.getRight().func_77973_b() == ModItems.MAGNETITE) {
+            if (event.getLeft().func_77952_i() != 0 && event.getLeft().func_196082_o().func_74762_e("TotalRepairs") < 30) {
+               ItemStack magnet = event.getLeft();
+               ItemStack magnetite = event.getRight();
+               ItemStack output = magnet.func_77946_l();
+               CompoundNBT nbt = output.func_196082_o();
+               if (!nbt.func_74764_b("TotalRepairs")) {
+                  nbt.func_74768_a("TotalRepairs", 0);
+                  output.func_77982_d(nbt);
+               }
+
+               int damage = magnet.func_77952_i();
+               int repairAmount = (int)Math.ceil(magnet.func_77958_k() * 0.1);
+               int newDamage = Math.max(0, damage - magnetite.func_190916_E() * repairAmount);
+               int materialCost = (int)Math.ceil((double)(damage - newDamage) / repairAmount);
+               event.setMaterialCost(materialCost);
+               event.setCost(materialCost);
+               nbt.func_74768_a("TotalRepairs", (int)Math.ceil(materialCost + nbt.func_74762_e("TotalRepairs")));
+               output.func_77982_d(nbt);
+               output.func_196085_b(newDamage);
+               event.setOutput(output);
+            } else {
+               event.setCanceled(true);
+            }
          }
       }
    }

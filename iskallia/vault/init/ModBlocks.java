@@ -2,70 +2,108 @@ package iskallia.vault.init;
 
 import iskallia.vault.Vault;
 import iskallia.vault.block.AdvancedVendingBlock;
+import iskallia.vault.block.BloodAltarBlock;
 import iskallia.vault.block.BowHatBlock;
-import iskallia.vault.block.CapacitorBlock;
+import iskallia.vault.block.CatalystDecryptionTableBlock;
 import iskallia.vault.block.CryoChamberBlock;
 import iskallia.vault.block.FinalVaultPortalBlock;
-import iskallia.vault.block.GlobalTraderBlock;
 import iskallia.vault.block.KeyPressBlock;
 import iskallia.vault.block.LootStatueBlock;
-import iskallia.vault.block.MVPCrownBlock;
 import iskallia.vault.block.MazeBlock;
 import iskallia.vault.block.ObeliskBlock;
-import iskallia.vault.block.PlayerStatueBlock;
+import iskallia.vault.block.OmegaStatueBlock;
+import iskallia.vault.block.OmegaVariantStatueBlock;
 import iskallia.vault.block.PuzzleRuneBlock;
 import iskallia.vault.block.RelicStatueBlock;
+import iskallia.vault.block.ScavengerChestBlock;
+import iskallia.vault.block.ScavengerTreasureBlock;
+import iskallia.vault.block.SoulAltarBlock;
+import iskallia.vault.block.StabilizerBlock;
+import iskallia.vault.block.StatueCauldronBlock;
 import iskallia.vault.block.StatueDragonHeadBlock;
+import iskallia.vault.block.TimeAltarBlock;
+import iskallia.vault.block.TransmogTableBlock;
+import iskallia.vault.block.TrophyBlock;
+import iskallia.vault.block.UnknownVaultDoorBlock;
 import iskallia.vault.block.VaultAltarBlock;
 import iskallia.vault.block.VaultArtifactBlock;
 import iskallia.vault.block.VaultBedrockBlock;
+import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.block.VaultDoorBlock;
+import iskallia.vault.block.VaultLootableBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.VaultPortalBlock;
+import iskallia.vault.block.VaultRockBlock;
 import iskallia.vault.block.VaultRuneBlock;
+import iskallia.vault.block.VaultTreasureChestBlock;
 import iskallia.vault.block.VendingMachineBlock;
+import iskallia.vault.block.XPAltarBlock;
 import iskallia.vault.block.entity.AdvancedVendingTileEntity;
-import iskallia.vault.block.entity.CapacitorTileEntity;
+import iskallia.vault.block.entity.AncientCryoChamberTileEntity;
+import iskallia.vault.block.entity.BloodAltarTileEntity;
+import iskallia.vault.block.entity.CatalystDecryptionTableTileEntity;
 import iskallia.vault.block.entity.CryoChamberTileEntity;
-import iskallia.vault.block.entity.GlobalTraderTileEntity;
 import iskallia.vault.block.entity.LootStatueTileEntity;
-import iskallia.vault.block.entity.PlayerStatueTileEntity;
+import iskallia.vault.block.entity.ObeliskTileEntity;
 import iskallia.vault.block.entity.RelicStatueTileEntity;
+import iskallia.vault.block.entity.ScavengerChestTileEntity;
+import iskallia.vault.block.entity.ScavengerTreasureTileEntity;
+import iskallia.vault.block.entity.SoulAltarTileEntity;
+import iskallia.vault.block.entity.StabilizerTileEntity;
+import iskallia.vault.block.entity.StatueCauldronTileEntity;
+import iskallia.vault.block.entity.TimeAltarTileEntity;
+import iskallia.vault.block.entity.TrophyStatueTileEntity;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
+import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.block.entity.VaultCrateTileEntity;
+import iskallia.vault.block.entity.VaultDoorTileEntity;
+import iskallia.vault.block.entity.VaultLootableTileEntity;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.block.entity.VaultRuneTileEntity;
+import iskallia.vault.block.entity.VaultTreasureChestTileEntity;
 import iskallia.vault.block.entity.VendingMachineTileEntity;
+import iskallia.vault.block.entity.XpAltarTileEntity;
 import iskallia.vault.block.item.AdvancedVendingMachineBlockItem;
-import iskallia.vault.block.item.GlobalTraderBlockItem;
 import iskallia.vault.block.item.LootStatueBlockItem;
-import iskallia.vault.block.item.PlayerStatueBlockItem;
 import iskallia.vault.block.item.RelicStatueBlockItem;
+import iskallia.vault.block.item.TrophyStatueBlockItem;
 import iskallia.vault.block.item.VendingMachineBlockItem;
 import iskallia.vault.block.render.AdvancedVendingRenderer;
 import iskallia.vault.block.render.CryoChamberRenderer;
-import iskallia.vault.block.render.GlobalTraderRenderer;
+import iskallia.vault.block.render.FillableAltarRenderer;
 import iskallia.vault.block.render.LootStatueRenderer;
-import iskallia.vault.block.render.PlayerStatueRenderer;
 import iskallia.vault.block.render.RelicStatueRenderer;
+import iskallia.vault.block.render.ScavengerChestRenderer;
+import iskallia.vault.block.render.StatueCauldronRenderer;
 import iskallia.vault.block.render.VaultAltarRenderer;
+import iskallia.vault.block.render.VaultChestRenderer;
 import iskallia.vault.block.render.VaultRuneRenderer;
 import iskallia.vault.block.render.VendingMachineRenderer;
+import iskallia.vault.client.render.VaultISTER;
+import iskallia.vault.fluid.block.VoidFluidBlock;
 import iskallia.vault.util.StatueType;
+import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.DoorBlock;
-import net.minecraft.block.OreBlock;
-import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.block.GlassBlock;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.TallBlockItem;
+import net.minecraft.item.Item.Properties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.tileentity.TileEntityType.Builder;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
@@ -73,77 +111,138 @@ public class ModBlocks {
    public static final VaultPortalBlock VAULT_PORTAL = new VaultPortalBlock();
    public static final FinalVaultPortalBlock FINAL_VAULT_PORTAL = new FinalVaultPortalBlock();
    public static final VaultAltarBlock VAULT_ALTAR = new VaultAltarBlock();
-   public static final OreBlock ALEXANDRITE_ORE = new VaultOreBlock();
-   public static final OreBlock BENITOITE_ORE = new VaultOreBlock();
-   public static final OreBlock LARIMAR_ORE = new VaultOreBlock();
-   public static final OreBlock BLACK_OPAL_ORE = new VaultOreBlock();
-   public static final OreBlock PAINITE_ORE = new VaultOreBlock();
-   public static final OreBlock ISKALLIUM_ORE = new VaultOreBlock();
-   public static final OreBlock RENIUM_ORE = new VaultOreBlock();
-   public static final OreBlock GORGINITE_ORE = new VaultOreBlock();
-   public static final OreBlock SPARKLETINE_ORE = new VaultOreBlock();
-   public static final OreBlock WUTODIE_ORE = new VaultOreBlock();
-   public static final OreBlock VAULT_ROCK_ORE = new VaultOreBlock();
-   public static final DoorBlock ALEXANDRITE_DOOR = new VaultDoorBlock(ModItems.ALEXANDRITE_KEY);
-   public static final DoorBlock BENITOITE_DOOR = new VaultDoorBlock(ModItems.BENITOITE_KEY);
-   public static final DoorBlock LARIMAR_DOOR = new VaultDoorBlock(ModItems.LARIMAR_KEY);
-   public static final DoorBlock BLACK_OPAL_DOOR = new VaultDoorBlock(ModItems.BLACK_OPAL_KEY);
-   public static final DoorBlock PAINITE_DOOR = new VaultDoorBlock(ModItems.PAINITE_KEY);
+   public static final VaultOreBlock ALEXANDRITE_ORE = new VaultOreBlock(ModItems.ALEXANDRITE_GEM);
+   public static final VaultOreBlock BENITOITE_ORE = new VaultOreBlock(ModItems.BENITOITE_GEM);
+   public static final VaultOreBlock LARIMAR_ORE = new VaultOreBlock(ModItems.LARIMAR_GEM);
+   public static final VaultOreBlock BLACK_OPAL_ORE = new VaultOreBlock(ModItems.BLACK_OPAL_GEM);
+   public static final VaultOreBlock PAINITE_ORE = new VaultOreBlock(ModItems.PAINITE_GEM);
+   public static final VaultOreBlock ISKALLIUM_ORE = new VaultOreBlock(ModItems.ISKALLIUM_GEM);
+   public static final VaultOreBlock GORGINITE_ORE = new VaultOreBlock(ModItems.GORGINITE_GEM);
+   public static final VaultOreBlock SPARKLETINE_ORE = new VaultOreBlock(ModItems.SPARKLETINE_GEM);
+   public static final VaultOreBlock WUTODIE_ORE = new VaultOreBlock(ModItems.WUTODIE_GEM);
+   public static final VaultOreBlock ASHIUM_ORE = new VaultOreBlock(ModItems.ASHIUM_GEM);
+   public static final VaultOreBlock BOMIGNITE_ORE = new VaultOreBlock(ModItems.BOMIGNITE_GEM);
+   public static final VaultOreBlock FUNSOIDE_ORE = new VaultOreBlock(ModItems.FUNSOIDE_GEM);
+   public static final VaultOreBlock TUBIUM_ORE = new VaultOreBlock(ModItems.TUBIUM_GEM);
+   public static final VaultOreBlock UPALINE_ORE = new VaultOreBlock(ModItems.UPALINE_GEM);
+   public static final VaultOreBlock PUFFIUM_ORE = new VaultOreBlock(ModItems.PUFFIUM_GEM);
+   public static final VaultOreBlock ECHO_ORE = new VaultOreBlock(ModItems.ECHO_GEM);
+   public static final Block UNKNOWN_ORE = new VaultLootableBlock(VaultLootableBlock.Type.ORE);
+   public static final VaultRockBlock VAULT_ROCK_ORE = new VaultRockBlock();
    public static final DoorBlock ISKALLIUM_DOOR = new VaultDoorBlock(ModItems.ISKALLIUM_KEY);
-   public static final DoorBlock RENIUM_DOOR = new VaultDoorBlock(ModItems.RENIUM_KEY);
    public static final DoorBlock GORGINITE_DOOR = new VaultDoorBlock(ModItems.GORGINITE_KEY);
    public static final DoorBlock SPARKLETINE_DOOR = new VaultDoorBlock(ModItems.SPARKLETINE_KEY);
-   public static final DoorBlock WUTODIE_DOOR = new VaultDoorBlock(ModItems.WUTODIE_KEY);
+   public static final DoorBlock ASHIUM_DOOR = new VaultDoorBlock(ModItems.ASHIUM_KEY);
+   public static final DoorBlock BOMIGNITE_DOOR = new VaultDoorBlock(ModItems.BOMIGNITE_KEY);
+   public static final DoorBlock FUNSOIDE_DOOR = new VaultDoorBlock(ModItems.FUNSOIDE_KEY);
+   public static final DoorBlock TUBIUM_DOOR = new VaultDoorBlock(ModItems.TUBIUM_KEY);
+   public static final DoorBlock UPALINE_DOOR = new VaultDoorBlock(ModItems.UPALINE_KEY);
+   public static final DoorBlock PUFFIUM_DOOR = new VaultDoorBlock(ModItems.PUFFIUM_KEY);
+   public static final DoorBlock UNKNOWN_DOOR = new UnknownVaultDoorBlock();
    public static final VaultRuneBlock VAULT_RUNE_BLOCK = new VaultRuneBlock();
-   public static final VaultArtifactBlock ARTIFACT_1 = new VaultArtifactBlock(1);
-   public static final VaultArtifactBlock ARTIFACT_2 = new VaultArtifactBlock(2);
-   public static final VaultArtifactBlock ARTIFACT_3 = new VaultArtifactBlock(3);
-   public static final VaultArtifactBlock ARTIFACT_4 = new VaultArtifactBlock(4);
-   public static final VaultArtifactBlock ARTIFACT_5 = new VaultArtifactBlock(5);
-   public static final VaultArtifactBlock ARTIFACT_6 = new VaultArtifactBlock(6);
-   public static final VaultArtifactBlock ARTIFACT_7 = new VaultArtifactBlock(7);
-   public static final VaultArtifactBlock ARTIFACT_8 = new VaultArtifactBlock(8);
-   public static final VaultArtifactBlock ARTIFACT_9 = new VaultArtifactBlock(9);
-   public static final VaultArtifactBlock ARTIFACT_10 = new VaultArtifactBlock(10);
-   public static final VaultArtifactBlock ARTIFACT_11 = new VaultArtifactBlock(11);
-   public static final VaultArtifactBlock ARTIFACT_12 = new VaultArtifactBlock(12);
-   public static final VaultArtifactBlock ARTIFACT_13 = new VaultArtifactBlock(13);
-   public static final VaultArtifactBlock ARTIFACT_14 = new VaultArtifactBlock(14);
-   public static final VaultArtifactBlock ARTIFACT_15 = new VaultArtifactBlock(15);
-   public static final VaultArtifactBlock ARTIFACT_16 = new VaultArtifactBlock(16);
+   public static final VaultArtifactBlock VAULT_ARTIFACT = new VaultArtifactBlock();
    public static final VaultCrateBlock VAULT_CRATE = new VaultCrateBlock();
    public static final VaultCrateBlock VAULT_CRATE_ARENA = new VaultCrateBlock();
+   public static final VaultCrateBlock VAULT_CRATE_SCAVENGER = new VaultCrateBlock();
    public static final ObeliskBlock OBELISK = new ObeliskBlock();
-   public static final MVPCrownBlock MVP_CROWN = new MVPCrownBlock();
-   public static final PlayerStatueBlock PLAYER_STATUE = new PlayerStatueBlock();
    public static final VendingMachineBlock VENDING_MACHINE = new VendingMachineBlock();
    public static final AdvancedVendingBlock ADVANCED_VENDING_MACHINE = new AdvancedVendingBlock();
    public static final VaultBedrockBlock VAULT_BEDROCK = new VaultBedrockBlock();
+   public static final Block VAULT_STONE = new Block(
+      net.minecraft.block.AbstractBlock.Properties.func_200945_a(Material.field_151576_e).func_200948_a(1.5F, 6.0F).func_235827_a_((a, b, c, d) -> false)
+   );
+   public static final GlassBlock VAULT_GLASS = new GlassBlock(
+      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150359_w).func_200948_a(-1.0F, 3600000.0F)
+   );
    public static final RelicStatueBlock RELIC_STATUE = new RelicStatueBlock();
    public static final LootStatueBlock GIFT_NORMAL_STATUE = new LootStatueBlock(StatueType.GIFT_NORMAL);
    public static final LootStatueBlock GIFT_MEGA_STATUE = new LootStatueBlock(StatueType.GIFT_MEGA);
    public static final BowHatBlock BOW_HAT = new BowHatBlock();
    public static final StatueDragonHeadBlock STATUE_DRAGON_HEAD = new StatueDragonHeadBlock();
    public static final LootStatueBlock VAULT_PLAYER_LOOT_STATUE = new LootStatueBlock(StatueType.VAULT_BOSS);
-   public static final LootStatueBlock ARENA_PLAYER_LOOT_STATUE = new LootStatueBlock(StatueType.VAULT_BOSS);
    public static final CryoChamberBlock CRYO_CHAMBER = new CryoChamberBlock();
-   public static final CapacitorBlock CAPACITOR = new CapacitorBlock();
    public static final KeyPressBlock KEY_PRESS = new KeyPressBlock();
-   public static final Block VAULT_DIAMOND_BLOCK = new Block(Properties.func_200950_a(Blocks.field_150484_ah));
-   public static final GlobalTraderBlock GLOBAL_TRADER = new GlobalTraderBlock();
+   public static final Block VAULT_DIAMOND_BLOCK = new Block(net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150484_ah));
    public static final MazeBlock MAZE_BLOCK = new MazeBlock();
    public static final PuzzleRuneBlock PUZZLE_RUNE_BLOCK = new PuzzleRuneBlock();
-   public static final PlayerStatueBlockItem PLAYER_STATUE_BLOCK_ITEM = new PlayerStatueBlockItem();
+   public static final Block YELLOW_PUZZLE_CONCRETE = new Block(net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_196858_iR));
+   public static final Block PINK_PUZZLE_CONCRETE = new Block(net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_196858_iR));
+   public static final Block GREEN_PUZZLE_CONCRETE = new Block(net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_196858_iR));
+   public static final Block BLUE_PUZZLE_CONCRETE = new Block(net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_196858_iR));
+   public static final OmegaStatueBlock OMEGA_STATUE = new OmegaStatueBlock();
+   public static final OmegaVariantStatueBlock OMEGA_STATUE_VARIANT = new OmegaVariantStatueBlock();
+   public static final TrophyBlock TROPHY_STATUE = new TrophyBlock();
+   public static final TransmogTableBlock TRANSMOG_TABLE = new TransmogTableBlock();
+   public static final Block VAULT_LOOT_RICHITY = new VaultLootableBlock(VaultLootableBlock.Type.RICHITY);
+   public static final Block VAULT_LOOT_RESOURCE = new VaultLootableBlock(VaultLootableBlock.Type.RESOURCE);
+   public static final Block VAULT_LOOT_MISC = new VaultLootableBlock(VaultLootableBlock.Type.MISC);
+   public static final Block UNKNOWN_VAULT_CHEST = new VaultLootableBlock(VaultLootableBlock.Type.VAULT_CHEST);
+   public static final Block UNKNOWN_TREASURE_CHEST = new VaultLootableBlock(VaultLootableBlock.Type.VAULT_TREASURE);
+   public static final Block UNKNOWN_VAULT_OBJECTIVE = new VaultLootableBlock(VaultLootableBlock.Type.VAULT_OBJECTIVE);
+   public static final Block VAULT_CHEST = new VaultChestBlock(
+      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(40.0F, 5.0F)
+   );
+   public static final Block VAULT_TREASURE_CHEST = new VaultTreasureChestBlock(
+      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(-1.0F, 3600000.0F)
+   );
+   public static final Block VAULT_ALTAR_CHEST = new VaultChestBlock(
+      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(-1.0F, 3600000.0F)
+   );
+   public static final Block VAULT_COOP_CHEST = new VaultChestBlock(
+      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(-1.0F, 3600000.0F)
+   );
+   public static final Block VAULT_BONUS_CHEST = new VaultChestBlock(
+      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(-1.0F, 3600000.0F)
+   );
+   public static final XPAltarBlock XP_ALTAR = new XPAltarBlock();
+   public static final BloodAltarBlock BLOOD_ALTAR = new BloodAltarBlock();
+   public static final TimeAltarBlock TIME_ALTAR = new TimeAltarBlock();
+   public static final SoulAltarBlock SOUL_ALTAR = new SoulAltarBlock();
+   public static final StatueCauldronBlock STATUE_CAULDRON = new StatueCauldronBlock();
+   public static final ScavengerChestBlock SCAVENGER_CHEST = new ScavengerChestBlock(
+      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(-1.0F, 3600000.0F)
+   );
+   public static final ScavengerTreasureBlock SCAVENGER_TREASURE = new ScavengerTreasureBlock();
+   public static final StabilizerBlock STABILIZER = new StabilizerBlock();
+   public static final CatalystDecryptionTableBlock CATALYST_DECRYPTION_TABLE = new CatalystDecryptionTableBlock();
+   public static final FlowingFluidBlock VOID_LIQUID_BLOCK = new VoidFluidBlock(
+      ModFluids.VOID_LIQUID,
+      net.minecraft.block.AbstractBlock.Properties.func_200949_a(Material.field_151586_h, MaterialColor.field_151646_E)
+         .func_200942_a()
+         .func_200944_c()
+         .func_200943_b(100.0F)
+         .func_235838_a_(state -> 15)
+         .func_222380_e()
+   );
    public static final RelicStatueBlockItem RELIC_STATUE_BLOCK_ITEM = new RelicStatueBlockItem();
-   public static final LootStatueBlockItem GIFT_NORMAL_STATUE_BLOCK_ITEM = new LootStatueBlockItem(GIFT_NORMAL_STATUE);
-   public static final LootStatueBlockItem GIFT_MEGA_STATUE_BLOCK_ITEM = new LootStatueBlockItem(GIFT_MEGA_STATUE);
-   public static final LootStatueBlockItem VAULT_PLAYER_LOOT_STATUE_BLOCK_ITEM = new LootStatueBlockItem(VAULT_PLAYER_LOOT_STATUE);
-   public static final LootStatueBlockItem ARENA_PLAYER_LOOT_STATUE_BLOCK_ITEM = new LootStatueBlockItem(ARENA_PLAYER_LOOT_STATUE);
+   public static final LootStatueBlockItem GIFT_NORMAL_STATUE_BLOCK_ITEM = new LootStatueBlockItem(GIFT_NORMAL_STATUE, StatueType.GIFT_NORMAL);
+   public static final LootStatueBlockItem GIFT_MEGA_STATUE_BLOCK_ITEM = new LootStatueBlockItem(GIFT_MEGA_STATUE, StatueType.GIFT_MEGA);
+   public static final LootStatueBlockItem VAULT_PLAYER_LOOT_STATUE_BLOCK_ITEM = new LootStatueBlockItem(VAULT_PLAYER_LOOT_STATUE, StatueType.VAULT_BOSS);
+   public static final LootStatueBlockItem OMEGA_STATUE_BLOCK_ITEM = new LootStatueBlockItem(OMEGA_STATUE, StatueType.OMEGA);
+   public static final LootStatueBlockItem OMEGA_STATUE_VARIANT_BLOCK_ITEM = new LootStatueBlockItem(OMEGA_STATUE_VARIANT, StatueType.OMEGA_VARIANT);
+   public static final TrophyStatueBlockItem TROPHY_STATUE_BLOCK_ITEM = new TrophyStatueBlockItem(TROPHY_STATUE);
    public static final VendingMachineBlockItem VENDING_MACHINE_BLOCK_ITEM = new VendingMachineBlockItem(VENDING_MACHINE);
    public static final AdvancedVendingMachineBlockItem ADVANCED_VENDING_BLOCK_ITEM = new AdvancedVendingMachineBlockItem(ADVANCED_VENDING_MACHINE);
-   public static final GlobalTraderBlockItem GLOBAL_TRADER_BLOCK_ITEM = new GlobalTraderBlockItem(GLOBAL_TRADER);
    public static final PuzzleRuneBlock.Item PUZZLE_RUNE_BLOCK_ITEM = new PuzzleRuneBlock.Item(
-      PUZZLE_RUNE_BLOCK, new net.minecraft.item.Item.Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(1)
+      PUZZLE_RUNE_BLOCK, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(1)
+   );
+   public static final BlockItem VAULT_CHEST_ITEM = new BlockItem(
+      VAULT_CHEST, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).setISTER(() -> ModBlocks.VaultStackRendererProvider.INSTANCE)
+   );
+   public static final BlockItem VAULT_TREASURE_CHEST_ITEM = new BlockItem(
+      VAULT_TREASURE_CHEST, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).setISTER(() -> ModBlocks.VaultStackRendererProvider.INSTANCE)
+   );
+   public static final BlockItem VAULT_ALTAR_CHEST_ITEM = new BlockItem(
+      VAULT_ALTAR_CHEST, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).setISTER(() -> ModBlocks.VaultStackRendererProvider.INSTANCE)
+   );
+   public static final BlockItem VAULT_COOP_CHEST_ITEM = new BlockItem(
+      VAULT_COOP_CHEST, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).setISTER(() -> ModBlocks.VaultStackRendererProvider.INSTANCE)
+   );
+   public static final BlockItem VAULT_BONUS_CHEST_ITEM = new BlockItem(
+      VAULT_BONUS_CHEST, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).setISTER(() -> ModBlocks.VaultStackRendererProvider.INSTANCE)
+   );
+   public static final BlockItem SCAVENGER_CHEST_ITEM = new BlockItem(
+      SCAVENGER_CHEST, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).setISTER(() -> ModBlocks.VaultStackRendererProvider.INSTANCE)
    );
    public static final TileEntityType<VaultAltarTileEntity> VAULT_ALTAR_TILE_ENTITY = Builder.func_223042_a(VaultAltarTileEntity::new, new Block[]{VAULT_ALTAR})
       .func_206865_a(null);
@@ -159,10 +258,6 @@ public class ModBlocks {
          VaultPortalTileEntity::new, new Block[]{VAULT_PORTAL}
       )
       .func_206865_a(null);
-   public static final TileEntityType<PlayerStatueTileEntity> PLAYER_STATUE_TILE_ENTITY = Builder.func_223042_a(
-         PlayerStatueTileEntity::new, new Block[]{PLAYER_STATUE}
-      )
-      .func_206865_a(null);
    public static final TileEntityType<VendingMachineTileEntity> VENDING_MACHINE_TILE_ENTITY = Builder.func_223042_a(
          VendingMachineTileEntity::new, new Block[]{VENDING_MACHINE}
       )
@@ -176,17 +271,69 @@ public class ModBlocks {
       )
       .func_206865_a(null);
    public static final TileEntityType<LootStatueTileEntity> LOOT_STATUE_TILE_ENTITY = Builder.func_223042_a(
-         LootStatueTileEntity::new, new Block[]{GIFT_NORMAL_STATUE, GIFT_MEGA_STATUE, VAULT_PLAYER_LOOT_STATUE, ARENA_PLAYER_LOOT_STATUE}
+         LootStatueTileEntity::new, new Block[]{GIFT_NORMAL_STATUE, GIFT_MEGA_STATUE, VAULT_PLAYER_LOOT_STATUE, OMEGA_STATUE, OMEGA_STATUE_VARIANT}
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<TrophyStatueTileEntity> TROPHY_STATUE_TILE_ENTITY = Builder.func_223042_a(
+         TrophyStatueTileEntity::new, new Block[]{TROPHY_STATUE}
       )
       .func_206865_a(null);
    public static final TileEntityType<CryoChamberTileEntity> CRYO_CHAMBER_TILE_ENTITY = Builder.func_223042_a(
          CryoChamberTileEntity::new, new Block[]{CRYO_CHAMBER}
       )
       .func_206865_a(null);
-   public static final TileEntityType<CapacitorTileEntity> CAPACITOR_TILE_ENTITY = Builder.func_223042_a(CapacitorTileEntity::new, new Block[]{CAPACITOR})
+   public static final TileEntityType<AncientCryoChamberTileEntity> ANCIENT_CRYO_CHAMBER_TILE_ENTITY = Builder.func_223042_a(
+         AncientCryoChamberTileEntity::new, new Block[]{CRYO_CHAMBER}
+      )
       .func_206865_a(null);
-   public static final TileEntityType<GlobalTraderTileEntity> GLOBAL_TRADER_TILE_ENTITY = Builder.func_223042_a(
-         GlobalTraderTileEntity::new, new Block[]{GLOBAL_TRADER}
+   public static final TileEntityType<VaultDoorTileEntity> VAULT_DOOR_TILE_ENTITY = Builder.func_223042_a(
+         VaultDoorTileEntity::new,
+         new Block[]{
+            ISKALLIUM_DOOR, GORGINITE_DOOR, SPARKLETINE_DOOR, ASHIUM_DOOR, BOMIGNITE_DOOR, FUNSOIDE_DOOR, TUBIUM_DOOR, UPALINE_DOOR, PUFFIUM_DOOR, UNKNOWN_DOOR
+         }
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<VaultLootableTileEntity> VAULT_LOOTABLE_TILE_ENTITY = Builder.func_223042_a(
+         VaultLootableTileEntity::new,
+         new Block[]{
+            UNKNOWN_ORE, VAULT_LOOT_RICHITY, VAULT_LOOT_RESOURCE, VAULT_LOOT_MISC, UNKNOWN_VAULT_CHEST, UNKNOWN_TREASURE_CHEST, UNKNOWN_VAULT_OBJECTIVE
+         }
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<VaultChestTileEntity> VAULT_CHEST_TILE_ENTITY = Builder.func_223042_a(
+         VaultChestTileEntity::new, new Block[]{VAULT_CHEST, VAULT_ALTAR_CHEST, VAULT_COOP_CHEST, VAULT_BONUS_CHEST}
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<VaultTreasureChestTileEntity> VAULT_TREASURE_CHEST_TILE_ENTITY = Builder.func_223042_a(
+         VaultTreasureChestTileEntity::new, new Block[]{VAULT_TREASURE_CHEST}
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<XpAltarTileEntity> XP_ALTAR_TILE_ENTITY = Builder.func_223042_a(XpAltarTileEntity::new, new Block[]{XP_ALTAR})
+      .func_206865_a(null);
+   public static final TileEntityType<BloodAltarTileEntity> BLOOD_ALTAR_TILE_ENTITY = Builder.func_223042_a(BloodAltarTileEntity::new, new Block[]{BLOOD_ALTAR})
+      .func_206865_a(null);
+   public static final TileEntityType<TimeAltarTileEntity> TIME_ALTAR_TILE_ENTITY = Builder.func_223042_a(TimeAltarTileEntity::new, new Block[]{TIME_ALTAR})
+      .func_206865_a(null);
+   public static final TileEntityType<SoulAltarTileEntity> SOUL_ALTAR_TILE_ENTITY = Builder.func_223042_a(SoulAltarTileEntity::new, new Block[]{SOUL_ALTAR})
+      .func_206865_a(null);
+   public static final TileEntityType<StatueCauldronTileEntity> STATUE_CAULDRON_TILE_ENTITY = Builder.func_223042_a(
+         StatueCauldronTileEntity::new, new Block[]{STATUE_CAULDRON}
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<ObeliskTileEntity> OBELISK_TILE_ENTITY = Builder.func_223042_a(ObeliskTileEntity::new, new Block[]{OBELISK})
+      .func_206865_a(null);
+   public static final TileEntityType<ScavengerChestTileEntity> SCAVENGER_CHEST_TILE_ENTITY = Builder.func_223042_a(
+         ScavengerChestTileEntity::new, new Block[]{SCAVENGER_CHEST}
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<ScavengerTreasureTileEntity> SCAVENGER_TREASURE_TILE_ENTITY = Builder.func_223042_a(
+         ScavengerTreasureTileEntity::new, new Block[]{SCAVENGER_TREASURE}
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<StabilizerTileEntity> STABILIZER_TILE_ENTITY = Builder.func_223042_a(StabilizerTileEntity::new, new Block[]{STABILIZER})
+      .func_206865_a(null);
+   public static final TileEntityType<CatalystDecryptionTableTileEntity> CATALYST_DECRYPTION_TABLE_TILE_ENTITY = Builder.func_223042_a(
+         CatalystDecryptionTableTileEntity::new, new Block[]{CATALYST_DECRYPTION_TABLE}
       )
       .func_206865_a(null);
 
@@ -200,60 +347,79 @@ public class ModBlocks {
       registerBlock(event, BLACK_OPAL_ORE, Vault.id("ore_black_opal"));
       registerBlock(event, PAINITE_ORE, Vault.id("ore_painite"));
       registerBlock(event, ISKALLIUM_ORE, Vault.id("ore_iskallium"));
-      registerBlock(event, RENIUM_ORE, Vault.id("ore_renium"));
       registerBlock(event, GORGINITE_ORE, Vault.id("ore_gorginite"));
       registerBlock(event, SPARKLETINE_ORE, Vault.id("ore_sparkletine"));
       registerBlock(event, WUTODIE_ORE, Vault.id("ore_wutodie"));
+      registerBlock(event, ASHIUM_ORE, Vault.id("ore_ashium"));
+      registerBlock(event, BOMIGNITE_ORE, Vault.id("ore_bomignite"));
+      registerBlock(event, FUNSOIDE_ORE, Vault.id("ore_funsoide"));
+      registerBlock(event, TUBIUM_ORE, Vault.id("ore_tubium"));
+      registerBlock(event, UPALINE_ORE, Vault.id("ore_upaline"));
+      registerBlock(event, PUFFIUM_ORE, Vault.id("ore_puffium"));
+      registerBlock(event, ECHO_ORE, Vault.id("ore_echo"));
+      registerBlock(event, UNKNOWN_ORE, Vault.id("ore_unknown"));
       registerBlock(event, VAULT_ROCK_ORE, Vault.id("ore_vault_rock"));
-      registerBlock(event, ALEXANDRITE_DOOR, Vault.id("door_alexandrite"));
-      registerBlock(event, BENITOITE_DOOR, Vault.id("door_benitoite"));
-      registerBlock(event, LARIMAR_DOOR, Vault.id("door_larimar"));
-      registerBlock(event, BLACK_OPAL_DOOR, Vault.id("door_black_opal"));
-      registerBlock(event, PAINITE_DOOR, Vault.id("door_painite"));
       registerBlock(event, ISKALLIUM_DOOR, Vault.id("door_iskallium"));
-      registerBlock(event, RENIUM_DOOR, Vault.id("door_renium"));
       registerBlock(event, GORGINITE_DOOR, Vault.id("door_gorginite"));
       registerBlock(event, SPARKLETINE_DOOR, Vault.id("door_sparkletine"));
-      registerBlock(event, WUTODIE_DOOR, Vault.id("door_wutodie"));
+      registerBlock(event, ASHIUM_DOOR, Vault.id("door_ashium"));
+      registerBlock(event, BOMIGNITE_DOOR, Vault.id("door_bomignite"));
+      registerBlock(event, FUNSOIDE_DOOR, Vault.id("door_funsoide"));
+      registerBlock(event, TUBIUM_DOOR, Vault.id("door_tubium"));
+      registerBlock(event, UPALINE_DOOR, Vault.id("door_upaline"));
+      registerBlock(event, PUFFIUM_DOOR, Vault.id("door_puffium"));
+      registerBlock(event, UNKNOWN_DOOR, Vault.id("door_unknown"));
       registerBlock(event, VAULT_RUNE_BLOCK, Vault.id("vault_rune_block"));
-      registerBlock(event, ARTIFACT_1, Vault.id("artifact_1"));
-      registerBlock(event, ARTIFACT_2, Vault.id("artifact_2"));
-      registerBlock(event, ARTIFACT_3, Vault.id("artifact_3"));
-      registerBlock(event, ARTIFACT_4, Vault.id("artifact_4"));
-      registerBlock(event, ARTIFACT_5, Vault.id("artifact_5"));
-      registerBlock(event, ARTIFACT_6, Vault.id("artifact_6"));
-      registerBlock(event, ARTIFACT_7, Vault.id("artifact_7"));
-      registerBlock(event, ARTIFACT_8, Vault.id("artifact_8"));
-      registerBlock(event, ARTIFACT_9, Vault.id("artifact_9"));
-      registerBlock(event, ARTIFACT_10, Vault.id("artifact_10"));
-      registerBlock(event, ARTIFACT_11, Vault.id("artifact_11"));
-      registerBlock(event, ARTIFACT_12, Vault.id("artifact_12"));
-      registerBlock(event, ARTIFACT_13, Vault.id("artifact_13"));
-      registerBlock(event, ARTIFACT_14, Vault.id("artifact_14"));
-      registerBlock(event, ARTIFACT_15, Vault.id("artifact_15"));
-      registerBlock(event, ARTIFACT_16, Vault.id("artifact_16"));
+      registerBlock(event, VAULT_ARTIFACT, Vault.id("vault_artifact"));
       registerBlock(event, VAULT_CRATE, Vault.id("vault_crate"));
       registerBlock(event, VAULT_CRATE_ARENA, Vault.id("vault_crate_arena"));
+      registerBlock(event, VAULT_CRATE_SCAVENGER, Vault.id("vault_crate_scavenger"));
       registerBlock(event, OBELISK, Vault.id("obelisk"));
-      registerBlock(event, MVP_CROWN, Vault.id("mvp_crown"));
-      registerBlock(event, PLAYER_STATUE, Vault.id("player_statue"));
       registerBlock(event, VENDING_MACHINE, Vault.id("vending_machine"));
       registerBlock(event, ADVANCED_VENDING_MACHINE, Vault.id("advanced_vending_machine"));
       registerBlock(event, VAULT_BEDROCK, Vault.id("vault_bedrock"));
+      registerBlock(event, VAULT_STONE, Vault.id("vault_stone"));
+      registerBlock(event, VAULT_GLASS, Vault.id("vault_glass"));
       registerBlock(event, RELIC_STATUE, Vault.id("relic_statue"));
       registerBlock(event, GIFT_NORMAL_STATUE, Vault.id("gift_normal_statue"));
       registerBlock(event, GIFT_MEGA_STATUE, Vault.id("gift_mega_statue"));
       registerBlock(event, BOW_HAT, Vault.id("bow_hat"));
       registerBlock(event, STATUE_DRAGON_HEAD, Vault.id("statue_dragon"));
       registerBlock(event, VAULT_PLAYER_LOOT_STATUE, Vault.id("vault_player_loot_statue"));
-      registerBlock(event, ARENA_PLAYER_LOOT_STATUE, Vault.id("arena_player_loot_statue"));
       registerBlock(event, CRYO_CHAMBER, Vault.id("cryo_chamber"));
-      registerBlock(event, CAPACITOR, Vault.id("capacitor"));
       registerBlock(event, KEY_PRESS, Vault.id("key_press"));
       registerBlock(event, VAULT_DIAMOND_BLOCK, Vault.id("vault_diamond_block"));
-      registerBlock(event, GLOBAL_TRADER, Vault.id("global_trader"));
       registerBlock(event, MAZE_BLOCK, Vault.id("maze_block"));
       registerBlock(event, PUZZLE_RUNE_BLOCK, Vault.id("puzzle_rune_block"));
+      registerBlock(event, YELLOW_PUZZLE_CONCRETE, Vault.id("yellow_puzzle_concrete"));
+      registerBlock(event, PINK_PUZZLE_CONCRETE, Vault.id("pink_puzzle_concrete"));
+      registerBlock(event, GREEN_PUZZLE_CONCRETE, Vault.id("green_puzzle_concrete"));
+      registerBlock(event, BLUE_PUZZLE_CONCRETE, Vault.id("blue_puzzle_concrete"));
+      registerBlock(event, OMEGA_STATUE, Vault.id("omega_statue"));
+      registerBlock(event, OMEGA_STATUE_VARIANT, Vault.id("omega_statue_variant"));
+      registerBlock(event, TROPHY_STATUE, Vault.id("trophy_statue"));
+      registerBlock(event, TRANSMOG_TABLE, Vault.id("transmog_table"));
+      registerBlock(event, VAULT_LOOT_RICHITY, Vault.id("vault_richity"));
+      registerBlock(event, VAULT_LOOT_RESOURCE, Vault.id("vault_resource"));
+      registerBlock(event, VAULT_LOOT_MISC, Vault.id("vault_misc"));
+      registerBlock(event, UNKNOWN_VAULT_CHEST, Vault.id("unknown_vault_chest"));
+      registerBlock(event, UNKNOWN_TREASURE_CHEST, Vault.id("unknown_treasure_chest"));
+      registerBlock(event, UNKNOWN_VAULT_OBJECTIVE, Vault.id("unknown_vault_objective"));
+      registerBlock(event, VAULT_CHEST, Vault.id("vault_chest"));
+      registerBlock(event, VAULT_TREASURE_CHEST, Vault.id("vault_treasure_chest"));
+      registerBlock(event, VAULT_ALTAR_CHEST, Vault.id("vault_altar_chest"));
+      registerBlock(event, VAULT_COOP_CHEST, Vault.id("vault_coop_chest"));
+      registerBlock(event, VAULT_BONUS_CHEST, Vault.id("vault_bonus_chest"));
+      registerBlock(event, XP_ALTAR, Vault.id("xp_altar"));
+      registerBlock(event, BLOOD_ALTAR, Vault.id("blood_altar"));
+      registerBlock(event, TIME_ALTAR, Vault.id("time_altar"));
+      registerBlock(event, SOUL_ALTAR, Vault.id("soul_altar"));
+      registerBlock(event, STATUE_CAULDRON, Vault.id("statue_cauldron"));
+      registerBlock(event, VOID_LIQUID_BLOCK, Vault.id("void_liquid"));
+      registerBlock(event, SCAVENGER_CHEST, Vault.id("scavenger_chest"));
+      registerBlock(event, SCAVENGER_TREASURE, Vault.id("scavenger_treasure"));
+      registerBlock(event, STABILIZER, Vault.id("stabilizer"));
+      registerBlock(event, CATALYST_DECRYPTION_TABLE, Vault.id("catalyst_decryption_table"));
    }
 
    public static void registerTileEntities(Register<TileEntityType<?>> event) {
@@ -261,26 +427,47 @@ public class ModBlocks {
       registerTileEntity(event, VAULT_RUNE_TILE_ENTITY, Vault.id("vault_rune_tile_entity"));
       registerTileEntity(event, VAULT_CRATE_TILE_ENTITY, Vault.id("vault_crate_tile_entity"));
       registerTileEntity(event, VAULT_PORTAL_TILE_ENTITY, Vault.id("vault_portal_tile_entity"));
-      registerTileEntity(event, PLAYER_STATUE_TILE_ENTITY, Vault.id("player_statue_tile_entity"));
       registerTileEntity(event, VENDING_MACHINE_TILE_ENTITY, Vault.id("vending_machine_tile_entity"));
       registerTileEntity(event, ADVANCED_VENDING_MACHINE_TILE_ENTITY, Vault.id("advanced_vending_machine_tile_entity"));
       registerTileEntity(event, RELIC_STATUE_TILE_ENTITY, Vault.id("relic_statue_tile_entity"));
       registerTileEntity(event, LOOT_STATUE_TILE_ENTITY, Vault.id("loot_statue_tile_entity"));
+      registerTileEntity(event, TROPHY_STATUE_TILE_ENTITY, Vault.id("trophy_statue_tile_entity"));
       registerTileEntity(event, CRYO_CHAMBER_TILE_ENTITY, Vault.id("cryo_chamber_tile_entity"));
-      registerTileEntity(event, CAPACITOR_TILE_ENTITY, Vault.id("capacitor_tile_entity"));
-      registerTileEntity(event, GLOBAL_TRADER_TILE_ENTITY, Vault.id("global_trader_tile_entity"));
+      registerTileEntity(event, ANCIENT_CRYO_CHAMBER_TILE_ENTITY, Vault.id("ancient_cryo_chamber_tile_entity"));
+      registerTileEntity(event, VAULT_DOOR_TILE_ENTITY, Vault.id("vault_door_tile_entity"));
+      registerTileEntity(event, VAULT_LOOTABLE_TILE_ENTITY, Vault.id("vault_lootable_tile_entity"));
+      registerTileEntity(event, VAULT_CHEST_TILE_ENTITY, Vault.id("vault_chest_tile_entity"));
+      registerTileEntity(event, VAULT_TREASURE_CHEST_TILE_ENTITY, Vault.id("vault_treasure_chest_tile_entity"));
+      registerTileEntity(event, XP_ALTAR_TILE_ENTITY, Vault.id("xp_altar_tile_entity"));
+      registerTileEntity(event, BLOOD_ALTAR_TILE_ENTITY, Vault.id("blood_altar_tile_entity"));
+      registerTileEntity(event, TIME_ALTAR_TILE_ENTITY, Vault.id("time_altar_tile_entity"));
+      registerTileEntity(event, SOUL_ALTAR_TILE_ENTITY, Vault.id("soul_altar_tile_entity"));
+      registerTileEntity(event, STATUE_CAULDRON_TILE_ENTITY, Vault.id("statue_cauldron_tile_entity"));
+      registerTileEntity(event, OBELISK_TILE_ENTITY, Vault.id("obelisk_tile_entity"));
+      registerTileEntity(event, SCAVENGER_CHEST_TILE_ENTITY, Vault.id("scavenger_chest_tile_entity"));
+      registerTileEntity(event, SCAVENGER_TREASURE_TILE_ENTITY, Vault.id("scavenger_treasure_tile_entity"));
+      registerTileEntity(event, STABILIZER_TILE_ENTITY, Vault.id("stabilizer_tile_entity"));
+      registerTileEntity(event, CATALYST_DECRYPTION_TABLE_TILE_ENTITY, Vault.id("catalyst_decryption_table_tile_entity"));
    }
 
    public static void registerTileEntityRenderers() {
       ClientRegistry.bindTileEntityRenderer(VAULT_ALTAR_TILE_ENTITY, VaultAltarRenderer::new);
       ClientRegistry.bindTileEntityRenderer(VAULT_RUNE_TILE_ENTITY, VaultRuneRenderer::new);
-      ClientRegistry.bindTileEntityRenderer(PLAYER_STATUE_TILE_ENTITY, PlayerStatueRenderer::new);
       ClientRegistry.bindTileEntityRenderer(VENDING_MACHINE_TILE_ENTITY, VendingMachineRenderer::new);
       ClientRegistry.bindTileEntityRenderer(ADVANCED_VENDING_MACHINE_TILE_ENTITY, AdvancedVendingRenderer::new);
       ClientRegistry.bindTileEntityRenderer(RELIC_STATUE_TILE_ENTITY, RelicStatueRenderer::new);
       ClientRegistry.bindTileEntityRenderer(LOOT_STATUE_TILE_ENTITY, LootStatueRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(TROPHY_STATUE_TILE_ENTITY, LootStatueRenderer::new);
       ClientRegistry.bindTileEntityRenderer(CRYO_CHAMBER_TILE_ENTITY, CryoChamberRenderer::new);
-      ClientRegistry.bindTileEntityRenderer(GLOBAL_TRADER_TILE_ENTITY, GlobalTraderRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(ANCIENT_CRYO_CHAMBER_TILE_ENTITY, CryoChamberRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(VAULT_CHEST_TILE_ENTITY, VaultChestRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(VAULT_TREASURE_CHEST_TILE_ENTITY, VaultChestRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(XP_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(BLOOD_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(TIME_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(SOUL_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(STATUE_CAULDRON_TILE_ENTITY, StatueCauldronRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(SCAVENGER_CHEST_TILE_ENTITY, ScavengerChestRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
@@ -293,59 +480,77 @@ public class ModBlocks {
       registerBlockItem(event, BLACK_OPAL_ORE);
       registerBlockItem(event, PAINITE_ORE);
       registerBlockItem(event, ISKALLIUM_ORE);
-      registerBlockItem(event, RENIUM_ORE);
       registerBlockItem(event, GORGINITE_ORE);
       registerBlockItem(event, SPARKLETINE_ORE);
       registerBlockItem(event, WUTODIE_ORE);
+      registerBlockItem(event, ASHIUM_ORE);
+      registerBlockItem(event, BOMIGNITE_ORE);
+      registerBlockItem(event, FUNSOIDE_ORE);
+      registerBlockItem(event, TUBIUM_ORE);
+      registerBlockItem(event, UPALINE_ORE);
+      registerBlockItem(event, PUFFIUM_ORE);
+      registerBlockItem(event, ECHO_ORE);
+      registerBlockItem(event, UNKNOWN_ORE);
       registerBlockItem(event, VAULT_ROCK_ORE);
-      registerTallBlockItem(event, ALEXANDRITE_DOOR);
-      registerTallBlockItem(event, BENITOITE_DOOR);
-      registerTallBlockItem(event, LARIMAR_DOOR);
-      registerTallBlockItem(event, BLACK_OPAL_DOOR);
-      registerTallBlockItem(event, PAINITE_DOOR);
       registerTallBlockItem(event, ISKALLIUM_DOOR);
-      registerTallBlockItem(event, RENIUM_DOOR);
       registerTallBlockItem(event, GORGINITE_DOOR);
       registerTallBlockItem(event, SPARKLETINE_DOOR);
-      registerTallBlockItem(event, WUTODIE_DOOR);
+      registerTallBlockItem(event, ASHIUM_DOOR);
+      registerTallBlockItem(event, BOMIGNITE_DOOR);
+      registerTallBlockItem(event, FUNSOIDE_DOOR);
+      registerTallBlockItem(event, TUBIUM_DOOR);
+      registerTallBlockItem(event, UPALINE_DOOR);
+      registerTallBlockItem(event, PUFFIUM_DOOR);
+      registerTallBlockItem(event, UNKNOWN_DOOR);
       registerBlockItem(event, VAULT_RUNE_BLOCK);
-      registerBlockItem(event, ARTIFACT_1, 1);
-      registerBlockItem(event, ARTIFACT_2, 1);
-      registerBlockItem(event, ARTIFACT_3, 1);
-      registerBlockItem(event, ARTIFACT_4, 1);
-      registerBlockItem(event, ARTIFACT_5, 1);
-      registerBlockItem(event, ARTIFACT_6, 1);
-      registerBlockItem(event, ARTIFACT_7, 1);
-      registerBlockItem(event, ARTIFACT_8, 1);
-      registerBlockItem(event, ARTIFACT_9, 1);
-      registerBlockItem(event, ARTIFACT_10, 1);
-      registerBlockItem(event, ARTIFACT_11, 1);
-      registerBlockItem(event, ARTIFACT_12, 1);
-      registerBlockItem(event, ARTIFACT_13, 1);
-      registerBlockItem(event, ARTIFACT_14, 1);
-      registerBlockItem(event, ARTIFACT_15, 1);
-      registerBlockItem(event, ARTIFACT_16, 1);
-      registerBlockItem(event, VAULT_CRATE, 1, true);
-      registerBlockItem(event, VAULT_CRATE_ARENA, 1, true);
+      registerBlockItem(event, VAULT_ARTIFACT, 1);
+      registerBlockItem(event, VAULT_CRATE, 1, Properties::func_234689_a_);
+      registerBlockItem(event, VAULT_CRATE_ARENA, 1, Properties::func_234689_a_);
+      registerBlockItem(event, VAULT_CRATE_SCAVENGER, 1, Properties::func_234689_a_);
       registerBlockItem(event, OBELISK, 1);
-      registerBlockItem(event, MVP_CROWN, 1);
-      registerBlockItem(event, PLAYER_STATUE, PLAYER_STATUE_BLOCK_ITEM);
       registerBlockItem(event, VENDING_MACHINE, VENDING_MACHINE_BLOCK_ITEM);
       registerBlockItem(event, ADVANCED_VENDING_MACHINE, ADVANCED_VENDING_BLOCK_ITEM);
       registerBlockItem(event, VAULT_BEDROCK);
+      registerBlockItem(event, VAULT_STONE);
+      registerBlockItem(event, VAULT_GLASS);
       registerBlockItem(event, RELIC_STATUE, RELIC_STATUE_BLOCK_ITEM);
       registerBlockItem(event, GIFT_NORMAL_STATUE, GIFT_NORMAL_STATUE_BLOCK_ITEM);
       registerBlockItem(event, GIFT_MEGA_STATUE, GIFT_MEGA_STATUE_BLOCK_ITEM);
       registerBlockItem(event, BOW_HAT, 1);
       registerBlockItem(event, STATUE_DRAGON_HEAD, 1);
       registerBlockItem(event, VAULT_PLAYER_LOOT_STATUE, VAULT_PLAYER_LOOT_STATUE_BLOCK_ITEM);
-      registerBlockItem(event, ARENA_PLAYER_LOOT_STATUE, ARENA_PLAYER_LOOT_STATUE_BLOCK_ITEM);
       registerBlockItem(event, CRYO_CHAMBER);
-      registerBlockItem(event, CAPACITOR);
       registerBlockItem(event, KEY_PRESS);
       registerBlockItem(event, VAULT_DIAMOND_BLOCK);
-      registerBlockItem(event, GLOBAL_TRADER, GLOBAL_TRADER_BLOCK_ITEM);
       registerBlockItem(event, PUZZLE_RUNE_BLOCK, PUZZLE_RUNE_BLOCK_ITEM);
+      registerBlockItem(event, YELLOW_PUZZLE_CONCRETE);
+      registerBlockItem(event, PINK_PUZZLE_CONCRETE);
+      registerBlockItem(event, GREEN_PUZZLE_CONCRETE);
+      registerBlockItem(event, BLUE_PUZZLE_CONCRETE);
+      registerBlockItem(event, OMEGA_STATUE, OMEGA_STATUE_BLOCK_ITEM);
+      registerBlockItem(event, OMEGA_STATUE_VARIANT, OMEGA_STATUE_VARIANT_BLOCK_ITEM);
+      registerBlockItem(event, TROPHY_STATUE, TROPHY_STATUE_BLOCK_ITEM);
+      registerBlockItem(event, TRANSMOG_TABLE);
+      registerBlockItem(event, VAULT_LOOT_RICHITY);
+      registerBlockItem(event, VAULT_LOOT_RESOURCE);
+      registerBlockItem(event, VAULT_LOOT_MISC);
+      registerBlockItem(event, UNKNOWN_VAULT_CHEST);
+      registerBlockItem(event, UNKNOWN_TREASURE_CHEST);
+      registerBlockItem(event, UNKNOWN_VAULT_OBJECTIVE);
+      registerBlockItem(event, VAULT_CHEST, VAULT_CHEST_ITEM);
+      registerBlockItem(event, VAULT_TREASURE_CHEST, VAULT_TREASURE_CHEST_ITEM);
+      registerBlockItem(event, VAULT_ALTAR_CHEST, VAULT_ALTAR_CHEST_ITEM);
+      registerBlockItem(event, VAULT_COOP_CHEST, VAULT_COOP_CHEST_ITEM);
+      registerBlockItem(event, VAULT_BONUS_CHEST, VAULT_BONUS_CHEST_ITEM);
+      registerBlockItem(event, XP_ALTAR);
+      registerBlockItem(event, BLOOD_ALTAR);
+      registerBlockItem(event, TIME_ALTAR);
+      registerBlockItem(event, SOUL_ALTAR);
+      registerBlockItem(event, STATUE_CAULDRON, 1);
+      registerBlockItem(event, SCAVENGER_CHEST, SCAVENGER_CHEST_ITEM);
+      registerBlockItem(event, SCAVENGER_TREASURE);
+      registerBlockItem(event, STABILIZER);
+      registerBlockItem(event, CATALYST_DECRYPTION_TABLE);
    }
 
    private static void registerBlock(Register<Block> event, Block block, ResourceLocation id) {
@@ -358,26 +563,29 @@ public class ModBlocks {
       event.getRegistry().register(type);
    }
 
-   private static void registerBlockItem(Register<Item> event, Block block) {
-      BlockItem blockItem = new BlockItem(block, new net.minecraft.item.Item.Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(64));
-      blockItem.setRegistryName(block.getRegistryName());
-      event.getRegistry().register(blockItem);
-   }
-
-   private static void registerBlockItem(Register<Item> event, Block block, int maxStackSize, final boolean showGlint) {
-      BlockItem blockItem = new BlockItem(block, new net.minecraft.item.Item.Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(maxStackSize)) {
+   private static void registerBlockItemWithEffect(Register<Item> event, Block block, int maxStackSize, Consumer<Properties> adjustProperties) {
+      Properties properties = new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(maxStackSize);
+      adjustProperties.accept(properties);
+      BlockItem blockItem = new BlockItem(block, properties) {
          public boolean func_77636_d(ItemStack stack) {
-            return showGlint;
+            return true;
          }
       };
-      blockItem.setRegistryName(block.getRegistryName());
-      event.getRegistry().register(blockItem);
+      registerBlockItem(event, block, blockItem);
+   }
+
+   private static void registerBlockItem(Register<Item> event, Block block) {
+      registerBlockItem(event, block, 64);
    }
 
    private static void registerBlockItem(Register<Item> event, Block block, int maxStackSize) {
-      BlockItem blockItem = new BlockItem(block, new net.minecraft.item.Item.Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(maxStackSize));
-      blockItem.setRegistryName(block.getRegistryName());
-      event.getRegistry().register(blockItem);
+      registerBlockItem(event, block, maxStackSize, properties -> {});
+   }
+
+   private static void registerBlockItem(Register<Item> event, Block block, int maxStackSize, Consumer<Properties> adjustProperties) {
+      Properties properties = new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(maxStackSize);
+      adjustProperties.accept(properties);
+      registerBlockItem(event, block, new BlockItem(block, properties));
    }
 
    private static void registerBlockItem(Register<Item> event, Block block, BlockItem blockItem) {
@@ -386,8 +594,17 @@ public class ModBlocks {
    }
 
    private static void registerTallBlockItem(Register<Item> event, Block block) {
-      TallBlockItem tallBlockItem = new TallBlockItem(block, new net.minecraft.item.Item.Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(64));
+      TallBlockItem tallBlockItem = new TallBlockItem(block, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(64));
       tallBlockItem.setRegistryName(block.getRegistryName());
       event.getRegistry().register(tallBlockItem);
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   private static class VaultStackRendererProvider implements Callable<ItemStackTileEntityRenderer> {
+      public static final ModBlocks.VaultStackRendererProvider INSTANCE = new ModBlocks.VaultStackRendererProvider();
+
+      public ItemStackTileEntityRenderer call() throws Exception {
+         return VaultISTER.INSTANCE;
+      }
    }
 }

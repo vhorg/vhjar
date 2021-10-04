@@ -3,11 +3,13 @@ package iskallia.vault.easteregg;
 import iskallia.vault.Vault;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.item.gear.VaultArmorItem;
-import iskallia.vault.skill.set.PlayerSet;
+import java.util.Arrays;
+import java.util.function.BiPredicate;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemStack;
 
 public class GrasshopperNinja {
    public static void achieve(ServerPlayerEntity playerEntity) {
@@ -16,7 +18,7 @@ public class GrasshopperNinja {
    }
 
    public static boolean isGrasshopperShape(PlayerEntity playerEntity) {
-      return PlayerSet.allMatch(
+      return allMatch(
          playerEntity,
          (slotType, itemStack) -> ModAttributes.GEAR_MODEL.getOrDefault(itemStack, -1).getValue(itemStack) == 0
             && isGrasshopperGreen(((VaultArmorItem)itemStack.func_77973_b()).func_200886_f(itemStack)),
@@ -25,6 +27,10 @@ public class GrasshopperNinja {
          EquipmentSlotType.LEGS,
          EquipmentSlotType.FEET
       );
+   }
+
+   public static boolean allMatch(PlayerEntity player, BiPredicate<EquipmentSlotType, ItemStack> predicate, EquipmentSlotType... slots) {
+      return Arrays.stream(slots).allMatch(slot -> predicate.test(slot, player.func_184582_a(slot)));
    }
 
    public static boolean isGrasshopperGreen(int color) {

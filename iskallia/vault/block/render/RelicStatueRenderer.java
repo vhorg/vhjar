@@ -3,7 +3,6 @@ package iskallia.vault.block.render;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import iskallia.vault.Vault;
-import iskallia.vault.block.PlayerStatueBlock;
 import iskallia.vault.block.RelicStatueBlock;
 import iskallia.vault.block.entity.RelicStatueTileEntity;
 import iskallia.vault.entity.model.StatuePlayerModel;
@@ -76,7 +75,7 @@ public class RelicStatueRenderer extends TileEntityRenderer<RelicStatueTileEntit
    }
 
    public void renderPlayer(MatrixStack matrixStack, BlockState blockState, IVertexBuilder vertexBuilder, int combinedLight, int combinedOverlay) {
-      Direction direction = (Direction)blockState.func_177229_b(PlayerStatueBlock.FACING);
+      Direction direction = (Direction)blockState.func_177229_b(RelicStatueBlock.FACING);
       matrixStack.func_227860_a_();
       matrixStack.func_227861_a_(0.0, 1.6, 0.0);
       matrixStack.func_227862_a_(0.4F, 0.4F, 0.4F);

@@ -3,8 +3,7 @@ package iskallia.vault.block;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.CrystalData;
-import iskallia.vault.item.ItemVaultCrystal;
+import iskallia.vault.item.crystal.CrystalData;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -154,16 +153,14 @@ public class VaultPortalSize {
       return this.bottomLeft != null && this.width >= 2 && this.width <= 21 && this.height >= 3 && this.height <= 21;
    }
 
-   public void placePortalBlocks(ItemVaultCrystal item, String playerBossName, CrystalData data) {
-      BlockState blockstate = (BlockState)((BlockState)ModBlocks.VAULT_PORTAL.func_176223_P().func_206870_a(VaultPortalBlock.field_176550_a, this.axis))
-         .func_206870_a(VaultPortalBlock.RARITY, item.getRarity().ordinal());
+   public void placePortalBlocks(CrystalData data) {
+      BlockState blockstate = (BlockState)ModBlocks.VAULT_PORTAL.func_176223_P().func_206870_a(VaultPortalBlock.field_176550_a, this.axis);
       BlockPos.func_218278_a(this.bottomLeft, this.bottomLeft.func_177967_a(Direction.UP, this.height - 1).func_177967_a(this.rightDir, this.width - 1))
          .forEach(pos -> {
             this.world.func_180501_a(pos, blockstate, 3);
             TileEntity te = this.world.func_175625_s(pos);
             if (te instanceof VaultPortalTileEntity) {
-               VaultPortalTileEntity portal = (VaultPortalTileEntity)this.world.func_175625_s(pos);
-               portal.setPlayerBossName(playerBossName);
+               VaultPortalTileEntity portal = (VaultPortalTileEntity)te;
                portal.setCrystalData(data);
             }
          });

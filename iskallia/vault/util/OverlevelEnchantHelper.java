@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -42,5 +43,13 @@ public class OverlevelEnchantHelper {
       }
 
       return enchantments;
+   }
+
+   public static ItemStack increaseFortuneBy(ItemStack itemStack, int amount) {
+      Map<Enchantment, Integer> enchantments = EnchantmentHelper.func_82781_a(itemStack);
+      int level = enchantments.getOrDefault(Enchantments.field_185308_t, 0);
+      enchantments.put(Enchantments.field_185308_t, level + amount);
+      EnchantmentHelper.func_82782_a(enchantments, itemStack);
+      return itemStack;
    }
 }

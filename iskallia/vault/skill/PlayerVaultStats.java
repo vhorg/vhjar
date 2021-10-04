@@ -21,8 +21,10 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
    private final UUID uuid;
    private int vaultLevel;
    private int exp;
-   private int unspentSkillPts;
+   private int unspentSkillPts = 5;
    private int unspentKnowledgePts;
+   private int totalSpentSkillPoints;
+   private int totalSpentKnowledgePoints;
 
    public PlayerVaultStats(UUID uuid) {
       this.uuid = uuid;
@@ -44,6 +46,14 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
       return this.unspentKnowledgePts;
    }
 
+   public int getTotalSpentSkillPoints() {
+      return this.totalSpentSkillPoints;
+   }
+
+   public int getTotalSpentKnowledgePoints() {
+      return this.totalSpentKnowledgePoints;
+   }
+
    public int getTnl() {
       return ModConfigs.LEVELS_META.getLevelMeta(this.vaultLevel).tnl;
    }
@@ -62,7 +72,10 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
       int tnl;
       while (this.exp >= (tnl = this.getTnl())) {
          this.vaultLevel++;
-         this.unspentSkillPts++;
+         if (this.vaultLevel <= 200) {
+            this.unspentSkillPts++;
+         }
+
          this.exp -= tnl;
       }
 
@@ -101,12 +114,14 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
 
    public PlayerVaultStats spendSkillPoints(MinecraftServer server, int amount) {
       this.unspentSkillPts -= amount;
+      this.totalSpentSkillPoints += amount;
       this.sync(server);
       return this;
    }
 
    public PlayerVaultStats spendKnowledgePoints(MinecraftServer server, int amount) {
       this.unspentKnowledgePts -= amount;
+      this.totalSpentKnowledgePoints += amount;
       this.sync(server);
       return this;
    }
@@ -149,6 +164,8 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
       nbt.func_74768_a("exp", this.exp);
       nbt.func_74768_a("unspentSkillPts", this.unspentSkillPts);
       nbt.func_74768_a("unspentKnowledgePts", this.unspentKnowledgePts);
+      nbt.func_74768_a("totalSpentSkillPoints", this.totalSpentSkillPoints);
+      nbt.func_74768_a("totalSpentKnowledgePoints", this.totalSpentKnowledgePoints);
       return nbt;
    }
 
@@ -157,6 +174,8 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
       this.exp = nbt.func_74762_e("exp");
       this.unspentSkillPts = nbt.func_74762_e("unspentSkillPts");
       this.unspentKnowledgePts = nbt.func_74762_e("unspentKnowledgePts");
+      this.totalSpentSkillPoints = nbt.func_74762_e("totalSpentSkillPoints");
+      this.totalSpentKnowledgePoints = nbt.func_74762_e("totalSpentKnowledgePoints");
       this.vaultLevel = nbt.func_74762_e("vaultLevel");
    }
 }

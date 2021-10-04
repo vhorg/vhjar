@@ -56,7 +56,17 @@ public class PlayerTalentsData extends WorldSavedData {
    }
 
    public PlayerTalentsData upgradeTalent(ServerPlayerEntity player, TalentNode<?> talentNode) {
-      this.getTalents(player).upgradeTalent(player.func_184102_h(), talentNode);
+      TalentTree talentTree = this.getTalents(player);
+      talentTree.upgradeTalent(player.func_184102_h(), talentNode);
+      talentTree.sync(player.func_184102_h());
+      this.func_76185_a();
+      return this;
+   }
+
+   public PlayerTalentsData downgradeTalent(ServerPlayerEntity player, TalentNode<?> talentNode) {
+      TalentTree talentTree = this.getTalents(player);
+      talentTree.downgradeTalent(player.func_184102_h(), talentNode);
+      talentTree.sync(player.func_184102_h());
       this.func_76185_a();
       return this;
    }
@@ -74,6 +84,7 @@ public class PlayerTalentsData extends WorldSavedData {
 
       TalentTree talentTree = new TalentTree(uniqueID);
       this.playerMap.put(uniqueID, talentTree);
+      talentTree.sync(player.func_184102_h());
       this.func_76185_a();
       return this;
    }
@@ -113,9 +124,9 @@ public class PlayerTalentsData extends WorldSavedData {
    public CompoundNBT func_189551_b(CompoundNBT nbt) {
       ListNBT playerList = new ListNBT();
       ListNBT talentList = new ListNBT();
-      this.playerMap.forEach((uuid, abilityTree) -> {
+      this.playerMap.forEach((uuid, talentTree) -> {
          playerList.add(StringNBT.func_229705_a_(uuid.toString()));
-         talentList.add(abilityTree.serializeNBT());
+         talentList.add(talentTree.serializeNBT());
       });
       nbt.func_218657_a("PlayerEntries", playerList);
       nbt.func_218657_a("TalentEntries", talentList);

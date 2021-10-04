@@ -1,0 +1,84 @@
+package iskallia.vault.util.calc;
+
+import iskallia.vault.aura.ActiveAura;
+import iskallia.vault.aura.AuraManager;
+import iskallia.vault.aura.type.ResistanceAuraConfig;
+import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModEffects;
+import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.skill.talent.TalentNode;
+import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.talent.type.CarapaceTalent;
+import iskallia.vault.skill.talent.type.ResistanceTalent;
+import iskallia.vault.world.data.PlayerTalentsData;
+import iskallia.vault.world.data.VaultRaidData;
+import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.influence.ResistanceInfluence;
+import java.util.function.Function;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.MathHelper;
+
+public class ResistanceHelper {
+   public static float getPlayerResistancePercent(ServerPlayerEntity player) {
+      return MathHelper.func_76131_a(getPlayerResistancePercentUnlimited(player), 0.0F, AttributeLimitHelper.getResistanceLimit(player));
+   }
+
+   public static float getPlayerResistancePercentUnlimited(ServerPlayerEntity player) {
+      float resistancePercent = 0.0F;
+      TalentTree abilities = PlayerTalentsData.get(player.func_71121_q()).getTalents(player);
+
+      for (TalentNode<?> node : abilities.getNodes()) {
+         if (node.getTalent() instanceof CarapaceTalent) {
+            CarapaceTalent talent = (CarapaceTalent)node.getTalent();
+            resistancePercent += talent.getResistanceBonus();
+         }
+
+         if (node.getTalent() instanceof ResistanceTalent) {
+            ResistanceTalent talent = (ResistanceTalent)node.getTalent();
+            resistancePercent += talent.getPercentDamageReduction();
+         }
+      }
+
+      for (ActiveAura aura : AuraManager.getInstance().getAurasAffecting(player)) {
+         if (aura.getAura() instanceof ResistanceAuraConfig) {
+            resistancePercent += ((ResistanceAuraConfig)aura.getAura()).getAdditionalResistance();
+         }
+      }
+
+      VaultRaid vault = VaultRaidData.get(player.func_71121_q()).getActiveFor(player);
+      if (vault != null) {
+         for (ResistanceInfluence influence : vault.getInfluences().getInfluences(ResistanceInfluence.class)) {
+            resistancePercent += influence.getAdditionalResistance();
+         }
+      }
+
+      return resistancePercent + getResistancePercent(player);
+   }
+
+   public static float getResistancePercent(LivingEntity entity) {
+      float resistancePercent = 0.0F;
+      resistancePercent += getGearResistanceChance(entity::func_184582_a);
+      if (entity.func_70644_a(ModEffects.RESISTANCE)) {
+         resistancePercent += (entity.func_70660_b(ModEffects.RESISTANCE).func_76458_c() + 1) / 100.0F;
+      }
+
+      return resistancePercent;
+   }
+
+   public static float getGearResistanceChance(Function<EquipmentSlotType, ItemStack> gearProvider) {
+      float resistancePercent = 0.0F;
+
+      for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+         ItemStack stack = gearProvider.apply(slot);
+         if (!(stack.func_77973_b() instanceof VaultGear) || ((VaultGear)stack.func_77973_b()).isIntendedForSlot(slot)) {
+            resistancePercent += ModAttributes.EXTRA_RESISTANCE.get(stack).map(attribute -> attribute.getValue(stack)).orElse(0.0F);
+            resistancePercent += ModAttributes.ADD_EXTRA_RESISTANCE.get(stack).map(attribute -> attribute.getValue(stack)).orElse(0.0F);
+         }
+      }
+
+      return MathHelper.func_76131_a(resistancePercent, 0.0F, 1.0F);
+   }
+}

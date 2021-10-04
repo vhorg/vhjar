@@ -6,8 +6,7 @@ import iskallia.vault.entity.ai.TeleportGoal;
 import iskallia.vault.entity.ai.TeleportRandomly;
 import iskallia.vault.entity.ai.ThrowProjectilesGoal;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.world.raid.VaultRaid;
-import java.util.Random;
+import iskallia.vault.skill.ability.effect.sub.RampageDotAbility;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -18,13 +17,10 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.BossInfo.Color;
 import net.minecraft.world.BossInfo.Overlay;
 import net.minecraft.world.server.ServerBossInfo;
-import net.minecraft.world.server.ServerWorld;
 
 public class BoogiemanEntity extends ZombieEntity implements VaultBoss {
    public TeleportRandomly<BoogiemanEntity> teleportTask = new TeleportRandomly(
@@ -38,6 +34,9 @@ public class BoogiemanEntity extends ZombieEntity implements VaultBoss {
    }
 
    protected void func_213354_a(DamageSource damageSource, boolean attackedRecently) {
+   }
+
+   protected void func_207302_dI() {
    }
 
    protected void func_175456_n() {
@@ -67,23 +66,11 @@ public class BoogiemanEntity extends ZombieEntity implements VaultBoss {
       return false;
    }
 
-   @Override
-   public void spawnInTheWorld(VaultRaid raid, ServerWorld world, BlockPos pos) {
-      this.func_70012_b(pos.func_177958_n() + 0.5, pos.func_177956_o() + 0.2, pos.func_177952_p() + 0.5, 0.0F, 0.0F);
-      world.func_217470_d(this);
-      this.func_184216_O().add("VaultBoss");
-      this.bossInfo.func_186758_d(true);
-      if (raid != null) {
-         raid.addBoss(this);
-         EntityScaler.scaleVault(this, raid.level, new Random(), EntityScaler.Type.BOSS);
-         if (raid.playerBossName != null) {
-            this.func_200203_b(new StringTextComponent(raid.playerBossName));
-         }
-      }
-   }
-
    public boolean func_70097_a(DamageSource source, float amount) {
-      if (!(source.func_76346_g() instanceof PlayerEntity) && !(source.func_76346_g() instanceof EternalEntity) && source != DamageSource.field_76380_i) {
+      if (!(source instanceof RampageDotAbility.PlayerDamageOverTimeSource)
+         && !(source.func_76346_g() instanceof PlayerEntity)
+         && !(source.func_76346_g() instanceof EternalEntity)
+         && source != DamageSource.field_76380_i) {
          return false;
       } else if (this.func_180431_b(source) || source == DamageSource.field_76379_h) {
          return false;

@@ -185,7 +185,7 @@ public class VendingMachineBlock extends Block {
                BlockState blockState = world.func_180495_p(pos);
                buffer.func_179255_a(getTileEntityPos(blockState, pos));
             });
-            return super.func_225533_a_(state, world, pos, player, hand, hit);
+            return ActionResultType.SUCCESS;
          }
       } else {
          TraderCore lastCore = machine.getLastCore();
@@ -210,7 +210,7 @@ public class VendingMachineBlock extends Block {
    @OnlyIn(Dist.CLIENT)
    public static void playOpenSound() {
       Minecraft minecraft = Minecraft.func_71410_x();
-      minecraft.func_147118_V().func_147682_a(SimpleSound.func_194007_a(ModSounds.VENDING_MACHINE_SFX, 1.0F, 1.0F));
+      minecraft.func_147118_V().func_147682_a(SimpleSound.func_194007_a(ModSounds.VENDING_MACHINE_SFX, 1.0F, 0.3F));
    }
 
    public static BlockPos getTileEntityPos(BlockState state, BlockPos pos) {

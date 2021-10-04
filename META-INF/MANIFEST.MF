@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
-Implementation-Title: Vault-public
-Implementation-Version: 1.0.3-public
+Implementation-Title: Vault-Public-Internal
+Implementation-Version: 1.0p1.8.8
 Specification-Vendor: Iskallia
 Specification-Title: TheVault
-Implementation-Timestamp: 2021-05-16T09:23:57-0500
+Implementation-Timestamp: 2021-10-04T14:05:06+0200
 MixinConnector: iskallia.vault.MixinConnector
 Specification-Version: 1
 Implementation-Vendor: Iskallia

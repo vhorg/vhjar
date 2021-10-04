@@ -1,8 +1,10 @@
 package iskallia.vault.research;
 
+import iskallia.vault.config.ResearchGroupConfig;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ResearchTreeMessage;
+import iskallia.vault.research.group.ResearchGroup;
 import iskallia.vault.research.type.Research;
 import iskallia.vault.util.NetcodeUtils;
 import java.util.LinkedList;
@@ -40,6 +42,22 @@ public class ResearchTree implements INBTSerializable<CompoundNBT> {
 
    public void resetAll() {
       this.researchesDone.clear();
+   }
+
+   public int getResearchCost(Research research) {
+      float cost = research.getCost();
+      ResearchGroupConfig config = ModConfigs.RESEARCH_GROUPS;
+      ResearchGroup thisGroup = config.getResearchGroup(research);
+      String thisGroupId = config.getResearchGroupId(thisGroup);
+
+      for (String doneResearch : this.getResearchesDone()) {
+         ResearchGroup otherGroup = config.getResearchGroup(doneResearch);
+         if (otherGroup != null) {
+            cost += otherGroup.getGroupIncreasedResearchCost(thisGroupId);
+         }
+      }
+
+      return Math.max(1, Math.round(cost));
    }
 
    public String restrictedBy(Item item, Restrictions.Type restrictionType) {

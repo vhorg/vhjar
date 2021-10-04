@@ -6,12 +6,14 @@ import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class MathUtilities {
+   private static final Random rand = new Random();
+
    public static float randomFloat(float min, float max) {
-      return new Random().nextFloat() * (max - min) + min;
+      return min >= max ? min : min + rand.nextFloat() * (max - min);
    }
 
    public static int getRandomInt(int min, int max) {
-      return (int)(Math.random() * (max - min) + min);
+      return min >= max ? min : min + rand.nextInt(max - min);
    }
 
    public static double map(double value, double x0, double y0, double x1, double y1) {

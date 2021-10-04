@@ -1,7 +1,6 @@
 package iskallia.vault.block;
 
 import iskallia.vault.container.KeyPressContainer;
-import iskallia.vault.init.ModBlocks;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -12,14 +11,12 @@ import net.minecraft.block.AbstractBlock.Properties;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.entity.item.FallingBlockEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.PathType;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.Property;
@@ -84,7 +81,7 @@ public class KeyPressBlock extends FallingBlock {
             public Container createMenu(int windowId, PlayerInventory inventory, PlayerEntity playerx) {
                return new KeyPressContainer(windowId, playerx);
             }
-         }, buffer -> {});
+         });
          return ActionResultType.SUCCESS;
       }
    }
@@ -120,15 +117,5 @@ public class KeyPressBlock extends FallingBlock {
    @OnlyIn(Dist.CLIENT)
    public int func_189876_x(BlockState state, IBlockReader reader, BlockPos pos) {
       return state.func_185909_g(reader, pos).field_76291_p;
-   }
-
-   public void func_196243_a(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-      if (!worldIn.field_72995_K) {
-         if (newState.func_196958_f()) {
-            ItemEntity entity = new ItemEntity(worldIn, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), new ItemStack(ModBlocks.KEY_PRESS));
-            worldIn.func_217376_c(entity);
-            super.func_196243_a(state, worldIn, pos, newState, isMoving);
-         }
-      }
    }
 }

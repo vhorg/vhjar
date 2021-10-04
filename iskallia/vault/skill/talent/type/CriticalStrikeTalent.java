@@ -1,7 +1,6 @@
 package iskallia.vault.skill.talent.type;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.world.data.PlayerTalentsData;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -29,13 +28,16 @@ public class CriticalStrikeTalent extends PlayerTalent {
 
    @SubscribeEvent
    public static void onCriticalHit(CriticalHitEvent event) {
-      if (!event.getEntity().field_70170_p.field_72995_K) {
+      if (!event.getEntity().field_70170_p.func_201670_d()) {
          ServerPlayerEntity player = (ServerPlayerEntity)event.getPlayer();
-         TalentTree abilities = PlayerTalentsData.get(player.func_71121_q()).getTalents(player);
+         TalentTree talents = PlayerTalentsData.get(player.func_71121_q()).getTalents(player);
 
-         for (TalentNode<?> node : abilities.getNodes()) {
-            if (node.getTalent() instanceof CriticalStrikeTalent
-               && player.field_70170_p.field_73012_v.nextFloat() < ((CriticalStrikeTalent)node.getTalent()).getChance()) {
+         for (CriticalStrikeTalent criticalStrikeTalent : talents.getTalents(CriticalStrikeTalent.class)) {
+            if (player.field_70170_p.field_73012_v.nextFloat() < criticalStrikeTalent.getChance()) {
+               if (event.getDamageModifier() < 1.5F) {
+                  event.setDamageModifier(1.5F);
+               }
+
                event.setResult(Result.ALLOW);
                return;
             }

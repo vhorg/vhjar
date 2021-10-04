@@ -1,5 +1,6 @@
 package iskallia.vault.container;
 
+import iskallia.vault.block.entity.VaultCrateTileEntity;
 import iskallia.vault.init.ModContainers;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -7,6 +8,8 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -18,15 +21,16 @@ public class VaultCrateContainer extends Container {
    public IItemHandler crateInventory;
    private PlayerEntity playerEntity;
    private IItemHandler playerInventory;
-   private TileEntity tileEntity;
+   private BlockPos tilePos;
 
    public VaultCrateContainer(int windowId, World world, BlockPos pos, PlayerInventory playerInventory, PlayerEntity player) {
       super(ModContainers.VAULT_CRATE_CONTAINER, windowId);
-      this.tileEntity = world.func_175625_s(pos);
       this.playerEntity = player;
       this.playerInventory = new InvWrapper(playerInventory);
-      if (this.tileEntity != null) {
-         this.tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
+      this.tilePos = pos;
+      TileEntity tileEntity = world.func_175625_s(pos);
+      if (tileEntity != null) {
+         tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
             this.crateInventory = h;
             int i = 36;
 
@@ -47,6 +51,10 @@ public class VaultCrateContainer extends Container {
             }
          });
       }
+   }
+
+   public BlockPos getTilePos() {
+      return this.tilePos;
    }
 
    public ItemStack func_82846_b(PlayerEntity playerIn, int index) {
@@ -74,7 +82,10 @@ public class VaultCrateContainer extends Container {
    }
 
    public boolean func_75145_c(PlayerEntity player) {
-      return true;
+      World world = player.func_130014_f_();
+      return !(world.func_175625_s(this.tilePos) instanceof VaultCrateTileEntity)
+         ? false
+         : player.func_70092_e(this.tilePos.func_177958_n() + 0.5, this.tilePos.func_177956_o() + 0.5, this.tilePos.func_177952_p() + 0.5) <= 64.0;
    }
 
    private int addSlotBox(IItemHandler handler, int index, int x, int y, int horAmount, int dx, int verAmount, int dy) {
@@ -94,5 +105,13 @@ public class VaultCrateContainer extends Container {
       }
 
       return index;
+   }
+
+   public void func_75134_a(PlayerEntity player) {
+      super.func_75134_a(player);
+      player.field_70170_p
+         .func_184148_a(
+            null, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), SoundEvents.field_219601_N, SoundCategory.BLOCKS, 1.0F, 1.0F
+         );
    }
 }

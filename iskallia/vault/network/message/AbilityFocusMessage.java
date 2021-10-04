@@ -1,33 +1,37 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
+import iskallia.vault.client.ClientAbilityData;
+import iskallia.vault.skill.ability.AbilityGroup;
 import java.util.function.Supplier;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
 public class AbilityFocusMessage {
-   public int focusedIndex;
+   private final String selectedAbility;
 
-   public AbilityFocusMessage() {
+   public AbilityFocusMessage(AbilityGroup<?, ?> ability) {
+      this(ability.getParentName());
    }
 
-   public AbilityFocusMessage(int focusedIndex) {
-      this.focusedIndex = focusedIndex;
+   public AbilityFocusMessage(String selectedAbility) {
+      this.selectedAbility = selectedAbility;
+   }
+
+   public String getSelectedAbility() {
+      return this.selectedAbility;
    }
 
    public static void encode(AbilityFocusMessage message, PacketBuffer buffer) {
-      buffer.writeInt(message.focusedIndex);
+      buffer.func_180714_a(message.selectedAbility);
    }
 
    public static AbilityFocusMessage decode(PacketBuffer buffer) {
-      AbilityFocusMessage message = new AbilityFocusMessage();
-      message.focusedIndex = buffer.readInt();
-      return message;
+      return new AbilityFocusMessage(buffer.func_150789_c(32767));
    }
 
    public static void handle(AbilityFocusMessage message, Supplier<Context> contextSupplier) {
       Context context = contextSupplier.get();
-      context.enqueueWork(() -> AbilitiesOverlay.focusedIndex = message.focusedIndex);
+      context.enqueueWork(() -> ClientAbilityData.updateSelectedAbility(message));
       context.setPacketHandled(true);
    }
 }

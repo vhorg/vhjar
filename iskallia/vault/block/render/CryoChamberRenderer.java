@@ -4,9 +4,12 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import iskallia.vault.Vault;
 import iskallia.vault.block.CryoChamberBlock;
-import iskallia.vault.block.PlayerStatueBlock;
+import iskallia.vault.block.entity.AncientCryoChamberTileEntity;
 import iskallia.vault.block.entity.CryoChamberTileEntity;
-import iskallia.vault.entity.EternalData;
+import iskallia.vault.client.ClientEternalData;
+import iskallia.vault.client.util.LightmapUtil;
+import iskallia.vault.client.util.ShaderUtil;
+import iskallia.vault.entity.eternal.EternalDataSnapshot;
 import iskallia.vault.entity.model.StatuePlayerModel;
 import iskallia.vault.init.ModConfigs;
 import java.awt.Color;
@@ -16,6 +19,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.IRenderTypeBuffer.Impl;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -38,6 +42,7 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
+import org.lwjgl.opengl.ARBShaderObjects;
 
 public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntity> {
    public static final Minecraft mc = Minecraft.func_71410_x();
@@ -76,29 +81,70 @@ public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntit
          float scale = Math.min(1.0F - tileEntity.getGrowEternalTimeRemaining() / maxTime, 0.85F);
          IVertexBuilder vertexBuilder = this.getPlayerVertexBuilder(INFUSED_PLAYER_SKIN, buffer);
          this.renderPlayerModel(matrixStack, tileEntity, scale, 0.5F, vertexBuilder, combinedLight, combinedOverlay);
-      } else if (tileEntity.getEternalName() != null && !tileEntity.getEternalName().isEmpty()) {
+      } else if (tileEntity.getEternalId() != null) {
+         EternalDataSnapshot snapshot = ClientEternalData.getSnapshot(tileEntity.getEternalId());
+         if (snapshot != null && snapshot.getName() != null) {
+            tileEntity.updateSkin();
+            if (buffer instanceof Impl) {
+               ((Impl)buffer).func_228461_a_();
+            }
+
+            if (!snapshot.isAlive()) {
+               ShaderUtil.useShader(ShaderUtil.GRAYSCALE_SHADER, () -> {
+                  int grayScaleFactor = ShaderUtil.getUniformLocation(ShaderUtil.GRAYSCALE_SHADER, "grayFactor");
+                  ARBShaderObjects.glUniform1fARB(grayScaleFactor, 0.0F);
+                  float brightness = LightmapUtil.getLightmapBrightness(combinedLight);
+                  int brightnessFactor = ShaderUtil.getUniformLocation(ShaderUtil.GRAYSCALE_SHADER, "brightness");
+                  ARBShaderObjects.glUniform1fARB(brightnessFactor, brightness);
+               });
+            }
+
+            ResourceLocation skinTexture = tileEntity.getSkin().getLocationSkin();
+            IVertexBuilder vertexBuilder = this.getPlayerVertexBuilder(skinTexture, buffer);
+            this.renderPlayerModel(matrixStack, tileEntity, 0.85F, 1.0F, vertexBuilder, combinedLight, combinedOverlay);
+            if (buffer instanceof Impl) {
+               ((Impl)buffer).func_228461_a_();
+            }
+
+            if (!snapshot.isAlive()) {
+               ShaderUtil.releaseShader();
+            }
+         }
+      } else if (tileEntity instanceof AncientCryoChamberTileEntity) {
          tileEntity.updateSkin();
-         ResourceLocation skinTexture = tileEntity.getSkin().getLocationSkin();
-         IVertexBuilder vertexBuilder = this.getPlayerVertexBuilder(skinTexture, buffer);
-         this.renderPlayerModel(matrixStack, tileEntity, 0.85F, 1.0F, vertexBuilder, combinedLight, combinedOverlay);
+         ResourceLocation skinTexturex = tileEntity.getSkin().getLocationSkin();
+         IVertexBuilder vertexBuilderx = this.getPlayerVertexBuilder(skinTexturex, buffer);
+         this.renderPlayerModel(matrixStack, tileEntity, 0.85F, 1.0F, vertexBuilderx, combinedLight, combinedOverlay);
+         if (buffer instanceof Impl) {
+            ((Impl)buffer).func_228461_a_();
+         }
       }
 
       this.renderArmor(matrixStack, tileEntity, buffer, combinedOverlay);
       this.renderLiquid(matrixStack, tileEntity, buffer, partialTicks);
-      if (mc.field_71476_x != null
-         && mc.field_71476_x.func_216346_c() == Type.BLOCK
-         && tileEntity.getEternal() != null
-         && tileEntity.getEternal().getName() != null) {
-         BlockRayTraceResult result = (BlockRayTraceResult)mc.field_71476_x;
-         if (tileEntity.func_174877_v().equals(result.func_216350_a()) || tileEntity.func_174877_v().func_177984_a().equals(result.func_216350_a())) {
-            this.renderLabel(
-               matrixStack,
-               buffer,
-               combinedLight,
-               new StringTextComponent(tileEntity.getEternal().getName()),
-               -1,
-               tileEntity.func_145831_w().func_180495_p(result.func_216350_a()).func_177229_b(CryoChamberBlock.HALF) == DoubleBlockHalf.UPPER
-            );
+      if (mc.field_71476_x != null && mc.field_71476_x.func_216346_c() == Type.BLOCK) {
+         String eternalName = null;
+         EternalDataSnapshot snapshot = ClientEternalData.getSnapshot(tileEntity.getEternalId());
+         if (snapshot != null && snapshot.getName() != null) {
+            eternalName = snapshot.getName();
+         }
+
+         if (tileEntity instanceof AncientCryoChamberTileEntity) {
+            eternalName = ((AncientCryoChamberTileEntity)tileEntity).getEternalName();
+         }
+
+         if (eternalName != null) {
+            BlockRayTraceResult result = (BlockRayTraceResult)mc.field_71476_x;
+            if (tileEntity.func_174877_v().equals(result.func_216350_a()) || tileEntity.func_174877_v().func_177984_a().equals(result.func_216350_a())) {
+               this.renderLabel(
+                  matrixStack,
+                  buffer,
+                  combinedLight,
+                  new StringTextComponent(eternalName),
+                  -1,
+                  tileEntity.func_145831_w().func_180495_p(result.func_216350_a()).func_177229_b(CryoChamberBlock.HALF) == DoubleBlockHalf.UPPER
+               );
+            }
          }
       }
    }
@@ -123,7 +169,7 @@ public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntit
       MatrixStack matrixStack, CryoChamberTileEntity tileEntity, float scale, float alpha, IVertexBuilder vertexBuilder, int combinedLight, int combinedOverlay
    ) {
       BlockState blockState = tileEntity.func_195044_w();
-      Direction direction = (Direction)blockState.func_177229_b(PlayerStatueBlock.FACING);
+      Direction direction = (Direction)blockState.func_177229_b(CryoChamberBlock.FACING);
       matrixStack.func_227860_a_();
       matrixStack.func_227861_a_(0.5, 1.3, 0.5);
       matrixStack.func_227862_a_(scale, scale, scale);
@@ -148,16 +194,18 @@ public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntit
    }
 
    public void renderArmor(MatrixStack matrixStack, CryoChamberTileEntity tileEntity, IRenderTypeBuffer buffer, int combinedOverlay) {
-      if (tileEntity.getEternal() != null) {
-         BlockState blockState = tileEntity.func_195044_w();
-         Direction direction = (Direction)blockState.func_177229_b(CryoChamberBlock.FACING);
-         int lightLevel = this.getLightAtPos(tileEntity.func_145831_w(), tileEntity.func_174877_v().func_177984_a());
-         EternalData eternalData = tileEntity.getEternal();
+      if (tileEntity.getEternalId() != null) {
+         EternalDataSnapshot snapshot = ClientEternalData.getSnapshot(tileEntity.getEternalId());
+         if (snapshot != null) {
+            BlockState blockState = tileEntity.func_195044_w();
+            Direction direction = (Direction)blockState.func_177229_b(CryoChamberBlock.FACING);
+            int lightLevel = this.getLightAtPos(tileEntity.func_145831_w(), tileEntity.func_174877_v().func_177984_a());
 
-         for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-            ItemStack stack = eternalData.getStack(slot);
-            if (!stack.func_190926_b()) {
-               this.renderItem(stack, matrixStack, buffer, combinedOverlay, lightLevel, direction, slot);
+            for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+               ItemStack stack = snapshot.getEquipment(slot);
+               if (!stack.func_190926_b()) {
+                  this.renderItem(stack, matrixStack, buffer, combinedOverlay, lightLevel, direction, slot);
+               }
             }
          }
       }
@@ -237,13 +285,13 @@ public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntit
             .func_228015_a_(PlayerContainer.field_226615_c_)
             .apply(Fluids.field_204546_a.getAttributes().getStillTexture());
          BlockState blockState = tileEntity.func_195044_w();
-         Direction direction = (Direction)blockState.func_177229_b(PlayerStatueBlock.FACING);
+         Direction direction = (Direction)blockState.func_177229_b(CryoChamberBlock.FACING);
          float max = tileEntity.getMaxCores();
          float difference = tileEntity.getCoreCount() - tileEntity.lastCoreCount;
          tileEntity.lastCoreCount += difference * 0.02F;
          float scale = tileEntity.lastCoreCount / max;
          this.updateIndex(mc.field_71439_g.field_70173_aa);
-         this.updateColor(partialTicks);
+         this.updateColor(partialTicks, tileEntity);
          float r = this.currentColor.getRed() / 255.0F;
          float g = this.currentColor.getGreen() / 255.0F;
          float b = this.currentColor.getBlue() / 255.0F;
@@ -389,13 +437,17 @@ public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntit
       }
    }
 
-   private void updateColor(float partialTicks) {
-      int nextIndex = this.index + 1;
-      if (nextIndex == this.colors.length) {
-         nextIndex = 0;
-      }
+   private void updateColor(float partialTicks, CryoChamberTileEntity tileEntity) {
+      if (tileEntity.func_195044_w().func_177229_b(CryoChamberBlock.CHAMBER_STATE) == CryoChamberBlock.ChamberState.RUSTY) {
+         this.currentColor = new Color(139, 69, 19);
+      } else {
+         int nextIndex = this.index + 1;
+         if (nextIndex == this.colors.length) {
+            nextIndex = 0;
+         }
 
-      this.currentColor = this.getBlendedColor(this.colors[this.index], this.colors[nextIndex], partialTicks);
+         this.currentColor = this.getBlendedColor(this.colors[this.index], this.colors[nextIndex], partialTicks);
+      }
    }
 
    private Color getBlendedColor(Color prev, Color next, float partialTicks) {

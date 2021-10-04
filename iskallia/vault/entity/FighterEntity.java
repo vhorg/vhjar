@@ -3,8 +3,8 @@ package iskallia.vault.entity;
 import iskallia.vault.entity.ai.ThrowProjectilesGoal;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.FighterSizeMessage;
+import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.SkinProfile;
-import java.lang.reflect.Field;
 import java.util.regex.Pattern;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
@@ -35,6 +35,8 @@ import net.minecraft.world.BossInfo.Color;
 import net.minecraft.world.BossInfo.Overlay;
 import net.minecraft.world.server.ServerBossInfo;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 public class FighterEntity extends ZombieEntity {
@@ -67,6 +69,7 @@ public class FighterEntity extends ZombieEntity {
       this.func_200203_b(new StringTextComponent(this.lastName));
    }
 
+   @OnlyIn(Dist.CLIENT)
    public ResourceLocation getLocationSkin() {
       return this.skin.getLocationSkin();
    }
@@ -148,15 +151,7 @@ public class FighterEntity extends ZombieEntity {
    }
 
    public EntitySize func_213305_a(Pose pose) {
-      Field sizeField = Entity.class.getDeclaredFields()[79];
-      sizeField.setAccessible(true);
-
-      try {
-         return (EntitySize)sizeField.get(this);
-      } catch (IllegalAccessException var4) {
-         var4.printStackTrace();
-         return super.func_213305_a(pose);
-      }
+      return this.field_213325_aI;
    }
 
    public float getSizeMultiplier() {
@@ -164,17 +159,9 @@ public class FighterEntity extends ZombieEntity {
    }
 
    public FighterEntity changeSize(float m) {
-      Field sizeField = Entity.class.getDeclaredFields()[79];
-      sizeField.setAccessible(true);
-
-      try {
-         sizeField.set(this, this.func_213305_a(Pose.STANDING).func_220313_a(this.sizeMultiplier = m));
-      } catch (IllegalAccessException var4) {
-         var4.printStackTrace();
-      }
-
-      this.func_213323_x_();
-      if (!this.field_70170_p.field_72995_K) {
+      this.sizeMultiplier = m;
+      EntityHelper.changeSize(this, this.sizeMultiplier);
+      if (!this.field_70170_p.func_201670_d()) {
          ModNetwork.CHANNEL.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new FighterSizeMessage(this, this.sizeMultiplier));
       }
 

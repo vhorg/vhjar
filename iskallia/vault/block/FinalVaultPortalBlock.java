@@ -1,14 +1,5 @@
 package iskallia.vault.block;
 
-import iskallia.vault.Vault;
-import iskallia.vault.block.entity.VaultPortalTileEntity;
-import iskallia.vault.init.ModBlocks;
-import iskallia.vault.item.CrystalData;
-import iskallia.vault.util.VaultRarity;
-import iskallia.vault.world.data.VaultRaidData;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -18,23 +9,15 @@ import net.minecraft.block.AbstractBlock.Properties;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.RegistryKey;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
-import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
@@ -88,11 +71,7 @@ public class FinalVaultPortalBlock extends NetherPortalBlock {
    }
 
    public boolean hasTileEntity(BlockState state) {
-      return true;
-   }
-
-   public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-      return ModBlocks.VAULT_PORTAL_TILE_ENTITY.func_200968_a();
+      return false;
    }
 
    public void func_225542_b_(BlockState state, ServerWorld world, BlockPos pos, Random random) {
@@ -107,13 +86,14 @@ public class FinalVaultPortalBlock extends NetherPortalBlock {
       if (world != null && world.func_234923_W_() == World.field_234918_g_) {
          Axis direction$axis = facing.func_176740_k();
          Axis direction$axis1 = (Axis)stateIn.func_177229_b(field_176550_a);
-         boolean flag = direction$axis1 != direction$axis && direction$axis.func_176722_c();
-         return !flag && !facingState.func_203425_a(this) && !new VaultPortalSize(worldIn, currentPos, direction$axis1).validatePortal()
-            ? Blocks.field_150350_a.func_176223_P()
-            : super.func_196271_a(stateIn, facing, facingState, worldIn, currentPos, facingPos);
-      } else {
-         return stateIn;
+         if (direction$axis1 != direction$axis && direction$axis.func_176722_c()) {
+            boolean var11 = true;
+         } else {
+            boolean var10000 = false;
+         }
       }
+
+      return stateIn;
    }
 
    public void func_196262_a(BlockState state, World world, BlockPos pos, Entity entity) {
@@ -123,45 +103,6 @@ public class FinalVaultPortalBlock extends NetherPortalBlock {
             VoxelShape playerVoxel = VoxelShapes.func_197881_a(
                player.func_174813_aQ().func_72317_d(-pos.func_177958_n(), -pos.func_177956_o(), -pos.func_177952_p())
             );
-            VaultPortalTileEntity portal = this.getPortalTileEntity(world, pos);
-            String playerBossName = portal == null ? "" : portal.getPlayerBossName();
-            if (VoxelShapes.func_197879_c(playerVoxel, state.func_196954_c(world, pos), IBooleanFunction.field_223238_i_)) {
-               RegistryKey<World> worldKey = world.func_234923_W_() == Vault.VAULT_KEY ? World.field_234918_g_ : Vault.VAULT_KEY;
-               ServerWorld destination = ((ServerWorld)world).func_73046_m().func_71218_a(worldKey);
-               if (destination == null) {
-                  return;
-               }
-
-               if (player.func_242280_ah()) {
-                  player.func_242279_ag();
-                  return;
-               }
-
-               world.func_73046_m()
-                  .func_222817_e(
-                     () -> {
-                        if (worldKey == World.field_234918_g_) {
-                           ServerPlayerEntity playerEntity = (ServerPlayerEntity)entity;
-                           StringTextComponent text = new StringTextComponent("Ha! No...");
-                           text.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16711680)));
-                           playerEntity.func_146105_b(text, true);
-                        } else if (worldKey == Vault.VAULT_KEY) {
-                           List<ServerPlayerEntity> players = new ArrayList<>(world.func_73046_m().func_184103_al().func_181057_v());
-                           if (portal.getData() == null) {
-                              portal.setCrystalData(new CrystalData(ItemStack.field_190927_a));
-                           }
-
-                           VaultRaidData.get(destination)
-                              .startNew(players, Collections.emptyList(), VaultRarity.OMEGA.ordinal(), playerBossName, portal.getData(), true);
-                        }
-                     }
-                  );
-               if (worldKey == Vault.VAULT_KEY) {
-                  world.func_175656_a(pos, Blocks.field_150350_a.func_176223_P());
-               }
-
-               player.func_242279_ag();
-            }
          }
       }
    }
@@ -190,10 +131,5 @@ public class FinalVaultPortalBlock extends NetherPortalBlock {
 
    protected void func_206840_a(Builder<Block, BlockState> builder) {
       super.func_206840_a(builder);
-   }
-
-   private VaultPortalTileEntity getPortalTileEntity(World worldIn, BlockPos pos) {
-      TileEntity te = worldIn.func_175625_s(pos);
-      return te instanceof VaultPortalTileEntity ? (VaultPortalTileEntity)te : null;
    }
 }

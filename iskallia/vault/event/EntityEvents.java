@@ -1,74 +1,75 @@
 package iskallia.vault.event;
 
 import iskallia.vault.Vault;
-import iskallia.vault.block.VaultCrateBlock;
+import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.VaultDoorBlock;
-import iskallia.vault.block.item.LootStatueBlockItem;
-import iskallia.vault.entity.EntityScaler;
+import iskallia.vault.config.ScavengerHuntConfig;
+import iskallia.vault.entity.AggressiveCowEntity;
+import iskallia.vault.entity.EffectCloudEntity;
 import iskallia.vault.entity.EternalEntity;
-import iskallia.vault.entity.FighterEntity;
+import iskallia.vault.entity.TreasureGoblinEntity;
 import iskallia.vault.entity.VaultFighterEntity;
 import iskallia.vault.entity.VaultGuardianEntity;
 import iskallia.vault.init.ModAttributes;
-import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.ItemTraderCore;
+import iskallia.vault.item.BasicScavengerItem;
+import iskallia.vault.item.ItemShardPouch;
+import iskallia.vault.item.ItemVaultRaffleSeal;
+import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.item.gear.VaultGear;
-import iskallia.vault.util.StatueType;
-import iskallia.vault.world.data.EternalsData;
+import iskallia.vault.skill.talent.TalentNode;
+import iskallia.vault.skill.talent.type.EffectTalent;
+import iskallia.vault.skill.talent.type.SoulShardTalent;
+import iskallia.vault.util.MiscUtils;
+import iskallia.vault.util.PlayerFilter;
+import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
-import iskallia.vault.world.gen.PortalPlacer;
-import iskallia.vault.world.raid.VaultRaid;
+import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
+import iskallia.vault.world.vault.modifier.CurseOnHitModifier;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.DoorBlock;
-import net.minecraft.entity.AreaEffectCloudEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.merchant.villager.VillagerTrades.ITrade;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.LootContext.Builder;
-import net.minecraft.network.play.server.STitlePacket;
-import net.minecraft.network.play.server.STitlePacket.Type;
-import net.minecraft.state.properties.DoubleBlockHalf;
-import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.item.MerchantOffer;
+import net.minecraft.item.ShieldItem;
+import net.minecraft.item.TippedArrowItem;
+import net.minecraft.potion.PotionUtils;
+import net.minecraft.potion.Potions;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.concurrent.TickDelayedTask;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.CheckSpawn;
+import net.minecraftforge.event.village.VillagerTradesEvent;
+import net.minecraftforge.event.world.BlockEvent.BreakEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
@@ -76,271 +77,75 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
    bus = Bus.FORGE
 )
 public class EntityEvents {
-   @SubscribeEvent
-   public static void onEntityTick(LivingUpdateEvent event) {
-      if (!event.getEntity().field_70170_p.field_72995_K
-         && event.getEntity() instanceof MonsterEntity
-         && !(event.getEntity() instanceof EternalEntity)
-         && event.getEntity().field_70170_p.func_234923_W_() == Vault.VAULT_KEY
-         && !event.getEntity().func_184216_O().contains("VaultScaled")) {
-         MonsterEntity entity = (MonsterEntity)event.getEntity();
-         VaultRaid raid = VaultRaidData.get((ServerWorld)entity.field_70170_p).getAt(entity.func_233580_cy_());
-         if (raid != null) {
-            EntityScaler.scaleVault(entity, raid.level, new Random(), EntityScaler.Type.MOB);
-            entity.func_184216_O().add("VaultScaled");
-            entity.func_110163_bv();
-         }
-      }
-   }
+   private static final Random rand = new Random();
 
    @SubscribeEvent
-   public static void onEntityTick2(LivingUpdateEvent event) {
-      if (!event.getEntity().field_70170_p.field_72995_K && event.getEntity() instanceof FighterEntity) {
-         ((FighterEntity)event.getEntity()).func_110163_bv();
-      }
-   }
+   public static void onTradesLoad(VillagerTradesEvent event) {
+      ObjectIterator var1 = event.getTrades().values().iterator();
 
-   @SubscribeEvent
-   public static void onEntityTick3(EntityConstructing event) {
-      if (!event.getEntity().field_70170_p.field_72995_K
-         && event.getEntity() instanceof AreaEffectCloudEntity
-         && event.getEntity().field_70170_p.func_234923_W_() == Vault.VAULT_KEY) {
-         event.getEntity()
-            .func_184102_h()
-            .func_212871_a_(
-               new TickDelayedTask(
-                  event.getEntity().func_184102_h().func_71259_af() + 2,
-                  () -> {
-                     if (event.getEntity().func_184216_O().contains("vault_door")) {
-                        for (int ox = -1; ox <= 1; ox++) {
-                           for (int oz = -1; oz <= 1; oz++) {
-                              BlockPos pos = event.getEntity().func_233580_cy_().func_177982_a(ox, 0, oz);
-                              BlockState state = event.getEntity().field_70170_p.func_180495_p(pos);
-                              if (state.func_177230_c() == Blocks.field_150454_av) {
-                                 BlockState newState = (BlockState)((BlockState)((BlockState)((BlockState)((BlockState)VaultDoorBlock.VAULT_DOORS
-                                                .get(event.getEntity().field_70170_p.field_73012_v.nextInt(VaultDoorBlock.VAULT_DOORS.size()))
-                                                .func_176223_P()
-                                                .func_206870_a(DoorBlock.field_176520_a, state.func_177229_b(DoorBlock.field_176520_a)))
-                                             .func_206870_a(DoorBlock.field_176519_b, state.func_177229_b(DoorBlock.field_176519_b)))
-                                          .func_206870_a(DoorBlock.field_176521_M, state.func_177229_b(DoorBlock.field_176521_M)))
-                                       .func_206870_a(DoorBlock.field_176522_N, state.func_177229_b(DoorBlock.field_176522_N)))
-                                    .func_206870_a(DoorBlock.field_176523_O, state.func_177229_b(DoorBlock.field_176523_O));
-                                 PortalPlacer placer = new PortalPlacer(
-                                    (pos1, random, facing) -> null, (pos1, random, facing) -> Blocks.field_150357_h.func_176223_P()
-                                 );
-                                 placer.place(
-                                    event.getEntity().field_70170_p, pos, ((Direction)state.func_177229_b(DoorBlock.field_176520_a)).func_176735_f(), 1, 2
-                                 );
-                                 placer.place(
-                                    event.getEntity().field_70170_p,
-                                    pos.func_177972_a(((Direction)state.func_177229_b(DoorBlock.field_176520_a)).func_176734_d()),
-                                    ((Direction)state.func_177229_b(DoorBlock.field_176520_a)).func_176735_f(),
-                                    1,
-                                    2
-                                 );
-                                 placer.place(
-                                    event.getEntity().field_70170_p,
-                                    pos.func_177967_a(((Direction)state.func_177229_b(DoorBlock.field_176520_a)).func_176734_d(), 2),
-                                    ((Direction)state.func_177229_b(DoorBlock.field_176520_a)).func_176735_f(),
-                                    1,
-                                    2
-                                 );
-                                 placer.place(
-                                    event.getEntity().field_70170_p,
-                                    pos.func_177972_a((Direction)state.func_177229_b(DoorBlock.field_176520_a)),
-                                    ((Direction)state.func_177229_b(DoorBlock.field_176520_a)).func_176735_f(),
-                                    1,
-                                    2
-                                 );
-                                 placer.place(
-                                    event.getEntity().field_70170_p,
-                                    pos.func_177967_a((Direction)state.func_177229_b(DoorBlock.field_176520_a), 2),
-                                    ((Direction)state.func_177229_b(DoorBlock.field_176520_a)).func_176735_f(),
-                                    1,
-                                    2
-                                 );
-                                 event.getEntity().field_70170_p.func_180501_a(pos.func_177984_a(), Blocks.field_150350_a.func_176223_P(), 27);
-                                 event.getEntity().field_70170_p.func_180501_a(pos, newState, 11);
-                                 event.getEntity()
-                                    .field_70170_p
-                                    .func_180501_a(pos.func_177984_a(), (BlockState)newState.func_206870_a(DoorBlock.field_176523_O, DoubleBlockHalf.UPPER), 11);
+      while (var1.hasNext()) {
+         List<ITrade> trades = (List<ITrade>)var1.next();
+         trades.removeIf(trade -> {
+            try {
+               MerchantOffer offer = trade.func_221182_a(null, rand);
+               ItemStack output = offer.func_222206_f();
+               Item outItem = output.func_77973_b();
+               if (outItem instanceof ShieldItem) {
+                  return true;
+               }
 
-                                 for (int x = -30; x <= 30; x++) {
-                                    for (int z = -30; z <= 30; z++) {
-                                       for (int y = -15; y <= 15; y++) {
-                                          BlockPos c = pos.func_177982_a(x, y, z);
-                                          BlockState s = event.getEntity().field_70170_p.func_180495_p(c);
-                                          if (s.func_177230_c() == Blocks.field_196562_aR) {
-                                             event.getEntity()
-                                                .field_70170_p
-                                                .func_180501_a(
-                                                   c,
-                                                   (BlockState)Blocks.field_150486_ae
-                                                      .func_176223_P()
-                                                      .func_206870_a(
-                                                         ChestBlock.field_176459_a,
-                                                         Direction.func_176731_b(event.getEntity().field_70170_p.field_73012_v.nextInt(4))
-                                                      ),
-                                                   2
-                                                );
-                                             TileEntity te = event.getEntity().field_70170_p.func_175625_s(c);
-                                             if (te instanceof ChestTileEntity) {
-                                                ((ChestTileEntity)te).func_189404_a(Vault.id("chest/treasure"), 0L);
-                                             }
-                                          } else if (s.func_177230_c() == Blocks.field_196566_aV) {
-                                             event.getEntity()
-                                                .field_70170_p
-                                                .func_180501_a(
-                                                   c,
-                                                   (BlockState)Blocks.field_150486_ae
-                                                      .func_176223_P()
-                                                      .func_206870_a(
-                                                         ChestBlock.field_176459_a,
-                                                         Direction.func_176731_b(event.getEntity().field_70170_p.field_73012_v.nextInt(4))
-                                                      ),
-                                                   2
-                                                );
-                                             TileEntity te = event.getEntity().field_70170_p.func_175625_s(c);
-                                             if (te instanceof ChestTileEntity) {
-                                                ((ChestTileEntity)te).func_189404_a(Vault.id("chest/treasure_extra"), 0L);
-                                             }
-                                          } else if (s.func_177230_c() == Blocks.field_150357_h) {
-                                             event.getEntity().field_70170_p.func_175656_a(c, ModBlocks.VAULT_BEDROCK.func_176223_P());
-                                          }
-                                       }
-                                    }
-                                 }
-
-                                 event.getEntity().func_70106_y();
-                              }
-                           }
-                        }
-                     }
-                  }
-               )
-            );
-      }
-   }
-
-   @SubscribeEvent
-   public static void onEntityTick5(LivingUpdateEvent event) {
-      if (!event.getEntity().field_70170_p.field_72995_K
-         && event.getEntity().field_70170_p.func_234923_W_() == Vault.VAULT_KEY
-         && event.getEntity() instanceof ArmorStandEntity) {
-         event.getEntityLiving().field_70170_p.func_175656_a(event.getEntityLiving().func_233580_cy_(), ModBlocks.OBELISK.func_176223_P());
-         event.getEntityLiving().func_70106_y();
-      }
-   }
-
-   @SubscribeEvent
-   public static void onEntityDeath(LivingDeathEvent event) {
-      if (!event.getEntity().field_70170_p.field_72995_K
-         && event.getEntity().field_70170_p.func_234923_W_() == Vault.VAULT_KEY
-         && event.getEntity().func_184216_O().contains("VaultBoss")) {
-         ServerWorld world = (ServerWorld)event.getEntityLiving().field_70170_p;
-         VaultRaid raid = VaultRaidData.get(world).getAt(event.getEntity().func_233580_cy_());
-         if (raid != null) {
-            raid.bosses.remove(event.getEntity().func_110124_au());
-            if (raid.isFinalVault) {
-               return;
+               if (outItem instanceof TippedArrowItem && PotionUtils.func_185191_c(output).equals(Potions.field_185220_C)) {
+                  return true;
+               }
+            } catch (Exception var4) {
             }
 
-            raid.runForPlayers(
-               world.func_73046_m(),
-               player -> {
-                  for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-                     ItemStack stack = player.func_184582_a(slot);
-                     float chance = ModAttributes.GEAR_LEVEL_CHANCE.getOrDefault(stack, 1.0F).getValue(stack);
-                     if (world.func_201674_k().nextFloat() < chance) {
-                        VaultGear.addLevel(stack, 1.0F);
-                     }
-                  }
+            return false;
+         });
+      }
+   }
 
-                  Builder builder = new Builder(world)
-                     .func_216023_a(world.field_73012_v)
-                     .func_216015_a(LootParameters.field_216281_a, player)
-                     .func_216015_a(LootParameters.field_237457_g_, event.getEntity().func_213303_ch())
-                     .func_216015_a(LootParameters.field_216283_c, event.getSource())
-                     .func_216021_b(LootParameters.field_216284_d, event.getSource().func_76346_g())
-                     .func_216021_b(LootParameters.field_216285_e, event.getSource().func_76364_f())
-                     .func_216015_a(LootParameters.field_216282_b, player)
-                     .func_186469_a(player.func_184817_da());
-                  LootContext ctx = builder.func_216022_a(LootParameterSets.field_216263_d);
-                  NonNullList<ItemStack> stacks = NonNullList.func_191196_a();
-                  stacks.addAll(world.func_73046_m().func_200249_aQ().func_186521_a(Vault.id("chest/boss")).func_216113_a(ctx));
-                  if (raid.playerBossName != null && !raid.playerBossName.isEmpty()) {
-                     stacks.add(LootStatueBlockItem.forVaultBoss(event.getEntity().func_200201_e().getString(), StatueType.VAULT_BOSS.ordinal(), false));
-                     if (world.field_73012_v.nextInt(4) != 0) {
-                        stacks.add(ItemTraderCore.generate(event.getEntity().func_200201_e().getString(), 100, true, ItemTraderCore.CoreType.RAFFLE));
-                     }
-                  }
-
-                  int count = EternalsData.get(world).getTotalEternals();
-                  if (count != 0) {
-                     stacks.add(new ItemStack(ModItems.ETERNAL_SOUL, world.field_73012_v.nextInt(count) + 1));
-                  }
-
-                  ItemStack crate = VaultCrateBlock.getCrateWithLoot(ModBlocks.VAULT_CRATE, stacks);
-                  event.getEntity().func_199701_a_(crate);
-                  FireworkRocketEntity fireworks = new FireworkRocketEntity(
-                     world,
-                     event.getEntity().func_226277_ct_(),
-                     event.getEntity().func_226278_cu_(),
-                     event.getEntity().func_226281_cx_(),
-                     new ItemStack(Items.field_196152_dE)
-                  );
-                  world.func_217376_c(fireworks);
-                  raid.won = true;
-                  raid.ticksLeft = 400;
-                  world.func_184148_a(
-                     null,
-                     player.func_226277_ct_(),
-                     player.func_226278_cu_(),
-                     player.func_226281_cx_(),
-                     SoundEvents.field_194228_if,
-                     SoundCategory.MASTER,
-                     1.0F,
-                     1.0F
-                  );
-                  StringTextComponent title = new StringTextComponent("Vault Cleared!");
-                  title.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
-                  Entity entity = event.getEntity();
-                  IFormattableTextComponent entityName = entity instanceof FighterEntity
-                     ? entity.func_200200_C_().func_230532_e_()
-                     : entity.func_200600_R().func_212546_e().func_230532_e_();
-                  entityName.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14512414)));
-                  IFormattableTextComponent subtitle = new StringTextComponent(" is defeated.");
-                  subtitle.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
-                  StringTextComponent actionBar = new StringTextComponent("You'll be teleported back soon...");
-                  actionBar.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
-                  STitlePacket titlePacket = new STitlePacket(Type.TITLE, title);
-                  STitlePacket subtitlePacket = new STitlePacket(Type.SUBTITLE, entityName.func_230532_e_().func_230529_a_(subtitle));
-                  player.field_71135_a.func_147359_a(titlePacket);
-                  player.field_71135_a.func_147359_a(subtitlePacket);
-                  player.func_146105_b(actionBar, true);
-                  IFormattableTextComponent playerName = player.func_145748_c_().func_230532_e_();
-                  playerName.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(9974168)));
-                  StringTextComponent text = new StringTextComponent(" cleared a Vault by defeating ");
-                  text.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16777215)));
-                  StringTextComponent punctuation = new StringTextComponent("!");
-                  punctuation.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16777215)));
-                  world.func_73046_m()
-                     .func_184103_al()
-                     .func_232641_a_(
-                        playerName.func_230529_a_(text).func_230529_a_(entityName).func_230529_a_(punctuation), ChatType.CHAT, player.func_110124_au()
-                     );
-               }
-            );
+   @SubscribeEvent
+   public static void onBlockBreak(BreakEvent event) {
+      PlayerEntity player = event.getPlayer();
+      ModifiableAttributeInstance reachAttr = player.func_110148_a((Attribute)ForgeMod.REACH_DISTANCE.get());
+      if (reachAttr != null) {
+         BlockPos pos = event.getPos();
+         BlockState state = player.func_130014_f_().func_180495_p(pos);
+         if (state.func_177230_c() instanceof VaultChestBlock) {
+            double reach = reachAttr.func_111126_e();
+            if (player.func_70092_e(pos.func_177958_n() + 0.5, pos.func_177956_o() + 0.5, pos.func_177952_p() + 0.5) >= reach * reach) {
+               event.setCanceled(true);
+            }
          }
       }
    }
 
    @SubscribeEvent
-   public static void onEntityDrops(LivingDropsEvent event) {
+   public static void onEffectImmune(LivingUpdateEvent event) {
+      if (!event.getEntity().func_130014_f_().func_201670_d()) {
+         if (event.getEntity() instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity)event.getEntity();
+            EffectTalent.getImmunities(livingEntity).forEach(livingEntity::func_195063_d);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onPlayerFallDamage(LivingDamageEvent event) {
       if (!event.getEntity().field_70170_p.field_72995_K) {
-         if (event.getEntity().field_70170_p.func_234923_W_() == Vault.VAULT_KEY) {
-            if (!(event.getEntity() instanceof VaultGuardianEntity)) {
-               if (!(event.getEntity() instanceof VaultFighterEntity)) {
+         if (event.getEntity() instanceof PlayerEntity) {
+            if (event.getSource() == DamageSource.field_76379_h) {
+               ServerPlayerEntity player = (ServerPlayerEntity)event.getEntity();
+               float totalReduction = 0.0F;
+
+               for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+                  ItemStack stack = player.func_184582_a(slot);
+                  totalReduction += ModAttributes.FEATHER_FEET.get(stack).map(attribute -> attribute.getValue(stack)).orElse(0.0F);
+               }
+
+               event.setAmount(event.getAmount() * (1.0F - Math.min(totalReduction, 1.0F)));
+               if (event.getAmount() <= 1.0E-4) {
                   event.setCanceled(true);
                }
             }
@@ -349,62 +154,197 @@ public class EntityEvents {
    }
 
    @SubscribeEvent
-   public static void onEntitySpawn(CheckSpawn event) {
-      if (event.getEntity().func_130014_f_().func_234923_W_() == Vault.VAULT_KEY && !event.isSpawner()) {
-         event.setCanceled(true);
-      }
-   }
+   public static void onPlayerMobHit(LivingHurtEvent event) {
+      World world = event.getEntity().func_130014_f_();
+      if (!world.func_201670_d()) {
+         if (event.getSource().func_76346_g() instanceof LivingEntity) {
+            LivingEntity entity = event.getEntityLiving();
+            LivingEntity attacker = (LivingEntity)event.getSource().func_76346_g();
 
-   @SubscribeEvent
-   public static void onPlayerDeathInVaults(LivingDeathEvent event) {
-      LivingEntity entityLiving = event.getEntityLiving();
-      if (!entityLiving.field_70170_p.field_72995_K) {
-         if (entityLiving instanceof ServerPlayerEntity) {
-            if (entityLiving.field_70170_p.func_234923_W_() == Vault.VAULT_KEY) {
-               ServerPlayerEntity player = (ServerPlayerEntity)entityLiving;
-               Vector3d position = player.func_213303_ch();
-               player.func_71121_q()
-                  .func_184148_a(
-                     null, position.field_72450_a, position.field_72448_b, position.field_72449_c, ModSounds.TIMER_KILL_SFX, SoundCategory.MASTER, 0.75F, 1.0F
-                  );
-               VaultRaid raid = VaultRaidData.get((ServerWorld)event.getEntity().field_70170_p).getAt(player.func_233580_cy_());
-               if (raid != null) {
-                  raid.finished = true;
+            for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+               ItemStack stack = attacker.func_184582_a(slot);
+               if (!(stack.func_77973_b() instanceof VaultGear) || ((VaultGear)stack.func_77973_b()).isIntendedForSlot(slot)) {
+                  for (EffectCloudEntity.Config config : ModAttributes.EFFECT_CLOUD.getOrDefault(stack, new ArrayList<>()).getValue(stack)) {
+                     if (!(world.field_73012_v.nextFloat() >= config.getChance())) {
+                        EffectCloudEntity cloud = EffectCloudEntity.fromConfig(
+                           entity.field_70170_p, attacker, entity.func_226277_ct_(), entity.func_226278_cu_(), entity.func_226281_cx_(), config
+                        );
+                        world.func_217376_c(cloud);
+                     }
+                  }
                }
             }
          }
       }
    }
 
-   @SubscribeEvent
-   public static void onPlayerHurt(LivingDamageEvent event) {
-      if (event.getEntity() instanceof PlayerEntity && !event.getEntity().field_70170_p.field_72995_K) {
-         ServerPlayerEntity player = (ServerPlayerEntity)event.getEntity();
-         VaultRaid raid = VaultRaidData.get((ServerWorld)event.getEntity().field_70170_p).getAt(player.func_233580_cy_());
-         if (raid != null) {
-            if (raid.won) {
-               event.setCanceled(true);
+   @SubscribeEvent(
+      priority = EventPriority.LOW
+   )
+   public static void onDamageTotem(LivingHurtEvent event) {
+      if (!event.getEntity().field_70170_p.func_201670_d()) {
+         if (event.getEntityLiving() instanceof PlayerEntity) {
+            if (!event.getSource().func_76363_c()) {
+               ItemStack offHand = event.getEntityLiving().func_184592_cb();
+               if (offHand.func_77973_b() instanceof IdolItem) {
+                  float damage = Math.max(1.0F, event.getAmount() / 5.0F);
+                  offHand.func_222118_a((int)damage, event.getEntityLiving(), player -> player.func_213361_c(EquipmentSlotType.OFFHAND));
+               }
             }
+         }
+      }
+   }
 
-            if (raid.isFinalVault && player.func_110143_aJ() - event.getAmount() <= 0.0F) {
-               player.func_71121_q()
-                  .func_184148_a(
-                     null,
-                     player.func_233580_cy_().func_177958_n(),
-                     player.func_233580_cy_().func_177956_o(),
-                     player.func_233580_cy_().func_177952_p(),
-                     ModSounds.TIMER_KILL_SFX,
-                     SoundCategory.MASTER,
-                     0.75F,
-                     1.0F
-                  );
-               event.setCanceled(true);
-               IFormattableTextComponent text = new StringTextComponent("");
-               text.func_230529_a_(new StringTextComponent(player.func_200200_C_().getString()).func_240699_a_(TextFormatting.GREEN));
-               text.func_230529_a_(new StringTextComponent(" has fallen, F."));
-               player.func_184102_h().func_184103_al().func_232641_a_(text, ChatType.CHAT, player.func_110124_au());
-               raid.addSpectator(player);
+   @SubscribeEvent(
+      priority = EventPriority.LOW
+   )
+   public static void onEntityDrops(LivingDropsEvent event) {
+      World world = event.getEntity().field_70170_p;
+      if (!world.func_201670_d() && world instanceof ServerWorld) {
+         if (world.func_234923_W_() == Vault.VAULT_KEY) {
+            Entity entity = event.getEntity();
+            if (!shouldDropDefaultInVault(entity)) {
+               BlockPos pos = entity.func_233580_cy_();
+               ServerWorld sWorld = (ServerWorld)world;
+               VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, pos);
+               if (vault == null) {
+                  event.setCanceled(true);
+               } else {
+                  DamageSource killingSrc = event.getSource();
+                  if (!(entity instanceof VaultFighterEntity) && !(entity instanceof AggressiveCowEntity)) {
+                     event.getDrops().clear();
+                  }
+
+                  boolean addedDrops = addScavengerDrops(world, entity, vault, event.getDrops());
+                  addedDrops |= addSubFighterDrops(world, entity, vault, event.getDrops());
+                  Entity killerEntity = killingSrc.func_76346_g();
+                  if (killerEntity instanceof EternalEntity) {
+                     killerEntity = (Entity)((EternalEntity)killerEntity).getOwner().right().orElse(null);
+                  }
+
+                  if (killerEntity instanceof ServerPlayerEntity) {
+                     ServerPlayerEntity killer = (ServerPlayerEntity)killerEntity;
+                     if (MiscUtils.inventoryContains(killer.field_71071_by, stack -> stack.func_77973_b() instanceof ItemShardPouch)
+                        && vault.getActiveObjectives().stream().noneMatch(objective -> objective.shouldPauseTimer(sWorld.func_73046_m(), vault))) {
+                        addedDrops |= addShardDrops(world, entity, killer, event.getDrops());
+                     }
+                  }
+
+                  if (!addedDrops) {
+                     event.setCanceled(true);
+                  }
+               }
             }
+         }
+      }
+   }
+
+   private static boolean shouldDropDefaultInVault(Entity entity) {
+      return entity instanceof VaultGuardianEntity || entity instanceof TreasureGoblinEntity;
+   }
+
+   private static boolean addScavengerDrops(World world, Entity killed, VaultRaid vault, Collection<ItemEntity> drops) {
+      boolean isScavengerVault = vault.getActiveObjective(ScavengerHuntObjective.class).isPresent();
+      if (!isScavengerVault) {
+         return false;
+      } else {
+         List<ScavengerHuntConfig.ItemEntry> specialDrops = ModConfigs.SCAVENGER_HUNT.generateMobDropLoot(killed.func_200600_R());
+         return specialDrops.isEmpty() ? false : vault.getProperties().getBase(VaultRaid.IDENTIFIER).map(identifier -> {
+            specialDrops.forEach(entry -> {
+               ItemStack stack = entry.createItemStack();
+               BasicScavengerItem.setVaultIdentifier(stack, identifier);
+               ItemEntity itemEntity = new ItemEntity(world, killed.func_226277_ct_(), killed.func_226278_cu_(), killed.func_226281_cx_(), stack);
+               itemEntity.func_174869_p();
+               drops.add(itemEntity);
+            });
+            return true;
+         }).orElse(false);
+      }
+   }
+
+   private static boolean addSubFighterDrops(World world, Entity killed, VaultRaid vault, Collection<ItemEntity> drops) {
+      if (killed.func_200600_R() != ModEntities.VAULT_FIGHTER) {
+         return false;
+      } else {
+         int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
+         float shardChance = ModConfigs.LOOT_TABLES.getForLevel(level).getSubFighterRaffleChance();
+         if (rand.nextFloat() >= shardChance) {
+            return false;
+         } else {
+            String name = killed.getPersistentData().func_74779_i("VaultPlayerName");
+            if (name.isEmpty()) {
+               return false;
+            } else {
+               ItemStack raffleSeal = new ItemStack(ModItems.CRYSTAL_SEAL_RAFFLE);
+               ItemVaultRaffleSeal.setPlayerName(raffleSeal, name);
+               ItemEntity itemEntity = new ItemEntity(world, killed.func_226277_ct_(), killed.func_226278_cu_(), killed.func_226281_cx_(), raffleSeal);
+               itemEntity.func_174869_p();
+               drops.add(itemEntity);
+               return true;
+            }
+         }
+      }
+   }
+
+   private static boolean addShardDrops(World world, Entity killed, ServerPlayerEntity killer, Collection<ItemEntity> drops) {
+      int shardCount = ModConfigs.SOUL_SHARD.getRandomShards(killed.func_200600_R());
+      if (shardCount <= 0) {
+         return false;
+      } else {
+         float additionalSoulShardChance = 0.0F;
+
+         for (TalentNode<SoulShardTalent> node : PlayerTalentsData.get(killer.func_71121_q()).getTalents(killer).getLearnedNodes(SoulShardTalent.class)) {
+            additionalSoulShardChance += node.getTalent().getAdditionalSoulShardChance();
+         }
+
+         float shShardCount = shardCount * (1.0F + additionalSoulShardChance);
+         shardCount = MathHelper.func_76141_d(shShardCount);
+         float decimal = shShardCount - shardCount;
+         if (rand.nextFloat() < decimal) {
+            shardCount++;
+         }
+
+         ItemStack shards = new ItemStack(ModItems.SOUL_SHARD, shardCount);
+         ItemEntity itemEntity = new ItemEntity(world, killed.func_226277_ct_(), killed.func_226278_cu_(), killed.func_226281_cx_(), shards);
+         itemEntity.func_174869_p();
+         drops.add(itemEntity);
+         return true;
+      }
+   }
+
+   @SubscribeEvent
+   public static void onEntitySpawn(CheckSpawn event) {
+      if (event.getEntity().func_130014_f_().func_234923_W_() == Vault.VAULT_KEY && !event.isSpawner()) {
+         event.setResult(Result.DENY);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onDamageArmorHit(LivingDamageEvent event) {
+      LivingEntity damaged = event.getEntityLiving();
+      if (damaged instanceof PlayerEntity && !damaged.func_130014_f_().func_201670_d()) {
+         PlayerEntity player = (PlayerEntity)damaged;
+         Entity trueSrc = event.getSource().func_76346_g();
+         if (trueSrc instanceof LivingEntity) {
+            double chance = ((LivingEntity)trueSrc).func_233637_b_(ModAttributes.BREAK_ARMOR_CHANCE);
+
+            while (chance > 0.0 && !(rand.nextFloat() > chance)) {
+               chance--;
+               player.field_71071_by.func_234563_a_(event.getSource(), 4.0F);
+            }
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onCurseOnHit(LivingDamageEvent event) {
+      LivingEntity damaged = event.getEntityLiving();
+      if (damaged instanceof ServerPlayerEntity && !(damaged.func_130014_f_() instanceof ServerWorld)) {
+         ServerWorld sWorld = (ServerWorld)damaged.func_130014_f_();
+         ServerPlayerEntity sPlayer = (ServerPlayerEntity)damaged;
+         VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, sPlayer.func_233580_cy_());
+         if (vault != null) {
+            vault.getActiveModifiersFor(PlayerFilter.any(), CurseOnHitModifier.class).forEach(modifier -> modifier.applyCurse(sPlayer));
          }
       }
    }

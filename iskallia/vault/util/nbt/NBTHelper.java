@@ -6,7 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -54,5 +56,29 @@ public class NBTHelper {
       ListNBT listNBT = new ListNBT();
       list.forEach(item -> listNBT.add(mapper.apply((T)item)));
       nbt.func_218657_a(name, listNBT);
+   }
+
+   public static <T> void writeOptional(CompoundNBT nbt, String key, @Nullable T object, BiConsumer<CompoundNBT, T> writer) {
+      nbt.func_74757_a(key + "_present", object != null);
+      if (object != null) {
+         CompoundNBT write = new CompoundNBT();
+         writer.accept(write, object);
+         nbt.func_218657_a(key, write);
+      }
+   }
+
+   @Nullable
+   public static <T> T readOptional(CompoundNBT nbt, String key, Function<CompoundNBT, T> reader) {
+      return readOptional(nbt, key, reader, null);
+   }
+
+   @Nullable
+   public static <T> T readOptional(CompoundNBT nbt, String key, Function<CompoundNBT, T> reader, T _default) {
+      if (nbt.func_74767_n(key + "_present")) {
+         CompoundNBT read = nbt.func_74775_l(key);
+         return reader.apply(read);
+      } else {
+         return _default;
+      }
    }
 }

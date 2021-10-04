@@ -3,15 +3,16 @@ package iskallia.vault.config;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.Vault;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.util.data.WeightedList;
+import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.Optional;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -32,11 +33,15 @@ public class VaultGeneralConfig extends Config {
    @Expose
    private List<String> BLOCK_BLACKLIST;
    @Expose
-   private Map<Integer, String> MONTHS_TO_TAG_COLOR;
-   @Expose
    public float VAULT_EXIT_TNL_MIN;
    @Expose
    public float VAULT_EXIT_TNL_MAX;
+   @Expose
+   public boolean SAVE_PLAYER_SNAPSHOTS;
+   @Expose
+   private final WeightedList<String> VAULT_OBJECTIVES = new WeightedList<>();
+   @Expose
+   private final WeightedList<String> VAULT_COOP_OBJECTIVES = new WeightedList<>();
 
    @Override
    public String getName() {
@@ -55,6 +60,21 @@ public class VaultGeneralConfig extends Config {
       return this.OBELISK_DROP_CHANCE;
    }
 
+   public VaultObjective generateObjective() {
+      return this.selectObjective(this.VAULT_OBJECTIVES);
+   }
+
+   public VaultObjective generateCoopObjective() {
+      return this.selectObjective(this.VAULT_COOP_OBJECTIVES);
+   }
+
+   private VaultObjective selectObjective(WeightedList<String> objectiveList) {
+      return Optional.ofNullable(objectiveList.getRandom(rand))
+         .<ResourceLocation>map(ResourceLocation::new)
+         .map(VaultObjective::getObjective)
+         .orElse(VaultRaid.SUMMON_AND_KILL_BOSS.get());
+   }
+
    @Override
    protected void reset() {
       this.TICK_COUNTER = 30000;
@@ -64,24 +84,15 @@ public class VaultGeneralConfig extends Config {
       this.BLOCK_BLACKLIST = new ArrayList<>();
       this.BLOCK_BLACKLIST.add(Blocks.field_150477_bB.getRegistryName().toString());
       this.OBELISK_DROP_CHANCE = 2;
-      this.MONTHS_TO_TAG_COLOR = new LinkedHashMap<>();
-      this.MONTHS_TO_TAG_COLOR.put(1, TextFormatting.AQUA.name());
-      this.MONTHS_TO_TAG_COLOR.put(7, TextFormatting.DARK_AQUA.name());
-      this.MONTHS_TO_TAG_COLOR.put(13, TextFormatting.YELLOW.name());
-      this.MONTHS_TO_TAG_COLOR.put(25, TextFormatting.GOLD.name());
-      this.MONTHS_TO_TAG_COLOR.put(48, TextFormatting.RED.name());
       this.VAULT_EXIT_TNL_MIN = 0.0F;
       this.VAULT_EXIT_TNL_MAX = 0.0F;
-   }
-
-   public TextFormatting getTagFormat(int months) {
-      for (Entry<Integer, String> e : this.MONTHS_TO_TAG_COLOR.entrySet()) {
-         if (months >= e.getKey()) {
-            return TextFormatting.valueOf(e.getValue());
-         }
-      }
-
-      return TextFormatting.WHITE;
+      this.SAVE_PLAYER_SNAPSHOTS = false;
+      this.VAULT_OBJECTIVES.clear();
+      this.VAULT_OBJECTIVES.add(Vault.id("summon_and_kill_boss").toString(), 1);
+      this.VAULT_OBJECTIVES.add(Vault.id("scavenger_hunt").toString(), 1);
+      this.VAULT_COOP_OBJECTIVES.clear();
+      this.VAULT_COOP_OBJECTIVES.add(Vault.id("summon_and_kill_boss").toString(), 1);
+      this.VAULT_COOP_OBJECTIVES.add(Vault.id("scavenger_hunt").toString(), 1);
    }
 
    @SubscribeEvent

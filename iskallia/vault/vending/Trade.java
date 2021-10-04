@@ -20,7 +20,6 @@ public class Trade implements INBTSerializable {
    @Expose
    @NBTSerialize
    protected int times_traded;
-   private int hashCode;
 
    public Trade() {
       this.max_trades = -1;
@@ -70,6 +69,10 @@ public class Trade implements INBTSerializable {
       this.times_traded++;
    }
 
+   public boolean wasTradeUsed() {
+      return this.max_trades == -1 ? true : this.times_traded > 0;
+   }
+
    public boolean isValid() {
       if (this.buy == null || !this.buy.isValid()) {
          return false;
@@ -92,8 +95,9 @@ public class Trade implements INBTSerializable {
       }
    }
 
-   public void setMaxTrades(int amount) {
+   public Trade setMaxTrades(int amount) {
       this.max_trades = amount;
+      return this;
    }
 
    public Trade copy() {

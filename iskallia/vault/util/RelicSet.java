@@ -23,9 +23,9 @@ public class RelicSet {
    public static RelicSet ELEMENT;
    public static RelicSet TWOLF999;
    public static RelicSet SHIELDMANH;
-   private String name;
-   private ResourceLocation id;
-   private Set<RelicPartItem> itemSet;
+   private final String name;
+   private final ResourceLocation id;
+   private final Set<RelicPartItem> itemSet;
 
    private RelicSet(String name, String id, RelicPartItem... items) {
       this.name = name;

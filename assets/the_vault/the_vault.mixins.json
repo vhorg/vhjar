@@ -1,31 +1,44 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "iskallia.vault.mixin",
-  "compatibilityLevel": "JAVA_8",
-  "refmap": "the_vault.refmap.json",
-  "mixins": [
-    "MixinAttributeInstance",
-    "MixinCUpdateStructureBlockPacket",
-    "MixinEnchantment",
-    "MixinItemRenderer",
-    "MixinItemStack",
-    "MixinLivingEntity",
-    "MixinPlayerInventory",
-    "MixinRepairContainer",
-    "MixinServerWorld",
-    "MixinStructureBlockTileEntity"
-  ],
-  "client": [
-    "MixinAnvilScreen",
-    "MixinBossOverlayGui",
-    "MixinElytraLayer",
-    "MixinEnchantedBookItem",
-    "MixinItem"
-  ],
-  "server": [],
-  "injectors": {
-    "defaultRequire": 1
+    "required": true,
+    "minVersion": "0.8",
+    "package": "iskallia.vault.mixin",
+    "compatibilityLevel": "JAVA_8",
+    "refmap": "the_vault.refmap.json",
+    "mixins": [
+        "MixinAbstractSkeletonEntity",
+        "MixinArmorMaterial",
+        "MixinAttributeInstance",
+        "MixinBiome",
+        "MixinCommandBlockTileEntity",
+        "MixinCrossbowItem",
+        "MixinCUpdateStructureBlockPacket",
+        "MixinEnchantment",
+        "MixinEnchantmentHelper",
+        "MixinFoodStats",
+        "MixinItemStack",
+        "MixinLivingEntity",
+        "MixinPlayerInventory",
+        "MixinRepairContainer",
+        "MixinServerPlayNetHandler",
+        "MixinServerWorld",
+        "MixinSingleJigsawPiece",
+        "MixinStructureBlockTileEntity",
+        "MixinStructureProcessor",
+        "MixinTemplatePalette"
+    ],
+    "client": [
+        "MixinAnvilScreen",
+        "MixinAtlases",
+        "MixinBossOverlayGui",
+        "MixinDebugOverlayGui",
+        "MixinElytraLayer",
+        "MixinEnchantedBookItem",
+        "MixinItem",
+        "MixinLivingRenderer"
+    ],
+    "server": [],
+    "injectors": {
+        "defaultRequire": 1
   }
 }
 

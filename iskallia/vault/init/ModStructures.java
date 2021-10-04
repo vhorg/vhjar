@@ -2,8 +2,9 @@ package iskallia.vault.init;
 
 import com.mojang.serialization.Codec;
 import iskallia.vault.Vault;
-import iskallia.vault.world.gen.structure.ArenaStructure;
+import iskallia.vault.world.gen.structure.ArchitectEventStructure;
 import iskallia.vault.world.gen.structure.VaultStructure;
+import iskallia.vault.world.gen.structure.VaultTroveStructure;
 import iskallia.vault.world.gen.structure.pool.PalettedListPoolElement;
 import iskallia.vault.world.gen.structure.pool.PalettedSinglePoolElement;
 import net.minecraft.util.registry.Registry;
@@ -14,12 +15,14 @@ import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class ModStructures {
-   public static Structure<VaultStructure.Config> VAULT;
-   public static Structure<ArenaStructure.Config> ARENA;
+   public static Structure<VaultStructure.Config> VAULT_STAR;
+   public static Structure<ArchitectEventStructure.Config> ARCHITECT_EVENT;
+   public static Structure<VaultTroveStructure.Config> VAULT_TROVE;
 
    public static void register(Register<Structure<?>> event) {
-      VAULT = register(event.getRegistry(), "vault", new VaultStructure(VaultStructure.Config.CODEC));
-      ARENA = register(event.getRegistry(), "arena", new ArenaStructure(ArenaStructure.Config.CODEC));
+      VAULT_STAR = register(event.getRegistry(), "vault_star", new VaultStructure(VaultStructure.Config.CODEC));
+      ARCHITECT_EVENT = register(event.getRegistry(), "architect_event", new ArchitectEventStructure(ArchitectEventStructure.Config.CODEC));
+      VAULT_TROVE = register(event.getRegistry(), "trove", new VaultTroveStructure(VaultTroveStructure.Config.CODEC));
       ModStructures.PoolElements.register(event);
    }
 

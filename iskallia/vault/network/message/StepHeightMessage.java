@@ -6,10 +6,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
 public class StepHeightMessage {
-   public float stepHeight;
-
-   protected StepHeightMessage() {
-   }
+   private final float stepHeight;
 
    public StepHeightMessage(float stepHeight) {
       this.stepHeight = stepHeight;
@@ -20,9 +17,7 @@ public class StepHeightMessage {
    }
 
    public static StepHeightMessage decode(PacketBuffer buffer) {
-      StepHeightMessage message = new StepHeightMessage();
-      message.stepHeight = buffer.readFloat();
-      return message;
+      return new StepHeightMessage(buffer.readFloat());
    }
 
    public static void handle(StepHeightMessage message, Supplier<Context> contextSupplier) {

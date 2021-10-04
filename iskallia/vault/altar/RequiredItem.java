@@ -57,14 +57,18 @@ public class RequiredItem {
    }
 
    public boolean reachedAmountRequired() {
-      return this.getCurrentAmount() == this.getAmountRequired();
+      return this.getCurrentAmount() >= this.getAmountRequired();
    }
 
    public int getRemainder(int amount) {
-      return this.getCurrentAmount() + amount >= this.getAmountRequired() ? this.getCurrentAmount() + amount - this.getAmountRequired() : 0;
+      return Math.max(this.getCurrentAmount() + amount - this.getAmountRequired(), 0);
    }
 
    public boolean isItemEqual(ItemStack stack) {
       return ItemStack.func_185132_d(this.getItem(), stack);
+   }
+
+   public RequiredItem copy() {
+      return new RequiredItem(this.item.func_77946_l(), this.currentAmount, this.amountRequired);
    }
 }

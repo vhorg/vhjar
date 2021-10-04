@@ -1,13 +1,14 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "the_vault:item/chestplate/chestplate"
+    "layer0": "the_vault:item/chestplate/chestplate",
+    "layer1": "the_vault:item/chestplate/chestplate_overlay"
   },
   "overrides": [
-    {"predicate": {"the_vault:texture": 0 }, "model": "the_vault:item/chestplate/samurai_chestplate"},
-    {"predicate": {"the_vault:texture": 1 }, "model": "the_vault:item/chestplate/knight_chestplate"},
-    {"predicate": {"the_vault:texture": 2 }, "model": "the_vault:item/chestplate/guard_chestplate"},
-    {"predicate": {"the_vault:texture": 3 }, "model": "the_vault:item/chestplate/dragon_chestplate"},
+    {"predicate": {"the_vault:texture": 0 }, "model": "the_vault:item/chestplate/scale_1_chestplate"},
+    {"predicate": {"the_vault:texture": 1 }, "model": "the_vault:item/chestplate/scale_2_chestplate"},
+    {"predicate": {"the_vault:texture": 2 }, "model": "the_vault:item/chestplate/scale_3_chestplate"},
+    {"predicate": {"the_vault:texture": 3 }, "model": "the_vault:item/chestplate/scale_4_chestplate"},
     {"predicate": {"the_vault:texture": 4 }, "model": "the_vault:item/chestplate/plated_1_chestplate"},
     {"predicate": {"the_vault:texture": 5 }, "model": "the_vault:item/chestplate/plated_1_dark_chestplate"},
     {"predicate": {"the_vault:texture": 6 }, "model": "the_vault:item/chestplate/plated_2_chestplate"},
@@ -16,6 +17,29 @@
     {"predicate": {"the_vault:texture": 9 }, "model": "the_vault:item/chestplate/plated_3_dark_chestplate"},
     {"predicate": {"the_vault:texture": 10 }, "model": "the_vault:item/chestplate/plated_4_chestplate"},
     {"predicate": {"the_vault:texture": 11 }, "model": "the_vault:item/chestplate/plated_4_dark_chestplate"},
-    {"predicate": {"the_vault:vault_rarity": 4 }, "model": "the_vault:item/chestplate/scrappy_chestplate"}
+    {"predicate": {"the_vault:texture": 12 }, "model": "the_vault:item/chestplate/fur_1_chestplate"},
+    {"predicate": {"the_vault:texture": 13 }, "model": "the_vault:item/chestplate/fur_2_chestplate"},
+    {"predicate": {"the_vault:texture": 14 }, "model": "the_vault:item/chestplate/fur_3_chestplate"},
+    {"predicate": {"the_vault:texture": 15 }, "model": "the_vault:item/chestplate/fur_4_chestplate"},
+    {"predicate": {"the_vault:texture": 16 }, "model": "the_vault:item/chestplate/robe_1_chestplate"},
+    {"predicate": {"the_vault:texture": 17 }, "model": "the_vault:item/chestplate/robe_2_chestplate"},
+    {"predicate": {"the_vault:texture": 18 }, "model": "the_vault:item/chestplate/robe_3_chestplate"},
+    {"predicate": {"the_vault:texture": 19 }, "model": "the_vault:item/chestplate/robe_4_chestplate"},
+    {"predicate": {"the_vault:texture": 20 }, "model": "the_vault:item/chestplate/royal_1_chestplate"},
+    {"predicate": {"the_vault:texture": 21 }, "model": "the_vault:item/chestplate/royal_2_chestplate"},
+    {"predicate": {"the_vault:texture": 22 }, "model": "the_vault:item/chestplate/scrappy_1_chestplate"},
+    {"predicate": {"the_vault:texture": 23 }, "model": "the_vault:item/chestplate/scrappy_2_chestplate"},
+    {"predicate": {"the_vault:texture": 24 }, "model": "the_vault:item/chestplate/scrappy_3_chestplate"},
+    {"predicate": {"the_vault:texture": 25 }, "model": "the_vault:item/chestplate/barbarian_1_chestplate"},
+    {"predicate": {"the_vault:texture": 26 }, "model": "the_vault:item/chestplate/barbarian_2_chestplate"},
+    {"predicate": {"the_vault:texture": 27 }, "model": "the_vault:item/chestplate/barbarian_3_chestplate"},
+    {"predicate": {"the_vault:texture": 28 }, "model": "the_vault:item/chestplate/royal_1_dark_chestplate"},
+    {"predicate": {"the_vault:texture": 29 }, "model": "the_vault:item/chestplate/barbarian_1_dark_chestplate"},
+    {"predicate": {"the_vault:texture": 30 }, "model": "the_vault:item/chestplate/barbarian_2_dark_chestplate"},
+    {"predicate": {"the_vault:texture": 31 }, "model": "the_vault:item/chestplate/barbarian_3_dark_chestplate"},
+    {"predicate": {"the_vault:texture": 32 }, "model": "the_vault:item/chestplate/omarlatif_chestplate"},
+    {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 0 }, "model": "the_vault:item/chestplate/scrappy_1_chestplate"},
+    {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 1 }, "model": "the_vault:item/chestplate/scrappy_2_chestplate"},
+    {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 2 }, "model": "the_vault:item/chestplate/scrappy_3_chestplate"}
   ]
 }

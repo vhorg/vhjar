@@ -5,11 +5,14 @@ import iskallia.vault.config.entry.SingleItemEntry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class LegendaryTreasureRareConfig extends Config {
@@ -23,8 +26,12 @@ public class LegendaryTreasureRareConfig extends Config {
 
    @Override
    protected void reset() {
-      this.ITEMS.add(new SingleItemEntry("minecraft:apple", "{display:{Name:'{\"text\":\"Fancy Apple\"}'}}"));
-      this.ITEMS.add(new SingleItemEntry("minecraft:golden_sword", "{Enchantments:[{id:\"minecraft:sharpness\",lvl:5s}]}"));
+      ItemStack fancyApple = new ItemStack(Items.field_151034_e);
+      fancyApple.func_200302_a(new StringTextComponent("Fancy Apple"));
+      this.ITEMS.add(new SingleItemEntry(fancyApple));
+      ItemStack sword = new ItemStack(Items.field_151010_B);
+      sword.func_77966_a(Enchantments.field_185302_k, 5);
+      this.ITEMS.add(new SingleItemEntry(sword));
    }
 
    public ItemStack getRandom() {

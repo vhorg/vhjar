@@ -1,56 +1,68 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.vending.Product;
-import iskallia.vault.vending.Trade;
+import iskallia.vault.config.entry.vending.ProductEntry;
+import iskallia.vault.config.entry.vending.TradeEntry;
+import iskallia.vault.util.data.WeightedList;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
 
-public class TraderCoreConfig extends Config {
-   @Expose
-   public List<Trade> TRADES = new ArrayList<>();
+public abstract class TraderCoreConfig extends Config {
+   public static class Level {
+      @Expose
+      private final int level;
+      @Expose
+      private final WeightedList<TradeEntry> trades;
 
-   @Override
-   public String getName() {
-      return "trader_core";
-   }
-
-   @Override
-   protected void reset() {
-      this.TRADES.add(new Trade(new Product(Items.field_151034_e, 8, null), null, new Product(Items.field_151153_ao, 1, null)));
-      this.TRADES.add(new Trade(new Product(Items.field_151153_ao, 8, null), null, new Product(Items.field_196100_at, 1, null)));
-      CompoundNBT nbt = new CompoundNBT();
-      ListNBT enchantments = new ListNBT();
-      CompoundNBT knockback = new CompoundNBT();
-      knockback.func_74778_a("id", "minecraft:knockback");
-      knockback.func_74768_a("lvl", 10);
-      enchantments.add(knockback);
-      nbt.func_218657_a("Enchantments", enchantments);
-      nbt.func_218657_a("ench", enchantments);
-      this.TRADES.add(new Trade(new Product(Items.field_196100_at, 8, null), null, new Product(Items.field_151055_y, 1, nbt)));
+      public Level(int level, WeightedList<TradeEntry> trades) {
+         this.level = level;
+         this.trades = trades;
+      }
    }
 
    public static class TraderCoreCommonConfig extends TraderCoreConfig {
+      @Expose
+      private final List<TraderCoreConfig.Level> levels = new ArrayList<>();
+
       @Override
       public String getName() {
          return "trader_core_common";
       }
-   }
 
-   public static class TraderCoreOmegaConfig extends TraderCoreConfig {
       @Override
-      public String getName() {
-         return "trader_core_omega";
+      protected void reset() {
+         WeightedList<TradeEntry> options = new WeightedList<>();
+         options.add(new TradeEntry(new ProductEntry(Items.field_151034_e, 8, 8, null), new ProductEntry(Items.field_151153_ao, 1, 1, null), 3), 1);
+         this.levels.add(new TraderCoreConfig.Level(0, options));
+         options = new WeightedList<>();
+         options.add(new TradeEntry(new ProductEntry(Items.field_151172_bF, 8, 8, null), new ProductEntry(Items.field_151150_bK, 1, 1, null), 3), 1);
+         this.levels.add(new TraderCoreConfig.Level(25, options));
       }
-   }
 
-   public static class TraderCoreRaffleConfig extends TraderCoreConfig {
-      @Override
-      public String getName() {
-         return "trader_core_raffle";
+      @Nullable
+      public TradeEntry getRandomTrade(int vaultLevel) {
+         TraderCoreConfig.Level levelConfig = this.getForLevel(this.levels, vaultLevel);
+         return levelConfig == null ? null : levelConfig.trades.getRandom(rand);
+      }
+
+      @Nullable
+      public TraderCoreConfig.Level getForLevel(List<TraderCoreConfig.Level> levels, int level) {
+         for (int i = 0; i < levels.size(); i++) {
+            if (level < levels.get(i).level) {
+               if (i != 0) {
+                  return levels.get(i - 1);
+               }
+               break;
+            }
+
+            if (i == levels.size() - 1) {
+               return levels.get(i);
+            }
+         }
+
+         return null;
       }
    }
 }

@@ -1,7 +1,7 @@
 package iskallia.vault.client.gui.screen;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
+import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.gui.widget.AbilitySelectionWidget;
 import iskallia.vault.init.ModKeybinds;
 import iskallia.vault.init.ModNetwork;
@@ -13,6 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 
 public class AbilitySelectionScreen extends Screen {
    public static final ResourceLocation HUD_RESOURCE = new ResourceLocation("the_vault", "textures/gui/vault-hud.png");
@@ -28,11 +29,11 @@ public class AbilitySelectionScreen extends Screen {
       float midX = minecraft.func_228018_at_().func_198107_o() / 2.0F;
       float midY = minecraft.func_228018_at_().func_198087_p() / 2.0F;
       float radius = 60.0F;
-      List<AbilityNode<?>> learnedAbilities = AbilitiesOverlay.learnedAbilities;
+      List<AbilityNode<?, ?>> learnedAbilities = ClientAbilityData.getLearnedAbilityNodes();
       double clickableAngle = (Math.PI * 2) / learnedAbilities.size();
 
       for (int i = 0; i < learnedAbilities.size(); i++) {
-         AbilityNode<?> ability = learnedAbilities.get(i);
+         AbilityNode<?, ?> ability = learnedAbilities.get(i);
          double angle = i * ((Math.PI * 2) / learnedAbilities.size()) - (Math.PI / 2);
          double x = radius * Math.cos(angle) + midX;
          double y = radius * Math.sin(angle) + midY;
@@ -85,10 +86,9 @@ public class AbilitySelectionScreen extends Screen {
       }
    }
 
-   public void requestSwap(AbilityNode<?> abilityNode) {
-      int abilityIndex = AbilitiesOverlay.learnedAbilities.indexOf(abilityNode);
-      if (abilityIndex != AbilitiesOverlay.focusedIndex) {
-         ModNetwork.CHANNEL.sendToServer(new AbilityKeyMessage(abilityIndex));
+   public void requestSwap(AbilityNode<?, ?> abilityNode) {
+      if (!abilityNode.getGroup().equals(ClientAbilityData.getSelectedAbility())) {
+         ModNetwork.CHANNEL.sendToServer(new AbilityKeyMessage(abilityNode.getGroup()));
       }
    }
 
@@ -101,14 +101,25 @@ public class AbilitySelectionScreen extends Screen {
       List<AbilitySelectionWidget> abilitiesAsWidgets = this.getAbilitiesAsWidgets();
       boolean focusRendered = false;
 
-      for (int i = 0; i < abilitiesAsWidgets.size(); i++) {
-         AbilitySelectionWidget widget = abilitiesAsWidgets.get(i);
+      for (AbilitySelectionWidget widget : abilitiesAsWidgets) {
          widget.func_230430_a_(matrixStack, mouseX, mouseY, partialTicks);
          if (!focusRendered && widget.func_231047_b_(mouseX, mouseY)) {
+            int yOffset = 35;
+            if (widget.getAbilityNode().getSpecialization() != null) {
+               yOffset += 10;
+            }
+
             String abilityName = widget.getAbilityNode().getName();
             int abilityNameWidth = minecraft.field_71466_p.func_78256_a(abilityName);
-            minecraft.field_71466_p.func_238405_a_(matrixStack, abilityName, midX - abilityNameWidth / 2.0F, midY - (radius + 35.0F), 16777215);
-            if (i == AbilitiesOverlay.focusedIndex) {
+            minecraft.field_71466_p.func_238405_a_(matrixStack, abilityName, midX - abilityNameWidth / 2.0F, midY - (radius + yOffset), 16777215);
+            if (widget.getAbilityNode().getSpecialization() != null) {
+               String specName = widget.getAbilityNode().getSpecializationName();
+               int specNameWidth = minecraft.field_71466_p.func_78256_a(specName);
+               minecraft.field_71466_p
+                  .func_238405_a_(matrixStack, specName, midX - specNameWidth / 2.0F, midY - (radius + yOffset - 10.0F), TextFormatting.GOLD.func_211163_e());
+            }
+
+            if (widget.getAbilityNode().getGroup().equals(ClientAbilityData.getSelectedAbility())) {
                String text = "Currently Focused Ability";
                int textWidth = minecraft.field_71466_p.func_78256_a(text);
                minecraft.field_71466_p.func_238405_a_(matrixStack, text, midX - textWidth / 2.0F, midY + radius + 15.0F, 11266750);

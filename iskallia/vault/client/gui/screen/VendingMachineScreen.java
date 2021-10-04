@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import iskallia.vault.block.entity.VendingMachineTileEntity;
 import iskallia.vault.block.render.VendingMachineRenderer;
 import iskallia.vault.client.gui.component.ScrollableContainer;
-import iskallia.vault.client.gui.helper.Rectangle;
 import iskallia.vault.client.gui.widget.TradeWidget;
 import iskallia.vault.container.VendingMachineContainer;
 import iskallia.vault.entity.model.StatuePlayerModel;
@@ -16,6 +15,7 @@ import iskallia.vault.network.message.VendingUIMessage;
 import iskallia.vault.util.SkinProfile;
 import iskallia.vault.vending.Trade;
 import iskallia.vault.vending.TraderCore;
+import java.awt.Rectangle;
 import java.util.LinkedList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -29,6 +29,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.Color;
@@ -61,14 +62,9 @@ public class VendingMachineScreen extends ContainerScreen<VendingMachineContaine
    }
 
    public Rectangle getTradeBoundaries() {
-      float midX = this.field_230708_k_ / 2.0F;
-      float midY = this.field_230709_l_ / 2.0F;
-      Rectangle boundaries = new Rectangle();
-      boundaries.x0 = (int)(midX - 134.0F);
-      boundaries.y0 = (int)(midY - 66.0F);
-      boundaries.setWidth(100);
-      boundaries.setHeight(142);
-      return boundaries;
+      int midX = MathHelper.func_76141_d(this.field_230708_k_ / 2.0F);
+      int midY = MathHelper.func_76141_d(this.field_230709_l_ / 2.0F);
+      return new Rectangle(midX - 134, midY - 66, 100, 142);
    }
 
    protected void func_231160_c_() {
@@ -77,8 +73,8 @@ public class VendingMachineScreen extends ContainerScreen<VendingMachineContaine
 
    public void func_212927_b(double mouseX, double mouseY) {
       Rectangle tradeBoundaries = this.getTradeBoundaries();
-      double tradeContainerX = mouseX - tradeBoundaries.x0;
-      double tradeContainerY = mouseY - tradeBoundaries.y0;
+      double tradeContainerX = mouseX - tradeBoundaries.x;
+      double tradeContainerY = mouseY - tradeBoundaries.y;
 
       for (TradeWidget tradeWidget : this.tradeWidgets) {
          tradeWidget.func_212927_b(tradeContainerX, tradeContainerY);
@@ -89,8 +85,8 @@ public class VendingMachineScreen extends ContainerScreen<VendingMachineContaine
 
    public boolean func_231044_a_(double mouseX, double mouseY, int button) {
       Rectangle tradeBoundaries = this.getTradeBoundaries();
-      double tradeContainerX = mouseX - tradeBoundaries.x0;
-      double tradeContainerY = mouseY - tradeBoundaries.y0 + this.tradesContainer.getyOffset();
+      double tradeContainerX = mouseX - tradeBoundaries.x;
+      double tradeContainerY = mouseY - tradeBoundaries.y + this.tradesContainer.getyOffset();
 
       for (int i = 0; i < this.tradeWidgets.size(); i++) {
          TradeWidget tradeWidget = this.tradeWidgets.get(i);
@@ -152,7 +148,7 @@ public class VendingMachineScreen extends ContainerScreen<VendingMachineContaine
       super.func_230430_a_(matrixStack, mouseX, mouseY, partialTicks);
       TraderCore lastCore = tileEntity.getLastCore();
       if (lastCore != null) {
-         drawSkin((int)midX + 175, (int)midY - 10, -45, tileEntity.getSkin(), lastCore.isMegahead());
+         drawSkin((int)midX + 175, (int)midY - 10, -45, tileEntity.getSkin());
       }
 
       minecraft.field_71466_p.func_238421_b_(matrixStack, "Trades", midX - 108.0F, midY - 77.0F, -12632257);
@@ -167,8 +163,8 @@ public class VendingMachineScreen extends ContainerScreen<VendingMachineContaine
 
    public void renderTrades(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
       Rectangle tradeBoundaries = this.getTradeBoundaries();
-      int tradeContainerX = mouseX - tradeBoundaries.x0;
-      int tradeContainerY = mouseY - tradeBoundaries.y0 + this.tradesContainer.getyOffset();
+      int tradeContainerX = mouseX - tradeBoundaries.x;
+      int tradeContainerY = mouseY - tradeBoundaries.y + this.tradesContainer.getyOffset();
 
       for (TradeWidget tradeWidget : this.tradeWidgets) {
          tradeWidget.func_230430_a_(matrixStack, tradeContainerX, tradeContainerY, partialTicks);
@@ -177,8 +173,8 @@ public class VendingMachineScreen extends ContainerScreen<VendingMachineContaine
 
    protected void func_230459_a_(MatrixStack matrixStack, int mouseX, int mouseY) {
       Rectangle tradeBoundaries = this.getTradeBoundaries();
-      int tradeContainerX = mouseX - tradeBoundaries.x0;
-      int tradeContainerY = mouseY - tradeBoundaries.y0 + this.tradesContainer.getyOffset();
+      int tradeContainerX = mouseX - tradeBoundaries.x;
+      int tradeContainerY = mouseY - tradeBoundaries.y + this.tradesContainer.getyOffset();
 
       for (TradeWidget tradeWidget : this.tradeWidgets) {
          if (tradeWidget.isHovered(tradeContainerX, tradeContainerY)) {
@@ -197,9 +193,8 @@ public class VendingMachineScreen extends ContainerScreen<VendingMachineContaine
       super.func_230459_a_(matrixStack, mouseX, mouseY);
    }
 
-   public static void drawSkin(int posX, int posY, int yRotation, SkinProfile skin, boolean megahead) {
+   public static void drawSkin(int posX, int posY, int yRotation, SkinProfile skin) {
       float scale = 8.0F;
-      float headScale = megahead ? 1.75F : 1.0F;
       RenderSystem.pushMatrix();
       RenderSystem.translatef(posX, posY, 1050.0F);
       RenderSystem.scalef(1.0F, 1.0F, -1.0F);
@@ -236,7 +231,6 @@ public class VendingMachineScreen extends ContainerScreen<VendingMachineContaine
          matrixStack.func_227861_a_(0.0, 0.0, -0.62F);
          model.field_178732_b.func_228309_a_(matrixStack, vertexBuilder, lighting, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
          matrixStack.func_227865_b_();
-         matrixStack.func_227862_a_(headScale, headScale, headScale);
          model.field_178720_f.func_228309_a_(matrixStack, vertexBuilder, lighting, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
          model.field_78116_c.func_228309_a_(matrixStack, vertexBuilder, lighting, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
          matrixStack.func_227865_b_();

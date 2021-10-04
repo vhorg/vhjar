@@ -59,15 +59,13 @@ public class MazeBlock extends Block {
 
             Score colorScore = worldIn.func_96441_U().func_96529_a(player.func_145748_c_().getString(), colorObjective);
             MazeBlock.MazeColor playerColor = MazeBlock.MazeColor.values()[colorScore.func_96652_c()];
-            BlockPos nextPosition = player.func_233580_cy_();
-            if (playerColor == worldIn.func_180495_p(pos).func_177229_b(COLOR)) {
-               nextPosition = nextPosition.func_177967_a(player.func_174811_aO().func_176734_d(), 1);
-            } else {
-               nextPosition = nextPosition.func_177967_a(player.func_174811_aO(), 1);
+            MazeBlock.MazeColor blockColor = (MazeBlock.MazeColor)worldIn.func_180495_p(pos).func_177229_b(COLOR);
+            if (playerColor != blockColor) {
+               BlockPos nextPosition = player.func_233580_cy_().func_177967_a(player.func_174811_aO(), 1);
                colorScore.func_96647_c(playerColor == MazeBlock.MazeColor.RED ? MazeBlock.MazeColor.BLUE.ordinal() : MazeBlock.MazeColor.RED.ordinal());
+               player.func_70634_a(nextPosition.func_177958_n() + 0.5, nextPosition.func_177956_o(), nextPosition.func_177952_p() + 0.5);
             }
 
-            player.func_70634_a(nextPosition.func_177958_n() + 0.5, nextPosition.func_177956_o(), nextPosition.func_177952_p() + 0.5);
             super.func_176199_a(worldIn, pos, entityIn);
          }
       }

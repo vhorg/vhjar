@@ -13,6 +13,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.minecraft.block.Blocks;
 import net.minecraft.state.properties.StructureMode;
 import net.minecraft.util.ResourceLocation;
@@ -25,7 +26,6 @@ import net.minecraft.world.gen.feature.jigsaw.IJigsawDeserializer;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPattern.PlacementBehaviour;
 import net.minecraft.world.gen.feature.structure.StructureManager;
-import net.minecraft.world.gen.feature.template.BlockIgnoreStructureProcessor;
 import net.minecraft.world.gen.feature.template.IStructureProcessorType;
 import net.minecraft.world.gen.feature.template.JigsawReplacementStructureProcessor;
 import net.minecraft.world.gen.feature.template.PlacementSettings;
@@ -72,12 +72,16 @@ public class PalettedSinglePoolElement extends JigsawPiece {
       this(Either.right(p_i242009_1_), () -> ProcessorLists.field_244101_a, PlacementBehaviour.RIGID);
    }
 
-   private Template func_236843_a_(TemplateManager p_236843_1_) {
-      return (Template)this.field_236839_c_.map(p_236843_1_::func_200220_a, Function.identity());
+   public Either<ResourceLocation, Template> getTemplate() {
+      return this.field_236839_c_;
+   }
+
+   public Template getTemplate(TemplateManager manager) {
+      return (Template)this.field_236839_c_.map(manager::func_200220_a, Function.identity());
    }
 
    public List<BlockInfo> getDataMarkers(TemplateManager p_214857_1_, BlockPos p_214857_2_, Rotation p_214857_3_, boolean p_214857_4_) {
-      Template template = this.func_236843_a_(p_214857_1_);
+      Template template = this.getTemplate(p_214857_1_);
       List<BlockInfo> list = template.func_215386_a(p_214857_2_, new PlacementSettings().func_186220_a(p_214857_3_), Blocks.field_185779_df, p_214857_4_);
       List<BlockInfo> list1 = Lists.newArrayList();
 
@@ -94,14 +98,14 @@ public class PalettedSinglePoolElement extends JigsawPiece {
    }
 
    public List<BlockInfo> func_214849_a(TemplateManager templateManager, BlockPos pos, Rotation rotation, Random random) {
-      Template template = this.func_236843_a_(templateManager);
+      Template template = this.getTemplate(templateManager);
       List<BlockInfo> list = template.func_215386_a(pos, new PlacementSettings().func_186220_a(rotation), Blocks.field_226904_lY_, true);
       Collections.shuffle(list, random);
       return list;
    }
 
    public MutableBoundingBox func_214852_a(TemplateManager templateManager, BlockPos pos, Rotation rotation) {
-      Template template = this.func_236843_a_(templateManager);
+      Template template = this.getTemplate(templateManager);
       return template.func_215388_b(new PlacementSettings().func_186220_a(rotation), pos);
    }
 
@@ -117,11 +121,11 @@ public class PalettedSinglePoolElement extends JigsawPiece {
       Random random,
       boolean keepJigsaws
    ) {
-      return this.generate(null, templateManager, world, structureManager, chunkGen, pos1, pos2, rotation, box, random, keepJigsaws);
+      return this.generate(null, templateManager, world, structureManager, chunkGen, pos1, pos2, rotation, box, random, keepJigsaws, 18);
    }
 
    public boolean generate(
-      Supplier<StructureProcessorList> extra,
+      @Nullable Supplier<StructureProcessorList> extra,
       TemplateManager templateManager,
       ISeedReader world,
       StructureManager structureManager,
@@ -131,11 +135,12 @@ public class PalettedSinglePoolElement extends JigsawPiece {
       Rotation rotation,
       MutableBoundingBox box,
       Random random,
-      boolean keepJigsaws
+      boolean keepJigsaws,
+      int updateFlags
    ) {
-      Template template = this.func_236843_a_(templateManager);
+      Template template = this.getTemplate(templateManager);
       PlacementSettings placementsettings = this.func_230379_a_(extra, rotation, box, keepJigsaws);
-      if (!template.func_237146_a_(world, pos1, pos2, placementsettings, random, 18)) {
+      if (!template.func_237146_a_(world, pos1, pos2, placementsettings, random, updateFlags)) {
          return false;
       } else {
          for (BlockInfo info : Template.processBlockInfos(
@@ -148,13 +153,14 @@ public class PalettedSinglePoolElement extends JigsawPiece {
       }
    }
 
-   protected PlacementSettings func_230379_a_(Supplier<StructureProcessorList> extra, Rotation p_230379_1_, MutableBoundingBox p_230379_2_, boolean p_230379_3_) {
+   protected PlacementSettings func_230379_a_(
+      @Nullable Supplier<StructureProcessorList> extra, Rotation p_230379_1_, MutableBoundingBox p_230379_2_, boolean p_230379_3_
+   ) {
       PlacementSettings placementsettings = new PlacementSettings();
       placementsettings.func_186223_a(p_230379_2_);
       placementsettings.func_186220_a(p_230379_1_);
       placementsettings.func_215223_c(true);
       placementsettings.func_186222_a(false);
-      placementsettings.func_215222_a(BlockIgnoreStructureProcessor.field_215204_a);
       placementsettings.func_237133_d_(true);
       if (!p_230379_3_) {
          placementsettings.func_215222_a(JigsawReplacementStructureProcessor.field_215196_a);

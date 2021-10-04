@@ -3,52 +3,76 @@ package iskallia.vault.block.item;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.util.NameProviderPublic;
 import iskallia.vault.util.StatueType;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Item.Properties;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class LootStatueBlockItem extends BlockItem {
-   public LootStatueBlockItem(Block block) {
+   private final StatueType type;
+
+   public LootStatueBlockItem(Block block, StatueType type) {
       super(block, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(1));
+      this.type = type;
    }
 
-   public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+   @OnlyIn(Dist.CLIENT)
+   public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> toolTip, ITooltipFlag flagIn) {
       CompoundNBT nbt = stack.func_77978_p();
-      if (nbt != null) {
-         CompoundNBT blockEntityTag = nbt.func_74775_l("BlockEntityTag");
-         String nickname = blockEntityTag.func_74779_i("PlayerNickname");
-         StringTextComponent text = new StringTextComponent(" Nickname: " + nickname);
-         text.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(-26266)));
-         tooltip.add(text);
+      if (nbt != null && nbt.func_150297_b("BlockEntityTag", 10)) {
+         this.addStatueInformation(nbt.func_74775_l("BlockEntityTag"), toolTip);
       }
 
-      super.func_77624_a(stack, worldIn, tooltip, flagIn);
+      super.func_77624_a(stack, worldIn, toolTip, flagIn);
    }
 
-   public static ItemStack forVaultBoss(String nickname, int variant, boolean hasCrown) {
-      return getStatueBlockItem(nickname, StatueType.values()[variant], hasCrown, false);
+   public void func_77663_a(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
+      super.func_77663_a(stack, world, entity, itemSlot, isSelected);
+      if (!world.func_201670_d()) {
+         CompoundNBT tag = stack.func_190925_c("BlockEntityTag");
+         if (!tag.func_150297_b("PlayerNickname", 8)) {
+            String name = NameProviderPublic.getRandomName();
+            initRandomStatue(tag, this.type, name);
+         }
+      }
    }
 
-   public static ItemStack forArenaChampion(String nickname, int variant, boolean hasCrown) {
-      return getStatueBlockItem(nickname, StatueType.values()[variant], hasCrown, false);
+   @OnlyIn(Dist.CLIENT)
+   protected void addStatueInformation(CompoundNBT dataTag, List<ITextComponent> toolTip) {
+      String nickname = dataTag.func_74779_i("PlayerNickname");
+      toolTip.add(new StringTextComponent("Player: "));
+      toolTip.add(new StringTextComponent("- ").func_230529_a_(new StringTextComponent(nickname).func_240699_a_(TextFormatting.GOLD)));
+      if (this.type.dropsItems()) {
+         ITextComponent itemDescriptor = new StringTextComponent("NOT SELECTED").func_240699_a_(TextFormatting.RED);
+         if (dataTag.func_74764_b("LootItem")) {
+            ItemStack lootItem = ItemStack.func_199557_a(dataTag.func_74775_l("LootItem"));
+            itemDescriptor = new StringTextComponent(lootItem.func_200301_q().getString()).func_240699_a_(TextFormatting.GREEN);
+         }
+
+         toolTip.add(StringTextComponent.field_240750_d_);
+         toolTip.add(new StringTextComponent("Item: ").func_240699_a_(TextFormatting.WHITE));
+         toolTip.add(new StringTextComponent("- ").func_230529_a_(itemDescriptor));
+      }
    }
 
-   public static ItemStack forGift(String nickname, int variant, boolean hasCrown) {
-      return getStatueBlockItem(nickname, StatueType.values()[variant], hasCrown, false);
+   private static StatueType getStatueType(ItemStack stack) {
+      return stack.func_77973_b() instanceof LootStatueBlockItem ? ((LootStatueBlockItem)stack.func_77973_b()).type : StatueType.GIFT_NORMAL;
    }
 
-   public static ItemStack getStatueBlockItem(String nickname, StatueType type, boolean hasCrown, boolean blankStatue) {
+   public static ItemStack getStatueBlockItem(String nickname, StatueType type) {
       ItemStack itemStack = ItemStack.field_190927_a;
       switch (type) {
          case GIFT_NORMAL:
@@ -60,26 +84,34 @@ public class LootStatueBlockItem extends BlockItem {
          case VAULT_BOSS:
             itemStack = new ItemStack(ModBlocks.VAULT_PLAYER_LOOT_STATUE);
             break;
-         case ARENA_CHAMPION:
-            itemStack = new ItemStack(ModBlocks.ARENA_PLAYER_LOOT_STATUE);
+         case OMEGA:
+            itemStack = new ItemStack(ModBlocks.OMEGA_STATUE);
+            break;
+         case OMEGA_VARIANT:
+            itemStack = new ItemStack(ModBlocks.OMEGA_STATUE_VARIANT);
       }
 
       CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("PlayerNickname", nickname);
-      nbt.func_74768_a("StatueType", type.ordinal());
-      nbt.func_74768_a("Interval", ModConfigs.STATUE_LOOT.getInterval(type));
-      ItemStack loot;
-      if (blankStatue) {
-         loot = ModConfigs.STATUE_LOOT.getLoot();
-      } else {
-         loot = ModConfigs.STATUE_LOOT.randomLoot(type);
-      }
-
-      nbt.func_218657_a("LootItem", loot.serializeNBT());
-      nbt.func_74757_a("HasCrown", hasCrown);
+      initRandomStatue(nbt, type, nickname);
       CompoundNBT stackNBT = new CompoundNBT();
       stackNBT.func_218657_a("BlockEntityTag", nbt);
       itemStack.func_77982_d(stackNBT);
       return itemStack;
+   }
+
+   private static void initRandomStatue(CompoundNBT out, StatueType type, String name) {
+      out.func_74778_a("PlayerNickname", name);
+      out.func_74768_a("StatueType", type.ordinal());
+      if (type.dropsItems()) {
+         out.func_74768_a("Interval", ModConfigs.STATUE_LOOT.getInterval(type));
+         if (!type.isOmega()) {
+            ItemStack loot = ModConfigs.STATUE_LOOT.randomLoot(type);
+            out.func_218657_a("LootItem", loot.serializeNBT());
+         }
+
+         int decay = ModConfigs.STATUE_LOOT.getDecay(type);
+         out.func_74768_a("ItemsRemaining", decay);
+         out.func_74768_a("TotalItems", decay);
+      }
    }
 }

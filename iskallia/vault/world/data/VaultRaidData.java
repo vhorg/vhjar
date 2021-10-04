@@ -1,29 +1,21 @@
 package iskallia.vault.world.data;
 
-import iskallia.vault.Vault;
-import iskallia.vault.init.ModFeatures;
-import iskallia.vault.init.ModStructures;
-import iskallia.vault.item.CrystalData;
-import iskallia.vault.item.ItemVaultCrystal;
-import iskallia.vault.world.raid.VaultRaid;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import iskallia.vault.attribute.RegistryKeyAttribute;
+import iskallia.vault.backup.BackupManager;
+import iskallia.vault.nbt.VMapNBT;
+import iskallia.vault.world.vault.VaultRaid;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.biome.BiomeRegistry;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.gen.feature.structure.StructureStart;
-import net.minecraft.world.gen.settings.StructureSeparationSettings;
+import net.minecraft.util.math.BlockPos.Mutable;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -38,8 +30,8 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 )
 public class VaultRaidData extends WorldSavedData {
    protected static final String DATA_NAME = "the_vault_VaultRaid";
-   private Map<UUID, VaultRaid> activeRaids = new HashMap<>();
-   private int xOffset = 0;
+   private VMapNBT<UUID, VaultRaid> activeVaults = VMapNBT.ofUUID(VaultRaid::new);
+   private Mutable nextVaultPos = BlockPos.field_177992_a.func_239590_i_();
 
    public VaultRaidData() {
       this("the_vault_VaultRaid");
@@ -49,131 +41,105 @@ public class VaultRaidData extends WorldSavedData {
       super(name);
    }
 
-   public VaultRaid getAt(BlockPos pos) {
-      return this.activeRaids.values().stream().filter(raid -> raid.box.func_175898_b(pos)).findFirst().orElse(null);
+   public VaultRaid getActiveFor(ServerPlayerEntity player) {
+      return this.getActiveFor(player.func_110124_au());
    }
 
-   public void remove(ServerWorld server, UUID playerId) {
-      VaultRaid v = this.activeRaids.remove(playerId);
-      if (v != null) {
-         v.ticksLeft = 0;
-         v.finish(server, playerId);
+   public VaultRaid getActiveFor(UUID playerId) {
+      return this.activeVaults.get(playerId);
+   }
+
+   public VaultRaid getAt(ServerWorld world, BlockPos pos) {
+      return this.activeVaults
+         .values()
+         .stream()
+         .filter(vault -> world.func_234923_W_() == vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION))
+         .filter(vault -> {
+            Optional<MutableBoundingBox> box = vault.getProperties().getBase(VaultRaid.BOUNDING_BOX);
+            return box.isPresent() && box.get().func_175898_b(pos);
+         })
+         .findFirst()
+         .orElse(null);
+   }
+
+   public void remove(MinecraftServer server, UUID playerId) {
+      VaultRaid vault = this.activeVaults.remove(playerId);
+      if (vault != null) {
+         ServerWorld world = server.func_71218_a(vault.getProperties().getValue(VaultRaid.DIMENSION));
+         vault.getPlayer(playerId)
+            .ifPresent(
+               player -> {
+                  if (!player.hasExited()) {
+                     VaultRaid.REMOVE_SCAVENGER_ITEMS
+                        .then(VaultRaid.REMOVE_INVENTORY_RESTORE_SNAPSHOTS)
+                        .then(VaultRaid.GRANT_EXP_COMPLETE)
+                        .then(VaultRaid.EXIT_SAFELY)
+                        .execute(vault, player, world);
+                  }
+               }
+            );
+         PlayerStatsData.get(world).onVaultFinished(playerId, vault);
       }
    }
 
-   public VaultRaid getActiveFor(ServerPlayerEntity player) {
-      return this.activeRaids.get(player.func_110124_au());
-   }
+   public VaultRaid startVault(ServerWorld world, VaultRaid.Builder builder) {
+      MinecraftServer server = world.func_73046_m();
+      VaultRaid vault = builder.build();
+      builder.getLevelInitializer().executeForAllPlayers(vault, world);
+      Optional<RegistryKey<World>> dimension = vault.getProperties().getBase(VaultRaid.DIMENSION);
+      if (dimension.isPresent()) {
+         world = server.func_71218_a(dimension.get());
+      } else {
+         vault.getProperties().create(VaultRaid.DIMENSION, world.func_234923_W_());
+      }
 
-   public VaultRaid startNew(ServerPlayerEntity player, ItemVaultCrystal crystal, boolean isFinalVault) {
-      return this.startNew(player, crystal.getRarity().ordinal(), "", new CrystalData(null), isFinalVault);
-   }
-
-   public VaultRaid startNew(ServerPlayerEntity player, int rarity, String playerBossName, CrystalData data, boolean isFinalVault) {
-      return this.startNew(Collections.singletonList(player), Collections.emptyList(), rarity, playerBossName, data, isFinalVault);
-   }
-
-   public VaultRaid startNew(
-      List<ServerPlayerEntity> players, List<ServerPlayerEntity> spectators, int rarity, String playerBossName, CrystalData data, boolean isFinalVault
-   ) {
-      players.forEach(player -> player.func_146105_b(new StringTextComponent("Generating vault, please wait...").func_240699_a_(TextFormatting.GREEN), true));
-      int level = players.stream()
-         .map(player -> PlayerVaultStatsData.get(player.func_71121_q()).getVaultStats(player).getVaultLevel())
-         .max(Integer::compareTo)
-         .get();
-      VaultRaid raid = new VaultRaid(
-         players, spectators, new MutableBoundingBox(this.xOffset, 0, 0, this.xOffset += 2048, 256, 2048), level, rarity, playerBossName
-      );
-      raid.isFinalVault = isFinalVault;
-      players.forEach(player -> {
-         if (this.activeRaids.containsKey(player.func_110124_au())) {
-            this.activeRaids.get(player.func_110124_au()).ticksLeft = 0;
-         }
+      ServerWorld destination = dimension.isPresent() ? server.func_71218_a(dimension.get()) : world;
+      server.func_222817_e(() -> {
+         vault.getGenerator().generate(destination, vault, this.nextVaultPos);
+         vault.getPlayers().forEach(player -> {
+            player.runIfPresent(server, BackupManager::createPlayerInventorySnapshot);
+            this.remove(server, player.getPlayerId());
+            this.activeVaults.put(player.getPlayerId(), vault);
+            vault.getInitializer().execute(vault, player, destination);
+         });
       });
-      raid.getPlayerIds().forEach(uuid -> this.activeRaids.put(uuid, raid));
-      this.func_76185_a();
-      ServerWorld world = players.get(0).func_184102_h().func_71218_a(Vault.VAULT_KEY);
-      players.get(0)
-         .func_184102_h()
-         .func_222817_e(
-            () -> {
-               try {
-                  ChunkPos chunkPos = new ChunkPos(
-                     raid.box.field_78897_a + raid.box.func_78883_b() / 2 >> 4, raid.box.field_78896_c + raid.box.func_78880_d() / 2 >> 4
-                  );
-                  StructureSeparationSettings settings = new StructureSeparationSettings(1, 0, -1);
-                  StructureStart<?> start = (raid.isFinalVault ? ModFeatures.FINAL_VAULT_FEATURE : ModFeatures.VAULT_FEATURE)
-                     .func_242771_a(
-                        world.func_241828_r(),
-                        world.func_72863_F().field_186029_c,
-                        world.func_72863_F().field_186029_c.func_202090_b(),
-                        world.func_184163_y(),
-                        world.func_72905_C(),
-                        chunkPos,
-                        BiomeRegistry.field_244200_a,
-                        0,
-                        settings
-                     );
-                  int chunkRadius = 64;
-
-                  for (int x = -chunkRadius; x <= chunkRadius; x += 17) {
-                     for (int z = -chunkRadius; z <= chunkRadius; z += 17) {
-                        world.func_217353_a(chunkPos.field_77276_a + x, chunkPos.field_77275_b + z, ChunkStatus.field_223226_a_, true)
-                           .func_230344_a_(ModStructures.VAULT, start);
-                     }
-                  }
-
-                  raid.start(world, chunkPos, data);
-               } catch (Exception var9x) {
-                  var9x.printStackTrace();
-               }
-            }
-         );
-      return raid;
+      return vault;
    }
 
    public void tick(ServerWorld world) {
-      this.activeRaids.values().forEach(vaultRaid -> vaultRaid.tick(world));
-      boolean removed = false;
-      List<Runnable> tasks = new ArrayList<>();
-
-      for (VaultRaid raid : this.activeRaids.values()) {
-         if (raid.isComplete()) {
-            raid.syncTicksLeft(world.func_73046_m());
-            tasks.add(() -> raid.playerIds.forEach(uuid -> this.remove(world, uuid)));
-            removed = true;
+      Set<VaultRaid> vaults = new HashSet<>(this.activeVaults.values());
+      vaults.stream()
+         .filter(vault -> vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION) == world.func_234923_W_())
+         .forEach(vault -> vault.tick(world));
+      Set<UUID> completed = new HashSet<>();
+      vaults.forEach(vault -> {
+         if (vault.isFinished()) {
+            vault.getPlayers().forEach(player -> completed.add(player.getPlayerId()));
          }
-      }
-
-      tasks.forEach(Runnable::run);
-      if (removed || this.activeRaids.size() > 0) {
-         this.func_76185_a();
-      }
+      });
+      completed.forEach(uuid -> this.remove(world.func_73046_m(), uuid));
    }
 
    @SubscribeEvent
    public static void onTick(WorldTickEvent event) {
-      if (event.side == LogicalSide.SERVER && event.phase == Phase.START && event.world.func_234923_W_() == Vault.VAULT_KEY) {
+      if (event.side == LogicalSide.SERVER && event.phase == Phase.START) {
          get((ServerWorld)event.world).tick((ServerWorld)event.world);
       }
    }
 
+   public boolean func_76188_b() {
+      return true;
+   }
+
    public void func_76184_a(CompoundNBT nbt) {
-      this.activeRaids.clear();
-      nbt.func_150295_c("ActiveRaids", 10).forEach(raidNBT -> {
-         VaultRaid raid = VaultRaid.fromNBT((CompoundNBT)raidNBT);
-         raid.getPlayerIds().forEach(uuid -> {
-            VaultRaid var10000 = this.activeRaids.put(uuid, raid);
-         });
-      });
-      this.xOffset = nbt.func_74762_e("XOffset");
+      this.activeVaults.deserializeNBT(nbt.func_150295_c("ActiveVaults", 10));
+      int[] pos = nbt.func_74759_k("NextVaultPos");
+      this.nextVaultPos = new Mutable(pos[0], pos[1], pos[2]);
    }
 
    public CompoundNBT func_189551_b(CompoundNBT nbt) {
-      ListNBT raidsList = new ListNBT();
-      this.activeRaids.values().forEach(raid -> raidsList.add(raid.serializeNBT()));
-      nbt.func_218657_a("ActiveRaids", raidsList);
-      nbt.func_74768_a("XOffset", this.xOffset);
+      nbt.func_218657_a("ActiveVaults", this.activeVaults.serializeNBT());
+      nbt.func_74783_a("NextVaultPos", new int[]{this.nextVaultPos.func_177958_n(), this.nextVaultPos.func_177956_o(), this.nextVaultPos.func_177952_p()});
       return nbt;
    }
 
