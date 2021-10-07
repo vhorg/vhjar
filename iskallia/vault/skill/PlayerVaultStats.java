@@ -66,6 +66,7 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
    }
 
    public PlayerVaultStats addVaultExp(MinecraftServer server, int exp) {
+      this.exp = Math.max(this.exp, 0);
       this.exp += exp;
       int initialLevel = this.vaultLevel;
 

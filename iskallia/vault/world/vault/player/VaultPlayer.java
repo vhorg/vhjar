@@ -158,8 +158,8 @@ public abstract class VaultPlayer implements INBTSerializable<CompoundNBT> {
       expGrantedPercent *= multiplier;
       int vaultLevel = stats.getVaultLevel();
       expGrantedPercent *= MathHelper.func_76131_a(1.0F - vaultLevel / 100.0F, 0.0F, 1.0F);
-      float remainingPercent = (float)stats.getExp() / stats.getTnl();
-      if (remainingPercent > expGrantedPercent) {
+      float remainingPercent = 1.0F - (float)stats.getExp() / stats.getTnl();
+      if (expGrantedPercent > remainingPercent) {
          expGrantedPercent -= remainingPercent;
          int remaining = stats.getTnl() - stats.getExp();
          stats.addVaultExp(server, remaining);
