@@ -2,6 +2,7 @@ package iskallia.vault.world.vault.builder;
 
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.util.MiscUtils;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultPartyData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.player.VaultPlayerType;
@@ -22,7 +23,7 @@ public class CoopVaultBuilder extends VaultRaidBuilder {
 
    @Override
    public VaultRaid.Builder initializeBuilder(ServerWorld world, ServerPlayerEntity player, CrystalData crystal) {
-      VaultRaid.Builder builder = this.getDefaultBuilder(crystal);
+      VaultRaid.Builder builder = this.getDefaultBuilder(crystal, world, player);
       Optional<VaultPartyData.Party> partyOpt = VaultPartyData.get(world).getParty(player.func_110124_au());
       if (partyOpt.isPresent() && partyOpt.get().getMembers().size() > 1) {
          VaultPartyData.Party party = partyOpt.get();
@@ -41,5 +42,13 @@ public class CoopVaultBuilder extends VaultRaidBuilder {
 
       builder.setLevelInitializer(VaultRaid.INIT_LEVEL_COOP);
       return builder;
+   }
+
+   @Override
+   protected int getVaultLevelForObjective(ServerWorld world, ServerPlayerEntity player) {
+      return VaultPartyData.get(world).getParty(player.func_110124_au()).map(party -> {
+         UUID leader = party.getLeader() != null ? party.getLeader() : MiscUtils.getRandomEntry(party.getMembers(), world.func_201674_k());
+         return PlayerVaultStatsData.get(world).getVaultStats(leader).getVaultLevel();
+      }).orElse(super.getVaultLevelForObjective(world, player));
    }
 }

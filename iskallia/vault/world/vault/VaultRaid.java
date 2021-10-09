@@ -219,6 +219,11 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       Vault.id("runners_left"), (vault, player, world) -> vault.players.stream().anyMatch(player1 -> player1 instanceof VaultRunner)
    );
    public static final VaultCondition NO_RUNNERS_LEFT = VaultCondition.register(Vault.id("no_runners_left"), RUNNERS_LEFT.negate());
+   public static final VaultCondition ACTIVE_RUNNERS_LEFT = VaultCondition.register(
+      Vault.id("active_runners_left"),
+      (vault, player, world) -> vault.players.stream().anyMatch(player1 -> player1 instanceof VaultRunner && !player1.hasExited())
+   );
+   public static final VaultCondition NO_ACTIVE_RUNNERS_LEFT = VaultCondition.register(Vault.id("no_active_runners_left"), ACTIVE_RUNNERS_LEFT.negate());
    public static final VaultTask CHECK_BAIL = VaultTask.register(
       Vault.id("check_bail"),
       (vault, player, world) -> {
@@ -1091,7 +1096,8 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
                               runner.getBehaviours()
                                  .add(
                                     new VaultBehaviour(
-                                       NO_RUNNERS_LEFT, REMOVE_SCAVENGER_ITEMS.then(REMOVE_INVENTORY_RESTORE_SNAPSHOTS).then(GRANT_EXP_BAIL.then(EXIT_SAFELY))
+                                       NO_ACTIVE_RUNNERS_LEFT,
+                                       REMOVE_SCAVENGER_ITEMS.then(REMOVE_INVENTORY_RESTORE_SNAPSHOTS).then(GRANT_EXP_BAIL.then(EXIT_SAFELY))
                                     )
                                  );
                               runner.getProperties().create(SPAWNER, new VaultSpawner());
@@ -1118,8 +1124,8 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static void init() {
    }
 
-   public static VaultRaid.Builder builder(VaultLogic logic, @Nullable VaultObjective objective) {
-      return new VaultRaid.Builder(logic, objective);
+   public static VaultRaid.Builder builder(VaultLogic logic, int vaultLevel, @Nullable VaultObjective objective) {
+      return new VaultRaid.Builder(logic, vaultLevel, objective);
    }
 
    static {
@@ -1153,8 +1159,8 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       private final List<VaultEvent<?>> events = new ArrayList<>();
       private final Map<VaultPlayerType, Set<ServerPlayerEntity>> players = new HashMap<>();
 
-      protected Builder(VaultLogic logic, @Nullable VaultObjective objective) {
-         this.objective = objective == null ? logic.getRandomObjective() : objective;
+      protected Builder(VaultLogic logic, int vaultLevel, @Nullable VaultObjective objective) {
+         this.objective = objective == null ? logic.getRandomObjective(vaultLevel) : objective;
          this.generator = this.objective.getVaultGenerator();
          this.logic = logic;
       }

@@ -8,7 +8,8 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
@@ -39,9 +40,9 @@ public class VaultGeneralConfig extends Config {
    @Expose
    public boolean SAVE_PLAYER_SNAPSHOTS;
    @Expose
-   private final WeightedList<String> VAULT_OBJECTIVES = new WeightedList<>();
+   private final List<VaultGeneralConfig.Level> VAULT_OBJECTIVES = new ArrayList<>();
    @Expose
-   private final WeightedList<String> VAULT_COOP_OBJECTIVES = new WeightedList<>();
+   private final List<VaultGeneralConfig.Level> VAULT_COOP_OBJECTIVES = new ArrayList<>();
 
    @Override
    public String getName() {
@@ -60,19 +61,12 @@ public class VaultGeneralConfig extends Config {
       return this.OBELISK_DROP_CHANCE;
    }
 
-   public VaultObjective generateObjective() {
-      return this.selectObjective(this.VAULT_OBJECTIVES);
+   public VaultObjective generateObjective(int vaultLevel) {
+      return this.getObjective(vaultLevel, false);
    }
 
-   public VaultObjective generateCoopObjective() {
-      return this.selectObjective(this.VAULT_COOP_OBJECTIVES);
-   }
-
-   private VaultObjective selectObjective(WeightedList<String> objectiveList) {
-      return Optional.ofNullable(objectiveList.getRandom(rand))
-         .<ResourceLocation>map(ResourceLocation::new)
-         .map(VaultObjective::getObjective)
-         .orElse(VaultRaid.SUMMON_AND_KILL_BOSS.get());
+   public VaultObjective generateCoopObjective(int vaultLevel) {
+      return this.getObjective(vaultLevel, true);
    }
 
    @Override
@@ -88,11 +82,15 @@ public class VaultGeneralConfig extends Config {
       this.VAULT_EXIT_TNL_MAX = 0.0F;
       this.SAVE_PLAYER_SNAPSHOTS = false;
       this.VAULT_OBJECTIVES.clear();
-      this.VAULT_OBJECTIVES.add(Vault.id("summon_and_kill_boss").toString(), 1);
-      this.VAULT_OBJECTIVES.add(Vault.id("scavenger_hunt").toString(), 1);
+      WeightedList<String> objectives = new WeightedList<>();
+      objectives.add(Vault.id("summon_and_kill_boss").toString(), 1);
+      objectives.add(Vault.id("scavenger_hunt").toString(), 1);
+      this.VAULT_OBJECTIVES.add(new VaultGeneralConfig.Level(0, objectives));
       this.VAULT_COOP_OBJECTIVES.clear();
-      this.VAULT_COOP_OBJECTIVES.add(Vault.id("summon_and_kill_boss").toString(), 1);
-      this.VAULT_COOP_OBJECTIVES.add(Vault.id("scavenger_hunt").toString(), 1);
+      objectives = new WeightedList<>();
+      objectives.add(Vault.id("summon_and_kill_boss").toString(), 1);
+      objectives.add(Vault.id("scavenger_hunt").toString(), 1);
+      this.VAULT_COOP_OBJECTIVES.add(new VaultGeneralConfig.Level(0, objectives));
    }
 
    @SubscribeEvent
@@ -111,6 +109,47 @@ public class VaultGeneralConfig extends Config {
          if (ModConfigs.VAULT_GENERAL.BLOCK_BLACKLIST.contains(state.func_177230_c().getRegistryName().toString()) && event.isCancelable()) {
             event.setCanceled(true);
          }
+      }
+   }
+
+   @Nonnull
+   private VaultObjective getObjective(int vaultLevel, boolean coop) {
+      VaultGeneralConfig.Level levelConfig = this.getForLevel(coop ? this.VAULT_COOP_OBJECTIVES : this.VAULT_OBJECTIVES, vaultLevel);
+      if (levelConfig == null) {
+         return VaultRaid.SUMMON_AND_KILL_BOSS.get();
+      } else {
+         String objective = levelConfig.outcomes.getRandom(rand);
+         return objective == null ? VaultRaid.SUMMON_AND_KILL_BOSS.get() : VaultObjective.getObjective(new ResourceLocation(objective));
+      }
+   }
+
+   @Nullable
+   public VaultGeneralConfig.Level getForLevel(List<VaultGeneralConfig.Level> levels, int level) {
+      for (int i = 0; i < levels.size(); i++) {
+         if (level < levels.get(i).level) {
+            if (i != 0) {
+               return levels.get(i - 1);
+            }
+            break;
+         }
+
+         if (i == levels.size() - 1) {
+            return levels.get(i);
+         }
+      }
+
+      return null;
+   }
+
+   public static class Level {
+      @Expose
+      private final int level;
+      @Expose
+      private final WeightedList<String> outcomes;
+
+      public Level(int level, WeightedList<String> outcomes) {
+         this.level = level;
+         this.outcomes = outcomes;
       }
    }
 }

@@ -395,6 +395,30 @@
               ]
             }
           ]
+        },
+        { "_name": "vaultcookie",
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:vault_cookie",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 2
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.0
+                }
+              ]
+            }
+          ]
         }
       ]
     },

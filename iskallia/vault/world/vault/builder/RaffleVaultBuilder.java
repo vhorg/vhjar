@@ -19,7 +19,7 @@ public class RaffleVaultBuilder extends VaultRaidBuilder {
 
    @Override
    public VaultRaid.Builder initializeBuilder(ServerWorld world, ServerPlayerEntity player, CrystalData crystal) {
-      VaultRaid.Builder builder = this.getDefaultBuilder(crystal).set(VaultRaid.IS_RAFFLE, true);
+      VaultRaid.Builder builder = this.getDefaultBuilder(crystal, world, player).set(VaultRaid.IS_RAFFLE, true);
       String playerBossName = crystal.getPlayerBossName();
       builder.set(VaultRaid.PLAYER_BOSS_NAME, playerBossName.isEmpty() ? NameProviderPublic.getRandomName() : playerBossName);
       builder.addPlayer(VaultPlayerType.RUNNER, player);

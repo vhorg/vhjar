@@ -4,14 +4,18 @@ import iskallia.vault.attribute.RegistryKeyAttribute;
 import iskallia.vault.backup.BackupManager;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.world.vault.VaultRaid;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.math.BlockPos.Mutable;
@@ -132,7 +136,24 @@ public class VaultRaidData extends WorldSavedData {
    }
 
    public void func_76184_a(CompoundNBT nbt) {
-      this.activeVaults.deserializeNBT(nbt.func_150295_c("ActiveVaults", 10));
+      Map<UUID, VaultRaid> foundVaults = new HashMap<>();
+      ListNBT vaults = nbt.func_150295_c("ActiveVaults", 10);
+
+      for (int i = 0; i < vaults.size(); i++) {
+         CompoundNBT tag = vaults.func_150305_b(i);
+         UUID playerId = UUID.fromString(tag.func_74779_i("Key"));
+         VaultRaid vault = new VaultRaid();
+         vault.deserializeNBT(tag.func_74775_l("Value"));
+         UUID vaultId = vault.getProperties().getBaseOrDefault(VaultRaid.IDENTIFIER, Util.field_240973_b_);
+         if (foundVaults.containsKey(vaultId)) {
+            vault = foundVaults.get(vaultId);
+         } else {
+            foundVaults.put(vaultId, vault);
+         }
+
+         this.activeVaults.put(playerId, vault);
+      }
+
       int[] pos = nbt.func_74759_k("NextVaultPos");
       this.nextVaultPos = new Mutable(pos[0], pos[1], pos[2]);
    }

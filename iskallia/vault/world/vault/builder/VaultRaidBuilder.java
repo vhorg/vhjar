@@ -1,6 +1,7 @@
 package iskallia.vault.world.vault.builder;
 
 import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.event.VaultEvent;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
@@ -15,7 +16,11 @@ import net.minecraft.world.server.ServerWorld;
 public abstract class VaultRaidBuilder {
    public abstract VaultRaid.Builder initializeBuilder(ServerWorld var1, ServerPlayerEntity var2, CrystalData var3);
 
-   protected VaultRaid.Builder getDefaultBuilder(CrystalData crystal) {
+   protected int getVaultLevelForObjective(ServerWorld world, ServerPlayerEntity player) {
+      return PlayerVaultStatsData.get(world).getVaultStats(player.func_110124_au()).getVaultLevel();
+   }
+
+   protected VaultRaid.Builder getDefaultBuilder(CrystalData crystal, ServerWorld world, ServerPlayerEntity player) {
       VaultObjective vObjective = null;
       if (crystal.getSelectedObjective() != null) {
          vObjective = VaultObjective.getObjective(crystal.getSelectedObjective());
@@ -25,11 +30,11 @@ public abstract class VaultRaidBuilder {
          vObjective.setObjectiveTargetCount(crystal.getTargetObjectiveCount());
       }
 
-      return this.getDefaultBuilder(crystal, vObjective);
+      return this.getDefaultBuilder(crystal, this.getVaultLevelForObjective(world, player), vObjective);
    }
 
-   protected VaultRaid.Builder getDefaultBuilder(CrystalData crystal, @Nullable VaultObjective objective) {
-      return VaultRaid.builder(crystal.getType().getLogic(), objective)
+   protected VaultRaid.Builder getDefaultBuilder(CrystalData crystal, int vaultLevel, @Nullable VaultObjective objective) {
+      return VaultRaid.builder(crystal.getType().getLogic(), vaultLevel, objective)
          .setInitializer(this.getDefaultInitializer())
          .addEvents(this.getDefaultEvents())
          .set(VaultRaid.CRYSTAL_DATA, crystal)

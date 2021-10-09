@@ -21,10 +21,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -103,6 +107,7 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
                   );
                   break;
                case INFUSING:
+                  this.playInfusionEffects((ServerWorld)world);
                   if (this.infusionTimer-- <= 0) {
                      this.completeInfusion(world);
                      this.sendUpdates();
@@ -118,8 +123,9 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
    }
 
    public void onAltarPowered() {
-      if (this.field_145850_b != null && this.getAltarState() == VaultAltarTileEntity.AltarState.COMPLETE) {
-         PlayerVaultAltarData.get((ServerWorld)this.field_145850_b).getAltars(this.owner).forEach(altarPos -> {
+      if (this.field_145850_b instanceof ServerWorld && this.getAltarState() == VaultAltarTileEntity.AltarState.COMPLETE) {
+         ServerWorld serverWorld = (ServerWorld)this.field_145850_b;
+         PlayerVaultAltarData.get(serverWorld).getAltars(this.owner).forEach(altarPos -> {
             if (!this.func_174877_v().equals(altarPos)) {
                TileEntity te = this.field_145850_b.func_175625_s(altarPos);
                if (te instanceof VaultAltarTileEntity) {
@@ -130,6 +136,16 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
                }
             }
          });
+         serverWorld.func_184148_a(
+            null,
+            this.func_174877_v().func_177958_n(),
+            this.func_174877_v().func_177956_o(),
+            this.func_174877_v().func_177952_p(),
+            SoundEvents.field_206938_K,
+            SoundCategory.BLOCKS,
+            1.0F,
+            0.5F
+         );
          this.infusionTimer = ModConfigs.VAULT_ALTAR.INFUSION_TIME * 20;
          this.altarState = VaultAltarTileEntity.AltarState.INFUSING;
       }
@@ -185,6 +201,7 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
    }
 
    private void completeInfusion(World world) {
+      ServerWorld serverWorld = (ServerWorld)world;
       ItemStack crystal = new ItemStack(ModItems.VAULT_CRYSTAL);
       world.func_217376_c(
          new ItemEntity(
@@ -196,6 +213,58 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
       data.setType(ModConfigs.LOOT_TABLES.getForLevel(level).CRYSTAL_TYPE.getRandom(world.func_201674_k()));
       PlayerStatsData.get((ServerWorld)world).onCrystalCrafted(this.owner, this.recipe.getRequiredItems(), data.getType());
       this.resetAltar((ServerWorld)world);
+      this.playCompletionEffects(serverWorld);
+   }
+
+   private void playInfusionEffects(ServerWorld world) {
+      float speed = this.infusionTimer * 0.01F - 0.5F;
+      if (speed > 0.0F) {
+         world.func_195598_a(
+            ParticleTypes.field_197599_J,
+            this.field_174879_c.func_177958_n() + 0.5,
+            this.func_174877_v().func_177956_o() + 1.6,
+            this.func_174877_v().func_177952_p() + 0.5,
+            3,
+            0.0,
+            0.0,
+            0.0,
+            speed
+         );
+      }
+   }
+
+   private void playCompletionEffects(ServerWorld serverWorld) {
+      RedstoneParticleData particleData = new RedstoneParticleData(0.0F, 1.0F, 0.0F, 1.0F);
+
+      for (int i = 0; i < 10; i++) {
+         float offset = 0.1F * i;
+         if (serverWorld.field_73012_v.nextFloat() < 0.5F) {
+            offset *= -1.0F;
+         }
+
+         serverWorld.func_195598_a(
+            particleData,
+            this.field_174879_c.func_177958_n() + 0.5,
+            this.field_174879_c.func_177956_o() + 1.6,
+            this.field_174879_c.func_177952_p() + 0.5,
+            10,
+            offset,
+            offset,
+            offset,
+            1.0
+         );
+      }
+
+      serverWorld.func_184148_a(
+         null,
+         this.func_174877_v().func_177958_n(),
+         this.func_174877_v().func_177956_o(),
+         this.func_174877_v().func_177952_p(),
+         SoundEvents.field_187802_ec,
+         SoundCategory.BLOCKS,
+         0.7F,
+         1.5F
+      );
    }
 
    private void resetAltar(ServerWorld world) {

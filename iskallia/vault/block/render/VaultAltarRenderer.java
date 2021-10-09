@@ -20,6 +20,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
@@ -99,17 +100,28 @@ public class VaultAltarRenderer extends TileEntityRenderer<VaultAltarTileEntity>
       RequiredItem item, MatrixStack matrixStack, IRenderTypeBuffer buffer, int lightLevel, double[] corner, StringTextComponent text, int color
    ) {
       FontRenderer fontRenderer = this.mc.field_71466_p;
-      matrixStack.func_227860_a_();
-      float scale = 0.01F;
-      int opacity = 1711276032;
-      float offset = -fontRenderer.func_238414_a_(text) / 2;
-      Matrix4f matrix4f = matrixStack.func_227866_c_().func_227870_a_();
-      matrixStack.func_227861_a_(corner[0], corner[1] + 0.4F, corner[2]);
-      matrixStack.func_227862_a_(scale, scale, scale);
-      matrixStack.func_227863_a_(this.mc.func_175598_ae().func_229098_b_());
-      matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(180.0F));
-      fontRenderer.func_243247_a(text, offset, 0.0F, color, false, matrix4f, buffer, false, opacity, lightLevel);
-      matrixStack.func_227865_b_();
+      ClientPlayerEntity player = Minecraft.func_71410_x().field_71439_g;
+      if (player != null) {
+         matrixStack.func_227860_a_();
+         float scale = 0.01F;
+         int opacity = 1711276032;
+         float offset = -fontRenderer.func_238414_a_(text) / 2;
+         Matrix4f matrix4f = matrixStack.func_227866_c_().func_227870_a_();
+         matrixStack.func_227861_a_(corner[0], corner[1] + 0.4F, corner[2]);
+         matrixStack.func_227862_a_(scale, scale, scale);
+         matrixStack.func_227863_a_(this.mc.func_175598_ae().func_229098_b_());
+         matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(180.0F));
+         fontRenderer.func_243247_a(text, offset, 0.0F, color, false, matrix4f, buffer, false, opacity, lightLevel);
+         if (player.func_225608_bj_()) {
+            ITextComponent itemName = item.getItem().func_200301_q();
+            offset = -fontRenderer.func_238414_a_(itemName) / 2;
+            matrixStack.func_227861_a_(0.0, 1.4F, 0.0);
+            matrix4f.func_226597_a_(new Vector3f(0.0F, 0.15F, 0.0F));
+            fontRenderer.func_243247_a(item.getItem().func_200301_q(), offset, 0.0F, color, false, matrix4f, buffer, false, opacity, lightLevel);
+         }
+
+         matrixStack.func_227865_b_();
+      }
    }
 
    private float getAngle(ClientPlayerEntity player, float partialTicks) {

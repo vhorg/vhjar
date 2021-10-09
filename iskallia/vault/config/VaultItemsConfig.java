@@ -4,7 +4,11 @@ import com.google.gson.annotations.Expose;
 
 public class VaultItemsConfig extends Config {
    @Expose
-   public VaultItemsConfig.VaultBurger VAULT_BURGER;
+   public VaultItemsConfig.PercentageExpFood VAULT_BURGER;
+   @Expose
+   public VaultItemsConfig.PercentageExpFood VAULT_PIZZA;
+   @Expose
+   public VaultItemsConfig.FlatExpFood VAULT_COOKIE;
 
    @Override
    public String getName() {
@@ -13,15 +17,32 @@ public class VaultItemsConfig extends Config {
 
    @Override
    protected void reset() {
-      this.VAULT_BURGER = new VaultItemsConfig.VaultBurger();
-      this.VAULT_BURGER.minExpPercent = 0.1F;
-      this.VAULT_BURGER.maxExpPercent = 0.2F;
+      this.VAULT_BURGER = new VaultItemsConfig.PercentageExpFood(0.0F, 0.03F);
+      this.VAULT_PIZZA = new VaultItemsConfig.PercentageExpFood(0.0F, 0.01F);
+      this.VAULT_COOKIE = new VaultItemsConfig.FlatExpFood(0, 100);
    }
 
-   public static class VaultBurger {
+   public static class FlatExpFood {
+      @Expose
+      public int minExp;
+      @Expose
+      public int maxExp;
+
+      public FlatExpFood(int minExp, int maxExp) {
+         this.minExp = minExp;
+         this.maxExp = maxExp;
+      }
+   }
+
+   public static class PercentageExpFood {
       @Expose
       public float minExpPercent;
       @Expose
       public float maxExpPercent;
+
+      public PercentageExpFood(float minExpPercent, float maxExpPercent) {
+         this.minExpPercent = minExpPercent;
+         this.maxExpPercent = maxExpPercent;
+      }
    }
 }

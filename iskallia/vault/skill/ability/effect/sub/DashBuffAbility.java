@@ -23,21 +23,22 @@ public class DashBuffAbility extends DashAbility<DashBuffConfig> {
    private static final Set<UUID> dashingPlayers = new HashSet<>();
 
    public boolean onAction(DashBuffConfig config, PlayerEntity player, boolean active) {
-      if (super.onAction(config, player, active)) {
-         World world = player.func_130014_f_();
-         if (world instanceof ServerWorld && player instanceof ServerPlayerEntity && dashingPlayers.add(player.func_110124_au())) {
-            MinecraftServer srv = world.func_73046_m();
-            AttributeModifier mod = new AttributeModifier("Dash damage increase", config.getDamageIncreasePerDash(), Operation.MULTIPLY_BASE);
-            player.func_110148_a(Attributes.field_233823_f_).func_233767_b_(mod);
-            ServerScheduler.INSTANCE.schedule(config.getDamageIncreaseTickTime(), () -> {
-               player.func_110148_a(Attributes.field_233823_f_).func_111124_b(mod);
-               dashingPlayers.remove(player.func_110124_au());
-               PlayerAbilitiesData data = PlayerAbilitiesData.get(srv);
-               AbilityTree abilities = data.getAbilities(player);
-               AbilityNode<?, ?> dash = abilities.getNodeByName("Dash");
-               abilities.putOnCooldown(player.func_184102_h(), dash, ModConfigs.ABILITIES.getCooldown(dash, (ServerPlayerEntity)player));
-            });
-         }
+      World world = player.func_130014_f_();
+      if (world instanceof ServerWorld
+         && player instanceof ServerPlayerEntity
+         && dashingPlayers.add(player.func_110124_au())
+         && super.onAction(config, player, active)) {
+         MinecraftServer srv = world.func_73046_m();
+         AttributeModifier mod = new AttributeModifier("Dash damage increase", config.getDamageIncreasePerDash(), Operation.MULTIPLY_BASE);
+         player.func_110148_a(Attributes.field_233823_f_).func_233767_b_(mod);
+         ServerScheduler.INSTANCE.schedule(config.getDamageIncreaseTickTime(), () -> {
+            player.func_110148_a(Attributes.field_233823_f_).func_111124_b(mod);
+            dashingPlayers.remove(player.func_110124_au());
+            PlayerAbilitiesData data = PlayerAbilitiesData.get(srv);
+            AbilityTree abilities = data.getAbilities(player);
+            AbilityNode<?, ?> dash = abilities.getNodeByName("Dash");
+            abilities.putOnCooldown(player.func_184102_h(), dash, ModConfigs.ABILITIES.getCooldown(dash, (ServerPlayerEntity)player));
+         });
       }
 
       return false;

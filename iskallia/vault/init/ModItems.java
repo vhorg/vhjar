@@ -80,11 +80,24 @@ public class ModItems {
          return true;
       }
    };
-   public static VaultXPFoodItem VAULT_BURGER = new VaultXPFoodItem(
+   public static VaultXPFoodItem VAULT_BURGER = new VaultXPFoodItem.Percent(
       Vault.id("vault_burger"),
       () -> ModConfigs.VAULT_ITEMS.VAULT_BURGER.minExpPercent,
       () -> ModConfigs.VAULT_ITEMS.VAULT_BURGER.maxExpPercent,
       new Properties().func_200916_a(VAULT_MOD_GROUP)
+   );
+   public static VaultXPFoodItem OOZING_PIZZA = new VaultXPFoodItem.Percent(
+      Vault.id("oozing_pizza"),
+      () -> ModConfigs.VAULT_ITEMS.VAULT_PIZZA.minExpPercent,
+      () -> ModConfigs.VAULT_ITEMS.VAULT_PIZZA.maxExpPercent,
+      new Properties().func_200916_a(VAULT_MOD_GROUP)
+   );
+   public static VaultXPFoodItem VAULT_COOKIE = new VaultXPFoodItem.Flat(
+      Vault.id("vault_cookie"),
+      () -> ModConfigs.VAULT_ITEMS.VAULT_COOKIE.minExp,
+      () -> ModConfigs.VAULT_ITEMS.VAULT_COOKIE.maxExp,
+      new Properties().func_200916_a(VAULT_MOD_GROUP),
+      25
    );
    public static ItemSkillOrb SKILL_ORB = new ItemSkillOrb(VAULT_MOD_GROUP);
    public static ItemVaultGem VAULT_ROCK = new ItemVaultGem(VAULT_MOD_GROUP, Vault.id("vault_rock"));
@@ -225,9 +238,6 @@ public class ModItems {
    public static BasicItem VAULT_GOLD = new BasicItem(Vault.id("vault_gold"), new Properties().func_200916_a(VAULT_MOD_GROUP));
    public static BasicItem VAULT_DIAMOND = new BasicItem(Vault.id("vault_diamond"), new Properties().func_200916_a(VAULT_MOD_GROUP));
    public static BasicItem SKILL_ESSENCE = new BasicItem(Vault.id("skill_essence"), new Properties().func_200916_a(VAULT_MOD_GROUP));
-   public static VaultXPFoodItem OOZING_PIZZA = new VaultXPFoodItem(
-      Vault.id("oozing_pizza"), () -> 0.0F, () -> 0.01F, new Properties().func_200916_a(VAULT_MOD_GROUP)
-   );
    public static LootableItem UNIDENTIFIED_RELIC = new LootableItem(
       Vault.id("unidentified_relic"), new Properties().func_200916_a(VAULT_MOD_GROUP), () -> new ItemStack(ModConfigs.VAULT_RELICS.getRandomPart())
    );
@@ -527,6 +537,8 @@ public class ModItems {
    public static void registerItems(Register<Item> event) {
       IForgeRegistry<Item> registry = event.getRegistry();
       registry.register(VAULT_BURGER);
+      registry.register(OOZING_PIZZA);
+      registry.register(VAULT_COOKIE);
       registry.register(SKILL_ORB);
       registry.register(ALEXANDRITE_GEM);
       registry.register(BENITOITE_GEM);
@@ -638,7 +650,6 @@ public class ModItems {
       registry.register(VAULT_GOLD);
       registry.register(VAULT_DIAMOND);
       registry.register(SKILL_ESSENCE);
-      registry.register(OOZING_PIZZA);
       registry.register(UNIDENTIFIED_RELIC);
       registry.register(SWEET_KIWI);
       registry.register(HUNTER_EYE);

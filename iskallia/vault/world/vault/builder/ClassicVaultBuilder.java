@@ -18,7 +18,7 @@ public class ClassicVaultBuilder extends VaultRaidBuilder {
 
    @Override
    public VaultRaid.Builder initializeBuilder(ServerWorld world, ServerPlayerEntity player, CrystalData crystal) {
-      VaultRaid.Builder builder = this.getDefaultBuilder(crystal);
+      VaultRaid.Builder builder = this.getDefaultBuilder(crystal, world, player);
       builder.addPlayer(VaultPlayerType.RUNNER, player);
       builder.set(VaultRaid.HOST, player.func_110124_au());
       return builder;

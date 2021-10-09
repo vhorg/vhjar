@@ -82,7 +82,7 @@ public class VaultSpectator extends VaultPlayer {
 
    @Override
    public void exit() {
-      this.delegate.exited = true;
+      this.delegate.exit();
    }
 
    @Override

@@ -117,7 +117,7 @@ public class BlockHelper {
          }
 
          xp = event.getExpToDrop();
-      } catch (Exception var24) {
+      } catch (Exception var25) {
          return false;
       }
 
@@ -132,18 +132,19 @@ public class BlockHelper {
             if (!ignoreHarvestRestrictions) {
                harvestable = stateBroken.canHarvestBlock(world, pos, player);
             }
-         } catch (Exception var23) {
+         } catch (Exception var24) {
             return false;
          }
 
          try {
             heldItem.func_77946_l().func_179548_a(world, stateBroken, pos, player);
-         } catch (Exception var22) {
+         } catch (Exception var23) {
             return false;
          }
 
          boolean wasCapturingStates = world.captureBlockSnapshots;
          List<BlockSnapshot> previousCapturedStates = new ArrayList<>(world.capturedBlockSnapshots);
+         TileEntity tileEntity = world.func_175625_s(pos);
          world.captureBlockSnapshots = true;
 
          try {
@@ -155,7 +156,7 @@ public class BlockHelper {
             } else {
                stateBroken.func_177230_c().func_176208_a(world, pos, stateBroken, player);
             }
-         } catch (Exception var21) {
+         } catch (Exception var22) {
             restoreWorldState(world, wasCapturingStates, previousCapturedStates);
             return false;
          }
@@ -163,9 +164,8 @@ public class BlockHelper {
          stateBroken.func_177230_c().func_176206_d(world, pos, stateBroken);
          if (harvestable) {
             try {
-               TileEntity tileEntity = world.func_175625_s(pos);
                stateBroken.func_177230_c().func_180657_a(world, player, pos, stateBroken, tileEntity, heldItem.func_77946_l());
-            } catch (Exception var20) {
+            } catch (Exception var21) {
                restoreWorldState(world, wasCapturingStates, previousCapturedStates);
                return false;
             }

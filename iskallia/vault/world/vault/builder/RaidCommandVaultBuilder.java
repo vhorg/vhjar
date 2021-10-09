@@ -17,7 +17,7 @@ public class RaidCommandVaultBuilder extends VaultRaidBuilder {
 
    @Override
    public VaultRaid.Builder initializeBuilder(ServerWorld world, ServerPlayerEntity player, CrystalData crystal) {
-      return VaultRaid.builder(VaultLogic.CLASSIC, VaultRaid.SUMMON_AND_KILL_BOSS.get())
+      return VaultRaid.builder(VaultLogic.CLASSIC, 0, VaultRaid.SUMMON_AND_KILL_BOSS.get())
          .setInitializer(this.getDefaultInitializer())
          .addEvents(this.getDefaultEvents())
          .addPlayer(VaultPlayerType.RUNNER, player);

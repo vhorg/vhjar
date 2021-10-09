@@ -172,6 +172,9 @@ public class FighterEntity extends ZombieEntity {
       return super.func_213348_b(pose, size) * this.sizeMultiplier;
    }
 
+   protected void func_207302_dI() {
+   }
+
    public ILivingEntityData func_213386_a(
       IServerWorld world, DifficultyInstance difficulty, SpawnReason reason, ILivingEntityData spawnData, CompoundNBT dataTag
    ) {

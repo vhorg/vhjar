@@ -12,7 +12,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -88,7 +87,7 @@ public class VeinMinerAbility<C extends VeinMinerConfig> extends AbilityEffect<C
                BlockState at = world.func_180495_p(offset);
                if (!at.isAir(world, offset) && at.func_177230_c() == targetBlock) {
                   if (this.shouldVoid(world, targetBlock)) {
-                     world.func_175656_a(offset, Blocks.field_150350_a.func_176223_P());
+                     world.func_217377_a(offset, false);
                      BlockHelper.damageMiningItem(heldItem, player, 1);
                   } else if (this.doDestroy(world, offset, player, config)) {
                      BlockHelper.damageMiningItem(heldItem, player, 1);
@@ -106,7 +105,7 @@ public class VeinMinerAbility<C extends VeinMinerConfig> extends AbilityEffect<C
 
    private boolean doDestroy(ServerWorld world, BlockPos pos, ServerPlayerEntity player, C config) {
       ItemStack miningStack = this.getVeinMiningItem(player, config);
-      return BlockHelper.breakBlock(world, player, pos, world.func_180495_p(pos), miningStack, true, true);
+      return BlockHelper.breakBlock(world, player, pos, world.func_180495_p(pos), miningStack, true, false);
    }
 
    public void damageMiningItem(ItemStack heldItem, PlayerEntity player, C config) {
