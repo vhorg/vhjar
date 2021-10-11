@@ -159,10 +159,19 @@ public class PlayerVaultStatsData extends WorldSavedData {
    private static NonNullList<ItemStack> generateTrophyBox(ServerWorld overWorld, int vaultLevel) {
       LootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(vaultLevel);
       LootTable bossBonusTbl = overWorld.func_73046_m().func_200249_aQ().func_186521_a(config.getScavengerCrate());
-      NonNullList<ItemStack> recordLoot = NonNullList.func_191197_a(27, ItemStack.field_190927_a);
+      NonNullList<ItemStack> recordLoot = NonNullList.func_191196_a();
       Builder builder = new Builder(overWorld).func_216023_a(overWorld.field_73012_v);
-      recordLoot.addAll(bossBonusTbl.func_216113_a(builder.func_216022_a(LootParameterSets.field_216260_a)));
+
+      while (recordLoot.size() < 27) {
+         recordLoot.addAll(bossBonusTbl.func_216113_a(builder.func_216022_a(LootParameterSets.field_216260_a)));
+      }
+
       Collections.shuffle(recordLoot);
+
+      while (recordLoot.size() > 27) {
+         recordLoot.remove(recordLoot.size() - 1);
+      }
+
       return recordLoot;
    }
 
