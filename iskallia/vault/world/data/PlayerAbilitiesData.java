@@ -1,5 +1,6 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
 import java.util.HashMap;
@@ -95,6 +96,12 @@ public class PlayerAbilitiesData extends WorldSavedData {
       abilityTree.sync(player.field_71133_b);
       this.func_76185_a();
       return this;
+   }
+
+   public static void setAbilityOnCooldown(ServerPlayerEntity player, String abilityName) {
+      AbilityTree abilities = get(player.func_71121_q()).getAbilities(player);
+      AbilityNode<?, ?> abilityNode = abilities.getNodeByName(abilityName);
+      abilities.putOnCooldown(player.func_184102_h(), abilityNode, ModConfigs.ABILITIES.getCooldown(abilityNode, player));
    }
 
    @SubscribeEvent

@@ -6,6 +6,7 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.gen.piece.VaultTreasure;
 import iskallia.vault.world.vault.logic.objective.TroveObjective;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import java.util.Random;
@@ -86,17 +87,23 @@ public class VaultLootableTileEntity extends TileEntity implements ITickableTile
             return Blocks.field_150350_a.func_176223_P();
          } else {
             VaultObjective objective = vault.getActiveObjective(TroveObjective.class).orElse(null);
-            if (objective == null) {
-               return ModConfigs.VAULT_LOOTABLES.ORE.get(world, pos, random, poolName, playerUUID);
+            if (objective != null) {
+               return this.getRandomVaultOreBlock(world, pos, random, poolName, playerUUID);
             } else {
-               BlockState generatedBlock;
-               do {
-                  generatedBlock = ModConfigs.VAULT_LOOTABLES.ORE.get(world, pos, random, poolName, playerUUID);
-               } while (!(generatedBlock.func_177230_c() instanceof VaultOreBlock));
-
-               return generatedBlock;
+               return !vault.getGenerator().getPiecesAt(pos, VaultTreasure.class).isEmpty()
+                  ? this.getRandomVaultOreBlock(world, pos, random, poolName, playerUUID)
+                  : ModConfigs.VAULT_LOOTABLES.ORE.get(world, pos, random, poolName, playerUUID);
             }
          }
+      }
+
+      private BlockState getRandomVaultOreBlock(ServerWorld world, BlockPos pos, Random random, String poolName, UUID playerUUID) {
+         BlockState generatedBlock;
+         do {
+            generatedBlock = ModConfigs.VAULT_LOOTABLES.ORE.get(world, pos, random, poolName, playerUUID);
+         } while (!(generatedBlock.func_177230_c() instanceof VaultOreBlock));
+
+         return generatedBlock;
       }
    }
 }

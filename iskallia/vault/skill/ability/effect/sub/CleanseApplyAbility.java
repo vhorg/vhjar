@@ -6,10 +6,11 @@ import iskallia.vault.util.EntityHelper;
 import java.util.List;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 
 public class CleanseApplyAbility extends CleanseAbility<CleanseApplyConfig> {
-   protected void removeEffects(CleanseApplyConfig config, PlayerEntity player, List<EffectInstance> effects) {
+   protected void removeEffects(CleanseApplyConfig config, ServerPlayerEntity player, List<EffectInstance> effects) {
       super.removeEffects(config, player, effects);
 
       for (EffectInstance effect : effects) {

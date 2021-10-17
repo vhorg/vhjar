@@ -6,9 +6,10 @@ import iskallia.vault.util.EntityHelper;
 import java.util.List;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 public class MegaJumpKnockbackAbility extends MegaJumpAbility<MegaJumpKnockbackConfig> {
-   public boolean onAction(MegaJumpKnockbackConfig config, PlayerEntity player, boolean active) {
+   public boolean onAction(MegaJumpKnockbackConfig config, ServerPlayerEntity player, boolean active) {
       if (super.onAction(config, player, active)) {
          List<LivingEntity> entities = EntityHelper.getNearby(player.func_130014_f_(), player.func_233580_cy_(), config.getRadius(), LivingEntity.class);
          entities.removeIf(e -> e instanceof PlayerEntity);

@@ -3,6 +3,7 @@ package iskallia.vault.config;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.skill.talent.ArchetypeTalentGroup;
 import iskallia.vault.skill.talent.TalentGroup;
+import iskallia.vault.skill.talent.type.AbsorptionTalent;
 import iskallia.vault.skill.talent.type.AngelTalent;
 import iskallia.vault.skill.talent.type.ArtisanTalent;
 import iskallia.vault.skill.talent.type.AttributeTalent;
@@ -112,6 +113,8 @@ public class TalentsConfig extends Config {
    public ArchetypeTalentGroup<BarbaricTalent> BARBARIC;
    @Expose
    public TalentGroup<SoulShardTalent> SOUL_HUNTER;
+   @Expose
+   public TalentGroup<AbsorptionTalent> BARRIER;
 
    @Override
    public String getName() {
@@ -155,7 +158,8 @@ public class TalentsConfig extends Config {
          this.COMMANDER,
          this.WARD,
          this.BARBARIC,
-         this.SOUL_HUNTER
+         this.SOUL_HUNTER,
+         this.BARRIER
       );
    }
 
@@ -309,11 +313,12 @@ public class TalentsConfig extends Config {
       this.GLASS_CANNON = new ArchetypeTalentGroup<>("Glass Cannon", new GlassCannonTalent(2, 1.5F, 1.5F));
       this.COMMANDER = new ArchetypeTalentGroup<>("Commander", new CommanderTalent(2, 1.2F, 0.8F, 0.1F, 1.5F));
       this.WARD = new ArchetypeTalentGroup<>(
-         "Ward", new WardTalent(2, 0.2F, 15, new EffectTalent(0, Effects.field_188425_z, 1, EffectTalent.Type.HIDDEN, EffectTalent.Operator.ADD), 0.01F)
+         "Ward", new WardTalent(2, 15, new EffectTalent(0, Effects.field_188425_z, 1, EffectTalent.Type.HIDDEN, EffectTalent.Operator.ADD), 0.01F)
       );
       this.BARBARIC = new ArchetypeTalentGroup<>("Barbaric", new BarbaricTalent(2, 100, 0.015F, 1));
       this.SOUL_HUNTER = new TalentGroup<>(
          "Soul Hunter", new SoulShardTalent(2, 0.25F), new SoulShardTalent(2, 0.5F), new SoulShardTalent(2, 0.75F), new SoulShardTalent(2, 1.0F)
       );
+      this.BARRIER = new TalentGroup<>("Barrier", new AbsorptionTalent(1, 0.1F));
    }
 }

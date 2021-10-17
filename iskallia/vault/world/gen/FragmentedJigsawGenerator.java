@@ -1,6 +1,7 @@
 package iskallia.vault.world.gen;
 
 import iskallia.vault.world.gen.structure.JigsawPieceResolver;
+import iskallia.vault.world.vault.gen.layout.JigsawPoolProvider;
 import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutGenerator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,13 +32,17 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
    public static final int TUNNEL_Y_OFFSET = 6;
    private final MutableBoundingBox structureBoundingBox;
    private final BlockPos startPos;
-   private final VaultRoomLayoutGenerator layoutGenerator;
+   private final JigsawPoolProvider jigsawPoolProvider;
+   private final VaultRoomLayoutGenerator.Layout generatedLayout;
    private List<StructurePiece> pieces = new ArrayList<>();
 
-   public FragmentedJigsawGenerator(MutableBoundingBox structureBoundingBox, BlockPos startPos, VaultRoomLayoutGenerator layoutGenerator) {
+   public FragmentedJigsawGenerator(
+      MutableBoundingBox structureBoundingBox, BlockPos startPos, JigsawPoolProvider jigsawPoolProvider, VaultRoomLayoutGenerator.Layout generatedLayout
+   ) {
       this.structureBoundingBox = structureBoundingBox;
       this.startPos = startPos;
-      this.layoutGenerator = layoutGenerator;
+      this.jigsawPoolProvider = jigsawPoolProvider;
+      this.generatedLayout = generatedLayout;
    }
 
    @Override
@@ -55,8 +60,8 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
       return 0;
    }
 
-   public VaultRoomLayoutGenerator getLayoutGenerator() {
-      return this.layoutGenerator;
+   public JigsawPoolProvider getJigsawPoolProvider() {
+      return this.jigsawPoolProvider;
    }
 
    @Override
@@ -84,7 +89,7 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
       Registry<JigsawPattern> registry = registries.func_243612_b(Registry.field_243555_ax);
       Rotation startRotation = Rotation.func_222466_a(random);
       Rotation vaultGenerationRotation = startRotation.func_185830_a(Rotation.CLOCKWISE_90);
-      JigsawPattern starts = this.getLayoutGenerator().getStartRoomPool(registry);
+      JigsawPattern starts = this.getJigsawPoolProvider().getStartRoomPool(registry);
       JigsawPiece startPiece = starts.func_214944_a(random);
       MutableBoundingBox startBoundingBox = startPiece.func_214852_a(manager, startPos, startRotation);
       AbstractVillagePiece start = pieceFactory.create(manager, startPiece, startPos, startPiece.func_214850_d(), startRotation, startBoundingBox);
@@ -93,9 +98,9 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
          .func_177967_a(vaultGenerationRotation.func_185831_a(Direction.EAST), 11)
          .func_177967_a(vaultGenerationRotation.func_185831_a(Direction.EAST), 23);
       List<StructurePiece> synchronizedPieces = Collections.synchronizedList(pieceList);
-      VaultRoomLayoutGenerator.Layout layout = this.layoutGenerator.generateLayout();
-      JigsawPattern rooms = this.getLayoutGenerator().getRoomPool(registry);
-      layout.getRooms()
+      JigsawPattern rooms = this.getJigsawPoolProvider().getRoomPool(registry);
+      this.generatedLayout
+         .getRooms()
          .parallelStream()
          .forEach(
             room -> {
@@ -116,9 +121,9 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
                synchronizedPieces.addAll(resolverx.resolveJigsawPieces(manager, registry));
             }
          );
-      JigsawPattern tunnels = this.getLayoutGenerator().getTunnelPool(registry);
+      JigsawPattern tunnels = this.getJigsawPoolProvider().getTunnelPool(registry);
 
-      for (VaultRoomLayoutGenerator.Tunnel tunnel : layout.getTunnels()) {
+      for (VaultRoomLayoutGenerator.Tunnel tunnel : this.generatedLayout.getTunnels()) {
          JigsawPiece tunnelPiece = tunnel.getRandomPiece(tunnels, random);
          Rotation tunnelRotation = tunnel.getRandomConnectingRotation(random).func_185830_a(vaultGenerationRotation);
          BlockPos tunnelPos = centerRoomPos.func_177971_a(tunnel.getAbsoluteOffset(vaultGenerationRotation, tunnelRotation));

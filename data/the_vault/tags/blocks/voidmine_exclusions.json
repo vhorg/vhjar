@@ -4,6 +4,8 @@
     "#forge:ores",
     "#forge:chests",
     "#forge:storage_blocks",
+    "the_vault:vault_coop_chest",
+    "the_vault:vault_bonus_chest",
     "the_vault:ore_alexandrite",
     "the_vault:ore_benitoite",
     "the_vault:ore_larimar",

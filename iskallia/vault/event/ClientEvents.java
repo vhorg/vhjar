@@ -2,6 +2,7 @@ package iskallia.vault.event;
 
 import iskallia.vault.Vault;
 import iskallia.vault.client.ClientActiveEternalData;
+import iskallia.vault.client.ClientDamageData;
 import iskallia.vault.client.ClientTalentData;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.talent.TalentNode;
@@ -56,5 +57,6 @@ public class ClientEvents {
    public static void onDisconnect(LoggedOutEvent event) {
       PlayerRageHelper.clearClientCache();
       ClientActiveEternalData.clearClientCache();
+      ClientDamageData.clearClientCache();
    }
 }

@@ -156,7 +156,10 @@ public class ItemRespecFlask extends Item {
          AbilityNode<?, ?> node = data.getAbilities(player).getNodeByName(abilityStr);
          if (node.isLearned() && node.getSpecialization() != null) {
             data.selectSpecialization(player, abilityStr, null);
-            stack.func_190918_g(1);
+            if (!player.func_184812_l_()) {
+               stack.func_190918_g(1);
+            }
+
             return stack;
          }
       }

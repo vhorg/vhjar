@@ -9,13 +9,16 @@ import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.item.gear.model.BarbarianArmorModel;
+import iskallia.vault.item.gear.model.BoneArmorModel;
 import iskallia.vault.item.gear.model.CloakArmorModel;
 import iskallia.vault.item.gear.model.FurArmorModel;
+import iskallia.vault.item.gear.model.LeprechaunArmorModel;
 import iskallia.vault.item.gear.model.OmarlatifArmorModel;
 import iskallia.vault.item.gear.model.PlatedArmorModel;
 import iskallia.vault.item.gear.model.RoyalArmorModel;
 import iskallia.vault.item.gear.model.ScaleArmorModel;
 import iskallia.vault.item.gear.model.ScrappyArmorModel;
+import iskallia.vault.item.gear.model.ScubaArmorModel;
 import iskallia.vault.item.gear.model.VaultGearModel;
 import iskallia.vault.item.gear.specials.CheeseHatModel;
 import iskallia.vault.item.gear.specials.IskallHololensModel;
@@ -159,6 +162,9 @@ public class ModModels {
       public static ModModels.GearModel BARBARIAN_2_DARK;
       public static ModModels.GearModel BARBARIAN_3_DARK;
       public static ModModels.GearModel OMARLATIF;
+      public static ModModels.GearModel SCUBA_1;
+      public static ModModels.GearModel LEPRECHAUN_1;
+      public static ModModels.GearModel BONE_1;
       int id;
       String displayName;
       VaultGearModel<? extends LivingEntity> helmetModel;
@@ -205,6 +211,9 @@ public class ModModels {
          BARBARIAN_2_DARK = register("Barbarian 2 Dark", BarbarianArmorModel.Variant2.class);
          BARBARIAN_3_DARK = register("Barbarian 3 Dark", BarbarianArmorModel.Variant3.class);
          OMARLATIF = register("Omarlatif", OmarlatifArmorModel.class);
+         SCUBA_1 = register("Scuba 1", ScubaArmorModel.Variant1.class);
+         LEPRECHAUN_1 = register("Leprechaun 1", LeprechaunArmorModel.Variant1.class);
+         BONE_1 = register("Bone 1", BoneArmorModel.Variant1.class);
       }
 
       public VaultGearModel<? extends LivingEntity> forSlotType(EquipmentSlotType slotType) {

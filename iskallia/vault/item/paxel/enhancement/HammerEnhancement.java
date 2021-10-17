@@ -43,24 +43,28 @@ public class HammerEnhancement extends PaxelEnhancement {
          List<BlockPos> sidePoses = breakPoses(centerPos, axis);
          BlockState centerState = world.func_180495_p(centerPos);
          float centerHardness = centerState.func_185887_b(world, centerPos);
-         ActiveFlags.IS_AOE_MINING.runIfNotSet(() -> {
-            for (BlockPos sidePos : sidePoses) {
-               BlockState state = world.func_180495_p(sidePos);
-               if (!state.func_177230_c().isAir(state, world, sidePos)) {
-                  float sideHardness = state.func_185887_b(world, sidePos);
-                  if (!(sideHardness > centerHardness) && sideHardness != -1.0F) {
-                     BlockDropCaptureHelper.startCapturing();
+         ActiveFlags.IS_AOE_MINING
+            .runIfNotSet(
+               () -> {
+                  for (BlockPos sidePos : sidePoses) {
+                     BlockState state = world.func_180495_p(sidePos);
+                     if (!state.func_177230_c().isAir(state, world, sidePos)) {
+                        float sideHardness = state.func_185887_b(world, sidePos);
+                        if (!(sideHardness > centerHardness) && sideHardness != -1.0F) {
+                           BlockDropCaptureHelper.startCapturing();
 
-                     try {
-                        BlockHelper.breakBlock(world, player, sidePos, true, true);
-                        BlockHelper.damageMiningItem(heldStack, player, 1);
-                     } finally {
-                        BlockDropCaptureHelper.getCapturedStacksAndStop().forEach(stack -> Block.func_180635_a(world, sidePos, stack));
+                           try {
+                              BlockHelper.breakBlock(world, player, sidePos, true, true);
+                              BlockHelper.damageMiningItem(heldStack, player, 1);
+                           } finally {
+                              BlockDropCaptureHelper.getCapturedStacksAndStop()
+                                 .forEach(entity -> Block.func_180635_a(world, entity.func_233580_cy_(), entity.func_92059_d()));
+                           }
+                        }
                      }
                   }
                }
-            }
-         });
+            );
       }
    }
 

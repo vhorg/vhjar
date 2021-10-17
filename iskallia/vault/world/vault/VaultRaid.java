@@ -188,6 +188,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final VAttribute<VaultChestPity, CompoundAttribute<VaultChestPity>> CHEST_PITY = new VAttribute<>(
       Vault.id("chest_pity"), () -> CompoundAttribute.of(VaultChestPity::new)
    );
+   public static final VAttribute<Boolean, BooleanAttribute> GRANTED_EXP = new VAttribute<>(Vault.id("granted_exp"), BooleanAttribute::new);
    public static final VAttribute<Integer, IntegerAttribute> LEVEL = new VAttribute<>(Vault.id("level"), IntegerAttribute::new);
    public static final VaultCondition IS_FINISHED = VaultCondition.register(Vault.id("is_finished"), (vault, player, world) -> vault.isFinished());
    public static final VaultCondition IS_RUNNER = VaultCondition.register(Vault.id("is_runner"), (vault, player, world) -> player instanceof VaultRunner);
@@ -543,15 +544,24 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
          }
       }
    });
-   public static final VaultTask GRANT_EXP_COMPLETE = VaultTask.register(
-      Vault.id("public_grant_exp_complete"), (vault, player, world) -> player.grantVaultExp(world.func_73046_m(), 1.0F)
-   );
-   public static final VaultTask GRANT_EXP_BAIL = VaultTask.register(
-      Vault.id("public_grant_exp_bail"), (vault, player, world) -> player.grantVaultExp(world.func_73046_m(), 0.5F)
-   );
-   public static final VaultTask GRANT_EXP_DEATH = VaultTask.register(
-      Vault.id("public_grant_exp_death"), (vault, player, world) -> player.grantVaultExp(world.func_73046_m(), 0.25F)
-   );
+   public static final VaultTask GRANT_EXP_COMPLETE = VaultTask.register(Vault.id("public_grant_exp_complete"), (vault, player, world) -> {
+      if (!player.getProperties().exists(GRANTED_EXP)) {
+         player.grantVaultExp(world.func_73046_m(), 1.0F);
+         player.getProperties().create(GRANTED_EXP, true);
+      }
+   });
+   public static final VaultTask GRANT_EXP_BAIL = VaultTask.register(Vault.id("public_grant_exp_bail"), (vault, player, world) -> {
+      if (!player.getProperties().exists(GRANTED_EXP)) {
+         player.grantVaultExp(world.func_73046_m(), 0.5F);
+         player.getProperties().create(GRANTED_EXP, true);
+      }
+   });
+   public static final VaultTask GRANT_EXP_DEATH = VaultTask.register(Vault.id("public_grant_exp_death"), (vault, player, world) -> {
+      if (!player.getProperties().exists(GRANTED_EXP)) {
+         player.grantVaultExp(world.func_73046_m(), 0.25F);
+         player.getProperties().create(GRANTED_EXP, true);
+      }
+   });
    public static final VaultTask EXIT_SAFELY = VaultTask.register(
       Vault.id("exit_safely"),
       (vault, player, world) -> player.runIfPresent(
@@ -610,7 +620,8 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    );
    public static final VaultTask EXIT_DEATH_ALL = VaultTask.register(
       Vault.id("exit_death_all"),
-      (vault, player, world) -> vault.players.forEach(vPlayer -> REMOVE_SCAVENGER_ITEMS.then(GRANT_EXP_DEATH.then(EXIT_DEATH)).execute(vault, vPlayer, world))
+      (vault, player, world) -> vault.players
+         .forEach(vPlayer -> REMOVE_SCAVENGER_ITEMS.then(SAVE_SOULBOUND_GEAR.then(GRANT_EXP_DEATH.then(EXIT_DEATH))).execute(vault, vPlayer, world))
    );
    public static final VaultTask VICTORY_SCENE = VaultTask.register(
       Vault.id("victory_scene"),

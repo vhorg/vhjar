@@ -1,12 +1,14 @@
 package iskallia.vault.util;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D.Float;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Predicate;
@@ -97,6 +99,19 @@ public class MiscUtils {
       return slots.isEmpty() ? -1 : getRandomEntry(slots, rand);
    }
 
+   public static List<Integer> getEmptySlots(IInventory inventory) {
+      List<Integer> list = Lists.newArrayList();
+
+      for (int i = 0; i < inventory.func_70302_i_(); i++) {
+         if (inventory.func_70301_a(i).func_190926_b()) {
+            list.add(i);
+         }
+      }
+
+      Collections.shuffle(list, rand);
+      return list;
+   }
+
    public static boolean inventoryContains(IInventory inventory, Predicate<ItemStack> filter) {
       for (int slot = 0; slot < inventory.func_70302_i_(); slot++) {
          if (filter.test(inventory.func_70301_a(slot))) {
@@ -110,6 +125,62 @@ public class MiscUtils {
    public static boolean inventoryContains(IItemHandler handler, Predicate<ItemStack> filter) {
       for (int slot = 0; slot < handler.getSlots(); slot++) {
          if (filter.test(handler.getStackInSlot(slot))) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public static List<ItemStack> mergeItemStacks(List<ItemStack> stacks) {
+      List<ItemStack> out = new ArrayList<>();
+
+      label29:
+      for (ItemStack stack : stacks) {
+         if (!stack.func_190926_b()) {
+            for (ItemStack existing : out) {
+               if (canMerge(existing, stack)) {
+                  existing.func_190920_e(existing.func_190916_E() + stack.func_190916_E());
+                  continue label29;
+               }
+            }
+
+            out.add(stack);
+         }
+      }
+
+      return out;
+   }
+
+   public static List<ItemStack> splitAndLimitStackSize(List<ItemStack> stacks) {
+      List<ItemStack> out = new ArrayList<>();
+
+      for (ItemStack stack : stacks) {
+         if (!stack.func_190926_b()) {
+            int i = stack.func_190916_E();
+
+            while (i > 0) {
+               int newCount = Math.min(i, stack.func_77976_d());
+               i -= newCount;
+               ItemStack copy = stack.func_77946_l();
+               copy.func_190920_e(newCount);
+               out.add(copy);
+            }
+         }
+      }
+
+      return out;
+   }
+
+   public static boolean canMerge(ItemStack stack, ItemStack other) {
+      return stack.func_77973_b() == other.func_77973_b() && ItemStack.func_77970_a(stack, other);
+   }
+
+   public static boolean addItemStack(IInventory inventory, ItemStack stack) {
+      for (int slot = 0; slot < inventory.func_70302_i_(); slot++) {
+         ItemStack contained = inventory.func_70301_a(slot);
+         if (contained.func_190926_b()) {
+            inventory.func_70299_a(slot, stack);
             return true;
          }
       }

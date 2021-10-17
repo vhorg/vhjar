@@ -7,13 +7,16 @@ import iskallia.vault.world.vault.builder.CoopVaultBuilder;
 import iskallia.vault.world.vault.builder.RaffleVaultBuilder;
 import iskallia.vault.world.vault.builder.TroveVaultBuilder;
 import iskallia.vault.world.vault.builder.VaultRaidBuilder;
+import iskallia.vault.world.vault.gen.VaultRoomNames;
 import iskallia.vault.world.vault.logic.VaultLogic;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.modifier.VaultModifier;
 import iskallia.vault.world.vault.modifier.VaultModifiers;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -24,6 +27,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
@@ -47,6 +51,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
    protected ResourceLocation selectedObjective = null;
    protected int targetObjectiveCount = -1;
    protected boolean canBeModified = true;
+   protected List<String> guaranteedRoomFilters = new ArrayList<>();
 
    public CrystalData() {
    }
@@ -137,6 +142,15 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       return Collections.unmodifiableList(this.modifiers);
    }
 
+   public void addGuaranteedRoom(String roomKey) {
+      this.guaranteedRoomFilters.add(roomKey);
+      this.updateDelegate();
+   }
+
+   public List<String> getGuaranteedRoomFilters() {
+      return Collections.unmodifiableList(this.guaranteedRoomFilters);
+   }
+
    public boolean preventsRandomModifiers() {
       return !this.canBeModified() ? true : this.preventsRandomModifiers || !this.getType().canGenerateRandomModifiers();
    }
@@ -224,6 +238,29 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
          );
       }
 
+      Map<String, Integer> collapsedFilters = new HashMap<>();
+
+      for (String roomFilter : this.guaranteedRoomFilters) {
+         int count = collapsedFilters.getOrDefault(roomFilter, 0);
+         collapsedFilters.put(roomFilter, ++count);
+      }
+
+      collapsedFilters.forEach(
+         (roomFilter, count) -> {
+            ITextComponent roomName = VaultRoomNames.getName(roomFilter);
+            if (roomName != null) {
+               String roomStr = count > 1 ? "Rooms" : "Room";
+               ITextComponent txt = new StringTextComponent("- Has ")
+                  .func_240699_a_(TextFormatting.GRAY)
+                  .func_230529_a_(new StringTextComponent(String.valueOf(count)).func_240699_a_(TextFormatting.GOLD))
+                  .func_240702_b_(" ")
+                  .func_230529_a_(roomName)
+                  .func_230529_a_(new StringTextComponent(" " + roomStr).func_240699_a_(TextFormatting.GRAY));
+               tooltip.add(txt);
+            }
+         }
+      );
+
       for (CrystalData.Modifier modifier : this.modifiers) {
          StringTextComponent modifierName = new StringTextComponent(modifier.name);
          VaultModifier vModifier = ModConfigs.VAULT_MODIFIERS.getByName(modifier.name);
@@ -254,6 +291,9 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       nbt.func_74768_a("targetObjectiveCount", this.targetObjectiveCount);
+      ListNBT roomList = new ListNBT();
+      this.guaranteedRoomFilters.forEach(roomKey -> roomList.add(StringNBT.func_229705_a_(roomKey)));
+      nbt.func_218657_a("rooms", roomList);
       return nbt;
    }
 
@@ -262,6 +302,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       this.playerBossName = nbt.func_74779_i("PlayerBossName");
       ListNBT modifiersList = nbt.func_150295_c("Modifiers", 10);
       modifiersList.forEach(inbt -> this.modifiers.add(CrystalData.Modifier.fromNBT((CompoundNBT)inbt)));
+      this.migrateModifiers(this.modifiers);
       this.preventsRandomModifiers = nbt.func_150297_b("preventsRandomModifiers", 1) ? nbt.func_74767_n("preventsRandomModifiers") : !this.modifiers.isEmpty();
       this.canBeModified = !nbt.func_150297_b("canBeModified", 1) || nbt.func_74767_n("canBeModified");
       this.selectedObjective = null;
@@ -270,6 +311,12 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       this.targetObjectiveCount = nbt.func_150297_b("targetObjectiveCount", 3) ? nbt.func_74762_e("targetObjectiveCount") : -1;
+      ListNBT roomList = nbt.func_150295_c("rooms", 8);
+      roomList.forEach(inbt -> this.guaranteedRoomFilters.add(inbt.func_150285_a_()));
+   }
+
+   private void migrateModifiers(List<CrystalData.Modifier> modifiers) {
+      modifiers.forEach(modifier -> modifier.name = VaultModifier.migrateModifierName(modifier.name));
    }
 
    private static class EmptyCrystalData extends CrystalData {
@@ -310,7 +357,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
    }
 
    public static class Modifier {
-      public final String name;
+      public String name;
       public final CrystalData.Modifier.Operation operation;
 
       public Modifier(String name, CrystalData.Modifier.Operation operation) {
@@ -344,7 +391,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       public static enum Operation {
-         ADD("Has", TextFormatting.GREEN);
+         ADD("Has", TextFormatting.GRAY);
 
          private final String title;
          private final TextFormatting color;

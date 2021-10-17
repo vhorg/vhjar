@@ -6,14 +6,11 @@ import iskallia.vault.aura.type.ResistanceAuraConfig;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.item.gear.VaultGear;
-import iskallia.vault.skill.talent.TalentNode;
-import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.skill.talent.type.CarapaceTalent;
-import iskallia.vault.skill.talent.type.ResistanceTalent;
-import iskallia.vault.world.data.PlayerTalentsData;
+import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.influence.ResistanceInfluence;
+import iskallia.vault.world.vault.modifier.StatModifier;
 import java.util.function.Function;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -28,19 +25,7 @@ public class ResistanceHelper {
 
    public static float getPlayerResistancePercentUnlimited(ServerPlayerEntity player) {
       float resistancePercent = 0.0F;
-      TalentTree abilities = PlayerTalentsData.get(player.func_71121_q()).getTalents(player);
-
-      for (TalentNode<?> node : abilities.getNodes()) {
-         if (node.getTalent() instanceof CarapaceTalent) {
-            CarapaceTalent talent = (CarapaceTalent)node.getTalent();
-            resistancePercent += talent.getResistanceBonus();
-         }
-
-         if (node.getTalent() instanceof ResistanceTalent) {
-            ResistanceTalent talent = (ResistanceTalent)node.getTalent();
-            resistancePercent += talent.getPercentDamageReduction();
-         }
-      }
+      resistancePercent += getResistancePercent(player);
 
       for (ActiveAura aura : AuraManager.getInstance().getAurasAffecting(player)) {
          if (aura.getAura() instanceof ResistanceAuraConfig) {
@@ -52,6 +37,12 @@ public class ResistanceHelper {
       if (vault != null) {
          for (ResistanceInfluence influence : vault.getInfluences().getInfluences(ResistanceInfluence.class)) {
             resistancePercent += influence.getAdditionalResistance();
+         }
+
+         for (StatModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), StatModifier.class)) {
+            if (modifier.getStat() == StatModifier.Statistic.RESISTANCE) {
+               resistancePercent *= modifier.getMultiplier();
+            }
          }
       }
 

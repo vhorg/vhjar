@@ -19,7 +19,9 @@ import iskallia.vault.world.vault.modifier.LootableModifier;
 import iskallia.vault.world.vault.modifier.MaxMobsModifier;
 import iskallia.vault.world.vault.modifier.NoExitModifier;
 import iskallia.vault.world.vault.modifier.ScaleModifier;
+import iskallia.vault.world.vault.modifier.StatModifier;
 import iskallia.vault.world.vault.modifier.TimerModifier;
+import iskallia.vault.world.vault.modifier.VaultFruitPreventionModifier;
 import iskallia.vault.world.vault.modifier.VaultModifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +72,10 @@ public class VaultModifiersConfig extends Config {
    @Expose
    public List<DurabilityDamageModifier> DURABILITY_DAMAGE_MODIFIERS;
    @Expose
+   public List<StatModifier> STAT_MODIFIERS;
+   @Expose
+   public List<VaultFruitPreventionModifier> VAULT_FRUIT_PREVENTION_MODIFIERS;
+   @Expose
    public List<VaultModifiersConfig.Level> LEVELS;
    @Expose
    public Map<String, List<String>> MODIFIER_PREVENTIONS;
@@ -95,7 +101,9 @@ public class VaultModifiersConfig extends Config {
             this.LOOTABLE_MODIFIERS,
             this.INV_RESTORE_MODIFIERS,
             this.CURSE_ON_HIT_MODIFIERS,
-            this.DURABILITY_DAMAGE_MODIFIERS
+            this.DURABILITY_DAMAGE_MODIFIERS,
+            this.STAT_MODIFIERS,
+            this.VAULT_FRUIT_PREVENTION_MODIFIERS
          )
          .flatMap(Collection::stream)
          .collect(Collectors.toList());
@@ -167,6 +175,12 @@ public class VaultModifiersConfig extends Config {
          new DurabilityDamageModifier("Reinforced", Vault.id("textures/gui/modifiers/reinforced.png"), 0.4F),
          new DurabilityDamageModifier("Indestructible", Vault.id("textures/gui/modifiers/indestructible.png"), 0.0F)
       );
+      this.STAT_MODIFIERS = Arrays.asList(
+         new StatModifier("NoParry", Vault.id("textures/gui/modifiers/phoenix.png"), StatModifier.Statistic.PARRY, 0.0F),
+         new StatModifier("NoResistance", Vault.id("textures/gui/modifiers/phoenix.png"), StatModifier.Statistic.RESISTANCE, 0.0F),
+         new StatModifier("NoCdr", Vault.id("textures/gui/modifiers/phoenix.png"), StatModifier.Statistic.COOLDOWN_REDUCTION, 0.0F)
+      );
+      this.VAULT_FRUIT_PREVENTION_MODIFIERS = Arrays.asList(new VaultFruitPreventionModifier("NoFruit", Vault.id("textures/gui/modifiers/phoenix.png")));
       VaultModifiersConfig.Level level = new VaultModifiersConfig.Level(5);
       level.DEFAULT_POOLS
          .addAll(

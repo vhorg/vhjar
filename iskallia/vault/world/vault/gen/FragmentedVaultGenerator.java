@@ -7,6 +7,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModFeatures;
 import iskallia.vault.init.ModStructures;
 import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.gen.FragmentedJigsawGenerator;
 import iskallia.vault.world.gen.PortalPlacer;
 import iskallia.vault.world.vault.VaultRaid;
@@ -15,8 +16,11 @@ import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutGenerator;
 import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutRegistry;
 import iskallia.vault.world.vault.gen.piece.VaultPiece;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.minecraft.block.BlockState;
@@ -29,6 +33,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.math.BlockPos.Mutable;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.gen.feature.structure.StructurePiece;
 import net.minecraft.world.gen.feature.structure.StructureStart;
@@ -44,7 +49,7 @@ public class FragmentedVaultGenerator extends VaultGenerator {
 
    @Nonnull
    protected VaultRoomLayoutGenerator provideLayoutGenerator(VaultSizeConfig.SizeLayout layout) {
-      VaultRoomLayoutGenerator generator = VaultRoomLayoutRegistry.generateLayout(layout.getLayout());
+      VaultRoomLayoutGenerator generator = VaultRoomLayoutRegistry.getLayoutGenerator(layout.getLayout());
       if (generator == null) {
          generator = new DiamondRoomLayout();
       }
@@ -64,8 +69,12 @@ public class FragmentedVaultGenerator extends VaultGenerator {
          this.layoutGenerator = vault.getAllObjectives().stream().findFirst().map(VaultObjective::getCustomLayout).orElse(this.provideLayoutGenerator(layout));
       }
 
+      VaultRoomLayoutGenerator.Layout vaultLayout = this.layoutGenerator.generateLayout();
+      this.setGuaranteedRooms(vaultLayout, vault);
       this.startChunk = new ChunkPos(new BlockPos(vaultBox.func_215126_f()));
-      FragmentedJigsawGenerator gen = new FragmentedJigsawGenerator(vaultBox, this.startChunk.func_206849_h().func_177982_a(0, 19, 0), this.layoutGenerator);
+      FragmentedJigsawGenerator gen = new FragmentedJigsawGenerator(
+         vaultBox, this.startChunk.func_206849_h().func_177982_a(0, 19, 0), this.layoutGenerator, vaultLayout
+      );
       StructureStart<?> start = ModFeatures.VAULT_FEATURE
          .generate(gen, world.func_241828_r(), world.func_72863_F().field_186029_c, world.func_184163_y(), 0, world.func_72905_C());
       gen.getGeneratedPieces().stream().flatMap(piece -> VaultPiece.of(piece).stream()).forEach(this.pieces::add);
@@ -86,6 +95,28 @@ public class FragmentedVaultGenerator extends VaultGenerator {
                (pos1, random, facing) -> Blocks.field_235406_np_.func_176223_P()
             )
          );
+   }
+
+   private void setGuaranteedRooms(VaultRoomLayoutGenerator.Layout vaultLayout, VaultRaid vault) {
+      CrystalData data = vault.getProperties().getBaseOrDefault(VaultRaid.CRYSTAL_DATA, CrystalData.EMPTY);
+      Collection<VaultRoomLayoutGenerator.Room> rooms = vaultLayout.getRooms();
+      List<String> roomKeys = data.getGuaranteedRoomFilters();
+      if (roomKeys.size() > rooms.size()) {
+         roomKeys = roomKeys.subList(0, rooms.size());
+      }
+
+      Set<Vector3i> usedRooms = new HashSet<>();
+      roomKeys.forEach(roomKey -> {
+         if (VaultRoomNames.getName(roomKey) != null) {
+            VaultRoomLayoutGenerator.Room room;
+            do {
+               room = MiscUtils.getRandomEntry(vaultLayout.getRooms(), rand);
+            } while (room == null || usedRooms.contains(room.getRoomPosition()));
+
+            usedRooms.add(room.getRoomPosition());
+            room.andFilter(key -> key.func_110623_a().contains(roomKey));
+         }
+      });
    }
 
    private void removeRandomObjectivePieces(VaultRaid vault, FragmentedJigsawGenerator generator, float objectiveRatio) {

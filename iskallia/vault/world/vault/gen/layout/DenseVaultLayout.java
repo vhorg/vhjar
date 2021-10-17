@@ -1,6 +1,5 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import java.util.function.Predicate;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -50,10 +49,6 @@ public abstract class DenseVaultLayout extends VaultRoomLayoutGenerator {
    public static class DensePackedRoom extends VaultRoomLayoutGenerator.Room {
       public DensePackedRoom(Vector3i roomPosition) {
          super(roomPosition);
-      }
-
-      public DensePackedRoom(Vector3i roomPosition, Predicate<ResourceLocation> roomPieceFilter) {
-         super(roomPosition, roomPieceFilter);
       }
 
       @Override

@@ -1,5 +1,6 @@
 package iskallia.vault.event;
 
+import iskallia.vault.Vault;
 import iskallia.vault.config.entry.EnchantedBookEntry;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
@@ -10,6 +11,7 @@ import iskallia.vault.item.VaultCatalystItem;
 import iskallia.vault.item.VaultMagnetItem;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
+import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.item.paxel.VaultPaxelItem;
 import iskallia.vault.item.paxel.enhancement.PaxelEnhancements;
 import iskallia.vault.util.OverlevelEnchantHelper;
@@ -25,7 +27,9 @@ import net.minecraft.item.Items;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.World;
 import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -34,6 +38,25 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
    bus = Bus.FORGE
 )
 public class AnvilEvents {
+   @SubscribeEvent(
+      priority = EventPriority.HIGH
+   )
+   public static void onVaultAnvil(AnvilUpdateEvent event) {
+      World world = event.getPlayer().func_130014_f_();
+      if (world.func_234923_W_() == Vault.VAULT_KEY) {
+         event.setCanceled(true);
+      }
+   }
+
+   @SubscribeEvent(
+      priority = EventPriority.HIGH
+   )
+   public static void onCombineVaultGear(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultGear && event.getRight().func_77973_b() instanceof VaultGear) {
+         event.setCanceled(true);
+      }
+   }
+
    @SubscribeEvent
    public static void onAnvilUpdate(AnvilUpdateEvent event) {
       ItemStack equipment = event.getLeft();

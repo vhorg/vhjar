@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
@@ -29,7 +28,7 @@ public class GhostWalkAbility<C extends GhostWalkConfig> extends AbilityEffect<C
       return "Ghost Walk";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       if (player.func_70644_a(ModEffects.GHOST_WALK)) {
          return false;
       } else {

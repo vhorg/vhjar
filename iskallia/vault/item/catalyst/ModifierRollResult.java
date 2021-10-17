@@ -34,7 +34,7 @@ public class ModifierRollResult {
 
    private ModifierRollResult(ModifierRollType type, String value) {
       this.type = type;
-      this.value = value;
+      this.value = type == ModifierRollType.ADD_SPECIFIC_MODIFIER ? VaultModifier.migrateModifierName(value) : value;
    }
 
    public static ModifierRollResult ofModifier(String modifier) {

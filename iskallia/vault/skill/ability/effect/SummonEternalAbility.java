@@ -18,6 +18,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.Util;
@@ -33,7 +34,7 @@ public class SummonEternalAbility<C extends SummonEternalConfig> extends Ability
       return "Summon Eternal";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       if (!player.func_130014_f_().func_201670_d() && player.func_130014_f_() instanceof ServerWorld) {
          ServerWorld sWorld = (ServerWorld)player.func_130014_f_();
          EternalsData.EternalGroup playerEternals = EternalsData.get(sWorld).getEternals(player);

@@ -4,14 +4,14 @@ import com.google.gson.annotations.Expose;
 
 public class ResistanceTalent extends PlayerTalent {
    @Expose
-   private final float percentDamageReduction;
+   protected float additionalResistanceLimit;
 
-   public ResistanceTalent(int cost, float percentDamageReduction) {
+   public ResistanceTalent(int cost, float additionalResistanceLimit) {
       super(cost);
-      this.percentDamageReduction = percentDamageReduction;
+      this.additionalResistanceLimit = additionalResistanceLimit;
    }
 
-   public float getPercentDamageReduction() {
-      return this.percentDamageReduction;
+   public float getAdditionalResistanceLimit() {
+      return this.additionalResistanceLimit;
    }
 }

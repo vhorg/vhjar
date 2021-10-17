@@ -26,6 +26,8 @@ import iskallia.vault.entity.renderer.MonsterEyeRenderer;
 import iskallia.vault.entity.renderer.RobotRenderer;
 import iskallia.vault.entity.renderer.TreasureGoblinRenderer;
 import iskallia.vault.entity.renderer.VaultGuardianRenderer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.CowRenderer;
@@ -44,10 +46,10 @@ import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 public class ModEntities {
+   public static List<EntityType<VaultFighterEntity>> VAULT_FIGHTER_TYPES = new ArrayList<>();
    public static EntityType<FighterEntity> FIGHTER;
    public static EntityType<ArenaBossEntity> ARENA_BOSS;
    public static EntityType<VaultGuardianEntity> VAULT_GUARDIAN;
-   public static EntityType<VaultFighterEntity> VAULT_FIGHTER;
    public static EntityType<EternalEntity> ETERNAL;
    public static EntityType<TreasureGoblinEntity> TREASURE_GOBLIN;
    public static EntityType<AggressiveCowEntity> AGGRESSIVE_COW;
@@ -61,6 +63,10 @@ public class ModEntities {
    public static EntityType<FloatingItemEntity> FLOATING_ITEM;
 
    public static void register(Register<EntityType<?>> event) {
+      for (int i = 0; i < 10; i++) {
+         VAULT_FIGHTER_TYPES.add(registerVaultFighter(i, event));
+      }
+
       FIGHTER = registerLiving(
          "fighter", Builder.func_220322_a(FighterEntity::new, EntityClassification.MONSTER).func_220321_a(0.6F, 1.95F), ZombieEntity::func_234342_eQ_, event
       );
@@ -73,12 +79,6 @@ public class ModEntities {
       VAULT_GUARDIAN = registerLiving(
          "vault_guardian",
          Builder.func_220322_a(VaultGuardianEntity::new, EntityClassification.MONSTER).func_220321_a(1.3F, 2.95F),
-         ZombieEntity::func_234342_eQ_,
-         event
-      );
-      VAULT_FIGHTER = registerLiving(
-         "vault_fighter",
-         Builder.func_220322_a(VaultFighterEntity::new, EntityClassification.MONSTER).func_220321_a(0.6F, 1.95F),
          ZombieEntity::func_234342_eQ_,
          event
       );
@@ -126,6 +126,15 @@ public class ModEntities {
       FLOATING_ITEM = register("floating_item", Builder.func_220322_a(FloatingItemEntity::new, EntityClassification.MISC), event);
    }
 
+   private static EntityType<VaultFighterEntity> registerVaultFighter(int count, Register<EntityType<?>> event) {
+      return registerLiving(
+         count > 0 ? "vault_fighter_" + count : "vault_fighter",
+         Builder.func_220322_a(VaultFighterEntity::new, EntityClassification.MONSTER).func_220321_a(0.6F, 1.95F),
+         ZombieEntity::func_234342_eQ_,
+         event
+      );
+   }
+
    private static <T extends Entity> EntityType<T> register(String name, Builder<T> builder, Register<EntityType<?>> event) {
       EntityType<T> entityType = builder.func_206830_a(Vault.sId(name));
       event.getRegistry().register(entityType.setRegistryName(Vault.id(name)));
@@ -145,10 +154,10 @@ public class ModEntities {
 
    public static class Renderers {
       public static void register(FMLClientSetupEvent event) {
+         ModEntities.VAULT_FIGHTER_TYPES.forEach(type -> RenderingRegistry.registerEntityRenderingHandler(type, FighterRenderer::new));
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.FIGHTER, FighterRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.ARENA_BOSS, FighterRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.VAULT_GUARDIAN, VaultGuardianRenderer::new);
-         RenderingRegistry.registerEntityRenderingHandler(ModEntities.VAULT_FIGHTER, FighterRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.ETERNAL, EternalRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.TREASURE_GOBLIN, TreasureGoblinRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.AGGRESSIVE_COW, CowRenderer::new);

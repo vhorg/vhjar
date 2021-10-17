@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
@@ -180,9 +179,11 @@ public class BlockHelper {
          try {
             world.captureBlockSnapshots = false;
             world.restoringBlockSnapshots = true;
-            world.capturedBlockSnapshots.forEach(s -> s.restore(true));
+            world.capturedBlockSnapshots.forEach(s -> {
+               world.func_184138_a(s.getPos(), s.getReplacedBlock(), s.getCurrentBlock(), s.getFlag());
+               s.getCurrentBlock().func_235734_a_(world, s.getPos(), 11);
+            });
             world.restoringBlockSnapshots = false;
-            world.capturedBlockSnapshots.forEach(s -> world.func_175656_a(s.getPos(), Blocks.field_150350_a.func_176223_P()));
          } finally {
             BlockDropCaptureHelper.getCapturedStacksAndStop();
             world.capturedBlockSnapshots.clear();

@@ -5,8 +5,8 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.talent.TalentGroup;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.talent.type.AbsorptionTalent;
 import iskallia.vault.skill.talent.type.PlayerTalent;
-import iskallia.vault.skill.talent.type.archetype.WardTalent;
 import iskallia.vault.world.data.PlayerTalentsData;
 import java.util.Optional;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,13 +19,17 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 @EventBusSubscriber
 public class AbsorptionHelper {
    public static float getMaxAbsorption(PlayerEntity player) {
-      float maxHealthPerc = 0.4F;
-      maxHealthPerc += getTalent(player, ModConfigs.TALENTS.WARD).map(TalentNode::getTalent).map(WardTalent::getAdditionalAbsorptionPercent).orElse(0.0F);
       if (getTalent(player, ModConfigs.TALENTS.BARBARIC).map(TalentNode::isLearned).orElse(false)) {
-         maxHealthPerc = 0.0F;
+         return 0.0F;
+      } else {
+         int maxAbsorptionHealth = 12;
+         float maxHealthPerc = 0.0F;
+         maxHealthPerc += getTalent(player, ModConfigs.TALENTS.BARRIER)
+            .map(TalentNode::getTalent)
+            .map(AbsorptionTalent::getIncreasedAbsorptionLimit)
+            .orElse(0.0F);
+         return maxAbsorptionHealth + player.func_110138_aP() * maxHealthPerc;
       }
-
-      return player.func_110138_aP() * maxHealthPerc;
    }
 
    private static <T extends PlayerTalent> Optional<TalentNode<T>> getTalent(PlayerEntity player, TalentGroup<T> talentGroup) {

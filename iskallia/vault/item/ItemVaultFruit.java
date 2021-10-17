@@ -3,9 +3,11 @@ package iskallia.vault.item;
 import iskallia.vault.Vault;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.MathUtilities;
+import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
+import iskallia.vault.world.vault.modifier.VaultFruitPreventionModifier;
 import iskallia.vault.world.vault.time.extension.FruitExtension;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -59,8 +61,12 @@ public class ItemVaultFruit extends Item {
                }
             }
 
-            vault.getPlayers().forEach(vPlayer -> vPlayer.getTimer().addTime(new FruitExtension(this), 0));
-            return true;
+            if (!vault.getActiveModifiersFor(PlayerFilter.of(player), VaultFruitPreventionModifier.class).isEmpty()) {
+               return false;
+            } else {
+               vault.getPlayers().forEach(vPlayer -> vPlayer.getTimer().addTime(new FruitExtension(this), 0));
+               return true;
+            }
          }
       } else {
          return false;

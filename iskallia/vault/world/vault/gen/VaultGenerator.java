@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.block.Blocks;
@@ -29,6 +30,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 public abstract class VaultGenerator implements INBTSerializable<CompoundNBT> {
    public static Map<ResourceLocation, Supplier<? extends VaultGenerator>> REGISTRY = new HashMap<>();
+   protected static final Random rand = new Random();
    protected VListNBT<VaultPiece, CompoundNBT> pieces = VListNBT.of(VaultPiece::fromNBT);
    private ResourceLocation id;
    protected ChunkPos startChunk;

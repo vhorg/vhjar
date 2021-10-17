@@ -20,6 +20,7 @@ import iskallia.vault.network.message.OmegaStatueUIMessage;
 import iskallia.vault.network.message.OpenSkillTreeMessage;
 import iskallia.vault.network.message.PartyMembersMessage;
 import iskallia.vault.network.message.PartyStatusMessage;
+import iskallia.vault.network.message.PlayerDamageMultiplierMessage;
 import iskallia.vault.network.message.PlayerStatisticsMessage;
 import iskallia.vault.network.message.RageSyncMessage;
 import iskallia.vault.network.message.RenameUIMessage;
@@ -111,6 +112,13 @@ public class ModNetwork {
       CHANNEL.registerMessage(nextId(), ActiveEternalMessage.class, ActiveEternalMessage::encode, ActiveEternalMessage::decode, ActiveEternalMessage::handle);
       CHANNEL.registerMessage(
          nextId(), GlobalDifficultyMessage.class, GlobalDifficultyMessage::encode, GlobalDifficultyMessage::decode, GlobalDifficultyMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         PlayerDamageMultiplierMessage.class,
+         PlayerDamageMultiplierMessage::encode,
+         PlayerDamageMultiplierMessage::decode,
+         PlayerDamageMultiplierMessage::handle
       );
    }
 

@@ -10,6 +10,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.gen.VaultRoomNames;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.modifier.VaultModifier;
 import net.minecraft.command.CommandSource;
@@ -40,6 +41,7 @@ public class CrystalCommand extends Command {
       );
       builder.then(Commands.func_197057_a("setModifiable").then(Commands.func_197056_a("modifiable", BoolArgumentType.bool()).executes(this::setModifiable)));
       builder.then(Commands.func_197057_a("addModifier").then(Commands.func_197056_a("modifier", StringArgumentType.string()).executes(this::addModifier)));
+      builder.then(Commands.func_197057_a("addRoom").then(Commands.func_197056_a("roomKey", StringArgumentType.string()).executes(this::addRoom)));
       builder.then(
          Commands.func_197057_a("objectiveCount").then(Commands.func_197056_a("count", IntegerArgumentType.integer(1)).executes(this::setObjectiveCount))
       );
@@ -66,6 +68,19 @@ public class CrystalCommand extends Command {
       boolean modifiable = BoolArgumentType.getBool(ctx, "modifiable");
       data.setModifiable(modifiable);
       return 0;
+   }
+
+   private int addRoom(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+      ItemStack crystal = this.getCrystal(ctx);
+      CrystalData data = VaultCrystalItem.getData(crystal);
+      String roomKey = StringArgumentType.getString(ctx, "roomKey");
+      if (VaultRoomNames.getName(roomKey) == null) {
+         ((CommandSource)ctx.getSource()).func_197035_h().func_145747_a(new StringTextComponent("Unknown Room: " + roomKey), Util.field_240973_b_);
+         return 0;
+      } else {
+         data.addGuaranteedRoom(roomKey);
+         return 0;
+      }
    }
 
    private int addModifier(CommandContext<CommandSource> ctx) throws CommandSyntaxException {

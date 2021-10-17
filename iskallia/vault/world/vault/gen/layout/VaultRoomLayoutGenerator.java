@@ -1,6 +1,5 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import iskallia.vault.Vault;
 import iskallia.vault.world.gen.structure.JigsawPatternFilter;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,11 +15,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPattern;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
 
-public abstract class VaultRoomLayoutGenerator {
+public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
    private final ResourceLocation id;
 
    protected VaultRoomLayoutGenerator(ResourceLocation id) {
@@ -34,18 +32,6 @@ public abstract class VaultRoomLayoutGenerator {
    public abstract void setSize(int var1);
 
    public abstract VaultRoomLayoutGenerator.Layout generateLayout();
-
-   public JigsawPattern getStartRoomPool(Registry<JigsawPattern> jigsawRegistry) {
-      return (JigsawPattern)jigsawRegistry.func_82594_a(Vault.id("vault/starts"));
-   }
-
-   public JigsawPattern getRoomPool(Registry<JigsawPattern> jigsawRegistry) {
-      return (JigsawPattern)jigsawRegistry.func_82594_a(Vault.id("vault/rooms"));
-   }
-
-   public JigsawPattern getTunnelPool(Registry<JigsawPattern> jigsawRegistry) {
-      return (JigsawPattern)jigsawRegistry.func_82594_a(Vault.id("vault/tunnels"));
-   }
 
    protected CompoundNBT serialize() {
       return new CompoundNBT();
@@ -92,9 +78,9 @@ public abstract class VaultRoomLayoutGenerator {
          this.roomPosition = roomPosition;
       }
 
-      public Room(Vector3i roomPosition, Predicate<ResourceLocation> roomPieceFilter) {
-         this(roomPosition);
+      public VaultRoomLayoutGenerator.Room andFilter(Predicate<ResourceLocation> roomPieceFilter) {
          this.jigsawFilter.andMatches(roomPieceFilter);
+         return this;
       }
 
       public Vector3i getRoomPosition() {

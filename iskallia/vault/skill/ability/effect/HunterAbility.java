@@ -36,11 +36,11 @@ public class HunterAbility<C extends HunterConfig> extends AbilityEffect<C> {
       return "Hunter";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       World world = player.func_130014_f_();
       if (player instanceof ServerPlayerEntity && world instanceof ServerWorld && world.func_234923_W_() == Vault.VAULT_KEY) {
          ServerWorld sWorld = (ServerWorld)world;
-         ServerPlayerEntity sPlayer = (ServerPlayerEntity)player;
+         ServerPlayerEntity sPlayer = player;
 
          for (int delay = 0; delay < config.getTickDuration() / 5; delay++) {
             ServerScheduler.INSTANCE

@@ -35,6 +35,7 @@ public class PlayerRageHelper {
    public static final int RAGE_DEGEN_INTERVAL = 10;
    private static final Map<UUID, Integer> lastAttackTick = new HashMap<>();
    private static final Map<UUID, Integer> currentRage = new HashMap<>();
+   private static final Map<UUID, PlayerDamageHelper.DamageMultiplier> multiplierMap = new HashMap<>();
    private static int clientRageInfo = 0;
 
    @SubscribeEvent
@@ -63,29 +64,10 @@ public class PlayerRageHelper {
                if (node.isLearned()) {
                   int rage = getCurrentRage(playerUUID, LogicalSide.SERVER);
                   setCurrentRage(attacker, rage + node.getTalent().getRagePerAttack());
+                  refreshDamageBuff(attacker, node.getTalent().getDamageMultiplierPerRage());
                   lastAttackTick.put(playerUUID, attacker.field_70173_aa);
                }
             }
-         }
-      }
-   }
-
-   @SubscribeEvent
-   public static void onRageEffect(LivingHurtEvent event) {
-      World world = event.getEntityLiving().func_130014_f_();
-      if (!world.func_201670_d()) {
-         Entity source = event.getSource().func_76346_g();
-         if (source instanceof ServerPlayerEntity) {
-            float damage = event.getAmount();
-            ServerPlayerEntity sPlayer = (ServerPlayerEntity)source;
-            int rage = getCurrentRage(sPlayer, LogicalSide.SERVER);
-            TalentTree tree = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
-            TalentNode<BarbaricTalent> node = tree.getNodeOf(ModConfigs.TALENTS.BARBARIC);
-            if (node.isLearned()) {
-               damage *= 1.0F + rage * node.getTalent().getDamageMultiplierPerRage();
-            }
-
-            event.setAmount(damage);
          }
       }
    }
@@ -101,22 +83,22 @@ public class PlayerRageHelper {
 
    @SubscribeEvent
    public static void onTick(PlayerTickEvent event) {
-      if (event.phase != Phase.START && event.side.isServer()) {
-         if (event.player instanceof ServerPlayerEntity) {
-            ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.player;
-            UUID playerUUID = sPlayer.func_110124_au();
-            int rage = getCurrentRage(sPlayer, LogicalSide.SERVER);
-            if (rage > 0) {
-               if (!canGenerateRage(sPlayer)) {
-                  setCurrentRage(sPlayer, 0);
-               } else {
-                  TalentTree tree = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
-                  BarbaricTalent talent = tree.getNodeOf(ModConfigs.TALENTS.BARBARIC).getTalent();
-                  int lastTick = lastAttackTick.getOrDefault(playerUUID, 0);
-                  if (lastTick < sPlayer.field_70173_aa - talent.getRageDegenTickDelay() && sPlayer.field_70173_aa % 10 == 0) {
-                     setCurrentRage(sPlayer, rage - 1);
-                  }
-               }
+      if (event.phase != Phase.START && event.player instanceof ServerPlayerEntity) {
+         ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.player;
+         UUID playerUUID = sPlayer.func_110124_au();
+         int rage = getCurrentRage(sPlayer, LogicalSide.SERVER);
+         if (rage <= 0) {
+            removeExistingDamageBuff(sPlayer);
+         } else if (!canGenerateRage(sPlayer)) {
+            setCurrentRage(sPlayer, 0);
+            removeExistingDamageBuff(sPlayer);
+         } else {
+            TalentTree tree = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
+            BarbaricTalent talent = tree.getNodeOf(ModConfigs.TALENTS.BARBARIC).getTalent();
+            int lastTick = lastAttackTick.getOrDefault(playerUUID, 0);
+            if (lastTick < sPlayer.field_70173_aa - talent.getRageDegenTickDelay() && sPlayer.field_70173_aa % 10 == 0) {
+               setCurrentRage(sPlayer, rage - 1);
+               refreshDamageBuff(sPlayer, talent.getDamageMultiplierPerRage());
             }
          }
       }
@@ -139,6 +121,20 @@ public class PlayerRageHelper {
    private static boolean canGenerateRage(ServerPlayerEntity sPlayer) {
       TalentTree tree = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
       return tree.hasLearnedNode(ModConfigs.TALENTS.BARBARIC);
+   }
+
+   private static void refreshDamageBuff(ServerPlayerEntity sPlayer, float dmgMultiplier) {
+      UUID playerUUID = sPlayer.func_110124_au();
+      int rage = getCurrentRage(playerUUID, LogicalSide.SERVER);
+      removeExistingDamageBuff(sPlayer);
+      multiplierMap.put(playerUUID, PlayerDamageHelper.applyMultiplier(sPlayer, rage * dmgMultiplier, PlayerDamageHelper.Operation.ADDITIVE_MULTIPLY));
+   }
+
+   private static void removeExistingDamageBuff(ServerPlayerEntity player) {
+      PlayerDamageHelper.DamageMultiplier existing = multiplierMap.get(player.func_110124_au());
+      if (existing != null) {
+         PlayerDamageHelper.removeMultiplier(player, existing);
+      }
    }
 
    @OnlyIn(Dist.CLIENT)

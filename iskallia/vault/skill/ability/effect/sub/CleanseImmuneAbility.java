@@ -10,6 +10,7 @@ import iskallia.vault.world.data.PlayerImmunityData;
 import java.util.Collections;
 import java.util.List;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
@@ -18,7 +19,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 
 public class CleanseImmuneAbility extends CleanseAbility<CleanseImmuneConfig> {
-   protected void removeEffects(CleanseImmuneConfig config, PlayerEntity player, List<EffectInstance> effects) {
+   protected void removeEffects(CleanseImmuneConfig config, ServerPlayerEntity player, List<EffectInstance> effects) {
       if (!effects.isEmpty()) {
          if (player.func_130014_f_() instanceof ServerWorld) {
             ServerWorld world = (ServerWorld)player.func_130014_f_();

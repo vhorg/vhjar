@@ -1,6 +1,8 @@
 package iskallia.vault.entity;
 
+import com.google.common.base.Strings;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModEntities;
 import iskallia.vault.util.NameProviderPublic;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
@@ -15,7 +17,9 @@ import net.minecraft.loot.LootContext.Builder;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
@@ -54,7 +58,13 @@ public class VaultFighterEntity extends FighterEntity {
          VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, this.func_233580_cy_());
          if (vault != null) {
             String name = NameProviderPublic.getRandomName();
-            this.func_200203_b(new StringTextComponent(name));
+            String star = String.valueOf('✦');
+            int count = Math.max(ModEntities.VAULT_FIGHTER_TYPES.indexOf(this.func_200600_R()), 0);
+            IFormattableTextComponent customName = new StringTextComponent("")
+               .func_230529_a_(new StringTextComponent(Strings.repeat(star, count)).func_240699_a_(TextFormatting.GOLD))
+               .func_240702_b_(" ")
+               .func_230529_a_(new StringTextComponent(name));
+            this.func_200203_b(customName);
             this.getPersistentData().func_74778_a("VaultPlayerName", name);
          }
       }

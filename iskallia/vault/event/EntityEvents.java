@@ -12,7 +12,6 @@ import iskallia.vault.entity.VaultFighterEntity;
 import iskallia.vault.entity.VaultGuardianEntity;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.BasicScavengerItem;
@@ -263,7 +262,7 @@ public class EntityEvents {
    }
 
    private static boolean addSubFighterDrops(World world, Entity killed, VaultRaid vault, Collection<ItemEntity> drops) {
-      if (killed.func_200600_R() != ModEntities.VAULT_FIGHTER) {
+      if (!(killed instanceof VaultFighterEntity)) {
          return false;
       } else {
          int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
@@ -338,13 +337,15 @@ public class EntityEvents {
 
    @SubscribeEvent
    public static void onCurseOnHit(LivingDamageEvent event) {
-      LivingEntity damaged = event.getEntityLiving();
-      if (damaged instanceof ServerPlayerEntity && !(damaged.func_130014_f_() instanceof ServerWorld)) {
-         ServerWorld sWorld = (ServerWorld)damaged.func_130014_f_();
-         ServerPlayerEntity sPlayer = (ServerPlayerEntity)damaged;
-         VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, sPlayer.func_233580_cy_());
-         if (vault != null) {
-            vault.getActiveModifiersFor(PlayerFilter.any(), CurseOnHitModifier.class).forEach(modifier -> modifier.applyCurse(sPlayer));
+      if (event.getSource().func_76346_g() instanceof LivingEntity) {
+         LivingEntity damaged = event.getEntityLiving();
+         if (damaged instanceof ServerPlayerEntity) {
+            ServerPlayerEntity sPlayer = (ServerPlayerEntity)damaged;
+            ServerWorld sWorld = sPlayer.func_71121_q();
+            VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, sPlayer.func_233580_cy_());
+            if (vault != null) {
+               vault.getActiveModifiersFor(PlayerFilter.any(), CurseOnHitModifier.class).forEach(modifier -> modifier.applyCurse(sPlayer));
+            }
          }
       }
    }

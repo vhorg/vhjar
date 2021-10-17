@@ -38,6 +38,9 @@
     {"predicate": {"the_vault:texture": 30 }, "model": "the_vault:item/leggings/barbarian_2_dark_leggings"},
     {"predicate": {"the_vault:texture": 31 }, "model": "the_vault:item/leggings/barbarian_3_dark_leggings"},
     {"predicate": {"the_vault:texture": 32 }, "model": "the_vault:item/leggings/omarlatif_leggings"},
+    {"predicate": {"the_vault:texture": 33 }, "model": "the_vault:item/leggings/scuba_1_leggings"},
+    {"predicate": {"the_vault:texture": 34 }, "model": "the_vault:item/leggings/leprechaun_1_leggings"},
+    {"predicate": {"the_vault:texture": 35 }, "model": "the_vault:item/leggings/bone_1_leggings"},
     {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 0 }, "model": "the_vault:item/leggings/scrappy_1_leggings"},
     {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 1 }, "model": "the_vault:item/leggings/scrappy_2_leggings"},
     {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 2 }, "model": "the_vault:item/leggings/scrappy_3_leggings"}

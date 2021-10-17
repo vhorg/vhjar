@@ -260,7 +260,9 @@ public class ItemResetFlask extends Item {
 
                PlayerVaultStatsData.get(sWorld).spendSkillPts(player, -node.getAbilityConfig().getLearningCost());
                abilitiesData.downgradeAbility(player, node);
-               stack.func_190918_g(1);
+               if (!player.func_184812_l_()) {
+                  stack.func_190918_g(1);
+               }
             }
          });
          ModConfigs.TALENTS.getTalent(skillableStr).ifPresent(talent -> {
@@ -278,7 +280,9 @@ public class ItemResetFlask extends Item {
 
                PlayerVaultStatsData.get(sWorld).spendSkillPts(player, -node.getTalent().getCost());
                talentsData.downgradeTalent(player, node);
-               stack.func_190918_g(1);
+               if (!player.func_184812_l_()) {
+                  stack.func_190918_g(1);
+               }
             }
          });
       }

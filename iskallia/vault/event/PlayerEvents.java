@@ -100,7 +100,11 @@ public class PlayerEvents {
       if (!event.getWorld().func_201670_d() && event.getWorld() instanceof ServerWorld) {
          TileEntity tile = event.getWorld().func_175625_s(event.getPos());
          if (tile instanceof LockableLootTileEntity) {
-            ((LockableLootTileEntity)tile).func_184281_d(event.getPlayer());
+            if (tile instanceof VaultChestTileEntity) {
+               ((VaultChestTileEntity)tile).generateChestLoot(event.getPlayer(), true);
+            } else {
+               ((LockableLootTileEntity)tile).func_184281_d(event.getPlayer());
+            }
          }
 
          if (tile instanceof VaultChestTileEntity) {

@@ -7,6 +7,7 @@ import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.TankConfig;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.server.ServerWorld;
@@ -19,7 +20,7 @@ public class TankAbility<C extends TankConfig> extends AbilityEffect<C> {
       return "Tank";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       if (player.func_70644_a(ModEffects.TANK)) {
          return false;
       } else {

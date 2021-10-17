@@ -145,7 +145,7 @@ public class OmegaStatueBlock extends LootStatueBlock {
 
    public void func_196243_a(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
       TileEntity te = worldIn.func_175625_s(pos);
-      if (te instanceof LootStatueTileEntity) {
+      if (te instanceof LootStatueTileEntity && ((LootStatueTileEntity)te).getMasterPos() != null) {
          BlockPos masterPos = ((LootStatueTileEntity)te).getMasterPos();
          TileEntity master = worldIn.func_175625_s(masterPos);
          if (master instanceof LootStatueTileEntity) {
@@ -178,7 +178,7 @@ public class OmegaStatueBlock extends LootStatueBlock {
 
    private LootStatueTileEntity getMaster(LootStatueTileEntity statue) {
       World world = statue.func_145831_w();
-      if (world != null) {
+      if (world != null && statue.getMasterPos() != null) {
          TileEntity master = statue.func_145831_w().func_175625_s(statue.getMasterPos());
          if (master instanceof LootStatueTileEntity) {
             return (LootStatueTileEntity)master;

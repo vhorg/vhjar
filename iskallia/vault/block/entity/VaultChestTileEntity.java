@@ -26,12 +26,20 @@ import iskallia.vault.world.vault.modifier.CatalystChanceModifier;
 import iskallia.vault.world.vault.modifier.ChestTrapModifier;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.player.VaultRunner;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Nullable;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameterSets;
+import net.minecraft.loot.LootParameters;
+import net.minecraft.loot.LootTable;
+import net.minecraft.loot.LootContext.Builder;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
@@ -41,6 +49,7 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
@@ -188,6 +197,10 @@ public class VaultChestTileEntity extends ChestTileEntity {
    }
 
    public void func_184281_d(PlayerEntity player) {
+      this.generateChestLoot(player, false);
+   }
+
+   public void generateChestLoot(PlayerEntity player, boolean compressLoot) {
       if (this.func_145831_w() != null && !this.func_145831_w().func_201670_d() && player instanceof ServerPlayerEntity && !this.generated) {
          ServerWorld world = (ServerWorld)this.func_145831_w();
          ServerPlayerEntity sPlayer = (ServerPlayerEntity)player;
@@ -243,8 +256,8 @@ public class VaultChestTileEntity extends ChestTileEntity {
                      }
                   }
 
-                  this.fillSpecialLoot(vault, world, sPlayer, state);
-                  super.func_184281_d(player);
+                  List<ItemStack> loot = this.generateSpecialLoot(vault, world, sPlayer, state);
+                  this.fillFromLootTable(player, loot, compressLoot);
                   this.func_70296_d();
                   this.func_145831_w().func_184138_a(this.func_174877_v(), this.func_195044_w(), this.func_195044_w(), 3);
                   this.generated = true;
@@ -257,7 +270,8 @@ public class VaultChestTileEntity extends ChestTileEntity {
       }
    }
 
-   private void fillSpecialLoot(VaultRaid vault, ServerWorld sWorld, ServerPlayerEntity player, BlockState thisState) {
+   private List<ItemStack> generateSpecialLoot(VaultRaid vault, ServerWorld sWorld, ServerPlayerEntity player, BlockState thisState) {
+      List<ItemStack> loot = new ArrayList<>();
       vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).ifPresent(crystalData -> {
          if (!crystalData.preventsRandomModifiers()) {
             float chance = ModConfigs.VAULT_CHEST_META.getCatalystChance(thisState.func_177230_c().getRegistryName(), this.rarity);
@@ -269,10 +283,7 @@ public class VaultChestTileEntity extends ChestTileEntity {
 
             chance *= 1.0F + incModifier;
             if (sWorld.func_201674_k().nextFloat() < chance) {
-               int slot = MiscUtils.getRandomEmptySlot(this);
-               if (slot != -1) {
-                  this.func_70299_a(slot, new ItemStack(ModItems.VAULT_CATALYST_FRAGMENT));
-               }
+               loot.add(new ItemStack(ModItems.VAULT_CATALYST_FRAGMENT));
             }
          }
       });
@@ -305,14 +316,12 @@ public class VaultChestTileEntity extends ChestTileEntity {
             objective -> vault.getProperties()
                .getBase(VaultRaid.IDENTIFIER)
                .ifPresent(identifier -> ModConfigs.SCAVENGER_HUNT.generateChestLoot().forEach(itemEntry -> {
-                  int slot = MiscUtils.getRandomEmptySlot(this);
-                  if (slot != -1) {
-                     ItemStack stack = itemEntry.createItemStack();
-                     BasicScavengerItem.setVaultIdentifier(stack, identifier);
-                     this.func_70299_a(slot, stack);
-                  }
+                  ItemStack stack = itemEntry.createItemStack();
+                  BasicScavengerItem.setVaultIdentifier(stack, identifier);
+                  loot.add(stack);
                }))
          );
+      return loot;
    }
 
    private boolean shouldDoChestTrapEffect(VaultRaid vault, ServerWorld sWorld, ServerPlayerEntity player, BlockState thisState) {
@@ -387,6 +396,58 @@ public class VaultChestTileEntity extends ChestTileEntity {
       }
    }
 
+   private void fillFromLootTable(@Nullable PlayerEntity player, List<ItemStack> customLoot, boolean compressLoot) {
+      if (this.field_184284_m != null && this.field_145850_b.func_73046_m() != null) {
+         LootTable loottable = this.field_145850_b.func_73046_m().func_200249_aQ().func_186521_a(this.field_184284_m);
+         if (player instanceof ServerPlayerEntity) {
+            CriteriaTriggers.field_232608_N_.func_235478_a_((ServerPlayerEntity)player, this.field_184284_m);
+         }
+
+         this.field_184284_m = null;
+         Builder ctxBuilder = new Builder((ServerWorld)this.field_145850_b)
+            .func_216015_a(LootParameters.field_237457_g_, Vector3d.func_237489_a_(this.field_174879_c))
+            .func_216016_a(this.field_184285_n);
+         if (player != null) {
+            ctxBuilder.func_186469_a(player.func_184817_da()).func_216015_a(LootParameters.field_216281_a, player);
+         }
+
+         this.fillFromLootTable(loottable, ctxBuilder.func_216022_a(LootParameterSets.field_216261_b), customLoot, compressLoot);
+      }
+   }
+
+   private void fillFromLootTable(LootTable lootTable, LootContext context, List<ItemStack> customLoot, boolean compressLoot) {
+      if (!compressLoot) {
+         customLoot.forEach(stack -> {
+            int slot = MiscUtils.getRandomEmptySlot(this);
+            if (slot != -1) {
+               this.func_70299_a(slot, stack);
+            }
+         });
+         lootTable.func_216118_a(this, context);
+      } else {
+         List<ItemStack> mergedLoot = MiscUtils.splitAndLimitStackSize(MiscUtils.mergeItemStacks(lootTable.func_216113_a(context)));
+         mergedLoot.addAll(customLoot);
+         mergedLoot.forEach(stack -> MiscUtils.addItemStack(this, stack));
+      }
+   }
+
+   public void func_70299_a(int index, ItemStack stack) {
+      super.func_70299_a(index, stack);
+      this.func_145831_w().func_184138_a(this.func_174877_v(), this.func_195044_w(), this.func_195044_w(), 3);
+   }
+
+   public ItemStack func_70298_a(int index, int count) {
+      ItemStack stack = super.func_70298_a(index, count);
+      this.func_145831_w().func_184138_a(this.func_174877_v(), this.func_195044_w(), this.func_195044_w(), 3);
+      return stack;
+   }
+
+   public ItemStack func_70304_b(int index) {
+      ItemStack stack = super.func_70304_b(index);
+      this.func_145831_w().func_184138_a(this.func_174877_v(), this.func_195044_w(), this.func_195044_w(), 3);
+      return stack;
+   }
+
    public BlockState func_195044_w() {
       return this.renderState != null ? this.renderState : super.func_195044_w();
    }
@@ -435,11 +496,8 @@ public class VaultChestTileEntity extends ChestTileEntity {
    }
 
    public CompoundNBT func_189517_E_() {
-      CompoundNBT nbt = super.func_189517_E_();
-      if (this.rarity != null) {
-         nbt.func_74768_a("Rarity", this.rarity.ordinal());
-      }
-
+      CompoundNBT nbt = new CompoundNBT();
+      this.func_189515_b(nbt);
       return nbt;
    }
 

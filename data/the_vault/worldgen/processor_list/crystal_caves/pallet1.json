@@ -189,7 +189,7 @@
         },
         {
           "output_state": {
-            "Name": "quark:orange_crystal"
+            "Name": "quark:waxed_orange_crystal"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
@@ -215,7 +215,7 @@
         },
         {
           "output_state": {
-            "Name": "quark:indigo_crystal"
+            "Name": "quark:waxed_indigo_crystal"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",

@@ -6,6 +6,7 @@ import iskallia.vault.skill.ability.effect.AbilityEffect;
 import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -94,7 +95,7 @@ public class AbilityNode<T extends AbilityConfig, E extends AbilityEffect<T>> im
       }
    }
 
-   public boolean onAction(PlayerEntity player, boolean active) {
+   public boolean onAction(ServerPlayerEntity player, boolean active) {
       return this.isLearned() && this.getAbility() != null ? this.getAbility().onAction(this.getAbilityConfig(), player, active) : false;
    }
 

@@ -2,7 +2,7 @@ package iskallia.vault.skill.ability.effect;
 
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.MegaJumpConfig;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.world.server.ServerWorld;
@@ -13,7 +13,7 @@ public class MegaJumpAbility<C extends MegaJumpConfig> extends AbilityEffect<C> 
       return "Mega Jump";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       double magnitude = config.getHeight() * 0.15;
       double addY = -Math.min(0.0, player.func_213322_ci().func_82617_b());
       player.func_70024_g(0.0, addY + magnitude, 0.0);

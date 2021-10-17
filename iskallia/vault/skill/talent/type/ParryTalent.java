@@ -14,15 +14,15 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 @EventBusSubscriber
 public class ParryTalent extends PlayerTalent {
    @Expose
-   private final float parryChance;
+   protected float additionalParryLimit;
 
-   public ParryTalent(int cost, float parryChance) {
+   public ParryTalent(int cost, float additionalParryLimit) {
       super(cost);
-      this.parryChance = parryChance;
+      this.additionalParryLimit = additionalParryLimit;
    }
 
-   public float getParryChance() {
-      return this.parryChance;
+   public float getAdditionalParryLimit() {
+      return this.additionalParryLimit;
    }
 
    @SubscribeEvent

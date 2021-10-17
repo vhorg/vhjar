@@ -3,6 +3,7 @@ package iskallia.vault.init;
 import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
 import iskallia.vault.client.gui.overlay.AbilityVignetteOverlay;
 import iskallia.vault.client.gui.overlay.PlayerArmorOverlay;
+import iskallia.vault.client.gui.overlay.PlayerDamageOverlay;
 import iskallia.vault.client.gui.overlay.PlayerRageOverlay;
 import iskallia.vault.client.gui.overlay.VaultBarOverlay;
 import iskallia.vault.client.gui.overlay.VaultGoalBossBarOverlay;
@@ -53,6 +54,7 @@ public class ModScreens {
       MinecraftForge.EVENT_BUS.register(VaultPartyOverlay.class);
       MinecraftForge.EVENT_BUS.register(PlayerRageOverlay.class);
       MinecraftForge.EVENT_BUS.register(PlayerArmorOverlay.class);
+      MinecraftForge.EVENT_BUS.register(PlayerDamageOverlay.class);
       MinecraftForge.EVENT_BUS.register(VaultGoalBossBarOverlay.class);
       MinecraftForge.EVENT_BUS.register(ObeliskGoalOverlay.class);
    }

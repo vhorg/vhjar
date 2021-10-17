@@ -81,7 +81,7 @@ public abstract class VaultXPFoodItem extends Item {
       if (this.levelLimit > 0) {
          tooltip.add(StringTextComponent.field_240750_d_);
          tooltip.add(
-            new StringTextComponent("Can't be conumed after Level: ")
+            new StringTextComponent("Can't be consumed after Level: ")
                .func_240699_a_(TextFormatting.GRAY)
                .func_230529_a_(new StringTextComponent(String.valueOf(this.levelLimit)).func_240699_a_(TextFormatting.AQUA))
          );

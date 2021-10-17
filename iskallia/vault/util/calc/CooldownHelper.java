@@ -6,7 +6,11 @@ import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.skill.ability.AbilityGroup;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.skill.talent.type.archetype.CommanderTalent;
+import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.PlayerTalentsData;
+import iskallia.vault.world.data.VaultRaidData;
+import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.modifier.StatModifier;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -37,6 +41,15 @@ public class CooldownHelper {
                   .mapToDouble(node -> node.getTalent().getSummonEternalAdditionalCooldownReduction())
                   .sum()
          );
+      }
+
+      VaultRaid vault = VaultRaidData.get(player.func_71121_q()).getActiveFor(player);
+      if (vault != null) {
+         for (StatModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), StatModifier.class)) {
+            if (modifier.getStat() == StatModifier.Statistic.COOLDOWN_REDUCTION) {
+               multiplier *= modifier.getMultiplier();
+            }
+         }
       }
 
       return multiplier;

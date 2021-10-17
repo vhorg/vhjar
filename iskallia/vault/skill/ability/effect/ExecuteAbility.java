@@ -8,6 +8,7 @@ import iskallia.vault.skill.ability.config.ExecuteConfig;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
@@ -21,7 +22,7 @@ public class ExecuteAbility<C extends ExecuteConfig> extends AbilityEffect<C> {
       return "Execute";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       if (player.func_70644_a(ModEffects.EXECUTE)) {
          return false;
       } else {

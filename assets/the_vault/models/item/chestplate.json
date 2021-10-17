@@ -38,6 +38,9 @@
     {"predicate": {"the_vault:texture": 30 }, "model": "the_vault:item/chestplate/barbarian_2_dark_chestplate"},
     {"predicate": {"the_vault:texture": 31 }, "model": "the_vault:item/chestplate/barbarian_3_dark_chestplate"},
     {"predicate": {"the_vault:texture": 32 }, "model": "the_vault:item/chestplate/omarlatif_chestplate"},
+    {"predicate": {"the_vault:texture": 33 }, "model": "the_vault:item/chestplate/scuba_1_chestplate"},
+    {"predicate": {"the_vault:texture": 34 }, "model": "the_vault:item/chestplate/leprechaun_1_chestplate"},
+    {"predicate": {"the_vault:texture": 35 }, "model": "the_vault:item/chestplate/bone_1_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 0 }, "model": "the_vault:item/chestplate/scrappy_1_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 1 }, "model": "the_vault:item/chestplate/scrappy_2_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 4, "the_vault:texture": 2 }, "model": "the_vault:item/chestplate/scrappy_3_chestplate"}

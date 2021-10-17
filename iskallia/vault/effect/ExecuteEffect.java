@@ -1,8 +1,5 @@
 package iskallia.vault.effect;
 
-import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;
@@ -21,10 +18,7 @@ public class ExecuteEffect extends Effect {
       super.func_111187_a(entityLiving, attributeMapIn, amplifier);
       if (entityLiving instanceof ServerPlayerEntity) {
          ServerPlayerEntity player = (ServerPlayerEntity)entityLiving;
-         PlayerAbilitiesData data = PlayerAbilitiesData.get(player.func_71121_q());
-         AbilityTree abilities = data.getAbilities(player);
-         AbilityNode<?, ?> execute = abilities.getNodeByName("Execute");
-         abilities.putOnCooldown(player.func_184102_h(), execute, ModConfigs.ABILITIES.getCooldown(execute, player));
+         PlayerAbilitiesData.setAbilityOnCooldown(player, "Execute");
       }
    }
 

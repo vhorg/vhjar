@@ -12,13 +12,14 @@ import iskallia.vault.skill.ability.config.sub.GhostWalkParryConfig;
 import iskallia.vault.skill.ability.config.sub.TankParryConfig;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.skill.talent.type.ParryTalent;
 import iskallia.vault.skill.talent.type.archetype.WardTalent;
+import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.influence.ParryInfluence;
+import iskallia.vault.world.vault.modifier.StatModifier;
 import java.util.function.Function;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -33,13 +34,10 @@ public class ParryHelper {
 
    public static float getPlayerParryChanceUnlimited(ServerPlayerEntity player) {
       float totalParryChance = 0.0F;
+      totalParryChance += getParryChance(player);
       TalentTree talents = PlayerTalentsData.get(player.func_71121_q()).getTalents(player);
 
       for (TalentNode<?> talentNode : talents.getLearnedNodes()) {
-         if (talentNode.getTalent() instanceof ParryTalent) {
-            totalParryChance += ((ParryTalent)talentNode.getTalent()).getParryChance();
-         }
-
          if (talentNode.getTalent() instanceof WardTalent) {
             totalParryChance += ((WardTalent)talentNode.getTalent()).getAdditionalParryChance();
          }
@@ -69,9 +67,15 @@ public class ParryHelper {
          for (ParryInfluence influence : vault.getInfluences().getInfluences(ParryInfluence.class)) {
             totalParryChance += influence.getAdditionalParry();
          }
+
+         for (StatModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), StatModifier.class)) {
+            if (modifier.getStat() == StatModifier.Statistic.PARRY) {
+               totalParryChance *= modifier.getMultiplier();
+            }
+         }
       }
 
-      return totalParryChance + getParryChance(player);
+      return totalParryChance;
    }
 
    public static float getParryChance(LivingEntity entity) {

@@ -3,7 +3,7 @@ package iskallia.vault.skill.ability.effect;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.RampageConfig;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundCategory;
 
@@ -13,7 +13,7 @@ public class RampageAbility<C extends RampageConfig> extends AbilityEffect<C> {
       return "Rampage";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       if (player.func_70644_a(ModEffects.RAMPAGE)) {
          return false;
       } else {

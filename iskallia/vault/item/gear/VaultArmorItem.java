@@ -29,7 +29,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class VaultArmorItem extends DyeableArmorItem implements VaultGear<VaultArmorItem> {
-   public static final int MODEL_VARIANT_COUNT = 33;
+   public static final int MODEL_VARIANT_COUNT = 36;
    public static final int SCRAPPY_VARIANT_COUNT = 3;
    public static final int SPECIAL_HELMET_COUNT = 2;
    public static final int SPECIAL_CHESTPLATE_COUNT = 0;
@@ -47,7 +47,7 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGear<VaultA
 
    @Override
    public int getModelsFor(VaultGear.Rarity rarity) {
-      return rarity == VaultGear.Rarity.SCRAPPY ? 3 : 33;
+      return rarity == VaultGear.Rarity.SCRAPPY ? 3 : 36;
    }
 
    @Nullable

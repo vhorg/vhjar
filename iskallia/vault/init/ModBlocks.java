@@ -90,6 +90,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.DoorBlock;
 import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.GlassBlock;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
@@ -189,10 +190,14 @@ public class ModBlocks {
       net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(-1.0F, 3600000.0F)
    );
    public static final Block VAULT_COOP_CHEST = new VaultChestBlock(
-      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(-1.0F, 3600000.0F)
+      net.minecraft.block.AbstractBlock.Properties.func_200945_a(Material.field_151576_e)
+         .func_200948_a(2.0F, 3600000.0F)
+         .func_200947_a(SoundType.field_185851_d)
    );
    public static final Block VAULT_BONUS_CHEST = new VaultChestBlock(
-      net.minecraft.block.AbstractBlock.Properties.func_200950_a(Blocks.field_150486_ae).func_200948_a(-1.0F, 3600000.0F)
+      net.minecraft.block.AbstractBlock.Properties.func_200945_a(Material.field_151576_e)
+         .func_200948_a(2.0F, 3600000.0F)
+         .func_200947_a(SoundType.field_185851_d)
    );
    public static final XPAltarBlock XP_ALTAR = new XPAltarBlock();
    public static final BloodAltarBlock BLOOD_ALTAR = new BloodAltarBlock();

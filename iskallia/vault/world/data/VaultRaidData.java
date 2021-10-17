@@ -34,7 +34,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 )
 public class VaultRaidData extends WorldSavedData {
    protected static final String DATA_NAME = "the_vault_VaultRaid";
-   private VMapNBT<UUID, VaultRaid> activeVaults = VMapNBT.ofUUID(VaultRaid::new);
+   private final VMapNBT<UUID, VaultRaid> activeVaults = VMapNBT.ofUUID(VaultRaid::new);
    private Mutable nextVaultPos = BlockPos.field_177992_a.func_239590_i_();
 
    public VaultRaidData() {
@@ -54,36 +54,43 @@ public class VaultRaidData extends WorldSavedData {
    }
 
    public VaultRaid getAt(ServerWorld world, BlockPos pos) {
-      return this.activeVaults
-         .values()
-         .stream()
-         .filter(vault -> world.func_234923_W_() == vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION))
-         .filter(vault -> {
-            Optional<MutableBoundingBox> box = vault.getProperties().getBase(VaultRaid.BOUNDING_BOX);
-            return box.isPresent() && box.get().func_175898_b(pos);
-         })
-         .findFirst()
-         .orElse(null);
+      synchronized (this.activeVaults) {
+         return this.activeVaults
+            .values()
+            .stream()
+            .filter(vault -> world.func_234923_W_() == vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION))
+            .filter(vault -> {
+               Optional<MutableBoundingBox> box = vault.getProperties().getBase(VaultRaid.BOUNDING_BOX);
+               return box.isPresent() && box.get().func_175898_b(pos);
+            })
+            .findFirst()
+            .orElse(null);
+      }
    }
 
    public void remove(MinecraftServer server, UUID playerId) {
-      VaultRaid vault = this.activeVaults.remove(playerId);
-      if (vault != null) {
-         ServerWorld world = server.func_71218_a(vault.getProperties().getValue(VaultRaid.DIMENSION));
-         vault.getPlayer(playerId)
-            .ifPresent(
-               player -> {
-                  if (!player.hasExited()) {
-                     VaultRaid.REMOVE_SCAVENGER_ITEMS
-                        .then(VaultRaid.REMOVE_INVENTORY_RESTORE_SNAPSHOTS)
-                        .then(VaultRaid.GRANT_EXP_COMPLETE)
-                        .then(VaultRaid.EXIT_SAFELY)
-                        .execute(vault, player, world);
-                  }
-               }
-            );
-         PlayerStatsData.get(world).onVaultFinished(playerId, vault);
+      VaultRaid vault;
+      synchronized (this.activeVaults) {
+         vault = this.activeVaults.remove(playerId);
+         if (vault == null) {
+            return;
+         }
       }
+
+      ServerWorld world = server.func_71218_a(vault.getProperties().getValue(VaultRaid.DIMENSION));
+      vault.getPlayer(playerId)
+         .ifPresent(
+            player -> {
+               if (!player.hasExited()) {
+                  VaultRaid.REMOVE_SCAVENGER_ITEMS
+                     .then(VaultRaid.REMOVE_INVENTORY_RESTORE_SNAPSHOTS)
+                     .then(VaultRaid.GRANT_EXP_COMPLETE)
+                     .then(VaultRaid.EXIT_SAFELY)
+                     .execute(vault, player, world);
+               }
+            }
+         );
+      PlayerStatsData.get(world).onVaultFinished(playerId, vault);
    }
 
    public VaultRaid startVault(ServerWorld world, VaultRaid.Builder builder) {
@@ -103,7 +110,10 @@ public class VaultRaidData extends WorldSavedData {
          vault.getPlayers().forEach(player -> {
             player.runIfPresent(server, BackupManager::createPlayerInventorySnapshot);
             this.remove(server, player.getPlayerId());
-            this.activeVaults.put(player.getPlayerId(), vault);
+            synchronized (this.activeVaults) {
+               this.activeVaults.put(player.getPlayerId(), vault);
+            }
+
             vault.getInitializer().execute(vault, player, destination);
          });
       });
@@ -111,7 +121,11 @@ public class VaultRaidData extends WorldSavedData {
    }
 
    public void tick(ServerWorld world) {
-      Set<VaultRaid> vaults = new HashSet<>(this.activeVaults.values());
+      Set<VaultRaid> vaults;
+      synchronized (this.activeVaults) {
+         vaults = new HashSet<>(this.activeVaults.values());
+      }
+
       vaults.stream()
          .filter(vault -> vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION) == world.func_234923_W_())
          .forEach(vault -> vault.tick(world));

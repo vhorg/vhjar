@@ -4,7 +4,7 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.CleanseConfig;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.SoundCategory;
 
@@ -14,7 +14,7 @@ public class CleanseAbility<C extends CleanseConfig> extends AbilityEffect<C> {
       return "Cleanse";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       List<EffectInstance> effects = player.func_70651_bq().stream().filter(effect -> !effect.func_188419_a().func_188408_i()).collect(Collectors.toList());
       this.removeEffects(config, player, effects);
       player.field_70170_p
@@ -25,7 +25,7 @@ public class CleanseAbility<C extends CleanseConfig> extends AbilityEffect<C> {
       return true;
    }
 
-   protected void removeEffects(C config, PlayerEntity player, List<EffectInstance> effects) {
+   protected void removeEffects(C config, ServerPlayerEntity player, List<EffectInstance> effects) {
       effects.forEach(effect -> player.func_195063_d(effect.func_188419_a()));
    }
 }

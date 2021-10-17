@@ -15,6 +15,7 @@ public class VaultRoomLayoutRegistry {
       layoutRegistry.put(LineRoomLayout.ID, LineRoomLayout::new);
       layoutRegistry.put(DiamondRoomLayout.ID, DiamondRoomLayout::new);
       layoutRegistry.put(SquareRoomLayout.ID, SquareRoomLayout::new);
+      layoutRegistry.put(CircleRoomLayout.ID, CircleRoomLayout::new);
       layoutRegistry.put(SpiralRoomLayout.ID, SpiralRoomLayout::new);
       layoutRegistry.put(DebugVaultLayout.ID, DebugVaultLayout::new);
       layoutRegistry.put(DenseDiamondRoomLayout.ID, DenseDiamondRoomLayout::new);
@@ -22,7 +23,7 @@ public class VaultRoomLayoutRegistry {
    }
 
    @Nullable
-   public static VaultRoomLayoutGenerator generateLayout(ResourceLocation id) {
+   public static VaultRoomLayoutGenerator getLayoutGenerator(ResourceLocation id) {
       return layoutRegistry.containsKey(id) ? layoutRegistry.get(id).get() : null;
    }
 
@@ -31,7 +32,7 @@ public class VaultRoomLayoutRegistry {
       if (!tag.func_150297_b("Id", 8)) {
          return null;
       } else {
-         VaultRoomLayoutGenerator layout = generateLayout(new ResourceLocation(tag.func_74779_i("Id")));
+         VaultRoomLayoutGenerator layout = getLayoutGenerator(new ResourceLocation(tag.func_74779_i("Id")));
          if (layout == null) {
             return null;
          } else {

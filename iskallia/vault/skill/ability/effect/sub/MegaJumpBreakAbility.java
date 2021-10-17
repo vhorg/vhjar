@@ -12,6 +12,7 @@ import java.util.UUID;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
@@ -23,7 +24,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class MegaJumpBreakAbility extends MegaJumpAbility<MegaJumpBreakConfig> {
    private final Map<UUID, Integer> playerBreakMap = new HashMap<>();
 
-   public boolean onAction(MegaJumpBreakConfig config, PlayerEntity player, boolean active) {
+   public boolean onAction(MegaJumpBreakConfig config, ServerPlayerEntity player, boolean active) {
       if (super.onAction(config, player, active)) {
          this.playerBreakMap.put(player.func_110124_au(), 30);
          return true;

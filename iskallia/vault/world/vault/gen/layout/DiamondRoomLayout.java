@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3i;
 
-public class DiamondRoomLayout extends VaultRoomLayoutGenerator {
+public class DiamondRoomLayout extends ConnectedRoomGenerator {
    public static final ResourceLocation ID = Vault.id("diamond");
    private int size;
 
@@ -51,29 +51,6 @@ public class DiamondRoomLayout extends VaultRoomLayoutGenerator {
    private void addRooms(VaultRoomLayoutGenerator.Layout layout, int x, int roomsZ) {
       for (int z = -roomsZ / 2; z <= roomsZ / 2; z++) {
          layout.putRoom(new VaultRoomLayoutGenerator.Room(new Vector3i(x, 0, z)));
-      }
-   }
-
-   private void connectRooms(VaultRoomLayoutGenerator.Layout layout, int size) {
-      int min = -size / 2;
-
-      for (int xx = min; xx < size / 2; xx++) {
-         for (int zz = min; zz < size / 2; zz++) {
-            VaultRoomLayoutGenerator.Room middle = layout.getRoom(new Vector3i(xx, 0, zz));
-            if (middle != null) {
-               if (xx != -1 || zz != 0) {
-                  VaultRoomLayoutGenerator.Room right = layout.getRoom(new Vector3i(xx + 1, 0, zz));
-                  if (right != null) {
-                     layout.addTunnel(new VaultRoomLayoutGenerator.Tunnel(middle, right));
-                  }
-               }
-
-               VaultRoomLayoutGenerator.Room up = layout.getRoom(new Vector3i(xx, 0, zz + 1));
-               if (up != null) {
-                  layout.addTunnel(new VaultRoomLayoutGenerator.Tunnel(middle, up));
-               }
-            }
-         }
       }
    }
 

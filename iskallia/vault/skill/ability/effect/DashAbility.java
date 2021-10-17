@@ -4,7 +4,6 @@ import iskallia.vault.easteregg.GrasshopperNinja;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.DashConfig;
 import iskallia.vault.util.MathUtilities;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
@@ -17,7 +16,7 @@ public class DashAbility<C extends DashConfig> extends AbilityEffect<C> {
       return "Dash";
    }
 
-   public boolean onAction(C config, PlayerEntity player, boolean active) {
+   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
       Vector3d lookVector = player.func_70040_Z();
       double magnitude = (10 + config.getExtraRadius()) * 0.15;
       double extraPitch = 10.0;
@@ -53,7 +52,7 @@ public class DashAbility<C extends DashConfig> extends AbilityEffect<C> {
                1.0F
             );
          player.func_213823_a(ModSounds.GRASSHOPPER_BRRR, SoundCategory.MASTER, 1.0F, 1.0F);
-         GrasshopperNinja.achieve((ServerPlayerEntity)player);
+         GrasshopperNinja.achieve(player);
       } else {
          player.field_70170_p
             .func_184148_a(

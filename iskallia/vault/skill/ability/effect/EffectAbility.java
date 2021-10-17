@@ -3,6 +3,7 @@ package iskallia.vault.skill.ability.effect;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.EffectConfig;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.SoundCategory;
@@ -30,7 +31,7 @@ public abstract class EffectAbility extends AbilityEffect<EffectConfig> {
       }
    }
 
-   public boolean onAction(EffectConfig config, PlayerEntity player, boolean active) {
+   public boolean onAction(EffectConfig config, ServerPlayerEntity player, boolean active) {
       if (active) {
          this.playEffects(config, player);
       }

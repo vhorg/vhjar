@@ -12,13 +12,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class CurseOnHitModifier extends TexturedVaultModifier {
    @Expose
-   private final String effectName;
+   protected String effectName;
    @Expose
-   private final int effectAmplifier;
+   protected int effectAmplifier;
    @Expose
-   private final int effectDuration;
+   protected int effectDuration;
    @Expose
-   private final double onHitApplyChance;
+   protected double onHitApplyChance;
 
    public CurseOnHitModifier(String name, ResourceLocation icon, Effect effect) {
       this(name, icon, effect.getRegistryName().toString(), 0, 100, 1.0);

@@ -65,7 +65,7 @@ public class FortuneEnhancement extends PaxelEnhancement {
                BlockHelper.breakBlock(world, player, pos, world.func_180495_p(pos), miningStack, true, true);
                BlockHelper.damageMiningItem(heldStack, player, 1);
             } finally {
-               BlockDropCaptureHelper.getCapturedStacksAndStop().forEach(stack -> Block.func_180635_a(world, pos, stack));
+               BlockDropCaptureHelper.getCapturedStacksAndStop().forEach(entity -> Block.func_180635_a(world, entity.func_233580_cy_(), entity.func_92059_d()));
             }
 
             event.setCanceled(true);

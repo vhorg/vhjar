@@ -13,6 +13,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.PacketBuffer;
@@ -100,13 +101,16 @@ public class VaultModifiers implements INBTSerializable<CompoundNBT>, Iterable<V
 
       for (int i = 0; i < modifierList.size(); i++) {
          CompoundNBT tag = modifierList.func_150305_b(i);
-         this.modifiers.add(new VaultModifiers.ActiveModifier(tag));
+         VaultModifiers.ActiveModifier mod = VaultModifiers.ActiveModifier.deserialize(tag);
+         if (mod != null) {
+            this.modifiers.add(mod);
+         }
       }
 
       ListNBT legacyModifierList = nbt.func_150295_c("List", 8);
 
-      for (int i = 0; i < legacyModifierList.size(); i++) {
-         VaultModifier modifier = ModConfigs.VAULT_MODIFIERS.getByName(legacyModifierList.func_150307_f(i));
+      for (int ix = 0; ix < legacyModifierList.size(); ix++) {
+         VaultModifier modifier = ModConfigs.VAULT_MODIFIERS.getByName(legacyModifierList.func_150307_f(ix));
          if (modifier != null) {
             this.modifiers.add(new VaultModifiers.ActiveModifier(modifier, -1));
          }
@@ -125,7 +129,10 @@ public class VaultModifiers implements INBTSerializable<CompoundNBT>, Iterable<V
       int size = buffer.readInt();
 
       for (int i = 0; i < size; i++) {
-         result.modifiers.add(VaultModifiers.ActiveModifier.decode(buffer));
+         VaultModifiers.ActiveModifier modifier = VaultModifiers.ActiveModifier.decode(buffer);
+         if (modifier != null) {
+            result.modifiers.add(modifier);
+         }
       }
 
       return result;
@@ -195,14 +202,19 @@ public class VaultModifiers implements INBTSerializable<CompoundNBT>, Iterable<V
          this.tick = tick;
       }
 
-      private ActiveModifier(CompoundNBT tag) {
-         this.modifier = ModConfigs.VAULT_MODIFIERS.getByName(tag.func_74779_i("key"));
-         this.tick = tag.func_74762_e("timeout");
+      @Nullable
+      private static VaultModifiers.ActiveModifier deserialize(CompoundNBT tag) {
+         VaultModifier modifier = ModConfigs.VAULT_MODIFIERS.getByName(tag.func_74779_i("key"));
+         int timeout = tag.func_74762_e("timeout");
+         return modifier == null ? null : new VaultModifiers.ActiveModifier(modifier, timeout);
       }
 
+      @Nullable
       private static VaultModifiers.ActiveModifier decode(PacketBuffer buffer) {
          String modifierName = buffer.func_150789_c(32767);
-         return new VaultModifiers.ActiveModifier(ModConfigs.VAULT_MODIFIERS.getByName(modifierName), buffer.readInt());
+         int timeout = buffer.readInt();
+         VaultModifier modifier = ModConfigs.VAULT_MODIFIERS.getByName(modifierName);
+         return modifier == null ? null : new VaultModifiers.ActiveModifier(modifier, timeout);
       }
 
       private VaultModifier getModifier() {

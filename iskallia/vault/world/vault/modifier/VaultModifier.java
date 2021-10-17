@@ -60,4 +60,16 @@ public abstract class VaultModifier implements IVaultModifier {
    @Override
    public void tick(VaultRaid vault, VaultPlayer player, ServerWorld world) {
    }
+
+   public static String migrateModifierName(String modifier) {
+      if (modifier.equalsIgnoreCase("Slow")) {
+         return "Freezing";
+      } else if (modifier.equalsIgnoreCase("Poison")) {
+         return "Poisonous";
+      } else if (modifier.equalsIgnoreCase("Wither")) {
+         return "Withering";
+      } else {
+         return modifier.equalsIgnoreCase("Chilling") ? "Fatiguing" : modifier;
+      }
+   }
 }

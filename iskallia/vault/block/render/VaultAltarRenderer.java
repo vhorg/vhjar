@@ -39,7 +39,7 @@ public class VaultAltarRenderer extends TileEntityRenderer<VaultAltarTileEntity>
          int lightLevel = this.getLightAtPos(altar.func_145831_w(), altar.func_174877_v().func_177984_a());
          this.renderItem(
             new ItemStack(ModItems.VAULT_ROCK),
-            new double[]{0.5, 1.6, 0.5},
+            new double[]{0.5, 1.35, 0.5},
             Vector3f.field_229181_d_.func_229187_a_(180.0F - player.field_70177_z),
             matrixStack,
             buffer,
@@ -91,6 +91,10 @@ public class VaultAltarRenderer extends TileEntityRenderer<VaultAltarTileEntity>
       matrixStack.func_227860_a_();
       matrixStack.func_227861_a_(translation[0], translation[1], translation[2]);
       matrixStack.func_227863_a_(rotation);
+      if (stack.func_77973_b().getItem() != ModItems.VAULT_ROCK) {
+         matrixStack.func_227862_a_(0.5F, 0.5F, 0.5F);
+      }
+
       IBakedModel ibakedmodel = this.mc.func_175599_af().func_184393_a(stack, null, null);
       this.mc.func_175599_af().func_229111_a_(stack, TransformType.GROUND, true, matrixStack, buffer, lightLevel, combinedOverlay, ibakedmodel);
       matrixStack.func_227865_b_();
@@ -107,7 +111,7 @@ public class VaultAltarRenderer extends TileEntityRenderer<VaultAltarTileEntity>
          int opacity = 1711276032;
          float offset = -fontRenderer.func_238414_a_(text) / 2;
          Matrix4f matrix4f = matrixStack.func_227866_c_().func_227870_a_();
-         matrixStack.func_227861_a_(corner[0], corner[1] + 0.4F, corner[2]);
+         matrixStack.func_227861_a_(corner[0], corner[1] + 0.25, corner[2]);
          matrixStack.func_227862_a_(scale, scale, scale);
          matrixStack.func_227863_a_(this.mc.func_175598_ae().func_229098_b_());
          matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(180.0F));
@@ -138,13 +142,13 @@ public class VaultAltarRenderer extends TileEntityRenderer<VaultAltarTileEntity>
    private double[] getTranslation(int index) {
       switch (index) {
          case 0:
-            return new double[]{0.875, 1.1, 0.125};
+            return new double[]{0.95, 1.35, 0.05};
          case 1:
-            return new double[]{0.875, 1.1, 0.875};
+            return new double[]{0.95, 1.35, 0.95};
          case 2:
-            return new double[]{0.125, 1.1, 0.875};
+            return new double[]{0.05, 1.35, 0.95};
          default:
-            return new double[]{0.125, 1.1, 0.125};
+            return new double[]{0.05, 1.35, 0.05};
       }
    }
 }

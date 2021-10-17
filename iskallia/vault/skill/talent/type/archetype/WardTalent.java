@@ -26,26 +26,17 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 public class WardTalent extends ArchetypeTalent {
    private static final Map<UUID, Long> lastAttackedTick = new HashMap<>();
    @Expose
-   protected float additionalAbsorptionPercent;
-   @Expose
    protected int startRegenAfterCombatSeconds;
    @Expose
    protected EffectTalent fullAbsorptionEffect;
    @Expose
    protected float additionalParryChance;
 
-   public WardTalent(
-      int cost, float additionalAbsorptionPercent, int startRegenAfterCombatSeconds, EffectTalent fullAbsorptionEffect, float additionalParryChance
-   ) {
+   public WardTalent(int cost, int startRegenAfterCombatSeconds, EffectTalent fullAbsorptionEffect, float additionalParryChance) {
       super(cost);
-      this.additionalAbsorptionPercent = additionalAbsorptionPercent;
       this.startRegenAfterCombatSeconds = startRegenAfterCombatSeconds;
       this.fullAbsorptionEffect = fullAbsorptionEffect;
       this.additionalParryChance = additionalParryChance;
-   }
-
-   public float getAdditionalAbsorptionPercent() {
-      return this.additionalAbsorptionPercent;
    }
 
    public int getStartRegenAfterCombatSeconds() {

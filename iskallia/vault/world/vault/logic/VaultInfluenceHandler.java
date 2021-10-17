@@ -171,6 +171,7 @@ public class VaultInfluenceHandler {
             VaultInfluence influence;
             String text;
             if (rand.nextBoolean()) {
+               favour = (int)(favour * 0.75F);
                influence = new TimeInfluence(favour * 60 * 20);
                text = "Grants " + favour + " additional minutes";
             } else {
@@ -261,7 +262,7 @@ public class VaultInfluenceHandler {
                text = "Applies +" + ampl + " Mining Fatigue";
             } else {
                int more = Math.min(favour * 4, 50);
-               float perc = more / 100.0F;
+               float perc = 1.0F + more / 100.0F;
                influence = new DamageTakenInfluence(perc);
                text = "You take " + more + "% more damage";
             }
@@ -272,6 +273,7 @@ public class VaultInfluenceHandler {
             VaultInfluence influence;
             String text;
             if (rVal >= 3) {
+               favour = Math.min(favour, 10);
                influence = new TimeInfluence(-favour * 60 * 20);
                text = "Removes " + favour + " minutes";
             } else {

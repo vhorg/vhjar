@@ -3,7 +3,12 @@ package iskallia.vault.effect;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.ability.config.sub.GhostWalkDamageConfig;
+import iskallia.vault.util.PlayerDamageHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;
@@ -15,9 +20,11 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.server.ServerWorld;
 
 public class GhostWalkEffect extends Effect {
    private AttributeModifier[] attributeModifiers = null;
+   private static final Map<UUID, PlayerDamageHelper.DamageMultiplier> multiplierMap = new HashMap<>();
 
    public GhostWalkEffect(EffectType typeIn, int liquidColorIn, ResourceLocation id) {
       super(typeIn, liquidColorIn);
@@ -47,6 +54,20 @@ public class GhostWalkEffect extends Effect {
          movementSpeed.func_233767_b_(attributeModifier);
       }
 
+      if (livingEntity instanceof ServerPlayerEntity) {
+         ServerPlayerEntity player = (ServerPlayerEntity)livingEntity;
+         this.removeExistingDamageBuff(player);
+         AbilityTree abilities = PlayerAbilitiesData.get((ServerWorld)player.func_130014_f_()).getAbilities(player);
+         AbilityNode<?, ?> ghostWalkNode = abilities.getNodeByName("Ghost Walk");
+         if (ghostWalkNode.getAbilityConfig() instanceof GhostWalkDamageConfig) {
+            float dmgIncrease = ((GhostWalkDamageConfig)ghostWalkNode.getAbilityConfig()).getDamageMultiplierInGhostWalk();
+            PlayerDamageHelper.DamageMultiplier multiplier = PlayerDamageHelper.applyMultiplier(
+               player, dmgIncrease, PlayerDamageHelper.Operation.ADDITIVE_MULTIPLY
+            );
+            multiplierMap.put(player.func_110124_au(), multiplier);
+         }
+      }
+
       super.func_111185_a(livingEntity, attributeMap, amplifier);
    }
 
@@ -59,12 +80,17 @@ public class GhostWalkEffect extends Effect {
 
       if (livingEntity instanceof ServerPlayerEntity) {
          ServerPlayerEntity player = (ServerPlayerEntity)livingEntity;
-         PlayerAbilitiesData data = PlayerAbilitiesData.get(player.func_71121_q());
-         AbilityTree abilities = data.getAbilities(player);
-         AbilityNode<?, ?> ghostWalk = abilities.getNodeByName("Ghost Walk");
-         abilities.putOnCooldown(player.func_184102_h(), ghostWalk, ModConfigs.ABILITIES.getCooldown(ghostWalk, player));
+         this.removeExistingDamageBuff(player);
+         PlayerAbilitiesData.setAbilityOnCooldown(player, "Ghost Walk");
       }
 
       super.func_111187_a(livingEntity, attributeMap, amplifier);
+   }
+
+   private void removeExistingDamageBuff(ServerPlayerEntity player) {
+      PlayerDamageHelper.DamageMultiplier existing = multiplierMap.get(player.func_110124_au());
+      if (existing != null) {
+         PlayerDamageHelper.removeMultiplier(player, existing);
+      }
    }
 }
