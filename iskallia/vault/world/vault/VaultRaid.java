@@ -532,7 +532,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
             if (stack.func_77973_b() instanceof BlockItem && ((BlockItem)stack.func_77973_b()).func_179223_d() instanceof VaultCrateBlock) {
                CompoundNBT tag = stack.func_179543_a("BlockEntityTag");
                if (tag != null) {
-                  NonNullList<ItemStack> stacks = NonNullList.func_191197_a(27, ItemStack.field_190927_a);
+                  NonNullList<ItemStack> stacks = NonNullList.func_191197_a(54, ItemStack.field_190927_a);
                   ItemStackHelper.func_191283_b(tag, stacks);
 
                   for (int i = 0; i < stacks.size(); i++) {

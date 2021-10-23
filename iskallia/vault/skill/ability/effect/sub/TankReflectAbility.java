@@ -30,7 +30,9 @@ public class TankReflectAbility extends TankAbility<TankReflectConfig> {
                if (tankNode.getAbility() == this && tankNode.isLearned()) {
                   TankReflectConfig config = (TankReflectConfig)tankNode.getAbilityConfig();
                   Entity attacker = event.getSource().func_76346_g();
-                  if (attacker instanceof LivingEntity && rand.nextFloat() < config.getDamageReflectChance()) {
+                  if (attacker instanceof LivingEntity
+                     && ((LivingEntity)attacker).func_110143_aJ() > 0.0F
+                     && rand.nextFloat() < config.getDamageReflectChance()) {
                      float damage = event.getAmount() * config.getDamageReflectPercent();
                      attacker.func_70097_a(DamageSource.func_92087_a(player), damage);
                   }
