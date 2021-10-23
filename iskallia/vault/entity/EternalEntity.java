@@ -2,7 +2,7 @@ package iskallia.vault.entity;
 
 import com.mojang.datafixers.util.Either;
 import iskallia.vault.aura.AuraManager;
-import iskallia.vault.aura.ProxyEntityAuraProvider;
+import iskallia.vault.aura.EntityAuraProvider;
 import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.entity.ai.FollowEntityGoal;
 import iskallia.vault.entity.eternal.ActiveEternalData;
@@ -213,7 +213,7 @@ public class EternalEntity extends ZombieEntity {
             this.getOwner().ifRight(sPlayer -> {
                EternalAuraConfig.AuraConfig auraCfg = ModConfigs.ETERNAL_AURAS.getByName(this.providedAura);
                if (auraCfg != null) {
-                  AuraManager.getInstance().provideAura(ProxyEntityAuraProvider.ofEntity(this, sPlayer, auraCfg));
+                  AuraManager.getInstance().provideAura(EntityAuraProvider.ofEntity(this, auraCfg));
                }
             });
          }

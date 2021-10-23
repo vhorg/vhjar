@@ -7,6 +7,7 @@ import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.skill.talent.type.EffectTalent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.world.World;
 
 public class EffectAuraConfig extends EternalAuraConfig.AuraConfig {
@@ -30,8 +31,11 @@ public class EffectAuraConfig extends EternalAuraConfig.AuraConfig {
    public void onTick(World world, ActiveAura aura) {
       super.onTick(world, aura);
       if (aura.getAuraProvider() instanceof EntityAuraProvider) {
-         LivingEntity auraTarget = ((EntityAuraProvider)aura.getAuraProvider()).getTrueSource();
-         auraTarget.func_195064_c(this.getEffect().makeEffect(259));
+         EffectInstance effect = this.getEffect().makeEffect(259);
+         LivingEntity auraTarget = ((EntityAuraProvider)aura.getAuraProvider()).getSource();
+         if (!auraTarget.func_70644_a(effect.func_188419_a()) || auraTarget.func_70660_b(effect.func_188419_a()).func_76459_b() < 40) {
+            auraTarget.func_195064_c(effect);
+         }
       }
    }
 }

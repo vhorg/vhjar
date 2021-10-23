@@ -22,6 +22,7 @@ import java.util.Map;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.ShieldItem;
@@ -43,8 +44,11 @@ public class AnvilEvents {
    )
    public static void onVaultAnvil(AnvilUpdateEvent event) {
       World world = event.getPlayer().func_130014_f_();
-      if (world.func_234923_W_() == Vault.VAULT_KEY) {
-         event.setCanceled(true);
+      Item repairItem = event.getRight().func_77973_b();
+      if (repairItem != ModItems.MAGNETITE && repairItem != ModItems.REPAIR_CORE && repairItem != ModItems.REPAIR_CORE_T2) {
+         if (world.func_234923_W_() == Vault.VAULT_KEY) {
+            event.setCanceled(true);
+         }
       }
    }
 

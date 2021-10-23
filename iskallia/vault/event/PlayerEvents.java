@@ -8,6 +8,7 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.network.message.FighterSizeMessage;
+import iskallia.vault.util.SideOnlyFixer;
 import iskallia.vault.util.VaultRarity;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.Random;
@@ -127,6 +128,11 @@ public class PlayerEvents {
       if (!player.func_130014_f_().func_201670_d()) {
          ItemStack crafted = event.getCrafting();
          if (crafted.func_77973_b() instanceof VaultGear) {
+            int slot = SideOnlyFixer.getSlotFor(player.field_71071_by, crafted);
+            if (slot != -1) {
+               ModAttributes.GEAR_CRAFTED_BY.create(player.field_71071_by.func_70301_a(slot), player.func_200200_C_().getString());
+            }
+
             ModAttributes.GEAR_CRAFTED_BY.create(crafted, player.func_200200_C_().getString());
          }
       }

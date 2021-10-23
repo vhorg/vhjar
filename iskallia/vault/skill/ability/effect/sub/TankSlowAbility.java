@@ -1,5 +1,6 @@
 package iskallia.vault.skill.ability.effect.sub;
 
+import iskallia.vault.entity.EternalEntity;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
@@ -34,7 +35,7 @@ public class TankSlowAbility extends TankAbility<TankSlowConfig> {
                if (tankNode.getAbility() == this && tankNode.isLearned()) {
                   TankSlowConfig config = (TankSlowConfig)tankNode.getAbilityConfig();
                   List<LivingEntity> entities = EntityHelper.getNearby(sWorld, event.player.func_233580_cy_(), config.getSlowAreaRadius(), LivingEntity.class);
-                  entities.removeIf(e -> e instanceof PlayerEntity);
+                  entities.removeIf(e -> e instanceof PlayerEntity || e instanceof EternalEntity);
 
                   for (LivingEntity entity : entities) {
                      entity.func_195064_c(new EffectInstance(Effects.field_76421_d, 80, config.getSlownessAmplifier(), false, false, false));

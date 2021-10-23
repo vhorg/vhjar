@@ -22,10 +22,6 @@ public class EntityAuraProvider extends AuraProvider {
       return this.entity;
    }
 
-   public LivingEntity getTrueSource() {
-      return this.getSource();
-   }
-
    @Override
    public boolean isValid() {
       return this.entity.func_70089_S();

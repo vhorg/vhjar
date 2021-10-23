@@ -69,7 +69,7 @@ public abstract class VaultModifier implements IVaultModifier {
       } else if (modifier.equalsIgnoreCase("Wither")) {
          return "Withering";
       } else {
-         return modifier.equalsIgnoreCase("Chilling") ? "Fatiguing" : modifier;
+         return !modifier.equalsIgnoreCase("Chilling") && !modifier.equalsIgnoreCase("Chaining") ? modifier : "Fatiguing";
       }
    }
 }

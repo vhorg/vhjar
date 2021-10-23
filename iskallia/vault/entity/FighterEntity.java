@@ -87,6 +87,13 @@ public class FighterEntity extends ZombieEntity {
       if (!this.field_70729_aU) {
          if (this.field_70170_p.field_72995_K) {
             String name = this.func_200201_e().getString();
+            String star = String.valueOf('✦');
+
+            while (name.startsWith(star)) {
+               name = name.substring(1);
+            }
+
+            name = name.trim();
             if (name.startsWith("[")) {
                String[] data = name.split(Pattern.quote("]"));
                name = data[1].trim();

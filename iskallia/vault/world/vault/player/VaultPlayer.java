@@ -135,7 +135,7 @@ public abstract class VaultPlayer implements INBTSerializable<CompoundNBT> {
 
    public abstract void tickObjectiveUpdates(VaultRaid var1, ServerWorld var2);
 
-   private Optional<ServerPlayerEntity> getServerPlayer(MinecraftServer srv) {
+   public Optional<ServerPlayerEntity> getServerPlayer(MinecraftServer srv) {
       return Optional.ofNullable(srv.func_184103_al().func_177451_a(this.getPlayerId()));
    }
 

@@ -130,7 +130,7 @@ public class VaultInfluenceHandler {
                int less = Math.min(favour * 4, 60);
                float perc = 1.0F - less / 100.0F;
                influence = new MobAttributeInfluence(
-                  Attributes.field_233818_a_, new AttributeModifier(BENEVOLENT_HP_REDUCTION, "Favours", perc, Operation.MULTIPLY_TOTAL)
+                  Attributes.field_233818_a_, new AttributeModifier(BENEVOLENT_HP_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
                );
                text = "Monsters have " + less + "% less Health";
             }
@@ -148,7 +148,7 @@ public class VaultInfluenceHandler {
                int less = Math.min(favour * 5, 50);
                float perc = 1.0F - less / 100.0F;
                influence = new MobAttributeInfluence(
-                  Attributes.field_233821_d_, new AttributeModifier(OMNISCIENT_SPEED_REDUCTION, "Favours", perc, Operation.MULTIPLY_TOTAL)
+                  Attributes.field_233821_d_, new AttributeModifier(OMNISCIENT_SPEED_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
                );
                text = "Monsters move " + less + "% slower";
             } else if (rVal >= 2) {
@@ -192,7 +192,7 @@ public class VaultInfluenceHandler {
                int less = Math.min(favour * 6, 66);
                float perc = 1.0F - less / 100.0F;
                influence = new MobAttributeInfluence(
-                  Attributes.field_233823_f_, new AttributeModifier(MALEVOLENCE_DAMAGE_REDUCTION, "Favours", perc, Operation.MULTIPLY_TOTAL)
+                  Attributes.field_233823_f_, new AttributeModifier(MALEVOLENCE_DAMAGE_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
                );
                text = "Monsters deal " + less + "% less damage";
             } else if (rVal >= 1) {
@@ -228,7 +228,7 @@ public class VaultInfluenceHandler {
                text = "Applies +" + ampl + " Weakness";
             } else if (rVal >= 1) {
                int more = Math.min(favour * 8, 140);
-               float perc = 1.0F + more / 100.0F;
+               float perc = more / 100.0F;
                influence = new MobAttributeInfluence(
                   Attributes.field_233818_a_, new AttributeModifier(BENEVOLENT_HP_INCREASE, "Favours", perc, Operation.MULTIPLY_TOTAL)
                );
@@ -251,7 +251,7 @@ public class VaultInfluenceHandler {
                text = "Applies -" + ampl + " Luck";
             } else if (rVal >= 2) {
                int more = Math.min(favour * 5, 80);
-               float perc = 1.0F + more / 100.0F;
+               float perc = more / 100.0F;
                influence = new MobAttributeInfluence(
                   Attributes.field_233826_i_, new AttributeModifier(OMNISCIENT_ARMOR_INCREASE, "Favours", perc, Operation.MULTIPLY_TOTAL)
                );
@@ -292,7 +292,7 @@ public class VaultInfluenceHandler {
                text = more + " additional monsters spawn around you";
             } else {
                int more = Math.min(favour * 6, 80);
-               float perc = 1.0F + more / 100.0F;
+               float perc = more / 100.0F;
                influence = new MobAttributeInfluence(
                   Attributes.field_233823_f_, new AttributeModifier(MALEVOLENCE_DAMAGE_INCREASE, "Favours", perc, Operation.MULTIPLY_TOTAL)
                );

@@ -39,6 +39,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.Color;
@@ -198,10 +199,10 @@ public class SummonAndKillBossObjective extends VaultObjective {
                .func_216015_a(LootParameters.field_216282_b, playerEntity)
                .func_186469_a(playerEntity.func_184817_da());
             LootContext ctx = builder.func_216022_a(LootParameterSets.field_216263_d);
-            this.dropBossCrate(world, vault, ctx);
+            this.dropBossCrate(world, vault, player, ctx);
             float additionalChance = vault.getPlayers().size() <= 1 ? 0.0F : Math.min(vault.getPlayers().size() * 0.5F, 1.0F);
             if (world.field_73012_v.nextFloat() < additionalChance) {
-               this.dropBossCrate(world, vault, ctx);
+               this.dropBossCrate(world, vault, player, ctx);
             }
 
             world.func_73046_m().func_184103_al().func_232641_a_(this.getBossKillMessage(playerEntity), ChatType.CHAT, player.getPlayerId());
@@ -216,7 +217,7 @@ public class SummonAndKillBossObjective extends VaultObjective {
       return msgContainer.func_230529_a_(playerName).func_240702_b_(" defeated ").func_230529_a_(this.getBossName()).func_240702_b_("!");
    }
 
-   private void dropBossCrate(ServerWorld world, VaultRaid vault, LootContext context) {
+   private void dropBossCrate(ServerWorld world, VaultRaid vault, VaultPlayer rewardPlayer, LootContext context) {
       NonNullList<ItemStack> stacks = this.createLoot(world, vault, context);
       vault.getProperties()
          .getBase(VaultRaid.IS_RAFFLE)
@@ -237,8 +238,9 @@ public class SummonAndKillBossObjective extends VaultObjective {
                }
             }
          );
+      BlockPos dropPos = rewardPlayer.getServerPlayer(world.func_73046_m()).<BlockPos>map(Entity::func_233580_cy_).orElse(new BlockPos(this.getBossPos()));
       ItemStack crate = VaultCrateBlock.getCrateWithLoot(ModBlocks.VAULT_CRATE, stacks);
-      ItemEntity item = new ItemEntity(world, this.getBossPos().func_82615_a(), this.getBossPos().func_82617_b(), this.getBossPos().func_82616_c(), crate);
+      ItemEntity item = new ItemEntity(world, dropPos.func_177958_n(), dropPos.func_177956_o(), dropPos.func_177952_p(), crate);
       item.func_174869_p();
       world.func_217376_c(item);
       this.crates.add(new VaultObjective.Crate(stacks));

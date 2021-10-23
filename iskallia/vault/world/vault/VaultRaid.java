@@ -11,6 +11,7 @@ import iskallia.vault.attribute.RegistryKeyAttribute;
 import iskallia.vault.attribute.StringAttribute;
 import iskallia.vault.attribute.UUIDAttribute;
 import iskallia.vault.attribute.VAttribute;
+import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.entity.EntityScaler;
 import iskallia.vault.entity.EternalEntity;
 import iskallia.vault.init.ModAttributes;
@@ -109,6 +110,8 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -117,6 +120,7 @@ import net.minecraft.network.play.server.STitlePacket.Type;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -525,6 +529,21 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
                   }
                }
             });
+            if (stack.func_77973_b() instanceof BlockItem && ((BlockItem)stack.func_77973_b()).func_179223_d() instanceof VaultCrateBlock) {
+               CompoundNBT tag = stack.func_179543_a("BlockEntityTag");
+               if (tag != null) {
+                  NonNullList<ItemStack> stacks = NonNullList.func_191197_a(27, ItemStack.field_190927_a);
+                  ItemStackHelper.func_191283_b(tag, stacks);
+
+                  for (int i = 0; i < stacks.size(); i++) {
+                     if (((ItemStack)stacks.get(i)).func_77973_b() instanceof BasicScavengerItem) {
+                        stacks.set(i, ItemStack.field_190927_a);
+                     }
+                  }
+
+                  ItemStackHelper.func_191282_a(tag, stacks);
+               }
+            }
          }
       })
    );

@@ -18,12 +18,11 @@ public class CleanseEffectAbility extends CleanseAbility<CleanseEffectConfig> {
             String effectStr = addEffects.get(rand.nextInt(addEffects.size()));
             Registry.field_212631_t.func_241873_b(new ResourceLocation(effectStr)).ifPresent(effect -> {
                EffectTalent.CombinedEffects grantedEffects = EffectTalent.getEffectData(player, player.func_71121_q(), effect);
-               EffectTalent display = grantedEffects.getDisplayEffect();
-               EffectTalent.Type type = display.getType();
-               if (grantedEffects.getAmplifier() >= 0) {
+               if (grantedEffects.getDisplayEffect() != null && grantedEffects.getAmplifier() >= 0) {
+                  EffectTalent.Type type = grantedEffects.getDisplayEffect().getType();
                   new EffectInstance(effect, 600, grantedEffects.getAmplifier() + config.getEffectAmplifier() + 1, false, type.showParticles, type.showIcon);
                } else {
-                  player.func_195064_c(new EffectInstance(effect, 600, config.getEffectAmplifier(), false, type.showParticles, type.showIcon));
+                  player.func_195064_c(new EffectInstance(effect, 600, config.getEffectAmplifier(), false, false, true));
                }
             });
          }

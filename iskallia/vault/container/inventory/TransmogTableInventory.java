@@ -1,6 +1,5 @@
 package iskallia.vault.container.inventory;
 
-import iskallia.vault.attribute.EnumAttribute;
 import iskallia.vault.attribute.IntegerAttribute;
 import iskallia.vault.container.base.RecipeInventory;
 import iskallia.vault.init.ModAttributes;
@@ -36,9 +35,8 @@ public class TransmogTableInventory extends RecipeInventory {
       ItemStack armorStack = this.func_70301_a(0);
       ItemStack appearanceStack = this.func_70301_a(1);
       ItemStack bronzeStack = this.func_70301_a(2);
-      EnumAttribute<VaultGear.Rarity> rarityAttr = ModAttributes.GEAR_RARITY.getOrDefault(appearanceStack, VaultGear.Rarity.SCRAPPY);
-      VaultGear.Rarity armorRarity = rarityAttr.getValue(armorStack);
-      VaultGear.Rarity appearanceRarity = rarityAttr.getValue(appearanceStack);
+      VaultGear.Rarity armorRarity = ModAttributes.GEAR_RARITY.getBase(armorStack).orElse(VaultGear.Rarity.SCRAPPY);
+      VaultGear.Rarity appearanceRarity = ModAttributes.GEAR_RARITY.getBase(appearanceStack).orElse(VaultGear.Rarity.SCRAPPY);
       return armorStack.func_77973_b() instanceof VaultArmorItem
          && appearanceStack.func_77973_b() instanceof VaultArmorItem
          && armorRarity != VaultGear.Rarity.SCRAPPY
