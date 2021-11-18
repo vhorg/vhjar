@@ -2,6 +2,7 @@ package iskallia.vault.skill.talent;
 
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.talent.type.PlayerTalent;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
@@ -62,13 +63,9 @@ public class TalentNode<T extends PlayerTalent> implements INBTSerializable<Comp
    }
 
    @Nullable
-   public static <T extends PlayerTalent> TalentNode<T> fromNBT(CompoundNBT nbt, Class<T> clazz) {
-      TalentGroup<T> group = (TalentGroup<T>)ModConfigs.TALENTS.getTalent(nbt.func_74779_i("Name")).orElse(null);
-      if (group == null) {
-         return null;
-      } else {
-         int level = nbt.func_74762_e("Level");
-         return new TalentNode<>(group, level);
-      }
+   public static TalentNode<?> fromNBT(@Nullable UUID playerId, CompoundNBT nbt, int currentVersion) {
+      String talentName = nbt.func_74779_i("Name");
+      int level = nbt.func_74762_e("Level");
+      return TalentTree.migrate(playerId, talentName, level, currentVersion);
    }
 }

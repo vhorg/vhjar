@@ -87,6 +87,12 @@ public class PlayerVaultStatsData extends WorldSavedData {
       return this;
    }
 
+   public PlayerVaultStatsData addSkillPointNoSync(UUID playerId, int amount) {
+      this.getVaultStats(playerId).addSkillPoints(amount);
+      this.func_76185_a();
+      return this;
+   }
+
    public PlayerVaultStatsData addKnowledgePoints(ServerPlayerEntity player, int amount) {
       this.getVaultStats(player).addKnowledgePoints(amount).sync(player.func_71121_q().func_73046_m());
       this.func_76185_a();

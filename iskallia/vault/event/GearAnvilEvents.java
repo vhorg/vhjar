@@ -6,7 +6,9 @@ import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.ArtisanScrollItem;
+import iskallia.vault.item.FlawedRubyItem;
 import iskallia.vault.item.gear.IdolItem;
+import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.item.gear.VaultGearHelper;
 import iskallia.vault.item.gear.applicable.VaultPlateItem;
@@ -32,37 +34,78 @@ public class GearAnvilEvents {
    @SubscribeEvent
    public static void onApplyT2Charm(AnvilUpdateEvent event) {
       ItemStack left = event.getLeft();
-      if (left.func_77973_b() instanceof VaultGear && event.getRight().func_77973_b() == ModItems.GEAR_CHARM) {
-         if (ModAttributes.GEAR_STATE.getOrDefault(left, VaultGear.State.UNIDENTIFIED).getValue(left) != VaultGear.State.UNIDENTIFIED) {
-            return;
-         }
+      if (left.func_77973_b() != ModItems.ETCHING) {
+         if (left.func_77973_b() instanceof VaultGear && event.getRight().func_77973_b() == ModItems.GEAR_CHARM) {
+            if (ModAttributes.GEAR_STATE.getOrDefault(left, VaultGear.State.UNIDENTIFIED).getValue(left) != VaultGear.State.UNIDENTIFIED) {
+               return;
+            }
 
-         if (!ModAttributes.GEAR_ROLL_TYPE.exists(left)) {
-            return;
-         }
+            if (!ModAttributes.GEAR_ROLL_TYPE.exists(left)) {
+               return;
+            }
 
-         if (ModAttributes.GEAR_TIER.getOrDefault(left, 0).getValue(left) >= 1) {
-            return;
-         }
+            if (ModAttributes.GEAR_TIER.getOrDefault(left, 0).getValue(left) >= 1) {
+               return;
+            }
 
-         PlayerEntity player = MiscUtils.findPlayerUsingAnvil(left, event.getRight());
-         if (player == null) {
-            return;
-         }
+            PlayerEntity player = MiscUtils.findPlayerUsingAnvil(left, event.getRight());
+            if (player == null) {
+               return;
+            }
 
-         int vaultLevel = SidedHelper.getVaultLevel(player);
-         if (vaultLevel < 100) {
-            return;
-         }
+            int vaultLevel = SidedHelper.getVaultLevel(player);
+            if (vaultLevel < 100) {
+               return;
+            }
 
-         String pool = ModAttributes.GEAR_ROLL_TYPE.get(left).map(attribute -> attribute.getValue(left)).get();
-         String upgraded = ModConfigs.VAULT_GEAR_UPGRADE.getUpgradedRarity(pool);
-         ItemStack output = left.func_77946_l();
-         ModAttributes.GEAR_TIER.create(output, 1);
-         ModAttributes.GEAR_ROLL_TYPE.create(output, upgraded);
-         event.setOutput(output);
-         event.setMaterialCost(1);
-         event.setCost(20);
+            String pool = ModAttributes.GEAR_ROLL_TYPE.get(left).map(attribute -> attribute.getValue(left)).get();
+            String upgraded = ModConfigs.VAULT_GEAR_UPGRADE.getUpgradedRarity(pool);
+            ItemStack output = left.func_77946_l();
+            ModAttributes.GEAR_TIER.create(output, 1);
+            ModAttributes.GEAR_ROLL_TYPE.create(output, upgraded);
+            event.setOutput(output);
+            event.setMaterialCost(1);
+            event.setCost(20);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyT3Charm(AnvilUpdateEvent event) {
+      ItemStack left = event.getLeft();
+      if (left.func_77973_b() != ModItems.ETCHING) {
+         if (left.func_77973_b() instanceof VaultGear && event.getRight().func_77973_b() == ModItems.GEAR_CHARM_T3) {
+            if (ModAttributes.GEAR_STATE.getOrDefault(left, VaultGear.State.UNIDENTIFIED).getValue(left) != VaultGear.State.UNIDENTIFIED) {
+               return;
+            }
+
+            if (!ModAttributes.GEAR_ROLL_TYPE.exists(left)) {
+               return;
+            }
+
+            if (ModAttributes.GEAR_TIER.getOrDefault(left, 0).getValue(left) != 1) {
+               return;
+            }
+
+            PlayerEntity player = MiscUtils.findPlayerUsingAnvil(left, event.getRight());
+            if (player == null) {
+               return;
+            }
+
+            int vaultLevel = SidedHelper.getVaultLevel(player);
+            if (vaultLevel < 200) {
+               return;
+            }
+
+            String pool = ModAttributes.GEAR_ROLL_TYPE.get(left).map(attribute -> attribute.getValue(left)).get();
+            String upgraded = ModConfigs.VAULT_GEAR_UPGRADE.getUpgradedRarity(pool);
+            ItemStack output = left.func_77946_l();
+            ModAttributes.GEAR_TIER.create(output, 2);
+            ModAttributes.GEAR_ROLL_TYPE.create(output, upgraded);
+            event.setOutput(output);
+            event.setMaterialCost(1);
+            event.setCost(20);
+         }
       }
    }
 
@@ -113,6 +156,18 @@ public class GearAnvilEvents {
          } else {
             ModAttributes.DURABILITY.getBase(original).ifPresent(value -> ModAttributes.DURABILITY.create(original, value + 3000));
          }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyEtching(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultArmorItem && event.getRight().func_77973_b() == ModItems.ETCHING) {
+         ItemStack output = event.getLeft().func_77946_l();
+         VaultGear.Set set = ModAttributes.GEAR_SET.getOrDefault(event.getRight(), VaultGear.Set.NONE).getValue(event.getRight());
+         ModAttributes.GEAR_SET.create(output, set);
+         event.setOutput(output);
+         event.setMaterialCost(1);
+         event.setCost(25);
       }
    }
 
@@ -283,20 +338,13 @@ public class GearAnvilEvents {
             if (event.getLeft().func_77973_b() instanceof VaultGear) {
                ItemStack input = event.getLeft();
                PlayerEntity playerEntity = event.getPlayer();
-               if (playerEntity != null) {
-                  World world = playerEntity.func_130014_f_();
-                  if (world instanceof ServerWorld) {
-                     ServerWorld serverWorld = (ServerWorld)world;
-                     TalentTree talents = PlayerTalentsData.get(serverWorld).getTalents(playerEntity);
-                     if (talents.hasLearnedNode(ModConfigs.TALENTS.ARTISAN)) {
-                        if (ModAttributes.GEAR_RANDOM_SEED.exists(input)) {
-                           if (ModAttributes.GEAR_STATE.getOrDefault(input, VaultGear.State.UNIDENTIFIED).getValue(input) != VaultGear.State.UNIDENTIFIED) {
-                              if (VaultGearHelper.hasModifier(input)) {
-                                 event.setCost(5);
-                                 event.setMaterialCost(1);
-                                 event.setOutput(new ItemStack(ModItems.ARTISAN_SCROLL));
-                              }
-                           }
+               if (hasLearnedArtisan(playerEntity)) {
+                  if (ModAttributes.GEAR_RANDOM_SEED.exists(input)) {
+                     if (ModAttributes.GEAR_STATE.getOrDefault(input, VaultGear.State.UNIDENTIFIED).getValue(input) != VaultGear.State.UNIDENTIFIED) {
+                        if (VaultGearHelper.hasModifier(input)) {
+                           event.setCost(5);
+                           event.setMaterialCost(1);
+                           event.setOutput(new ItemStack(ModItems.ARTISAN_SCROLL));
                         }
                      }
                   }
@@ -329,6 +377,56 @@ public class GearAnvilEvents {
                   }
                }
             }
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyArtisanPearl(AnvilUpdateEvent event) {
+      if (event.getRight().func_77973_b() == ModItems.FLAWED_RUBY) {
+         PlayerEntity playerEntity = event.getPlayer();
+         if (hasLearnedArtisan(playerEntity) || hasLearnedTreasureHunter(playerEntity)) {
+            if (ModAttributes.IMBUED.getOrDefault(event.getLeft(), false).getValue(event.getLeft())) {
+               return;
+            }
+
+            if (event.getLeft().func_77973_b() instanceof VaultGear) {
+               ItemStack output = event.getLeft().func_77946_l();
+               FlawedRubyItem.markApplied(output);
+               event.setOutput(output);
+               event.setMaterialCost(1);
+               event.setCost(1);
+            }
+         }
+      }
+   }
+
+   private static boolean hasLearnedArtisan(PlayerEntity player) {
+      if (player == null) {
+         return false;
+      } else {
+         World world = player.func_130014_f_();
+         if (!(world instanceof ServerWorld)) {
+            return false;
+         } else {
+            ServerWorld serverWorld = (ServerWorld)world;
+            TalentTree talents = PlayerTalentsData.get(serverWorld).getTalents(player);
+            return talents.hasLearnedNode(ModConfigs.TALENTS.ARTISAN);
+         }
+      }
+   }
+
+   private static boolean hasLearnedTreasureHunter(PlayerEntity player) {
+      if (player == null) {
+         return false;
+      } else {
+         World world = player.func_130014_f_();
+         if (!(world instanceof ServerWorld)) {
+            return false;
+         } else {
+            ServerWorld serverWorld = (ServerWorld)world;
+            TalentTree talents = PlayerTalentsData.get(serverWorld).getTalents(player);
+            return talents.hasLearnedNode(ModConfigs.TALENTS.TREASURE_HUNTER);
          }
       }
    }

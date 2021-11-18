@@ -7,17 +7,26 @@ import iskallia.vault.aura.AuraManager;
 import iskallia.vault.aura.type.EffectAuraConfig;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModEffects;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.item.paxel.enhancement.EffectEnhancement;
+import iskallia.vault.item.paxel.enhancement.PaxelEnhancement;
+import iskallia.vault.item.paxel.enhancement.PaxelEnhancements;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.AbilityConfig;
 import iskallia.vault.skill.ability.config.sub.GhostWalkRegenerationConfig;
 import iskallia.vault.skill.ability.effect.GhostWalkAbility;
+import iskallia.vault.skill.set.EffectSet;
+import iskallia.vault.skill.set.PlayerSet;
+import iskallia.vault.skill.set.SetNode;
+import iskallia.vault.skill.set.SetTree;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.skill.talent.type.archetype.WardTalent;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.PlayerAbilitiesData;
+import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
@@ -42,6 +51,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.server.ServerWorld;
@@ -49,6 +59,7 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @EventBusSubscriber
 public class EffectTalent extends PlayerTalent {
@@ -158,17 +169,31 @@ public class EffectTalent extends PlayerTalent {
    public static Map<Effect, EffectTalent.CombinedEffects> getEffectData(PlayerEntity player, ServerWorld world, Predicate<Effect> effectFilter) {
       Map<Effect, EffectTalent.CombinedEffects> effectMap = new HashMap<>();
       TalentTree talents = PlayerTalentsData.get(world).getTalents(player);
+      SetTree sets = PlayerSetsData.get(world).getSets(player);
       talents.getLearnedNodes(EffectTalent.class).stream().map(TalentNode::getTalent).forEach(effectTalent -> {
          if (effectFilter.test(effectTalent.getEffect())) {
             effectMap.computeIfAbsent(effectTalent.getEffect(), effect -> new EffectTalent.CombinedEffects()).addTalent(effectTalent);
          }
       });
+
+      for (SetNode<?> node : sets.getNodes()) {
+         if (node.getSet() instanceof EffectSet) {
+            EffectSet set = (EffectSet)node.getSet();
+            if (effectFilter.test(set.getChild().getEffect())) {
+               EffectTalent.CombinedEffects combinedEffects = effectMap.computeIfAbsent(
+                  set.getChild().getEffect(), effect -> new EffectTalent.CombinedEffects()
+               );
+               combinedEffects.addTalent(set.getChild());
+            }
+         }
+      }
+
       if (effectFilter.test(Effects.field_76428_l) && player.func_70644_a(ModEffects.GHOST_WALK)) {
          AbilityTree abilities = PlayerAbilitiesData.get(world).getAbilities(player);
 
-         for (AbilityNode<?, ?> node : abilities.getNodes()) {
-            if (node.isLearned() && node.getAbility() instanceof GhostWalkAbility) {
-               AbilityConfig cfg = node.getAbilityConfig();
+         for (AbilityNode<?, ?> nodex : abilities.getNodes()) {
+            if (nodex.isLearned() && nodex.getAbility() instanceof GhostWalkAbility) {
+               AbilityConfig cfg = nodex.getAbilityConfig();
                if (cfg instanceof GhostWalkRegenerationConfig) {
                   GhostWalkRegenerationConfig config = (GhostWalkRegenerationConfig)cfg;
                   effectMap.computeIfAbsent(Effects.field_76428_l, effect -> new EffectTalent.CombinedEffects()).addTalent(config.makeRegenerationTalent());
@@ -184,6 +209,17 @@ public class EffectTalent extends PlayerTalent {
                if (effectFilter.test(gearEffect.getEffect())) {
                   effectMap.computeIfAbsent(gearEffect.getEffect(), effect -> new EffectTalent.CombinedEffects()).addTalent(gearEffect);
                }
+            }
+         }
+      }
+
+      ItemStack heldItem = player.func_184586_b(Hand.MAIN_HAND);
+      if (heldItem.func_77973_b() == ModItems.VAULT_PAXEL) {
+         PaxelEnhancement enhancement = PaxelEnhancements.getEnhancement(heldItem);
+         if (enhancement instanceof EffectEnhancement) {
+            EffectEnhancement effectEnhancement = (EffectEnhancement)enhancement;
+            if (effectFilter.test(effectEnhancement.getEffect())) {
+               effectMap.computeIfAbsent(effectEnhancement.getEffect(), ct -> new EffectTalent.CombinedEffects()).addTalent(effectEnhancement.makeTalent());
             }
          }
       }
@@ -257,6 +293,10 @@ public class EffectTalent extends PlayerTalent {
             .get(stack)
             .map(attribute -> attribute.getValue(stack))
             .ifPresent(effectList -> effectList.stream().map(EffectAttribute.Instance::toEffect).forEach(immunities::add));
+      }
+
+      if (entity instanceof PlayerEntity && PlayerSet.isActive(VaultGear.Set.DIVINITY, (PlayerEntity)entity)) {
+         ForgeRegistries.POTIONS.getValues().stream().filter(e -> !e.func_188408_i()).forEach(immunities::add);
       }
 
       return immunities;

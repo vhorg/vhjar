@@ -61,6 +61,13 @@ public class NameProviderPublic {
       return names;
    }
 
+   public static List<String> getVHSMPAssociates() {
+      List<String> names = new ArrayList<>();
+      names.addAll(DEV_NAMES);
+      names.addAll(SMP_S2);
+      return names;
+   }
+
    private static List<String> getKnownUsernames() {
       return new ArrayList<>(UsernameCache.getMap().values());
    }

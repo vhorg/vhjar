@@ -3,9 +3,11 @@ package iskallia.vault.block;
 import iskallia.vault.Vault;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.VaultUtils;
+import iskallia.vault.world.vault.logic.VaultCowOverrides;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -68,8 +70,14 @@ public class VaultPortalBlock extends NetherPortalBlock {
                            player.func_242279_ag();
                         }
                      } else if (destinationKey == Vault.VAULT_KEY && portal != null) {
+                        CrystalData data = portal.getData();
                         VaultRaid.Builder builder = portal.getData().createVault(destination, player);
-                        VaultRaidData.get(destination).startVault(destination, builder);
+                        VaultRaid vault = VaultRaidData.get(destination).startVault(destination, builder);
+                        if (CrystalData.shouldForceCowVault(data)) {
+                           vault.getProperties().create(VaultRaid.COW_VAULT, true);
+                           VaultCowOverrides.setupVault(vault);
+                        }
+
                         world.func_175656_a(pos, Blocks.field_150350_a.func_176223_P());
                         player.func_242279_ag();
                      }

@@ -1,6 +1,7 @@
 package iskallia.vault.item.crystal;
 
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.util.MathUtilities;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.builder.ClassicVaultBuilder;
 import iskallia.vault.world.vault.builder.CoopVaultBuilder;
@@ -13,6 +14,7 @@ import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.modifier.VaultModifier;
 import iskallia.vault.world.vault.modifier.VaultModifiers;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +54,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
    protected int targetObjectiveCount = -1;
    protected boolean canBeModified = true;
    protected List<String> guaranteedRoomFilters = new ArrayList<>();
+   protected CrystalData.EchoData echoData;
 
    public CrystalData() {
    }
@@ -133,9 +136,34 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       this.addModifier(name, CrystalData.Modifier.Operation.ADD);
    }
 
-   private void addModifier(String name, CrystalData.Modifier.Operation operation) {
+   public void addModifier(String name, CrystalData.Modifier.Operation operation) {
       this.modifiers.add(new CrystalData.Modifier(name, operation));
       this.updateDelegate();
+   }
+
+   public boolean canRemoveModifier(String name, CrystalData.Modifier.Operation operation) {
+      return this.canBeModified() && this.getModifiers().stream().anyMatch(mod -> name.equals(mod.name));
+   }
+
+   public boolean removeCatalystModifier(String name, boolean preventsRandomModifiers, CrystalData.Modifier.Operation operation) {
+      if (!this.canRemoveModifier(name, operation)) {
+         return false;
+      } else {
+         this.removeModifier(name, operation);
+         if (preventsRandomModifiers) {
+            this.setPreventsRandomModifiers(true);
+         }
+
+         return true;
+      }
+   }
+
+   public void removeModifier(String name, CrystalData.Modifier.Operation operation) {
+      CrystalData.Modifier modifier = this.modifiers.stream().filter(mod -> mod.name.equals(name)).findFirst().orElse(null);
+      if (modifier != null) {
+         this.modifiers.remove(modifier);
+         this.updateDelegate();
+      }
    }
 
    public List<CrystalData.Modifier> getModifiers() {
@@ -198,6 +226,27 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       return this.getType().getVaultBuilder().initializeBuilder(world, player, this);
    }
 
+   public static boolean shouldForceCowVault(CrystalData data) {
+      List<String> requiredModifiers = Arrays.asList("hoard", "hunger", "raging");
+      List<CrystalData.Modifier> existingModifiers = data.getModifiers();
+      return existingModifiers.size() == 3
+         && existingModifiers.stream().allMatch(modifier -> requiredModifiers.contains(modifier.getModifierName().toLowerCase()));
+   }
+
+   public CrystalData.EchoData getEchoData() {
+      if (this.echoData == null) {
+         this.echoData = new CrystalData.EchoData(0);
+      }
+
+      return this.echoData;
+   }
+
+   public int addEchoGems(int amount) {
+      int remainder = this.getEchoData().addEchoGems(amount);
+      this.updateDelegate();
+      return remainder;
+   }
+
    @OnlyIn(Dist.CLIENT)
    public void addInformation(World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
       CrystalData.Type crystalType = this.getType();
@@ -250,13 +299,13 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
             ITextComponent roomName = VaultRoomNames.getName(roomFilter);
             if (roomName != null) {
                String roomStr = count > 1 ? "Rooms" : "Room";
-               ITextComponent txt = new StringTextComponent("- Has ")
+               ITextComponent txtx = new StringTextComponent("- Has ")
                   .func_240699_a_(TextFormatting.GRAY)
                   .func_230529_a_(new StringTextComponent(String.valueOf(count)).func_240699_a_(TextFormatting.GOLD))
                   .func_240702_b_(" ")
                   .func_230529_a_(roomName)
                   .func_230529_a_(new StringTextComponent(" " + roomStr).func_240699_a_(TextFormatting.GRAY));
-               tooltip.add(txt);
+               tooltip.add(txtx);
             }
          }
       );
@@ -272,6 +321,37 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
          tooltip.add(new StringTextComponent("- ").func_230529_a_(type).func_240702_b_(" ").func_230529_a_(modifierName));
          if (Screen.func_231173_s_() && vModifier != null) {
             ITextComponent description = new StringTextComponent("   " + vModifier.getDescription()).func_240699_a_(TextFormatting.DARK_GRAY);
+            tooltip.add(description);
+         }
+      }
+
+      if (this.getEchoData().getEchoCount() > 0) {
+         int count = this.getEchoData().getEchoCount();
+         StringTextComponent txt = new StringTextComponent("Echoed");
+         txt.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(2491465)));
+         tooltip.add(new StringTextComponent("- ").func_230529_a_(txt));
+         if (Screen.func_231173_s_()) {
+            ITextComponent description = new StringTextComponent("   " + count + "% Echo Rate").func_240699_a_(TextFormatting.DARK_GRAY);
+            tooltip.add(description);
+         }
+      }
+
+      if (!this.canBeModified()) {
+         StringTextComponent txt = new StringTextComponent("Exhausted");
+         txt.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(3084959)));
+         tooltip.add(new StringTextComponent("- ").func_230529_a_(txt));
+         if (Screen.func_231173_s_()) {
+            ITextComponent description = new StringTextComponent("   Crystal can not be modified.").func_240699_a_(TextFormatting.DARK_GRAY);
+            tooltip.add(description);
+         }
+      }
+
+      if (this.delegate.func_74767_n("Cloned")) {
+         StringTextComponent txt = new StringTextComponent("Cloned");
+         txt.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(2491465)));
+         tooltip.add(new StringTextComponent("- ").func_230529_a_(txt));
+         if (Screen.func_231173_s_()) {
+            ITextComponent description = new StringTextComponent("   Crystal has been cloned with an Echoed Crystal.").func_240699_a_(TextFormatting.DARK_GRAY);
             tooltip.add(description);
          }
       }
@@ -291,6 +371,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       nbt.func_74768_a("targetObjectiveCount", this.targetObjectiveCount);
+      nbt.func_218657_a("echoData", this.getEchoData().toNBT());
       ListNBT roomList = new ListNBT();
       this.guaranteedRoomFilters.forEach(roomKey -> roomList.add(StringNBT.func_229705_a_(roomKey)));
       nbt.func_218657_a("rooms", roomList);
@@ -311,12 +392,64 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       this.targetObjectiveCount = nbt.func_150297_b("targetObjectiveCount", 3) ? nbt.func_74762_e("targetObjectiveCount") : -1;
+      if (nbt.func_74764_b("echoData")) {
+         this.echoData = CrystalData.EchoData.fromNBT(nbt.func_74775_l("echoData"));
+      }
+
       ListNBT roomList = nbt.func_150295_c("rooms", 8);
       roomList.forEach(inbt -> this.guaranteedRoomFilters.add(inbt.func_150285_a_()));
    }
 
    private void migrateModifiers(List<CrystalData.Modifier> modifiers) {
       modifiers.forEach(modifier -> modifier.name = VaultModifier.migrateModifierName(modifier.name));
+   }
+
+   public static class EchoData {
+      int echoCount;
+
+      public EchoData(int echoCount) {
+         this.echoCount = echoCount;
+      }
+
+      public int getEchoCount() {
+         return this.echoCount;
+      }
+
+      public int addEchoGems(int amount) {
+         if (this.echoCount >= 100) {
+            return amount;
+         } else {
+            for (int i = amount; i > 0; i--) {
+               if (this.echoCount >= 100) {
+                  return i;
+               }
+
+               if (MathUtilities.randomFloat(0.0F, 1.0F) < this.getEchoSuccessRate()) {
+                  this.echoCount++;
+               }
+            }
+
+            return 0;
+         }
+      }
+
+      public float getCloneSuccessRate() {
+         return this.echoCount / 100.0F;
+      }
+
+      public float getEchoSuccessRate() {
+         return (100 - this.echoCount) / 100.0F;
+      }
+
+      public CompoundNBT toNBT() {
+         CompoundNBT nbt = new CompoundNBT();
+         nbt.func_74768_a("echoCount", this.echoCount);
+         return nbt;
+      }
+
+      public static CrystalData.EchoData fromNBT(CompoundNBT nbt) {
+         return new CrystalData.EchoData(nbt.func_74762_e("echoCount"));
+      }
    }
 
    private static class EmptyCrystalData extends CrystalData {

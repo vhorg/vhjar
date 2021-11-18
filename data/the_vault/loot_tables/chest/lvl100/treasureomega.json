@@ -2930,10 +2930,6 @@
         "max": 1
       },
       "entries": [
-        { "_name": "EMPTY",
-          "type": "minecraft:empty",
-          "weight": 1
-        },
         { "_name": "Artisan Scroll",
           "type": "minecraft:item",
           "weight": 1,

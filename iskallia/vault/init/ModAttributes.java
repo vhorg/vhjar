@@ -67,6 +67,7 @@ public class ModAttributes {
    public static VAttribute<Float, FloatAttribute> ADD_FEATHER_FEET;
    public static VAttribute<Boolean, BooleanAttribute> ADD_SOULBOUND;
    public static VAttribute<Boolean, BooleanAttribute> ADD_REFORGED;
+   public static VAttribute<Boolean, BooleanAttribute> ADD_IMBUED;
    public static VAttribute<Integer, IntegerAttribute> ADD_PLATING;
    public static VAttribute<Float, FloatAttribute> ADD_EXTRA_LEECH_RATIO;
    public static VAttribute<Float, FloatAttribute> ADD_EXTRA_RESISTANCE;
@@ -76,6 +77,15 @@ public class ModAttributes {
    public static VAttribute<Float, FloatAttribute> FATAL_STRIKE_DAMAGE;
    public static VAttribute<Float, FloatAttribute> THORNS_CHANCE;
    public static VAttribute<Float, FloatAttribute> THORNS_DAMAGE;
+   public static VAttribute<Float, FloatAttribute> CHEST_RARITY;
+   public static VAttribute<Float, FloatAttribute> DAMAGE_INCREASE;
+   public static VAttribute<Float, FloatAttribute> DAMAGE_INCREASE_2;
+   public static VAttribute<Float, FloatAttribute> DAMAGE_ILLAGERS;
+   public static VAttribute<Float, FloatAttribute> DAMAGE_SPIDERS;
+   public static VAttribute<Float, FloatAttribute> DAMAGE_UNDEAD;
+   public static VAttribute<Integer, IntegerAttribute> ON_HIT_CHAIN;
+   public static VAttribute<Integer, IntegerAttribute> ON_HIT_AOE;
+   public static VAttribute<Float, FloatAttribute> ON_HIT_STUN;
    public static VAttribute<Double, DoubleAttribute> ARMOR;
    public static VAttribute<Double, DoubleAttribute> ARMOR_TOUGHNESS;
    public static VAttribute<Double, DoubleAttribute> KNOCKBACK_RESISTANCE;
@@ -92,6 +102,7 @@ public class ModAttributes {
    public static VAttribute<String, StringAttribute> GUARANTEED_MODIFIER;
    public static VAttribute<VaultGear.Rarity, EnumAttribute<VaultGear.Rarity>> GEAR_RARITY;
    public static VAttribute<VaultGear.State, EnumAttribute<VaultGear.State>> GEAR_STATE;
+   public static VAttribute<VaultGear.Set, EnumAttribute<VaultGear.Set>> GEAR_SET;
    public static VAttribute<String, StringAttribute> GEAR_NAME;
    public static VAttribute<PlayerFavourData.VaultGodType, EnumAttribute<PlayerFavourData.VaultGodType>> IDOL_TYPE;
    public static VAttribute<Boolean, BooleanAttribute> IDOL_AUGMENTED;
@@ -111,6 +122,7 @@ public class ModAttributes {
    public static VAttribute<String, StringAttribute> GEAR_ROLL_POOL;
    public static VAttribute<Boolean, BooleanAttribute> SOULBOUND;
    public static VAttribute<Boolean, BooleanAttribute> REFORGED;
+   public static VAttribute<Boolean, BooleanAttribute> IMBUED;
    public static VAttribute<List<EffectAttribute.Instance>, EffectAttribute> EFFECT_IMMUNITY;
    public static VAttribute<Float, FloatAttribute> FEATHER_FEET;
    public static VAttribute<List<EffectCloudEntity.Config>, EffectCloudAttribute> EFFECT_CLOUD;
@@ -227,6 +239,7 @@ public class ModAttributes {
       ADD_FEATHER_FEET = register(Vault.id("add_feather_feet"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
       ADD_SOULBOUND = register(Vault.id("add_soulbound"), () -> new BooleanAttribute((stack, parent, value) -> parent.getBaseValue() | value));
       ADD_REFORGED = register(Vault.id("add_reforged"), () -> new BooleanAttribute((stack, parent, value) -> parent.getBaseValue() | value));
+      ADD_IMBUED = register(Vault.id("add_imbued"), () -> new BooleanAttribute((stack, parent, value) -> parent.getBaseValue() | value));
       ADD_PLATING = register(Vault.id("add_plating"), () -> new IntegerAttribute((stack, parent, value) -> parent.getBaseValue() * 50 + value));
       ADD_EXTRA_LEECH_RATIO = register(Vault.id("add_extra_leech_ratio"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
       ADD_EXTRA_RESISTANCE = register(Vault.id("add_extra_resistance"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
@@ -236,6 +249,15 @@ public class ModAttributes {
       FATAL_STRIKE_DAMAGE = register(Vault.id("fatal_strike_damage"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
       THORNS_CHANCE = register(Vault.id("thorns_chance"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
       THORNS_DAMAGE = register(Vault.id("thorns_damage"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      CHEST_RARITY = register(Vault.id("chest_rarity"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      DAMAGE_INCREASE = register(Vault.id("damage_increase"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      DAMAGE_INCREASE_2 = register(Vault.id("damage_increase_2"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      DAMAGE_ILLAGERS = register(Vault.id("damage_illagers"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      DAMAGE_SPIDERS = register(Vault.id("damage_spiders"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      DAMAGE_UNDEAD = register(Vault.id("damage_undead"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      ON_HIT_CHAIN = register(Vault.id("on_hit_chain"), () -> new IntegerAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      ON_HIT_AOE = register(Vault.id("on_hit_aoe"), () -> new IntegerAttribute((stack, parent, value) -> parent.getBaseValue() + value));
+      ON_HIT_STUN = register(Vault.id("on_hit_stun"), () -> new FloatAttribute((stack, parent, value) -> parent.getBaseValue() + value));
       ARMOR = register(new ResourceLocation("minecraft", "armor"), DoubleAttribute::new, ADD_ARMOR, ADD_ARMOR_2);
       ARMOR_TOUGHNESS = register(new ResourceLocation("minecraft", "armor_toughness"), DoubleAttribute::new, ADD_ARMOR_TOUGHNESS, ADD_ARMOR_TOUGHNESS_2);
       KNOCKBACK_RESISTANCE = register(
@@ -254,6 +276,7 @@ public class ModAttributes {
       GUARANTEED_MODIFIER = register(Vault.id("guaranteed_modifier"), StringAttribute::new);
       GEAR_RARITY = register(Vault.id("gear_rarity"), () -> new EnumAttribute<>(VaultGear.Rarity.class));
       GEAR_STATE = register(Vault.id("gear_state"), () -> new EnumAttribute<>(VaultGear.State.class));
+      GEAR_SET = register(Vault.id("gear_set"), () -> new EnumAttribute<>(VaultGear.Set.class));
       IDOL_TYPE = register(Vault.id("idol_type"), () -> new EnumAttribute<>(PlayerFavourData.VaultGodType.class));
       IDOL_AUGMENTED = register(Vault.id("idol_augmented"), BooleanAttribute::new);
       GEAR_NAME = register(Vault.id("gear_name"), StringAttribute::new);
@@ -273,6 +296,7 @@ public class ModAttributes {
       GEAR_ROLL_POOL = register(Vault.id("gear_roll_pool"), StringAttribute::new);
       SOULBOUND = register(Vault.id("soulbound"), BooleanAttribute::new, ADD_SOULBOUND);
       REFORGED = register(Vault.id("reforged"), BooleanAttribute::new, ADD_REFORGED);
+      IMBUED = register(Vault.id("imbued"), BooleanAttribute::new, ADD_IMBUED);
       EFFECT_IMMUNITY = register(
          Vault.id("effect_immunity"),
          EffectAttribute::new,

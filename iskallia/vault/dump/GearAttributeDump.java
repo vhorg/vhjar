@@ -42,6 +42,13 @@ public class GearAttributeDump extends JsonDump {
       );
       this.addTooltip(
          attributes,
+         ModAttributes.GEAR_SET,
+         GearAttributeDump.PossibleValues.enumType(VaultGear.Set.class),
+         GearAttributeDump.TooltipFragment.of("Etching: "),
+         GearAttributeDump.TooltipFragment.of("${value}").color(11184810)
+      );
+      this.addTooltip(
+         attributes,
          ModAttributes.MAX_REPAIRS,
          GearAttributeDump.PossibleValues.integerType(),
          GearAttributeDump.TooltipFragment.of("Repairs: "),

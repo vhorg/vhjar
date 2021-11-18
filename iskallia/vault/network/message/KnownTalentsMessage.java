@@ -3,7 +3,6 @@ package iskallia.vault.network.message;
 import iskallia.vault.client.ClientTalentData;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.skill.talent.type.PlayerTalent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -41,7 +40,7 @@ public class KnownTalentsMessage {
       ListNBT learnedTalents = nbt.func_150295_c("LearnedTalents", 10);
 
       for (int i = 0; i < learnedTalents.size(); i++) {
-         abilities.add(TalentNode.fromNBT(learnedTalents.func_150305_b(i), PlayerTalent.class));
+         abilities.add(TalentNode.fromNBT(null, learnedTalents.func_150305_b(i), 1));
       }
 
       return new KnownTalentsMessage(abilities);

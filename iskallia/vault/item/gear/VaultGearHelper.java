@@ -1,6 +1,8 @@
 package iskallia.vault.item.gear;
 
 import iskallia.vault.attribute.EffectTalentAttribute;
+import iskallia.vault.attribute.FloatAttribute;
+import iskallia.vault.attribute.IntegerAttribute;
 import iskallia.vault.attribute.VAttribute;
 import iskallia.vault.config.VaultGearConfig;
 import iskallia.vault.init.ModAttributes;
@@ -14,6 +16,8 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -204,6 +208,42 @@ public class VaultGearHelper {
       }
    }
 
+   public static int getAttributeValueOnGearSumInt(LivingEntity le, VAttribute<Integer, IntegerAttribute>... attributes) {
+      int sum = 0;
+
+      for (EquipmentSlotType slotType : EquipmentSlotType.values()) {
+         ItemStack stack = le.func_184582_a(slotType);
+         if (!stack.func_190926_b() && stack.func_77973_b() instanceof VaultGear) {
+            VaultGear<?> gear = (VaultGear<?>)stack.func_77973_b();
+            if (gear.isIntendedForSlot(slotType)) {
+               for (VAttribute<Integer, IntegerAttribute> attribute : attributes) {
+                  sum += attribute.getBase(stack).orElse(0);
+               }
+            }
+         }
+      }
+
+      return sum;
+   }
+
+   public static float getAttributeValueOnGearSumFloat(LivingEntity le, VAttribute<Float, FloatAttribute>... attributes) {
+      float sum = 0.0F;
+
+      for (EquipmentSlotType slotType : EquipmentSlotType.values()) {
+         ItemStack stack = le.func_184582_a(slotType);
+         if (!stack.func_190926_b() && stack.func_77973_b() instanceof VaultGear) {
+            VaultGear<?> gear = (VaultGear<?>)stack.func_77973_b();
+            if (gear.isIntendedForSlot(slotType)) {
+               for (VAttribute<Float, FloatAttribute> attribute : attributes) {
+                  sum += attribute.getBase(stack).orElse(0.0F);
+               }
+            }
+         }
+      }
+
+      return sum;
+   }
+
    public static List<VAttribute<?, ?>> getBaseAttributes() {
       return Arrays.asList(
          ModAttributes.GEAR_CRAFTED_BY,
@@ -260,7 +300,16 @@ public class VaultGearHelper {
          ModAttributes.EXTRA_RESISTANCE,
          ModAttributes.EXTRA_PARRY_CHANCE,
          ModAttributes.EXTRA_HEALTH,
-         ModAttributes.EXTRA_EFFECTS
+         ModAttributes.EXTRA_EFFECTS,
+         ModAttributes.CHEST_RARITY,
+         ModAttributes.DAMAGE_INCREASE,
+         ModAttributes.DAMAGE_INCREASE_2,
+         ModAttributes.DAMAGE_ILLAGERS,
+         ModAttributes.DAMAGE_SPIDERS,
+         ModAttributes.DAMAGE_UNDEAD,
+         ModAttributes.ON_HIT_CHAIN,
+         ModAttributes.ON_HIT_AOE,
+         ModAttributes.ON_HIT_STUN
       );
    }
 
@@ -319,9 +368,25 @@ public class VaultGearHelper {
          return text("Withering Cloud", 15007916);
       } else if (attribute == ModAttributes.EXTRA_EFFECTS) {
          return text("Potion Effect", 14111487);
+      } else if (attribute == ModAttributes.ADD_SOULBOUND) {
+         return text("Soulbound", 9856253);
+      } else if (attribute == ModAttributes.CHEST_RARITY) {
+         return text("Chest Rarity", 11073085);
+      } else if (attribute == ModAttributes.DAMAGE_INCREASE || attribute == ModAttributes.DAMAGE_INCREASE_2) {
+         return text("Increased Damage", 16739072);
+      } else if (attribute == ModAttributes.DAMAGE_ILLAGERS) {
+         return text("Spiteful", 40882);
+      } else if (attribute == ModAttributes.DAMAGE_SPIDERS) {
+         return text("Baneful", 8281694);
+      } else if (attribute == ModAttributes.DAMAGE_UNDEAD) {
+         return text("Holy", 16382128);
+      } else if (attribute == ModAttributes.ON_HIT_CHAIN) {
+         return text("Chaining Attacks", 6119096);
+      } else if (attribute == ModAttributes.ON_HIT_AOE) {
+         return text("Attack AoE", 12085504);
       } else {
-         return (ITextComponent)(attribute == ModAttributes.ADD_SOULBOUND
-            ? text("Soulbound", 9856253)
+         return (ITextComponent)(attribute == ModAttributes.ON_HIT_STUN
+            ? text("Stun Attack Chance", 1681124)
             : new StringTextComponent(attribute.getId().toString()).func_240699_a_(TextFormatting.GRAY));
       }
    }

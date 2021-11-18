@@ -65,12 +65,16 @@ public abstract class VaultGearConfig extends Config {
    protected void reset() {
       VaultGearConfig.Tier tier1 = new VaultGearConfig.Tier();
       VaultGearConfig.Tier tier2 = new VaultGearConfig.Tier();
+      VaultGearConfig.Tier tier3 = new VaultGearConfig.Tier();
       tier1.NAME = "1";
       tier1.reset();
       tier2.NAME = "2";
       tier2.reset();
+      tier3.NAME = "3";
+      tier3.reset();
       this.TIERS.add(tier1);
       this.TIERS.add(tier2);
+      this.TIERS.add(tier3);
    }
 
    public static class BaseAttributes {
@@ -86,6 +90,8 @@ public abstract class VaultGearConfig extends Config {
       public DoubleAttribute.Generator ATTACK_SPEED;
       @Expose
       public IntegerAttribute.Generator DURABILITY;
+      @Expose
+      public EnumAttribute.Generator<VaultGear.Set> GEAR_SET;
       @Expose
       public EnumAttribute.Generator<PlayerFavourData.VaultGodType> IDOL_TYPE;
       @Expose
@@ -136,6 +142,10 @@ public abstract class VaultGearConfig extends Config {
 
          if (this.DURABILITY != null) {
             ModAttributes.DURABILITY.create(stack, random, this.DURABILITY);
+         }
+
+         if (this.GEAR_SET != null) {
+            ModAttributes.GEAR_SET.create(stack, random, this.GEAR_SET);
          }
 
          if (this.IDOL_TYPE != null) {
@@ -199,6 +209,7 @@ public abstract class VaultGearConfig extends Config {
          copy.ATTACK_DAMAGE = this.ATTACK_DAMAGE;
          copy.ATTACK_SPEED = this.ATTACK_SPEED;
          copy.DURABILITY = this.DURABILITY;
+         copy.GEAR_SET = this.GEAR_SET;
          copy.IDOL_TYPE = this.IDOL_TYPE;
          copy.GEAR_LEVEL_CHANCE = this.GEAR_LEVEL_CHANCE;
          copy.GEAR_MAX_LEVEL = this.GEAR_MAX_LEVEL;
@@ -298,6 +309,24 @@ public abstract class VaultGearConfig extends Config {
       public WeightedList.Entry<FloatAttribute.Generator> THORNS_CHANCE;
       @Expose
       public WeightedList.Entry<FloatAttribute.Generator> THORNS_DAMAGE;
+      @Expose
+      public WeightedList.Entry<FloatAttribute.Generator> CHEST_RARITY;
+      @Expose
+      public WeightedList.Entry<FloatAttribute.Generator> DAMAGE_INCREASE;
+      @Expose
+      public WeightedList.Entry<FloatAttribute.Generator> DAMAGE_INCREASE_2;
+      @Expose
+      public WeightedList.Entry<FloatAttribute.Generator> DAMAGE_ILLAGERS;
+      @Expose
+      public WeightedList.Entry<FloatAttribute.Generator> DAMAGE_SPIDERS;
+      @Expose
+      public WeightedList.Entry<FloatAttribute.Generator> DAMAGE_UNDEAD;
+      @Expose
+      public WeightedList.Entry<IntegerAttribute.Generator> ON_HIT_CHAIN;
+      @Expose
+      public WeightedList.Entry<IntegerAttribute.Generator> ON_HIT_AOE;
+      @Expose
+      public WeightedList.Entry<FloatAttribute.Generator> ON_HIT_STUN;
 
       public void initialize(ItemStack stack, Random random) {
          int rolls = ModAttributes.GEAR_MODIFIERS_TO_ROLL.getOrDefault(stack, 0).getValue(stack);
@@ -356,7 +385,16 @@ public abstract class VaultGearConfig extends Config {
                   ModAttributes.FATAL_STRIKE_CHANCE.exists(stack),
                   ModAttributes.FATAL_STRIKE_DAMAGE.exists(stack),
                   ModAttributes.THORNS_CHANCE.exists(stack),
-                  ModAttributes.THORNS_DAMAGE.exists(stack)
+                  ModAttributes.THORNS_DAMAGE.exists(stack),
+                  ModAttributes.CHEST_RARITY.exists(stack),
+                  ModAttributes.DAMAGE_INCREASE.exists(stack),
+                  ModAttributes.DAMAGE_INCREASE_2.exists(stack),
+                  ModAttributes.DAMAGE_ILLAGERS.exists(stack),
+                  ModAttributes.DAMAGE_SPIDERS.exists(stack),
+                  ModAttributes.DAMAGE_UNDEAD.exists(stack),
+                  ModAttributes.ON_HIT_CHAIN.exists(stack),
+                  ModAttributes.ON_HIT_AOE.exists(stack),
+                  ModAttributes.ON_HIT_STUN.exists(stack)
                );
                List<Integer> picked = IntStream.range(0, generators.size())
                   .filter(ix -> generators.get(ix) != null)
@@ -536,6 +574,42 @@ public abstract class VaultGearConfig extends Config {
                   if (this.THORNS_DAMAGE == generators.get(picked.get(i))) {
                      ModAttributes.THORNS_DAMAGE.create(stack, random, this.THORNS_DAMAGE.value);
                   }
+
+                  if (this.CHEST_RARITY == generators.get(picked.get(i))) {
+                     ModAttributes.CHEST_RARITY.create(stack, random, this.CHEST_RARITY.value);
+                  }
+
+                  if (this.DAMAGE_INCREASE == generators.get(picked.get(i))) {
+                     ModAttributes.DAMAGE_INCREASE.create(stack, random, this.DAMAGE_INCREASE.value);
+                  }
+
+                  if (this.DAMAGE_INCREASE_2 == generators.get(picked.get(i))) {
+                     ModAttributes.DAMAGE_INCREASE_2.create(stack, random, this.DAMAGE_INCREASE_2.value);
+                  }
+
+                  if (this.DAMAGE_ILLAGERS == generators.get(picked.get(i))) {
+                     ModAttributes.DAMAGE_ILLAGERS.create(stack, random, this.DAMAGE_ILLAGERS.value);
+                  }
+
+                  if (this.DAMAGE_SPIDERS == generators.get(picked.get(i))) {
+                     ModAttributes.DAMAGE_SPIDERS.create(stack, random, this.DAMAGE_SPIDERS.value);
+                  }
+
+                  if (this.DAMAGE_UNDEAD == generators.get(picked.get(i))) {
+                     ModAttributes.DAMAGE_UNDEAD.create(stack, random, this.DAMAGE_UNDEAD.value);
+                  }
+
+                  if (this.ON_HIT_CHAIN == generators.get(picked.get(i))) {
+                     ModAttributes.ON_HIT_CHAIN.create(stack, random, this.ON_HIT_CHAIN.value);
+                  }
+
+                  if (this.ON_HIT_AOE == generators.get(picked.get(i))) {
+                     ModAttributes.ON_HIT_AOE.create(stack, random, this.ON_HIT_AOE.value);
+                  }
+
+                  if (this.ON_HIT_STUN == generators.get(picked.get(i))) {
+                     ModAttributes.ON_HIT_STUN.create(stack, random, this.ON_HIT_STUN.value);
+                  }
                }
 
                ModAttributes.GEAR_MODIFIERS_TO_ROLL.create(stack, rolls - added);
@@ -586,6 +660,15 @@ public abstract class VaultGearConfig extends Config {
          copy.FATAL_STRIKE_DAMAGE = this.FATAL_STRIKE_DAMAGE;
          copy.THORNS_CHANCE = this.THORNS_CHANCE;
          copy.THORNS_DAMAGE = this.THORNS_DAMAGE;
+         copy.CHEST_RARITY = this.CHEST_RARITY;
+         copy.DAMAGE_INCREASE = this.DAMAGE_INCREASE;
+         copy.DAMAGE_INCREASE_2 = this.DAMAGE_INCREASE_2;
+         copy.DAMAGE_ILLAGERS = this.DAMAGE_ILLAGERS;
+         copy.DAMAGE_SPIDERS = this.DAMAGE_SPIDERS;
+         copy.DAMAGE_UNDEAD = this.DAMAGE_UNDEAD;
+         copy.ON_HIT_CHAIN = this.ON_HIT_CHAIN;
+         copy.ON_HIT_AOE = this.ON_HIT_AOE;
+         copy.ON_HIT_STUN = this.ON_HIT_STUN;
          return copy;
       }
 
@@ -631,7 +714,16 @@ public abstract class VaultGearConfig extends Config {
             this.FATAL_STRIKE_CHANCE,
             this.FATAL_STRIKE_DAMAGE,
             this.THORNS_CHANCE,
-            this.THORNS_DAMAGE
+            this.THORNS_DAMAGE,
+            this.CHEST_RARITY,
+            this.DAMAGE_INCREASE,
+            this.DAMAGE_INCREASE_2,
+            this.DAMAGE_ILLAGERS,
+            this.DAMAGE_SPIDERS,
+            this.DAMAGE_UNDEAD,
+            this.ON_HIT_CHAIN,
+            this.ON_HIT_AOE,
+            this.ON_HIT_STUN
          );
       }
 
@@ -720,6 +812,24 @@ public abstract class VaultGearConfig extends Config {
             generatorEntry = this.THORNS_CHANCE;
          } else if (attribute == ModAttributes.THORNS_DAMAGE) {
             generatorEntry = this.THORNS_DAMAGE;
+         } else if (attribute == ModAttributes.CHEST_RARITY) {
+            generatorEntry = this.CHEST_RARITY;
+         } else if (attribute == ModAttributes.DAMAGE_INCREASE) {
+            generatorEntry = this.DAMAGE_INCREASE;
+         } else if (attribute == ModAttributes.DAMAGE_INCREASE_2) {
+            generatorEntry = this.DAMAGE_INCREASE_2;
+         } else if (attribute == ModAttributes.DAMAGE_ILLAGERS) {
+            generatorEntry = this.DAMAGE_ILLAGERS;
+         } else if (attribute == ModAttributes.DAMAGE_SPIDERS) {
+            generatorEntry = this.DAMAGE_SPIDERS;
+         } else if (attribute == ModAttributes.DAMAGE_UNDEAD) {
+            generatorEntry = this.DAMAGE_UNDEAD;
+         } else if (attribute == ModAttributes.ON_HIT_CHAIN) {
+            generatorEntry = this.ON_HIT_CHAIN;
+         } else if (attribute == ModAttributes.ON_HIT_AOE) {
+            generatorEntry = this.ON_HIT_AOE;
+         } else if (attribute == ModAttributes.ON_HIT_STUN) {
+            generatorEntry = this.ON_HIT_STUN;
          }
 
          return generatorEntry;
@@ -739,9 +849,13 @@ public abstract class VaultGearConfig extends Config {
             .forEach(
                tier -> tier.BASE_ATTRIBUTES
                   .forEach(
-                     (key, value) -> value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
-                        .add(Integer.valueOf(1), PooledAttribute.Rolls.ofEmpty(), pool -> {})
-                        .collect(IntegerAttribute.of(NumberAttribute.Type.SET))
+                     (key, value) -> {
+                        if (!ModItems.ETCHING.getRegistryName().toString().equals(key)) {
+                           value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
+                              .add(Integer.valueOf(1), PooledAttribute.Rolls.ofEmpty(), pool -> {})
+                              .collect(IntegerAttribute.of(NumberAttribute.Type.SET));
+                        }
+                     }
                   )
             );
       }
@@ -760,9 +874,13 @@ public abstract class VaultGearConfig extends Config {
             .forEach(
                tier -> tier.BASE_ATTRIBUTES
                   .forEach(
-                     (key, value) -> value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
-                        .add(Integer.valueOf(2), PooledAttribute.Rolls.ofEmpty(), pool -> {})
-                        .collect(IntegerAttribute.of(NumberAttribute.Type.SET))
+                     (key, value) -> {
+                        if (!ModItems.ETCHING.getRegistryName().toString().equals(key)) {
+                           value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
+                              .add(Integer.valueOf(2), PooledAttribute.Rolls.ofEmpty(), pool -> {})
+                              .collect(IntegerAttribute.of(NumberAttribute.Type.SET));
+                        }
+                     }
                   )
             );
       }
@@ -786,6 +904,7 @@ public abstract class VaultGearConfig extends Config {
          this.TIER = new ArrayList<>();
          this.TIER.add(new VaultGearConfig.General.TierConfig("", String.valueOf(65535), 0));
          this.TIER.add(new VaultGearConfig.General.TierConfig("2", String.valueOf(65535), 100));
+         this.TIER.add(new VaultGearConfig.General.TierConfig("3", String.valueOf(65535), 200));
          this.ROLLS = new LinkedHashMap<>();
          this.ROLLS.put("Scrappy Only", new VaultGearConfig.General.Roll(new WeightedList<VaultGear.Rarity>().add(VaultGear.Rarity.SCRAPPY, 1)));
          this.ROLLS
@@ -895,9 +1014,13 @@ public abstract class VaultGearConfig extends Config {
             .forEach(
                tier -> tier.BASE_ATTRIBUTES
                   .forEach(
-                     (key, value) -> value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
-                        .add(Integer.valueOf(2), PooledAttribute.Rolls.ofEmpty(), pool -> {})
-                        .collect(IntegerAttribute.of(NumberAttribute.Type.SET))
+                     (key, value) -> {
+                        if (!ModItems.ETCHING.getRegistryName().toString().equals(key)) {
+                           value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
+                              .add(Integer.valueOf(2), PooledAttribute.Rolls.ofEmpty(), pool -> {})
+                              .collect(IntegerAttribute.of(NumberAttribute.Type.SET));
+                        }
+                     }
                   )
             );
       }
@@ -916,9 +1039,13 @@ public abstract class VaultGearConfig extends Config {
             .forEach(
                tier -> tier.BASE_ATTRIBUTES
                   .forEach(
-                     (key, value) -> value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
-                        .add(Integer.valueOf(1), PooledAttribute.Rolls.ofEmpty(), pool -> {})
-                        .collect(IntegerAttribute.of(NumberAttribute.Type.SET))
+                     (key, value) -> {
+                        if (!ModItems.ETCHING.getRegistryName().toString().equals(key)) {
+                           value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
+                              .add(Integer.valueOf(1), PooledAttribute.Rolls.ofEmpty(), pool -> {})
+                              .collect(IntegerAttribute.of(NumberAttribute.Type.SET));
+                        }
+                     }
                   )
             );
       }
@@ -937,9 +1064,13 @@ public abstract class VaultGearConfig extends Config {
             .forEach(
                tier -> tier.BASE_ATTRIBUTES
                   .forEach(
-                     (key, value) -> value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
-                        .add(Integer.valueOf(0), PooledAttribute.Rolls.ofEmpty(), pool -> {})
-                        .collect(IntegerAttribute.of(NumberAttribute.Type.SET))
+                     (key, value) -> {
+                        if (!ModItems.ETCHING.getRegistryName().toString().equals(key)) {
+                           value.GEAR_MODIFIERS_TO_ROLL = (IntegerAttribute.Generator)IntegerAttribute.generator()
+                              .add(Integer.valueOf(0), PooledAttribute.Rolls.ofEmpty(), pool -> {})
+                              .collect(IntegerAttribute.of(NumberAttribute.Type.SET));
+                        }
+                     }
                   )
             );
       }
@@ -982,6 +1113,7 @@ public abstract class VaultGearConfig extends Config {
          VaultGearConfig.BaseAttributes CHESTPLATE = new VaultGearConfig.BaseAttributes();
          VaultGearConfig.BaseAttributes LEGGINGS = new VaultGearConfig.BaseAttributes();
          VaultGearConfig.BaseAttributes BOOTS = new VaultGearConfig.BaseAttributes();
+         VaultGearConfig.BaseAttributes ETCHING = new VaultGearConfig.BaseAttributes();
          VaultGearConfig.BaseAttributes ALL_IDOLS = new VaultGearConfig.BaseAttributes();
          SWORD.ATTACK_DAMAGE = (DoubleAttribute.Generator)DoubleAttribute.generator()
             .add(
@@ -1366,6 +1498,23 @@ public abstract class VaultGearConfig extends Config {
          ALL_IDOLS.SOULBOUND = (BooleanAttribute.Generator)BooleanAttribute.generator()
             .add(Boolean.valueOf(false), PooledAttribute.Rolls.ofEmpty(), pool -> {})
             .collect(BooleanAttribute.of(BooleanAttribute.Type.SET));
+         ETCHING.GEAR_SET = (EnumAttribute.Generator<VaultGear.Set>)EnumAttribute.generator(VaultGear.Set.class)
+            .add(
+               VaultGear.Set.NONE,
+               PooledAttribute.Rolls.ofConstant(1),
+               pool -> pool.add(VaultGear.Set.ASSASSIN, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.DRAGON, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.GOBLIN, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.GOLEM, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.RIFT, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.VAMPIRE, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.BRUTE, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.TITAN, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.DRYAD, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.NINJA, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+                  .add(VaultGear.Set.TREASURE_HUNTER, EnumAttribute.of(EnumAttribute.Type.SET), 1)
+            )
+            .collect(EnumAttribute.of(EnumAttribute.Type.SET));
          VaultGearConfig.BaseAttributes IDOL_BENEVOLENT = ALL_IDOLS.copy();
          IDOL_BENEVOLENT.IDOL_TYPE = (EnumAttribute.Generator<PlayerFavourData.VaultGodType>)EnumAttribute.generator(PlayerFavourData.VaultGodType.class)
             .add(PlayerFavourData.VaultGodType.BENEVOLENT, PooledAttribute.Rolls.ofEmpty(), pool -> {})
@@ -1395,6 +1544,7 @@ public abstract class VaultGearConfig extends Config {
          this.BASE_ATTRIBUTES.put(ModItems.CHESTPLATE.getRegistryName().toString(), CHESTPLATE);
          this.BASE_ATTRIBUTES.put(ModItems.LEGGINGS.getRegistryName().toString(), LEGGINGS);
          this.BASE_ATTRIBUTES.put(ModItems.BOOTS.getRegistryName().toString(), BOOTS);
+         this.BASE_ATTRIBUTES.put(ModItems.ETCHING.getRegistryName().toString(), ETCHING);
          this.BASE_ATTRIBUTES.put(ModItems.IDOL_BENEVOLENT.getRegistryName().toString(), IDOL_BENEVOLENT);
          this.BASE_ATTRIBUTES.put(ModItems.IDOL_OMNISCIENT.getRegistryName().toString(), IDOL_OMNISCIENT);
          this.BASE_ATTRIBUTES.put(ModItems.IDOL_TIMEKEEPER.getRegistryName().toString(), IDOL_TIMEKEEPER);
@@ -1409,6 +1559,7 @@ public abstract class VaultGearConfig extends Config {
          VaultGearConfig.BaseModifiers CHESTPLATE = new VaultGearConfig.BaseModifiers();
          VaultGearConfig.BaseModifiers LEGGINGS = new VaultGearConfig.BaseModifiers();
          VaultGearConfig.BaseModifiers BOOTS = new VaultGearConfig.BaseModifiers();
+         VaultGearConfig.BaseModifiers ETCHING = new VaultGearConfig.BaseModifiers();
          VaultGearConfig.BaseModifiers ALL_IDOLS = new VaultGearConfig.BaseModifiers();
          SWORD.ADD_ATTACK_DAMAGE = new WeightedList.Entry<>(
             (DoubleAttribute.Generator)DoubleAttribute.generator()
@@ -4302,6 +4453,7 @@ public abstract class VaultGearConfig extends Config {
          this.BASE_MODIFIERS.put(ModItems.CHESTPLATE.getRegistryName().toString(), CHESTPLATE);
          this.BASE_MODIFIERS.put(ModItems.LEGGINGS.getRegistryName().toString(), LEGGINGS);
          this.BASE_MODIFIERS.put(ModItems.BOOTS.getRegistryName().toString(), BOOTS);
+         this.BASE_MODIFIERS.put(ModItems.ETCHING.getRegistryName().toString(), ETCHING);
          this.BASE_MODIFIERS.put(ModItems.IDOL_BENEVOLENT.getRegistryName().toString(), IDOL_BENEVOLENT);
          this.BASE_MODIFIERS.put(ModItems.IDOL_OMNISCIENT.getRegistryName().toString(), IDOL_OMNISCIENT);
          this.BASE_MODIFIERS.put(ModItems.IDOL_TIMEKEEPER.getRegistryName().toString(), IDOL_TIMEKEEPER);

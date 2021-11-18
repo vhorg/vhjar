@@ -1,19 +1,36 @@
 package iskallia.vault.event;
 
+import iskallia.vault.Vault;
 import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.entity.EternalEntity;
 import iskallia.vault.entity.FighterEntity;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.item.gear.EtchingItem;
 import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.network.message.FighterSizeMessage;
+import iskallia.vault.skill.set.BloodSet;
+import iskallia.vault.skill.set.DragonSet;
+import iskallia.vault.skill.set.DryadSet;
+import iskallia.vault.skill.set.PlayerSet;
+import iskallia.vault.skill.set.SetNode;
+import iskallia.vault.skill.set.SetTree;
+import iskallia.vault.util.AdvancementHelper;
+import iskallia.vault.util.PlayerDamageHelper;
 import iskallia.vault.util.SideOnlyFixer;
 import iskallia.vault.util.VaultRarity;
+import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.world.data.VaultRaidData;
+import iskallia.vault.world.vault.VaultRaid;
 import java.util.Random;
+import java.util.UUID;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -23,15 +40,18 @@ import net.minecraft.potion.Effects;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemCraftedEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -77,21 +97,93 @@ public class PlayerEvents {
    }
 
    @SubscribeEvent
+   public static void onPlayerDamage(LivingHurtEvent event) {
+      Entity target = event.getEntity();
+      if (target instanceof ServerPlayerEntity) {
+         ServerPlayerEntity player = (ServerPlayerEntity)target;
+         if (player.func_71121_q().func_234923_W_() == Vault.VAULT_KEY) {
+            VaultRaid active = VaultRaidData.get(player.func_71121_q()).getActiveFor(player);
+            if (active != null && active.isFinished()) {
+               event.setCanceled(true);
+            }
+         }
+      }
+   }
+
+   @SubscribeEvent
    public static void onPlayerTick2(PlayerTickEvent event) {
       if (event.player.func_70644_a(Effects.field_76426_n)) {
          event.player.func_70066_B();
       }
 
-      if (!event.player.func_130014_f_().func_201670_d()) {
+      if (!event.player.func_130014_f_().func_201670_d() && event.player instanceof ServerPlayerEntity) {
+         ServerPlayerEntity player = (ServerPlayerEntity)event.player;
+
          for (EquipmentSlotType slot : EquipmentSlotType.values()) {
             if (slot.func_188453_a().equals(Group.ARMOR)) {
-               ItemStack stack = event.player.func_184582_a(slot);
-               int level = PlayerVaultStatsData.get((ServerWorld)event.player.field_70170_p).getVaultStats(event.player).getVaultLevel();
+               ItemStack stack = player.func_184582_a(slot);
+               int level = PlayerVaultStatsData.get((ServerWorld)event.player.field_70170_p).getVaultStats(player).getVaultLevel();
                if (ModAttributes.MIN_VAULT_LEVEL.exists(stack) && level < ModAttributes.MIN_VAULT_LEVEL.get(stack).get().getValue(stack)) {
-                  event.player.func_146097_a(stack.func_77946_l(), false, false);
+                  player.func_146097_a(stack.func_77946_l(), false, false);
                   stack.func_190920_e(0);
                }
             }
+         }
+      }
+   }
+
+   public static void onApplyPlayerSets(PlayerTickEvent event) {
+      if (!event.player.func_130014_f_().func_201670_d() && event.player instanceof ServerPlayerEntity) {
+         ServerPlayerEntity player = (ServerPlayerEntity)event.player;
+         SetTree sets = PlayerSetsData.get(player.func_71121_q()).getSets(player);
+         if (PlayerSet.isActive(VaultGear.Set.DRAGON, player) && !PlayerDamageHelper.getMultiplier(player, DragonSet.MULTIPLIER_ID).isPresent()) {
+            float multiplier = 1.0F;
+
+            for (SetNode<?> node : sets.getNodes()) {
+               if (node.getSet() instanceof DragonSet) {
+                  DragonSet set = (DragonSet)node.getSet();
+                  multiplier *= set.getDamageMultiplier();
+               }
+            }
+
+            PlayerDamageHelper.applyMultiplier(
+               DragonSet.MULTIPLIER_ID, (ServerPlayerEntity)event.player, multiplier, PlayerDamageHelper.Operation.STACKING_MULTIPLY, false
+            );
+         } else if (!PlayerSet.isActive(VaultGear.Set.DRAGON, player)) {
+            PlayerDamageHelper.removeMultiplier(player, DragonSet.MULTIPLIER_ID);
+         }
+
+         if (PlayerSet.isActive(VaultGear.Set.DRYAD, player)) {
+            UUID id = MathHelper.func_180182_a(new Random("dryad".hashCode()));
+            float health = 0.0F;
+
+            for (SetNode<?> nodex : sets.getNodes()) {
+               if (nodex.getSet() instanceof DryadSet) {
+                  DryadSet set = (DryadSet)nodex.getSet();
+                  health += set.getExtraHealth();
+               }
+            }
+
+            player.func_110148_a(Attributes.field_233818_a_).func_233767_b_(new AttributeModifier(id, "Dryad Bonus Health", health, Operation.ADDITION));
+         } else {
+            player.func_110148_a(Attributes.field_233818_a_).func_188479_b(MathHelper.func_180182_a(new Random("dryad".hashCode())));
+         }
+
+         if (PlayerSet.isActive(VaultGear.Set.BLOOD, player) && !PlayerDamageHelper.getMultiplier(player, BloodSet.MULTIPLIER_ID).isPresent()) {
+            float multiplier = 1.0F;
+
+            for (SetNode<?> nodexx : sets.getNodes()) {
+               if (nodexx.getSet() instanceof BloodSet) {
+                  BloodSet set = (BloodSet)nodexx.getSet();
+                  multiplier *= set.getDamageMultiplier();
+               }
+            }
+
+            PlayerDamageHelper.applyMultiplier(
+               BloodSet.MULTIPLIER_ID, (ServerPlayerEntity)event.player, multiplier, PlayerDamageHelper.Operation.STACKING_MULTIPLY
+            );
+         } else if (!PlayerSet.isActive(VaultGear.Set.BLOOD, player)) {
+            PlayerDamageHelper.removeMultiplier(player, BloodSet.MULTIPLIER_ID);
          }
       }
    }
@@ -128,12 +220,14 @@ public class PlayerEvents {
       if (!player.func_130014_f_().func_201670_d()) {
          ItemStack crafted = event.getCrafting();
          if (crafted.func_77973_b() instanceof VaultGear) {
-            int slot = SideOnlyFixer.getSlotFor(player.field_71071_by, crafted);
-            if (slot != -1) {
-               ModAttributes.GEAR_CRAFTED_BY.create(player.field_71071_by.func_70301_a(slot), player.func_200200_C_().getString());
-            }
+            if (!(crafted.func_77973_b() instanceof EtchingItem)) {
+               int slot = SideOnlyFixer.getSlotFor(player.field_71071_by, crafted);
+               if (slot != -1) {
+                  ModAttributes.GEAR_CRAFTED_BY.create(player.field_71071_by.func_70301_a(slot), player.func_200200_C_().getString());
+               }
 
-            ModAttributes.GEAR_CRAFTED_BY.create(crafted, player.func_200200_C_().getString());
+               ModAttributes.GEAR_CRAFTED_BY.create(crafted, player.func_200200_C_().getString());
+            }
          }
       }
    }
@@ -150,6 +244,16 @@ public class PlayerEvents {
                event.getToolTip().set(i, new StringTextComponent("the_vault:idol").func_230530_a_(txt.func_150256_b()));
             }
          }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onPlayerEnterVault(PlayerChangedDimensionEvent event) {
+      PlayerEntity player = event.getPlayer();
+      if (event.getTo() == Vault.VAULT_KEY && player instanceof ServerPlayerEntity) {
+         ServerPlayerEntity serverPlayer = (ServerPlayerEntity)player;
+         AdvancementHelper.grantCriterion(serverPlayer, Vault.id("main/root"), "entered_vault");
+         AdvancementHelper.grantCriterion(serverPlayer, Vault.id("armors/root"), "entered_vault");
       }
    }
 }

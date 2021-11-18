@@ -7,10 +7,14 @@ import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.AbilityConfig;
 import iskallia.vault.skill.ability.config.sub.RampageLeechConfig;
 import iskallia.vault.skill.ability.effect.RampageAbility;
+import iskallia.vault.skill.set.SetNode;
+import iskallia.vault.skill.set.SetTree;
+import iskallia.vault.skill.set.VampirismSet;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.skill.talent.type.VampirismTalent;
 import iskallia.vault.world.data.PlayerAbilitiesData;
+import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
@@ -40,6 +44,15 @@ public class LeechHelper {
             if (cfg instanceof RampageLeechConfig) {
                leech += ((RampageLeechConfig)cfg).getLeechPercent();
             }
+         }
+      }
+
+      SetTree sets = PlayerSetsData.get(player.func_71121_q()).getSets(player);
+
+      for (SetNode<?> nodexx : sets.getNodes()) {
+         if (nodexx.getSet() instanceof VampirismSet) {
+            VampirismSet set = (VampirismSet)nodexx.getSet();
+            leech += set.getLeechRatio();
          }
       }
 

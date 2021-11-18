@@ -3,17 +3,19 @@ package iskallia.vault.block.entity;
 import com.google.common.base.Enums;
 import iskallia.vault.config.LootTablesConfig;
 import iskallia.vault.config.VaultChestConfig;
+import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.BasicScavengerItem;
+import iskallia.vault.item.gear.VaultGearHelper;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.util.VaultRarity;
 import iskallia.vault.util.data.RandomListAccess;
-import iskallia.vault.util.data.WeightedList;
+import iskallia.vault.util.data.WeightedDoubleList;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.chest.VaultChestEffect;
@@ -221,24 +223,32 @@ public class VaultChestTileEntity extends ChestTileEntity {
                   this.field_184284_m = null;
                } else {
                   if (this.field_184284_m == null) {
+                     WeightedDoubleList<String> chestRarityList = new WeightedDoubleList<>();
+                     float incChestRarity = VaultGearHelper.getAttributeValueOnGearSumFloat(sPlayer, ModAttributes.CHEST_RARITY);
                      if (this.rarityPool.isEmpty()) {
-                        this.rarity = vault.getPlayer(player)
-                           .map(VaultPlayer::getProperties)
-                           .flatMap(properties -> properties.getBase(VaultRaid.CHEST_PITY))
-                           .map(pity -> pity.getRandomChestRarity(ModConfigs.VAULT_CHEST.RARITY_POOL, player, world.func_201674_k()))
-                           .flatMap(key -> Enums.getIfPresent(VaultRarity.class, key).toJavaUtil())
-                           .orElse(VaultRarity.COMMON);
+                        ModConfigs.VAULT_CHEST.RARITY_POOL.forEach((rarity, weight) -> {
+                           if (!rarity.equalsIgnoreCase(VaultRarity.COMMON.name())) {
+                              chestRarityList.add(rarity, weight.floatValue() * (1.0F + incChestRarity));
+                           } else {
+                              chestRarityList.add(rarity, weight.floatValue());
+                           }
+                        });
                      } else {
-                        WeightedList<String> weightedList = new WeightedList<>();
-                        this.rarityPool.forEach((rarity, weight) -> weightedList.add(rarity.name(), weight));
-                        this.rarity = vault.getPlayer(player)
-                           .map(VaultPlayer::getProperties)
-                           .flatMap(properties -> properties.getBase(VaultRaid.CHEST_PITY))
-                           .map(pity -> pity.getRandomChestRarity(weightedList, player, world.func_201674_k()))
-                           .flatMap(key -> Enums.getIfPresent(VaultRarity.class, key).toJavaUtil())
-                           .orElse(VaultRarity.COMMON);
+                        this.rarityPool.forEach((rarity, weight) -> {
+                           if (!rarity.equals(VaultRarity.COMMON)) {
+                              chestRarityList.add(rarity.name(), weight.floatValue() * (1.0F + incChestRarity));
+                           } else {
+                              chestRarityList.add(rarity.name(), weight.floatValue());
+                           }
+                        });
                      }
 
+                     this.rarity = vault.getPlayer(player)
+                        .map(VaultPlayer::getProperties)
+                        .flatMap(properties -> properties.getBase(VaultRaid.CHEST_PITY))
+                        .map(pity -> pity.getRandomChestRarity(chestRarityList, player, world.func_201674_k()))
+                        .flatMap(key -> Enums.getIfPresent(VaultRarity.class, key).toJavaUtil())
+                        .orElse(VaultRarity.COMMON);
                      int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
                      LootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(level);
                      if (config != null) {

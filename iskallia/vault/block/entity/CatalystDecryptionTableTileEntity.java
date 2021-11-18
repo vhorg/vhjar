@@ -3,6 +3,7 @@ package iskallia.vault.block.entity;
 import iskallia.vault.container.inventory.CatalystDecryptionContainer;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.VaultCatalystItem;
+import iskallia.vault.item.VaultInhibitorItem;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -50,6 +51,10 @@ public class CatalystDecryptionTableTileEntity extends TileEntity implements INa
 
          if (stack.func_77973_b() instanceof VaultCrystalItem) {
             VaultCrystalItem.getSeed(stack);
+         }
+
+         if (stack.func_77973_b() instanceof VaultInhibitorItem) {
+            VaultInhibitorItem.getSeed(stack);
          }
       }
    }

@@ -51,7 +51,7 @@ public class ModContainers {
          AbilityTree abilityTree = new AbilityTree(uniqueID);
          abilityTree.deserializeNBT(Optional.ofNullable(buffer.func_150793_b()).orElse(new CompoundNBT()));
          TalentTree talentTree = new TalentTree(uniqueID);
-         talentTree.deserializeNBT(Optional.ofNullable(buffer.func_150793_b()).orElse(new CompoundNBT()));
+         talentTree.deserialize(Optional.ofNullable(buffer.func_150793_b()).orElse(new CompoundNBT()), false);
          ResearchTree researchTree = new ResearchTree(uniqueID);
          researchTree.deserializeNBT(Optional.ofNullable(buffer.func_150793_b()).orElse(new CompoundNBT()));
          return new SkillTreeContainer(windowId, abilityTree, talentTree, researchTree);

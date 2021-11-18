@@ -12,6 +12,7 @@
     {"predicate": {"the_vault:texture": 4}, "model": "the_vault:item/sword/all/sword_4"},
     {"predicate": {"the_vault:texture": 5}, "model": "the_vault:item/sword/all/sword_5"},
     {"predicate": {"the_vault:texture": 6}, "model": "the_vault:item/sword/all/sword_6"},
-    {"predicate": {"the_vault:texture": 7}, "model": "the_vault:item/sword/all/sword_7"}
+    {"predicate": {"the_vault:texture": 7}, "model": "the_vault:item/sword/all/sword_7"},
+    {"predicate": {"the_vault:texture": 8}, "model": "the_vault:item/sword/all/greatsword"}
   ]
 }

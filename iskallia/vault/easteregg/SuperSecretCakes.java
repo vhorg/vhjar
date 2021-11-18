@@ -1,8 +1,8 @@
 package iskallia.vault.easteregg;
 
 import iskallia.vault.Vault;
+import iskallia.vault.util.AdvancementHelper;
 import java.util.Random;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.EffectInstance;
@@ -76,8 +76,7 @@ public class SuperSecretCakes {
             } else {
                event.getPlayer().func_195064_c(new EffectInstance(Effects.field_76444_x, 1200, 0));
                event.getWorld().func_175655_b(event.getPos(), false);
-               Advancement advancement = event.getPlayer().func_184102_h().func_191949_aK().func_192778_a(Vault.id("super_secret_cakes"));
-               ((ServerPlayerEntity)event.getPlayer()).func_192039_O().func_192750_a(advancement, "cake_consumed");
+               AdvancementHelper.grantCriterion((ServerPlayerEntity)event.getPlayer(), Vault.id("main/super_secret_cakes"), "cake_consumed");
                event.setCanceled(true);
             }
          }

@@ -352,7 +352,7 @@ public class EternalEntity extends ZombieEntity {
       if (this.field_70170_p instanceof ServerWorld && this.field_70729_aU && this.owner != null && this.eternalId != null && !cause.func_76357_e()) {
          ServerWorld sWorld = (ServerWorld)this.field_70170_p;
          TalentTree tree = PlayerTalentsData.get(sWorld).getTalents(this.owner);
-         if (tree.hasLearnedNode(ModConfigs.TALENTS.COMMANDER)) {
+         if (tree.hasLearnedNode(ModConfigs.TALENTS.COMMANDER) && !tree.getNodeOf(ModConfigs.TALENTS.COMMANDER).getTalent().doEternalsUnaliveWhenDead()) {
             return;
          }
 
@@ -372,11 +372,13 @@ public class EternalEntity extends ZombieEntity {
       this.func_110163_bv();
       if (this.field_70146_Z.nextInt(100) == 0) {
          ChickenEntity chicken = (ChickenEntity)EntityType.field_200795_i.func_200721_a(this.field_70170_p);
-         chicken.func_70012_b(this.func_226277_ct_(), this.func_226278_cu_(), this.func_226281_cx_(), this.field_70177_z, 0.0F);
-         chicken.func_213386_a(world, difficulty, reason, spawnData, dataTag);
-         chicken.func_152117_i(true);
-         ((ServerWorld)this.field_70170_p).func_217470_d(chicken);
-         this.func_184220_m(chicken);
+         if (chicken != null) {
+            chicken.func_70012_b(this.func_226277_ct_(), this.func_226278_cu_(), this.func_226281_cx_(), this.field_70177_z, 0.0F);
+            chicken.func_213386_a(world, difficulty, reason, spawnData, dataTag);
+            chicken.func_152117_i(true);
+            ((ServerWorld)this.field_70170_p).func_217470_d(chicken);
+            this.func_184220_m(chicken);
+         }
       }
 
       return spawnData;

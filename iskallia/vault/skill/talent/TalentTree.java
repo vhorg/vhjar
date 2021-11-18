@@ -5,6 +5,7 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.KnownTalentsMessage;
 import iskallia.vault.skill.talent.type.PlayerTalent;
 import iskallia.vault.util.NetcodeUtils;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -12,15 +13,20 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.LogicalSidedProvider;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 import net.minecraftforge.fml.network.NetworkDirection;
 
-public class TalentTree implements INBTSerializable<CompoundNBT> {
+public class TalentTree {
+   public static final int CURRENT_VERSION = 1;
    private final UUID uuid;
    private final List<TalentNode<?>> nodes = new ArrayList<>();
+   private int version;
 
    public TalentTree(UUID uuid) {
       this.uuid = uuid;
@@ -139,21 +145,63 @@ public class TalentTree implements INBTSerializable<CompoundNBT> {
 
    public CompoundNBT serializeNBT() {
       CompoundNBT nbt = new CompoundNBT();
+      nbt.func_74768_a("version", this.version);
       ListNBT list = new ListNBT();
       this.nodes.stream().map(TalentNode::serializeNBT).forEach(list::add);
       nbt.func_218657_a("Nodes", list);
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserialize(CompoundNBT nbt, boolean migrateData) {
+      int currentVersion = nbt.func_150297_b("version", 3) ? nbt.func_74762_e("version") : 0;
       ListNBT list = nbt.func_150295_c("Nodes", 10);
       this.nodes.clear();
 
       for (int i = 0; i < list.size(); i++) {
-         TalentNode<?> talent = TalentNode.fromNBT(list.func_150305_b(i), PlayerTalent.class);
+         TalentNode<?> talent = TalentNode.fromNBT(this.uuid, list.func_150305_b(i), migrateData ? currentVersion : 1);
          if (talent != null) {
             this.add(null, talent);
          }
       }
+
+      this.version = 1;
+   }
+
+   @Nullable
+   static TalentNode<?> migrate(@Nullable UUID playerId, String talentName, int talentLevel, int vFrom) {
+      TalentGroup<?> group = ModConfigs.TALENTS.getTalent(talentName).orElse(null);
+      if (vFrom >= 1) {
+         return group == null ? null : new TalentNode<>(group, talentLevel);
+      } else {
+         int refundedCost = 0;
+         MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+         if (vFrom <= 0) {
+            if (talentName.equalsIgnoreCase("Commander")
+               || talentName.equalsIgnoreCase("Ward")
+               || talentName.equalsIgnoreCase("Barbaric")
+               || talentName.equalsIgnoreCase("Frenzy")
+               || talentName.equalsIgnoreCase("Glass Cannon")) {
+               refundedCost += getRefundAmount(talentLevel, new int[]{3, 5, 6, 7, 9});
+               talentLevel = 0;
+            }
+         } else if (vFrom <= 1) {
+         }
+
+         if (playerId != null && srv != null && Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+            PlayerVaultStatsData.get(srv).addSkillPointNoSync(playerId, refundedCost);
+         }
+
+         return group == null ? null : new TalentNode<>(group, talentLevel);
+      }
+   }
+
+   private static int getRefundAmount(int currentLevel, int[] levelCost) {
+      int totalRefund = 0;
+
+      for (int i = 0; i < Math.min(currentLevel, levelCost.length); i++) {
+         totalRefund += levelCost[i];
+      }
+
+      return totalRefund;
    }
 }

@@ -311,7 +311,7 @@ public class TalentsConfig extends Config {
          new ThornsDamageTalent(2, 2.0F)
       );
       this.GLASS_CANNON = new ArchetypeTalentGroup<>("Glass Cannon", new GlassCannonTalent(2, 1.5F, 1.5F));
-      this.COMMANDER = new ArchetypeTalentGroup<>("Commander", new CommanderTalent(2, 1.2F, 0.8F, 0.1F, 1.5F));
+      this.COMMANDER = new ArchetypeTalentGroup<>("Commander", new CommanderTalent(2, 1.2F, 0.8F, 0.1F, 1.5F, true));
       this.WARD = new ArchetypeTalentGroup<>(
          "Ward", new WardTalent(2, 15, new EffectTalent(0, Effects.field_188425_z, 1, EffectTalent.Type.HIDDEN, EffectTalent.Operator.ADD), 0.01F)
       );

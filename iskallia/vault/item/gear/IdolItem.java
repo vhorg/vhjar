@@ -96,6 +96,7 @@ public class IdolItem extends BasicItem implements VaultGear<IdolItem> {
    }
 
    @OnlyIn(Dist.CLIENT)
+   @Override
    public void func_77624_a(ItemStack stack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
       super.func_77624_a(stack, world, tooltip, flag);
       this.addInformation(this, stack, world, tooltip, flag);

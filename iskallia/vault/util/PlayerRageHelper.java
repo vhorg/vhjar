@@ -6,6 +6,7 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.RageSyncMessage;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.talent.type.archetype.ArchetypeTalent;
 import iskallia.vault.skill.talent.type.archetype.BarbaricTalent;
 import iskallia.vault.world.data.PlayerTalentsData;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ public class PlayerRageHelper {
             if (lastAttack <= attacker.field_70173_aa - 10) {
                TalentTree tree = PlayerTalentsData.get(attacker.func_71121_q()).getTalents(attacker);
                TalentNode<BarbaricTalent> node = tree.getNodeOf(ModConfigs.TALENTS.BARBARIC);
-               if (node.isLearned()) {
+               if (ArchetypeTalent.isEnabled(world) && node.isLearned()) {
                   int rage = getCurrentRage(playerUUID, LogicalSide.SERVER);
                   setCurrentRage(attacker, rage + node.getTalent().getRagePerAttack());
                   refreshDamageBuff(attacker, node.getTalent().getDamageMultiplierPerRage());
@@ -95,10 +96,12 @@ public class PlayerRageHelper {
          } else {
             TalentTree tree = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
             BarbaricTalent talent = tree.getNodeOf(ModConfigs.TALENTS.BARBARIC).getTalent();
-            int lastTick = lastAttackTick.getOrDefault(playerUUID, 0);
-            if (lastTick < sPlayer.field_70173_aa - talent.getRageDegenTickDelay() && sPlayer.field_70173_aa % 10 == 0) {
-               setCurrentRage(sPlayer, rage - 1);
-               refreshDamageBuff(sPlayer, talent.getDamageMultiplierPerRage());
+            if (ArchetypeTalent.isEnabled(sPlayer.func_71121_q())) {
+               int lastTick = lastAttackTick.getOrDefault(playerUUID, 0);
+               if (lastTick < sPlayer.field_70173_aa - talent.getRageDegenTickDelay() && sPlayer.field_70173_aa % 10 == 0) {
+                  setCurrentRage(sPlayer, rage - 1);
+                  refreshDamageBuff(sPlayer, talent.getDamageMultiplierPerRage());
+               }
             }
          }
       }
@@ -120,7 +123,7 @@ public class PlayerRageHelper {
 
    private static boolean canGenerateRage(ServerPlayerEntity sPlayer) {
       TalentTree tree = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
-      return tree.hasLearnedNode(ModConfigs.TALENTS.BARBARIC);
+      return tree.hasLearnedNode(ModConfigs.TALENTS.BARBARIC) && ArchetypeTalent.isEnabled(sPlayer.func_71121_q());
    }
 
    private static void refreshDamageBuff(ServerPlayerEntity sPlayer, float dmgMultiplier) {

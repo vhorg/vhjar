@@ -8,6 +8,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 
 public abstract class VaultGearModel<T extends LivingEntity> extends BipedModel<T> {
+   protected static final float VOXEL_SIZE = 0.0625F;
    protected final EquipmentSlotType slotType;
    protected ModelRenderer Head;
    protected ModelRenderer Body;
@@ -28,35 +29,50 @@ public abstract class VaultGearModel<T extends LivingEntity> extends BipedModel<
       return this.slotType == EquipmentSlotType.LEGS;
    }
 
+   protected void prepareForRender(
+      MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha
+   ) {
+   }
+
    public void func_225598_a_(
       MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha
    ) {
       matrixStack.func_227860_a_();
+      this.prepareForRender(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
       if (this.slotType == EquipmentSlotType.HEAD) {
-         this.Head.func_217177_a(this.field_78116_c);
-         this.Head.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.Head, this.field_78116_c, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
       } else if (this.slotType == EquipmentSlotType.CHEST) {
-         this.Body.func_217177_a(this.field_78115_e);
-         this.Body.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-         this.RightArm.func_217177_a(this.field_178723_h);
-         this.RightArm.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-         this.LeftArm.func_217177_a(this.field_178724_i);
-         this.LeftArm.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.Body, this.field_78115_e, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.RightArm, this.field_178723_h, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.LeftArm, this.field_178724_i, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
       } else if (this.slotType == EquipmentSlotType.LEGS) {
-         this.Belt.func_217177_a(this.field_78115_e);
-         this.Belt.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-         this.RightLeg.func_217177_a(this.field_178721_j);
-         this.RightLeg.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-         this.LeftLeg.func_217177_a(this.field_178722_k);
-         this.LeftLeg.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.Belt, this.field_78115_e, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.RightLeg, this.field_178721_j, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.LeftLeg, this.field_178722_k, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
       } else if (this.slotType == EquipmentSlotType.FEET) {
-         this.RightBoot.func_217177_a(this.field_178721_j);
-         this.RightBoot.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-         this.LeftBoot.func_217177_a(this.field_178722_k);
-         this.LeftBoot.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.RightBoot, this.field_178721_j, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+         this.renderWithModelAngles(this.LeftBoot, this.field_178722_k, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
       }
 
       matrixStack.func_227865_b_();
+   }
+
+   private void renderWithModelAngles(
+      ModelRenderer renderer,
+      ModelRenderer target,
+      MatrixStack matrixStack,
+      IVertexBuilder buffer,
+      int packedLight,
+      int packedOverlay,
+      float red,
+      float green,
+      float blue,
+      float alpha
+   ) {
+      if (renderer != null && target != null) {
+         renderer.func_217177_a(target);
+         renderer.func_228309_a_(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+      }
    }
 
    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {

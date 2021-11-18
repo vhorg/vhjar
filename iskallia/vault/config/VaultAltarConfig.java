@@ -117,8 +117,8 @@ public class VaultAltarConfig extends Config {
       lootTable.getPool("Richity").func_216091_a(richity::setItem, ctx);
       lootTable.getPool("Farmable").func_216091_a(farmable::setItem, ctx);
       lootTable.getPool("Misc").func_216091_a(misc::setItem, ctx);
-      double m1 = 800.0 * Math.atan(altarLevel / 120.0) / Math.PI + 1.0;
-      double m2 = 200.0 / (1.0 + Math.exp((-altarLevel + 130.0) / 25.0));
+      double m1 = 800.0 * Math.atan(altarLevel / 250.0) / Math.PI + 1.0;
+      double m2 = 200.0 / (1.0 + Math.exp((-altarLevel + 260.0) / 50.0));
       double m3 = 400.0 / (1.0 + Math.exp((-altarLevel + 200.0) / 40.0));
       resource.setAmountRequired((int)Math.round(resource.getItem().func_190916_E() * m1 * amtMultiplier));
       richity.setAmountRequired((int)Math.round(richity.getItem().func_190916_E() * m2 * amtMultiplier));

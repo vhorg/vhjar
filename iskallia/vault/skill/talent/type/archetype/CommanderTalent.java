@@ -30,19 +30,23 @@ public class CommanderTalent extends ArchetypeTalent {
    protected float summonEternalAdditionalCooldownReduction;
    @Expose
    protected float summonEternalDamageDealtMultiplier;
+   @Expose
+   protected boolean doEternalsUnaliveWhenDead;
 
    public CommanderTalent(
       int cost,
       float damageTakenMultiplier,
       float damageDealtMultiplier,
       float summonEternalAdditionalCooldownReduction,
-      float summonEternalDamageDealtMultiplier
+      float summonEternalDamageDealtMultiplier,
+      boolean doEternalsUnaliveWhenDead
    ) {
       super(cost);
       this.damageTakenMultiplier = damageTakenMultiplier;
       this.damageDealtMultiplier = damageDealtMultiplier;
       this.summonEternalAdditionalCooldownReduction = summonEternalAdditionalCooldownReduction;
       this.summonEternalDamageDealtMultiplier = summonEternalDamageDealtMultiplier;
+      this.doEternalsUnaliveWhenDead = doEternalsUnaliveWhenDead;
    }
 
    public float getDamageTakenMultiplier() {
@@ -61,18 +65,24 @@ public class CommanderTalent extends ArchetypeTalent {
       return this.summonEternalDamageDealtMultiplier;
    }
 
+   public boolean doEternalsUnaliveWhenDead() {
+      return this.doEternalsUnaliveWhenDead;
+   }
+
    @SubscribeEvent
    public static void onPlayerDamage(LivingHurtEvent event) {
       LivingEntity entity = event.getEntityLiving();
       World world = entity.func_130014_f_();
       if (!world.func_201670_d()) {
-         if (entity instanceof ServerPlayerEntity) {
-            ServerPlayerEntity sPlayer = (ServerPlayerEntity)entity;
-            TalentTree talents = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
+         if (isEnabled(world)) {
+            if (entity instanceof ServerPlayerEntity) {
+               ServerPlayerEntity sPlayer = (ServerPlayerEntity)entity;
+               TalentTree talents = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
 
-            for (TalentNode<CommanderTalent> node : talents.getLearnedNodes(CommanderTalent.class)) {
-               CommanderTalent talent = node.getTalent();
-               event.setAmount(event.getAmount() * talent.getDamageTakenMultiplier());
+               for (TalentNode<CommanderTalent> node : talents.getLearnedNodes(CommanderTalent.class)) {
+                  CommanderTalent talent = node.getTalent();
+                  event.setAmount(event.getAmount() * talent.getDamageTakenMultiplier());
+               }
             }
          }
       }
@@ -82,25 +92,27 @@ public class CommanderTalent extends ArchetypeTalent {
    public static void onPlayerTick(PlayerTickEvent event) {
       if (event.phase != Phase.END && event.player instanceof ServerPlayerEntity) {
          ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.player;
-         TalentTree talents = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
-         if (talents.hasLearnedNode(ModConfigs.TALENTS.COMMANDER)) {
-            float damageMultiplier = talents.getNodeOf(ModConfigs.TALENTS.COMMANDER).getTalent().getDamageDealtMultiplier();
-            PlayerDamageHelper.DamageMultiplier existing = multiplierMap.get(sPlayer.func_110124_au());
-            if (existing != null) {
-               if (existing.getMultiplier() == damageMultiplier) {
-                  existing.refreshDuration(sPlayer.func_184102_h());
-               } else {
-                  PlayerDamageHelper.removeMultiplier(sPlayer, existing);
-                  existing = null;
+         if (isEnabled(sPlayer.func_71121_q())) {
+            TalentTree talents = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
+            if (talents.hasLearnedNode(ModConfigs.TALENTS.COMMANDER)) {
+               float damageMultiplier = talents.getNodeOf(ModConfigs.TALENTS.COMMANDER).getTalent().getDamageDealtMultiplier();
+               PlayerDamageHelper.DamageMultiplier existing = multiplierMap.get(sPlayer.func_110124_au());
+               if (existing != null) {
+                  if (existing.getMultiplier() == damageMultiplier) {
+                     existing.refreshDuration(sPlayer.func_184102_h());
+                  } else {
+                     PlayerDamageHelper.removeMultiplier(sPlayer, existing);
+                     existing = null;
+                  }
                }
-            }
 
-            if (existing == null) {
-               existing = PlayerDamageHelper.applyMultiplier(sPlayer, damageMultiplier, PlayerDamageHelper.Operation.STACKING_MULTIPLY, false);
-               multiplierMap.put(sPlayer.func_110124_au(), existing);
+               if (existing == null) {
+                  existing = PlayerDamageHelper.applyMultiplier(sPlayer, damageMultiplier, PlayerDamageHelper.Operation.STACKING_MULTIPLY, false);
+                  multiplierMap.put(sPlayer.func_110124_au(), existing);
+               }
+            } else {
+               removeExistingDamageBuff(sPlayer);
             }
-         } else {
-            removeExistingDamageBuff(sPlayer);
          }
       }
    }

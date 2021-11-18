@@ -17,6 +17,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.TickPriority;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 
@@ -85,20 +86,28 @@ public class TwerkerTalent extends PlayerTalent {
             world.func_195598_a(ParticleTypes.field_197632_y, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), 100, 1.0, 0.5, 1.0, 0.0);
          }
 
-         if (this.growsSugarcaneCactus && (block instanceof SugarCaneBlock || block instanceof CactusBlock)) {
-            int height = 1;
-
-            while (world.func_180495_p(pos.func_177979_c(height)).func_203425_a(block)) {
-               height++;
+         if (this.growsSugarcaneCactus) {
+            BlockPos above = new BlockPos(pos).func_177984_a();
+            if (!world.func_175623_d(above)) {
+               return;
             }
 
-            if (height < 3 && rand.nextInt(3) == 0 && ForgeHooks.onCropsGrowPre(world, pos, state, true)) {
-               world.func_175656_a(pos.func_177984_a(), block.func_176223_P());
-               BlockState newState = (BlockState)state.func_206870_a(BlockStateProperties.field_208171_X, 0);
-               world.func_180501_a(pos, newState, 4);
-               newState.func_215697_a(world, pos.func_177984_a(), block, pos, false);
-               ForgeHooks.onCropsGrowPost(world, pos.func_177984_a(), state);
-               world.func_195598_a(ParticleTypes.field_197632_y, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), 100, 1.0, 0.5, 1.0, 0.0);
+            if (block instanceof SugarCaneBlock || block instanceof CactusBlock) {
+               int height = 1;
+
+               while (world.func_180495_p(pos.func_177979_c(height)).func_203425_a(block)) {
+                  height++;
+               }
+
+               if (height < 3 && rand.nextInt(3) == 0 && ForgeHooks.onCropsGrowPre(world, pos, state, true)) {
+                  world.func_175656_a(above, block.func_176223_P());
+                  BlockState newState = (BlockState)state.func_206870_a(BlockStateProperties.field_208171_X, 0);
+                  world.func_180501_a(pos, newState, 4);
+                  newState.func_215697_a(world, above, block, pos, false);
+                  world.func_205220_G_().func_205362_a(above, block, 1, TickPriority.EXTREMELY_HIGH);
+                  ForgeHooks.onCropsGrowPost(world, above, state);
+                  world.func_195598_a(ParticleTypes.field_197632_y, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), 100, 1.0, 0.5, 1.0, 0.0);
+               }
             }
          }
 

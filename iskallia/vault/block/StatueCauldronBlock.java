@@ -4,7 +4,6 @@ import iskallia.vault.block.entity.StatueCauldronTileEntity;
 import iskallia.vault.client.gui.screen.StatueCauldronScreen;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
 import javax.annotation.Nullable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CauldronBlock;
@@ -21,7 +20,6 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.stats.Stats;
 import net.minecraft.tileentity.TileEntity;
@@ -35,6 +33,10 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 
 public class StatueCauldronBlock extends CauldronBlock {
    public StatueCauldronBlock() {
@@ -63,8 +65,9 @@ public class StatueCauldronBlock extends CauldronBlock {
          Item item = itemstack.func_77973_b();
          if (item instanceof BucketItem && ((BucketItem)item).getFluid() != Fluids.field_204541_a) {
             if (i < 3 && !worldIn.field_72995_K) {
-               if (!player.func_184812_l_() || item != ModItems.INFINITE_WATER_BUCKET) {
-                  player.func_184611_a(handIn, new ItemStack(Items.field_151133_ar));
+               if (!player.func_184812_l_()) {
+                  LazyOptional<IFluidHandlerItem> providerOptional = itemstack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY);
+                  providerOptional.ifPresent(provider -> provider.drain(1000, FluidAction.EXECUTE));
                }
 
                player.func_195066_a(Stats.field_188077_K);

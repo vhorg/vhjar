@@ -1,7 +1,7 @@
 package iskallia.vault.world.vault.logic;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.util.data.WeightedList;
+import iskallia.vault.util.data.WeightedDoubleList;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.task.IVaultTask;
 import iskallia.vault.world.vault.player.VaultPlayer;
@@ -23,7 +23,7 @@ public class VaultChestPity implements INBTSerializable<CompoundNBT>, IVaultTask
       this.ticksElapsed.put(player.getPlayerId(), ticks + 1);
    }
 
-   public String getRandomChestRarity(WeightedList<String> chestWeights, PlayerEntity player, Random rand) {
+   public String getRandomChestRarity(WeightedDoubleList<String> chestWeights, PlayerEntity player, Random rand) {
       int ticks = this.getTicksElapsed(player);
       String rarity = ModConfigs.VAULT_CHEST_META.getPityAdjustedRarity(chestWeights, ticks).getRandom(rand);
       this.resetTicks(player);

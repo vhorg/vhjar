@@ -2864,7 +2864,7 @@
       "entries": [
         { "_name": "EMPTY",
           "type": "minecraft:empty",
-          "weight": 2
+          "weight": 4
         },
         { "_name": "Artisan Scroll",
           "type": "minecraft:item",

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import iskallia.vault.Vault;
 import iskallia.vault.container.inventory.CatalystDecryptionContainer;
 import iskallia.vault.item.VaultCatalystItem;
+import iskallia.vault.item.VaultInhibitorItem;
 import iskallia.vault.item.catalyst.ModifierRollResult;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import java.util.Collection;
@@ -43,14 +44,18 @@ public class CatalystDecryptionScreen extends ContainerScreen<CatalystDecryption
          if (!crystal.func_190926_b() && crystal.func_77973_b() instanceof VaultCrystalItem) {
             for (Slot catalystSlot : ((CatalystDecryptionContainer)this.field_147002_h).getCatalystSlots()) {
                if (catalystSlot.func_75216_d()) {
-                  ItemStack catalyst = catalystSlot.func_75211_c();
-                  if (!catalyst.func_190926_b() && catalyst.func_77973_b() instanceof VaultCatalystItem) {
-                     List<String> modifierOutcomes = VaultCatalystItem.getCrystalCombinationModifiers(catalyst, crystal);
+                  ItemStack modifyingItem = catalystSlot.func_75211_c();
+                  if (!modifyingItem.func_190926_b()
+                     && (modifyingItem.func_77973_b() instanceof VaultCatalystItem || modifyingItem.func_77973_b() instanceof VaultInhibitorItem)) {
+                     boolean catalyst = modifyingItem.func_77973_b() instanceof VaultCatalystItem;
+                     List<String> modifierOutcomes = catalyst
+                        ? VaultCatalystItem.getCrystalCombinationModifiers(modifyingItem, crystal)
+                        : VaultInhibitorItem.getCrystalCombinationModifiers(modifyingItem, crystal);
                      if (modifierOutcomes != null && !modifierOutcomes.isEmpty()) {
                         boolean isLeft = catalystSlot.field_75222_d % 2 == 0;
                         List<ITextComponent> results = modifierOutcomes.stream()
                            .map(ModifierRollResult::ofModifier)
-                           .map(result -> result.getTooltipDescription("Adds ", false))
+                           .map(result -> result.getTooltipDescription(catalyst ? "Adds " : "Removes ", false))
                            .flatMap(Collection::stream)
                            .collect(Collectors.toList());
                         RenderSystem.pushMatrix();

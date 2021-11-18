@@ -42,6 +42,7 @@ public class ArtisanScrollItem extends BasicItem {
    }
 
    @OnlyIn(Dist.CLIENT)
+   @Override
    public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
       tooltip.add(StringTextComponent.field_240750_d_);
       tooltip.add(new StringTextComponent("Reforges a gear piece to").func_240699_a_(TextFormatting.GRAY));

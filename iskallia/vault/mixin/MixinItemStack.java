@@ -3,7 +3,9 @@ package iskallia.vault.mixin;
 import iskallia.vault.config.DurabilityConfig;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.skill.set.PlayerSet;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.skill.talent.type.UnbreakableTalent;
 import iskallia.vault.world.data.PlayerTalentsData;
@@ -52,6 +54,8 @@ public abstract class MixinItemStack {
    @Overwrite
    public boolean func_96631_a(int damage, Random rand, @Nullable ServerPlayerEntity damager) {
       if (!this.func_77984_f()) {
+         return false;
+      } else if (damager != null && this.func_77973_b() instanceof VaultArmorItem && PlayerSet.isActive(VaultGear.Set.ZOD, damager)) {
          return false;
       } else {
          if (damage > 0) {

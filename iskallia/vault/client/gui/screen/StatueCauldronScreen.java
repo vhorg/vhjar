@@ -61,6 +61,19 @@ public class StatueCauldronScreen extends Screen {
       return false;
    }
 
+   public boolean func_231046_a_(int keyCode, int scanCode, int modifiers) {
+      if (keyCode != 256 && keyCode != 69) {
+         return super.func_231046_a_(keyCode, scanCode, modifiers);
+      } else {
+         PlayerEntity player = Minecraft.func_71410_x().field_71439_g;
+         if (player != null) {
+            player.func_71053_j();
+         }
+
+         return true;
+      }
+   }
+
    public SkinProfile getSelected() {
       return this.selected;
    }

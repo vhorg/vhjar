@@ -4,7 +4,6 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.VaultRarity;
 import iskallia.vault.util.data.WeightedDoubleList;
-import iskallia.vault.util.data.WeightedList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +25,7 @@ public class VaultMetaChestConfig extends Config {
       return this.catalystChances.getOrDefault(chestKey.toString(), Collections.emptyMap()).getOrDefault(chestRarity.name(), 0.0F);
    }
 
-   public WeightedDoubleList<String> getPityAdjustedRarity(WeightedList<String> chestWeights, int ticksSinceLastChest) {
+   public WeightedDoubleList<String> getPityAdjustedRarity(WeightedDoubleList<String> chestWeights, int ticksSinceLastChest) {
       float multiplier = ticksSinceLastChest / 1200.0F;
       WeightedDoubleList<String> adjusted = new WeightedDoubleList<>();
       chestWeights.forEach((rarityKey, weight) -> {

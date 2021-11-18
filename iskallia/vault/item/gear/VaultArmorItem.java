@@ -3,6 +3,7 @@ package iskallia.vault.item.gear;
 import com.google.common.collect.Multimap;
 import iskallia.vault.attribute.EnumAttribute;
 import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModModels;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -29,13 +30,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class VaultArmorItem extends DyeableArmorItem implements VaultGear<VaultArmorItem> {
-   public static final int MODEL_VARIANT_COUNT = 36;
-   public static final int SCRAPPY_VARIANT_COUNT = 3;
-   public static final int SPECIAL_HELMET_COUNT = 2;
-   public static final int SPECIAL_CHESTPLATE_COUNT = 0;
-   public static final int SPECIAL_LEGGINGS_COUNT = 0;
-   public static final int SPECIAL_BOOTS_COUNT = 0;
-
    public VaultArmorItem(ResourceLocation id, EquipmentSlotType slot, Properties builder) {
       super(VaultGear.Material.INSTANCE, slot, builder);
       this.setRegistryName(id);
@@ -47,7 +41,7 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGear<VaultA
 
    @Override
    public int getModelsFor(VaultGear.Rarity rarity) {
-      return rarity == VaultGear.Rarity.SCRAPPY ? 3 : 36;
+      return rarity == VaultGear.Rarity.SCRAPPY ? ModModels.GearModel.SCRAPPY_REGISTRY.size() : ModModels.GearModel.REGISTRY.size();
    }
 
    @Nullable

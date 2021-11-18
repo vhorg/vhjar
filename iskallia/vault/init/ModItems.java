@@ -1,15 +1,18 @@
 package iskallia.vault.init;
 
+import com.google.common.collect.ImmutableList;
 import iskallia.vault.Vault;
 import iskallia.vault.item.ArtisanScrollItem;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.item.BasicTooltipItem;
+import iskallia.vault.item.FlawedRubyItem;
 import iskallia.vault.item.GatedLootableItem;
 import iskallia.vault.item.InfiniteWaterBucketItem;
 import iskallia.vault.item.ItemDrillArrow;
 import iskallia.vault.item.ItemKnowledgeStar;
 import iskallia.vault.item.ItemLegendaryTreasure;
+import iskallia.vault.item.ItemModArmorCrate;
 import iskallia.vault.item.ItemRelicBoosterPack;
 import iskallia.vault.item.ItemResetFlask;
 import iskallia.vault.item.ItemRespecFlask;
@@ -31,6 +34,7 @@ import iskallia.vault.item.RelicItem;
 import iskallia.vault.item.RelicPartItem;
 import iskallia.vault.item.UnknownEggItem;
 import iskallia.vault.item.VaultCatalystItem;
+import iskallia.vault.item.VaultInhibitorItem;
 import iskallia.vault.item.VaultMagnetItem;
 import iskallia.vault.item.VaultPearlItem;
 import iskallia.vault.item.VaultStewItem;
@@ -39,6 +43,7 @@ import iskallia.vault.item.VoidOrbItem;
 import iskallia.vault.item.WutaxShardItem;
 import iskallia.vault.item.consumable.VaultConsumableItem;
 import iskallia.vault.item.crystal.VaultCrystalItem;
+import iskallia.vault.item.gear.EtchingItem;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.item.gear.VaultAxeItem;
@@ -301,6 +306,8 @@ public class ModItems {
    public static VaultArmorItem BOOTS = new VaultArmorItem(
       Vault.id("boots"), EquipmentSlotType.FEET, new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(1)
    );
+   public static EtchingItem ETCHING = new EtchingItem(Vault.id("etching"), new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(1));
+   public static BasicItem ETCHING_FRAGMENT = new BasicItem(Vault.id("etching_fragment"), new Properties().func_200916_a(VAULT_MOD_GROUP));
    public static IdolItem IDOL_BENEVOLENT = new IdolItem(
       Vault.id("idol_benevolent"), PlayerFavourData.VaultGodType.BENEVOLENT, new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(1)
    );
@@ -371,6 +378,13 @@ public class ModItems {
       new StringTextComponent("Can be used to fully repair any vault gear,").func_240699_a_(TextFormatting.GRAY),
       new StringTextComponent("as long as it has repair slots remaining.").func_240699_a_(TextFormatting.GRAY)
    );
+   public static BasicItem REPAIR_CORE_T3 = new VaultRepairCoreItem(
+      Vault.id("repair_core_t3"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP),
+      2,
+      new StringTextComponent("Can be used to fully repair any vault gear,").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("as long as it has repair slots remaining.").func_240699_a_(TextFormatting.GRAY)
+   );
    public static BasicItem VAULT_PLATING = new VaultPlateItem(
       Vault.id("vault_plating"),
       new Properties().func_200916_a(VAULT_MOD_GROUP),
@@ -385,9 +399,17 @@ public class ModItems {
       new StringTextComponent("Permanently adds 50 max durability to any vault gear.").func_240699_a_(TextFormatting.GRAY),
       new StringTextComponent("Maximum 20 plates can be attached to any one vault gear.").func_240699_a_(TextFormatting.GRAY)
    );
+   public static BasicItem VAULT_PLATING_T3 = new VaultPlateItem(
+      Vault.id("vault_plating_t3"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP),
+      1,
+      new StringTextComponent("Permanently adds 50 max durability to any vault gear.").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("Maximum 20 plates can be attached to any one vault gear.").func_240699_a_(TextFormatting.GRAY)
+   );
    public static WutaxShardItem WUTAX_SHARD = new WutaxShardItem(Vault.id("wutax_shard"), new Properties().func_200916_a(VAULT_MOD_GROUP));
    public static BasicItem WUTAX_CRYSTAL = new BasicItem(Vault.id("wutax_crystal"), new Properties().func_200916_a(VAULT_MOD_GROUP));
    public static VaultCatalystItem VAULT_CATALYST = new VaultCatalystItem(VAULT_MOD_GROUP, Vault.id("vault_catalyst"));
+   public static VaultInhibitorItem VAULT_INHIBITOR = new VaultInhibitorItem(VAULT_MOD_GROUP, Vault.id("vault_inhibitor"));
    public static BasicItem VAULT_CATALYST_FRAGMENT = new BasicTooltipItem(
       Vault.id("vault_catalyst_fragment"),
       new Properties().func_200916_a(VAULT_MOD_GROUP),
@@ -411,6 +433,15 @@ public class ModItems {
       new StringTextComponent("Requires level: ")
          .func_240699_a_(TextFormatting.GRAY)
          .func_230529_a_(new StringTextComponent("100").func_240699_a_(TextFormatting.AQUA))
+   );
+   public static BasicTooltipItem GEAR_CHARM_T3 = new BasicTooltipItem(
+      Vault.id("gear_charm_tier_3"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP),
+      new StringTextComponent("Combine with an unidentified vault gear in an anvil").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("to increase its tier to Tier 3.").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("Requires level: ")
+         .func_240699_a_(TextFormatting.GRAY)
+         .func_230529_a_(new StringTextComponent("200").func_240699_a_(TextFormatting.AQUA))
    );
    public static BasicTooltipItem IDENTIFICATION_TOME = new BasicTooltipItem(
       Vault.id("identification_tome"),
@@ -532,6 +563,82 @@ public class ModItems {
       new StringTextComponent("Requires Talent: ")
          .func_240699_a_(TextFormatting.GRAY)
          .func_230529_a_(new StringTextComponent("Artisan").func_240699_a_(TextFormatting.AQUA))
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_HELLCOW = new ItemModArmorCrate(
+      Vault.id("armor_crate_hellcow"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.HELLCOW_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_BOTANIA = new ItemModArmorCrate(
+      Vault.id("armor_crate_botania"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.BOTANIA_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_CREATE = new ItemModArmorCrate(
+      Vault.id("armor_crate_create"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.CREATE_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_DANK = new ItemModArmorCrate(
+      Vault.id("armor_crate_dank"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.DANK_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_FLUX = new ItemModArmorCrate(
+      Vault.id("armor_crate_flux"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.FLUX_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_IMMERSIVE_ENGINEERING = new ItemModArmorCrate(
+      Vault.id("armor_crate_ie"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.IMMERSIVE_ENGINEERING_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_MEKA = new ItemModArmorCrate(
+      Vault.id("armor_crate_meka"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.MEKA_SET_DARK, ModModels.SpecialGearModel.MEKA_SET_LIGHT)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_POWAH = new ItemModArmorCrate(
+      Vault.id("armor_crate_powah"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.POWAH_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_THERMAL = new ItemModArmorCrate(
+      Vault.id("armor_crate_thermal"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.THERMAL_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_TRASH = new ItemModArmorCrate(
+      Vault.id("armor_crate_trash"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.TRASH_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_VILLAGER = new ItemModArmorCrate(
+      Vault.id("armor_crate_villager"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.VILLAGER_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_AUTOMATIC = new ItemModArmorCrate(
+      Vault.id("armor_crate_automatic"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.AUTOMATIC_SET)
+   );
+   public static FlawedRubyItem FLAWED_RUBY = new FlawedRubyItem(
+      Vault.id("flawed_ruby"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP),
+      new StringTextComponent("Combine with a gear piece in an anvil").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("to add additional modifier(s) with a").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("chance that the gear will break.").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent(" ").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("Requires Talent: ")
+         .func_240699_a_(TextFormatting.GRAY)
+         .func_230529_a_(new StringTextComponent("Artisan ").func_240699_a_(TextFormatting.AQUA))
+         .func_230529_a_(new StringTextComponent("or ").func_240699_a_(TextFormatting.GRAY))
+         .func_230529_a_(new StringTextComponent("Treasure Hunter").func_240699_a_(TextFormatting.AQUA))
+   );
+   public static BasicItem ARTIFACT_FRAGMENT = new BasicItem(
+      Vault.id("artifact_fragment"), new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64).func_234689_a_()
    );
 
    public static void registerItems(Register<Item> event) {
@@ -689,6 +796,8 @@ public class ModItems {
       registry.register(CHESTPLATE);
       registry.register(LEGGINGS);
       registry.register(BOOTS);
+      registry.register(ETCHING);
+      registry.register(ETCHING_FRAGMENT);
       registry.register(IDOL_BENEVOLENT);
       registry.register(IDOL_OMNISCIENT);
       registry.register(IDOL_TIMEKEEPER);
@@ -727,11 +836,14 @@ public class ModItems {
       registry.register(VAULT_ESSENCE);
       registry.register(REPAIR_CORE);
       registry.register(REPAIR_CORE_T2);
+      registry.register(REPAIR_CORE_T3);
       registry.register(VAULT_PLATING);
       registry.register(VAULT_PLATING_T2);
+      registry.register(VAULT_PLATING_T3);
       registry.register(WUTAX_SHARD);
       registry.register(WUTAX_CRYSTAL);
       registry.register(VAULT_CATALYST);
+      registry.register(VAULT_INHIBITOR);
       registry.register(VAULT_CATALYST_FRAGMENT);
       registry.register(SOUL_FLAME);
       registry.register(VAULT_GEAR);
@@ -741,6 +853,7 @@ public class ModItems {
       registry.register(CRYSTAL_SEAL_ANCIENTS);
       registry.register(CRYSTAL_SEAL_RAFFLE);
       registry.register(GEAR_CHARM);
+      registry.register(GEAR_CHARM_T3);
       registry.register(IDENTIFICATION_TOME);
       registry.register(BANISHED_SOUL);
       registry.register(UNKNOWN_ITEM);
@@ -816,5 +929,19 @@ public class ModItems {
       registry.register(AURA_SCROLL);
       registry.register(ARTISAN_SCROLL);
       registry.register(FABRICATION_JEWEL);
+      registry.register(FLAWED_RUBY);
+      registry.register(ARMOR_CRATE_HELLCOW);
+      registry.register(ARMOR_CRATE_BOTANIA);
+      registry.register(ARMOR_CRATE_CREATE);
+      registry.register(ARMOR_CRATE_DANK);
+      registry.register(ARMOR_CRATE_FLUX);
+      registry.register(ARMOR_CRATE_IMMERSIVE_ENGINEERING);
+      registry.register(ARMOR_CRATE_MEKA);
+      registry.register(ARMOR_CRATE_POWAH);
+      registry.register(ARMOR_CRATE_THERMAL);
+      registry.register(ARMOR_CRATE_TRASH);
+      registry.register(ARMOR_CRATE_VILLAGER);
+      registry.register(ARMOR_CRATE_AUTOMATIC);
+      registry.register(ARTIFACT_FRAGMENT);
    }
 }

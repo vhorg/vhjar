@@ -5,6 +5,7 @@ import iskallia.vault.network.message.PlayerDamageMultiplierMessage;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -56,6 +57,38 @@ public class PlayerDamageHelper {
       );
    }
 
+   public static PlayerDamageHelper.DamageMultiplier applyMultiplier(int id, ServerPlayerEntity player, float value, PlayerDamageHelper.Operation operation) {
+      return applyMultiplier(id, player, value, operation, true);
+   }
+
+   public static PlayerDamageHelper.DamageMultiplier applyMultiplier(
+      int id, ServerPlayerEntity player, float value, PlayerDamageHelper.Operation operation, boolean showOnClient
+   ) {
+      return applyMultiplier(id, player, value, operation, showOnClient, Integer.MAX_VALUE);
+   }
+
+   public static PlayerDamageHelper.DamageMultiplier applyMultiplier(
+      int id, ServerPlayerEntity player, float value, PlayerDamageHelper.Operation operation, boolean showOnClient, int tickDuration
+   ) {
+      return applyMultiplier(id, player, value, operation, showOnClient, tickDuration, sPlayer -> {});
+   }
+
+   public static PlayerDamageHelper.DamageMultiplier applyMultiplier(
+      int id,
+      ServerPlayerEntity player,
+      float value,
+      PlayerDamageHelper.Operation operation,
+      boolean showOnClient,
+      int tickDuration,
+      Consumer<ServerPlayerEntity> onTimeout
+   ) {
+      return applyMultiplier(
+         player.func_184102_h(),
+         player.func_110124_au(),
+         new PlayerDamageHelper.DamageMultiplier(id, player.func_110124_au(), value, operation, showOnClient, tickDuration, onTimeout)
+      );
+   }
+
    private static PlayerDamageHelper.DamageMultiplier applyMultiplier(MinecraftServer srv, UUID playerId, PlayerDamageHelper.DamageMultiplier multiplier) {
       multipliers.computeIfAbsent(playerId, id -> new HashSet<>()).add(multiplier);
       multiplier.removed = false;
@@ -63,8 +96,16 @@ public class PlayerDamageHelper {
       return multiplier;
    }
 
+   public static Optional<PlayerDamageHelper.DamageMultiplier> getMultiplier(ServerPlayerEntity player, int id) {
+      return multipliers.getOrDefault(player.func_110124_au(), new HashSet<>()).stream().filter(m -> m.id == id).findFirst();
+   }
+
    public static boolean removeMultiplier(ServerPlayerEntity player, PlayerDamageHelper.DamageMultiplier multiplier) {
       return removeMultiplier(player.func_184102_h(), player.func_110124_au(), multiplier);
+   }
+
+   public static boolean removeMultiplier(ServerPlayerEntity player, int id) {
+      return getMultiplier(player, id).filter(damageMultiplier -> removeMultiplier(player, damageMultiplier)).isPresent();
    }
 
    public static boolean removeMultiplier(MinecraftServer srv, UUID playerId, PlayerDamageHelper.DamageMultiplier multiplier) {
@@ -164,7 +205,19 @@ public class PlayerDamageHelper {
       private DamageMultiplier(
          UUID playerId, float value, PlayerDamageHelper.Operation operation, boolean showOnClient, int tickTimeout, Consumer<ServerPlayerEntity> onTimeout
       ) {
-         this.id = counter++;
+         this(counter++ & 2147483647, playerId, value, operation, showOnClient, tickTimeout, onTimeout);
+      }
+
+      private DamageMultiplier(
+         int id,
+         UUID playerId,
+         float value,
+         PlayerDamageHelper.Operation operation,
+         boolean showOnClient,
+         int tickTimeout,
+         Consumer<ServerPlayerEntity> onTimeout
+      ) {
+         this.id = id;
          this.playerId = playerId;
          this.value = value;
          this.operation = operation;

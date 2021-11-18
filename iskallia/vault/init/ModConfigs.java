@@ -11,6 +11,7 @@ import iskallia.vault.config.DurabilityConfig;
 import iskallia.vault.config.EternalAttributeConfig;
 import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.config.EternalConfig;
+import iskallia.vault.config.FlawedRubyConfig;
 import iskallia.vault.config.GlobalTraderConfig;
 import iskallia.vault.config.KeyPressRecipesConfig;
 import iskallia.vault.config.LegendaryTreasureEpicConfig;
@@ -29,6 +30,7 @@ import iskallia.vault.config.ResearchGroupConfig;
 import iskallia.vault.config.ResearchGroupStyleConfig;
 import iskallia.vault.config.ResearchesGUIConfig;
 import iskallia.vault.config.ScavengerHuntConfig;
+import iskallia.vault.config.SetsConfig;
 import iskallia.vault.config.SkillDescriptionsConfig;
 import iskallia.vault.config.SkillGatesConfig;
 import iskallia.vault.config.SoulShardConfig;
@@ -49,6 +51,7 @@ import iskallia.vault.config.VaultGearScalingConfig;
 import iskallia.vault.config.VaultGearUpgradeConfig;
 import iskallia.vault.config.VaultGearUtilitiesConfig;
 import iskallia.vault.config.VaultGeneralConfig;
+import iskallia.vault.config.VaultInhibitorConfig;
 import iskallia.vault.config.VaultItemsConfig;
 import iskallia.vault.config.VaultLevelsConfig;
 import iskallia.vault.config.VaultLootablesConfig;
@@ -101,6 +104,7 @@ public class ModConfigs {
    public static VaultGearConfig VAULT_GEAR_EPIC;
    public static VaultGearConfig VAULT_GEAR_OMEGA;
    public static VaultGearConfig.General VAULT_GEAR;
+   public static SetsConfig SETS;
    public static GlobalTraderConfig GLOBAL_TRADER;
    public static VaultLootablesConfig VAULT_LOOTABLES;
    public static VaultChestConfig VAULT_CHEST;
@@ -132,6 +136,8 @@ public class ModConfigs {
    public static VaultGearCraftingScalingConfig VAULT_GEAR_CRAFTING_SCALING;
    public static DifficultyDescriptionConfig DIFFICULTY_DESCRIPTION;
    public static VaultScalingChestConfig SCALING_CHEST_REWARDS;
+   public static VaultInhibitorConfig VAULT_INHIBITOR;
+   public static FlawedRubyConfig FLAWED_RUBY;
 
    public static void registerCompressionConfigs() {
    }
@@ -175,6 +181,7 @@ public class ModConfigs {
       VAULT_GEAR_EPIC = new VaultGearConfig.Epic().readConfig();
       VAULT_GEAR_OMEGA = new VaultGearConfig.Omega().readConfig();
       VAULT_GEAR = new VaultGearConfig.General().readConfig();
+      SETS = new SetsConfig().readConfig();
       GLOBAL_TRADER = new GlobalTraderConfig().readConfig();
       VAULT_LOOTABLES = new VaultLootablesConfig().readConfig();
       VAULT_CHEST = new VaultChestConfig("vault_chest").readConfig();
@@ -206,6 +213,8 @@ public class ModConfigs {
       VAULT_GEAR_CRAFTING_SCALING = new VaultGearCraftingScalingConfig().readConfig();
       DIFFICULTY_DESCRIPTION = new DifficultyDescriptionConfig().readConfig();
       SCALING_CHEST_REWARDS = new VaultScalingChestConfig().readConfig();
+      VAULT_INHIBITOR = new VaultInhibitorConfig().readConfig();
+      FLAWED_RUBY = new FlawedRubyConfig().readConfig();
       Vault.LOGGER.info("Vault Configs are loaded successfully!");
    }
 }

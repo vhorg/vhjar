@@ -2825,6 +2825,102 @@
           ]
         }
       ]
+    },
+    { "name": "Secret Book",
+      "rolls": {
+        "min": 0,
+        "max": 1
+      },
+      "entries": [
+        { "_name": "EMPTY",
+          "type": "minecraft:empty",
+          "weight": 6
+        },
+        { "_name": "Written Book Hungry",
+          "type": "minecraft:item",
+          "weight": 1,
+          "name": "minecraft:written_book",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.2
+                }
+              ]
+            },
+            {
+              "function": "set_nbt",
+              "tag": "{pages:['[{\"text\":\"They were \"},{\"text\":\"Hungry\",\"color\":\"#9A7935\"},{\"text\":\"\nThey were \",\"color\":\"reset\"},{\"text\":\"\u2588\",\"color\":\"#E29D1E\"},{\"text\":\"\nThey came in \",\"color\":\"reset\"},{\"text\":\"\u2588\",\"color\":\"#FFE100\"},{\"text\":\" and made me wealthier than ever before.\",\"color\":\"reset\"}]'],title:Hmmm,author:\"Carl Oscar Wellington\"}"
+            }
+          ]
+        },
+        { "_name": "Written Book Raging",
+          "type": "minecraft:item",
+          "weight": 1,
+          "name": "minecraft:written_book",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.2
+                }
+              ]
+            },
+            {
+              "function": "set_nbt",
+              "tag": "{pages:['[{\"text\":\"They were \"},{\"text\":\"\u2588\",\"color\":\"#9A7935\"},{\"text\":\"\nThey were \",\"color\":\"reset\"},{\"text\":\"Raging\",\"color\":\"#E29D1E\"},{\"text\":\"\nThey came in \",\"color\":\"reset\"},{\"text\":\"\u2588\",\"color\":\"#FFE100\"},{\"text\":\" and made me wealthier than ever before.\",\"color\":\"reset\"}]'],title:Hmmm,author:\"Carl Oscar Wellington\"}"
+            }
+          ]
+        },
+        { "_name": "Written Book Hoards",
+          "type": "minecraft:item",
+          "weight": 1,
+          "name": "minecraft:written_book",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.2
+                }
+              ]
+            },
+            {
+              "function": "set_nbt",
+              "tag": "{pages:['[{\"text\":\"They were \"},{\"text\":\"\u2588\",\"color\":\"#9A7935\"},{\"text\":\"\nThey were \",\"color\":\"reset\"},{\"text\":\"\u2588\",\"color\":\"#E29D1E\"},{\"text\":\"\nThey came in \",\"color\":\"reset\"},{\"text\":\"Hoards\",\"color\":\"#FFE100\"},{\"text\":\" and made me wealthier than ever before.\",\"color\":\"reset\"}]'],title:Hmmm,author:\"Carl Oscar Wellington\"}"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

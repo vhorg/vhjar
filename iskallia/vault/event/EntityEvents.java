@@ -19,9 +19,11 @@ import iskallia.vault.item.ItemShardPouch;
 import iskallia.vault.item.ItemVaultRaffleSeal;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.item.gear.VaultGearHelper;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.type.EffectTalent;
 import iskallia.vault.skill.talent.type.SoulShardTalent;
+import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.PlayerTalentsData;
@@ -32,11 +34,14 @@ import iskallia.vault.world.vault.modifier.CurseOnHitModifier;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.item.ItemEntity;
@@ -49,6 +54,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.item.ShieldItem;
 import net.minecraft.item.TippedArrowItem;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.util.DamageSource;
@@ -157,7 +164,7 @@ public class EntityEvents {
       World world = event.getEntity().func_130014_f_();
       if (!world.func_201670_d()) {
          if (event.getSource().func_76346_g() instanceof LivingEntity) {
-            LivingEntity entity = event.getEntityLiving();
+            LivingEntity attacked = event.getEntityLiving();
             LivingEntity attacker = (LivingEntity)event.getSource().func_76346_g();
 
             for (EquipmentSlotType slot : EquipmentSlotType.values()) {
@@ -166,12 +173,68 @@ public class EntityEvents {
                   for (EffectCloudEntity.Config config : ModAttributes.EFFECT_CLOUD.getOrDefault(stack, new ArrayList<>()).getValue(stack)) {
                      if (!(world.field_73012_v.nextFloat() >= config.getChance())) {
                         EffectCloudEntity cloud = EffectCloudEntity.fromConfig(
-                           entity.field_70170_p, attacker, entity.func_226277_ct_(), entity.func_226278_cu_(), entity.func_226281_cx_(), config
+                           attacked.field_70170_p, attacker, attacked.func_226277_ct_(), attacked.func_226278_cu_(), attacked.func_226281_cx_(), config
                         );
                         world.func_217376_c(cloud);
                      }
                   }
                }
+            }
+
+            float incDamage = VaultGearHelper.getAttributeValueOnGearSumFloat(attacker, ModAttributes.DAMAGE_INCREASE, ModAttributes.DAMAGE_INCREASE_2);
+            CreatureAttribute creatureType = attacked.func_70668_bt();
+            if (creatureType == CreatureAttribute.field_223223_b_) {
+               incDamage += VaultGearHelper.getAttributeValueOnGearSumFloat(attacker, ModAttributes.DAMAGE_UNDEAD);
+            } else if (creatureType == CreatureAttribute.field_223224_c_) {
+               incDamage += VaultGearHelper.getAttributeValueOnGearSumFloat(attacker, ModAttributes.DAMAGE_SPIDERS);
+            } else if (creatureType == CreatureAttribute.field_223225_d_) {
+               incDamage += VaultGearHelper.getAttributeValueOnGearSumFloat(attacker, ModAttributes.DAMAGE_ILLAGERS);
+            }
+
+            event.setAmount(event.getAmount() * (1.0F + incDamage));
+         }
+      }
+   }
+
+   @SubscribeEvent(
+      priority = EventPriority.LOW
+   )
+   public static void onPlayerMobHitAfter(LivingHurtEvent event) {
+      World world = event.getEntity().func_130014_f_();
+      if (!world.func_201670_d()) {
+         if (event.getSource().func_76346_g() instanceof LivingEntity) {
+            LivingEntity attacked = event.getEntityLiving();
+            LivingEntity attacker = (LivingEntity)event.getSource().func_76346_g();
+            int additionalChains = VaultGearHelper.getAttributeValueOnGearSumInt(attacker, ModAttributes.ON_HIT_CHAIN);
+            if (additionalChains > 0) {
+               ActiveFlags.IS_CHAIN_ATTACKING.runIfNotSet(() -> {
+                  List<MobEntity> nearby = EntityHelper.getNearby(world, attacked.func_233580_cy_(), 5.0F, MobEntity.class);
+                  if (!nearby.isEmpty()) {
+                     nearby.sort(Comparator.comparing(e -> e.func_70068_e(attacked)));
+
+                     for (MobEntity me : nearby.subList(0, Math.min(additionalChains, nearby.size()))) {
+                        me.func_70097_a(event.getSource(), event.getAmount());
+                     }
+                  }
+               });
+            }
+
+            int blockAoE = VaultGearHelper.getAttributeValueOnGearSumInt(attacker, ModAttributes.ON_HIT_AOE);
+            if (blockAoE > 0) {
+               ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                  List<MobEntity> nearby = EntityHelper.getNearby(world, attacked.func_233580_cy_(), blockAoE, MobEntity.class);
+                  if (!nearby.isEmpty()) {
+                     for (MobEntity me : nearby) {
+                        me.func_70097_a(event.getSource(), event.getAmount());
+                     }
+                  }
+               });
+            }
+
+            float stunChance = VaultGearHelper.getAttributeValueOnGearSumFloat(attacker, ModAttributes.ON_HIT_STUN);
+            if (rand.nextFloat() < stunChance) {
+               attacked.func_195064_c(new EffectInstance(Effects.field_76421_d, 40, 9));
+               attacked.func_195064_c(new EffectInstance(Effects.field_76419_f, 40, 9));
             }
          }
       }

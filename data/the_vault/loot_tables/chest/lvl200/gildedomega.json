@@ -44,8 +44,8 @@
             {
               "function": "minecraft:set_count",
               "count": {
-                "min": 32,
-                "max": 64
+                "min": 16,
+                "max": 36
               }
             },
             {
@@ -302,14 +302,14 @@
         },
         { "_name": "vaultnugget",
           "type": "minecraft:item",
-          "weight": 2,
+          "weight": 1,
           "name": "the_vault:vault_nugget",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
-                "min": 2,
-                "max": 4
+                "min": 5,
+                "max": 9
               }
             },
             {
@@ -916,6 +916,110 @@
             {
               "function": "set_nbt",
               "tag": "{Vault:{Attributes:[{Id:\"the_vault:gear_roll_pool\",BaseValue:\"treasureroom\"}]}}"
+            }
+          ]
+        }
+      ]
+    },
+    { "name": "Eternal Foods",
+      "rolls": {
+        "min": 2,
+        "max": 4
+      },
+      "bonus_rolls": {
+        "min": 0,
+        "max": 1
+      },
+      "entries": [
+        { "_name": "Burger",
+          "type": "minecraft:item",
+          "weight": 3,
+          "name": "the_vault:crystal_burger",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 2
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.1
+                }
+              ]
+            }
+          ]
+        },
+        { "_name": "Pizza",
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:full_pizza",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 3
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        { "_name": "EMPTY",
+          "type": "minecraft:empty",
+          "weight": 4
+        }
+      ]
+    },
+    { "name": "Flawed Ruby",
+      "rolls": {
+        "min": 0,
+        "max": 1
+      },
+      "bonus_rolls": {
+        "min": 0,
+        "max": 1
+      },
+      "entries": [
+        { "_name": "EMPTY",
+          "type": "minecraft:empty",
+          "weight": 8
+        },
+        { "_name": "Flawed Ruby",
+          "type": "minecraft:item",
+          "weight": 1,
+          "name": "the_vault:flawed_ruby",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.8
+                }
+              ]
             }
           ]
         }

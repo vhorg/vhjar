@@ -600,7 +600,7 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 2,
+          "weight": 1,
           "name": "the_vault:vault_bronze",
           "functions": [
             {
@@ -624,7 +624,7 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 5,
+          "weight": 3,
           "name": "the_vault:mystery_box",
           "functions": [
             {
@@ -632,30 +632,6 @@
               "count": {
                 "min": 1,
                 "max": 2
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.1
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 3,
-          "name": "the_vault:vault_cookie",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
               }
             },
             {
@@ -936,7 +912,7 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 4,
+          "weight": 3,
           "name": "the_vault:oozing_pizza",
           "functions": [
             {
@@ -1140,328 +1116,19 @@
               }
             }
           ]
-        }
-      ]
-    },
-    { "name": "Altar Rares",
-      "rolls": {
-        "min": 0,
-        "max": 1
-      },
-      "entries": [
-        {
-          "type": "minecraft:empty",
-          "weight": 4
         },
         {
-          "type": "minecraft:item",
-          "weight": 1,
-          "name": "minecraft:nether_star",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 3,
-          "name": "minecraft:wither_skeleton_skull",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 3,
-          "name": "minecraft:wither_rose",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 2,
-                "max": 3
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
+          "type": "minecraft:tag",
           "weight": 4,
-          "name": "minecraft:saddle",
+          "name": "curios:curio",
+          "expand": "true",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
-                "min": 1,
+                "min": 0,
                 "max": 1
               }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 3,
-          "name": "botania:overgrowth_seed",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 3,
-          "name": "minecraft:dragon_head",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 1,
-          "name": "minecraft:totem_of_undying",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:nautilus_shell",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 1,
-          "name": "minecraft:elytra",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.25
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:phantom_membrane",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:ghast_tear",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 2
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 2,
-          "name": "minecraft:turtle_egg",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 2,
-          "name": "minecraft:trident",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
             }
           ]
         }

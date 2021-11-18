@@ -116,8 +116,10 @@ public class PlayerTalentsData extends WorldSavedData {
       } else {
          for (int i = 0; i < playerList.size(); i++) {
             UUID playerUUID = UUID.fromString(playerList.func_150307_f(i));
-            this.getTalents(playerUUID).deserializeNBT(talentList.func_150305_b(i));
+            this.getTalents(playerUUID).deserialize(talentList.func_150305_b(i), true);
          }
+
+         this.func_76185_a();
       }
    }
 
@@ -134,6 +136,10 @@ public class PlayerTalentsData extends WorldSavedData {
    }
 
    public static PlayerTalentsData get(ServerWorld world) {
-      return (PlayerTalentsData)world.func_73046_m().func_241755_D_().func_217481_x().func_215752_a(PlayerTalentsData::new, "the_vault_PlayerTalents");
+      return get(world.func_73046_m());
+   }
+
+   public static PlayerTalentsData get(MinecraftServer srv) {
+      return (PlayerTalentsData)srv.func_241755_D_().func_217481_x().func_215752_a(PlayerTalentsData::new, "the_vault_PlayerTalents");
    }
 }

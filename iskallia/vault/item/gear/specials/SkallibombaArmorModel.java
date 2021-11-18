@@ -1,0 +1,73 @@
+package iskallia.vault.item.gear.specials;
+
+import iskallia.vault.item.gear.model.VaultGearModel;
+import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+
+public class SkallibombaArmorModel<T extends LivingEntity> extends VaultGearModel<T> {
+   public SkallibombaArmorModel(float modelSize, EquipmentSlotType slotType) {
+      super(modelSize, slotType);
+      this.field_78090_t = this.isLayer2() ? 64 : 256;
+      this.field_78089_u = this.isLayer2() ? 64 : 256;
+      this.Head = new ModelRenderer(this);
+      this.Head.func_78793_a(0.0F, 0.0F, 0.0F);
+      this.Head.func_78784_a(111, 104).func_228303_a_(-5.0F, -27.0F, -6.0F, 10.0F, 24.0F, 11.0F, 0.0F, false);
+      this.Head.func_78784_a(100, 28).func_228303_a_(-5.0F, -32.0F, -25.0F, 10.0F, 5.0F, 16.0F, 0.0F, false);
+      this.Head.func_78784_a(106, 87).func_228303_a_(-6.0F, -34.0F, -34.0F, 12.0F, 7.0F, 9.0F, 0.0F, false);
+      this.Head.func_78784_a(85, 17).func_228303_a_(-5.0F, -36.0F, -34.0F, 2.0F, 2.0F, 5.0F, 0.0F, false);
+      this.Head.func_78784_a(98, 0).func_228303_a_(-5.0F, -41.0F, -1.0F, 2.0F, 7.0F, 5.0F, 0.0F, false);
+      this.Head.func_78784_a(0, 16).func_228303_a_(3.0F, -36.0F, -34.0F, 2.0F, 2.0F, 5.0F, 0.0F, false);
+      this.Head.func_78784_a(76, 10).func_228303_a_(3.0F, -41.0F, -1.0F, 2.0F, 7.0F, 5.0F, 0.0F, false);
+      this.Head.func_78784_a(15, 18).func_228303_a_(3.0F, -27.0F, -33.0F, 2.0F, 2.0F, 2.0F, 0.0F, false);
+      this.Head.func_78784_a(9, 16).func_228303_a_(-5.0F, -27.0F, -33.0F, 2.0F, 2.0F, 2.0F, 0.0F, false);
+      this.Head.func_78784_a(74, 59).func_228303_a_(-8.0F, -34.0F, -9.0F, 16.0F, 12.0F, 16.0F, 0.0F, false);
+      ModelRenderer cube_r1 = new ModelRenderer(this);
+      cube_r1.func_78793_a(-0.5F, -22.5F, -17.0F);
+      this.Head.func_78792_a(cube_r1);
+      this.setRotationAngle(cube_r1, 0.3491F, 0.0F, 0.0F);
+      cube_r1.func_78784_a(34, 115).func_228303_a_(-3.0F, 0.5F, -8.0F, 7.0F, 3.0F, 16.0F, 0.0F, false);
+      this.Body = new ModelRenderer(this);
+      this.Body.func_78793_a(0.0F, 0.0F, 0.0F);
+      this.Body.func_78784_a(0, 0).func_228303_a_(-13.0F, -10.0F, -14.0F, 26.0F, 35.0F, 24.0F, 0.0F, false);
+      this.Body.func_78784_a(0, 59).func_228303_a_(-13.0F, -3.0F, -25.0F, 26.0F, 28.0F, 11.0F, 0.0F, false);
+      ModelRenderer cube_r2 = new ModelRenderer(this);
+      cube_r2.func_78793_a(-5.5F, -10.0F, 15.0F);
+      this.Body.func_78792_a(cube_r2);
+      this.setRotationAngle(cube_r2, 0.3491F, -0.3054F, 0.0F);
+      cube_r2.func_78784_a(0, 126).func_228303_a_(-0.5F, -5.0F, -7.0F, 1.0F, 10.0F, 14.0F, 0.0F, false);
+      ModelRenderer cube_r3 = new ModelRenderer(this);
+      cube_r3.func_78793_a(5.5F, -10.0F, 16.0F);
+      this.Body.func_78792_a(cube_r3);
+      this.setRotationAngle(cube_r3, 0.2618F, 0.3054F, 0.0F);
+      cube_r3.func_78784_a(92, 130).func_228303_a_(-0.5F, -5.0F, -7.0F, 1.0F, 10.0F, 14.0F, 0.0F, false);
+      this.RightArm = new ModelRenderer(this);
+      this.RightArm.func_78793_a(-5.0F, 2.0F, 0.0F);
+      this.RightArm.func_78784_a(122, 49).func_228303_a_(-12.0F, -9.0F, -9.0F, 7.0F, 10.0F, 12.0F, 0.0F, false);
+      this.RightArm.func_78784_a(63, 59).func_228303_a_(-12.0F, -3.0F, -15.0F, 5.0F, 4.0F, 6.0F, 0.0F, false);
+      this.LeftArm = new ModelRenderer(this);
+      this.LeftArm.func_78793_a(5.0F, 2.0F, 0.0F);
+      this.LeftArm.func_78784_a(68, 122).func_228303_a_(6.0F, -9.0F, -9.0F, 7.0F, 10.0F, 12.0F, 0.0F, false);
+      this.LeftArm.func_78784_a(76, 0).func_228303_a_(8.0F, -3.0F, -15.0F, 5.0F, 4.0F, 6.0F, 0.0F, false);
+      this.RightBoot = new ModelRenderer(this);
+      this.RightBoot.func_78793_a(-1.9F, 12.0F, 0.0F);
+      this.RightBoot.func_78784_a(100, 0).func_228303_a_(-22.1F, -3.0F, -9.0F, 13.0F, 16.0F, 12.0F, 0.0F, false);
+      this.RightBoot.func_78784_a(138, 0).func_228303_a_(-22.1F, 10.0F, -15.0F, 13.0F, 3.0F, 6.0F, 0.0F, false);
+      this.LeftBoot = new ModelRenderer(this);
+      this.LeftBoot.func_78793_a(1.9F, 12.0F, 0.0F);
+      this.LeftBoot.func_78784_a(136, 28).func_228303_a_(9.1F, 10.0F, -15.0F, 13.0F, 3.0F, 6.0F, 0.0F, false);
+      this.LeftBoot.func_78784_a(0, 98).func_228303_a_(9.1F, -3.0F, -9.0F, 13.0F, 16.0F, 12.0F, 0.0F, false);
+      this.Belt = new ModelRenderer(this);
+      this.Belt.func_78793_a(0.0F, 0.0F, 0.0F);
+      this.Belt.func_78784_a(0, 0).func_228303_a_(-9.0F, 14.0F, 4.0F, 18.0F, 8.0F, 12.0F, 0.0F, false);
+      this.Belt.func_78784_a(0, 34).func_228303_a_(-1.0F, 11.0F, 6.0F, 2.0F, 3.0F, 8.0F, 0.0F, false);
+      this.Belt.func_78784_a(31, 20).func_228303_a_(-1.0F, 13.0F, 17.0F, 2.0F, 2.0F, 5.0F, 0.0F, false);
+      this.Belt.func_78784_a(12, 34).func_228303_a_(-1.0F, 17.0F, 23.0F, 2.0F, 1.0F, 5.0F, 0.0F, false);
+      this.Belt.func_78784_a(0, 20).func_228303_a_(-6.0F, 15.0F, 16.0F, 12.0F, 7.0F, 7.0F, 0.0F, false);
+      this.Belt.func_78784_a(31, 27).func_228303_a_(-4.0F, 18.0F, 23.0F, 8.0F, 4.0F, 7.0F, 0.0F, false);
+      this.RightLeg = new ModelRenderer(this);
+      this.RightLeg.func_78793_a(-1.9F, 12.0F, 0.0F);
+      this.LeftLeg = new ModelRenderer(this);
+      this.LeftLeg.func_78793_a(1.9F, 12.0F, 0.0F);
+   }
+}

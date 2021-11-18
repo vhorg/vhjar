@@ -84,28 +84,30 @@ public class WardTalent extends ArchetypeTalent {
    public static void onPlayerTick(PlayerTickEvent event) {
       if (event.phase == Phase.START && event.side.isServer() && event.player.field_70173_aa % 20 == 0) {
          if (event.player instanceof ServerPlayerEntity) {
-            ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.player;
-            UUID playerUUID = sPlayer.func_110124_au();
-            float maxAbsorption = AbsorptionHelper.getMaxAbsorption(sPlayer);
-            if (!(maxAbsorption <= 0.1F)) {
-               TalentTree tree = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
-               int startSeconds = tree.getLearnedNodes(WardTalent.class)
-                  .stream()
-                  .mapToInt(node -> node.getTalent().getStartRegenAfterCombatSeconds())
-                  .min()
-                  .orElse(-1);
-               if (startSeconds >= 0) {
-                  if (lastAttackedTick.containsKey(playerUUID)) {
-                     long lastAttacked = lastAttackedTick.get(playerUUID);
-                     long current = sPlayer.func_184102_h().func_241755_D_().func_82737_E();
-                     if (lastAttacked >= current - startSeconds * 20) {
-                        return;
+            if (ArchetypeTalent.isEnabled(event.player.field_70170_p)) {
+               ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.player;
+               UUID playerUUID = sPlayer.func_110124_au();
+               float maxAbsorption = AbsorptionHelper.getMaxAbsorption(sPlayer);
+               if (!(maxAbsorption <= 0.1F)) {
+                  TalentTree tree = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
+                  int startSeconds = tree.getLearnedNodes(WardTalent.class)
+                     .stream()
+                     .mapToInt(node -> node.getTalent().getStartRegenAfterCombatSeconds())
+                     .min()
+                     .orElse(-1);
+                  if (startSeconds >= 0) {
+                     if (lastAttackedTick.containsKey(playerUUID)) {
+                        long lastAttacked = lastAttackedTick.get(playerUUID);
+                        long current = sPlayer.func_184102_h().func_241755_D_().func_82737_E();
+                        if (lastAttacked >= current - startSeconds * 20) {
+                           return;
+                        }
                      }
-                  }
 
-                  float absorption = sPlayer.func_110139_bj();
-                  if (absorption < maxAbsorption) {
-                     sPlayer.func_110149_m(Math.min(absorption + 2.0F, maxAbsorption));
+                     float absorption = sPlayer.func_110139_bj();
+                     if (absorption < maxAbsorption) {
+                        sPlayer.func_110149_m(Math.min(absorption + 2.0F, maxAbsorption));
+                     }
                   }
                }
             }

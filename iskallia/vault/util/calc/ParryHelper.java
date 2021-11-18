@@ -10,11 +10,17 @@ import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.sub.GhostWalkParryConfig;
 import iskallia.vault.skill.ability.config.sub.TankParryConfig;
+import iskallia.vault.skill.set.AssassinSet;
+import iskallia.vault.skill.set.NinjaSet;
+import iskallia.vault.skill.set.SetNode;
+import iskallia.vault.skill.set.SetTree;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.talent.type.archetype.ArchetypeTalent;
 import iskallia.vault.skill.talent.type.archetype.WardTalent;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.PlayerAbilitiesData;
+import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
@@ -38,8 +44,20 @@ public class ParryHelper {
       TalentTree talents = PlayerTalentsData.get(player.func_71121_q()).getTalents(player);
 
       for (TalentNode<?> talentNode : talents.getLearnedNodes()) {
-         if (talentNode.getTalent() instanceof WardTalent) {
+         if (talentNode.getTalent() instanceof WardTalent && ArchetypeTalent.isEnabled(player.func_71121_q())) {
             totalParryChance += ((WardTalent)talentNode.getTalent()).getAdditionalParryChance();
+         }
+      }
+
+      SetTree sets = PlayerSetsData.get(player.func_71121_q()).getSets(player);
+
+      for (SetNode<?> node : sets.getNodes()) {
+         if (node.getSet() instanceof AssassinSet) {
+            AssassinSet set = (AssassinSet)node.getSet();
+            totalParryChance += set.getParryChance();
+         } else if (node.getSet() instanceof NinjaSet) {
+            NinjaSet set = (NinjaSet)node.getSet();
+            totalParryChance += set.getBonusParry();
          }
       }
 

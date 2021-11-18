@@ -6,6 +6,7 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModKeybinds;
+import iskallia.vault.init.ModModels;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModRecipes;
 import iskallia.vault.init.ModScreens;
@@ -44,5 +45,7 @@ public class SetupEvents {
    @SubscribeEvent
    public static void setupDedicatedServer(FMLDedicatedServerSetupEvent event) {
       Vault.LOGGER.info("setupDedicatedServer()");
+      ModModels.SpecialGearModel.register();
+      ModModels.GearModel.register();
    }
 }

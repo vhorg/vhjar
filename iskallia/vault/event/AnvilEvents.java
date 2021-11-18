@@ -8,14 +8,18 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.item.ItemVaultCrystalSeal;
 import iskallia.vault.item.ItemVaultRaffleSeal;
 import iskallia.vault.item.VaultCatalystItem;
+import iskallia.vault.item.VaultInhibitorItem;
 import iskallia.vault.item.VaultMagnetItem;
+import iskallia.vault.item.catalyst.ModifierRollResult;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.item.paxel.VaultPaxelItem;
 import iskallia.vault.item.paxel.enhancement.PaxelEnhancements;
+import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.OverlevelEnchantHelper;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -176,6 +180,88 @@ public class AnvilEvents {
          event.setOutput(output);
          event.setCost(modifiers.size() * 8);
          event.setMaterialCost(1);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onCraftInhibitor(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCatalystItem) {
+         if (event.getRight().func_77973_b() == ModItems.PERFECT_ECHO_GEM) {
+            ItemStack catalyst = event.getLeft().func_77946_l();
+            ItemStack inhibitor = new ItemStack(ModItems.VAULT_INHIBITOR);
+            List<ModifierRollResult> modifiers = VaultCatalystItem.getModifierRolls(catalyst).orElse(Collections.emptyList());
+            VaultInhibitorItem.setModifierRolls(inhibitor, modifiers);
+            event.setOutput(inhibitor);
+            event.setCost(1);
+            event.setMaterialCost(1);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyInhibitor(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof VaultInhibitorItem) {
+         ItemStack output = event.getLeft().func_77946_l();
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (!data.canCraftCatalysts()) {
+            return;
+         }
+
+         List<CrystalData.Modifier> crystalModifiers = data.getModifiers();
+         List<String> inhibitorModifiers = VaultInhibitorItem.getCrystalCombinationModifiers(event.getRight(), event.getLeft());
+         if (crystalModifiers.isEmpty() || inhibitorModifiers == null || inhibitorModifiers.isEmpty()) {
+            return;
+         }
+
+         inhibitorModifiers.forEach(modifier -> data.removeCatalystModifier(modifier, true, CrystalData.Modifier.Operation.ADD));
+         VaultCrystalItem.markAttemptExhaust(output);
+         event.setOutput(output);
+         event.setCost(inhibitorModifiers.size() * 8);
+         event.setMaterialCost(1);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyEchoGemToCrystal(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() == ModItems.ECHO_GEM) {
+         ItemStack output = event.getLeft().func_77946_l();
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (data.getEchoData().getEchoCount() == 0) {
+            data.addEchoGems(1);
+            data.setModifiable(false);
+            event.setMaterialCost(1);
+         } else {
+            VaultCrystalItem.markAttemptApplyEcho(output, event.getRight().func_190916_E());
+            event.setMaterialCost(event.getRight().func_190916_E());
+         }
+
+         event.setCost(1);
+         event.setOutput(output);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyEchoCrystal(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem) {
+         if (event.getRight().func_77973_b() instanceof VaultCrystalItem) {
+            ItemStack output = event.getLeft().func_77946_l();
+            if (!output.func_196082_o().func_74767_n("Cloned")) {
+               CrystalData crystalData = VaultCrystalItem.getData(output);
+               if (crystalData.getEchoData().getEchoCount() == 0) {
+                  if (crystalData.canBeModified()) {
+                     ItemStack echoCrystal = event.getRight().func_77946_l();
+                     CrystalData echoCrystalData = VaultCrystalItem.getData(echoCrystal);
+                     if (echoCrystalData.getEchoData().getEchoCount() > 0) {
+                        boolean success = MathUtilities.randomFloat(0.0F, 1.0F) < echoCrystalData.getEchoData().getCloneSuccessRate();
+                        VaultCrystalItem.markForClone(output, success);
+                        event.setCost(1);
+                        event.setMaterialCost(1);
+                        event.setOutput(output);
+                     }
+                  }
+               }
+            }
+         }
       }
    }
 

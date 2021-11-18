@@ -4,6 +4,7 @@ import iskallia.vault.block.entity.CatalystDecryptionTableTileEntity;
 import iskallia.vault.container.slot.FilteredSlot;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.item.VaultCatalystItem;
+import iskallia.vault.item.VaultInhibitorItem;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class CatalystDecryptionContainer extends Container {
          this.func_75146_a(new Slot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 210));
       }
 
-      Predicate<ItemStack> catalystFilter = stack -> stack.func_77973_b() instanceof VaultCatalystItem;
+      Predicate<ItemStack> catalystFilter = stack -> stack.func_77973_b() instanceof VaultCatalystItem || stack.func_77973_b() instanceof VaultInhibitorItem;
       Predicate<ItemStack> crystalFilter = stack -> stack.func_77973_b() instanceof VaultCrystalItem;
 
       for (int slotY = 0; slotY < 5; slotY++) {

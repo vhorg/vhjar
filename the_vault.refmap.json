@@ -39,6 +39,10 @@
     "iskallia/vault/mixin/MixinItem": {
       "getDisplayName": "Lnet/minecraft/item/Item;func_200295_i(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/util/text/ITextComponent;"
     },
+    "iskallia/vault/mixin/MixinEntity": {
+      "baseTick": "Lnet/minecraft/entity/Entity;func_70030_z()V",
+      "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z": "Lnet/minecraft/entity/Entity;func_70097_a(Lnet/minecraft/util/DamageSource;F)Z"
+    },
     "iskallia/vault/mixin/MixinLivingRenderer": {
       "render": "Lnet/minecraft/client/renderer/entity/LivingRenderer;func_225623_a_(Lnet/minecraft/entity/LivingEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V",
       "Lcom/mojang/blaze3d/matrix/MatrixStack;push()V": "Lcom/mojang/blaze3d/matrix/MatrixStack;func_227860_a_()V"
@@ -143,6 +147,10 @@
       },
       "iskallia/vault/mixin/MixinItem": {
         "getDisplayName": "Lnet/minecraft/item/Item;func_200295_i(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/util/text/ITextComponent;"
+      },
+      "iskallia/vault/mixin/MixinEntity": {
+        "baseTick": "Lnet/minecraft/entity/Entity;func_70030_z()V",
+        "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z": "Lnet/minecraft/entity/Entity;func_70097_a(Lnet/minecraft/util/DamageSource;F)Z"
       },
       "iskallia/vault/mixin/MixinLivingRenderer": {
         "render": "Lnet/minecraft/client/renderer/entity/LivingRenderer;func_225623_a_(Lnet/minecraft/entity/LivingEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V",

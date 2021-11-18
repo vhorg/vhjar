@@ -76,6 +76,7 @@ public class GatedLootableItem extends BasicItem {
       return super.func_77659_a(world, player, hand);
    }
 
+   @Override
    public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
       super.func_77624_a(stack, worldIn, tooltip, flagIn);
       if (this.tooltip != null) {
