@@ -2,8 +2,11 @@ package iskallia.vault.client.gui.overlay.goal;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.client.vault.goal.VaultScavengerData;
+import iskallia.vault.config.ScavengerHuntConfig;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -59,10 +62,21 @@ public class ScavengerBarOverlay extends BossBarOverlay {
 
    private static int renderItemRequirement(MatrixStack renderStack, ScavengerHuntObjective.ItemSubmission itemRequirement, int itemBoxWidth) {
       Minecraft mc = Minecraft.func_71410_x();
+      FontRenderer fr = mc.field_71466_p;
       ItemStack requiredStack = new ItemStack(itemRequirement.getRequiredItem());
+      ScavengerHuntConfig.SourceType source = ModConfigs.SCAVENGER_HUNT.getRequirementSource(requiredStack);
       renderStack.func_227860_a_();
       renderStack.func_227861_a_(0.0, -itemBoxWidth / 2.0F, 0.0);
       renderItemStack(renderStack, requiredStack);
+      RenderSystem.enableBlend();
+      RenderSystem.defaultBlendFunc();
+      mc.func_110434_K().func_110577_a(source.getIconPath());
+      renderStack.func_227860_a_();
+      renderStack.func_227861_a_(-16.0, -2.4, 0.0);
+      renderStack.func_227862_a_(0.4F, 0.4F, 1.0F);
+      ScreenDrawHelper.drawQuad(buf -> ScreenDrawHelper.rect(buf, renderStack).dim(16.0F, 16.0F).draw());
+      renderStack.func_227865_b_();
+      RenderSystem.disableBlend();
       renderStack.func_227861_a_(0.0, 10.0, 0.0);
       String requiredText = itemRequirement.getCurrentAmount() + "/" + itemRequirement.getRequiredAmount();
       IFormattableTextComponent cmp = new StringTextComponent(requiredText).func_240699_a_(TextFormatting.GREEN);
@@ -71,7 +85,7 @@ public class ScavengerBarOverlay extends BossBarOverlay {
       renderStack.func_227860_a_();
       renderStack.func_227862_a_(0.5F, 0.5F, 1.0F);
       ITextComponent name = requiredStack.func_200301_q();
-      IFormattableTextComponent display = name.func_230532_e_().func_240699_a_(TextFormatting.WHITE);
+      IFormattableTextComponent display = name.func_230532_e_().func_240699_a_(source.getRequirementColor());
       int lines = UIHelper.renderCenteredWrappedText(renderStack, display, 60, 0);
       renderStack.func_227865_b_();
       renderStack.func_227865_b_();

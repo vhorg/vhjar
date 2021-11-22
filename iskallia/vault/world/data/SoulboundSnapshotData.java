@@ -26,11 +26,6 @@ public class SoulboundSnapshotData extends InventorySnapshotData {
       return ModAttributes.SOULBOUND.getOrDefault(stack, false).getValue(stack);
    }
 
-   @Override
-   protected InventorySnapshotData.Builder makeSnapshotBuilder(PlayerEntity player) {
-      return super.makeSnapshotBuilder(player).removeSnapshotItems();
-   }
-
    @SubscribeEvent
    public static void onTick(PlayerTickEvent event) {
       PlayerEntity player = event.player;
@@ -44,7 +39,7 @@ public class SoulboundSnapshotData extends InventorySnapshotData {
    }
 
    @SubscribeEvent(
-      priority = EventPriority.HIGHEST
+      priority = EventPriority.HIGH
    )
    public static void onDeath(LivingDeathEvent event) {
       if (event.getEntity() instanceof PlayerEntity && event.getEntity().field_70170_p instanceof ServerWorld) {

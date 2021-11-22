@@ -302,5 +302,11 @@
     "sounds": [
       "the_vault:chest/vault_chest_omega_open"
     ]
+  },
+  "vault_chest_rare_open": {
+    "category": "master",
+    "sounds": [
+      "the_vault:chest/vault_chest_rare_open"
+    ]
   }
 }

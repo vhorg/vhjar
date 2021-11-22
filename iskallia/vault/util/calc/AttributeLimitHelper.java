@@ -47,7 +47,7 @@ public class AttributeLimitHelper {
       for (SetNode<?> node : sets.getNodes()) {
          if (node.getSet() instanceof GolemSet) {
             GolemSet set = (GolemSet)node.getSet();
-            limit += set.getResistanceBonus();
+            limit += set.getBonusResistanceCap();
          }
       }
 

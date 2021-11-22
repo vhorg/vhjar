@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
@@ -62,7 +63,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class ScavengerHuntObjective extends VaultObjective {
    public static final int INVENTORY_SIZE = 45;
-   private static final int MAX_ACTIVE_SUBMISSIONS = 5;
    private final ScavengerHuntObjective.ChestWatcher chestWatcher = new ScavengerHuntObjective.ChestWatcher();
    private final ScavengerHuntObjective.Inventory inventoryMirror = new ScavengerHuntObjective.Inventory();
    private final List<ScavengerHuntObjective.ItemSubmission> submissions = new ArrayList<>();
@@ -87,7 +87,7 @@ public class ScavengerHuntObjective extends VaultObjective {
    }
 
    private Stream<ScavengerHuntObjective.ItemSubmission> getActiveSubmissionsFilter() {
-      return this.getAllSubmissions().stream().filter(submission -> !submission.isFinished()).limit(5L);
+      return this.getAllSubmissions().stream().filter(submission -> !submission.isFinished());
    }
 
    public List<ScavengerHuntObjective.ItemSubmission> getActiveSubmissions() {
@@ -96,6 +96,21 @@ public class ScavengerHuntObjective extends VaultObjective {
 
    public List<ScavengerHuntObjective.ItemSubmission> getAllSubmissions() {
       return Collections.unmodifiableList(this.submissions);
+   }
+
+   public Predicate<ScavengerHuntConfig.ItemEntry> getGenerationDropFilter() {
+      List<ScavengerHuntObjective.ItemSubmission> submissions = this.getActiveSubmissions();
+      return entry -> {
+         Item generatedItem = entry.getItem();
+
+         for (ScavengerHuntObjective.ItemSubmission submission : submissions) {
+            if (generatedItem.equals(submission.getRequiredItem())) {
+               return true;
+            }
+         }
+
+         return false;
+      };
    }
 
    public boolean trySubmitItem(UUID vaultIdentifier, ItemStack stack) {
@@ -206,7 +221,7 @@ public class ScavengerHuntObjective extends VaultObjective {
             this.spawnRewards(world, vault);
          }
 
-         if (activeSubmissions < 5L && this.getAllSubmissions().size() < this.requiredSubmissions) {
+         if (this.getAllSubmissions().size() < this.requiredSubmissions) {
             ScavengerHuntObjective.ItemSubmission newEntry = this.getNewEntry(vault);
             if (newEntry != null) {
                this.submissions.add(newEntry);
@@ -282,9 +297,23 @@ public class ScavengerHuntObjective extends VaultObjective {
    private ScavengerHuntObjective.ItemSubmission getNewEntry(VaultRaid vault) {
       List<Item> currentItems = this.submissions.stream().map(submission -> submission.requiredItem).collect(Collectors.toList());
       int players = vault.getPlayers().size();
+      int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
       float multiplier = 1.0F + (players - 1) * 0.5F;
       ScavengerHuntConfig.ItemEntry newEntry = ModConfigs.SCAVENGER_HUNT.getRandomRequiredItem(currentItems::contains);
-      return newEntry == null ? null : ScavengerHuntObjective.ItemSubmission.fromConfigEntry(newEntry, multiplier);
+      if (newEntry == null) {
+         return null;
+      } else {
+         ScavengerHuntConfig.SourceType sourceType = ModConfigs.SCAVENGER_HUNT.getRequirementSource(newEntry.createItemStack());
+         switch (sourceType) {
+            case MOB:
+               multiplier *= 1.0F + level / 100.0F;
+               break;
+            case CHEST:
+               multiplier *= 1.0F + level / 100.0F / 1.5F;
+         }
+
+         return ScavengerHuntObjective.ItemSubmission.fromConfigEntry(newEntry, multiplier);
+      }
    }
 
    @Override

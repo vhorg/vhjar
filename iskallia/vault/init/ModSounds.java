@@ -52,6 +52,7 @@ public class ModSounds {
    public static SoundEvent PUZZLE_COMPLETION_FAIL;
    public static SoundEvent VAULT_CHEST_EPIC_OPEN;
    public static SoundEvent VAULT_CHEST_OMEGA_OPEN;
+   public static SoundEvent VAULT_CHEST_RARE_OPEN;
    public static LazySoundType VAULT_GEM = new LazySoundType();
 
    public static void registerSounds(Register<SoundEvent> event) {
@@ -100,6 +101,7 @@ public class ModSounds {
       PUZZLE_COMPLETION_FAIL = registerSound(event, "puzzle_completion_fail");
       VAULT_CHEST_EPIC_OPEN = registerSound(event, "vault_chest_epic_open");
       VAULT_CHEST_OMEGA_OPEN = registerSound(event, "vault_chest_omega_open");
+      VAULT_CHEST_RARE_OPEN = registerSound(event, "vault_chest_rare_open");
    }
 
    public static void registerSoundTypes() {

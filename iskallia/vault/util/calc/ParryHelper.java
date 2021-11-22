@@ -10,7 +10,7 @@ import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.sub.GhostWalkParryConfig;
 import iskallia.vault.skill.ability.config.sub.TankParryConfig;
-import iskallia.vault.skill.set.AssassinSet;
+import iskallia.vault.skill.set.DreamSet;
 import iskallia.vault.skill.set.NinjaSet;
 import iskallia.vault.skill.set.SetNode;
 import iskallia.vault.skill.set.SetTree;
@@ -52,12 +52,14 @@ public class ParryHelper {
       SetTree sets = PlayerSetsData.get(player.func_71121_q()).getSets(player);
 
       for (SetNode<?> node : sets.getNodes()) {
-         if (node.getSet() instanceof AssassinSet) {
-            AssassinSet set = (AssassinSet)node.getSet();
-            totalParryChance += set.getParryChance();
-         } else if (node.getSet() instanceof NinjaSet) {
+         if (node.getSet() instanceof NinjaSet) {
             NinjaSet set = (NinjaSet)node.getSet();
             totalParryChance += set.getBonusParry();
+         }
+
+         if (node.getSet() instanceof DreamSet) {
+            DreamSet set = (DreamSet)node.getSet();
+            totalParryChance += set.getIncreasedParry();
          }
       }
 

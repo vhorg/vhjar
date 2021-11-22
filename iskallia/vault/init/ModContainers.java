@@ -12,6 +12,7 @@ import iskallia.vault.container.VaultCrateContainer;
 import iskallia.vault.container.VendingMachineContainer;
 import iskallia.vault.container.inventory.CatalystDecryptionContainer;
 import iskallia.vault.container.inventory.CryochamberContainer;
+import iskallia.vault.container.inventory.EtchingTradeContainer;
 import iskallia.vault.container.inventory.ShardPouchContainer;
 import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.research.ResearchTree;
@@ -44,6 +45,7 @@ public class ModContainers {
    public static ContainerType<ShardTradeContainer> SHARD_TRADE_CONTAINER;
    public static ContainerType<CryochamberContainer> CRYOCHAMBER_CONTAINER;
    public static ContainerType<GlobalDifficultyContainer> GLOBAL_DIFFICULTY_CONTAINER;
+   public static ContainerType<EtchingTradeContainer> ETCHING_TRADE_CONTAINER;
 
    public static void register(Register<ContainerType<?>> event) {
       SKILL_TREE_CONTAINER = createContainerType((windowId, inventory, buffer) -> {
@@ -110,6 +112,7 @@ public class ModContainers {
          CompoundNBT data = buffer.func_150793_b();
          return new GlobalDifficultyContainer(windowId, data);
       });
+      ETCHING_TRADE_CONTAINER = createContainerType((windowId, inventory, data) -> new EtchingTradeContainer(windowId, inventory, data.readInt()));
       event.getRegistry()
          .registerAll(
             new ContainerType[]{
@@ -126,7 +129,8 @@ public class ModContainers {
                (ContainerType)SHARD_POUCH_CONTAINER.setRegistryName("shard_pouch_container"),
                (ContainerType)SHARD_TRADE_CONTAINER.setRegistryName("shard_trade_container"),
                (ContainerType)CRYOCHAMBER_CONTAINER.setRegistryName("cryochamber_container"),
-               (ContainerType)GLOBAL_DIFFICULTY_CONTAINER.setRegistryName("global_difficulty_container")
+               (ContainerType)GLOBAL_DIFFICULTY_CONTAINER.setRegistryName("global_difficulty_container"),
+               (ContainerType)ETCHING_TRADE_CONTAINER.setRegistryName("etching_trade_container")
             }
          );
    }

@@ -63,6 +63,7 @@
     {"predicate": {"the_vault:special_texture": 10 }, "model": "the_vault:item/leggings/special/trash_leggings"},
     {"predicate": {"the_vault:special_texture": 11 }, "model": "the_vault:item/leggings/special/skallibomba_leggings"},
     {"predicate": {"the_vault:special_texture": 12 }, "model": "the_vault:item/leggings/special/villager_leggings"},
-    {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/leggings/special/automatic_leggings"}
+    {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/leggings/special/automatic_leggings"},
+    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/leggings/special/fairy_leggings"}
   ]
 }

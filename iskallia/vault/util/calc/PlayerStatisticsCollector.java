@@ -103,6 +103,9 @@ public class PlayerStatisticsCollector {
                   .setLimit((double)(AttributeLimitHelper.getCooldownReductionLimit(sPlayer) * 100.0F))
             );
             snapshots.add(
+               new PlayerStatisticsCollector.AttributeSnapshot("stat.the_vault.chest_rarity", ChestRarityHelper.getIncreasedChestRarity(sPlayer) * 100.0F, true)
+            );
+            snapshots.add(
                new PlayerStatisticsCollector.AttributeSnapshot("stat.the_vault.thorns_chance", ThornsHelper.getPlayerThornsChance(sPlayer) * 100.0F, true)
             );
             snapshots.add(

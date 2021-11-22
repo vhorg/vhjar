@@ -8,6 +8,7 @@ import iskallia.vault.config.ConsumablesConfig;
 import iskallia.vault.config.CryoChamberConfig;
 import iskallia.vault.config.DifficultyDescriptionConfig;
 import iskallia.vault.config.DurabilityConfig;
+import iskallia.vault.config.EtchingConfig;
 import iskallia.vault.config.EternalAttributeConfig;
 import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.config.EternalConfig;
@@ -138,6 +139,7 @@ public class ModConfigs {
    public static VaultScalingChestConfig SCALING_CHEST_REWARDS;
    public static VaultInhibitorConfig VAULT_INHIBITOR;
    public static FlawedRubyConfig FLAWED_RUBY;
+   public static EtchingConfig ETCHING;
 
    public static void registerCompressionConfigs() {
    }
@@ -215,6 +217,7 @@ public class ModConfigs {
       SCALING_CHEST_REWARDS = new VaultScalingChestConfig().readConfig();
       VAULT_INHIBITOR = new VaultInhibitorConfig().readConfig();
       FLAWED_RUBY = new FlawedRubyConfig().readConfig();
+      ETCHING = new EtchingConfig().readConfig();
       Vault.LOGGER.info("Vault Configs are loaded successfully!");
    }
 }

@@ -29,7 +29,7 @@ public abstract class InventorySnapshotData extends WorldSavedData {
    protected abstract boolean shouldSnapshotItem(PlayerEntity var1, ItemStack var2);
 
    protected InventorySnapshotData.Builder makeSnapshotBuilder(PlayerEntity player) {
-      return new InventorySnapshotData.Builder(player).setStackFilter(this::shouldSnapshotItem);
+      return new InventorySnapshotData.Builder(player).setStackFilter(this::shouldSnapshotItem).removeSnapshotItems();
    }
 
    public boolean hasSnapshot(PlayerEntity player) {

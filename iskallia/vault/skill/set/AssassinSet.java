@@ -2,19 +2,17 @@ package iskallia.vault.skill.set;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.item.gear.VaultGear;
-import iskallia.vault.skill.talent.type.EffectTalent;
-import net.minecraft.potion.Effects;
 
-public class AssassinSet extends EffectSet {
+public class AssassinSet extends PlayerSet {
    @Expose
-   private float parryChance;
+   private float increasedFatalStrikeChance;
 
-   public AssassinSet(int speedAmplifier, float parryChance) {
-      super(VaultGear.Set.ASSASSIN, new EffectTalent(0, Effects.field_76424_c, speedAmplifier, EffectTalent.Type.ICON_ONLY, EffectTalent.Operator.ADD));
-      this.parryChance = parryChance;
+   public AssassinSet(float increasedFatalStrikeChance) {
+      super(VaultGear.Set.ASSASSIN);
+      this.increasedFatalStrikeChance = increasedFatalStrikeChance;
    }
 
-   public float getParryChance() {
-      return this.parryChance;
+   public float getIncreasedFatalStrikeChance() {
+      return this.increasedFatalStrikeChance;
    }
 }

@@ -63,6 +63,7 @@
     {"predicate": {"the_vault:special_texture": 10 }, "model": "the_vault:item/chestplate/special/trash_chestplate"},
     {"predicate": {"the_vault:special_texture": 11 }, "model": "the_vault:item/chestplate/special/skallibomba_chestplate"},
     {"predicate": {"the_vault:special_texture": 12 }, "model": "the_vault:item/chestplate/special/villager_chestplate"},
-    {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/chestplate/special/automatic_chestplate"}
+    {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/chestplate/special/automatic_chestplate"},
+    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/chestplate/special/fairy_chestplate"}
   ]
 }

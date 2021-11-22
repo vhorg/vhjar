@@ -161,19 +161,6 @@
         },
         {
           "output_state": {
-            "Name": "botania:rannuncarpus"
-          },
-          "input_predicate": {
-            "predicate_type": "minecraft:random_block_match",
-            "block": "minecraft:blue_orchid",
-            "probability": 0.25
-          },
-          "location_predicate": {
-            "predicate_type": "minecraft:always_true"
-          }
-        },
-        {
-          "output_state": {
             "Name": "byg:pink_daffodil"
           },
           "input_predicate": {
@@ -187,7 +174,7 @@
         },
         {
           "output_state": {
-            "Name": "botania:rannuncarpus_chibi"
+            "Name": "byg:lolipop_flower"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",

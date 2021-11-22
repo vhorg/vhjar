@@ -3,17 +3,16 @@ package iskallia.vault.block.entity;
 import com.google.common.base.Enums;
 import iskallia.vault.config.LootTablesConfig;
 import iskallia.vault.config.VaultChestConfig;
-import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.BasicScavengerItem;
-import iskallia.vault.item.gear.VaultGearHelper;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.util.VaultRarity;
+import iskallia.vault.util.calc.ChestRarityHelper;
 import iskallia.vault.util.data.RandomListAccess;
 import iskallia.vault.util.data.WeightedDoubleList;
 import iskallia.vault.world.data.VaultRaidData;
@@ -143,6 +142,19 @@ public class VaultChestTileEntity extends ChestTileEntity {
                );
             if (this.rarity != null) {
                switch (this.rarity) {
+                  case RARE:
+                     this.field_145850_b
+                        .func_184148_a(
+                           null,
+                           x,
+                           y,
+                           z,
+                           ModSounds.VAULT_CHEST_RARE_OPEN,
+                           SoundCategory.BLOCKS,
+                           0.2F,
+                           this.field_145850_b.field_73012_v.nextFloat() * 0.1F + 0.9F
+                        );
+                     break;
                   case EPIC:
                      this.field_145850_b
                         .func_184148_a(
@@ -224,7 +236,7 @@ public class VaultChestTileEntity extends ChestTileEntity {
                } else {
                   if (this.field_184284_m == null) {
                      WeightedDoubleList<String> chestRarityList = new WeightedDoubleList<>();
-                     float incChestRarity = VaultGearHelper.getAttributeValueOnGearSumFloat(sPlayer, ModAttributes.CHEST_RARITY);
+                     float incChestRarity = ChestRarityHelper.getIncreasedChestRarity(sPlayer);
                      if (this.rarityPool.isEmpty()) {
                         ModConfigs.VAULT_CHEST.RARITY_POOL.forEach((rarity, weight) -> {
                            if (!rarity.equalsIgnoreCase(VaultRarity.COMMON.name())) {
@@ -325,10 +337,12 @@ public class VaultChestTileEntity extends ChestTileEntity {
          .ifPresent(
             objective -> vault.getProperties()
                .getBase(VaultRaid.IDENTIFIER)
-               .ifPresent(identifier -> ModConfigs.SCAVENGER_HUNT.generateChestLoot().forEach(itemEntry -> {
+               .ifPresent(identifier -> ModConfigs.SCAVENGER_HUNT.generateChestLoot(objective.getGenerationDropFilter()).forEach(itemEntry -> {
                   ItemStack stack = itemEntry.createItemStack();
-                  BasicScavengerItem.setVaultIdentifier(stack, identifier);
-                  loot.add(stack);
+                  if (!stack.func_190926_b()) {
+                     BasicScavengerItem.setVaultIdentifier(stack, identifier);
+                     loot.add(stack);
+                  }
                }))
          );
       return loot;

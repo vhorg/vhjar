@@ -8,6 +8,7 @@ import iskallia.vault.entity.BlueBlazeEntity;
 import iskallia.vault.entity.BoogiemanEntity;
 import iskallia.vault.entity.DrillArrowEntity;
 import iskallia.vault.entity.EffectCloudEntity;
+import iskallia.vault.entity.EtchingVendorEntity;
 import iskallia.vault.entity.EternalEntity;
 import iskallia.vault.entity.FighterEntity;
 import iskallia.vault.entity.FloatingItemEntity;
@@ -20,6 +21,7 @@ import iskallia.vault.entity.renderer.AggressiveCowBossRenderer;
 import iskallia.vault.entity.renderer.BlueBlazeRenderer;
 import iskallia.vault.entity.renderer.BoogiemanRenderer;
 import iskallia.vault.entity.renderer.EffectCloudRenderer;
+import iskallia.vault.entity.renderer.EtchingVendorRenderer;
 import iskallia.vault.entity.renderer.EternalRenderer;
 import iskallia.vault.entity.renderer.FighterRenderer;
 import iskallia.vault.entity.renderer.MonsterEyeRenderer;
@@ -53,6 +55,7 @@ public class ModEntities {
    public static EntityType<EternalEntity> ETERNAL;
    public static EntityType<TreasureGoblinEntity> TREASURE_GOBLIN;
    public static EntityType<AggressiveCowEntity> AGGRESSIVE_COW;
+   public static EntityType<EtchingVendorEntity> ETCHING_VENDOR;
    public static EntityType<MonsterEyeEntity> MONSTER_EYE;
    public static EntityType<RobotEntity> ROBOT;
    public static EntityType<BlueBlazeEntity> BLUE_BLAZE;
@@ -96,6 +99,9 @@ public class ModEntities {
          Builder.func_220322_a(AggressiveCowEntity::new, EntityClassification.MONSTER).func_220321_a(0.9F, 1.4F).func_233606_a_(8),
          AggressiveCowEntity::getAttributes,
          event
+      );
+      ETCHING_VENDOR = registerLiving(
+         "etching_vendor", Builder.func_220322_a(EtchingVendorEntity::new, EntityClassification.MISC), ZombieEntity::func_234342_eQ_, event
       );
       MONSTER_EYE = registerLiving(
          "monster_eye",
@@ -161,6 +167,7 @@ public class ModEntities {
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.ETERNAL, EternalRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.TREASURE_GOBLIN, TreasureGoblinRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.AGGRESSIVE_COW, CowRenderer::new);
+         RenderingRegistry.registerEntityRenderingHandler(ModEntities.ETCHING_VENDOR, EtchingVendorRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.MONSTER_EYE, MonsterEyeRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.ROBOT, RobotRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.BLUE_BLAZE, BlueBlazeRenderer::new);

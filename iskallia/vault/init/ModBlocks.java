@@ -6,6 +6,7 @@ import iskallia.vault.block.BloodAltarBlock;
 import iskallia.vault.block.BowHatBlock;
 import iskallia.vault.block.CatalystDecryptionTableBlock;
 import iskallia.vault.block.CryoChamberBlock;
+import iskallia.vault.block.EtchingVendorControllerBlock;
 import iskallia.vault.block.FinalVaultPortalBlock;
 import iskallia.vault.block.KeyPressBlock;
 import iskallia.vault.block.LootStatueBlock;
@@ -44,6 +45,7 @@ import iskallia.vault.block.entity.AncientCryoChamberTileEntity;
 import iskallia.vault.block.entity.BloodAltarTileEntity;
 import iskallia.vault.block.entity.CatalystDecryptionTableTileEntity;
 import iskallia.vault.block.entity.CryoChamberTileEntity;
+import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
 import iskallia.vault.block.entity.LootStatueTileEntity;
 import iskallia.vault.block.entity.ObeliskTileEntity;
 import iskallia.vault.block.entity.RelicStatueTileEntity;
@@ -210,6 +212,7 @@ public class ModBlocks {
    public static final ScavengerTreasureBlock SCAVENGER_TREASURE = new ScavengerTreasureBlock();
    public static final StabilizerBlock STABILIZER = new StabilizerBlock();
    public static final CatalystDecryptionTableBlock CATALYST_DECRYPTION_TABLE = new CatalystDecryptionTableBlock();
+   public static final EtchingVendorControllerBlock ETCHING_CONTROLLER_BLOCK = new EtchingVendorControllerBlock();
    public static final FlowingFluidBlock VOID_LIQUID_BLOCK = new VoidFluidBlock(
       ModFluids.VOID_LIQUID,
       net.minecraft.block.AbstractBlock.Properties.func_200949_a(Material.field_151586_h, MaterialColor.field_151646_E)
@@ -341,6 +344,10 @@ public class ModBlocks {
          CatalystDecryptionTableTileEntity::new, new Block[]{CATALYST_DECRYPTION_TABLE}
       )
       .func_206865_a(null);
+   public static final TileEntityType<EtchingVendorControllerTileEntity> ETCHING_CONTROLLER_TILE_ENTITY = Builder.func_223042_a(
+         EtchingVendorControllerTileEntity::new, new Block[]{ETCHING_CONTROLLER_BLOCK}
+      )
+      .func_206865_a(null);
 
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, VAULT_PORTAL, Vault.id("vault_portal"));
@@ -425,6 +432,7 @@ public class ModBlocks {
       registerBlock(event, SCAVENGER_TREASURE, Vault.id("scavenger_treasure"));
       registerBlock(event, STABILIZER, Vault.id("stabilizer"));
       registerBlock(event, CATALYST_DECRYPTION_TABLE, Vault.id("catalyst_decryption_table"));
+      registerBlock(event, ETCHING_CONTROLLER_BLOCK, Vault.id("etching_vendor_controller"));
    }
 
    public static void registerTileEntities(Register<TileEntityType<?>> event) {
@@ -453,6 +461,7 @@ public class ModBlocks {
       registerTileEntity(event, SCAVENGER_TREASURE_TILE_ENTITY, Vault.id("scavenger_treasure_tile_entity"));
       registerTileEntity(event, STABILIZER_TILE_ENTITY, Vault.id("stabilizer_tile_entity"));
       registerTileEntity(event, CATALYST_DECRYPTION_TABLE_TILE_ENTITY, Vault.id("catalyst_decryption_table_tile_entity"));
+      registerTileEntity(event, ETCHING_CONTROLLER_TILE_ENTITY, Vault.id("etching_vendor_controller_tile_entity"));
    }
 
    public static void registerTileEntityRenderers() {
@@ -556,6 +565,7 @@ public class ModBlocks {
       registerBlockItem(event, SCAVENGER_TREASURE);
       registerBlockItem(event, STABILIZER);
       registerBlockItem(event, CATALYST_DECRYPTION_TABLE);
+      registerBlockItem(event, ETCHING_CONTROLLER_BLOCK);
    }
 
    private static void registerBlock(Register<Block> event, Block block, ResourceLocation id) {

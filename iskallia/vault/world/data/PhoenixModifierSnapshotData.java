@@ -30,6 +30,11 @@ public class PhoenixModifierSnapshotData extends InventorySnapshotData {
       return !stack.func_190926_b() && !ModAttributes.SOULBOUND.getOrDefault(stack, false).getValue(stack);
    }
 
+   @Override
+   protected InventorySnapshotData.Builder makeSnapshotBuilder(PlayerEntity player) {
+      return new InventorySnapshotData.Builder(player).setStackFilter(this::shouldSnapshotItem);
+   }
+
    @SubscribeEvent
    public static void onTick(PlayerTickEvent event) {
       PlayerEntity player = event.player;

@@ -2,10 +2,8 @@ package iskallia.vault.world.gen.decorator;
 
 import com.mojang.serialization.Codec;
 import iskallia.vault.Vault;
-import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.PlayerFilter;
-import iskallia.vault.util.VaultRarity;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
@@ -19,7 +17,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ISeedReader;
@@ -77,13 +74,7 @@ public class BreadcrumbFeature extends Feature<NoFeatureConfig> {
    private static void doChestSpawnPass(
       Random rand, IWorld world, BiPredicate<BlockPos, BlockState> blockPlacer, BlockPos pos, BlockState toPlace, int attempts
    ) {
-      doPlacementPass(rand, world, blockPlacer, pos, toPlace, attempts, offset -> {
-         TileEntity te = world.func_175625_s(offset);
-         if (te instanceof VaultChestTileEntity) {
-            VaultChestTileEntity chest = (VaultChestTileEntity)te;
-            chest.getRarityPool().put(VaultRarity.COMMON, 1);
-         }
-      });
+      doPlacementPass(rand, world, blockPlacer, pos, toPlace, attempts, offset -> {});
    }
 
    private static void doPlacementPass(

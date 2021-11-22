@@ -163,6 +163,10 @@ public class GearAnvilEvents {
    public static void onApplyEtching(AnvilUpdateEvent event) {
       if (event.getLeft().func_77973_b() instanceof VaultArmorItem && event.getRight().func_77973_b() == ModItems.ETCHING) {
          ItemStack output = event.getLeft().func_77946_l();
+         if (ModAttributes.GEAR_SET.exists(output) && ModAttributes.GEAR_SET.getBase(output).orElse(VaultGear.Set.NONE) != VaultGear.Set.NONE) {
+            return;
+         }
+
          VaultGear.Set set = ModAttributes.GEAR_SET.getOrDefault(event.getRight(), VaultGear.Set.NONE).getValue(event.getRight());
          ModAttributes.GEAR_SET.create(output, set);
          event.setOutput(output);

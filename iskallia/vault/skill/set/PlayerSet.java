@@ -7,6 +7,7 @@ import iskallia.vault.item.gear.VaultGear;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiPredicate;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
@@ -23,7 +24,7 @@ public class PlayerSet {
       return VaultGear.Set.valueOf(this.set);
    }
 
-   public boolean shouldBeActive(PlayerEntity player) {
+   public boolean shouldBeActive(LivingEntity player) {
       return isActive(this.getSet(), player);
    }
 
@@ -36,11 +37,11 @@ public class PlayerSet {
    public void onRemoved(PlayerEntity player) {
    }
 
-   public static boolean allMatch(PlayerEntity player, BiPredicate<EquipmentSlotType, ItemStack> predicate, EquipmentSlotType... slots) {
+   public static boolean allMatch(LivingEntity player, BiPredicate<EquipmentSlotType, ItemStack> predicate, EquipmentSlotType... slots) {
       return Arrays.stream(slots).allMatch(slot -> predicate.test(slot, player.func_184582_a(slot)));
    }
 
-   public static boolean isActive(VaultGear.Set set, PlayerEntity player) {
+   public static boolean isActive(VaultGear.Set set, LivingEntity player) {
       return allMatch(player, (slot, stack) -> {
          Optional<EnumAttribute<VaultGear.Set>> attribute = ModAttributes.GEAR_SET.get(stack);
          return attribute.isPresent() && attribute.get().getValue(stack) == set;

@@ -29,6 +29,7 @@ import iskallia.vault.item.gear.specials.BotaniaArmorModel;
 import iskallia.vault.item.gear.specials.CheeseHatModel;
 import iskallia.vault.item.gear.specials.CreateArmorModel;
 import iskallia.vault.item.gear.specials.DankArmorModel;
+import iskallia.vault.item.gear.specials.FairyArmorModel;
 import iskallia.vault.item.gear.specials.FluxArmorModel;
 import iskallia.vault.item.gear.specials.HellcowArmorModel;
 import iskallia.vault.item.gear.specials.ImmersiveEngineeringArmorModel;
@@ -411,6 +412,7 @@ public class ModModels {
       public static ModModels.SpecialGearModel.SpecialGearModelSet SKALLIBOMBA_SET;
       public static ModModels.SpecialGearModel.SpecialGearModelSet VILLAGER_SET;
       public static ModModels.SpecialGearModel.SpecialGearModelSet AUTOMATIC_SET;
+      public static ModModels.SpecialGearModel.SpecialGearModelSet FAIRY_SET;
       int id;
       String displayName;
       VaultGearModel<? extends LivingEntity> model;
@@ -458,6 +460,7 @@ public class ModModels {
          SKALLIBOMBA_SET = registerSet("Skallibomba", () -> SkallibombaArmorModel.class, new GearModelProperties().allowTransmogrification());
          VILLAGER_SET = registerSet("Villager", () -> VillagerArmorModel.class, new GearModelProperties().allowTransmogrification());
          AUTOMATIC_SET = registerSet("Automatic", () -> AutomaticArmorModel.class, new GearModelProperties().allowTransmogrification());
+         FAIRY_SET = registerSet("Fairy", () -> FairyArmorModel.class, new GearModelProperties().allowTransmogrification());
       }
 
       public int getId() {

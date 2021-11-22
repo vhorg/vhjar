@@ -295,7 +295,7 @@ public class EffectTalent extends PlayerTalent {
             .ifPresent(effectList -> effectList.stream().map(EffectAttribute.Instance::toEffect).forEach(immunities::add));
       }
 
-      if (entity instanceof PlayerEntity && PlayerSet.isActive(VaultGear.Set.DIVINITY, (PlayerEntity)entity)) {
+      if (PlayerSet.isActive(VaultGear.Set.DIVINITY, entity)) {
          ForgeRegistries.POTIONS.getValues().stream().filter(e -> !e.func_188408_i()).forEach(immunities::add);
       }
 

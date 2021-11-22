@@ -1,12 +1,14 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.Vault;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.data.WeightedList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -15,6 +17,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ScavengerHuntConfig extends Config {
@@ -36,16 +39,34 @@ public class ScavengerHuntConfig extends Config {
       return this.requiredItems.getRandomAmount();
    }
 
-   public List<ScavengerHuntConfig.ItemEntry> generateChestLoot() {
-      return this.chestItems.getRandomEntries();
+   public List<ScavengerHuntConfig.ItemEntry> generateChestLoot(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {
+      return this.chestItems.getRandomEntries(dropFilter);
    }
 
-   public List<ScavengerHuntConfig.ItemEntry> generateTreasureLoot() {
-      return this.treasureItems.getRandomEntries();
+   public List<ScavengerHuntConfig.ItemEntry> generateTreasureLoot(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {
+      return this.treasureItems.getRandomEntries(dropFilter);
    }
 
-   public List<ScavengerHuntConfig.ItemEntry> generateMobDropLoot(EntityType<?> mobType) {
-      return this.mobDropItems.getOrDefault(mobType.getRegistryName().toString(), ScavengerHuntConfig.ItemPool.EMPTY).getRandomEntries();
+   public List<ScavengerHuntConfig.ItemEntry> generateMobDropLoot(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter, EntityType<?> mobType) {
+      return this.mobDropItems.getOrDefault(mobType.getRegistryName().toString(), ScavengerHuntConfig.ItemPool.EMPTY).getRandomEntries(dropFilter);
+   }
+
+   public ScavengerHuntConfig.SourceType getRequirementSource(ItemStack stack) {
+      Item requiredItem = stack.func_77973_b();
+
+      for (WeightedList.Entry<ScavengerHuntConfig.ItemEntry> entry : this.chestItems.pool) {
+         if (requiredItem.equals(entry.value.getItem())) {
+            return ScavengerHuntConfig.SourceType.CHEST;
+         }
+      }
+
+      for (WeightedList.Entry<ScavengerHuntConfig.ItemEntry> entryx : this.treasureItems.pool) {
+         if (requiredItem.equals(entryx.value.getItem())) {
+            return ScavengerHuntConfig.SourceType.TREASURE;
+         }
+      }
+
+      return ScavengerHuntConfig.SourceType.MOB;
    }
 
    @Override
@@ -230,16 +251,41 @@ public class ScavengerHuntConfig extends Config {
          this.max = max;
       }
 
-      public ScavengerHuntConfig.ItemEntry getRandomEntry() {
-         return this.pool.getRandom(Config.rand);
+      public ScavengerHuntConfig.ItemEntry getRandomEntry(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {
+         return this.pool.copyFiltered(dropFilter).getRandom(Config.rand);
       }
 
       public int getRandomAmount() {
          return MathUtilities.getRandomInt(this.min, this.max + 1);
       }
 
-      public List<ScavengerHuntConfig.ItemEntry> getRandomEntries() {
-         return IntStream.range(0, this.getRandomAmount()).mapToObj(index -> this.getRandomEntry()).collect(Collectors.toList());
+      public List<ScavengerHuntConfig.ItemEntry> getRandomEntries(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {
+         return IntStream.range(0, this.getRandomAmount())
+            .mapToObj(index -> this.getRandomEntry(dropFilter))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
+      }
+   }
+
+   public static enum SourceType {
+      MOB(Vault.id("textures/gui/overlay/scav_mob.png"), TextFormatting.RED),
+      CHEST(Vault.id("textures/gui/overlay/scav_chest.png"), TextFormatting.GREEN),
+      TREASURE(Vault.id("textures/gui/overlay/scav_treasure.png"), TextFormatting.GOLD);
+
+      private final ResourceLocation iconPath;
+      private final TextFormatting requirementColor;
+
+      private SourceType(ResourceLocation iconPath, TextFormatting requirementColor) {
+         this.iconPath = iconPath;
+         this.requirementColor = requirementColor;
+      }
+
+      public ResourceLocation getIconPath() {
+         return this.iconPath;
+      }
+
+      public TextFormatting getRequirementColor() {
+         return this.requirementColor;
       }
    }
 }

@@ -35,6 +35,8 @@ public class VaultRoomNames {
             return new StringTextComponent("Puzzle").func_240699_a_(TextFormatting.YELLOW);
          case "rainbow_forest":
             return new StringTextComponent("Rainbow Forest").func_240699_a_(TextFormatting.GREEN);
+         case "vendor":
+            return new StringTextComponent("Vendor").func_240699_a_(TextFormatting.GOLD);
          case "viewer":
             return new StringTextComponent("Viewer").func_240699_a_(TextFormatting.GOLD);
          case "village":

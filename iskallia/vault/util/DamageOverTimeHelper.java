@@ -22,10 +22,16 @@ public class DamageOverTimeHelper {
    private static final Map<RegistryKey<World>, List<DamageOverTimeHelper.DamageOverTimeEntry>> worldEntries = new HashMap<>();
 
    public static void applyDamageOverTime(LivingEntity target, DamageSource damageSource, float totalDamage, int seconds) {
-      DamageOverTimeHelper.DamageOverTimeEntry entry = new DamageOverTimeHelper.DamageOverTimeEntry(
-         seconds * 20, damageSource, target.func_145782_y(), totalDamage / seconds
-      );
-      worldEntries.computeIfAbsent(target.func_130014_f_().func_234923_W_(), key -> new ArrayList<>()).add(entry);
+      ServerScheduler.INSTANCE
+         .schedule(
+            1,
+            () -> {
+               DamageOverTimeHelper.DamageOverTimeEntry entry = new DamageOverTimeHelper.DamageOverTimeEntry(
+                  seconds * 20, damageSource, target.func_145782_y(), totalDamage / seconds
+               );
+               worldEntries.computeIfAbsent(target.func_130014_f_().func_234923_W_(), key -> new ArrayList<>()).add(entry);
+            }
+         );
    }
 
    @SubscribeEvent

@@ -13,6 +13,7 @@ import iskallia.vault.client.gui.overlay.goal.ObeliskGoalOverlay;
 import iskallia.vault.client.gui.screen.AdvancedVendingMachineScreen;
 import iskallia.vault.client.gui.screen.CatalystDecryptionScreen;
 import iskallia.vault.client.gui.screen.CryochamberScreen;
+import iskallia.vault.client.gui.screen.EtchingTradeScreen;
 import iskallia.vault.client.gui.screen.GlobalDifficultyScreen;
 import iskallia.vault.client.gui.screen.KeyPressScreen;
 import iskallia.vault.client.gui.screen.OmegaStatueScreen;
@@ -44,6 +45,7 @@ public class ModScreens {
       ScreenManager.func_216911_a(ModContainers.SHARD_TRADE_CONTAINER, ShardTradeScreen::new);
       ScreenManager.func_216911_a(ModContainers.CRYOCHAMBER_CONTAINER, CryochamberScreen::new);
       ScreenManager.func_216911_a(ModContainers.GLOBAL_DIFFICULTY_CONTAINER, GlobalDifficultyScreen::new);
+      ScreenManager.func_216911_a(ModContainers.ETCHING_TRADE_CONTAINER, EtchingTradeScreen::new);
    }
 
    public static void registerOverlays() {

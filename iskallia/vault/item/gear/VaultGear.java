@@ -28,7 +28,6 @@ import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -210,7 +209,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
    default void tickRoll(T item, ItemStack stack, World world, ServerPlayerEntity player, int itemSlot, boolean isSelected) {
       int rollTicks = stack.func_196082_o().func_74762_e("RollTicks");
       int lastModelHit = stack.func_196082_o().func_74762_e("LastModelHit");
-      double displacement = this.getDisplacement(rollTicks);
+      double displacement = getDisplacement(rollTicks);
       if (player.func_184586_b(Hand.OFF_HAND).func_77973_b() == ModItems.IDENTIFICATION_TOME) {
          String roll = ModAttributes.GEAR_ROLL_TYPE.getOrCreate(stack, this.getDefaultRoll(player).getName()).getValue(stack);
          VaultGear.Rarity rarity = ModConfigs.VAULT_GEAR.getRoll(roll).orElse(this.getDefaultRoll(player)).getRandom(world.func_201674_k());
@@ -269,7 +268,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
       return ModConfigs.VAULT_GEAR_CRAFTING_SCALING.getRandomTier(vaultLevel);
    }
 
-   default double getDisplacement(int tick) {
+   static double getDisplacement(int tick) {
       double c = 7200.0;
       return (-tick * tick * tick / 6.0 + c * tick) * 50.0 / (-288000.0 + c * 120.0);
    }
@@ -337,9 +336,9 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .get(stack)
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
-            rarityx -> {
+            rarity -> {
                if (item != ModItems.ETCHING) {
-                  IFormattableTextComponent rarityText = new StringTextComponent("Rarity: ").func_230529_a_(rarityx.getName());
+                  IFormattableTextComponent rarityText = new StringTextComponent("Rarity: ").func_230529_a_(rarity.getName());
                   if (Screen.func_231173_s_()) {
                      ModAttributes.GEAR_MODEL
                         .get(stack)
@@ -354,21 +353,27 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
                }
             }
          );
+      if (item instanceof VaultArmorItem) {
+         VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(stack, VaultGear.Rarity.SCRAPPY).getValue(stack);
+         Integer gearModel = ModAttributes.GEAR_MODEL.getOrDefault(stack, -1).getValue(stack);
+         Integer gearSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getOrDefault(stack, -1).getValue(stack);
+         if (rarity != VaultGear.Rarity.SCRAPPY && gearModel == ModModels.GearModel.SCALE_1.getId()) {
+            tooltip.add(new StringTextComponent(""));
+            tooltip.add(new StringTextComponent("Required in \"Grasshopper Ninja\" advancement").func_240699_a_(TextFormatting.GREEN));
+         }
+
+         if (rarity == VaultGear.Rarity.UNIQUE && gearSpecialModel != -1) {
+            ModModels.SpecialGearModel model = ModModels.SpecialGearModel.getModel(item.getIntendedSlot(), gearSpecialModel);
+            if (model != null) {
+               tooltip.add(new StringTextComponent(model.getDisplayName() + " Armor Set"));
+            }
+         }
+      }
+
       ModAttributes.GEAR_SET.get(stack).map(attribute -> attribute.getValue(stack)).ifPresent(value -> {
-         tooltip.add(StringTextComponent.field_240750_d_);
-         tooltip.add(new StringTextComponent("Etching: ").func_230529_a_(new StringTextComponent(value.name()).func_240699_a_(TextFormatting.RED)));
-         if (item == ModItems.ETCHING) {
+         if (value != VaultGear.Set.NONE) {
             tooltip.add(StringTextComponent.field_240750_d_);
-
-            for (TextComponent descriptionLine : value.getLore()) {
-               tooltip.add(descriptionLine.func_240701_a_(new TextFormatting[]{TextFormatting.ITALIC, TextFormatting.GRAY}));
-            }
-
-            tooltip.add(StringTextComponent.field_240750_d_);
-
-            for (TextComponent descriptionLine : value.getDescription()) {
-               tooltip.add(descriptionLine.func_240699_a_(TextFormatting.GRAY));
-            }
+            tooltip.add(new StringTextComponent("Etching: ").func_230529_a_(new StringTextComponent(value.name()).func_240699_a_(TextFormatting.RED)));
          }
       });
       ModAttributes.MAX_REPAIRS
@@ -439,24 +444,6 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
                   .func_230529_a_(new StringTextComponent(value + "").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16770048))))
             )
          );
-      if (item instanceof VaultArmorItem) {
-         VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(stack, VaultGear.Rarity.SCRAPPY).getValue(stack);
-         Integer gearModel = ModAttributes.GEAR_MODEL.getOrDefault(stack, -1).getValue(stack);
-         Integer gearSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getOrDefault(stack, -1).getValue(stack);
-         if (rarity != VaultGear.Rarity.SCRAPPY && gearModel == ModModels.GearModel.SCALE_1.getId()) {
-            tooltip.add(new StringTextComponent(""));
-            tooltip.add(new StringTextComponent("Required in \"Grasshopper Ninja\" advancement").func_240699_a_(TextFormatting.GREEN));
-         }
-
-         if (rarity == VaultGear.Rarity.UNIQUE && gearSpecialModel != -1) {
-            ModModels.SpecialGearModel model = ModModels.SpecialGearModel.getModel(item.getIntendedSlot(), gearSpecialModel);
-            if (model != null) {
-               tooltip.add(new StringTextComponent(""));
-               tooltip.add(new StringTextComponent("Part of \"" + model.getDisplayName() + " Armor Set\"").func_240699_a_(TextFormatting.GOLD));
-            }
-         }
-      }
-
       if (FlawedRubyItem.shouldHandleOutcome(stack)) {
          tooltip.add(new StringTextComponent("Flawed Ruby Applied").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16772263))));
          if (Screen.func_231173_s_()) {
@@ -875,7 +862,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
    }
 
    default boolean canElytraFly(T item, ItemStack stack, LivingEntity entity) {
-      return entity instanceof PlayerEntity ? PlayerSet.isActive(VaultGear.Set.DRAGON, (PlayerEntity)entity) : false;
+      return entity instanceof PlayerEntity ? PlayerSet.isActive(VaultGear.Set.DRAGON, entity) : false;
    }
 
    default boolean elytraFlightTick(T item, ItemStack stack, LivingEntity entity, int flightTicks) {
@@ -1154,62 +1141,21 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
    }
 
    public static enum Set {
-      NONE("", ""),
-      PHOENIX(
-         "Reborn from the ashes!",
-         "Next time you take a lethal damage in the Vaults, become invulnerable for 3 seconds and get fully healed. (Can be triggered only once per Vault instance)"
-      ),
-      GOBLIN("Hoard all the way!", "Grants better loot chance (+1 Luck)"),
-      GOLEM("Steady as rock!", "Grants +20% resistance cap"),
-      ASSASSIN("Fast as wind!", "Increases speed and grants +10% dodge chance"),
-      SLAYER("Slay them all!", "Grants +2 Strength"),
-      RIFT("Become one with the Vault Rifts!", "Reduce all ability cooldowns by 50%"),
-      DRAGON("Breath of the ender!", "Gain elytra and gliding powers without an elytra item and +50% damage increase"),
-      BRUTE("Angry as the Piglins!", "Grants +1 Strength"),
-      TITAN("Sturdy as a titan!", "Grants +14% resistance"),
-      DRYAD("Touch of the nature!", "Grants 10 hearts"),
-      VAMPIRE("Smell the blood!", "Grants 5% life leech"),
-      NINJA("Can't hit me!", "Grants +30% parry and +10% parry cap"),
-      TREASURE_HUNTER("Leave no chest behind!", "Grants better loot chance (+3 Luck)"),
-      ZOD("Someone write this lore bit idk eloquence is not part of my skill set", "Negates gear durability damage"),
-      DIVINITY("Someone write this lore bit idk eloquence is not part of my skill set", "Grants immunity against all curses"),
-      CARAPACE("Someone write this lore bit idk eloquence is not part of my skill set", "Grants +50% absorption heart cap"),
-      BLOOD("Someone write this lore bit idk eloquence is not part of my skill set", "Grants +200% damage increase");
-
-      String lore;
-      String description;
-
-      private Set(String lore, String description) {
-         this.lore = lore;
-         this.description = description;
-      }
-
-      public List<TextComponent> getDescription() {
-         return this.getTooltip(this.description);
-      }
-
-      public List<TextComponent> getLore() {
-         return this.getTooltip(this.lore);
-      }
-
-      private List<TextComponent> getTooltip(String text) {
-         LinkedList<TextComponent> tooltip = new LinkedList<>();
-         StringBuilder sb = new StringBuilder();
-
-         for (String word : text.split("\\s+")) {
-            sb.append(word + " ");
-            if (sb.length() >= 30) {
-               tooltip.add(new StringTextComponent(sb.toString().trim()));
-               sb = new StringBuilder();
-            }
-         }
-
-         if (sb.length() > 0) {
-            tooltip.add(new StringTextComponent(sb.toString().trim()));
-         }
-
-         return tooltip;
-      }
+      NONE,
+      DRAGON,
+      ZOD,
+      NINJA,
+      GOLEM,
+      RIFT,
+      CARAPACE,
+      DIVINITY,
+      DRYAD,
+      BLOOD,
+      VAMPIRE,
+      TREASURE,
+      ASSASSIN,
+      PHOENIX,
+      DREAM;
    }
 
    public static enum State {

@@ -7,8 +7,10 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -62,16 +64,25 @@ public class ScavengerTreasureBlock extends ContainerBlock {
       if (vault == null) {
          return super.func_220076_a(state, builder);
       } else {
-         List<ItemStack> drops = new ArrayList<>(super.func_220076_a(state, builder));
-         ModConfigs.SCAVENGER_HUNT
-            .generateTreasureLoot()
-            .stream()
-            .map(ScavengerHuntConfig.ItemEntry::createItemStack)
-            .peek(
-               stack -> vault.getProperties().getBase(VaultRaid.IDENTIFIER).ifPresent(identifier -> BasicScavengerItem.setVaultIdentifier(stack, identifier))
-            )
-            .forEach(drops::add);
-         return drops;
+         Optional<ScavengerHuntObjective> objectiveOpt = vault.getActiveObjective(ScavengerHuntObjective.class);
+         if (!objectiveOpt.isPresent()) {
+            return super.func_220076_a(state, builder);
+         } else {
+            ScavengerHuntObjective objective = objectiveOpt.get();
+            List<ItemStack> drops = new ArrayList<>(super.func_220076_a(state, builder));
+            ModConfigs.SCAVENGER_HUNT
+               .generateTreasureLoot(objective.getGenerationDropFilter())
+               .stream()
+               .map(ScavengerHuntConfig.ItemEntry::createItemStack)
+               .filter(stack -> !stack.func_190926_b())
+               .peek(
+                  stack -> vault.getProperties()
+                     .getBase(VaultRaid.IDENTIFIER)
+                     .ifPresent(identifier -> BasicScavengerItem.setVaultIdentifier(stack, identifier))
+               )
+               .forEach(drops::add);
+            return drops;
+         }
       }
    }
 }

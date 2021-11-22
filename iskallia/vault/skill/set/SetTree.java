@@ -1,7 +1,6 @@
 package iskallia.vault.skill.set;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.talent.TalentGroup;
 import iskallia.vault.util.NetcodeUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,8 +24,8 @@ public class SetTree implements INBTSerializable<CompoundNBT> {
       return this.nodes;
    }
 
-   public SetNode<?> getNodeOf(TalentGroup<?> talentGroup) {
-      return this.getNodeByName(talentGroup.getParentName());
+   public SetNode<?> getNodeOf(SetGroup<?> setGroup) {
+      return this.getNodeByName(setGroup.getParentName());
    }
 
    public SetNode<?> getNodeByName(String name) {

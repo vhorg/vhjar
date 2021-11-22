@@ -3494,6 +3494,16 @@
                 "min": 1,
                 "max": 1
               }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.5
+                }
+              ]
             }
           ]
         },
@@ -3515,7 +3525,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.5
+                  "chance": 0.70
                 }
               ]
             }
@@ -3539,7 +3549,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.75
+                  "chance": 0.85
                 }
               ]
             }
@@ -3563,7 +3573,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.8
+                  "chance": 0.95
                 }
               ]
             }
@@ -3659,7 +3669,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.4
+                  "chance": 0.6
                 }
               ]
             }
@@ -3683,7 +3693,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.1
+                  "chance": 0.4
                 }
               ]
             }
@@ -3707,7 +3717,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.1
+                  "chance": 0.4
                 }
               ]
             }
@@ -3731,7 +3741,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.2
+                  "chance": 0.6
                 }
               ]
             }
@@ -3763,7 +3773,7 @@
         },
         { "_name": "Leg Treasure Omega",
           "type": "minecraft:item",
-          "weight": 6,
+          "weight": 4,
           "name": "the_vault:legendary_treasure_omega",
           "functions": [
             {
@@ -3779,7 +3789,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.2
+                  "chance": 0.85
                 }
               ]
             }
@@ -3803,7 +3813,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.1
+                  "chance": 0.25
                 }
               ]
             }
@@ -3827,7 +3837,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.1
+                  "chance": 0.3
                 }
               ]
             }

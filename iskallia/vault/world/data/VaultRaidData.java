@@ -2,7 +2,9 @@ package iskallia.vault.world.data;
 
 import iskallia.vault.attribute.RegistryKeyAttribute;
 import iskallia.vault.backup.BackupManager;
+import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.nbt.VMapNBT;
+import iskallia.vault.skill.set.PlayerSet;
 import iskallia.vault.world.vault.VaultRaid;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -108,7 +110,17 @@ public class VaultRaidData extends WorldSavedData {
       server.func_222817_e(() -> {
          vault.getGenerator().generate(destination, vault, this.nextVaultPos);
          vault.getPlayers().forEach(player -> {
-            player.runIfPresent(server, BackupManager::createPlayerInventorySnapshot);
+            player.runIfPresent(server, sPlayer -> {
+               BackupManager.createPlayerInventorySnapshot(sPlayer);
+               if (PlayerSet.isActive(VaultGear.Set.PHOENIX, sPlayer)) {
+                  PhoenixSetSnapshotData phoenixSetData = PhoenixSetSnapshotData.get(server);
+                  if (phoenixSetData.hasSnapshot(sPlayer)) {
+                     phoenixSetData.removeSnapshot(sPlayer);
+                  }
+
+                  phoenixSetData.createSnapshot(sPlayer);
+               }
+            });
             this.remove(server, player.getPlayerId());
             synchronized (this.activeVaults) {
                this.activeVaults.put(player.getPlayerId(), vault);

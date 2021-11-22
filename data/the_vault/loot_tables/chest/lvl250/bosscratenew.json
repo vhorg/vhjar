@@ -301,6 +301,20 @@
               }
             }
           ]
+        },
+        { "_name": "Nugg",
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:vault_nugget",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 2,
+                "max": 8
+              }
+            }
+          ]
         }
       ]
     },

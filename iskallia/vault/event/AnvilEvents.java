@@ -18,6 +18,7 @@ import iskallia.vault.item.paxel.VaultPaxelItem;
 import iskallia.vault.item.paxel.enhancement.PaxelEnhancements;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.OverlevelEnchantHelper;
+import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import java.util.Collections;
 import java.util.HashMap;
@@ -129,6 +130,7 @@ public class AnvilEvents {
             return;
          }
 
+         VaultRaid.init();
          ResourceLocation objectiveKey = ((ItemVaultCrystalSeal)event.getRight().func_77973_b()).getObjectiveId();
          VaultObjective objective = VaultObjective.getObjective(objectiveKey);
          if (objective != null) {

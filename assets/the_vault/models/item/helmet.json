@@ -65,6 +65,7 @@
     {"predicate": {"the_vault:special_texture": 12 }, "model": "the_vault:item/helmet/special/trash_helmet"},
     {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/helmet/special/skallibomba_helmet"},
     {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/helmet/special/villager_helmet"},
-    {"predicate": {"the_vault:special_texture": 15 }, "model": "the_vault:item/helmet/special/automatic_helmet"}
+    {"predicate": {"the_vault:special_texture": 15 }, "model": "the_vault:item/helmet/special/automatic_helmet"},
+    {"predicate": {"the_vault:special_texture": 16 }, "model": "the_vault:item/helmet/special/fairy_helmet"}
   ]
 }

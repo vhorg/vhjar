@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.CreatureAttribute;
@@ -277,7 +278,8 @@ public class EntityEvents {
                      event.getDrops().clear();
                   }
 
-                  boolean addedDrops = addScavengerDrops(world, entity, vault, event.getDrops());
+                  boolean addedDrops = entity instanceof AggressiveCowEntity;
+                  addedDrops |= addScavengerDrops(world, entity, vault, event.getDrops());
                   addedDrops |= addSubFighterDrops(world, entity, vault, event.getDrops());
                   Entity killerEntity = killingSrc.func_76346_g();
                   if (killerEntity instanceof EternalEntity) {
@@ -306,18 +308,22 @@ public class EntityEvents {
    }
 
    private static boolean addScavengerDrops(World world, Entity killed, VaultRaid vault, Collection<ItemEntity> drops) {
-      boolean isScavengerVault = vault.getActiveObjective(ScavengerHuntObjective.class).isPresent();
-      if (!isScavengerVault) {
+      Optional<ScavengerHuntObjective> objectiveOpt = vault.getActiveObjective(ScavengerHuntObjective.class);
+      if (!objectiveOpt.isPresent()) {
          return false;
       } else {
-         List<ScavengerHuntConfig.ItemEntry> specialDrops = ModConfigs.SCAVENGER_HUNT.generateMobDropLoot(killed.func_200600_R());
+         ScavengerHuntObjective objective = objectiveOpt.get();
+         List<ScavengerHuntConfig.ItemEntry> specialDrops = ModConfigs.SCAVENGER_HUNT
+            .generateMobDropLoot(objective.getGenerationDropFilter(), killed.func_200600_R());
          return specialDrops.isEmpty() ? false : vault.getProperties().getBase(VaultRaid.IDENTIFIER).map(identifier -> {
             specialDrops.forEach(entry -> {
                ItemStack stack = entry.createItemStack();
-               BasicScavengerItem.setVaultIdentifier(stack, identifier);
-               ItemEntity itemEntity = new ItemEntity(world, killed.func_226277_ct_(), killed.func_226278_cu_(), killed.func_226281_cx_(), stack);
-               itemEntity.func_174869_p();
-               drops.add(itemEntity);
+               if (!stack.func_190926_b()) {
+                  BasicScavengerItem.setVaultIdentifier(stack, identifier);
+                  ItemEntity itemEntity = new ItemEntity(world, killed.func_226277_ct_(), killed.func_226278_cu_(), killed.func_226281_cx_(), stack);
+                  itemEntity.func_174869_p();
+                  drops.add(itemEntity);
+               }
             });
             return true;
          }).orElse(false);

@@ -42,36 +42,34 @@ public class FrenzyTalent extends ArchetypeTalent {
          ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.player;
          TalentTree talents = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
          float healthPart = sPlayer.func_110143_aJ() / sPlayer.func_110138_aP();
-         if (ArchetypeTalent.isEnabled(sPlayer.func_71121_q())) {
-            boolean fulfillsFrenzyConditions = false;
-            float damageMultiplier = 1.0F;
+         boolean fulfillsFrenzyConditions = false;
+         float damageMultiplier = 1.0F;
 
-            for (TalentNode<FrenzyTalent> talentNode : talents.getLearnedNodes(FrenzyTalent.class)) {
-               if (healthPart <= talentNode.getTalent().getThreshold()) {
-                  fulfillsFrenzyConditions = true;
-                  damageMultiplier = talentNode.getTalent().getDamageMultiplier();
-                  break;
+         for (TalentNode<FrenzyTalent> talentNode : talents.getLearnedNodes(FrenzyTalent.class)) {
+            if (healthPart <= talentNode.getTalent().getThreshold()) {
+               fulfillsFrenzyConditions = true;
+               damageMultiplier = talentNode.getTalent().getDamageMultiplier();
+               break;
+            }
+         }
+
+         if (fulfillsFrenzyConditions && isEnabled(sPlayer.func_71121_q())) {
+            PlayerDamageHelper.DamageMultiplier existing = multiplierMap.get(sPlayer.func_110124_au());
+            if (existing != null) {
+               if (existing.getMultiplier() == damageMultiplier) {
+                  existing.refreshDuration(sPlayer.func_184102_h());
+               } else {
+                  PlayerDamageHelper.removeMultiplier(sPlayer, existing);
+                  existing = null;
                }
             }
 
-            if (fulfillsFrenzyConditions) {
-               PlayerDamageHelper.DamageMultiplier existing = multiplierMap.get(sPlayer.func_110124_au());
-               if (existing != null) {
-                  if (existing.getMultiplier() == damageMultiplier) {
-                     existing.refreshDuration(sPlayer.func_184102_h());
-                  } else {
-                     PlayerDamageHelper.removeMultiplier(sPlayer, existing);
-                     existing = null;
-                  }
-               }
-
-               if (existing == null) {
-                  existing = PlayerDamageHelper.applyMultiplier(sPlayer, damageMultiplier, PlayerDamageHelper.Operation.ADDITIVE_MULTIPLY);
-                  multiplierMap.put(sPlayer.func_110124_au(), existing);
-               }
-            } else {
-               removeExistingDamageBuff(sPlayer);
+            if (existing == null) {
+               existing = PlayerDamageHelper.applyMultiplier(sPlayer, damageMultiplier, PlayerDamageHelper.Operation.ADDITIVE_MULTIPLY);
+               multiplierMap.put(sPlayer.func_110124_au(), existing);
             }
+         } else {
+            removeExistingDamageBuff(sPlayer);
          }
       }
    }

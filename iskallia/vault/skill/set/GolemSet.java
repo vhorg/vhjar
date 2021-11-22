@@ -5,14 +5,21 @@ import iskallia.vault.item.gear.VaultGear;
 
 public class GolemSet extends PlayerSet {
    @Expose
-   private final float resistanceBonus;
+   private final float bonusResistance;
+   @Expose
+   private final float bonusResistanceCap;
 
-   public GolemSet(float resistanceBonus) {
+   public GolemSet(float bonusResistance, float bonusResistanceCap) {
       super(VaultGear.Set.GOLEM);
-      this.resistanceBonus = resistanceBonus;
+      this.bonusResistance = bonusResistance;
+      this.bonusResistanceCap = bonusResistanceCap;
    }
 
-   public float getResistanceBonus() {
-      return this.resistanceBonus;
+   public float getBonusResistance() {
+      return this.bonusResistance;
+   }
+
+   public float getBonusResistanceCap() {
+      return this.bonusResistanceCap;
    }
 }

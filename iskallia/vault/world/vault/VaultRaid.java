@@ -29,6 +29,7 @@ import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.util.RelicSet;
 import iskallia.vault.world.data.GlobalDifficultyData;
 import iskallia.vault.world.data.PhoenixModifierSnapshotData;
+import iskallia.vault.world.data.PhoenixSetSnapshotData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.SoulboundSnapshotData;
 import iskallia.vault.world.data.VaultSetsData;
@@ -64,7 +65,6 @@ import iskallia.vault.world.vault.logic.objective.ancient.AncientObjective;
 import iskallia.vault.world.vault.logic.objective.architect.ArchitectObjective;
 import iskallia.vault.world.vault.logic.task.VaultTask;
 import iskallia.vault.world.vault.modifier.FrenzyModifier;
-import iskallia.vault.world.vault.modifier.InventoryRestoreModifier;
 import iskallia.vault.world.vault.modifier.NoExitModifier;
 import iskallia.vault.world.vault.modifier.ScaleModifier;
 import iskallia.vault.world.vault.modifier.VaultModifier;
@@ -556,11 +556,14 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       })
    );
    public static final VaultTask REMOVE_INVENTORY_RESTORE_SNAPSHOTS = VaultTask.register(Vault.id("remove_inventory_snapshots"), (vault, player, world) -> {
-      if (!vault.getActiveModifiersFor(PlayerFilter.of(player), InventoryRestoreModifier.class).isEmpty()) {
-         PhoenixModifierSnapshotData data = PhoenixModifierSnapshotData.get(world);
-         if (data.hasSnapshot(player.getPlayerId())) {
-            data.removeSnapshot(player.getPlayerId());
-         }
+      PhoenixModifierSnapshotData modifierData = PhoenixModifierSnapshotData.get(world);
+      if (modifierData.hasSnapshot(player.getPlayerId())) {
+         modifierData.removeSnapshot(player.getPlayerId());
+      }
+
+      PhoenixSetSnapshotData setSnapshotData = PhoenixSetSnapshotData.get(world);
+      if (setSnapshotData.hasSnapshot(player.getPlayerId())) {
+         setSnapshotData.removeSnapshot(player.getPlayerId());
       }
    });
    public static final VaultTask GRANT_EXP_COMPLETE = VaultTask.register(Vault.id("public_grant_exp_complete"), (vault, player, world) -> {

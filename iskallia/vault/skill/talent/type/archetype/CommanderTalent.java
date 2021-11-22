@@ -92,27 +92,25 @@ public class CommanderTalent extends ArchetypeTalent {
    public static void onPlayerTick(PlayerTickEvent event) {
       if (event.phase != Phase.END && event.player instanceof ServerPlayerEntity) {
          ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.player;
-         if (isEnabled(sPlayer.func_71121_q())) {
-            TalentTree talents = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
-            if (talents.hasLearnedNode(ModConfigs.TALENTS.COMMANDER)) {
-               float damageMultiplier = talents.getNodeOf(ModConfigs.TALENTS.COMMANDER).getTalent().getDamageDealtMultiplier();
-               PlayerDamageHelper.DamageMultiplier existing = multiplierMap.get(sPlayer.func_110124_au());
-               if (existing != null) {
-                  if (existing.getMultiplier() == damageMultiplier) {
-                     existing.refreshDuration(sPlayer.func_184102_h());
-                  } else {
-                     PlayerDamageHelper.removeMultiplier(sPlayer, existing);
-                     existing = null;
-                  }
+         TalentTree talents = PlayerTalentsData.get(sPlayer.func_71121_q()).getTalents(sPlayer);
+         if (talents.hasLearnedNode(ModConfigs.TALENTS.COMMANDER) && isEnabled(sPlayer.func_71121_q())) {
+            float damageMultiplier = talents.getNodeOf(ModConfigs.TALENTS.COMMANDER).getTalent().getDamageDealtMultiplier();
+            PlayerDamageHelper.DamageMultiplier existing = multiplierMap.get(sPlayer.func_110124_au());
+            if (existing != null) {
+               if (existing.getMultiplier() == damageMultiplier) {
+                  existing.refreshDuration(sPlayer.func_184102_h());
+               } else {
+                  PlayerDamageHelper.removeMultiplier(sPlayer, existing);
+                  existing = null;
                }
-
-               if (existing == null) {
-                  existing = PlayerDamageHelper.applyMultiplier(sPlayer, damageMultiplier, PlayerDamageHelper.Operation.STACKING_MULTIPLY, false);
-                  multiplierMap.put(sPlayer.func_110124_au(), existing);
-               }
-            } else {
-               removeExistingDamageBuff(sPlayer);
             }
+
+            if (existing == null) {
+               existing = PlayerDamageHelper.applyMultiplier(sPlayer, damageMultiplier, PlayerDamageHelper.Operation.STACKING_MULTIPLY, false);
+               multiplierMap.put(sPlayer.func_110124_au(), existing);
+            }
+         } else {
+            removeExistingDamageBuff(sPlayer);
          }
       }
    }

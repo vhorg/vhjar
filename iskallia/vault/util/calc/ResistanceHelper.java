@@ -6,7 +6,12 @@ import iskallia.vault.aura.type.ResistanceAuraConfig;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.skill.set.DreamSet;
+import iskallia.vault.skill.set.GolemSet;
+import iskallia.vault.skill.set.SetNode;
+import iskallia.vault.skill.set.SetTree;
 import iskallia.vault.util.PlayerFilter;
+import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.influence.ResistanceInfluence;
@@ -17,6 +22,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.server.ServerWorld;
 
 public class ResistanceHelper {
    public static float getPlayerResistancePercent(ServerPlayerEntity player) {
@@ -43,6 +49,20 @@ public class ResistanceHelper {
             if (modifier.getStat() == StatModifier.Statistic.RESISTANCE) {
                resistancePercent *= modifier.getMultiplier();
             }
+         }
+      }
+
+      SetTree sets = PlayerSetsData.get((ServerWorld)player.field_70170_p).getSets(player);
+
+      for (SetNode<?> node : sets.getNodes()) {
+         if (node.getSet() instanceof GolemSet) {
+            GolemSet set = (GolemSet)node.getSet();
+            resistancePercent += set.getBonusResistance();
+         }
+
+         if (node.getSet() instanceof DreamSet) {
+            DreamSet set = (DreamSet)node.getSet();
+            resistancePercent += set.getIncreasedResistance();
          }
       }
 

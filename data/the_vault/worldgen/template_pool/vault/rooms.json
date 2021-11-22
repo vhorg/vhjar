@@ -1676,6 +1676,25 @@
             }
           ]
         }
+    },
+    {
+        "weight": 40,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/vendor/layer0/big1",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "minecraft:empty"
+            }
+          ]
+        }
     }
     ]
   }

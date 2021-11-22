@@ -63,6 +63,7 @@
     {"predicate": {"the_vault:special_texture": 10 }, "model": "the_vault:item/boots/special/trash_boots"},
     {"predicate": {"the_vault:special_texture": 11 }, "model": "the_vault:item/boots/special/skallibomba_boots"},
     {"predicate": {"the_vault:special_texture": 12 }, "model": "the_vault:item/boots/special/villager_boots"},
-    {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/boots/special/automatic_boots"}
+    {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/boots/special/automatic_boots"},
+    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/boots/special/fairy_boots"}
   ]
 }

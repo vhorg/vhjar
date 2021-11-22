@@ -1113,7 +1113,6 @@ public abstract class VaultGearConfig extends Config {
          VaultGearConfig.BaseAttributes CHESTPLATE = new VaultGearConfig.BaseAttributes();
          VaultGearConfig.BaseAttributes LEGGINGS = new VaultGearConfig.BaseAttributes();
          VaultGearConfig.BaseAttributes BOOTS = new VaultGearConfig.BaseAttributes();
-         VaultGearConfig.BaseAttributes ETCHING = new VaultGearConfig.BaseAttributes();
          VaultGearConfig.BaseAttributes ALL_IDOLS = new VaultGearConfig.BaseAttributes();
          SWORD.ATTACK_DAMAGE = (DoubleAttribute.Generator)DoubleAttribute.generator()
             .add(
@@ -1498,23 +1497,6 @@ public abstract class VaultGearConfig extends Config {
          ALL_IDOLS.SOULBOUND = (BooleanAttribute.Generator)BooleanAttribute.generator()
             .add(Boolean.valueOf(false), PooledAttribute.Rolls.ofEmpty(), pool -> {})
             .collect(BooleanAttribute.of(BooleanAttribute.Type.SET));
-         ETCHING.GEAR_SET = (EnumAttribute.Generator<VaultGear.Set>)EnumAttribute.generator(VaultGear.Set.class)
-            .add(
-               VaultGear.Set.NONE,
-               PooledAttribute.Rolls.ofConstant(1),
-               pool -> pool.add(VaultGear.Set.ASSASSIN, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.DRAGON, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.GOBLIN, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.GOLEM, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.RIFT, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.VAMPIRE, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.BRUTE, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.TITAN, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.DRYAD, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.NINJA, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-                  .add(VaultGear.Set.TREASURE_HUNTER, EnumAttribute.of(EnumAttribute.Type.SET), 1)
-            )
-            .collect(EnumAttribute.of(EnumAttribute.Type.SET));
          VaultGearConfig.BaseAttributes IDOL_BENEVOLENT = ALL_IDOLS.copy();
          IDOL_BENEVOLENT.IDOL_TYPE = (EnumAttribute.Generator<PlayerFavourData.VaultGodType>)EnumAttribute.generator(PlayerFavourData.VaultGodType.class)
             .add(PlayerFavourData.VaultGodType.BENEVOLENT, PooledAttribute.Rolls.ofEmpty(), pool -> {})
@@ -1544,7 +1526,6 @@ public abstract class VaultGearConfig extends Config {
          this.BASE_ATTRIBUTES.put(ModItems.CHESTPLATE.getRegistryName().toString(), CHESTPLATE);
          this.BASE_ATTRIBUTES.put(ModItems.LEGGINGS.getRegistryName().toString(), LEGGINGS);
          this.BASE_ATTRIBUTES.put(ModItems.BOOTS.getRegistryName().toString(), BOOTS);
-         this.BASE_ATTRIBUTES.put(ModItems.ETCHING.getRegistryName().toString(), ETCHING);
          this.BASE_ATTRIBUTES.put(ModItems.IDOL_BENEVOLENT.getRegistryName().toString(), IDOL_BENEVOLENT);
          this.BASE_ATTRIBUTES.put(ModItems.IDOL_OMNISCIENT.getRegistryName().toString(), IDOL_OMNISCIENT);
          this.BASE_ATTRIBUTES.put(ModItems.IDOL_TIMEKEEPER.getRegistryName().toString(), IDOL_TIMEKEEPER);
@@ -1559,7 +1540,6 @@ public abstract class VaultGearConfig extends Config {
          VaultGearConfig.BaseModifiers CHESTPLATE = new VaultGearConfig.BaseModifiers();
          VaultGearConfig.BaseModifiers LEGGINGS = new VaultGearConfig.BaseModifiers();
          VaultGearConfig.BaseModifiers BOOTS = new VaultGearConfig.BaseModifiers();
-         VaultGearConfig.BaseModifiers ETCHING = new VaultGearConfig.BaseModifiers();
          VaultGearConfig.BaseModifiers ALL_IDOLS = new VaultGearConfig.BaseModifiers();
          SWORD.ADD_ATTACK_DAMAGE = new WeightedList.Entry<>(
             (DoubleAttribute.Generator)DoubleAttribute.generator()
@@ -4453,7 +4433,6 @@ public abstract class VaultGearConfig extends Config {
          this.BASE_MODIFIERS.put(ModItems.CHESTPLATE.getRegistryName().toString(), CHESTPLATE);
          this.BASE_MODIFIERS.put(ModItems.LEGGINGS.getRegistryName().toString(), LEGGINGS);
          this.BASE_MODIFIERS.put(ModItems.BOOTS.getRegistryName().toString(), BOOTS);
-         this.BASE_MODIFIERS.put(ModItems.ETCHING.getRegistryName().toString(), ETCHING);
          this.BASE_MODIFIERS.put(ModItems.IDOL_BENEVOLENT.getRegistryName().toString(), IDOL_BENEVOLENT);
          this.BASE_MODIFIERS.put(ModItems.IDOL_OMNISCIENT.getRegistryName().toString(), IDOL_OMNISCIENT);
          this.BASE_MODIFIERS.put(ModItems.IDOL_TIMEKEEPER.getRegistryName().toString(), IDOL_TIMEKEEPER);
