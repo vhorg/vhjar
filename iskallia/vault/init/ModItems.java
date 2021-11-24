@@ -624,6 +624,11 @@ public class ModItems {
       new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
       () -> ImmutableList.of(ModModels.SpecialGearModel.AUTOMATIC_SET)
    );
+   public static ItemModArmorCrate ARMOR_CRATE_FAIRY = new ItemModArmorCrate(
+      Vault.id("armor_crate_fairy"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.FAIRY_SET)
+   );
    public static FlawedRubyItem FLAWED_RUBY = new FlawedRubyItem(
       Vault.id("flawed_ruby"),
       new Properties().func_200916_a(VAULT_MOD_GROUP),
@@ -942,6 +947,7 @@ public class ModItems {
       registry.register(ARMOR_CRATE_TRASH);
       registry.register(ARMOR_CRATE_VILLAGER);
       registry.register(ARMOR_CRATE_AUTOMATIC);
+      registry.register(ARMOR_CRATE_FAIRY);
       registry.register(ARTIFACT_FRAGMENT);
    }
 }
