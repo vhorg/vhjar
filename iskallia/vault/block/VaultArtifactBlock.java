@@ -26,6 +26,7 @@ import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -103,7 +104,7 @@ public class VaultArtifactBlock extends FacedBlock {
       Item artifactItem = (Item)ForgeRegistries.ITEMS.getValue(ModBlocks.VAULT_ARTIFACT.getRegistryName());
       ItemStack itemStack = new ItemStack(artifactItem, 1);
       CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74768_a("CustomModelData", order);
+      nbt.func_74768_a("CustomModelData", MathHelper.func_76125_a(order, 0, 25));
       itemStack.func_77982_d(nbt);
       return itemStack;
    }

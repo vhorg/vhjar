@@ -1,0 +1,22 @@
+{
+    "type": "the_vault:non_raffle_crystal_shaped",
+    "pattern": [
+        "nsn",
+        " h "
+    ],
+    "key": {
+        "h": {
+            "item": "the_vault:hunter_eye"
+        },
+        "s": {
+            "item": "the_vault:crystal_seal_executioner"
+        },
+        "n": {
+            "item": "minecraft:netherite_sword"
+        }
+    },
+    "result": {
+        "item": "the_vault:crystal_seal_raid",
+        "count": 1
+    }
+}

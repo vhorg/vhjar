@@ -47,6 +47,7 @@
     {"predicate": {"the_vault:texture": 39 }, "model": "the_vault:item/leggings/knight_1_leggings"},
     {"predicate": {"the_vault:texture": 40 }, "model": "the_vault:item/leggings/knight_2_leggings"},
     {"predicate": {"the_vault:texture": 41 }, "model": "the_vault:item/leggings/knight_3_leggings"},
+    {"predicate": {"the_vault:texture": 42 }, "model": "the_vault:item/leggings/devilduck_1_leggings"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 0 }, "model": "the_vault:item/leggings/scrappy_1_leggings"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 1 }, "model": "the_vault:item/leggings/scrappy_2_leggings"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 2 }, "model": "the_vault:item/leggings/scrappy_3_leggings"},

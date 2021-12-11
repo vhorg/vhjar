@@ -13,12 +13,20 @@ import net.minecraft.world.server.ServerWorld;
 public class VaultRoom extends VaultPiece {
    public static final ResourceLocation ID = Vault.id("room");
 
+   protected VaultRoom(ResourceLocation id) {
+      super(id);
+   }
+
    public VaultRoom() {
-      super(ID);
+      this(ID);
+   }
+
+   protected VaultRoom(ResourceLocation id, ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
+      super(id, template, boundingBox, rotation);
    }
 
    public VaultRoom(ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
-      super(ID, template, boundingBox, rotation);
+      this(ID, template, boundingBox, rotation);
    }
 
    @Override

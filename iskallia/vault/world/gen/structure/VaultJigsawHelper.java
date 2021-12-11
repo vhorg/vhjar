@@ -166,6 +166,11 @@ public class VaultJigsawHelper {
    }
 
    @Nonnull
+   public static JigsawPiece getRaidChallengeRoom() {
+      return getRandomPiece(Vault.id("raid/rooms"));
+   }
+
+   @Nonnull
    public static JigsawPattern getRoomJigsawPool() {
       MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
       MutableRegistry<JigsawPattern> jigsawRegistry = srv.func_244267_aX().func_243612_b(Registry.field_243555_ax);

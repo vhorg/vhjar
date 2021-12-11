@@ -34,9 +34,11 @@ import iskallia.vault.item.RelicItem;
 import iskallia.vault.item.RelicPartItem;
 import iskallia.vault.item.UnknownEggItem;
 import iskallia.vault.item.VaultCatalystItem;
+import iskallia.vault.item.VaultCharmUpgrade;
 import iskallia.vault.item.VaultInhibitorItem;
 import iskallia.vault.item.VaultMagnetItem;
 import iskallia.vault.item.VaultPearlItem;
+import iskallia.vault.item.VaultRuneItem;
 import iskallia.vault.item.VaultStewItem;
 import iskallia.vault.item.VaultXPFoodItem;
 import iskallia.vault.item.VoidOrbItem;
@@ -267,6 +269,14 @@ public class ModItems {
    public static ItemDrillArrow DRILL_ARROW = new ItemDrillArrow(VAULT_MOD_GROUP, Vault.id("drill_arrow"));
    public static ItemRespecFlask RESPEC_FLASK = new ItemRespecFlask(VAULT_MOD_GROUP, Vault.id("respec_flask"));
    public static ItemResetFlask RESET_FLASK = new ItemResetFlask(VAULT_MOD_GROUP, Vault.id("reset_flask"));
+   public static LootableItem MYSTERY_EGG = new LootableItem(
+      Vault.id("mystery_egg"), new Properties().func_200916_a(VAULT_MOD_GROUP), () -> ModConfigs.MYSTERY_EGG.POOL.getRandom(new Random()).generateItemStack()
+   );
+   public static LootableItem MYSTERY_HOSTILE_EGG = new LootableItem(
+      Vault.id("mystery_hostile_egg"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP),
+      () -> ModConfigs.MYSTERY_HOSTILE_EGG.POOL.getRandom(new Random()).generateItemStack()
+   );
    public static BasicItem ACCELERATION_CHIP = new BasicTooltipItem(
       Vault.id("acceleration_chip"),
       new Properties().func_200916_a(VAULT_MOD_GROUP),
@@ -402,7 +412,7 @@ public class ModItems {
    public static BasicItem VAULT_PLATING_T3 = new VaultPlateItem(
       Vault.id("vault_plating_t3"),
       new Properties().func_200916_a(VAULT_MOD_GROUP),
-      1,
+      2,
       new StringTextComponent("Permanently adds 50 max durability to any vault gear.").func_240699_a_(TextFormatting.GRAY),
       new StringTextComponent("Maximum 20 plates can be attached to any one vault gear.").func_240699_a_(TextFormatting.GRAY)
    );
@@ -410,6 +420,13 @@ public class ModItems {
    public static BasicItem WUTAX_CRYSTAL = new BasicItem(Vault.id("wutax_crystal"), new Properties().func_200916_a(VAULT_MOD_GROUP));
    public static VaultCatalystItem VAULT_CATALYST = new VaultCatalystItem(VAULT_MOD_GROUP, Vault.id("vault_catalyst"));
    public static VaultInhibitorItem VAULT_INHIBITOR = new VaultInhibitorItem(VAULT_MOD_GROUP, Vault.id("vault_inhibitor"));
+   public static VaultRuneItem VAULT_RUNE_MINE = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_mineshaft"), "mineshaft");
+   public static VaultRuneItem VAULT_RUNE_PUZZLE = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_puzzle_cube"), "puzzle_cube");
+   public static VaultRuneItem VAULT_RUNE_DIGSITE = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_digsite"), "digsite");
+   public static VaultRuneItem VAULT_RUNE_CRYSTAL = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_crystal_caves"), "crystal_caves");
+   public static VaultRuneItem VAULT_RUNE_VIEWER = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_viewer"), "viewer");
+   public static VaultRuneItem VAULT_RUNE_VENDOR = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_vendor"), "vendor");
+   public static VaultRuneItem VAULT_RUNE_XMARK = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_xmark"), "x_spot");
    public static BasicItem VAULT_CATALYST_FRAGMENT = new BasicTooltipItem(
       Vault.id("vault_catalyst_fragment"),
       new Properties().func_200916_a(VAULT_MOD_GROUP),
@@ -424,6 +441,7 @@ public class ModItems {
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_HUNTER = new ItemVaultCrystalSeal(Vault.id("crystal_seal_hunter"), Vault.id("scavenger_hunt"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_ARCHITECT = new ItemVaultCrystalSeal(Vault.id("crystal_seal_architect"), Vault.id("architect"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_ANCIENTS = new ItemVaultCrystalSeal(Vault.id("crystal_seal_ancients"), Vault.id("ancients"));
+   public static ItemVaultCrystalSeal CRYSTAL_SEAL_RAID = new ItemVaultCrystalSeal(Vault.id("crystal_seal_raid"), Vault.id("raid_challenge"));
    public static ItemVaultRaffleSeal CRYSTAL_SEAL_RAFFLE = new ItemVaultRaffleSeal(Vault.id("crystal_seal_raffle"));
    public static BasicTooltipItem GEAR_CHARM = new BasicTooltipItem(
       Vault.id("gear_charm"),
@@ -643,7 +661,24 @@ public class ModItems {
          .func_230529_a_(new StringTextComponent("Treasure Hunter").func_240699_a_(TextFormatting.AQUA))
    );
    public static BasicItem ARTIFACT_FRAGMENT = new BasicItem(
-      Vault.id("artifact_fragment"), new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64).func_234689_a_()
+      Vault.id("artifact_fragment"), new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(3).func_234689_a_()
+   );
+   public static BasicTooltipItem VAULT_CHARM = new BasicTooltipItem(
+      Vault.id("vault_charm"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(1),
+      new StringTextComponent("When this charm is in your inventory").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("it will automatically void any item").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("whitelisted in the Vault Controller").func_240699_a_(TextFormatting.GRAY),
+      new StringTextComponent("on pickup in a Vault.").func_240699_a_(TextFormatting.GRAY)
+   );
+   public static VaultCharmUpgrade CHARM_UPGRADE_TIER_1 = new VaultCharmUpgrade(
+      Vault.id("charm_upgrade_tier_1"), VaultCharmUpgrade.Tier.ONE, new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(1).func_234689_a_()
+   );
+   public static VaultCharmUpgrade CHARM_UPGRADE_TIER_2 = new VaultCharmUpgrade(
+      Vault.id("charm_upgrade_tier_2"), VaultCharmUpgrade.Tier.TWO, new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(1).func_234689_a_()
+   );
+   public static VaultCharmUpgrade CHARM_UPGRADE_TIER_3 = new VaultCharmUpgrade(
+      Vault.id("charm_upgrade_tier_3"), VaultCharmUpgrade.Tier.THREE, new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(1).func_234689_a_()
    );
 
    public static void registerItems(Register<Item> event) {
@@ -777,6 +812,8 @@ public class ModItems {
       registry.register(DRILL_ARROW);
       registry.register(RESPEC_FLASK);
       registry.register(RESET_FLASK);
+      registry.register(MYSTERY_EGG);
+      registry.register(MYSTERY_HOSTILE_EGG);
       registry.register(ACCELERATION_CHIP);
       registry.register(PANDORAS_BOX);
       registry.register(ISKALLIUM_CHUNK);
@@ -849,6 +886,13 @@ public class ModItems {
       registry.register(WUTAX_CRYSTAL);
       registry.register(VAULT_CATALYST);
       registry.register(VAULT_INHIBITOR);
+      registry.register(VAULT_RUNE_MINE);
+      registry.register(VAULT_RUNE_PUZZLE);
+      registry.register(VAULT_RUNE_DIGSITE);
+      registry.register(VAULT_RUNE_CRYSTAL);
+      registry.register(VAULT_RUNE_VIEWER);
+      registry.register(VAULT_RUNE_VENDOR);
+      registry.register(VAULT_RUNE_XMARK);
       registry.register(VAULT_CATALYST_FRAGMENT);
       registry.register(SOUL_FLAME);
       registry.register(VAULT_GEAR);
@@ -856,6 +900,7 @@ public class ModItems {
       registry.register(CRYSTAL_SEAL_HUNTER);
       registry.register(CRYSTAL_SEAL_ARCHITECT);
       registry.register(CRYSTAL_SEAL_ANCIENTS);
+      registry.register(CRYSTAL_SEAL_RAID);
       registry.register(CRYSTAL_SEAL_RAFFLE);
       registry.register(GEAR_CHARM);
       registry.register(GEAR_CHARM_T3);
@@ -949,5 +994,9 @@ public class ModItems {
       registry.register(ARMOR_CRATE_AUTOMATIC);
       registry.register(ARMOR_CRATE_FAIRY);
       registry.register(ARTIFACT_FRAGMENT);
+      registry.register(VAULT_CHARM);
+      registry.register(CHARM_UPGRADE_TIER_1);
+      registry.register(CHARM_UPGRADE_TIER_2);
+      registry.register(CHARM_UPGRADE_TIER_3);
    }
 }

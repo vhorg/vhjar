@@ -26,6 +26,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemUnidentifiedArtifact extends Item {
+   public static int artifactOverride = -1;
+
    public ItemUnidentifiedArtifact(ItemGroup group, ResourceLocation id) {
       super(new Properties().func_200916_a(group).func_200917_a(64));
       this.setRegistryName(id);
@@ -48,7 +50,14 @@ public class ItemUnidentifiedArtifact extends Item {
             );
          ((ServerWorld)world)
             .func_195598_a(ParticleTypes.field_197616_i, position.field_72450_a, position.field_72448_b, position.field_72449_c, 500, 1.0, 1.0, 1.0, 0.5);
-         ItemStack artifactStack = VaultArtifactBlock.createRandomArtifact();
+         ItemStack artifactStack;
+         if (artifactOverride != -1) {
+            artifactStack = VaultArtifactBlock.createArtifact(artifactOverride);
+            artifactOverride = -1;
+         } else {
+            artifactStack = VaultArtifactBlock.createRandomArtifact();
+         }
+
          player.func_146097_a(artifactStack, false, false);
          heldStack.func_190918_g(1);
       }

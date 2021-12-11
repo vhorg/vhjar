@@ -30,7 +30,9 @@ import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
+import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.modifier.CurseOnHitModifier;
+import iskallia.vault.world.vault.modifier.DurabilityDamageModifier;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -167,16 +169,20 @@ public class EntityEvents {
          if (event.getSource().func_76346_g() instanceof LivingEntity) {
             LivingEntity attacked = event.getEntityLiving();
             LivingEntity attacker = (LivingEntity)event.getSource().func_76346_g();
-
-            for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-               ItemStack stack = attacker.func_184582_a(slot);
-               if (!(stack.func_77973_b() instanceof VaultGear) || ((VaultGear)stack.func_77973_b()).isIntendedForSlot(slot)) {
-                  for (EffectCloudEntity.Config config : ModAttributes.EFFECT_CLOUD.getOrDefault(stack, new ArrayList<>()).getValue(stack)) {
-                     if (!(world.field_73012_v.nextFloat() >= config.getChance())) {
-                        EffectCloudEntity cloud = EffectCloudEntity.fromConfig(
-                           attacked.field_70170_p, attacker, attacked.func_226277_ct_(), attacked.func_226278_cu_(), attacked.func_226281_cx_(), config
-                        );
-                        world.func_217376_c(cloud);
+            boolean doEffectClouds = !ActiveFlags.IS_AOE_ATTACKING.isSet()
+               && !ActiveFlags.IS_DOT_ATTACKING.isSet()
+               && !ActiveFlags.IS_REFLECT_ATTACKING.isSet();
+            if (doEffectClouds) {
+               for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+                  ItemStack stack = attacker.func_184582_a(slot);
+                  if (!(stack.func_77973_b() instanceof VaultGear) || ((VaultGear)stack.func_77973_b()).isIntendedForSlot(slot)) {
+                     for (EffectCloudEntity.Config config : ModAttributes.EFFECT_CLOUD.getOrDefault(stack, new ArrayList<>()).getValue(stack)) {
+                        if (!(world.field_73012_v.nextFloat() >= config.getChance())) {
+                           EffectCloudEntity cloud = EffectCloudEntity.fromConfig(
+                              attacked.field_70170_p, attacker, attacked.func_226277_ct_(), attacked.func_226278_cu_(), attacked.func_226281_cx_(), config
+                           );
+                           world.func_217376_c(cloud);
+                        }
                      }
                   }
                }
@@ -206,36 +212,68 @@ public class EntityEvents {
          if (event.getSource().func_76346_g() instanceof LivingEntity) {
             LivingEntity attacked = event.getEntityLiving();
             LivingEntity attacker = (LivingEntity)event.getSource().func_76346_g();
-            int additionalChains = VaultGearHelper.getAttributeValueOnGearSumInt(attacker, ModAttributes.ON_HIT_CHAIN);
-            if (additionalChains > 0) {
-               ActiveFlags.IS_CHAIN_ATTACKING.runIfNotSet(() -> {
-                  List<MobEntity> nearby = EntityHelper.getNearby(world, attacked.func_233580_cy_(), 5.0F, MobEntity.class);
-                  if (!nearby.isEmpty()) {
-                     nearby.sort(Comparator.comparing(e -> e.func_70068_e(attacked)));
+            if (!ActiveFlags.IS_DOT_ATTACKING.isSet() && !ActiveFlags.IS_REFLECT_ATTACKING.isSet()) {
+               boolean mayChainAttack = true;
+               if (attacker instanceof PlayerEntity) {
+                  mayChainAttack = !PlayerActiveFlags.isSet((PlayerEntity)attacker, PlayerActiveFlags.Flag.CHAINING_AOE);
+               }
 
-                     for (MobEntity me : nearby.subList(0, Math.min(additionalChains, nearby.size()))) {
-                        me.func_70097_a(event.getSource(), event.getAmount());
+               if (mayChainAttack) {
+                  int additionalChains = VaultGearHelper.getAttributeValueOnGearSumInt(attacker, ModAttributes.ON_HIT_CHAIN);
+                  if (additionalChains > 0) {
+                     ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                        List<MobEntity> nearby = EntityHelper.getNearby(world, attacked.func_233580_cy_(), 5.0F, MobEntity.class);
+                        nearby.remove(attacked);
+                        nearby.remove(attacker);
+                        nearby.removeIf(mob -> (attacker instanceof EternalEntity || attacker instanceof PlayerEntity) && mob instanceof EternalEntity);
+                        if (!nearby.isEmpty()) {
+                           nearby.sort(Comparator.comparing(e -> e.func_70068_e(attacked)));
+                           nearby = nearby.subList(0, Math.min(additionalChains, nearby.size()));
+                           float multiplier = 0.5F;
+
+                           for (MobEntity me : nearby) {
+                              me.func_70097_a(event.getSource(), event.getAmount() * multiplier);
+                              multiplier *= 0.5F;
+                           }
+                        }
+                     });
+                     if (attacker instanceof PlayerEntity) {
+                        PlayerActiveFlags.set((PlayerEntity)attacker, PlayerActiveFlags.Flag.CHAINING_AOE, 2);
                      }
                   }
-               });
-            }
+               }
 
-            int blockAoE = VaultGearHelper.getAttributeValueOnGearSumInt(attacker, ModAttributes.ON_HIT_AOE);
-            if (blockAoE > 0) {
-               ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-                  List<MobEntity> nearby = EntityHelper.getNearby(world, attacked.func_233580_cy_(), blockAoE, MobEntity.class);
-                  if (!nearby.isEmpty()) {
-                     for (MobEntity me : nearby) {
-                        me.func_70097_a(event.getSource(), event.getAmount());
-                     }
+               boolean mayAoeAttack = true;
+               if (attacker instanceof PlayerEntity) {
+                  mayAoeAttack = !PlayerActiveFlags.isSet((PlayerEntity)attacker, PlayerActiveFlags.Flag.ATTACK_AOE);
+               }
+
+               if (mayAoeAttack) {
+                  int blockAoE = VaultGearHelper.getAttributeValueOnGearSumInt(attacker, ModAttributes.ON_HIT_AOE);
+                  if (blockAoE > 0) {
+                     ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                        List<MobEntity> nearby = EntityHelper.getNearby(world, attacked.func_233580_cy_(), blockAoE, MobEntity.class);
+                        nearby.remove(attacked);
+                        nearby.remove(attacker);
+                        nearby.removeIf(mob -> (attacker instanceof EternalEntity || attacker instanceof PlayerEntity) && mob instanceof EternalEntity);
+                        if (!nearby.isEmpty()) {
+                           for (MobEntity me : nearby) {
+                              me.func_70097_a(event.getSource(), event.getAmount() * 0.6F);
+                           }
+                        }
+                     });
                   }
-               });
-            }
 
-            float stunChance = VaultGearHelper.getAttributeValueOnGearSumFloat(attacker, ModAttributes.ON_HIT_STUN);
-            if (rand.nextFloat() < stunChance) {
-               attacked.func_195064_c(new EffectInstance(Effects.field_76421_d, 40, 9));
-               attacked.func_195064_c(new EffectInstance(Effects.field_76419_f, 40, 9));
+                  if (attacker instanceof PlayerEntity) {
+                     PlayerActiveFlags.set((PlayerEntity)attacker, PlayerActiveFlags.Flag.ATTACK_AOE, 2);
+                  }
+               }
+
+               float stunChance = VaultGearHelper.getAttributeValueOnGearSumFloat(attacker, ModAttributes.ON_HIT_STUN);
+               if (rand.nextFloat() < stunChance) {
+                  attacked.func_195064_c(new EffectInstance(Effects.field_76421_d, 40, 9));
+                  attacked.func_195064_c(new EffectInstance(Effects.field_76419_f, 40, 9));
+               }
             }
          }
       }
@@ -245,13 +283,23 @@ public class EntityEvents {
       priority = EventPriority.LOW
    )
    public static void onDamageTotem(LivingHurtEvent event) {
-      if (!event.getEntity().field_70170_p.func_201670_d()) {
+      World world = event.getEntity().func_130014_f_();
+      if (!world.func_201670_d() && world instanceof ServerWorld) {
          if (event.getEntityLiving() instanceof PlayerEntity) {
             if (!event.getSource().func_76363_c()) {
+               ServerWorld sWorld = (ServerWorld)world;
                ItemStack offHand = event.getEntityLiving().func_184592_cb();
                if (offHand.func_77973_b() instanceof IdolItem) {
+                  PlayerEntity player = (PlayerEntity)event.getEntityLiving();
                   float damage = Math.max(1.0F, event.getAmount() / 5.0F);
-                  offHand.func_222118_a((int)damage, event.getEntityLiving(), player -> player.func_213361_c(EquipmentSlotType.OFFHAND));
+                  VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, player.func_233580_cy_());
+                  if (vault != null) {
+                     for (DurabilityDamageModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), DurabilityDamageModifier.class)) {
+                        damage *= modifier.getDurabilityDamageTakenMultiplier();
+                     }
+                  }
+
+                  offHand.func_222118_a((int)damage, event.getEntityLiving(), entity -> entity.func_213361_c(EquipmentSlotType.OFFHAND));
                }
             }
          }
@@ -278,24 +326,28 @@ public class EntityEvents {
                      event.getDrops().clear();
                   }
 
-                  boolean addedDrops = entity instanceof AggressiveCowEntity;
-                  addedDrops |= addScavengerDrops(world, entity, vault, event.getDrops());
-                  addedDrops |= addSubFighterDrops(world, entity, vault, event.getDrops());
-                  Entity killerEntity = killingSrc.func_76346_g();
-                  if (killerEntity instanceof EternalEntity) {
-                     killerEntity = (Entity)((EternalEntity)killerEntity).getOwner().right().orElse(null);
-                  }
-
-                  if (killerEntity instanceof ServerPlayerEntity) {
-                     ServerPlayerEntity killer = (ServerPlayerEntity)killerEntity;
-                     if (MiscUtils.inventoryContains(killer.field_71071_by, stack -> stack.func_77973_b() instanceof ItemShardPouch)
-                        && vault.getActiveObjectives().stream().noneMatch(objective -> objective.shouldPauseTimer(sWorld.func_73046_m(), vault))) {
-                        addedDrops |= addShardDrops(world, entity, killer, event.getDrops());
-                     }
-                  }
-
-                  if (!addedDrops) {
+                  if (vault.getActiveObjectives().stream().anyMatch(VaultObjective::preventsNormalMonsterDrops)) {
                      event.setCanceled(true);
+                  } else {
+                     boolean addedDrops = entity instanceof AggressiveCowEntity;
+                     addedDrops |= addScavengerDrops(world, entity, vault, event.getDrops());
+                     addedDrops |= addSubFighterDrops(world, entity, vault, event.getDrops());
+                     Entity killerEntity = killingSrc.func_76346_g();
+                     if (killerEntity instanceof EternalEntity) {
+                        killerEntity = (Entity)((EternalEntity)killerEntity).getOwner().right().orElse(null);
+                     }
+
+                     if (killerEntity instanceof ServerPlayerEntity) {
+                        ServerPlayerEntity killer = (ServerPlayerEntity)killerEntity;
+                        if (MiscUtils.inventoryContains(killer.field_71071_by, stack -> stack.func_77973_b() instanceof ItemShardPouch)
+                           && vault.getActiveObjectives().stream().noneMatch(objective -> objective.shouldPauseTimer(sWorld.func_73046_m(), vault))) {
+                           addedDrops |= addShardDrops(world, entity, killer, event.getDrops());
+                        }
+                     }
+
+                     if (!addedDrops) {
+                        event.setCanceled(true);
+                     }
                   }
                }
             }
@@ -427,7 +479,7 @@ public class EntityEvents {
             Entity trueSource = event.getSource().func_76346_g();
             if (trueSource instanceof LivingEntity) {
                LivingEntity attacker = (LivingEntity)trueSource;
-               attacker.func_70097_a(DamageSource.func_92087_a(entityLiving), 20.0F);
+               attacker.func_70097_a(DamageSource.func_92087_a(entityLiving), event.getAmount() * 0.2F);
             }
          }
       }

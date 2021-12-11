@@ -75,7 +75,7 @@ public class VaultInhibitorItem extends Item {
    @Nullable
    public static List<String> getCrystalCombinationModifiers(ItemStack catalyst, ItemStack crystal) {
       CrystalData data = VaultCrystalItem.getData(crystal.func_77946_l());
-      if (!data.canCraftCatalysts()) {
+      if (!data.canModifyWithCrafting()) {
          return null;
       } else {
          Optional<List<ModifierRollResult>> rollsOpt = getModifierRolls(catalyst);

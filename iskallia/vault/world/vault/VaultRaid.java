@@ -27,6 +27,7 @@ import iskallia.vault.network.message.VaultModifierMessage;
 import iskallia.vault.network.message.VaultOverlayMessage;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.util.RelicSet;
+import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.GlobalDifficultyData;
 import iskallia.vault.world.data.PhoenixModifierSnapshotData;
 import iskallia.vault.world.data.PhoenixSetSnapshotData;
@@ -38,11 +39,13 @@ import iskallia.vault.world.vault.event.VaultEvent;
 import iskallia.vault.world.vault.event.VaultListener;
 import iskallia.vault.world.vault.gen.ArchitectEventGenerator;
 import iskallia.vault.world.vault.gen.FragmentedVaultGenerator;
+import iskallia.vault.world.vault.gen.RaidChallengeGenerator;
 import iskallia.vault.world.vault.gen.VaultGenerator;
 import iskallia.vault.world.vault.gen.VaultTroveGenerator;
 import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutRegistry;
 import iskallia.vault.world.vault.gen.piece.VaultObelisk;
 import iskallia.vault.world.vault.gen.piece.VaultPiece;
+import iskallia.vault.world.vault.gen.piece.VaultRaidRoom;
 import iskallia.vault.world.vault.gen.piece.VaultRoom;
 import iskallia.vault.world.vault.gen.piece.VaultStart;
 import iskallia.vault.world.vault.gen.piece.VaultTreasure;
@@ -63,6 +66,8 @@ import iskallia.vault.world.vault.logic.objective.TroveObjective;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.logic.objective.ancient.AncientObjective;
 import iskallia.vault.world.vault.logic.objective.architect.ArchitectObjective;
+import iskallia.vault.world.vault.logic.objective.raid.ActiveRaid;
+import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import iskallia.vault.world.vault.logic.task.VaultTask;
 import iskallia.vault.world.vault.modifier.FrenzyModifier;
 import iskallia.vault.world.vault.modifier.NoExitModifier;
@@ -161,6 +166,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    protected VaultModifiers modifiers = new VaultModifiers();
    protected RaidProperties properties = new RaidProperties();
    protected VaultInfluences influence = new VaultInfluences();
+   protected ActiveRaid activeRaid = null;
    protected final VListNBT<VaultObjective, CompoundNBT> objectives = VListNBT.of(VaultObjective::fromNBT);
    protected final VListNBT<VaultEvent<?>, CompoundNBT> events = (VListNBT<VaultEvent<?>, CompoundNBT>)NonNullVListNBT.of(VaultEvent::fromNBT);
    protected final VListNBT<VaultPlayer, CompoundNBT> players = VListNBT.of(VaultPlayer::fromNBT);
@@ -168,6 +174,9 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final Supplier<FragmentedVaultGenerator> SINGLE_STAR = VaultGenerator.register(() -> new FragmentedVaultGenerator(Vault.id("single_star")));
    public static final Supplier<ArchitectEventGenerator> ARCHITECT_GENERATOR = VaultGenerator.register(() -> new ArchitectEventGenerator(Vault.id("architect")));
    public static final Supplier<VaultTroveGenerator> TROVE_GENERATOR = VaultGenerator.register(() -> new VaultTroveGenerator(Vault.id("vault_trove")));
+   public static final Supplier<RaidChallengeGenerator> RAID_CHALLENGE_GENERATOR = VaultGenerator.register(
+      () -> new RaidChallengeGenerator(Vault.id("raid_challenge"))
+   );
    public static final VAttribute<RegistryKey<World>, RegistryKeyAttribute<World>> DIMENSION = new VAttribute<>(
       Vault.id("dimension"), RegistryKeyAttribute::new
    );
@@ -450,6 +459,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
             CrystalData crystalData = vault.getProperties().getBase(CRYSTAL_DATA).orElse(CrystalData.EMPTY);
             int level = vault.getProperties().getBase(LEVEL).orElse(0);
             if (crystalData.getType().canBeCowVault()
+               && crystalData.getSelectedObjective() == null
                && crystalData.getModifiers().isEmpty()
                && !vault.getProperties().getBaseOrDefault(IS_RAFFLE, false)
                && level >= 50) {
@@ -755,6 +765,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final Supplier<ArchitectObjective> ARCHITECT_EVENT = VaultObjective.register(() -> new ArchitectObjective(Vault.id("architect")));
    public static final Supplier<TroveObjective> VAULT_TROVE = VaultObjective.register(() -> new TroveObjective(Vault.id("trove")));
    public static final Supplier<AncientObjective> ANCIENTS = VaultObjective.register(() -> new AncientObjective(Vault.id("ancients")));
+   public static final Supplier<RaidChallengeObjective> RAID_CHALLENGE = VaultObjective.register(() -> new RaidChallengeObjective(Vault.id("raid_challenge")));
    @Deprecated
    public static final VaultEvent<Event> TRIGGER_BOSS_SUMMON = VaultEvent.register(Vault.id("trigger_boss_summon"), Event.class, (vault, event) -> {});
    public static final VaultEvent<LivingUpdateEvent> SCALE_MOB = VaultEvent.register(
@@ -802,10 +813,12 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
                if (VaultUtils.inVault(vault, event.getEntity())) {
                   if (entity instanceof LivingEntity && !(entity instanceof PlayerEntity)) {
                      LivingEntity replaced = VaultCowOverrides.replaceVaultEntity((LivingEntity)entity, (ServerWorld)event.getWorld());
-                     Vector3d pos = entity.func_213303_ch();
-                     replaced.func_70080_a(pos.field_72450_a, pos.field_72448_b, pos.field_72449_c, entity.field_70177_z, entity.field_70125_A);
-                     event.getWorld().func_217376_c(replaced);
-                     event.setCanceled(true);
+                     if (replaced != null) {
+                        Vector3d pos = entity.func_213303_ch();
+                        replaced.func_70080_a(pos.field_72450_a, pos.field_72448_b, pos.field_72449_c, entity.field_70177_z, entity.field_70125_A);
+                        event.getWorld().func_217376_c(replaced);
+                        event.setCanceled(true);
+                     }
                   }
                }
             }
@@ -929,6 +942,20 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       return this.getActiveModifiersFor(PlayerFilter.of(player), NoExitModifier.class).isEmpty();
    }
 
+   public boolean triggerRaid(ServerWorld world, BlockPos controller) {
+      if (this.activeRaid != null) {
+         return false;
+      } else {
+         this.activeRaid = ActiveRaid.create(this, world, controller);
+         return true;
+      }
+   }
+
+   @Nullable
+   public ActiveRaid getActiveRaid() {
+      return this.activeRaid;
+   }
+
    public RaidProperties getProperties() {
       return this.properties;
    }
@@ -993,6 +1020,13 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
             .peek(objective -> objective.setCompletionTime(this.getTimer().getRunTime()))
             .forEach(objective -> objective.complete(this, world));
          this.getActiveObjectives().forEach(objective -> objective.tick(this, PlayerFilter.any(), world));
+         if (this.activeRaid != null) {
+            this.activeRaid.tick(this, world);
+            if (this.activeRaid.isFinished()) {
+               this.activeRaid.finish(this, world);
+               this.activeRaid = null;
+            }
+         }
       }
    }
 
@@ -1011,6 +1045,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       nbt.func_218657_a("Events", this.events.serializeNBT());
       nbt.func_218657_a("Players", this.players.serializeNBT());
       nbt.func_74772_a("CreationTime", this.getCreationTime());
+      NBTHelper.writeOptional(nbt, "activeRaid", this.activeRaid, (tag, raid) -> raid.serialize(tag));
       return nbt;
    }
 
@@ -1024,6 +1059,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       this.events.deserializeNBT(nbt.func_150295_c("Events", 10));
       this.players.deserializeNBT(nbt.func_150295_c("Players", 10));
       this.creationTime = nbt.func_74763_f("CreationTime");
+      this.activeRaid = NBTHelper.readOptional(nbt, "activeRaid", ActiveRaid::deserializeNBT);
    }
 
    public static VaultRaid classic(
@@ -1178,6 +1214,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       VaultPiece.REGISTRY.put(VaultStart.ID, VaultStart::new);
       VaultPiece.REGISTRY.put(VaultTreasure.ID, VaultTreasure::new);
       VaultPiece.REGISTRY.put(VaultTunnel.ID, VaultTunnel::new);
+      VaultPiece.REGISTRY.put(VaultRaidRoom.ID, VaultRaidRoom::new);
       VaultRoomLayoutRegistry.init();
       VaultInfluenceRegistry.init();
    }

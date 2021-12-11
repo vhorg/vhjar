@@ -119,7 +119,6 @@ public class RenameScreen extends ContainerScreen<RenamingContainer> {
             break;
          case VAULT_CRYSTAL:
             VaultCrystalItem.getData(this.itemStack).setPlayerBossName(this.name);
-            System.out.println(VaultCrystalItem.getData(this.itemStack).getPlayerBossName());
             nbt.func_218657_a("Data", this.itemStack.serializeNBT());
       }
 

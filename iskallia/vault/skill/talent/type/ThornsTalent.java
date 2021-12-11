@@ -1,6 +1,7 @@
 package iskallia.vault.skill.talent.type;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.calc.ThornsHelper;
 import net.minecraft.entity.Entity;
@@ -57,8 +58,13 @@ public class ThornsTalent extends PlayerTalent {
                   thornsDamage = ThornsHelper.getThornsDamage(hurt);
                }
 
-               float dmg = (float)hurt.func_233637_b_(Attributes.field_233823_f_);
-               ServerScheduler.INSTANCE.schedule(0, () -> source.func_70097_a(DamageSource.func_92087_a(hurt), dmg * (1.0F + thornsDamage)));
+               if (!(thornsDamage <= 0.001F)) {
+                  float dmg = (float)hurt.func_233637_b_(Attributes.field_233823_f_);
+                  ServerScheduler.INSTANCE
+                     .schedule(
+                        0, () -> ActiveFlags.IS_REFLECT_ATTACKING.runIfNotSet(() -> source.func_70097_a(DamageSource.func_92087_a(hurt), dmg * thornsDamage))
+                     );
+               }
             }
          }
       }

@@ -769,7 +769,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             value -> tooltip.add(
-               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Parry")
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Parry")
                   .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(11534098)))
             )
          );
@@ -778,7 +778,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             value -> tooltip.add(
-               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Parry")
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Parry")
                   .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(11534098)))
             )
          );
@@ -787,7 +787,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             value -> tooltip.add(
-               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Resistance")
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Resistance")
                   .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16702720)))
             )
          );
@@ -796,7 +796,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             value -> tooltip.add(
-               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Resistance")
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Resistance")
                   .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16702720)))
             )
          );
@@ -805,7 +805,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             value -> tooltip.add(
-               new StringTextComponent("+" + format(value * 100.0F, 5) + "% Chest Rarity")
+               new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Chest Rarity")
                   .func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(11073085)))
             )
          );

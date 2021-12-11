@@ -8,6 +8,7 @@ import iskallia.vault.command.Command;
 import iskallia.vault.command.CrystalCommand;
 import iskallia.vault.command.DebugCommand;
 import iskallia.vault.command.EternalCommand;
+import iskallia.vault.command.GearCommand;
 import iskallia.vault.command.GiveLootCommand;
 import iskallia.vault.command.InternalCommand;
 import iskallia.vault.command.InvRestoreCommand;
@@ -31,6 +32,7 @@ public class ModCommands {
    public static VaultGodSayCommand VAULTGOD_SAY;
    public static CrystalCommand CRYSTAL;
    public static EternalCommand ETERNAL;
+   public static GearCommand GEAR;
    public static PartyCommand PARTY;
 
    public static void registerCommands(CommandDispatcher<CommandSource> dispatcher, EnvironmentType env) {
@@ -43,6 +45,7 @@ public class ModCommands {
       VAULTGOD_SAY = registerCommand(VaultGodSayCommand::new, dispatcher, env);
       CRYSTAL = registerCommand(CrystalCommand::new, dispatcher, env);
       ETERNAL = registerCommand(EternalCommand::new, dispatcher, env);
+      GEAR = registerCommand(GearCommand::new, dispatcher, env);
       PARTY = registerCommand(PartyCommand::new, dispatcher, env);
       ArchitectDirectionCommands.register(dispatcher);
    }

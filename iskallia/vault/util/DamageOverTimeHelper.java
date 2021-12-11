@@ -1,5 +1,6 @@
 package iskallia.vault.util;
 
+import iskallia.vault.event.ActiveFlags;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +42,7 @@ public class DamageOverTimeHelper {
          if (!world.func_201670_d()) {
             List<DamageOverTimeHelper.DamageOverTimeEntry> entries = worldEntries.computeIfAbsent(world.func_234923_W_(), key -> new ArrayList<>());
             entries.forEach(rec$ -> rec$.decrement());
-            entries.forEach(entry -> {
+            ActiveFlags.IS_DOT_ATTACKING.runIfNotSet(() -> entries.forEach(entry -> {
                if (entry.ticks % 20 == 0) {
                   Entity e = world.func_73045_a(entry.entityId);
                   if (e instanceof LivingEntity && e.func_70089_S()) {
@@ -50,7 +51,7 @@ public class DamageOverTimeHelper {
                      entry.invalidate();
                   }
                }
-            });
+            }));
             entries.removeIf(entry -> !entry.valid);
          }
       }

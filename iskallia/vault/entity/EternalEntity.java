@@ -236,23 +236,40 @@ public class EternalEntity extends ZombieEntity {
    }
 
    public void func_70624_b(LivingEntity entity) {
-      if (entity != this.getOwner().right().orElse(null) && !(entity instanceof EternalEntity) && !(entity instanceof PlayerEntity)) {
+      if (entity != this.getOwner().right().orElse(null)
+         && !(entity instanceof EternalEntity)
+         && !(entity instanceof PlayerEntity)
+         && !(entity instanceof EtchingVendorEntity)) {
          super.func_70624_b(entity);
       }
    }
 
    public void func_70604_c(LivingEntity entity) {
-      if (entity != this.getOwner().right().orElse(null) && !(entity instanceof EternalEntity) && !(entity instanceof PlayerEntity)) {
+      if (entity != this.getOwner().right().orElse(null)
+         && !(entity instanceof EternalEntity)
+         && !(entity instanceof PlayerEntity)
+         && !(entity instanceof EtchingVendorEntity)) {
          super.func_70604_c(entity);
       }
    }
 
    private void updateAttackTarget() {
       AxisAlignedBB box = this.func_174813_aQ().func_186662_g(32.0);
-      this.field_70170_p.func_225316_b(LivingEntity.class, box, e -> {
-         Either<UUID, ServerPlayerEntity> owner = this.getOwner();
-         return owner.right().isPresent() && owner.right().get() == e ? false : !(e instanceof EternalEntity) && !(e instanceof PlayerEntity);
-      }).stream().sorted(Comparator.comparingDouble(e -> e.func_213303_ch().func_72438_d(this.func_213303_ch()))).findFirst().ifPresent(this::func_70624_b);
+      this.field_70170_p
+         .func_225316_b(
+            LivingEntity.class,
+            box,
+            e -> {
+               Either<UUID, ServerPlayerEntity> owner = this.getOwner();
+               return owner.right().isPresent() && owner.right().get() == e
+                  ? false
+                  : !(e instanceof EternalEntity) && !(e instanceof PlayerEntity) && !(e instanceof EtchingVendorEntity);
+            }
+         )
+         .stream()
+         .sorted(Comparator.comparingDouble(e -> e.func_213303_ch().func_72438_d(this.func_213303_ch())))
+         .findFirst()
+         .ifPresent(this::func_70624_b);
    }
 
    private Predicate<LivingEntity> ignoreEntities() {

@@ -12,8 +12,4 @@ public class SellSlot extends Slot {
    public boolean func_75214_a(ItemStack stack) {
       return false;
    }
-
-   public void func_75215_d(ItemStack stack) {
-      super.func_75215_d(stack);
-   }
 }

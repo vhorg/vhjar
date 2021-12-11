@@ -9,6 +9,7 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.piece.VaultTreasure;
 import iskallia.vault.world.vault.logic.objective.TroveObjective;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
+import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nonnull;
@@ -102,6 +103,31 @@ public class VaultLootableTileEntity extends TileEntity implements ITickableTile
          do {
             generatedBlock = ModConfigs.VAULT_LOOTABLES.ORE.get(world, pos, random, poolName, playerUUID);
          } while (!(generatedBlock.func_177230_c() instanceof VaultOreBlock));
+
+         return generatedBlock;
+      }
+   }
+
+   public static class VaultResourceBlockGenerator implements VaultLootableTileEntity.Generator {
+      @Nonnull
+      @Override
+      public BlockState generate(ServerWorld world, BlockPos pos, Random random, String poolName, UUID playerUUID) {
+         VaultRaid vault = VaultRaidData.get(world).getAt(world, pos);
+         if (vault == null) {
+            return Blocks.field_150350_a.func_176223_P();
+         } else {
+            VaultObjective objective = vault.getActiveObjective(RaidChallengeObjective.class).orElse(null);
+            return objective != null
+               ? this.getRandomNonMinecraftBlock(world, pos, random, poolName, playerUUID)
+               : ModConfigs.VAULT_LOOTABLES.RESOURCE.get(world, pos, random, poolName, playerUUID);
+         }
+      }
+
+      private BlockState getRandomNonMinecraftBlock(ServerWorld world, BlockPos pos, Random random, String poolName, UUID playerUUID) {
+         BlockState generatedBlock;
+         do {
+            generatedBlock = ModConfigs.VAULT_LOOTABLES.RESOURCE.get(world, pos, random, poolName, playerUUID);
+         } while (generatedBlock.func_177230_c().getRegistryName().func_110624_b().equals("minecraft"));
 
          return generatedBlock;
       }

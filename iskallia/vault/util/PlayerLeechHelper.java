@@ -29,16 +29,18 @@ public class PlayerLeechHelper {
                }
             }
 
-            float leech;
-            if (attacker instanceof ServerPlayerEntity) {
-               leech = LeechHelper.getPlayerLeechPercent((ServerPlayerEntity)attacker);
-            } else {
-               leech = LeechHelper.getLeechPercent(attacker);
-            }
+            if (!ActiveFlags.IS_AOE_ATTACKING.isSet() && !ActiveFlags.IS_DOT_ATTACKING.isSet() && !ActiveFlags.IS_REFLECT_ATTACKING.isSet()) {
+               float leech;
+               if (attacker instanceof ServerPlayerEntity) {
+                  leech = LeechHelper.getPlayerLeechPercent((ServerPlayerEntity)attacker);
+               } else {
+                  leech = LeechHelper.getLeechPercent(attacker);
+               }
 
-            leech *= leechMultiplier;
-            if (leech > 1.0E-4) {
-               leechHealth(attacker, event.getAmount() * leech);
+               leech *= leechMultiplier;
+               if (leech > 1.0E-4) {
+                  leechHealth(attacker, event.getAmount() * leech);
+               }
             }
          }
       }

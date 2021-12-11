@@ -47,6 +47,7 @@
     {"predicate": {"the_vault:texture": 39 }, "model": "the_vault:item/chestplate/knight_1_chestplate"},
     {"predicate": {"the_vault:texture": 40 }, "model": "the_vault:item/chestplate/knight_2_chestplate"},
     {"predicate": {"the_vault:texture": 41 }, "model": "the_vault:item/chestplate/knight_3_chestplate"},
+    {"predicate": {"the_vault:texture": 42 }, "model": "the_vault:item/chestplate/devilduck_1_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 0 }, "model": "the_vault:item/chestplate/scrappy_1_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 1 }, "model": "the_vault:item/chestplate/scrappy_2_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 2 }, "model": "the_vault:item/chestplate/scrappy_3_chestplate"},

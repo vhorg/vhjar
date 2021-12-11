@@ -117,7 +117,12 @@ public class PlayerStatisticsTab extends SkillTab {
       numberOffset = this.addVaultStat(out, "vaultTotal", String.valueOf(vaultStats.func_74762_e("vaultTotal")), numberOffset);
       numberOffset = this.addVaultStat(out, "vaultDeaths", String.valueOf(vaultStats.func_74762_e("vaultDeaths")), numberOffset);
       numberOffset = this.addVaultStat(out, "vaultBails", String.valueOf(vaultStats.func_74762_e("vaultBails")), numberOffset);
-      return this.addVaultStat(out, "vaultBossKills", String.valueOf(vaultStats.func_74762_e("vaultBossKills")), numberOffset);
+      numberOffset = this.addVaultStat(out, "vaultBossKills", String.valueOf(vaultStats.func_74762_e("vaultBossKills")), numberOffset);
+      if (vaultStats.func_150297_b("vaultRaids", 3)) {
+         numberOffset = this.addVaultStat(out, "vaultRaids", String.valueOf(vaultStats.func_74762_e("vaultRaids")), numberOffset);
+      }
+
+      return numberOffset;
    }
 
    private int addVaultStat(List<Tuple<ITextComponent, Tuple<ITextComponent, Integer>>> out, String key, String value, int currentMaxOffset) {

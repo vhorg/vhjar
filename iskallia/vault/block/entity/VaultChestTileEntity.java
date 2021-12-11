@@ -294,21 +294,31 @@ public class VaultChestTileEntity extends ChestTileEntity {
 
    private List<ItemStack> generateSpecialLoot(VaultRaid vault, ServerWorld sWorld, ServerPlayerEntity player, BlockState thisState) {
       List<ItemStack> loot = new ArrayList<>();
-      vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).ifPresent(crystalData -> {
-         if (!crystalData.preventsRandomModifiers()) {
-            float chance = ModConfigs.VAULT_CHEST_META.getCatalystChance(thisState.func_177230_c().getRegistryName(), this.rarity);
-            float incModifier = 0.0F;
+      if (vault.getActiveObjectives().stream().noneMatch(VaultObjective::preventsCatalystFragments)) {
+         vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).ifPresent(crystalData -> {
+            if (!crystalData.preventsRandomModifiers()) {
+               float chance = ModConfigs.VAULT_CHEST_META.getCatalystChance(thisState.func_177230_c().getRegistryName(), this.rarity);
+               float incModifier = 0.0F;
 
-            for (CatalystChanceModifier modifier : vault.getActiveModifiersFor(PlayerFilter.any(), CatalystChanceModifier.class)) {
-               incModifier += modifier.getCatalystChanceIncrease();
+               for (CatalystChanceModifier modifier : vault.getActiveModifiersFor(PlayerFilter.any(), CatalystChanceModifier.class)) {
+                  incModifier += modifier.getCatalystChanceIncrease();
+               }
+
+               chance *= 1.0F + incModifier;
+               if (sWorld.func_201674_k().nextFloat() < chance) {
+                  loot.add(new ItemStack(ModItems.VAULT_CATALYST_FRAGMENT));
+               }
             }
 
-            chance *= 1.0F + incModifier;
-            if (sWorld.func_201674_k().nextFloat() < chance) {
-               loot.add(new ItemStack(ModItems.VAULT_CATALYST_FRAGMENT));
+            if (crystalData.getGuaranteedRoomFilters().isEmpty()) {
+               float chance = ModConfigs.VAULT_CHEST_META.getRuneChance(thisState.func_177230_c().getRegistryName(), this.rarity);
+               if (sWorld.func_201674_k().nextFloat() < chance) {
+                  loot.add(new ItemStack(ModConfigs.VAULT_RUNE.getRandomRune()));
+               }
             }
-         }
-      });
+         });
+      }
+
       vault.getProperties().getBase(VaultRaid.LEVEL).ifPresent(level -> {
          int traders = ModConfigs.SCALING_CHEST_REWARDS.traderCount(thisState.func_177230_c().getRegistryName(), this.rarity, level);
 

@@ -14,6 +14,8 @@ public class VaultMetaChestConfig extends Config {
    @Expose
    private final Map<String, Map<String, Float>> catalystChances = new HashMap<>();
    @Expose
+   private final Map<String, Map<String, Float>> runeChances = new HashMap<>();
+   @Expose
    private final Map<String, Float> pityWeight = new HashMap<>();
 
    @Override
@@ -23,6 +25,10 @@ public class VaultMetaChestConfig extends Config {
 
    public float getCatalystChance(ResourceLocation chestKey, VaultRarity chestRarity) {
       return this.catalystChances.getOrDefault(chestKey.toString(), Collections.emptyMap()).getOrDefault(chestRarity.name(), 0.0F);
+   }
+
+   public float getRuneChance(ResourceLocation chestKey, VaultRarity chestRarity) {
+      return this.runeChances.getOrDefault(chestKey.toString(), Collections.emptyMap()).getOrDefault(chestRarity.name(), 0.0F);
    }
 
    public WeightedDoubleList<String> getPityAdjustedRarity(WeightedDoubleList<String> chestWeights, int ticksSinceLastChest) {
@@ -46,11 +52,17 @@ public class VaultMetaChestConfig extends Config {
       this.pityWeight.put(VaultRarity.EPIC.name(), 0.1F);
       this.pityWeight.put(VaultRarity.OMEGA.name(), 0.3F);
       this.catalystChances.clear();
-      this.setupEmptyChances(ModBlocks.VAULT_CHEST);
-      this.setupEmptyChances(ModBlocks.VAULT_ALTAR_CHEST);
-      this.setupEmptyChances(ModBlocks.VAULT_TREASURE_CHEST);
-      this.setupEmptyChances(ModBlocks.VAULT_COOP_CHEST);
-      this.setupEmptyChances(ModBlocks.VAULT_BONUS_CHEST);
+      this.setupEmptyChances(ModBlocks.VAULT_CHEST, this.catalystChances);
+      this.setupEmptyChances(ModBlocks.VAULT_ALTAR_CHEST, this.catalystChances);
+      this.setupEmptyChances(ModBlocks.VAULT_TREASURE_CHEST, this.catalystChances);
+      this.setupEmptyChances(ModBlocks.VAULT_COOP_CHEST, this.catalystChances);
+      this.setupEmptyChances(ModBlocks.VAULT_BONUS_CHEST, this.catalystChances);
+      this.runeChances.clear();
+      this.setupEmptyChances(ModBlocks.VAULT_CHEST, this.runeChances);
+      this.setupEmptyChances(ModBlocks.VAULT_ALTAR_CHEST, this.runeChances);
+      this.setupEmptyChances(ModBlocks.VAULT_TREASURE_CHEST, this.runeChances);
+      this.setupEmptyChances(ModBlocks.VAULT_COOP_CHEST, this.runeChances);
+      this.setupEmptyChances(ModBlocks.VAULT_BONUS_CHEST, this.runeChances);
       Map<String, Float> chestChances = this.catalystChances.get(ModBlocks.VAULT_CHEST.getRegistryName().toString());
       chestChances.put(VaultRarity.RARE.name(), 0.1F);
       chestChances.put(VaultRarity.EPIC.name(), 0.4F);
@@ -62,13 +74,13 @@ public class VaultMetaChestConfig extends Config {
       }
    }
 
-   private void setupEmptyChances(Block block) {
+   private void setupEmptyChances(Block block, Map<String, Map<String, Float>> mapOut) {
       Map<String, Float> chances = new HashMap<>();
 
       for (VaultRarity rarity : VaultRarity.values()) {
          chances.put(rarity.name(), 0.0F);
       }
 
-      this.catalystChances.put(block.getRegistryName().toString(), chances);
+      mapOut.put(block.getRegistryName().toString(), chances);
    }
 }

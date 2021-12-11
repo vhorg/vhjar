@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -34,10 +35,15 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.IWorldReader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.FakePlayer;
@@ -193,6 +199,10 @@ public class MiscUtils {
       return constants[MathHelper.func_76125_a(index, 0, constants.length - 1)];
    }
 
+   public static Optional<BlockPos> getEmptyNearby(IWorldReader world, BlockPos pos) {
+      return BlockPos.func_239584_a_(pos, 8, 8, world::func_175623_d);
+   }
+
    public static BlockPos getRandomPos(AxisAlignedBB box, Random r) {
       int sizeX = Math.max(1, MathHelper.func_76128_c(box.func_216364_b()));
       int sizeY = Math.max(1, MathHelper.func_76128_c(box.func_216360_c()));
@@ -217,6 +227,26 @@ public class MiscUtils {
       float y = pos.func_177956_o() + 0.5F - scale / 2.0F + r.nextFloat() * scale;
       float z = pos.func_177952_p() + 0.5F - scale / 2.0F + r.nextFloat() * scale;
       return new Vector3d(x, y, z);
+   }
+
+   public static Collection<ChunkPos> getChunksContaining(AxisAlignedBB box) {
+      return getChunksContaining(
+         new Vector3i(box.field_72340_a, box.field_72338_b, box.field_72339_c), new Vector3i(box.field_72336_d, box.field_72337_e, box.field_72334_f)
+      );
+   }
+
+   public static Collection<ChunkPos> getChunksContaining(Vector3i min, Vector3i max) {
+      List<ChunkPos> affected = Lists.newArrayList();
+      int maxX = max.func_177958_n() >> 4;
+      int maxZ = max.func_177952_p() >> 4;
+
+      for (int chX = min.func_177958_n() >> 4; chX <= maxX; chX++) {
+         for (int chZ = min.func_177952_p() >> 4; chZ <= maxZ; chZ++) {
+            affected.add(new ChunkPos(chX, chZ));
+         }
+      }
+
+      return affected;
    }
 
    @Nullable
@@ -341,6 +371,34 @@ public class MiscUtils {
             dropped.func_200217_b(player.func_110124_au());
          }
       }
+   }
+
+   public static Vector3f getRandomCirclePosition(Vector3f centerOffset, Vector3f axis, float radius) {
+      return getCirclePosition(centerOffset, axis, radius, (float)(Math.random() * 360.0));
+   }
+
+   public static Vector3f getCirclePosition(Vector3f centerOffset, Vector3f axis, float radius, float degree) {
+      Vector3f circleVec = normalize(perpendicular(axis));
+      circleVec = new Vector3f(circleVec.func_195899_a() * radius, circleVec.func_195900_b() * radius, circleVec.func_195902_c() * radius);
+      Quaternion rotQuat = new Quaternion(axis, degree, true);
+      circleVec.func_214905_a(rotQuat);
+      return new Vector3f(
+         circleVec.func_195899_a() + centerOffset.func_195899_a(),
+         circleVec.func_195900_b() + centerOffset.func_195900_b(),
+         circleVec.func_195902_c() + centerOffset.func_195902_c()
+      );
+   }
+
+   public static Vector3f normalize(Vector3f vec) {
+      float lengthSq = vec.func_195899_a() * vec.func_195899_a() + vec.func_195900_b() * vec.func_195900_b() + vec.func_195902_c() * vec.func_195902_c();
+      float length = (float)Math.sqrt(lengthSq);
+      return new Vector3f(vec.func_195899_a() / length, vec.func_195900_b() / length, vec.func_195902_c() / length);
+   }
+
+   public static Vector3f perpendicular(Vector3f vec) {
+      return vec.func_195902_c() == 0.0
+         ? new Vector3f(vec.func_195900_b(), -vec.func_195899_a(), 0.0F)
+         : new Vector3f(0.0F, vec.func_195902_c(), -vec.func_195900_b());
    }
 
    public static boolean isPlayerFakeMP(ServerPlayerEntity player) {

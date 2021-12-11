@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 public abstract class VaultGoalData {
    public static VaultGoalData CURRENT_DATA = null;
+   public static VaultGoalData ADDITIONAL_DATA = null;
 
    public abstract void receive(VaultGoalMessage var1);
 
@@ -31,8 +32,13 @@ public abstract class VaultGoalData {
             CURRENT_DATA = new AncientGoalData();
             CURRENT_DATA.receive(pkt);
             break;
+         case RAID_GOAL:
+            CURRENT_DATA = new ActiveRaidGoalData();
+            CURRENT_DATA.receive(pkt);
+            break;
          case CLEAR:
             CURRENT_DATA = null;
+            ADDITIONAL_DATA = null;
       }
    }
 }

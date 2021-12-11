@@ -12,6 +12,7 @@ import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.item.gear.model.BarbarianArmorModel;
 import iskallia.vault.item.gear.model.BoneArmorModel;
 import iskallia.vault.item.gear.model.CloakArmorModel;
+import iskallia.vault.item.gear.model.DevilDuckArmorModel;
 import iskallia.vault.item.gear.model.FurArmorModel;
 import iskallia.vault.item.gear.model.JawboneArmorModel;
 import iskallia.vault.item.gear.model.KnightArmorModel;
@@ -89,6 +90,8 @@ public class ModModels {
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.func_228639_c_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.VAULT_CRATE_SCAVENGER, RenderType.func_228639_c_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.func_228639_c_(), RenderType.func_228645_f_());
+      setRenderLayers(ModBlocks.RAID_CONTROLLER_BLOCK, RenderType.func_228639_c_(), RenderType.func_228645_f_());
+      setRenderLayers(ModBlocks.VAULT_CHARM_CONTROLLER_BLOCK, RenderType.func_228639_c_(), RenderType.func_228645_f_());
    }
 
    private static void setRenderLayers(Block block, RenderType... renderTypes) {
@@ -191,6 +194,7 @@ public class ModModels {
       public static ModModels.GearModel KNIGHT_1;
       public static ModModels.GearModel KNIGHT_2;
       public static ModModels.GearModel KNIGHT_3;
+      public static ModModels.GearModel DEVIL_DUCK_1;
       int id;
       String displayName;
       VaultGearModel<? extends LivingEntity> helmetModel;
@@ -246,6 +250,7 @@ public class ModModels {
          KNIGHT_1 = register("Knight 1", () -> KnightArmorModel.Variant1.class);
          KNIGHT_2 = register("Knight 2", () -> KnightArmorModel.Variant2.class);
          KNIGHT_3 = register("Knight 3", () -> KnightArmorModel.Variant3.class);
+         DEVIL_DUCK_1 = register("DevilDuck 1", () -> DevilDuckArmorModel.Variant1.class);
       }
 
       public VaultGearModel<? extends LivingEntity> forSlotType(EquipmentSlotType slotType) {

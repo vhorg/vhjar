@@ -63,6 +63,11 @@ public class TroveObjective extends VaultObjective {
       return true;
    }
 
+   @Override
+   public boolean preventsInfluences() {
+      return true;
+   }
+
    @Nonnull
    @Override
    public Supplier<? extends VaultGenerator> getVaultGenerator() {

@@ -47,6 +47,7 @@
     {"predicate": {"the_vault:texture": 39 }, "model": "the_vault:item/boots/knight_1_boots"},
     {"predicate": {"the_vault:texture": 40 }, "model": "the_vault:item/boots/knight_2_boots"},
     {"predicate": {"the_vault:texture": 41 }, "model": "the_vault:item/boots/knight_3_boots"},
+    {"predicate": {"the_vault:texture": 42 }, "model": "the_vault:item/boots/devilduck_1_boots"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 0 }, "model": "the_vault:item/boots/scrappy_1_boots"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 1 }, "model": "the_vault:item/boots/scrappy_2_boots"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 2 }, "model": "the_vault:item/boots/scrappy_3_boots"},

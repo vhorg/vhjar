@@ -1695,6 +1695,186 @@
             }
           ]
         }
-    }
+    },
+    {
+        "weight": 50,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "the_vault:wildwest/pallet1"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/wildwest/layer0/big1",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "the_vault:generic/unstable_tnt"
+            }
+          ]
+        }
+      },
+      {
+        "weight": 50,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "the_vault:wildwest/pallet1"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/wildwest/layer0/big2",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "the_vault:generic/unstable_tnt"
+            }
+          ]
+        }
+      },
+      {
+        "weight": 50,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "the_vault:wildwest/pallet1"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/wildwest/layer0/big3",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "the_vault:generic/unstable_tnt"
+            }
+          ]
+        }
+      },
+      {
+        "weight": 50,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "minecraft:empty",
+            "the_vault:wildwest/pallet1"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/wildwest/layer0/big4",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "the_vault:generic/unstable_tnt"
+            }
+          ]
+        }
+      },
+      {
+        "weight": 40,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/contest/layer0/dragon",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "the_vault:contest/dragon_loot"
+            }
+          ]
+        }
+      },
+      {
+        "weight": 20,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/contest/layer0/mine",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "the_vault:contest/mine_ores"
+            }
+          ]
+        }
+      },
+      {
+        "weight": 300,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/contest/layer0/tree",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "minecraft:empty"
+            }
+          ]
+        }
+      },
+      {
+        "weight": 300,
+        "element":
+        {
+          "processors": [
+            "minecraft:empty"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+            {
+              "location": "the_vault:vault/enigma/rooms/contest/layer0/prismarine",
+              "projection": "rigid",
+              "element_type": "the_vault:paletted_single_pool_element",
+              "processors": "minecraft:empty"
+            }
+          ]
+        }
+      }
     ]
   }

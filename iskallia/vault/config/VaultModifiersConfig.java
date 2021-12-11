@@ -212,6 +212,21 @@ public class VaultModifiersConfig extends Config {
                new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
             )
          );
+      level.RAID_POOLS
+         .addAll(
+            Arrays.asList(
+               new VaultModifiersConfig.Pool(2, 2)
+                  .add("Crowded", 1)
+                  .add("Chaos", 1)
+                  .add("Fast", 1)
+                  .add("Rush", 1)
+                  .add("Easy", 1)
+                  .add("Hard", 1)
+                  .add("Treasure", 1)
+                  .add("Unlucky", 1),
+               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
+            )
+         );
       this.LEVELS.add(level);
       this.MODIFIER_PREVENTIONS = new HashMap<>();
       List<String> preventedModifiers = new ArrayList<>();
@@ -219,9 +234,20 @@ public class VaultModifiersConfig extends Config {
       this.MODIFIER_PREVENTIONS.put(Vault.id("scavenger_hunt").toString(), preventedModifiers);
    }
 
-   public Set<VaultModifier> getRandom(Random random, int level, boolean raffle, @Nullable ResourceLocation objectiveKey) {
+   public Set<VaultModifier> getRandom(Random random, int level, VaultModifiersConfig.ModifierPoolType type, @Nullable ResourceLocation objectiveKey) {
       VaultModifiersConfig.Level override = this.getForLevel(level);
-      List<VaultModifiersConfig.Pool> pools = raffle ? override.RAFFLE_POOLS : override.DEFAULT_POOLS;
+      List<VaultModifiersConfig.Pool> pools;
+      switch (type) {
+         case RAFFLE:
+            pools = override.RAFFLE_POOLS;
+            break;
+         case RAID:
+            pools = override.RAID_POOLS;
+            break;
+         default:
+            pools = override.DEFAULT_POOLS;
+      }
+
       if (pools == null) {
          return new HashSet<>();
       } else {
@@ -263,12 +289,21 @@ public class VaultModifiersConfig extends Config {
       public List<VaultModifiersConfig.Pool> DEFAULT_POOLS;
       @Expose
       public List<VaultModifiersConfig.Pool> RAFFLE_POOLS;
+      @Expose
+      public List<VaultModifiersConfig.Pool> RAID_POOLS;
 
       public Level(int minLevel) {
          this.MIN_LEVEL = minLevel;
          this.DEFAULT_POOLS = new ArrayList<>();
          this.RAFFLE_POOLS = new ArrayList<>();
+         this.RAID_POOLS = new ArrayList<>();
       }
+   }
+
+   public static enum ModifierPoolType {
+      DEFAULT,
+      RAFFLE,
+      RAID;
    }
 
    public static class Pool {

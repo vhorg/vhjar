@@ -1,9 +1,11 @@
 package iskallia.vault.world.vault.modifier;
 
+import iskallia.vault.config.VaultModifiersConfig;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
+import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,17 +41,29 @@ public class VaultModifiers implements INBTSerializable<CompoundNBT>, Iterable<V
 
    public void generateGlobal(VaultRaid vault, ServerWorld world, Random random) {
       int level = vault.getProperties().getValue(VaultRaid.LEVEL);
-      boolean raffle = vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false);
+      VaultModifiersConfig.ModifierPoolType type = VaultModifiersConfig.ModifierPoolType.DEFAULT;
+      if (vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false)) {
+         type = VaultModifiersConfig.ModifierPoolType.RAFFLE;
+      } else if (vault.getActiveObjective(RaidChallengeObjective.class).isPresent()) {
+         type = VaultModifiersConfig.ModifierPoolType.RAID;
+      }
+
       ResourceLocation objectiveKey = vault.getAllObjectives().stream().findFirst().map(VaultObjective::getId).orElse(null);
-      ModConfigs.VAULT_MODIFIERS.getRandom(random, level, raffle, objectiveKey).forEach(this::addPermanentModifier);
+      ModConfigs.VAULT_MODIFIERS.getRandom(random, level, type, objectiveKey).forEach(this::addPermanentModifier);
    }
 
    @Deprecated
    public void generatePlayer(VaultRaid vault, VaultPlayer player, ServerWorld world, Random random) {
       int level = player.getProperties().getValue(VaultRaid.LEVEL);
-      boolean raffle = vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false);
+      VaultModifiersConfig.ModifierPoolType type = VaultModifiersConfig.ModifierPoolType.DEFAULT;
+      if (vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false)) {
+         type = VaultModifiersConfig.ModifierPoolType.RAFFLE;
+      } else if (vault.getActiveObjective(RaidChallengeObjective.class).isPresent()) {
+         type = VaultModifiersConfig.ModifierPoolType.RAID;
+      }
+
       ResourceLocation objectiveKey = vault.getAllObjectives().stream().findFirst().map(VaultObjective::getId).orElse(null);
-      ModConfigs.VAULT_MODIFIERS.getRandom(random, level, raffle, objectiveKey).forEach(this::addPermanentModifier);
+      ModConfigs.VAULT_MODIFIERS.getRandom(random, level, type, objectiveKey).forEach(this::addPermanentModifier);
       this.setInitialized();
    }
 

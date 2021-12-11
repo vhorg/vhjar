@@ -22,10 +22,15 @@ import iskallia.vault.config.LegendaryTreasureRareConfig;
 import iskallia.vault.config.LootTablesConfig;
 import iskallia.vault.config.ModBoxConfig;
 import iskallia.vault.config.MysteryBoxConfig;
+import iskallia.vault.config.MysteryEggConfig;
+import iskallia.vault.config.MysteryHostileEggConfig;
 import iskallia.vault.config.OverLevelEnchantConfig;
 import iskallia.vault.config.PandorasBoxConfig;
 import iskallia.vault.config.PaxelEnhancementConfig;
 import iskallia.vault.config.PlayerScalingConfig;
+import iskallia.vault.config.RaidConfig;
+import iskallia.vault.config.RaidEventConfig;
+import iskallia.vault.config.RaidModifierConfig;
 import iskallia.vault.config.ResearchConfig;
 import iskallia.vault.config.ResearchGroupConfig;
 import iskallia.vault.config.ResearchGroupStyleConfig;
@@ -43,6 +48,7 @@ import iskallia.vault.config.TraderCoreConfig;
 import iskallia.vault.config.UnidentifiedTreasureKeyConfig;
 import iskallia.vault.config.UnknownEggConfig;
 import iskallia.vault.config.VaultAltarConfig;
+import iskallia.vault.config.VaultCharmConfig;
 import iskallia.vault.config.VaultChestConfig;
 import iskallia.vault.config.VaultCrystalCatalystConfig;
 import iskallia.vault.config.VaultCrystalConfig;
@@ -61,6 +67,7 @@ import iskallia.vault.config.VaultMobsConfig;
 import iskallia.vault.config.VaultModifiersConfig;
 import iskallia.vault.config.VaultPortalConfig;
 import iskallia.vault.config.VaultRelicsConfig;
+import iskallia.vault.config.VaultRuneConfig;
 import iskallia.vault.config.VaultScalingChestConfig;
 import iskallia.vault.config.VaultSizeConfig;
 import iskallia.vault.config.VaultStewConfig;
@@ -140,6 +147,13 @@ public class ModConfigs {
    public static VaultInhibitorConfig VAULT_INHIBITOR;
    public static FlawedRubyConfig FLAWED_RUBY;
    public static EtchingConfig ETCHING;
+   public static RaidConfig RAID_CONFIG;
+   public static RaidModifierConfig RAID_MODIFIER_CONFIG;
+   public static RaidEventConfig RAID_EVENT_CONFIG;
+   public static VaultCharmConfig VAULT_CHARM;
+   public static MysteryEggConfig MYSTERY_EGG;
+   public static MysteryHostileEggConfig MYSTERY_HOSTILE_EGG;
+   public static VaultRuneConfig VAULT_RUNE;
 
    public static void registerCompressionConfigs() {
    }
@@ -218,6 +232,13 @@ public class ModConfigs {
       VAULT_INHIBITOR = new VaultInhibitorConfig().readConfig();
       FLAWED_RUBY = new FlawedRubyConfig().readConfig();
       ETCHING = new EtchingConfig().readConfig();
+      RAID_CONFIG = new RaidConfig().readConfig();
+      RAID_MODIFIER_CONFIG = new RaidModifierConfig().readConfig();
+      RAID_EVENT_CONFIG = new RaidEventConfig().readConfig();
+      VAULT_CHARM = new VaultCharmConfig().readConfig();
+      MYSTERY_EGG = new MysteryEggConfig().readConfig();
+      MYSTERY_HOSTILE_EGG = new MysteryHostileEggConfig().readConfig();
+      VAULT_RUNE = new VaultRuneConfig().readConfig();
       Vault.LOGGER.info("Vault Configs are loaded successfully!");
    }
 }

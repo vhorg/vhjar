@@ -14,6 +14,7 @@ import iskallia.vault.world.vault.influence.ResistanceInfluence;
 import iskallia.vault.world.vault.influence.TimeInfluence;
 import iskallia.vault.world.vault.influence.VaultInfluence;
 import iskallia.vault.world.vault.influence.VaultInfluences;
+import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,63 +52,65 @@ public class VaultInfluenceHandler {
       if (vaultLvl >= 50) {
          CrystalData data = vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).orElse(null);
          if (data != null && data.canBeModified() && data.getType().canTriggerInfluences() && vault.getPlayers().size() <= 1) {
-            VaultInfluences influences = vault.getInfluences();
-            PlayerFavourData favourData = PlayerFavourData.get(world);
-            Map<PlayerFavourData.VaultGodType, Integer> positives = new HashMap<>();
-            Map<PlayerFavourData.VaultGodType, Integer> negatives = new HashMap<>();
+            if (!vault.getAllObjectives().stream().anyMatch(VaultObjective::preventsInfluences)) {
+               VaultInfluences influences = vault.getInfluences();
+               PlayerFavourData favourData = PlayerFavourData.get(world);
+               Map<PlayerFavourData.VaultGodType, Integer> positives = new HashMap<>();
+               Map<PlayerFavourData.VaultGodType, Integer> negatives = new HashMap<>();
 
-            for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {
-               for (VaultPlayer vPlayer : vault.getPlayers()) {
-                  int favour = favourData.getFavour(vPlayer.getPlayerId(), type);
-                  if (Math.abs(favour) >= 4 && !(rand.nextFloat() >= 0.35F)) {
-                     if (favour < 0) {
-                        negatives.put(type, favour);
-                     } else {
-                        positives.put(type, favour);
+               for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {
+                  for (VaultPlayer vPlayer : vault.getPlayers()) {
+                     int favour = favourData.getFavour(vPlayer.getPlayerId(), type);
+                     if (Math.abs(favour) >= 4 && !(rand.nextFloat() >= 0.35F)) {
+                        if (favour < 0) {
+                           negatives.put(type, favour);
+                        } else {
+                           positives.put(type, favour);
+                        }
+                        break;
                      }
-                     break;
                   }
                }
-            }
 
-            positives.forEach(
-               (typex, favourx) -> {
-                  Tuple<VaultInfluence, String> influenceResult = getPositiveInfluence(typex, Math.abs(favourx));
-                  influences.addInfluence((VaultInfluence)influenceResult.func_76341_a(), vault, world);
-                  String message = messages.get(typex).getPositiveMessage();
-                  IFormattableTextComponent vgName = new StringTextComponent(typex.getName()).func_240699_a_(typex.getChatColor());
-                  vgName.func_240700_a_(style -> style.func_240716_a_(new HoverEvent(Action.field_230550_a_, typex.getHoverChatComponent())));
-                  IFormattableTextComponent txt = new StringTextComponent("");
-                  txt.func_230529_a_(new StringTextComponent("[VG] ").func_240699_a_(TextFormatting.DARK_PURPLE))
-                     .func_230529_a_(vgName)
-                     .func_230529_a_(new StringTextComponent(": ").func_240699_a_(TextFormatting.WHITE))
-                     .func_230529_a_(new StringTextComponent(message));
-                  IFormattableTextComponent info = new StringTextComponent((String)influenceResult.func_76340_b()).func_240699_a_(TextFormatting.DARK_GRAY);
-                  vault.getPlayers().forEach(vPlayerx -> vPlayerx.runIfPresent(world.func_73046_m(), sPlayer -> {
-                     sPlayer.func_145747_a(txt, Util.field_240973_b_);
-                     sPlayer.func_145747_a(info, Util.field_240973_b_);
-                  }));
-               }
-            );
-            negatives.forEach(
-               (typex, favourx) -> {
-                  Tuple<VaultInfluence, String> influenceResult = getNegativeInfluence(typex, Math.abs(favourx));
-                  influences.addInfluence((VaultInfluence)influenceResult.func_76341_a(), vault, world);
-                  String message = messages.get(typex).getNegativeMessage();
-                  IFormattableTextComponent vgName = new StringTextComponent(typex.getName()).func_240699_a_(typex.getChatColor());
-                  vgName.func_240700_a_(style -> style.func_240716_a_(new HoverEvent(Action.field_230550_a_, typex.getHoverChatComponent())));
-                  IFormattableTextComponent txt = new StringTextComponent("");
-                  txt.func_230529_a_(new StringTextComponent("[VG] ").func_240699_a_(TextFormatting.DARK_PURPLE))
-                     .func_230529_a_(vgName)
-                     .func_230529_a_(new StringTextComponent(": ").func_240699_a_(TextFormatting.WHITE))
-                     .func_230529_a_(new StringTextComponent(message));
-                  IFormattableTextComponent info = new StringTextComponent((String)influenceResult.func_76340_b()).func_240699_a_(TextFormatting.DARK_GRAY);
-                  vault.getPlayers().forEach(vPlayerx -> vPlayerx.runIfPresent(world.func_73046_m(), sPlayer -> {
-                     sPlayer.func_145747_a(txt, Util.field_240973_b_);
-                     sPlayer.func_145747_a(info, Util.field_240973_b_);
-                  }));
-               }
-            );
+               positives.forEach(
+                  (typex, favourx) -> {
+                     Tuple<VaultInfluence, String> influenceResult = getPositiveInfluence(typex, Math.abs(favourx));
+                     influences.addInfluence((VaultInfluence)influenceResult.func_76341_a(), vault, world);
+                     String message = messages.get(typex).getPositiveMessage();
+                     IFormattableTextComponent vgName = new StringTextComponent(typex.getName()).func_240699_a_(typex.getChatColor());
+                     vgName.func_240700_a_(style -> style.func_240716_a_(new HoverEvent(Action.field_230550_a_, typex.getHoverChatComponent())));
+                     IFormattableTextComponent txt = new StringTextComponent("");
+                     txt.func_230529_a_(new StringTextComponent("[VG] ").func_240699_a_(TextFormatting.DARK_PURPLE))
+                        .func_230529_a_(vgName)
+                        .func_230529_a_(new StringTextComponent(": ").func_240699_a_(TextFormatting.WHITE))
+                        .func_230529_a_(new StringTextComponent(message));
+                     IFormattableTextComponent info = new StringTextComponent((String)influenceResult.func_76340_b()).func_240699_a_(TextFormatting.DARK_GRAY);
+                     vault.getPlayers().forEach(vPlayerx -> vPlayerx.runIfPresent(world.func_73046_m(), sPlayer -> {
+                        sPlayer.func_145747_a(txt, Util.field_240973_b_);
+                        sPlayer.func_145747_a(info, Util.field_240973_b_);
+                     }));
+                  }
+               );
+               negatives.forEach(
+                  (typex, favourx) -> {
+                     Tuple<VaultInfluence, String> influenceResult = getNegativeInfluence(typex, Math.abs(favourx));
+                     influences.addInfluence((VaultInfluence)influenceResult.func_76341_a(), vault, world);
+                     String message = messages.get(typex).getNegativeMessage();
+                     IFormattableTextComponent vgName = new StringTextComponent(typex.getName()).func_240699_a_(typex.getChatColor());
+                     vgName.func_240700_a_(style -> style.func_240716_a_(new HoverEvent(Action.field_230550_a_, typex.getHoverChatComponent())));
+                     IFormattableTextComponent txt = new StringTextComponent("");
+                     txt.func_230529_a_(new StringTextComponent("[VG] ").func_240699_a_(TextFormatting.DARK_PURPLE))
+                        .func_230529_a_(vgName)
+                        .func_230529_a_(new StringTextComponent(": ").func_240699_a_(TextFormatting.WHITE))
+                        .func_230529_a_(new StringTextComponent(message));
+                     IFormattableTextComponent info = new StringTextComponent((String)influenceResult.func_76340_b()).func_240699_a_(TextFormatting.DARK_GRAY);
+                     vault.getPlayers().forEach(vPlayerx -> vPlayerx.runIfPresent(world.func_73046_m(), sPlayer -> {
+                        sPlayer.func_145747_a(txt, Util.field_240973_b_);
+                        sPlayer.func_145747_a(info, Util.field_240973_b_);
+                     }));
+                  }
+               );
+            }
          }
       }
    }

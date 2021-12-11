@@ -54,10 +54,16 @@ public class BreadcrumbFeature extends Feature<NoFeatureConfig> {
          doChestSpawnPass(rand, world, blockPlacer, featurePos, ModBlocks.VAULT_COOP_CHEST.func_176223_P());
       }
 
+      placeChestModifierFeatures(vault, world, blockPlacer, rand, featurePos);
+   }
+
+   public static void placeChestModifierFeatures(
+      VaultRaid vault, ISeedReader world, BiPredicate<BlockPos, BlockState> blockPlacer, Random rand, BlockPos featurePos
+   ) {
       vault.getActiveModifiersFor(PlayerFilter.any(), ChestModifier.class).forEach(modifier -> {
          int attempts = modifier.getChestGenerationAttempts();
 
-         for (int ix = 0; ix < modifier.getAdditionalBonusChestPasses(); ix++) {
+         for (int i = 0; i < modifier.getAdditionalBonusChestPasses(); i++) {
             doChestSpawnPass(rand, world, blockPlacer, featurePos, ModBlocks.VAULT_BONUS_CHEST.func_176223_P(), attempts);
          }
       });
@@ -77,7 +83,7 @@ public class BreadcrumbFeature extends Feature<NoFeatureConfig> {
       doPlacementPass(rand, world, blockPlacer, pos, toPlace, attempts, offset -> {});
    }
 
-   private static void doPlacementPass(
+   public static void doPlacementPass(
       Random rand, IWorld world, BiPredicate<BlockPos, BlockState> blockPlacer, BlockPos pos, BlockState toPlace, int attempts, Consumer<BlockPos> pass
    ) {
       for (int i = 0; i < attempts; i++) {

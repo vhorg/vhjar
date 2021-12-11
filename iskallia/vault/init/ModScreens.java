@@ -22,6 +22,7 @@ import iskallia.vault.client.gui.screen.ShardPouchScreen;
 import iskallia.vault.client.gui.screen.ShardTradeScreen;
 import iskallia.vault.client.gui.screen.SkillTreeScreen;
 import iskallia.vault.client.gui.screen.TransmogTableScreen;
+import iskallia.vault.client.gui.screen.VaultCharmControllerScreen;
 import iskallia.vault.client.gui.screen.VaultCrateScreen;
 import iskallia.vault.client.gui.screen.VendingMachineScreen;
 import net.minecraft.client.gui.ScreenManager;
@@ -46,6 +47,7 @@ public class ModScreens {
       ScreenManager.func_216911_a(ModContainers.CRYOCHAMBER_CONTAINER, CryochamberScreen::new);
       ScreenManager.func_216911_a(ModContainers.GLOBAL_DIFFICULTY_CONTAINER, GlobalDifficultyScreen::new);
       ScreenManager.func_216911_a(ModContainers.ETCHING_TRADE_CONTAINER, EtchingTradeScreen::new);
+      ScreenManager.func_216911_a(ModContainers.VAULT_CHARM_CONTROLLER_CONTAINER, VaultCharmControllerScreen::new);
    }
 
    public static void registerOverlays() {

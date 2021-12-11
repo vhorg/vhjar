@@ -1,9 +1,11 @@
 package iskallia.vault.world.vault.logic;
 
 import iskallia.vault.entity.AggressiveCowEntity;
+import iskallia.vault.entity.EtchingVendorEntity;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.world.vault.VaultRaid;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -11,6 +13,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifierManager;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
+import net.minecraft.entity.monster.SilverfishEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.server.ServerWorld;
@@ -23,30 +26,36 @@ public class VaultCowOverrides {
       vault.getEvents().add(VaultRaid.REPLACE_WITH_COW);
    }
 
+   @Nullable
    public static AggressiveCowEntity replaceVaultEntity(LivingEntity spawned, ServerWorld world) {
-      AggressiveCowEntity override = (AggressiveCowEntity)ModEntities.AGGRESSIVE_COW.func_200721_a(world);
-      AttributeModifierManager mgr = override.func_233645_dx_();
+      if (!(spawned instanceof SilverfishEntity) && !(spawned instanceof EtchingVendorEntity)) {
+         AggressiveCowEntity override = (AggressiveCowEntity)ModEntities.AGGRESSIVE_COW.func_200721_a(world);
+         AttributeModifierManager mgr = override.func_233645_dx_();
 
-      for (ModifiableAttributeInstance instance : spawned.func_233645_dx_().func_233778_a_()) {
-         if (mgr.func_233790_b_(instance.func_111123_a())) {
-            override.func_110148_a(instance.func_111123_a()).func_111128_a(instance.func_111125_b());
-         }
-      }
-
-      mgr.func_233779_a_(Attributes.field_233823_f_)
-         .func_233769_c_(new AttributeModifier(DAMAGE_NERF_MULTIPLIER, "Scaling Damage Reduction", 0.2, Operation.MULTIPLY_TOTAL));
-      if (spawned instanceof MobEntity) {
-         for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-            ItemStack has = override.func_184582_a(slot);
-            if (!has.func_190926_b()) {
-               spawned.func_184201_a(slot, has.func_77946_l());
-            } else {
-               spawned.func_184201_a(slot, ItemStack.field_190927_a);
+         for (ModifiableAttributeInstance instance : spawned.func_233645_dx_().func_233778_a_()) {
+            if (mgr.func_233790_b_(instance.func_111123_a())) {
+               override.func_110148_a(instance.func_111123_a()).func_111128_a(instance.func_111125_b());
             }
          }
-      }
 
-      override.func_184211_a("replaced_entity");
-      return override;
+         mgr.func_233779_a_(Attributes.field_233823_f_)
+            .func_233769_c_(new AttributeModifier(DAMAGE_NERF_MULTIPLIER, "Scaling Damage Reduction", 0.2, Operation.MULTIPLY_TOTAL));
+         if (spawned instanceof MobEntity) {
+            for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+               ItemStack has = override.func_184582_a(slot);
+               if (!has.func_190926_b()) {
+                  spawned.func_184201_a(slot, has.func_77946_l());
+               } else {
+                  spawned.func_184201_a(slot, ItemStack.field_190927_a);
+               }
+            }
+         }
+
+         override.func_184211_a("replaced_entity");
+         return override;
+      } else {
+         spawned.func_184211_a("replaced_entity");
+         return null;
+      }
    }
 }

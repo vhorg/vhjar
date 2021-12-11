@@ -50,14 +50,6 @@ public class ParryTalent extends PlayerTalent {
                   1.0F
                );
                event.setCanceled(true);
-               if (entity.field_70172_ad > 10) {
-                  entity.field_110153_bc = event.getAmount();
-               } else {
-                  entity.field_70172_ad = 20;
-                  entity.field_110153_bc = event.getAmount();
-                  entity.field_70738_aO = 10;
-                  entity.field_70737_aN = entity.field_70738_aO;
-               }
             }
          }
       }

@@ -1,5 +1,6 @@
 package iskallia.vault.item.crystal;
 
+import iskallia.vault.Vault;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.world.vault.VaultRaid;
@@ -106,12 +107,16 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
    }
 
-   public boolean canCraftCatalysts() {
+   public boolean canModifyWithCrafting() {
       if (!this.canBeModified()) {
          return false;
       } else {
          List<String> modifierNames = this.getModifiers().stream().map(CrystalData.Modifier::getModifierName).collect(Collectors.toList());
-         return modifierNames.contains("Afterlife") ? false : this.getType().canCraftModifiers();
+         if (modifierNames.contains("Afterlife")) {
+            return false;
+         } else {
+            return Vault.id("raid_challenge").equals(this.getSelectedObjective()) ? false : this.getType().canCraftModifiers();
+         }
       }
    }
 

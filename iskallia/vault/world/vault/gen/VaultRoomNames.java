@@ -11,6 +11,8 @@ public class VaultRoomNames {
       switch (filterKey) {
          case "crystal_caves":
             return new StringTextComponent("Crystal Cave").func_240699_a_(TextFormatting.DARK_PURPLE);
+         case "contest":
+            return new StringTextComponent("Contest").func_240699_a_(TextFormatting.DARK_AQUA);
          case "digsite":
             return new StringTextComponent("Digsite").func_240699_a_(TextFormatting.YELLOW);
          case "dungeons":
@@ -41,6 +43,8 @@ public class VaultRoomNames {
             return new StringTextComponent("Viewer").func_240699_a_(TextFormatting.GOLD);
          case "village":
             return new StringTextComponent("Village").func_240699_a_(TextFormatting.AQUA);
+         case "wildwest":
+            return new StringTextComponent("Wild West").func_240699_a_(TextFormatting.YELLOW);
          case "x_spot":
             return new StringTextComponent("X-Mark").func_240699_a_(TextFormatting.YELLOW);
          default:

@@ -16,7 +16,7 @@ public class PlayerRecoveryHelper {
          if (healed instanceof ServerPlayerEntity) {
             ServerPlayerEntity sPlayer = (ServerPlayerEntity)healed;
             int rage = PlayerRageHelper.getCurrentRage(sPlayer, LogicalSide.SERVER);
-            float healMultiplier = 1.0F - rage / 100.0F;
+            float healMultiplier = 1.0F - rage / 100.0F / 2.0F;
             event.setAmount(event.getAmount() * healMultiplier);
          }
       }

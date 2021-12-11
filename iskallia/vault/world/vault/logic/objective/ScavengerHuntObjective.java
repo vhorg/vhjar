@@ -269,9 +269,11 @@ public class ScavengerHuntObjective extends VaultObjective {
                   .func_186469_a(sPlayer.func_184817_da());
                LootContext ctx = builder.func_216022_a(LootParameterSets.field_216261_b);
                this.dropRewardCrate(world, vault, pos, ctx);
-               float additionalChance = vault.getPlayers().size() <= 1 ? 0.0F : Math.min(vault.getPlayers().size() * 0.5F, 1.0F);
-               if (world.field_73012_v.nextFloat() < additionalChance) {
-                  this.dropRewardCrate(world, vault, pos, ctx);
+
+               for (int i = 1; i < vault.getPlayers().size(); i++) {
+                  if (rand.nextFloat() < 0.5F) {
+                     this.dropRewardCrate(world, vault, pos, ctx);
+                  }
                }
 
                IFormattableTextComponent msgContainer = new StringTextComponent("").func_240699_a_(TextFormatting.WHITE);

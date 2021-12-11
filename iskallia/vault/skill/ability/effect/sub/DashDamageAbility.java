@@ -1,5 +1,6 @@
 package iskallia.vault.skill.ability.effect.sub;
 
+import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.skill.ability.config.sub.DashDamageConfig;
 import iskallia.vault.skill.ability.effect.DashAbility;
 import iskallia.vault.util.EntityHelper;
@@ -22,7 +23,8 @@ public class DashDamageAbility extends DashAbility<DashDamageConfig> {
          float atk = (float)player.func_233637_b_(Attributes.field_233823_f_);
 
          for (LivingEntity entity : other) {
-            entity.func_70097_a(DamageSource.func_76365_a(player), atk * config.getAttackDamagePercentPerDash());
+            ActiveFlags.IS_AOE_ATTACKING
+               .runIfNotSet(() -> entity.func_70097_a(DamageSource.func_76365_a(player), atk * config.getAttackDamagePercentPerDash()));
             ServerScheduler.INSTANCE
                .schedule(0, () -> PlayerDamageHelper.applyMultiplier(player, 0.95F, PlayerDamageHelper.Operation.STACKING_MULTIPLY, true, config.getCooldown()));
          }

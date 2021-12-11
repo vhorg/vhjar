@@ -30,11 +30,11 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
    protected MutableBoundingBox boundingBox;
    protected Rotation rotation;
 
-   public VaultPiece(ResourceLocation id) {
+   protected VaultPiece(ResourceLocation id) {
       this.id = id;
    }
 
-   public VaultPiece(ResourceLocation id, ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
+   protected VaultPiece(ResourceLocation id, ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
       this.id = id;
       this.template = template;
       this.boundingBox = boundingBox;
@@ -128,36 +128,48 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
          });
       }
 
-      return elements.stream().map(element -> {
-         ResourceLocation template = (ResourceLocation)element.getTemplate().left().get();
-         String path = template.func_110623_a();
-         if (path.startsWith("vault/prefab/decor/generic/obelisk")) {
-            return new VaultObelisk(template, box, rotation);
-         } else {
-            if (path.startsWith("vault/enigma/rooms")) {
-               if (path.contains("layer0")) {
-                  return new VaultRoom(template, box, rotation);
-               }
-            } else {
-               if (path.startsWith("architect_event/enigma/rooms")) {
-                  return new VaultRoom(template, box, rotation);
-               }
+      return elements.stream()
+         .map(
+            element -> {
+               ResourceLocation template = (ResourceLocation)element.getTemplate().left().get();
+               String path = template.func_110623_a();
+               if (path.startsWith("vault/prefab/decor/generic/obelisk")) {
+                  return new VaultObelisk(template, box, rotation);
+               } else {
+                  if (path.startsWith("vault/enigma/rooms")) {
+                     if (path.contains("layer0")) {
+                        return new VaultRoom(template, box, rotation);
+                     }
+                  } else {
+                     if (path.startsWith("architect_event/enigma/rooms")) {
+                        return new VaultRoom(template, box, rotation);
+                     }
 
-               if (path.startsWith("vault/enigma/tunnels")) {
-                  return new VaultTunnel(template, box, rotation);
-               }
+                     if (path.startsWith("raid/enigma/rooms")) {
+                        return new VaultRaidRoom(template, box, rotation);
+                     }
 
-               if (path.startsWith("vault/enigma/starts") || path.startsWith("architect_event/enigma/starts") || path.startsWith("trove/enigma/starts")) {
-                  return new VaultStart(template, box, rotation);
-               }
+                     if (path.startsWith("vault/enigma/tunnels")) {
+                        return new VaultTunnel(template, box, rotation);
+                     }
 
-               if (path.startsWith("vault/enigma/treasure")) {
-                  return new VaultTreasure(template, box, rotation);
+                     if (path.startsWith("vault/enigma/starts")
+                        || path.startsWith("architect_event/enigma/starts")
+                        || path.startsWith("raid/enigma/starts")
+                        || path.startsWith("trove/enigma/starts")) {
+                        return new VaultStart(template, box, rotation);
+                     }
+
+                     if (path.startsWith("vault/enigma/treasure")) {
+                        return new VaultTreasure(template, box, rotation);
+                     }
+                  }
+
+                  return null;
                }
             }
-
-            return null;
-         }
-      }).filter(Objects::nonNull).collect(Collectors.toList());
+         )
+         .filter(Objects::nonNull)
+         .collect(Collectors.toList());
    }
 }

@@ -89,7 +89,6 @@ public abstract class SkillTab extends Screen {
    }
 
    public void func_231164_f_() {
-      System.out.println(this.getClass().getSimpleName() + " closed.");
       persistedTranslations.put((Class<? extends SkillTab>)this.getClass(), this.viewportTranslation);
       persistedScales.put((Class<? extends SkillTab>)this.getClass(), this.viewportScale);
    }

@@ -5,6 +5,7 @@ import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.entity.EternalEntity;
 import iskallia.vault.entity.FighterEntity;
 import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.gear.EtchingItem;
@@ -18,20 +19,26 @@ import iskallia.vault.skill.set.PlayerSet;
 import iskallia.vault.skill.set.SetNode;
 import iskallia.vault.skill.set.SetTree;
 import iskallia.vault.util.AdvancementHelper;
+import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.PlayerDamageHelper;
 import iskallia.vault.util.SideOnlyFixer;
 import iskallia.vault.util.VaultRarity;
 import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.world.data.VaultCharmData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.EquipmentSlotType.Group;
@@ -39,6 +46,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Effects;
 import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -48,6 +56,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemCraftedEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
@@ -86,11 +95,18 @@ public class PlayerEvents {
 
    @SubscribeEvent
    public static void onAttack(AttackEntityEvent event) {
-      if (!event.getPlayer().field_70170_p.field_72995_K) {
-         int level = PlayerVaultStatsData.get((ServerWorld)event.getPlayer().field_70170_p).getVaultStats(event.getPlayer()).getVaultLevel();
-         ItemStack stack = event.getPlayer().func_184614_ca();
+      PlayerEntity attacker = event.getPlayer();
+      if (!attacker.field_70170_p.func_201670_d()) {
+         int level = PlayerVaultStatsData.get((ServerWorld)attacker.field_70170_p).getVaultStats(attacker).getVaultLevel();
+         ItemStack stack = attacker.func_184614_ca();
          if (ModAttributes.MIN_VAULT_LEVEL.exists(stack) && level < ModAttributes.MIN_VAULT_LEVEL.get(stack).get().getValue(stack)) {
             event.setCanceled(true);
+         } else {
+            if (event.getTarget() instanceof LivingEntity) {
+               LivingEntity target = (LivingEntity)event.getTarget();
+               EntityHelper.getNearby(attacker.field_70170_p, attacker.func_233580_cy_(), 9.0F, EternalEntity.class)
+                  .forEach(eternal -> eternal.func_70624_b(target));
+            }
          }
       }
    }
@@ -275,5 +291,36 @@ public class PlayerEvents {
          AdvancementHelper.grantCriterion(serverPlayer, Vault.id("main/root"), "entered_vault");
          AdvancementHelper.grantCriterion(serverPlayer, Vault.id("armors/root"), "entered_vault");
       }
+   }
+
+   @SubscribeEvent
+   public static void onVaultCharmUse(EntityItemPickupEvent event) {
+      if (event.getPlayer() instanceof ServerPlayerEntity) {
+         ServerPlayerEntity player = (ServerPlayerEntity)event.getPlayer();
+         ItemEntity itemEntity = event.getItem();
+         ItemStack stack = itemEntity.func_92059_d();
+         if (!stack.func_190926_b()) {
+            if (player.func_71121_q().func_234923_W_() == Vault.VAULT_KEY) {
+               if (hasVaultCharm(player.field_71071_by)) {
+                  List<ResourceLocation> whitelist = VaultCharmData.get(player.func_71121_q()).getWhitelistedItems(player);
+                  if (whitelist.contains(stack.func_77973_b().getRegistryName())) {
+                     event.setCanceled(true);
+                     itemEntity.func_70106_y();
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   private static boolean hasVaultCharm(PlayerInventory inventory) {
+      for (int slot = 0; slot < inventory.func_70302_i_(); slot++) {
+         ItemStack stack = inventory.func_70301_a(slot);
+         if (!stack.func_190926_b() && stack.func_77973_b() == ModItems.VAULT_CHARM) {
+            return true;
+         }
+      }
+
+      return false;
    }
 }

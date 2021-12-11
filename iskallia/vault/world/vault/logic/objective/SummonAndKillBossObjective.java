@@ -4,6 +4,7 @@ import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.config.LootTablesConfig;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.BossMusicMessage;
 import iskallia.vault.network.message.VaultGoalMessage;
@@ -200,9 +201,11 @@ public class SummonAndKillBossObjective extends VaultObjective {
                .func_186469_a(playerEntity.func_184817_da());
             LootContext ctx = builder.func_216022_a(LootParameterSets.field_216263_d);
             this.dropBossCrate(world, vault, player, ctx);
-            float additionalChance = vault.getPlayers().size() <= 1 ? 0.0F : Math.min(vault.getPlayers().size() * 0.5F, 1.0F);
-            if (world.field_73012_v.nextFloat() < additionalChance) {
-               this.dropBossCrate(world, vault, player, ctx);
+
+            for (int i = 1; i < vault.getPlayers().size(); i++) {
+               if (rand.nextFloat() < 0.5F) {
+                  this.dropBossCrate(world, vault, player, ctx);
+               }
             }
 
             world.func_73046_m().func_184103_al().func_232641_a_(this.getBossKillMessage(playerEntity), ChatType.CHAT, player.getPlayerId());
@@ -244,6 +247,15 @@ public class SummonAndKillBossObjective extends VaultObjective {
       item.func_174869_p();
       world.func_217376_c(item);
       this.crates.add(new VaultObjective.Crate(stacks));
+   }
+
+   @Override
+   protected void addSpecialLoot(ServerWorld world, VaultRaid vault, LootContext context, NonNullList<ItemStack> stacks) {
+      super.addSpecialLoot(world, vault, context, stacks);
+      boolean isCowVault = vault.getProperties().getBaseOrDefault(VaultRaid.COW_VAULT, false);
+      if (isCowVault) {
+         stacks.add(new ItemStack(ModItems.ARMOR_CRATE_HELLCOW));
+      }
    }
 
    protected void onBossDeath(LivingDeathEvent event, VaultRaid vault, ServerWorld world, boolean dropCrate) {

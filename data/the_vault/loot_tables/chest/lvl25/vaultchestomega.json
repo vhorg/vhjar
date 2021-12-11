@@ -1199,6 +1199,30 @@
               ]
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 3,
+          "name": "the_vault:mystery_egg",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.1
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1219,44 +1243,6 @@
               "count": {
                 "min": 1,
                 "max": 1
-              }
-            }
-          ]
-        }
-      ]
-    },
-    { "name": "Mob Eggs",
-      "rolls": {
-        "min": 0,
-        "max": 1
-      },
-      "entries": [
-        {
-          "type": "minecraft:tag",
-          "weight": 1,
-          "name": "the_vault:passiveegg",
-          "expand": "true",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 0,
-                "max": 1
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:tag",
-          "weight": 1,
-          "name": "the_vault:gems",
-          "expand": "true",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 2
               }
             }
           ]

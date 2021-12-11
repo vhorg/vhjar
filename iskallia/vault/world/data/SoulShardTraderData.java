@@ -6,6 +6,7 @@ import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
+import iskallia.vault.item.ItemVaultCrystalSeal;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.util.MathUtilities;
 import java.time.Duration;
@@ -58,14 +59,27 @@ public class SoulShardTraderData extends WorldSavedData {
          this.trades.put(i, new SoulShardTraderData.SelectedTrade(ModConfigs.SOUL_SHARD.getRandomTrade(rand)));
       }
 
+      if (ModConfigs.RAID_EVENT_CONFIG.isEnabled()) {
+         ItemStack eventSeal = new ItemStack(ModItems.CRYSTAL_SEAL_RAID);
+         ItemVaultCrystalSeal.setEventKey(eventSeal, "raid");
+         SoulShardTraderData.SelectedTrade eventTrade = new SoulShardTraderData.SelectedTrade(eventSeal, ModConfigs.RAID_EVENT_CONFIG.getSoulShardTradeCost());
+         eventTrade.isInfinite = true;
+         this.trades.put(0, eventTrade);
+      }
+
       this.nextReset = System.currentTimeMillis() / 1000L + Duration.ofDays(1L).getSeconds();
       this.func_76185_a();
    }
 
    public boolean useTrade(int tradeId) {
-      this.trades.remove(tradeId);
-      this.func_76185_a();
-      return true;
+      SoulShardTraderData.SelectedTrade trade = this.trades.get(tradeId);
+      if (trade != null && trade.isInfinite) {
+         return true;
+      } else {
+         this.trades.remove(tradeId);
+         this.func_76185_a();
+         return true;
+      }
    }
 
    public Map<Integer, SoulShardTraderData.SelectedTrade> getTrades() {
@@ -154,6 +168,7 @@ public class SoulShardTraderData extends WorldSavedData {
    public static class SelectedTrade {
       private final ItemStack stack;
       private final int shardCost;
+      private boolean isInfinite = false;
 
       public SelectedTrade(SoulShardConfig.ShardTrade trade) {
          this.stack = trade.getItem();
@@ -168,6 +183,7 @@ public class SoulShardTraderData extends WorldSavedData {
       public SelectedTrade(CompoundNBT tag) {
          this.stack = ItemStack.func_199557_a(tag.func_74775_l("stack"));
          this.shardCost = tag.func_74762_e("cost");
+         this.isInfinite = tag.func_74767_n("infinite");
       }
 
       public int getShardCost() {
@@ -178,10 +194,15 @@ public class SoulShardTraderData extends WorldSavedData {
          return this.stack.func_77946_l();
       }
 
+      public boolean isInfinite() {
+         return this.isInfinite;
+      }
+
       public CompoundNBT serialize() {
          CompoundNBT tag = new CompoundNBT();
          tag.func_218657_a("stack", this.stack.serializeNBT());
          tag.func_74768_a("cost", this.shardCost);
+         tag.func_74757_a("infinite", this.isInfinite);
          return tag;
       }
    }

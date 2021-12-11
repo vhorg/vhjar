@@ -61,7 +61,7 @@ public class VaultLootableBlock extends Block {
    public static enum Type {
       ORE(VaultLootableTileEntity.VaultOreBlockGenerator::new),
       RICHITY(() -> ModConfigs.VAULT_LOOTABLES.RICHITY::get),
-      RESOURCE(() -> ModConfigs.VAULT_LOOTABLES.RESOURCE::get),
+      RESOURCE(VaultLootableTileEntity.VaultResourceBlockGenerator::new),
       MISC(() -> ModConfigs.VAULT_LOOTABLES.MISC::get),
       VAULT_CHEST(() -> ModConfigs.VAULT_LOOTABLES.VAULT_CHEST::get),
       VAULT_TREASURE(() -> ModConfigs.VAULT_LOOTABLES.VAULT_TREASURE::get),

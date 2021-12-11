@@ -2,9 +2,12 @@ package iskallia.vault.world.data;
 
 import iskallia.vault.attribute.RegistryKeyAttribute;
 import iskallia.vault.backup.BackupManager;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.skill.set.PlayerSet;
+import iskallia.vault.util.calc.PlayerStatisticsCollector;
 import iskallia.vault.world.vault.VaultRaid;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,9 +16,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
@@ -92,7 +99,80 @@ public class VaultRaidData extends WorldSavedData {
                }
             }
          );
-      PlayerStatsData.get(world).onVaultFinished(playerId, vault);
+      PlayerStatsData.get(server).onVaultFinished(playerId, vault);
+      if (!PlayerStatsData.get(server).get(playerId).hasFinishedRaidReward()) {
+         int raids = PlayerStatisticsCollector.getFinishedRaids(server, playerId);
+         if (raids >= PlayerVaultStatsData.get(server).getVaultStats(playerId).getVaultLevel()) {
+            ScheduledItemDropData.get(server).addDrop(playerId, this.generateRaidRewardCrate());
+            PlayerStatsData.get(server).setRaidRewardReceived(playerId);
+         }
+      }
+   }
+
+   private ItemStack generateRaidRewardCrate() {
+      ItemStack stack = new ItemStack(Items.field_221895_gF);
+      CrystalData minerData = new CrystalData();
+      minerData.setModifiable(false);
+      minerData.setPreventsRandomModifiers(true);
+      minerData.setSelectedObjective(VaultRaid.ARCHITECT_EVENT.get().getId());
+      minerData.setTargetObjectiveCount(20);
+      minerData.addModifier("Copious");
+      minerData.addModifier("Rich");
+      minerData.addModifier("Plentiful");
+      minerData.addModifier("Endless");
+      ItemStack miner = new ItemStack(ModItems.VAULT_CRYSTAL);
+      miner.func_196082_o().func_218657_a("CrystalData", minerData.serializeNBT());
+      CrystalData digsiteData = new CrystalData();
+      digsiteData.setModifiable(false);
+      digsiteData.setPreventsRandomModifiers(true);
+      digsiteData.setSelectedObjective(VaultRaid.SCAVENGER_HUNT.get().getId());
+      digsiteData.setTargetObjectiveCount(6);
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addGuaranteedRoom("digsite");
+      digsiteData.addModifier("Super Lucky");
+      digsiteData.addModifier("Super Lucky");
+      digsiteData.addModifier("Locked");
+      ItemStack digsite = new ItemStack(ModItems.VAULT_CRYSTAL);
+      digsite.func_196082_o().func_218657_a("CrystalData", digsiteData.serializeNBT());
+      NonNullList<ItemStack> raidContents = NonNullList.func_191196_a();
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.KNOWLEDGE_STAR));
+      raidContents.add(new ItemStack(ModItems.KNOWLEDGE_STAR));
+      raidContents.add(new ItemStack(ModItems.VAULT_PLATINUM));
+      raidContents.add(new ItemStack(ModItems.VAULT_PLATINUM));
+      raidContents.add(new ItemStack(ModItems.VAULT_PLATINUM));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.UNIDENTIFIED_TREASURE_KEY));
+      raidContents.add(new ItemStack(ModItems.LEGENDARY_TREASURE_OMEGA));
+      raidContents.add(miner);
+      raidContents.add(new ItemStack(ModItems.UNIDENTIFIED_ARTIFACT));
+      raidContents.add(digsite);
+      raidContents.add(new ItemStack(ModItems.LEGENDARY_TREASURE_OMEGA));
+      raidContents.add(new ItemStack(ModItems.UNIDENTIFIED_TREASURE_KEY));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      raidContents.add(new ItemStack(ModItems.VAULT_PLATINUM));
+      raidContents.add(new ItemStack(ModItems.VAULT_PLATINUM));
+      raidContents.add(new ItemStack(ModItems.VAULT_PLATINUM));
+      raidContents.add(new ItemStack(ModItems.SKILL_ORB));
+      raidContents.add(new ItemStack(ModItems.SKILL_ORB));
+      raidContents.add(new ItemStack(ModItems.PANDORAS_BOX));
+      stack.func_196082_o().func_218657_a("BlockEntityTag", new CompoundNBT());
+      ItemStackHelper.func_191282_a(stack.func_196082_o().func_74775_l("BlockEntityTag"), raidContents);
+      return stack;
    }
 
    public VaultRaid startVault(ServerWorld world, VaultRaid.Builder builder) {

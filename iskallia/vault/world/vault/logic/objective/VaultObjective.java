@@ -165,6 +165,18 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
       return false;
    }
 
+   public boolean preventsInfluences() {
+      return false;
+   }
+
+   public boolean preventsNormalMonsterDrops() {
+      return false;
+   }
+
+   public boolean preventsCatalystFragments() {
+      return false;
+   }
+
    public void notifyBail(VaultRaid vault, VaultPlayer player, ServerWorld world) {
    }
 

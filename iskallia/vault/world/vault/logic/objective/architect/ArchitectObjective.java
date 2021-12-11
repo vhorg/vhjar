@@ -394,9 +394,11 @@ public class ArchitectObjective extends VaultObjective {
                .func_186469_a(playerEntity.func_184817_da());
             LootContext ctx = builder.func_216022_a(LootParameterSets.field_216263_d);
             this.spawnRewardCrate(world, bossPos, vault, ctx);
-            float additionalChance = vault.getPlayers().size() <= 1 ? 0.0F : Math.min(vault.getPlayers().size() * 0.5F, 1.0F);
-            if (world.field_73012_v.nextFloat() < additionalChance) {
-               this.spawnRewardCrate(world, bossPos, vault, ctx);
+
+            for (int i = 1; i < vault.getPlayers().size(); i++) {
+               if (rand.nextFloat() < 0.5F) {
+                  this.spawnRewardCrate(world, bossPos, vault, ctx);
+               }
             }
 
             MiscUtils.broadcast(isBossKill ? this.getBossKillMessage(playerEntity) : this.getEscapeMessage(playerEntity));

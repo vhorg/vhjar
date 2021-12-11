@@ -61,9 +61,13 @@ public class PlayerVaultAltarData extends WorldSavedData {
    }
 
    public List<BlockPos> getAltars(UUID uuid) {
-      this.playerAltars.computeIfAbsent(uuid, k -> new ArrayList<>());
-      this.func_76185_a();
-      return this.playerAltars.get(uuid);
+      if (uuid == null) {
+         return new ArrayList<>();
+      } else {
+         this.playerAltars.computeIfAbsent(uuid, k -> new ArrayList<>());
+         this.func_76185_a();
+         return this.playerAltars.get(uuid);
+      }
    }
 
    public PlayerVaultAltarData addAltar(UUID uuid, BlockPos altarPos) {
@@ -79,7 +83,6 @@ public class PlayerVaultAltarData extends WorldSavedData {
    }
 
    public void func_76184_a(CompoundNBT nbt) {
-      System.out.println("----------------READING ALTAR DATA------------------");
       ListNBT playerList = nbt.func_150295_c("PlayerEntries", 8);
       ListNBT recipeList = nbt.func_150295_c("AltarRecipeEntries", 10);
       ListNBT playerBlockPosList = nbt.func_150295_c("PlayerBlockPosEntries", 8);

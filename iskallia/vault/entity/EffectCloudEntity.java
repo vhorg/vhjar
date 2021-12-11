@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.annotations.Expose;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.world.data.VaultPartyData;
 import java.util.ArrayList;
@@ -224,7 +225,11 @@ public class EffectCloudEntity extends Entity {
 
                            for (EffectInstance effectinstance : effectsToApply) {
                               if (effectinstance.func_188419_a().func_76403_b()) {
-                                 effectinstance.func_188419_a().func_180793_a(this, this.getOwner(), livingentity, effectinstance.func_76458_c(), 0.5);
+                                 ActiveFlags.IS_AOE_ATTACKING
+                                    .runIfNotSet(
+                                       () -> effectinstance.func_188419_a()
+                                          .func_180793_a(this, this.getOwner(), livingentity, effectinstance.func_76458_c(), 0.5)
+                                    );
                               } else {
                                  livingentity.func_195064_c(new EffectInstance(effectinstance));
                               }

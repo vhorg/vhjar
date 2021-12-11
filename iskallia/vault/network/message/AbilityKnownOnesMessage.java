@@ -48,10 +48,7 @@ public class AbilityKnownOnesMessage {
 
    public static void handle(AbilityKnownOnesMessage message, Supplier<Context> contextSupplier) {
       Context context = contextSupplier.get();
-      context.enqueueWork(() -> {
-         System.out.println("Received tree! " + message.learnedAbilities.size());
-         ClientAbilityData.updateAbilities(message);
-      });
+      context.enqueueWork(() -> ClientAbilityData.updateAbilities(message));
       context.setPacketHandled(true);
    }
 }

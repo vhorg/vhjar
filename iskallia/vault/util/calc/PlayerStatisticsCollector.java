@@ -14,6 +14,7 @@ import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
+import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.player.VaultRunner;
 import iskallia.vault.world.vault.player.VaultSpectator;
@@ -28,6 +29,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
@@ -137,6 +139,10 @@ public class PlayerStatisticsCollector {
             vaultStats.func_74768_a("vaultDeaths", vaultRunsSnapshot.deaths);
             vaultStats.func_74768_a("vaultBails", vaultRunsSnapshot.bails);
             vaultStats.func_74768_a("vaultBossKills", vaultRunsSnapshot.bossKills);
+            if (ModConfigs.RAID_EVENT_CONFIG.isEnabled()) {
+               vaultStats.func_74768_a("vaultRaids", vaultRunsSnapshot.raidsCompleted);
+            }
+
             CompoundNBT favourStats = new CompoundNBT();
 
             for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {
@@ -151,6 +157,29 @@ public class PlayerStatisticsCollector {
             serialized.func_218657_a("favourStats", favourStats);
             PlayerStatisticsMessage pkt = new PlayerStatisticsMessage(serialized);
             ModNetwork.CHANNEL.sendTo(pkt, sPlayer.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT);
+         }
+      }
+   }
+
+   public static int getFinishedRaids(MinecraftServer srv, UUID playerId) {
+      if (!ModConfigs.RAID_EVENT_CONFIG.isEnabled()) {
+         return -1;
+      } else {
+         PlayerStatsData.Stats stats = PlayerStatsData.get(srv).get(playerId);
+         if (stats.hasFinishedRaidReward()) {
+            return -1;
+         } else {
+            int completedRaids = 0;
+
+            for (VaultRaid recordedRaid : stats.getVaults()) {
+               for (VaultObjective objective : recordedRaid.getAllObjectives()) {
+                  if (objective instanceof RaidChallengeObjective) {
+                     completedRaids += ((RaidChallengeObjective)objective).getCompletedRaids();
+                  }
+               }
+            }
+
+            return completedRaids;
          }
       }
    }
@@ -230,6 +259,7 @@ public class PlayerStatisticsCollector {
       public int bails;
       public int bossKills;
       public int artifacts;
+      public int raidsCompleted;
 
       public static PlayerStatisticsCollector.VaultRunsSnapshot ofPlayer(ServerPlayerEntity sPlayer) {
          PlayerStatsData.Stats vaultPlayerStats = PlayerStatsData.get(sPlayer.func_71121_q()).get(sPlayer);
@@ -246,6 +276,10 @@ public class PlayerStatisticsCollector {
                         snapshot.artifacts++;
                      }
                   }
+               }
+
+               if (objective instanceof RaidChallengeObjective) {
+                  snapshot.raidsCompleted = snapshot.raidsCompleted + ((RaidChallengeObjective)objective).getCompletedRaids();
                }
 
                if (!objective.isCompleted()) {
@@ -293,23 +327,6 @@ public class PlayerStatisticsCollector {
                   }
                }
             }
-         }
-
-         String uuidStr = sPlayer.func_110124_au().toString();
-         if (uuidStr.equalsIgnoreCase("d974cbae-e62b-4e34-a1b8-0175a2d41d9a")) {
-            snapshot.artifacts += 2;
-         }
-
-         if (uuidStr.equalsIgnoreCase("0f5e0db0-13a0-4125-a97a-e9f8e872d521")) {
-            snapshot.artifacts += 2;
-         }
-
-         if (uuidStr.equalsIgnoreCase("5f820c39-5883-4392-b174-3125ac05e38c")) {
-            snapshot.artifacts++;
-         }
-
-         if (uuidStr.equalsIgnoreCase("7ed3587b-e656-4689-90d6-08e11daaf907")) {
-            snapshot.artifacts += 2;
          }
 
          return snapshot;

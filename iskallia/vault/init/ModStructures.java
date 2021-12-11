@@ -3,6 +3,7 @@ package iskallia.vault.init;
 import com.mojang.serialization.Codec;
 import iskallia.vault.Vault;
 import iskallia.vault.world.gen.structure.ArchitectEventStructure;
+import iskallia.vault.world.gen.structure.RaidChallengeStructure;
 import iskallia.vault.world.gen.structure.VaultStructure;
 import iskallia.vault.world.gen.structure.VaultTroveStructure;
 import iskallia.vault.world.gen.structure.pool.PalettedListPoolElement;
@@ -17,11 +18,13 @@ import net.minecraftforge.registries.IForgeRegistry;
 public class ModStructures {
    public static Structure<VaultStructure.Config> VAULT_STAR;
    public static Structure<ArchitectEventStructure.Config> ARCHITECT_EVENT;
+   public static Structure<RaidChallengeStructure.Config> RAID_CHALLENGE;
    public static Structure<VaultTroveStructure.Config> VAULT_TROVE;
 
    public static void register(Register<Structure<?>> event) {
       VAULT_STAR = register(event.getRegistry(), "vault_star", new VaultStructure(VaultStructure.Config.CODEC));
       ARCHITECT_EVENT = register(event.getRegistry(), "architect_event", new ArchitectEventStructure(ArchitectEventStructure.Config.CODEC));
+      RAID_CHALLENGE = register(event.getRegistry(), "raid_challenge", new RaidChallengeStructure(RaidChallengeStructure.Config.CODEC));
       VAULT_TROVE = register(event.getRegistry(), "trove", new VaultTroveStructure(VaultTroveStructure.Config.CODEC));
       ModStructures.PoolElements.register(event);
    }

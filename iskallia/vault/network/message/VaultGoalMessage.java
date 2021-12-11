@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -83,6 +84,32 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
       });
    }
 
+   public static VaultGoalMessage raidChallenge(
+      int wave,
+      int totalWaves,
+      int aliveMobs,
+      int totalMobs,
+      int tickWaveDelay,
+      int completed,
+      List<ITextComponent> positiveModifiers,
+      List<ITextComponent> negativeModifiers
+   ) {
+      return composeMessage(new VaultGoalMessage(), VaultGoalMessage.VaultGoal.RAID_GOAL, payload -> {
+         payload.func_74768_a("wave", wave);
+         payload.func_74768_a("totalWaves", totalWaves);
+         payload.func_74768_a("aliveMobs", aliveMobs);
+         payload.func_74768_a("totalMobs", totalMobs);
+         payload.func_74768_a("tickWaveDelay", tickWaveDelay);
+         payload.func_74768_a("completedRaids", completed);
+         ListNBT positives = new ListNBT();
+         positiveModifiers.forEach(modifier -> positives.add(StringNBT.func_229705_a_(Serializer.func_150696_a(modifier))));
+         payload.func_218657_a("positives", positives);
+         ListNBT negatives = new ListNBT();
+         negativeModifiers.forEach(modifier -> negatives.add(StringNBT.func_229705_a_(Serializer.func_150696_a(modifier))));
+         payload.func_218657_a("negatives", negatives);
+      });
+   }
+
    public static VaultGoalMessage clear() {
       return composeMessage(new VaultGoalMessage(), VaultGoalMessage.VaultGoal.CLEAR, payload -> {});
    }
@@ -93,6 +120,7 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
       SCAVENGER_GOAL,
       ARCHITECT_GOAL,
       ANCIENTS_GOAL,
+      RAID_GOAL,
       CLEAR;
    }
 }

@@ -13,8 +13,24 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
+import net.minecraft.util.math.BlockPos;
 
 public class NBTHelper {
+   public static CompoundNBT serializeBlockPos(BlockPos pos) {
+      CompoundNBT tag = new CompoundNBT();
+      tag.func_74768_a("posX", pos.func_177958_n());
+      tag.func_74768_a("posY", pos.func_177956_o());
+      tag.func_74768_a("posZ", pos.func_177952_p());
+      return tag;
+   }
+
+   public static BlockPos deserializeBlockPos(CompoundNBT tag) {
+      int x = tag.func_74762_e("posX");
+      int y = tag.func_74762_e("posY");
+      int z = tag.func_74762_e("posZ");
+      return new BlockPos(x, y, z);
+   }
+
    public static <T, N extends INBT> Map<UUID, T> readMap(CompoundNBT nbt, String name, Class<N> nbtType, Function<N, T> mapper) {
       Map<UUID, T> res = new HashMap<>();
       ListNBT uuidList = nbt.func_150295_c(name + "Keys", 8);
@@ -43,10 +59,9 @@ public class NBTHelper {
 
    public static <T, N extends INBT> List<T> readList(CompoundNBT nbt, String name, Class<N> nbtType, Function<N, T> mapper) {
       List<T> res = new LinkedList<>();
-      ListNBT listNBT = (ListNBT)nbt.func_74781_a(name);
 
-      for (int i = 0; i < listNBT.size(); i++) {
-         res.add(mapper.apply((N)listNBT.get(i)));
+      for (INBT inbt : (ListNBT)nbt.func_74781_a(name)) {
+         res.add(mapper.apply((N)inbt));
       }
 
       return res;

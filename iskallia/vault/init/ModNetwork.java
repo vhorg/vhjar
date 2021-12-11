@@ -32,6 +32,7 @@ import iskallia.vault.network.message.ShardTraderScreenMessage;
 import iskallia.vault.network.message.StepHeightMessage;
 import iskallia.vault.network.message.SyncOversizedStackMessage;
 import iskallia.vault.network.message.TalentUpgradeMessage;
+import iskallia.vault.network.message.VaultCharmControllerScrollMessage;
 import iskallia.vault.network.message.VaultGoalMessage;
 import iskallia.vault.network.message.VaultLevelMessage;
 import iskallia.vault.network.message.VaultModifierMessage;
@@ -119,6 +120,13 @@ public class ModNetwork {
          PlayerDamageMultiplierMessage::encode,
          PlayerDamageMultiplierMessage::decode,
          PlayerDamageMultiplierMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         VaultCharmControllerScrollMessage.class,
+         VaultCharmControllerScrollMessage::encode,
+         VaultCharmControllerScrollMessage::decode,
+         VaultCharmControllerScrollMessage::handle
       );
    }
 

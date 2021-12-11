@@ -25,7 +25,6 @@ public class TeleportRandomly<T extends LivingEntity> implements INBTSerializabl
          if (this.entity.field_70170_p.field_73012_v.nextDouble() < chance) {
             for (int i = 0; i < 64; i++) {
                if (this.teleportRandomly()) {
-                  System.out.println("TP!");
                   this.entity
                      .field_70170_p
                      .func_184148_a(

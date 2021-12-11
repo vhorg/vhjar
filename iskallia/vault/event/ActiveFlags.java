@@ -3,9 +3,10 @@ package iskallia.vault.event;
 public enum ActiveFlags {
    IS_AOE_MINING,
    IS_FORTUNE_MINING,
+   IS_DOT_ATTACKING,
    IS_LEECHING,
-   IS_CHAIN_ATTACKING,
-   IS_AOE_ATTACKING;
+   IS_AOE_ATTACKING,
+   IS_REFLECT_ATTACKING;
 
    private int activeReferences = 0;
 

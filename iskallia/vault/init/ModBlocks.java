@@ -29,12 +29,14 @@ import iskallia.vault.block.UnknownVaultDoorBlock;
 import iskallia.vault.block.VaultAltarBlock;
 import iskallia.vault.block.VaultArtifactBlock;
 import iskallia.vault.block.VaultBedrockBlock;
+import iskallia.vault.block.VaultCharmControllerBlock;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.block.VaultDoorBlock;
 import iskallia.vault.block.VaultLootableBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.VaultPortalBlock;
+import iskallia.vault.block.VaultRaidControllerBlock;
 import iskallia.vault.block.VaultRockBlock;
 import iskallia.vault.block.VaultRuneBlock;
 import iskallia.vault.block.VaultTreasureChestBlock;
@@ -57,11 +59,13 @@ import iskallia.vault.block.entity.StatueCauldronTileEntity;
 import iskallia.vault.block.entity.TimeAltarTileEntity;
 import iskallia.vault.block.entity.TrophyStatueTileEntity;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
+import iskallia.vault.block.entity.VaultCharmControllerTileEntity;
 import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.block.entity.VaultCrateTileEntity;
 import iskallia.vault.block.entity.VaultDoorTileEntity;
 import iskallia.vault.block.entity.VaultLootableTileEntity;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
+import iskallia.vault.block.entity.VaultRaidControllerTileEntity;
 import iskallia.vault.block.entity.VaultRuneTileEntity;
 import iskallia.vault.block.entity.VaultTreasureChestTileEntity;
 import iskallia.vault.block.entity.VendingMachineTileEntity;
@@ -80,6 +84,7 @@ import iskallia.vault.block.render.ScavengerChestRenderer;
 import iskallia.vault.block.render.StatueCauldronRenderer;
 import iskallia.vault.block.render.VaultAltarRenderer;
 import iskallia.vault.block.render.VaultChestRenderer;
+import iskallia.vault.block.render.VaultRaidControllerRenderer;
 import iskallia.vault.block.render.VaultRuneRenderer;
 import iskallia.vault.block.render.VendingMachineRenderer;
 import iskallia.vault.client.render.VaultISTER;
@@ -213,6 +218,8 @@ public class ModBlocks {
    public static final StabilizerBlock STABILIZER = new StabilizerBlock();
    public static final CatalystDecryptionTableBlock CATALYST_DECRYPTION_TABLE = new CatalystDecryptionTableBlock();
    public static final EtchingVendorControllerBlock ETCHING_CONTROLLER_BLOCK = new EtchingVendorControllerBlock();
+   public static final VaultCharmControllerBlock VAULT_CHARM_CONTROLLER_BLOCK = new VaultCharmControllerBlock();
+   public static final VaultRaidControllerBlock RAID_CONTROLLER_BLOCK = new VaultRaidControllerBlock();
    public static final FlowingFluidBlock VOID_LIQUID_BLOCK = new VoidFluidBlock(
       ModFluids.VOID_LIQUID,
       net.minecraft.block.AbstractBlock.Properties.func_200949_a(Material.field_151586_h, MaterialColor.field_151646_E)
@@ -348,6 +355,14 @@ public class ModBlocks {
          EtchingVendorControllerTileEntity::new, new Block[]{ETCHING_CONTROLLER_BLOCK}
       )
       .func_206865_a(null);
+   public static final TileEntityType<VaultCharmControllerTileEntity> VAULT_CHARM_CONTROLLER_TILE_ENTITY = Builder.func_223042_a(
+         VaultCharmControllerTileEntity::new, new Block[]{VAULT_CHARM_CONTROLLER_BLOCK}
+      )
+      .func_206865_a(null);
+   public static final TileEntityType<VaultRaidControllerTileEntity> RAID_CONTROLLER_TILE_ENTITY = Builder.func_223042_a(
+         VaultRaidControllerTileEntity::new, new Block[]{RAID_CONTROLLER_BLOCK}
+      )
+      .func_206865_a(null);
 
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, VAULT_PORTAL, Vault.id("vault_portal"));
@@ -433,6 +448,8 @@ public class ModBlocks {
       registerBlock(event, STABILIZER, Vault.id("stabilizer"));
       registerBlock(event, CATALYST_DECRYPTION_TABLE, Vault.id("catalyst_decryption_table"));
       registerBlock(event, ETCHING_CONTROLLER_BLOCK, Vault.id("etching_vendor_controller"));
+      registerBlock(event, VAULT_CHARM_CONTROLLER_BLOCK, Vault.id("vault_charm_controller"));
+      registerBlock(event, RAID_CONTROLLER_BLOCK, Vault.id("raid_controller"));
    }
 
    public static void registerTileEntities(Register<TileEntityType<?>> event) {
@@ -462,6 +479,8 @@ public class ModBlocks {
       registerTileEntity(event, STABILIZER_TILE_ENTITY, Vault.id("stabilizer_tile_entity"));
       registerTileEntity(event, CATALYST_DECRYPTION_TABLE_TILE_ENTITY, Vault.id("catalyst_decryption_table_tile_entity"));
       registerTileEntity(event, ETCHING_CONTROLLER_TILE_ENTITY, Vault.id("etching_vendor_controller_tile_entity"));
+      registerTileEntity(event, VAULT_CHARM_CONTROLLER_TILE_ENTITY, Vault.id("vault_charm_controller_tile_entity"));
+      registerTileEntity(event, RAID_CONTROLLER_TILE_ENTITY, Vault.id("raid_controller_tile_entity"));
    }
 
    public static void registerTileEntityRenderers() {
@@ -482,6 +501,7 @@ public class ModBlocks {
       ClientRegistry.bindTileEntityRenderer(SOUL_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
       ClientRegistry.bindTileEntityRenderer(STATUE_CAULDRON_TILE_ENTITY, StatueCauldronRenderer::new);
       ClientRegistry.bindTileEntityRenderer(SCAVENGER_CHEST_TILE_ENTITY, ScavengerChestRenderer::new);
+      ClientRegistry.bindTileEntityRenderer(RAID_CONTROLLER_TILE_ENTITY, VaultRaidControllerRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
@@ -566,6 +586,8 @@ public class ModBlocks {
       registerBlockItem(event, STABILIZER);
       registerBlockItem(event, CATALYST_DECRYPTION_TABLE);
       registerBlockItem(event, ETCHING_CONTROLLER_BLOCK);
+      registerBlockItem(event, VAULT_CHARM_CONTROLLER_BLOCK);
+      registerBlockItem(event, RAID_CONTROLLER_BLOCK);
    }
 
    private static void registerBlock(Register<Block> event, Block block, ResourceLocation id) {

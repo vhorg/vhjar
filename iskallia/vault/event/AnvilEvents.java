@@ -10,6 +10,7 @@ import iskallia.vault.item.ItemVaultRaffleSeal;
 import iskallia.vault.item.VaultCatalystItem;
 import iskallia.vault.item.VaultInhibitorItem;
 import iskallia.vault.item.VaultMagnetItem;
+import iskallia.vault.item.VaultRuneItem;
 import iskallia.vault.item.catalyst.ModifierRollResult;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
@@ -169,7 +170,7 @@ public class AnvilEvents {
       if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof VaultCatalystItem) {
          ItemStack output = event.getLeft().func_77946_l();
          CrystalData data = VaultCrystalItem.getData(output);
-         if (!data.canCraftCatalysts()) {
+         if (!data.canModifyWithCrafting()) {
             return;
          }
 
@@ -180,8 +181,30 @@ public class AnvilEvents {
 
          modifiers.forEach(modifier -> data.addCatalystModifier(modifier, true, CrystalData.Modifier.Operation.ADD));
          event.setOutput(output);
-         event.setCost(modifiers.size() * 8);
+         event.setCost(modifiers.size() * 4);
          event.setMaterialCost(1);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyRune(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof VaultRuneItem) {
+         ItemStack output = event.getLeft().func_77946_l();
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (!data.canModifyWithCrafting()) {
+            return;
+         }
+
+         int amount = event.getRight().func_190916_E();
+         VaultRuneItem runeItem = (VaultRuneItem)event.getRight().func_77973_b();
+
+         for (int i = 0; i < amount; i++) {
+            data.addGuaranteedRoom(runeItem.getRoomName());
+         }
+
+         event.setOutput(output);
+         event.setCost(amount * 4);
+         event.setMaterialCost(amount);
       }
    }
 
@@ -205,7 +228,7 @@ public class AnvilEvents {
       if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof VaultInhibitorItem) {
          ItemStack output = event.getLeft().func_77946_l();
          CrystalData data = VaultCrystalItem.getData(output);
-         if (!data.canCraftCatalysts()) {
+         if (!data.canModifyWithCrafting()) {
             return;
          }
 

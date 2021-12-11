@@ -2,6 +2,7 @@ package iskallia.vault.world.vault.logic;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.JsonAdapter;
+import iskallia.vault.entity.AggressiveCowEntity;
 import iskallia.vault.entity.EntityScaler;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.nbt.VListNBT;
@@ -123,7 +124,10 @@ public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
    public static LivingEntity spawnMob(VaultRaid vault, ServerWorld world, int vaultLevel, int x, int y, int z, Random random) {
       LivingEntity entity = createMob(world, vaultLevel, random);
       if (vault.getProperties().getBaseOrDefault(VaultRaid.COW_VAULT, false)) {
-         entity = VaultCowOverrides.replaceVaultEntity(entity, world);
+         AggressiveCowEntity replaced = VaultCowOverrides.replaceVaultEntity(entity, world);
+         if (replaced != null) {
+            entity = replaced;
+         }
       }
 
       BlockState state = world.func_180495_p(new BlockPos(x, y - 1, z));

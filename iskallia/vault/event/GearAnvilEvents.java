@@ -348,7 +348,9 @@ public class GearAnvilEvents {
                         if (VaultGearHelper.hasModifier(input)) {
                            event.setCost(5);
                            event.setMaterialCost(1);
-                           event.setOutput(new ItemStack(ModItems.ARTISAN_SCROLL));
+                           ItemStack result = new ItemStack(ModItems.ARTISAN_SCROLL);
+                           ArtisanScrollItem.setInitialized(result, true);
+                           event.setOutput(result);
                         }
                      }
                   }

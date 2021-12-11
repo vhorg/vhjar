@@ -260,13 +260,18 @@ public class ShardTradeContainer extends AbstractPlayerSensitiveContainer {
 
          if (ItemShardPouch.reduceShardAmount(player.field_71071_by, shardCost, simulate)) {
             if (side.isServer() && !simulate) {
-               if (player.field_71070_bA != null) {
-                  player.field_71070_bA.func_75142_b();
-               }
-
                if (player instanceof ServerPlayerEntity) {
                   SoulShardTraderData tradeData = SoulShardTraderData.get(((ServerPlayerEntity)player).func_71121_q());
                   tradeData.useTrade(this.getSlotIndex() - 1);
+                  SoulShardTraderData.SelectedTrade trade = tradeData.getTrades().get(this.getSlotIndex() - 1);
+                  if (trade != null && trade.isInfinite()) {
+                     player.field_71070_bA.field_75153_a.set(this.field_75222_d, ItemStack.field_190927_a);
+                     this.func_75211_c().func_190917_f(1);
+                  }
+               }
+
+               if (player.field_71070_bA != null) {
+                  player.field_71070_bA.func_75142_b();
                }
             }
 

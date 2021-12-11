@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -52,6 +53,11 @@ public class PlayerStatsData extends WorldSavedData {
       this.func_76185_a();
    }
 
+   public void setRaidRewardReceived(UUID playerId) {
+      this.get(playerId).finishedRaidReward = true;
+      this.func_76185_a();
+   }
+
    public void func_76184_a(CompoundNBT nbt) {
       this.playerStats.deserializeNBT(nbt.func_150295_c("Stats", 10));
    }
@@ -62,13 +68,18 @@ public class PlayerStatsData extends WorldSavedData {
    }
 
    public static PlayerStatsData get(ServerWorld world) {
-      return (PlayerStatsData)world.func_73046_m().func_241755_D_().func_217481_x().func_215752_a(PlayerStatsData::new, "the_vault_PlayerStats");
+      return get(world.func_73046_m());
+   }
+
+   public static PlayerStatsData get(MinecraftServer srv) {
+      return (PlayerStatsData)srv.func_241755_D_().func_217481_x().func_215752_a(PlayerStatsData::new, "the_vault_PlayerStats");
    }
 
    public static class Stats implements INBTSerializable<CompoundNBT> {
       protected VListNBT<VaultRaid, CompoundNBT> vaults = VListNBT.of(VaultRaid::new);
       protected VListNBT<CrystalStat, CompoundNBT> crystals = VListNBT.of(CrystalStat::new);
       protected VListNBT<RaffleStat, CompoundNBT> raffles = VListNBT.of(RaffleStat::new);
+      private boolean finishedRaidReward = false;
 
       public List<VaultRaid> getVaults() {
          return Collections.unmodifiableList(this.vaults);
@@ -82,11 +93,16 @@ public class PlayerStatsData extends WorldSavedData {
          return Collections.unmodifiableList(this.raffles);
       }
 
+      public boolean hasFinishedRaidReward() {
+         return this.finishedRaidReward;
+      }
+
       public CompoundNBT serializeNBT() {
          CompoundNBT nbt = new CompoundNBT();
          nbt.func_218657_a("Vaults", this.vaults.serializeNBT());
          nbt.func_218657_a("Crystals", this.crystals.serializeNBT());
          nbt.func_218657_a("Raffles", this.raffles.serializeNBT());
+         nbt.func_74757_a("finishedRaidReward", this.finishedRaidReward);
          return nbt;
       }
 
@@ -94,6 +110,7 @@ public class PlayerStatsData extends WorldSavedData {
          this.vaults.deserializeNBT(nbt.func_150295_c("Vaults", 10));
          this.crystals.deserializeNBT(nbt.func_150295_c("Crystals", 10));
          this.raffles.deserializeNBT(nbt.func_150295_c("Raffles", 10));
+         nbt.func_74757_a("finishedRaidReward", this.finishedRaidReward);
       }
    }
 }

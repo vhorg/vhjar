@@ -30,6 +30,10 @@ public class LootableModifier extends TexturedVaultModifier {
       }
    }
 
+   public float getAverageMultiplier() {
+      return (float)this.resultMultipliers.values().stream().mapToDouble(Float::doubleValue).average().orElse(1.0);
+   }
+
    public static Map<String, Float> getDefaultOreModifiers(float multiplier) {
       Map<String, Float> oreResults = new HashMap<>();
       oreResults.put(ModBlocks.BENITOITE_ORE.getRegistryName().toString(), multiplier);
