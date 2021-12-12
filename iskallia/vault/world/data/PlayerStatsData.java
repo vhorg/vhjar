@@ -110,7 +110,7 @@ public class PlayerStatsData extends WorldSavedData {
          this.vaults.deserializeNBT(nbt.func_150295_c("Vaults", 10));
          this.crystals.deserializeNBT(nbt.func_150295_c("Crystals", 10));
          this.raffles.deserializeNBT(nbt.func_150295_c("Raffles", 10));
-         nbt.func_74757_a("finishedRaidReward", this.finishedRaidReward);
+         this.finishedRaidReward = nbt.func_74767_n("finishedRaidReward");
       }
    }
 }

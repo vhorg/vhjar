@@ -96,20 +96,17 @@ public class VaultCharmControllerContainer extends Container {
    }
 
    private void updateVisibleItems() {
-      this.visibleItems.func_174888_l();
-
-      for (int i = 0; i < 54; i++) {
+      for (int i = 0; i < this.getInventorySize() && i < 54; i++) {
          int whitelistIndex = this.currentStart + i;
          if (whitelistIndex >= this.whitelist.size()) {
             this.visibleItems.func_70299_a(i, ItemStack.field_190927_a);
-            this.field_75153_a.add(i, ItemStack.field_190927_a);
-            break;
+            this.field_75153_a.set(i, ItemStack.field_190927_a);
+         } else {
+            ResourceLocation id = this.whitelist.get(whitelistIndex);
+            ItemStack stack = new ItemStack((IItemProvider)ForgeRegistries.ITEMS.getValue(id));
+            this.visibleItems.func_70299_a(i, stack);
+            this.field_75153_a.add(i, stack);
          }
-
-         ResourceLocation id = this.whitelist.get(whitelistIndex);
-         ItemStack stack = new ItemStack((IItemProvider)ForgeRegistries.ITEMS.getValue(id));
-         this.visibleItems.func_70299_a(i, stack);
-         this.field_75153_a.add(i, stack);
       }
    }
 
