@@ -65,6 +65,11 @@
     {"predicate": {"the_vault:special_texture": 11 }, "model": "the_vault:item/boots/special/skallibomba_boots"},
     {"predicate": {"the_vault:special_texture": 12 }, "model": "the_vault:item/boots/special/villager_boots"},
     {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/boots/special/automatic_boots"},
-    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/boots/special/fairy_boots"}
+    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/boots/special/fairy_boots"},
+    {"predicate": {"the_vault:special_texture": 15 }, "model": "the_vault:item/boots/special/building_boots"},
+    {"predicate": {"the_vault:special_texture": 16 }, "model": "the_vault:item/boots/special/zombie_boots"},
+    {"predicate": {"the_vault:special_texture": 17 }, "model": "the_vault:item/boots/special/xnet_boots"},
+    {"predicate": {"the_vault:special_texture": 18 }, "model": "the_vault:item/boots/special/test_dummy_boots"},
+    {"predicate": {"the_vault:special_texture": 19 }, "model": "the_vault:item/boots/special/industrial_foregoing_boots"}
   ]
 }

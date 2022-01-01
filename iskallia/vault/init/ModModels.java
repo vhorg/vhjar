@@ -26,6 +26,7 @@ import iskallia.vault.item.gear.model.ScubaArmorModel;
 import iskallia.vault.item.gear.model.VaultGearModel;
 import iskallia.vault.item.gear.specials.AutomaticArmorModel;
 import iskallia.vault.item.gear.specials.BotaniaArmorModel;
+import iskallia.vault.item.gear.specials.BuildingArmorModel;
 import iskallia.vault.item.gear.specials.CheeseHatModel;
 import iskallia.vault.item.gear.specials.CreateArmorModel;
 import iskallia.vault.item.gear.specials.DankArmorModel;
@@ -33,13 +34,17 @@ import iskallia.vault.item.gear.specials.FairyArmorModel;
 import iskallia.vault.item.gear.specials.FluxArmorModel;
 import iskallia.vault.item.gear.specials.HellcowArmorModel;
 import iskallia.vault.item.gear.specials.ImmersiveEngineeringArmorModel;
+import iskallia.vault.item.gear.specials.IndustrialForegoingArmorModel;
 import iskallia.vault.item.gear.specials.IskallHololensModel;
 import iskallia.vault.item.gear.specials.MekaArmorModel;
 import iskallia.vault.item.gear.specials.PowahArmorModel;
 import iskallia.vault.item.gear.specials.SkallibombaArmorModel;
+import iskallia.vault.item.gear.specials.TestDummyArmorModel;
 import iskallia.vault.item.gear.specials.ThermalArmorModel;
 import iskallia.vault.item.gear.specials.TrashArmorModel;
 import iskallia.vault.item.gear.specials.VillagerArmorModel;
+import iskallia.vault.item.gear.specials.XnetArmorModel;
+import iskallia.vault.item.gear.specials.ZombieArmorModel;
 import iskallia.vault.util.MiscUtils;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
@@ -417,6 +422,11 @@ public class ModModels {
       public static ModModels.SpecialGearModel.SpecialGearModelSet VILLAGER_SET;
       public static ModModels.SpecialGearModel.SpecialGearModelSet AUTOMATIC_SET;
       public static ModModels.SpecialGearModel.SpecialGearModelSet FAIRY_SET;
+      public static ModModels.SpecialGearModel.SpecialGearModelSet BUILDING_SET;
+      public static ModModels.SpecialGearModel.SpecialGearModelSet ZOMBIE_SET;
+      public static ModModels.SpecialGearModel.SpecialGearModelSet XNET_SET;
+      public static ModModels.SpecialGearModel.SpecialGearModelSet TEST_DUMMY_SET;
+      public static ModModels.SpecialGearModel.SpecialGearModelSet INDUSTRIAL_FOREGOING_SET;
       int id;
       String displayName;
       VaultGearModel<? extends LivingEntity> model;
@@ -465,6 +475,13 @@ public class ModModels {
          VILLAGER_SET = registerSet("Villager", () -> VillagerArmorModel.class, new GearModelProperties().allowTransmogrification());
          AUTOMATIC_SET = registerSet("Automatic", () -> AutomaticArmorModel.class, new GearModelProperties().allowTransmogrification());
          FAIRY_SET = registerSet("Fairy", () -> FairyArmorModel.class, new GearModelProperties().allowTransmogrification());
+         BUILDING_SET = registerSet("Building", () -> BuildingArmorModel.class, new GearModelProperties().allowTransmogrification());
+         ZOMBIE_SET = registerSet("Zombie", () -> ZombieArmorModel.class, new GearModelProperties().allowTransmogrification());
+         XNET_SET = registerSet("Xnet", () -> XnetArmorModel.class, new GearModelProperties().allowTransmogrification());
+         TEST_DUMMY_SET = registerSet("Test Dummy", () -> TestDummyArmorModel.class, new GearModelProperties().allowTransmogrification());
+         INDUSTRIAL_FOREGOING_SET = registerSet(
+            "Industrial Foregoing", () -> IndustrialForegoingArmorModel.class, new GearModelProperties().allowTransmogrification()
+         );
       }
 
       public int getId() {

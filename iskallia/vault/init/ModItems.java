@@ -647,6 +647,31 @@ public class ModItems {
       new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
       () -> ImmutableList.of(ModModels.SpecialGearModel.FAIRY_SET)
    );
+   public static ItemModArmorCrate ARMOR_CRATE_BUILDING = new ItemModArmorCrate(
+      Vault.id("armor_crate_building"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.BUILDING_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_ZOMBIE = new ItemModArmorCrate(
+      Vault.id("armor_crate_zombie"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.ZOMBIE_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_XNET = new ItemModArmorCrate(
+      Vault.id("armor_crate_xnet"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.XNET_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_TEST_DUMMY = new ItemModArmorCrate(
+      Vault.id("armor_crate_test_dummy"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.TEST_DUMMY_SET)
+   );
+   public static ItemModArmorCrate ARMOR_CRATE_INDUSTRIAL_FOREGOING = new ItemModArmorCrate(
+      Vault.id("armor_crate_if"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.INDUSTRIAL_FOREGOING_SET)
+   );
    public static FlawedRubyItem FLAWED_RUBY = new FlawedRubyItem(
       Vault.id("flawed_ruby"),
       new Properties().func_200916_a(VAULT_MOD_GROUP),
@@ -993,6 +1018,11 @@ public class ModItems {
       registry.register(ARMOR_CRATE_VILLAGER);
       registry.register(ARMOR_CRATE_AUTOMATIC);
       registry.register(ARMOR_CRATE_FAIRY);
+      registry.register(ARMOR_CRATE_BUILDING);
+      registry.register(ARMOR_CRATE_ZOMBIE);
+      registry.register(ARMOR_CRATE_XNET);
+      registry.register(ARMOR_CRATE_TEST_DUMMY);
+      registry.register(ARMOR_CRATE_INDUSTRIAL_FOREGOING);
       registry.register(ARTIFACT_FRAGMENT);
       registry.register(VAULT_CHARM);
       registry.register(CHARM_UPGRADE_TIER_1);

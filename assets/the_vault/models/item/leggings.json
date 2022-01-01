@@ -65,6 +65,11 @@
     {"predicate": {"the_vault:special_texture": 11 }, "model": "the_vault:item/leggings/special/skallibomba_leggings"},
     {"predicate": {"the_vault:special_texture": 12 }, "model": "the_vault:item/leggings/special/villager_leggings"},
     {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/leggings/special/automatic_leggings"},
-    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/leggings/special/fairy_leggings"}
+    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/leggings/special/fairy_leggings"},
+    {"predicate": {"the_vault:special_texture": 15 }, "model": "the_vault:item/leggings/special/building_leggings"},
+    {"predicate": {"the_vault:special_texture": 16 }, "model": "the_vault:item/leggings/special/zombie_leggings"},
+    {"predicate": {"the_vault:special_texture": 17 }, "model": "the_vault:item/leggings/special/xnet_leggings"},
+    {"predicate": {"the_vault:special_texture": 18 }, "model": "the_vault:item/leggings/special/test_dummy_leggings"},
+    {"predicate": {"the_vault:special_texture": 19 }, "model": "the_vault:item/leggings/special/industrial_foregoing_leggings"}
   ]
 }

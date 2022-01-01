@@ -67,6 +67,11 @@
     {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/helmet/special/skallibomba_helmet"},
     {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/helmet/special/villager_helmet"},
     {"predicate": {"the_vault:special_texture": 15 }, "model": "the_vault:item/helmet/special/automatic_helmet"},
-    {"predicate": {"the_vault:special_texture": 16 }, "model": "the_vault:item/helmet/special/fairy_helmet"}
+    {"predicate": {"the_vault:special_texture": 16 }, "model": "the_vault:item/helmet/special/fairy_helmet"},
+    {"predicate": {"the_vault:special_texture": 17 }, "model": "the_vault:item/helmet/special/building_helmet"},
+    {"predicate": {"the_vault:special_texture": 18 }, "model": "the_vault:item/helmet/special/zombie_helmet"},
+    {"predicate": {"the_vault:special_texture": 19 }, "model": "the_vault:item/helmet/special/xnet_helmet"},
+    {"predicate": {"the_vault:special_texture": 20 }, "model": "the_vault:item/helmet/special/test_dummy_helmet"},
+    {"predicate": {"the_vault:special_texture": 21 }, "model": "the_vault:item/helmet/special/industrial_foregoing_helmet"}
   ]
 }

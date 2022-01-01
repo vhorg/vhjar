@@ -65,6 +65,11 @@
     {"predicate": {"the_vault:special_texture": 11 }, "model": "the_vault:item/chestplate/special/skallibomba_chestplate"},
     {"predicate": {"the_vault:special_texture": 12 }, "model": "the_vault:item/chestplate/special/villager_chestplate"},
     {"predicate": {"the_vault:special_texture": 13 }, "model": "the_vault:item/chestplate/special/automatic_chestplate"},
-    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/chestplate/special/fairy_chestplate"}
+    {"predicate": {"the_vault:special_texture": 14 }, "model": "the_vault:item/chestplate/special/fairy_chestplate"},
+    {"predicate": {"the_vault:special_texture": 15 }, "model": "the_vault:item/chestplate/special/building_chestplate"},
+    {"predicate": {"the_vault:special_texture": 16 }, "model": "the_vault:item/chestplate/special/zombie_chestplate"},
+    {"predicate": {"the_vault:special_texture": 17 }, "model": "the_vault:item/chestplate/special/xnet_chestplate"},
+    {"predicate": {"the_vault:special_texture": 18 }, "model": "the_vault:item/chestplate/special/test_dummy_chestplate"},
+    {"predicate": {"the_vault:special_texture": 19 }, "model": "the_vault:item/chestplate/special/industrial_foregoing_chestplate"}
   ]
 }
