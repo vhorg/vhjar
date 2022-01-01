@@ -15,6 +15,7 @@ import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.StatueType;
 import iskallia.vault.util.WeekKey;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.world.data.VaultRaidData;
 import java.util.Collections;
 import java.util.List;
 import net.minecraft.command.CommandSource;
@@ -61,6 +62,7 @@ public class GiveLootCommand extends Command {
             )
       );
       builder.then(Commands.func_197057_a("normal_boss_crate").executes(ctx -> this.giveNormalBossCrate(ctx, ((CommandSource)ctx.getSource()).func_197035_h())));
+      builder.then(Commands.func_197057_a("raid_reward_crate").executes(ctx -> this.giveRaidRewardCrate(ctx, ((CommandSource)ctx.getSource()).func_197035_h())));
       builder.then(
          Commands.func_197057_a("record_trophy")
             .then(
@@ -100,6 +102,11 @@ public class GiveLootCommand extends Command {
          sPlayer.func_145747_a(new StringTextComponent("No record set!"), Util.field_240973_b_);
       }
 
+      return 0;
+   }
+
+   private int giveRaidRewardCrate(CommandContext<CommandSource> ctx, ServerPlayerEntity player) {
+      EntityHelper.giveItem(player, VaultRaidData.generateRaidRewardCrate());
       return 0;
    }
 

@@ -53,6 +53,7 @@ public class ModSounds {
    public static SoundEvent VAULT_CHEST_EPIC_OPEN;
    public static SoundEvent VAULT_CHEST_OMEGA_OPEN;
    public static SoundEvent VAULT_CHEST_RARE_OPEN;
+   public static SoundEvent WITCHSKALL_IDLE;
    public static LazySoundType VAULT_GEM = new LazySoundType();
 
    public static void registerSounds(Register<SoundEvent> event) {
@@ -102,6 +103,7 @@ public class ModSounds {
       VAULT_CHEST_EPIC_OPEN = registerSound(event, "vault_chest_epic_open");
       VAULT_CHEST_OMEGA_OPEN = registerSound(event, "vault_chest_omega_open");
       VAULT_CHEST_RARE_OPEN = registerSound(event, "vault_chest_rare_open");
+      WITCHSKALL_IDLE = registerSound(event, "witchskall_idle");
    }
 
    public static void registerSoundTypes() {

@@ -353,7 +353,7 @@ public class VaultMobsConfig extends Config {
          return Registry.field_212629_r.func_241873_b(new ResourceLocation(this.NAME)).orElse(EntityType.field_200791_e);
       }
 
-      public LivingEntity scale(LivingEntity entity, VaultRaid vault, GlobalDifficultyData.Difficulty vaultDifficulty) {
+      public static LivingEntity scale(LivingEntity entity, VaultRaid vault, GlobalDifficultyData.Difficulty vaultDifficulty) {
          int level = vault.getProperties().getValue(VaultRaid.LEVEL);
          UUID host = vault.getProperties().getValue(VaultRaid.HOST);
          MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
@@ -369,7 +369,9 @@ public class VaultMobsConfig extends Config {
          }
 
          int mobLevel = Math.max(level, 0);
-         List<VaultMobsConfig.Mob.AttributeOverride> attributes = ModConfigs.VAULT_MOBS.ATTRIBUTE_OVERRIDES.get(this.getType().getRegistryName().toString());
+         List<VaultMobsConfig.Mob.AttributeOverride> attributes = ModConfigs.VAULT_MOBS
+            .ATTRIBUTE_OVERRIDES
+            .get(entity.func_200600_R().getRegistryName().toString());
          if (attributes != null) {
             for (VaultMobsConfig.Mob.AttributeOverride override : attributes) {
                if (!(entity.field_70170_p.field_73012_v.nextDouble() >= override.ROLL_CHANCE)) {

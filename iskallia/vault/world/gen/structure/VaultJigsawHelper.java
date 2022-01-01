@@ -5,6 +5,7 @@ import iskallia.vault.util.data.WeightedList;
 import iskallia.vault.world.gen.structure.pool.PalettedListPoolElement;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.VaultGenerator;
+import iskallia.vault.world.vault.gen.VaultRoomLevelRestrictions;
 import iskallia.vault.world.vault.gen.piece.VaultPiece;
 import iskallia.vault.world.vault.gen.piece.VaultRoom;
 import java.util.ArrayList;
@@ -55,7 +56,8 @@ public class VaultJigsawHelper {
          BlockPos side = fromRoom.getTunnelConnectorPos(targetDir);
          Mutable mutableGenPos = side.func_239590_i_();
          VaultGenerator generator = vault.getGenerator();
-         JigsawPiece roomPiece = roomToGenerate == null ? getRandomRoom() : roomToGenerate;
+         int vaultLevel = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
+         JigsawPiece roomPiece = roomToGenerate == null ? getRandomVaultRoom(vaultLevel) : roomToGenerate;
          List<VaultPiece> pieces = new ArrayList<>();
          pieces.addAll(placeRandomTunnel(sWorld, mutableGenPos, targetDir));
          pieces.addAll(placeRandomRoom(sWorld, mutableGenPos, targetDir, roomPiece));
@@ -100,7 +102,7 @@ public class VaultJigsawHelper {
 
    private static List<VaultPiece> placeRandomTunnel(ServerWorld sWorld, Mutable generationPos, Direction targetDir) {
       int jigsawGroundOffset = 2;
-      JigsawPiece tunnel = getRandomTunnel();
+      JigsawPiece tunnel = getRandomVaultTunnel();
       BlockPos at = generationPos.func_185334_h();
       Rotation tunnelRotation = getTunnelRotation(targetDir);
       Direction shift = targetDir.func_176746_e();
@@ -138,8 +140,7 @@ public class VaultJigsawHelper {
    public static void preloadVaultRooms(FMLServerStartedEvent event) {
       Random rand = new Random();
       TemplateManager mgr = event.getServer().func_240792_aT_();
-      getRoomJigsawPool().field_214952_d.forEach(weightedPiece -> {
-         JigsawPiece piece = (JigsawPiece)weightedPiece.getFirst();
+      getVaultRoomList(Integer.MAX_VALUE).forEach((piece, weight) -> {
          if (piece instanceof PalettedListPoolElement) {
             for (JigsawPiece listPiece : ((PalettedListPoolElement)piece).getElements()) {
                listPiece.func_214849_a(mgr, BlockPos.field_177992_a, Rotation.func_222466_a(rand), rand);
@@ -151,13 +152,14 @@ public class VaultJigsawHelper {
    }
 
    @Nonnull
-   public static JigsawPiece getRandomTunnel() {
+   public static JigsawPiece getRandomVaultTunnel() {
       return getRandomPiece(Vault.id("vault/tunnels"));
    }
 
    @Nonnull
-   public static JigsawPiece getRandomRoom() {
-      return getRandomPiece(Vault.id("vault/rooms"));
+   public static JigsawPiece getRandomVaultRoom(int vaultLevel) {
+      WeightedList<JigsawPiece> rooms = getRoomList(Vault.id("vault/rooms"));
+      return rooms.copyFiltered(piece -> VaultRoomLevelRestrictions.canGenerate(piece, vaultLevel)).getOptionalRandom(rand).orElseThrow(RuntimeException::new);
    }
 
    @Nonnull
@@ -171,19 +173,28 @@ public class VaultJigsawHelper {
    }
 
    @Nonnull
-   public static JigsawPattern getRoomJigsawPool() {
+   public static WeightedList<JigsawPiece> getVaultRoomList(int vaultLevel) {
+      WeightedList<JigsawPiece> rooms = getRoomList(Vault.id("vault/rooms"));
+      return rooms.copyFiltered(piece -> VaultRoomLevelRestrictions.canGenerate(piece, vaultLevel));
+   }
+
+   @Nonnull
+   private static WeightedList<JigsawPiece> getRoomList(ResourceLocation key) {
+      JigsawPattern roomPool = getPool(key);
+      WeightedList<JigsawPiece> pool = new WeightedList<>();
+      roomPool.field_214952_d.forEach(weightedPiece -> pool.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond()));
+      return pool;
+   }
+
+   @Nonnull
+   private static JigsawPattern getPool(ResourceLocation key) {
       MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
       MutableRegistry<JigsawPattern> jigsawRegistry = srv.func_244267_aX().func_243612_b(Registry.field_243555_ax);
-      return (JigsawPattern)jigsawRegistry.func_241873_b(Vault.id("vault/rooms")).orElseThrow(RuntimeException::new);
+      return (JigsawPattern)jigsawRegistry.func_241873_b(key).orElseThrow(RuntimeException::new);
    }
 
    @Nonnull
    private static JigsawPiece getRandomPiece(ResourceLocation key) {
-      MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-      MutableRegistry<JigsawPattern> jigsawRegistry = srv.func_244267_aX().func_243612_b(Registry.field_243555_ax);
-      JigsawPattern pattern = (JigsawPattern)jigsawRegistry.func_241873_b(key).orElseThrow(RuntimeException::new);
-      WeightedList<JigsawPiece> weightedPieces = new WeightedList<>();
-      pattern.field_214952_d.forEach(weightedPiece -> weightedPieces.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond()));
-      return weightedPieces.getOptionalRandom(rand).orElseThrow(RuntimeException::new);
+      return getRoomList(key).getOptionalRandom(rand).orElseThrow(RuntimeException::new);
    }
 }

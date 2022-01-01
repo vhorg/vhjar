@@ -5,11 +5,11 @@
       "text": "The Grasshopper Ninja"
     },
     "description": {
-      "text": "Use Dash with a full set of green Samurai armor!"
+      "text": "Use Dash with a full set of green Fairy armor!"
     },
     "icon": {
-      "item": "the_vault:chestplate",
-      "nbt": "{\"Vault\":{\"Attributes\":[{\"Id\":\"the_vault:gear_model\",\"BaseValue\":0},{\"Id\":\"the_vault:gear_color\",\"BaseValue\":6192150},{\"Id\":\"the_vault:gear_state\",\"BaseValue\":\"IDENTIFIED\"},{\"Id\":\"the_vault:gear_rarity\",\"BaseValue\":\"COMMON\"}]}}"
+      "item": "the_vault:helmet",
+      "nbt": "{Vault:{Attributes:[{BaseValue:\"IDENTIFIED\",Id:\"the_vault:gear_state\"},{BaseValue:\"OMEGA\",Id:\"the_vault:gear_rarity\"},{BaseValue:\"NONE\",Id:\"the_vault:gear_set\"},{BaseValue:16,Id:\"the_vault:gear_special_model\"},{BaseValue:-1,Id:\"the_vault:gear_color\"},{BaseValue:4845100660900061521L,Id:\"the_vault:gear_random_seed\"},{BaseValue:\"All\",Id:\"the_vault:gear_roll_type\"},{BaseValue:0,Id:\"the_vault:gear_tier\"}]}}"
     },
     "frame": "challenge",
     "show_toast": true,

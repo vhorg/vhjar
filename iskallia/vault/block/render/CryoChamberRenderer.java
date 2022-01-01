@@ -17,31 +17,23 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.IRenderTypeBuffer.Impl;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.DoubleBlockHalf;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
 import org.lwjgl.opengl.ARBShaderObjects;
 
 public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntity> {
@@ -120,7 +112,6 @@ public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntit
          }
       }
 
-      this.renderArmor(matrixStack, tileEntity, buffer, combinedOverlay);
       this.renderLiquid(matrixStack, tileEntity, buffer, partialTicks);
       if (mc.field_71476_x != null && mc.field_71476_x.func_216346_c() == Type.BLOCK) {
          String eternalName = null;
@@ -193,45 +184,6 @@ public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntit
       matrixStack.func_227865_b_();
    }
 
-   public void renderArmor(MatrixStack matrixStack, CryoChamberTileEntity tileEntity, IRenderTypeBuffer buffer, int combinedOverlay) {
-      if (tileEntity.getEternalId() != null) {
-         EternalDataSnapshot snapshot = ClientEternalData.getSnapshot(tileEntity.getEternalId());
-         if (snapshot != null) {
-            BlockState blockState = tileEntity.func_195044_w();
-            Direction direction = (Direction)blockState.func_177229_b(CryoChamberBlock.FACING);
-            int lightLevel = this.getLightAtPos(tileEntity.func_145831_w(), tileEntity.func_174877_v().func_177984_a());
-
-            for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-               ItemStack stack = snapshot.getEquipment(slot);
-               if (!stack.func_190926_b()) {
-                  this.renderItem(stack, matrixStack, buffer, combinedOverlay, lightLevel, direction, slot);
-               }
-            }
-         }
-      }
-   }
-
-   private void renderItem(
-      ItemStack stack, MatrixStack matrixStack, IRenderTypeBuffer buffer, int combinedOverlay, int lightLevel, Direction direction, EquipmentSlotType slot
-   ) {
-      matrixStack.func_227860_a_();
-      double[] rootTranslation = this.getRootTranslation(direction);
-      double[] itemTranslation = this.getItemTranslation(slot);
-      matrixStack.func_227863_a_(this.getRotationFromDirection(direction));
-      matrixStack.func_227861_a_(rootTranslation[0], rootTranslation[1], rootTranslation[2]);
-      matrixStack.func_227861_a_(itemTranslation[0], itemTranslation[1], itemTranslation[2]);
-      matrixStack.func_227862_a_(0.25F, 0.25F, 0.25F);
-      IBakedModel ibakedmodel = mc.func_175599_af().func_184393_a(stack, null, null);
-      mc.func_175599_af().func_229111_a_(stack, TransformType.GROUND, false, matrixStack, buffer, lightLevel, combinedOverlay, ibakedmodel);
-      matrixStack.func_227865_b_();
-   }
-
-   private int getLightAtPos(World world, BlockPos pos) {
-      int blockLight = world.func_226658_a_(LightType.BLOCK, pos);
-      int skyLight = world.func_226658_a_(LightType.SKY, pos);
-      return LightTexture.func_228451_a_(blockLight, skyLight);
-   }
-
    private Quaternion getRotationFromDirection(Direction direction) {
       switch (direction) {
          case NORTH:
@@ -252,29 +204,6 @@ public class CryoChamberRenderer extends TileEntityRenderer<CryoChamberTileEntit
             return new double[]{0.0, 0.0, -1.0};
          default:
             return new double[]{0.0, 0.0, 0.0};
-      }
-   }
-
-   private double[] getItemTranslation(EquipmentSlotType slot) {
-      double pixel = 0.0625;
-      double width = 14.0 * pixel;
-      double distance = width / 6.0;
-      double start = pixel * 2.0;
-      switch (slot) {
-         case MAINHAND:
-            return new double[]{start, 1.85, 1.0};
-         case HEAD:
-            return new double[]{start + distance, 1.85, 1.0};
-         case CHEST:
-            return new double[]{start + distance * 2.0, 1.85, 1.0};
-         case LEGS:
-            return new double[]{start + distance * 3.0, 1.85, 1.0};
-         case FEET:
-            return new double[]{start + distance * 4.0, 1.85, 1.0};
-         case OFFHAND:
-            return new double[]{start + distance * 5.0, 1.85, 1.0};
-         default:
-            return new double[3];
       }
    }
 

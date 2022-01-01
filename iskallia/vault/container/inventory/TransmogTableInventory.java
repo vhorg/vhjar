@@ -7,13 +7,14 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModModels;
 import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.item.gear.VaultSwordItem;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 
 public class TransmogTableInventory extends RecipeInventory {
-   public static final int ARMOR_SLOT = 0;
+   public static final int GEAR_SLOT = 0;
    public static final int APPEARANCE_SLOT = 1;
    public static final int BRONZE_SLOT = 2;
 
@@ -22,66 +23,95 @@ public class TransmogTableInventory extends RecipeInventory {
    }
 
    public int requiredVaultBronze() {
-      ItemStack armorItemStack = this.func_70301_a(0);
-      if (armorItemStack.func_190926_b()) {
+      ItemStack gearStack = this.func_70301_a(0);
+      if (gearStack.func_190926_b()) {
          return -1;
       } else {
-         IntegerAttribute levelAttr = ModAttributes.MIN_VAULT_LEVEL.getOrDefault(armorItemStack, 1);
-         int gearLevel = levelAttr.getValue(armorItemStack);
+         IntegerAttribute levelAttr = ModAttributes.MIN_VAULT_LEVEL.getOrDefault(gearStack, 1);
+         int gearLevel = levelAttr.getValue(gearStack);
          return MathHelper.func_76125_a(gearLevel, 1, 64);
       }
    }
 
    @Override
    public boolean recipeFulfilled() {
-      ItemStack armorStack = this.func_70301_a(0);
+      ItemStack gearStack = this.func_70301_a(0);
       ItemStack appearanceStack = this.func_70301_a(1);
       ItemStack bronzeStack = this.func_70301_a(2);
-      if (!(armorStack.func_77973_b() instanceof VaultArmorItem)) {
+      if (gearStack.func_77973_b() instanceof VaultArmorItem && appearanceStack.func_77973_b() instanceof VaultArmorItem) {
+         return this.armorRecipeFulfilled(gearStack, appearanceStack, bronzeStack);
+      } else {
+         return gearStack.func_77973_b() instanceof VaultSwordItem && appearanceStack.func_77973_b() instanceof VaultSwordItem
+            ? this.swordRecipeFulfilled(gearStack, appearanceStack, bronzeStack)
+            : false;
+      }
+   }
+
+   private boolean armorRecipeFulfilled(ItemStack armorStack, ItemStack appearanceStack, ItemStack bronzeStack) {
+      VaultGear.Rarity armorRarity = ModAttributes.GEAR_RARITY.getBase(armorStack).orElse(VaultGear.Rarity.SCRAPPY);
+      VaultGear.Rarity appearanceRarity = ModAttributes.GEAR_RARITY.getBase(appearanceStack).orElse(VaultGear.Rarity.SCRAPPY);
+      if (armorRarity == VaultGear.Rarity.SCRAPPY) {
          return false;
-      } else if (!(appearanceStack.func_77973_b() instanceof VaultArmorItem)) {
+      } else if (appearanceRarity == VaultGear.Rarity.SCRAPPY) {
          return false;
       } else {
-         VaultGear.Rarity armorRarity = ModAttributes.GEAR_RARITY.getBase(armorStack).orElse(VaultGear.Rarity.SCRAPPY);
-         VaultGear.Rarity appearanceRarity = ModAttributes.GEAR_RARITY.getBase(appearanceStack).orElse(VaultGear.Rarity.SCRAPPY);
-         if (armorRarity == VaultGear.Rarity.SCRAPPY) {
-            return false;
-         } else if (appearanceRarity == VaultGear.Rarity.SCRAPPY) {
+         EquipmentSlotType armorSlot = MobEntity.func_184640_d(appearanceStack);
+         EquipmentSlotType appearanceSlot = MobEntity.func_184640_d(armorStack);
+         if (armorSlot != appearanceSlot) {
             return false;
          } else {
-            EquipmentSlotType armorSlot = MobEntity.func_184640_d(appearanceStack);
-            EquipmentSlotType appearanceSlot = MobEntity.func_184640_d(armorStack);
-            if (armorSlot != appearanceSlot) {
+            int armorSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(armorStack).orElse(-1);
+            int appearanceSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(appearanceStack).orElse(-1);
+            if (armorSpecialModel != -1) {
                return false;
             } else {
-               int armorSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(armorStack).orElse(-1);
-               int appearanceSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(appearanceStack).orElse(-1);
-               if (armorSpecialModel != -1) {
-                  return false;
-               } else {
-                  if (appearanceSpecialModel != -1) {
-                     ModModels.SpecialGearModel specialGearModel = ModModels.SpecialGearModel.getModel(appearanceSlot, appearanceSpecialModel);
-                     if (specialGearModel != null && !specialGearModel.getModelProperties().doesAllowTransmogrification()) {
-                        return false;
-                     }
+               if (appearanceSpecialModel != -1) {
+                  ModModels.SpecialGearModel specialGearModel = ModModels.SpecialGearModel.getModel(appearanceSlot, appearanceSpecialModel);
+                  if (specialGearModel != null && !specialGearModel.getModelProperties().doesAllowTransmogrification()) {
+                     return false;
                   }
+               }
 
-                  return bronzeStack.func_77973_b() == ModItems.VAULT_BRONZE && bronzeStack.func_190916_E() >= this.requiredVaultBronze();
+               return bronzeStack.func_77973_b() == ModItems.VAULT_BRONZE && bronzeStack.func_190916_E() >= this.requiredVaultBronze();
+            }
+         }
+      }
+   }
+
+   private boolean swordRecipeFulfilled(ItemStack swordStack, ItemStack appearanceStack, ItemStack bronzeStack) {
+      VaultGear.Rarity swordRarity = ModAttributes.GEAR_RARITY.getBase(swordStack).orElse(VaultGear.Rarity.SCRAPPY);
+      VaultGear.Rarity appearanceRarity = ModAttributes.GEAR_RARITY.getBase(appearanceStack).orElse(VaultGear.Rarity.SCRAPPY);
+      if (swordRarity == VaultGear.Rarity.SCRAPPY) {
+         return false;
+      } else if (appearanceRarity == VaultGear.Rarity.SCRAPPY) {
+         return false;
+      } else {
+         int armorSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(swordStack).orElse(-1);
+         int appearanceSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(appearanceStack).orElse(-1);
+         if (armorSpecialModel != -1) {
+            return false;
+         } else {
+            if (appearanceSpecialModel != -1) {
+               ModModels.SpecialSwordModel specialSwordModel = ModModels.SpecialSwordModel.getModel(appearanceSpecialModel);
+               if (specialSwordModel != null && !specialSwordModel.getModelProperties().doesAllowTransmogrification()) {
+                  return false;
                }
             }
+
+            return bronzeStack.func_77973_b() == ModItems.VAULT_BRONZE && bronzeStack.func_190916_E() >= this.requiredVaultBronze();
          }
       }
    }
 
    @Override
    public ItemStack resultingItemStack() {
-      ItemStack armorStack = this.func_70301_a(0);
+      ItemStack gearStack = this.func_70301_a(0);
       ItemStack appearanceStack = this.func_70301_a(1);
       IntegerAttribute modelAttr = ModAttributes.GEAR_MODEL.getOrDefault(appearanceStack, 0);
       int modelId = modelAttr.getValue(appearanceStack);
       IntegerAttribute specialModelAttr = ModAttributes.GEAR_SPECIAL_MODEL.getOrDefault(appearanceStack, -1);
       int specialModelId = specialModelAttr.getValue(appearanceStack);
-      ItemStack resultingStack = armorStack.func_77946_l();
+      ItemStack resultingStack = gearStack.func_77946_l();
       ModAttributes.GEAR_MODEL.create(resultingStack, modelId);
       if (specialModelId != -1) {
          ModAttributes.GEAR_SPECIAL_MODEL.create(resultingStack, specialModelId);

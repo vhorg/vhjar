@@ -31,7 +31,7 @@ public class EntityScaler {
    ) {
       VaultMobsConfig.Level overrides = ModConfigs.VAULT_MOBS.getForLevel(level);
       if (!isScaled(entity)) {
-         overrides.getMob(entity).ifPresent(mob -> mob.scale(entity, vault, vaultDifficulty));
+         VaultMobsConfig.Mob.scale(entity, vault, vaultDifficulty);
       }
 
       for (EquipmentSlotType slot : EquipmentSlotType.values()) {

@@ -11,8 +11,24 @@ public class VaultRoomNames {
       switch (filterKey) {
          case "crystal_caves":
             return new StringTextComponent("Crystal Cave").func_240699_a_(TextFormatting.DARK_PURPLE);
-         case "contest":
-            return new StringTextComponent("Contest").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_alien":
+            return new StringTextComponent("Contest: Alien").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_dragon":
+            return new StringTextComponent("Contest: Dragon").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_fishtank":
+            return new StringTextComponent("Contest: Aquarium").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_mine":
+            return new StringTextComponent("Contest: Mine").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_oriental":
+            return new StringTextComponent("Contest: Oriental").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_pixel":
+            return new StringTextComponent("Contest: Pixelart").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_prismarine":
+            return new StringTextComponent("Contest: Atlantis").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_tree":
+            return new StringTextComponent("Contest: Tree").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_web":
+            return new StringTextComponent("Contest: Spiderweb").func_240699_a_(TextFormatting.DARK_AQUA);
          case "digsite":
             return new StringTextComponent("Digsite").func_240699_a_(TextFormatting.YELLOW);
          case "dungeons":

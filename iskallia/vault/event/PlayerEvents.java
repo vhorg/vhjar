@@ -48,6 +48,7 @@ import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.server.ServerWorld;
@@ -300,12 +301,21 @@ public class PlayerEvents {
          ItemEntity itemEntity = event.getItem();
          ItemStack stack = itemEntity.func_92059_d();
          if (!stack.func_190926_b()) {
-            if (player.func_71121_q().func_234923_W_() == Vault.VAULT_KEY) {
+            ServerWorld world = player.func_71121_q();
+            if (world.func_234923_W_() == Vault.VAULT_KEY) {
                if (hasVaultCharm(player.field_71071_by)) {
-                  List<ResourceLocation> whitelist = VaultCharmData.get(player.func_71121_q()).getWhitelistedItems(player);
+                  List<ResourceLocation> whitelist = VaultCharmData.get(world).getWhitelistedItems(player);
                   if (whitelist.contains(stack.func_77973_b().getRegistryName())) {
                      event.setCanceled(true);
                      itemEntity.func_70106_y();
+                     world.func_184133_a(
+                        null,
+                        player.func_233580_cy_(),
+                        SoundEvents.field_187638_cR,
+                        SoundCategory.PLAYERS,
+                        0.2F,
+                        (world.field_73012_v.nextFloat() - world.field_73012_v.nextFloat()) * 1.4F + 2.0F
+                     );
                   }
                }
             }

@@ -8,6 +8,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.BasicItem;
+import iskallia.vault.util.MiscUtils;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -76,6 +78,14 @@ public class EtchingItem extends BasicItem {
       super.func_77663_a(stack, world, entity, itemSlot, isSelected);
       if (entity instanceof ServerPlayerEntity) {
          ServerPlayerEntity player = (ServerPlayerEntity)entity;
+         if (world instanceof ServerWorld && stack.func_190916_E() > 1) {
+            while (stack.func_190916_E() > 1) {
+               stack.func_190918_g(1);
+               ItemStack flask = new ItemStack(this);
+               MiscUtils.giveItem(player, flask);
+            }
+         }
+
          if (ModAttributes.GEAR_STATE.getOrCreate(stack, VaultGear.State.UNIDENTIFIED).getValue(stack) == VaultGear.State.ROLLING) {
             this.tickRoll(stack, world, player, itemSlot, isSelected);
          }

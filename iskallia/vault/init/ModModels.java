@@ -5,7 +5,6 @@ import iskallia.vault.Vault;
 import iskallia.vault.block.CryoChamberBlock;
 import iskallia.vault.config.VaultGearConfig;
 import iskallia.vault.item.ItemDrillArrow;
-import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.gear.GearModelProperties;
 import iskallia.vault.item.gear.VaultGear;
@@ -346,6 +345,7 @@ public class ModModels {
          .intValue();
 
       public static void register() {
+         registerItemProperty(ModItems.SWORD, "special_texture", SPECIAL_GEAR_TEXTURE);
          registerItemProperty(ModItems.HELMET, "special_texture", SPECIAL_GEAR_TEXTURE);
          registerItemProperty(ModItems.CHESTPLATE, "special_texture", SPECIAL_GEAR_TEXTURE);
          registerItemProperty(ModItems.LEGGINGS, "special_texture", SPECIAL_GEAR_TEXTURE);
@@ -385,10 +385,9 @@ public class ModModels {
             new ResourceLocation("type"),
             (stack, world, entity) -> (float)stack.func_77952_i() / CryoChamberBlock.ChamberState.values().length
          );
-         ItemModelsProperties.func_239418_a_(ModItems.VAULT_CRYSTAL, new ResourceLocation("type"), (stack, world, entity) -> {
-            CrystalData.Type crystalType = VaultCrystalItem.getData(stack).getType();
-            return (float)crystalType.ordinal() / CrystalData.Type.values().length;
-         });
+         ItemModelsProperties.func_239418_a_(
+            ModItems.VAULT_CRYSTAL, new ResourceLocation("type"), (stack, world, entity) -> VaultCrystalItem.getData(stack).getType().ordinal()
+         );
       }
 
       public static void registerItemProperty(Item item, String name, IItemPropertyGetter property) {
@@ -583,6 +582,59 @@ public class ModModels {
          public ModModels.SpecialGearModel chestplate;
          public ModModels.SpecialGearModel leggings;
          public ModModels.SpecialGearModel boots;
+
+         public ModModels.SpecialGearModel modelForSlot(EquipmentSlotType slot) {
+            if (slot == EquipmentSlotType.HEAD) {
+               return this.head;
+            } else if (slot == EquipmentSlotType.CHEST) {
+               return this.chestplate;
+            } else {
+               return slot == EquipmentSlotType.LEGS ? this.leggings : this.boots;
+            }
+         }
+      }
+   }
+
+   public static class SpecialSwordModel {
+      public static Map<Integer, ModModels.SpecialSwordModel> REGISTRY;
+      public static ModModels.SpecialSwordModel JANITORS_BROOM;
+      int id;
+      String displayName;
+      GearModelProperties modelProperties = new GearModelProperties();
+
+      public static ModModels.SpecialSwordModel getModel(int id) {
+         return REGISTRY.get(id);
+      }
+
+      public static void register() {
+         REGISTRY = new HashMap<>();
+         JANITORS_BROOM = register("Janitor's Broom", new GearModelProperties().allowTransmogrification());
+      }
+
+      public int getId() {
+         return this.id;
+      }
+
+      public String getDisplayName() {
+         return this.displayName;
+      }
+
+      public GearModelProperties getModelProperties() {
+         return this.modelProperties;
+      }
+
+      private static ModModels.SpecialSwordModel register(String displayName) {
+         ModModels.SpecialSwordModel swordModel = new ModModels.SpecialSwordModel();
+         swordModel.displayName = displayName;
+         swordModel.id = REGISTRY.size();
+         REGISTRY.put(swordModel.id, swordModel);
+         return swordModel;
+      }
+
+      private static ModModels.SpecialSwordModel register(String displayName, GearModelProperties modelProperties) {
+         ModModels.SpecialSwordModel swordModel = register(displayName);
+         swordModel.modelProperties = modelProperties;
+         return swordModel;
       }
    }
 }

@@ -47,5 +47,6 @@ public class SetupEvents {
       Vault.LOGGER.info("setupDedicatedServer()");
       ModModels.SpecialGearModel.register();
       ModModels.GearModel.register();
+      ModModels.SpecialSwordModel.register();
    }
 }

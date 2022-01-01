@@ -139,10 +139,7 @@ public class PlayerStatisticsCollector {
             vaultStats.func_74768_a("vaultDeaths", vaultRunsSnapshot.deaths);
             vaultStats.func_74768_a("vaultBails", vaultRunsSnapshot.bails);
             vaultStats.func_74768_a("vaultBossKills", vaultRunsSnapshot.bossKills);
-            if (ModConfigs.RAID_EVENT_CONFIG.isEnabled()) {
-               vaultStats.func_74768_a("vaultRaids", vaultRunsSnapshot.raidsCompleted);
-            }
-
+            vaultStats.func_74768_a("vaultRaids", vaultRunsSnapshot.raidsCompleted);
             CompoundNBT favourStats = new CompoundNBT();
 
             for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {

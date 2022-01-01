@@ -60,6 +60,7 @@ public class RegistryEvents {
       ModModels.ItemProperty.register();
       ModModels.GearModel.register();
       ModModels.SpecialGearModel.register();
+      ModModels.SpecialSwordModel.register();
    }
 
    @SubscribeEvent

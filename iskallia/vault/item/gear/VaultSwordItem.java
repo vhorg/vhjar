@@ -73,6 +73,7 @@ public class VaultSwordItem extends SwordItem implements VaultGear<VaultSwordIte
 
    public void func_77663_a(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
       super.func_77663_a(stack, world, entity, itemSlot, isSelected);
+      this.splitStack(this, stack, world, entity);
       if (entity instanceof ServerPlayerEntity) {
          this.inventoryTick(this, stack, world, (ServerPlayerEntity)entity, itemSlot, isSelected);
       }

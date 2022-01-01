@@ -39,9 +39,23 @@ public class CrystalCommand extends Command {
       builder.then(
          Commands.func_197057_a("preventRandomModifiers").then(Commands.func_197056_a("random", BoolArgumentType.bool()).executes(this::setRollsRandom))
       );
+      builder.then(
+         Commands.func_197057_a("canTriggerInfluences")
+            .then(Commands.func_197056_a("trigger", BoolArgumentType.bool()).executes(this::setCanTriggerInfluences))
+      );
+      builder.then(
+         Commands.func_197057_a("canGenerateTreasureRooms")
+            .then(Commands.func_197056_a("generate", BoolArgumentType.bool()).executes(this::canGenerateTreasureRooms))
+      );
       builder.then(Commands.func_197057_a("setModifiable").then(Commands.func_197056_a("modifiable", BoolArgumentType.bool()).executes(this::setModifiable)));
       builder.then(Commands.func_197057_a("addModifier").then(Commands.func_197056_a("modifier", StringArgumentType.string()).executes(this::addModifier)));
-      builder.then(Commands.func_197057_a("addRoom").then(Commands.func_197056_a("roomKey", StringArgumentType.string()).executes(this::addRoom)));
+      builder.then(
+         Commands.func_197057_a("addRoom")
+            .then(
+               Commands.func_197056_a("roomKey", StringArgumentType.string())
+                  .then(Commands.func_197056_a("amount", IntegerArgumentType.integer(1, 100)).executes(this::addRoom))
+            )
+      );
       builder.then(
          Commands.func_197057_a("objectiveCount").then(Commands.func_197056_a("count", IntegerArgumentType.integer(1)).executes(this::setObjectiveCount))
       );
@@ -52,6 +66,22 @@ public class CrystalCommand extends Command {
       builder.then(
          Commands.func_197057_a("type").then(Commands.func_197056_a("crystalType", EnumArgument.enumArgument(CrystalData.Type.class)).executes(this::setType))
       );
+   }
+
+   private int canGenerateTreasureRooms(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+      ItemStack crystal = this.getCrystal(ctx);
+      CrystalData data = VaultCrystalItem.getData(crystal);
+      boolean generateTreasureRooms = BoolArgumentType.getBool(ctx, "generate");
+      data.setCanGenerateTreasureRooms(generateTreasureRooms);
+      return 0;
+   }
+
+   private int setCanTriggerInfluences(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
+      ItemStack crystal = this.getCrystal(ctx);
+      CrystalData data = VaultCrystalItem.getData(crystal);
+      boolean triggerInfluences = BoolArgumentType.getBool(ctx, "trigger");
+      data.setCanTriggerInfluences(triggerInfluences);
+      return 0;
    }
 
    private int setRollsRandom(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
@@ -78,7 +108,12 @@ public class CrystalCommand extends Command {
          ((CommandSource)ctx.getSource()).func_197035_h().func_145747_a(new StringTextComponent("Unknown Room: " + roomKey), Util.field_240973_b_);
          return 0;
       } else {
-         data.addGuaranteedRoom(roomKey);
+         int amount = IntegerArgumentType.getInteger(ctx, "amount");
+
+         for (int i = 0; i < amount; i++) {
+            data.addGuaranteedRoom(roomKey);
+         }
+
          return 0;
       }
    }

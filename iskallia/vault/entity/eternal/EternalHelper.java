@@ -33,8 +33,9 @@ public class EternalHelper {
       EternalEntity eternal = (EternalEntity)ModEntities.ETERNAL.func_200721_a(world);
       eternal.func_200203_b(
          new StringTextComponent("[")
-            .func_230529_a_(new StringTextComponent(String.valueOf(level)).func_240699_a_(TextFormatting.GREEN))
-            .func_230529_a_(new StringTextComponent("] " + name))
+            .func_240699_a_(TextFormatting.GREEN)
+            .func_230529_a_(new StringTextComponent(String.valueOf(level)).func_240699_a_(TextFormatting.RED))
+            .func_230529_a_(new StringTextComponent("] " + name).func_240699_a_(TextFormatting.GREEN))
       );
       eternal.setSkinName(name);
       equipment.forEach((slot, stack) -> {

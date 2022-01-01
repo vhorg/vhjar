@@ -54,6 +54,8 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
    protected ResourceLocation selectedObjective = null;
    protected int targetObjectiveCount = -1;
    protected boolean canBeModified = true;
+   protected boolean canTriggerInfluences = true;
+   protected boolean canGenerateTreasureRooms = true;
    protected List<String> guaranteedRoomFilters = new ArrayList<>();
    protected CrystalData.EchoData echoData;
 
@@ -115,7 +117,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
          if (modifierNames.contains("Afterlife")) {
             return false;
          } else {
-            return Vault.id("raid_challenge").equals(this.getSelectedObjective()) ? false : this.getType().canCraftModifiers();
+            return Vault.id("raid_challenge").equals(this.getSelectedObjective()) ? false : this.getType().canCraft();
          }
       }
    }
@@ -175,6 +177,10 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       return Collections.unmodifiableList(this.modifiers);
    }
 
+   public boolean canAddRoom(String roomKey) {
+      return !VaultRaid.ARCHITECT_EVENT.get().getId().equals(this.getSelectedObjective());
+   }
+
    public void addGuaranteedRoom(String roomKey) {
       this.guaranteedRoomFilters.add(roomKey);
       this.updateDelegate();
@@ -190,6 +196,24 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
 
    public void setPreventsRandomModifiers(boolean preventsRandomModifiers) {
       this.preventsRandomModifiers = preventsRandomModifiers;
+      this.updateDelegate();
+   }
+
+   public boolean canTriggerInfluences() {
+      return this.canTriggerInfluences;
+   }
+
+   public void setCanTriggerInfluences(boolean canTriggerInfluences) {
+      this.canTriggerInfluences = canTriggerInfluences;
+      this.updateDelegate();
+   }
+
+   public boolean canGenerateTreasureRooms() {
+      return this.canGenerateTreasureRooms;
+   }
+
+   public void setCanGenerateTreasureRooms(boolean canGenerateTreasureRooms) {
+      this.canGenerateTreasureRooms = canGenerateTreasureRooms;
       this.updateDelegate();
    }
 
@@ -371,6 +395,8 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       nbt.func_218657_a("Modifiers", modifiersList);
       nbt.func_74757_a("preventsRandomModifiers", this.preventsRandomModifiers);
       nbt.func_74757_a("canBeModified", this.canBeModified);
+      nbt.func_74757_a("canTriggerInfluences", this.canTriggerInfluences);
+      nbt.func_74757_a("canGenerateTreasureRooms", this.canGenerateTreasureRooms);
       if (this.selectedObjective != null) {
          nbt.func_74778_a("Objective", this.selectedObjective.toString());
       }
@@ -391,6 +417,8 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       this.migrateModifiers(this.modifiers);
       this.preventsRandomModifiers = nbt.func_150297_b("preventsRandomModifiers", 1) ? nbt.func_74767_n("preventsRandomModifiers") : !this.modifiers.isEmpty();
       this.canBeModified = !nbt.func_150297_b("canBeModified", 1) || nbt.func_74767_n("canBeModified");
+      this.canTriggerInfluences = !nbt.func_150297_b("canTriggerInfluences", 1) || nbt.func_74767_n("canTriggerInfluences");
+      this.canGenerateTreasureRooms = !nbt.func_150297_b("canGenerateTreasureRooms", 1) || nbt.func_74767_n("canGenerateTreasureRooms");
       this.selectedObjective = null;
       if (nbt.func_150297_b("Objective", 8)) {
          this.selectedObjective = new ResourceLocation(nbt.func_74779_i("Objective"));
@@ -402,11 +430,19 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       ListNBT roomList = nbt.func_150295_c("rooms", 8);
-      roomList.forEach(inbt -> this.guaranteedRoomFilters.add(inbt.func_150285_a_()));
+      roomList.forEach(inbt -> this.guaranteedRoomFilters.add(this.migrateRoomName(inbt.func_150285_a_())));
    }
 
    private void migrateModifiers(List<CrystalData.Modifier> modifiers) {
       modifiers.forEach(modifier -> modifier.name = VaultModifier.migrateModifierName(modifier.name));
+   }
+
+   private String migrateRoomName(String roomName) {
+      if (roomName.equalsIgnoreCase("contest")) {
+         roomName = "contest_tree";
+      }
+
+      return roomName;
    }
 
    public static class EchoData {
@@ -571,7 +607,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
          this.color = color;
       }
 
-      public boolean canCraftModifiers() {
+      public boolean canCraft() {
          return this == CLASSIC || this == COOP;
       }
 

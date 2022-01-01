@@ -58,7 +58,7 @@ public class ChallengeCrystalArchive {
       CrystalData theHunt = baseData();
       theHunt.setType(CrystalData.Type.CLASSIC);
       theHunt.setSelectedObjective(VaultRaid.SCAVENGER_HUNT.get().getId());
-      theHunt.setTargetObjectiveCount(40);
+      theHunt.setTargetObjectiveCount(8);
       theHunt.addModifier("Odyssey");
       theHunt.addModifier("Unlucky");
       theHunt.addModifier("Unlucky");
@@ -70,7 +70,7 @@ public class ChallengeCrystalArchive {
       CrystalData buildAEscape = baseData();
       buildAEscape.setType(CrystalData.Type.COOP);
       buildAEscape.setSelectedObjective(VaultRaid.ARCHITECT_EVENT.get().getId());
-      buildAEscape.setTargetObjectiveCount(35);
+      buildAEscape.setTargetObjectiveCount(28);
       buildAEscape.addModifier("Locked");
       buildAEscape.addModifier("Phoenix");
       buildAEscape.addModifier("Unlucky");
@@ -124,7 +124,7 @@ public class ChallengeCrystalArchive {
       CrystalData mighty = baseData();
       mighty.setType(CrystalData.Type.CLASSIC);
       mighty.setSelectedObjective(VaultRaid.SCAVENGER_HUNT.get().getId());
-      mighty.setTargetObjectiveCount(51);
+      mighty.setTargetObjectiveCount(12);
       mighty.addModifier("Crowded");
       mighty.addModifier("Challenging");
       mighty.addModifier("Wither");
@@ -135,7 +135,7 @@ public class ChallengeCrystalArchive {
       CrystalData spawnHunter = baseData();
       spawnHunter.setType(CrystalData.Type.CLASSIC);
       spawnHunter.setSelectedObjective(VaultRaid.SCAVENGER_HUNT.get().getId());
-      spawnHunter.setTargetObjectiveCount(40);
+      spawnHunter.setTargetObjectiveCount(5);
       spawnHunter.addModifier("Silent");
       spawnHunter.addModifier("Frenzy");
       spawnHunter.addModifier("Speedy");
@@ -155,7 +155,7 @@ public class ChallengeCrystalArchive {
       CrystalData panic = baseData();
       panic.setType(CrystalData.Type.CLASSIC);
       panic.setSelectedObjective(VaultRaid.SCAVENGER_HUNT.get().getId());
-      panic.setTargetObjectiveCount(40);
+      panic.setTargetObjectiveCount(8);
       panic.addModifier("Silent");
       panic.addModifier("Faster");
       panic.addModifier("Locked");
@@ -184,7 +184,7 @@ public class ChallengeCrystalArchive {
       CrystalData builder = baseData();
       builder.setType(CrystalData.Type.COOP);
       builder.setSelectedObjective(VaultRaid.ARCHITECT_EVENT.get().getId());
-      builder.setTargetObjectiveCount(60);
+      builder.setTargetObjectiveCount(35);
       builder.addModifier("Locked");
       generatedCrystals.add(make(builder));
       CrystalData dream = baseData();
@@ -221,6 +221,8 @@ public class ChallengeCrystalArchive {
    private static CrystalData baseData() {
       CrystalData data = new CrystalData();
       data.setModifiable(false);
+      data.setCanTriggerInfluences(false);
+      data.setCanGenerateTreasureRooms(false);
       data.setPreventsRandomModifiers(true);
       return data;
    }

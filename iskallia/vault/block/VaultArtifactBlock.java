@@ -3,7 +3,9 @@ package iskallia.vault.block;
 import iskallia.vault.block.base.FacedBlock;
 import iskallia.vault.block.property.HiddenIntegerProperty;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MathUtilities;
+import iskallia.vault.util.ServerScheduler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +35,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class VaultArtifactBlock extends FacedBlock {
@@ -83,6 +86,58 @@ public class VaultArtifactBlock extends FacedBlock {
    }
 
    public void onBlockExploded(BlockState state, World world, BlockPos pos, Explosion explosion) {
+      if (world instanceof ServerWorld) {
+         ServerWorld sWorld = (ServerWorld)world;
+         List<BlockPos> validPositions = isValidArtifactSetup(sWorld, pos, state);
+         if (!validPositions.isEmpty()) {
+            validPositions.forEach(at -> world.func_217377_a(at, false));
+            ServerScheduler.INSTANCE.schedule(5, () -> Block.func_180635_a(sWorld, pos, new ItemStack(ModItems.VAULT_RUNE)));
+         }
+      }
+   }
+
+   public boolean canDropFromExplosion(BlockState state, IBlockReader world, BlockPos pos, Explosion explosion) {
+      return false;
+   }
+
+   public static List<BlockPos> isValidArtifactSetup(ServerWorld world, BlockPos at, BlockState state) {
+      int order = (25 - (Integer)state.func_177229_b(ORDER_PROPERTY) + 24) % 25;
+      int shiftVertical = order / 5;
+      int shiftHorizontal = order % 5;
+      BlockPos yPos = at.func_177981_b(shiftVertical);
+
+      for (Direction dir : Direction.values()) {
+         if (!dir.func_176740_k().func_200128_b()) {
+            BlockPos startPos = yPos.func_177967_a(dir, -shiftHorizontal);
+            List<BlockPos> artifactPositions = hasFullArtifactSet(world, startPos, dir);
+            if (!artifactPositions.isEmpty()) {
+               return artifactPositions;
+            }
+         }
+      }
+
+      return Collections.emptyList();
+   }
+
+   private static List<BlockPos> hasFullArtifactSet(ServerWorld world, BlockPos start, Direction facing) {
+      List<BlockPos> positions = new ArrayList<>();
+
+      for (int order = 0; order < 25; order++) {
+         BlockPos at = start.func_177979_c(order / 5).func_177967_a(facing, order % 5);
+         BlockState offsetState = world.func_180495_p(at);
+         if (!(offsetState.func_177230_c() instanceof VaultArtifactBlock)) {
+            return Collections.emptyList();
+         }
+
+         int orderAt = (25 - (Integer)offsetState.func_177229_b(ORDER_PROPERTY) + 24) % 25;
+         if (order != orderAt) {
+            return Collections.emptyList();
+         }
+
+         positions.add(at);
+      }
+
+      return positions;
    }
 
    public List<ItemStack> func_220076_a(BlockState state, net.minecraft.loot.LootContext.Builder builder) {

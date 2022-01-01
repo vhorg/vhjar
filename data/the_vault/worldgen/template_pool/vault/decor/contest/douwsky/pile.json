@@ -1,107 +1,102 @@
 {
-  "name": "the_vault:vault/decor/pirate_cove/sunken_ship_extended",
-  "fallback": "the_vault:vault/decor/pirate_cove/sunken_ship_extended",
-  "elements": [
-    {
-      "weight": 18,
-      "element": {
-        "element_type": "minecraft:empty_pool_element"
-      }
-    },
-	{
-        "weight": 9,
+    "name": "the_vault:vault/decor/contest/douwsky/pile",
+    "fallback": "the_vault:vault/decor/contest/douwsky/pile",
+    "elements": [
+        {
+            "weight": 32,
+            "element": {
+              "element_type": "minecraft:empty_pool_element"
+            }
+      },
+      {
+        "weight": 4,
         "element": {
           "processors": [
-              
-              "the_vault:treasure/barrel_half"
+              "the_vault:treasure/air_half"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
           "elements": [
               {
-                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/s1",
+                  "location": "the_vault:vault/prefab/decor/contest/douwsky/pile/p1",
                   "projection": "rigid",
                   "element_type": "the_vault:paletted_single_pool_element",
-                  "processors": "the_vault:pirate_cove/ship_trap"
-              }
-          ]
-        }
-    },
-	{
-        "weight": 9,
-        "element": {
-          "processors": [
-              
-              "the_vault:treasure/barrel_half"
-          ],
-          "element_type": "the_vault:paletted_list_pool_element",
-          "projection": "rigid",
-          "elements": [
-              {
-                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/s2",
-                  "projection": "rigid",
-                  "element_type": "the_vault:paletted_single_pool_element",
-                  "processors": "the_vault:pirate_cove/ship_trap"
-              }
-          ]
-        }
-    },
-	{
-        "weight": 9,
-        "element": {
-          "processors": [
-              
-              "the_vault:treasure/barrel_half"
-          ],
-          "element_type": "the_vault:paletted_list_pool_element",
-          "projection": "rigid",
-          "elements": [
-              {
-                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/s3",
-                  "projection": "rigid",
-                  "element_type": "the_vault:paletted_single_pool_element",
-                  "processors": "the_vault:pirate_cove/ship_trap"
-              }
-          ]
-        }
-    },
-	{
-        "weight": 9,
-        "element": {
-          "processors": [
-              
-              "the_vault:treasure/barrel_half"
-          ],
-          "element_type": "the_vault:paletted_list_pool_element",
-          "projection": "rigid",
-          "elements": [
-              {
-                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/s4",
-                  "projection": "rigid",
-                  "element_type": "the_vault:paletted_single_pool_element",
-                  "processors": "the_vault:pirate_cove/ship_trap"
+                  "processors": "the_vault:generic/ignore_air"
               }
           ]
         }
     },
     {
-        "weight": 1,
+        "weight": 4,
         "element": {
           "processors": [
-              
-              "the_vault:treasure/barrel_half"
+              "the_vault:treasure/air_half"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
           "elements": [
               {
-                  "location": "the_vault:vault/prefab/decor/pirate_cove/sunken_ship/c1",
+                  "location": "the_vault:vault/prefab/decor/contest/douwsky/pile/p2",
                   "projection": "rigid",
                   "element_type": "the_vault:paletted_single_pool_element",
-                  "processors": "the_vault:pirate_cove/ship_trap"
+                  "processors": "the_vault:generic/ignore_air"
+              }
+          ]
+        }
+    },
+    {
+        "weight": 4,
+        "element": {
+          "processors": [
+              "the_vault:treasure/air_half"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+              {
+                  "location": "the_vault:vault/prefab/decor/contest/douwsky/pile/p3",
+                  "projection": "rigid",
+                  "element_type": "the_vault:paletted_single_pool_element",
+                  "processors": "the_vault:generic/ignore_air"
+              }
+          ]
+        }
+    },
+    {
+        "weight": 4,
+        "element": {
+          "processors": [
+              "the_vault:treasure/air_half"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+              {
+                  "location": "the_vault:vault/prefab/decor/contest/douwsky/pile/p4",
+                  "projection": "rigid",
+                  "element_type": "the_vault:paletted_single_pool_element",
+                  "processors": "the_vault:generic/ignore_air"
+              }
+          ]
+        }
+    },
+    {
+        "weight": 4,
+        "element": {
+          "processors": [
+              "the_vault:treasure/air_half"
+          ],
+          "element_type": "the_vault:paletted_list_pool_element",
+          "projection": "rigid",
+          "elements": [
+              {
+                  "location": "the_vault:vault/prefab/decor/contest/douwsky/pile/p5",
+                  "projection": "rigid",
+                  "element_type": "the_vault:paletted_single_pool_element",
+                  "processors": "the_vault:generic/ignore_air"
               }
           ]
         }
     }
-  ]
-}
+    ]
+  }

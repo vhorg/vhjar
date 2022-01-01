@@ -102,17 +102,18 @@ public class VaultRaidData extends WorldSavedData {
       PlayerStatsData.get(server).onVaultFinished(playerId, vault);
       if (!PlayerStatsData.get(server).get(playerId).hasFinishedRaidReward()) {
          int raids = PlayerStatisticsCollector.getFinishedRaids(server, playerId);
-         if (raids >= PlayerVaultStatsData.get(server).getVaultStats(playerId).getVaultLevel()) {
-            ScheduledItemDropData.get(server).addDrop(playerId, this.generateRaidRewardCrate());
+         if (raids >= 5 && raids >= PlayerVaultStatsData.get(server).getVaultStats(playerId).getVaultLevel()) {
+            ScheduledItemDropData.get(server).addDrop(playerId, generateRaidRewardCrate());
             PlayerStatsData.get(server).setRaidRewardReceived(playerId);
          }
       }
    }
 
-   private ItemStack generateRaidRewardCrate() {
+   public static ItemStack generateRaidRewardCrate() {
       ItemStack stack = new ItemStack(Items.field_221895_gF);
       CrystalData minerData = new CrystalData();
       minerData.setModifiable(false);
+      minerData.setCanTriggerInfluences(false);
       minerData.setPreventsRandomModifiers(true);
       minerData.setSelectedObjective(VaultRaid.ARCHITECT_EVENT.get().getId());
       minerData.setTargetObjectiveCount(20);
@@ -124,6 +125,7 @@ public class VaultRaidData extends WorldSavedData {
       miner.func_196082_o().func_218657_a("CrystalData", minerData.serializeNBT());
       CrystalData digsiteData = new CrystalData();
       digsiteData.setModifiable(false);
+      digsiteData.setCanTriggerInfluences(false);
       digsiteData.setPreventsRandomModifiers(true);
       digsiteData.setSelectedObjective(VaultRaid.SCAVENGER_HUNT.get().getId());
       digsiteData.setTargetObjectiveCount(6);

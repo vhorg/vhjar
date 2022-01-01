@@ -1,12 +1,11 @@
 package iskallia.vault.easteregg;
 
 import iskallia.vault.entity.FighterEntity;
-import iskallia.vault.init.ModAttributes;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModModels;
 import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.GearItemStackBuilder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -41,16 +40,18 @@ public class DevAccessories {
          if (!(world.func_201674_k().nextDouble() > 0.4)) {
             String bossName = bossInfo.func_186744_e().getString();
             if (bossName.equalsIgnoreCase("iskall85")) {
-               ItemStack itemStack = new ItemStack(ModItems.HELMET);
-               ModAttributes.GEAR_STATE.create(itemStack, VaultGear.State.IDENTIFIED);
-               ModAttributes.GEAR_RARITY.create(itemStack, VaultGear.Rarity.OMEGA);
-               itemStack.func_196082_o().func_82580_o("RollTicks");
-               itemStack.func_196082_o().func_82580_o("LastModelHit");
-               ModAttributes.GEAR_ROLL_TYPE.create(itemStack, ModConfigs.VAULT_GEAR.DEFAULT_ROLL);
-               ModAttributes.GEAR_COLOR.create(itemStack, -5384139);
-               ModAttributes.GEAR_SPECIAL_MODEL.create(itemStack, ModModels.SpecialGearModel.ISKALL_HOLOLENS.getId());
+               ItemStack itemStack = new GearItemStackBuilder(ModItems.HELMET)
+                  .setGearRarity(VaultGear.Rarity.UNIQUE)
+                  .setColor(-5384139)
+                  .setSpecialModelId(ModModels.SpecialGearModel.ISKALL_HOLOLENS.getId())
+                  .build();
                EntityHelper.giveItem(player, itemStack);
-            } else if (bossName.equalsIgnoreCase("iGoodie")) {
+            } else if (!bossName.equalsIgnoreCase("iGoodie") && bossName.equalsIgnoreCase("Douwsky")) {
+               ItemStack itemStack = new GearItemStackBuilder(ModItems.SWORD)
+                  .setGearRarity(VaultGear.Rarity.UNIQUE)
+                  .setSpecialModelId(ModModels.SpecialSwordModel.JANITORS_BROOM.getId())
+                  .build();
+               EntityHelper.giveItem(player, itemStack);
             }
          }
       }

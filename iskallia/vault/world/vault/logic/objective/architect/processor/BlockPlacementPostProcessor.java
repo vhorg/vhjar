@@ -1,13 +1,10 @@
 package iskallia.vault.world.vault.logic.objective.architect.processor;
 
-import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.util.MiscUtils;
-import iskallia.vault.util.VaultRarity;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.piece.VaultObelisk;
 import iskallia.vault.world.vault.gen.piece.VaultPiece;
 import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -40,11 +37,6 @@ public class BlockPlacementPostProcessor extends VaultPieceProcessor {
                   && world.func_180495_p(pos.func_177977_b()).func_224755_d(world, pos, Direction.UP)
                   && world.func_180501_a(pos, this.toPlace, 2)) {
                   placed = true;
-                  TileEntity te = world.func_175625_s(pos);
-                  if (te instanceof VaultChestTileEntity) {
-                     VaultChestTileEntity chest = (VaultChestTileEntity)te;
-                     chest.getRarityPool().put(VaultRarity.COMMON, 1);
-                  }
                }
             }
          }

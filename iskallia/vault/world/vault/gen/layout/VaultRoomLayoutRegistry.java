@@ -16,6 +16,7 @@ public class VaultRoomLayoutRegistry {
       layoutRegistry.put(DiamondRoomLayout.ID, DiamondRoomLayout::new);
       layoutRegistry.put(SquareRoomLayout.ID, SquareRoomLayout::new);
       layoutRegistry.put(CircleRoomLayout.ID, CircleRoomLayout::new);
+      layoutRegistry.put(TriangleRoomLayout.ID, TriangleRoomLayout::new);
       layoutRegistry.put(SpiralRoomLayout.ID, SpiralRoomLayout::new);
       layoutRegistry.put(DebugVaultLayout.ID, DebugVaultLayout::new);
       layoutRegistry.put(DenseDiamondRoomLayout.ID, DenseDiamondRoomLayout::new);

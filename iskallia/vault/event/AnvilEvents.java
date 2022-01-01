@@ -195,8 +195,12 @@ public class AnvilEvents {
             return;
          }
 
-         int amount = event.getRight().func_190916_E();
          VaultRuneItem runeItem = (VaultRuneItem)event.getRight().func_77973_b();
+         if (!data.canAddRoom(runeItem.getRoomName())) {
+            return;
+         }
+
+         int amount = event.getRight().func_190916_E();
 
          for (int i = 0; i < amount; i++) {
             data.addGuaranteedRoom(runeItem.getRoomName());

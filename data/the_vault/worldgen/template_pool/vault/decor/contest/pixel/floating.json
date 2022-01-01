@@ -3,16 +3,16 @@
     "fallback": "the_vault:vault/decor/contest/pixel/floating",
     "elements": [
         {
-            "weight": 22,
+            "weight": 44,
             "element": {
               "element_type": "minecraft:empty_pool_element"
             }
       },
       {
-          "weight": 2,
+          "weight": 4,
           "element": {
             "processors": [
-                "the_vault:treasure/air_half"
+                "the_vault:contest/pixel_chests"
             ],
             "element_type": "the_vault:paletted_list_pool_element",
             "projection": "rigid",
@@ -27,10 +27,10 @@
           }
       },
       {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -45,10 +45,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -63,10 +63,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -81,10 +81,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 1,
         "element": {
           "processors": [
-              "minecraft:empty"
+              "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -99,10 +99,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -117,10 +117,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -135,10 +135,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -153,10 +153,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -171,10 +171,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -189,10 +189,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 1,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -207,10 +207,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -225,10 +225,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -243,10 +243,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -261,10 +261,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -279,10 +279,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -297,10 +297,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -315,10 +315,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -333,10 +333,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -351,10 +351,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -369,10 +369,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -387,10 +387,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -405,10 +405,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
@@ -423,10 +423,10 @@
         }
     },
     {
-        "weight": 2,
+        "weight": 4,
         "element": {
           "processors": [
-              "minecraft:empty"
+            "the_vault:contest/pixel_chests"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",

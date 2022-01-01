@@ -12,6 +12,7 @@
         "MixinCommandBlockTileEntity",
         "MixinCrossbowItem",
         "MixinCUpdateStructureBlockPacket",
+        "MixinDankItem",
         "MixinEnchantment",
         "MixinEnchantmentHelper",
         "MixinEntity",
@@ -20,15 +21,16 @@
         "MixinItemStack",
         "MixinLavaFluid",
         "MixinLivingEntity",
+        "MixinNBTSizeTracker",
         "MixinPlayerInventory",
         "MixinRepairContainer",
-        "MixinServerHangWatchdog",
         "MixinServerPlayNetHandler",
         "MixinServerWorld",
         "MixinSingleJigsawPiece",
         "MixinStructureBlockTileEntity",
         "MixinStructureProcessor",
-        "MixinTemplatePalette"
+        "MixinTemplatePalette",
+        "MixinWitchEntity"
     ],
     "client": [
         "MixinAnvilScreen",
@@ -39,11 +41,12 @@
         "MixinEnchantedBookItem",
         "MixinItem",
         "MixinItemStackClient",
-        "MixinLivingRenderer"
+        "MixinLivingRenderer",
+        "MixinWitchRenderer"
     ],
     "server": [],
     "injectors": {
         "defaultRequire": 1
-  }
+    }
 }
 

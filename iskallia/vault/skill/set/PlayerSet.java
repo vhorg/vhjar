@@ -41,10 +41,14 @@ public class PlayerSet {
       return Arrays.stream(slots).allMatch(slot -> predicate.test(slot, player.func_184582_a(slot)));
    }
 
+   public static boolean allMatch(LivingEntity player, BiPredicate<EquipmentSlotType, ItemStack> predicate) {
+      return allMatch(player, predicate, EquipmentSlotType.HEAD, EquipmentSlotType.CHEST, EquipmentSlotType.LEGS, EquipmentSlotType.FEET);
+   }
+
    public static boolean isActive(VaultGear.Set set, LivingEntity player) {
       return allMatch(player, (slot, stack) -> {
          Optional<EnumAttribute<VaultGear.Set>> attribute = ModAttributes.GEAR_SET.get(stack);
          return attribute.isPresent() && attribute.get().getValue(stack) == set;
-      }, EquipmentSlotType.HEAD, EquipmentSlotType.CHEST, EquipmentSlotType.LEGS, EquipmentSlotType.FEET);
+      });
    }
 }

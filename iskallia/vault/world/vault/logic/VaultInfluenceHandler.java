@@ -51,7 +51,7 @@ public class VaultInfluenceHandler {
       int vaultLvl = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
       if (vaultLvl >= 50) {
          CrystalData data = vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).orElse(null);
-         if (data != null && data.canBeModified() && data.getType().canTriggerInfluences() && vault.getPlayers().size() <= 1) {
+         if (data != null && data.canTriggerInfluences() && data.getType().canTriggerInfluences() && vault.getPlayers().size() <= 1) {
             if (!vault.getAllObjectives().stream().anyMatch(VaultObjective::preventsInfluences)) {
                VaultInfluences influences = vault.getInfluences();
                PlayerFavourData favourData = PlayerFavourData.get(world);

@@ -2,12 +2,15 @@ package iskallia.vault.client.util;
 
 import iskallia.vault.Vault;
 import iskallia.vault.client.util.color.ColorThief;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.util.MiscUtils;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
@@ -22,6 +25,7 @@ import net.minecraftforge.client.model.data.EmptyModelData;
 
 @OnlyIn(Dist.CLIENT)
 public class ColorizationHelper {
+   private static final Random rand = new Random();
    private static final Map<Item, Optional<Color>> itemColors = new HashMap<>();
 
    private ColorizationHelper() {
@@ -32,17 +36,33 @@ public class ColorizationHelper {
       if (stack.func_190926_b()) {
          return Optional.empty();
       } else {
-         Item i = stack.func_77973_b();
-         if (!itemColors.containsKey(i)) {
-            TextureAtlasSprite tas = getParticleTexture(stack);
-            if (tas != null) {
-               itemColors.put(i, getDominantColor(tas));
-            } else {
-               itemColors.put(i, Optional.empty());
+         Optional<Color> override = getCustomColorOverride(stack);
+         if (override.isPresent()) {
+            return override;
+         } else {
+            Item i = stack.func_77973_b();
+            if (!itemColors.containsKey(i)) {
+               TextureAtlasSprite tas = getParticleTexture(stack);
+               if (tas != null) {
+                  itemColors.put(i, getDominantColor(tas));
+               } else {
+                  itemColors.put(i, Optional.empty());
+               }
             }
-         }
 
-         return itemColors.get(i).map(c -> MiscUtils.overlayColor(c, new Color(MiscUtils.getOverlayColor(stack))));
+            return itemColors.get(i).map(c -> MiscUtils.overlayColor(c, new Color(MiscUtils.getOverlayColor(stack))));
+         }
+      }
+   }
+
+   private static Optional<Color> getCustomColorOverride(ItemStack stack) {
+      Item i = stack.func_77973_b();
+      if (i == ModItems.VAULT_PLATINUM) {
+         return Optional.of(new Color(16705664));
+      } else if (i == ModItems.BANISHED_SOUL) {
+         return Optional.of(new Color(9972223));
+      } else {
+         return i instanceof VaultGear ? Optional.of(Color.getHSBColor(rand.nextFloat(), 1.0F, 1.0F)) : Optional.empty();
       }
    }
 

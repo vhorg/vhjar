@@ -1,10 +1,13 @@
 package iskallia.vault.world.vault.gen.layout;
 
 import iskallia.vault.Vault;
+import java.util.Random;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPattern;
 
 public interface JigsawPoolProvider {
+   Random rand = new Random();
+
    default JigsawPattern getStartRoomPool(Registry<JigsawPattern> jigsawRegistry) {
       return (JigsawPattern)jigsawRegistry.func_82594_a(Vault.id("vault/starts"));
    }

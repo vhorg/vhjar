@@ -32,15 +32,21 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
    public static final int TUNNEL_Y_OFFSET = 6;
    private final MutableBoundingBox structureBoundingBox;
    private final BlockPos startPos;
+   private final boolean generateTreasureRooms;
    private final JigsawPoolProvider jigsawPoolProvider;
    private final VaultRoomLayoutGenerator.Layout generatedLayout;
    private List<StructurePiece> pieces = new ArrayList<>();
 
    public FragmentedJigsawGenerator(
-      MutableBoundingBox structureBoundingBox, BlockPos startPos, JigsawPoolProvider jigsawPoolProvider, VaultRoomLayoutGenerator.Layout generatedLayout
+      MutableBoundingBox structureBoundingBox,
+      BlockPos startPos,
+      boolean generateTreasureRooms,
+      JigsawPoolProvider jigsawPoolProvider,
+      VaultRoomLayoutGenerator.Layout generatedLayout
    ) {
       this.structureBoundingBox = structureBoundingBox;
       this.startPos = startPos;
+      this.generateTreasureRooms = generateTreasureRooms;
       this.jigsawPoolProvider = jigsawPoolProvider;
       this.generatedLayout = generatedLayout;
    }
@@ -53,6 +59,10 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
    @Override
    public BlockPos getStartPos() {
       return this.startPos;
+   }
+
+   public boolean generatesTreasureRooms() {
+      return this.generateTreasureRooms;
    }
 
    @Override
@@ -114,7 +124,7 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
                   resolverx.addStructureBox(AxisAlignedBB.func_216363_a(startBoundingBox).func_72314_b(1.0, 3.0, 1.0));
                }
 
-               if (!room.canGenerateTreasureRooms()) {
+               if (!this.generatesTreasureRooms() || !room.canGenerateTreasureRooms()) {
                   resolverx.andJigsawFilter(key -> !key.func_110623_a().contains("treasure_rooms"));
                }
 

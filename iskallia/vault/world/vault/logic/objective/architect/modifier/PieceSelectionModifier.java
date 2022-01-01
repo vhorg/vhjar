@@ -33,12 +33,8 @@ public class PieceSelectionModifier extends VoteModifier {
       } else if (this.filteredPieces != null) {
          return this.filteredPieces.getRandom(rand);
       } else {
-         this.filteredPieces = new WeightedList<>();
-         VaultJigsawHelper.getRoomJigsawPool().field_214952_d.forEach(weightedPiece -> {
-            if (this.isApplicable((JigsawPiece)weightedPiece.getFirst())) {
-               this.filteredPieces.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond());
-            }
-         });
+         int vaultLevel = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
+         this.filteredPieces = VaultJigsawHelper.getVaultRoomList(vaultLevel).copyFiltered(this::isApplicable);
          return this.filteredPieces.getRandom(rand);
       }
    }

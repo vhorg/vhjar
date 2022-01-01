@@ -45,7 +45,7 @@ public class VaultBossSpawner {
       }
 
       GlobalDifficultyData.Difficulty difficulty = GlobalDifficultyData.get(world).getVaultDifficulty();
-      bossConfig.scale(boss, vault, difficulty);
+      VaultMobsConfig.Mob.scale(boss, vault, difficulty);
       EntityScaler.setScaled(boss);
       if (boss instanceof FighterEntity) {
          ((FighterEntity)boss).changeSize(2.0F);

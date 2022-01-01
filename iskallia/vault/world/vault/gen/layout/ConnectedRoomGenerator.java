@@ -18,13 +18,13 @@ public abstract class ConnectedRoomGenerator extends VaultRoomLayoutGenerator {
                if (xx != -1 || zz != 0) {
                   VaultRoomLayoutGenerator.Room right = layout.getRoom(new Vector3i(xx + 1, 0, zz));
                   if (right != null) {
-                     layout.addTunnel(new VaultRoomLayoutGenerator.Tunnel(middle, right));
+                     layout.addTunnel(middle, right);
                   }
                }
 
                VaultRoomLayoutGenerator.Room up = layout.getRoom(new Vector3i(xx, 0, zz + 1));
                if (up != null) {
-                  layout.addTunnel(new VaultRoomLayoutGenerator.Tunnel(middle, up));
+                  layout.addTunnel(middle, up);
                }
             }
          }

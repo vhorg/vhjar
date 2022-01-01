@@ -22,6 +22,7 @@ import iskallia.vault.skill.set.PlayerSet;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.skill.talent.type.ArtisanTalent;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.calc.CooldownHelper;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
@@ -76,6 +77,7 @@ import net.minecraft.util.text.TextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
@@ -171,6 +173,20 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          ItemStack stack = new ItemStack((IItemProvider)this);
          ModAttributes.GEAR_TIER.create(stack, tier);
          items.add(stack);
+      }
+   }
+
+   default void splitStack(T item, ItemStack stack, World world, Entity entity) {
+      if (world instanceof ServerWorld && entity instanceof ServerPlayerEntity) {
+         ServerPlayerEntity player = (ServerPlayerEntity)entity;
+         if (stack.func_190916_E() > 1) {
+            while (stack.func_190916_E() > 1) {
+               stack.func_190918_g(1);
+               ItemStack gearPiece = stack.func_77946_l();
+               gearPiece.func_190920_e(1);
+               MiscUtils.giveItem(player, gearPiece);
+            }
+         }
       }
    }
 
@@ -336,9 +352,9 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .get(stack)
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
-            rarity -> {
+            rarityx -> {
                if (item != ModItems.ETCHING) {
-                  IFormattableTextComponent rarityText = new StringTextComponent("Rarity: ").func_230529_a_(rarity.getName());
+                  IFormattableTextComponent rarityText = new StringTextComponent("Rarity: ").func_230529_a_(rarityx.getName());
                   if (Screen.func_231173_s_()) {
                      ModAttributes.GEAR_MODEL
                         .get(stack)
@@ -354,15 +370,16 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
             }
          );
       if (item instanceof VaultArmorItem) {
+         EquipmentSlotType equipmentSlot = ((VaultArmorItem)item).getEquipmentSlot(stack);
          VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(stack, VaultGear.Rarity.SCRAPPY).getValue(stack);
          Integer gearModel = ModAttributes.GEAR_MODEL.getOrDefault(stack, -1).getValue(stack);
          Integer gearSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getOrDefault(stack, -1).getValue(stack);
-         if (rarity != VaultGear.Rarity.SCRAPPY && gearModel == ModModels.GearModel.SCALE_1.getId()) {
+         if (gearSpecialModel != -1 && gearSpecialModel == ModModels.SpecialGearModel.FAIRY_SET.modelForSlot(equipmentSlot).getId()) {
             tooltip.add(new StringTextComponent(""));
             tooltip.add(new StringTextComponent("Required in \"Grasshopper Ninja\" advancement").func_240699_a_(TextFormatting.GREEN));
          }
 
-         if (rarity == VaultGear.Rarity.UNIQUE && gearSpecialModel != -1) {
+         if (rarity == VaultGear.Rarity.UNIQUE && gearSpecialModel != -1 && item.getIntendedSlot() != null) {
             ModModels.SpecialGearModel model = ModModels.SpecialGearModel.getModel(item.getIntendedSlot(), gearSpecialModel);
             if (model != null) {
                tooltip.add(new StringTextComponent(model.getDisplayName() + " Armor Set"));

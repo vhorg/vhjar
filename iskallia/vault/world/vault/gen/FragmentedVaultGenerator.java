@@ -64,6 +64,7 @@ public class FragmentedVaultGenerator extends VaultGenerator {
       pos.func_189534_c(Direction.EAST, 8192);
       boolean raffle = vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false);
       int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
+      boolean generatesTreasureRooms = vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).map(CrystalData::canGenerateTreasureRooms).orElse(true);
       VaultSizeConfig.SizeLayout layout = ModConfigs.VAULT_SIZE.getLayout(level, raffle);
       if (this.layoutGenerator == null) {
          this.layoutGenerator = vault.getAllObjectives().stream().findFirst().map(VaultObjective::getCustomLayout).orElse(this.provideLayoutGenerator(layout));
@@ -71,10 +72,10 @@ public class FragmentedVaultGenerator extends VaultGenerator {
 
       VaultRoomLayoutGenerator.Layout vaultLayout = this.layoutGenerator.generateLayout();
       this.setGuaranteedRooms(vaultLayout, vault);
-      this.preventLevelRequirementRooms(vaultLayout, level);
+      VaultRoomLevelRestrictions.addGenerationPreventions(vaultLayout, level);
       this.startChunk = new ChunkPos(new BlockPos(vaultBox.func_215126_f()));
       FragmentedJigsawGenerator gen = new FragmentedJigsawGenerator(
-         vaultBox, this.startChunk.func_206849_h().func_177982_a(0, 19, 0), this.layoutGenerator, vaultLayout
+         vaultBox, this.startChunk.func_206849_h().func_177982_a(0, 19, 0), generatesTreasureRooms, this.layoutGenerator, vaultLayout
       );
       StructureStart<?> start = ModFeatures.VAULT_FEATURE
          .generate(gen, world.func_241828_r(), world.func_72863_F().field_186029_c, world.func_184163_y(), 0, world.func_72905_C());
@@ -96,12 +97,6 @@ public class FragmentedVaultGenerator extends VaultGenerator {
                (pos1, random, facing) -> Blocks.field_235406_np_.func_176223_P()
             )
          );
-   }
-
-   private void preventLevelRequirementRooms(VaultRoomLayoutGenerator.Layout vaultLayout, int vaultLevel) {
-      if (vaultLevel < 250) {
-         vaultLayout.getRooms().forEach(room -> room.andFilter(key -> !key.func_110623_a().contains("vendor")));
-      }
    }
 
    private void setGuaranteedRooms(VaultRoomLayoutGenerator.Layout vaultLayout, VaultRaid vault) {

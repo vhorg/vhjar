@@ -6,14 +6,17 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.GlobalDifficultyData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.piece.VaultRoom;
 import iskallia.vault.world.vault.logic.objective.raid.modifier.MonsterAmountModifier;
 import iskallia.vault.world.vault.logic.objective.raid.modifier.MonsterLevelModifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -85,39 +88,60 @@ public class ActiveRaid {
          this.startDelay--;
       }
 
-      this.activeEntities.removeIf(entityUid -> {
-         Entity e = world.func_217461_a(entityUid);
-         if (!(e instanceof MobEntity)) {
-            return true;
-         } else {
-            MobEntity mob = (MobEntity)e;
-            mob.func_110163_bv();
-            if (!vault.getActiveObjective(RaidChallengeObjective.class).isPresent()) {
-               mob.func_184195_f(true);
-            }
-
-            if (!(mob.func_70638_az() instanceof PlayerEntity)) {
-               UUID playerId = MiscUtils.getRandomEntry(this.participatingPlayers, rand);
-               if (playerId != null) {
-                  PlayerEntity player = world.func_217371_b(playerId);
-                  if (player != null) {
-                     mob.func_70624_b(player);
+      this.activeEntities
+         .removeIf(
+            entityUid -> {
+               Entity e = world.func_217461_a(entityUid);
+               if (!(e instanceof MobEntity)) {
+                  return true;
+               } else {
+                  MobEntity mob = (MobEntity)e;
+                  mob.func_110163_bv();
+                  if (!vault.getActiveObjective(RaidChallengeObjective.class).isPresent()) {
+                     mob.func_184195_f(true);
                   }
+
+                  if (!(mob.func_70638_az() instanceof PlayerEntity)) {
+                     List<PlayerEntity> players = this.participatingPlayers
+                        .stream()
+                        .<PlayerEntity>map(world::func_217371_b)
+                        .filter(Objects::nonNull)
+                        .filter(playerx -> this.raidBox.func_186662_g(10.0).func_72318_a(playerx.func_213303_ch()))
+                        .collect(Collectors.toList());
+                     if (!players.isEmpty()) {
+                        PlayerEntity player = MiscUtils.getRandomEntry(players, rand);
+                        mob.func_70624_b(player);
+                     }
+                  }
+
+                  return false;
                }
             }
-
-            return false;
-         }
-      });
+         );
    }
 
    public void spawnWave(RaidPreset.CompoundWaveSpawn wave, VaultRaid vault, ServerWorld world) {
+      int participantLevel = -1;
+
+      for (PlayerEntity player : world.func_217357_a(PlayerEntity.class, this.getRaidBoundingBox())) {
+         int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
+         if (participantLevel == -1) {
+            participantLevel = playerLevel;
+         } else if (participantLevel > playerLevel) {
+            participantLevel = playerLevel;
+         }
+      }
+
+      if (participantLevel == -1) {
+         participantLevel = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
+      }
+
+      int scalingLevel = participantLevel;
       int playerCount = this.participatingPlayers.size();
-      int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
       wave.getWaveSpawns()
          .forEach(
             spawn -> {
-               RaidConfig.MobPool pool = ModConfigs.RAID_CONFIG.getPool(spawn.getMobPool(), level);
+               RaidConfig.MobPool pool = ModConfigs.RAID_CONFIG.getPool(spawn.getMobPool(), scalingLevel);
                if (pool != null) {
                   int spawnCount = spawn.getMobCount();
                   spawnCount = (int)(
@@ -136,7 +160,7 @@ public class ActiveRaid {
                         )
                         * playerCount
                   );
-                  spawnCount = (int)(spawnCount * ModConfigs.RAID_CONFIG.getMobCountMultiplier(level));
+                  spawnCount = (int)(spawnCount * ModConfigs.RAID_CONFIG.getMobCountMultiplier(scalingLevel));
 
                   for (int i = 0; i < spawnCount; i++) {
                      String mobType = pool.getRandomMob();
@@ -155,7 +179,7 @@ public class ActiveRaid {
                            if (spawned instanceof MobEntity) {
                               GlobalDifficultyData.Difficulty difficulty = GlobalDifficultyData.get(world).getVaultDifficulty();
                               MobEntity mob = (MobEntity)spawned;
-                              this.processSpawnedMob(mob, vault, difficulty, level);
+                              this.processSpawnedMob(mob, vault, difficulty, scalingLevel);
                               this.activeEntities.add(mob.func_110124_au());
                            }
                         }

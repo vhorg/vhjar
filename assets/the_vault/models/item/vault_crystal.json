@@ -4,9 +4,9 @@
     "layer0": "the_vault:item/vault_crystal"
   },
   "overrides": [
-    { "predicate": { "type": 0.000 }, "model": "the_vault:item/vault_crystal" },
-    { "predicate": { "type": 0.249 }, "model": "the_vault:item/vault_crystal" },
-    { "predicate": { "type": 0.499 }, "model": "the_vault:item/vault_crystal" },
-    { "predicate": { "type": 0.749 }, "model": "the_vault:item/vault_crystal_trove" }
+    { "predicate": { "type": 0 }, "model": "the_vault:item/vault_crystal" },
+    { "predicate": { "type": 1 }, "model": "the_vault:item/vault_crystal" },
+    { "predicate": { "type": 2 }, "model": "the_vault:item/vault_crystal" },
+    { "predicate": { "type": 3 }, "model": "the_vault:item/vault_crystal_trove" }
   ]
 }

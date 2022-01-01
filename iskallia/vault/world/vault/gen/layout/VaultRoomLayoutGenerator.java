@@ -61,6 +61,10 @@ public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
          return this.rooms.values();
       }
 
+      protected void addTunnel(VaultRoomLayoutGenerator.Room from, VaultRoomLayoutGenerator.Room to) {
+         this.addTunnel(new VaultRoomLayoutGenerator.Tunnel(from, to));
+      }
+
       protected void addTunnel(VaultRoomLayoutGenerator.Tunnel tunnel) {
          this.tunnels.add(tunnel);
       }
