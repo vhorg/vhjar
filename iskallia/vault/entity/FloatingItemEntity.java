@@ -4,6 +4,7 @@ import iskallia.vault.client.util.ColorizationHelper;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.util.MiscUtils;
 import java.awt.Color;
+import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.particle.SimpleAnimatedParticle;
@@ -81,13 +82,19 @@ public class FloatingItemEntity extends ItemEntity {
       int color1 = (Integer)this.func_184212_Q().func_187225_a(COLOR1);
       int color2 = (Integer)this.func_184212_Q().func_187225_a(COLOR2);
       if (color1 == 16777215 && color2 == 16777215) {
-         color1 = ColorizationHelper.getColor(this.func_92059_d()).map(Color::getRGB).orElse(16777215);
-         this.field_70180_af.func_187227_b(COLOR1, color1);
-         int r = Math.min((color1 >> 16 & 0xFF) * 2, 255);
-         int g = Math.min((color1 >> 8 & 0xFF) * 2, 255);
-         int b = Math.min((color1 >> 0 & 0xFF) * 2, 255);
-         color2 = r << 16 | g << 8 | b;
-         this.field_70180_af.func_187227_b(COLOR2, color2);
+         Optional<Color> override = ColorizationHelper.getCustomColorOverride(this.func_92059_d());
+         if (override.isPresent()) {
+            color1 = override.get().getRGB();
+            color2 = color1;
+         } else {
+            color1 = ColorizationHelper.getColor(this.func_92059_d()).map(Color::getRGB).orElse(16777215);
+            this.field_70180_af.func_187227_b(COLOR1, color1);
+            int r = Math.min((color1 >> 16 & 0xFF) * 2, 255);
+            int g = Math.min((color1 >> 8 & 0xFF) * 2, 255);
+            int b = Math.min((color1 >> 0 & 0xFF) * 2, 255);
+            color2 = r << 16 | g << 8 | b;
+            this.field_70180_af.func_187227_b(COLOR2, color2);
+         }
       }
 
       if (this.field_70146_Z.nextInt(3) == 0) {

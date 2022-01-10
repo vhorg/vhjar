@@ -250,7 +250,7 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
       LootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(level);
       int eternals = EternalsData.get(world).getTotalEternals();
       if (eternals > 0) {
-         stacks.add(new ItemStack(ModItems.ETERNAL_SOUL, world.field_73012_v.nextInt(eternals) + 1));
+         stacks.add(new ItemStack(ModItems.ETERNAL_SOUL, Math.min(world.field_73012_v.nextInt(eternals) + 1, 64)));
       }
 
       if (vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false)) {

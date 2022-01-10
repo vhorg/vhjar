@@ -9,6 +9,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.network.message.VaultGoalMessage;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.task.VaultTask;
@@ -46,11 +47,9 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -279,8 +278,7 @@ public class ScavengerHuntObjective extends VaultObjective {
                IFormattableTextComponent msgContainer = new StringTextComponent("").func_240699_a_(TextFormatting.WHITE);
                IFormattableTextComponent playerName = sPlayer.func_145748_c_().func_230532_e_();
                playerName.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(9974168)));
-               ITextComponent msg = msgContainer.func_230529_a_(playerName).func_240702_b_(" finished a Scavenger Hunt!");
-               world.func_73046_m().func_184103_al().func_232641_a_(msg, ChatType.CHAT, Util.field_240973_b_);
+               MiscUtils.broadcast(msgContainer.func_230529_a_(playerName).func_240702_b_(" finished a Scavenger Hunt!"));
             }
          );
       }

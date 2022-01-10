@@ -26,7 +26,7 @@ public class VaultRoomLevelRestrictions {
    }
 
    private static String getVaultRoomPrefix(String roomName) {
-      return Vault.sId("vault/enigma/" + roomName);
+      return Vault.sId("vault/enigma/rooms/" + roomName);
    }
 
    private static boolean isJigsawPieceOfName(JigsawPiece piece, String name) {

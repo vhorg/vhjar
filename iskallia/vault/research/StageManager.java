@@ -40,7 +40,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 public class StageManager {
    public static ResearchTree RESEARCH_TREE;
 
-   private static ResearchTree getResearchTree(PlayerEntity player) {
+   public static ResearchTree getResearchTree(PlayerEntity player) {
       if (player.field_70170_p.field_72995_K) {
          return RESEARCH_TREE != null ? RESEARCH_TREE : new ResearchTree(player.func_110124_au());
       } else {

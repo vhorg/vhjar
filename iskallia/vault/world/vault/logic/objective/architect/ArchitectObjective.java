@@ -28,14 +28,11 @@ import iskallia.vault.world.vault.logic.task.VaultTask;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.player.VaultRunner;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -62,9 +59,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.Color;
@@ -259,7 +254,7 @@ public class ArchitectObjective extends VaultObjective {
                   .findFirst()
                   .orElse(null);
                List<VaultPiece> generatedPieces = VaultJigsawHelper.expandVault(vault, world, room, choice.getDirection(), roomPiece);
-               this.generateBreadcrumb(vault, world, generatedPieces);
+               BreadcrumbFeature.generateVaultBreadcrumb(vault, world, generatedPieces);
                List<VaultPieceProcessor> postProcessors = modifiers.stream()
                   .map(modifier -> modifier.getPostProcessor(this, vault))
                   .filter(Objects::nonNull)
@@ -285,33 +280,6 @@ public class ArchitectObjective extends VaultObjective {
                }));
             }
          );
-   }
-
-   private void generateBreadcrumb(VaultRaid vault, ServerWorld sWorld, List<VaultPiece> pieces) {
-      Predicate<BlockPos> filter = posx -> false;
-      Set<ChunkPos> chunks = new HashSet<>();
-
-      for (VaultPiece piece : pieces) {
-         MutableBoundingBox box = piece.getBoundingBox();
-         filter = filter.or(box::func_175898_b);
-         ChunkPos chMin = new ChunkPos(box.field_78897_a >> 4, box.field_78896_c >> 4);
-         ChunkPos chMax = new ChunkPos(box.field_78893_d >> 4, box.field_78892_f >> 4);
-
-         for (int x = chMin.field_77276_a; x <= chMax.field_77276_a; x++) {
-            for (int z = chMin.field_77275_b; z <= chMax.field_77275_b; z++) {
-               chunks.add(new ChunkPos(x, z));
-            }
-         }
-      }
-
-      Predicate<BlockPos> featurePlacementFilter = filter;
-
-      for (ChunkPos pos : chunks) {
-         BlockPos featurePos = pos.func_206849_h();
-         BreadcrumbFeature.placeBreadcrumbFeatures(
-            vault, sWorld, (at, state) -> featurePlacementFilter.test(at) ? sWorld.func_180501_a(at, state, 2) : false, rand, featurePos
-         );
-      }
    }
 
    public void buildPortal(List<BlockPos> portalLocations) {

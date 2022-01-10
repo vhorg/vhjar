@@ -150,6 +150,7 @@ public class ModBlocks {
    public static final VaultRuneBlock VAULT_RUNE_BLOCK = new VaultRuneBlock();
    public static final VaultArtifactBlock VAULT_ARTIFACT = new VaultArtifactBlock();
    public static final VaultCrateBlock VAULT_CRATE = new VaultCrateBlock();
+   public static final VaultCrateBlock VAULT_CRATE_CAKE = new VaultCrateBlock();
    public static final VaultCrateBlock VAULT_CRATE_ARENA = new VaultCrateBlock();
    public static final VaultCrateBlock VAULT_CRATE_SCAVENGER = new VaultCrateBlock();
    public static final ObeliskBlock OBELISK = new ObeliskBlock();
@@ -266,7 +267,7 @@ public class ModBlocks {
       )
       .func_206865_a(null);
    public static final TileEntityType<VaultCrateTileEntity> VAULT_CRATE_TILE_ENTITY = Builder.func_223042_a(
-         VaultCrateTileEntity::new, new Block[]{VAULT_CRATE, VAULT_CRATE_ARENA}
+         VaultCrateTileEntity::new, new Block[]{VAULT_CRATE, VAULT_CRATE_CAKE, VAULT_CRATE_ARENA, VAULT_CRATE_SCAVENGER}
       )
       .func_206865_a(null);
    public static final TileEntityType<VaultPortalTileEntity> VAULT_PORTAL_TILE_ENTITY = Builder.func_223042_a(
@@ -399,6 +400,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_RUNE_BLOCK, Vault.id("vault_rune_block"));
       registerBlock(event, VAULT_ARTIFACT, Vault.id("vault_artifact"));
       registerBlock(event, VAULT_CRATE, Vault.id("vault_crate"));
+      registerBlock(event, VAULT_CRATE_CAKE, Vault.id("vault_crate_cake"));
       registerBlock(event, VAULT_CRATE_ARENA, Vault.id("vault_crate_arena"));
       registerBlock(event, VAULT_CRATE_SCAVENGER, Vault.id("vault_crate_scavenger"));
       registerBlock(event, OBELISK, Vault.id("obelisk"));
@@ -539,6 +541,7 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_RUNE_BLOCK);
       registerBlockItem(event, VAULT_ARTIFACT, 1);
       registerBlockItem(event, VAULT_CRATE, 1, Properties::func_234689_a_);
+      registerBlockItem(event, VAULT_CRATE_CAKE, 1, Properties::func_234689_a_);
       registerBlockItem(event, VAULT_CRATE_ARENA, 1, Properties::func_234689_a_);
       registerBlockItem(event, VAULT_CRATE_SCAVENGER, 1, Properties::func_234689_a_);
       registerBlockItem(event, OBELISK, 1);

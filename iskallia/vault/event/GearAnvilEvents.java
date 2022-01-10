@@ -7,6 +7,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.ArtisanScrollItem;
 import iskallia.vault.item.FlawedRubyItem;
+import iskallia.vault.item.VoidOrbItem;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.item.gear.VaultGear;
@@ -18,6 +19,8 @@ import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.SideOnlyFixer;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.world.data.PlayerTalentsData;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -263,6 +266,7 @@ public class GearAnvilEvents {
       if (event.getRight().func_77973_b() == ModItems.VOID_ORB) {
          if (event.getLeft().func_77973_b() instanceof VaultGear) {
             ItemStack output = event.getLeft().func_77946_l();
+            VaultGear<?> outputItem = (VaultGear<?>)output.func_77973_b();
             int maxRepairs = ModAttributes.MAX_REPAIRS.getOrDefault(output, -1).getValue(output);
             int curRepairs = ModAttributes.CURRENT_REPAIRS.getOrDefault(output, 0).getValue(output);
             float level = ModAttributes.GEAR_LEVEL.getOrDefault(output, 0.0F).getValue(output);
@@ -275,11 +279,42 @@ public class GearAnvilEvents {
                return;
             }
 
+            Pair<EquipmentSlotType, VAttribute<?, ?>> predefinedRemoval = VoidOrbItem.getPredefinedRemoval(event.getRight());
+            VAttribute<?, ?> foundAttribute = null;
+            if (predefinedRemoval != null) {
+               if (!outputItem.isIntendedForSlot((EquipmentSlotType)predefinedRemoval.getFirst())) {
+                  return;
+               }
+
+               List<VAttribute<?, ?>> attributes = VaultGearHelper.getAliasAttributes(((VAttribute)predefinedRemoval.getSecond()).getId());
+               Iterator var10 = attributes.iterator();
+
+               while (true) {
+                  if (var10.hasNext()) {
+                     VAttribute<?, ?> attribute = (VAttribute<?, ?>)var10.next();
+                     if (!VaultGearHelper.hasModifier(output, attribute)) {
+                        continue;
+                     }
+
+                     foundAttribute = attribute;
+                  }
+
+                  if (foundAttribute == null) {
+                     return;
+                  }
+                  break;
+               }
+            }
+
             if (!VaultGearHelper.hasModifier(output) || !VaultGearHelper.hasUsedLevels(output)) {
                return;
             }
 
             ModAttributes.GEAR_MODIFIERS_TO_ROLL.create(output, -1);
+            if (predefinedRemoval != null) {
+               ModAttributes.GUARANTEED_MODIFIER_REMOVAL.create(output, foundAttribute.getId().toString());
+            }
+
             event.setOutput(output);
             event.setMaterialCost(1);
             event.setCost(1);
@@ -331,6 +366,22 @@ public class GearAnvilEvents {
                   }
                }
             }
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onCreateVoidOrb(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof ArtisanScrollItem && event.getRight().func_77973_b() instanceof VoidOrbItem) {
+         ItemStack scroll = event.getLeft();
+         ItemStack orb = event.getRight();
+         Pair<EquipmentSlotType, VAttribute<?, ?>> predefinedRoll;
+         if ((predefinedRoll = ArtisanScrollItem.getPredefinedRoll(scroll)) != null && VoidOrbItem.getPredefinedRemoval(orb) == null) {
+            ItemStack output = orb.func_77946_l();
+            VoidOrbItem.setPredefinedRemoval(output, (EquipmentSlotType)predefinedRoll.getFirst(), (VAttribute<?, ?>)predefinedRoll.getSecond());
+            event.setCost(5);
+            event.setMaterialCost(1);
+            event.setOutput(output);
          }
       }
    }

@@ -6,16 +6,14 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.influence.DamageInfluence;
 import iskallia.vault.world.vault.influence.DamageTakenInfluence;
 import iskallia.vault.world.vault.influence.EffectInfluence;
-import iskallia.vault.world.vault.influence.LeechInfluence;
 import iskallia.vault.world.vault.influence.MobAttributeInfluence;
 import iskallia.vault.world.vault.influence.MobsInfluence;
-import iskallia.vault.world.vault.influence.ParryInfluence;
-import iskallia.vault.world.vault.influence.ResistanceInfluence;
-import iskallia.vault.world.vault.influence.TimeInfluence;
+import iskallia.vault.world.vault.influence.VaultAttributeInfluence;
 import iskallia.vault.world.vault.influence.VaultInfluence;
 import iskallia.vault.world.vault.influence.VaultInfluences;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.player.VaultPlayer;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -116,97 +114,105 @@ public class VaultInfluenceHandler {
    }
 
    private static Tuple<VaultInfluence, String> getPositiveInfluence(PlayerFavourData.VaultGodType type, int favour) {
+      DecimalFormat percentFormat = new DecimalFormat("0.##");
       switch (type) {
          case BENEVOLENT:
-            int rVal = rand.nextInt(6);
             VaultInfluence influence;
             String text;
-            if (rVal >= 5) {
-               int ampl = Math.min(favour / 4, 3);
-               influence = new EffectInfluence(Effects.field_76428_l, ampl);
-               text = "Grants +" + ampl + " Regeneration";
-            } else if (rVal >= 4) {
-               int ampl = Math.max(Math.min(favour / 6, 2), 1);
-               influence = new EffectInfluence(Effects.field_76443_y, ampl);
-               text = "Grants +" + ampl + " Saturation";
-            } else {
-               int less = Math.min(favour * 4, 60);
-               float perc = 1.0F - less / 100.0F;
-               influence = new MobAttributeInfluence(
-                  Attributes.field_233818_a_, new AttributeModifier(BENEVOLENT_HP_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
-               );
-               text = "Monsters have " + less + "% less Health";
+            switch (rand.nextInt(3)) {
+               case 0:
+               default:
+                  int less = Math.min(favour * 4, 60);
+                  float perc = 1.0F - less / 100.0F;
+                  influence = new MobAttributeInfluence(
+                     Attributes.field_233818_a_, new AttributeModifier(BENEVOLENT_HP_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
+                  );
+                  text = "Monsters have " + less + "% less Health";
+                  break;
+               case 1: {
+                  int ampl = MathHelper.func_76125_a(favour / 2, 1, 10);
+                  influence = new EffectInfluence(Effects.field_76443_y, ampl);
+                  text = "Grants +" + ampl + " Saturation";
+                  break;
+               }
+               case 2: {
+                  int ampl = MathHelper.func_76125_a(favour / 5, 1, 3);
+                  influence = new EffectInfluence(Effects.field_76428_l, ampl);
+                  text = "Grants +" + ampl + " Regeneration";
+               }
             }
 
             return new Tuple(influence, text);
          case OMNISCIENT:
-            int rVal = rand.nextInt(5);
             VaultInfluence influence;
             String text;
-            if (rVal >= 4) {
-               int ampl = Math.min(favour / 3, 4);
-               influence = new EffectInfluence(Effects.field_188425_z, ampl);
-               text = "Grants +" + ampl + " Luck";
-            } else if (rVal >= 3) {
-               int less = Math.min(favour * 5, 50);
-               float perc = 1.0F - less / 100.0F;
-               influence = new MobAttributeInfluence(
-                  Attributes.field_233821_d_, new AttributeModifier(OMNISCIENT_SPEED_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
-               );
-               text = "Monsters move " + less + "% slower";
-            } else if (rVal >= 2) {
-               int increased = Math.min(favour * 3, 36);
-               influence = new ParryInfluence(increased / 100.0F);
-               text = "Grants " + increased + "% Parry";
-            } else if (rVal >= 1) {
-               int increased = Math.min(favour * 3, 36);
-               influence = new ResistanceInfluence(increased / 100.0F);
-               text = "Grants " + increased + "% Resistance";
-            } else {
-               int less = Math.min(favour * 3, 45);
-               float perc = 1.0F - less / 100.0F;
-               influence = new DamageTakenInfluence(perc);
-               text = "You take " + less + "% less damage";
+            switch (rand.nextInt(3)) {
+               case 0:
+               default:
+                  int less = Math.min(favour * 5, 50);
+                  float perc = 1.0F - less / 100.0F;
+                  influence = new MobAttributeInfluence(
+                     Attributes.field_233821_d_, new AttributeModifier(OMNISCIENT_SPEED_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
+                  );
+                  text = "Monsters move " + less + "% slower";
+                  break;
+               case 1:
+                  int increased = 10 + Math.min((favour - 4) * 3, 30);
+                  influence = new VaultAttributeInfluence(VaultAttributeInfluence.Type.PARRY, increased / 100.0F, false);
+                  text = "Grants " + increased + "% Parry";
+                  break;
+               case 2:
+                  int ampl = MathHelper.func_76125_a(favour / 5, 1, 3);
+                  influence = new EffectInfluence(Effects.field_188425_z, ampl);
+                  text = "Grants +" + ampl + " Luck";
             }
 
             return new Tuple(influence, text);
          case TIMEKEEPER:
             VaultInfluence influence;
             String text;
-            if (rand.nextBoolean()) {
-               favour = (int)(favour * 0.75F);
-               influence = new TimeInfluence(favour * 60 * 20);
-               text = "Grants " + favour + " additional minutes";
-            } else {
-               int ampl = Math.min(favour / 4, 4);
-               influence = new EffectInfluence(Effects.field_76422_e, ampl);
-               text = "Grants +" + ampl + " Haste";
+            switch (rand.nextInt(3)) {
+               case 0:
+               default:
+                  int dmgIncrease = 10 + (favour - 4) * 5;
+                  influence = new VaultAttributeInfluence(VaultAttributeInfluence.Type.DURABILITY_DAMAGE, dmgIncrease / 100.0F, true);
+                  text = "Your gear takes " + dmgIncrease + "% less durability damage.";
+                  break;
+               case 1:
+                  int less = (int)(favour * 3.125F);
+                  float perc = 1.0F - less / 100.0F;
+                  influence = new MobAttributeInfluence(
+                     Attributes.field_233823_f_, new AttributeModifier(MALEVOLENCE_DAMAGE_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
+                  );
+                  text = "Monsters deal " + less + "% less damage";
+                  break;
+               case 2:
+                  int ampl = Math.min(favour / 4, 4);
+                  influence = new EffectInfluence(Effects.field_76422_e, ampl);
+                  text = "Grants +" + ampl + " Haste";
             }
 
             return new Tuple(influence, text);
          case MALEVOLENCE:
-            int rVal = rand.nextInt(4);
             VaultInfluence influence;
             String text;
-            if (rVal >= 3) {
-               influence = new LeechInfluence(0.02F);
-               text = "Grants 2% Leech";
-            } else if (rVal >= 2) {
-               int less = Math.min(favour * 6, 66);
-               float perc = 1.0F - less / 100.0F;
-               influence = new MobAttributeInfluence(
-                  Attributes.field_233823_f_, new AttributeModifier(MALEVOLENCE_DAMAGE_REDUCTION, "Favours", perc - 1.0F, Operation.MULTIPLY_TOTAL)
-               );
-               text = "Monsters deal " + less + "% less damage";
-            } else if (rVal >= 1) {
-               int ampl = Math.min(favour / 2, 6);
-               influence = new EffectInfluence(Effects.field_76420_g, ampl);
-               text = "Grants +" + ampl + " Strength";
-            } else {
-               int more = Math.min(favour * 6, 75);
-               float perc = 1.0F + more / 100.0F;
-               influence = new DamageInfluence(perc);
-               text = "You deal " + more + "% more damage";
+            switch (rand.nextInt(3)) {
+               case 0:
+               default:
+                  int less = MathHelper.func_76125_a(favour / 4, 1, 5);
+                  influence = new MobsInfluence(-less);
+                  text = less + " fewer monsters spawn around you";
+                  break;
+               case 1:
+                  float increased = 10.0F + (favour - 4) * 2.5F;
+                  influence = new VaultAttributeInfluence(VaultAttributeInfluence.Type.FATAL_STRIKE_CHANCE, increased / 100.0F, false);
+                  text = "Grants +" + percentFormat.format(increased) + "% Fatal Strike Chance";
+                  break;
+               case 2:
+                  int more = Math.min(favour * 6, 75);
+                  float perc = 1.0F + more / 100.0F;
+                  influence = new DamageInfluence(perc);
+                  text = "You deal " + more + "% more damage";
             }
 
             return new Tuple(influence, text);
@@ -218,88 +224,100 @@ public class VaultInfluenceHandler {
    private static Tuple<VaultInfluence, String> getNegativeInfluence(PlayerFavourData.VaultGodType type, int favour) {
       switch (type) {
          case BENEVOLENT:
-            int rVal = rand.nextInt(4);
             VaultInfluence influence;
             String text;
-            if (rVal >= 3) {
-               int ampl = Math.min(favour - 1, 10);
-               influence = new EffectInfluence(Effects.field_76438_s, ampl);
-               text = "Applies +" + ampl + " Hunger";
-            } else if (rVal >= 2) {
-               int ampl = Math.min(favour / 3, 5);
-               influence = new EffectInfluence(Effects.field_76437_t, ampl);
-               text = "Applies +" + ampl + " Weakness";
-            } else if (rVal >= 1) {
-               int more = Math.min(favour * 8, 140);
-               float perc = more / 100.0F;
-               influence = new MobAttributeInfluence(
-                  Attributes.field_233818_a_, new AttributeModifier(BENEVOLENT_HP_INCREASE, "Favours", perc, Operation.MULTIPLY_TOTAL)
-               );
-               text = "Monsters have " + more + "% more Health";
-            } else {
-               int less = Math.min(favour * 4, 54);
-               float perc = 1.0F - less / 100.0F;
-               influence = new DamageInfluence(perc);
-               text = "You deal " + less + "% less damage";
+            switch (rand.nextInt(3)) {
+               case 0:
+               default:
+                  int reduced = 50 + (favour - 4) * 3;
+                  influence = new VaultAttributeInfluence(VaultAttributeInfluence.Type.HEALING_EFFECTIVENESS, 1.0F - reduced / 100.0F, true);
+                  text = "Effectiveness of Healing is reduced by " + reduced + "%";
+                  break;
+               case 1:
+                  int more = 50 + favour * 20;
+                  float perc = more / 100.0F;
+                  influence = new MobAttributeInfluence(
+                     Attributes.field_233818_a_, new AttributeModifier(BENEVOLENT_HP_INCREASE, "Favours", perc, Operation.MULTIPLY_TOTAL)
+                  );
+                  text = "Monsters have " + more + "% more Health";
+                  break;
+               case 2:
+                  int ampl = Math.min(favour - 1, 10);
+                  influence = new EffectInfluence(Effects.field_76438_s, ampl);
+                  text = "Applies +" + ampl + " Hunger";
             }
 
             return new Tuple(influence, text);
          case OMNISCIENT:
-            int rVal = rand.nextInt(4);
             VaultInfluence influence;
             String text;
-            if (rVal >= 3) {
-               int ampl = Math.min(favour / 2, 7);
-               influence = new EffectInfluence(Effects.field_189112_A, ampl);
-               text = "Applies -" + ampl + " Luck";
-            } else if (rVal >= 2) {
-               int more = Math.min(favour * 5, 80);
-               float perc = more / 100.0F;
-               influence = new MobAttributeInfluence(
-                  Attributes.field_233826_i_, new AttributeModifier(OMNISCIENT_ARMOR_INCREASE, "Favours", perc, Operation.MULTIPLY_TOTAL)
-               );
-               text = "Monsters have " + more + "% more armor";
-            } else if (rVal >= 1) {
-               int ampl = Math.min(favour / 4, 3);
-               influence = new EffectInfluence(Effects.field_76419_f, ampl);
-               text = "Applies +" + ampl + " Mining Fatigue";
-            } else {
-               int more = Math.min(favour * 4, 50);
-               float perc = 1.0F + more / 100.0F;
-               influence = new DamageTakenInfluence(perc);
-               text = "You take " + more + "% more damage";
+            switch (rand.nextInt(3)) {
+               case 0:
+               default:
+                  int mre = 20 + (favour - 4) * 10;
+                  float prc = 1.0F + mre / 100.0F;
+                  influence = new DamageTakenInfluence(prc);
+                  text = "You take " + mre + "% more damage";
+                  break;
+               case 1:
+                  int less = 50 + MathHelper.func_76123_f((favour - 4) / 12.0F * 50.0F);
+                  influence = new VaultAttributeInfluence(VaultAttributeInfluence.Type.PARRY, 1.0F - less / 100.0F, true);
+                  text = "You have " + less + "% less Parry";
+                  break;
+               case 2:
+                  int more = Math.max((favour - 3) * 10, 10);
+                  float perc = more / 100.0F;
+                  influence = new MobAttributeInfluence(
+                     Attributes.field_233821_d_, new AttributeModifier(OMNISCIENT_SPEED_REDUCTION, "Favours", perc, Operation.MULTIPLY_TOTAL)
+                  );
+                  text = "Monsters move " + more + "% faster";
             }
 
             return new Tuple(influence, text);
          case TIMEKEEPER:
-            int rVal = rand.nextInt(4);
             VaultInfluence influence;
             String text;
-            if (rVal >= 3) {
-               favour = Math.min(favour, 10);
-               influence = new TimeInfluence(-favour * 60 * 20);
-               text = "Removes " + favour + " minutes";
-            } else {
-               int ampl = Math.min(favour / 3, 4);
-               influence = new EffectInfluence(Effects.field_76421_d, ampl);
-               text = "Applies +" + ampl + " Slowness";
+            switch (rand.nextInt(3)) {
+               case 0:
+               default:
+                  int cdrReduction = Math.min(50 + (favour - 4) * 5, 100);
+                  influence = new VaultAttributeInfluence(VaultAttributeInfluence.Type.COOLDOWN_REDUCTION, 1.0F - cdrReduction / 100.0F, true);
+                  text = "You have " + cdrReduction + "% less cooldown reduction.";
+                  break;
+               case 1:
+                  int dmgIncrease = 10 + (favour - 4) * 5;
+                  influence = new VaultAttributeInfluence(VaultAttributeInfluence.Type.DURABILITY_DAMAGE, 1.0F + dmgIncrease / 100.0F, true);
+                  text = "Your gear takes " + dmgIncrease + "% more durability damage.";
+                  break;
+               case 2:
+                  int ampl = Math.min(favour / 4, 4);
+                  influence = new EffectInfluence(Effects.field_76419_f, ampl);
+                  text = "Grants +" + ampl + " Mining Fatigue";
             }
 
             return new Tuple(influence, text);
          case MALEVOLENCE:
             VaultInfluence influence;
             String text;
-            if (rand.nextBoolean()) {
-               int more = MathHelper.func_76141_d(Math.min(favour * 2.0F, 20.0F));
-               influence = new MobsInfluence(more);
-               text = more + " additional monsters spawn around you";
-            } else {
-               int more = Math.min(favour * 6, 80);
-               float perc = more / 100.0F;
-               influence = new MobAttributeInfluence(
-                  Attributes.field_233823_f_, new AttributeModifier(MALEVOLENCE_DAMAGE_INCREASE, "Favours", perc, Operation.MULTIPLY_TOTAL)
-               );
-               text = "Monsters deal " + more + "% more damage";
+            switch (rand.nextInt(3)) {
+               case 0:
+               default:
+                  int less = 10 + Math.min((favour - 4) * 7, 85);
+                  influence = new DamageInfluence(1.0F - less / 100.0F);
+                  text = "You deal " + less + "% less damage";
+                  break;
+               case 1:
+                  int moreDmg = 20 + Math.min(favour * 12, 140);
+                  float perc = moreDmg / 100.0F;
+                  influence = new MobAttributeInfluence(
+                     Attributes.field_233823_f_, new AttributeModifier(MALEVOLENCE_DAMAGE_INCREASE, "Favours", perc, Operation.MULTIPLY_TOTAL)
+                  );
+                  text = "Monsters deal " + moreDmg + "% more damage";
+                  break;
+               case 2:
+                  int more = MathHelper.func_76141_d(Math.min(favour - 4 + 1, 20));
+                  influence = new MobsInfluence(more);
+                  text = more + " additional monsters spawn around you";
             }
 
             return new Tuple(influence, text);

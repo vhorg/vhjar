@@ -244,6 +244,85 @@ public class VaultGearHelper {
       return sum;
    }
 
+   public static List<VAttribute<?, ?>> getAliasAttributes(ResourceLocation key) {
+      List<VAttribute<?, ?>> attributes = new ArrayList<>();
+      String var2 = key.func_110623_a();
+      switch (var2) {
+         case "add_armor":
+         case "add_armor_2":
+            attributes.add(ModAttributes.ADD_ARMOR);
+            attributes.add(ModAttributes.ADD_ARMOR_2);
+            break;
+         case "add_armor_toughness":
+         case "add_armor_toughness_2":
+            attributes.add(ModAttributes.ADD_ARMOR_TOUGHNESS);
+            attributes.add(ModAttributes.ADD_ARMOR_TOUGHNESS_2);
+            break;
+         case "add_knockback_resistance":
+         case "add_knockback_resistance_2":
+            attributes.add(ModAttributes.ADD_KNOCKBACK_RESISTANCE);
+            attributes.add(ModAttributes.ADD_KNOCKBACK_RESISTANCE_2);
+            break;
+         case "add_attack_damage":
+         case "add_attack_damage_2":
+            attributes.add(ModAttributes.ADD_ATTACK_DAMAGE);
+            attributes.add(ModAttributes.ADD_ATTACK_DAMAGE_2);
+            break;
+         case "add_attack_speed":
+         case "add_attack_speed_2":
+            attributes.add(ModAttributes.ADD_ATTACK_SPEED);
+            attributes.add(ModAttributes.ADD_ATTACK_SPEED_2);
+            break;
+         case "add_durability":
+         case "add_durability_2":
+            attributes.add(ModAttributes.ADD_DURABILITY);
+            attributes.add(ModAttributes.ADD_DURABILITY_2);
+            break;
+         case "add_reach":
+         case "add_reach_2":
+            attributes.add(ModAttributes.ADD_REACH);
+            attributes.add(ModAttributes.ADD_REACH_2);
+            break;
+         case "add_cooldown_reduction":
+         case "add_cooldown_reduction_2":
+            attributes.add(ModAttributes.ADD_COOLDOWN_REDUCTION);
+            attributes.add(ModAttributes.ADD_COOLDOWN_REDUCTION_2);
+            break;
+         case "add_extra_leech_ratio":
+         case "extra_leech_ratio":
+            attributes.add(ModAttributes.ADD_EXTRA_LEECH_RATIO);
+            attributes.add(ModAttributes.EXTRA_LEECH_RATIO);
+            break;
+         case "add_extra_resistance":
+         case "extra_resistance":
+            attributes.add(ModAttributes.ADD_EXTRA_RESISTANCE);
+            attributes.add(ModAttributes.EXTRA_RESISTANCE);
+            break;
+         case "add_extra_parry_chance":
+         case "extra_parry_chance":
+            attributes.add(ModAttributes.ADD_EXTRA_PARRY_CHANCE);
+            attributes.add(ModAttributes.EXTRA_PARRY_CHANCE);
+            break;
+         case "add_extra_health":
+         case "extra_health":
+            attributes.add(ModAttributes.ADD_EXTRA_HEALTH);
+            attributes.add(ModAttributes.EXTRA_HEALTH);
+            break;
+         case "damage_increase":
+         case "damage_increase_2":
+            attributes.add(ModAttributes.DAMAGE_INCREASE);
+            attributes.add(ModAttributes.DAMAGE_INCREASE_2);
+            break;
+         default:
+            VAttribute<?, ?> attribute = ModAttributes.REGISTRY.get(key);
+            if (attribute != null) {
+               attributes.add(attribute);
+            }
+      }
+
+      return attributes;
+   }
+
    public static List<VAttribute<?, ?>> getBaseAttributes() {
       return Arrays.asList(
          ModAttributes.GEAR_CRAFTED_BY,

@@ -26,6 +26,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -64,6 +65,18 @@ public class ArtisanScrollItem extends BasicItem {
 
    public void func_77663_a(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
       if (!isInitialized(stack) && entity instanceof ServerPlayerEntity) {
+         if (world instanceof ServerWorld) {
+            ServerPlayerEntity player = (ServerPlayerEntity)entity;
+            if (stack.func_190916_E() > 1) {
+               while (stack.func_190916_E() > 1) {
+                  stack.func_190918_g(1);
+                  ItemStack scroll = stack.func_77946_l();
+                  scroll.func_190920_e(1);
+                  MiscUtils.giveItem(player, scroll);
+               }
+            }
+         }
+
          if (generateRoll(stack)) {
             setInitialized(stack, true);
          }

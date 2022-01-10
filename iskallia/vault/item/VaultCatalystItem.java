@@ -7,6 +7,7 @@ import iskallia.vault.item.catalyst.ModifierRollResult;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.util.CodecUtils;
+import iskallia.vault.util.MiscUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -26,6 +28,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -54,6 +57,18 @@ public class VaultCatalystItem extends Item {
 
    public void func_77663_a(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
       if (!world.func_201670_d()) {
+         if (world instanceof ServerWorld) {
+            ServerPlayerEntity player = (ServerPlayerEntity)entity;
+            if (stack.func_190916_E() > 1) {
+               while (stack.func_190916_E() > 1) {
+                  stack.func_190918_g(1);
+                  ItemStack catalyst = stack.func_77946_l();
+                  catalyst.func_190920_e(1);
+                  MiscUtils.giveItem(player, catalyst);
+               }
+            }
+         }
+
          List<ModifierRollResult> results = getModifierRolls(stack).orElse(Collections.emptyList());
          if (results.isEmpty()) {
             setModifierRolls(stack, createRandomModifiers());

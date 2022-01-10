@@ -118,7 +118,7 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
                   BlockPos altarRef = CodecUtils.readNBT(BlockPos.field_239578_a_, tag.func_74781_a("the_vault_SoulAltarPos"), null);
                   if (altarRef != null && world.func_175667_e(altarRef)) {
                      TileEntity te = world.func_175625_s(altarRef);
-                     if (te instanceof SoulAltarTileEntity && ((SoulAltarTileEntity)te).initialized()) {
+                     if (te instanceof SoulAltarTileEntity && ((SoulAltarTileEntity)te).initialized() && !((SoulAltarTileEntity)te).isMaxedOut()) {
                         ((SoulAltarTileEntity)te).makeProgress(killer, 1, sPlayer -> {
                            PlayerFavourData data = PlayerFavourData.get(sPlayer.func_71121_q());
                            if (rand.nextFloat() < FillableAltarBlock.getFavourChance(sPlayer, PlayerFavourData.VaultGodType.MALEVOLENCE)) {

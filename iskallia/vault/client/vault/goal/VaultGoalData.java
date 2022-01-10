@@ -36,6 +36,10 @@ public abstract class VaultGoalData {
             CURRENT_DATA = new ActiveRaidGoalData();
             CURRENT_DATA.receive(pkt);
             break;
+         case CAKE_HUNT_GOAL:
+            CURRENT_DATA = new CakeHuntData();
+            CURRENT_DATA.receive(pkt);
+            break;
          case CLEAR:
             CURRENT_DATA = null;
             ADDITIONAL_DATA = null;

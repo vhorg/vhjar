@@ -48,6 +48,8 @@
     {"predicate": {"the_vault:texture": 40 }, "model": "the_vault:item/helmet/knight_2_helmet"},
     {"predicate": {"the_vault:texture": 41 }, "model": "the_vault:item/helmet/knight_3_helmet"},
     {"predicate": {"the_vault:texture": 42 }, "model": "the_vault:item/helmet/devilduck_1_helmet"},
+    {"predicate": {"the_vault:texture": 43 }, "model": "the_vault:item/helmet/angel_1_helmet"},
+    {"predicate": {"the_vault:texture": 44 }, "model": "the_vault:item/helmet/devil_1_helmet"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 0 }, "model": "the_vault:item/helmet/scrappy_1_helmet"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 1 }, "model": "the_vault:item/helmet/scrappy_2_helmet"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 2 }, "model": "the_vault:item/helmet/scrappy_3_helmet"},
@@ -72,6 +74,7 @@
     {"predicate": {"the_vault:special_texture": 18 }, "model": "the_vault:item/helmet/special/zombie_helmet"},
     {"predicate": {"the_vault:special_texture": 19 }, "model": "the_vault:item/helmet/special/xnet_helmet"},
     {"predicate": {"the_vault:special_texture": 20 }, "model": "the_vault:item/helmet/special/test_dummy_helmet"},
-    {"predicate": {"the_vault:special_texture": 21 }, "model": "the_vault:item/helmet/special/industrial_foregoing_helmet"}
+    {"predicate": {"the_vault:special_texture": 21 }, "model": "the_vault:item/helmet/special/industrial_foregoing_helmet"},
+    {"predicate": {"the_vault:special_texture": 22 }, "model": "the_vault:item/helmet/special/cake_helmet"}
   ]
 }

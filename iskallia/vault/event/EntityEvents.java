@@ -29,6 +29,7 @@ import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.influence.VaultAttributeInfluence;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.modifier.CurseOnHitModifier;
@@ -294,8 +295,20 @@ public class EntityEvents {
                   float damage = Math.max(1.0F, event.getAmount() / 5.0F);
                   VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, player.func_233580_cy_());
                   if (vault != null) {
+                     for (VaultAttributeInfluence influence : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+                        if (influence.getType() == VaultAttributeInfluence.Type.DURABILITY_DAMAGE && !influence.isMultiplicative()) {
+                           damage += influence.getValue();
+                        }
+                     }
+
                      for (DurabilityDamageModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), DurabilityDamageModifier.class)) {
                         damage *= modifier.getDurabilityDamageTakenMultiplier();
+                     }
+
+                     for (VaultAttributeInfluence influencex : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+                        if (influencex.getType() == VaultAttributeInfluence.Type.DURABILITY_DAMAGE && influencex.isMultiplicative()) {
+                           damage += influencex.getValue();
+                        }
                      }
                   }
 

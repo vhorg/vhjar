@@ -16,9 +16,6 @@ import iskallia.vault.skill.talent.type.VampirismTalent;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.PlayerTalentsData;
-import iskallia.vault.world.data.VaultRaidData;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.influence.LeechInfluence;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -53,13 +50,6 @@ public class LeechHelper {
          if (nodexx.getSet() instanceof VampirismSet) {
             VampirismSet set = (VampirismSet)nodexx.getSet();
             leech += set.getLeechRatio();
-         }
-      }
-
-      VaultRaid vault = VaultRaidData.get(player.func_71121_q()).getActiveFor(player);
-      if (vault != null) {
-         for (LeechInfluence influence : vault.getInfluences().getInfluences(LeechInfluence.class)) {
-            leech += influence.getLeechPercent();
          }
       }
 

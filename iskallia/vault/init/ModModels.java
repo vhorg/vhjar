@@ -8,9 +8,11 @@ import iskallia.vault.item.ItemDrillArrow;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.gear.GearModelProperties;
 import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.item.gear.model.AngelArmorModel;
 import iskallia.vault.item.gear.model.BarbarianArmorModel;
 import iskallia.vault.item.gear.model.BoneArmorModel;
 import iskallia.vault.item.gear.model.CloakArmorModel;
+import iskallia.vault.item.gear.model.DevilArmorModel;
 import iskallia.vault.item.gear.model.DevilDuckArmorModel;
 import iskallia.vault.item.gear.model.FurArmorModel;
 import iskallia.vault.item.gear.model.JawboneArmorModel;
@@ -27,6 +29,7 @@ import iskallia.vault.item.gear.model.VaultGearModel;
 import iskallia.vault.item.gear.specials.AutomaticArmorModel;
 import iskallia.vault.item.gear.specials.BotaniaArmorModel;
 import iskallia.vault.item.gear.specials.BuildingArmorModel;
+import iskallia.vault.item.gear.specials.CakeArmorModel;
 import iskallia.vault.item.gear.specials.CheeseHatModel;
 import iskallia.vault.item.gear.specials.CreateArmorModel;
 import iskallia.vault.item.gear.specials.DankArmorModel;
@@ -93,6 +96,7 @@ public class ModModels {
       setRenderLayers(ModBlocks.ADVANCED_VENDING_MACHINE, RenderType.func_228643_e_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.func_228639_c_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.VAULT_CRATE_SCAVENGER, RenderType.func_228639_c_(), RenderType.func_228645_f_());
+      setRenderLayers(ModBlocks.VAULT_CRATE_CAKE, RenderType.func_228643_e_());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.func_228639_c_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.RAID_CONTROLLER_BLOCK, RenderType.func_228639_c_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.VAULT_CHARM_CONTROLLER_BLOCK, RenderType.func_228639_c_(), RenderType.func_228645_f_());
@@ -199,6 +203,8 @@ public class ModModels {
       public static ModModels.GearModel KNIGHT_2;
       public static ModModels.GearModel KNIGHT_3;
       public static ModModels.GearModel DEVIL_DUCK_1;
+      public static ModModels.GearModel ANGEL_1;
+      public static ModModels.GearModel DEVIL_1;
       int id;
       String displayName;
       VaultGearModel<? extends LivingEntity> helmetModel;
@@ -255,6 +261,8 @@ public class ModModels {
          KNIGHT_2 = register("Knight 2", () -> KnightArmorModel.Variant2.class);
          KNIGHT_3 = register("Knight 3", () -> KnightArmorModel.Variant3.class);
          DEVIL_DUCK_1 = register("DevilDuck 1", () -> DevilDuckArmorModel.Variant1.class);
+         ANGEL_1 = register("Angel 1", () -> AngelArmorModel.Variant1.class);
+         DEVIL_1 = register("Devil 1", () -> DevilArmorModel.Variant1.class);
       }
 
       public VaultGearModel<? extends LivingEntity> forSlotType(EquipmentSlotType slotType) {
@@ -427,6 +435,7 @@ public class ModModels {
       public static ModModels.SpecialGearModel.SpecialGearModelSet XNET_SET;
       public static ModModels.SpecialGearModel.SpecialGearModelSet TEST_DUMMY_SET;
       public static ModModels.SpecialGearModel.SpecialGearModelSet INDUSTRIAL_FOREGOING_SET;
+      public static ModModels.SpecialGearModel.SpecialGearModelSet CAKE_SET;
       int id;
       String displayName;
       VaultGearModel<? extends LivingEntity> model;
@@ -482,6 +491,7 @@ public class ModModels {
          INDUSTRIAL_FOREGOING_SET = registerSet(
             "Industrial Foregoing", () -> IndustrialForegoingArmorModel.class, new GearModelProperties().allowTransmogrification()
          );
+         CAKE_SET = registerSet("Cake", () -> CakeArmorModel.class, new GearModelProperties().allowTransmogrification());
       }
 
       public int getId() {

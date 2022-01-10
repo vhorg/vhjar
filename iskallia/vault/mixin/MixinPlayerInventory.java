@@ -8,6 +8,7 @@ import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.InventorySnapshotData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.influence.VaultAttributeInfluence;
 import iskallia.vault.world.vault.modifier.DurabilityDamageModifier;
 import java.util.List;
 import net.minecraft.entity.player.PlayerEntity;
@@ -50,8 +51,20 @@ public class MixinPlayerInventory implements InventorySnapshotData.InventoryAcce
          ServerWorld sWorld = (ServerWorld)this.field_70458_d.func_130014_f_();
          VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, this.field_70458_d.func_233580_cy_());
          if (vault != null) {
+            for (VaultAttributeInfluence influence : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+               if (influence.getType() == VaultAttributeInfluence.Type.DURABILITY_DAMAGE && !influence.isMultiplicative()) {
+                  damageAmount = (int)(damageAmount + influence.getValue());
+               }
+            }
+
             for (DurabilityDamageModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(this.field_70458_d), DurabilityDamageModifier.class)) {
                damageAmount = (int)(damageAmount * modifier.getDurabilityDamageTakenMultiplier());
+            }
+
+            for (VaultAttributeInfluence influencex : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+               if (influencex.getType() == VaultAttributeInfluence.Type.DURABILITY_DAMAGE && influencex.isMultiplicative()) {
+                  damageAmount = (int)(damageAmount * influencex.getValue());
+               }
             }
          }
       }

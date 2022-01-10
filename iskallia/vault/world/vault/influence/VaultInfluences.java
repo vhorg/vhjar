@@ -69,11 +69,10 @@ public class VaultInfluences implements INBTSerializable<CompoundNBT>, Iterable<
 
       for (int i = 0; i < influenceList.size(); i++) {
          CompoundNBT ct = influenceList.func_150305_b(i);
-         VaultInfluence influence = VaultInfluenceRegistry.getInfluence(new ResourceLocation(ct.func_74779_i("id")));
-         if (influence != null) {
+         VaultInfluenceRegistry.getInfluence(new ResourceLocation(ct.func_74779_i("id"))).ifPresent(influence -> {
             influence.deserializeNBT(ct.func_74775_l("data"));
             this.influences.add(influence);
-         }
+         });
       }
    }
 }

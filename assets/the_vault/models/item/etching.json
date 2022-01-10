@@ -18,6 +18,7 @@
     {"predicate": {"the_vault:vault_set": 11}, "model": "the_vault:item/etching/treasure_etching"},
     {"predicate": {"the_vault:vault_set": 12}, "model": "the_vault:item/etching/assassin_etching"},
     {"predicate": {"the_vault:vault_set": 13}, "model": "the_vault:item/etching/phoenix_etching"},
-    {"predicate": {"the_vault:vault_set": 14}, "model": "the_vault:item/etching/dream_etching"}
+    {"predicate": {"the_vault:vault_set": 14}, "model": "the_vault:item/etching/dream_etching"},
+    {"predicate": {"the_vault:vault_set": 15}, "model": "the_vault:item/etching/porcupine_etching"}
   ]
 }

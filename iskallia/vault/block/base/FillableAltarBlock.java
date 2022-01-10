@@ -29,7 +29,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> extends FacedBlock {
    protected static final Random rand = new Random();
-   public static final float FAVOUR_CHANCE = 0.03F;
+   public static final float FAVOUR_CHANCE = 0.05F;
    public static final VoxelShape SHAPE = Block.func_208617_a(0.0, 0.0, 0.0, 16.0, 13.0, 16.0);
 
    public FillableAltarBlock() {
@@ -81,16 +81,16 @@ public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> exte
    public static float getFavourChance(PlayerEntity player, PlayerFavourData.VaultGodType favourType) {
       ItemStack offHand = player.func_184586_b(Hand.OFF_HAND);
       if (offHand.func_190926_b() || !(offHand.func_77973_b() instanceof IdolItem)) {
-         return 0.03F;
+         return 0.05F;
       } else if (favourType != ((IdolItem)offHand.func_77973_b()).getType()) {
-         return 0.03F;
+         return 0.05F;
       } else {
          int multiplier = 2;
          if (ModAttributes.IDOL_AUGMENTED.exists(offHand)) {
             multiplier = 3;
          }
 
-         return 0.03F * multiplier;
+         return 0.05F * multiplier;
       }
    }
 

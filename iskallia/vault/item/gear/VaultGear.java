@@ -1172,7 +1172,8 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
       TREASURE,
       ASSASSIN,
       PHOENIX,
-      DREAM;
+      DREAM,
+      PORCUPINE;
    }
 
    public static enum State {

@@ -48,6 +48,8 @@
     {"predicate": {"the_vault:texture": 40 }, "model": "the_vault:item/chestplate/knight_2_chestplate"},
     {"predicate": {"the_vault:texture": 41 }, "model": "the_vault:item/chestplate/knight_3_chestplate"},
     {"predicate": {"the_vault:texture": 42 }, "model": "the_vault:item/chestplate/devilduck_1_chestplate"},
+    {"predicate": {"the_vault:texture": 43 }, "model": "the_vault:item/chestplate/angel_1_chestplate"},
+    {"predicate": {"the_vault:texture": 44 }, "model": "the_vault:item/chestplate/devil_1_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 0 }, "model": "the_vault:item/chestplate/scrappy_1_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 1 }, "model": "the_vault:item/chestplate/scrappy_2_chestplate"},
     {"predicate": {"the_vault:vault_rarity": 5, "the_vault:texture": 2 }, "model": "the_vault:item/chestplate/scrappy_3_chestplate"},
@@ -70,6 +72,7 @@
     {"predicate": {"the_vault:special_texture": 16 }, "model": "the_vault:item/chestplate/special/zombie_chestplate"},
     {"predicate": {"the_vault:special_texture": 17 }, "model": "the_vault:item/chestplate/special/xnet_chestplate"},
     {"predicate": {"the_vault:special_texture": 18 }, "model": "the_vault:item/chestplate/special/test_dummy_chestplate"},
-    {"predicate": {"the_vault:special_texture": 19 }, "model": "the_vault:item/chestplate/special/industrial_foregoing_chestplate"}
+    {"predicate": {"the_vault:special_texture": 19 }, "model": "the_vault:item/chestplate/special/industrial_foregoing_chestplate"},
+    {"predicate": {"the_vault:special_texture": 20 }, "model": "the_vault:item/chestplate/special/cake_chestplate"}
   ]
 }

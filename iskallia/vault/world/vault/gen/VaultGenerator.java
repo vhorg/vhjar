@@ -75,6 +75,10 @@ public abstract class VaultGenerator implements INBTSerializable<CompoundNBT> {
          .collect(Collectors.toSet());
    }
 
+   public <T extends VaultPiece> Collection<T> getPieces(Class<T> pieceClass) {
+      return this.pieces.stream().filter(piece -> pieceClass.isAssignableFrom(piece.getClass())).map(piece -> (VaultPiece)piece).collect(Collectors.toSet());
+   }
+
    public boolean intersectsWithAnyPiece(MutableBoundingBox box) {
       return this.pieces.stream().map(VaultPiece::getBoundingBox).anyMatch(pieceBox -> pieceBox.func_78884_a(box));
    }

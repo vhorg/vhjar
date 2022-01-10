@@ -75,6 +75,8 @@ public class VaultPortalBlock extends NetherPortalBlock {
                         VaultRaid vault = VaultRaidData.get(destination).startVault(destination, builder);
                         if (CrystalData.shouldForceCowVault(data)) {
                            vault.getProperties().create(VaultRaid.COW_VAULT, true);
+                           data.clearModifiers();
+                           data.setSelectedObjective(VaultRaid.SUMMON_AND_KILL_BOSS.get().getId());
                            VaultCowOverrides.setupVault(vault);
                         }
 

@@ -55,7 +55,7 @@ public class ColorizationHelper {
       }
    }
 
-   private static Optional<Color> getCustomColorOverride(ItemStack stack) {
+   public static Optional<Color> getCustomColorOverride(ItemStack stack) {
       Item i = stack.func_77973_b();
       if (i == ModItems.VAULT_PLATINUM) {
          return Optional.of(new Color(16705664));

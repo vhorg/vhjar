@@ -10,6 +10,7 @@ import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.influence.VaultAttributeInfluence;
 import iskallia.vault.world.vault.modifier.StatModifier;
 import javax.annotation.Nullable;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -45,9 +46,21 @@ public class CooldownHelper {
 
       VaultRaid vault = VaultRaidData.get(player.func_71121_q()).getActiveFor(player);
       if (vault != null) {
+         for (VaultAttributeInfluence influence : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+            if (influence.getType() == VaultAttributeInfluence.Type.COOLDOWN_REDUCTION && !influence.isMultiplicative()) {
+               multiplier += influence.getValue();
+            }
+         }
+
          for (StatModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), StatModifier.class)) {
             if (modifier.getStat() == StatModifier.Statistic.COOLDOWN_REDUCTION) {
                multiplier *= modifier.getMultiplier();
+            }
+         }
+
+         for (VaultAttributeInfluence influencex : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+            if (influencex.getType() == VaultAttributeInfluence.Type.COOLDOWN_REDUCTION && influencex.isMultiplicative()) {
+               multiplier *= influencex.getValue();
             }
          }
       }

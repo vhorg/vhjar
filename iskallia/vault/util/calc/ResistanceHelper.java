@@ -14,7 +14,7 @@ import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.influence.ResistanceInfluence;
+import iskallia.vault.world.vault.influence.VaultAttributeInfluence;
 import iskallia.vault.world.vault.modifier.StatModifier;
 import java.util.function.Function;
 import net.minecraft.entity.LivingEntity;
@@ -41,13 +41,21 @@ public class ResistanceHelper {
 
       VaultRaid vault = VaultRaidData.get(player.func_71121_q()).getActiveFor(player);
       if (vault != null) {
-         for (ResistanceInfluence influence : vault.getInfluences().getInfluences(ResistanceInfluence.class)) {
-            resistancePercent += influence.getAdditionalResistance();
+         for (VaultAttributeInfluence influence : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+            if (influence.getType() == VaultAttributeInfluence.Type.RESISTANCE && !influence.isMultiplicative()) {
+               resistancePercent += influence.getValue();
+            }
          }
 
          for (StatModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), StatModifier.class)) {
             if (modifier.getStat() == StatModifier.Statistic.RESISTANCE) {
                resistancePercent *= modifier.getMultiplier();
+            }
+         }
+
+         for (VaultAttributeInfluence influencex : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+            if (influencex.getType() == VaultAttributeInfluence.Type.PARRY && influencex.isMultiplicative()) {
+               resistancePercent += influencex.getValue();
             }
          }
       }

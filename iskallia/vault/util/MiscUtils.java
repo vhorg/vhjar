@@ -37,6 +37,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.MutableBoundingBox;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
@@ -201,6 +202,10 @@ public class MiscUtils {
 
    public static Optional<BlockPos> getEmptyNearby(IWorldReader world, BlockPos pos) {
       return BlockPos.func_239584_a_(pos, 8, 8, world::func_175623_d);
+   }
+
+   public static BlockPos getRandomPos(MutableBoundingBox box, Random r) {
+      return getRandomPos(AxisAlignedBB.func_216363_a(box), r);
    }
 
    public static BlockPos getRandomPos(AxisAlignedBB box, Random r) {

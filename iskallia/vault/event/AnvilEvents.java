@@ -145,6 +145,24 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
+   public static void onApplyCake(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() == Items.field_222070_lD) {
+         ItemStack output = event.getLeft().func_77946_l();
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (!data.getModifiers().isEmpty() || data.getSelectedObjective() != null && data.getType() == CrystalData.Type.COOP) {
+            return;
+         }
+
+         VaultRaid.init();
+         data.setSelectedObjective(Vault.id("cake_hunt"));
+         VaultCrystalItem.setRandomSeed(output);
+         event.setOutput(output);
+         event.setMaterialCost(1);
+         event.setCost(8);
+      }
+   }
+
+   @SubscribeEvent
    public static void onApplyRaffleSeal(AnvilUpdateEvent event) {
       if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof ItemVaultRaffleSeal) {
          ItemStack output = event.getLeft().func_77946_l();
@@ -228,6 +246,21 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
+   public static void onApplyPainiteStar(AnvilUpdateEvent event) {
+      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() == ModItems.PAINITE_STAR) {
+         ItemStack output = event.getLeft().func_77946_l();
+         if (!VaultCrystalItem.getData(output).canBeModified()) {
+            return;
+         }
+
+         VaultCrystalItem.setRandomSeed(output);
+         event.setOutput(output);
+         event.setCost(2);
+         event.setMaterialCost(1);
+      }
+   }
+
+   @SubscribeEvent
    public static void onApplyInhibitor(AnvilUpdateEvent event) {
       if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof VaultInhibitorItem) {
          ItemStack output = event.getLeft().func_77946_l();
@@ -244,6 +277,7 @@ public class AnvilEvents {
 
          inhibitorModifiers.forEach(modifier -> data.removeCatalystModifier(modifier, true, CrystalData.Modifier.Operation.ADD));
          VaultCrystalItem.markAttemptExhaust(output);
+         VaultCrystalItem.setRandomSeed(output);
          event.setOutput(output);
          event.setCost(inhibitorModifiers.size() * 8);
          event.setMaterialCost(1);

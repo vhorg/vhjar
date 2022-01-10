@@ -24,7 +24,7 @@ import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.influence.ParryInfluence;
+import iskallia.vault.world.vault.influence.VaultAttributeInfluence;
 import iskallia.vault.world.vault.modifier.StatModifier;
 import java.util.function.Function;
 import net.minecraft.entity.LivingEntity;
@@ -84,13 +84,21 @@ public class ParryHelper {
 
       VaultRaid vault = VaultRaidData.get(player.func_71121_q()).getActiveFor(player);
       if (vault != null) {
-         for (ParryInfluence influence : vault.getInfluences().getInfluences(ParryInfluence.class)) {
-            totalParryChance += influence.getAdditionalParry();
+         for (VaultAttributeInfluence influence : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+            if (influence.getType() == VaultAttributeInfluence.Type.PARRY && !influence.isMultiplicative()) {
+               totalParryChance += influence.getValue();
+            }
          }
 
          for (StatModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), StatModifier.class)) {
             if (modifier.getStat() == StatModifier.Statistic.PARRY) {
                totalParryChance *= modifier.getMultiplier();
+            }
+         }
+
+         for (VaultAttributeInfluence influencex : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+            if (influencex.getType() == VaultAttributeInfluence.Type.PARRY && influencex.isMultiplicative()) {
+               totalParryChance *= influencex.getValue();
             }
          }
       }

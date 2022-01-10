@@ -420,6 +420,11 @@ public class ModItems {
    public static BasicItem WUTAX_CRYSTAL = new BasicItem(Vault.id("wutax_crystal"), new Properties().func_200916_a(VAULT_MOD_GROUP));
    public static VaultCatalystItem VAULT_CATALYST = new VaultCatalystItem(VAULT_MOD_GROUP, Vault.id("vault_catalyst"));
    public static VaultInhibitorItem VAULT_INHIBITOR = new VaultInhibitorItem(VAULT_MOD_GROUP, Vault.id("vault_inhibitor"));
+   public static BasicTooltipItem PAINITE_STAR = new BasicTooltipItem(
+      Vault.id("painite_star"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(4),
+      new StringTextComponent("Reroll the vault catalyst combination results").func_240699_a_(TextFormatting.GRAY)
+   );
    public static VaultRuneItem VAULT_RUNE_MINE = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_mineshaft"), "mineshaft");
    public static VaultRuneItem VAULT_RUNE_PUZZLE = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_puzzle_cube"), "puzzle_cube");
    public static VaultRuneItem VAULT_RUNE_DIGSITE = new VaultRuneItem(VAULT_MOD_GROUP, Vault.id("vault_rune_digsite"), "digsite");
@@ -672,6 +677,11 @@ public class ModItems {
       new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
       () -> ImmutableList.of(ModModels.SpecialGearModel.INDUSTRIAL_FOREGOING_SET)
    );
+   public static ItemModArmorCrate ARMOR_CRATE_CAKE = new ItemModArmorCrate(
+      Vault.id("armor_crate_cake"),
+      new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(64),
+      () -> ImmutableList.of(ModModels.SpecialGearModel.CAKE_SET)
+   );
    public static FlawedRubyItem FLAWED_RUBY = new FlawedRubyItem(
       Vault.id("flawed_ruby"),
       new Properties().func_200916_a(VAULT_MOD_GROUP),
@@ -911,6 +921,7 @@ public class ModItems {
       registry.register(WUTAX_CRYSTAL);
       registry.register(VAULT_CATALYST);
       registry.register(VAULT_INHIBITOR);
+      registry.register(PAINITE_STAR);
       registry.register(VAULT_RUNE_MINE);
       registry.register(VAULT_RUNE_PUZZLE);
       registry.register(VAULT_RUNE_DIGSITE);
@@ -1023,6 +1034,7 @@ public class ModItems {
       registry.register(ARMOR_CRATE_XNET);
       registry.register(ARMOR_CRATE_TEST_DUMMY);
       registry.register(ARMOR_CRATE_INDUSTRIAL_FOREGOING);
+      registry.register(ARMOR_CRATE_CAKE);
       registry.register(ARTIFACT_FRAGMENT);
       registry.register(VAULT_CHARM);
       registry.register(CHARM_UPGRADE_TIER_1);

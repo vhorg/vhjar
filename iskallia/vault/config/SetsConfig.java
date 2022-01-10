@@ -11,6 +11,7 @@ import iskallia.vault.skill.set.DryadSet;
 import iskallia.vault.skill.set.GolemSet;
 import iskallia.vault.skill.set.NinjaSet;
 import iskallia.vault.skill.set.PlayerSet;
+import iskallia.vault.skill.set.PorcupineSet;
 import iskallia.vault.skill.set.SetGroup;
 import iskallia.vault.skill.set.TreasureSet;
 import iskallia.vault.skill.set.VampirismSet;
@@ -46,6 +47,8 @@ public class SetsConfig extends Config {
    public SetGroup<AssassinSet> ASSASSIN;
    @Expose
    public SetGroup<DreamSet> DREAM;
+   @Expose
+   public SetGroup<PorcupineSet> PORCUPINE;
 
    @Override
    public String getName() {
@@ -66,7 +69,8 @@ public class SetsConfig extends Config {
          this.DIVINITY,
          this.CARAPACE,
          this.BLOOD,
-         this.DREAM
+         this.DREAM,
+         this.PORCUPINE
       );
    }
 
@@ -94,5 +98,6 @@ public class SetsConfig extends Config {
       this.PHOENIX = SetGroup.of("Phoenix", 1, i -> new PlayerSet(VaultGear.Set.PHOENIX));
       this.ASSASSIN = SetGroup.of("Assassin", 1, i -> new AssassinSet(0.4F));
       this.DREAM = SetGroup.of("Dream", 1, i -> new DreamSet(0.5F, 2, 0.1F, 0.1F, 0.25F));
+      this.PORCUPINE = SetGroup.of("Porcupine", 1, i -> new PorcupineSet(0.4F, 1.0F));
    }
 }

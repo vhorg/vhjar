@@ -100,6 +100,7 @@ public class ModAttributes {
    public static VAttribute<Integer, IntegerAttribute> GEAR_SPECIAL_MODEL;
    public static VAttribute<Integer, IntegerAttribute> GEAR_COLOR;
    public static VAttribute<String, StringAttribute> GUARANTEED_MODIFIER;
+   public static VAttribute<String, StringAttribute> GUARANTEED_MODIFIER_REMOVAL;
    public static VAttribute<VaultGear.Rarity, EnumAttribute<VaultGear.Rarity>> GEAR_RARITY;
    public static VAttribute<VaultGear.State, EnumAttribute<VaultGear.State>> GEAR_STATE;
    public static VAttribute<VaultGear.Set, EnumAttribute<VaultGear.Set>> GEAR_SET;
@@ -274,6 +275,7 @@ public class ModAttributes {
       GEAR_SPECIAL_MODEL = register(Vault.id("gear_special_model"), IntegerAttribute::new);
       GEAR_COLOR = register(Vault.id("gear_color"), IntegerAttribute::new);
       GUARANTEED_MODIFIER = register(Vault.id("guaranteed_modifier"), StringAttribute::new);
+      GUARANTEED_MODIFIER_REMOVAL = register(Vault.id("guaranteed_modifier_removal"), StringAttribute::new);
       GEAR_RARITY = register(Vault.id("gear_rarity"), () -> new EnumAttribute<>(VaultGear.Rarity.class));
       GEAR_STATE = register(Vault.id("gear_state"), () -> new EnumAttribute<>(VaultGear.State.class));
       GEAR_SET = register(Vault.id("gear_set"), () -> new EnumAttribute<>(VaultGear.Set.class));

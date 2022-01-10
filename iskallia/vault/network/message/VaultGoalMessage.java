@@ -110,6 +110,13 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
       });
    }
 
+   public static VaultGoalMessage cakeHunt(int totalCakes, int foundCakes) {
+      return composeMessage(new VaultGoalMessage(), VaultGoalMessage.VaultGoal.CAKE_HUNT_GOAL, payload -> {
+         payload.func_74768_a("total", totalCakes);
+         payload.func_74768_a("found", foundCakes);
+      });
+   }
+
    public static VaultGoalMessage clear() {
       return composeMessage(new VaultGoalMessage(), VaultGoalMessage.VaultGoal.CLEAR, payload -> {});
    }
@@ -121,6 +128,7 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
       ARCHITECT_GOAL,
       ANCIENTS_GOAL,
       RAID_GOAL,
+      CAKE_HUNT_GOAL,
       CLEAR;
    }
 }

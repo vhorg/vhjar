@@ -47,6 +47,10 @@ public class VaultJigsawHelper {
       return !path.contains("treasure_rooms") && !path.contains("tunnels");
    };
 
+   public static List<VaultPiece> expandVault(VaultRaid vault, ServerWorld sWorld, VaultRoom fromRoom, Direction targetDir) {
+      return expandVault(vault, sWorld, fromRoom, targetDir, null);
+   }
+
    public static List<VaultPiece> expandVault(
       VaultRaid vault, ServerWorld sWorld, VaultRoom fromRoom, Direction targetDir, @Nullable JigsawPiece roomToGenerate
    ) {

@@ -100,7 +100,11 @@ public class VaultCrateBlock extends Block {
                   : (
                      state.func_177230_c() == ModBlocks.VAULT_CRATE_SCAVENGER
                         ? new TranslationTextComponent("container.vault.vault_crate_scavenger")
-                        : new TranslationTextComponent("container.vault.vault_crate")
+                        : (
+                           state.func_177230_c() == ModBlocks.VAULT_CRATE_CAKE
+                              ? new TranslationTextComponent("container.vault.vault_crate_cake")
+                              : new TranslationTextComponent("container.vault.vault_crate")
+                        )
                   );
             }
 
@@ -154,8 +158,10 @@ public class VaultCrateBlock extends Block {
    private VaultCrateBlock getBlockVariant() {
       if (this.getBlock() == ModBlocks.VAULT_CRATE) {
          return ModBlocks.VAULT_CRATE;
+      } else if (this.getBlock() == ModBlocks.VAULT_CRATE_SCAVENGER) {
+         return ModBlocks.VAULT_CRATE_SCAVENGER;
       } else {
-         return this.getBlock() == ModBlocks.VAULT_CRATE_SCAVENGER ? ModBlocks.VAULT_CRATE_SCAVENGER : ModBlocks.VAULT_CRATE_ARENA;
+         return this.getBlock() == ModBlocks.VAULT_CRATE_CAKE ? ModBlocks.VAULT_CRATE_CAKE : ModBlocks.VAULT_CRATE_ARENA;
       }
    }
 

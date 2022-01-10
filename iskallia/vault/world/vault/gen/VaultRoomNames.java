@@ -13,12 +13,18 @@ public class VaultRoomNames {
             return new StringTextComponent("Crystal Cave").func_240699_a_(TextFormatting.DARK_PURPLE);
          case "contest_alien":
             return new StringTextComponent("Contest: Alien").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_birdcage":
+            return new StringTextComponent("Contest: Ancient Temple").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_city":
+            return new StringTextComponent("Contest: City Streets").func_240699_a_(TextFormatting.DARK_AQUA);
          case "contest_dragon":
             return new StringTextComponent("Contest: Dragon").func_240699_a_(TextFormatting.DARK_AQUA);
          case "contest_fishtank":
             return new StringTextComponent("Contest: Aquarium").func_240699_a_(TextFormatting.DARK_AQUA);
          case "contest_mine":
             return new StringTextComponent("Contest: Mine").func_240699_a_(TextFormatting.DARK_AQUA);
+         case "contest_mustard":
+            return new StringTextComponent("Contest: Yellow Brick Road").func_240699_a_(TextFormatting.DARK_AQUA);
          case "contest_oriental":
             return new StringTextComponent("Contest: Oriental").func_240699_a_(TextFormatting.DARK_AQUA);
          case "contest_pixel":

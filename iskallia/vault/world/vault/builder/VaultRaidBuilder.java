@@ -52,6 +52,7 @@ public abstract class VaultRaidBuilder {
    protected Collection<VaultEvent<?>> getDefaultEvents() {
       return Arrays.asList(
          VaultRaid.SCALE_MOB,
+         VaultRaid.SCALE_MOB_JOIN,
          VaultRaid.BLOCK_NATURAL_SPAWNING,
          VaultRaid.PREVENT_ITEM_PICKUP,
          VaultRaid.APPLY_SCALE_MODIFIER,

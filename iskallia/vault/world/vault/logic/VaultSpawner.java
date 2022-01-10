@@ -124,7 +124,7 @@ public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
    public static LivingEntity spawnMob(VaultRaid vault, ServerWorld world, int vaultLevel, int x, int y, int z, Random random) {
       LivingEntity entity = createMob(world, vaultLevel, random);
       if (vault.getProperties().getBaseOrDefault(VaultRaid.COW_VAULT, false)) {
-         AggressiveCowEntity replaced = VaultCowOverrides.replaceVaultEntity(entity, world);
+         AggressiveCowEntity replaced = VaultCowOverrides.replaceVaultEntity(vault, entity, world);
          if (replaced != null) {
             entity = replaced;
          }

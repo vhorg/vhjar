@@ -116,8 +116,10 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
          List<String> modifierNames = this.getModifiers().stream().map(CrystalData.Modifier::getModifierName).collect(Collectors.toList());
          if (modifierNames.contains("Afterlife")) {
             return false;
+         } else if (Vault.id("raid_challenge").equals(this.getSelectedObjective())) {
+            return false;
          } else {
-            return Vault.id("raid_challenge").equals(this.getSelectedObjective()) ? false : this.getType().canCraft();
+            return Vault.id("cake_hunt").equals(this.getSelectedObjective()) ? false : this.getType().canCraft();
          }
       }
    }
@@ -177,12 +179,24 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       return Collections.unmodifiableList(this.modifiers);
    }
 
+   public void clearModifiers() {
+      this.modifiers.clear();
+      this.updateDelegate();
+   }
+
    public boolean canAddRoom(String roomKey) {
       return !VaultRaid.ARCHITECT_EVENT.get().getId().equals(this.getSelectedObjective());
    }
 
    public void addGuaranteedRoom(String roomKey) {
-      this.guaranteedRoomFilters.add(roomKey);
+      this.addGuaranteedRoom(roomKey, 1);
+   }
+
+   public void addGuaranteedRoom(String roomKey, int amount) {
+      for (int i = 0; i < amount; i++) {
+         this.guaranteedRoomFilters.add(roomKey);
+      }
+
       this.updateDelegate();
    }
 

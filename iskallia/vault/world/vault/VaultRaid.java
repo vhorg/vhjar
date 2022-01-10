@@ -27,8 +27,8 @@ import iskallia.vault.network.message.VaultModifierMessage;
 import iskallia.vault.network.message.VaultOverlayMessage;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.util.RelicSet;
+import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.nbt.NBTHelper;
-import iskallia.vault.world.data.GlobalDifficultyData;
 import iskallia.vault.world.data.PhoenixModifierSnapshotData;
 import iskallia.vault.world.data.PhoenixSetSnapshotData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
@@ -60,6 +60,7 @@ import iskallia.vault.world.vault.logic.VaultLogic;
 import iskallia.vault.world.vault.logic.VaultSpawner;
 import iskallia.vault.world.vault.logic.behaviour.VaultBehaviour;
 import iskallia.vault.world.vault.logic.condition.VaultCondition;
+import iskallia.vault.world.vault.logic.objective.CakeHuntObjective;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
 import iskallia.vault.world.vault.logic.objective.SummonAndKillBossObjective;
 import iskallia.vault.world.vault.logic.objective.TroveObjective;
@@ -109,7 +110,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -766,27 +766,14 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final Supplier<TroveObjective> VAULT_TROVE = VaultObjective.register(() -> new TroveObjective(Vault.id("trove")));
    public static final Supplier<AncientObjective> ANCIENTS = VaultObjective.register(() -> new AncientObjective(Vault.id("ancients")));
    public static final Supplier<RaidChallengeObjective> RAID_CHALLENGE = VaultObjective.register(() -> new RaidChallengeObjective(Vault.id("raid_challenge")));
+   public static final Supplier<CakeHuntObjective> CAKE_HUNT = VaultObjective.register(() -> new CakeHuntObjective(Vault.id("cake_hunt")));
    @Deprecated
    public static final VaultEvent<Event> TRIGGER_BOSS_SUMMON = VaultEvent.register(Vault.id("trigger_boss_summon"), Event.class, (vault, event) -> {});
    public static final VaultEvent<LivingUpdateEvent> SCALE_MOB = VaultEvent.register(
-      Vault.id("scale_mob"),
-      LivingUpdateEvent.class,
-      (vault, event) -> {
-         if (event.getEntity() instanceof MonsterEntity && !(event.getEntity() instanceof EternalEntity) && !EntityScaler.isScaled(event.getEntity())) {
-            if (VaultUtils.inVault(vault, event.getEntity())) {
-               World world = event.getEntityLiving().func_130014_f_();
-               if (world instanceof ServerWorld) {
-                  GlobalDifficultyData.Difficulty difficulty = GlobalDifficultyData.get((ServerWorld)world).getVaultDifficulty();
-                  MonsterEntity entity = (MonsterEntity)event.getEntity();
-                  vault.getProperties()
-                     .getBase(LEVEL)
-                     .ifPresent(level -> EntityScaler.setScaledEquipment(entity, vault, difficulty, level, new Random(), EntityScaler.Type.MOB));
-                  EntityScaler.setScaled(entity);
-                  entity.func_110163_bv();
-               }
-            }
-         }
-      }
+      Vault.id("scale_mob"), LivingUpdateEvent.class, EntityScaler::scaleVaultEntity
+   );
+   public static final VaultEvent<EntityJoinWorldEvent> SCALE_MOB_JOIN = VaultEvent.register(
+      Vault.id("scale_mob_join"), EntityJoinWorldEvent.class, EntityScaler::scaleVaultEntity
    );
    public static final VaultEvent<CheckSpawn> BLOCK_NATURAL_SPAWNING = VaultEvent.register(
       Vault.id("block_natural_spawning"), CheckSpawn.class, (vault, event) -> {
@@ -812,11 +799,11 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
             if (!entity.func_184216_O().contains("replaced_entity")) {
                if (VaultUtils.inVault(vault, event.getEntity())) {
                   if (entity instanceof LivingEntity && !(entity instanceof PlayerEntity)) {
-                     LivingEntity replaced = VaultCowOverrides.replaceVaultEntity((LivingEntity)entity, (ServerWorld)event.getWorld());
+                     LivingEntity replaced = VaultCowOverrides.replaceVaultEntity(vault, (LivingEntity)entity, (ServerWorld)event.getWorld());
                      if (replaced != null) {
                         Vector3d pos = entity.func_213303_ch();
                         replaced.func_70080_a(pos.field_72450_a, pos.field_72448_b, pos.field_72449_c, entity.field_70177_z, entity.field_70125_A);
-                        event.getWorld().func_217376_c(replaced);
+                        ServerScheduler.INSTANCE.schedule(1, () -> event.getWorld().func_217376_c(replaced));
                         event.setCanceled(true);
                      }
                   }

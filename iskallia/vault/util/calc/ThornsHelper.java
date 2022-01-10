@@ -2,10 +2,14 @@ package iskallia.vault.util.calc;
 
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.skill.set.PorcupineSet;
+import iskallia.vault.skill.set.SetNode;
+import iskallia.vault.skill.set.SetTree;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.skill.talent.type.ThornsChanceTalent;
 import iskallia.vault.skill.talent.type.ThornsDamageTalent;
 import iskallia.vault.skill.talent.type.ThornsTalent;
+import iskallia.vault.world.data.PlayerSetsData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -23,6 +27,15 @@ public class ThornsHelper {
 
       for (ThornsChanceTalent talent : tree.getTalents(ThornsChanceTalent.class)) {
          chance += talent.getAdditionalThornsChance();
+      }
+
+      SetTree sets = PlayerSetsData.get(player.func_71121_q()).getSets(player);
+
+      for (SetNode<?> node : sets.getNodes()) {
+         if (node.getSet() instanceof PorcupineSet) {
+            PorcupineSet set = (PorcupineSet)node.getSet();
+            chance += set.getAdditionalThornsChance();
+         }
       }
 
       return chance + getThornsChance(player);
@@ -51,6 +64,15 @@ public class ThornsHelper {
 
       for (ThornsDamageTalent talent : tree.getTalents(ThornsDamageTalent.class)) {
          additionalMultiplier += talent.getAdditionalThornsDamage();
+      }
+
+      SetTree sets = PlayerSetsData.get(player.func_71121_q()).getSets(player);
+
+      for (SetNode<?> node : sets.getNodes()) {
+         if (node.getSet() instanceof PorcupineSet) {
+            PorcupineSet set = (PorcupineSet)node.getSet();
+            additionalMultiplier += set.getAdditionalThornsDamage();
+         }
       }
 
       return additionalMultiplier + getThornsDamage(player);

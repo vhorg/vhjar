@@ -4,6 +4,7 @@ import iskallia.vault.config.VaultMobsConfig;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.data.GlobalDifficultyData;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.VaultUtils;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -11,12 +12,38 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.EquipmentSlotType.Group;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.event.entity.EntityEvent;
 
 public class EntityScaler {
    private static final String SCALED_TAG = "vault_scaled";
+
+   public static void scaleVaultEntity(VaultRaid vault, EntityEvent event) {
+      if (VaultUtils.inVault(vault, event.getEntity())) {
+         scaleVaultEntity(vault, event.getEntity());
+      }
+   }
+
+   public static void scaleVaultEntity(VaultRaid vault, Entity entity) {
+      if (entity instanceof MonsterEntity && !(entity instanceof EternalEntity) && !isScaled(entity)) {
+         World world = entity.func_130014_f_();
+         if (world instanceof ServerWorld) {
+            ServerWorld sWorld = (ServerWorld)world;
+            MonsterEntity livingEntity = (MonsterEntity)entity;
+            GlobalDifficultyData.Difficulty difficulty = GlobalDifficultyData.get(sWorld).getVaultDifficulty();
+            vault.getProperties()
+               .getBase(VaultRaid.LEVEL)
+               .ifPresent(level -> setScaledEquipment(livingEntity, vault, difficulty, level, new Random(), EntityScaler.Type.MOB));
+            setScaled(livingEntity);
+            livingEntity.func_110163_bv();
+         }
+      }
+   }
 
    public static boolean isScaled(Entity entity) {
       return entity.func_184216_O().contains("vault_scaled");

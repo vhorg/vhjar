@@ -1,18 +1,25 @@
 {
     "type": "the_vault:non_raffle_crystal_shaped",
     "pattern": [
-        "nsn",
-        " h "
+        "pnp",
+        "scs",
+        "pvp"
     ],
     "key": {
-        "h": {
-            "item": "the_vault:hunter_eye"
+        "p": {
+            "item": "the_vault:perfect_painite"
         },
         "s": {
-            "item": "the_vault:crystal_seal_executioner"
+            "item": "the_vault:skill_shard"
         },
         "n": {
             "item": "minecraft:netherite_sword"
+        },
+        "c": {
+            "item": "the_vault:vault_crystal"
+        },
+        "v": {
+            "item": "the_vault:infused_eternal_soul"
         }
     },
     "result": {

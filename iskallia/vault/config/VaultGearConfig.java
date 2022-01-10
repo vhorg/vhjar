@@ -35,6 +35,7 @@ import javax.annotation.Nullable;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Effects;
 import net.minecraft.potion.Potions;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
@@ -332,15 +333,29 @@ public abstract class VaultGearConfig extends Config {
          int rolls = ModAttributes.GEAR_MODIFIERS_TO_ROLL.getOrDefault(stack, 0).getValue(stack);
          if (rolls != 0) {
             if (rolls < 0) {
-               int removed = VaultGearHelper.removeRandomModifiers(stack, Math.abs(rolls));
-               if (removed > 0) {
-                  ModAttributes.GEAR_MODIFIERS_TO_ROLL.create(stack, rolls + removed);
-                  VaultGear.decrementLevel(stack, removed);
-                  if (Math.random() < ModConfigs.VAULT_GEAR_UTILITIES.getVoidOrbRepairCostChance()) {
-                     VaultGear.incrementRepairs(stack);
+               if (ModAttributes.GUARANTEED_MODIFIER_REMOVAL.exists(stack)) {
+                  String attrName = ModAttributes.GUARANTEED_MODIFIER_REMOVAL.getBase(stack).orElseThrow(RuntimeException::new);
+                  VAttribute<?, ?> modifier = ModAttributes.REGISTRY.get(new ResourceLocation(attrName));
+                  if (modifier != null && VaultGearHelper.removeAttribute(stack, modifier)) {
+                     ModAttributes.GEAR_MODIFIERS_TO_ROLL.create(stack, rolls + 1);
+                     VaultGear.decrementLevel(stack, 1);
+                     if (Math.random() < ModConfigs.VAULT_GEAR_UTILITIES.getVoidOrbPredefinedRepairCostChance()) {
+                        VaultGear.incrementRepairs(stack);
+                     }
                   }
+
+                  VaultGearHelper.removeAttribute(stack, ModAttributes.GUARANTEED_MODIFIER_REMOVAL);
                } else {
-                  ModAttributes.GEAR_MODIFIERS_TO_ROLL.create(stack, 0);
+                  int removed = VaultGearHelper.removeRandomModifiers(stack, Math.abs(rolls));
+                  if (removed > 0) {
+                     ModAttributes.GEAR_MODIFIERS_TO_ROLL.create(stack, rolls + removed);
+                     VaultGear.decrementLevel(stack, removed);
+                     if (Math.random() < ModConfigs.VAULT_GEAR_UTILITIES.getVoidOrbRepairCostChance()) {
+                        VaultGear.incrementRepairs(stack);
+                     }
+                  } else {
+                     ModAttributes.GEAR_MODIFIERS_TO_ROLL.create(stack, 0);
+                  }
                }
             } else {
                List<WeightedList.Entry<? extends VAttribute.Instance.Generator<?>>> generators = this.getGenerators();

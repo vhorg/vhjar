@@ -7,7 +7,7 @@
         "element": {
           "processors": [
               
-              "minecraft:empty"
+              "the_vault:x_spot/stone_to_air"
           ],
           "element_type": "the_vault:paletted_list_pool_element",
           "projection": "rigid",
