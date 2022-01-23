@@ -122,7 +122,8 @@ public class LootStatueBlockItem extends BlockItem {
          return false;
       } else {
          CompoundNBT tag = ctx.func_195996_i().func_196082_o();
-         return tag.func_150297_b("PlayerNickname", 8) && tag.func_150297_b("StatueType", 3) ? super.func_195944_a(ctx, state) : false;
+         CompoundNBT blockTag = tag.func_74775_l("BlockEntityTag");
+         return blockTag.func_150297_b("PlayerNickname", 8) && blockTag.func_150297_b("StatueType", 3) ? super.func_195944_a(ctx, state) : false;
       }
    }
 }

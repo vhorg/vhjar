@@ -7,6 +7,8 @@ import iskallia.vault.util.WeekKey;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.List;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.StringUtils;
@@ -57,6 +59,17 @@ public class TrophyStatueBlockItem extends LootStatueBlockItem {
          stackNBT.func_218657_a("BlockEntityTag", nbt);
          stack.func_77982_d(stackNBT);
          return stack;
+      }
+   }
+
+   @Override
+   protected boolean func_195944_a(BlockItemUseContext ctx, BlockState state) {
+      if (!ctx.func_195996_i().func_77942_o()) {
+         return false;
+      } else {
+         CompoundNBT tag = ctx.func_195996_i().func_196082_o();
+         CompoundNBT blockTag = tag.func_74775_l("BlockEntityTag");
+         return blockTag.func_150297_b("PlayerNickname", 8) && blockTag.func_150297_b("StatueType", 3) ? super.func_195944_a(ctx, state) : false;
       }
    }
 }
