@@ -2,6 +2,7 @@ package iskallia.vault.block.base;
 
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.world.data.PlayerFavourData;
 import java.util.Random;
@@ -17,10 +18,14 @@ import net.minecraft.particles.IParticleData;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -92,6 +97,14 @@ public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> exte
 
          return 0.05F * multiplier;
       }
+   }
+
+   public static void playFavourInfo(ServerPlayerEntity sPlayer) {
+      BlockPos pos = sPlayer.func_233580_cy_();
+      sPlayer.field_70170_p
+         .func_184148_a(null, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), ModSounds.FAVOUR_UP, SoundCategory.PLAYERS, 0.4F, 0.7F);
+      ITextComponent msg = new StringTextComponent("You gained a favour!").func_240699_a_(TextFormatting.DARK_GREEN).func_240699_a_(TextFormatting.BOLD);
+      sPlayer.func_146105_b(msg, true);
    }
 
    @OnlyIn(Dist.CLIENT)

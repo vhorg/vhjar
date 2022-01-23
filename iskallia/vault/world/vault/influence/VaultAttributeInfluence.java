@@ -56,7 +56,9 @@ public class VaultAttributeInfluence extends VaultInfluence {
       PARRY,
       DURABILITY_DAMAGE,
       COOLDOWN_REDUCTION,
+      CHEST_RARITY,
       HEALING_EFFECTIVENESS,
+      SOUL_SHARD_DROPS,
       FATAL_STRIKE_CHANCE,
       FATAL_STRIKE_DAMAGE;
    }

@@ -6,6 +6,7 @@ import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModModels;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
@@ -95,7 +96,7 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGear<VaultA
    @OnlyIn(Dist.CLIENT)
    public void func_77624_a(ItemStack itemStack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
       super.func_77624_a(itemStack, world, tooltip, flag);
-      this.addInformation(this, itemStack, world, tooltip, flag);
+      this.addInformation(this, itemStack, tooltip, Screen.func_231173_s_());
    }
 
    public boolean canElytraFly(ItemStack stack, LivingEntity entity) {

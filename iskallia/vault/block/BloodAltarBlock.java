@@ -56,6 +56,7 @@ public class BloodAltarBlock extends FillableAltarBlock<BloodAltarTileEntity> {
                PlayerFavourData.VaultGodType vg = this.getAssociatedVaultGod();
                if (data.addFavour(sPlayer, vg, 1)) {
                   data.addFavour(sPlayer, vg.getOther(rand), -1);
+                  FillableAltarBlock.playFavourInfo(sPlayer);
                }
             }
          });

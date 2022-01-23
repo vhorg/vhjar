@@ -19,6 +19,7 @@ import iskallia.vault.item.paxel.VaultPaxelItem;
 import iskallia.vault.item.paxel.enhancement.PaxelEnhancements;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.OverlevelEnchantHelper;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import java.util.Collections;
@@ -28,6 +29,7 @@ import java.util.Map;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -206,27 +208,36 @@ public class AnvilEvents {
 
    @SubscribeEvent
    public static void onApplyRune(AnvilUpdateEvent event) {
-      if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof VaultRuneItem) {
-         ItemStack output = event.getLeft().func_77946_l();
-         CrystalData data = VaultCrystalItem.getData(output);
-         if (!data.canModifyWithCrafting()) {
-            return;
+      if (event.getPlayer() instanceof ServerPlayerEntity) {
+         if (event.getLeft().func_77973_b() instanceof VaultCrystalItem && event.getRight().func_77973_b() instanceof VaultRuneItem) {
+            ServerPlayerEntity sPlayer = (ServerPlayerEntity)event.getPlayer();
+            int level = PlayerVaultStatsData.get(sPlayer.func_71121_q()).getVaultStats(sPlayer).getVaultLevel();
+            int minLevel = ModConfigs.VAULT_RUNE.getMinimumLevel(event.getRight().func_77973_b()).orElse(0);
+            if (level < minLevel) {
+               return;
+            }
+
+            ItemStack output = event.getLeft().func_77946_l();
+            CrystalData data = VaultCrystalItem.getData(output);
+            if (!data.canModifyWithCrafting()) {
+               return;
+            }
+
+            VaultRuneItem runeItem = (VaultRuneItem)event.getRight().func_77973_b();
+            if (!data.canAddRoom(runeItem.getRoomName())) {
+               return;
+            }
+
+            int amount = event.getRight().func_190916_E();
+
+            for (int i = 0; i < amount; i++) {
+               data.addGuaranteedRoom(runeItem.getRoomName());
+            }
+
+            event.setOutput(output);
+            event.setCost(amount * 4);
+            event.setMaterialCost(amount);
          }
-
-         VaultRuneItem runeItem = (VaultRuneItem)event.getRight().func_77973_b();
-         if (!data.canAddRoom(runeItem.getRoomName())) {
-            return;
-         }
-
-         int amount = event.getRight().func_190916_E();
-
-         for (int i = 0; i < amount; i++) {
-            data.addGuaranteedRoom(runeItem.getRoomName());
-         }
-
-         event.setOutput(output);
-         event.setCost(amount * 4);
-         event.setMaterialCost(amount);
       }
    }
 

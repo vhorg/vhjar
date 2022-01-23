@@ -8,6 +8,7 @@ import iskallia.vault.world.data.PlayerFavourData;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -100,7 +101,7 @@ public class IdolItem extends BasicItem implements VaultGear<IdolItem> {
    @Override
    public void func_77624_a(ItemStack stack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
       super.func_77624_a(stack, world, tooltip, flag);
-      this.addInformation(this, stack, world, tooltip, flag);
+      this.addInformation(this, stack, tooltip, Screen.func_231173_s_());
    }
 
    public boolean canElytraFly(ItemStack stack, LivingEntity entity) {

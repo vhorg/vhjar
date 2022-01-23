@@ -35,6 +35,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameterSets;
@@ -313,7 +314,12 @@ public class VaultChestTileEntity extends ChestTileEntity {
             if (crystalData.getGuaranteedRoomFilters().isEmpty()) {
                float chance = ModConfigs.VAULT_CHEST_META.getRuneChance(thisState.func_177230_c().getRegistryName(), this.rarity);
                if (sWorld.func_201674_k().nextFloat() < chance) {
-                  loot.add(new ItemStack(ModConfigs.VAULT_RUNE.getRandomRune()));
+                  Item rune = ModConfigs.VAULT_RUNE.getRandomRune();
+                  int vaultLevel = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
+                  int minLevel = ModConfigs.VAULT_RUNE.getMinimumLevel(rune).orElse(0);
+                  if (vaultLevel >= minLevel) {
+                     loot.add(new ItemStack(rune));
+                  }
                }
             }
          });

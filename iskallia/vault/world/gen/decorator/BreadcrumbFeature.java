@@ -5,6 +5,7 @@ import iskallia.vault.Vault;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.world.data.VaultRaidData;
+import iskallia.vault.world.gen.structure.JigsawPiecePlacer;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.piece.VaultPiece;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
@@ -51,33 +52,41 @@ public class BreadcrumbFeature extends Feature<NoFeatureConfig> {
    }
 
    public static void generateVaultBreadcrumb(VaultRaid vault, ServerWorld sWorld, List<VaultPiece> pieces) {
-      Predicate<BlockPos> filter = posx -> false;
-      Set<ChunkPos> chunks = new HashSet<>();
+      runGeneration(
+         () -> {
+            Predicate<BlockPos> filter = posx -> false;
+            Set<ChunkPos> chunks = new HashSet<>();
 
-      for (VaultPiece piece : pieces) {
-         MutableBoundingBox box = piece.getBoundingBox();
-         filter = filter.or(box::func_175898_b);
-         ChunkPos chMin = new ChunkPos(box.field_78897_a >> 4, box.field_78896_c >> 4);
-         ChunkPos chMax = new ChunkPos(box.field_78893_d >> 4, box.field_78892_f >> 4);
+            for (VaultPiece piece : pieces) {
+               MutableBoundingBox box = piece.getBoundingBox();
+               filter = filter.or(box::func_175898_b);
+               ChunkPos chMin = new ChunkPos(box.field_78897_a >> 4, box.field_78896_c >> 4);
+               ChunkPos chMax = new ChunkPos(box.field_78893_d >> 4, box.field_78892_f >> 4);
 
-         for (int x = chMin.field_77276_a; x <= chMax.field_77276_a; x++) {
-            for (int z = chMin.field_77275_b; z <= chMax.field_77275_b; z++) {
-               chunks.add(new ChunkPos(x, z));
+               for (int x = chMin.field_77276_a; x <= chMax.field_77276_a; x++) {
+                  for (int z = chMin.field_77275_b; z <= chMax.field_77275_b; z++) {
+                     chunks.add(new ChunkPos(x, z));
+                  }
+               }
+            }
+
+            Predicate<BlockPos> featurePlacementFilter = filter;
+
+            for (ChunkPos pos : chunks) {
+               BlockPos featurePos = pos.func_206849_h();
+               placeBreadcrumbFeatures(
+                  vault,
+                  sWorld,
+                  (at, state) -> featurePlacementFilter.test(at) ? sWorld.func_180501_a(at, state, 2) : false,
+                  sWorld.func_201674_k(),
+                  featurePos
+               );
             }
          }
-      }
-
-      Predicate<BlockPos> featurePlacementFilter = filter;
-
-      for (ChunkPos pos : chunks) {
-         BlockPos featurePos = pos.func_206849_h();
-         placeBreadcrumbFeatures(
-            vault, sWorld, (at, state) -> featurePlacementFilter.test(at) ? sWorld.func_180501_a(at, state, 2) : false, sWorld.func_201674_k(), featurePos
-         );
-      }
+      );
    }
 
-   public static void placeBreadcrumbFeatures(
+   private static void placeBreadcrumbFeatures(
       VaultRaid vault, ISeedReader world, BiPredicate<BlockPos, BlockState> blockPlacer, Random rand, BlockPos featurePos
    ) {
       vault.getActiveObjective(ScavengerHuntObjective.class).ifPresent(objective -> doTreasureSpawnPass(rand, world, blockPlacer, featurePos));
@@ -91,7 +100,7 @@ public class BreadcrumbFeature extends Feature<NoFeatureConfig> {
       placeChestModifierFeatures(vault, world, blockPlacer, rand, featurePos);
    }
 
-   public static void placeChestModifierFeatures(
+   private static void placeChestModifierFeatures(
       VaultRaid vault, ISeedReader world, BiPredicate<BlockPos, BlockState> blockPlacer, Random rand, BlockPos featurePos
    ) {
       vault.getActiveModifiersFor(PlayerFilter.any(), ChestModifier.class).forEach(modifier -> {
@@ -117,7 +126,7 @@ public class BreadcrumbFeature extends Feature<NoFeatureConfig> {
       doPlacementPass(rand, world, blockPlacer, pos, toPlace, attempts, offset -> {});
    }
 
-   public static void doPlacementPass(
+   private static void doPlacementPass(
       Random rand, IWorld world, BiPredicate<BlockPos, BlockState> blockPlacer, BlockPos pos, BlockState toPlace, int attempts, Consumer<BlockPos> pass
    ) {
       for (int i = 0; i < attempts; i++) {
@@ -131,6 +140,16 @@ public class BreadcrumbFeature extends Feature<NoFeatureConfig> {
             && blockPlacer.test(offset, toPlace)) {
             pass.accept(offset);
          }
+      }
+   }
+
+   private static void runGeneration(Runnable run) {
+      JigsawPiecePlacer.generationPlacementCount++;
+
+      try {
+         run.run();
+      } finally {
+         JigsawPiecePlacer.generationPlacementCount--;
       }
    }
 

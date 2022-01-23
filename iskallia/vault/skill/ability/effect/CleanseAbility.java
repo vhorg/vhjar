@@ -19,9 +19,9 @@ public class CleanseAbility<C extends CleanseConfig> extends AbilityEffect<C> {
       this.removeEffects(config, player, effects);
       player.field_70170_p
          .func_184148_a(
-            player, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), ModSounds.CLEANSE_SFX, SoundCategory.MASTER, 0.7F, 1.0F
+            player, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), ModSounds.CLEANSE_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F
          );
-      player.func_213823_a(ModSounds.CLEANSE_SFX, SoundCategory.MASTER, 0.7F, 1.0F);
+      player.func_213823_a(ModSounds.CLEANSE_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F);
       return true;
    }
 

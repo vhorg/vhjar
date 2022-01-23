@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin({ModifiableAttributeInstance.class})
 public abstract class MixinAttributeInstance {
    @Shadow
-   public abstract Collection<AttributeModifier> func_220370_b(Operation var1);
+   protected abstract Collection<AttributeModifier> func_220370_b(Operation var1);
 
    @Redirect(
       method = {"computeValue"},

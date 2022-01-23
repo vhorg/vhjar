@@ -3,7 +3,7 @@
     { "name": "Bonus Pool",
       "rolls": {
         "min": 2,
-        "max": 3
+        "max": 4
       },
       "bonus_rolls": {
         "min": 0,
@@ -36,102 +36,6 @@
             } 
           ]
         },
-        { "_name": "vaultdust",
-          "type": "minecraft:item",
-          "weight": 3,
-          "name": "the_vault:vault_dust",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 2,
-                "max": 8
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.4
-                }
-              ]
-            }
-          ]
-        },
-        { "_name": "vaultplating",
-          "type": "minecraft:item",
-          "weight": 3,
-          "name": "the_vault:vault_plating",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 2
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.35
-                }
-              ]
-            }
-          ]
-        },
-        { "_name": "wutaxshard",
-          "type": "minecraft:item",
-          "weight": 3,
-          "name": "the_vault:wutax_shard",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.20
-                }
-              ]
-            }
-          ]
-        },
-        { "_name": "vaultessence",
-          "type": "minecraft:item",
-          "weight": 1,
-          "name": "the_vault:vault_essence",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.8
-                }
-              ]
-            }
-          ]
-        },
         { "_name": "vaultbronze",
           "type": "minecraft:item",
           "weight": 2,
@@ -158,7 +62,7 @@
         },
         { "_name": "staressence",
           "type": "minecraft:item",
-          "weight": 2,
+          "weight": 4,
           "name": "the_vault:star_essence",
           "functions": [
             {
@@ -166,30 +70,6 @@
               "count": {
                 "min": 2,
                 "max": 4
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
-                }
-              ]
-            }
-          ]
-        },
-        { "_name": "skillessence",
-          "type": "minecraft:item",
-          "weight": 1,
-          "name": "the_vault:skill_essence",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
               }
             },
             {
@@ -238,6 +118,30 @@
               "count": {
                 "min": 1,
                 "max": 1
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        { "_name": "heartyapple",
+          "type": "minecraft:item",
+          "weight": 6,
+          "name": "the_vault:hearty_apple",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 2
               }
             },
             {
@@ -381,7 +285,7 @@
               "function": "minecraft:set_count",
               "count": {
                 "min": 1,
-                "max": 1
+                "max": 2
               }
             },
             {
@@ -398,7 +302,7 @@
         },
         { "_name": "vaultcookie",
           "type": "minecraft:item",
-          "weight": 4,
+          "weight": 3,
           "name": "the_vault:vault_cookie",
           "functions": [
             {
@@ -419,13 +323,61 @@
               ]
             }
           ]
+        },
+        { "_name": "witherskull",
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "minecraft:wither_skeleton_skull",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.0
+                }
+              ]
+            }
+          ]
+        },
+        { "_name": "shulkershell",
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "minecraft:shulker_shell",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            },
+            {
+              "function": "minecraft:set_count",
+              "count": 0,
+              "conditions": [
+                {
+                  "condition": "minecraft:random_chance",
+                  "chance": 0.0
+                }
+              ]
+            }
+          ]
         }
       ]
     },
     { "name": "Light Pool",
       "rolls": {
-        "min": 2,
-        "max": 4
+        "min": 3,
+        "max": 5
       },
       "bonus_rolls": {
         "min": 0,
@@ -451,30 +403,6 @@
                 {
                   "condition": "minecraft:random_chance",
                   "chance": 0.1
-                }
-              ]
-            }
-          ]
-        },
-        { "_name": "witherskull",
-          "type": "minecraft:item",
-          "weight": 2,
-          "name": "minecraft:wither_skeleton_skull",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.0
                 }
               ]
             }
@@ -668,162 +596,6 @@
                 "min": 1,
                 "max": 1
               }
-            }
-          ]
-        }
-      ]
-    },
-    { "name": "Gear",
-      "rolls": {
-        "min": 0,
-        "max": 1
-      },
-      "entries": [
-        {
-          "type": "minecraft:empty",
-          "weight": 24
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:netherite_sword",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.25
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:netherite_axe",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.25
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:netherite_helmet",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.25
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:netherite_chestplate",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.25
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:netherite_leggings",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.25
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "weight": 4,
-          "name": "minecraft:netherite_boots",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": {
-                "min": 1,
-                "max": 1
-              }
-            },
-            {
-              "function": "minecraft:set_count",
-              "count": 0,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.25
-                }
-              ]
             }
           ]
         }

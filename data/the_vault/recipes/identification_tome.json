@@ -1,22 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "pvp",
-    "pep",
-    "pcp"
+    "g",
+    "p"
   ],
   "key": {
     "p": {
-      "item": "minecraft:paper"
+      "item": "minecraft:book"
     },
-    "v": {
-      "item": "the_vault:vault_diamond_block"
-    },
-    "e": {
-      "item": "the_vault:echo_pog"
-    },
-    "c": {
-      "tag": "the_vault:playerchunks"
+    "g": {
+      "item": "the_vault:gear_charm"
     }
   },
   "result": {

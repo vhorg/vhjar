@@ -8,9 +8,11 @@ import iskallia.vault.util.StatueType;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Item.Properties;
 import net.minecraft.nbt.CompoundNBT;
@@ -112,6 +114,15 @@ public class LootStatueBlockItem extends BlockItem {
          int decay = ModConfigs.STATUE_LOOT.getDecay(type);
          out.func_74768_a("ItemsRemaining", decay);
          out.func_74768_a("TotalItems", decay);
+      }
+   }
+
+   protected boolean func_195944_a(BlockItemUseContext ctx, BlockState state) {
+      if (!ctx.func_195996_i().func_77942_o()) {
+         return false;
+      } else {
+         CompoundNBT tag = ctx.func_195996_i().func_196082_o();
+         return tag.func_150297_b("PlayerNickname", 8) && tag.func_150297_b("StatueType", 3) ? super.func_195944_a(ctx, state) : false;
       }
    }
 }

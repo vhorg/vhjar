@@ -1,7 +1,10 @@
 package iskallia.vault.item.crystal;
 
+import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.VaultPortalSize;
+import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.container.RenamingContainer;
+import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
@@ -11,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -24,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.item.Item.Properties;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
@@ -134,9 +139,17 @@ public class VaultCrystalItem extends Item {
    }
 
    private boolean tryCreatePortal(World world, BlockPos pos, Direction facing, CrystalData data) {
-      Optional<VaultPortalSize> optional = VaultPortalSize.getPortalSize(world, pos.func_177972_a(facing), Axis.X);
+      Optional<VaultPortalSize> optional = VaultPortalSize.getPortalSize(world, pos.func_177972_a(facing), Axis.X, VaultPortalBlock.FRAME);
       if (optional.isPresent()) {
-         optional.get().placePortalBlocks(data);
+         BlockState state = (BlockState)ModBlocks.VAULT_PORTAL.func_176223_P().func_206870_a(VaultPortalBlock.field_176550_a, optional.get().getAxis());
+         optional.get().placePortalBlocks(blockPos -> {
+            world.func_180501_a(blockPos, state, 3);
+            TileEntity te = world.func_175625_s(blockPos);
+            if (te instanceof VaultPortalTileEntity) {
+               VaultPortalTileEntity portal = (VaultPortalTileEntity)te;
+               portal.setCrystalData(data);
+            }
+         });
          return true;
       } else {
          return false;

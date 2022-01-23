@@ -35,9 +35,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.MendingEnchantment;
@@ -290,7 +288,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
    }
 
    @OnlyIn(Dist.CLIENT)
-   default void addInformation(T item, ItemStack stack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+   default void addInformation(T item, ItemStack stack, List<ITextComponent> tooltip, boolean displayDetails) {
       ModAttributes.GEAR_CRAFTED_BY
          .get(stack)
          .map(attribute -> attribute.getValue(stack))
@@ -334,12 +332,10 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .get(stack)
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(state -> ModAttributes.GEAR_TIER.get(stack).map(attribute -> attribute.getValue(stack)).ifPresent(tierId -> {
-            if (item != ModItems.ETCHING) {
-               if (ModConfigs.VAULT_GEAR != null) {
-                  ITextComponent displayTxt = ModConfigs.VAULT_GEAR.getTierConfig(tierId).getDisplay();
-                  if (!displayTxt.getString().isEmpty()) {
-                     tooltip.add(new StringTextComponent("Tier: ").func_230529_a_(displayTxt));
-                  }
+            if (ModConfigs.VAULT_GEAR != null) {
+               ITextComponent displayTxt = ModConfigs.VAULT_GEAR.getTierConfig(tierId).getDisplay();
+               if (!displayTxt.getString().isEmpty()) {
+                  tooltip.add(new StringTextComponent("Tier: ").func_230529_a_(displayTxt));
                }
             }
          }));
@@ -353,20 +349,18 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          .map(attribute -> attribute.getValue(stack))
          .ifPresent(
             rarityx -> {
-               if (item != ModItems.ETCHING) {
-                  IFormattableTextComponent rarityText = new StringTextComponent("Rarity: ").func_230529_a_(rarityx.getName());
-                  if (Screen.func_231173_s_()) {
-                     ModAttributes.GEAR_MODEL
-                        .get(stack)
-                        .map(attribute -> attribute.getValue(stack))
-                        .ifPresent(
-                           modelx -> rarityText.func_230529_a_(new StringTextComponent(" | ").func_240699_a_(TextFormatting.BLACK))
-                              .func_230529_a_(new StringTextComponent("" + modelx).func_240699_a_(TextFormatting.GRAY))
-                        );
-                  }
-
-                  tooltip.add(rarityText);
+               IFormattableTextComponent rarityText = new StringTextComponent("Rarity: ").func_230529_a_(rarityx.getName());
+               if (displayDetails) {
+                  ModAttributes.GEAR_MODEL
+                     .get(stack)
+                     .map(attribute -> attribute.getValue(stack))
+                     .ifPresent(
+                        modelx -> rarityText.func_230529_a_(new StringTextComponent(" | ").func_240699_a_(TextFormatting.BLACK))
+                           .func_230529_a_(new StringTextComponent("" + modelx).func_240699_a_(TextFormatting.GRAY))
+                     );
                }
+
+               tooltip.add(rarityText);
             }
          );
       if (item instanceof VaultArmorItem) {
@@ -426,24 +420,24 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
             }
          );
       if (ModAttributes.GEAR_STATE.getOrDefault(stack, VaultGear.State.UNIDENTIFIED).getValue(stack) == VaultGear.State.IDENTIFIED) {
-         this.addModifierInformation(stack, tooltip, flag);
+         this.addModifierInformation(stack, tooltip, displayDetails);
       }
 
       ModAttributes.REFORGED.get(stack).map(attribute -> attribute.getValue(stack)).filter(b -> b).ifPresent(value -> {
          tooltip.add(new StringTextComponent("Reforged").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14833698))));
-         if (Screen.func_231173_s_()) {
+         if (displayDetails) {
             tooltip.add(new StringTextComponent(" Has been reforged with Artisan Scroll").func_240699_a_(TextFormatting.DARK_GRAY));
          }
       });
       ModAttributes.IMBUED.get(stack).map(attribute -> attribute.getValue(stack)).filter(b -> b).ifPresent(value -> {
          tooltip.add(new StringTextComponent("Imbued").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16772263))));
-         if (Screen.func_231173_s_()) {
+         if (displayDetails) {
             tooltip.add(new StringTextComponent(" Has been imbued with a Flawed Ruby").func_240699_a_(TextFormatting.DARK_GRAY));
          }
       });
       ModAttributes.IDOL_AUGMENTED.get(stack).map(attribute -> attribute.getValue(stack)).filter(b -> b).ifPresent(value -> {
          tooltip.add(new StringTextComponent("Hallowed").func_240700_a_(style -> style.func_240718_a_(Color.func_240743_a_(16746496))));
-         if (Screen.func_231173_s_()) {
+         if (displayDetails) {
             tooltip.add(new StringTextComponent(" Adds +3000 Durability").func_240699_a_(TextFormatting.DARK_GRAY));
          }
       });
@@ -463,7 +457,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          );
       if (FlawedRubyItem.shouldHandleOutcome(stack)) {
          tooltip.add(new StringTextComponent("Flawed Ruby Applied").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16772263))));
-         if (Screen.func_231173_s_()) {
+         if (displayDetails) {
             tooltip.add(new StringTextComponent(" A Flawed Ruby has been applied").func_240699_a_(TextFormatting.DARK_GRAY));
             tooltip.add(new StringTextComponent(" and is unstable. This may break").func_240699_a_(TextFormatting.DARK_GRAY));
             tooltip.add(new StringTextComponent(" or become imbued and gain an").func_240699_a_(TextFormatting.DARK_GRAY));
@@ -473,8 +467,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
       }
    }
 
-   @OnlyIn(Dist.CLIENT)
-   default void addModifierInformation(ItemStack stack, List<ITextComponent> tooltip, ITooltipFlag flag) {
+   default void addModifierInformation(ItemStack stack, List<ITextComponent> tooltip, boolean displayDetails) {
       ModAttributes.ADD_ARMOR
          .get(stack)
          .map(attribute -> attribute.getValue(stack))
@@ -864,7 +857,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          );
       ModAttributes.SOULBOUND.get(stack).map(attribute -> attribute.getValue(stack)).filter(b -> b).ifPresent(value -> {
          tooltip.add(new StringTextComponent("Soulbound").func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(9856253))));
-         if (Screen.func_231173_s_()) {
+         if (displayDetails) {
             tooltip.add(new StringTextComponent(" Keep item on death in vault").func_240699_a_(TextFormatting.DARK_GRAY));
          }
       });

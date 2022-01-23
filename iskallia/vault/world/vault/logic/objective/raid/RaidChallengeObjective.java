@@ -1,5 +1,6 @@
 package iskallia.vault.world.vault.logic.objective.raid;
 
+import com.google.common.collect.Lists;
 import iskallia.vault.block.entity.VaultRaidControllerTileEntity;
 import iskallia.vault.config.entry.SingleItemEntry;
 import iskallia.vault.init.ModBlocks;
@@ -8,13 +9,13 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.VaultGoalMessage;
 import iskallia.vault.util.MathUtilities;
-import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.PlayerFilter;
 import iskallia.vault.util.data.WeightedList;
 import iskallia.vault.world.gen.decorator.BreadcrumbFeature;
 import iskallia.vault.world.gen.structure.VaultJigsawHelper;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.VaultGenerator;
+import iskallia.vault.world.vault.gen.piece.VaultPiece;
 import iskallia.vault.world.vault.gen.piece.VaultRaidRoom;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.logic.objective.raid.modifier.BlockPlacementModifier;
@@ -50,7 +51,6 @@ import net.minecraft.util.Util;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -226,35 +226,27 @@ public class RaidChallengeObjective extends VaultObjective {
          }
       }
 
-      vault.getGenerator().getPiecesAt(controller, VaultRaidRoom.class).stream().findFirst().ifPresent(room -> {
+      VaultRaidRoom raidRoom = vault.getGenerator().getPiecesAt(controller, VaultRaidRoom.class).stream().findFirst().orElse(null);
+      if (raidRoom != null) {
          for (Direction direction : Direction.values()) {
-            if (direction.func_176740_k() != Axis.Y && VaultJigsawHelper.canExpand(vault, room, direction)) {
-               VaultJigsawHelper.expandVault(vault, world, room, direction, VaultJigsawHelper.getRaidChallengeRoom());
+            if (direction.func_176740_k() != Axis.Y && VaultJigsawHelper.canExpand(vault, raidRoom, direction)) {
+               VaultJigsawHelper.expandVault(vault, world, raidRoom, direction, VaultJigsawHelper.getRaidChallengeRoom());
             }
          }
 
-         room.setRaidFinished();
-      });
-      this.getAllModifiers().forEach((modifier, value) -> modifier.onVaultRaidFinish(vault, world, controller, raid, value));
-      AxisAlignedBB raidBoundingBox = raid.getRaidBoundingBox();
-      FloatingItemModifier catalystPlacement = new FloatingItemModifier(
-         "", 4, new WeightedList<SingleItemEntry>().add(new SingleItemEntry(ModItems.VAULT_CATALYST_FRAGMENT), 1), ""
-      );
-      vault.getActiveModifiersFor(PlayerFilter.any(), CatalystChanceModifier.class)
-         .forEach(modifier -> catalystPlacement.onVaultRaidFinish(vault, world, controller, raid, 1.0F));
-      BlockPlacementModifier orePlacement = new BlockPlacementModifier("", ModBlocks.UNKNOWN_ORE, 12, "");
-      vault.getActiveModifiersFor(PlayerFilter.any(), LootableModifier.class)
-         .forEach(modifier -> orePlacement.onVaultRaidFinish(vault, world, controller, raid, modifier.getAverageMultiplier()));
-      MiscUtils.getChunksContaining(raidBoundingBox)
-         .forEach(
-            chunkPos -> BreadcrumbFeature.placeChestModifierFeatures(
-               vault,
-               world,
-               (pos, state) -> raidBoundingBox.func_72318_a(Vector3d.func_237489_a_(pos)) ? world.func_180501_a(pos, state, 3) : false,
-               rand,
-               chunkPos.func_206849_h()
-            )
+         raidRoom.setRaidFinished();
+         this.getAllModifiers().forEach((modifier, value) -> modifier.onVaultRaidFinish(vault, world, controller, raid, value));
+         AxisAlignedBB raidBoundingBox = raid.getRaidBoundingBox();
+         FloatingItemModifier catalystPlacement = new FloatingItemModifier(
+            "", 4, new WeightedList<SingleItemEntry>().add(new SingleItemEntry(ModItems.VAULT_CATALYST_FRAGMENT), 1), ""
          );
+         vault.getActiveModifiersFor(PlayerFilter.any(), CatalystChanceModifier.class)
+            .forEach(modifier -> catalystPlacement.onVaultRaidFinish(vault, world, controller, raid, 1.0F));
+         BlockPlacementModifier orePlacement = new BlockPlacementModifier("", ModBlocks.UNKNOWN_ORE, 12, "");
+         vault.getActiveModifiersFor(PlayerFilter.any(), LootableModifier.class)
+            .forEach(modifier -> orePlacement.onVaultRaidFinish(vault, world, controller, raid, modifier.getAverageMultiplier()));
+         BreadcrumbFeature.generateVaultBreadcrumb(vault, world, Lists.newArrayList(new VaultPiece[]{raidRoom}));
+      }
    }
 
    @Override

@@ -45,7 +45,11 @@ public class VaultCharmControllerScreen extends ContainerScreen<VaultCharmContro
    }
 
    protected void func_230451_b_(MatrixStack matrixStack, int x, int y) {
-      String title = "Charm Inscription Table - " + ((VaultCharmControllerContainer)this.field_147002_h).getInventorySize() + " Slots";
+      String title = "Charm Inscription - "
+         + ((VaultCharmControllerContainer)this.field_147002_h).getCurrentAmountWhitelisted()
+         + "/"
+         + ((VaultCharmControllerContainer)this.field_147002_h).getInventorySize()
+         + " slots";
       this.field_230712_o_.func_243248_b(matrixStack, new StringTextComponent(title), 5.0F, 5.0F, 4210752);
       if (this.needsScrollBars()) {
          this.field_230706_i_.func_110434_K().func_110577_a(TEXTURE);

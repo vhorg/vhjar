@@ -47,18 +47,18 @@ public class DashAbility<C extends DashConfig> extends AbilityEffect<C> {
                player.func_226278_cu_(),
                player.func_226281_cx_(),
                ModSounds.GRASSHOPPER_BRRR,
-               SoundCategory.MASTER,
-               1.0F,
+               SoundCategory.PLAYERS,
+               0.2F,
                1.0F
             );
-         player.func_213823_a(ModSounds.GRASSHOPPER_BRRR, SoundCategory.MASTER, 1.0F, 1.0F);
+         player.func_213823_a(ModSounds.GRASSHOPPER_BRRR, SoundCategory.PLAYERS, 0.2F, 1.0F);
          GrasshopperNinja.achieve(player);
       } else {
          player.field_70170_p
             .func_184148_a(
-               player, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), ModSounds.DASH_SFX, SoundCategory.MASTER, 1.0F, 1.0F
+               player, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), ModSounds.DASH_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F
             );
-         player.func_213823_a(ModSounds.DASH_SFX, SoundCategory.MASTER, 1.0F, 1.0F);
+         player.func_213823_a(ModSounds.DASH_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F);
       }
 
       return true;

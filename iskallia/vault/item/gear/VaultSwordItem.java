@@ -3,6 +3,7 @@ package iskallia.vault.item.gear;
 import com.google.common.collect.Multimap;
 import java.util.List;
 import javax.annotation.Nullable;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -82,7 +83,7 @@ public class VaultSwordItem extends SwordItem implements VaultGear<VaultSwordIte
    @OnlyIn(Dist.CLIENT)
    public void func_77624_a(ItemStack stack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
       super.func_77624_a(stack, world, tooltip, flag);
-      this.addInformation(this, stack, world, tooltip, flag);
+      this.addInformation(this, stack, tooltip, Screen.func_231173_s_());
    }
 
    public boolean canElytraFly(ItemStack stack, LivingEntity entity) {

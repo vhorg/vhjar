@@ -3,16 +3,19 @@ package iskallia.vault.block;
 import iskallia.vault.Vault;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.VaultUtils;
 import iskallia.vault.world.vault.logic.VaultCowOverrides;
+import java.util.Arrays;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.NetherPortalBlock;
+import net.minecraft.block.AbstractBlock.IPositionPredicate;
 import net.minecraft.block.AbstractBlock.Properties;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -35,6 +38,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class VaultPortalBlock extends NetherPortalBlock {
+   public static final IPositionPredicate FRAME = (state, reader, p) -> Arrays.stream(ModConfigs.VAULT_PORTAL.getValidFrameBlocks())
+      .anyMatch(b -> b == state.func_177230_c());
+
    public VaultPortalBlock() {
       super(Properties.func_200950_a(Blocks.field_150427_aO));
       this.func_180632_j((BlockState)((BlockState)this.field_176227_L.func_177621_b()).func_206870_a(field_176550_a, Axis.X));
@@ -99,7 +105,7 @@ public class VaultPortalBlock extends NetherPortalBlock {
          Axis facingAxis = facing.func_176740_k();
          Axis portalAxis = (Axis)state.func_177229_b(field_176550_a);
          boolean flag = portalAxis != facingAxis && facingAxis.func_176722_c();
-         return !flag && !facingState.func_203425_a(this) && !new VaultPortalSize(iworld, currentPos, portalAxis).validatePortal()
+         return !flag && !facingState.func_203425_a(this) && !new VaultPortalSize(iworld, currentPos, portalAxis, FRAME).validatePortal()
             ? Blocks.field_150350_a.func_176223_P()
             : super.func_196271_a(state, facing, facingState, iworld, currentPos, facingPos);
       }

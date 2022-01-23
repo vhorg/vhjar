@@ -22,9 +22,9 @@ public class RampageAbility<C extends RampageConfig> extends AbilityEffect<C> {
          );
          player.field_70170_p
             .func_184148_a(
-               null, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), ModSounds.RAMPAGE_SFX, SoundCategory.MASTER, 0.175F, 1.0F
+               null, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), ModSounds.RAMPAGE_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F
             );
-         player.func_213823_a(ModSounds.RAMPAGE_SFX, SoundCategory.MASTER, 0.175F, 1.0F);
+         player.func_213823_a(ModSounds.RAMPAGE_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F);
          player.func_195064_c(newEffect);
          return false;
       }

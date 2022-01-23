@@ -1972,7 +1972,7 @@
       }
     },
     {
-      "weight": 200,
+      "weight": 100,
       "element":
       {
         "processors": [

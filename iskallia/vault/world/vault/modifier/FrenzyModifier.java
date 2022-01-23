@@ -107,6 +107,7 @@ public class FrenzyModifier extends TexturedVaultModifier {
          this.applyModifier(
             entity, Attributes.field_233818_a_, new AttributeModifier(this.getHealthModifierID(), "Frenzy MaxHealth 1", 1.0, FRENZY_HEALTH_OPERATION)
          );
+         entity.func_70606_j(1.0F);
       }
    }
 

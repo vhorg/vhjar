@@ -95,7 +95,10 @@ public class ChallengeCrystalArchive {
       trap.addModifier("Super Lucky");
       trap.addModifier("Super Lucky");
       generatedCrystals.add(make(trap));
-      CrystalData dream = baseData();
+      CrystalData dream = new CrystalData();
+      dream.setModifiable(false);
+      dream.setCanTriggerInfluences(false);
+      dream.setCanGenerateTreasureRooms(false);
       dream.setType(CrystalData.Type.CLASSIC);
       dream.setSelectedObjective(VaultRaid.SUMMON_AND_KILL_BOSS.get().getId());
       dream.setTargetObjectiveCount(10);

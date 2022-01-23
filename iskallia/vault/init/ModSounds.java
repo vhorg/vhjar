@@ -54,6 +54,7 @@ public class ModSounds {
    public static SoundEvent VAULT_CHEST_OMEGA_OPEN;
    public static SoundEvent VAULT_CHEST_RARE_OPEN;
    public static SoundEvent WITCHSKALL_IDLE;
+   public static SoundEvent FAVOUR_UP;
    public static LazySoundType VAULT_GEM = new LazySoundType();
 
    public static void registerSounds(Register<SoundEvent> event) {
@@ -104,10 +105,11 @@ public class ModSounds {
       VAULT_CHEST_OMEGA_OPEN = registerSound(event, "vault_chest_omega_open");
       VAULT_CHEST_RARE_OPEN = registerSound(event, "vault_chest_rare_open");
       WITCHSKALL_IDLE = registerSound(event, "witchskall_idle");
+      FAVOUR_UP = registerSound(event, "favour_up");
    }
 
    public static void registerSoundTypes() {
-      VAULT_GEM.initialize(0.75F, 1.0F, VAULT_GEM_BREAK, null, null, VAULT_GEM_HIT, null);
+      VAULT_GEM.initialize(0.25F, 1.0F, VAULT_GEM_BREAK, null, null, VAULT_GEM_HIT, null);
    }
 
    private static SoundEvent registerSound(Register<SoundEvent> event, String soundName) {

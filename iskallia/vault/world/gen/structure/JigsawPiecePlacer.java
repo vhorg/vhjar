@@ -24,6 +24,7 @@ import net.minecraft.world.server.ServerWorld;
 
 public class JigsawPiecePlacer {
    private static final Random rand = new Random();
+   public static int generationPlacementCount = 0;
    private final ServerWorld world;
    private final JigsawPieceResolver resolver;
    private final TemplateManager templateManager;
@@ -65,7 +66,13 @@ public class JigsawPiecePlacer {
       Vector3i center = structureBox.func_215126_f();
       BlockPos generationPos = new BlockPos(center.func_177958_n(), structureBox.field_78895_b, center.func_177952_p());
       JigsawPiece toGenerate = structurePiece.func_214826_b();
-      this.placeJigsawPiece(toGenerate, structurePiece.func_214828_c(), generationPos, structurePiece.func_214809_Y_(), structureBox);
+
+      try {
+         generationPlacementCount++;
+         this.placeJigsawPiece(toGenerate, structurePiece.func_214828_c(), generationPos, structurePiece.func_214809_Y_(), structureBox);
+      } finally {
+         generationPlacementCount--;
+      }
    }
 
    private void placeJigsawPiece(JigsawPiece jigsawPiece, BlockPos seedPos, BlockPos generationPos, Rotation pieceRotation, MutableBoundingBox pieceBox) {
@@ -95,5 +102,9 @@ public class JigsawPiecePlacer {
             this.templateManager, this.world, this.structureManager, this.chunkGenerator, seedPos, generationPos, pieceRotation, pieceBox, rand, false
          );
       }
+   }
+
+   public static boolean isPlacingRoom() {
+      return generationPlacementCount > 0;
    }
 }

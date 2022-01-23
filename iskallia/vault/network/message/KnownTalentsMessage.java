@@ -40,7 +40,7 @@ public class KnownTalentsMessage {
       ListNBT learnedTalents = nbt.func_150295_c("LearnedTalents", 10);
 
       for (int i = 0; i < learnedTalents.size(); i++) {
-         abilities.add(TalentNode.fromNBT(null, learnedTalents.func_150305_b(i), 1));
+         abilities.add(TalentNode.fromNBT(null, learnedTalents.func_150305_b(i), 2));
       }
 
       return new KnownTalentsMessage(abilities);

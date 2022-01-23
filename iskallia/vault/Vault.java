@@ -44,6 +44,7 @@ public class Vault {
    public static final String MOD_ID = "the_vault";
    public static final Logger LOGGER = LogManager.getLogger();
    public static RegistryKey<World> VAULT_KEY = RegistryKey.func_240903_a_(Registry.field_239699_ae_, id("vault"));
+   public static RegistryKey<World> OTHER_SIDE_KEY = RegistryKey.func_240903_a_(Registry.field_239699_ae_, id("the_other_side"));
 
    public Vault() {
       MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, this::onCommandRegister);

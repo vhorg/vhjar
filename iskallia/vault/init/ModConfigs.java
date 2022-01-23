@@ -24,6 +24,7 @@ import iskallia.vault.config.ModBoxConfig;
 import iskallia.vault.config.MysteryBoxConfig;
 import iskallia.vault.config.MysteryEggConfig;
 import iskallia.vault.config.MysteryHostileEggConfig;
+import iskallia.vault.config.OtherSideConfig;
 import iskallia.vault.config.OverLevelEnchantConfig;
 import iskallia.vault.config.PandorasBoxConfig;
 import iskallia.vault.config.PaxelEnhancementConfig;
@@ -44,6 +45,7 @@ import iskallia.vault.config.StatueLootConfig;
 import iskallia.vault.config.StatueRecyclingConfig;
 import iskallia.vault.config.TalentsConfig;
 import iskallia.vault.config.TalentsGUIConfig;
+import iskallia.vault.config.TooltipConfig;
 import iskallia.vault.config.TraderCoreConfig;
 import iskallia.vault.config.UnidentifiedTreasureKeyConfig;
 import iskallia.vault.config.UnknownEggConfig;
@@ -154,6 +156,8 @@ public class ModConfigs {
    public static MysteryEggConfig MYSTERY_EGG;
    public static MysteryHostileEggConfig MYSTERY_HOSTILE_EGG;
    public static VaultRuneConfig VAULT_RUNE;
+   public static OtherSideConfig OTHER_SIDE;
+   public static TooltipConfig TOOLTIP;
 
    public static void registerCompressionConfigs() {
    }
@@ -239,6 +243,8 @@ public class ModConfigs {
       MYSTERY_EGG = new MysteryEggConfig().readConfig();
       MYSTERY_HOSTILE_EGG = new MysteryHostileEggConfig().readConfig();
       VAULT_RUNE = new VaultRuneConfig().readConfig();
+      OTHER_SIDE = new OtherSideConfig().readConfig();
+      TOOLTIP = new TooltipConfig().readConfig();
       Vault.LOGGER.info("Vault Configs are loaded successfully!");
    }
 }

@@ -6,6 +6,7 @@ import iskallia.vault.item.ArtisanScrollItem;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.item.BasicTooltipItem;
+import iskallia.vault.item.BurntCrystalItem;
 import iskallia.vault.item.FlawedRubyItem;
 import iskallia.vault.item.GatedLootableItem;
 import iskallia.vault.item.InfiniteWaterBucketItem;
@@ -715,6 +716,7 @@ public class ModItems {
    public static VaultCharmUpgrade CHARM_UPGRADE_TIER_3 = new VaultCharmUpgrade(
       Vault.id("charm_upgrade_tier_3"), VaultCharmUpgrade.Tier.THREE, new Properties().func_200916_a(VAULT_MOD_GROUP).func_200917_a(1).func_234689_a_()
    );
+   public static BurntCrystalItem BURNT_CRYSTAL = new BurntCrystalItem(VAULT_MOD_GROUP, Vault.id("burnt_crystal"));
 
    public static void registerItems(Register<Item> event) {
       IForgeRegistry<Item> registry = event.getRegistry();
@@ -1040,5 +1042,6 @@ public class ModItems {
       registry.register(CHARM_UPGRADE_TIER_1);
       registry.register(CHARM_UPGRADE_TIER_2);
       registry.register(CHARM_UPGRADE_TIER_3);
+      registry.register(BURNT_CRYSTAL);
    }
 }

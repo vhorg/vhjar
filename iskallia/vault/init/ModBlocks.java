@@ -14,6 +14,7 @@ import iskallia.vault.block.MazeBlock;
 import iskallia.vault.block.ObeliskBlock;
 import iskallia.vault.block.OmegaStatueBlock;
 import iskallia.vault.block.OmegaVariantStatueBlock;
+import iskallia.vault.block.OtherSidePortalBlock;
 import iskallia.vault.block.PuzzleRuneBlock;
 import iskallia.vault.block.RelicStatueBlock;
 import iskallia.vault.block.ScavengerChestBlock;
@@ -50,6 +51,7 @@ import iskallia.vault.block.entity.CryoChamberTileEntity;
 import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
 import iskallia.vault.block.entity.LootStatueTileEntity;
 import iskallia.vault.block.entity.ObeliskTileEntity;
+import iskallia.vault.block.entity.OtherSidePortalTileEntity;
 import iskallia.vault.block.entity.RelicStatueTileEntity;
 import iskallia.vault.block.entity.ScavengerChestTileEntity;
 import iskallia.vault.block.entity.ScavengerTreasureTileEntity;
@@ -118,6 +120,7 @@ import net.minecraftforge.fml.client.registry.ClientRegistry;
 public class ModBlocks {
    public static final VaultPortalBlock VAULT_PORTAL = new VaultPortalBlock();
    public static final FinalVaultPortalBlock FINAL_VAULT_PORTAL = new FinalVaultPortalBlock();
+   public static final OtherSidePortalBlock OTHER_SIDE_PORTAL = new OtherSidePortalBlock();
    public static final VaultAltarBlock VAULT_ALTAR = new VaultAltarBlock();
    public static final VaultOreBlock ALEXANDRITE_ORE = new VaultOreBlock(ModItems.ALEXANDRITE_GEM);
    public static final VaultOreBlock BENITOITE_ORE = new VaultOreBlock(ModItems.BENITOITE_GEM);
@@ -274,6 +277,10 @@ public class ModBlocks {
          VaultPortalTileEntity::new, new Block[]{VAULT_PORTAL}
       )
       .func_206865_a(null);
+   public static final TileEntityType<OtherSidePortalTileEntity> OTHER_SIDE_PORTAL_TILE_ENTITY = Builder.func_223042_a(
+         OtherSidePortalTileEntity::new, new Block[]{OTHER_SIDE_PORTAL}
+      )
+      .func_206865_a(null);
    public static final TileEntityType<VendingMachineTileEntity> VENDING_MACHINE_TILE_ENTITY = Builder.func_223042_a(
          VendingMachineTileEntity::new, new Block[]{VENDING_MACHINE}
       )
@@ -368,6 +375,7 @@ public class ModBlocks {
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, VAULT_PORTAL, Vault.id("vault_portal"));
       registerBlock(event, FINAL_VAULT_PORTAL, Vault.id("final_vault_portal"));
+      registerBlock(event, OTHER_SIDE_PORTAL, Vault.id("other_side_portal"));
       registerBlock(event, VAULT_ALTAR, Vault.id("vault_altar"));
       registerBlock(event, ALEXANDRITE_ORE, Vault.id("ore_alexandrite"));
       registerBlock(event, BENITOITE_ORE, Vault.id("ore_benitoite"));
@@ -459,6 +467,7 @@ public class ModBlocks {
       registerTileEntity(event, VAULT_RUNE_TILE_ENTITY, Vault.id("vault_rune_tile_entity"));
       registerTileEntity(event, VAULT_CRATE_TILE_ENTITY, Vault.id("vault_crate_tile_entity"));
       registerTileEntity(event, VAULT_PORTAL_TILE_ENTITY, Vault.id("vault_portal_tile_entity"));
+      registerTileEntity(event, OTHER_SIDE_PORTAL_TILE_ENTITY, Vault.id("other_side_portal_tile_entity"));
       registerTileEntity(event, VENDING_MACHINE_TILE_ENTITY, Vault.id("vending_machine_tile_entity"));
       registerTileEntity(event, ADVANCED_VENDING_MACHINE_TILE_ENTITY, Vault.id("advanced_vending_machine_tile_entity"));
       registerTileEntity(event, RELIC_STATUE_TILE_ENTITY, Vault.id("relic_statue_tile_entity"));
@@ -509,6 +518,7 @@ public class ModBlocks {
    public static void registerBlockItems(Register<Item> event) {
       registerBlockItem(event, VAULT_PORTAL);
       registerBlockItem(event, FINAL_VAULT_PORTAL);
+      registerBlockItem(event, OTHER_SIDE_PORTAL);
       registerBlockItem(event, VAULT_ALTAR, 1);
       registerBlockItem(event, ALEXANDRITE_ORE);
       registerBlockItem(event, BENITOITE_ORE);

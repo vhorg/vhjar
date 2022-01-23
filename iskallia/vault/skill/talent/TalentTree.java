@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 import net.minecraftforge.fml.network.NetworkDirection;
 
 public class TalentTree {
-   public static final int CURRENT_VERSION = 1;
+   public static final int CURRENT_VERSION = 2;
    private final UUID uuid;
    private final List<TalentNode<?>> nodes = new ArrayList<>();
    private int version;
@@ -158,33 +158,41 @@ public class TalentTree {
       this.nodes.clear();
 
       for (int i = 0; i < list.size(); i++) {
-         TalentNode<?> talent = TalentNode.fromNBT(this.uuid, list.func_150305_b(i), migrateData ? currentVersion : 1);
+         TalentNode<?> talent = TalentNode.fromNBT(this.uuid, list.func_150305_b(i), migrateData ? currentVersion : 2);
          if (talent != null) {
             this.add(null, talent);
          }
       }
 
-      this.version = 1;
+      this.version = 2;
    }
 
    @Nullable
    static TalentNode<?> migrate(@Nullable UUID playerId, String talentName, int talentLevel, int vFrom) {
       TalentGroup<?> group = ModConfigs.TALENTS.getTalent(talentName).orElse(null);
-      if (vFrom >= 1) {
+      if (vFrom >= 2) {
          return group == null ? null : new TalentNode<>(group, talentLevel);
       } else {
          int refundedCost = 0;
          MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-         if (vFrom <= 0) {
-            if (talentName.equalsIgnoreCase("Commander")
-               || talentName.equalsIgnoreCase("Ward")
-               || talentName.equalsIgnoreCase("Barbaric")
-               || talentName.equalsIgnoreCase("Frenzy")
-               || talentName.equalsIgnoreCase("Glass Cannon")) {
-               refundedCost += getRefundAmount(talentLevel, new int[]{3, 5, 6, 7, 9});
-               talentLevel = 0;
-            }
-         } else if (vFrom <= 1) {
+         if (vFrom <= 0
+            && (
+               talentName.equalsIgnoreCase("Commander")
+                  || talentName.equalsIgnoreCase("Ward")
+                  || talentName.equalsIgnoreCase("Barbaric")
+                  || talentName.equalsIgnoreCase("Frenzy")
+                  || talentName.equalsIgnoreCase("Glass Cannon")
+            )) {
+            refundedCost += getRefundAmount(talentLevel, new int[]{3, 5, 6, 7, 9});
+            talentLevel = 0;
+         }
+
+         if (vFrom <= 1 && talentName.equalsIgnoreCase("Soul Hunter")) {
+            refundedCost += getRefundAmount(talentLevel, new int[]{1, 2, 3, 5});
+            talentLevel = 0;
+         }
+
+         if (vFrom <= 2) {
          }
 
          if (playerId != null && srv != null && Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {

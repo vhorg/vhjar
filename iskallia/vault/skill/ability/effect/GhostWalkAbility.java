@@ -37,9 +37,16 @@ public class GhostWalkAbility<C extends GhostWalkConfig> extends AbilityEffect<C
          );
          player.field_70170_p
             .func_184148_a(
-               player, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), ModSounds.GHOST_WALK_SFX, SoundCategory.MASTER, 0.7F, 1.0F
+               player,
+               player.func_226277_ct_(),
+               player.func_226278_cu_(),
+               player.func_226281_cx_(),
+               ModSounds.GHOST_WALK_SFX,
+               SoundCategory.PLAYERS,
+               0.2F,
+               1.0F
             );
-         player.func_213823_a(ModSounds.GHOST_WALK_SFX, SoundCategory.MASTER, 0.7F, 1.0F);
+         player.func_213823_a(ModSounds.GHOST_WALK_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F);
          player.func_195064_c(newEffect);
          return false;
       }

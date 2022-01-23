@@ -236,57 +236,65 @@ public class LootStatueTileEntity extends SkinnableTileEntity implements ITickab
    }
 
    public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-      this.setStatueType(StatueType.values()[nbt.func_74762_e("StatueType")]);
-      if (this.statueType == StatueType.OMEGA) {
-         if (!nbt.func_74767_n("Master")) {
-            this.master = false;
-            this.masterPos = NBTUtil.func_186861_c(nbt.func_74775_l("MasterPos"));
-            super.func_230337_a_(state, nbt);
-            return;
+      if (!nbt.func_150297_b("StatueType", 3)) {
+         throw new IllegalStateException("Invalid State NBT " + nbt.toString());
+      } else {
+         this.setStatueType(StatueType.values()[nbt.func_74762_e("StatueType")]);
+         if (this.statueType == StatueType.OMEGA) {
+            if (!nbt.func_74767_n("Master")) {
+               this.master = false;
+               this.masterPos = NBTUtil.func_186861_c(nbt.func_74775_l("MasterPos"));
+               super.func_230337_a_(state, nbt);
+               return;
+            }
+
+            this.master = true;
+            this.masterPos = this.func_174877_v();
          }
 
-         this.master = true;
-         this.masterPos = this.func_174877_v();
-      }
+         String nickname = nbt.func_74779_i("PlayerNickname");
+         this.skin.updateSkin(nickname);
+         this.lootItem = ItemStack.func_199557_a(nbt.func_74775_l("LootItem"));
+         this.setCurrentTick(nbt.func_74762_e("CurrentTick"));
+         this.chipCount = nbt.func_74762_e("ChipCount");
+         this.itemsRemaining = nbt.func_74762_e("ItemsRemaining");
+         this.totalItems = nbt.func_74762_e("TotalItems");
+         if (nbt.func_74764_b("playerScale")) {
+            this.playerScale = nbt.func_74760_g("playerScale");
+         } else {
+            this.playerScale = MathUtilities.randomFloat(2.0F, 4.0F);
+         }
 
-      String nickname = nbt.func_74779_i("PlayerNickname");
-      this.skin.updateSkin(nickname);
-      this.lootItem = ItemStack.func_199557_a(nbt.func_74775_l("LootItem"));
-      this.setCurrentTick(nbt.func_74762_e("CurrentTick"));
-      this.chipCount = nbt.func_74762_e("ChipCount");
-      this.itemsRemaining = nbt.func_74762_e("ItemsRemaining");
-      this.totalItems = nbt.func_74762_e("TotalItems");
-      if (nbt.func_74764_b("playerScale")) {
-         this.playerScale = nbt.func_74760_g("playerScale");
-      } else {
-         this.playerScale = MathUtilities.randomFloat(2.0F, 4.0F);
+         super.func_230337_a_(state, nbt);
       }
-
-      super.func_230337_a_(state, nbt);
    }
 
    public CompoundNBT func_189517_E_() {
       CompoundNBT nbt = super.func_189517_E_();
-      nbt.func_74768_a("StatueType", this.getStatueType().ordinal());
-      if (this.statueType == StatueType.OMEGA) {
-         if (!this.master) {
-            nbt.func_74757_a("Master", false);
-            nbt.func_218657_a("MasterPos", NBTUtil.func_186859_a(this.masterPos));
-            return nbt;
+      if (this.getStatueType() == null) {
+         return nbt;
+      } else {
+         nbt.func_74768_a("StatueType", this.getStatueType().ordinal());
+         if (this.statueType == StatueType.OMEGA) {
+            if (!this.master) {
+               nbt.func_74757_a("Master", false);
+               nbt.func_218657_a("MasterPos", NBTUtil.func_186859_a(this.masterPos));
+               return nbt;
+            }
+
+            nbt.func_74757_a("Master", true);
+            nbt.func_218657_a("MasterPos", NBTUtil.func_186859_a(this.func_174877_v()));
          }
 
-         nbt.func_74757_a("Master", true);
-         nbt.func_218657_a("MasterPos", NBTUtil.func_186859_a(this.func_174877_v()));
+         String nickname = this.skin.getLatestNickname();
+         nbt.func_74778_a("PlayerNickname", nickname == null ? "" : nickname);
+         nbt.func_74768_a("CurrentTick", this.getCurrentTick());
+         nbt.func_218657_a("LootItem", this.getLootItem().serializeNBT());
+         nbt.func_74768_a("ChipCount", this.chipCount);
+         nbt.func_74768_a("ItemsRemaining", this.itemsRemaining);
+         nbt.func_74768_a("TotalItems", this.totalItems);
+         nbt.func_74776_a("playerScale", this.playerScale);
+         return nbt;
       }
-
-      String nickname = this.skin.getLatestNickname();
-      nbt.func_74778_a("PlayerNickname", nickname == null ? "" : nickname);
-      nbt.func_74768_a("CurrentTick", this.getCurrentTick());
-      nbt.func_218657_a("LootItem", this.getLootItem().serializeNBT());
-      nbt.func_74768_a("ChipCount", this.chipCount);
-      nbt.func_74768_a("ItemsRemaining", this.itemsRemaining);
-      nbt.func_74768_a("TotalItems", this.totalItems);
-      nbt.func_74776_a("playerScale", this.playerScale);
-      return nbt;
    }
 }

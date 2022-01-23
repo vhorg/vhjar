@@ -1,0 +1,146 @@
+package iskallia.vault.block;
+
+import iskallia.vault.Vault;
+import iskallia.vault.block.entity.OtherSidePortalTileEntity;
+import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
+import iskallia.vault.item.BurntCrystalItem;
+import iskallia.vault.item.OtherSideData;
+import iskallia.vault.world.vault.VaultUtils;
+import java.util.Arrays;
+import java.util.Random;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.NetherPortalBlock;
+import net.minecraft.block.AbstractBlock.IPositionPredicate;
+import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.state.StateContainer.Builder;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.Direction.Axis;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.IBooleanFunction;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+public class OtherSidePortalBlock extends NetherPortalBlock {
+   public static final IPositionPredicate FRAME = (state, reader, p) -> Arrays.stream(ModConfigs.OTHER_SIDE.getValidFrameBlocks())
+      .anyMatch(b -> b == state.func_177230_c());
+
+   public OtherSidePortalBlock() {
+      super(Properties.func_200950_a(Blocks.field_150427_aO));
+      this.func_180632_j((BlockState)((BlockState)this.field_176227_L.func_177621_b()).func_206870_a(field_176550_a, Axis.X));
+   }
+
+   protected void func_206840_a(Builder<Block, BlockState> builder) {
+      super.func_206840_a(builder);
+   }
+
+   public void func_225542_b_(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+   }
+
+   public void func_196262_a(BlockState state, World world, BlockPos pos, Entity entity) {
+      if (!world.field_72995_K && entity instanceof PlayerEntity) {
+         if (!entity.func_184218_aH() && !entity.func_184207_aI() && entity.func_184222_aU()) {
+            VoxelShape playerVoxel = VoxelShapes.func_197881_a(
+               entity.func_174813_aQ().func_72317_d(-pos.func_177958_n(), -pos.func_177956_o(), -pos.func_177952_p())
+            );
+            if (VoxelShapes.func_197879_c(playerVoxel, state.func_196954_c(world, pos), IBooleanFunction.field_223238_i_)) {
+               VaultPortalSize current = new VaultPortalSize(world, pos, (Axis)state.func_177229_b(field_176550_a), FRAME);
+               if (current.validatePortal()) {
+                  RegistryKey<World> destinationKey = world.func_234923_W_() == Vault.OTHER_SIDE_KEY ? World.field_234918_g_ : Vault.OTHER_SIDE_KEY;
+                  ServerWorld destination = ((ServerWorld)world).func_73046_m().func_71218_a(destinationKey);
+                  if (destination != null) {
+                     ServerPlayerEntity player = (ServerPlayerEntity)entity;
+                     if (player.func_242280_ah()) {
+                        player.func_242279_ag();
+                     } else {
+                        TileEntity te = world.func_175625_s(pos);
+                        OtherSidePortalTileEntity portal = te instanceof OtherSidePortalTileEntity ? (OtherSidePortalTileEntity)te : null;
+                        if (portal != null) {
+                           OtherSideData data = portal.getData();
+                           if (data != null) {
+                              BlockPos targetPos = data.getLinkedPos();
+                              RegistryKey<World> targetDim = data.getLinkedDim();
+                              if (targetPos != null && targetDim != null) {
+                                 ServerWorld target = world.func_73046_m().func_71218_a(targetDim);
+                                 if (target != null) {
+                                    if (target.func_180495_p(targetPos).func_177230_c() != ModBlocks.OTHER_SIDE_PORTAL) {
+                                       targetPos = BurntCrystalItem.forcePlace((ServerWorld)world, current.getBottomLeft(), target, current);
+                                       data.setLinkedPos(targetPos);
+                                    }
+
+                                    VaultUtils.moveTo(
+                                       target,
+                                       player,
+                                       new Vector3d(targetPos.func_177958_n() + 0.2, targetPos.func_177956_o(), targetPos.func_177952_p() + 0.2)
+                                    );
+                                    player.func_242279_ag();
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   public BlockState func_196271_a(BlockState state, Direction facing, BlockState facingState, IWorld iworld, BlockPos currentPos, BlockPos facingPos) {
+      if (!(iworld instanceof ServerWorld)) {
+         return state;
+      } else {
+         Axis facingAxis = facing.func_176740_k();
+         Axis portalAxis = (Axis)state.func_177229_b(field_176550_a);
+         boolean flag = portalAxis != facingAxis && facingAxis.func_176722_c();
+         return !flag && !facingState.func_203425_a(this) && !new VaultPortalSize(iworld, currentPos, portalAxis, FRAME).validatePortal()
+            ? Blocks.field_150350_a.func_176223_P()
+            : super.func_196271_a(state, facing, facingState, iworld, currentPos, facingPos);
+      }
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   public void func_180655_c(BlockState state, World world, BlockPos pos, Random rand) {
+      for (int i = 0; i < 4; i++) {
+         double d0 = pos.func_177958_n() + rand.nextDouble();
+         double d1 = pos.func_177956_o() + rand.nextDouble();
+         double d2 = pos.func_177952_p() + rand.nextDouble();
+         double d3 = (rand.nextFloat() - 0.5) * 0.5;
+         double d4 = (rand.nextFloat() - 0.5) * 0.5;
+         double d5 = (rand.nextFloat() - 0.5) * 0.5;
+         int j = rand.nextInt(2) * 2 - 1;
+         if (!world.func_180495_p(pos.func_177976_e()).func_203425_a(this) && !world.func_180495_p(pos.func_177974_f()).func_203425_a(this)) {
+            d0 = pos.func_177958_n() + 0.5 + 0.25 * j;
+            d3 = rand.nextFloat() * 2.0F * j;
+         } else {
+            d2 = pos.func_177952_p() + 0.5 + 0.25 * j;
+            d5 = rand.nextFloat() * 2.0F * j;
+         }
+
+         world.func_195594_a(ParticleTypes.field_239820_at_, d0, d1, d2, d3, d4, d5);
+      }
+   }
+
+   public boolean hasTileEntity(BlockState state) {
+      return true;
+   }
+
+   public TileEntity createTileEntity(BlockState state, IBlockReader world) {
+      return ModBlocks.OTHER_SIDE_PORTAL_TILE_ENTITY.func_200968_a();
+   }
+}

@@ -4,7 +4,7 @@
       "rules": [
         {
           "output_state": {
-            "Name": "minecraft:infested_stone_bricks"
+            "Name": "minecraft:stone_bricks"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
@@ -43,7 +43,7 @@
         },
         {
           "output_state": {
-            "Name": "minecraft:infested_stone"
+            "Name": "minecraft:stone"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
@@ -56,7 +56,7 @@
         },
         {
           "output_state": {
-            "Name": "minecraft:infested_chiseled_stone_bricks"
+            "Name": "minecraft:chiseled_stone_bricks"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",

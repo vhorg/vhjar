@@ -59,6 +59,11 @@
       "render": "Lnet/minecraft/client/renderer/entity/LivingRenderer;func_225623_a_(Lnet/minecraft/entity/LivingEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V",
       "Lcom/mojang/blaze3d/matrix/MatrixStack;push()V": "Lcom/mojang/blaze3d/matrix/MatrixStack;func_227860_a_()V"
     },
+    "iskallia/vault/mixin/MixinFallingBlock": {
+      "Lnet/minecraft/world/ITickList;scheduleTick(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V": "Lnet/minecraft/world/ITickList;func_205360_a(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V",
+      "updatePostPlacement": "Lnet/minecraft/block/FallingBlock;func_196271_a(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/IWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;",
+      "onBlockAdded": "Lnet/minecraft/block/FallingBlock;func_220082_b(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Z)V"
+    },
     "iskallia/vault/mixin/MixinEnchantedBookItem": {
       "addInformation": "Lnet/minecraft/item/EnchantedBookItem;func_77624_a(Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Ljava/util/List;Lnet/minecraft/client/util/ITooltipFlag;)V"
     },
@@ -198,6 +203,11 @@
       "iskallia/vault/mixin/MixinLivingRenderer": {
         "render": "Lnet/minecraft/client/renderer/entity/LivingRenderer;func_225623_a_(Lnet/minecraft/entity/LivingEntity;FFLcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V",
         "Lcom/mojang/blaze3d/matrix/MatrixStack;push()V": "Lcom/mojang/blaze3d/matrix/MatrixStack;func_227860_a_()V"
+      },
+      "iskallia/vault/mixin/MixinFallingBlock": {
+        "Lnet/minecraft/world/ITickList;scheduleTick(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V": "Lnet/minecraft/world/ITickList;func_205360_a(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V",
+        "updatePostPlacement": "Lnet/minecraft/block/FallingBlock;func_196271_a(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/IWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;",
+        "onBlockAdded": "Lnet/minecraft/block/FallingBlock;func_220082_b(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Z)V"
       },
       "iskallia/vault/mixin/MixinEnchantedBookItem": {
         "addInformation": "Lnet/minecraft/item/EnchantedBookItem;func_77624_a(Lnet/minecraft/item/ItemStack;Lnet/minecraft/world/World;Ljava/util/List;Lnet/minecraft/client/util/ITooltipFlag;)V"

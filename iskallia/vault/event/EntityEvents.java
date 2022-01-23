@@ -354,7 +354,7 @@ public class EntityEvents {
                         ServerPlayerEntity killer = (ServerPlayerEntity)killerEntity;
                         if (MiscUtils.inventoryContains(killer.field_71071_by, stack -> stack.func_77973_b() instanceof ItemShardPouch)
                            && vault.getActiveObjectives().stream().noneMatch(objective -> objective.shouldPauseTimer(sWorld.func_73046_m(), vault))) {
-                           addedDrops |= addShardDrops(world, entity, killer, event.getDrops());
+                           addedDrops |= addShardDrops(world, entity, killer, vault, event.getDrops());
                         }
                      }
 
@@ -419,29 +419,53 @@ public class EntityEvents {
       }
    }
 
-   private static boolean addShardDrops(World world, Entity killed, ServerPlayerEntity killer, Collection<ItemEntity> drops) {
-      int shardCount = ModConfigs.SOUL_SHARD.getRandomShards(killed.func_200600_R());
-      if (shardCount <= 0) {
+   private static boolean addShardDrops(World world, Entity killed, ServerPlayerEntity killer, VaultRaid vault, Collection<ItemEntity> drops) {
+      List<TalentNode<SoulShardTalent>> shardNodes = PlayerTalentsData.get(killer.func_71121_q()).getTalents(killer).getLearnedNodes(SoulShardTalent.class);
+      if (shardNodes.isEmpty()) {
          return false;
       } else {
-         float additionalSoulShardChance = 0.0F;
-
-         for (TalentNode<SoulShardTalent> node : PlayerTalentsData.get(killer.func_71121_q()).getTalents(killer).getLearnedNodes(SoulShardTalent.class)) {
-            additionalSoulShardChance += node.getTalent().getAdditionalSoulShardChance();
+         for (TalentNode<SoulShardTalent> node : shardNodes) {
+            if (!node.isLearned()) {
+               return false;
+            }
          }
 
-         float shShardCount = shardCount * (1.0F + additionalSoulShardChance);
-         shardCount = MathHelper.func_76141_d(shShardCount);
-         float decimal = shShardCount - shardCount;
-         if (rand.nextFloat() < decimal) {
-            shardCount++;
+         int shardCount = ModConfigs.SOUL_SHARD.getRandomShards(killed.func_200600_R());
+
+         for (VaultAttributeInfluence influence : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+            if (influence.getType() == VaultAttributeInfluence.Type.SOUL_SHARD_DROPS && !influence.isMultiplicative()) {
+               shardCount = (int)(shardCount + influence.getValue());
+            }
          }
 
-         ItemStack shards = new ItemStack(ModItems.SOUL_SHARD, shardCount);
-         ItemEntity itemEntity = new ItemEntity(world, killed.func_226277_ct_(), killed.func_226278_cu_(), killed.func_226281_cx_(), shards);
-         itemEntity.func_174869_p();
-         drops.add(itemEntity);
-         return true;
+         if (shardCount <= 0) {
+            return false;
+         } else {
+            float additionalSoulShardChance = 0.0F;
+
+            for (TalentNode<SoulShardTalent> nodex : shardNodes) {
+               additionalSoulShardChance += nodex.getTalent().getAdditionalSoulShardChance();
+            }
+
+            float shShardCount = shardCount * (1.0F + additionalSoulShardChance);
+            shardCount = MathHelper.func_76141_d(shShardCount);
+            float decimal = shShardCount - shardCount;
+            if (rand.nextFloat() < decimal) {
+               shardCount++;
+            }
+
+            for (VaultAttributeInfluence influencex : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
+               if (influencex.getType() == VaultAttributeInfluence.Type.SOUL_SHARD_DROPS && influencex.isMultiplicative()) {
+                  shardCount = (int)(shardCount * influencex.getValue());
+               }
+            }
+
+            ItemStack shards = new ItemStack(ModItems.SOUL_SHARD, shardCount);
+            ItemEntity itemEntity = new ItemEntity(world, killed.func_226277_ct_(), killed.func_226278_cu_(), killed.func_226281_cx_(), shards);
+            itemEntity.func_174869_p();
+            drops.add(itemEntity);
+            return true;
+         }
       }
    }
 

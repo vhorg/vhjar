@@ -1,5 +1,6 @@
 package iskallia.vault.item;
 
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.vault.gen.VaultRoomNames;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -36,6 +37,20 @@ public class VaultRuneItem extends Item {
          tooltip.add(StringTextComponent.field_240750_d_);
          tooltip.add(new StringTextComponent("Combine with a vault crystal to add").func_240699_a_(TextFormatting.GRAY));
          tooltip.add(new StringTextComponent("a room to the vault: ").func_240699_a_(TextFormatting.GRAY).func_230529_a_(displayName));
+         if (ModConfigs.VAULT_RUNE != null) {
+            ModConfigs.VAULT_RUNE
+               .getMinimumLevel(this)
+               .ifPresent(
+                  minLevel -> {
+                     tooltip.add(StringTextComponent.field_240750_d_);
+                     tooltip.add(
+                        new StringTextComponent("Only usable after level ")
+                           .func_240699_a_(TextFormatting.GRAY)
+                           .func_230529_a_(new StringTextComponent(String.valueOf(minLevel)).func_240699_a_(TextFormatting.AQUA))
+                     );
+                  }
+               );
+         }
       }
    }
 }

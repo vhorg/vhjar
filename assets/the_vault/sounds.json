@@ -325,5 +325,11 @@
     "sounds": [
       "the_vault:chest/vault_chest_rare_open"
     ]
+  },
+  "favour_up": {
+    "category": "player",
+    "sounds": [
+      "the_vault:favour_up"
+    ]
   }
 }

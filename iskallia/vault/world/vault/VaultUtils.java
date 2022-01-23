@@ -78,6 +78,28 @@ public class VaultUtils {
       }
    }
 
+   public static void moveTo(ServerWorld world, Entity entity, final Vector3d pos) {
+      RegistryKey<World> targetDim = world.func_234923_W_();
+      RegistryKey<World> sourceDim = entity.func_130014_f_().func_234923_W_();
+      entity.changeDimension(
+         world,
+         new ITeleporter() {
+            public Entity placeEntity(Entity entity, ServerWorld currentWorld, ServerWorld destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+               Entity repositionedEntity = repositionEntity.apply(false);
+               repositionedEntity.func_70634_a(pos.func_82615_a(), pos.func_82617_b(), pos.func_82616_c());
+               if (repositionedEntity instanceof ServerPlayerEntity) {
+                  ((ServerPlayerEntity)repositionedEntity)
+                     .func_71121_q()
+                     .func_73046_m()
+                     .func_212871_a_(new TickDelayedTask(20, () -> ((ServerPlayerEntity)repositionedEntity).func_195068_e(0)));
+               }
+
+               return repositionedEntity;
+            }
+         }
+      );
+   }
+
    public static void moveToWorldSpawn(ServerWorld world, ServerPlayerEntity player) {
       BlockPos blockpos = world.func_241135_u_();
       if (world.func_230315_m_().func_218272_d() && world.func_73046_m().func_240793_aU_().func_76077_q() != GameType.ADVENTURE) {

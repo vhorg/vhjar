@@ -2,6 +2,12 @@ package iskallia.vault.util;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import iskallia.vault.client.ClientTalentData;
+import iskallia.vault.skill.talent.TalentGroup;
+import iskallia.vault.skill.talent.TalentNode;
+import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.talent.type.PlayerTalent;
+import iskallia.vault.world.data.PlayerTalentsData;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D.Float;
@@ -70,6 +76,15 @@ public class MiscUtils {
 
    public static Float getMidpoint(Rectangle r) {
       return new Float(r.x + r.width / 2.0F, r.y + r.height / 2.0F);
+   }
+
+   public static <T extends PlayerTalent> Optional<TalentNode<T>> getTalent(PlayerEntity player, TalentGroup<T> talentGroup) {
+      if (player instanceof ServerPlayerEntity) {
+         TalentTree talents = PlayerTalentsData.get(((ServerPlayerEntity)player).func_71121_q()).getTalents(player);
+         return Optional.of(talents.getNodeOf(talentGroup));
+      } else {
+         return Optional.ofNullable(ClientTalentData.getLearnedTalentNode(talentGroup));
+      }
    }
 
    public static boolean hasEmptySlot(IInventory inventory) {

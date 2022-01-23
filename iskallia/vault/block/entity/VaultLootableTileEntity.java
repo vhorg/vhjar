@@ -47,7 +47,7 @@ public class VaultLootableTileEntity extends TileEntity implements ITickableTile
                .getBase(VaultRaid.HOST)
                .map(hostUUID -> this.type.generateBlock(world, this.func_174877_v(), world.func_201674_k(), hostUUID))
                .orElse(new VaultLootableBlock.GeneratedBlockState(Blocks.field_150350_a.func_176223_P()));
-            if (world.func_175656_a(this.func_174877_v(), placingState.getState())) {
+            if (world.func_180501_a(this.func_174877_v(), placingState.getState(), 19)) {
                placingState.getPostProcessor().accept(world, this.func_174877_v());
             }
          }

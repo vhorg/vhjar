@@ -2,6 +2,7 @@ package iskallia.vault.container;
 
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.util.MathUtilities;
 import iskallia.vault.world.data.VaultCharmData;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -17,6 +18,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.IItemProvider;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class VaultCharmControllerContainer extends Container {
@@ -129,6 +132,8 @@ public class VaultCharmControllerContainer extends Container {
             return ItemStack.field_190927_a;
          } else if (this.whitelist.size() < this.inventorySize && !this.whitelist.contains(stack.func_77973_b().getRegistryName())) {
             this.whitelist.add(stack.func_77973_b().getRegistryName());
+            float pitch = MathUtilities.randomFloat(0.9F, 1.1F);
+            playerIn.field_70170_p.func_184133_a(null, playerIn.func_233580_cy_(), SoundEvents.field_232748_iQ_, SoundCategory.PLAYERS, 0.7F, pitch);
             this.updateVisibleItems();
             return ItemStack.field_190927_a;
          } else {
@@ -199,6 +204,14 @@ public class VaultCharmControllerContainer extends Container {
 
    public int getInventorySize() {
       return this.inventorySize;
+   }
+
+   public List<ResourceLocation> getWhitelist() {
+      return this.whitelist;
+   }
+
+   public int getCurrentAmountWhitelisted() {
+      return this.whitelist.size();
    }
 
    public class VaultCharmControllerSlot extends Slot {

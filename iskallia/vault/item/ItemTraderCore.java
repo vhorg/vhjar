@@ -151,12 +151,19 @@ public class ItemTraderCore extends Item {
       super.func_77663_a(stack, world, entity, itemSlot, isSelected);
       if (entity instanceof ServerPlayerEntity) {
          ServerPlayerEntity sPlayer = (ServerPlayerEntity)entity;
-         if (!stack.func_196082_o().func_150297_b("core", 10)) {
+         CompoundNBT nbt = stack.func_196082_o();
+         if (!nbt.func_150297_b("core", 10)) {
             PlayerVaultStats stats = PlayerVaultStatsData.get(sPlayer.func_71121_q()).getVaultStats(sPlayer);
             ItemStack generated = generate(NameProviderPublic.getRandomName(), stats.getVaultLevel());
             if (!generated.func_190926_b()) {
                stack.func_77982_d(generated.func_77978_p());
             }
+         }
+
+         if (nbt.func_150297_b("rename_trader", 8)) {
+            String rename = nbt.func_74779_i("rename_trader");
+            stack.func_196082_o().func_74775_l("core").func_74778_a("NAME", rename);
+            stack.func_196082_o().func_82580_o("rename_trader");
          }
       }
    }
