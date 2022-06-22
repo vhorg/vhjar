@@ -2,6 +2,7 @@ package iskallia.vault.init;
 
 import iskallia.vault.client.particles.AltarFlameParticle;
 import iskallia.vault.client.particles.DepthFireworkParticle;
+import iskallia.vault.client.particles.EyesoreAppearanceParticle;
 import iskallia.vault.client.particles.RaidCubeParticle;
 import iskallia.vault.client.particles.StabilizerCubeParticle;
 import net.minecraft.client.Minecraft;
@@ -30,6 +31,7 @@ public class ModParticles {
    public static final RegistryObject<BasicParticleType> DEPTH_FIREWORK = REGISTRY.register("depth_ignoring_firework", () -> new BasicParticleType(true));
    public static final RegistryObject<BasicParticleType> STABILIZER_CUBE = REGISTRY.register("stabilizer_cube", () -> new BasicParticleType(true));
    public static final RegistryObject<BasicParticleType> RAID_EFFECT_CUBE = REGISTRY.register("raid_cube", () -> new BasicParticleType(true));
+   public static final RegistryObject<BasicParticleType> EYESORE_APPEARANCE = REGISTRY.register("eyesore_appearance", () -> new BasicParticleType(true));
 
    @SubscribeEvent(
       priority = EventPriority.LOWEST
@@ -43,5 +45,6 @@ public class ModParticles {
       particleManager.func_215234_a((ParticleType)DEPTH_FIREWORK.get(), DepthFireworkParticle.Factory::new);
       particleManager.func_215234_a((ParticleType)STABILIZER_CUBE.get(), StabilizerCubeParticle.Factory::new);
       particleManager.func_215234_a((ParticleType)RAID_EFFECT_CUBE.get(), RaidCubeParticle.Factory::new);
+      particleManager.func_215234_a((ParticleType)EYESORE_APPEARANCE.get(), EyesoreAppearanceParticle.Factory::new);
    }
 }

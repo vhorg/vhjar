@@ -60,6 +60,7 @@ public class DebugCommand extends Command {
                );
          }
 
+         VaultRaidData.get(world).remove(vault.getProperties().getValue(VaultRaid.IDENTIFIER));
          IFormattableTextComponent playerName = player.func_145748_c_().func_230532_e_();
          playerName.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(9974168)));
          StringTextComponent suffix = new StringTextComponent(" bailed.");

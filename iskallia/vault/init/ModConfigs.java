@@ -1,5 +1,6 @@
 package iskallia.vault.init;
 
+import iskallia.vault.SandEventConfig;
 import iskallia.vault.Vault;
 import iskallia.vault.config.AbilitiesConfig;
 import iskallia.vault.config.AbilitiesGUIConfig;
@@ -12,6 +13,10 @@ import iskallia.vault.config.EtchingConfig;
 import iskallia.vault.config.EternalAttributeConfig;
 import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.config.EternalConfig;
+import iskallia.vault.config.EyesoreConfig;
+import iskallia.vault.config.FinalArchitectEventConfig;
+import iskallia.vault.config.FinalRaidConfig;
+import iskallia.vault.config.FinalRaidModifierConfig;
 import iskallia.vault.config.FlawedRubyConfig;
 import iskallia.vault.config.GlobalTraderConfig;
 import iskallia.vault.config.KeyPressRecipesConfig;
@@ -47,6 +52,7 @@ import iskallia.vault.config.TalentsConfig;
 import iskallia.vault.config.TalentsGUIConfig;
 import iskallia.vault.config.TooltipConfig;
 import iskallia.vault.config.TraderCoreConfig;
+import iskallia.vault.config.TreasureHuntConfig;
 import iskallia.vault.config.UnidentifiedTreasureKeyConfig;
 import iskallia.vault.config.UnknownEggConfig;
 import iskallia.vault.config.VaultAltarConfig;
@@ -130,8 +136,10 @@ public class ModConfigs {
    public static VaultUtilitiesConfig VAULT_UTILITIES;
    public static VaultCrystalCatalystConfig VAULT_CRYSTAL_CATALYST;
    public static PlayerScalingConfig PLAYER_SCALING;
+   public static SandEventConfig SAND_EVENT;
    public static PaxelEnhancementConfig PAXEL_ENHANCEMENTS;
    public static ScavengerHuntConfig SCAVENGER_HUNT;
+   public static TreasureHuntConfig TREASURE_HUNT;
    public static DurabilityConfig DURBILITY;
    public static ModBoxConfig MOD_BOX;
    public static ArchitectEventConfig ARCHITECT_EVENT;
@@ -149,15 +157,19 @@ public class ModConfigs {
    public static VaultInhibitorConfig VAULT_INHIBITOR;
    public static FlawedRubyConfig FLAWED_RUBY;
    public static EtchingConfig ETCHING;
-   public static RaidConfig RAID_CONFIG;
+   public static RaidConfig RAID;
    public static RaidModifierConfig RAID_MODIFIER_CONFIG;
    public static RaidEventConfig RAID_EVENT_CONFIG;
+   public static FinalRaidModifierConfig FINAL_RAID_MODIFIER_CONFIG;
    public static VaultCharmConfig VAULT_CHARM;
    public static MysteryEggConfig MYSTERY_EGG;
    public static MysteryHostileEggConfig MYSTERY_HOSTILE_EGG;
    public static VaultRuneConfig VAULT_RUNE;
    public static OtherSideConfig OTHER_SIDE;
    public static TooltipConfig TOOLTIP;
+   public static EyesoreConfig EYESORE;
+   public static FinalRaidConfig FINAL_RAID;
+   public static FinalArchitectEventConfig FINAL_ARCHITECT;
 
    public static void registerCompressionConfigs() {
    }
@@ -217,8 +229,10 @@ public class ModConfigs {
       VAULT_UTILITIES = new VaultUtilitiesConfig().readConfig();
       VAULT_CRYSTAL_CATALYST = new VaultCrystalCatalystConfig().readConfig();
       PLAYER_SCALING = new PlayerScalingConfig().readConfig();
+      SAND_EVENT = new SandEventConfig().readConfig();
       PAXEL_ENHANCEMENTS = new PaxelEnhancementConfig().readConfig();
       SCAVENGER_HUNT = new ScavengerHuntConfig().readConfig();
+      TREASURE_HUNT = new TreasureHuntConfig().readConfig();
       DURBILITY = new DurabilityConfig().readConfig();
       MOD_BOX = new ModBoxConfig().readConfig();
       ARCHITECT_EVENT = new ArchitectEventConfig().readConfig();
@@ -232,19 +246,23 @@ public class ModConfigs {
       VAULT_GEAR_UTILITIES = new VaultGearUtilitiesConfig().readConfig();
       VAULT_GEAR_CRAFTING_SCALING = new VaultGearCraftingScalingConfig().readConfig();
       DIFFICULTY_DESCRIPTION = new DifficultyDescriptionConfig().readConfig();
-      SCALING_CHEST_REWARDS = new VaultScalingChestConfig().readConfig();
       VAULT_INHIBITOR = new VaultInhibitorConfig().readConfig();
       FLAWED_RUBY = new FlawedRubyConfig().readConfig();
       ETCHING = new EtchingConfig().readConfig();
-      RAID_CONFIG = new RaidConfig().readConfig();
+      RAID = new RaidConfig().readConfig();
       RAID_MODIFIER_CONFIG = new RaidModifierConfig().readConfig();
       RAID_EVENT_CONFIG = new RaidEventConfig().readConfig();
+      FINAL_RAID_MODIFIER_CONFIG = new FinalRaidModifierConfig().readConfig();
       VAULT_CHARM = new VaultCharmConfig().readConfig();
       MYSTERY_EGG = new MysteryEggConfig().readConfig();
       MYSTERY_HOSTILE_EGG = new MysteryHostileEggConfig().readConfig();
       VAULT_RUNE = new VaultRuneConfig().readConfig();
       OTHER_SIDE = new OtherSideConfig().readConfig();
       TOOLTIP = new TooltipConfig().readConfig();
+      EYESORE = new EyesoreConfig().readConfig();
+      FINAL_RAID = new FinalRaidConfig().readConfig();
+      FINAL_ARCHITECT = new FinalArchitectEventConfig().readConfig();
+      SCALING_CHEST_REWARDS = new VaultScalingChestConfig().readConfig();
       Vault.LOGGER.info("Vault Configs are loaded successfully!");
    }
 }

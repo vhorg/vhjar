@@ -1,10 +1,14 @@
 package iskallia.vault.world.vault.gen.piece;
 
 import iskallia.vault.Vault;
+import iskallia.vault.nbt.VListNBT;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.vault.VaultRaid;
+import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
@@ -17,6 +21,7 @@ public class VaultRoom extends VaultPiece {
    public static final ResourceLocation ID = Vault.id("room");
    private boolean cakeEaten = false;
    private BlockPos cakePos = null;
+   private VListNBT<UUID, StringNBT> sandIds = VListNBT.ofUUID();
 
    protected VaultRoom(ResourceLocation id) {
       super(id);
@@ -50,13 +55,17 @@ public class VaultRoom extends VaultPiece {
       this.cakePos = cakePos;
    }
 
+   public List<UUID> getSandId() {
+      return this.sandIds;
+   }
+
+   public void addSandId(UUID sandId) {
+      this.sandIds.add(sandId);
+   }
+
    @Nullable
    public BlockPos getCakePos() {
       return this.cakePos;
-   }
-
-   public Vector3i getCenter() {
-      return this.getBoundingBox().func_215126_f();
    }
 
    public BlockPos getTunnelConnectorPos(Direction dir) {
@@ -73,6 +82,7 @@ public class VaultRoom extends VaultPiece {
          tag.func_218657_a("cakePos", NBTHelper.serializeBlockPos(this.cakePos));
       }
 
+      tag.func_218657_a("sandIds", this.sandIds.serializeNBT());
       return tag;
    }
 
@@ -83,5 +93,7 @@ public class VaultRoom extends VaultPiece {
       if (tag.func_150297_b("cakePos", 10)) {
          this.cakePos = NBTHelper.deserializeBlockPos(tag.func_74775_l("cakePos"));
       }
+
+      this.sandIds.deserializeNBT(tag.func_150295_c("sandIds", 8));
    }
 }

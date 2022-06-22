@@ -119,7 +119,7 @@ public class SummonAndKillBossObjective extends VaultObjective {
 
    @Nonnull
    @Override
-   public BlockState getObjectiveRelevantBlock() {
+   public BlockState getObjectiveRelevantBlock(VaultRaid vault, ServerWorld world, BlockPos pos) {
       return ModBlocks.OBELISK.func_176223_P();
    }
 

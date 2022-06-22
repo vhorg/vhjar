@@ -7,10 +7,13 @@ import net.minecraft.block.SoundType;
 import net.minecraft.block.AbstractBlock.Properties;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.properties.DoorHingeSide;
 import net.minecraft.state.properties.DoubleBlockHalf;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
@@ -31,6 +34,9 @@ public class UnknownVaultDoorBlock extends DoorBlock {
                .func_206870_a(field_176522_N, Boolean.FALSE))
             .func_206870_a(field_176523_O, DoubleBlockHalf.LOWER)
       );
+   }
+
+   public void func_149666_a(ItemGroup group, NonNullList<ItemStack> items) {
    }
 
    public boolean hasTileEntity(BlockState state) {

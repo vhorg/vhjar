@@ -187,6 +187,7 @@ public class PlayerEvents {
             PlayerDamageHelper.removeMultiplier(player, DreamSet.MULTIPLIER_ID);
          }
 
+         player.func_110148_a(Attributes.field_233818_a_).func_188479_b(DryadSet.HEALTH_MODIFIER_ID);
          if (PlayerSet.isActive(VaultGear.Set.DRYAD, player)) {
             float health = 0.0F;
 
@@ -199,8 +200,6 @@ public class PlayerEvents {
 
             player.func_110148_a(Attributes.field_233818_a_)
                .func_233767_b_(new AttributeModifier(DryadSet.HEALTH_MODIFIER_ID, "Dryad Bonus Health", health, Operation.ADDITION));
-         } else {
-            player.func_110148_a(Attributes.field_233818_a_).func_188479_b(DryadSet.HEALTH_MODIFIER_ID);
          }
 
          if (PlayerSet.isActive(VaultGear.Set.BLOOD, player) && !PlayerDamageHelper.getMultiplier(player, BloodSet.MULTIPLIER_ID).isPresent()) {

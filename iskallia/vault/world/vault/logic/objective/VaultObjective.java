@@ -1,5 +1,7 @@
 package iskallia.vault.world.vault.logic.objective;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Iterables;
 import iskallia.vault.block.entity.VaultLootableTileEntity;
 import iskallia.vault.block.item.LootStatueBlockItem;
@@ -26,9 +28,7 @@ import iskallia.vault.world.vault.time.VaultTimer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Function;
@@ -53,11 +53,11 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, IVaultTask {
-   public static final Map<ResourceLocation, Supplier<? extends VaultObjective>> REGISTRY = new HashMap<>();
+   public static final BiMap<ResourceLocation, Supplier<? extends VaultObjective>> REGISTRY = HashBiMap.create();
    public static final float COOP_DOUBLE_CRATE_CHANCE = 0.5F;
    protected static final Random rand = new Random();
    private ResourceLocation id;
-   private VaultTask onTick;
+   protected VaultTask onTick;
    private VaultTask onComplete;
    private boolean completed;
    private int completionTime = -1;
@@ -104,7 +104,7 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
    }
 
    @Nonnull
-   public abstract BlockState getObjectiveRelevantBlock();
+   public abstract BlockState getObjectiveRelevantBlock(VaultRaid var1, ServerWorld var2, BlockPos var3);
 
    public void postProcessObjectiveRelevantBlock(ServerWorld world, BlockPos pos) {
    }
@@ -324,14 +324,14 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
    }
 
    public static VaultObjective fromNBT(CompoundNBT nbt) {
-      VaultObjective objective = REGISTRY.get(new ResourceLocation(nbt.func_74779_i("Id"))).get();
+      VaultObjective objective = (VaultObjective)((Supplier)REGISTRY.get(new ResourceLocation(nbt.func_74779_i("Id")))).get();
       objective.deserializeNBT(nbt);
       return objective;
    }
 
    @Nullable
    public static VaultObjective getObjective(ResourceLocation key) {
-      return REGISTRY.getOrDefault(key, () -> null).get();
+      return (VaultObjective)((Supplier)REGISTRY.getOrDefault(key, (Supplier<VaultObjective>)() -> null)).get();
    }
 
    public static <T extends VaultObjective> Supplier<T> register(Supplier<T> objective) {
@@ -346,7 +346,7 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
          public BlockState generate(ServerWorld world, BlockPos pos, Random random, String poolName, UUID playerUUID) {
             VaultRaid vault = VaultRaidData.get(world).getAt(world, pos);
             VaultObjective objective = (VaultObjective)Iterables.getFirst(vault.getAllObjectives(), null);
-            return objective == null ? Blocks.field_150350_a.func_176223_P() : objective.getObjectiveRelevantBlock();
+            return objective == null ? Blocks.field_150350_a.func_176223_P() : objective.getObjectiveRelevantBlock(vault, world, pos);
          }
 
          @Override

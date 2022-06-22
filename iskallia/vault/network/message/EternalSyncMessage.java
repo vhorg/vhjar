@@ -27,7 +27,7 @@ public class EternalSyncMessage {
       pkt.eternalData.forEach((playerUUID, playerEternals) -> {
          buffer.func_179252_a(playerUUID);
          buffer.writeInt(playerEternals.size());
-         playerEternals.forEach(eternalData -> eternalData.serialize(buffer));
+         playerEternals.forEach(eternalData -> eternalData.serialize(buffer, false));
       });
    }
 

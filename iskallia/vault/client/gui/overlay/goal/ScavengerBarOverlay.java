@@ -2,6 +2,7 @@ package iskallia.vault.client.gui.overlay.goal;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import iskallia.vault.client.gui.helper.MobHeadTextures;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.client.vault.goal.VaultScavengerData;
@@ -14,6 +15,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -65,12 +67,15 @@ public class ScavengerBarOverlay extends BossBarOverlay {
       FontRenderer fr = mc.field_71466_p;
       ItemStack requiredStack = new ItemStack(itemRequirement.getRequiredItem());
       ScavengerHuntConfig.SourceType source = ModConfigs.SCAVENGER_HUNT.getRequirementSource(requiredStack);
+      ResourceLocation iconPath = source == ScavengerHuntConfig.SourceType.MOB
+         ? MobHeadTextures.get(ModConfigs.SCAVENGER_HUNT.getRequirementMobType(requiredStack)).orElse(source.getIconPath())
+         : source.getIconPath();
       renderStack.func_227860_a_();
       renderStack.func_227861_a_(0.0, -itemBoxWidth / 2.0F, 0.0);
       renderItemStack(renderStack, requiredStack);
       RenderSystem.enableBlend();
       RenderSystem.defaultBlendFunc();
-      mc.func_110434_K().func_110577_a(source.getIconPath());
+      mc.func_110434_K().func_110577_a(iconPath);
       renderStack.func_227860_a_();
       renderStack.func_227861_a_(-16.0, -2.4, 0.0);
       renderStack.func_227862_a_(0.4F, 0.4F, 1.0F);

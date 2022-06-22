@@ -98,10 +98,12 @@ public abstract class VaultGenerator implements INBTSerializable<CompoundNBT> {
    }
 
    protected boolean findStartPosition(ServerWorld world, VaultRaid vault, ChunkPos startChunk, Supplier<PortalPlacer> portalPlacer) {
-      for (int x = -48; x < 48; x++) {
-         for (int z = -48; z < 48; z++) {
+      BlockPos start = startChunk.func_206849_h();
+
+      for (int x = -96; x < 96; x++) {
+         for (int z = -96; z < 96; z++) {
             for (int y = 0; y < 48; y++) {
-               BlockPos pos = startChunk.func_206849_h().func_177982_a(x, 19 + y, z);
+               BlockPos pos = start.func_177982_a(x, 19 + y, z);
                if (world.func_180495_p(pos).func_177230_c() == Blocks.field_235348_mG_) {
                   world.func_175656_a(pos, Blocks.field_150350_a.func_176223_P());
                   vault.getProperties().create(VaultRaid.START_POS, pos);

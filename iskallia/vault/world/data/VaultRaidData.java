@@ -5,16 +5,18 @@ import iskallia.vault.backup.BackupManager;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.gear.VaultGear;
+import iskallia.vault.nbt.VListNBT;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.skill.set.PlayerSet;
-import iskallia.vault.util.calc.PlayerStatisticsCollector;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.player.VaultMember;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
@@ -43,8 +45,10 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 )
 public class VaultRaidData extends WorldSavedData {
    protected static final String DATA_NAME = "the_vault_VaultRaid";
-   private final VMapNBT<UUID, VaultRaid> activeVaults = VMapNBT.ofUUID(VaultRaid::new);
+   private VListNBT<VaultRaid, CompoundNBT> vaults = VListNBT.of(VaultRaid::new);
    private Mutable nextVaultPos = BlockPos.field_177992_a.func_239590_i_();
+   @Deprecated
+   private VMapNBT<UUID, VaultRaid> activeVaults = VMapNBT.ofUUID(VaultRaid::new);
 
    public VaultRaidData() {
       this("the_vault_VaultRaid");
@@ -54,58 +58,50 @@ public class VaultRaidData extends WorldSavedData {
       super(name);
    }
 
+   public VaultRaid get(UUID vaultId) {
+      return vaultId == null
+         ? null
+         : this.vaults
+            .stream()
+            .filter(vault -> vaultId.equals(vault.getProperties().getBaseOrDefault(VaultRaid.IDENTIFIER, (UUID)null)))
+            .findFirst()
+            .orElse(null);
+   }
+
    public VaultRaid getActiveFor(ServerPlayerEntity player) {
       return this.getActiveFor(player.func_110124_au());
    }
 
    public VaultRaid getActiveFor(UUID playerId) {
-      return this.activeVaults.get(playerId);
+      return this.vaults.stream().filter(vault -> vault.getPlayer(playerId).isPresent()).findFirst().orElse(null);
    }
 
    public VaultRaid getAt(ServerWorld world, BlockPos pos) {
-      synchronized (this.activeVaults) {
-         return this.activeVaults
-            .values()
-            .stream()
-            .filter(vault -> world.func_234923_W_() == vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION))
-            .filter(vault -> {
-               Optional<MutableBoundingBox> box = vault.getProperties().getBase(VaultRaid.BOUNDING_BOX);
-               return box.isPresent() && box.get().func_175898_b(pos);
-            })
-            .findFirst()
-            .orElse(null);
-      }
+      return this.vaults
+         .stream()
+         .filter(vault -> world.func_234923_W_() == vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION))
+         .filter(vault -> {
+            Optional<MutableBoundingBox> box = vault.getProperties().getBase(VaultRaid.BOUNDING_BOX);
+            return box.isPresent() && box.get().func_175898_b(pos);
+         })
+         .findFirst()
+         .orElse(null);
+   }
+
+   public void remove(UUID vaultId) {
+      this.vaults.removeIf(vault -> vault.getProperties().getValue(VaultRaid.IDENTIFIER).equals(vaultId));
    }
 
    public void remove(MinecraftServer server, UUID playerId) {
-      VaultRaid vault;
-      synchronized (this.activeVaults) {
-         vault = this.activeVaults.remove(playerId);
-         if (vault == null) {
-            return;
-         }
-      }
-
-      ServerWorld world = server.func_71218_a(vault.getProperties().getValue(VaultRaid.DIMENSION));
-      vault.getPlayer(playerId)
-         .ifPresent(
-            player -> {
-               if (!player.hasExited()) {
-                  VaultRaid.REMOVE_SCAVENGER_ITEMS
-                     .then(VaultRaid.REMOVE_INVENTORY_RESTORE_SNAPSHOTS)
-                     .then(VaultRaid.GRANT_EXP_COMPLETE)
-                     .then(VaultRaid.EXIT_SAFELY)
-                     .execute(vault, player, world);
-               }
+      VaultRaid vault = this.getActiveFor(playerId);
+      if (vault != null) {
+         ServerWorld world = server.func_71218_a(vault.getProperties().getValue(VaultRaid.DIMENSION));
+         vault.getPlayer(playerId).ifPresent(player -> {
+            if (!player.hasExited() && !(player instanceof VaultMember)) {
+               VaultRaid.REMOVE_SCAVENGER_ITEMS.then(VaultRaid.REMOVE_INVENTORY_RESTORE_SNAPSHOTS).then(VaultRaid.EXIT_SAFELY).execute(vault, player, world);
             }
-         );
-      PlayerStatsData.get(server).onVaultFinished(playerId, vault);
-      if (!PlayerStatsData.get(server).get(playerId).hasFinishedRaidReward()) {
-         int raids = PlayerStatisticsCollector.getFinishedRaids(server, playerId);
-         if (raids >= 5 && raids >= PlayerVaultStatsData.get(server).getVaultStats(playerId).getVaultLevel()) {
-            ScheduledItemDropData.get(server).addDrop(playerId, generateRaidRewardCrate());
-            PlayerStatsData.get(server).setRaidRewardReceived(playerId);
-         }
+         });
+         PlayerStatsData.get(world).onVaultFinished(playerId, vault);
       }
    }
 
@@ -178,8 +174,13 @@ public class VaultRaidData extends WorldSavedData {
    }
 
    public VaultRaid startVault(ServerWorld world, VaultRaid.Builder builder) {
+      return this.startVault(world, builder, vault -> {});
+   }
+
+   public VaultRaid startVault(ServerWorld world, VaultRaid.Builder builder, Consumer<VaultRaid> onBuild) {
       MinecraftServer server = world.func_73046_m();
       VaultRaid vault = builder.build();
+      onBuild.accept(vault);
       builder.getLevelInitializer().executeForAllPlayers(vault, world);
       Optional<RegistryKey<World>> dimension = vault.getProperties().getBase(VaultRaid.DIMENSION);
       if (dimension.isPresent()) {
@@ -203,31 +204,25 @@ public class VaultRaidData extends WorldSavedData {
                   phoenixSetData.createSnapshot(sPlayer);
                }
             });
-            this.remove(server, player.getPlayerId());
-            synchronized (this.activeVaults) {
-               this.activeVaults.put(player.getPlayerId(), vault);
-            }
-
             vault.getInitializer().execute(vault, player, destination);
          });
+         this.vaults.add(vault);
       });
       return vault;
    }
 
    public void tick(ServerWorld world) {
-      Set<VaultRaid> vaults;
-      synchronized (this.activeVaults) {
-         vaults = new HashSet<>(this.activeVaults.values());
-      }
-
-      vaults.stream()
+      new ArrayList<>(this.vaults)
+         .stream()
          .filter(vault -> vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION) == world.func_234923_W_())
          .forEach(vault -> vault.tick(world));
-      Set<UUID> completed = new HashSet<>();
-      vaults.forEach(vault -> {
+      List<UUID> completed = new ArrayList<>();
+      this.vaults.removeIf(vault -> {
          if (vault.isFinished()) {
             vault.getPlayers().forEach(player -> completed.add(player.getPlayerId()));
          }
+
+         return vault.isFinished();
       });
       completed.forEach(uuid -> this.remove(world.func_73046_m(), uuid));
    }
@@ -262,12 +257,14 @@ public class VaultRaidData extends WorldSavedData {
          this.activeVaults.put(playerId, vault);
       }
 
+      this.vaults.deserializeNBT(nbt.func_150295_c("Vaults", 10));
+      this.vaults.addAll(this.activeVaults.values());
       int[] pos = nbt.func_74759_k("NextVaultPos");
       this.nextVaultPos = new Mutable(pos[0], pos[1], pos[2]);
    }
 
    public CompoundNBT func_189551_b(CompoundNBT nbt) {
-      nbt.func_218657_a("ActiveVaults", this.activeVaults.serializeNBT());
+      nbt.func_218657_a("Vaults", this.vaults.serializeNBT());
       nbt.func_74783_a("NextVaultPos", new int[]{this.nextVaultPos.func_177958_n(), this.nextVaultPos.func_177956_o(), this.nextVaultPos.func_177952_p()});
       return nbt;
    }

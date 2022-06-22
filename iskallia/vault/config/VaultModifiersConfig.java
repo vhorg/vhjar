@@ -29,6 +29,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -227,6 +228,66 @@ public class VaultModifiersConfig extends Config {
                new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
             )
          );
+      level.FINAL_IDONA_POOLS
+         .addAll(
+            Arrays.asList(
+               new VaultModifiersConfig.Pool(2, 2)
+                  .add("Crowded", 1)
+                  .add("Chaos", 1)
+                  .add("Fast", 1)
+                  .add("Rush", 1)
+                  .add("Easy", 1)
+                  .add("Hard", 1)
+                  .add("Treasure", 1)
+                  .add("Unlucky", 1),
+               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
+            )
+         );
+      level.FINAL_TENOS_POOLS
+         .addAll(
+            Arrays.asList(
+               new VaultModifiersConfig.Pool(2, 2)
+                  .add("Crowded", 1)
+                  .add("Chaos", 1)
+                  .add("Fast", 1)
+                  .add("Rush", 1)
+                  .add("Easy", 1)
+                  .add("Hard", 1)
+                  .add("Treasure", 1)
+                  .add("Unlucky", 1),
+               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
+            )
+         );
+      level.FINAL_VELARA_POOLS
+         .addAll(
+            Arrays.asList(
+               new VaultModifiersConfig.Pool(2, 2)
+                  .add("Crowded", 1)
+                  .add("Chaos", 1)
+                  .add("Fast", 1)
+                  .add("Rush", 1)
+                  .add("Easy", 1)
+                  .add("Hard", 1)
+                  .add("Treasure", 1)
+                  .add("Unlucky", 1),
+               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
+            )
+         );
+      level.FINAL_WENDARR_POOLS
+         .addAll(
+            Arrays.asList(
+               new VaultModifiersConfig.Pool(2, 2)
+                  .add("Crowded", 1)
+                  .add("Chaos", 1)
+                  .add("Fast", 1)
+                  .add("Rush", 1)
+                  .add("Easy", 1)
+                  .add("Hard", 1)
+                  .add("Treasure", 1)
+                  .add("Unlucky", 1),
+               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
+            )
+         );
       this.LEVELS.add(level);
       this.MODIFIER_PREVENTIONS = new HashMap<>();
       List<String> preventedModifiers = new ArrayList<>();
@@ -243,6 +304,27 @@ public class VaultModifiersConfig extends Config {
             break;
          case RAID:
             pools = override.RAID_POOLS;
+            break;
+         case FINAL_VELARA:
+            pools = override.FINAL_VELARA_POOLS;
+            break;
+         case FINAL_VELARA_ADDS:
+            pools = override.FINAL_VELARA_ADDS_POOLS;
+            break;
+         case FINAL_TENOS:
+            pools = override.FINAL_TENOS_POOLS;
+            break;
+         case FINAL_TENOS_ADDS:
+            pools = override.FINAL_TENOS_ADDS_POOLS;
+            break;
+         case FINAL_WENDARR:
+            pools = override.FINAL_WENDARR_POOLS;
+            break;
+         case FINAL_WENDARR_ADDS:
+            pools = override.FINAL_WENDARR_ADDS_POOLS;
+            break;
+         case FINAL_IDONA:
+            pools = override.FINAL_IDONA_POOLS;
             break;
          default:
             pools = override.DEFAULT_POOLS;
@@ -291,19 +373,48 @@ public class VaultModifiersConfig extends Config {
       public List<VaultModifiersConfig.Pool> RAFFLE_POOLS;
       @Expose
       public List<VaultModifiersConfig.Pool> RAID_POOLS;
+      @Expose
+      public List<VaultModifiersConfig.Pool> FINAL_VELARA_POOLS;
+      @Expose
+      public List<VaultModifiersConfig.Pool> FINAL_VELARA_ADDS_POOLS;
+      @Expose
+      public List<VaultModifiersConfig.Pool> FINAL_TENOS_POOLS;
+      @Expose
+      public List<VaultModifiersConfig.Pool> FINAL_TENOS_ADDS_POOLS;
+      @Expose
+      public List<VaultModifiersConfig.Pool> FINAL_WENDARR_POOLS;
+      @Expose
+      public List<VaultModifiersConfig.Pool> FINAL_WENDARR_ADDS_POOLS;
+      @Expose
+      public List<VaultModifiersConfig.Pool> FINAL_IDONA_POOLS;
 
       public Level(int minLevel) {
          this.MIN_LEVEL = minLevel;
          this.DEFAULT_POOLS = new ArrayList<>();
          this.RAFFLE_POOLS = new ArrayList<>();
          this.RAID_POOLS = new ArrayList<>();
+         this.FINAL_VELARA_POOLS = new ArrayList<>();
+         this.FINAL_VELARA_ADDS_POOLS = new ArrayList<>();
+         this.FINAL_TENOS_POOLS = new ArrayList<>();
+         this.FINAL_TENOS_ADDS_POOLS = new ArrayList<>();
+         this.FINAL_WENDARR_POOLS = new ArrayList<>();
+         this.FINAL_WENDARR_ADDS_POOLS = new ArrayList<>();
+         this.FINAL_IDONA_POOLS = new LinkedList<>();
       }
    }
 
    public static enum ModifierPoolType {
       DEFAULT,
       RAFFLE,
-      RAID;
+      RAID,
+      FINAL_VELARA,
+      FINAL_VELARA_ADDS,
+      FINAL_TENOS,
+      FINAL_TENOS_ADDS,
+      FINAL_WENDARR,
+      FINAL_WENDARR_ADDS,
+      FINAL_IDONA,
+      FINAL_IDONA_ADDS;
    }
 
    public static class Pool {

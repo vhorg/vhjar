@@ -4,7 +4,7 @@ import iskallia.vault.Vault;
 import net.minecraft.util.ResourceLocation;
 
 public class FavourExtension extends TimeExtension {
-   public static final ResourceLocation ID = Vault.id("relic_set");
+   public static final ResourceLocation ID = Vault.id("favour");
 
    public FavourExtension() {
    }

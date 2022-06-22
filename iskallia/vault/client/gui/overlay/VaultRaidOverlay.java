@@ -7,6 +7,7 @@ import iskallia.vault.client.gui.helper.FontHelper;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.network.message.VaultOverlayMessage;
+import iskallia.vault.util.ListHelper;
 import iskallia.vault.world.vault.modifier.TexturedVaultModifier;
 import iskallia.vault.world.vault.modifier.VaultModifiers;
 import net.minecraft.client.Minecraft;
@@ -46,22 +47,31 @@ public class VaultRaidOverlay {
          }
 
          String timer = UIHelper.formatTimeString(remainingTicks);
-         FontHelper.drawStringWithBorder(matrixStack, timer, (float)(barWidth + 18), (float)(bottom - 12), color, -16777216);
+         if (ClientVaultRaidData.showTimer()) {
+            FontHelper.drawStringWithBorder(matrixStack, timer, (float)(barWidth + 18), (float)(bottom - 12), color, -16777216);
+         }
+
          minecraft.func_110434_K().func_110577_a(RESOURCE);
          RenderSystem.enableBlend();
          RenderSystem.disableDepthTest();
          matrixStack.func_227860_a_();
-         matrixStack.func_227861_a_(barWidth + 30, bottom - 25, 0.0);
-         if (remainingTicks < 600) {
-            matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(remainingTicks * 10.0F % 360.0F));
-         } else {
-            matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(remainingTicks % 360));
+         if (ClientVaultRaidData.showTimer()) {
+            matrixStack.func_227861_a_(barWidth + 30, bottom - 25, 0.0);
+            if (remainingTicks < 600) {
+               matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(remainingTicks * 10.0F % 360.0F));
+            } else {
+               matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(remainingTicks % 360));
+            }
+
+            matrixStack.func_227861_a_(-hourglassWidth / 2.0F, -hourglassHeight / 2.0F, 0.0);
+            ScreenDrawHelper.drawQuad(
+               buf -> ScreenDrawHelper.rect(buf, matrixStack)
+                  .dim(hourglassWidth, hourglassHeight)
+                  .texVanilla(1.0F, 36.0F, hourglassWidth, hourglassHeight)
+                  .draw()
+            );
          }
 
-         matrixStack.func_227861_a_(-hourglassWidth / 2.0F, -hourglassHeight / 2.0F, 0.0);
-         ScreenDrawHelper.drawQuad(
-            buf -> ScreenDrawHelper.rect(buf, matrixStack).dim(hourglassWidth, hourglassHeight).texVanilla(1.0F, 36.0F, hourglassWidth, hourglassHeight).draw()
-         );
          matrixStack.func_227865_b_();
          if (type == VaultOverlayMessage.OverlayType.VAULT) {
             renderVaultModifiers(event);
@@ -80,27 +90,22 @@ public class VaultRaidOverlay {
       int rightMargin = 28;
       int modifierSize = 24;
       int modifierGap = 2;
-      modifiers.forEach(
-         (index, modifier) -> {
-            if (modifier instanceof TexturedVaultModifier) {
-               minecraft.func_110434_K().func_110577_a(((TexturedVaultModifier)modifier).getIcon());
-               int x = index % 4;
-               int y = index / 4;
-               int offsetX = modifierSize * x + modifierGap * Math.max(x - 1, 0);
-               int offsetY = modifierSize * y + modifierGap * Math.max(y - 1, 0);
-               AbstractGui.func_238463_a_(
-                  matrixStack,
-                  right - (rightMargin + modifierSize) - offsetX,
-                  bottom - modifierSize - 2 - offsetY,
-                  0.0F,
-                  0.0F,
-                  modifierSize,
-                  modifierSize,
-                  modifierSize,
-                  modifierSize
-               );
+      ListHelper.traverseOccurrences(modifiers, (index, modifier, occurrence) -> {
+         if (modifier instanceof TexturedVaultModifier) {
+            minecraft.func_110434_K().func_110577_a(((TexturedVaultModifier)modifier).getIcon());
+            int x = index % 4;
+            int y = index / 4;
+            int offsetX = modifierSize * x + modifierGap * Math.max(x - 1, 0);
+            int offsetY = modifierSize * y + modifierGap * Math.max(y - 1, 0);
+            int posX = right - (rightMargin + modifierSize) - offsetX;
+            int posY = bottom - modifierSize - 2 - offsetY;
+            AbstractGui.func_238463_a_(matrixStack, posX, posY, 0.0F, 0.0F, modifierSize, modifierSize, modifierSize, modifierSize);
+            if (occurrence > 1L) {
+               String text = String.valueOf(occurrence);
+               int textWidth = minecraft.field_71466_p.func_78256_a(text);
+               minecraft.field_71466_p.func_238405_a_(matrixStack, text, posX + (modifierSize - textWidth), posY + (modifierSize - 10), -1);
             }
          }
-      );
+      });
    }
 }

@@ -355,9 +355,9 @@ public class VaultMobsConfig extends Config {
 
       public static LivingEntity scale(LivingEntity entity, VaultRaid vault, GlobalDifficultyData.Difficulty vaultDifficulty) {
          int level = vault.getProperties().getValue(VaultRaid.LEVEL);
-         UUID host = vault.getProperties().getValue(VaultRaid.HOST);
+         UUID host = vault.getProperties().getBaseOrDefault(VaultRaid.HOST, (UUID)null);
          MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-         if (srv != null) {
+         if (srv != null && host != null) {
             level += NetcodeUtils.<Integer>runIfPresent(
                   srv, host, sPlayer -> ModConfigs.PLAYER_SCALING.getMobLevelAdjustment(sPlayer.func_200200_C_().getString())
                )

@@ -722,7 +722,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          );
       ModAttributes.EXTRA_LEECH_RATIO
          .get(stack)
-         .map(attribute -> attribute.getValue(stack))
+         .map(VAttribute.Instance::getBaseValue)
          .ifPresent(
             value -> tooltip.add(
                new StringTextComponent("+" + format(value * 100.0F, 5) + "% Leech")
@@ -758,7 +758,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          );
       ModAttributes.EXTRA_HEALTH
          .get(stack)
-         .map(attribute -> attribute.getValue(stack))
+         .map(VAttribute.Instance::getBaseValue)
          .ifPresent(
             value -> tooltip.add(
                new StringTextComponent("+" + format(value.floatValue(), 5) + " Health")
@@ -776,7 +776,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          );
       ModAttributes.EXTRA_PARRY_CHANCE
          .get(stack)
-         .map(attribute -> attribute.getValue(stack))
+         .map(VAttribute.Instance::getBaseValue)
          .ifPresent(
             value -> tooltip.add(
                new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Parry")
@@ -794,7 +794,7 @@ public interface VaultGear<T extends Item & VaultGear<? extends Item>> extends I
          );
       ModAttributes.EXTRA_RESISTANCE
          .get(stack)
-         .map(attribute -> attribute.getValue(stack))
+         .map(VAttribute.Instance::getBaseValue)
          .ifPresent(
             value -> tooltip.add(
                new StringTextComponent("+" + formatPercent(value * 100.0F) + "% Resistance")

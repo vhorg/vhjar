@@ -11,6 +11,7 @@ import iskallia.vault.network.message.ActiveEternalMessage;
 import iskallia.vault.network.message.AdvancedVendingUIMessage;
 import iskallia.vault.network.message.BossMusicMessage;
 import iskallia.vault.network.message.EffectMessage;
+import iskallia.vault.network.message.EnteredEyesoreDomainMessage;
 import iskallia.vault.network.message.EternalInteractionMessage;
 import iskallia.vault.network.message.EternalSyncMessage;
 import iskallia.vault.network.message.FighterSizeMessage;
@@ -26,6 +27,8 @@ import iskallia.vault.network.message.RageSyncMessage;
 import iskallia.vault.network.message.RenameUIMessage;
 import iskallia.vault.network.message.ResearchMessage;
 import iskallia.vault.network.message.ResearchTreeMessage;
+import iskallia.vault.network.message.SandEventContributorMessage;
+import iskallia.vault.network.message.SandEventUpdateMessage;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.network.message.ShardTraderScreenMessage;
@@ -93,6 +96,16 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(nextId(), PartyStatusMessage.class, PartyStatusMessage::encode, PartyStatusMessage::decode, PartyStatusMessage::handle);
       CHANNEL.registerMessage(nextId(), PartyMembersMessage.class, PartyMembersMessage::encode, PartyMembersMessage::decode, PartyMembersMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(), SandEventUpdateMessage.class, SandEventUpdateMessage::encode, SandEventUpdateMessage::decode, SandEventUpdateMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         SandEventContributorMessage.class,
+         SandEventContributorMessage::encode,
+         SandEventContributorMessage::decode,
+         SandEventContributorMessage::handle
+      );
       CHANNEL.registerMessage(nextId(), EffectMessage.class, EffectMessage::encode, EffectMessage::decode, EffectMessage::handle);
       CHANNEL.registerMessage(nextId(), KnownTalentsMessage.class, KnownTalentsMessage::encode, KnownTalentsMessage::decode, KnownTalentsMessage::handle);
       CHANNEL.registerMessage(nextId(), ShardTradeMessage.class, ShardTradeMessage::encode, ShardTradeMessage::decode, ShardTradeMessage::handle);
@@ -127,6 +140,13 @@ public class ModNetwork {
          VaultCharmControllerScrollMessage::encode,
          VaultCharmControllerScrollMessage::decode,
          VaultCharmControllerScrollMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         EnteredEyesoreDomainMessage.class,
+         EnteredEyesoreDomainMessage::encode,
+         EnteredEyesoreDomainMessage::decode,
+         EnteredEyesoreDomainMessage::handle
       );
    }
 

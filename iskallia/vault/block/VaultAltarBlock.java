@@ -1,9 +1,12 @@
 package iskallia.vault.block;
 
+import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.world.data.PlayerVaultAltarData;
+import java.util.Random;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -17,6 +20,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer.Builder;
@@ -48,6 +52,34 @@ public class VaultAltarBlock extends Block {
       builder.func_206894_a(new Property[]{POWERED});
    }
 
+   public void func_180655_c(@Nonnull BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull Random rand) {
+      TileEntity tileEntity = world.func_175625_s(pos);
+      if (tileEntity instanceof VaultAltarTileEntity) {
+         VaultAltarTileEntity altarTileEntity = (VaultAltarTileEntity)tileEntity;
+         AltarInfusionRecipe recipe = altarTileEntity.getRecipe();
+         if (recipe != null && recipe.isPogInfused()) {
+            for (int i = 0; i < 4; i++) {
+               double d0 = pos.func_177958_n() + rand.nextDouble();
+               double d1 = pos.func_177956_o() + rand.nextDouble();
+               double d2 = pos.func_177952_p() + rand.nextDouble();
+               double d3 = (rand.nextFloat() - 0.5) * 0.5;
+               double d4 = (rand.nextFloat() - 0.5) * 0.5;
+               double d5 = (rand.nextFloat() - 0.5) * 0.5;
+               int j = rand.nextInt(2) * 2 - 1;
+               if (!world.func_180495_p(pos.func_177976_e()).func_203425_a(this) && !world.func_180495_p(pos.func_177974_f()).func_203425_a(this)) {
+                  d0 = pos.func_177958_n() + 0.5 + 0.25 * j;
+                  d3 = rand.nextFloat() * 2.0F * j;
+               } else {
+                  d2 = pos.func_177952_p() + 0.5 + 0.25 * j;
+                  d5 = rand.nextFloat() * 2.0F * j;
+               }
+
+               world.func_195594_a(ParticleTypes.field_197607_R, d0, d1, d2, d3, d4, d5);
+            }
+         }
+      }
+   }
+
    public boolean hasTileEntity(BlockState state) {
       return true;
    }
@@ -56,19 +88,23 @@ public class VaultAltarBlock extends Block {
       return ModBlocks.VAULT_ALTAR_TILE_ENTITY.func_200968_a();
    }
 
-   public ActionResultType func_225533_a_(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
-      if (!worldIn.field_72995_K && handIn == Hand.MAIN_HAND && player instanceof ServerPlayerEntity) {
+   public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+      if (!world.field_72995_K && handIn == Hand.MAIN_HAND && player instanceof ServerPlayerEntity) {
          ItemStack heldItem = player.func_184614_ca();
-         VaultAltarTileEntity altar = this.getAltarTileEntity(worldIn, pos);
+         VaultAltarTileEntity altar = this.getAltarTileEntity(world, pos);
          if (altar == null) {
             return ActionResultType.SUCCESS;
          } else if (altar.getAltarState() == VaultAltarTileEntity.AltarState.IDLE) {
-            return heldItem.func_77973_b() != ModItems.VAULT_ROCK ? ActionResultType.SUCCESS : altar.onAddVaultRock((ServerPlayerEntity)player, heldItem);
+            return heldItem.func_77973_b() == ModItems.VAULT_ROCK ? altar.onAddVaultRock((ServerPlayerEntity)player, heldItem) : ActionResultType.SUCCESS;
+         } else if (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING && heldItem.func_77973_b() == ModItems.POG) {
+            return altar.getRecipe().isPogInfused() ? ActionResultType.FAIL : altar.onPogRightClick((ServerPlayerEntity)player, heldItem);
+         } else if (player.func_225608_bj_()
+            && (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING || altar.getAltarState() == VaultAltarTileEntity.AltarState.COMPLETE)) {
+            ActionResultType result = altar.getRecipe() != null && altar.getRecipe().isPogInfused() ? altar.onRemovePogInfusion() : altar.onRemoveVaultRock();
+            PlayerVaultAltarData.get((ServerWorld)world).func_76185_a();
+            return result;
          } else {
-            return !player.func_225608_bj_()
-                  || altar.getAltarState() != VaultAltarTileEntity.AltarState.ACCEPTING && altar.getAltarState() != VaultAltarTileEntity.AltarState.COMPLETE
-               ? ActionResultType.SUCCESS
-               : altar.onRemoveVaultRock();
+            return ActionResultType.SUCCESS;
          }
       } else {
          return ActionResultType.SUCCESS;

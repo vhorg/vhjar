@@ -9,10 +9,13 @@ import net.minecraft.block.AbstractBlock.Properties;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Direction;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
@@ -31,6 +34,9 @@ public class FinalVaultPortalBlock extends NetherPortalBlock {
    public FinalVaultPortalBlock() {
       super(Properties.func_200950_a(Blocks.field_150427_aO));
       this.func_180632_j((BlockState)((BlockState)this.field_176227_L.func_177621_b()).func_206870_a(field_176550_a, Axis.X));
+   }
+
+   public void func_149666_a(ItemGroup group, NonNullList<ItemStack> items) {
    }
 
    protected static BlockPos getSpawnPoint(ServerWorld p_241092_0_, int p_241092_1_, int p_241092_2_, boolean p_241092_3_) {

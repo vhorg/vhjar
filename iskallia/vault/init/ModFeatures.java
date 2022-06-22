@@ -3,11 +3,15 @@ package iskallia.vault.init;
 import iskallia.vault.Vault;
 import iskallia.vault.world.gen.decorator.ArchitectEventFeature;
 import iskallia.vault.world.gen.decorator.BreadcrumbFeature;
+import iskallia.vault.world.gen.decorator.FinalVaultBossFeature;
+import iskallia.vault.world.gen.decorator.FinalVaultLobbyFeature;
 import iskallia.vault.world.gen.decorator.OverworldOreFeature;
 import iskallia.vault.world.gen.decorator.RaidChallengeFeature;
 import iskallia.vault.world.gen.decorator.VaultFeature;
 import iskallia.vault.world.gen.decorator.VaultTroveFeature;
 import iskallia.vault.world.gen.structure.ArchitectEventStructure;
+import iskallia.vault.world.gen.structure.FinalVaultBossStructure;
+import iskallia.vault.world.gen.structure.FinalVaultLobbyStructure;
 import iskallia.vault.world.gen.structure.RaidChallengeStructure;
 import iskallia.vault.world.gen.structure.VaultStructure;
 import iskallia.vault.world.gen.structure.VaultTroveStructure;
@@ -29,6 +33,8 @@ public class ModFeatures {
    public static ArchitectEventFeature ARCHITECT_EVENT_FEATURE;
    public static RaidChallengeFeature RAID_CHALLENGE_FEATURE;
    public static VaultTroveFeature VAULT_TROVE_FEATURE;
+   public static FinalVaultLobbyFeature FINAL_VAULT_LOBBY_FEATURE;
+   public static FinalVaultBossFeature FINAL_VAULT_BOSS_FEATURE;
    public static ConfiguredFeature<?, ?> BREADCRUMB_CHEST;
    public static ConfiguredFeature<?, ?> VAULT_ROCK_ORE;
 
@@ -44,6 +50,14 @@ public class ModFeatures {
       );
       VAULT_TROVE_FEATURE = register(
          "trove", new VaultTroveFeature(ModStructures.VAULT_TROVE, new VaultTroveStructure.Config(() -> VaultTroveStructure.Pools.START, 1))
+      );
+      FINAL_VAULT_LOBBY_FEATURE = register(
+         "final_vault_lobby",
+         new FinalVaultLobbyFeature(ModStructures.FINAL_VAULT_LOBBY, new FinalVaultLobbyStructure.Config(() -> FinalVaultLobbyStructure.Pools.START, 1))
+      );
+      FINAL_VAULT_BOSS_FEATURE = register(
+         "final_vault_boss",
+         new FinalVaultBossFeature(ModStructures.FINAL_VAULT_BOSS, new FinalVaultBossStructure.Config(() -> FinalVaultBossStructure.Pools.START, 1))
       );
    }
 

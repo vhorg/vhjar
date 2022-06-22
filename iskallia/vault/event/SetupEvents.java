@@ -5,6 +5,7 @@ import iskallia.vault.client.util.ShaderUtil;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
+import iskallia.vault.init.ModGameRules;
 import iskallia.vault.init.ModKeybinds;
 import iskallia.vault.init.ModModels;
 import iskallia.vault.init.ModNetwork;
@@ -40,6 +41,7 @@ public class SetupEvents {
       ModConfigs.register();
       ModNetwork.initialize();
       ModRecipes.initialize();
+      ModGameRules.initialize();
    }
 
    @SubscribeEvent

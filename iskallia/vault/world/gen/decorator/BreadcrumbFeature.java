@@ -9,6 +9,7 @@ import iskallia.vault.world.gen.structure.JigsawPiecePlacer;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.piece.VaultPiece;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
+import iskallia.vault.world.vault.logic.objective.TreasureHuntObjective;
 import iskallia.vault.world.vault.modifier.ChestModifier;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.player.VaultRunner;
@@ -90,14 +91,19 @@ public class BreadcrumbFeature extends Feature<NoFeatureConfig> {
       VaultRaid vault, ISeedReader world, BiPredicate<BlockPos, BlockState> blockPlacer, Random rand, BlockPos featurePos
    ) {
       vault.getActiveObjective(ScavengerHuntObjective.class).ifPresent(objective -> doTreasureSpawnPass(rand, world, blockPlacer, featurePos));
-      doChestSpawnPass(rand, world, blockPlacer, featurePos, ModBlocks.VAULT_CHEST.func_176223_P());
-      List<VaultPlayer> runners = vault.getPlayers().stream().filter(vaultPlayer -> vaultPlayer instanceof VaultRunner).collect(Collectors.toList());
+      vault.getActiveObjective(TreasureHuntObjective.class).ifPresent(objective -> doTreasureSpawnPass(rand, world, blockPlacer, featurePos));
+      if (!vault.getProperties().exists(VaultRaid.PARENT)) {
+         doChestSpawnPass(rand, world, blockPlacer, featurePos, ModBlocks.VAULT_CHEST.func_176223_P());
+         List<VaultPlayer> runners = vault.getPlayers().stream().filter(vaultPlayer -> vaultPlayer instanceof VaultRunner).collect(Collectors.toList());
 
-      for (int i = 0; i < runners.size() - 1; i++) {
-         doChestSpawnPass(rand, world, blockPlacer, featurePos, ModBlocks.VAULT_COOP_CHEST.func_176223_P());
+         for (int i = 0; i < runners.size() - 1; i++) {
+            doChestSpawnPass(rand, world, blockPlacer, featurePos, ModBlocks.VAULT_COOP_CHEST.func_176223_P());
+         }
       }
 
-      placeChestModifierFeatures(vault, world, blockPlacer, rand, featurePos);
+      if (!vault.getProperties().exists(VaultRaid.PARENT)) {
+         placeChestModifierFeatures(vault, world, blockPlacer, rand, featurePos);
+      }
    }
 
    private static void placeChestModifierFeatures(

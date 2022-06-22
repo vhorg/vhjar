@@ -74,26 +74,29 @@ public class SuperSecretCakes {
       if (event.getWorld().func_234923_W_() == Vault.VAULT_KEY) {
          World world = event.getWorld();
          PlayerEntity player = event.getPlayer();
-         if (world.func_180495_p(event.getPos()).func_177230_c() instanceof CakeBlock) {
-            if (world.func_201670_d()) {
-               Random random = new Random();
-               String cakeQuote = CAKE_QUOTES[random.nextInt(CAKE_QUOTES.length)];
-               StringTextComponent text = new StringTextComponent("\"" + cakeQuote + "\"");
-               text.func_230530_a_(Style.field_240709_b_.func_240722_b_(true).func_240718_a_(Color.func_240743_a_(-15343)));
-               player.func_146105_b(text, true);
-            } else if (world instanceof ServerWorld && player instanceof ServerPlayerEntity) {
-               ServerPlayerEntity sPlayer = (ServerPlayerEntity)player;
-               ServerWorld sWorld = (ServerWorld)world;
-               world.func_175655_b(event.getPos(), false);
-               player.func_195064_c(new EffectInstance(Effects.field_76444_x, 1200, 0));
-               AdvancementHelper.grantCriterion(sPlayer, Vault.id("main/super_secret_cakes"), "cake_consumed");
-               VaultRaid raid = VaultRaidData.get(sWorld).getAt(sWorld, event.getPos());
-               if (raid != null) {
-                  raid.getGenerator().getPiecesAt(event.getPos(), VaultRoom.class).forEach(room -> room.setCakeEaten(true));
-                  raid.getActiveObjective(CakeHuntObjective.class).ifPresent(cakeObjective -> cakeObjective.expandVault(sWorld, event.getPos(), raid));
-               }
+         if (!player.func_175149_v()) {
+            if (world.func_180495_p(event.getPos()).func_177230_c() instanceof CakeBlock) {
+               if (world.func_201670_d()) {
+                  Random random = new Random();
+                  String cakeQuote = CAKE_QUOTES[random.nextInt(CAKE_QUOTES.length)];
+                  StringTextComponent text = new StringTextComponent("\"" + cakeQuote + "\"");
+                  text.func_230530_a_(Style.field_240709_b_.func_240722_b_(true).func_240718_a_(Color.func_240743_a_(-15343)));
+                  player.func_146105_b(text, true);
+               } else if (world instanceof ServerWorld && player instanceof ServerPlayerEntity) {
+                  ServerPlayerEntity sPlayer = (ServerPlayerEntity)player;
+                  ServerWorld sWorld = (ServerWorld)world;
+                  world.func_175655_b(event.getPos(), false);
+                  player.func_195064_c(new EffectInstance(Effects.field_76444_x, 1200, 0));
+                  AdvancementHelper.grantCriterion(sPlayer, Vault.id("main/super_secret_cakes"), "cake_consumed");
+                  VaultRaid raid = VaultRaidData.get(sWorld).getAt(sWorld, event.getPos());
+                  if (raid != null) {
+                     raid.getGenerator().getPiecesAt(event.getPos(), VaultRoom.class).forEach(room -> room.setCakeEaten(true));
+                     raid.getActiveObjective(CakeHuntObjective.class)
+                        .ifPresent(cakeObjective -> cakeObjective.expandVault(sWorld, sPlayer, event.getPos(), raid));
+                  }
 
-               event.setCanceled(true);
+                  event.setCanceled(true);
+               }
             }
          }
       }

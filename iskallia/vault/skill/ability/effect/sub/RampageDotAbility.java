@@ -1,5 +1,6 @@
 package iskallia.vault.skill.ability.effect.sub;
 
+import iskallia.vault.Vault;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.skill.ability.AbilityNode;
@@ -10,6 +11,7 @@ import iskallia.vault.util.DamageOverTimeHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import javax.annotation.Nullable;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.EntityDamageSource;
@@ -32,12 +34,16 @@ public class RampageDotAbility extends RampageAbility<RampageDotConfig> {
                         AbilityTree abilities = PlayerAbilitiesData.get(world).getAbilities(player);
                         AbilityNode<?, ?> node = abilities.getNodeByName("Rampage");
                         if (node.getAbility() instanceof RampageDotAbility && node.isLearned()) {
+                           LivingEntity targetEntity = event.getEntityLiving();
                            RampageDotConfig cfg = (RampageDotConfig)node.getAbilityConfig();
+                           if (cfg == null) {
+                              Vault.LOGGER.warn("RampageDotConfig was null when trying to apply Dot.");
+                              return;
+                           }
+
+                           DamageOverTimeHelper.invalidateAll(targetEntity);
                            DamageOverTimeHelper.applyDamageOverTime(
-                              event.getEntityLiving(),
-                              RampageDotAbility.PlayerDamageOverTimeSource.causeDoTDamage(player),
-                              event.getAmount(),
-                              cfg.getDotSecondDuration()
+                              targetEntity, RampageDotAbility.PlayerDamageOverTimeSource.causeDoTDamage(player), event.getAmount(), cfg.getDotSecondDuration()
                            );
                            event.setAmount(0.0F);
                         }

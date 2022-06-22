@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.nbt.CompoundNBT;
@@ -17,6 +18,7 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MutableBoundingBox;
+import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
 import net.minecraft.world.gen.feature.structure.AbstractVillagePiece;
 import net.minecraft.world.gen.feature.structure.StructurePiece;
@@ -29,6 +31,7 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
    protected ResourceLocation template;
    protected MutableBoundingBox boundingBox;
    protected Rotation rotation;
+   protected UUID uuid = UUID.randomUUID();
 
    protected VaultPiece(ResourceLocation id) {
       this.id = id;
@@ -57,6 +60,10 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
       return this.rotation;
    }
 
+   public UUID getUUID() {
+      return this.uuid;
+   }
+
    public abstract void tick(ServerWorld var1, VaultRaid var2);
 
    public CompoundNBT serializeNBT() {
@@ -65,6 +72,7 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
       nbt.func_74778_a("Template", this.template.toString());
       nbt.func_218657_a("BoundingBox", this.boundingBox.func_151535_h());
       nbt.func_74768_a("Rotation", this.rotation.ordinal());
+      nbt.func_74778_a("UUID", this.uuid.toString());
       return nbt;
    }
 
@@ -73,6 +81,9 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
       this.template = new ResourceLocation(nbt.func_74779_i("Template"));
       this.boundingBox = new MutableBoundingBox(nbt.func_74759_k("BoundingBox"));
       this.rotation = Rotation.values()[nbt.func_74762_e("Rotation")];
+      if (nbt.func_150297_b("UUID", 8)) {
+         this.uuid = UUID.fromString(nbt.func_74779_i("UUID"));
+      }
    }
 
    public boolean isInside(AxisAlignedBB box) {
@@ -81,6 +92,18 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
 
    public boolean contains(BlockPos pos) {
       return this.boundingBox.func_175898_b(pos);
+   }
+
+   public BlockPos getMin() {
+      return new BlockPos(this.boundingBox.field_78897_a, this.boundingBox.field_78895_b, this.boundingBox.field_78896_c);
+   }
+
+   public BlockPos getMax() {
+      return new BlockPos(this.boundingBox.field_78893_d, this.boundingBox.field_78894_e, this.boundingBox.field_78892_f);
+   }
+
+   public Vector3i getCenter() {
+      return this.getBoundingBox().func_215126_f();
    }
 
    public static VaultPiece fromNBT(CompoundNBT nbt) {
@@ -145,11 +168,11 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
                         return new VaultRoom(template, box, rotation);
                      }
 
-                     if (path.startsWith("raid/enigma/rooms")) {
+                     if (path.startsWith("raid/enigma/rooms") || path.startsWith("final_vault/idona/rooms")) {
                         return new VaultRaidRoom(template, box, rotation);
                      }
 
-                     if (path.startsWith("vault/enigma/tunnels")) {
+                     if (path.startsWith("vault/enigma/tunnels") || path.startsWith("final_vault/idona/tunnels")) {
                         return new VaultTunnel(template, box, rotation);
                      }
 
@@ -162,6 +185,34 @@ public abstract class VaultPiece implements INBTSerializable<CompoundNBT> {
 
                      if (path.startsWith("vault/enigma/treasure")) {
                         return new VaultTreasure(template, box, rotation);
+                     }
+
+                     if (path.startsWith("final_vault/starts")) {
+                        return new FinalVaultLobby(template, box, rotation);
+                     }
+
+                     if (path.startsWith("final_vault/portals")) {
+                        return new VaultPortal(template, box, rotation);
+                     }
+
+                     if (path.startsWith("final_vault/velara/rooms")
+                        || path.startsWith("final_vault/tenos/rooms")
+                        || path.startsWith("final_vault/wendarr/rooms")) {
+                        return new VaultRoom(template, box, rotation);
+                     }
+
+                     if (path.startsWith("final_vault/velara/tunnels")
+                        || path.startsWith("final_vault/tenos/tunnels")
+                        || path.startsWith("final_vault/wendarr/tunnels")) {
+                        return new VaultTunnel(template, box, rotation);
+                     }
+
+                     if (path.startsWith("final_vault") && path.contains("eye")) {
+                        return new VaultGodEye(template, box, rotation);
+                     }
+
+                     if (path.startsWith("final_vault") && path.contains("boss")) {
+                        return new FinalVaultBoss(template, box, rotation);
                      }
                   }
 

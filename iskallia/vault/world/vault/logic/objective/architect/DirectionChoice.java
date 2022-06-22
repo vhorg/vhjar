@@ -4,6 +4,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.vault.logic.objective.architect.modifier.VoteModifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -67,9 +68,17 @@ public class DirectionChoice {
    }
 
    public List<VoteModifier> getModifiers() {
+      return this.getModifiers(ModConfigs.ARCHITECT_EVENT::getModifier);
+   }
+
+   public List<VoteModifier> getFinalArchitectModifiers() {
+      return this.getModifiers(ModConfigs.FINAL_ARCHITECT::getModifier);
+   }
+
+   public List<VoteModifier> getModifiers(Function<String, VoteModifier> resolver) {
       List<VoteModifier> modifierList = new ArrayList<>();
       this.modifiers.forEach(modifierStr -> {
-         VoteModifier modifier = ModConfigs.ARCHITECT_EVENT.getModifier(modifierStr);
+         VoteModifier modifier = resolver.apply(modifierStr);
          if (modifier != null) {
             modifierList.add(modifier);
          }

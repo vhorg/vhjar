@@ -69,9 +69,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
 public class ModModels {
-   public static void setupModelLoaders() {
-   }
-
    public static void setupRenderLayers() {
       RenderTypeLookup.setRenderLayer(ModBlocks.VAULT_PORTAL, RenderType.func_228645_f_());
       RenderTypeLookup.setRenderLayer(ModBlocks.ISKALLIUM_DOOR, RenderType.func_228643_e_());
@@ -92,9 +89,11 @@ public class ModModels {
       RenderTypeLookup.setRenderLayer(ModBlocks.TIME_ALTAR, RenderType.func_228645_f_());
       RenderTypeLookup.setRenderLayer(ModBlocks.SOUL_ALTAR, RenderType.func_228645_f_());
       RenderTypeLookup.setRenderLayer(ModBlocks.VAULT_GLASS, RenderType.func_228645_f_());
+      RenderTypeLookup.setRenderLayer(ModBlocks.FINAL_VAULT_FRAME, RenderType.func_228643_e_());
       setRenderLayers(ModBlocks.VENDING_MACHINE, RenderType.func_228643_e_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.ADVANCED_VENDING_MACHINE, RenderType.func_228643_e_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.func_228639_c_(), RenderType.func_228645_f_());
+      setRenderLayers(ModBlocks.HOURGLASS, RenderType.func_228639_c_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.VAULT_CRATE_SCAVENGER, RenderType.func_228639_c_(), RenderType.func_228645_f_());
       setRenderLayers(ModBlocks.VAULT_CRATE_CAKE, RenderType.func_228643_e_());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.func_228639_c_(), RenderType.func_228645_f_());

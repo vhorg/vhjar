@@ -107,7 +107,7 @@ public class StabilizerBlock extends Block {
                .map(stabilizer -> stabilizer.equals(pos))
                .orElse(false)
             ? true
-            : vault.getActiveObjective(ArchitectObjective.class).map(objective -> objective.createVotingSession(vault, world, pos)).orElse(false);
+            : vault.getActiveObjective(ArchitectObjective.class).map(objective -> objective.createVotingSession(world, pos)).orElse(false);
       }
    }
 

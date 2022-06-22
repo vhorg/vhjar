@@ -21,6 +21,7 @@ public class VaultRoomLayoutRegistry {
       layoutRegistry.put(DebugVaultLayout.ID, DebugVaultLayout::new);
       layoutRegistry.put(DenseDiamondRoomLayout.ID, DenseDiamondRoomLayout::new);
       layoutRegistry.put(DenseSquareRoomLayout.ID, DenseSquareRoomLayout::new);
+      layoutRegistry.put(EmptyVaultLayout.ID, EmptyVaultLayout::new);
    }
 
    @Nullable

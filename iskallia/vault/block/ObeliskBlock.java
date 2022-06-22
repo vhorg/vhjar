@@ -5,7 +5,9 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.VaultBossSpawner;
+import iskallia.vault.world.vault.logic.objective.SummonAndKillAllBossesObjective;
 import iskallia.vault.world.vault.logic.objective.SummonAndKillBossObjective;
+import iskallia.vault.world.vault.logic.objective.architect.ArchitectSummonAndKillBossesObjective;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
@@ -104,7 +106,30 @@ public class ObeliskBlock extends Block {
                   return true;
                }
             } else {
-               return false;
+               ArchitectSummonAndKillBossesObjective objective3 = vault.getPlayer(player.func_110124_au())
+                  .flatMap(vaultPlayer -> vaultPlayer.getActiveObjective(ArchitectSummonAndKillBossesObjective.class))
+                  .orElseGet(() -> vault.getActiveObjective(ArchitectSummonAndKillBossesObjective.class).orElse(null));
+               if (objective3 != null) {
+                  LivingEntity boss = VaultBossSpawner.spawnBoss(vault, (ServerWorld)world, pos);
+                  objective3.setBoss(boss);
+                  return true;
+               } else {
+                  SummonAndKillAllBossesObjective objective2 = vault.getPlayer(player.func_110124_au())
+                     .flatMap(vaultPlayer -> vaultPlayer.getActiveObjective(SummonAndKillAllBossesObjective.class))
+                     .orElseGet(() -> vault.getActiveObjective(SummonAndKillAllBossesObjective.class).orElse(null));
+                  if (objective2 != null) {
+                     if (!objective2.allObelisksClicked() && !objective2.allBossesDefeated()) {
+                        objective2.addObelisk();
+                        LivingEntity boss = VaultBossSpawner.spawnBoss(vault, (ServerWorld)world, pos);
+                        objective2.addBoss(boss);
+                        return true;
+                     } else {
+                        return false;
+                     }
+                  } else {
+                     return false;
+                  }
+               }
             }
          }
       }

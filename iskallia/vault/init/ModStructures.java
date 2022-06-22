@@ -3,6 +3,8 @@ package iskallia.vault.init;
 import com.mojang.serialization.Codec;
 import iskallia.vault.Vault;
 import iskallia.vault.world.gen.structure.ArchitectEventStructure;
+import iskallia.vault.world.gen.structure.FinalVaultBossStructure;
+import iskallia.vault.world.gen.structure.FinalVaultLobbyStructure;
 import iskallia.vault.world.gen.structure.RaidChallengeStructure;
 import iskallia.vault.world.gen.structure.VaultStructure;
 import iskallia.vault.world.gen.structure.VaultTroveStructure;
@@ -20,12 +22,16 @@ public class ModStructures {
    public static Structure<ArchitectEventStructure.Config> ARCHITECT_EVENT;
    public static Structure<RaidChallengeStructure.Config> RAID_CHALLENGE;
    public static Structure<VaultTroveStructure.Config> VAULT_TROVE;
+   public static Structure<FinalVaultLobbyStructure.Config> FINAL_VAULT_LOBBY;
+   public static Structure<FinalVaultBossStructure.Config> FINAL_VAULT_BOSS;
 
    public static void register(Register<Structure<?>> event) {
       VAULT_STAR = register(event.getRegistry(), "vault_star", new VaultStructure(VaultStructure.Config.CODEC));
       ARCHITECT_EVENT = register(event.getRegistry(), "architect_event", new ArchitectEventStructure(ArchitectEventStructure.Config.CODEC));
       RAID_CHALLENGE = register(event.getRegistry(), "raid_challenge", new RaidChallengeStructure(RaidChallengeStructure.Config.CODEC));
       VAULT_TROVE = register(event.getRegistry(), "trove", new VaultTroveStructure(VaultTroveStructure.Config.CODEC));
+      FINAL_VAULT_LOBBY = register(event.getRegistry(), "final_vault_lobby", new FinalVaultLobbyStructure(FinalVaultLobbyStructure.Config.CODEC));
+      FINAL_VAULT_BOSS = register(event.getRegistry(), "final_vault_boss", new FinalVaultBossStructure(FinalVaultBossStructure.Config.CODEC));
       ModStructures.PoolElements.register(event);
    }
 

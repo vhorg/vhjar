@@ -5,13 +5,18 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.data.GlobalDifficultyData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.VaultUtils;
+import iskallia.vault.world.vault.logic.objective.architect.ArchitectSummonAndKillBossesObjective;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.EquipmentSlotType.Group;
@@ -60,6 +65,25 @@ public class EntityScaler {
       if (!isScaled(entity)) {
          VaultMobsConfig.Mob.scale(entity, vault, vaultDifficulty);
       }
+
+      vault.getActiveObjective(ArchitectSummonAndKillBossesObjective.class)
+         .ifPresent(
+            objective -> {
+               if (entity.func_233645_dx_().func_233790_b_(Attributes.field_233818_a_)) {
+                  UUID randomId;
+                  do {
+                     randomId = UUID.randomUUID();
+                  } while (entity.func_233645_dx_().func_233782_a_(Attributes.field_233818_a_, randomId));
+
+                  entity.func_110148_a(Attributes.field_233818_a_)
+                     .func_233769_c_(
+                        new AttributeModifier(randomId, "Final Architect Health", objective.getCombinedMobHealthMultiplier(), Operation.MULTIPLY_BASE)
+                     );
+               }
+
+               entity.func_70691_i(1000000.0F);
+            }
+         );
 
       for (EquipmentSlotType slot : EquipmentSlotType.values()) {
          if (slot.func_188453_a() != Group.HAND || entity.func_184582_a(slot).func_190926_b()) {

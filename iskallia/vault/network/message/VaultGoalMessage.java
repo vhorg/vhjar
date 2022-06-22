@@ -3,6 +3,7 @@ package iskallia.vault.network.message;
 import iskallia.vault.client.vault.goal.VaultGoalData;
 import iskallia.vault.network.message.base.OpcodeMessage;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
+import iskallia.vault.world.vault.logic.objective.TreasureHuntObjective;
 import iskallia.vault.world.vault.logic.objective.architect.VotingSession;
 import java.util.List;
 import java.util.function.Supplier;
@@ -64,6 +65,18 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
       });
    }
 
+   public static VaultGoalMessage treasureHunt(List<TreasureHuntObjective.ItemSubmission> activeSubmissions) {
+      return composeMessage(new VaultGoalMessage(), VaultGoalMessage.VaultGoal.SCAVENGER_GOAL, payload -> {
+         ListNBT list = new ListNBT();
+
+         for (TreasureHuntObjective.ItemSubmission submission : activeSubmissions) {
+            list.add(submission.serialize());
+         }
+
+         payload.func_218657_a("scavengerItems", list);
+      });
+   }
+
    public static VaultGoalMessage architectEvent(
       float completedPercent, int ticksUntilNextVote, int totalTicksUntilNextVote, @Nullable VotingSession activeVotingSession
    ) {
@@ -71,6 +84,28 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
          payload.func_74776_a("completedPercent", completedPercent);
          payload.func_74768_a("ticksUntilNextVote", ticksUntilNextVote);
          payload.func_74768_a("totalTicksUntilNextVote", totalTicksUntilNextVote);
+         if (activeVotingSession != null) {
+            payload.func_218657_a("votingSession", activeVotingSession.serialize());
+         }
+      });
+   }
+
+   public static VaultGoalMessage architectFinalEvent(
+      int killedBosses, int totalBosses, int knowledge, int totalKnowledge, @Nullable VotingSession activeVotingSession, boolean killCurrentBoss
+   ) {
+      ITextComponent text;
+      if (killCurrentBoss) {
+         text = new StringTextComponent("Kill the Boss!").func_240699_a_(TextFormatting.BOLD).func_240699_a_(TextFormatting.RED);
+      } else {
+         text = new StringTextComponent("Gather Knowledge!").func_240699_a_(TextFormatting.BOLD).func_240699_a_(TextFormatting.AQUA);
+      }
+
+      return composeMessage(new VaultGoalMessage(), VaultGoalMessage.VaultGoal.FINAL_ARCHITECT_GOAL, payload -> {
+         payload.func_74778_a("message", Serializer.func_150696_a(text));
+         payload.func_74768_a("killedBosses", killedBosses);
+         payload.func_74768_a("totalBosses", totalBosses);
+         payload.func_74768_a("knowledge", knowledge);
+         payload.func_74768_a("totalKnowledge", totalKnowledge);
          if (activeVotingSession != null) {
             payload.func_218657_a("votingSession", activeVotingSession.serialize());
          }
@@ -91,6 +126,7 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
       int totalMobs,
       int tickWaveDelay,
       int completed,
+      int target,
       List<ITextComponent> positiveModifiers,
       List<ITextComponent> negativeModifiers
    ) {
@@ -101,6 +137,7 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
          payload.func_74768_a("totalMobs", totalMobs);
          payload.func_74768_a("tickWaveDelay", tickWaveDelay);
          payload.func_74768_a("completedRaids", completed);
+         payload.func_74768_a("targetRaids", target);
          ListNBT positives = new ListNBT();
          positiveModifiers.forEach(modifier -> positives.add(StringNBT.func_229705_a_(Serializer.func_150696_a(modifier))));
          payload.func_218657_a("positives", positives);
@@ -129,6 +166,7 @@ public class VaultGoalMessage extends OpcodeMessage<VaultGoalMessage.VaultGoal> 
       ANCIENTS_GOAL,
       RAID_GOAL,
       CAKE_HUNT_GOAL,
-      CLEAR;
+      CLEAR,
+      FINAL_ARCHITECT_GOAL;
    }
 }

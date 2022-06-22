@@ -21,6 +21,7 @@ public class ClientVaultRaidData {
    private static int remainingTicks = 0;
    private static boolean canGetRecordTime = false;
    private static VaultOverlayMessage.OverlayType type = VaultOverlayMessage.OverlayType.NONE;
+   private static boolean showTimer = true;
    private static VaultModifiers modifiers = new VaultModifiers();
    private static boolean inBossFight = false;
 
@@ -34,6 +35,10 @@ public class ClientVaultRaidData {
 
    public static VaultOverlayMessage.OverlayType getOverlayType() {
       return type;
+   }
+
+   public static boolean showTimer() {
+      return showTimer;
    }
 
    public static VaultModifiers getModifiers() {
@@ -74,6 +79,7 @@ public class ClientVaultRaidData {
       remainingTicks = overlayMessage.getRemainingTicks();
       canGetRecordTime = overlayMessage.canGetRecordTime();
       type = overlayMessage.getOverlayType();
+      showTimer = overlayMessage.showTimer();
    }
 
    public static void receiveModifierUpdate(VaultModifierMessage message) {

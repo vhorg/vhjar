@@ -117,7 +117,7 @@ public class JigsawPieceResolver {
          thisPieceBlocks = jigsawpiece.func_214849_a(templateMgr, pos, rotation, rand);
       }
 
-      label118:
+      label126:
       for (BlockInfo blockInfo : thisPieceBlocks) {
          Direction connectingDirection = JigsawBlock.func_235508_h_(blockInfo.field_186243_b);
          BlockPos jigsawConnectorPos = blockInfo.field_186242_a;
@@ -145,13 +145,13 @@ public class JigsawPieceResolver {
                }
 
                WeightedList<JigsawPiece> weightedPieces = new WeightedList<>();
-               if (this.filter.test(connectorPool)) {
+               if (!connectorPool.equals(new ResourceLocation("empty")) && this.filter.test(connectorPool)) {
                   mainJigsawPattern.get()
                      .field_214952_d
                      .forEach(weightedPiece -> weightedPieces.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond()));
                }
 
-               if (this.filter.test(fallbackConnectorPool)) {
+               if (!fallbackConnectorPool.equals(new ResourceLocation("empty")) && this.filter.test(fallbackConnectorPool)) {
                   fallbackJigsawPattern.get()
                      .field_214952_d
                      .forEach(weightedPiece -> weightedPieces.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond()));
@@ -172,6 +172,10 @@ public class JigsawPieceResolver {
                      for (BlockInfo nextPieceBlockInfo : nextPieceBlocks) {
                         if (JigsawBlock.func_220171_a(blockInfo, nextPieceBlockInfo)) {
                            BlockPos nextPiecePos = nextPieceBlockInfo.field_186242_a;
+                           if (connectorPool.equals(Vault.id("final_vault/tenos/obelisk"))) {
+                              nextPiecePos = nextPiecePos.func_177984_a();
+                           }
+
                            BlockPos pieceDiff = new BlockPos(
                               expectedConnectionPos.func_177958_n() - nextPiecePos.func_177958_n(),
                               expectedConnectionPos.func_177956_o() - nextPiecePos.func_177956_o(),
@@ -206,7 +210,7 @@ public class JigsawPieceResolver {
                               );
                               resolvedPieces.add(nextPieceVillagePiece);
                               generationEntries.add(new JigsawPieceResolver.Entry(nextPieceVillagePiece, nextGenerationBox));
-                              continue label118;
+                              continue label126;
                            }
                         }
                      }

@@ -10,6 +10,7 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.VaultUtils;
 import iskallia.vault.world.vault.logic.VaultCowOverrides;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,10 +21,16 @@ import net.minecraft.block.AbstractBlock.Properties;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.state.EnumProperty;
+import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
@@ -40,14 +47,22 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class VaultPortalBlock extends NetherPortalBlock {
    public static final IPositionPredicate FRAME = (state, reader, p) -> Arrays.stream(ModConfigs.VAULT_PORTAL.getValidFrameBlocks())
       .anyMatch(b -> b == state.func_177230_c());
+   public static final EnumProperty<VaultPortalBlock.Style> STYLE = EnumProperty.func_177709_a("style", VaultPortalBlock.Style.class);
 
    public VaultPortalBlock() {
       super(Properties.func_200950_a(Blocks.field_150427_aO));
-      this.func_180632_j((BlockState)((BlockState)this.field_176227_L.func_177621_b()).func_206870_a(field_176550_a, Axis.X));
+      this.func_180632_j(
+         (BlockState)((BlockState)((BlockState)this.field_176227_L.func_177621_b()).func_206870_a(field_176550_a, Axis.X))
+            .func_206870_a(STYLE, VaultPortalBlock.Style.RAINBOW)
+      );
+   }
+
+   public void func_149666_a(ItemGroup group, NonNullList<ItemStack> items) {
    }
 
    protected void func_206840_a(Builder<Block, BlockState> builder) {
       super.func_206840_a(builder);
+      builder.func_206894_a(new Property[]{STYLE});
    }
 
    public void func_225542_b_(BlockState state, ServerWorld world, BlockPos pos, Random random) {
@@ -78,15 +93,20 @@ public class VaultPortalBlock extends NetherPortalBlock {
                      } else if (destinationKey == Vault.VAULT_KEY && portal != null) {
                         CrystalData data = portal.getData();
                         VaultRaid.Builder builder = portal.getData().createVault(destination, player);
-                        VaultRaid vault = VaultRaidData.get(destination).startVault(destination, builder);
-                        if (CrystalData.shouldForceCowVault(data)) {
-                           vault.getProperties().create(VaultRaid.COW_VAULT, true);
-                           data.clearModifiers();
-                           data.setSelectedObjective(VaultRaid.SUMMON_AND_KILL_BOSS.get().getId());
-                           VaultCowOverrides.setupVault(vault);
+                        if (builder != null) {
+                           VaultRaid vault = VaultRaidData.get(destination).startVault(destination, builder);
+                           if (CrystalData.shouldForceCowVault(data)) {
+                              vault.getProperties().create(VaultRaid.COW_VAULT, true);
+                              data.clearModifiers();
+                              data.setSelectedObjective(VaultRaid.SUMMON_AND_KILL_BOSS.get().getId());
+                              VaultCowOverrides.setupVault(vault);
+                           }
+
+                           world.func_175656_a(pos, Blocks.field_150350_a.func_176223_P());
+                           List<BlockPos> frame = VaultPortalSize.getFrame(world, pos);
+                           frame.forEach(frameBlock -> world.func_180501_a(frameBlock, Blocks.field_235406_np_.func_176223_P(), 11));
                         }
 
-                        world.func_175656_a(pos, Blocks.field_150350_a.func_176223_P());
                         player.func_242279_ag();
                      }
                   }
@@ -139,5 +159,18 @@ public class VaultPortalBlock extends NetherPortalBlock {
 
    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
       return ModBlocks.VAULT_PORTAL_TILE_ENTITY.func_200968_a();
+   }
+
+   public static enum Style implements IStringSerializable {
+      RAINBOW,
+      FINAL,
+      VELARA,
+      TENOS,
+      WENDARR,
+      IDONA;
+
+      public String func_176610_l() {
+         return this.name().toLowerCase();
+      }
    }
 }

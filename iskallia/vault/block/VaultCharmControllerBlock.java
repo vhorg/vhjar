@@ -59,6 +59,8 @@ public class VaultCharmControllerBlock extends Block {
             if (heldItem.func_77973_b() instanceof VaultCharmUpgrade) {
                VaultCharmUpgrade item = (VaultCharmUpgrade)heldItem.func_77973_b();
                int newSize = item.getTier().getSlotAmount();
+               System.out.println(newSize);
+               System.out.println(inventory.canUpgrade(newSize));
                if (inventory.canUpgrade(newSize)) {
                   player.field_70170_p.func_184133_a(null, pos, SoundEvents.field_187604_bf, SoundCategory.BLOCKS, 1.0F, 1.0F);
                   data.upgradeInventorySize(sPlayer, item.getTier().getSlotAmount());

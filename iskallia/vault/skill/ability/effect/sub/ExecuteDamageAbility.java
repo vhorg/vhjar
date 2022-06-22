@@ -1,5 +1,6 @@
 package iskallia.vault.skill.ability.effect.sub;
 
+import iskallia.vault.entity.EyesoreEntity;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
@@ -32,6 +33,10 @@ public class ExecuteDamageAbility extends ExecuteAbility<ExecuteDamageConfig> {
                      ExecuteDamageConfig cfg = (ExecuteDamageConfig)node.getAbilityConfig();
                      float missingHealth = event.getEntityLiving().func_110138_aP() - event.getEntityLiving().func_110143_aJ();
                      float damageDealt = missingHealth * cfg.getDamagePercentPerMissingHealthPercent();
+                     if (event.getEntityLiving() instanceof EyesoreEntity) {
+                        damageDealt = Math.min(5.0F, damageDealt);
+                     }
+
                      event.setAmount(event.getAmount() + damageDealt);
                   }
                }

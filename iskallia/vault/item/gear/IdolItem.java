@@ -73,6 +73,10 @@ public class IdolItem extends BasicItem implements VaultGear<IdolItem> {
       }
    }
 
+   public boolean isRepairable(ItemStack stack) {
+      return false;
+   }
+
    public boolean isDamageable(ItemStack stack) {
       return this.isDamageable(this, stack);
    }

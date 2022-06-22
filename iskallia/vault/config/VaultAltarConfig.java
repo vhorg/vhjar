@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameterSets;
 import net.minecraft.loot.LootParameters;
@@ -109,14 +109,19 @@ public class VaultAltarConfig extends Config {
       }
 
       LootTable lootTable = world.func_73046_m().func_200249_aQ().func_186521_a(ModConfigs.LOOT_TABLES.getForLevel(vaultLevel).getAltar());
-      RequiredItem resource = new RequiredItem(ItemStack.field_190927_a, 0, 0);
-      RequiredItem richity = new RequiredItem(ItemStack.field_190927_a, 0, 0);
-      RequiredItem farmable = new RequiredItem(ItemStack.field_190927_a, 0, 0);
-      RequiredItem misc = new RequiredItem(ItemStack.field_190927_a, 0, 0);
-      lootTable.getPool("Resource").func_216091_a(resource::setItem, ctx);
-      lootTable.getPool("Richity").func_216091_a(richity::setItem, ctx);
-      lootTable.getPool("Farmable").func_216091_a(farmable::setItem, ctx);
-      lootTable.getPool("Misc").func_216091_a(misc::setItem, ctx);
+      RequiredItem resource = new RequiredItem(Items.field_151119_aD, 0, 0);
+      RequiredItem richity = new RequiredItem(Items.field_151045_i, 0, 0);
+      RequiredItem farmable = new RequiredItem(Items.field_151034_e, 0, 0);
+      RequiredItem misc = new RequiredItem(Items.field_151110_aK, 0, 0);
+
+      try {
+         lootTable.getPool("Resource").func_216091_a(resource::setItem, ctx);
+         lootTable.getPool("Richity").func_216091_a(richity::setItem, ctx);
+         lootTable.getPool("Farmable").func_216091_a(farmable::setItem, ctx);
+         lootTable.getPool("Misc").func_216091_a(misc::setItem, ctx);
+      } catch (Exception var22) {
+      }
+
       double m1 = 800.0 * Math.atan(altarLevel / 250.0) / Math.PI + 1.0;
       double m2 = 200.0 / (1.0 + Math.exp((-altarLevel + 260.0) / 50.0));
       double m3 = 400.0 / (1.0 + Math.exp((-altarLevel + 200.0) / 40.0));

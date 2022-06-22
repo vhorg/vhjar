@@ -151,7 +151,7 @@ public class ScavengerHuntObjective extends VaultObjective {
 
    @Nonnull
    @Override
-   public BlockState getObjectiveRelevantBlock() {
+   public BlockState getObjectiveRelevantBlock(VaultRaid vault, ServerWorld world, BlockPos pos) {
       return ModBlocks.SCAVENGER_CHEST.func_176223_P();
    }
 

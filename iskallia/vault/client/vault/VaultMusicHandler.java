@@ -55,7 +55,7 @@ public class VaultMusicHandler {
                stopBossLoop();
             } else {
                VaultOverlayMessage.OverlayType type = ClientVaultRaidData.getOverlayType();
-               if (type == VaultOverlayMessage.OverlayType.VAULT) {
+               if (type == VaultOverlayMessage.OverlayType.VAULT && ClientVaultRaidData.showTimer()) {
                   int remainingTicks = ClientVaultRaidData.getRemainingTicks();
                   int panicTicks = 600;
                   if (remainingTicks < 600) {

@@ -23,6 +23,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class VaultCowOverrides {
    private static final UUID DAMAGE_NERF_MULTIPLIER = UUID.fromString("384df991-f603-344c-a090-3693adfa984a");
+   public static boolean forceSpecialVault = false;
    public static final String ENTITY_TAG = "replaced_entity";
 
    public static void setupVault(VaultRaid vault) {

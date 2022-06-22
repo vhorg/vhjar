@@ -5,10 +5,12 @@ import iskallia.vault.Vault;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.data.WeightedList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -67,6 +69,21 @@ public class ScavengerHuntConfig extends Config {
       }
 
       return ScavengerHuntConfig.SourceType.MOB;
+   }
+
+   @Nullable
+   public ResourceLocation getRequirementMobType(ItemStack stack) {
+      Item requiredItem = stack.func_77973_b();
+
+      for (Entry<String, ScavengerHuntConfig.ItemPool> mobDropEntry : this.mobDropItems.entrySet()) {
+         for (WeightedList.Entry<ScavengerHuntConfig.ItemEntry> entry : mobDropEntry.getValue().getPool()) {
+            if (requiredItem.equals(entry.value.getItem())) {
+               return new ResourceLocation(mobDropEntry.getKey());
+            }
+         }
+      }
+
+      return null;
    }
 
    @Override
@@ -249,6 +266,10 @@ public class ScavengerHuntConfig extends Config {
       public ItemPool(int min, int max) {
          this.min = min;
          this.max = max;
+      }
+
+      public List<WeightedList.Entry<ScavengerHuntConfig.ItemEntry>> getPool() {
+         return Collections.unmodifiableList(this.pool);
       }
 
       public ScavengerHuntConfig.ItemEntry getRandomEntry(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {

@@ -74,6 +74,25 @@ public class VaultAltarRenderer extends TileEntityRenderer<VaultAltarTileEntity>
                );
                this.renderLabel(requiredItem, matrixStack, buffer, lightLevel, translation, text, textColor);
             }
+
+            if (recipe.isPogInfused()) {
+               boolean infusing = altar.getAltarState() == VaultAltarTileEntity.AltarState.INFUSING;
+               ItemStack pogStack = new ItemStack(ModItems.POG);
+               IBakedModel ibakedmodel = this.mc.func_175599_af().func_184393_a(pogStack, null, null);
+
+               for (int i = 0; i < 3; i++) {
+                  double r = 1.0;
+                  matrixStack.func_227860_a_();
+                  matrixStack.func_227861_a_(0.5, 0.85, 0.5);
+                  matrixStack.func_227863_a_(
+                     Vector3f.field_229181_d_.func_229187_a_(i * 120 + this.getAngle(player, partialTicks) * (infusing ? 25.0F : 15.0F))
+                  );
+                  matrixStack.func_227861_a_(r, Math.sin(this.getAngle(player, partialTicks) * 0.25 + i) * 0.2, 0.0);
+                  matrixStack.func_227863_a_(Vector3f.field_229181_d_.func_229187_a_(this.getAngle(player, partialTicks) * 10.0F));
+                  this.mc.func_175599_af().func_229111_a_(pogStack, TransformType.GROUND, true, matrixStack, buffer, lightLevel, combinedOverlay, ibakedmodel);
+                  matrixStack.func_227865_b_();
+               }
+            }
          }
       }
    }

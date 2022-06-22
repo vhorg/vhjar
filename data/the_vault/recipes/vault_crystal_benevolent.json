@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sss",
+    "svs",
+    "sss"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:shard_benevolent"
+    },
+    "v": {
+      "item": "the_vault:vault_crystal"
+    }
+  },
+  "result": {
+    "item": "the_vault:vault_crystal",
+    "nbt": "{CrystalData:{Type:\"BOSS_BENEVOLENT_PREP\"}}",
+    "count": 1
+  }
+}

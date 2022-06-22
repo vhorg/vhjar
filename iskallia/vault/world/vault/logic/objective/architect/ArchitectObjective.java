@@ -82,12 +82,12 @@ import net.minecraftforge.fml.network.NetworkDirection;
    bus = Bus.FORGE
 )
 public class ArchitectObjective extends VaultObjective {
-   private final List<VotingSession> completedSessions = new ArrayList<>();
-   private VotingSession activeSession = null;
+   protected final List<VotingSession> completedSessions = new ArrayList<>();
+   protected VotingSession activeSession = null;
    private boolean votingLocked = false;
-   private int totalRequiredVotes;
-   private int voteDowntimeTicks = 400;
-   private int ticksUntilNextVote = 0;
+   protected int totalRequiredVotes;
+   protected int voteDowntimeTicks = 400;
+   protected int ticksUntilNextVote = 0;
    private UUID bossId = null;
    private boolean isBossDead = false;
    private final VListNBT<BlockPos, CompoundNBT> exitPortalLocations = VListNBT.ofCodec(BlockPos.field_239578_a_, BlockPos.field_177992_a);
@@ -98,64 +98,69 @@ public class ArchitectObjective extends VaultObjective {
       this.totalRequiredVotes = ModConfigs.ARCHITECT_EVENT.getRandomTotalRequiredPolls();
    }
 
-   public boolean createVotingSession(VaultRaid vault, ServerWorld world, BlockPos origin) {
+   public boolean createVotingSession(ServerWorld world, BlockPos origin) {
       if (this.activeSession == null && this.ticksUntilNextVote <= 0 && !this.isVotingLocked()) {
-         VaultRoom room = (VaultRoom)Iterables.getFirst(vault.getGenerator().getPiecesAt(origin, VaultRoom.class), null);
-         if (room == null) {
+         VaultRaid thisRaid = VaultRaidData.get(world).getAt(world, origin);
+         if (thisRaid == null) {
             return false;
          } else {
-            List<Direction> availableDirections = new ArrayList<>();
-
-            for (Direction dir : Direction.values()) {
-               if (dir.func_176740_k().func_176722_c() && VaultJigsawHelper.canExpand(vault, room, dir)) {
-                  availableDirections.add(dir);
-               }
-            }
-
-            if (availableDirections.size() <= 1) {
+            VaultRoom room = (VaultRoom)Iterables.getFirst(thisRaid.getGenerator().getPiecesAt(origin, VaultRoom.class), null);
+            if (room == null) {
                return false;
             } else {
-               Direction bossDir = null;
-               if (this.completedSessions.size() >= this.totalRequiredVotes) {
-                  bossDir = MiscUtils.getRandomEntry(availableDirections, rand);
+               List<Direction> availableDirections = new ArrayList<>();
+
+               for (Direction dir : Direction.values()) {
+                  if (dir.func_176740_k().func_176722_c() && VaultJigsawHelper.canExpand(thisRaid, room, dir)) {
+                     availableDirections.add(dir);
+                  }
                }
 
-               List<DirectionChoice> choices = new ArrayList<>();
-
-               for (Direction dirx : availableDirections) {
-                  DirectionChoice choice = new DirectionChoice(dirx);
-                  if (dirx == bossDir) {
-                     choice.addModifier(ModConfigs.ARCHITECT_EVENT.getBossModifier());
-                  } else {
-                     VoteModifier randomModifier = ModConfigs.ARCHITECT_EVENT.generateRandomModifier();
-                     if (randomModifier != null) {
-                        choice.addModifier(randomModifier);
-                     }
+               if (availableDirections.size() <= 1) {
+                  return false;
+               } else {
+                  Direction bossDir = null;
+                  if (this.completedSessions.size() >= this.totalRequiredVotes) {
+                     bossDir = MiscUtils.getRandomEntry(availableDirections, rand);
                   }
 
-                  choices.add(choice);
-               }
+                  List<DirectionChoice> choices = new ArrayList<>();
 
-               this.activeSession = new VotingSession(origin, choices);
-               if (this.completedSessions.isEmpty()) {
-                  IFormattableTextComponent display = new StringTextComponent("").func_240702_b_("Vote with ");
-                  List<DirectionChoice> directions = this.activeSession.getDirections();
-
-                  for (int i = 0; i < directions.size(); i++) {
-                     if (i != 0) {
-                        display.func_240702_b_(", ");
+                  for (Direction dirx : availableDirections) {
+                     DirectionChoice choice = new DirectionChoice(dirx);
+                     if (dirx == bossDir) {
+                        choice.addModifier(ModConfigs.ARCHITECT_EVENT.getBossModifier());
+                     } else {
+                        VoteModifier randomModifier = ModConfigs.ARCHITECT_EVENT.generateRandomModifier();
+                        if (randomModifier != null) {
+                           choice.addModifier(randomModifier);
+                        }
                      }
 
-                     DirectionChoice choice = directions.get(i);
-                     display.func_230529_a_(choice.getDirectionDisplay("/"));
+                     choices.add(choice);
                   }
 
-                  display.func_240702_b_("!");
-                  vault.getPlayers()
-                     .forEach(vPlayer -> vPlayer.runIfPresent(world.func_73046_m(), sPlayer -> sPlayer.func_145747_a(display, Util.field_240973_b_)));
-               }
+                  this.activeSession = new VotingSession(origin, choices);
+                  if (this.completedSessions.isEmpty()) {
+                     IFormattableTextComponent display = new StringTextComponent("").func_240702_b_("Vote with ");
+                     List<DirectionChoice> directions = this.activeSession.getDirections();
 
-               return true;
+                     for (int i = 0; i < directions.size(); i++) {
+                        if (i != 0) {
+                           display.func_240702_b_(", ");
+                        }
+
+                        DirectionChoice choice = directions.get(i);
+                        display.func_230529_a_(choice.getDirectionDisplay("/"));
+                     }
+
+                     display.func_240702_b_("!");
+                     thisRaid.getPlayers()
+                        .forEach(vPlayer -> vPlayer.runIfPresent(world.func_73046_m(), sPlayer -> sPlayer.func_145747_a(display, Util.field_240973_b_)));
+                  }
+
+                  return true;
+               }
             }
          }
       } else {
@@ -232,7 +237,7 @@ public class ArchitectObjective extends VaultObjective {
       }
    }
 
-   private void finishVote(VaultRaid vault, VotingSession session, ServerWorld world) {
+   protected void finishVote(VaultRaid vault, VotingSession session, ServerWorld world) {
       vault.getGenerator()
          .getPiecesAt(session.getStabilizerPos(), VaultRoom.class)
          .stream()
@@ -253,14 +258,13 @@ public class ArchitectObjective extends VaultObjective {
                   .filter(Objects::nonNull)
                   .findFirst()
                   .orElse(null);
-               List<VaultPiece> generatedPieces = VaultJigsawHelper.expandVault(vault, world, room, choice.getDirection(), roomPiece);
-               BreadcrumbFeature.generateVaultBreadcrumb(vault, world, generatedPieces);
+               modifiers.forEach(modifier -> modifier.onApply(this, vault, world));
+               List<VaultPiece> generatedPieces = this.expandVault(vault, world, room, session, choice.getDirection(), roomPiece, null);
                List<VaultPieceProcessor> postProcessors = modifiers.stream()
                   .map(modifier -> modifier.getPostProcessor(this, vault))
                   .filter(Objects::nonNull)
                   .collect(Collectors.toList());
                generatedPieces.forEach(piece -> postProcessors.forEach(processor -> processor.postProcess(vault, world, piece, choice.getDirection())));
-               modifiers.forEach(modifier -> modifier.onApply(this, vault, world));
                choice.getModifiers().forEach(modifier -> this.voteDowntimeTicks = this.voteDowntimeTicks + modifier.getVoteLockDurationChangeSeconds() * 20);
                this.voteDowntimeTicks = Math.max(0, this.voteDowntimeTicks);
                STitlePacket titlePacket = new STitlePacket(Type.TITLE, choice.getDirectionDisplay());
@@ -280,6 +284,20 @@ public class ArchitectObjective extends VaultObjective {
                }));
             }
          );
+   }
+
+   protected List<VaultPiece> expandVault(
+      VaultRaid vault,
+      ServerWorld world,
+      VaultRoom room,
+      VotingSession session,
+      Direction direction,
+      @Nullable JigsawPiece roomToGenerate,
+      @Nullable JigsawPiece tunnelToGenerate
+   ) {
+      List<VaultPiece> generatedPieces = VaultJigsawHelper.expandVault(vault, world, room, direction, roomToGenerate, tunnelToGenerate);
+      BreadcrumbFeature.generateVaultBreadcrumb(vault, world, generatedPieces);
+      return generatedPieces;
    }
 
    public void buildPortal(List<BlockPos> portalLocations) {
@@ -444,7 +462,7 @@ public class ArchitectObjective extends VaultObjective {
 
    @Nonnull
    @Override
-   public BlockState getObjectiveRelevantBlock() {
+   public BlockState getObjectiveRelevantBlock(VaultRaid vault, ServerWorld world, BlockPos pos) {
       return ModBlocks.STABILIZER.func_176223_P();
    }
 
@@ -501,7 +519,7 @@ public class ArchitectObjective extends VaultObjective {
    public void deserializeNBT(CompoundNBT tag) {
       super.deserializeNBT(tag);
       if (tag.func_150297_b("activeSession", 10)) {
-         this.activeSession = new VotingSession(tag.func_74775_l("activeSession"));
+         this.activeSession = VotingSession.deserialize(tag.func_74775_l("activeSession"));
       } else {
          this.activeSession = null;
       }
@@ -510,7 +528,7 @@ public class ArchitectObjective extends VaultObjective {
       ListNBT sessions = tag.func_150295_c("completedSessions", 10);
 
       for (int i = 0; i < sessions.size(); i++) {
-         this.completedSessions.add(new VotingSession(sessions.func_150305_b(i)));
+         this.completedSessions.add(VotingSession.deserialize(sessions.func_150305_b(i)));
       }
 
       this.totalRequiredVotes = tag.func_74762_e("totalRequiredVotes");

@@ -13,7 +13,7 @@ import javax.annotation.Nullable;
 import net.minecraft.entity.EntityType;
 
 public class RaidConfig extends Config {
-   private static final RaidConfig.Level DEFAULT = new RaidConfig.Level(0, new RaidConfig.MobPool());
+   public static final RaidConfig.Level DEFAULT = new RaidConfig.Level(0, new RaidConfig.MobPool());
    @Expose
    private final Map<String, List<RaidConfig.Level>> mobPools = new HashMap<>();
    @Expose
@@ -171,9 +171,9 @@ public class RaidConfig extends Config {
 
    public static class Level {
       @Expose
-      private final int level;
+      public final int level;
       @Expose
-      private final RaidConfig.MobPool mobPool;
+      public final RaidConfig.MobPool mobPool;
 
       public Level(int level, RaidConfig.MobPool mobPool) {
          this.level = level;

@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.IStringSerializable;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -83,7 +85,7 @@ public class PlayerFavourData extends WorldSavedData {
       return (PlayerFavourData)world.func_73046_m().func_241755_D_().func_217481_x().func_215752_a(PlayerFavourData::new, "the_vault_PlayerFavour");
    }
 
-   public static enum VaultGodType {
+   public static enum VaultGodType implements IStringSerializable {
       BENEVOLENT("Velara", "The Benevolent", TextFormatting.GREEN),
       OMNISCIENT("Tenos", "The Omniscient", TextFormatting.AQUA),
       TIMEKEEPER("Wendarr", "The Timekeeper", TextFormatting.GOLD),
@@ -99,6 +101,16 @@ public class PlayerFavourData extends WorldSavedData {
          this.color = color;
       }
 
+      public static PlayerFavourData.VaultGodType fromName(String name) {
+         for (PlayerFavourData.VaultGodType type : values()) {
+            if (name.equalsIgnoreCase(type.getName())) {
+               return type;
+            }
+         }
+
+         return null;
+      }
+
       public String getName() {
          return this.name;
       }
@@ -109,6 +121,11 @@ public class PlayerFavourData extends WorldSavedData {
 
       public TextFormatting getChatColor() {
          return this.color;
+      }
+
+      @Nonnull
+      public String func_176610_l() {
+         return this.getName().toLowerCase();
       }
 
       public ITextComponent getHoverChatComponent() {

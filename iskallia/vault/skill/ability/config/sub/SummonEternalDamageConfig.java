@@ -8,9 +8,16 @@ public class SummonEternalDamageConfig extends SummonEternalConfig {
    private final float increasedDamagePercent;
 
    public SummonEternalDamageConfig(
-      int cost, int cooldown, int numberOfEternals, int despawnTime, boolean vaultOnly, float ancientChance, float increasedDamagePercent
+      int cost,
+      int cooldown,
+      int numberOfEternals,
+      int summonedEternalsCap,
+      int despawnTime,
+      boolean vaultOnly,
+      float ancientChance,
+      float increasedDamagePercent
    ) {
-      super(cost, cooldown, numberOfEternals, despawnTime, ancientChance, vaultOnly);
+      super(cost, cooldown, numberOfEternals, summonedEternalsCap, despawnTime, ancientChance, vaultOnly);
       this.increasedDamagePercent = increasedDamagePercent;
    }
 

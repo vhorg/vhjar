@@ -4,7 +4,7 @@
       "rules": [
         {
           "output_state": {
-            "Name": "minecraft:infested_mossy_stone_bricks"
+            "Name": "minecraft:mossy_stone_bricks"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
@@ -17,7 +17,7 @@
         },
         {
           "output_state": {
-            "Name": "minecraft:infested_cobblestone"
+            "Name": "minecraft:cobblestone"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",
@@ -43,7 +43,7 @@
         },
         {
           "output_state": {
-            "Name": "minecraft:infested_cracked_stone_bricks"
+            "Name": "minecraft:cracked_stone_bricks"
           },
           "input_predicate": {
             "predicate_type": "minecraft:random_block_match",

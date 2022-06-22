@@ -1,8 +1,10 @@
 package iskallia.vault.world.data;
 
 import iskallia.vault.init.ModAttributes;
+import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.skill.set.PlayerSet;
+import iskallia.vault.world.vault.VaultRaid;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -59,10 +61,15 @@ public class PhoenixSetSnapshotData extends InventorySnapshotData {
       if (event.getEntity() instanceof ServerPlayerEntity && event.getEntity().field_70170_p instanceof ServerWorld) {
          ServerPlayerEntity player = (ServerPlayerEntity)event.getEntity();
          ServerWorld world = (ServerWorld)player.field_70170_p;
-         if (PlayerSet.isActive(VaultGear.Set.PHOENIX, player)) {
-            PhoenixSetSnapshotData data = get(world);
-            if (data.hasSnapshot(player)) {
-               player.func_184211_a("the_vault_restore_phoenixset");
+         VaultRaid vault = VaultRaidData.get(world).getAt(world, player.func_233580_cy_());
+         if (vault != null && vault.getProperties().exists(VaultRaid.PARENT)) {
+            CrystalData data = vault.getProperties().getBaseOrDefault(VaultRaid.CRYSTAL_DATA, CrystalData.EMPTY);
+         } else {
+            if (PlayerSet.isActive(VaultGear.Set.PHOENIX, player)) {
+               PhoenixSetSnapshotData data = get(world);
+               if (data.hasSnapshot(player)) {
+                  player.func_184211_a("the_vault_restore_phoenixset");
+               }
             }
          }
       }

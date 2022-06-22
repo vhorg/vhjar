@@ -12,6 +12,7 @@ import java.util.List;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.Item;
@@ -127,5 +128,9 @@ public class AdvancedVendingContainer extends Container {
       if (!buy.func_190926_b()) {
          EntityHelper.giveItem(player, buy);
       }
+   }
+
+   public ItemStack func_184996_a(int slotId, int dragType, ClickType clickType, PlayerEntity player) {
+      return clickType == ClickType.SWAP && slotId == 1 ? ItemStack.field_190927_a : super.func_184996_a(slotId, dragType, clickType, player);
    }
 }

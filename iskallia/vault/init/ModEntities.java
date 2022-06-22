@@ -10,6 +10,9 @@ import iskallia.vault.entity.DrillArrowEntity;
 import iskallia.vault.entity.EffectCloudEntity;
 import iskallia.vault.entity.EtchingVendorEntity;
 import iskallia.vault.entity.EternalEntity;
+import iskallia.vault.entity.EyesoreEntity;
+import iskallia.vault.entity.EyesoreFireballEntity;
+import iskallia.vault.entity.EyestalkEntity;
 import iskallia.vault.entity.FighterEntity;
 import iskallia.vault.entity.FloatingItemEntity;
 import iskallia.vault.entity.MonsterEyeEntity;
@@ -17,12 +20,15 @@ import iskallia.vault.entity.RobotEntity;
 import iskallia.vault.entity.TreasureGoblinEntity;
 import iskallia.vault.entity.VaultFighterEntity;
 import iskallia.vault.entity.VaultGuardianEntity;
+import iskallia.vault.entity.VaultSandEntity;
 import iskallia.vault.entity.renderer.AggressiveCowBossRenderer;
 import iskallia.vault.entity.renderer.BlueBlazeRenderer;
 import iskallia.vault.entity.renderer.BoogiemanRenderer;
 import iskallia.vault.entity.renderer.EffectCloudRenderer;
 import iskallia.vault.entity.renderer.EtchingVendorRenderer;
 import iskallia.vault.entity.renderer.EternalRenderer;
+import iskallia.vault.entity.renderer.EyesoreRenderer;
+import iskallia.vault.entity.renderer.EyestalkRenderer;
 import iskallia.vault.entity.renderer.FighterRenderer;
 import iskallia.vault.entity.renderer.MonsterEyeRenderer;
 import iskallia.vault.entity.renderer.RobotRenderer;
@@ -34,6 +40,7 @@ import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.CowRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.entity.SpriteRenderer;
 import net.minecraft.client.renderer.entity.TippedArrowRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
@@ -61,9 +68,13 @@ public class ModEntities {
    public static EntityType<BlueBlazeEntity> BLUE_BLAZE;
    public static EntityType<BoogiemanEntity> BOOGIEMAN;
    public static EntityType<AggressiveCowBossEntity> AGGRESSIVE_COW_BOSS;
+   public static EntityType<EyesoreEntity> EYESORE;
+   public static EntityType<EyestalkEntity> EYESTALK;
    public static EntityType<DrillArrowEntity> DRILL_ARROW;
    public static EntityType<EffectCloudEntity> EFFECT_CLOUD;
+   public static EntityType<VaultSandEntity> VAULT_SAND;
    public static EntityType<FloatingItemEntity> FLOATING_ITEM;
+   public static EntityType<EyesoreFireballEntity> EYESORE_FIREBALL;
 
    public static void register(Register<EntityType<?>> event) {
       for (int i = 0; i < 10; i++) {
@@ -127,9 +138,17 @@ public class ModEntities {
          AggressiveCowEntity::getAttributes,
          event
       );
+      EYESORE = registerLiving(
+         "eyesore", Builder.func_220322_a(EyesoreEntity::new, EntityClassification.MONSTER).func_220321_a(9.78F, 9.78F), EyesoreEntity::getAttributes, event
+      );
+      EYESTALK = registerLiving(
+         "eyestalk", Builder.func_220322_a(EyestalkEntity::new, EntityClassification.MONSTER).func_220321_a(2.2F, 2.6F), EyestalkEntity::getAttributes, event
+      );
       DRILL_ARROW = register("drill_arrow", Builder.func_220322_a(DrillArrowEntity::new, EntityClassification.MISC), event);
       EFFECT_CLOUD = register("effect_cloud", Builder.func_220322_a(EffectCloudEntity::new, EntityClassification.MISC), event);
+      VAULT_SAND = register("vault_sand", Builder.func_220322_a(VaultSandEntity::new, EntityClassification.MISC), event);
       FLOATING_ITEM = register("floating_item", Builder.func_220322_a(FloatingItemEntity::new, EntityClassification.MISC), event);
+      EYESORE_FIREBALL = register("eyesore_fireball", Builder.func_220322_a(EyesoreFireballEntity::new, EntityClassification.MISC), event);
    }
 
    private static EntityType<VaultFighterEntity> registerVaultFighter(int count, Register<EntityType<?>> event) {
@@ -173,9 +192,15 @@ public class ModEntities {
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.BLUE_BLAZE, BlueBlazeRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.BOOGIEMAN, BoogiemanRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.AGGRESSIVE_COW_BOSS, AggressiveCowBossRenderer::new);
+         RenderingRegistry.registerEntityRenderingHandler(ModEntities.EYESORE, EyesoreRenderer::new);
+         RenderingRegistry.registerEntityRenderingHandler(ModEntities.EYESTALK, EyestalkRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.DRILL_ARROW, TippedArrowRenderer::new);
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.EFFECT_CLOUD, EffectCloudRenderer::new);
+         RenderingRegistry.registerEntityRenderingHandler(ModEntities.VAULT_SAND, rm -> new ItemRenderer(rm, Minecraft.func_71410_x().func_175599_af()));
          RenderingRegistry.registerEntityRenderingHandler(ModEntities.FLOATING_ITEM, rm -> new ItemRenderer(rm, Minecraft.func_71410_x().func_175599_af()));
+         RenderingRegistry.registerEntityRenderingHandler(
+            ModEntities.EYESORE_FIREBALL, rm -> new SpriteRenderer(rm, Minecraft.func_71410_x().func_175599_af(), 5.0F, true)
+         );
       }
    }
 }

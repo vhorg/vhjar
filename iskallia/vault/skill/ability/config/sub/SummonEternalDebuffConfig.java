@@ -15,6 +15,7 @@ public class SummonEternalDebuffConfig extends SummonEternalConfig {
       int cost,
       int cooldown,
       int numberOfEternals,
+      int summonedEternalsCap,
       int despawnTime,
       boolean vaultOnly,
       float ancientChance,
@@ -22,7 +23,7 @@ public class SummonEternalDebuffConfig extends SummonEternalConfig {
       int debuffDurationTicks,
       int debuffAmplifier
    ) {
-      super(cost, cooldown, numberOfEternals, despawnTime, ancientChance, vaultOnly);
+      super(cost, cooldown, numberOfEternals, summonedEternalsCap, despawnTime, ancientChance, vaultOnly);
       this.applyDebuffChance = applyDebuffChance;
       this.debuffDurationTicks = debuffDurationTicks;
       this.debuffAmplifier = debuffAmplifier;

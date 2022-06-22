@@ -8,9 +8,9 @@ import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
+import iskallia.vault.world.vault.logic.objective.TreasureHuntObjective;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -61,28 +61,39 @@ public class ScavengerTreasureBlock extends ContainerBlock {
       ServerWorld world = builder.func_216018_a();
       BlockPos pos = new BlockPos((Vector3d)builder.func_216019_b(LootParameters.field_237457_g_));
       VaultRaid vault = VaultRaidData.get(world).getAt(world, pos);
+      List<ItemStack> drops = new ArrayList<>(super.func_220076_a(state, builder));
       if (vault == null) {
-         return super.func_220076_a(state, builder);
+         return drops;
       } else {
-         Optional<ScavengerHuntObjective> objectiveOpt = vault.getActiveObjective(ScavengerHuntObjective.class);
-         if (!objectiveOpt.isPresent()) {
-            return super.func_220076_a(state, builder);
-         } else {
-            ScavengerHuntObjective objective = objectiveOpt.get();
-            List<ItemStack> drops = new ArrayList<>(super.func_220076_a(state, builder));
-            ModConfigs.SCAVENGER_HUNT
-               .generateTreasureLoot(objective.getGenerationDropFilter())
-               .stream()
-               .map(ScavengerHuntConfig.ItemEntry::createItemStack)
-               .filter(stack -> !stack.func_190926_b())
-               .peek(
-                  stack -> vault.getProperties()
-                     .getBase(VaultRaid.IDENTIFIER)
-                     .ifPresent(identifier -> BasicScavengerItem.setVaultIdentifier(stack, identifier))
-               )
-               .forEach(drops::add);
-            return drops;
-         }
+         vault.getActiveObjective(ScavengerHuntObjective.class)
+            .ifPresent(
+               objective -> ModConfigs.SCAVENGER_HUNT
+                  .generateTreasureLoot(objective.getGenerationDropFilter())
+                  .stream()
+                  .map(ScavengerHuntConfig.ItemEntry::createItemStack)
+                  .filter(stack -> !stack.func_190926_b())
+                  .peek(
+                     stack -> vault.getProperties()
+                        .getBase(VaultRaid.IDENTIFIER)
+                        .ifPresent(identifier -> BasicScavengerItem.setVaultIdentifier(stack, identifier))
+                  )
+                  .forEach(drops::add)
+            );
+         vault.getActiveObjective(TreasureHuntObjective.class)
+            .ifPresent(
+               objective -> ModConfigs.TREASURE_HUNT
+                  .generateTreasureLoot(objective.getGenerationDropFilter())
+                  .stream()
+                  .map(ScavengerHuntConfig.ItemEntry::createItemStack)
+                  .filter(stack -> !stack.func_190926_b())
+                  .peek(
+                     stack -> vault.getProperties()
+                        .getBase(VaultRaid.IDENTIFIER)
+                        .ifPresent(identifier -> BasicScavengerItem.setVaultIdentifier(stack, identifier))
+                  )
+                  .forEach(drops::add)
+            );
+         return drops;
       }
    }
 }

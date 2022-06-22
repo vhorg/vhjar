@@ -57,7 +57,9 @@ public class ActiveRaid {
 
    @Nullable
    public static ActiveRaid create(VaultRaid vault, ServerWorld world, BlockPos controller) {
-      RaidPreset preset = RaidPreset.randomFromConfig();
+      int raidIndex = vault.getProperties().getBaseOrDefault(VaultRaid.RAID_INDEX, 0);
+      RaidPreset preset = vault.getProperties().exists(VaultRaid.PARENT) ? RaidPreset.randomFromFinalConfig(raidIndex) : RaidPreset.randomFromConfig();
+      vault.getProperties().create(VaultRaid.RAID_INDEX, raidIndex + 1);
       if (preset == null) {
          return null;
       } else {
@@ -141,7 +143,13 @@ public class ActiveRaid {
       wave.getWaveSpawns()
          .forEach(
             spawn -> {
-               RaidConfig.MobPool pool = ModConfigs.RAID_CONFIG.getPool(spawn.getMobPool(), scalingLevel);
+               RaidConfig.MobPool pool;
+               if (vault.getProperties().exists(VaultRaid.PARENT)) {
+                  pool = ModConfigs.FINAL_RAID.getPool(spawn.getMobPool(), scalingLevel);
+               } else {
+                  pool = ModConfigs.RAID.getPool(spawn.getMobPool(), scalingLevel);
+               }
+
                if (pool != null) {
                   int spawnCount = spawn.getMobCount();
                   spawnCount = (int)(
@@ -160,7 +168,9 @@ public class ActiveRaid {
                         )
                         * playerCount
                   );
-                  spawnCount = (int)(spawnCount * ModConfigs.RAID_CONFIG.getMobCountMultiplier(scalingLevel));
+                  if (!vault.getProperties().exists(VaultRaid.PARENT)) {
+                     spawnCount = (int)(spawnCount * ModConfigs.RAID.getMobCountMultiplier(scalingLevel));
+                  }
 
                   for (int i = 0; i < spawnCount; i++) {
                      String mobType = pool.getRandomMob();

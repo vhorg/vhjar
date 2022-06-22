@@ -212,14 +212,14 @@ public class EternalDataSnapshot implements EternalDataAccess {
       }
    }
 
-   public void serialize(PacketBuffer buffer) {
+   public void serialize(PacketBuffer buffer, boolean useEquipment) {
       buffer.func_179252_a(this.eternalUUID);
       buffer.writeLong(this.seed);
       buffer.func_180714_a(this.eternalName);
       buffer.writeInt(this.equipment.size());
       this.equipment.forEach((slot, stack) -> {
          buffer.func_179249_a(slot);
-         buffer.func_150788_a(stack);
+         buffer.func_150788_a(useEquipment ? stack : ItemStack.field_190927_a);
       });
       buffer.writeInt(this.attributes.size());
       this.attributes.forEach((attr, value) -> {

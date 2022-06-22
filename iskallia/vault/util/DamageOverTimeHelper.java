@@ -3,6 +3,7 @@ package iskallia.vault.util;
 import iskallia.vault.event.ActiveFlags;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import net.minecraft.entity.Entity;
@@ -35,6 +36,27 @@ public class DamageOverTimeHelper {
          );
    }
 
+   public static void invalidateAll(LivingEntity target) {
+      getDotEntries(target).forEach(rec$ -> rec$.invalidate());
+   }
+
+   public static List<DamageOverTimeHelper.DamageOverTimeEntry> getDotEntries(Entity entity) {
+      World entityWorld = entity.func_130014_f_();
+      List<DamageOverTimeHelper.DamageOverTimeEntry> allEntries = worldEntries.get(entityWorld.func_234923_W_());
+      List<DamageOverTimeHelper.DamageOverTimeEntry> entries = new LinkedList<>();
+      if (allEntries == null) {
+         return entries;
+      } else {
+         for (DamageOverTimeHelper.DamageOverTimeEntry entry : allEntries) {
+            if (entry.entityId == entity.func_145782_y()) {
+               entries.add(entry);
+            }
+         }
+
+         return entries;
+      }
+   }
+
    @SubscribeEvent
    public static void onWorldTick(WorldTickEvent event) {
       if (event.phase != Phase.END) {
@@ -43,7 +65,7 @@ public class DamageOverTimeHelper {
             List<DamageOverTimeHelper.DamageOverTimeEntry> entries = worldEntries.computeIfAbsent(world.func_234923_W_(), key -> new ArrayList<>());
             entries.forEach(rec$ -> rec$.decrement());
             ActiveFlags.IS_DOT_ATTACKING.runIfNotSet(() -> entries.forEach(entry -> {
-               if (entry.ticks % 20 == 0) {
+               if (entry.valid && entry.ticks % 20 == 0) {
                   Entity e = world.func_73045_a(entry.entityId);
                   if (e instanceof LivingEntity && e.func_70089_S()) {
                      DamageUtil.shotgunAttack(e, entity -> entity.func_70097_a(entry.source, entry.damagePerSecond));

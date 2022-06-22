@@ -3,7 +3,6 @@ package iskallia.vault.block;
 import iskallia.vault.block.base.FacedBlock;
 import iskallia.vault.block.property.HiddenIntegerProperty;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.ServerScheduler;
 import java.util.ArrayList;
@@ -91,7 +90,10 @@ public class VaultArtifactBlock extends FacedBlock {
          List<BlockPos> validPositions = isValidArtifactSetup(sWorld, pos, state);
          if (!validPositions.isEmpty()) {
             validPositions.forEach(at -> world.func_217377_a(at, false));
-            ServerScheduler.INSTANCE.schedule(5, () -> Block.func_180635_a(sWorld, pos, new ItemStack(ModItems.VAULT_RUNE)));
+            ServerScheduler.INSTANCE.schedule(5, () -> {
+               ItemStack frameStack = new ItemStack(ModBlocks.FINAL_VAULT_FRAME_BLOCK_ITEM);
+               Block.func_180635_a(sWorld, pos, frameStack);
+            });
          }
       }
    }

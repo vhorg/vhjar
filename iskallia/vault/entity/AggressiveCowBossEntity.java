@@ -9,6 +9,9 @@ import iskallia.vault.entity.ai.TeleportRandomly;
 import iskallia.vault.entity.ai.ThrowProjectilesGoal;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.sub.RampageDotAbility;
+import iskallia.vault.world.data.VaultRaidData;
+import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -22,6 +25,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.BossInfo.Color;
 import net.minecraft.world.BossInfo.Overlay;
 import net.minecraft.world.server.ServerBossInfo;
+import net.minecraft.world.server.ServerWorld;
 
 public class AggressiveCowBossEntity extends AggressiveCowEntity implements VaultBoss {
    public TeleportRandomly<AggressiveCowBossEntity> teleportTask = new TeleportRandomly(
@@ -93,6 +97,8 @@ public class AggressiveCowBossEntity extends AggressiveCowEntity implements Vaul
       if (!this.field_70170_p.field_72995_K) {
          this.bossInfo.func_186735_a(this.func_110143_aJ() / this.func_110138_aP());
          this.regenAfterAWhile.tick();
+         VaultRaid vault = VaultRaidData.get((ServerWorld)this.field_70170_p).getAt((ServerWorld)this.field_70170_p, this.func_233580_cy_());
+         this.bossInfo.func_186758_d(vault == null || !vault.getActiveObjective(RaidChallengeObjective.class).isPresent());
       }
    }
 

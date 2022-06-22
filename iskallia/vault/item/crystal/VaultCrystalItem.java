@@ -120,12 +120,15 @@ public class VaultCrystalItem extends Item {
                   );
                IFormattableTextComponent playerName = context.func_195999_j().func_145748_c_().func_230532_e_();
                playerName.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(9974168)));
-               StringTextComponent suffix = new StringTextComponent(" opened a Vault!");
+               String suffix = data.getType() == CrystalData.Type.FINAL_LOBBY ? " opened the Final Vault!" : " opened a Vault!";
+               StringTextComponent suffixComponent = new StringTextComponent(suffix);
                context.func_195991_k()
                   .func_73046_m()
                   .func_184103_al()
                   .func_232641_a_(
-                     new StringTextComponent("").func_230529_a_(playerName).func_230529_a_(suffix), ChatType.CHAT, context.func_195999_j().func_110124_au()
+                     new StringTextComponent("").func_230529_a_(playerName).func_230529_a_(suffixComponent),
+                     ChatType.CHAT,
+                     context.func_195999_j().func_110124_au()
                   );
                context.func_195996_i().func_190918_g(1);
                return ActionResultType.SUCCESS;
@@ -140,19 +143,33 @@ public class VaultCrystalItem extends Item {
 
    private boolean tryCreatePortal(World world, BlockPos pos, Direction facing, CrystalData data) {
       Optional<VaultPortalSize> optional = VaultPortalSize.getPortalSize(world, pos.func_177972_a(facing), Axis.X, VaultPortalBlock.FRAME);
-      if (optional.isPresent()) {
-         BlockState state = (BlockState)ModBlocks.VAULT_PORTAL.func_176223_P().func_206870_a(VaultPortalBlock.field_176550_a, optional.get().getAxis());
-         optional.get().placePortalBlocks(blockPos -> {
+      if (!optional.isPresent()) {
+         return false;
+      } else {
+         VaultPortalSize portal = optional.get();
+         BlockState state = (BlockState)ModBlocks.VAULT_PORTAL.func_176223_P().func_206870_a(VaultPortalBlock.field_176550_a, portal.getAxis());
+         data.frameData = new FrameData();
+
+         for (int i = -1; i <= portal.getWidth(); i++) {
+            for (int j = -1; j <= portal.getHeight(); j++) {
+               if (i == -1 || j == -1 || i == portal.getWidth() || j == portal.getHeight()) {
+                  BlockPos p = portal.getBottomLeft().func_177967_a(portal.getRightDir(), i).func_177981_b(j);
+                  TileEntity te = world.func_175625_s(p);
+                  data.frameData.tiles.add(new FrameData.Tile(world.func_180495_p(p).func_177230_c(), te == null ? new CompoundNBT() : te.serializeNBT(), p));
+               }
+            }
+         }
+
+         data.updateDelegate();
+         portal.placePortalBlocks(blockPos -> {
             world.func_180501_a(blockPos, state, 3);
-            TileEntity te = world.func_175625_s(blockPos);
-            if (te instanceof VaultPortalTileEntity) {
-               VaultPortalTileEntity portal = (VaultPortalTileEntity)te;
-               portal.setCrystalData(data);
+            TileEntity tex = world.func_175625_s(blockPos);
+            if (tex instanceof VaultPortalTileEntity) {
+               VaultPortalTileEntity portalTE = (VaultPortalTileEntity)tex;
+               portalTE.setCrystalData(data);
             }
          });
          return true;
-      } else {
-         return false;
       }
    }
 

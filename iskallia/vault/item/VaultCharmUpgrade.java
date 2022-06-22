@@ -2,6 +2,7 @@ package iskallia.vault.item;
 
 import iskallia.vault.init.ModConfigs;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
@@ -54,7 +55,8 @@ public class VaultCharmUpgrade extends BasicItem {
    public static enum Tier {
       ONE("Tier 1", 1),
       TWO("Tier 2", 2),
-      THREE("Tier 3", 3);
+      THREE("Tier 3", 3),
+      FOUR("Tier 4", 4);
 
       private final String name;
       private final int tier;
@@ -90,16 +92,7 @@ public class VaultCharmUpgrade extends BasicItem {
       }
 
       public static VaultCharmUpgrade.Tier getByValue(int value) {
-         switch (value) {
-            case 1:
-               return ONE;
-            case 2:
-               return TWO;
-            case 3:
-               return THREE;
-            default:
-               return null;
-         }
+         return Arrays.stream(values()).filter(tier -> tier.getTier() == value).findFirst().orElse(null);
       }
 
       public VaultCharmUpgrade.Tier getNext() {
@@ -108,6 +101,8 @@ public class VaultCharmUpgrade extends BasicItem {
                return TWO;
             case TWO:
                return THREE;
+            case THREE:
+               return FOUR;
             default:
                return null;
          }

@@ -2,14 +2,18 @@ package iskallia.vault.block.entity;
 
 import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.altar.RequiredItem;
+import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.item.gear.VaultGear;
 import iskallia.vault.util.VectorHelper;
+import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.PlayerVaultAltarData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nonnull;
@@ -75,6 +79,10 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
 
    public VaultAltarTileEntity.AltarState getAltarState() {
       return this.altarState;
+   }
+
+   public int getInfusionTimer() {
+      return this.infusionTimer;
    }
 
    public void sendUpdates() {
@@ -179,6 +187,69 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
       }
    }
 
+   public ActionResultType onPogRightClick(ServerPlayerEntity player, ItemStack heldItem) {
+      if (this.field_145850_b == null) {
+         return ActionResultType.FAIL;
+      } else {
+         ServerWorld world = (ServerWorld)this.field_145850_b;
+         if (this.recipe == null) {
+            return ActionResultType.SUCCESS;
+         } else {
+            for (BlockPos altarPosition : PlayerVaultAltarData.get(world).getAltars(player.func_110124_au())) {
+               TileEntity te = world.func_175625_s(altarPosition);
+               if (te instanceof VaultAltarTileEntity) {
+                  VaultAltarTileEntity altar = (VaultAltarTileEntity)te;
+                  if (altar.altarState == VaultAltarTileEntity.AltarState.INFUSING) {
+                     return ActionResultType.FAIL;
+                  }
+               }
+            }
+
+            List<RequiredItem> idolRequirements = new ArrayList<>();
+            ItemStack benevolent = new ItemStack(ModItems.IDOL_BENEVOLENT);
+            ItemStack malevolence = new ItemStack(ModItems.IDOL_MALEVOLENCE);
+            ItemStack omniscient = new ItemStack(ModItems.IDOL_OMNISCIENT);
+            ItemStack timekeeper = new ItemStack(ModItems.IDOL_TIMEKEEPER);
+            ModAttributes.IDOL_TYPE.create(benevolent, PlayerFavourData.VaultGodType.BENEVOLENT);
+            ModAttributes.GEAR_STATE.create(benevolent, VaultGear.State.IDENTIFIED);
+            ModAttributes.GEAR_MODEL.create(benevolent, 0);
+            ModAttributes.IDOL_TYPE.create(malevolence, PlayerFavourData.VaultGodType.MALEVOLENCE);
+            ModAttributes.GEAR_STATE.create(malevolence, VaultGear.State.IDENTIFIED);
+            ModAttributes.GEAR_MODEL.create(malevolence, 0);
+            ModAttributes.IDOL_TYPE.create(omniscient, PlayerFavourData.VaultGodType.OMNISCIENT);
+            ModAttributes.GEAR_STATE.create(omniscient, VaultGear.State.IDENTIFIED);
+            ModAttributes.GEAR_MODEL.create(omniscient, 0);
+            ModAttributes.IDOL_TYPE.create(timekeeper, PlayerFavourData.VaultGodType.TIMEKEEPER);
+            ModAttributes.GEAR_STATE.create(timekeeper, VaultGear.State.IDENTIFIED);
+            ModAttributes.GEAR_MODEL.create(timekeeper, 0);
+            idolRequirements.add(new RequiredItem(benevolent, 0, 1));
+            idolRequirements.add(new RequiredItem(malevolence, 0, 1));
+            idolRequirements.add(new RequiredItem(omniscient, 0, 1));
+            idolRequirements.add(new RequiredItem(timekeeper, 0, 1));
+            System.out.println(benevolent.func_77978_p());
+            this.recipe.cacheRequiredItems(idolRequirements);
+            this.recipe.setPogInfused(true);
+            PlayerVaultAltarData.get(world).func_76185_a();
+            if (!player.func_184812_l_()) {
+               heldItem.func_190918_g(1);
+            }
+
+            this.sendUpdates();
+            world.func_184148_a(
+               null,
+               this.func_174877_v().func_177958_n(),
+               this.func_174877_v().func_177956_o(),
+               this.func_174877_v().func_177952_p(),
+               SoundEvents.field_193782_bq,
+               SoundCategory.BLOCKS,
+               1.0F,
+               2.0F
+            );
+            return ActionResultType.SUCCESS;
+         }
+      }
+   }
+
    public ActionResultType onRemoveVaultRock() {
       this.setAltarState(VaultAltarTileEntity.AltarState.IDLE);
       this.recipe = null;
@@ -200,17 +271,54 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
       return ActionResultType.SUCCESS;
    }
 
+   public ActionResultType onRemovePogInfusion() {
+      this.setAltarState(VaultAltarTileEntity.AltarState.ACCEPTING);
+      this.recipe.revertCache();
+      this.recipe.setPogInfused(false);
+      if (this.field_145850_b != null) {
+         this.field_145850_b
+            .func_184148_a(
+               null,
+               this.func_174877_v().func_177958_n(),
+               this.func_174877_v().func_177956_o(),
+               this.func_174877_v().func_177952_p(),
+               SoundEvents.field_187849_gA,
+               SoundCategory.BLOCKS,
+               0.7F,
+               1.5F
+            );
+      }
+
+      this.sendUpdates();
+      return ActionResultType.SUCCESS;
+   }
+
    private void completeInfusion(World world) {
       ServerWorld serverWorld = (ServerWorld)world;
       ItemStack crystal = new ItemStack(ModItems.VAULT_CRYSTAL);
+      CrystalData data = new CrystalData(crystal);
+      if (this.recipe.isPogInfused()) {
+         data.setType(CrystalData.Type.FINAL_LOBBY);
+         serverWorld.func_184148_a(
+            null,
+            this.func_174877_v().func_177958_n(),
+            this.func_174877_v().func_177956_o(),
+            this.func_174877_v().func_177952_p(),
+            SoundEvents.field_193782_bq,
+            SoundCategory.BLOCKS,
+            1.0F,
+            0.8F
+         );
+      } else {
+         int level = PlayerVaultStatsData.get((ServerWorld)world).getVaultStats(this.owner).getVaultLevel();
+         data.setType(ModConfigs.LOOT_TABLES.getForLevel(level).CRYSTAL_TYPE.getRandom(world.func_201674_k()));
+      }
+
       world.func_217376_c(
          new ItemEntity(
             world, this.func_174877_v().func_177958_n() + 0.5, this.field_174879_c.func_177956_o() + 1.5, this.field_174879_c.func_177952_p() + 0.5, crystal
          )
       );
-      CrystalData data = new CrystalData(crystal);
-      int level = PlayerVaultStatsData.get((ServerWorld)world).getVaultStats(this.owner).getVaultLevel();
-      data.setType(ModConfigs.LOOT_TABLES.getForLevel(level).CRYSTAL_TYPE.getRandom(world.func_201674_k()));
       PlayerStatsData.get((ServerWorld)world).onCrystalCrafted(this.owner, this.recipe.getRequiredItems(), data.getType());
       this.resetAltar((ServerWorld)world);
       this.playCompletionEffects(serverWorld);
@@ -268,10 +376,18 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
    }
 
    private void resetAltar(ServerWorld world) {
-      this.recipe = null;
       this.infusionTimer = -666;
-      PlayerVaultAltarData.get(world).removeRecipe(this.owner);
-      this.altarState = VaultAltarTileEntity.AltarState.IDLE;
+      if (this.recipe.isPogInfused()) {
+         this.recipe.revertCache();
+         this.recipe.setPogInfused(false);
+         PlayerVaultAltarData.get(world).func_76185_a();
+         this.altarState = VaultAltarTileEntity.AltarState.ACCEPTING;
+         this.sendUpdates();
+      } else {
+         this.recipe = null;
+         PlayerVaultAltarData.get(world).removeRecipe(this.owner);
+         this.altarState = VaultAltarTileEntity.AltarState.IDLE;
+      }
    }
 
    private void pullNearbyItems(World world, PlayerVaultAltarData data, double x, double y, double z, double range) {
@@ -334,7 +450,7 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
       }
 
       if (this.recipe != null) {
-         compound.func_218657_a("Recipe", AltarInfusionRecipe.serialize(this.recipe));
+         compound.func_218657_a("Recipe", this.recipe.serialize());
       }
 
       compound.func_74768_a("InfusionTimer", this.infusionTimer);
@@ -380,7 +496,7 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
       }
 
       if (this.recipe != null) {
-         tag.func_218657_a("Recipe", AltarInfusionRecipe.serialize(this.recipe));
+         tag.func_218657_a("Recipe", this.recipe.serialize());
       }
 
       tag.func_74768_a("InfusionTimer", this.infusionTimer);
@@ -425,8 +541,9 @@ public class VaultAltarTileEntity extends TileEntity implements ITickableTileEnt
          @Nonnull
          public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
             PlayerVaultAltarData data = PlayerVaultAltarData.get((ServerWorld)VaultAltarTileEntity.this.field_145850_b);
-            if (data.getRecipe(VaultAltarTileEntity.this.owner) != null && !data.getRecipe(VaultAltarTileEntity.this.owner).isComplete()) {
-               for (RequiredItem item : data.getRecipe(VaultAltarTileEntity.this.owner).getRequiredItems()) {
+            AltarInfusionRecipe recipe = data.getRecipe(VaultAltarTileEntity.this.owner);
+            if (recipe != null && !recipe.isComplete()) {
+               for (RequiredItem item : recipe.getRequiredItems()) {
                   if (!item.reachedAmountRequired() && item.isItemEqual(stack)) {
                      int amount = stack.func_190916_E();
                      int excess = item.getRemainder(amount);

@@ -57,10 +57,14 @@ public class VotingSession {
          if (world.func_175667_e(this.getStabilizerPos())) {
             TileEntity tile = world.func_175625_s(this.getStabilizerPos());
             if (tile instanceof StabilizerTileEntity) {
-               ((StabilizerTileEntity)tile).setActive();
+               this.setStabilizerActive((StabilizerTileEntity)tile);
             }
          }
       }
+   }
+
+   protected void setStabilizerActive(StabilizerTileEntity tile) {
+      tile.setActive();
    }
 
    public BlockPos getStabilizerPos() {
@@ -81,6 +85,16 @@ public class VotingSession {
 
    public List<DirectionChoice> getDirections() {
       return this.directions;
+   }
+
+   public boolean hasDirectionChoice(Direction direction) {
+      for (DirectionChoice directionChoice : this.getDirections()) {
+         if (directionChoice.getDirection() == direction) {
+            return true;
+         }
+      }
+
+      return false;
    }
 
    public float getChoicePercentage(DirectionChoice choice) {
@@ -122,6 +136,6 @@ public class VotingSession {
    }
 
    public static VotingSession deserialize(CompoundNBT tag) {
-      return new VotingSession(tag);
+      return (VotingSession)(tag.func_74767_n("isFinal") ? new SummonAndKillBossesVotingSession(tag) : new VotingSession(tag));
    }
 }

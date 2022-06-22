@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.player.VaultPlayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.FoodStats;
 import net.minecraft.world.server.ServerWorld;
@@ -22,7 +23,10 @@ public class MixinFoodStats {
       if (!player.field_70170_p.field_72995_K) {
          VaultRaid vault = VaultRaidData.get((ServerWorld)player.field_70170_p).getActiveFor(player.func_110124_au());
          if (vault != null) {
-            return false;
+            VaultPlayer vPlayer = vault.getPlayer(player.func_110124_au()).orElse(null);
+            if (vPlayer != null && !vPlayer.getProperties().getBase(VaultRaid.CAN_HEAL).orElse(false)) {
+               return false;
+            }
          }
       }
 

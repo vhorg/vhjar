@@ -133,6 +133,15 @@ public class VMapNBT<K, V> implements INBTSerializable<ListNBT>, Map<K, V> {
       ));
    }
 
+   public static VMapNBT<UUID, Integer> ofUUIDToInt() {
+      return new VMapNBT<>(
+         (nbt, uuid) -> nbt.func_74778_a("Key", uuid.toString()),
+         (nbt, value) -> nbt.func_74768_a("Value", value),
+         nbt -> UUID.fromString(nbt.func_74779_i("Key")),
+         nbt -> nbt.func_74762_e("Value")
+      );
+   }
+
    public static <N extends INBT, T extends INBTSerializable<N>> VMapNBT<Integer, T> ofInt(Supplier<T> supplier) {
       return ofInt(new HashMap<>(), supplier);
    }

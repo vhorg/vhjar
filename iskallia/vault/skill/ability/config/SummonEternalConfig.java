@@ -6,15 +6,18 @@ public class SummonEternalConfig extends AbilityConfig {
    @Expose
    private final int numberOfEternals;
    @Expose
+   private final int summonedEternalsCap;
+   @Expose
    private final int despawnTime;
    @Expose
    private final float ancientChance;
    @Expose
    private final boolean vaultOnly;
 
-   public SummonEternalConfig(int cost, int cooldown, int numberOfEternals, int despawnTime, float ancientChance, boolean vaultOnly) {
+   public SummonEternalConfig(int cost, int cooldown, int numberOfEternals, int summonedEternalsCap, int despawnTime, float ancientChance, boolean vaultOnly) {
       super(cost, AbilityConfig.Behavior.RELEASE_TO_PERFORM, cooldown);
       this.numberOfEternals = numberOfEternals;
+      this.summonedEternalsCap = summonedEternalsCap;
       this.despawnTime = despawnTime;
       this.ancientChance = ancientChance;
       this.vaultOnly = vaultOnly;
@@ -22,6 +25,10 @@ public class SummonEternalConfig extends AbilityConfig {
 
    public int getNumberOfEternals() {
       return this.numberOfEternals;
+   }
+
+   public int getSummonedEternalsCap() {
+      return this.summonedEternalsCap;
    }
 
    public int getDespawnTime() {

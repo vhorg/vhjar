@@ -45,7 +45,8 @@ public class VaultRunner extends VaultPlayer {
             }
          }
 
-         this.sendIfPresent(world.func_73046_m(), VaultOverlayMessage.forVault(this.timer.getTimeLeft(), earlyKill));
+         boolean showTimer = this.getProperties().getBaseOrDefault(VaultRaid.SHOW_TIMER, true);
+         this.sendIfPresent(world.func_73046_m(), VaultOverlayMessage.forVault(!showTimer ? 0 : this.timer.getTimeLeft(), earlyKill, showTimer));
       });
    }
 }

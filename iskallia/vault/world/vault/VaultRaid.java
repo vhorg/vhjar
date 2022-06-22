@@ -31,20 +31,28 @@ import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.PhoenixModifierSnapshotData;
 import iskallia.vault.world.data.PhoenixSetSnapshotData;
+import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.SoulboundSnapshotData;
+import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.data.VaultSetsData;
 import iskallia.vault.world.raid.RaidProperties;
 import iskallia.vault.world.vault.event.VaultEvent;
 import iskallia.vault.world.vault.event.VaultListener;
 import iskallia.vault.world.vault.gen.ArchitectEventGenerator;
+import iskallia.vault.world.vault.gen.FinalBossGenerator;
+import iskallia.vault.world.vault.gen.FinalLobbyGenerator;
 import iskallia.vault.world.vault.gen.FragmentedVaultGenerator;
 import iskallia.vault.world.vault.gen.RaidChallengeGenerator;
 import iskallia.vault.world.vault.gen.VaultGenerator;
 import iskallia.vault.world.vault.gen.VaultTroveGenerator;
 import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutRegistry;
+import iskallia.vault.world.vault.gen.piece.FinalVaultBoss;
+import iskallia.vault.world.vault.gen.piece.FinalVaultLobby;
+import iskallia.vault.world.vault.gen.piece.VaultGodEye;
 import iskallia.vault.world.vault.gen.piece.VaultObelisk;
 import iskallia.vault.world.vault.gen.piece.VaultPiece;
+import iskallia.vault.world.vault.gen.piece.VaultPortal;
 import iskallia.vault.world.vault.gen.piece.VaultRaidRoom;
 import iskallia.vault.world.vault.gen.piece.VaultRoom;
 import iskallia.vault.world.vault.gen.piece.VaultStart;
@@ -56,17 +64,23 @@ import iskallia.vault.world.vault.influence.VaultInfluences;
 import iskallia.vault.world.vault.logic.VaultChestPity;
 import iskallia.vault.world.vault.logic.VaultCowOverrides;
 import iskallia.vault.world.vault.logic.VaultInfluenceHandler;
+import iskallia.vault.world.vault.logic.VaultLobby;
 import iskallia.vault.world.vault.logic.VaultLogic;
+import iskallia.vault.world.vault.logic.VaultSandEvent;
 import iskallia.vault.world.vault.logic.VaultSpawner;
 import iskallia.vault.world.vault.logic.behaviour.VaultBehaviour;
 import iskallia.vault.world.vault.logic.condition.VaultCondition;
 import iskallia.vault.world.vault.logic.objective.CakeHuntObjective;
+import iskallia.vault.world.vault.logic.objective.KillTheBossObjective;
 import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
+import iskallia.vault.world.vault.logic.objective.SummonAndKillAllBossesObjective;
 import iskallia.vault.world.vault.logic.objective.SummonAndKillBossObjective;
+import iskallia.vault.world.vault.logic.objective.TreasureHuntObjective;
 import iskallia.vault.world.vault.logic.objective.TroveObjective;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.logic.objective.ancient.AncientObjective;
 import iskallia.vault.world.vault.logic.objective.architect.ArchitectObjective;
+import iskallia.vault.world.vault.logic.objective.architect.ArchitectSummonAndKillBossesObjective;
 import iskallia.vault.world.vault.logic.objective.raid.ActiveRaid;
 import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import iskallia.vault.world.vault.logic.task.VaultTask;
@@ -75,6 +89,7 @@ import iskallia.vault.world.vault.modifier.NoExitModifier;
 import iskallia.vault.world.vault.modifier.ScaleModifier;
 import iskallia.vault.world.vault.modifier.VaultModifier;
 import iskallia.vault.world.vault.modifier.VaultModifiers;
+import iskallia.vault.world.vault.player.VaultMember;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.player.VaultPlayerType;
 import iskallia.vault.world.vault.player.VaultRunner;
@@ -87,6 +102,7 @@ import iskallia.vault.world.vault.time.extension.FruitExtension;
 import iskallia.vault.world.vault.time.extension.ModifierExtension;
 import iskallia.vault.world.vault.time.extension.RelicSetExtension;
 import iskallia.vault.world.vault.time.extension.RoomGenerationExtension;
+import iskallia.vault.world.vault.time.extension.SandExtension;
 import iskallia.vault.world.vault.time.extension.TimeAltarExtension;
 import iskallia.vault.world.vault.time.extension.TimeExtension;
 import iskallia.vault.world.vault.time.extension.WinExtension;
@@ -141,6 +157,7 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.util.text.event.HoverEvent.Action;
 import net.minecraft.world.World;
@@ -177,6 +194,8 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final Supplier<RaidChallengeGenerator> RAID_CHALLENGE_GENERATOR = VaultGenerator.register(
       () -> new RaidChallengeGenerator(Vault.id("raid_challenge"))
    );
+   public static final Supplier<FinalLobbyGenerator> FINAL_LOBBY = VaultGenerator.register(() -> new FinalLobbyGenerator(Vault.id("final_lobby")));
+   public static final Supplier<FinalBossGenerator> FINAL_BOSS = VaultGenerator.register(() -> new FinalBossGenerator(Vault.id("final_boss")));
    public static final VAttribute<RegistryKey<World>, RegistryKeyAttribute<World>> DIMENSION = new VAttribute<>(
       Vault.id("dimension"), RegistryKeyAttribute::new
    );
@@ -192,6 +211,13 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final VAttribute<Boolean, BooleanAttribute> COW_VAULT = new VAttribute<>(Vault.id("cow"), BooleanAttribute::new);
    public static final VAttribute<UUID, UUIDAttribute> HOST = new VAttribute<>(Vault.id("host"), UUIDAttribute::new);
    public static final VAttribute<UUID, UUIDAttribute> IDENTIFIER = new VAttribute<>(Vault.id("identifier"), UUIDAttribute::new);
+   public static final VAttribute<UUID, UUIDAttribute> PARENT = new VAttribute<>(Vault.id("parent"), UUIDAttribute::new);
+   public static final VAttribute<VaultLobby, CompoundAttribute<VaultLobby>> LOBBY = new VAttribute<>(
+      Vault.id("lobby"), () -> CompoundAttribute.of(VaultLobby::new)
+   );
+   public static final VAttribute<Boolean, BooleanAttribute> FORCE_ACTIVE = new VAttribute<>(Vault.id("force_active"), BooleanAttribute::new);
+   public static final VAttribute<Integer, IntegerAttribute> RAID_INDEX = new VAttribute<>(Vault.id("raid_index"), IntegerAttribute::new);
+   public static final VAttribute<Boolean, BooleanAttribute> GRANTED_EXP = new VAttribute<>(Vault.id("granted_exp"), BooleanAttribute::new);
    public static final VAttribute<String, StringAttribute> PLAYER_BOSS_NAME = new VAttribute<>(Vault.id("player_boss_name"), StringAttribute::new);
    @Deprecated
    public static final VAttribute<Boolean, BooleanAttribute> CAN_EXIT = new VAttribute<>(Vault.id("can_exit"), BooleanAttribute::new);
@@ -201,13 +227,22 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final VAttribute<VaultChestPity, CompoundAttribute<VaultChestPity>> CHEST_PITY = new VAttribute<>(
       Vault.id("chest_pity"), () -> CompoundAttribute.of(VaultChestPity::new)
    );
-   public static final VAttribute<Boolean, BooleanAttribute> GRANTED_EXP = new VAttribute<>(Vault.id("granted_exp"), BooleanAttribute::new);
+   public static final VAttribute<VaultSandEvent, CompoundAttribute<VaultSandEvent>> SAND_EVENT = new VAttribute<>(
+      Vault.id("sand_event"), () -> CompoundAttribute.of(VaultSandEvent::new)
+   );
+   public static final VAttribute<Boolean, BooleanAttribute> SHOW_TIMER = new VAttribute<>(Vault.id("show_timer"), BooleanAttribute::new);
+   public static final VAttribute<Boolean, BooleanAttribute> CAN_HEAL = new VAttribute<>(Vault.id("can_heal"), BooleanAttribute::new);
    public static final VAttribute<Integer, IntegerAttribute> LEVEL = new VAttribute<>(Vault.id("level"), IntegerAttribute::new);
    public static final VaultCondition IS_FINISHED = VaultCondition.register(Vault.id("is_finished"), (vault, player, world) -> vault.isFinished());
    public static final VaultCondition IS_RUNNER = VaultCondition.register(Vault.id("is_runner"), (vault, player, world) -> player instanceof VaultRunner);
    public static final VaultCondition IS_SPECTATOR = VaultCondition.register(
       Vault.id("is_spectator"), (vault, player, world) -> player instanceof VaultSpectator
    );
+   public static final VaultCondition IS_OUTSIDE = VaultCondition.register(Vault.id("is_outside"), (vault, player, world) -> {
+      boolean[] outside = new boolean[1];
+      player.runIfPresent(world.func_73046_m(), sPlayer -> outside[0] = !VaultUtils.inVault(vault, sPlayer));
+      return outside[0];
+   });
    public static final VaultCondition AFTER_GRACE_PERIOD = VaultCondition.register(
       Vault.id("after_grace_period"), (vault, player, world) -> vault.getTimer().getRunTime() > 300
    );
@@ -238,6 +273,24 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       (vault, player, world) -> vault.players.stream().anyMatch(player1 -> player1 instanceof VaultRunner && !player1.hasExited())
    );
    public static final VaultCondition NO_ACTIVE_RUNNERS_LEFT = VaultCondition.register(Vault.id("no_active_runners_left"), ACTIVE_RUNNERS_LEFT.negate());
+   public static final VaultTask GRANT_EXP_COMPLETE = VaultTask.register(Vault.id("public_grant_exp_complete"), (vault, player, world) -> {
+      if (!player.getProperties().exists(GRANTED_EXP)) {
+         player.grantVaultExp(world.func_73046_m(), 1.0F);
+         player.getProperties().create(GRANTED_EXP, true);
+      }
+   });
+   public static final VaultTask GRANT_EXP_BAIL = VaultTask.register(Vault.id("public_grant_exp_bail"), (vault, player, world) -> {
+      if (!player.getProperties().exists(GRANTED_EXP)) {
+         player.grantVaultExp(world.func_73046_m(), 0.5F);
+         player.getProperties().create(GRANTED_EXP, true);
+      }
+   });
+   public static final VaultTask GRANT_EXP_DEATH = VaultTask.register(Vault.id("public_grant_exp_death"), (vault, player, world) -> {
+      if (!player.getProperties().exists(GRANTED_EXP)) {
+         player.grantVaultExp(world.func_73046_m(), 0.25F);
+         player.getProperties().create(GRANTED_EXP, true);
+      }
+   });
    public static final VaultTask CHECK_BAIL = VaultTask.register(
       Vault.id("check_bail"),
       (vault, player, world) -> {
@@ -272,7 +325,6 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
                                     sPlayer.func_242279_ag();
                                     VaultRaid.REMOVE_SCAVENGER_ITEMS
                                        .then(VaultRaid.REMOVE_INVENTORY_RESTORE_SNAPSHOTS)
-                                       .then(VaultRaid.GRANT_EXP_BAIL)
                                        .then(VaultRaid.EXIT_SAFELY)
                                        .execute(vault, player, world);
                                     IFormattableTextComponent playerName = sPlayer.func_145748_c_().func_230532_e_();
@@ -347,6 +399,63 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
          }
       }
    );
+   public static final VaultTask CHECK_BAIL_FINAL = VaultTask.register(
+      Vault.id("check_bail_final"),
+      (vault, player, world) -> player.runIfPresent(
+         world.func_73046_m(),
+         sPlayer -> {
+            if (!vault.getGenerator().getPiecesAt(sPlayer.func_233580_cy_(), VaultStart.class).isEmpty()) {
+               AxisAlignedBB box = sPlayer.func_174813_aQ();
+               BlockPos min = new BlockPos(box.field_72340_a + 0.001, box.field_72338_b + 0.001, box.field_72339_c + 0.001);
+               BlockPos max = new BlockPos(box.field_72336_d - 0.001, box.field_72337_e - 0.001, box.field_72334_f - 0.001);
+               Mutable pos = new Mutable();
+               if (world.func_175707_a(min, max)) {
+                  for (int i = min.func_177958_n(); i <= max.func_177958_n(); i++) {
+                     for (int j = min.func_177956_o(); j <= max.func_177956_o(); j++) {
+                        for (int k = min.func_177952_p(); k <= max.func_177952_p(); k++) {
+                           BlockState state = world.func_180495_p(pos.func_181079_c(i, j, k));
+                           if (state.func_177230_c() == ModBlocks.VAULT_PORTAL) {
+                              if (sPlayer.func_242280_ah()) {
+                                 sPlayer.func_242279_ag();
+                                 return;
+                              }
+
+                              if (!vault.canExit(player)) {
+                                 StringTextComponent text = new StringTextComponent("You cannot exit this Vault!");
+                                 text.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(16711680)));
+                                 sPlayer.func_146105_b(text, true);
+                                 return;
+                              }
+
+                              vault.getAllObjectives().forEach(objective -> objective.notifyBail(vault, player, world));
+                              sPlayer.func_242279_ag();
+                              new ArrayList<>(vault.getPlayers()).forEach(vaultPlayer -> {
+                                 if (vaultPlayer instanceof VaultRunner) {
+                                    VaultRaid.RUNNER_TO_SPECTATOR.execute(vault, vaultPlayer, world);
+                                 }
+                              });
+                              vault.getProperties().create(FORCE_ACTIVE, false);
+                              VaultRaid.HIDE_OVERLAY.execute(vault, player, world);
+                              IFormattableTextComponent playerName = sPlayer.func_145748_c_().func_230532_e_();
+                              playerName.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(9974168)));
+                              StringTextComponent suffix = new StringTextComponent(" bailed.");
+                              world.func_73046_m()
+                                 .func_184103_al()
+                                 .func_232641_a_(
+                                    new StringTextComponent("").func_230529_a_(playerName).func_230529_a_(suffix), ChatType.CHAT, player.getPlayerId()
+                                 );
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      )
+   );
+   public static final VaultTask TICK_SAND_EVENT = VaultTask.register(
+      Vault.id("tick_sand_event"), (vault, player, world) -> vault.getProperties().getBase(SAND_EVENT).ifPresent(event -> event.execute(vault, player, world))
+   );
    public static final VaultTask TICK_CHEST_PITY = VaultTask.register(
       Vault.id("tick_chest_pity"), (vault, player, world) -> player.getProperties().getBase(CHEST_PITY).ifPresent(event -> event.execute(vault, player, world))
    );
@@ -376,6 +485,13 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
                );
          }
       }
+   );
+   public static final VaultTask TICK_LOBBY = VaultTask.register(
+      Vault.id("tick_lobby"), (vault, player, world) -> vault.getProperties().get(LOBBY).ifPresent(attribute -> {
+         VaultLobby lobby = (VaultLobby)attribute.getBaseValue();
+         lobby.execute(vault, player, world);
+         vault.getProperties().create(LOBBY, lobby);
+      })
    );
    public static final VaultTask TICK_INFLUENCES = VaultTask.register(Vault.id("tick_influences"), (vault, player, world) -> {
       if (!vault.getInfluences().isInitialized()) {
@@ -433,6 +549,10 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
          player.getProperties().create(LEVEL, vaultLevel);
       })
    );
+   public static final VaultTask INIT_LEVEL_FINAL = VaultTask.register(Vault.id("init_level_final"), (vault, player, world) -> {
+      vault.getProperties().create(LEVEL, 1000);
+      player.getProperties().create(LEVEL, 1000);
+   });
    public static final VaultTask INIT_RELIC_TIME = VaultTask.register(
       Vault.id("init_relic_extension"),
       (vault, player, world) -> {
@@ -452,18 +572,22 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    );
    @Deprecated
    public static final VaultTask INIT_FAVOUR_TIME = VaultTask.register(Vault.id("init_favour_extension"), (vault, player, world) -> {});
+   public static final VaultTask INIT_SANDS_EVENT = VaultTask.register(Vault.id("init_sand_event"), (vault, player, world) -> {
+      if (ModConfigs.SAND_EVENT.isEnabled()) {
+         vault.getProperties().create(SAND_EVENT, new VaultSandEvent());
+         player.getBehaviours().add(new VaultBehaviour(IS_FINISHED.negate(), TICK_SAND_EVENT));
+      }
+   });
    public static final VaultTask INIT_COW_VAULT = VaultTask.register(
       Vault.id("init_cow_vault"),
       (vault, player, world) -> {
          if (!vault.getProperties().exists(COW_VAULT)) {
             CrystalData crystalData = vault.getProperties().getBase(CRYSTAL_DATA).orElse(CrystalData.EMPTY);
-            int level = vault.getProperties().getBase(LEVEL).orElse(0);
             if (crystalData.getType().canBeCowVault()
                && crystalData.getSelectedObjective() == null
                && crystalData.getModifiers().isEmpty()
-               && !vault.getProperties().getBaseOrDefault(IS_RAFFLE, false)
-               && level >= 50) {
-               boolean isCowVault = world.func_201674_k().nextInt(300) == 0;
+               && !vault.getProperties().getBaseOrDefault(IS_RAFFLE, false)) {
+               boolean isCowVault = VaultCowOverrides.forceSpecialVault;
                vault.getProperties().create(COW_VAULT, isCowVault);
                if (isCowVault) {
                   VaultCowOverrides.setupVault(vault);
@@ -476,6 +600,8 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
                vault.getProperties().create(COW_VAULT, false);
             }
          }
+
+         VaultCowOverrides.forceSpecialVault = false;
       }
    );
    public static final VaultTask INIT_GLOBAL_MODIFIERS = VaultTask.register(Vault.id("init_global_modifiers"), (vault, player, world) -> {
@@ -504,6 +630,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final VaultTask HIDE_OVERLAY = VaultTask.register(
       Vault.id("hide_overlay"), (vault, player, world) -> player.sendIfPresent(world.func_73046_m(), VaultOverlayMessage.hide())
    );
+   public static final VaultTask PAUSE_IN_ARENA = VaultTask.register(Vault.id("pause_in_arena"), (vault, player, world) -> {});
    public static final VaultTask LEVEL_UP_GEAR = VaultTask.register(Vault.id("level_up_gear"), (vault, player, world) -> {
       if (player instanceof VaultRunner) {
          player.runIfPresent(world.func_73046_m(), playerEntity -> {
@@ -559,9 +686,11 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    );
    public static final VaultTask SAVE_SOULBOUND_GEAR = VaultTask.register(
       Vault.id("save_soulbound_gear"), (vault, player, world) -> player.runIfPresent(world.func_73046_m(), sPlayer -> {
-         SoulboundSnapshotData data = SoulboundSnapshotData.get(world);
-         if (!data.hasSnapshot(sPlayer)) {
-            data.createSnapshot(sPlayer);
+         if (!vault.getProperties().exists(PARENT)) {
+            SoulboundSnapshotData data = SoulboundSnapshotData.get(world);
+            if (!data.hasSnapshot(sPlayer)) {
+               data.createSnapshot(sPlayer);
+            }
          }
       })
    );
@@ -576,24 +705,47 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
          setSnapshotData.removeSnapshot(player.getPlayerId());
       }
    });
-   public static final VaultTask GRANT_EXP_COMPLETE = VaultTask.register(Vault.id("public_grant_exp_complete"), (vault, player, world) -> {
-      if (!player.getProperties().exists(GRANTED_EXP)) {
-         player.grantVaultExp(world.func_73046_m(), 1.0F);
-         player.getProperties().create(GRANTED_EXP, true);
+   public static final VaultTask FINAL_VICTORY_SCENE = VaultTask.register(
+      Vault.id("final_victory_scene"),
+      (vault, player, world) -> {
+         if (player instanceof VaultRunner) {
+            player.getTimer().addTime(new WinExtension(player.getTimer(), 400), 0);
+            player.runIfPresent(
+               world.func_73046_m(),
+               playerEntity -> {
+                  FireworkRocketEntity fireworks = new FireworkRocketEntity(
+                     world,
+                     playerEntity.func_226277_ct_(),
+                     playerEntity.func_226278_cu_(),
+                     playerEntity.func_226281_cx_(),
+                     new ItemStack(Items.field_196152_dE)
+                  );
+                  world.func_217376_c(fireworks);
+                  world.func_184148_a(
+                     null,
+                     playerEntity.func_226277_ct_(),
+                     playerEntity.func_226278_cu_(),
+                     playerEntity.func_226281_cx_(),
+                     SoundEvents.field_194228_if,
+                     SoundCategory.MASTER,
+                     1.0F,
+                     1.0F
+                  );
+                  StringTextComponent title = new StringTextComponent("Branch Cleared!");
+                  title.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
+                  StringTextComponent subtitle = new StringTextComponent("Place your essence in the eye.");
+                  subtitle.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
+                  if (vault.getProperties().getValue(CRYSTAL_DATA).getType() == CrystalData.Type.FINAL_BOSS) {
+                     title = new StringTextComponent("The End...");
+                  }
+
+                  STitlePacket titlePacket = new STitlePacket(Type.TITLE, title);
+                  playerEntity.field_71135_a.func_147359_a(titlePacket);
+               }
+            );
+         }
       }
-   });
-   public static final VaultTask GRANT_EXP_BAIL = VaultTask.register(Vault.id("public_grant_exp_bail"), (vault, player, world) -> {
-      if (!player.getProperties().exists(GRANTED_EXP)) {
-         player.grantVaultExp(world.func_73046_m(), 0.5F);
-         player.getProperties().create(GRANTED_EXP, true);
-      }
-   });
-   public static final VaultTask GRANT_EXP_DEATH = VaultTask.register(Vault.id("public_grant_exp_death"), (vault, player, world) -> {
-      if (!player.getProperties().exists(GRANTED_EXP)) {
-         player.grantVaultExp(world.func_73046_m(), 0.25F);
-         player.getProperties().create(GRANTED_EXP, true);
-      }
-   });
+   );
    public static final VaultTask EXIT_SAFELY = VaultTask.register(
       Vault.id("exit_safely"),
       (vault, player, world) -> player.runIfPresent(
@@ -603,7 +755,6 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
                playerEntity.field_71134_c.func_73076_a(((VaultSpectator)player).oldGameType);
             }
 
-            VaultUtils.exitSafely(world.func_73046_m().func_71218_a(World.field_234918_g_), playerEntity);
             world.func_184148_a(
                null,
                playerEntity.func_226277_ct_(),
@@ -617,6 +768,34 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
             world.func_217384_a(null, playerEntity, ModSounds.VAULT_PORTAL_LEAVE, SoundCategory.PLAYERS, 1.0F, 1.0F);
             player.exit();
             HIDE_OVERLAY.execute(vault, player, world);
+            UUID parent = vault.getProperties().getBase(PARENT).orElse(null);
+            VaultRaid parentVault = parent == null ? null : VaultRaidData.get(world).get(parent);
+            if (parentVault != null) {
+               parentVault.getProperties().getBase(LOBBY).ifPresent(lobby -> {
+                  VaultMember member = new VaultMember(player.getPlayerId());
+                  member.getProperties().create(CAN_HEAL, true);
+                  member.getBehaviours().add(new VaultBehaviour(IS_OUTSIDE, TP_TO_START));
+                  member.getBehaviours().add(new VaultBehaviour(IS_DEAD.negate(), TICK_LOBBY));
+                  parentVault.getPlayers().add(member);
+                  TP_TO_START.execute(parentVault, member, world.func_73046_m().func_71218_a(parentVault.getProperties().getValue(DIMENSION)));
+                  if (vault.getActiveObjectives().stream().allMatch(VaultObjective::isCompleted)) {
+                     FINAL_VICTORY_SCENE.execute(vault, player, world);
+                     player.runIfPresent(world.func_73046_m(), sPlayer -> lobby.snapshots.removeSnapshot(sPlayer));
+                  } else {
+                     player.runIfPresent(world.func_73046_m(), sPlayer -> {
+                        lobby.snapshots.restoreSnapshot(sPlayer);
+                        lobby.snapshots.removeSnapshot(sPlayer);
+                     });
+                  }
+
+                  parentVault.getProperties().create(LOBBY, lobby);
+                  lobby.exitVault(vault, world, parentVault, member, playerEntity, false);
+                  vault.getPlayers().remove(player);
+               });
+               vault.getProperties().create(FORCE_ACTIVE, false);
+            } else {
+               VaultUtils.exitSafely(world.func_73046_m().func_71218_a(World.field_234918_g_), playerEntity);
+            }
          }
       )
    );
@@ -647,13 +826,33 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
             playerEntity.func_70097_a(new DamageSource("vaultFailed").func_76348_h().func_76359_i(), 1.0E8F);
             player.exit();
             HIDE_OVERLAY.execute(vault, player, world);
+            UUID parent = vault.getProperties().getBase(PARENT).orElse(null);
+            VaultRaid parentVault = parent == null ? null : VaultRaidData.get(world).get(parent);
+            if (parentVault != null) {
+               parentVault.getProperties().getBase(LOBBY).ifPresent(lobby -> {
+                  VaultMember member = new VaultMember(player.getPlayerId());
+                  member.getProperties().create(CAN_HEAL, true);
+                  member.getBehaviours().add(new VaultBehaviour(IS_OUTSIDE, TP_TO_START));
+                  member.getBehaviours().add(new VaultBehaviour(IS_DEAD.negate(), TICK_LOBBY));
+                  parentVault.getPlayers().add(member);
+                  player.runIfPresent(world.func_73046_m(), sPlayer -> lobby.snapshots.restoreSnapshot(sPlayer));
+                  parentVault.getProperties().create(LOBBY, lobby);
+                  lobby.exitVault(vault, world, parentVault, member, playerEntity, true);
+                  vault.getPlayers().remove(player);
+               });
+               vault.getProperties().create(FORCE_ACTIVE, false);
+            }
          }
       )
    );
    public static final VaultTask EXIT_DEATH_ALL = VaultTask.register(
       Vault.id("exit_death_all"),
-      (vault, player, world) -> vault.players
+      (vault, player, world) -> new ArrayList<>(vault.players)
          .forEach(vPlayer -> REMOVE_SCAVENGER_ITEMS.then(SAVE_SOULBOUND_GEAR.then(GRANT_EXP_DEATH.then(EXIT_DEATH))).execute(vault, vPlayer, world))
+   );
+   public static final VaultTask EXIT_DEATH_ALL_NO_SAVE = VaultTask.register(
+      Vault.id("exit_death_all_no_save"),
+      (vault, player, world) -> new ArrayList<>(vault.players).forEach(vPlayer -> REMOVE_SCAVENGER_ITEMS.then(EXIT_DEATH).execute(vault, vPlayer, world))
    );
    public static final VaultTask VICTORY_SCENE = VaultTask.register(
       Vault.id("victory_scene"),
@@ -699,16 +898,20 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       (vault, player, world) -> player.runIfPresent(
          world.func_73046_m(),
          playerEntity -> {
-            StringTextComponent title = new StringTextComponent("The Vault");
-            title.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
-            IFormattableTextComponent subtitle = vault.canExit(player)
-               ? new StringTextComponent("Good luck, ").func_230529_a_(playerEntity.func_200200_C_()).func_230529_a_(new StringTextComponent("!"))
-               : new StringTextComponent("No exit this time, ").func_230529_a_(playerEntity.func_200200_C_()).func_230529_a_(new StringTextComponent("!"));
-            subtitle.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
-            STitlePacket titlePacket = new STitlePacket(Type.TITLE, title);
-            STitlePacket subtitlePacket = new STitlePacket(Type.SUBTITLE, subtitle);
-            playerEntity.field_71135_a.func_147359_a(titlePacket);
-            playerEntity.field_71135_a.func_147359_a(subtitlePacket);
+            CrystalData data = vault.getProperties().getBaseOrDefault(CRYSTAL_DATA, CrystalData.EMPTY);
+            if (!data.getType().isFinalType()) {
+               StringTextComponent title = new StringTextComponent("The Vault");
+               title.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
+               IFormattableTextComponent subtitle = vault.canExit(player)
+                  ? new StringTextComponent("Good luck, ").func_230529_a_(playerEntity.func_200200_C_()).func_230529_a_(new StringTextComponent("!"))
+                  : new StringTextComponent("No exit this time, ").func_230529_a_(playerEntity.func_200200_C_()).func_230529_a_(new StringTextComponent("!"));
+               subtitle.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(14536734)));
+               STitlePacket titlePacket = new STitlePacket(Type.TITLE, title);
+               STitlePacket subtitlePacket = new STitlePacket(Type.SUBTITLE, subtitle);
+               playerEntity.field_71135_a.func_147359_a(titlePacket);
+               playerEntity.field_71135_a.func_147359_a(subtitlePacket);
+            }
+
             StringTextComponent text = new StringTextComponent("");
             AtomicBoolean startsWithVowel = new AtomicBoolean(false);
             vault.getModifiers().forEach((i, modifier) -> {
@@ -733,11 +936,37 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
             }
 
             StringTextComponent prefix = new StringTextComponent(startsWithVowel.get() ? " entered an " : " entered a ");
+            switch (data.getType()) {
+               case FINAL_LOBBY:
+                  prefix = new StringTextComponent(" entered ");
+                  vaultName = new StringTextComponent("the Final Vault").func_240699_a_(TextFormatting.DARK_PURPLE);
+                  break;
+               case FINAL_BOSS:
+                  prefix = new StringTextComponent(" is facing ");
+                  vaultName = new StringTextComponent("the Final Challenge").func_240699_a_(TextFormatting.DARK_RED);
+                  break;
+               case FINAL_VELARA:
+                  prefix = new StringTextComponent(" entered ");
+                  vaultName = new StringTextComponent("Velara's Gluttony").func_240699_a_(PlayerFavourData.VaultGodType.BENEVOLENT.getChatColor());
+                  break;
+               case FINAL_TENOS:
+                  prefix = new StringTextComponent(" entered ");
+                  vaultName = new StringTextComponent("Tenos' Puzzle").func_240699_a_(PlayerFavourData.VaultGodType.OMNISCIENT.getChatColor());
+                  break;
+               case FINAL_WENDARR:
+                  prefix = new StringTextComponent(" entered ");
+                  vaultName = new StringTextComponent("Wendarr's Passage").func_240699_a_(PlayerFavourData.VaultGodType.TIMEKEEPER.getChatColor());
+                  break;
+               case FINAL_IDONA:
+                  prefix = new StringTextComponent(" entered ");
+                  vaultName = new StringTextComponent("Idona's Wrath").func_240699_a_(PlayerFavourData.VaultGodType.MALEVOLENCE.getChatColor());
+            }
+
             if (!vault.getModifiers().isEmpty()) {
                text.func_230529_a_(new StringTextComponent(" "));
             }
 
-            if (vault.getProperties().getBaseOrDefault(COW_VAULT, false)) {
+            if (vault.getProperties().getBaseOrDefault(COW_VAULT, false) && !vault.getProperties().exists(PARENT)) {
                IFormattableTextComponent txt = new StringTextComponent("Vault that doesn't exist!");
                ITextComponent hoverText = new StringTextComponent(
                   "A vault that doesn't exist.\nThe Vault gods are not responsible for events that transpire here.\n\nThis realm may also harbor additional riches."
@@ -767,6 +996,14 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    public static final Supplier<AncientObjective> ANCIENTS = VaultObjective.register(() -> new AncientObjective(Vault.id("ancients")));
    public static final Supplier<RaidChallengeObjective> RAID_CHALLENGE = VaultObjective.register(() -> new RaidChallengeObjective(Vault.id("raid_challenge")));
    public static final Supplier<CakeHuntObjective> CAKE_HUNT = VaultObjective.register(() -> new CakeHuntObjective(Vault.id("cake_hunt")));
+   public static final Supplier<SummonAndKillAllBossesObjective> SUMMON_AND_KILL_ALL_BOSSES = VaultObjective.register(
+      () -> new SummonAndKillAllBossesObjective(Vault.id("summon_and_kill_all_bosses"))
+   );
+   public static final Supplier<ArchitectSummonAndKillBossesObjective> ARCHITECT_KILL_ALL_BOSSES = VaultObjective.register(
+      () -> new ArchitectSummonAndKillBossesObjective(Vault.id("architect_kill_all_bosses"))
+   );
+   public static final Supplier<TreasureHuntObjective> TREASURE_HUNT = VaultObjective.register(() -> new TreasureHuntObjective(Vault.id("treasure_hunt")));
+   public static final Supplier<KillTheBossObjective> KILL_THE_BOSS = VaultObjective.register(() -> new KillTheBossObjective(Vault.id("kill_the_boss")));
    @Deprecated
    public static final VaultEvent<Event> TRIGGER_BOSS_SUMMON = VaultEvent.register(Vault.id("trigger_boss_summon"), Event.class, (vault, event) -> {});
    public static final VaultEvent<LivingUpdateEvent> SCALE_MOB = VaultEvent.register(
@@ -964,6 +1201,14 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
          .map(vaultObjective -> (T)vaultObjective);
    }
 
+   public <T extends VaultObjective> Optional<T> getObjective(Class<T> objectiveClass) {
+      return this.getAllObjectives()
+         .stream()
+         .filter(objective -> objectiveClass.isAssignableFrom(objective.getClass()))
+         .findFirst()
+         .map(vaultObjective -> (T)vaultObjective);
+   }
+
    public boolean hasActiveObjective(VaultPlayer player, Class<? extends VaultObjective> objectiveClass) {
       return this.getActiveObjective(objectiveClass).isPresent() || player.getActiveObjective(objectiveClass).isPresent();
    }
@@ -1018,7 +1263,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
    }
 
    public boolean isFinished() {
-      return this.players.isEmpty() || this.players.stream().allMatch(VaultPlayer::hasExited);
+      return !this.getProperties().getBaseOrDefault(FORCE_ACTIVE, false) && (this.players.isEmpty() || this.players.stream().allMatch(VaultPlayer::hasExited));
    }
 
    public CompoundNBT serializeNBT() {
@@ -1079,19 +1324,18 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
                                  .add(
                                     new VaultBehaviour(
                                        NO_OBJECTIVES_LEFT_GLOBALLY.and(NO_TIME_LEFT.or(NO_RUNNERS_LEFT)),
-                                       REMOVE_SCAVENGER_ITEMS.then(REMOVE_INVENTORY_RESTORE_SNAPSHOTS).then(GRANT_EXP_COMPLETE.then(EXIT_SAFELY))
+                                       REMOVE_SCAVENGER_ITEMS.then(REMOVE_INVENTORY_RESTORE_SNAPSHOTS).then(EXIT_SAFELY)
                                     )
                                  );
                               runner.getBehaviours()
                                  .add(
                                     new VaultBehaviour(
-                                       OBJECTIVES_LEFT_GLOBALLY.and(NO_RUNNERS_LEFT),
-                                       REMOVE_SCAVENGER_ITEMS.then(SAVE_SOULBOUND_GEAR.then(GRANT_EXP_DEATH.then(EXIT_DEATH)))
+                                       OBJECTIVES_LEFT_GLOBALLY.and(NO_RUNNERS_LEFT), REMOVE_SCAVENGER_ITEMS.then(SAVE_SOULBOUND_GEAR.then(EXIT_DEATH))
                                     )
                                  );
                               runner.getBehaviours().add(new VaultBehaviour(IS_FINISHED.negate(), TICK_SPAWNER.then(TICK_CHEST_PITY)));
                               runner.getBehaviours().add(new VaultBehaviour(AFTER_GRACE_PERIOD.and(IS_FINISHED.negate()), TICK_INFLUENCES));
-                              runner.getBehaviours().add(new VaultBehaviour(IS_RUNNER, CHECK_BAIL));
+                              runner.getBehaviours().add(new VaultBehaviour(IS_RUNNER, PAUSE_IN_ARENA.then(CHECK_BAIL)));
                               runner.getProperties().create(SPAWNER, new VaultSpawner());
                               runner.getProperties().create(CHEST_PITY, new VaultChestPity());
                               runner.getTimer().start(objective.getVaultTimerStart(ModConfigs.VAULT_GENERAL.getTickCounter()));
@@ -1177,6 +1421,59 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       return vault;
    }
 
+   public static VaultRaid lobby(
+      VaultGenerator generator,
+      VaultTask initializer,
+      RaidProperties properties,
+      VaultObjective objective,
+      List<VaultEvent<?>> events,
+      Map<VaultPlayerType, Set<ServerPlayerEntity>> playersMap
+   ) {
+      MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+      VaultRaid vault = new VaultRaid(generator, initializer, properties, events, playersMap.entrySet().stream().flatMap(entry -> {
+         Set<ServerPlayerEntity> players = entry.getValue();
+         return players.stream().map(player -> {
+            VaultMember member = new VaultMember(player.func_110124_au());
+            member.getProperties().create(CAN_HEAL, true);
+            member.getBehaviours().add(new VaultBehaviour(IS_OUTSIDE, TP_TO_START));
+            member.getBehaviours().add(new VaultBehaviour(IS_DEAD.negate(), TICK_LOBBY));
+            return member;
+         });
+      }).collect(Collectors.toList()));
+      vault.getProperties().create(LOBBY, new VaultLobby());
+      vault.getProperties().create(FORCE_ACTIVE, true);
+      vault.getAllObjectives().forEach(obj -> obj.initialize(srv, vault));
+      return vault;
+   }
+
+   public static VaultRaid boss(
+      VaultGenerator generator,
+      VaultTask initializer,
+      RaidProperties properties,
+      VaultObjective objective,
+      List<VaultEvent<?>> events,
+      Map<VaultPlayerType, Set<ServerPlayerEntity>> playersMap
+   ) {
+      MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+      VaultRaid vault = new VaultRaid(generator, initializer, properties, events, playersMap.entrySet().stream().flatMap(entry -> {
+         Set<ServerPlayerEntity> players = entry.getValue();
+         return players.stream().map(player -> {
+            VaultRunner runner = new VaultRunner(player.func_110124_au());
+            runner.getBehaviours().add(new VaultBehaviour(IS_OUTSIDE, TP_TO_START));
+            runner.getBehaviours().add(new VaultBehaviour(IS_DEAD.and(IS_RUNNER), RUNNER_TO_SPECTATOR));
+            runner.getBehaviours().add(new VaultBehaviour(NO_RUNNERS_LEFT, EXIT_DEATH));
+            runner.getBehaviours().add(new VaultBehaviour(NO_OBJECTIVES_LEFT_GLOBALLY, EXIT_SAFELY));
+            runner.getProperties().create(SPAWNER, new VaultSpawner());
+            runner.getProperties().create(SHOW_TIMER, false);
+            runner.getTimer().start(30000);
+            return runner;
+         });
+      }).collect(Collectors.toList()));
+      vault.getAllObjectives().add(objective);
+      vault.getAllObjectives().forEach(obj -> obj.initialize(srv, vault));
+      return vault;
+   }
+
    public static void init() {
    }
 
@@ -1194,14 +1491,20 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
       TimeExtension.REGISTRY.put(AccelerationExtension.ID, AccelerationExtension::new);
       TimeExtension.REGISTRY.put(RoomGenerationExtension.ID, RoomGenerationExtension::new);
       TimeExtension.REGISTRY.put(FavourExtension.ID, FavourExtension::new);
+      TimeExtension.REGISTRY.put(SandExtension.ID, SandExtension::new);
       VaultPlayer.REGISTRY.put(VaultRunner.ID, VaultRunner::new);
       VaultPlayer.REGISTRY.put(VaultSpectator.ID, VaultSpectator::new);
+      VaultPlayer.REGISTRY.put(VaultMember.ID, VaultMember::new);
       VaultPiece.REGISTRY.put(VaultObelisk.ID, VaultObelisk::new);
       VaultPiece.REGISTRY.put(VaultRoom.ID, VaultRoom::new);
       VaultPiece.REGISTRY.put(VaultStart.ID, VaultStart::new);
       VaultPiece.REGISTRY.put(VaultTreasure.ID, VaultTreasure::new);
       VaultPiece.REGISTRY.put(VaultTunnel.ID, VaultTunnel::new);
       VaultPiece.REGISTRY.put(VaultRaidRoom.ID, VaultRaidRoom::new);
+      VaultPiece.REGISTRY.put(FinalVaultLobby.ID, FinalVaultLobby::new);
+      VaultPiece.REGISTRY.put(VaultPortal.ID, VaultPortal::new);
+      VaultPiece.REGISTRY.put(VaultGodEye.ID, VaultGodEye::new);
+      VaultPiece.REGISTRY.put(FinalVaultBoss.ID, FinalVaultBoss::new);
       VaultRoomLayoutRegistry.init();
       VaultInfluenceRegistry.init();
    }
@@ -1218,7 +1521,7 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
 
       protected Builder(VaultLogic logic, int vaultLevel, @Nullable VaultObjective objective) {
          this.objective = objective == null ? logic.getRandomObjective(vaultLevel) : objective;
-         this.generator = this.objective.getVaultGenerator();
+         this.generator = this.objective == null ? null : this.objective.getVaultGenerator();
          this.logic = logic;
       }
 

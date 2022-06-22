@@ -13,10 +13,12 @@ import org.lwjgl.opengl.ARBShaderObjects;
 public class ShaderUtil {
    private static final String PREFIX = "/assets/the_vault/shader/";
    public static int GRAYSCALE_SHADER = 0;
+   public static int COLORIZE_SHADER = 0;
    private static final Map<Integer, Map<String, Integer>> UNIFORM_CONSTANTS = new HashMap<>();
 
    public static void initShaders() {
       GRAYSCALE_SHADER = createProgram("grayscale.vert", "grayscale.frag");
+      COLORIZE_SHADER = createProgram("colorize.vert", "colorize.frag");
    }
 
    public static void useShader(int shader) {

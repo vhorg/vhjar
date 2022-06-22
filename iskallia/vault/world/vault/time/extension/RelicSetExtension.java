@@ -28,7 +28,10 @@ public class RelicSetExtension extends TimeExtension {
    @Override
    public CompoundNBT serializeNBT() {
       CompoundNBT nbt = super.serializeNBT();
-      nbt.func_74778_a("RelicSet", this.getRelicSet().getId().toString());
+      if (this.relicSet != null) {
+         nbt.func_74778_a("RelicSet", this.getRelicSet().getId().toString());
+      }
+
       return nbt;
    }
 
@@ -38,7 +41,6 @@ public class RelicSetExtension extends TimeExtension {
       this.relicSet = RelicSet.REGISTRY.get(new ResourceLocation(nbt.func_74779_i("RelicSet")));
       if (this.relicSet == null) {
          Vault.LOGGER.error("Relic set <" + nbt.func_74779_i("RelicSet") + "> is not defined.");
-         throw new IllegalStateException();
       }
    }
 }

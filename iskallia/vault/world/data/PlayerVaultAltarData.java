@@ -117,7 +117,7 @@ public class PlayerVaultAltarData extends WorldSavedData {
       ListNBT blockPosList = new ListNBT();
       this.playerMap.forEach((uuid, recipe) -> {
          playerList.add(StringNBT.func_229705_a_(uuid.toString()));
-         recipeList.add(AltarInfusionRecipe.serialize(recipe));
+         recipeList.add(recipe.serialize());
       });
       this.playerAltars.forEach((uuid, altarPositions) -> {
          playerBlockPosList.add(StringNBT.func_229705_a_(uuid.toString()));

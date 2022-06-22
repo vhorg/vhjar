@@ -171,6 +171,10 @@ public class EternalEntity extends ZombieEntity {
       return EntityClassification.MONSTER;
    }
 
+   public UUID getOwnerUUID() {
+      return this.owner;
+   }
+
    public Either<UUID, ServerPlayerEntity> getOwner() {
       if (this.field_70170_p.func_201670_d()) {
          return Either.left(this.owner);

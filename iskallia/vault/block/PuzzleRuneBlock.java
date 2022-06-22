@@ -14,6 +14,7 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.state.BooleanProperty;
@@ -26,6 +27,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.IStringSerializable;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
@@ -45,6 +47,9 @@ public class PuzzleRuneBlock extends Block {
                .func_206870_a(COLOR, PuzzleRuneBlock.Color.YELLOW))
             .func_206870_a(RUNE_PLACED, false)
       );
+   }
+
+   public void func_149666_a(ItemGroup group, NonNullList<ItemStack> items) {
    }
 
    @Nullable

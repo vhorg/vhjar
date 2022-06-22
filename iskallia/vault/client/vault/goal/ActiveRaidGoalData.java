@@ -18,6 +18,7 @@ public class ActiveRaidGoalData extends VaultGoalData {
    private int totalMobs;
    private int tickWaveDelay;
    private int raidsCompleted;
+   private int targetRaids;
    private List<ITextComponent> positives = new ArrayList<>();
    private List<ITextComponent> negatives = new ArrayList<>();
 
@@ -51,6 +52,10 @@ public class ActiveRaidGoalData extends VaultGoalData {
       return this.raidsCompleted;
    }
 
+   public int getTargetRaids() {
+      return this.targetRaids;
+   }
+
    public List<ITextComponent> getPositives() {
       return this.positives;
    }
@@ -68,6 +73,7 @@ public class ActiveRaidGoalData extends VaultGoalData {
       this.totalMobs = tag.func_74762_e("totalMobs");
       this.tickWaveDelay = tag.func_74762_e("tickWaveDelay");
       this.raidsCompleted = tag.func_74762_e("completedRaids");
+      this.targetRaids = tag.func_74762_e("targetRaids");
       ListNBT positives = tag.func_150295_c("positives", 8);
       this.positives = new ArrayList<>();
 

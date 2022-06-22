@@ -51,26 +51,26 @@ public class SummonEternalAbilityGroup extends AbilityGroup<SummonEternalConfig,
 
    public static SummonEternalAbilityGroup defaultConfig() {
       SummonEternalAbilityGroup group = new SummonEternalAbilityGroup();
-      group.addLevel(new SummonEternalConfig(1, 12000, 1, 12000, 0.2F, true));
-      group.addLevel(new SummonEternalConfig(1, 10800, 1, 10800, 0.2F, true));
-      group.addLevel(new SummonEternalConfig(1, 9600, 1, 9600, 0.2F, false));
-      group.addLevel(new SummonEternalConfig(1, 8400, 1, 8400, 0.2F, false));
-      group.addLevel(new SummonEternalConfig(1, 7200, 1, 7200, 0.2F, false));
-      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 12000, 1, 12000, true, 0.2F, 1));
-      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 10800, 1, 10800, true, 0.2F, 1));
-      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 9600, 1, 9600, false, 0.2F, 1));
-      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 8400, 1, 8400, false, 0.2F, 1));
-      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 7200, 1, 7200, false, 0.2F, 1));
-      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 12000, 1, 12000, true, 0.2F, 0.1F, 20, 0));
-      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 10800, 1, 10800, true, 0.2F, 0.2F, 30, 0));
-      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 9600, 1, 9600, false, 0.2F, 0.3F, 40, 1));
-      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 8400, 1, 8400, false, 0.2F, 0.4F, 60, 1));
-      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 7200, 1, 7200, false, 0.2F, 0.5F, 80, 1));
-      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 12000, 1, 12000, true, 0.2F, 0.1F));
-      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 10800, 1, 10800, true, 0.2F, 0.2F));
-      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 9600, 1, 9600, false, 0.2F, 0.25F));
-      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 8400, 1, 8400, false, 0.2F, 0.3F));
-      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 7200, 1, 7200, false, 0.2F, 0.35F));
+      group.addLevel(new SummonEternalConfig(1, 12000, 1, 3, 12000, 0.2F, true));
+      group.addLevel(new SummonEternalConfig(1, 10800, 1, 3, 10800, 0.2F, true));
+      group.addLevel(new SummonEternalConfig(1, 9600, 1, 3, 9600, 0.2F, false));
+      group.addLevel(new SummonEternalConfig(1, 8400, 1, 3, 8400, 0.2F, false));
+      group.addLevel(new SummonEternalConfig(1, 7200, 1, 3, 7200, 0.2F, false));
+      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 12000, 1, 3, 12000, true, 0.2F, 1));
+      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 10800, 1, 3, 10800, true, 0.2F, 1));
+      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 9600, 1, 3, 9600, false, 0.2F, 1));
+      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 8400, 1, 3, 8400, false, 0.2F, 1));
+      group.countLevelConfiguration.add(new SummonEternalCountConfig(1, 7200, 1, 3, 7200, false, 0.2F, 1));
+      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 12000, 1, 3, 12000, true, 0.2F, 0.1F, 20, 0));
+      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 10800, 1, 3, 10800, true, 0.2F, 0.2F, 30, 0));
+      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 9600, 1, 3, 9600, false, 0.2F, 0.3F, 40, 1));
+      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 8400, 1, 3, 8400, false, 0.2F, 0.4F, 60, 1));
+      group.debuffLevelConfiguration.add(new SummonEternalDebuffConfig(1, 7200, 1, 3, 7200, false, 0.2F, 0.5F, 80, 1));
+      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 12000, 1, 3, 12000, true, 0.2F, 0.1F));
+      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 10800, 1, 3, 10800, true, 0.2F, 0.2F));
+      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 9600, 1, 3, 9600, false, 0.2F, 0.25F));
+      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 8400, 1, 3, 8400, false, 0.2F, 0.3F));
+      group.damageLevelConfiguration.add(new SummonEternalDamageConfig(1, 7200, 1, 3, 7200, false, 0.2F, 0.35F));
       return group;
    }
 }

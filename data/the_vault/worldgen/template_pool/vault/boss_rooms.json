@@ -866,7 +866,7 @@
         "element_type": "minecraft:single_pool_element"
       }
     },
-,    {
+    {
       "weight": 2,
       "element": {
         "location": "the_vault:vault/rooms/big50",

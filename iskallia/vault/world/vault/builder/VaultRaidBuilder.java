@@ -17,7 +17,7 @@ public abstract class VaultRaidBuilder {
    public abstract VaultRaid.Builder initializeBuilder(ServerWorld var1, ServerPlayerEntity var2, CrystalData var3);
 
    protected int getVaultLevelForObjective(ServerWorld world, ServerPlayerEntity player) {
-      return PlayerVaultStatsData.get(world).getVaultStats(player.func_110124_au()).getVaultLevel();
+      return player == null ? 0 : PlayerVaultStatsData.get(world).getVaultStats(player.func_110124_au()).getVaultLevel();
    }
 
    protected VaultRaid.Builder getDefaultBuilder(CrystalData crystal, ServerWorld world, ServerPlayerEntity player) {

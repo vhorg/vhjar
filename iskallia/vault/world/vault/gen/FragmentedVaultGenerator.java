@@ -42,9 +42,15 @@ import net.minecraft.world.server.ServerWorld;
 public class FragmentedVaultGenerator extends VaultGenerator {
    public static final int REGION_SIZE = 8192;
    private VaultRoomLayoutGenerator layoutGenerator;
+   private VaultSizeConfig.SizeLayout layout;
 
    public FragmentedVaultGenerator(ResourceLocation id) {
       super(id);
+   }
+
+   public FragmentedVaultGenerator setLayout(VaultSizeConfig.SizeLayout layout) {
+      this.layout = layout;
+      return this;
    }
 
    @Nonnull
@@ -65,7 +71,7 @@ public class FragmentedVaultGenerator extends VaultGenerator {
       boolean raffle = vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false);
       int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
       boolean generatesTreasureRooms = vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).map(CrystalData::canGenerateTreasureRooms).orElse(true);
-      VaultSizeConfig.SizeLayout layout = ModConfigs.VAULT_SIZE.getLayout(level, raffle);
+      VaultSizeConfig.SizeLayout layout = this.layout != null ? this.layout : ModConfigs.VAULT_SIZE.getLayout(level, raffle);
       if (this.layoutGenerator == null) {
          this.layoutGenerator = vault.getAllObjectives().stream().findFirst().map(VaultObjective::getCustomLayout).orElse(this.provideLayoutGenerator(layout));
       }

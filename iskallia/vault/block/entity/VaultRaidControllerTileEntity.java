@@ -79,7 +79,7 @@ public class VaultRaidControllerTileEntity extends TileEntity implements ITickab
          if (this.func_145831_w() instanceof ServerWorld) {
             ServerWorld sWorld = (ServerWorld)this.func_145831_w();
             VaultRaid vault = VaultRaidData.get(sWorld).getAt(sWorld, this.func_174877_v());
-            if (vault != null) {
+            if (vault != null && vault.getPlayers().size() > 0) {
                if (vault.getActiveRaid() != null && vault.getActiveRaid().getController().equals(this.func_174877_v())) {
                   boolean needsUpdate = this.activeTimeout <= 0;
                   this.activeTimeout = 20;
@@ -88,40 +88,59 @@ public class VaultRaidControllerTileEntity extends TileEntity implements ITickab
                   }
                }
 
-               vault.getActiveObjective(RaidChallengeObjective.class)
-                  .ifPresent(
-                     raidObjective -> {
-                        if (this.raidModifiers.isEmpty()) {
-                           boolean cannotGetArtifact = vault.getActiveModifiersFor(PlayerFilter.any(), InventoryRestoreModifier.class)
-                              .stream()
-                              .anyMatch(InventoryRestoreModifier::preventsArtifact);
-                           int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
-                           RaidModifier addedModifier = ModConfigs.RAID_MODIFIER_CONFIG.getRandomModifier(level, true, cannotGetArtifact).map(modifier -> {
-                              RaidModifier mod = modifier.getModifier();
-                              if (mod != null) {
-                                 this.raidModifiers.put(mod.getName(), Float.valueOf(modifier.getRandomValue()));
-                              }
-
-                              return mod;
-                           }).orElse(null);
-                           if (addedModifier != null && !(addedModifier instanceof ModifierDoublingModifier)) {
-                              ModConfigs.RAID_MODIFIER_CONFIG.getRandomModifier(level, false, cannotGetArtifact).ifPresent(modifier -> {
-                                 RaidModifier mod = modifier.getModifier();
-                                 if (mod != null) {
-                                    this.raidModifiers.put(mod.getName(), Float.valueOf(modifier.getRandomValue()));
-                                 }
-                              });
-                           }
-
-                           this.markForUpdate();
-                        }
+               vault.getActiveObjective(RaidChallengeObjective.class).ifPresent(raidObjective -> {
+                  if (this.raidModifiers.isEmpty()) {
+                     if (vault.getProperties().exists(VaultRaid.PARENT)) {
+                        this.generateModifiersFinal(vault);
+                     } else {
+                        this.generateModifiers(vault);
                      }
-                  );
+                  }
+               });
             }
          }
       } else {
          this.setupParticles();
       }
+   }
+
+   private void generateModifiers(VaultRaid vault) {
+      boolean cannotGetArtifact = vault.getActiveModifiersFor(PlayerFilter.any(), InventoryRestoreModifier.class)
+         .stream()
+         .anyMatch(InventoryRestoreModifier::preventsArtifact);
+      int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
+      RaidModifier addedModifier = ModConfigs.RAID_MODIFIER_CONFIG.getRandomModifier(level, true, cannotGetArtifact).map(modifier -> {
+         RaidModifier mod = modifier.getModifier();
+         if (mod != null) {
+            this.raidModifiers.put(mod.getName(), Float.valueOf(modifier.getRandomValue()));
+         }
+
+         return mod;
+      }).orElse(null);
+      if (addedModifier != null && !(addedModifier instanceof ModifierDoublingModifier)) {
+         ModConfigs.RAID_MODIFIER_CONFIG.getRandomModifier(level, false, cannotGetArtifact).ifPresent(modifier -> {
+            RaidModifier mod = modifier.getModifier();
+            if (mod != null) {
+               this.raidModifiers.put(mod.getName(), Float.valueOf(modifier.getRandomValue()));
+            }
+         });
+      }
+
+      this.markForUpdate();
+   }
+
+   private void generateModifiersFinal(VaultRaid vault) {
+      boolean cannotGetArtifact = vault.getActiveModifiersFor(PlayerFilter.any(), InventoryRestoreModifier.class)
+         .stream()
+         .anyMatch(InventoryRestoreModifier::preventsArtifact);
+      int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
+      ModConfigs.FINAL_RAID_MODIFIER_CONFIG.getRandomModifier(level, cannotGetArtifact).ifPresent(modifier -> {
+         RaidModifier mod = modifier.getModifier();
+         if (mod != null) {
+            this.raidModifiers.put(mod.getName(), Float.valueOf(modifier.getRandomValue()));
+         }
+      });
+      this.markForUpdate();
    }
 
    @OnlyIn(Dist.CLIENT)

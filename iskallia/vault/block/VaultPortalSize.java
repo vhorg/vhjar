@@ -1,6 +1,8 @@
 package iskallia.vault.block;
 
 import iskallia.vault.init.ModBlocks;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -56,6 +58,84 @@ public class VaultPortalSize {
          Axis direction$axis = axis == Axis.X ? Axis.Z : Axis.X;
          return Optional.of(new VaultPortalSize(world, pos, direction$axis, positionPredicate)).filter(sizePredicate);
       }
+   }
+
+   public static List<BlockPos> getFrame(IWorld world, BlockPos pos) {
+      List<BlockPos> positions = new ArrayList<>();
+      Optional<VaultPortalSize> portalSize = findPortalSizeFromPortalBlock(world, pos);
+      if (portalSize.isPresent()) {
+         VaultPortalSize size = portalSize.get();
+         BlockPos current = size.bottomLeft == null ? null : size.bottomLeft.func_177972_a(size.rightDir.func_176734_d()).func_177977_b();
+         if (current != null) {
+            positions.add(current);
+            findAndAddPositions(world, positions, size, current);
+         }
+      }
+
+      return positions;
+   }
+
+   private static void findAndAddPositions(IWorld world, List<BlockPos> positions, VaultPortalSize size, BlockPos current) {
+      for (int up = 0; up <= size.height; up++) {
+         if (!VaultPortalBlock.FRAME.test(world.func_180495_p(current.func_177984_a()), world, current.func_177984_a())) {
+            current = current.func_177984_a();
+            positions.add(current);
+            break;
+         }
+
+         current = current.func_177984_a();
+         positions.add(current);
+      }
+
+      for (int right = 0; right <= size.width; right++) {
+         if (!VaultPortalBlock.FRAME.test(world.func_180495_p(current.func_177972_a(size.rightDir)), world, current.func_177972_a(size.rightDir))) {
+            current = current.func_177972_a(size.rightDir);
+            positions.add(current);
+            break;
+         }
+
+         current = current.func_177972_a(size.rightDir);
+         positions.add(current);
+      }
+
+      for (int down = 0; down <= size.height; down++) {
+         if (!VaultPortalBlock.FRAME.test(world.func_180495_p(current.func_177977_b()), world, current.func_177977_b())) {
+            current = current.func_177977_b();
+            positions.add(current);
+            break;
+         }
+
+         current = current.func_177977_b();
+         positions.add(current);
+      }
+
+      for (int left = 0; left < size.width; left++) {
+         if (!VaultPortalBlock.FRAME
+            .test(world.func_180495_p(current.func_177972_a(size.rightDir.func_176734_d())), world, current.func_177972_a(size.rightDir.func_176734_d()))) {
+            positions.add(current.func_177984_a());
+            break;
+         }
+
+         current = current.func_177972_a(size.rightDir.func_176734_d());
+         positions.add(current);
+      }
+   }
+
+   private static Optional<VaultPortalSize> findPortalSizeFromPortalBlock(IWorld world, BlockPos pos) {
+      Optional<VaultPortalSize> portalSize = getPortalSize(world, pos.func_177978_c(), VaultPortalSize::isValid, Axis.Z, VaultPortalBlock.FRAME);
+      if (!portalSize.isPresent()) {
+         portalSize = getPortalSize(world, pos.func_177968_d(), VaultPortalSize::isValid, Axis.Z, VaultPortalBlock.FRAME);
+      }
+
+      if (!portalSize.isPresent()) {
+         portalSize = getPortalSize(world, pos.func_177974_f(), VaultPortalSize::isValid, Axis.X, VaultPortalBlock.FRAME);
+      }
+
+      if (!portalSize.isPresent()) {
+         portalSize = getPortalSize(world, pos.func_177976_e(), VaultPortalSize::isValid, Axis.X, VaultPortalBlock.FRAME);
+      }
+
+      return portalSize;
    }
 
    private static boolean canConnect(BlockState state) {

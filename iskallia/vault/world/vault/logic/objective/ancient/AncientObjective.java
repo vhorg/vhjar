@@ -84,7 +84,7 @@ public class AncientObjective extends VaultObjective {
 
    @Nonnull
    @Override
-   public BlockState getObjectiveRelevantBlock() {
+   public BlockState getObjectiveRelevantBlock(VaultRaid vault, ServerWorld world, BlockPos pos) {
       return (BlockState)ModBlocks.CRYO_CHAMBER.func_176223_P().func_206870_a(CryoChamberBlock.CHAMBER_STATE, CryoChamberBlock.ChamberState.RUSTY);
    }
 

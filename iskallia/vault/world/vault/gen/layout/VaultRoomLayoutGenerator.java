@@ -1,5 +1,6 @@
 package iskallia.vault.world.vault.gen.layout;
 
+import iskallia.vault.Vault;
 import iskallia.vault.world.gen.structure.JigsawPatternFilter;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +21,9 @@ import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
 
 public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
    private final ResourceLocation id;
+   private ResourceLocation startRoomId = Vault.id("vault/starts");
+   private ResourceLocation roomId = Vault.id("vault/rooms");
+   private ResourceLocation tunnelId = Vault.id("vault/tunnels");
 
    protected VaultRoomLayoutGenerator(ResourceLocation id) {
       this.id = id;
@@ -29,15 +33,57 @@ public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
       return this.id;
    }
 
+   @Override
+   public ResourceLocation getStartRoomId() {
+      return this.startRoomId;
+   }
+
+   @Override
+   public ResourceLocation getRoomId() {
+      return this.roomId;
+   }
+
+   @Override
+   public ResourceLocation getTunnelId() {
+      return this.tunnelId;
+   }
+
+   public void setStartRoomId(ResourceLocation startRoomId) {
+      this.startRoomId = startRoomId;
+   }
+
+   public void setRoomId(ResourceLocation roomId) {
+      this.roomId = roomId;
+   }
+
+   public void setTunnelId(ResourceLocation tunnelId) {
+      this.tunnelId = tunnelId;
+   }
+
    public abstract void setSize(int var1);
 
    public abstract VaultRoomLayoutGenerator.Layout generateLayout();
 
    protected CompoundNBT serialize() {
-      return new CompoundNBT();
+      CompoundNBT nbt = new CompoundNBT();
+      nbt.func_74778_a("startRoomId", this.startRoomId.toString());
+      nbt.func_74778_a("roomId", this.roomId.toString());
+      nbt.func_74778_a("tunnelId", this.tunnelId.toString());
+      return nbt;
    }
 
    protected void deserialize(CompoundNBT tag) {
+      if (tag.func_150297_b("startRoomId", 8)) {
+         this.startRoomId = new ResourceLocation(tag.func_74779_i("startRoomId"));
+      }
+
+      if (tag.func_150297_b("roomId", 8)) {
+         this.roomId = new ResourceLocation(tag.func_74779_i("roomId"));
+      }
+
+      if (tag.func_150297_b("tunnelId", 8)) {
+         this.tunnelId = new ResourceLocation(tag.func_74779_i("tunnelId"));
+      }
    }
 
    public static class Layout {

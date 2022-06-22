@@ -1,5 +1,6 @@
 package iskallia.vault.skill.ability.effect;
 
+import iskallia.vault.entity.EyesoreEntity;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.AbilityNode;
@@ -55,6 +56,10 @@ public class ExecuteAbility<C extends ExecuteConfig> extends AbilityEffect<C> {
                      C cfg = (C)node.getAbilityConfig();
                      LivingEntity entity = event.getEntityLiving();
                      float dmgDealt = entity.func_110138_aP() * cfg.getHealthPercentage();
+                     if (event.getEntityLiving() instanceof EyesoreEntity) {
+                        dmgDealt = Math.min(5.0F, dmgDealt);
+                     }
+
                      event.setAmount(event.getAmount() + dmgDealt);
                      player.func_184614_ca().func_222118_a(1, player, playerEntity -> {});
                      player.field_70170_p

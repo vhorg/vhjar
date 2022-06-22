@@ -12,6 +12,7 @@ import iskallia.vault.world.data.EternalsData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -47,6 +48,14 @@ public class SummonEternalAbility<C extends SummonEternalConfig> extends Ability
          } else {
             List<EternalData> eternals = new ArrayList<>();
             int count = this.getEternalCount(playerEternals, config);
+            List<EternalEntity> summonedEternals = player.func_71121_q()
+               .getEntities()
+               .filter(entity -> entity instanceof EternalEntity)
+               .map(entity -> (EternalEntity)entity)
+               .filter(eternalx -> eternalx.getOwnerUUID().equals(player.func_110124_au()))
+               .collect(Collectors.toList());
+            int maxToSummon = config.getSummonedEternalsCap() - summonedEternals.size();
+            count = Math.min(count, maxToSummon);
 
             for (int i = 0; i < count; i++) {
                EternalData eternal = null;
@@ -68,7 +77,14 @@ public class SummonEternalAbility<C extends SummonEternalConfig> extends Ability
             }
 
             if (eternals.isEmpty()) {
-               player.func_145747_a(new StringTextComponent("You have no (alive) eternals to summon.").func_240699_a_(TextFormatting.RED), Util.field_240973_b_);
+               if (count > 0) {
+                  player.func_145747_a(
+                     new StringTextComponent("You have no (alive) eternals to summon.").func_240699_a_(TextFormatting.RED), Util.field_240973_b_
+                  );
+               } else {
+                  player.func_145747_a(new StringTextComponent("You have reached the eternal cap.").func_240699_a_(TextFormatting.RED), Util.field_240973_b_);
+               }
+
                return false;
             } else {
                TalentTree talents = PlayerTalentsData.get(sWorld).getTalents(player);

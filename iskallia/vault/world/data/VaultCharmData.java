@@ -128,7 +128,9 @@ public class VaultCharmData extends WorldSavedData {
 
       public boolean canUpgrade(int newSize) {
          VaultCharmUpgrade.Tier current = VaultCharmUpgrade.Tier.getTierBySize(this.size);
+         System.out.println(current);
          VaultCharmUpgrade.Tier potential = VaultCharmUpgrade.Tier.getTierBySize(newSize);
+         System.out.println(potential);
          if (potential == null) {
             return false;
          } else if (current == null) {
