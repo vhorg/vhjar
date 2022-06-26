@@ -12,7 +12,6 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.player.VaultMember;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -92,8 +91,7 @@ public class VaultRaidData extends WorldSavedData {
       this.vaults.removeIf(vault -> vault.getProperties().getValue(VaultRaid.IDENTIFIER).equals(vaultId));
    }
 
-   public void remove(MinecraftServer server, UUID playerId) {
-      VaultRaid vault = this.getActiveFor(playerId);
+   public void remove(MinecraftServer server, UUID playerId, VaultRaid vault) {
       if (vault != null) {
          ServerWorld world = server.func_71218_a(vault.getProperties().getValue(VaultRaid.DIMENSION));
          vault.getPlayer(playerId).ifPresent(player -> {
@@ -216,15 +214,13 @@ public class VaultRaidData extends WorldSavedData {
          .stream()
          .filter(vault -> vault.getProperties().<RegistryKey<World>, RegistryKeyAttribute<World>>getValue(VaultRaid.DIMENSION) == world.func_234923_W_())
          .forEach(vault -> vault.tick(world));
-      List<UUID> completed = new ArrayList<>();
       this.vaults.removeIf(vault -> {
          if (vault.isFinished()) {
-            vault.getPlayers().forEach(player -> completed.add(player.getPlayerId()));
+            vault.getPlayers().forEach(player -> this.remove(world.func_73046_m(), player.getPlayerId(), vault));
          }
 
          return vault.isFinished();
       });
-      completed.forEach(uuid -> this.remove(world.func_73046_m(), uuid));
    }
 
    @SubscribeEvent

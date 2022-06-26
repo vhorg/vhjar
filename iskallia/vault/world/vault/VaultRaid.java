@@ -1461,8 +1461,8 @@ public class VaultRaid implements INBTSerializable<CompoundNBT> {
             VaultRunner runner = new VaultRunner(player.func_110124_au());
             runner.getBehaviours().add(new VaultBehaviour(IS_OUTSIDE, TP_TO_START));
             runner.getBehaviours().add(new VaultBehaviour(IS_DEAD.and(IS_RUNNER), RUNNER_TO_SPECTATOR));
-            runner.getBehaviours().add(new VaultBehaviour(NO_RUNNERS_LEFT, EXIT_DEATH));
             runner.getBehaviours().add(new VaultBehaviour(NO_OBJECTIVES_LEFT_GLOBALLY, EXIT_SAFELY));
+            runner.getBehaviours().add(new VaultBehaviour(NO_RUNNERS_LEFT, EXIT_DEATH));
             runner.getProperties().create(SPAWNER, new VaultSpawner());
             runner.getProperties().create(SHOW_TIMER, false);
             runner.getTimer().start(30000);

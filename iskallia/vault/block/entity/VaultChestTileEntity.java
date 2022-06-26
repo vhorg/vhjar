@@ -297,7 +297,7 @@ public class VaultChestTileEntity extends ChestTileEntity {
       List<ItemStack> loot = new ArrayList<>();
       if (vault.getActiveObjectives().stream().noneMatch(VaultObjective::preventsCatalystFragments)) {
          vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).ifPresent(crystalData -> {
-            if (!crystalData.preventsRandomModifiers()) {
+            if (crystalData.isChallenge() || !crystalData.preventsRandomModifiers()) {
                float chance = ModConfigs.VAULT_CHEST_META.getCatalystChance(thisState.func_177230_c().getRegistryName(), this.rarity);
                float incModifier = 0.0F;
 

@@ -3,6 +3,7 @@ package iskallia.vault.config;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.Vault;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.util.GlobUtils;
 import iskallia.vault.util.data.WeightedList;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
@@ -14,13 +15,15 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.world.BlockEvent.EntityPlaceEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
 @EventBusSubscriber(
-   modid = "the_vault",
    bus = Bus.FORGE
 )
 public class VaultGeneralConfig extends Config {
@@ -97,8 +100,17 @@ public class VaultGeneralConfig extends Config {
    @SubscribeEvent
    public static void cancelItemInteraction(PlayerInteractEvent event) {
       if (event.getPlayer().field_70170_p.func_234923_W_() == Vault.VAULT_KEY) {
-         if (ModConfigs.VAULT_GENERAL.ITEM_BLACKLIST.contains(event.getItemStack().func_77973_b().getRegistryName().toString()) && event.isCancelable()) {
-            event.setCanceled(true);
+         if (event.isCancelable()) {
+            ResourceLocation registryName = event.getItemStack().func_77973_b().getRegistryName();
+            if (registryName != null) {
+               String itemId = registryName.toString();
+
+               for (String blacklistGlob : ModConfigs.VAULT_GENERAL.ITEM_BLACKLIST) {
+                  if (GlobUtils.matches(blacklistGlob, itemId)) {
+                     event.setCanceled(true);
+                  }
+               }
+            }
          }
       }
    }
@@ -106,9 +118,40 @@ public class VaultGeneralConfig extends Config {
    @SubscribeEvent
    public static void cancelBlockInteraction(PlayerInteractEvent event) {
       if (event.getPlayer().field_70170_p.func_234923_W_() == Vault.VAULT_KEY) {
-         BlockState state = event.getWorld().func_180495_p(event.getPos());
-         if (ModConfigs.VAULT_GENERAL.BLOCK_BLACKLIST.contains(state.func_177230_c().getRegistryName().toString()) && event.isCancelable()) {
-            event.setCanceled(true);
+         if (event.isCancelable()) {
+            BlockState state = event.getWorld().func_180495_p(event.getPos());
+            ResourceLocation registryName = state.func_177230_c().getRegistryName();
+            if (registryName != null) {
+               String blockId = registryName.toString();
+
+               for (String blacklistGlob : ModConfigs.VAULT_GENERAL.BLOCK_BLACKLIST) {
+                  if (GlobUtils.matches(blacklistGlob, blockId)) {
+                     event.setCanceled(true);
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void cancelBlockPlacement(EntityPlaceEvent event) {
+      IWorld world = event.getWorld();
+      if (!world.func_201670_d()) {
+         if (((ServerWorld)world).func_234923_W_() == Vault.VAULT_KEY) {
+            if (event.isCancelable()) {
+               BlockState state = world.func_180495_p(event.getPos());
+               ResourceLocation registryName = state.func_177230_c().getRegistryName();
+               if (registryName != null) {
+                  String blockId = registryName.toString();
+
+                  for (String blacklistGlob : ModConfigs.VAULT_GENERAL.BLOCK_BLACKLIST) {
+                     if (GlobUtils.matches(blacklistGlob, blockId)) {
+                        event.setCanceled(true);
+                     }
+                  }
+               }
+            }
          }
       }
    }

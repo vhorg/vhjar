@@ -103,8 +103,14 @@ public class VaultPortalBlock extends NetherPortalBlock {
                            }
 
                            world.func_175656_a(pos, Blocks.field_150350_a.func_176223_P());
-                           List<BlockPos> frame = VaultPortalSize.getFrame(world, pos);
-                           frame.forEach(frameBlock -> world.func_180501_a(frameBlock, Blocks.field_235406_np_.func_176223_P(), 11));
+                           if (data.getType() == CrystalData.Type.FINAL_LOBBY) {
+                              List<BlockPos> frame = VaultPortalSize.getFrame(world, pos);
+                              frame.forEach(frameBlock -> {
+                                 if (world.func_180495_p(frameBlock).func_177230_c() == ModBlocks.FINAL_VAULT_FRAME) {
+                                    world.func_180501_a(frameBlock, Blocks.field_235406_np_.func_176223_P(), 11);
+                                 }
+                              });
+                           }
                         }
 
                         player.func_242279_ag();

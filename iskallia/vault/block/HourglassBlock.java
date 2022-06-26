@@ -11,6 +11,7 @@ import iskallia.vault.world.vault.logic.objective.TreasureHuntObjective;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -23,6 +24,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.Property;
@@ -93,6 +95,19 @@ public class HourglassBlock extends Block {
       } else {
          ItemStack interacted = player.func_184586_b(hand);
          if (ModItems.VAULT_SAND.equals(interacted.func_77973_b())) {
+            VaultRaid vault = VaultRaidData.get((ServerWorld)world).getAt((ServerWorld)world, pos);
+            if (vault != null) {
+               CompoundNBT sandNBT = interacted.func_77978_p();
+               if (sandNBT == null) {
+                  return ActionResultType.SUCCESS;
+               }
+
+               UUID vaultId = sandNBT.func_186857_a("vault_id");
+               if (!vaultId.equals(vault.getProperties().getValue(VaultRaid.IDENTIFIER))) {
+                  return ActionResultType.SUCCESS;
+               }
+            }
+
             TileEntity te = world.func_175625_s(pos);
             if (te instanceof HourglassTileEntity) {
                HourglassTileEntity hourglass = (HourglassTileEntity)te;

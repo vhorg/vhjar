@@ -25,7 +25,9 @@ public class NameProviderPublic {
          "RowanArtifex",
          "HellFirePvP",
          "Pau1_",
-         "Douwsky"
+         "Douwsky",
+         "pomodoko",
+         "Damnsecci"
       }
    );
    private static final List<String> SMP_S2 = Lists.newArrayList(

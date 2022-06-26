@@ -232,6 +232,14 @@ public class VaultJigsawHelper {
    }
 
    @Nonnull
+   private static WeightedList<JigsawPiece> getRoomList(ResourceLocation key, int level) {
+      JigsawPattern roomPool = getPool(key);
+      WeightedList<JigsawPiece> pool = new WeightedList<>();
+      roomPool.field_214952_d.forEach(weightedPiece -> pool.add((JigsawPiece)weightedPiece.getFirst(), (Integer)weightedPiece.getSecond()));
+      return pool.copyFiltered(piece -> VaultRoomLevelRestrictions.canGenerate(piece, level));
+   }
+
+   @Nonnull
    private static JigsawPattern getPool(ResourceLocation key) {
       MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
       MutableRegistry<JigsawPattern> jigsawRegistry = srv.func_244267_aX().func_243612_b(Registry.field_243555_ax);
@@ -241,5 +249,10 @@ public class VaultJigsawHelper {
    @Nonnull
    public static JigsawPiece getRandomPiece(ResourceLocation key) {
       return getRoomList(key).getOptionalRandom(rand).orElseThrow(RuntimeException::new);
+   }
+
+   @Nonnull
+   public static JigsawPiece getRandomPiece(ResourceLocation key, int level) {
+      return getRoomList(key, level).getOptionalRandom(rand).orElseThrow(RuntimeException::new);
    }
 }

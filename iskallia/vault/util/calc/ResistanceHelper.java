@@ -74,7 +74,7 @@ public class ResistanceHelper {
          }
       }
 
-      return resistancePercent + getResistancePercent(player);
+      return resistancePercent;
    }
 
    public static float getResistancePercent(LivingEntity entity) {

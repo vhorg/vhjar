@@ -281,7 +281,7 @@ public class CryochamberScreen extends ContainerScreen<CryochamberContainer> {
 
       String parryPercent = PERCENT_FORMAT.format(snapshot.getParry() * 100.0F) + "%";
       String resistPercent = PERCENT_FORMAT.format(snapshot.getResistance() * 100.0F) + "%";
-      String armorAmount = PERCENT_FORMAT.format(EternalHelper.getEternalGearModifierAdjustments(snapshot, Attributes.field_233826_i_, 0.0F));
+      String armorAmount = PERCENT_FORMAT.format(snapshot.getArmor());
       this.field_230706_i_.func_110434_K().func_110577_a(TEXTURE);
       this.func_238474_b_(matrixStack, 8, 72, 216, 0, 16, 16);
       matrixStack.func_227860_a_();

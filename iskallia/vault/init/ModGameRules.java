@@ -12,7 +12,7 @@ public class ModGameRules {
    public static RuleKey<BooleanValue> FINAL_VAULT_ALLOW_PARTY;
 
    public static void initialize() {
-      FINAL_VAULT_ALLOW_PARTY = register("finalVaultAllowParty", Category.MISC, booleanRule(true));
+      FINAL_VAULT_ALLOW_PARTY = register("finalVaultAllowParty", Category.MISC, booleanRule(false));
    }
 
    public static <T extends RuleValue<T>> RuleKey<T> register(String name, Category category, RuleType<T> type) {

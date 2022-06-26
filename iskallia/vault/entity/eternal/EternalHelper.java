@@ -52,16 +52,20 @@ public class EternalHelper {
    }
 
    public static float getEternalGearModifierAdjustments(EternalDataAccess dataAccess, Attribute attribute, float value) {
-      Map<Operation, List<AttributeModifier>> modifiers = new HashMap<>();
+      return getEternalGearModifierAdjustments(dataAccess.getEquipment(), attribute, value);
+   }
 
-      for (EquipmentSlotType slotType : EquipmentSlotType.values()) {
-         ItemStack stack = dataAccess.getEquipment().getOrDefault(slotType, ItemStack.field_190927_a);
-         if (!stack.func_190926_b()) {
-            stack.func_111283_C(slotType)
-               .get(attribute)
-               .forEach(modifier -> modifiers.computeIfAbsent(modifier.func_220375_c(), op -> new ArrayList<>()).add(modifier));
+   public static float getEternalGearModifierAdjustments(Map<EquipmentSlotType, ItemStack> equipments, Attribute attribute, float value) {
+      Map<Operation, List<AttributeModifier>> modifiers = new HashMap<>();
+      equipments.forEach(
+         (slotType, stack) -> {
+            if (!stack.func_190926_b()) {
+               stack.func_111283_C(slotType)
+                  .get(attribute)
+                  .forEach(modifierx -> modifiers.computeIfAbsent(modifierx.func_220375_c(), op -> new ArrayList<>()).add(modifierx));
+            }
          }
-      }
+      );
 
       for (AttributeModifier modifier : modifiers.getOrDefault(Operation.ADDITION, Collections.emptyList())) {
          value = (float)(value + modifier.func_111164_d());

@@ -430,8 +430,6 @@ public class ModBlocks {
       registerBlock(event, VAULT_CHAMPION_TROPHY, Vault.id("vault_champion_trophy"));
       registerBlock(event, FINAL_VAULT_PORTAL, Vault.id("final_vault_portal"));
       registerBlock(event, FINAL_VAULT_FRAME, Vault.id("final_vault_frame"));
-      registerBlock(event, FINAL_VAULT_KEYSTONE_SOCKET, Vault.id("final_vault_keystone_socket"));
-      registerBlock(event, OTHER_SIDE_PORTAL, Vault.id("other_side_portal"));
       registerBlock(event, VAULT_ALTAR, Vault.id("vault_altar"));
       registerBlock(event, ALEXANDRITE_ORE, Vault.id("ore_alexandrite"));
       registerBlock(event, BENITOITE_ORE, Vault.id("ore_benitoite"));
@@ -534,7 +532,6 @@ public class ModBlocks {
       registerTileEntity(event, FINAL_VAULT_FRAME_TILE_ENTITY, Vault.id("final_vault_frame_tile_entity"));
       registerTileEntity(event, VAULT_CRATE_TILE_ENTITY, Vault.id("vault_crate_tile_entity"));
       registerTileEntity(event, VAULT_PORTAL_TILE_ENTITY, Vault.id("vault_portal_tile_entity"));
-      registerTileEntity(event, OTHER_SIDE_PORTAL_TILE_ENTITY, Vault.id("other_side_portal_tile_entity"));
       registerTileEntity(event, VENDING_MACHINE_TILE_ENTITY, Vault.id("vending_machine_tile_entity"));
       registerTileEntity(event, ADVANCED_VENDING_MACHINE_TILE_ENTITY, Vault.id("advanced_vending_machine_tile_entity"));
       registerTileEntity(event, RELIC_STATUE_TILE_ENTITY, Vault.id("relic_statue_tile_entity"));
@@ -592,8 +589,6 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_PORTAL);
       registerBlockItem(event, VAULT_CHAMPION_TROPHY, VAULT_CHAMPION_TROPHY_BLOCK_ITEM);
       registerBlockItem(event, FINAL_VAULT_FRAME, FINAL_VAULT_FRAME_BLOCK_ITEM);
-      registerBlockItem(event, FINAL_VAULT_KEYSTONE_SOCKET);
-      registerBlockItem(event, OTHER_SIDE_PORTAL);
       registerBlockItem(event, VAULT_ALTAR, 1);
       registerBlockItem(event, ALEXANDRITE_ORE);
       registerBlockItem(event, BENITOITE_ORE);

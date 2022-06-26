@@ -124,8 +124,14 @@ public class CakeHuntObjective extends VaultObjective {
                         Direction direction = Direction.func_176737_a(
                            next.func_177958_n() - curr.func_177958_n(), 0.0F, next.func_177952_p() - curr.func_177952_p()
                         );
+                        int level = vault.getProperties().getBaseOrDefault(VaultRaid.LEVEL, 0);
                         List<VaultPiece> generatedPieces = VaultJigsawHelper.expandVault(
-                           vault, world, room, direction, VaultJigsawHelper.getRandomPiece(this.roomPool), VaultJigsawHelper.getRandomPiece(this.tunnelPool)
+                           vault,
+                           world,
+                           room,
+                           direction,
+                           VaultJigsawHelper.getRandomPiece(this.roomPool, level),
+                           VaultJigsawHelper.getRandomPiece(this.tunnelPool, level)
                         );
                         generatedPieces.stream()
                            .filter(piece -> piece instanceof VaultRoom)

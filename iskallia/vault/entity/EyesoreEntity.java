@@ -66,7 +66,7 @@ public class EyesoreEntity extends GhastEntity implements VaultBoss {
       this.field_70145_X = true;
       this.func_110163_bv();
       this.func_110148_a(Attributes.field_233818_a_).func_111128_a(ModConfigs.EYESORE.getHealth(this));
-      this.func_70606_j(ModConfigs.EYESORE.health);
+      this.func_70606_j(ModConfigs.EYESORE.getHealth(this));
       this.prevHealth = this.func_110143_aJ();
    }
 

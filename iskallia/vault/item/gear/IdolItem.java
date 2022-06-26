@@ -32,8 +32,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class IdolItem extends BasicItem implements VaultGear<IdolItem> {
-   private static final UUID ATTACK_DAMAGE_MODIFIER = UUID.fromString("CB3F55D3-645C-4F38-A497-2C13A33DB5CF");
-   private static final UUID ATTACK_SPEED_MODIFIER = UUID.fromString("FA233E1C-4180-4865-B01B-4CCE9785ACA3");
+   private static final UUID ATTACK_DAMAGE_MODIFIER = UUID.fromString("CB3F55D3-645C-4F38-A497-2C13A33D1234");
+   private static final UUID ATTACK_SPEED_MODIFIER = UUID.fromString("FA233E1C-4180-4865-B01B-4CCE97851234");
    private final PlayerFavourData.VaultGodType type;
 
    public IdolItem(ResourceLocation id, PlayerFavourData.VaultGodType type, Properties properties) {

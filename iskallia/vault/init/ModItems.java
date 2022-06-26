@@ -1089,10 +1089,5 @@ public class ModItems {
       registry.register(CHARM_UPGRADE_TIER_2);
       registry.register(CHARM_UPGRADE_TIER_3);
       registry.register(CHARM_UPGRADE_TIER_4);
-      registry.register(BURNT_CRYSTAL);
-      registry.register(KEYSTONE_IDONA);
-      registry.register(KEYSTONE_VELARA);
-      registry.register(KEYSTONE_TENOS);
-      registry.register(KEYSTONE_WENDARR);
    }
 }

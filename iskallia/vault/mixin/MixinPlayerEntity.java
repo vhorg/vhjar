@@ -5,17 +5,23 @@ import iskallia.vault.world.vault.VaultRaid;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.GameRules.BooleanValue;
 import net.minecraft.world.GameRules.RuleKey;
 import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin({PlayerEntity.class})
 public abstract class MixinPlayerEntity extends LivingEntity {
+   @Shadow
+   public abstract ItemStack func_184582_a(EquipmentSlotType var1);
+
    protected MixinPlayerEntity(EntityType<? extends LivingEntity> type, World worldIn) {
       super(type, worldIn);
    }

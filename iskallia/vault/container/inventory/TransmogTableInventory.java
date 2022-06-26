@@ -54,26 +54,23 @@ public class TransmogTableInventory extends RecipeInventory {
          return false;
       } else if (appearanceRarity == VaultGear.Rarity.SCRAPPY) {
          return false;
+      } else if (armorRarity == VaultGear.Rarity.UNIQUE) {
+         return false;
       } else {
          EquipmentSlotType armorSlot = MobEntity.func_184640_d(appearanceStack);
          EquipmentSlotType appearanceSlot = MobEntity.func_184640_d(armorStack);
          if (armorSlot != appearanceSlot) {
             return false;
          } else {
-            int armorSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(armorStack).orElse(-1);
             int appearanceSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(appearanceStack).orElse(-1);
-            if (armorSpecialModel != -1) {
-               return false;
-            } else {
-               if (appearanceSpecialModel != -1) {
-                  ModModels.SpecialGearModel specialGearModel = ModModels.SpecialGearModel.getModel(appearanceSlot, appearanceSpecialModel);
-                  if (specialGearModel != null && !specialGearModel.getModelProperties().doesAllowTransmogrification()) {
-                     return false;
-                  }
+            if (appearanceSpecialModel != -1) {
+               ModModels.SpecialGearModel specialGearModel = ModModels.SpecialGearModel.getModel(appearanceSlot, appearanceSpecialModel);
+               if (specialGearModel != null && !specialGearModel.getModelProperties().doesAllowTransmogrification()) {
+                  return false;
                }
-
-               return bronzeStack.func_77973_b() == ModItems.VAULT_BRONZE && bronzeStack.func_190916_E() >= this.requiredVaultBronze();
             }
+
+            return bronzeStack.func_77973_b() == ModItems.VAULT_BRONZE && bronzeStack.func_190916_E() >= this.requiredVaultBronze();
          }
       }
    }
@@ -85,21 +82,18 @@ public class TransmogTableInventory extends RecipeInventory {
          return false;
       } else if (appearanceRarity == VaultGear.Rarity.SCRAPPY) {
          return false;
+      } else if (swordRarity == VaultGear.Rarity.UNIQUE) {
+         return false;
       } else {
-         int armorSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(swordStack).orElse(-1);
          int appearanceSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(appearanceStack).orElse(-1);
-         if (armorSpecialModel != -1) {
-            return false;
-         } else {
-            if (appearanceSpecialModel != -1) {
-               ModModels.SpecialSwordModel specialSwordModel = ModModels.SpecialSwordModel.getModel(appearanceSpecialModel);
-               if (specialSwordModel != null && !specialSwordModel.getModelProperties().doesAllowTransmogrification()) {
-                  return false;
-               }
+         if (appearanceSpecialModel != -1) {
+            ModModels.SpecialSwordModel specialSwordModel = ModModels.SpecialSwordModel.getModel(appearanceSpecialModel);
+            if (specialSwordModel != null && !specialSwordModel.getModelProperties().doesAllowTransmogrification()) {
+               return false;
             }
-
-            return bronzeStack.func_77973_b() == ModItems.VAULT_BRONZE && bronzeStack.func_190916_E() >= this.requiredVaultBronze();
          }
+
+         return bronzeStack.func_77973_b() == ModItems.VAULT_BRONZE && bronzeStack.func_190916_E() >= this.requiredVaultBronze();
       }
    }
 
@@ -107,14 +101,16 @@ public class TransmogTableInventory extends RecipeInventory {
    public ItemStack resultingItemStack() {
       ItemStack gearStack = this.func_70301_a(0);
       ItemStack appearanceStack = this.func_70301_a(1);
-      IntegerAttribute modelAttr = ModAttributes.GEAR_MODEL.getOrDefault(appearanceStack, 0);
-      int modelId = modelAttr.getValue(appearanceStack);
-      IntegerAttribute specialModelAttr = ModAttributes.GEAR_SPECIAL_MODEL.getOrDefault(appearanceStack, -1);
-      int specialModelId = specialModelAttr.getValue(appearanceStack);
+      int gearModel = ModAttributes.GEAR_MODEL.getBase(gearStack).orElse(-1);
+      int gearSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(gearStack).orElse(-1);
+      int appearanceModel = ModAttributes.GEAR_MODEL.getBase(appearanceStack).orElse(-1);
+      int appearanceSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getBase(appearanceStack).orElse(-1);
       ItemStack resultingStack = gearStack.func_77946_l();
-      ModAttributes.GEAR_MODEL.create(resultingStack, modelId);
-      if (specialModelId != -1) {
-         ModAttributes.GEAR_SPECIAL_MODEL.create(resultingStack, specialModelId);
+      if (appearanceSpecialModel != -1) {
+         ModAttributes.GEAR_SPECIAL_MODEL.create(resultingStack, appearanceSpecialModel);
+      } else {
+         ModAttributes.GEAR_MODEL.create(resultingStack, appearanceModel);
+         ModAttributes.GEAR_SPECIAL_MODEL.create(resultingStack, -1);
       }
 
       return resultingStack;

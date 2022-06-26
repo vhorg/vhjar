@@ -16,6 +16,7 @@ import iskallia.vault.util.StatueType;
 import iskallia.vault.util.WeekKey;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultRaidData;
+import iskallia.vault.world.data.generated.ChallengeCrystalArchive;
 import java.util.Collections;
 import java.util.List;
 import net.minecraft.command.CommandSource;
@@ -71,6 +72,16 @@ public class GiveLootCommand extends Command {
             )
       );
       builder.then(Commands.func_197057_a("record_box").executes(this::giveTrophyBox));
+      builder.then(
+         Commands.func_197057_a("challenge_crystal").then(Commands.func_197056_a("index", IntegerArgumentType.integer()).executes(this::giveChallengeCrystal))
+      );
+   }
+
+   public int giveChallengeCrystal(CommandContext<CommandSource> context) throws CommandSyntaxException {
+      ServerPlayerEntity sPlayer = ((CommandSource)context.getSource()).func_197035_h();
+      int index = IntegerArgumentType.getInteger(context, "index");
+      sPlayer.func_191521_c(ChallengeCrystalArchive.get(index));
+      return 0;
    }
 
    public int giveTrophyBox(CommandContext<CommandSource> context) throws CommandSyntaxException {

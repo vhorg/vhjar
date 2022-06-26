@@ -142,7 +142,7 @@ public class EntityEvents {
    }
 
    @SubscribeEvent
-   public static void onPlayerFallDamage(LivingDamageEvent event) {
+   public static void onPlayerFallDamage(LivingHurtEvent event) {
       if (!event.getEntity().field_70170_p.field_72995_K) {
          if (event.getEntity() instanceof PlayerEntity) {
             if (event.getSource() == DamageSource.field_76379_h) {

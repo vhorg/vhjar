@@ -30,6 +30,7 @@ public class EternalDataSnapshot implements EternalDataAccess {
    private final Map<String, Float> attributes;
    private final float parry;
    private final float resistance;
+   private final float armor;
    private final int level;
    private final int usedLevels;
    private final int maxLevel;
@@ -46,6 +47,7 @@ public class EternalDataSnapshot implements EternalDataAccess {
       Map<String, Float> attributes,
       float parry,
       float resistance,
+      float armor,
       int level,
       int usedLevels,
       int maxLevel,
@@ -61,6 +63,7 @@ public class EternalDataSnapshot implements EternalDataAccess {
       this.attributes = attributes;
       this.parry = parry;
       this.resistance = resistance;
+      this.armor = armor;
       this.level = level;
       this.usedLevels = usedLevels;
       this.maxLevel = maxLevel;
@@ -96,6 +99,7 @@ public class EternalDataSnapshot implements EternalDataAccess {
       attributes.put(ATTR_SPEED, value);
       float parry = ParryHelper.getGearParryChance(eternal::getStack);
       float resistance = ResistanceHelper.getGearResistanceChance(eternal::getStack);
+      float armor = EternalHelper.getEternalGearModifierAdjustments(eternal.getEquipment(), Attributes.field_233826_i_, 0.0F);
       int level = eternal.getLevel();
       int usedLevels = eternal.getUsedLevels();
       int maxLevel = eternal.getMaxLevel();
@@ -104,7 +108,21 @@ public class EternalDataSnapshot implements EternalDataAccess {
       boolean ancient = eternal.isAncient();
       String abilityName = eternal.getAura() != null ? eternal.getAura().getAuraName() : null;
       return new EternalDataSnapshot(
-         eternalUUID, seed, eternalName, equipment, attributes, parry, resistance, level, usedLevels, maxLevel, levelPercent, alive, ancient, abilityName
+         eternalUUID,
+         seed,
+         eternalName,
+         equipment,
+         attributes,
+         parry,
+         resistance,
+         armor,
+         level,
+         usedLevels,
+         maxLevel,
+         levelPercent,
+         alive,
+         ancient,
+         abilityName
       );
    }
 
@@ -150,6 +168,10 @@ public class EternalDataSnapshot implements EternalDataAccess {
 
    public float getResistance() {
       return this.resistance;
+   }
+
+   public float getArmor() {
+      return this.armor;
    }
 
    @Override
@@ -228,6 +250,7 @@ public class EternalDataSnapshot implements EternalDataAccess {
       });
       buffer.writeFloat(this.parry);
       buffer.writeFloat(this.resistance);
+      buffer.writeFloat(this.armor);
       buffer.writeInt(this.level);
       buffer.writeInt(this.usedLevels);
       buffer.writeInt(this.maxLevel);
@@ -264,6 +287,7 @@ public class EternalDataSnapshot implements EternalDataAccess {
 
       float parry = buffer.readFloat();
       float resistance = buffer.readFloat();
+      float armor = buffer.readFloat();
       int level = buffer.readInt();
       int usedLevels = buffer.readInt();
       int maxLevel = buffer.readInt();
@@ -272,7 +296,21 @@ public class EternalDataSnapshot implements EternalDataAccess {
       boolean ancient = buffer.readBoolean();
       String abilityName = buffer.readBoolean() ? buffer.func_150789_c(32767) : null;
       return new EternalDataSnapshot(
-         eternalUUID, seed, eternalName, equipment, attributes, parry, resistance, level, usedLevels, maxLevel, levelPercent, alive, ancient, abilityName
+         eternalUUID,
+         seed,
+         eternalName,
+         equipment,
+         attributes,
+         parry,
+         resistance,
+         armor,
+         level,
+         usedLevels,
+         maxLevel,
+         levelPercent,
+         alive,
+         ancient,
+         abilityName
       );
    }
 }

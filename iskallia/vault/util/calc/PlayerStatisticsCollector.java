@@ -13,6 +13,7 @@ import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.world.vault.logic.behaviour.VaultBehaviour;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import iskallia.vault.world.vault.player.VaultPlayer;
@@ -30,6 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
@@ -290,27 +292,26 @@ public class PlayerStatisticsCollector {
             } else {
                CrystalData data = recordedRaid.getProperties().getBaseOrDefault(VaultRaid.CRYSTAL_DATA, CrystalData.EMPTY);
                CrystalData.Type vaultType = data.getType();
-               if (vaultType != CrystalData.Type.COOP) {
-                  for (VaultPlayer vPlayer : recordedRaid.getPlayers()) {
-                     if (vPlayer.hasExited()) {
-                        if (vPlayer instanceof VaultSpectator) {
-                           snapshot.deaths++;
-                        } else {
-                           snapshot.bails++;
-                        }
-                        break;
-                     }
+               boolean isOldClassic = false;
+               if (recordedRaid.getPlayers().size() == 1) {
+                  VaultPlayer player = recordedRaid.getPlayers().get(0);
+                  VaultBehaviour behaviour = player.getBehaviours().get(0);
+                  ResourceLocation id = behaviour.getTask().getId();
+                  if (VaultRaid.RUNNER_TO_SPECTATOR.getId().equals(id)) {
+                     isOldClassic = true;
                   }
-               } else {
+               }
+
+               if (!isOldClassic && vaultType != CrystalData.Type.TROVE && vaultType != CrystalData.Type.RAFFLE) {
                   boolean done = true;
                   boolean areAllSpectators = true;
 
-                  for (VaultPlayer vPlayerx : recordedRaid.getPlayers()) {
-                     if (!vPlayerx.hasExited()) {
+                  for (VaultPlayer vPlayer : recordedRaid.getPlayers()) {
+                     if (!vPlayer.hasExited()) {
                         done = false;
                      }
 
-                     if (vPlayerx instanceof VaultRunner) {
+                     if (vPlayer instanceof VaultRunner) {
                         areAllSpectators = false;
                      }
                   }
@@ -320,6 +321,17 @@ public class PlayerStatisticsCollector {
                         snapshot.bails++;
                      } else {
                         snapshot.deaths++;
+                     }
+                  }
+               } else {
+                  for (VaultPlayer vPlayer : recordedRaid.getPlayers()) {
+                     if (vPlayer.hasExited()) {
+                        if (vPlayer instanceof VaultSpectator) {
+                           snapshot.deaths++;
+                        } else {
+                           snapshot.bails++;
+                        }
+                        break;
                      }
                   }
                }

@@ -62,6 +62,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
    protected List<String> guaranteedRoomFilters = new ArrayList<>();
    protected CrystalData.EchoData echoData;
    protected FrameData frameData;
+   protected boolean challenge;
 
    public CrystalData() {
    }
@@ -232,6 +233,15 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
 
    public void setCanGenerateTreasureRooms(boolean canGenerateTreasureRooms) {
       this.canGenerateTreasureRooms = canGenerateTreasureRooms;
+      this.updateDelegate();
+   }
+
+   public boolean isChallenge() {
+      return this.challenge;
+   }
+
+   public void setChallenge(boolean challenge) {
+      this.challenge = challenge;
       this.updateDelegate();
    }
 
@@ -432,6 +442,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
          nbt.func_218657_a("Frame", this.frameData.serializeNBT());
       }
 
+      nbt.func_74757_a("Challenge", this.challenge);
       return nbt;
    }
 
@@ -462,6 +473,7 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       ListNBT roomList = nbt.func_150295_c("rooms", 8);
       roomList.forEach(inbt -> this.guaranteedRoomFilters.add(this.migrateRoomName(inbt.func_150285_a_())));
       this.frameData = FrameData.fromNBT(nbt.func_74775_l("Frame"));
+      this.challenge = nbt.func_74767_n("Challenge");
    }
 
    private void migrateModifiers(List<CrystalData.Modifier> modifiers) {
