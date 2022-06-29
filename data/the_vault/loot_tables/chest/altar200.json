@@ -1760,7 +1760,7 @@
 	    	{
           "type": "minecraft:item",
           "weight": 1,
-          "name": "minecraft:rabbit_feet",
+          "name": "minecraft:rabbit_foot",
           "functions": [
             {
               "function": "minecraft:set_count",

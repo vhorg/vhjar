@@ -472,6 +472,7 @@
           "type": "minecraft:tag",
           "weight": 4,
           "name": "quark:runes",
+          "expand": "true",
           "functions": [
             {
               "function": "minecraft:set_count",
