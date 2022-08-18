@@ -150,6 +150,9 @@
       "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$RuleKey;)Z": "Lnet/minecraft/world/GameRules;func_223586_b(Lnet/minecraft/world/GameRules$RuleKey;)Z",
       "copyFrom": "Lnet/minecraft/entity/player/ServerPlayerEntity;func_193104_a(Lnet/minecraft/entity/player/ServerPlayerEntity;Z)V"
     },
+    "iskallia/vault/mixin/MixinIntegerValue": {
+      "create": "func_223559_b(I)Lnet/minecraft/world/GameRules$RuleType;"
+    },
     "iskallia/vault/mixin/MixinSlotItemHandler": {
       "isItemValid": "Lnet/minecraftforge/items/SlotItemHandler;func_75214_a(Lnet/minecraft/item/ItemStack;)Z"
     },
@@ -315,6 +318,9 @@
       "iskallia/vault/mixin/MixinServerPlayerEntity": {
         "Lnet/minecraft/world/GameRules;getBoolean(Lnet/minecraft/world/GameRules$RuleKey;)Z": "Lnet/minecraft/world/GameRules;func_223586_b(Lnet/minecraft/world/GameRules$RuleKey;)Z",
         "copyFrom": "Lnet/minecraft/entity/player/ServerPlayerEntity;func_193104_a(Lnet/minecraft/entity/player/ServerPlayerEntity;Z)V"
+      },
+      "iskallia/vault/mixin/MixinIntegerValue": {
+        "create": "func_223559_b(I)Lnet/minecraft/world/GameRules$RuleType;"
       },
       "iskallia/vault/mixin/MixinSlotItemHandler": {
         "isItemValid": "Lnet/minecraftforge/items/SlotItemHandler;func_75214_a(Lnet/minecraft/item/ItemStack;)Z"

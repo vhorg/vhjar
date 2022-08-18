@@ -150,7 +150,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.95
+                  "chance": 0.3
                 }
               ]
             }
@@ -246,7 +246,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.25
+                  "chance": 0.1
                 }
               ]
             }
@@ -777,7 +777,7 @@
       "entries": [
         {
           "type": "minecraft:empty",
-          "weight": 36
+          "weight": 24
         },
         {
           "type": "minecraft:item",

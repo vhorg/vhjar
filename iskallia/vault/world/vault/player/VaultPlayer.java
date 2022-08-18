@@ -1,6 +1,7 @@
 package iskallia.vault.world.vault.player;
 
 import iskallia.vault.Vault;
+import iskallia.vault.init.ModGameRules;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.nbt.VListNBT;
 import iskallia.vault.skill.PlayerVaultStats;
@@ -19,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -147,6 +149,10 @@ public abstract class VaultPlayer implements INBTSerializable<CompoundNBT> {
       this.getServerPlayer(server).ifPresent(action::accept);
    }
 
+   public <T> T mapIfPresent(MinecraftServer server, Function<ServerPlayerEntity, T> action, T _default) {
+      return this.getServerPlayer(server).map(action).orElse(_default);
+   }
+
    public void sendIfPresent(MinecraftServer server, Object message) {
       this.runIfPresent(server, playerEntity -> ModNetwork.CHANNEL.sendTo(message, playerEntity.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT));
    }
@@ -156,8 +162,12 @@ public abstract class VaultPlayer implements INBTSerializable<CompoundNBT> {
       PlayerVaultStats stats = data.getVaultStats(this.getPlayerId());
       float expGrantedPercent = MathHelper.func_76131_a((float)this.timer.getRunTime() / this.timer.getStartTime(), 0.0F, 1.0F);
       expGrantedPercent *= multiplier;
+      expGrantedPercent *= this.mapIfPresent(
+            server, player -> MathHelper.func_76125_a(player.func_71121_q().func_82736_K().func_223592_c(ModGameRules.EXP_MULTIPLIER), 0, 25), 1
+         )
+         .intValue();
       int vaultLevel = stats.getVaultLevel();
-      expGrantedPercent *= MathHelper.func_76131_a(1.0F - vaultLevel / 100.0F, 0.0F, 1.0F);
+      expGrantedPercent *= MathHelper.func_76131_a(1.0F - vaultLevel / 200.0F, 0.0F, 1.0F);
       float remainingPercent = 1.0F - (float)stats.getExp() / stats.getTnl();
       if (expGrantedPercent > remainingPercent) {
          expGrantedPercent -= remainingPercent;

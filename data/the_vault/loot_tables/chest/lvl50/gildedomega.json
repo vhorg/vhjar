@@ -134,7 +134,7 @@
         },
         { "_name": "echogem",
           "type": "minecraft:item",
-          "weight": 1,
+          "weight": 2,
           "name": "the_vault:gem_echo",
           "functions": [
             {
@@ -150,7 +150,7 @@
               "conditions": [
                 {
                   "condition": "minecraft:random_chance",
-                  "chance": 0.95
+                  "chance": 0.25
                 }
               ]
             }
@@ -777,7 +777,7 @@
       "entries": [
         {
           "type": "minecraft:empty",
-          "weight": 36
+          "weight": 20
         },
         {
           "type": "minecraft:item",
