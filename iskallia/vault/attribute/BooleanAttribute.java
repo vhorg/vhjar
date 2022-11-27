@@ -3,7 +3,7 @@ package iskallia.vault.attribute;
 import com.google.gson.annotations.Expose;
 import java.util.Optional;
 import java.util.Random;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class BooleanAttribute extends PooledAttribute<Boolean> {
    public BooleanAttribute() {
@@ -14,13 +14,13 @@ public class BooleanAttribute extends PooledAttribute<Boolean> {
    }
 
    @Override
-   public void write(CompoundNBT nbt) {
-      nbt.func_74757_a("BaseValue", this.getBaseValue());
+   public void write(CompoundTag nbt) {
+      nbt.putBoolean("BaseValue", this.getBaseValue());
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      this.setBaseValue(Boolean.valueOf(nbt.func_74767_n("BaseValue")));
+   public void read(CompoundTag nbt) {
+      this.setBaseValue(Boolean.valueOf(nbt.getBoolean("BaseValue")));
    }
 
    public static BooleanAttribute.Generator generator() {

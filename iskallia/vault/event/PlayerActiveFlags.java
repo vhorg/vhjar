@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,14 +20,14 @@ public class PlayerActiveFlags {
    public static void onTick(ServerTickEvent event) {
       if (event.phase != Phase.END) {
          timeouts.forEach((playerId, flagTimeouts) -> {
-            flagTimeouts.forEach(rec$ -> rec$.tick());
-            flagTimeouts.removeIf(rec$ -> rec$.isFinished());
+            flagTimeouts.forEach(PlayerActiveFlags.FlagTimeout::tick);
+            flagTimeouts.removeIf(PlayerActiveFlags.FlagTimeout::isFinished);
          });
       }
    }
 
-   public static void set(PlayerEntity player, PlayerActiveFlags.Flag flag, int timeout) {
-      set(player.func_110124_au(), flag, timeout);
+   public static void set(Player player, PlayerActiveFlags.Flag flag, int timeout) {
+      set(player.getUUID(), flag, timeout);
    }
 
    public static void set(UUID playerId, PlayerActiveFlags.Flag flag, int timeout) {
@@ -43,8 +43,8 @@ public class PlayerActiveFlags {
       flags.add(new PlayerActiveFlags.FlagTimeout(flag, timeout));
    }
 
-   public static boolean isSet(PlayerEntity player, PlayerActiveFlags.Flag flag) {
-      return isSet(player.func_110124_au(), flag);
+   public static boolean isSet(Player player, PlayerActiveFlags.Flag flag) {
+      return isSet(player.getUUID(), flag);
    }
 
    public static boolean isSet(UUID playerId, PlayerActiveFlags.Flag flag) {

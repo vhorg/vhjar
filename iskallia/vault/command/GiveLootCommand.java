@@ -3,37 +3,48 @@ package iskallia.vault.command;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import iskallia.vault.VaultMod;
+import iskallia.vault.block.VaultChampionTrophy;
 import iskallia.vault.block.VaultCrateBlock;
+import iskallia.vault.block.item.FinalVaultFrameBlockItem;
 import iskallia.vault.block.item.LootStatueBlockItem;
 import iskallia.vault.block.item.TrophyStatueBlockItem;
-import iskallia.vault.config.LootTablesConfig;
+import iskallia.vault.block.item.VaultChampionTrophyBlockItem;
+import iskallia.vault.config.LegacyLootTablesConfig;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.VaultDollItem;
+import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.item.crystal.VaultCrystalItem;
+import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.util.EntityHelper;
-import iskallia.vault.util.StatueType;
 import iskallia.vault.util.WeekKey;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.data.VaultRaidData;
-import iskallia.vault.world.data.generated.ChallengeCrystalArchive;
 import java.util.Collections;
 import java.util.List;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootContext.Builder;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import java.util.UUID;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.LootContext.Builder;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraftforge.server.command.EnumArgument;
 
 public class GiveLootCommand extends Command {
    @Override
@@ -52,98 +63,256 @@ public class GiveLootCommand extends Command {
    }
 
    @Override
-   public void build(LiteralArgumentBuilder<CommandSource> builder) {
+   public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
       builder.then(
-         Commands.func_197057_a("raffle_boss_crate")
+         Commands.literal("arena_crate")
             .then(
-               Commands.func_197056_a("boss_name", StringArgumentType.word())
+               Commands.argument("champion", StringArgumentType.word())
                   .executes(
-                     ctx -> this.giveRaffleBossCrate(ctx, ((CommandSource)ctx.getSource()).func_197035_h(), StringArgumentType.getString(ctx, "boss_name"))
+                     ctx -> this.giveArenaCrate(
+                        ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException(), StringArgumentType.getString(ctx, "champion")
+                     )
                   )
             )
       );
-      builder.then(Commands.func_197057_a("normal_boss_crate").executes(ctx -> this.giveNormalBossCrate(ctx, ((CommandSource)ctx.getSource()).func_197035_h())));
-      builder.then(Commands.func_197057_a("raid_reward_crate").executes(ctx -> this.giveRaidRewardCrate(ctx, ((CommandSource)ctx.getSource()).func_197035_h())));
       builder.then(
-         Commands.func_197057_a("record_trophy")
+         Commands.literal("raffle_boss_crate")
             .then(
-               Commands.func_197056_a("year", IntegerArgumentType.integer())
-                  .then(Commands.func_197056_a("week", IntegerArgumentType.integer()).executes(this::giveTrophy))
+               Commands.argument("boss_name", StringArgumentType.word())
+                  .executes(
+                     ctx -> this.giveRaffleBossCrate(
+                        ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException(), StringArgumentType.getString(ctx, "boss_name")
+                     )
+                  )
             )
       );
-      builder.then(Commands.func_197057_a("record_box").executes(this::giveTrophyBox));
       builder.then(
-         Commands.func_197057_a("challenge_crystal").then(Commands.func_197056_a("index", IntegerArgumentType.integer()).executes(this::giveChallengeCrystal))
+         Commands.literal("normal_boss_crate").executes(ctx -> this.giveNormalBossCrate(ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException()))
+      );
+      builder.then(
+         Commands.literal("loot_statue")
+            .then(
+               Commands.argument("name", StringArgumentType.word())
+                  .executes(
+                     ctx -> this.giveLootStatue(StringArgumentType.getString(ctx, "name"), ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException())
+                  )
+            )
+      );
+      builder.then(
+         Commands.literal("raffle_crystal")
+            .then(
+               Commands.argument("winner", StringArgumentType.word())
+                  .executes(
+                     ctx -> this.giveRaffleCrystal(
+                        ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException(), StringArgumentType.getString(ctx, "winner")
+                     )
+                  )
+            )
+      );
+      builder.then(
+         Commands.literal("crystal")
+            .then(
+               ((RequiredArgumentBuilder)Commands.argument("type", EnumArgument.enumArgument(CrystalData.Type.class)).executes(this::giveCrystal))
+                  .then(Commands.argument("level", IntegerArgumentType.integer()).executes(this::giveCrystal))
+            )
+      );
+      builder.then(
+         Commands.literal("paxel")
+            .then(
+               Commands.argument("enhancementId", StringArgumentType.string())
+                  .executes(
+                     ctx -> this.givePaxel(
+                        ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException(), StringArgumentType.getString(ctx, "enhancementId")
+                     )
+                  )
+            )
+      );
+      builder.then(Commands.literal("set_gear_name").then(Commands.argument("name", StringArgumentType.word()).executes(this::setGearName)));
+      builder.then(
+         Commands.literal("record_trophy")
+            .then(
+               Commands.argument("year", IntegerArgumentType.integer())
+                  .then(Commands.argument("week", IntegerArgumentType.integer()).executes(this::giveTrophy))
+            )
+      );
+      builder.then(Commands.literal("record_box").executes(this::giveTrophyBox));
+      builder.then(
+         Commands.literal("final_vault_frame")
+            .then(
+               Commands.argument("ownerUUID", UuidArgument.uuid())
+                  .then(
+                     Commands.argument("ownerNickname", StringArgumentType.word())
+                        .executes(
+                           ctx -> this.giveFinalVaultFrame(ctx, UuidArgument.getUuid(ctx, "ownerUUID"), StringArgumentType.getString(ctx, "ownerNickname"))
+                        )
+                  )
+            )
+      );
+      builder.then(
+         Commands.literal("champion_trophy")
+            .then(
+               Commands.argument("ownerUUID", UuidArgument.uuid())
+                  .then(
+                     Commands.argument("ownerNickname", StringArgumentType.word())
+                        .then(
+                           Commands.argument("variant", EnumArgument.enumArgument(VaultChampionTrophy.Variant.class))
+                              .executes(
+                                 ctx -> this.giveChampionTrophy(
+                                    ctx,
+                                    UuidArgument.getUuid(ctx, "ownerUUID"),
+                                    StringArgumentType.getString(ctx, "ownerNickname"),
+                                    (VaultChampionTrophy.Variant)ctx.getArgument("variant", VaultChampionTrophy.Variant.class)
+                                 )
+                              )
+                        )
+                  )
+            )
+      );
+      builder.then(
+         Commands.literal("vault_doll")
+            .then(
+               Commands.argument("playerIGN", StringArgumentType.word())
+                  .executes(ctx -> this.giveVaultDoll(ctx, StringArgumentType.getString(ctx, "playerIGN")))
+            )
       );
    }
 
-   public int giveChallengeCrystal(CommandContext<CommandSource> context) throws CommandSyntaxException {
-      ServerPlayerEntity sPlayer = ((CommandSource)context.getSource()).func_197035_h();
-      int index = IntegerArgumentType.getInteger(context, "index");
-      sPlayer.func_191521_c(ChallengeCrystalArchive.get(index));
-      return 0;
+   private int setGearName(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer sPlayer = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      ItemStack heldItem = sPlayer.getMainHandItem();
+      return heldItem.isEmpty() ? 0 : 0;
    }
 
-   public int giveTrophyBox(CommandContext<CommandSource> context) throws CommandSyntaxException {
-      ServerPlayerEntity sPlayer = ((CommandSource)context.getSource()).func_197035_h();
-      ServerWorld sWorld = sPlayer.func_71121_q();
-      Builder builder = new Builder(sWorld).func_216023_a(sWorld.field_73012_v).func_186469_a(sPlayer.func_184817_da());
-      int playerLevel = PlayerVaultStatsData.get(sWorld).getVaultStats(sPlayer.func_110124_au()).getVaultLevel();
-      LootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(playerLevel);
-      LootTable bossBonusTbl = sPlayer.func_184102_h().func_200249_aQ().func_186521_a(config.getScavengerCrate());
-      NonNullList<ItemStack> quickBossLoot = NonNullList.func_191196_a();
-      quickBossLoot.addAll(bossBonusTbl.func_216113_a(builder.func_216022_a(LootParameterSets.field_216260_a)));
+   public int giveTrophyBox(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer sPlayer = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      ServerLevel sWorld = sPlayer.getLevel();
+      Builder builder = new Builder(sWorld).withRandom(sWorld.random).withLuck(sPlayer.getLuck());
+      int playerLevel = PlayerVaultStatsData.get(sWorld).getVaultStats(sPlayer.getUUID()).getVaultLevel();
+      LegacyLootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(playerLevel);
+      LootTable bossBonusTbl = sPlayer.getServer().getLootTables().get(config.getScavengerCrate());
+      NonNullList<ItemStack> quickBossLoot = NonNullList.create();
+      quickBossLoot.addAll(bossBonusTbl.getRandomItems(builder.create(LootContextParamSets.EMPTY)));
       Collections.shuffle(quickBossLoot);
-      ItemStack box = new ItemStack(Items.field_221972_gr);
-      box.func_196082_o().func_218657_a("BlockEntityTag", new CompoundNBT());
-      ItemStackHelper.func_191282_a(box.func_196082_o().func_74775_l("BlockEntityTag"), quickBossLoot);
-      sPlayer.func_191521_c(box);
-      sPlayer.func_145747_a(new StringTextComponent("Generated Recordbox for Vault level " + playerLevel), Util.field_240973_b_);
+      ItemStack box = new ItemStack(Items.WHITE_SHULKER_BOX);
+      box.getOrCreateTag().put("BlockEntityTag", new CompoundTag());
+      ContainerHelper.saveAllItems(box.getOrCreateTag().getCompound("BlockEntityTag"), quickBossLoot);
+      sPlayer.addItem(box);
+      sPlayer.sendMessage(new TextComponent("Generated Recordbox for Vault level " + playerLevel), Util.NIL_UUID);
       return 0;
    }
 
-   public int giveTrophy(CommandContext<CommandSource> context) throws CommandSyntaxException {
-      ServerPlayerEntity sPlayer = ((CommandSource)context.getSource()).func_197035_h();
+   public int giveTrophy(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer sPlayer = ((CommandSourceStack)context.getSource()).getPlayerOrException();
       int year = IntegerArgumentType.getInteger(context, "year");
       int week = IntegerArgumentType.getInteger(context, "week");
-      ItemStack statue = TrophyStatueBlockItem.getTrophy(sPlayer.func_71121_q(), WeekKey.of(year, week));
-      if (!statue.func_190926_b()) {
-         sPlayer.func_191521_c(statue);
+      ItemStack statue = TrophyStatueBlockItem.getTrophy(sPlayer.getLevel(), WeekKey.of(year, week));
+      if (!statue.isEmpty()) {
+         sPlayer.addItem(statue);
       } else {
-         sPlayer.func_145747_a(new StringTextComponent("No record set!"), Util.field_240973_b_);
+         sPlayer.sendMessage(new TextComponent("No record set!"), Util.NIL_UUID);
       }
 
       return 0;
    }
 
-   private int giveRaidRewardCrate(CommandContext<CommandSource> ctx, ServerPlayerEntity player) {
-      EntityHelper.giveItem(player, VaultRaidData.generateRaidRewardCrate());
+   private int giveLootStatue(String name, CommandContext<CommandSourceStack> context, ServerPlayer player) {
+      ItemStack statue = LootStatueBlockItem.getStatueBlockItem(name);
+      player.addItem(statue);
       return 0;
    }
 
-   public int giveNormalBossCrate(CommandContext<CommandSource> context, ServerPlayerEntity player) {
-      ServerWorld world = player.func_71121_q();
-      Builder builder = new Builder(world).func_216023_a(world.field_73012_v).func_186469_a(player.func_184817_da());
-      LootContext ctx = builder.func_216022_a(LootParameterSets.field_216260_a);
-      int level = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
-      NonNullList<ItemStack> stacks = NonNullList.func_191196_a();
-      stacks.addAll(world.func_73046_m().func_200249_aQ().func_186521_a(ModConfigs.LOOT_TABLES.getForLevel(level).getBossCrate()).func_216113_a(ctx));
-      ItemStack crate = VaultCrateBlock.getCrateWithLoot(ModBlocks.VAULT_CRATE, stacks);
-      EntityHelper.giveItem(player, crate);
+   public int giveCrystal(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      int level = 0;
+
+      try {
+         level = (Integer)context.getArgument("level", Integer.class);
+      } catch (IllegalArgumentException var6) {
+      }
+
+      CrystalData.Type type = (CrystalData.Type)context.getArgument("type", CrystalData.Type.class);
+      ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
+      CrystalData crystal = new CrystalData(stack);
+      crystal.setTheme(new PoolCrystalTheme(VaultMod.id("default")));
+      crystal.setLevel(level);
+      if (type == CrystalData.Type.RAFFLE) {
+      }
+
+      EntityHelper.giveItem(((CommandSourceStack)context.getSource()).getPlayerOrException(), stack);
       return 0;
    }
 
-   public int giveRaffleBossCrate(CommandContext<CommandSource> context, ServerPlayerEntity player, String bossName) {
-      ServerWorld world = player.func_71121_q();
-      Builder builder = new Builder(world).func_216023_a(world.field_73012_v).func_186469_a(player.func_184817_da());
-      LootContext ctx = builder.func_216022_a(LootParameterSets.field_216260_a);
-      NonNullList<ItemStack> stacks = NonNullList.func_191196_a();
-      stacks.add(LootStatueBlockItem.getStatueBlockItem(bossName, StatueType.VAULT_BOSS));
+   public int giveArenaCrate(CommandContext<CommandSourceStack> context, ServerPlayer player, String championName) {
+      ServerLevel world = player.getLevel();
+      Builder builder = new Builder(world).withRandom(world.random).withLuck(player.getLuck());
+      LootContext ctx = builder.create(LootContextParamSets.EMPTY);
+      NonNullList<ItemStack> stacks = NonNullList.create();
+      stacks.add(LootStatueBlockItem.getStatueBlockItem(championName));
       int level = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
-      List<ItemStack> items = world.func_73046_m().func_200249_aQ().func_186521_a(ModConfigs.LOOT_TABLES.getForLevel(level).getBossCrate()).func_216113_a(ctx);
+      List<ItemStack> items = world.getServer().getLootTables().get(ModConfigs.LOOT_TABLES.getForLevel(level).getArenaCrate()).getRandomItems(ctx);
       stacks.addAll(items);
-      ItemStack crate = VaultCrateBlock.getCrateWithLoot(ModBlocks.VAULT_CRATE, stacks);
+      ItemStack crate = VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.ARENA, stacks);
       EntityHelper.giveItem(player, crate);
+      return 0;
+   }
+
+   public int giveNormalBossCrate(CommandContext<CommandSourceStack> context, ServerPlayer player) {
+      ServerLevel world = player.getLevel();
+      Builder builder = new Builder(world).withRandom(world.random).withLuck(player.getLuck());
+      LootContext ctx = builder.create(LootContextParamSets.EMPTY);
+      int level = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
+      NonNullList<ItemStack> stacks = NonNullList.create();
+      ItemStack crate = VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.BOSS, stacks);
+      EntityHelper.giveItem(player, crate);
+      return 0;
+   }
+
+   public int giveRaffleBossCrate(CommandContext<CommandSourceStack> context, ServerPlayer player, String bossName) {
+      ServerLevel world = player.getLevel();
+      Builder builder = new Builder(world).withRandom(world.random).withLuck(player.getLuck());
+      LootContext ctx = builder.create(LootContextParamSets.EMPTY);
+      NonNullList<ItemStack> stacks = NonNullList.create();
+      stacks.add(LootStatueBlockItem.getStatueBlockItem(bossName));
+      int level = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
+      ItemStack crate = VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.BOSS, stacks);
+      EntityHelper.giveItem(player, crate);
+      return 0;
+   }
+
+   public int giveRaffleCrystal(CommandContext<CommandSourceStack> context, ServerPlayer player, String winner) {
+      ItemStack crystalStack = VaultCrystalItem.getCrystalWithBoss(winner);
+      EntityHelper.giveItem(player, crystalStack);
+      return 0;
+   }
+
+   public int givePaxel(CommandContext<CommandSourceStack> context, ServerPlayer player, String enhancementSId) {
+      ItemStack paxelStack = new ItemStack(ModItems.VAULTERITE_PICKAXE);
+      EntityHelper.giveItem(player, paxelStack);
+      return 0;
+   }
+
+   public int giveFinalVaultFrame(CommandContext<CommandSourceStack> context, UUID ownerUUID, String ownerNickname) throws CommandSyntaxException {
+      ItemStack frameStack = new ItemStack(ModBlocks.FINAL_VAULT_FRAME_BLOCK_ITEM);
+      FinalVaultFrameBlockItem.writeToItemStack(frameStack, ownerUUID, ownerNickname);
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      EntityHelper.giveItem(player, frameStack);
+      return 0;
+   }
+
+   public int giveChampionTrophy(CommandContext<CommandSourceStack> context, UUID ownerUUID, String ownerNickname, VaultChampionTrophy.Variant variant) throws CommandSyntaxException {
+      ItemStack trophyStack = VaultChampionTrophyBlockItem.create(ownerUUID, ownerNickname, variant);
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      EntityHelper.giveItem(player, trophyStack);
+      return 0;
+   }
+
+   private int giveVaultDoll(CommandContext<CommandSourceStack> context, String playerIGN) throws CommandSyntaxException {
+      ServerPlayer serverPlayer = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      ItemStack dollStack = new ItemStack(ModItems.VAULT_DOLL);
+      ServerLevel serverLevel = ((CommandSourceStack)context.getSource()).getLevel();
+      serverLevel.getServer().getProfileCache().get(playerIGN).ifPresentOrElse(gp -> {
+         VaultDollItem.setNewDollAttributes(dollStack, gp, ((CommandSourceStack)context.getSource()).getLevel());
+         EntityHelper.giveItem(serverPlayer, dollStack);
+      }, () -> serverPlayer.sendMessage(new TextComponent("Unable to find player's IGN: " + playerIGN).withStyle(ChatFormatting.RED), Util.NIL_UUID));
       return 0;
    }
 }

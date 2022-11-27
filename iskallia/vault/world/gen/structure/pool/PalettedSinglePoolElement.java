@@ -14,80 +14,84 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.minecraft.block.Blocks;
-import net.minecraft.state.properties.StructureMode;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.feature.jigsaw.IJigsawDeserializer;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPattern.PlacementBehaviour;
-import net.minecraft.world.gen.feature.structure.StructureManager;
-import net.minecraft.world.gen.feature.template.IStructureProcessorType;
-import net.minecraft.world.gen.feature.template.JigsawReplacementStructureProcessor;
-import net.minecraft.world.gen.feature.template.PlacementSettings;
-import net.minecraft.world.gen.feature.template.ProcessorLists;
-import net.minecraft.world.gen.feature.template.StructureProcessorList;
-import net.minecraft.world.gen.feature.template.Template;
-import net.minecraft.world.gen.feature.template.TemplateManager;
-import net.minecraft.world.gen.feature.template.Template.BlockInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Vec3i;
+import net.minecraft.data.worldgen.ProcessorLists;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.properties.StructureMode;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool.Projection;
+import net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorType;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 
-public class PalettedSinglePoolElement extends JigsawPiece {
-   private static final Codec<Either<ResourceLocation, Template>> field_236837_a_ = Codec.of(
-      PalettedSinglePoolElement::func_236840_a_, ResourceLocation.field_240908_a_.map(Either::left)
+public class PalettedSinglePoolElement extends StructurePoolElement {
+   private static final Codec<Either<ResourceLocation, StructureTemplate>> TEMPLATE_CODEC = Codec.of(
+      PalettedSinglePoolElement::encodeTemplate, ResourceLocation.CODEC.map(Either::left)
    );
    public static final Codec<PalettedSinglePoolElement> CODEC = RecordCodecBuilder.create(
-      p_236841_0_ -> p_236841_0_.group(func_236846_c_(), func_236844_b_(), func_236848_d_()).apply(p_236841_0_, PalettedSinglePoolElement::new)
+      p_236841_0_ -> p_236841_0_.group(templateCodec(), processorsCodec(), projectionCodec()).apply(p_236841_0_, PalettedSinglePoolElement::new)
    );
-   protected final Either<ResourceLocation, Template> field_236839_c_;
-   protected final Supplier<StructureProcessorList> processors;
+   protected final Either<ResourceLocation, StructureTemplate> template;
+   protected final Holder<StructureProcessorList> processors;
 
-   private static <T> DataResult<T> func_236840_a_(Either<ResourceLocation, Template> p_236840_0_, DynamicOps<T> p_236840_1_, T p_236840_2_) {
+   private static <T> DataResult<T> encodeTemplate(Either<ResourceLocation, StructureTemplate> p_236840_0_, DynamicOps<T> p_236840_1_, T p_236840_2_) {
       Optional<ResourceLocation> optional = p_236840_0_.left();
       return !optional.isPresent()
          ? DataResult.error("Can not serialize a runtime pool element")
-         : ResourceLocation.field_240908_a_.encode(optional.get(), p_236840_1_, p_236840_2_);
+         : ResourceLocation.CODEC.encode(optional.get(), p_236840_1_, p_236840_2_);
    }
 
-   protected static <E extends PalettedSinglePoolElement> RecordCodecBuilder<E, Supplier<StructureProcessorList>> func_236844_b_() {
-      return IStructureProcessorType.field_242922_m.fieldOf("processors").forGetter(p_236845_0_ -> p_236845_0_.processors);
+   protected static <E extends PalettedSinglePoolElement> RecordCodecBuilder<E, Holder<StructureProcessorList>> processorsCodec() {
+      return StructureProcessorType.LIST_CODEC.fieldOf("processors").forGetter(p_236845_0_ -> p_236845_0_.processors);
    }
 
-   protected static <E extends PalettedSinglePoolElement> RecordCodecBuilder<E, Either<ResourceLocation, Template>> func_236846_c_() {
-      return field_236837_a_.fieldOf("location").forGetter(p_236842_0_ -> p_236842_0_.field_236839_c_);
+   protected static <E extends PalettedSinglePoolElement> RecordCodecBuilder<E, Either<ResourceLocation, StructureTemplate>> templateCodec() {
+      return TEMPLATE_CODEC.fieldOf("location").forGetter(p_236842_0_ -> p_236842_0_.template);
    }
 
    protected PalettedSinglePoolElement(
-      Either<ResourceLocation, Template> p_i242008_1_, Supplier<StructureProcessorList> p_i242008_2_, PlacementBehaviour p_i242008_3_
+      Either<ResourceLocation, StructureTemplate> p_i242008_1_, Holder<StructureProcessorList> p_i242008_2_, Projection p_i242008_3_
    ) {
       super(p_i242008_3_);
-      this.field_236839_c_ = p_i242008_1_;
+      this.template = p_i242008_1_;
       this.processors = p_i242008_2_;
    }
 
-   public PalettedSinglePoolElement(Template p_i242009_1_) {
-      this(Either.right(p_i242009_1_), () -> ProcessorLists.field_244101_a, PlacementBehaviour.RIGID);
+   public PalettedSinglePoolElement(StructureTemplate p_210419_) {
+      this(Either.right(p_210419_), ProcessorLists.EMPTY, Projection.RIGID);
    }
 
-   public Either<ResourceLocation, Template> getTemplate() {
-      return this.field_236839_c_;
+   public Either<ResourceLocation, StructureTemplate> getTemplate() {
+      return this.template;
    }
 
-   public Template getTemplate(TemplateManager manager) {
-      return (Template)this.field_236839_c_.map(manager::func_200220_a, Function.identity());
+   public StructureTemplate getTemplate(StructureManager manager) {
+      return (StructureTemplate)this.template.map(manager::getOrCreate, Function.identity());
    }
 
-   public List<BlockInfo> getDataMarkers(TemplateManager p_214857_1_, BlockPos p_214857_2_, Rotation p_214857_3_, boolean p_214857_4_) {
-      Template template = this.getTemplate(p_214857_1_);
-      List<BlockInfo> list = template.func_215386_a(p_214857_2_, new PlacementSettings().func_186220_a(p_214857_3_), Blocks.field_185779_df, p_214857_4_);
-      List<BlockInfo> list1 = Lists.newArrayList();
+   public List<StructureBlockInfo> getDataMarkers(StructureManager p_214857_1_, BlockPos p_214857_2_, Rotation p_214857_3_, boolean p_214857_4_) {
+      StructureTemplate template = this.getTemplate(p_214857_1_);
+      List<StructureBlockInfo> list = template.filterBlocks(
+         p_214857_2_, new StructurePlaceSettings().setRotation(p_214857_3_), Blocks.STRUCTURE_BLOCK, p_214857_4_
+      );
+      List<StructureBlockInfo> list1 = Lists.newArrayList();
 
-      for (BlockInfo template$blockinfo : list) {
-         if (template$blockinfo.field_186244_c != null) {
-            StructureMode structuremode = StructureMode.valueOf(template$blockinfo.field_186244_c.func_74779_i("mode"));
+      for (StructureBlockInfo template$blockinfo : list) {
+         if (template$blockinfo.nbt != null) {
+            StructureMode structuremode = StructureMode.valueOf(template$blockinfo.nbt.getString("mode"));
             if (structuremode == StructureMode.DATA) {
                list1.add(template$blockinfo);
             }
@@ -97,27 +101,32 @@ public class PalettedSinglePoolElement extends JigsawPiece {
       return list1;
    }
 
-   public List<BlockInfo> func_214849_a(TemplateManager templateManager, BlockPos pos, Rotation rotation, Random random) {
-      Template template = this.getTemplate(templateManager);
-      List<BlockInfo> list = template.func_215386_a(pos, new PlacementSettings().func_186220_a(rotation), Blocks.field_226904_lY_, true);
+   public Vec3i getSize(StructureManager p_210493_, Rotation p_210494_) {
+      StructureTemplate structuretemplate = this.getTemplate(p_210493_);
+      return structuretemplate.getSize(p_210494_);
+   }
+
+   public List<StructureBlockInfo> getShuffledJigsawBlocks(StructureManager templateManager, BlockPos pos, Rotation rotation, Random random) {
+      StructureTemplate template = this.getTemplate(templateManager);
+      List<StructureBlockInfo> list = template.filterBlocks(pos, new StructurePlaceSettings().setRotation(rotation), Blocks.JIGSAW, true);
       Collections.shuffle(list, random);
       return list;
    }
 
-   public MutableBoundingBox func_214852_a(TemplateManager templateManager, BlockPos pos, Rotation rotation) {
-      Template template = this.getTemplate(templateManager);
-      return template.func_215388_b(new PlacementSettings().func_186220_a(rotation), pos);
+   public BoundingBox getBoundingBox(StructureManager templateManager, BlockPos pos, Rotation rotation) {
+      StructureTemplate template = this.getTemplate(templateManager);
+      return template.getBoundingBox(new StructurePlaceSettings().setRotation(rotation), pos);
    }
 
-   public boolean func_230378_a_(
-      TemplateManager templateManager,
-      ISeedReader world,
-      StructureManager structureManager,
+   public boolean place(
+      StructureManager templateManager,
+      WorldGenLevel world,
+      StructureFeatureManager structureManager,
       ChunkGenerator chunkGen,
       BlockPos pos1,
       BlockPos pos2,
       Rotation rotation,
-      MutableBoundingBox box,
+      BoundingBox box,
       Random random,
       boolean keepJigsaws
    ) {
@@ -126,60 +135,60 @@ public class PalettedSinglePoolElement extends JigsawPiece {
 
    public boolean generate(
       @Nullable Supplier<StructureProcessorList> extra,
-      TemplateManager templateManager,
-      ISeedReader world,
-      StructureManager structureManager,
+      StructureManager templateManager,
+      WorldGenLevel world,
+      StructureFeatureManager structureManager,
       ChunkGenerator chunkGen,
       BlockPos pos1,
       BlockPos pos2,
       Rotation rotation,
-      MutableBoundingBox box,
+      BoundingBox box,
       Random random,
       boolean keepJigsaws,
       int updateFlags
    ) {
-      Template template = this.getTemplate(templateManager);
-      PlacementSettings placementsettings = this.func_230379_a_(extra, rotation, box, keepJigsaws);
-      if (!template.func_237146_a_(world, pos1, pos2, placementsettings, random, updateFlags)) {
+      StructureTemplate template = this.getTemplate(templateManager);
+      StructurePlaceSettings placementsettings = this.getSettings(extra, rotation, box, keepJigsaws);
+      if (!template.placeInWorld(world, pos1, pos2, placementsettings, random, updateFlags)) {
          return false;
       } else {
-         for (BlockInfo info : Template.processBlockInfos(
+         for (StructureBlockInfo info : StructureTemplate.processBlockInfos(
             world, pos1, pos2, placementsettings, this.getDataMarkers(templateManager, pos1, rotation, false), template
          )) {
-            this.func_214846_a(world, info, pos1, rotation, random, box);
+            this.handleDataMarker(world, info, pos1, rotation, random, box);
          }
 
          return true;
       }
    }
 
-   protected PlacementSettings func_230379_a_(
-      @Nullable Supplier<StructureProcessorList> extra, Rotation p_230379_1_, MutableBoundingBox p_230379_2_, boolean p_230379_3_
+   protected StructurePlaceSettings getSettings(
+      @Nullable Supplier<StructureProcessorList> extra, Rotation p_230379_1_, BoundingBox p_230379_2_, boolean p_230379_3_
    ) {
-      PlacementSettings placementsettings = new PlacementSettings();
-      placementsettings.func_186223_a(p_230379_2_);
-      placementsettings.func_186220_a(p_230379_1_);
-      placementsettings.func_215223_c(true);
-      placementsettings.func_186222_a(false);
-      placementsettings.func_237133_d_(true);
+      StructurePlaceSettings placementsettings = new StructurePlaceSettings();
+      placementsettings.setBoundingBox(p_230379_2_);
+      placementsettings.setRotation(p_230379_1_);
+      placementsettings.setKnownShape(true);
+      placementsettings.setIgnoreEntities(false);
+      placementsettings.setFinalizeEntities(true);
       if (!p_230379_3_) {
-         placementsettings.func_215222_a(JigsawReplacementStructureProcessor.field_215196_a);
+         placementsettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
       }
 
-      this.processors.get().func_242919_a().forEach(placementsettings::func_215222_a);
+      ((StructureProcessorList)this.processors.value()).list().forEach(placementsettings::addProcessor);
       if (extra != null) {
-         extra.get().func_242919_a().forEach(placementsettings::func_215222_a);
+         extra.get().list().forEach(placementsettings::addProcessor);
       }
 
-      this.func_214854_c().func_214937_b().forEach(placementsettings::func_215222_a);
+      this.getProjection().getProcessors().forEach(placementsettings::addProcessor);
       return placementsettings;
    }
 
-   public IJigsawDeserializer<?> func_214853_a() {
+   public StructurePoolElementType<?> getType() {
       return ModStructures.PoolElements.PALETTED_SINGLE_POOL_ELEMENT;
    }
 
    public String toString() {
-      return "PalettedSingle[" + this.field_236839_c_ + "]";
+      return "PalettedSingle[" + this.template + "]";
    }
 }

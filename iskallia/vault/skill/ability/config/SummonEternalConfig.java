@@ -1,12 +1,11 @@
 package iskallia.vault.skill.ability.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.skill.ability.config.spi.AbstractInstantManaConfig;
 
-public class SummonEternalConfig extends AbilityConfig {
+public class SummonEternalConfig extends AbstractInstantManaConfig {
    @Expose
    private final int numberOfEternals;
-   @Expose
-   private final int summonedEternalsCap;
    @Expose
    private final int despawnTime;
    @Expose
@@ -14,10 +13,19 @@ public class SummonEternalConfig extends AbilityConfig {
    @Expose
    private final boolean vaultOnly;
 
-   public SummonEternalConfig(int cost, int cooldown, int numberOfEternals, int summonedEternalsCap, int despawnTime, float ancientChance, boolean vaultOnly) {
-      super(cost, AbilityConfig.Behavior.RELEASE_TO_PERFORM, cooldown);
+   public SummonEternalConfig(
+      int learningCost,
+      int regretCost,
+      int cooldownTicks,
+      int levelRequirement,
+      float manaCost,
+      int numberOfEternals,
+      int despawnTime,
+      float ancientChance,
+      boolean vaultOnly
+   ) {
+      super(learningCost, regretCost, cooldownTicks, levelRequirement, manaCost);
       this.numberOfEternals = numberOfEternals;
-      this.summonedEternalsCap = summonedEternalsCap;
       this.despawnTime = despawnTime;
       this.ancientChance = ancientChance;
       this.vaultOnly = vaultOnly;
@@ -25,10 +33,6 @@ public class SummonEternalConfig extends AbilityConfig {
 
    public int getNumberOfEternals() {
       return this.numberOfEternals;
-   }
-
-   public int getSummonedEternalsCap() {
-      return this.summonedEternalsCap;
    }
 
    public int getDespawnTime() {

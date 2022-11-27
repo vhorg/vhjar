@@ -1,0 +1,564 @@
+{
+  "pools": [
+    {"name": "CommonItems",
+      "rolls": {
+        "min": 14,
+        "max": 14
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 64,
+          "name": "the_vault:vault_essence",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 2,
+                "max": 6
+              }
+            }
+          ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 24,
+           "name": "the_vault:wild_focus",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 1
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 24,
+           "name": "the_vault:amplifying_focus",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 1
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 64,
+           "name": "the_vault:vault_plating",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 2,
+                 "max": 6
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 64,
+           "name": "the_vault:vault_meat",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 2,
+                 "max": 6
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 64,
+           "name": "the_vault:carbon",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 4
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 24,
+           "name": "the_vault:regret_chunk",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 1
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 32,
+           "name": "the_vault:vault_diamond",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 1
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 32,
+           "name": "the_vault:magnetite",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 2,
+                 "max": 6
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 32,
+           "name": "the_vault:skill_essence",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 2
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 32,
+           "name": "the_vault:knowledge_star_essence",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 2
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 64,
+           "name": "the_vault:vault_bronze",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 16,
+                 "max": 64
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 64,
+           "name": "the_vault:driftwood",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 2,
+                 "max": 8
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 48,
+           "name": "minecraft:netherite_ingot",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 1
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 64,
+           "name": "minecraft:netherite_scrap",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 1,
+                 "max": 2
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 64,
+           "name": "minecraft:diamond",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 2,
+                 "max": 4
+               }
+             }
+           ]
+        },
+        {
+           "type": "minecraft:item",
+           "weight": 32,
+           "name": "the_vault:vault_nugget",
+           "functions": [
+             {
+               "function": "minecraft:set_count",
+               "count": {
+                 "min": 2,
+                 "max": 6
+               }
+             }
+           ]
+        }
+      ]
+    },
+    {"name": "RareItems",
+      "rolls": {
+        "min": 1,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:boots",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:leggings",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:chestplate",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:helmet",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:sword",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:axe",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:shield",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:idol_benevolent",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:idol_omniscient",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:idol_timekeeper",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:idol_malevolence",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:unidentified_relic_fragment",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:fundamental_focus",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:memory_shard",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:mote_clarity",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 2,
+          "name": "the_vault:mote_purity",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 4,
+          "name": "the_vault:bitter_lemon",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 16,
+          "name": "the_vault:mystery_box",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 8,
+          "name": "the_vault:crystal_seal_empty",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 8,
+          "name": "the_vault:eternal_soul",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {"name": "SuperItems",
+      "rolls": {
+        "min": 1,
+        "max": 1
+      },
+      "entries": [
+        {
+          "type": "minecraft:empty",
+          "weight": 99
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 1,
+          "name": "the_vault:trinket",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "min": 1,
+                "max": 1
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

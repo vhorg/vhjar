@@ -1,7 +1,7 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.config.entry.SingleItemEntry;
+import iskallia.vault.config.entry.ItemEntry;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
@@ -9,11 +9,12 @@ import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.data.WeightedList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class SoulShardConfig extends Config {
    @Expose
@@ -34,32 +35,43 @@ public class SoulShardConfig extends Config {
    protected void reset() {
       this.shardTradePrice = 1000;
       this.shardTrades.clear();
-      this.shardTrades.add(new SoulShardConfig.ShardTrade(new SingleItemEntry(ModItems.SKILL_ESSENCE), 1500, 2500), 1);
-      this.shardTrades.add(new SoulShardConfig.ShardTrade(new SingleItemEntry(ModItems.STAR_ESSENCE), 900, 1200), 1);
+      this.shardTrades.add(new SoulShardConfig.ShardTrade(new ItemEntry(ModItems.SKILL_ESSENCE, 1), 1500, 2500), 1);
+      this.shardTrades.add(new SoulShardConfig.ShardTrade(new ItemEntry(ModItems.KNOWLEDGE_STAR_ESSENCE, 1), 900, 1200), 1);
       this.defaultShardDrops = new SoulShardConfig.DropRange(1, 1, 1.0F);
       this.shardDrops.clear();
-      this.shardDrops.put(EntityType.field_200725_aD.getRegistryName().toString(), new SoulShardConfig.DropRange(1, 1, 0.5F));
+      this.shardDrops.put(EntityType.ZOMBIE.getRegistryName().toString(), new SoulShardConfig.DropRange(1, 1, 0.5F));
    }
 
    public int getShardTradePrice() {
       return this.shardTradePrice;
    }
 
-   public SoulShardConfig.ShardTrade getRandomTrade(Random random) {
-      return this.shardTrades.getRandom(random);
+   public SoulShardConfig.ShardTrade getRandomTrade() {
+      return this.shardTrades.getRandom(rand);
    }
 
-   public int getRandomShards(EntityType<?> type) {
+   public int getRandomShards(EntityType<?> type, float chanceMultiplier) {
       SoulShardConfig.DropRange range = this.shardDrops.get(type.getRegistryName().toString());
-      return range == null ? this.defaultShardDrops.getRandomAmount() : range.getRandomAmount();
+      return range == null ? this.defaultShardDrops.getRandomAmount(chanceMultiplier) : range.getRandomAmount(chanceMultiplier);
    }
 
    public WeightedList<SoulShardConfig.ShardTrade> getShardTrades() {
       return this.shardTrades;
    }
 
-   public void syncTo(ServerPlayerEntity player) {
-      ModNetwork.CHANNEL.sendTo(new ShardGlobalTradeMessage(this.getShardTrades()), player.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT);
+   @Override
+   public <T extends Config> T readConfig() {
+      T cfg = super.readConfig();
+      MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+      if (srv != null) {
+         srv.getPlayerList().getPlayers().forEach(player -> this.syncTo((SoulShardConfig)cfg, player));
+      }
+
+      return cfg;
+   }
+
+   public void syncTo(SoulShardConfig cfg, ServerPlayer player) {
+      ModNetwork.CHANNEL.sendTo(new ShardGlobalTradeMessage(cfg.getShardTrades()), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
    }
 
    public static class DropRange {
@@ -76,20 +88,20 @@ public class SoulShardConfig extends Config {
          this.chance = chance;
       }
 
-      public int getRandomAmount() {
-         return Config.rand.nextFloat() > this.chance ? 0 : MathUtilities.getRandomInt(this.min, this.max + 1);
+      public int getRandomAmount(float chanceMultiplier) {
+         return Config.rand.nextFloat() > this.chance * chanceMultiplier ? 0 : MathUtilities.getRandomInt(this.min, this.max + 1);
       }
    }
 
    public static class ShardTrade {
       @Expose
-      private final SingleItemEntry item;
+      private final ItemEntry item;
       @Expose
       private final int minPrice;
       @Expose
       private final int maxPrice;
 
-      public ShardTrade(SingleItemEntry item, int minPrice, int maxPrice) {
+      public ShardTrade(ItemEntry item, int minPrice, int maxPrice) {
          this.item = item;
          this.minPrice = minPrice;
          this.maxPrice = maxPrice;
@@ -99,7 +111,7 @@ public class SoulShardConfig extends Config {
          return this.item.createItemStack();
       }
 
-      public SingleItemEntry getItemEntry() {
+      public ItemEntry getItemEntry() {
          return this.item;
       }
 

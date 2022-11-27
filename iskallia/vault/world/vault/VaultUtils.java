@@ -3,95 +3,123 @@ package iskallia.vault.world.vault;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.function.Function;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.concurrent.TickDelayedTask;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.BlockPos.Mutable;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.GameType;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.Heightmap.Type;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap.Types;
+import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.ITeleporter;
+import org.jetbrains.annotations.Nullable;
 
 public class VaultUtils {
-   public static void exitSafely(final ServerWorld world, final ServerPlayerEntity player) {
-      BlockPos rawSpawnPoint = player.func_241140_K_();
-      final Optional<Vector3d> spawnPoint = rawSpawnPoint != null
-         ? PlayerEntity.func_242374_a(world, rawSpawnPoint, player.func_242109_L(), player.func_241142_M_(), true)
+   public static void exitSafely(final ServerLevel world, final ServerPlayer player) {
+      BlockPos rawSpawnPoint = player.getRespawnPosition();
+      final Optional<Vec3> spawnPoint = rawSpawnPoint != null
+         ? Player.findRespawnPositionAndUseSpawnBlock(world, rawSpawnPoint, player.getRespawnAngle(), player.isRespawnForced(), true)
          : Optional.empty();
-      RegistryKey<World> targetDim = world.func_234923_W_();
-      RegistryKey<World> sourceDim = player.func_130014_f_().func_234923_W_();
+      ResourceKey<Level> targetDim = world.dimension();
+      ResourceKey<Level> sourceDim = player.getCommandSenderWorld().dimension();
       if (!targetDim.equals(sourceDim)) {
          player.changeDimension(
             world,
             new ITeleporter() {
-               public Entity placeEntity(Entity entity, ServerWorld currentWorld, ServerWorld destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+               public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
                   Entity repositionedEntity = repositionEntity.apply(false);
                   if (spawnPoint.isPresent()) {
-                     Vector3d spawnPos = spawnPoint.get();
-                     repositionedEntity.func_70634_a(spawnPos.func_82615_a(), spawnPos.func_82617_b(), spawnPos.func_82616_c());
+                     Vec3 spawnPos = spawnPoint.get();
+                     repositionedEntity.teleportTo(spawnPos.x(), spawnPos.y(), spawnPos.z());
                   } else {
                      VaultUtils.moveToWorldSpawn(world, player);
                   }
 
-                  if (repositionedEntity instanceof ServerPlayerEntity) {
-                     ((ServerPlayerEntity)repositionedEntity)
-                        .func_71121_q()
-                        .func_73046_m()
-                        .func_212871_a_(new TickDelayedTask(20, () -> ((ServerPlayerEntity)repositionedEntity).func_195068_e(0)));
+                  if (repositionedEntity instanceof ServerPlayer) {
+                     ((ServerPlayer)repositionedEntity)
+                        .getLevel()
+                        .getServer()
+                        .tell(new TickTask(20, () -> ((ServerPlayer)repositionedEntity).giveExperiencePoints(0)));
                   }
 
                   return repositionedEntity;
                }
+
+               public boolean playTeleportSound(ServerPlayer playerx, ServerLevel sourceWorld, ServerLevel destWorld) {
+                  return false;
+               }
             }
          );
       } else if (spawnPoint.isPresent()) {
-         BlockState blockstate = world.func_180495_p(rawSpawnPoint);
-         Vector3d spawnPos = spawnPoint.get();
-         if (!blockstate.func_235714_a_(BlockTags.field_219747_F) && !blockstate.func_203425_a(Blocks.field_235400_nj_)) {
-            player.func_200619_a(world, spawnPos.field_72450_a, spawnPos.field_72448_b, spawnPos.field_72449_c, player.func_242109_L(), 0.0F);
+         BlockState blockstate = world.getBlockState(rawSpawnPoint);
+         Vec3 spawnPos = spawnPoint.get();
+         if (!blockstate.is(BlockTags.BEDS) && !blockstate.is(Blocks.RESPAWN_ANCHOR)) {
+            player.teleportTo(world, spawnPos.x, spawnPos.y, spawnPos.z, player.getRespawnAngle(), 0.0F);
          } else {
-            Vector3d vector3d1 = Vector3d.func_237492_c_(rawSpawnPoint).func_178788_d(spawnPos).func_72432_b();
-            player.func_200619_a(
-               world,
-               spawnPos.field_72450_a,
-               spawnPos.field_72448_b,
-               spawnPos.field_72449_c,
-               (float)MathHelper.func_76138_g(MathHelper.func_181159_b(vector3d1.field_72449_c, vector3d1.field_72450_a) * (180.0 / Math.PI) - 90.0),
-               0.0F
+            Vec3 vector3d1 = Vec3.atBottomCenterOf(rawSpawnPoint).subtract(spawnPos).normalize();
+            player.teleportTo(
+               world, spawnPos.x, spawnPos.y, spawnPos.z, (float)Mth.wrapDegrees(Mth.atan2(vector3d1.z, vector3d1.x) * (180.0 / Math.PI) - 90.0), 0.0F
             );
          }
 
-         player.func_70634_a(spawnPos.field_72450_a, spawnPos.field_72448_b, spawnPos.field_72449_c);
+         player.teleportTo(spawnPos.x, spawnPos.y, spawnPos.z);
       } else {
          moveToWorldSpawn(world, player);
       }
    }
 
-   public static void moveTo(ServerWorld world, Entity entity, final Vector3d pos) {
-      RegistryKey<World> targetDim = world.func_234923_W_();
-      RegistryKey<World> sourceDim = entity.func_130014_f_().func_234923_W_();
+   public static <T extends Entity> void changeDimension(
+      ServerLevel world, T entity, final Vec3 position, final Vec3 velocity, final float yaw, final float pitch, final Consumer<T> runnable
+   ) {
+      final MinecraftServer server = world.getServer();
+      entity.changeDimension(world, new ITeleporter() {
+         public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yawx, Function<Boolean, Entity> repositionEntity) {
+            Entity repositionedEntity = repositionEntity.apply(false);
+            if (repositionedEntity instanceof ServerPlayer player) {
+               server.tell(new TickTask(server.getTickCount() + 20, () -> player.giveExperiencePoints(0)));
+            }
+
+            runnable.accept((T)repositionedEntity);
+            return repositionedEntity;
+         }
+
+         public boolean playTeleportSound(ServerPlayer player, ServerLevel sourceWorld, ServerLevel destWorld) {
+            return destWorld.dimension() == Level.OVERWORLD;
+         }
+
+         @Nullable
+         public PortalInfo getPortalInfo(Entity entity, ServerLevel destWorld, Function<ServerLevel, PortalInfo> defaultPortalInfo) {
+            return new PortalInfo(position, velocity, yaw, pitch);
+         }
+      });
+   }
+
+   public static void moveTo(ServerLevel world, Entity entity, final Vec3 pos, Vec2 rotation) {
       entity.changeDimension(
          world,
          new ITeleporter() {
-            public Entity placeEntity(Entity entity, ServerWorld currentWorld, ServerWorld destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
+            public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld, float yaw, Function<Boolean, Entity> repositionEntity) {
                Entity repositionedEntity = repositionEntity.apply(false);
-               repositionedEntity.func_70634_a(pos.func_82615_a(), pos.func_82617_b(), pos.func_82616_c());
-               if (repositionedEntity instanceof ServerPlayerEntity) {
-                  ((ServerPlayerEntity)repositionedEntity)
-                     .func_71121_q()
-                     .func_73046_m()
-                     .func_212871_a_(new TickDelayedTask(20, () -> ((ServerPlayerEntity)repositionedEntity).func_195068_e(0)));
+               repositionedEntity.teleportTo(pos.x, pos.y, pos.z);
+               if (repositionedEntity instanceof ServerPlayer) {
+                  ((ServerPlayer)repositionedEntity)
+                     .getLevel()
+                     .getServer()
+                     .tell(new TickTask(20, () -> ((ServerPlayer)repositionedEntity).giveExperiencePoints(0)));
                }
 
                return repositionedEntity;
@@ -100,11 +128,11 @@ public class VaultUtils {
       );
    }
 
-   public static void moveToWorldSpawn(ServerWorld world, ServerPlayerEntity player) {
-      BlockPos blockpos = world.func_241135_u_();
-      if (world.func_230315_m_().func_218272_d() && world.func_73046_m().func_240793_aU_().func_76077_q() != GameType.ADVENTURE) {
-         int i = Math.max(0, world.func_73046_m().func_184108_a(world));
-         int j = MathHelper.func_76128_c(world.func_175723_af().func_177729_b(blockpos.func_177958_n(), blockpos.func_177952_p()));
+   public static void moveToWorldSpawn(ServerLevel world, ServerPlayer player) {
+      BlockPos blockpos = world.getSharedSpawnPos();
+      if (world.dimensionType().hasSkyLight() && world.getServer().getWorldData().getGameType() != GameType.ADVENTURE) {
+         int i = Math.max(0, world.getServer().getSpawnRadius(world));
+         int j = Mth.floor(world.getWorldBorder().getDistanceToBorder(blockpos.getX(), blockpos.getZ()));
          if (j < i) {
             i = j;
          }
@@ -123,45 +151,41 @@ public class VaultUtils {
             int i2 = (k1 + j1 * l1) % i1;
             int j2 = i2 % (i * 2 + 1);
             int k2 = i2 / (i * 2 + 1);
-            BlockPos pos = new BlockPos(blockpos.func_177958_n() + j2 - i, 0, blockpos.func_177952_p() + k2 - i);
-            OptionalInt height = getSpawnHeight(world, pos.func_177958_n(), pos.func_177952_p());
+            BlockPos pos = new BlockPos(blockpos.getX() + j2 - i, 0, blockpos.getZ() + k2 - i);
+            OptionalInt height = getSpawnHeight(world, pos.getX(), pos.getZ());
             if (height.isPresent()) {
-               player.func_200619_a(world, pos.func_177958_n(), height.getAsInt(), pos.func_177952_p(), 0.0F, 0.0F);
-               player.func_70634_a(pos.func_177958_n(), height.getAsInt(), pos.func_177952_p());
-               if (world.func_226669_j_(player)) {
+               player.teleportTo(world, pos.getX(), height.getAsInt(), pos.getZ(), 0.0F, 0.0F);
+               player.teleportTo(pos.getX(), height.getAsInt(), pos.getZ());
+               if (world.noCollision(player)) {
                   break;
                }
             }
          }
       } else {
-         player.func_200619_a(world, blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p(), 0.0F, 0.0F);
-         player.func_70634_a(blockpos.func_177958_n(), blockpos.func_177956_o(), blockpos.func_177952_p());
+         player.teleportTo(world, blockpos.getX(), blockpos.getY(), blockpos.getZ(), 0.0F, 0.0F);
+         player.teleportTo(blockpos.getX(), blockpos.getY(), blockpos.getZ());
 
-         while (!world.func_226669_j_(player) && player.func_226278_cu_() < 255.0) {
-            player.func_200619_a(world, player.func_226277_ct_(), player.func_226278_cu_() + 1.0, player.func_226281_cx_(), 0.0F, 0.0F);
-            player.func_70634_a(player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_());
+         while (!world.noCollision(player) && player.getY() < 255.0) {
+            player.teleportTo(world, player.getX(), player.getY() + 1.0, player.getZ(), 0.0F, 0.0F);
+            player.teleportTo(player.getX(), player.getY(), player.getZ());
          }
       }
    }
 
-   public static OptionalInt getSpawnHeight(ServerWorld world, int posX, int posZ) {
-      Mutable pos = new Mutable(posX, 0, posZ);
-      Chunk chunk = world.func_212866_a_(posX >> 4, posZ >> 4);
-      int top = world.func_230315_m_().func_236037_d_()
-         ? world.func_72863_F().func_201711_g().func_205470_d()
-         : chunk.func_201576_a(Type.MOTION_BLOCKING, posX & 15, posZ & 15);
+   public static OptionalInt getSpawnHeight(ServerLevel world, int posX, int posZ) {
+      MutableBlockPos pos = new MutableBlockPos(posX, 0, posZ);
+      LevelChunk chunk = world.getChunk(posX >> 4, posZ >> 4);
+      int top = world.dimensionType().hasCeiling()
+         ? world.getChunkSource().getGenerator().getSpawnHeight(world)
+         : chunk.getHeight(Types.MOTION_BLOCKING, posX & 15, posZ & 15);
       if (top >= 0) {
-         int j = chunk.func_201576_a(Type.WORLD_SURFACE, posX & 15, posZ & 15);
-         if (j > top || j <= chunk.func_201576_a(Type.OCEAN_FLOOR, posX & 15, posZ & 15)) {
+         int j = chunk.getHeight(Types.WORLD_SURFACE, posX & 15, posZ & 15);
+         if (j > top || j <= chunk.getHeight(Types.OCEAN_FLOOR, posX & 15, posZ & 15)) {
             for (int k = top + 1; k >= 0; k--) {
-               pos.func_181079_c(posX, k, posZ);
-               BlockState state = world.func_180495_p(pos);
-               if (!state.func_204520_s().func_206888_e()) {
+               pos.set(posX, k, posZ);
+               BlockState state = world.getBlockState(pos);
+               if (!state.getFluidState().isEmpty()) {
                   break;
-               }
-
-               if (state.equals(world.func_226691_t_(pos).func_242440_e().func_242502_e().func_204108_a())) {
-                  return OptionalInt.of(pos.func_177984_a().func_177956_o());
                }
             }
          }
@@ -170,22 +194,26 @@ public class VaultUtils {
       return OptionalInt.empty();
    }
 
-   public static boolean matchesDimension(VaultRaid vault, World world) {
-      return vault.getProperties().getBase(VaultRaid.DIMENSION).filter(key -> key == world.func_234923_W_()).isPresent();
+   public static boolean matchesDimension(VaultRaid vault, Level world) {
+      return vault.getProperties().getBase(VaultRaid.DIMENSION).filter(key -> key == world.dimension()).isPresent();
    }
 
    public static boolean inVault(VaultRaid vault, Entity entity) {
-      return inVault(vault, entity.func_130014_f_(), entity.func_233580_cy_());
+      return inVault(vault, entity.getCommandSenderWorld(), entity.blockPosition());
    }
 
-   public static boolean inVault(VaultRaid vault, World world, BlockPos pos) {
+   public static boolean inVault(VaultRaid vault, Level world, BlockPos pos) {
       if (vault == null) {
          return false;
       } else {
-         Optional<RegistryKey<World>> dimension = vault.getProperties().getBase(VaultRaid.DIMENSION);
-         return dimension.isPresent() && world.func_234923_W_() == dimension.get()
-            ? vault.getProperties().getBase(VaultRaid.BOUNDING_BOX).map(box -> box.func_175898_b(pos)).orElse(false)
+         Optional<ResourceKey<Level>> dimension = vault.getProperties().getBase(VaultRaid.DIMENSION);
+         return dimension.isPresent() && world.dimension() == dimension.get()
+            ? vault.getProperties().getBase(VaultRaid.BOUNDING_BOX).map(box -> box.isInside(pos)).orElse(false)
             : false;
       }
+   }
+
+   public static boolean inVault(ServerPlayer player) {
+      return true;
    }
 }

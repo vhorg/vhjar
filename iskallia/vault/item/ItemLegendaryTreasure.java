@@ -4,82 +4,68 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.VaultRarity;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemLegendaryTreasure extends Item {
-   private VaultRarity vaultRarity;
+   private final VaultRarity vaultRarity;
 
-   public ItemLegendaryTreasure(ItemGroup group, ResourceLocation id, VaultRarity vaultRarity) {
-      super(new Properties().func_200916_a(group).func_200917_a(1));
+   public ItemLegendaryTreasure(CreativeModeTab group, ResourceLocation id, VaultRarity vaultRarity) {
+      super(new Properties().tab(group).stacksTo(1));
       this.setRegistryName(id);
       this.vaultRarity = vaultRarity;
    }
 
-   public ActionResult<ItemStack> func_77659_a(World worldIn, PlayerEntity playerIn, Hand handIn) {
-      if (worldIn.field_72995_K) {
-         return super.func_77659_a(worldIn, playerIn, handIn);
-      } else if (handIn != Hand.MAIN_HAND) {
-         return super.func_77659_a(worldIn, playerIn, handIn);
+   public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
+      if (worldIn.isClientSide) {
+         return super.use(worldIn, playerIn, handIn);
+      } else if (handIn != InteractionHand.MAIN_HAND) {
+         return super.use(worldIn, playerIn, handIn);
       } else {
-         ItemStack stack = playerIn.func_184614_ca();
-         if (stack.func_77973_b() instanceof ItemLegendaryTreasure) {
-            ItemLegendaryTreasure item = (ItemLegendaryTreasure)stack.func_77973_b();
-            ItemStack toDrop = ItemStack.field_190927_a;
-            switch (item.getRarity()) {
-               case COMMON:
-                  toDrop = ModConfigs.LEGENDARY_TREASURE_NORMAL.getRandom();
-                  break;
-               case RARE:
-                  toDrop = ModConfigs.LEGENDARY_TREASURE_RARE.getRandom();
-                  break;
-               case EPIC:
-                  toDrop = ModConfigs.LEGENDARY_TREASURE_EPIC.getRandom();
-                  break;
-               case OMEGA:
-                  toDrop = ModConfigs.LEGENDARY_TREASURE_OMEGA.getRandom();
-            }
-
-            playerIn.func_71019_a(toDrop, false);
-            stack.func_190918_g(1);
-            ItemRelicBoosterPack.successEffects(worldIn, playerIn.func_213303_ch());
+         ItemStack stack = playerIn.getMainHandItem();
+         if (stack.getItem() instanceof ItemLegendaryTreasure item) {
+            ItemStack toDrop = switch (item.getRarity()) {
+               case COMMON -> ModConfigs.LEGENDARY_TREASURE_NORMAL.getRandom();
+               case RARE -> ModConfigs.LEGENDARY_TREASURE_RARE.getRandom();
+               case EPIC -> ModConfigs.LEGENDARY_TREASURE_EPIC.getRandom();
+               case OMEGA -> ModConfigs.LEGENDARY_TREASURE_OMEGA.getRandom();
+            };
+            playerIn.drop(toDrop, false);
+            stack.shrink(1);
+            ItemRelicBoosterPack.successEffects(worldIn, playerIn.position());
          }
 
-         return super.func_77659_a(worldIn, playerIn, handIn);
+         return super.use(worldIn, playerIn, handIn);
       }
    }
 
    @OnlyIn(Dist.CLIENT)
-   public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-      if (stack.func_77973_b() instanceof ItemLegendaryTreasure) {
-         ItemLegendaryTreasure item = (ItemLegendaryTreasure)stack.func_77973_b();
-         tooltip.add(new StringTextComponent(TextFormatting.GOLD + "Right-Click to identify..."));
-         tooltip.add(new StringTextComponent("Rarity: " + item.getRarity().color + item.getRarity()));
+   public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+      if (stack.getItem() instanceof ItemLegendaryTreasure item) {
+         tooltip.add(new TextComponent(ChatFormatting.GOLD + "Right-Click to identify..."));
+         tooltip.add(new TextComponent("Rarity: " + item.getRarity().color + item.getRarity()));
       }
 
-      super.func_77624_a(stack, worldIn, tooltip, flagIn);
+      super.appendHoverText(stack, worldIn, tooltip, flagIn);
    }
 
-   public ITextComponent func_200295_i(ItemStack stack) {
-      if (stack.func_77973_b() instanceof ItemLegendaryTreasure) {
-         ItemLegendaryTreasure item = (ItemLegendaryTreasure)stack.func_77973_b();
-         return new StringTextComponent(item.getRarity().color + "Legendary Treasure");
-      } else {
-         return super.func_200295_i(stack);
-      }
+   public Component getName(ItemStack stack) {
+      return (Component)(stack.getItem() instanceof ItemLegendaryTreasure item
+         ? new TextComponent(item.getRarity().color + "Legendary Treasure")
+         : super.getName(stack));
    }
 
    public VaultRarity getRarity() {

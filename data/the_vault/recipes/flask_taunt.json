@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " a ",
+    " b ",
+    " c "
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:wither_skeleton_skull"
+    },
+    "b": {
+      "item": "the_vault:empty_flask"
+    },
+    "c": {
+      "item": "the_vault:red_vault_essence"
+    },
+    "d": {
+      "item": "architects_palette:withered_bone"
+    }
+  },
+  "result": {
+    "item": "the_vault:respec_flask",
+    "count": 1,
+    "nbt": "{Ability:\"Taunt\"}"
+  }
+}

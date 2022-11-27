@@ -1,44 +1,71 @@
 package iskallia.vault.event;
 
+import iskallia.vault.etching.EtchingRegistry;
+import iskallia.vault.etching.EtchingSet;
+import iskallia.vault.gear.attribute.VaultGearAttribute;
+import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
+import iskallia.vault.gear.modification.GearModification;
+import iskallia.vault.gear.modification.GearModificationRegistry;
+import iskallia.vault.gear.trinket.TrinketEffect;
+import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.init.ModAbilities;
+import iskallia.vault.init.ModArchetypes;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModContainers;
+import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModEntities;
+import iskallia.vault.init.ModEtchings;
 import iskallia.vault.init.ModFeatures;
+import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.init.ModGearModifications;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.init.ModLootModifiers;
 import iskallia.vault.init.ModModels;
 import iskallia.vault.init.ModRecipes;
+import iskallia.vault.init.ModShaders;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.init.ModStructures;
-import iskallia.vault.util.RelicSet;
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.RangedAttribute;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.potion.Effect;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.structure.Structure;
+import iskallia.vault.init.ModTrinkets;
+import iskallia.vault.skill.archetype.AbstractArchetype;
+import iskallia.vault.skill.archetype.ArchetypeRegistry;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.RangedAttribute;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
+import net.minecraftforge.client.event.RegisterShadersEvent;
+import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.registries.NewRegistryEvent;
 
 @EventBusSubscriber(
    bus = Bus.MOD
 )
 public class RegistryEvents {
+   @SubscribeEvent
+   public static void onNewRegistryRegister(NewRegistryEvent event) {
+      VaultGearAttributeRegistry.buildRegistry(event);
+      EtchingRegistry.buildRegistry(event);
+      TrinketEffectRegistry.buildRegistry(event);
+      GearModificationRegistry.buildRegistry(event);
+      ArchetypeRegistry.buildRegistry(event);
+   }
+
    @SubscribeEvent
    public static void onBlockRegister(Register<Block> event) {
       ModConfigs.registerCompressionConfigs();
@@ -49,8 +76,9 @@ public class RegistryEvents {
    public static void onItemRegister(Register<Item> event) {
       ModConfigs.registerCompressionConfigs();
       ModItems.registerItems(event);
+      ModDynamicModels.initItemAssociations();
+      ModDynamicModels.initCauldronWashables();
       ModBlocks.registerBlockItems(event);
-      RelicSet.register();
       ModAbilities.init();
    }
 
@@ -58,19 +86,26 @@ public class RegistryEvents {
    public static void onModelRegister(ModelRegistryEvent event) {
       ModModels.setupRenderLayers();
       ModModels.ItemProperty.register();
-      ModModels.GearModel.register();
-      ModModels.SpecialGearModel.register();
-      ModModels.SpecialSwordModel.register();
+      ModModels.ItemProperty.registerOverrides();
+   }
+
+   @SubscribeEvent
+   public static void ohRegisterRenderers(RegisterRenderers event) {
+      ModBlocks.registerTileEntityRenderers(event);
+   }
+
+   @SubscribeEvent
+   public static void onRegisterShaders(RegisterShadersEvent event) {
+      ModShaders.register(event);
    }
 
    @SubscribeEvent
    public static void onSoundRegister(Register<SoundEvent> event) {
       ModSounds.registerSounds(event);
-      ModSounds.registerSoundTypes();
    }
 
    @SubscribeEvent
-   public static void onStructureRegister(Register<Structure<?>> event) {
+   public static void onStructureRegister(Register<StructureFeature<?>> event) {
       ModStructures.register(event);
       ModFeatures.registerStructureFeatures();
    }
@@ -81,7 +116,7 @@ public class RegistryEvents {
    }
 
    @SubscribeEvent
-   public static void onContainerRegister(Register<ContainerType<?>> event) {
+   public static void onContainerRegister(Register<MenuType<?>> event) {
       ModContainers.register(event);
    }
 
@@ -91,32 +126,57 @@ public class RegistryEvents {
    }
 
    @SubscribeEvent
-   public static void onTileEntityRegister(Register<TileEntityType<?>> event) {
+   public static void onTileEntityRegister(Register<BlockEntityType<?>> event) {
       ModBlocks.registerTileEntities(event);
    }
 
    @SubscribeEvent
-   public static void onRecipeRegister(Register<IRecipeSerializer<?>> event) {
+   public static void onRecipeRegister(Register<RecipeSerializer<?>> event) {
       ModRecipes.Serializer.register(event);
    }
 
    @SubscribeEvent
-   public static void registerGlobalLootModifierSerializers(Register<GlobalLootModifierSerializer<?>> event) {
-      ModLootModifiers.registerGlobalModifiers(event);
-   }
-
-   @SubscribeEvent
-   public static void onEffectRegister(Register<Effect> event) {
+   public static void onEffectRegister(Register<MobEffect> event) {
       ModEffects.register(event);
+      MobEffects.DIG_SPEED.getAttributeModifiers().clear();
    }
 
    @SubscribeEvent
    public static void onAttributeRegister(Register<Attribute> event) {
-      Attribute attr = Attributes.field_233818_a_;
-      if (attr instanceof RangedAttribute) {
-         ((RangedAttribute)attr).field_111118_b = Double.MAX_VALUE;
+      if (Attributes.MAX_HEALTH instanceof RangedAttribute attr) {
+         attr.maxValue = Double.MAX_VALUE;
+      }
+
+      if (Attributes.ARMOR instanceof RangedAttribute attr) {
+         attr.maxValue = Double.MAX_VALUE;
       }
 
       ModAttributes.register(event);
+   }
+
+   @SubscribeEvent
+   public static void onGearAttributeRegistry(Register<VaultGearAttribute<?>> event) {
+      ModGearAttributes.init(event);
+      ModGearAttributes.registerVanillaAssociations();
+   }
+
+   @SubscribeEvent
+   public static void onEtchingRegistry(Register<EtchingSet<?>> event) {
+      ModEtchings.init(event);
+   }
+
+   @SubscribeEvent
+   public static void onTrinketRegistry(Register<TrinketEffect<?>> event) {
+      ModTrinkets.init(event);
+   }
+
+   @SubscribeEvent
+   public static void onModificationRegistry(Register<GearModification> event) {
+      ModGearModifications.init(event);
+   }
+
+   @SubscribeEvent
+   public static void onArchetypesRegistry(Register<AbstractArchetype<?>> event) {
+      ModArchetypes.init(event);
    }
 }

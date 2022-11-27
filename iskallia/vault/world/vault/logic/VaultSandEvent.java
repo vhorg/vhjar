@@ -1,6 +1,6 @@
 package iskallia.vault.world.vault.logic;
 
-import iskallia.vault.entity.VaultSandEntity;
+import iskallia.vault.entity.entity.VaultSandEntity;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.SandEventContributorMessage;
@@ -13,32 +13,32 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Supplier;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.network.NetworkDirection;
 
-public class VaultSandEvent implements INBTSerializable<CompoundNBT>, IVaultTask {
+public class VaultSandEvent implements INBTSerializable<CompoundTag>, IVaultTask {
    private static final Random rand = new Random();
    private final Map<UUID, VaultSandEvent.SandProgress> playerProgress = new HashMap<>();
 
    @Override
-   public void execute(VaultRaid vault, VaultPlayer player, ServerWorld world) {
-      if (world.func_82737_E() % 10L == 0L) {
-         player.runIfPresent(world.func_73046_m(), this::sendUpdate);
+   public void execute(VaultRaid vault, VaultPlayer player, ServerLevel world) {
+      if (world.getGameTime() % 10L == 0L) {
+         player.runIfPresent(world.getServer(), this::sendUpdate);
       }
    }
 
-   public void addSand(ServerPlayerEntity player, String contributor, TextFormatting contributorColor, int amount, Supplier<Boolean> onSandFilled) {
-      VaultSandEvent.SandProgress progress = this.playerProgress.computeIfAbsent(player.func_110124_au(), uuid -> new VaultSandEvent.SandProgress());
+   public void addSand(ServerPlayer player, String contributor, ChatFormatting contributorColor, int amount, Supplier<Boolean> onSandFilled) {
+      VaultSandEvent.SandProgress progress = this.playerProgress.computeIfAbsent(player.getUUID(), uuid -> new VaultSandEvent.SandProgress());
       int requiredTotal = ModConfigs.SAND_EVENT.getRedemptionsRequiredPerSand(player);
       int current = (int)(requiredTotal * progress.fillPercent);
       int newAmount = current + amount;
@@ -46,56 +46,46 @@ public class VaultSandEvent implements INBTSerializable<CompoundNBT>, IVaultTask
          if (onSandFilled.get()) {
             progress.fillPercent = 0.0F;
             progress.spawnedSands++;
-            player.func_71121_q()
-               .func_184148_a(
-                  null,
-                  player.func_226277_ct_(),
-                  player.func_226278_cu_(),
-                  player.func_226281_cx_(),
-                  SoundEvents.field_187802_ec,
-                  SoundCategory.PLAYERS,
-                  0.6F,
-                  1.0F
-               );
+            player.getLevel().playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.6F, 1.0F);
          }
       } else {
          progress.fillPercent = Math.min((float)newAmount / requiredTotal, 1.0F);
       }
 
       this.sendUpdate(player, progress);
-      IFormattableTextComponent display = new StringTextComponent(contributor).func_240699_a_(contributorColor);
-      ModNetwork.CHANNEL.sendTo(new SandEventContributorMessage(display), player.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT);
+      MutableComponent display = new TextComponent(contributor).withStyle(contributorColor);
+      ModNetwork.CHANNEL.sendTo(new SandEventContributorMessage(display), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
    }
 
-   public void pickupSand(ServerPlayerEntity player) {
-      VaultSandEvent.SandProgress progress = this.playerProgress.computeIfAbsent(player.func_110124_au(), uuid -> new VaultSandEvent.SandProgress());
+   public void pickupSand(ServerPlayer player) {
+      VaultSandEvent.SandProgress progress = this.playerProgress.computeIfAbsent(player.getUUID(), uuid -> new VaultSandEvent.SandProgress());
       progress.collectedSands++;
       this.sendUpdate(player, progress);
    }
 
-   private void sendUpdate(ServerPlayerEntity sPlayer) {
-      VaultSandEvent.SandProgress progress = this.playerProgress.computeIfAbsent(sPlayer.func_110124_au(), uuid -> new VaultSandEvent.SandProgress());
+   private void sendUpdate(ServerPlayer sPlayer) {
+      VaultSandEvent.SandProgress progress = this.playerProgress.computeIfAbsent(sPlayer.getUUID(), uuid -> new VaultSandEvent.SandProgress());
       this.sendUpdate(sPlayer, progress);
    }
 
-   private void sendUpdate(ServerPlayerEntity sPlayer, VaultSandEvent.SandProgress progress) {
-      ModNetwork.CHANNEL.sendTo(progress.makeUpdatePacket(), sPlayer.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT);
+   private void sendUpdate(ServerPlayer sPlayer, VaultSandEvent.SandProgress progress) {
+      ModNetwork.CHANNEL.sendTo(progress.makeUpdatePacket(), sPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
    }
 
-   public static boolean spawnSand(ServerWorld world, ServerPlayerEntity player) {
+   public static boolean spawnSand(ServerLevel world, ServerPlayer player) {
       int attempts = 100000;
       float min = ModConfigs.SAND_EVENT.getMinDistance();
       float max = ModConfigs.SAND_EVENT.getMaxDistance();
 
-      for (BlockPos offset = player.func_233580_cy_(); attempts > 0; attempts--) {
+      for (BlockPos offset = player.blockPosition(); attempts > 0; attempts--) {
          int x = Math.round(min + rand.nextFloat() * (max - min)) * (rand.nextBoolean() ? 1 : -1);
          int y = Math.round(rand.nextFloat() * 30.0F) * (rand.nextBoolean() ? 1 : -1);
          int z = Math.round(min + rand.nextFloat() * (max - min)) * (rand.nextBoolean() ? 1 : -1);
-         BlockPos pos = offset.func_177982_a(x, y, z);
+         BlockPos pos = offset.offset(x, y, z);
          if (world.isAreaLoaded(pos, 1)) {
-            BlockState state = world.func_180495_p(pos);
-            if (state.isAir(world, pos)) {
-               world.func_217376_c(VaultSandEntity.create(world, pos));
+            BlockState state = world.getBlockState(pos);
+            if (state.isAir()) {
+               world.addFreshEntity(VaultSandEntity.create(world, pos));
                return true;
             }
          }
@@ -104,16 +94,16 @@ public class VaultSandEvent implements INBTSerializable<CompoundNBT>, IVaultTask
       return false;
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      this.playerProgress.forEach((uuid, progress) -> nbt.func_218657_a(uuid.toString(), progress.serialize()));
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      this.playerProgress.forEach((uuid, progress) -> nbt.put(uuid.toString(), progress.serialize()));
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       this.playerProgress.clear();
 
-      for (String key : nbt.func_150296_c()) {
+      for (String key : nbt.getAllKeys()) {
          UUID playerUUID;
          try {
             playerUUID = UUID.fromString(key);
@@ -121,7 +111,7 @@ public class VaultSandEvent implements INBTSerializable<CompoundNBT>, IVaultTask
             continue;
          }
 
-         CompoundNBT tag = nbt.func_74775_l(key);
+         CompoundTag tag = nbt.getCompound(key);
          this.playerProgress.put(playerUUID, VaultSandEvent.SandProgress.deserialize(tag));
       }
    }
@@ -131,22 +121,19 @@ public class VaultSandEvent implements INBTSerializable<CompoundNBT>, IVaultTask
       private int spawnedSands = 0;
       private int collectedSands = 0;
 
-      private SandProgress() {
-      }
-
-      private CompoundNBT serialize() {
-         CompoundNBT nbt = new CompoundNBT();
-         nbt.func_74776_a("fillPercent", this.fillPercent);
-         nbt.func_74768_a("spawnedSands", this.spawnedSands);
-         nbt.func_74768_a("collectedSands", this.collectedSands);
+      private CompoundTag serialize() {
+         CompoundTag nbt = new CompoundTag();
+         nbt.putFloat("fillPercent", this.fillPercent);
+         nbt.putInt("spawnedSands", this.spawnedSands);
+         nbt.putInt("collectedSands", this.collectedSands);
          return nbt;
       }
 
-      private static VaultSandEvent.SandProgress deserialize(CompoundNBT nbt) {
+      private static VaultSandEvent.SandProgress deserialize(CompoundTag nbt) {
          VaultSandEvent.SandProgress progress = new VaultSandEvent.SandProgress();
-         progress.fillPercent = nbt.func_74760_g("fillPercent");
-         progress.spawnedSands = nbt.func_74762_e("spawnedSands");
-         progress.collectedSands = nbt.func_74762_e("collectedSands");
+         progress.fillPercent = nbt.getFloat("fillPercent");
+         progress.spawnedSands = nbt.getInt("spawnedSands");
+         progress.collectedSands = nbt.getInt("collectedSands");
          return progress;
       }
 

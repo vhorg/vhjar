@@ -1,18 +1,18 @@
 package iskallia.vault.world.vault.logic.task;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class VaultTask implements IVaultTask, INBTSerializable<CompoundNBT> {
+public class VaultTask implements IVaultTask, INBTSerializable<CompoundTag> {
    public static final Map<ResourceLocation, VaultTask> REGISTRY = new HashMap<>();
-   public static final VaultTask EMPTY = register(Vault.id("empty"), (vault, player, world) -> {});
+   public static final VaultTask EMPTY = register(VaultMod.id("empty"), (vault, player, world) -> {});
    private ResourceLocation id;
    protected IVaultTask task;
 
@@ -29,7 +29,7 @@ public class VaultTask implements IVaultTask, INBTSerializable<CompoundNBT> {
    }
 
    @Override
-   public void execute(VaultRaid vault, VaultPlayer player, ServerWorld world) {
+   public void execute(VaultRaid vault, VaultPlayer player, ServerLevel world) {
       this.task.execute(vault, player, world);
    }
 
@@ -37,18 +37,18 @@ public class VaultTask implements IVaultTask, INBTSerializable<CompoundNBT> {
       return new CompoundVaultTask(this, other, ">", this.task.then(other));
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Id", this.getId().toString());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putString("Id", this.getId().toString());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.id = new ResourceLocation(nbt.func_74779_i("Id"));
+   public void deserializeNBT(CompoundTag nbt) {
+      this.id = new ResourceLocation(nbt.getString("Id"));
    }
 
-   public static VaultTask fromNBT(CompoundNBT nbt) {
-      return (VaultTask)(nbt.func_150297_b("Id", 8) ? REGISTRY.get(new ResourceLocation(nbt.func_74779_i("Id"))) : CompoundVaultTask.fromNBT(nbt));
+   public static VaultTask fromNBT(CompoundTag nbt) {
+      return (VaultTask)(nbt.contains("Id", 8) ? REGISTRY.get(new ResourceLocation(nbt.getString("Id"))) : CompoundVaultTask.fromNBT(nbt));
    }
 
    public static VaultTask register(ResourceLocation id, IVaultTask task) {

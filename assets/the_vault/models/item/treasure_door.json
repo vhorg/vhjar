@@ -1,0 +1,15 @@
+{
+    "parent": "the_vault:block/door_iskallium",
+    "overrides": [
+      { "predicate": { "the_vault:treasure_door_type": 0 }, "model": "the_vault:item/treasure_door/iskallium" },
+{ "predicate": { "the_vault:treasure_door_type": 1 }, "model": "the_vault:item/treasure_door/gorginite" },
+{ "predicate": { "the_vault:treasure_door_type": 2 }, "model": "the_vault:item/treasure_door/sparkletine" },
+{ "predicate": { "the_vault:treasure_door_type": 3 }, "model": "the_vault:item/treasure_door/ashium" },
+{ "predicate": { "the_vault:treasure_door_type": 4 }, "model": "the_vault:item/treasure_door/bomignite" },
+{ "predicate": { "the_vault:treasure_door_type": 6 }, "model": "the_vault:item/treasure_door/tubium" },
+{ "predicate": { "the_vault:treasure_door_type": 7 }, "model": "the_vault:item/treasure_door/upaline" },
+{ "predicate": { "the_vault:treasure_door_type": 8 }, "model": "the_vault:item/treasure_door/puffium" },
+{ "predicate": { "the_vault:treasure_door_type": 9 }, "model": "the_vault:item/treasure_door/petzanite" },
+{ "predicate": { "the_vault:treasure_door_type": 10 }, "model": "the_vault:item/treasure_door/xenium" }
+    ]
+  }

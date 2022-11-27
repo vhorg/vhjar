@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_vault:item/black_chromatic_steel_nugget"
+  }
+}

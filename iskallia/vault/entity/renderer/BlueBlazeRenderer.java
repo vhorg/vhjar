@@ -1,25 +1,25 @@
 package iskallia.vault.entity.renderer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import iskallia.vault.Vault;
+import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.VaultMod;
 import net.minecraft.client.renderer.entity.BlazeRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.entity.monster.BlazeEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.monster.Blaze;
 
 public class BlueBlazeRenderer extends BlazeRenderer {
-   public static final ResourceLocation TEXTURE = Vault.id("textures/entity/blue_blaze.png");
+   public static final ResourceLocation TEXTURE = VaultMod.id("textures/entity/blue_blaze.png");
 
-   public BlueBlazeRenderer(EntityRendererManager renderManager) {
-      super(renderManager);
+   public BlueBlazeRenderer(Context context) {
+      super(context);
    }
 
-   protected void preRenderCallback(BlazeEntity entitylivingbase, MatrixStack matrixStack, float partialTickTime) {
-      super.func_225620_a_(entitylivingbase, matrixStack, partialTickTime);
-      matrixStack.func_227862_a_(2.0F, 2.0F, 2.0F);
+   protected void scale(Blaze entitylivingbase, PoseStack matrixStack, float partialTickTime) {
+      super.scale(entitylivingbase, matrixStack, partialTickTime);
+      matrixStack.scale(2.0F, 2.0F, 2.0F);
    }
 
-   public ResourceLocation func_110775_a(BlazeEntity entity) {
+   public ResourceLocation getTextureLocation(Blaze entity) {
       return TEXTURE;
    }
 }

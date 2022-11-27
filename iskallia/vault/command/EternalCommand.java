@@ -7,21 +7,21 @@ import iskallia.vault.block.CryoChamberBlock;
 import iskallia.vault.entity.eternal.EternalData;
 import iskallia.vault.world.data.EternalsData;
 import java.util.UUID;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.UUIDArgument;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.util.text.event.HoverEvent.Action;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.UuidArgument;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.HoverEvent.Action;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
 
 public class EternalCommand extends Command {
    @Override
@@ -35,62 +35,62 @@ public class EternalCommand extends Command {
    }
 
    @Override
-   public void build(LiteralArgumentBuilder<CommandSource> builder) {
-      builder.then(Commands.func_197057_a("remove").then(Commands.func_197056_a("uuid", UUIDArgument.func_239194_a_()).executes(this::removeEternal)));
-      builder.then(Commands.func_197057_a("list").then(Commands.func_197056_a("playerId", UUIDArgument.func_239194_a_()).executes(this::listEternals)));
-      builder.then(Commands.func_197057_a("set").then(Commands.func_197056_a("uuid", UUIDArgument.func_239194_a_()).executes(this::setEternal)));
+   public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
+      builder.then(Commands.literal("remove").then(Commands.argument("uuid", UuidArgument.uuid()).executes(this::removeEternal)));
+      builder.then(Commands.literal("list").then(Commands.argument("playerId", UuidArgument.uuid()).executes(this::listEternals)));
+      builder.then(Commands.literal("set").then(Commands.argument("uuid", UuidArgument.uuid()).executes(this::setEternal)));
    }
 
-   private int setEternal(CommandContext<CommandSource> context) throws CommandSyntaxException {
-      ServerPlayerEntity sPlayer = ((CommandSource)context.getSource()).func_197035_h();
-      ItemStack held = sPlayer.func_184586_b(Hand.MAIN_HAND);
-      if (!held.func_190926_b() && held.func_77973_b() instanceof BlockItem && ((BlockItem)held.func_77973_b()).func_179223_d() instanceof CryoChamberBlock) {
-         UUID eternalUUID = UUIDArgument.func_239195_a_(context, "uuid");
-         EternalsData data = EternalsData.get(sPlayer.func_71121_q());
+   private int setEternal(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer sPlayer = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      ItemStack held = sPlayer.getItemInHand(InteractionHand.MAIN_HAND);
+      if (!held.isEmpty() && held.getItem() instanceof BlockItem && ((BlockItem)held.getItem()).getBlock() instanceof CryoChamberBlock) {
+         UUID eternalUUID = UuidArgument.getUuid(context, "uuid");
+         EternalsData data = EternalsData.get(sPlayer.getLevel());
          EternalData eternal = data.getEternal(eternalUUID);
          if (eternal == null) {
-            sPlayer.func_145747_a(new StringTextComponent("Specified eternal does not exist!").func_240699_a_(TextFormatting.RED), Util.field_240973_b_);
+            sPlayer.sendMessage(new TextComponent("Specified eternal does not exist!").withStyle(ChatFormatting.RED), Util.NIL_UUID);
             return 0;
          } else {
-            CompoundNBT tag = held.func_190925_c("BlockEntityTag");
-            tag.func_186854_a("EternalId", eternalUUID);
-            sPlayer.func_145747_a(new StringTextComponent("Eternal set!").func_240699_a_(TextFormatting.GREEN), Util.field_240973_b_);
+            CompoundTag tag = held.getOrCreateTagElement("BlockEntityTag");
+            tag.putUUID("EternalId", eternalUUID);
+            sPlayer.sendMessage(new TextComponent("Eternal set!").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
             return 0;
          }
       } else {
-         sPlayer.func_145747_a(new StringTextComponent("Not holding cryochamber!").func_240699_a_(TextFormatting.RED), Util.field_240973_b_);
+         sPlayer.sendMessage(new TextComponent("Not holding cryochamber!").withStyle(ChatFormatting.RED), Util.NIL_UUID);
          return 0;
       }
    }
 
-   private int listEternals(CommandContext<CommandSource> context) throws CommandSyntaxException {
-      ServerPlayerEntity sPlayer = ((CommandSource)context.getSource()).func_197035_h();
-      UUID playerId = UUIDArgument.func_239195_a_(context, "playerId");
-      EternalsData data = EternalsData.get(sPlayer.func_71121_q());
+   private int listEternals(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer sPlayer = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      UUID playerId = UuidArgument.getUuid(context, "playerId");
+      EternalsData data = EternalsData.get(sPlayer.getLevel());
       EternalsData.EternalGroup group = data.getEternals(playerId);
-      sPlayer.func_145747_a(new StringTextComponent("Eternals:").func_240699_a_(TextFormatting.GREEN), Util.field_240973_b_);
+      sPlayer.sendMessage(new TextComponent("Eternals:").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
 
       for (EternalData eternal : group.getEternals()) {
-         IFormattableTextComponent txt = new StringTextComponent(eternal.getId().toString() + " / " + eternal.getName());
-         txt.func_240700_a_(style -> style.func_240716_a_(new HoverEvent(Action.field_230550_a_, new StringTextComponent("Copy UUID"))));
-         txt.func_240700_a_(
-            style -> style.func_240715_a_(new ClickEvent(net.minecraft.util.text.event.ClickEvent.Action.COPY_TO_CLIPBOARD, eternal.getId().toString()))
+         MutableComponent txt = new TextComponent(eternal.getId().toString() + " / " + eternal.getName());
+         txt.withStyle(style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, new TextComponent("Copy UUID"))));
+         txt.withStyle(
+            style -> style.withClickEvent(new ClickEvent(net.minecraft.network.chat.ClickEvent.Action.COPY_TO_CLIPBOARD, eternal.getId().toString()))
          );
-         sPlayer.func_145747_a(txt, Util.field_240973_b_);
+         sPlayer.sendMessage(txt, Util.NIL_UUID);
       }
 
       return 0;
    }
 
-   private int removeEternal(CommandContext<CommandSource> context) throws CommandSyntaxException {
-      ServerPlayerEntity sPlayer = ((CommandSource)context.getSource()).func_197035_h();
-      UUID eternalUUID = UUIDArgument.func_239195_a_(context, "uuid");
-      EternalsData data = EternalsData.get(sPlayer.func_71121_q());
+   private int removeEternal(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer sPlayer = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      UUID eternalUUID = UuidArgument.getUuid(context, "uuid");
+      EternalsData data = EternalsData.get(sPlayer.getLevel());
       if (data.removeEternal(eternalUUID)) {
-         sPlayer.func_145747_a(new StringTextComponent("Eternal removed!").func_240699_a_(TextFormatting.GREEN), Util.field_240973_b_);
+         sPlayer.sendMessage(new TextComponent("Eternal removed!").withStyle(ChatFormatting.GREEN), Util.NIL_UUID);
          return 0;
       } else {
-         sPlayer.func_145747_a(new StringTextComponent("Specified eternal does not exist!").func_240699_a_(TextFormatting.RED), Util.field_240973_b_);
+         sPlayer.sendMessage(new TextComponent("Specified eternal does not exist!").withStyle(ChatFormatting.RED), Util.NIL_UUID);
          return 0;
       }
    }

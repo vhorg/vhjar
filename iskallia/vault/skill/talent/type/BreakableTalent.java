@@ -3,17 +3,20 @@ package iskallia.vault.skill.talent.type;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.world.data.PlayerTalentsData;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.EquipmentSlotType.Group;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlot.Type;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
+@Deprecated(
+   forRemoval = true
+)
 @EventBusSubscriber
 public class BreakableTalent extends PlayerTalent {
    @Expose
@@ -29,15 +32,15 @@ public class BreakableTalent extends PlayerTalent {
 
    @SubscribeEvent
    public static void onPlayerDamage(LivingHurtEvent event) {
-      if (!event.getEntityLiving().field_70170_p.field_72995_K) {
-         if (event.getEntityLiving() instanceof ServerPlayerEntity) {
-            ServerPlayerEntity player = (ServerPlayerEntity)event.getEntityLiving();
+      if (!event.getEntityLiving().level.isClientSide) {
+         if (event.getEntityLiving() instanceof ServerPlayer) {
+            ServerPlayer player = (ServerPlayer)event.getEntityLiving();
             int armorPieces = 0;
 
-            for (EquipmentSlotType slotType : EquipmentSlotType.values()) {
-               if (slotType.func_188453_a() != Group.HAND) {
-                  ItemStack stack = player.func_184582_a(slotType);
-                  if (!stack.func_190926_b() && stack.func_77984_f()) {
+            for (EquipmentSlot slotType : EquipmentSlot.values()) {
+               if (slotType.getType() != Type.HAND) {
+                  ItemStack stack = player.getItemBySlot(slotType);
+                  if (!stack.isEmpty() && stack.isDamageableItem()) {
                      armorPieces++;
                   }
                }
@@ -46,7 +49,7 @@ public class BreakableTalent extends PlayerTalent {
             if (armorPieces > 0) {
                float durabilityDamageMultiplier = 1.0F;
                float preventionChance = 0.0F;
-               TalentTree talents = PlayerTalentsData.get(player.func_71121_q()).getTalents(player);
+               TalentTree talents = PlayerTalentsData.get(player.getLevel()).getTalents(player);
 
                for (BreakableTalent talent : talents.getTalents(BreakableTalent.class)) {
                   preventionChance += talent.damagePreventionChance;
@@ -58,26 +61,17 @@ public class BreakableTalent extends PlayerTalent {
                   float postArmorAmount = dmgAmount / 4.0F * (4 - armorPieces);
                   float armorDmgHit = dmgAmount / 4.0F * durabilityDamageMultiplier;
 
-                  for (EquipmentSlotType slotTypex : EquipmentSlotType.values()) {
-                     if (slotTypex.func_188453_a() != Group.HAND) {
-                        ItemStack stack = player.func_184582_a(slotTypex);
-                        if (!stack.func_190926_b() && stack.func_77984_f()) {
-                           stack.func_222118_a(MathHelper.func_76123_f(armorDmgHit), player, brokenStack -> player.func_213361_c(slotType));
+                  for (EquipmentSlot slotTypex : EquipmentSlot.values()) {
+                     if (slotTypex.getType() != Type.HAND) {
+                        ItemStack stack = player.getItemBySlot(slotTypex);
+                        if (!stack.isEmpty() && stack.isDamageableItem()) {
+                           stack.hurtAndBreak(Mth.ceil(armorDmgHit), player, brokenStack -> player.broadcastBreakEvent(slotType));
                         }
                      }
                   }
 
-                  player.func_130014_f_()
-                     .func_184148_a(
-                        null,
-                        player.func_226277_ct_(),
-                        player.func_226278_cu_(),
-                        player.func_226281_cx_(),
-                        SoundEvents.field_226142_fM_,
-                        SoundCategory.MASTER,
-                        0.5F,
-                        1.0F
-                     );
+                  player.getCommandSenderWorld()
+                     .playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.IRON_GOLEM_DAMAGE, SoundSource.MASTER, 0.5F, 1.0F);
                   event.setAmount(postArmorAmount);
                   if (armorPieces >= 4) {
                      event.setAmount(0.0F);

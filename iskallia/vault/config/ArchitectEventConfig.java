@@ -1,6 +1,7 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.RangeEntry;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.data.WeightedList;
@@ -12,12 +13,15 @@ import iskallia.vault.world.vault.logic.objective.architect.modifier.PieceSelect
 import iskallia.vault.world.vault.logic.objective.architect.modifier.RandomVoteModifier;
 import iskallia.vault.world.vault.logic.objective.architect.modifier.TimeModifyModifier;
 import iskallia.vault.world.vault.logic.objective.architect.modifier.VoteModifier;
+import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
+import net.minecraft.resources.ResourceLocation;
 
 public class ArchitectEventConfig extends Config {
    public static final String EVENT_KEY = "architect_event";
@@ -40,7 +44,13 @@ public class ArchitectEventConfig extends Config {
    @Expose
    private RangeEntry requiredPolls;
    @Expose
+   private int temporaryModifierMinutes;
+   @Expose
    private WeightedList<String> rolls;
+   @Expose
+   private WeightedList<ResourceLocation> viewerPositiveModifiers;
+   @Expose
+   private WeightedList<ResourceLocation> viewerNegativeModifiers;
 
    public List<VoteModifier> getAll() {
       List<VoteModifier> modifiers = Stream.of(
@@ -72,8 +82,32 @@ public class ArchitectEventConfig extends Config {
       return this.requiredPolls.getRandom();
    }
 
+   public VaultModifier getRandomPositiveModifier() {
+      VaultModifier positiveModifier = null;
+
+      while (positiveModifier == null) {
+         positiveModifier = VaultModifierRegistry.getOrDefault(this.viewerPositiveModifiers.getRandom(rand), null);
+      }
+
+      return positiveModifier;
+   }
+
+   public VaultModifier getRandomNegativeModifier() {
+      VaultModifier positiveModifier = null;
+
+      while (positiveModifier == null) {
+         positiveModifier = VaultModifierRegistry.getOrDefault(this.viewerNegativeModifiers.getRandom(rand), null);
+      }
+
+      return positiveModifier;
+   }
+
    public boolean isEnabled() {
       return this.enabled;
+   }
+
+   public int getTemporaryModifierMinutes() {
+      return this.temporaryModifierMinutes;
    }
 
    @Override
@@ -83,7 +117,7 @@ public class ArchitectEventConfig extends Config {
 
    @Override
    protected void reset() {
-      this.BLOCK_PLACEMENT = Arrays.asList(new BlockPlacementModifier("Treasure", "+Gilded Chests", 30, ModBlocks.VAULT_BONUS_CHEST, 6000));
+      this.BLOCK_PLACEMENT = Arrays.asList(new BlockPlacementModifier("Treasure", "+Gilded Chests", 30, ModBlocks.GILDED_CHEST, 6000));
       this.FLOATING_ITEM_PLACEMENT = Arrays.asList(
          new FloatingItemPlacementModifier("Gems", "+Gems", 15, 4500, FloatingItemPlacementModifier.defaultGemList()),
          new FloatingItemPlacementModifier("Prismatic", "+Catalysts", 15, 12000, FloatingItemPlacementModifier.defaultPrismaticList()),
@@ -105,6 +139,7 @@ public class ArchitectEventConfig extends Config {
       this.RANDOM = Arrays.asList(new RandomVoteModifier("Random", "? Random ?", -15));
       this.BOSS = new BossExitModifier("BossExit", "Summon Boss", 0, 0.1F);
       this.requiredPolls = new RangeEntry(12, 20);
+      this.temporaryModifierMinutes = 10;
       this.enabled = false;
       this.rolls = new WeightedList<>();
       this.rolls.add("None", 20);
@@ -118,5 +153,12 @@ public class ArchitectEventConfig extends Config {
       this.rolls.add("Crowded", 2);
       this.rolls.add("Chaotic", 2);
       this.rolls.add("OmegaRooms", 2);
+      this.viewerPositiveModifiers = new WeightedList<>();
+      this.viewerPositiveModifiers.add(VaultMod.id("gilded"), 1);
+      this.viewerPositiveModifiers.add(VaultMod.id("ornate"), 1);
+      this.viewerPositiveModifiers.add(VaultMod.id("living"), 1);
+      this.viewerNegativeModifiers = new WeightedList<>();
+      this.viewerNegativeModifiers.add(VaultMod.id("mobs"), 1);
+      this.viewerNegativeModifiers.add(VaultMod.id("locked"), 1);
    }
 }

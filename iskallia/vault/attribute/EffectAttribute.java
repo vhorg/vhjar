@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.potion.Effect;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
 
 public class EffectAttribute extends PooledAttribute<List<EffectAttribute.Instance>> {
    public EffectAttribute() {
@@ -21,32 +21,29 @@ public class EffectAttribute extends PooledAttribute<List<EffectAttribute.Instan
    }
 
    @Override
-   public void write(CompoundNBT nbt) {
+   public void write(CompoundTag nbt) {
       if (this.getBaseValue() != null) {
-         CompoundNBT tag = new CompoundNBT();
-         ListNBT effectsList = new ListNBT();
+         CompoundTag tag = new CompoundTag();
+         ListTag effectsList = new ListTag();
          this.getBaseValue().forEach(effect -> {
-            CompoundNBT effectTag = new CompoundNBT();
-            tag.func_74778_a("Id", effect.effect);
+            CompoundTag effectTag = new CompoundTag();
+            tag.putString("Id", effect.effect);
             effectsList.add(effectTag);
          });
-         tag.func_218657_a("Effects", effectsList);
-         nbt.func_218657_a("BaseValue", tag);
+         tag.put("Effects", effectsList);
+         nbt.put("BaseValue", tag);
       }
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      if (!nbt.func_150297_b("BaseValue", 10)) {
+   public void read(CompoundTag nbt) {
+      if (!nbt.contains("BaseValue", 10)) {
          this.setBaseValue(new ArrayList<>());
       } else {
-         CompoundNBT tag = nbt.func_74775_l("BaseValue");
-         ListNBT effectsList = tag.func_150295_c("Effects", 10);
+         CompoundTag tag = nbt.getCompound("BaseValue");
+         ListTag effectsList = tag.getList("Effects", 10);
          this.setBaseValue(
-            effectsList.stream()
-               .map(inbt -> (CompoundNBT)inbt)
-               .map(effect -> new EffectAttribute.Instance(tag.func_74779_i("Id")))
-               .collect(Collectors.toList())
+            effectsList.stream().map(inbt -> (CompoundTag)inbt).map(effect -> new EffectAttribute.Instance(tag.getString("Id"))).collect(Collectors.toList())
          );
       }
    }
@@ -98,7 +95,7 @@ public class EffectAttribute extends PooledAttribute<List<EffectAttribute.Instan
          this.effect = effect;
       }
 
-      public Instance(Effect effect) {
+      public Instance(MobEffect effect) {
          this(effect.getRegistryName().toString());
       }
 
@@ -106,13 +103,13 @@ public class EffectAttribute extends PooledAttribute<List<EffectAttribute.Instan
          return this.effect;
       }
 
-      public Effect toEffect() {
-         return (Effect)Registry.field_212631_t.func_241873_b(new ResourceLocation(this.effect)).orElse(null);
+      public MobEffect toEffect() {
+         return (MobEffect)Registry.MOB_EFFECT.getOptional(new ResourceLocation(this.effect)).orElse(null);
       }
 
       @Override
       public String toString() {
-         return "Instance{effect='" + this.effect + '\'' + '}';
+         return "Instance{effect='" + this.effect + "'}";
       }
    }
 

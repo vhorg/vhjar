@@ -1,6 +1,12 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "the_vault:item/vault_silver"
-  }
+    "layer0": "the_vault:item/coins/silver/silver1"
+  },
+  "overrides": [
+    { "predicate": { "the_vault:count": 2 }, "model": "the_vault:item/vault_silver2" },
+    { "predicate": { "the_vault:count": 8}, "model": "the_vault:item/vault_silver3" },
+    { "predicate": { "the_vault:count": 16 }, "model": "the_vault:item/vault_silver4" },
+    { "predicate": { "the_vault:count": 32 }, "model": "the_vault:item/vault_silver5" }
+  ]
 }

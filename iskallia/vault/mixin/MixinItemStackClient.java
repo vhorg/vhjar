@@ -1,21 +1,19 @@
 package iskallia.vault.mixin;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({ItemStack.class})
-public class MixinItemStackClient {
-   @Redirect(
-      method = {"getTooltip"},
-      at = @At(
-         value = "INVOKE",
-         target = "Lnet/minecraft/item/ItemStack;hasDisplayName()Z",
-         ordinal = 0
-      )
+public abstract class MixinItemStackClient {
+   @Inject(
+      method = {"hasCustomHoverName"},
+      at = {@At("HEAD")},
+      cancellable = true
    )
-   public boolean doDisplayNameItalic(ItemStack stack) {
-      return false;
+   public void doDisplayNameItalic(CallbackInfoReturnable<Boolean> cir) {
+      cir.setReturnValue(false);
    }
 }

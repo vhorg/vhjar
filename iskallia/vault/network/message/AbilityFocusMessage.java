@@ -1,10 +1,10 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientAbilityData;
-import iskallia.vault.skill.ability.AbilityGroup;
+import iskallia.vault.skill.ability.group.AbilityGroup;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class AbilityFocusMessage {
    private final String selectedAbility;
@@ -21,12 +21,12 @@ public class AbilityFocusMessage {
       return this.selectedAbility;
    }
 
-   public static void encode(AbilityFocusMessage message, PacketBuffer buffer) {
-      buffer.func_180714_a(message.selectedAbility);
+   public static void encode(AbilityFocusMessage message, FriendlyByteBuf buffer) {
+      buffer.writeUtf(message.selectedAbility);
    }
 
-   public static AbilityFocusMessage decode(PacketBuffer buffer) {
-      return new AbilityFocusMessage(buffer.func_150789_c(32767));
+   public static AbilityFocusMessage decode(FriendlyByteBuf buffer) {
+      return new AbilityFocusMessage(buffer.readUtf(32767));
    }
 
    public static void handle(AbilityFocusMessage message, Supplier<Context> contextSupplier) {

@@ -1,185 +1,174 @@
 package iskallia.vault.block;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.block.entity.VaultCrateTileEntity;
-import iskallia.vault.container.VaultCrateContainer;
 import iskallia.vault.init.ModBlocks;
-import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.Property;
-import net.minecraft.state.StateContainer.Builder;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.Direction.Plane;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import iskallia.vault.init.ModSounds;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Direction.Plane;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.items.CapabilityItemHandler;
+import org.jetbrains.annotations.Nullable;
 
-public class VaultCrateBlock extends Block {
-   public static final DirectionProperty HORIZONTAL_FACING = DirectionProperty.func_177712_a("horizontal_facing", Plane.HORIZONTAL);
-   public static final DirectionProperty FACING = BlockStateProperties.field_208155_H;
+public class VaultCrateBlock extends Block implements EntityBlock {
+   public static final DirectionProperty HORIZONTAL_FACING = DirectionProperty.create("horizontal_facing", Plane.HORIZONTAL);
+   public static final DirectionProperty FACING = BlockStateProperties.FACING;
+   public static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 14.0, 15.0);
 
-   public VaultCrateBlock() {
-      super(
-         Properties.func_200949_a(Material.field_151573_f, MaterialColor.field_151668_h)
-            .func_200948_a(2.0F, 3600000.0F)
-            .func_200947_a(SoundType.field_185852_e)
-            .func_226896_b_()
-      );
-      this.func_180632_j((BlockState)((BlockState)this.func_176223_P().func_206870_a(HORIZONTAL_FACING, Direction.NORTH)).func_206870_a(FACING, Direction.UP));
+   public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
+      return SHAPE;
    }
 
-   public static ItemStack getCrateWithLoot(VaultCrateBlock crateType, NonNullList<ItemStack> items) {
+   public VaultCrateBlock() {
+      super(Properties.of(Material.METAL, MaterialColor.METAL).strength(2.0F, 3600000.0F).sound(SoundType.METAL).noOcclusion());
+      this.registerDefaultState((BlockState)((BlockState)this.defaultBlockState().setValue(HORIZONTAL_FACING, Direction.NORTH)).setValue(FACING, Direction.UP));
+   }
+
+   public static ItemStack getCrateWithLoot(VaultCrateBlock.Type type, NonNullList<ItemStack> items) {
+      Block block = switch (type) {
+         case BOSS -> ModBlocks.VAULT_CRATE;
+         case SCAVENGER -> ModBlocks.VAULT_CRATE_SCAVENGER;
+         case CAKE -> ModBlocks.VAULT_CRATE_CAKE;
+         case ARENA -> ModBlocks.VAULT_CRATE_ARENA;
+         case CHAMPION -> ModBlocks.VAULT_CRATE_CHAMPION;
+         case BOUNTY -> ModBlocks.VAULT_CRATE_BOUNTY;
+         case MONOLITH -> ModBlocks.VAULT_CRATE_MONOLITH;
+      };
       if (items.size() > 54) {
-         Vault.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
-         items = NonNullList.func_193580_a(ItemStack.field_190927_a, items.stream().limit(54L).toArray(ItemStack[]::new));
+         VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
+         items = NonNullList.of(ItemStack.EMPTY, items.stream().limit(54L).toArray(ItemStack[]::new));
       }
 
-      ItemStack crate = new ItemStack(crateType);
-      CompoundNBT nbt = new CompoundNBT();
-      ItemStackHelper.func_191282_a(nbt, items);
+      ItemStack crate = new ItemStack(block);
+      CompoundTag nbt = new CompoundTag();
+      ContainerHelper.saveAllItems(nbt, items);
       if (!nbt.isEmpty()) {
-         crate.func_77983_a("BlockEntityTag", nbt);
+         crate.addTagElement("BlockEntityTag", nbt);
       }
 
       return crate;
    }
 
-   public boolean hasTileEntity(BlockState state) {
-      return true;
-   }
-
-   public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-      return ModBlocks.VAULT_CRATE_TILE_ENTITY.func_200968_a();
-   }
-
-   protected void func_206840_a(Builder<Block, BlockState> builder) {
-      builder.func_206894_a(new Property[]{HORIZONTAL_FACING, FACING});
-   }
-
-   public ActionResultType func_225533_a_(
-      final BlockState state, final World world, final BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit
-   ) {
-      if (!world.field_72995_K) {
-         TileEntity tileEntity = world.func_175625_s(pos);
-         if (!(tileEntity instanceof VaultCrateTileEntity)) {
-            throw new IllegalStateException("Our named container provider is missing!");
-         }
-
-         INamedContainerProvider containerProvider = new INamedContainerProvider() {
-            public ITextComponent func_145748_c_() {
-               return state.func_177230_c() == ModBlocks.VAULT_CRATE_ARENA
-                  ? new TranslationTextComponent("container.vault.vault_crate_arena")
-                  : (
-                     state.func_177230_c() == ModBlocks.VAULT_CRATE_SCAVENGER
-                        ? new TranslationTextComponent("container.vault.vault_crate_scavenger")
-                        : (
-                           state.func_177230_c() == ModBlocks.VAULT_CRATE_CAKE
-                              ? new TranslationTextComponent("container.vault.vault_crate_cake")
-                              : new TranslationTextComponent("container.vault.vault_crate")
-                        )
-                  );
-            }
-
-            public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-               return new VaultCrateContainer(i, world, pos, playerInventory, playerEntity);
-            }
-         };
-         NetworkHooks.openGui((ServerPlayerEntity)player, containerProvider, tileEntity.func_174877_v());
-         world.func_184148_a(
-            null, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), SoundEvents.field_219602_O, SoundCategory.BLOCKS, 1.0F, 1.0F
-         );
-      }
-
-      return ActionResultType.SUCCESS;
-   }
-
-   public void func_176208_a(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-      super.func_176208_a(world, pos, state, player);
-      VaultCrateBlock block = this.getBlockVariant();
-      TileEntity tileentity = world.func_175625_s(pos);
-      if (tileentity instanceof VaultCrateTileEntity) {
-         VaultCrateTileEntity crate = (VaultCrateTileEntity)tileentity;
-         ItemStack itemstack = new ItemStack(block);
-         CompoundNBT compoundnbt = crate.saveToNbt();
-         if (!compoundnbt.isEmpty()) {
-            itemstack.func_77983_a("BlockEntityTag", compoundnbt);
-         }
-
-         ItemEntity itementity = new ItemEntity(world, pos.func_177958_n() + 0.5, pos.func_177956_o() + 0.5, pos.func_177952_p() + 0.5, itemstack);
-         itementity.func_174869_p();
-         world.func_217376_c(itementity);
-      }
-   }
-
    @Nullable
-   public BlockState func_196258_a(BlockItemUseContext context) {
-      Direction placeDir = context.func_196010_d().func_176734_d();
+   public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+      return ModBlocks.VAULT_CRATE_TILE_ENTITY.create(pPos, pState);
+   }
+
+   protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+      builder.add(new Property[]{HORIZONTAL_FACING, FACING});
+   }
+
+   public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
+      if (player.isShiftKeyDown() && !world.isClientSide) {
+         if (world.getBlockEntity(pos) instanceof VaultCrateTileEntity crate) {
+            crate.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(inventory -> {
+               for (int i = 0; i < inventory.getSlots(); i++) {
+                  if (!inventory.getStackInSlot(i).isEmpty()) {
+                     popResource(world, pos, inventory.getStackInSlot(i));
+                  }
+               }
+            });
+         }
+
+         world.removeBlock(pos, false);
+         Vec3 vec3 = new Vec3(pos.getX() + 0.5F, pos.getY() + 0.5F, pos.getZ() + 0.5F);
+         world.playSound(null, vec3.x, vec3.y, vec3.z, ModSounds.CRATE_OPEN, SoundSource.PLAYERS, 1.0F, 1.0F);
+         BlockParticleOption particle = new BlockParticleOption(ParticleTypes.BLOCK, state);
+         ((ServerLevel)world).sendParticles(particle, vec3.x, vec3.y, vec3.z, 400, 1.0, 1.0, 1.0, 0.5);
+         ((ServerLevel)world).sendParticles(ParticleTypes.SCRAPE, vec3.x, vec3.y, vec3.z, 50, 1.0, 1.0, 1.0, 0.5);
+      }
+
+      return InteractionResult.SUCCESS;
+   }
+
+   public void playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+      super.playerWillDestroy(world, pos, state, player);
+      if (world.getBlockEntity(pos) instanceof VaultCrateTileEntity crate) {
+         ItemStack itemstack = new ItemStack(this);
+         CompoundTag compoundnbt = crate.saveToNbt();
+         if (!compoundnbt.isEmpty()) {
+            itemstack.addTagElement("BlockEntityTag", compoundnbt);
+         }
+
+         ItemEntity itementity = new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, itemstack);
+         itementity.setDefaultPickUpDelay();
+         world.addFreshEntity(itementity);
+      }
+   }
+
+   @javax.annotation.Nullable
+   public BlockState getStateForPlacement(BlockPlaceContext context) {
+      Direction placeDir = context.getNearestLookingDirection().getOpposite();
       Direction horizontalDir = Direction.NORTH;
-      if (placeDir.func_176740_k().func_200128_b()) {
-         for (Direction direction : context.func_196009_e()) {
-            if (direction.func_176740_k().func_176722_c()) {
+      if (placeDir.getAxis().isVertical()) {
+         for (Direction direction : context.getNearestLookingDirections()) {
+            if (direction.getAxis().isHorizontal()) {
                horizontalDir = direction;
                break;
             }
          }
       }
 
-      return (BlockState)((BlockState)this.func_176223_P().func_206870_a(FACING, placeDir)).func_206870_a(HORIZONTAL_FACING, horizontalDir);
+      return (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, placeDir)).setValue(HORIZONTAL_FACING, horizontalDir);
    }
 
-   private VaultCrateBlock getBlockVariant() {
-      if (this.getBlock() == ModBlocks.VAULT_CRATE) {
-         return ModBlocks.VAULT_CRATE;
-      } else if (this.getBlock() == ModBlocks.VAULT_CRATE_SCAVENGER) {
-         return ModBlocks.VAULT_CRATE_SCAVENGER;
-      } else {
-         return this.getBlock() == ModBlocks.VAULT_CRATE_CAKE ? ModBlocks.VAULT_CRATE_CAKE : ModBlocks.VAULT_CRATE_ARENA;
-      }
-   }
-
-   public void func_180633_a(World worldIn, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-      if (!worldIn.func_201670_d()) {
-         CompoundNBT tag = stack.func_179543_a("BlockEntityTag");
+   public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, @javax.annotation.Nullable LivingEntity placer, ItemStack stack) {
+      if (!worldIn.isClientSide()) {
+         CompoundTag tag = stack.getTagElement("BlockEntityTag");
          if (tag != null) {
             VaultCrateTileEntity crate = this.getCrateTileEntity(worldIn, pos);
             if (crate != null) {
                crate.loadFromNBT(tag);
-               super.func_180633_a(worldIn, pos, state, placer, stack);
+               super.setPlacedBy(worldIn, pos, state, placer, stack);
             }
          }
       }
    }
 
-   private VaultCrateTileEntity getCrateTileEntity(World worldIn, BlockPos pos) {
-      TileEntity te = worldIn.func_175625_s(pos);
-      return !(te instanceof VaultCrateTileEntity) ? null : (VaultCrateTileEntity)worldIn.func_175625_s(pos);
+   private VaultCrateTileEntity getCrateTileEntity(Level worldIn, BlockPos pos) {
+      BlockEntity var4 = worldIn.getBlockEntity(pos);
+      return var4 instanceof VaultCrateTileEntity ? (VaultCrateTileEntity)var4 : null;
+   }
+
+   public static enum Type {
+      BOSS,
+      SCAVENGER,
+      CAKE,
+      ARENA,
+      CHAMPION,
+      BOUNTY,
+      MONOLITH;
    }
 }

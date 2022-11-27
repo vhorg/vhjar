@@ -6,27 +6,26 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.skill.talent.type.LuckyAltarTalent;
 import iskallia.vault.util.MiscUtils;
-import iskallia.vault.world.data.GlobalDifficultyData;
 import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootContext.Builder;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.LootContext.Builder;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 
 public class VaultAltarConfig extends Config {
    @Expose
@@ -85,18 +84,16 @@ public class VaultAltarConfig extends Config {
       this.LUCKY_ALTAR_CHANCE = 0.1F;
    }
 
-   public List<RequiredItem> getRequiredItemsFromConfig(ServerWorld world, BlockPos pos, ServerPlayerEntity player) {
+   public List<RequiredItem> getRequiredItemsFromConfig(ServerLevel world, BlockPos pos, ServerPlayer player) {
       LootContext ctx = new Builder(world)
-         .func_216015_a(LootParameters.field_216281_a, player)
-         .func_216023_a(world.field_73012_v)
-         .func_186469_a(player.func_184817_da())
-         .func_216022_a(LootParameterSets.field_237453_h_);
-      int vaultLevel = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
-      int altarLevel = PlayerStatsData.get(world).get(player.func_110124_au()).getCrystals().size();
+         .withParameter(LootContextParams.THIS_ENTITY, player)
+         .withRandom(world.random)
+         .withLuck(player.getLuck())
+         .create(LootContextParamSets.PIGLIN_BARTER);
+      int altarLevel = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
+      int crystalsCrafted = PlayerStatsData.get(world.getServer()).get(player.getUUID()).getCrystals().size();
       float amtMultiplier = 1.0F;
       float luckyAltarChance = this.LUCKY_ALTAR_CHANCE;
-      GlobalDifficultyData.Difficulty difficulty = GlobalDifficultyData.get(world).getCrystalCost();
-      amtMultiplier = (float)(amtMultiplier * difficulty.getMultiplier());
       TalentTree talents = PlayerTalentsData.get(world).getTalents(player);
 
       for (LuckyAltarTalent talent : talents.getTalents(LuckyAltarTalent.class)) {
@@ -108,42 +105,41 @@ public class VaultAltarConfig extends Config {
          this.spawnLuckyEffects(world, pos);
       }
 
-      LootTable lootTable = world.func_73046_m().func_200249_aQ().func_186521_a(ModConfigs.LOOT_TABLES.getForLevel(vaultLevel).getAltar());
-      RequiredItem resource = new RequiredItem(Items.field_151119_aD, 0, 0);
-      RequiredItem richity = new RequiredItem(Items.field_151045_i, 0, 0);
-      RequiredItem farmable = new RequiredItem(Items.field_151034_e, 0, 0);
-      RequiredItem misc = new RequiredItem(Items.field_151110_aK, 0, 0);
+      LootTable lootTable = world.getServer().getLootTables().get(ModConfigs.LOOT_TABLES.getForLevel(altarLevel).getAltar());
+      RequiredItem resource = new RequiredItem(Items.CLAY_BALL, 0, 0);
+      RequiredItem richity = new RequiredItem(Items.DIAMOND, 0, 0);
+      RequiredItem farmable = new RequiredItem(Items.APPLE, 0, 0);
+      RequiredItem misc = new RequiredItem(Items.EGG, 0, 0);
 
       try {
-         lootTable.getPool("Resource").func_216091_a(resource::setItem, ctx);
-         lootTable.getPool("Richity").func_216091_a(richity::setItem, ctx);
-         lootTable.getPool("Farmable").func_216091_a(farmable::setItem, ctx);
-         lootTable.getPool("Misc").func_216091_a(misc::setItem, ctx);
-      } catch (Exception var22) {
+         lootTable.getPool("Resource").addRandomItems(resource::setItem, ctx);
+         lootTable.getPool("Richity").addRandomItems(richity::setItem, ctx);
+         lootTable.getPool("Farmable").addRandomItems(farmable::setItem, ctx);
+         lootTable.getPool("Misc").addRandomItems(misc::setItem, ctx);
+      } catch (Exception var21) {
       }
 
-      double m1 = 800.0 * Math.atan(altarLevel / 250.0) / Math.PI + 1.0;
-      double m2 = 200.0 / (1.0 + Math.exp((-altarLevel + 260.0) / 50.0));
-      double m3 = 400.0 / (1.0 + Math.exp((-altarLevel + 200.0) / 40.0));
-      resource.setAmountRequired((int)Math.round(resource.getItem().func_190916_E() * m1 * amtMultiplier));
-      richity.setAmountRequired((int)Math.round(richity.getItem().func_190916_E() * m2 * amtMultiplier));
-      farmable.setAmountRequired((int)Math.round(farmable.getItem().func_190916_E() * m3 * amtMultiplier));
-      misc.setAmountRequired(misc.getItem().func_190916_E());
-      resource.getItem().func_190920_e(1);
-      richity.getItem().func_190920_e(1);
-      farmable.getItem().func_190920_e(1);
-      misc.getItem().func_190920_e(1);
+      double m1 = 250.0 / (1.0 + Math.exp((-crystalsCrafted + 260.0) / 140.0)) - 32.759;
+      double m2 = crystalsCrafted / 8.0 + 1.0;
+      double m3 = 800.0 * Math.atan(crystalsCrafted / 400.0) / Math.PI + 1.0;
+      resource.setAmountRequired(Math.max((int)Math.round(resource.getItem().getCount() * m1 * amtMultiplier), 1));
+      richity.setAmountRequired(Math.max((int)Math.round(richity.getItem().getCount() * m2 * amtMultiplier), 1));
+      farmable.setAmountRequired(Math.max((int)Math.round(farmable.getItem().getCount() * m3 * amtMultiplier), 1));
+      misc.setAmountRequired(misc.getItem().getCount());
+      resource.getItem().setCount(1);
+      richity.getItem().setCount(1);
+      farmable.getItem().setCount(1);
+      misc.getItem().setCount(1);
       return Arrays.asList(resource, richity, farmable, misc);
    }
 
-   private void spawnLuckyEffects(World world, BlockPos pos) {
+   private void spawnLuckyEffects(Level world, BlockPos pos) {
       for (int i = 0; i < 30; i++) {
-         Vector3d offset = MiscUtils.getRandomOffset(pos, rand, 2.0F);
-         ((ServerWorld)world)
-            .func_195598_a(ParticleTypes.field_197632_y, offset.field_72450_a, offset.field_72448_b, offset.field_72449_c, 3, 0.0, 0.0, 0.0, 1.0);
+         Vec3 offset = MiscUtils.getRandomOffset(pos, rand, 2.0F);
+         ((ServerLevel)world).sendParticles(ParticleTypes.HAPPY_VILLAGER, offset.x, offset.y, offset.z, 3, 0.0, 0.0, 0.0, 1.0);
       }
 
-      world.func_184133_a(null, pos, SoundEvents.field_187802_ec, SoundCategory.BLOCKS, 1.0F, 1.0F);
+      world.playSound(null, pos, SoundEvents.PLAYER_LEVELUP, SoundSource.BLOCKS, 1.0F, 1.0F);
    }
 
    public class AltarConfigItem {

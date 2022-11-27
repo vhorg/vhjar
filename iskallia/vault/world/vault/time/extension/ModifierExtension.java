@@ -1,11 +1,11 @@
 package iskallia.vault.world.vault.time.extension;
 
-import iskallia.vault.Vault;
-import iskallia.vault.world.vault.modifier.TimerModifier;
-import net.minecraft.util.ResourceLocation;
+import iskallia.vault.VaultMod;
+import iskallia.vault.world.vault.modifier.modifier.VaultTimeModifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class ModifierExtension extends TimeExtension {
-   public static final ResourceLocation ID = Vault.id("modifier");
+   public static final ResourceLocation ID = VaultMod.id("modifier");
 
    public ModifierExtension() {
    }
@@ -14,11 +14,11 @@ public class ModifierExtension extends TimeExtension {
       super(ID, addedTime);
    }
 
-   public ModifierExtension(TimerModifier modifier) {
-      this(modifier.getTimerAddend());
+   public ModifierExtension(VaultTimeModifier modifier) {
+      this(modifier.properties().getTimeAddedTicks());
    }
 
-   public ModifierExtension(ResourceLocation id, TimerModifier modifier) {
-      super(id, modifier.getTimerAddend());
+   public ModifierExtension(ResourceLocation id, VaultTimeModifier modifier) {
+      super(id, modifier.properties().getTimeAddedTicks());
    }
 }

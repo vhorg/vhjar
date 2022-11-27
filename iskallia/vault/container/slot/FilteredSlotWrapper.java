@@ -3,73 +3,73 @@ package iskallia.vault.container.slot;
 import com.mojang.datafixers.util.Pair;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public class FilteredSlotWrapper extends Slot {
    private final Slot decorated;
    private final Predicate<ItemStack> canInsert;
 
    public FilteredSlotWrapper(Slot decorated, Predicate<ItemStack> canInsert) {
-      super(decorated.field_75224_c, decorated.getSlotIndex(), decorated.field_75223_e, decorated.field_75221_f);
+      super(decorated.container, decorated.getSlotIndex(), decorated.x, decorated.y);
       this.canInsert = canInsert;
-      this.field_75222_d = decorated.field_75222_d;
+      this.index = decorated.index;
       this.decorated = decorated;
    }
 
-   public void func_75220_a(ItemStack oldStackIn, ItemStack newStackIn) {
-      this.decorated.func_75220_a(oldStackIn, newStackIn);
+   public void onQuickCraft(ItemStack oldStackIn, ItemStack newStackIn) {
+      this.decorated.onQuickCraft(oldStackIn, newStackIn);
    }
 
-   public ItemStack func_190901_a(PlayerEntity thePlayer, ItemStack stack) {
-      return this.decorated.func_190901_a(thePlayer, stack);
+   public void onTake(Player thePlayer, ItemStack stack) {
+      this.decorated.onTake(thePlayer, stack);
    }
 
-   public boolean func_75214_a(ItemStack stack) {
-      return !this.canInsert.test(stack) ? false : this.decorated.func_75214_a(stack);
+   public boolean mayPlace(ItemStack stack) {
+      return !this.canInsert.test(stack) ? false : this.decorated.mayPlace(stack);
    }
 
-   public ItemStack func_75211_c() {
-      return this.decorated.func_75211_c();
+   public ItemStack getItem() {
+      return this.decorated.getItem();
    }
 
-   public boolean func_75216_d() {
-      return this.decorated.func_75216_d();
+   public boolean hasItem() {
+      return this.decorated.hasItem();
    }
 
-   public void func_75215_d(ItemStack stack) {
-      this.decorated.func_75215_d(stack);
+   public void set(ItemStack stack) {
+      this.decorated.set(stack);
    }
 
-   public void func_75218_e() {
-      this.decorated.func_75218_e();
+   public void setChanged() {
+      this.decorated.setChanged();
    }
 
-   public int func_75219_a() {
-      return this.decorated.func_75219_a();
+   public int getMaxStackSize() {
+      return this.decorated.getMaxStackSize();
    }
 
-   public int func_178170_b(ItemStack stack) {
-      return this.decorated.func_178170_b(stack);
+   public int getMaxStackSize(ItemStack stack) {
+      return this.decorated.getMaxStackSize(stack);
    }
 
    @Nullable
-   public Pair<ResourceLocation, ResourceLocation> func_225517_c_() {
-      return this.decorated.func_225517_c_();
+   public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
+      return this.decorated.getNoItemIcon();
    }
 
-   public ItemStack func_75209_a(int amount) {
-      return this.decorated.func_75209_a(amount);
+   public ItemStack remove(int amount) {
+      return this.decorated.remove(amount);
    }
 
-   public boolean func_82869_a(PlayerEntity playerIn) {
-      return this.decorated.func_82869_a(playerIn);
+   public boolean mayPickup(Player playerIn) {
+      return this.decorated.mayPickup(playerIn);
    }
 
-   public boolean func_111238_b() {
-      return this.decorated.func_111238_b();
+   public boolean isActive() {
+      return this.decorated.isActive();
    }
 
    public int getSlotIndex() {

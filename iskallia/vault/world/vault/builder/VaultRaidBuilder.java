@@ -10,26 +10,18 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public abstract class VaultRaidBuilder {
-   public abstract VaultRaid.Builder initializeBuilder(ServerWorld var1, ServerPlayerEntity var2, CrystalData var3);
+   public abstract VaultRaid.Builder initializeBuilder(ServerLevel var1, ServerPlayer var2, CrystalData var3);
 
-   protected int getVaultLevelForObjective(ServerWorld world, ServerPlayerEntity player) {
-      return player == null ? 0 : PlayerVaultStatsData.get(world).getVaultStats(player.func_110124_au()).getVaultLevel();
+   protected int getVaultLevelForObjective(ServerLevel world, ServerPlayer player) {
+      return player == null ? 0 : PlayerVaultStatsData.get(world).getVaultStats(player.getUUID()).getVaultLevel();
    }
 
-   protected VaultRaid.Builder getDefaultBuilder(CrystalData crystal, ServerWorld world, ServerPlayerEntity player) {
+   protected VaultRaid.Builder getDefaultBuilder(CrystalData crystal, ServerLevel world, ServerPlayer player) {
       VaultObjective vObjective = null;
-      if (crystal.getSelectedObjective() != null) {
-         vObjective = VaultObjective.getObjective(crystal.getSelectedObjective());
-      }
-
-      if (crystal.getTargetObjectiveCount() >= 0 && vObjective != null) {
-         vObjective.setObjectiveTargetCount(crystal.getTargetObjectiveCount());
-      }
-
       return this.getDefaultBuilder(crystal, this.getVaultLevelForObjective(world, player), vObjective);
    }
 
@@ -43,6 +35,7 @@ public abstract class VaultRaidBuilder {
 
    protected VaultTask getDefaultInitializer() {
       return VaultRaid.TP_TO_START
+         .then(VaultRaid.INIT_SANDS_EVENT)
          .then(VaultRaid.INIT_COW_VAULT)
          .then(VaultRaid.INIT_GLOBAL_MODIFIERS)
          .then(VaultRaid.ENTER_DISPLAY)
@@ -57,6 +50,7 @@ public abstract class VaultRaidBuilder {
          VaultRaid.PREVENT_ITEM_PICKUP,
          VaultRaid.APPLY_SCALE_MODIFIER,
          VaultRaid.APPLY_FRENZY_MODIFIERS,
+         VaultRaid.APPLY_MOB_ATTRIBUTE_MODIFIERS,
          VaultRaid.APPLY_INFLUENCE_MODIFIERS
       );
    }

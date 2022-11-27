@@ -1,13 +1,13 @@
 package iskallia.vault.mixin;
 
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ArmorMaterial;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ArmorMaterials;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({ArmorMaterial.class})
+@Mixin({ArmorMaterials.class})
 public class MixinArmorMaterial {
    @Inject(
       method = {"getToughness"},
@@ -15,13 +15,13 @@ public class MixinArmorMaterial {
       cancellable = true
    )
    public void getToughness(CallbackInfoReturnable<Float> ci) {
-      ArmorMaterial material = (ArmorMaterial)this;
-      if (material == ArmorMaterial.LEATHER
-         || material == ArmorMaterial.CHAIN
-         || material == ArmorMaterial.GOLD
-         || material == ArmorMaterial.IRON
-         || material == ArmorMaterial.DIAMOND
-         || material == ArmorMaterial.NETHERITE) {
+      ArmorMaterials material = (ArmorMaterials)this;
+      if (material == ArmorMaterials.LEATHER
+         || material == ArmorMaterials.CHAIN
+         || material == ArmorMaterials.GOLD
+         || material == ArmorMaterials.IRON
+         || material == ArmorMaterials.DIAMOND
+         || material == ArmorMaterials.NETHERITE) {
          ci.setReturnValue(0.0F);
       }
    }
@@ -32,24 +32,24 @@ public class MixinArmorMaterial {
       cancellable = true
    )
    public void getKockbackResistance(CallbackInfoReturnable<Float> ci) {
-      ArmorMaterial material = (ArmorMaterial)this;
-      if (material == ArmorMaterial.LEATHER
-         || material == ArmorMaterial.CHAIN
-         || material == ArmorMaterial.GOLD
-         || material == ArmorMaterial.IRON
-         || material == ArmorMaterial.DIAMOND
-         || material == ArmorMaterial.NETHERITE) {
+      ArmorMaterials material = (ArmorMaterials)this;
+      if (material == ArmorMaterials.LEATHER
+         || material == ArmorMaterials.CHAIN
+         || material == ArmorMaterials.GOLD
+         || material == ArmorMaterials.IRON
+         || material == ArmorMaterials.DIAMOND
+         || material == ArmorMaterials.NETHERITE) {
          ci.setReturnValue(0.0F);
       }
    }
 
    @Inject(
-      method = {"getDamageReductionAmount"},
+      method = {"getDefenseForSlot"},
       at = {@At("HEAD")},
       cancellable = true
    )
-   public void getDamageReductionAmount(EquipmentSlotType slot, CallbackInfoReturnable<Integer> ci) {
-      switch ((ArmorMaterial)this) {
+   public void getDamageReductionAmount(EquipmentSlot slot, CallbackInfoReturnable<Integer> ci) {
+      switch ((ArmorMaterials)this) {
          case LEATHER:
             switch (slot) {
                case HEAD:

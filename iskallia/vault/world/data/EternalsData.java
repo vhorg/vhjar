@@ -5,6 +5,8 @@ import iskallia.vault.entity.eternal.EternalDataSnapshot;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.EternalSyncMessage;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -17,29 +19,22 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.PacketDistributor;
+import org.jetbrains.annotations.NotNull;
 
-public class EternalsData extends WorldSavedData {
+public class EternalsData extends SavedData {
    protected static final String DATA_NAME = "the_vault_Eternals";
    private final Map<UUID, EternalsData.EternalGroup> playerMap = new HashMap<>();
-
-   public EternalsData() {
-      this("the_vault_Eternals");
-   }
-
-   public EternalsData(String name) {
-      super(name);
-   }
 
    public int getTotalEternals() {
       int total = 0;
@@ -52,8 +47,8 @@ public class EternalsData extends WorldSavedData {
    }
 
    @Nonnull
-   public EternalsData.EternalGroup getEternals(PlayerEntity player) {
-      return this.getEternals(player.func_110124_au());
+   public EternalsData.EternalGroup getEternals(Player player) {
+      return this.getEternals(player.getUUID());
    }
 
    @Nonnull
@@ -79,9 +74,9 @@ public class EternalsData extends WorldSavedData {
       return new ArrayList<>(names);
    }
 
-   public UUID add(UUID owner, String name, boolean isAncient) {
-      UUID eternalId = this.getEternals(owner).addEternal(name, isAncient);
-      this.func_76185_a();
+   public UUID add(UUID owner, String name, boolean isAncient, EternalsData.EternalVariant variant, boolean isUsingPlayerSkin) {
+      UUID eternalId = this.getEternals(owner).addEternal(name, isAncient, variant, isUsingPlayerSkin);
+      this.setDirty();
       return eternalId;
    }
 
@@ -120,15 +115,13 @@ public class EternalsData extends WorldSavedData {
 
    public Map<UUID, List<EternalDataSnapshot>> getEternalDataSnapshots() {
       Map<UUID, List<EternalDataSnapshot>> eternalDataSet = new HashMap<>();
-      this.playerMap.forEach((playerUUID, eternalGrp) -> {
-         List var10000 = eternalDataSet.put(playerUUID, eternalGrp.getEternalSnapshots());
-      });
+      this.playerMap.forEach((playerUUID, eternalGrp) -> eternalDataSet.put(playerUUID, eternalGrp.getEternalSnapshots()));
       return eternalDataSet;
    }
 
-   public void syncTo(ServerPlayerEntity sPlayer) {
+   public void syncTo(ServerPlayer sPlayer) {
       EternalSyncMessage pkt = new EternalSyncMessage(this.getEternalDataSnapshots());
-      ModNetwork.CHANNEL.sendTo(pkt, sPlayer.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT);
+      ModNetwork.CHANNEL.sendTo(pkt, sPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
    }
 
    public void syncAll() {
@@ -136,49 +129,56 @@ public class EternalsData extends WorldSavedData {
       ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), pkt);
    }
 
-   public void func_76185_a() {
-      super.func_76185_a();
+   public void setDirty() {
+      super.setDirty();
       this.syncAll();
    }
 
-   public void func_76184_a(CompoundNBT nbt) {
-      ListNBT playerList = nbt.func_150295_c("PlayerEntries", 8);
-      ListNBT eternalsList = nbt.func_150295_c("EternalEntries", 10);
+   private static EternalsData create(CompoundTag tag) {
+      EternalsData data = new EternalsData();
+      data.load(tag);
+      return data;
+   }
+
+   public void load(CompoundTag nbt) {
+      ListTag playerList = nbt.getList("PlayerEntries", 8);
+      ListTag eternalsList = nbt.getList("EternalEntries", 10);
       if (playerList.size() != eternalsList.size()) {
          throw new IllegalStateException("Map doesn't have the same amount of keys as values");
       } else {
          for (int i = 0; i < playerList.size(); i++) {
-            UUID playerUUID = UUID.fromString(playerList.func_150307_f(i));
-            this.getEternals(playerUUID).deserializeNBT(eternalsList.func_150305_b(i));
+            UUID playerUUID = UUID.fromString(playerList.getString(i));
+            this.getEternals(playerUUID).deserializeNBT(eternalsList.getCompound(i));
          }
       }
    }
 
-   public CompoundNBT func_189551_b(CompoundNBT nbt) {
-      ListNBT playerList = new ListNBT();
-      ListNBT eternalsList = new ListNBT();
+   @NotNull
+   public CompoundTag save(CompoundTag nbt) {
+      ListTag playerList = new ListTag();
+      ListTag eternalsList = new ListTag();
       this.playerMap.forEach((uuid, eternalGroup) -> {
-         playerList.add(StringNBT.func_229705_a_(uuid.toString()));
+         playerList.add(StringTag.valueOf(uuid.toString()));
          eternalsList.add(eternalGroup.serializeNBT());
       });
-      nbt.func_218657_a("PlayerEntries", playerList);
-      nbt.func_218657_a("EternalEntries", eternalsList);
+      nbt.put("PlayerEntries", playerList);
+      nbt.put("EternalEntries", eternalsList);
       return nbt;
    }
 
-   public static EternalsData get(ServerWorld world) {
-      return get(world.func_73046_m());
+   public static EternalsData get(ServerLevel world) {
+      return get(world.getServer());
    }
 
    public static EternalsData get(MinecraftServer srv) {
-      return (EternalsData)srv.func_241755_D_().func_217481_x().func_215752_a(EternalsData::new, "the_vault_Eternals");
+      return (EternalsData)srv.overworld().getDataStorage().computeIfAbsent(EternalsData::create, EternalsData::new, "the_vault_Eternals");
    }
 
-   public boolean func_76188_b() {
+   public boolean isDirty() {
       return true;
    }
 
-   public class EternalGroup implements INBTSerializable<CompoundNBT> {
+   public class EternalGroup implements INBTSerializable<CompoundTag> {
       private final Map<UUID, EternalData> eternals = new HashMap<>();
 
       public List<EternalData> getEternals() {
@@ -189,8 +189,8 @@ public class EternalsData extends WorldSavedData {
          return (int)this.eternals.entrySet().stream().filter(entry -> !entry.getValue().isAncient()).count();
       }
 
-      public UUID addEternal(String name, boolean isAncient) {
-         return this.addEternal(EternalData.createEternal(EternalsData.this, name, isAncient)).getId();
+      public UUID addEternal(String name, boolean isAncient, EternalsData.EternalVariant variant, boolean isUsingPlayerSkin) {
+         return this.addEternal(EternalData.createEternal(EternalsData.this, name, isAncient, variant, isUsingPlayerSkin)).getId();
       }
 
       private EternalData addEternal(EternalData newEternal) {
@@ -235,7 +235,7 @@ public class EternalsData extends WorldSavedData {
       public boolean removeEternal(UUID eternalId) {
          EternalData eternal = this.eternals.remove(eternalId);
          if (eternal != null) {
-            EternalsData.this.func_76185_a();
+            EternalsData.this.setDirty();
             return true;
          } else {
             return false;
@@ -275,21 +275,47 @@ public class EternalsData extends WorldSavedData {
          return EternalDataSnapshot.getFromEternal(this, eternal);
       }
 
-      public CompoundNBT serializeNBT() {
-         CompoundNBT nbt = new CompoundNBT();
-         ListNBT eternalsList = new ListNBT();
+      public CompoundTag serializeNBT() {
+         CompoundTag nbt = new CompoundTag();
+         ListTag eternalsList = new ListTag();
          this.eternals.values().forEach(eternal -> eternalsList.add(eternal.serializeNBT()));
-         nbt.func_218657_a("EternalsList", eternalsList);
+         nbt.put("EternalsList", eternalsList);
          return nbt;
       }
 
-      public void deserializeNBT(CompoundNBT nbt) {
+      public void deserializeNBT(CompoundTag nbt) {
          this.eternals.clear();
-         ListNBT eternalsList = nbt.func_150295_c("EternalsList", 10);
+         ListTag eternalsList = nbt.getList("EternalsList", 10);
 
          for (int i = 0; i < eternalsList.size(); i++) {
-            this.addEternal(EternalData.fromNBT(EternalsData.this, eternalsList.func_150305_b(i)));
+            this.addEternal(EternalData.fromNBT(EternalsData.this, eternalsList.getCompound(i)));
          }
+      }
+   }
+
+   public static enum EternalVariant {
+      CAVE(0),
+      DESERT(1),
+      HELL(2),
+      ICE(3),
+      LUSH(4),
+      VOID(5);
+
+      private static final EternalsData.EternalVariant[] BY_ID = Arrays.stream(values())
+         .sorted(Comparator.comparingInt(EternalsData.EternalVariant::getId))
+         .toArray(EternalsData.EternalVariant[]::new);
+      private final int id;
+
+      private EternalVariant(int pId) {
+         this.id = pId;
+      }
+
+      public int getId() {
+         return this.id;
+      }
+
+      public static EternalsData.EternalVariant byId(int pId) {
+         return BY_ID[pId % BY_ID.length];
       }
    }
 }

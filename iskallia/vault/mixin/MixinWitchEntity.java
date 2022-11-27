@@ -2,34 +2,34 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.easteregg.Witchskall;
 import iskallia.vault.init.ModSounds;
-import net.minecraft.entity.monster.WitchEntity;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.SoundEvent;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.monster.Witch;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({WitchEntity.class})
+@Mixin({Witch.class})
 public abstract class MixinWitchEntity {
    @Inject(
-      method = {"registerData"},
+      method = {"defineSynchedData"},
       at = {@At("TAIL")}
    )
    protected void registerData(CallbackInfo ci) {
-      WitchEntity thiz = (WitchEntity)this;
+      Witch thiz = (Witch)this;
       if (Witchskall.WITCHSKALL_TICKS == null) {
-         Witchskall.WITCHSKALL_TICKS = EntityDataManager.func_187226_a(WitchEntity.class, DataSerializers.field_187192_b);
+         Witchskall.WITCHSKALL_TICKS = SynchedEntityData.defineId(Witch.class, EntityDataSerializers.INT);
       }
 
-      thiz.func_184212_Q().func_187214_a(Witchskall.WITCHSKALL_TICKS, -1);
+      thiz.getEntityData().define(Witchskall.WITCHSKALL_TICKS, -1);
       if (Witchskall.IS_WITCHSKALL == null) {
-         Witchskall.IS_WITCHSKALL = EntityDataManager.func_187226_a(WitchEntity.class, DataSerializers.field_187198_h);
+         Witchskall.IS_WITCHSKALL = SynchedEntityData.defineId(Witch.class, EntityDataSerializers.BOOLEAN);
       }
 
-      thiz.func_184212_Q().func_187214_a(Witchskall.IS_WITCHSKALL, false);
+      thiz.getEntityData().define(Witchskall.IS_WITCHSKALL, false);
    }
 
    @Inject(
@@ -38,7 +38,7 @@ public abstract class MixinWitchEntity {
       cancellable = true
    )
    protected void getAmbientSound(CallbackInfoReturnable<SoundEvent> ci) {
-      WitchEntity thiz = (WitchEntity)this;
+      Witch thiz = (Witch)this;
       if (Witchskall.isWitchskall(thiz)) {
          ci.setReturnValue(ModSounds.WITCHSKALL_IDLE);
       }

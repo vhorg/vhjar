@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "msm",
+    "sms",
+    "msm"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:knowledge_star_shard"
+    },
+    "m": {
+      "item": "the_vault:memory_crystal"
+    }
+  },
+  "result": {
+    "item": "the_vault:sublime_vault_vision",
+    "count": 1
+  }
+}

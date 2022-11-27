@@ -1,11 +1,11 @@
 package iskallia.vault.world.vault.time.extension;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.vault.time.VaultTimer;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class WinExtension extends TimeExtension {
-   public static final ResourceLocation ID = Vault.id("win");
+   public static final ResourceLocation ID = VaultMod.id("win");
 
    public WinExtension() {
    }

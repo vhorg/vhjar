@@ -1,0 +1,7 @@
+{
+  "parent": "the_vault:block/coins/coin_pile_decor_10",
+  "textures": {
+  	"coin": "the_vault:block/coinpileplatinum",
+	"particle": "the_vault:block/coin_particle_platinum"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ese",
+    "iai",
+    "iii"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "s": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "a": {
+      "item": "minecraft:anvil"
+    },
+    "i": {
+      "item": "the_vault:chromatic_steel_ingot"
+    }
+  },
+  "result": {
+    "item": "the_vault:vault_artisan_station",
+    "count": 1
+  }
+}

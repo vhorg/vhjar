@@ -1,114 +1,112 @@
 package iskallia.vault.entity.renderer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import iskallia.vault.Vault;
-import iskallia.vault.entity.TreasureGoblinEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import iskallia.vault.VaultMod;
+import iskallia.vault.entity.entity.TreasureGoblinEntity;
+import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.TreasureGoblinModel;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.LivingRenderer;
-import net.minecraft.client.renderer.entity.model.BipedModel.ArmPose;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.model.HumanoidModel.ArmPose;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.phys.Vec3;
 
-public class TreasureGoblinRenderer extends LivingRenderer<TreasureGoblinEntity, TreasureGoblinModel> {
-   public static final ResourceLocation TREASURE_GOBLIN_TEXTURES = Vault.id("textures/entity/treasure_goblin.png");
+public class TreasureGoblinRenderer extends LivingEntityRenderer<TreasureGoblinEntity, TreasureGoblinModel> {
+   public static final ResourceLocation TREASURE_GOBLIN_TEXTURES = VaultMod.id("textures/entity/treasure_goblin.png");
 
-   public TreasureGoblinRenderer(EntityRendererManager renderManagerIn) {
-      super(renderManagerIn, new TreasureGoblinModel(), 0.5F);
+   public TreasureGoblinRenderer(Context context) {
+      super(context, new TreasureGoblinModel(context.bakeLayer(ModModelLayers.TREASURE_GOBLIN)), 0.5F);
    }
 
-   public ResourceLocation getEntityTexture(TreasureGoblinEntity entity) {
+   public ResourceLocation getTextureLocation(TreasureGoblinEntity entity) {
       return TREASURE_GOBLIN_TEXTURES;
    }
 
-   protected void preRenderCallback(TreasureGoblinEntity entity, MatrixStack matrixStack, float partialTickTime) {
+   protected void scale(TreasureGoblinEntity entity, PoseStack matrixStack, float partialTickTime) {
       float f = 0.75F;
-      matrixStack.func_227862_a_(f, f, f);
+      matrixStack.scale(f, f, f);
    }
 
-   public Vector3d getRenderOffset(TreasureGoblinEntity entityIn, float partialTicks) {
-      return entityIn.func_213453_ef() ? new Vector3d(0.0, -0.125, 0.0) : super.func_225627_b_(entityIn, partialTicks);
+   public Vec3 getRenderOffset(TreasureGoblinEntity entityIn, float partialTicks) {
+      return entityIn.isCrouching() ? new Vec3(0.0, -0.125, 0.0) : super.getRenderOffset(entityIn, partialTicks);
    }
 
-   public void render(TreasureGoblinEntity entity, float entityYaw, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLightIn) {
+   public void render(TreasureGoblinEntity entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLightIn) {
       this.setModelVisibilities(entity);
-      super.func_225623_a_(entity, entityYaw, partialTicks, matrixStack, buffer, packedLightIn);
+      super.render(entity, entityYaw, partialTicks, matrixStack, buffer, packedLightIn);
    }
 
-   protected void renderName(
-      TreasureGoblinEntity entityIn, ITextComponent displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn
-   ) {
+   protected void renderNameTag(TreasureGoblinEntity entityIn, Component displayNameIn, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn) {
    }
 
-   protected boolean canRenderName(TreasureGoblinEntity entity) {
+   protected boolean shouldShowName(TreasureGoblinEntity entity) {
       return false;
    }
 
    private void setModelVisibilities(TreasureGoblinEntity entity) {
-      TreasureGoblinModel model = (TreasureGoblinModel)this.func_217764_d();
-      if (entity.func_175149_v()) {
-         model.func_178719_a(false);
-         model.field_78116_c.field_78806_j = true;
-         model.field_178720_f.field_78806_j = true;
+      TreasureGoblinModel model = (TreasureGoblinModel)this.getModel();
+      if (entity.isSpectator()) {
+         model.setAllVisible(false);
+         model.head.visible = true;
+         model.hat.visible = true;
       } else {
-         model.func_178719_a(true);
-         model.field_228270_o_ = entity.func_213453_ef();
-         ArmPose bipedmodel$armpose = func_241741_a_(entity, Hand.MAIN_HAND);
-         ArmPose bipedmodel$armpose1 = func_241741_a_(entity, Hand.OFF_HAND);
-         if (bipedmodel$armpose.func_241657_a_()) {
-            bipedmodel$armpose1 = entity.func_184592_cb().func_190926_b() ? ArmPose.EMPTY : ArmPose.ITEM;
+         model.setAllVisible(true);
+         model.crouching = entity.isCrouching();
+         ArmPose bipedmodel$armpose = getArmPose(entity, InteractionHand.MAIN_HAND);
+         ArmPose bipedmodel$armpose1 = getArmPose(entity, InteractionHand.OFF_HAND);
+         if (bipedmodel$armpose.isTwoHanded()) {
+            bipedmodel$armpose1 = entity.getOffhandItem().isEmpty() ? ArmPose.EMPTY : ArmPose.ITEM;
          }
 
-         if (entity.func_184591_cq() == HandSide.RIGHT) {
-            model.field_187076_m = bipedmodel$armpose;
-            model.field_187075_l = bipedmodel$armpose1;
+         if (entity.getMainArm() == HumanoidArm.RIGHT) {
+            model.rightArmPose = bipedmodel$armpose;
+            model.leftArmPose = bipedmodel$armpose1;
          } else {
-            model.field_187076_m = bipedmodel$armpose1;
-            model.field_187075_l = bipedmodel$armpose;
+            model.rightArmPose = bipedmodel$armpose1;
+            model.leftArmPose = bipedmodel$armpose;
          }
       }
    }
 
-   private static ArmPose func_241741_a_(TreasureGoblinEntity entity, Hand hand) {
+   private static ArmPose getArmPose(TreasureGoblinEntity entity, InteractionHand hand) {
       return ArmPose.EMPTY;
    }
 
-   protected void applyRotations(TreasureGoblinEntity entityLiving, MatrixStack matrixStack, float ageInTicks, float rotationYaw, float partialTicks) {
-      float f = entityLiving.func_205015_b(partialTicks);
-      if (entityLiving.func_184613_cA()) {
-         super.func_225621_a_(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
-         float f1 = entityLiving.func_184599_cB() + partialTicks;
-         float f2 = MathHelper.func_76131_a(f1 * f1 / 100.0F, 0.0F, 1.0F);
-         if (!entityLiving.func_204805_cN()) {
-            matrixStack.func_227863_a_(Vector3f.field_229179_b_.func_229187_a_(f2 * (-90.0F - entityLiving.field_70125_A)));
+   protected void setupRotations(TreasureGoblinEntity entityLiving, PoseStack matrixStack, float ageInTicks, float rotationYaw, float partialTicks) {
+      float f = entityLiving.getSwimAmount(partialTicks);
+      if (entityLiving.isFallFlying()) {
+         super.setupRotations(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
+         float f1 = entityLiving.getFallFlyingTicks() + partialTicks;
+         float f2 = Mth.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
+         if (!entityLiving.isAutoSpinAttack()) {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(f2 * (-90.0F - entityLiving.getXRot())));
          }
 
-         Vector3d vector3d = entityLiving.func_70676_i(partialTicks);
-         Vector3d vector3d1 = entityLiving.func_213322_ci();
-         double d0 = Entity.func_213296_b(vector3d1);
-         double d1 = Entity.func_213296_b(vector3d);
+         Vec3 vector3d = entityLiving.getViewVector(partialTicks);
+         Vec3 vector3d1 = entityLiving.getDeltaMovement();
+         double d0 = vector3d1.horizontalDistanceSqr();
+         double d1 = vector3d.horizontalDistanceSqr();
          if (d0 > 0.0 && d1 > 0.0) {
-            double d2 = (vector3d1.field_72450_a * vector3d.field_72450_a + vector3d1.field_72449_c * vector3d.field_72449_c) / Math.sqrt(d0 * d1);
-            double d3 = vector3d1.field_72450_a * vector3d.field_72449_c - vector3d1.field_72449_c * vector3d.field_72450_a;
-            matrixStack.func_227863_a_(Vector3f.field_229181_d_.func_229193_c_((float)(Math.signum(d3) * Math.acos(d2))));
+            double d2 = (vector3d1.x * vector3d.x + vector3d1.z * vector3d.z) / Math.sqrt(d0 * d1);
+            double d3 = vector3d1.x * vector3d.z - vector3d1.z * vector3d.x;
+            matrixStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(d3) * Math.acos(d2))));
          }
       } else if (f > 0.0F) {
-         super.func_225621_a_(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
-         float f3 = entityLiving.func_70090_H() ? -90.0F - entityLiving.field_70125_A : -90.0F;
-         float f4 = MathHelper.func_219799_g(f, 0.0F, f3);
-         matrixStack.func_227863_a_(Vector3f.field_229179_b_.func_229187_a_(f4));
-         if (entityLiving.func_213314_bj()) {
-            matrixStack.func_227861_a_(0.0, -1.0, 0.3F);
+         super.setupRotations(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
+         float f3 = entityLiving.isInWater() ? -90.0F - entityLiving.getXRot() : -90.0F;
+         float f4 = Mth.lerp(f, 0.0F, f3);
+         matrixStack.mulPose(Vector3f.XP.rotationDegrees(f4));
+         if (entityLiving.isVisuallySwimming()) {
+            matrixStack.translate(0.0, -1.0, 0.3F);
          }
       } else {
-         super.func_225621_a_(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
+         super.setupRotations(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
       }
    }
 }

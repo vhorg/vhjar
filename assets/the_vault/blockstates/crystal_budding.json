@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "unbreakable=true": {
+      "model": "the_vault:block/crystal_budding"
+    },
+    "unbreakable=false": {
+      "model": "the_vault:block/crystal_budding"
+    }
+  }
+}

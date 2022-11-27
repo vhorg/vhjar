@@ -1,77 +1,88 @@
 package iskallia.vault.mixin;
 
-import iskallia.vault.Vault;
-import iskallia.vault.world.data.VaultRaidData;
-import iskallia.vault.world.vault.VaultRaid;
-import net.minecraft.util.SharedSeedRandom;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.WorldGenRegion;
-import net.minecraft.world.gen.feature.structure.StructureManager;
-import net.minecraft.world.server.ServerWorld;
+import iskallia.vault.core.event.ClientEvents;
+import iskallia.vault.core.event.client.BiomeColorsEvent;
+import java.util.Optional;
+import net.minecraft.world.level.biome.AmbientParticleSettings;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSpecialEffects;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({Biome.class})
 public abstract class MixinBiome {
+   @Shadow
+   @Final
+   private BiomeSpecialEffects specialEffects;
+
+   @Shadow
+   protected abstract int getGrassColorFromTexture();
+
+   @Shadow
+   protected abstract int getFoliageColorFromTexture();
+
    @Inject(
-      method = {"generateFeatures"},
-      at = {@At("HEAD")}
+      method = {"getFogColor"},
+      at = {@At("HEAD")},
+      cancellable = true
    )
-   public void generate(
-      StructureManager structureManager,
-      ChunkGenerator chunkGenerator,
-      WorldGenRegion worldGenRegion,
-      long seed,
-      SharedSeedRandom rand,
-      BlockPos pos,
-      CallbackInfo ci
-   ) {
-      this.generateVault(structureManager, chunkGenerator, worldGenRegion, seed, rand, pos);
+   public void getFogColor(CallbackInfoReturnable<Integer> ci) {
+      int color = this.specialEffects.getFogColor();
+      ci.setReturnValue(ClientEvents.BIOME_COLORS.invoke((Biome)this, 0.0, 0.0, color, BiomeColorsEvent.Type.FOG).getColor());
    }
 
-   private void generateVault(
-      StructureManager structureManager, ChunkGenerator chunkGenerator, WorldGenRegion worldGenRegion, long seed, SharedSeedRandom rand, BlockPos pos
-   ) {
-      ServerWorld world = worldGenRegion.func_201672_e();
-      VaultRaid vault = VaultRaidData.get(world).getAt(world, pos);
-      if (vault != null) {
-         ChunkPos startChunk = vault.getGenerator().getStartChunk();
-         if ((pos.func_177958_n() >> 4 != startChunk.field_77276_a || pos.func_177952_p() >> 4 != startChunk.field_77275_b)
-            && worldGenRegion.func_201672_e().func_72863_F().func_73149_a(startChunk.field_77276_a, startChunk.field_77275_b)) {
-            worldGenRegion.func_201672_e()
-               .func_212866_a_(startChunk.field_77276_a, startChunk.field_77275_b)
-               .func_201609_c()
-               .values()
-               .forEach(
-                  start -> start.func_230366_a_(
-                     worldGenRegion,
-                     structureManager,
-                     chunkGenerator,
-                     rand,
-                     new MutableBoundingBox(pos.func_177958_n(), pos.func_177952_p(), pos.func_177958_n() + 15, pos.func_177952_p() + 15),
-                     new ChunkPos(pos)
-                  )
-               );
-         } else {
-            Vault.LOGGER
-               .error(
-                  "Start chunk at ["
-                     + startChunk.field_77276_a
-                     + ", "
-                     + startChunk.field_77275_b
-                     + "] has no ticket. Failed to generate chunk ["
-                     + (pos.func_177958_n() >> 4)
-                     + ", "
-                     + (pos.func_177952_p() >> 4)
-                     + "]."
-               );
-         }
-      }
+   @Inject(
+      method = {"getGrassColor"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void getGrassColor(double posX, double posZ, CallbackInfoReturnable<Integer> ci) {
+      int i = this.specialEffects.getGrassColorOverride().orElseGet(this::getGrassColorFromTexture);
+      int color = this.specialEffects.getGrassColorModifier().modifyColor(posX, posZ, i);
+      ci.setReturnValue(ClientEvents.BIOME_COLORS.invoke((Biome)this, posX, posZ, color, BiomeColorsEvent.Type.GRASS).getColor());
+   }
+
+   @Inject(
+      method = {"getFoliageColor"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void getFoliageColor(CallbackInfoReturnable<Integer> ci) {
+      int color = this.specialEffects.getFoliageColorOverride().orElseGet(this::getFoliageColorFromTexture);
+      ci.setReturnValue(ClientEvents.BIOME_COLORS.invoke((Biome)this, 0.0, 0.0, color, BiomeColorsEvent.Type.FOLIAGE).getColor());
+   }
+
+   @Inject(
+      method = {"getWaterColor"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void getWaterColor(CallbackInfoReturnable<Integer> ci) {
+      int color = this.specialEffects.getWaterColor();
+      ci.setReturnValue(ClientEvents.BIOME_COLORS.invoke((Biome)this, 0.0, 0.0, color, BiomeColorsEvent.Type.WATER).getColor());
+   }
+
+   @Inject(
+      method = {"getWaterFogColor"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void getWaterFogColor(CallbackInfoReturnable<Integer> ci) {
+      int color = this.specialEffects.getWaterFogColor();
+      ci.setReturnValue(ClientEvents.BIOME_COLORS.invoke((Biome)this, 0.0, 0.0, color, BiomeColorsEvent.Type.WATER_FOG).getColor());
+   }
+
+   @Inject(
+      method = {"getAmbientParticle"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void getAmbientParticle(CallbackInfoReturnable<Optional<AmbientParticleSettings>> ci) {
+      AmbientParticleSettings settings = (AmbientParticleSettings)this.specialEffects.getAmbientParticleSettings().orElse(null);
+      ci.setReturnValue(ClientEvents.AMBIENT_PARTICLE.invoke((Biome)this, settings).getSettings());
    }
 }

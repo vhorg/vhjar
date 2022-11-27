@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "the_vault:carbon_nugget"},
+    {"item": "the_vault:carbon_nugget"},
+    {"item": "the_vault:carbon_nugget"},
+    {"item": "the_vault:carbon_nugget"},
+    {"item": "the_vault:carbon_nugget"},
+    {"item": "the_vault:carbon_nugget"},
+    {"item": "the_vault:carbon_nugget"},
+    {"item": "the_vault:carbon_nugget"},
+    {"item": "the_vault:carbon_nugget"}
+  ],
+  "result": {
+    "item": "the_vault:carbon",
+    "count": 1
+  }
+}

@@ -1,10 +1,10 @@
 package iskallia.vault.client.util;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.client.util.color.ColorThief;
-import iskallia.vault.init.ModItems;
-import iskallia.vault.item.gear.VaultGear;
-import iskallia.vault.util.MiscUtils;
+import iskallia.vault.client.util.color.ColorUtil;
+import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.init.ModBlocks;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
@@ -14,11 +14,11 @@ import java.util.Random;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.EmptyModelData;
@@ -33,14 +33,14 @@ public class ColorizationHelper {
 
    @Nonnull
    public static Optional<Color> getColor(ItemStack stack) {
-      if (stack.func_190926_b()) {
+      if (stack.isEmpty()) {
          return Optional.empty();
       } else {
          Optional<Color> override = getCustomColorOverride(stack);
          if (override.isPresent()) {
             return override;
          } else {
-            Item i = stack.func_77973_b();
+            Item i = stack.getItem();
             if (!itemColors.containsKey(i)) {
                TextureAtlasSprite tas = getParticleTexture(stack);
                if (tas != null) {
@@ -50,30 +50,28 @@ public class ColorizationHelper {
                }
             }
 
-            return itemColors.get(i).map(c -> MiscUtils.overlayColor(c, new Color(MiscUtils.getOverlayColor(stack))));
+            return itemColors.get(i).map(c -> ColorUtil.overlayColor(c, new Color(ColorUtil.getOverlayColor(stack))));
          }
       }
    }
 
    public static Optional<Color> getCustomColorOverride(ItemStack stack) {
-      Item i = stack.func_77973_b();
-      if (i == ModItems.VAULT_PLATINUM) {
+      Item i = stack.getItem();
+      if (i == ModBlocks.VAULT_PLATINUM) {
          return Optional.of(new Color(16705664));
-      } else if (i == ModItems.BANISHED_SOUL) {
-         return Optional.of(new Color(9972223));
       } else {
-         return i instanceof VaultGear ? Optional.of(Color.getHSBColor(rand.nextFloat(), 1.0F, 1.0F)) : Optional.empty();
+         return i instanceof VaultGearItem ? Optional.of(Color.getHSBColor(rand.nextFloat(), 1.0F, 1.0F)) : Optional.empty();
       }
    }
 
    @Nullable
    private static TextureAtlasSprite getParticleTexture(ItemStack stack) {
-      if (stack.func_190926_b()) {
+      if (stack.isEmpty()) {
          return null;
       } else {
-         ItemModelMesher imm = Minecraft.func_71410_x().func_175599_af().func_175037_a();
-         IBakedModel mdl = imm.func_178089_a(stack);
-         return mdl.equals(imm.func_178083_a().func_174951_a()) ? null : mdl.getParticleTexture(EmptyModelData.INSTANCE);
+         ItemModelShaper imm = Minecraft.getInstance().getItemRenderer().getItemModelShaper();
+         BakedModel mdl = imm.getItemModel(stack);
+         return mdl.equals(imm.getModelManager().getMissingModel()) ? null : mdl.getParticleIcon(EmptyModelData.INSTANCE);
       }
    }
 
@@ -87,7 +85,7 @@ public class ColorizationHelper {
             int color = (dominantColor[0] & 0xFF) << 16 | (dominantColor[1] & 0xFF) << 8 | dominantColor[2] & 0xFF;
             return Optional.of(new Color(color));
          } catch (Exception var4) {
-            Vault.LOGGER.error("Item Colorization Helper: Ignoring non-resolvable image " + tas.func_195668_m().toString());
+            VaultMod.LOGGER.error("Item Colorization Helper: Ignoring non-resolvable image " + tas.getName().toString());
             var4.printStackTrace();
             return Optional.empty();
          }
@@ -96,19 +94,19 @@ public class ColorizationHelper {
 
    @Nullable
    private static BufferedImage extractImage(TextureAtlasSprite tas) {
-      int w = tas.func_94211_a();
-      int h = tas.func_94216_b();
-      int count = tas.func_110970_k();
+      int w = tas.getWidth();
+      int h = tas.getHeight();
+      int count = tas.getFrameCount();
       if (w > 0 && h > 0 && count > 0) {
          BufferedImage bufferedImage = new BufferedImage(w, h * count, 6);
 
          for (int i = 0; i < count; i++) {
-            int[] pxArray = new int[tas.func_94211_a() * tas.func_94216_b()];
+            int[] pxArray = new int[tas.getWidth() * tas.getHeight()];
 
-            for (int xx = 0; xx < tas.func_94211_a(); xx++) {
-               for (int zz = 0; zz < tas.func_94216_b(); zz++) {
-                  int argb = tas.getPixelRGBA(0, xx, zz + i * tas.func_94216_b());
-                  pxArray[zz * tas.func_94211_a() + xx] = argb & -16711936 | (argb & 0xFF0000) >> 16 | (argb & 0xFF) << 16;
+            for (int xx = 0; xx < tas.getWidth(); xx++) {
+               for (int zz = 0; zz < tas.getHeight(); zz++) {
+                  int argb = tas.getPixelRGBA(0, xx, zz + i * tas.getHeight());
+                  pxArray[zz * tas.getWidth() + xx] = argb & -16711936 | (argb & 0xFF0000) >> 16 | (argb & 0xFF) << 16;
                }
             }
 

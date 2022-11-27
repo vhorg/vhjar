@@ -1,35 +1,39 @@
 package iskallia.vault.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import iskallia.vault.init.ModAttributes;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
+import com.google.common.base.Strings;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.world.item.ItemStack;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-public abstract class MixinItemRenderer {
-   private void render(FontRenderer fr, ItemStack stack, int xPosition, int yPosition, String text, CallbackInfo ci) {
-      if (ModAttributes.GEAR_MAX_LEVEL.exists(stack)) {
-         RenderSystem.disableDepthTest();
-         RenderSystem.disableTexture();
-         RenderSystem.disableAlphaTest();
-         RenderSystem.disableBlend();
-         Tessellator tessellator = Tessellator.func_178181_a();
-         BufferBuilder bufferbuilder = tessellator.func_178180_c();
-         float progress = ModAttributes.GEAR_MAX_LEVEL.getOrDefault(stack, 1).getValue(stack).intValue();
-         progress = (progress - ModAttributes.GEAR_LEVEL.getOrDefault(stack, 0.0F).getValue(stack)) / progress;
-         progress = MathHelper.func_76131_a(progress, 0.0F, 1.0F);
-         if (progress != 0.0F && progress != 1.0F) {
-            int i = Math.round(13.0F - progress * 13.0F);
-            int var11 = MathHelper.func_181758_c(Math.max(0.0F, 1.0F - progress) / 3.0F, 1.0F, 1.0F);
-         }
-
-         RenderSystem.enableBlend();
-         RenderSystem.enableAlphaTest();
-         RenderSystem.enableTexture();
-         RenderSystem.enableDepthTest();
+@Mixin({ItemRenderer.class})
+public class MixinItemRenderer {
+   @Inject(
+      method = {"renderGuiItemDecorations(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;IILjava/lang/String;)V"},
+      at = {@At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/client/gui/Font;drawInBatch(Ljava/lang/String;FFIZLcom/mojang/math/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;ZII)I"
+      )},
+      locals = LocalCapture.CAPTURE_FAILSOFT
+   )
+   public void preStackCount(Font font, ItemStack stack, int x, int y, String text, CallbackInfo ci, PoseStack matrixStack) {
+      if (text == null && stack.getCount() >= 1000) {
+         String countStr = String.valueOf(stack.getCount());
+         String countLengthStr = Strings.repeat("8", countStr.length());
+         String comparisonLength = Strings.repeat("8", 3);
+         float width = font.width(countLengthStr);
+         float compareWidth = font.width(comparisonLength);
+         float posX = x + 19 - 2;
+         float posY = y + 6 + 3 + 9;
+         matrixStack.translate(posX, posY, 0.0);
+         float scale = compareWidth / width;
+         matrixStack.scale(scale, scale, 1.0F);
+         matrixStack.translate(-posX, -posY - 1.0F, 0.0);
       }
    }
 }

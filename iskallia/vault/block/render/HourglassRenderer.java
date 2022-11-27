@@ -1,89 +1,73 @@
 package iskallia.vault.block.render;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import iskallia.vault.Vault;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import iskallia.vault.VaultMod;
 import iskallia.vault.block.entity.HourglassTileEntity;
 import iskallia.vault.client.util.RenderTypeDecorator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.AABB;
 
-public class HourglassRenderer extends TileEntityRenderer<HourglassTileEntity> {
-   private static final ResourceLocation SAND_TEXTURE = Vault.id("textures/block/hourglass_sand.png");
-   private static List<AxisAlignedBB> SAND_BOXES = new ArrayList<>();
+public class HourglassRenderer implements BlockEntityRenderer<HourglassTileEntity> {
+   private static final ResourceLocation SAND_TEXTURE = VaultMod.id("textures/block/hourglass_sand.png");
+   private static List<AABB> SAND_BOXES = new ArrayList<>();
    private static final int totalHeight = 28;
 
-   public HourglassRenderer(TileEntityRendererDispatcher terd) {
-      super(terd);
+   public HourglassRenderer(Context context) {
    }
 
-   public void render(HourglassTileEntity te, float partialTicks, MatrixStack renderStack, IRenderTypeBuffer buffers, int combinedLight, int combinedOverlay) {
-      ModelRenderer sandBoxes = this.prepareSandRender(te.getFilledPercentage());
+   public void render(HourglassTileEntity te, float partialTicks, PoseStack renderStack, MultiBufferSource buffers, int combinedLight, int combinedOverlay) {
+      ModelPart sandBoxes = this.prepareSandRender(te.getFilledPercentage());
       RenderType wrapped = RenderTypeDecorator.decorate(
-         RenderType.func_228639_c_(),
-         () -> Minecraft.func_71410_x().func_110434_K().func_110577_a(SAND_TEXTURE),
-         () -> Minecraft.func_71410_x().func_110434_K().func_110577_a(AtlasTexture.field_110575_b)
+         RenderType.solid(),
+         () -> GlStateManager._bindTexture(Minecraft.getInstance().getTextureManager().getTexture(SAND_TEXTURE).getId()),
+         () -> RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_BLOCKS)
       );
-      renderStack.func_227860_a_();
-      renderStack.func_227861_a_(0.01, 0.125, 0.01);
-      renderStack.func_227862_a_(0.98F, 1.0F, 0.98F);
-      IVertexBuilder vb = buffers.getBuffer(wrapped);
-      sandBoxes.func_228308_a_(renderStack, vb, combinedLight, combinedOverlay);
-      renderStack.func_227865_b_();
-      buffers.getBuffer(RenderType.func_228659_m_());
+      RenderType other = RenderType.entitySolid(SAND_TEXTURE);
+      renderStack.pushPose();
+      renderStack.translate(0.01, 0.125, 0.01);
+      renderStack.scale(0.98F, 1.0F, 0.98F);
+      VertexConsumer vb = buffers.getBuffer(wrapped);
+      renderStack.popPose();
+      buffers.getBuffer(RenderType.lines());
    }
 
-   private ModelRenderer prepareSandRender(float percentage) {
-      float heightPart = totalHeight * MathHelper.func_76131_a(percentage, 0.0F, 1.0F);
-      ModelRenderer renderer = new ModelRenderer(16, 16, 0, 0);
+   private ModelPart prepareSandRender(float percentage) {
+      float heightPart = totalHeight * Mth.clamp(percentage, 0.0F, 1.0F);
 
-      for (AxisAlignedBB box : SAND_BOXES) {
-         float ySize = (float)box.func_216360_c();
+      for (AABB box : SAND_BOXES) {
+         float ySize = (float)box.getYsize();
          float remainingHeight = heightPart - ySize;
          if (!(remainingHeight >= 0.0F)) {
             float part = heightPart / ySize;
-            renderer.func_228300_a_(
-               (float)box.field_72340_a,
-               (float)box.field_72338_b,
-               (float)box.field_72339_c,
-               (float)box.func_216364_b(),
-               (float)box.func_216360_c() * part,
-               (float)box.func_216362_d()
-            );
             break;
          }
 
-         renderer.func_228300_a_(
-            (float)box.field_72340_a,
-            (float)box.field_72338_b,
-            (float)box.field_72339_c,
-            (float)box.func_216364_b(),
-            (float)box.func_216360_c(),
-            (float)box.func_216362_d()
-         );
-         heightPart = (float)(heightPart - box.func_216360_c());
+         heightPart = (float)(heightPart - box.getYsize());
       }
 
-      return renderer;
+      return null;
    }
 
    private static void shiftY(float y) {
-      SAND_BOXES = SAND_BOXES.stream().map(box -> box.func_72317_d(0.0, y, 0.0)).collect(Collectors.toList());
+      SAND_BOXES = SAND_BOXES.stream().map(box -> box.move(0.0, y, 0.0)).collect(Collectors.toList());
    }
 
-   private static AxisAlignedBB makeBox(double x, double y, double z, double width, double height, double depth) {
-      return new AxisAlignedBB(x, y, z, x + width, y + height, z + depth);
+   private static AABB makeBox(double x, double y, double z, double width, double height, double depth) {
+      return new AABB(x, y, z, x + width, y + height, z + depth);
    }
 
    static {

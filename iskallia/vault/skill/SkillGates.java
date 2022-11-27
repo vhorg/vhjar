@@ -4,8 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.research.type.Research;
-import iskallia.vault.skill.ability.AbilityGroup;
-import iskallia.vault.skill.talent.ArchetypeTalentGroup;
+import iskallia.vault.skill.ability.group.AbilityGroup;
 import iskallia.vault.skill.talent.TalentGroup;
 import iskallia.vault.skill.talent.TalentTree;
 import java.util.Arrays;
@@ -155,26 +154,28 @@ public class SkillGates {
 
    public boolean isLocked(TalentGroup<?> talent, TalentTree talentTree) {
       SkillGates gates = ModConfigs.SKILL_GATES.getGates();
-      if (talent instanceof ArchetypeTalentGroup
-         && talentTree.getLearnedNodes()
-            .stream()
-            .filter(other -> !other.getGroup().getParentName().equals(talent.getParentName()))
-            .anyMatch(t -> t.getGroup() instanceof ArchetypeTalentGroup)) {
-         return true;
-      } else {
-         for (TalentGroup<?> dependencyTalent : gates.getDependencyTalents(talent.getParentName())) {
-            if (!talentTree.getNodeOf(dependencyTalent).isLearned()) {
-               return true;
-            }
-         }
 
-         for (TalentGroup<?> lockedByTalent : gates.getLockedByTalents(talent.getParentName())) {
-            if (talentTree.getNodeOf(lockedByTalent).isLearned()) {
-               return true;
-            }
+      for (TalentGroup<?> dependencyTalent : gates.getDependencyTalents(talent.getParentName())) {
+         if (!talentTree.getNodeOf(dependencyTalent).isLearned()) {
+            return true;
          }
+      }
 
+      for (TalentGroup<?> lockedByTalent : gates.getLockedByTalents(talent.getParentName())) {
+         if (talentTree.getNodeOf(lockedByTalent).isLearned()) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public boolean shouldDrawArrow(String entryA, String entryB) {
+      SkillGates.Entry entry = this.entries.get(entryA);
+      if (entry == null) {
          return false;
+      } else {
+         return !entry.dependsOn.contains(entryB) && !entry.lockedBy.contains(entryB) ? false : !entry.ignoreArrow;
       }
    }
 
@@ -183,6 +184,8 @@ public class SkillGates {
       private List<String> dependsOn = new LinkedList<>();
       @Expose
       private List<String> lockedBy = new LinkedList<>();
+      @Expose
+      private boolean ignoreArrow;
 
       public void setDependsOn(String... skills) {
          this.dependsOn.addAll(Arrays.asList(skills));

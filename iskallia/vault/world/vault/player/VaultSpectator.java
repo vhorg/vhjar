@@ -1,6 +1,6 @@
 package iskallia.vault.world.vault.player;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.raid.RaidProperties;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.behaviour.VaultBehaviour;
@@ -9,15 +9,15 @@ import iskallia.vault.world.vault.time.VaultTimer;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.GameType;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.GameType;
 
 public class VaultSpectator extends VaultPlayer {
-   public static final ResourceLocation ID = Vault.id("spectator");
+   public static final ResourceLocation ID = VaultMod.id("spectator");
    private VaultRunner delegate = new VaultRunner(null);
-   public GameType oldGameType = GameType.NOT_SET;
+   public GameType oldGameType;
    private boolean initialized = false;
 
    public VaultSpectator() {
@@ -86,12 +86,12 @@ public class VaultSpectator extends VaultPlayer {
    }
 
    @Override
-   public void tick(VaultRaid vault, ServerWorld world) {
+   public void tick(VaultRaid vault, ServerLevel world) {
       if (!this.hasExited()) {
          if (!this.isInitialized()) {
-            this.runIfPresent(world.func_73046_m(), playerEntity -> {
-               this.oldGameType = playerEntity.field_71134_c.func_73081_b();
-               playerEntity.func_71033_a(GameType.SPECTATOR);
+            this.runIfPresent(world.getServer(), playerEntity -> {
+               this.oldGameType = playerEntity.gameMode.getGameModeForPlayer();
+               playerEntity.setGameMode(GameType.SPECTATOR);
                this.setInitialized();
             });
          }
@@ -101,27 +101,27 @@ public class VaultSpectator extends VaultPlayer {
    }
 
    @Override
-   public void tickTimer(VaultRaid vault, ServerWorld world, VaultTimer timer) {
+   public void tickTimer(VaultRaid vault, ServerLevel world, VaultTimer timer) {
    }
 
    @Override
-   public void tickObjectiveUpdates(VaultRaid vault, ServerWorld world) {
+   public void tickObjectiveUpdates(VaultRaid vault, ServerLevel world) {
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = super.serializeNBT();
-      nbt.func_74768_a("OldGameType", this.oldGameType.ordinal());
-      nbt.func_74757_a("Initialized", this.initialized);
-      nbt.func_218657_a("Delegate", this.delegate.serializeNBT());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = super.serializeNBT();
+      nbt.putInt("OldGameType", this.oldGameType.ordinal());
+      nbt.putBoolean("Initialized", this.initialized);
+      nbt.put("Delegate", this.delegate.serializeNBT());
       return nbt;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.oldGameType = GameType.values()[nbt.func_74762_e("OldGameType")];
-      this.initialized = nbt.func_74767_n("Initialized");
-      this.delegate.deserializeNBT(nbt.func_74775_l("Delegate"));
+   public void deserializeNBT(CompoundTag nbt) {
+      this.oldGameType = GameType.values()[nbt.getInt("OldGameType")];
+      this.initialized = nbt.getBoolean("Initialized");
+      this.delegate.deserializeNBT(nbt.getCompound("Delegate"));
       super.deserializeNBT(nbt);
    }
 }

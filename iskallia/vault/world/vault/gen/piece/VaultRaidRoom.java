@@ -1,20 +1,20 @@
 package iskallia.vault.world.vault.gen.piece;
 
-import iskallia.vault.Vault;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.MutableBoundingBox;
+import iskallia.vault.VaultMod;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class VaultRaidRoom extends VaultRoom {
-   public static final ResourceLocation ID = Vault.id("raid_room");
+   public static final ResourceLocation ID = VaultMod.id("raid_room");
    private boolean raidFinished = false;
 
    public VaultRaidRoom() {
       super(ID);
    }
 
-   public VaultRaidRoom(ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
+   public VaultRaidRoom(ResourceLocation template, BoundingBox boundingBox, Rotation rotation) {
       super(ID, template, boundingBox, rotation);
    }
 
@@ -27,15 +27,15 @@ public class VaultRaidRoom extends VaultRoom {
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT tag = super.serializeNBT();
-      tag.func_74757_a("raidFinished", this.raidFinished);
+   public CompoundTag serializeNBT() {
+      CompoundTag tag = super.serializeNBT();
+      tag.putBoolean("raidFinished", this.raidFinished);
       return tag;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       super.deserializeNBT(nbt);
-      this.raidFinished = nbt.func_74767_n("raidFinished");
+      this.raidFinished = nbt.getBoolean("raidFinished");
    }
 }

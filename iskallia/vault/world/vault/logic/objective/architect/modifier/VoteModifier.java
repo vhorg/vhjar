@@ -6,12 +6,12 @@ import iskallia.vault.world.vault.logic.objective.architect.ArchitectObjective;
 import iskallia.vault.world.vault.logic.objective.architect.processor.VaultPieceProcessor;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 
 public class VoteModifier {
    protected static final Random rand = new Random();
@@ -42,13 +42,12 @@ public class VoteModifier {
       return this.voteLockDurationChangeSeconds;
    }
 
-   public ITextComponent getDescription() {
-      return new StringTextComponent(this.getDescriptionText())
-         .func_240703_c_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(Integer.parseInt(this.color))));
+   public Component getDescription() {
+      return new TextComponent(this.getDescriptionText()).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(Integer.parseInt(this.color))));
    }
 
    @Nullable
-   public JigsawPiece getSpecialRoom(ArchitectObjective objective, VaultRaid vault) {
+   public StructurePoolElement getSpecialRoom(ArchitectObjective objective, VaultRaid vault) {
       return null;
    }
 
@@ -57,6 +56,6 @@ public class VoteModifier {
       return null;
    }
 
-   public void onApply(ArchitectObjective objective, VaultRaid vault, ServerWorld world) {
+   public void onApply(ArchitectObjective objective, VaultRaid vault, ServerLevel world) {
    }
 }

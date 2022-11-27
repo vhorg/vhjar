@@ -1,16 +1,16 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.AbilityGroup;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.ability.config.AbilityConfig;
+import iskallia.vault.skill.ability.KeyBehavior;
+import iskallia.vault.skill.ability.group.AbilityGroup;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.function.Supplier;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class AbilityQuickselectMessage {
    private final String abilityName;
@@ -19,31 +19,31 @@ public class AbilityQuickselectMessage {
       this.abilityName = abilityName;
    }
 
-   public static void encode(AbilityQuickselectMessage pkt, PacketBuffer buffer) {
-      buffer.func_180714_a(pkt.abilityName);
+   public static void encode(AbilityQuickselectMessage pkt, FriendlyByteBuf buffer) {
+      buffer.writeUtf(pkt.abilityName);
    }
 
-   public static AbilityQuickselectMessage decode(PacketBuffer buffer) {
-      return new AbilityQuickselectMessage(buffer.func_150789_c(32767));
+   public static AbilityQuickselectMessage decode(FriendlyByteBuf buffer) {
+      return new AbilityQuickselectMessage(buffer.readUtf(32767));
    }
 
    public static void handle(AbilityQuickselectMessage pkt, Supplier<Context> contextSupplier) {
       Context context = contextSupplier.get();
       context.enqueueWork(
          () -> {
-            ServerPlayerEntity sender = context.getSender();
+            ServerPlayer sender = context.getSender();
             if (sender != null) {
                AbilityGroup<?, ?> ability = ModConfigs.ABILITIES.getAbilityGroupByName(pkt.abilityName);
                if (ability != null) {
-                  PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerWorld)sender.field_70170_p);
+                  PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
                   AbilityTree abilityTree = abilitiesData.getAbilities(sender);
                   AbilityNode<?, ?> abilityNode = abilityTree.getNodeOf(ability);
                   if (abilityNode.isLearned()) {
-                     abilityTree.quickSelectAbility(sender.field_71133_b, ability.getParentName());
+                     abilityTree.quickSelectAbility(sender.server, ability.getParentName());
                      if (abilityNode.equals(abilityTree.getSelectedAbility())
-                        && abilityNode.getAbilityConfig().getBehavior() == AbilityConfig.Behavior.RELEASE_TO_PERFORM
+                        && abilityNode.getKeyBehavior() == KeyBehavior.INSTANT_ON_RELEASE
                         && !abilityTree.isOnCooldown(abilityNode)) {
-                        abilityTree.keyUp(sender.field_71133_b);
+                        abilityTree.keyUp(sender.server);
                      }
                   }
                }

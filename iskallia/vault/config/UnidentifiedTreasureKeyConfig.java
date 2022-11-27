@@ -5,7 +5,7 @@ import iskallia.vault.config.entry.vending.ProductEntry;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.data.WeightedList;
 import java.util.Random;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class UnidentifiedTreasureKeyConfig extends Config {
    @Expose
@@ -18,7 +18,7 @@ public class UnidentifiedTreasureKeyConfig extends Config {
 
    public ItemStack getRandomKey(Random random) {
       ProductEntry product = this.treasureKeys.getRandom(random);
-      return product == null ? ItemStack.field_190927_a : product.generateItemStack();
+      return product == null ? ItemStack.EMPTY : product.generateItemStack();
    }
 
    @Override

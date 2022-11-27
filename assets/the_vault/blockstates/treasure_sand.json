@@ -1,0 +1,26 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "the_vault:block/treasure_sand",
+        "weight": 30
+      },
+      {
+        "model": "the_vault:block/treasure_sand_1",
+        "weight": 5
+      },
+      {
+        "model": "the_vault:block/treasure_sand_2",
+        "weight": 5
+      },
+      {
+        "model": "the_vault:block/treasure_sand_3",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/treasure_sand_4",
+        "weight": 5
+      }
+    ]
+  }
+}

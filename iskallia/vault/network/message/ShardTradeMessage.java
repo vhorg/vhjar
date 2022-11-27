@@ -5,10 +5,10 @@ import iskallia.vault.world.data.SoulShardTraderData;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Tuple;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class ShardTradeMessage {
    private final int randomTradeCost;
@@ -41,24 +41,24 @@ public class ShardTradeMessage {
       return this.availableTrades;
    }
 
-   public static void encode(ShardTradeMessage message, PacketBuffer buffer) {
+   public static void encode(ShardTradeMessage message, FriendlyByteBuf buffer) {
       buffer.writeInt(message.randomTradeCost);
       buffer.writeLong(message.seed);
       buffer.writeInt(message.availableTrades.size());
       message.availableTrades.forEach((index, tradeTpl) -> {
          buffer.writeInt(index);
-         buffer.func_150788_a((ItemStack)tradeTpl.func_76341_a());
-         buffer.writeInt((Integer)tradeTpl.func_76340_b());
+         buffer.writeItem((ItemStack)tradeTpl.getA());
+         buffer.writeInt((Integer)tradeTpl.getB());
       });
    }
 
-   public static ShardTradeMessage decode(PacketBuffer buffer) {
+   public static ShardTradeMessage decode(FriendlyByteBuf buffer) {
       ShardTradeMessage message = new ShardTradeMessage(buffer.readInt(), buffer.readLong());
       int trades = buffer.readInt();
 
       for (int i = 0; i < trades; i++) {
          int index = buffer.readInt();
-         ItemStack tradeStack = buffer.func_150791_c();
+         ItemStack tradeStack = buffer.readItem();
          int cost = buffer.readInt();
          message.availableTrades.put(index, new Tuple(tradeStack, cost));
       }

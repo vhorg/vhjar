@@ -1,10 +1,10 @@
 package iskallia.vault.entity.ai;
 
-import iskallia.vault.entity.AggressiveCowEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.vector.Vector3d;
+import iskallia.vault.entity.entity.AggressiveCowEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 public class CowDashAttackGoal extends Goal {
    protected final AggressiveCowEntity entity;
@@ -15,33 +15,33 @@ public class CowDashAttackGoal extends Goal {
       this.dashStrength = 0.4F;
    }
 
-   public boolean func_75250_a() {
-      LivingEntity target = this.entity.func_70638_az();
-      if (!(target instanceof PlayerEntity) || !target.func_70089_S()) {
+   public boolean canUse() {
+      LivingEntity target = this.entity.getTarget();
+      if (!(target instanceof Player) || !target.isAlive()) {
          return false;
       } else if (!this.entity.canDash()) {
          return false;
       } else {
-         double dist = this.entity.func_70092_e(target.func_226277_ct_(), target.func_226278_cu_(), target.func_226281_cx_());
-         double attackReach = this.entity.func_213311_cf() * 2.0F * this.entity.func_213311_cf() * 2.0F + target.func_213311_cf();
+         double dist = this.entity.distanceToSqr(target.getX(), target.getY(), target.getZ());
+         double attackReach = this.entity.getBbWidth() * 2.0F * this.entity.getBbWidth() * 2.0F + target.getBbWidth();
          return dist >= attackReach * 4.0 && dist <= attackReach * 16.0;
       }
    }
 
-   public boolean func_75253_b() {
+   public boolean canContinueToUse() {
       return false;
    }
 
-   public void func_75246_d() {
-      LivingEntity target = this.entity.func_70638_az();
-      if (target instanceof PlayerEntity && target.func_70089_S()) {
-         Vector3d dir = target.func_174824_e(1.0F).func_178788_d(this.entity.func_213303_ch());
-         dir = dir.func_216372_d(this.dashStrength, this.dashStrength, this.dashStrength);
-         if (dir.func_82617_b() <= 0.4) {
-            dir = new Vector3d(dir.func_82615_a(), 0.4, dir.func_82616_c());
+   public void tick() {
+      LivingEntity target = this.entity.getTarget();
+      if (target instanceof Player && target.isAlive()) {
+         Vec3 dir = target.getEyePosition(1.0F).subtract(this.entity.position());
+         dir = dir.multiply(this.dashStrength, this.dashStrength, this.dashStrength);
+         if (dir.y() <= 0.4) {
+            dir = new Vec3(dir.x(), 0.4, dir.z());
          }
 
-         this.entity.func_70024_g(dir.field_72450_a, dir.field_72448_b, dir.field_72449_c);
+         this.entity.push(dir.x, dir.y, dir.z);
          this.entity.onDash();
       }
    }

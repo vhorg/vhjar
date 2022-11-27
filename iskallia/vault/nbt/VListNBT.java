@@ -10,13 +10,13 @@ import java.util.ListIterator;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class VListNBT<T, N extends INBT> implements INBTSerializable<ListNBT>, List<T> {
+public class VListNBT<T, N extends Tag> implements INBTSerializable<ListTag>, List<T> {
    private List<T> delegate;
    private final Function<T, N> write;
    private final Function<N, T> read;
@@ -31,15 +31,15 @@ public class VListNBT<T, N extends INBT> implements INBTSerializable<ListNBT>, L
       this(new ArrayList<>(), write, read);
    }
 
-   public ListNBT serializeNBT() {
-      ListNBT nbt = new ListNBT();
+   public ListTag serializeNBT() {
+      ListTag nbt = new ListTag();
       this.delegate.forEach(value -> nbt.add(this.write.apply((T)value)));
       return nbt;
    }
 
-   public void deserializeNBT(ListNBT nbt) {
+   public void deserializeNBT(ListTag nbt) {
       this.delegate.clear();
-      nbt.stream().map(tag -> (INBT)tag).forEach(entry -> this.add(this.read.apply((N)entry)));
+      nbt.stream().map(tag -> (Tag)tag).forEach(entry -> this.add(this.read.apply((N)entry)));
    }
 
    @Override
@@ -157,15 +157,15 @@ public class VListNBT<T, N extends INBT> implements INBTSerializable<ListNBT>, L
       return this.delegate.subList(fromIndex, toIndex);
    }
 
-   public static <T extends INBTSerializable<N>, N extends INBT> VListNBT<T, N> of(Function<N, T> read) {
+   public static <T extends INBTSerializable<N>, N extends Tag> VListNBT<T, N> of(Function<N, T> read) {
       return new VListNBT<>(INBTSerializable::serializeNBT, read);
    }
 
-   public static <T extends INBTSerializable<N>, N extends INBT> VListNBT<T, N> of(List<T> list, Function<N, T> read) {
+   public static <T extends INBTSerializable<N>, N extends Tag> VListNBT<T, N> of(List<T> list, Function<N, T> read) {
       return new VListNBT<>(list, INBTSerializable::serializeNBT, read);
    }
 
-   public static <T extends INBTSerializable<N>, N extends INBT> VListNBT<T, N> of(Supplier<T> supplier) {
+   public static <T extends INBTSerializable<N>, N extends Tag> VListNBT<T, N> of(Supplier<T> supplier) {
       return new VListNBT<>(INBTSerializable::serializeNBT, n -> {
          T value = supplier.get();
          value.deserializeNBT(n);
@@ -173,15 +173,15 @@ public class VListNBT<T, N extends INBT> implements INBTSerializable<ListNBT>, L
       });
    }
 
-   public static VListNBT<UUID, StringNBT> ofUUID() {
-      return new VListNBT<>(uuid -> (N)StringNBT.func_229705_a_(uuid.toString()), stringNBT -> UUID.fromString(stringNBT.func_150285_a_()));
+   public static VListNBT<UUID, StringTag> ofUUID() {
+      return new VListNBT<>(uuid -> (N)StringTag.valueOf(uuid.toString()), stringNBT -> UUID.fromString(stringNBT.getAsString()));
    }
 
-   public static <T> VListNBT<T, CompoundNBT> ofCodec(Codec<T> codec, T defaultValue) {
+   public static <T> VListNBT<T, CompoundTag> ofCodec(Codec<T> codec, T defaultValue) {
       return new VListNBT<>(value -> {
-         CompoundNBT tag = new CompoundNBT();
-         tag.func_218657_a("data", CodecUtils.writeNBT(codec, value));
+         CompoundTag tag = new CompoundTag();
+         tag.put("data", CodecUtils.writeNBT(codec, value));
          return (N)tag;
-      }, tag -> CodecUtils.<T>readNBT(codec, tag.func_74781_a("data")).orElse(defaultValue));
+      }, tag -> CodecUtils.<T>readNBT(codec, tag.get("data")).orElse(defaultValue));
    }
 }

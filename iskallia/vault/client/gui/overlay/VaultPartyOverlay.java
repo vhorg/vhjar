@@ -1,182 +1,184 @@
 package iskallia.vault.client.gui.overlay;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.client.ClientActiveEternalData;
 import iskallia.vault.client.ClientPartyData;
 import iskallia.vault.client.gui.helper.FontHelper;
-import iskallia.vault.client.util.ShaderUtil;
 import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.entity.eternal.ActiveEternalData;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModShaders;
 import iskallia.vault.world.data.VaultPartyData;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.network.play.ClientPlayNetHandler;
-import net.minecraft.client.network.play.NetworkPlayerInfo;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.resources.DefaultPlayerSkin;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
-import net.minecraftforge.client.event.RenderGameOverlayEvent.Post;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.lwjgl.opengl.ARBShaderObjects;
+import net.minecraftforge.client.gui.ForgeIngameGui;
+import net.minecraftforge.client.gui.IIngameOverlay;
 
 @OnlyIn(Dist.CLIENT)
-public class VaultPartyOverlay {
-   public static final ResourceLocation VAULT_HUD_SPRITE = new ResourceLocation("the_vault", "textures/gui/vault-hud.png");
+public class VaultPartyOverlay implements IIngameOverlay {
+   public static final ResourceLocation VAULT_HUD_SPRITE = new ResourceLocation("the_vault", "textures/gui/vault_hud.png");
 
-   @SubscribeEvent
-   public static void renderSidebarHUD(Post event) {
-      if (event.getType() == ElementType.HOTBAR) {
-         Minecraft mc = Minecraft.func_71410_x();
-         ClientPlayerEntity player = mc.field_71439_g;
-         if (player != null) {
-            MatrixStack matrixStack = event.getMatrixStack();
-            int bottom = mc.func_228018_at_().func_198087_p();
-            int right = mc.func_228018_at_().func_198107_o();
-            float offsetY = Math.max(bottom / 3.0F, 45.0F);
-            offsetY += renderPartyHUD(matrixStack, offsetY, right);
-            offsetY += renderEternalHUD(matrixStack, offsetY, right);
-            mc.func_110434_K().func_110577_a(AbstractGui.field_230665_h_);
-         }
+   public void render(ForgeIngameGui gui, PoseStack matrixStack, float partialTick, int width, int height) {
+      Minecraft mc = Minecraft.getInstance();
+      LocalPlayer player = mc.player;
+      if (player != null) {
+         float offsetY = Math.max(height / 3.0F, 45.0F);
+         offsetY += renderPartyHUD(matrixStack, offsetY, width);
+         offsetY += renderEternalHUD(matrixStack, offsetY, width);
+         RenderSystem.setShader(GameRenderer::getPositionTexShader);
+         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+         RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
       }
    }
 
-   private static int renderEternalHUD(MatrixStack matrixStack, float offsetY, int right) {
+   private static int renderEternalHUD(PoseStack matrixStack, float offsetY, int right) {
       Set<ActiveEternalData.ActiveEternal> eternals = ClientActiveEternalData.getActiveEternals();
       if (eternals.isEmpty()) {
          return 0;
       } else {
          int height = 0;
-         matrixStack.func_227860_a_();
-         matrixStack.func_227861_a_(right - 5, offsetY, 0.0);
-         matrixStack.func_227860_a_();
-         matrixStack.func_227862_a_(0.8F, 0.8F, 1.0F);
-         ITextComponent vpText = new StringTextComponent("Eternals").func_240699_a_(TextFormatting.GOLD);
+         matrixStack.pushPose();
+         matrixStack.translate(right - 5, offsetY, 0.0);
+         matrixStack.pushPose();
+         matrixStack.scale(0.8F, 0.8F, 1.0F);
+         Component vpText = new TextComponent("Eternals").withStyle(ChatFormatting.GOLD);
          FontHelper.drawTextComponent(matrixStack, vpText, true);
-         matrixStack.func_227865_b_();
+         matrixStack.popPose();
          height += 8;
-         matrixStack.func_227861_a_(0.0, 8.0, -50.0);
-         matrixStack.func_227862_a_(0.7F, 0.7F, 1.0F);
+         matrixStack.translate(0.0, 8.0, -50.0);
+         matrixStack.scale(0.7F, 0.7F, 1.0F);
 
          for (ActiveEternalData.ActiveEternal eternal : eternals) {
             int eternalHeight = renderEternalSection(matrixStack, eternal) + 4;
-            matrixStack.func_227861_a_(0.0, eternalHeight, 0.0);
+            matrixStack.translate(0.0, eternalHeight, 0.0);
             height = (int)(height + eternalHeight * 0.7F);
          }
 
-         matrixStack.func_227865_b_();
+         matrixStack.popPose();
          return height + 6;
       }
    }
 
-   private static int renderEternalSection(MatrixStack matrixStack, ActiveEternalData.ActiveEternal eternal) {
+   private static int renderEternalSection(PoseStack matrixStack, ActiveEternalData.ActiveEternal eternal) {
       int textSize = 8;
       int headSize = 16;
       int gap = 2;
       boolean dead = eternal.getHealth() <= 0.0F;
       ResourceLocation skin = eternal.getSkin().getLocationSkin();
-      IFormattableTextComponent txt = new StringTextComponent("");
-      matrixStack.func_227860_a_();
-      matrixStack.func_227861_a_(-headSize, 0.0, 0.0);
+      MutableComponent txt = new TextComponent("");
+      matrixStack.pushPose();
+      matrixStack.translate(-headSize, 0.0, 0.0);
       render2DHead(matrixStack, skin, headSize, dead);
-      matrixStack.func_227861_a_(-gap, (headSize - textSize) / 2.0F, 0.0);
+      matrixStack.translate(-gap, (headSize - textSize) / 2.0F, 0.0);
       if (dead) {
-         txt.func_230529_a_(new StringTextComponent("Unalived").func_240699_a_(TextFormatting.RED));
+         txt.append(new TextComponent("Unalived").withStyle(ChatFormatting.RED));
       } else {
          int heartSize = 9;
          int heartU = 86;
          int heartV = 2;
-         matrixStack.func_227861_a_(-heartSize, 0.0, 0.0);
-         Minecraft.func_71410_x().func_110434_K().func_110577_a(VAULT_HUD_SPRITE);
-         AbstractGui.func_238463_a_(matrixStack, 0, 0, heartU, heartV, heartSize, heartSize, 256, 256);
-         matrixStack.func_227861_a_(-gap, 0.0, 0.0);
-         txt.func_230529_a_(new StringTextComponent((int)eternal.getHealth() + "x").func_240699_a_(TextFormatting.WHITE));
+         matrixStack.translate(-heartSize, 0.0, 0.0);
+         RenderSystem.setShader(GameRenderer::getPositionTexShader);
+         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+         RenderSystem.setShaderTexture(0, VAULT_HUD_SPRITE);
+         GuiComponent.blit(matrixStack, 0, 0, heartU, heartV, heartSize, heartSize, 256, 256);
+         matrixStack.translate(-gap, 0.0, 0.0);
+         txt.append(new TextComponent((int)eternal.getHealth() + "x").withStyle(ChatFormatting.WHITE));
       }
 
       int width = FontHelper.drawTextComponent(matrixStack, txt, true);
       if (eternal.getAbilityName() != null) {
          EternalAuraConfig.AuraConfig cfg = ModConfigs.ETERNAL_AURAS.getByName(eternal.getAbilityName());
          if (cfg != null) {
-            matrixStack.func_227861_a_(-(width + 18), -4.0, 0.0);
-            Minecraft.func_71410_x().func_110434_K().func_110577_a(new ResourceLocation(cfg.getIconPath()));
-            AbstractGui.func_238463_a_(matrixStack, 0, 0, 0.0F, 0.0F, 16, 16, 16, 16);
+            matrixStack.translate(-(width + 18), -4.0, 0.0);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, new ResourceLocation(cfg.getIconPath()));
+            GuiComponent.blit(matrixStack, 0, 0, 0.0F, 0.0F, 16, 16, 16, 16);
          }
       }
 
-      matrixStack.func_227865_b_();
+      matrixStack.popPose();
       return headSize;
    }
 
-   private static int renderPartyHUD(MatrixStack matrixStack, float offsetY, int right) {
-      ClientPlayerEntity player = Minecraft.func_71410_x().field_71439_g;
-      VaultPartyData.Party thisParty = ClientPartyData.getParty(player.func_110124_au());
+   private static int renderPartyHUD(PoseStack matrixStack, float offsetY, int right) {
+      LocalPlayer player = Minecraft.getInstance().player;
+      VaultPartyData.Party thisParty = ClientPartyData.getParty(player.getUUID());
       if (thisParty == null) {
          return 0;
       } else {
          int height = 0;
-         matrixStack.func_227860_a_();
-         matrixStack.func_227861_a_(right - 5, offsetY, 0.0);
-         matrixStack.func_227860_a_();
-         matrixStack.func_227862_a_(0.8F, 0.8F, 1.0F);
-         ITextComponent vpText = new StringTextComponent("Vault Party").func_240699_a_(TextFormatting.GREEN);
+         matrixStack.pushPose();
+         matrixStack.translate(right - 5, offsetY, 0.0);
+         matrixStack.pushPose();
+         matrixStack.scale(0.8F, 0.8F, 1.0F);
+         Component vpText = new TextComponent("Vault Party").withStyle(ChatFormatting.GREEN);
          FontHelper.drawTextComponent(matrixStack, vpText, true);
-         matrixStack.func_227865_b_();
+         matrixStack.popPose();
          height += 8;
-         matrixStack.func_227861_a_(0.0, 8.0, -50.0);
-         matrixStack.func_227862_a_(0.7F, 0.7F, 1.0F);
-         ClientPlayNetHandler netHandler = Minecraft.func_71410_x().func_147114_u();
+         matrixStack.translate(0.0, 8.0, -50.0);
+         matrixStack.scale(0.7F, 0.7F, 1.0F);
+         ClientPacketListener netHandler = Minecraft.getInstance().getConnection();
          if (netHandler != null) {
             for (UUID uuid : thisParty.getMembers()) {
-               NetworkPlayerInfo info = netHandler.func_175102_a(uuid);
+               PlayerInfo info = netHandler.getPlayerInfo(uuid);
                int playerHeight = renderPartyPlayerSection(matrixStack, thisParty, uuid, info) + 4;
-               matrixStack.func_227861_a_(0.0, playerHeight, 0.0);
+               matrixStack.translate(0.0, playerHeight, 0.0);
                height = (int)(height + playerHeight * 0.7F);
             }
          }
 
-         matrixStack.func_227865_b_();
+         matrixStack.popPose();
          return height + 6;
       }
    }
 
-   private static int renderPartyPlayerSection(MatrixStack matrixStack, VaultPartyData.Party party, UUID playerUUID, NetworkPlayerInfo info) {
+   private static int renderPartyPlayerSection(PoseStack matrixStack, VaultPartyData.Party party, UUID playerUUID, PlayerInfo info) {
       int textSize = 8;
       int headSize = 16;
       int gap = 2;
       boolean offline = info == null;
-      ClientPartyData.PartyMember member = offline ? null : ClientPartyData.getCachedMember(info.func_178845_a().getId());
-      ResourceLocation skin = offline ? DefaultPlayerSkin.func_177335_a() : info.func_178837_g();
+      ClientPartyData.PartyMember member = offline ? null : ClientPartyData.getCachedMember(info.getProfile().getId());
+      ResourceLocation skin = offline ? DefaultPlayerSkin.getDefaultSkin() : info.getSkinLocation();
       String prefix = playerUUID.equals(party.getLeader()) ? "⭐ " : "";
-      IFormattableTextComponent txt = new StringTextComponent(prefix).func_240699_a_(TextFormatting.GOLD);
-      matrixStack.func_227860_a_();
-      matrixStack.func_227861_a_(-headSize, 0.0, 0.0);
+      MutableComponent txt = new TextComponent(prefix).withStyle(ChatFormatting.GOLD);
+      matrixStack.pushPose();
+      matrixStack.translate(-headSize, 0.0, 0.0);
       render2DHead(matrixStack, skin, headSize, offline);
-      matrixStack.func_227861_a_(-gap, (headSize - textSize) / 2.0F, 0.0);
+      matrixStack.translate(-gap, (headSize - textSize) / 2.0F, 0.0);
       if (offline) {
-         txt.func_230529_a_(new StringTextComponent(prefix + "OFFLINE").func_240699_a_(TextFormatting.GRAY));
+         txt.append(new TextComponent(prefix + "OFFLINE").withStyle(ChatFormatting.GRAY));
       } else {
          int heartSize = 9;
          int heartU = 86;
          int heartV = 2;
-         matrixStack.func_227861_a_(-heartSize, 0.0, 0.0);
-         Minecraft.func_71410_x().func_110434_K().func_110577_a(VAULT_HUD_SPRITE);
+         matrixStack.translate(-heartSize, 0.0, 0.0);
+         RenderSystem.setShader(GameRenderer::getPositionTexShader);
+         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+         RenderSystem.setShaderTexture(0, VAULT_HUD_SPRITE);
          ClientPartyData.PartyMember.Status status = member == null ? ClientPartyData.PartyMember.Status.NORMAL : member.status;
-         AbstractGui.func_238463_a_(matrixStack, 0, 0, heartU + getPartyPlayerStatusOffset(status), heartV, heartSize, heartSize, 256, 256);
-         matrixStack.func_227861_a_(-gap, 0.0, 0.0);
-         txt.func_230529_a_(new StringTextComponent(member == null ? "-" : (int)member.healthPts + "x").func_240699_a_(TextFormatting.WHITE));
+         GuiComponent.blit(matrixStack, 0, 0, heartU + getPartyPlayerStatusOffset(status), heartV, heartSize, heartSize, 256, 256);
+         matrixStack.translate(-gap, 0.0, 0.0);
+         txt.append(new TextComponent(member == null ? "-" : (int)member.healthPts + "x").withStyle(ChatFormatting.WHITE));
       }
 
       FontHelper.drawTextComponent(matrixStack, txt, true);
-      matrixStack.func_227865_b_();
+      matrixStack.popPose();
       return headSize;
    }
 
@@ -193,9 +195,10 @@ public class VaultPartyOverlay {
       }
    }
 
-   public static void render2DHead(MatrixStack matrixStack, ResourceLocation skin, int size, boolean grayscaled) {
-      Minecraft minecraft = Minecraft.func_71410_x();
-      minecraft.func_110434_K().func_110577_a(skin);
+   private static void render2DHead(PoseStack matrixStack, ResourceLocation skin, int size, boolean grayscaled) {
+      RenderSystem.setShader(GameRenderer::getPositionTexShader);
+      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+      RenderSystem.setShaderTexture(0, skin);
       int u1 = 8;
       int v1 = 8;
       int u2 = 40;
@@ -203,16 +206,10 @@ public class VaultPartyOverlay {
       int w = 8;
       int h = 8;
       if (grayscaled) {
-         ShaderUtil.useShader(ShaderUtil.GRAYSCALE_SHADER, () -> {
-            int grayScaleFactor = ShaderUtil.getUniformLocation(ShaderUtil.GRAYSCALE_SHADER, "grayFactor");
-            ARBShaderObjects.glUniform1fARB(grayScaleFactor, 0.0F);
-         });
+         ModShaders.getGrayscalePositionTexShader().withGrayscale(0.0F).withBrightness(1.0F).enable();
       }
 
-      AbstractGui.func_238466_a_(matrixStack, 0, 0, size, size, u1, v1, w, h, 64, 64);
-      AbstractGui.func_238466_a_(matrixStack, 0, 0, size, size, u2, v2, w, h, 64, 64);
-      if (grayscaled) {
-         ShaderUtil.releaseShader();
-      }
+      GuiComponent.blit(matrixStack, 0, 0, size, size, u1, v1, w, h, 64, 64);
+      GuiComponent.blit(matrixStack, 0, 0, size, size, u2, v2, w, h, 64, 64);
    }
 }

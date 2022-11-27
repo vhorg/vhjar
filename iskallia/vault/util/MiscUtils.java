@@ -2,19 +2,24 @@ package iskallia.vault.util;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import iskallia.vault.client.ClientTalentData;
+import iskallia.vault.core.data.key.FieldKey;
+import iskallia.vault.core.vault.ClientVaults;
+import iskallia.vault.core.vault.Vault;
+import iskallia.vault.integration.IntegrationCurios;
+import iskallia.vault.skill.talent.Talent;
 import iskallia.vault.skill.talent.TalentGroup;
 import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.skill.talent.type.PlayerTalent;
 import iskallia.vault.world.data.PlayerTalentsData;
-import java.awt.Color;
+import iskallia.vault.world.data.ServerVaults;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D.Float;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -22,42 +27,33 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.RepairContainer;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.IWorldReader;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayer;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class MiscUtils {
    private static final Random rand = new Random();
@@ -78,16 +74,17 @@ public class MiscUtils {
       return new Float(r.x + r.width / 2.0F, r.y + r.height / 2.0F);
    }
 
-   public static <T extends PlayerTalent> Optional<TalentNode<T>> getTalent(PlayerEntity player, TalentGroup<T> talentGroup) {
-      if (player instanceof ServerPlayerEntity) {
-         TalentTree talents = PlayerTalentsData.get(((ServerPlayerEntity)player).func_71121_q()).getTalents(player);
-         return Optional.of(talents.getNodeOf(talentGroup));
+   public static <T extends Talent> Optional<TalentNode<T>> getTalent(Player player, TalentGroup<T> talentGroup) {
+      if (player instanceof ServerPlayer) {
+         TalentTree talents = PlayerTalentsData.get(((ServerPlayer)player).getLevel()).getTalents(player);
+         TalentNode<T> node = talents.getNodeOf(talentGroup);
+         return node.isLearned() ? Optional.of(node) : Optional.empty();
       } else {
          return Optional.ofNullable(ClientTalentData.getLearnedTalentNode(talentGroup));
       }
    }
 
-   public static boolean hasEmptySlot(IInventory inventory) {
+   public static boolean hasEmptySlot(Container inventory) {
       return getRandomEmptySlot(inventory) != -1;
    }
 
@@ -95,7 +92,7 @@ public class MiscUtils {
       return getRandomEmptySlot(inventory) != -1;
    }
 
-   public static int getRandomEmptySlot(IInventory inventory) {
+   public static int getRandomEmptySlot(Container inventory) {
       return getRandomEmptySlot(new InvWrapper(inventory));
    }
 
@@ -103,7 +100,7 @@ public class MiscUtils {
       List<Integer> slots = new ArrayList<>();
 
       for (int slot = 0; slot < handler.getSlots(); slot++) {
-         if (handler.getStackInSlot(slot).func_190926_b()) {
+         if (handler.getStackInSlot(slot).isEmpty()) {
             slots.add(slot);
          }
       }
@@ -121,22 +118,21 @@ public class MiscUtils {
       return slots.isEmpty() ? -1 : getRandomEntry(slots, rand);
    }
 
-   public static List<Integer> getEmptySlots(IInventory inventory) {
+   public static List<Integer> getEmptySlots(Container inventory) {
       List<Integer> list = Lists.newArrayList();
 
-      for (int i = 0; i < inventory.func_70302_i_(); i++) {
-         if (inventory.func_70301_a(i).func_190926_b()) {
+      for (int i = 0; i < inventory.getContainerSize(); i++) {
+         if (inventory.getItem(i).isEmpty()) {
             list.add(i);
          }
       }
 
-      Collections.shuffle(list, rand);
       return list;
    }
 
-   public static boolean inventoryContains(IInventory inventory, Predicate<ItemStack> filter) {
-      for (int slot = 0; slot < inventory.func_70302_i_(); slot++) {
-         if (filter.test(inventory.func_70301_a(slot))) {
+   public static boolean inventoryContains(Container inventory, Predicate<ItemStack> filter) {
+      for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+         if (filter.test(inventory.getItem(slot))) {
             return true;
          }
       }
@@ -159,10 +155,10 @@ public class MiscUtils {
 
       label29:
       for (ItemStack stack : stacks) {
-         if (!stack.func_190926_b()) {
+         if (!stack.isEmpty()) {
             for (ItemStack existing : out) {
                if (canMerge(existing, stack)) {
-                  existing.func_190920_e(existing.func_190916_E() + stack.func_190916_E());
+                  existing.setCount(existing.getCount() + stack.getCount());
                   continue label29;
                }
             }
@@ -178,14 +174,14 @@ public class MiscUtils {
       List<ItemStack> out = new ArrayList<>();
 
       for (ItemStack stack : stacks) {
-         if (!stack.func_190926_b()) {
-            int i = stack.func_190916_E();
+         if (!stack.isEmpty()) {
+            int i = stack.getCount();
 
             while (i > 0) {
-               int newCount = Math.min(i, stack.func_77976_d());
+               int newCount = Math.min(i, stack.getMaxStackSize());
                i -= newCount;
-               ItemStack copy = stack.func_77946_l();
-               copy.func_190920_e(newCount);
+               ItemStack copy = stack.copy();
+               copy.setCount(newCount);
                out.add(copy);
             }
          }
@@ -195,14 +191,99 @@ public class MiscUtils {
    }
 
    public static boolean canMerge(ItemStack stack, ItemStack other) {
-      return stack.func_77973_b() == other.func_77973_b() && ItemStack.func_77970_a(stack, other);
+      return stack.getItem() == other.getItem() && ItemStack.tagMatches(stack, other);
    }
 
-   public static boolean addItemStack(IInventory inventory, ItemStack stack) {
-      for (int slot = 0; slot < inventory.func_70302_i_(); slot++) {
-         ItemStack contained = inventory.func_70301_a(slot);
-         if (contained.func_190926_b()) {
-            inventory.func_70299_a(slot, stack);
+   public static boolean canFullyMergeIntoSlot(Container inventory, int slot, ItemStack stack) {
+      if (stack.isEmpty()) {
+         return true;
+      } else {
+         ItemStack existing = inventory.getItem(slot);
+         if (existing.isEmpty()) {
+            return inventory.getMaxStackSize() >= stack.getCount();
+         } else {
+            return !canMerge(existing, stack) ? false : inventory.getMaxStackSize() >= existing.getCount() + stack.getCount();
+         }
+      }
+   }
+
+   public static boolean mergeIntoInventory(Container inventory, ItemStack toAdd) {
+      if (toAdd.isEmpty()) {
+         return true;
+      } else {
+         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            if (!stack.isEmpty()) {
+               if (canMerge(stack, toAdd)) {
+                  int maxToAdd = Math.min(Math.min(stack.getMaxStackSize(), inventory.getMaxStackSize()) - stack.getCount(), toAdd.getCount());
+                  if (maxToAdd > 0) {
+                     toAdd.shrink(maxToAdd);
+                     stack.grow(maxToAdd);
+                  }
+               }
+
+               if (toAdd.isEmpty()) {
+                  return true;
+               }
+            }
+         }
+
+         int maxStackSize = Math.min(toAdd.getMaxStackSize(), inventory.getMaxStackSize());
+
+         for (int emptySlotId : getEmptySlots(inventory)) {
+            inventory.setItem(emptySlotId, toAdd.split(maxStackSize));
+            if (toAdd.isEmpty()) {
+               return true;
+            }
+         }
+
+         return false;
+      }
+   }
+
+   public static boolean canMergeIntoInventory(Container inventory, ItemStack toAdd) {
+      if (toAdd.isEmpty()) {
+         return true;
+      } else {
+         int toMerge = toAdd.getCount();
+
+         for (int i = 0; i < inventory.getContainerSize(); i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.isEmpty() && canMerge(stack, toAdd)) {
+               int maxToAdd = Math.min(stack.getMaxStackSize() - stack.getCount(), toMerge);
+               if (maxToAdd > 0) {
+                  toMerge -= maxToAdd;
+               }
+            }
+         }
+
+         if (toMerge <= 0) {
+            return true;
+         } else {
+            int maxStackSize = Math.min(toAdd.getMaxStackSize(), inventory.getMaxStackSize());
+            return getEmptySlots(inventory).size() * maxStackSize >= toMerge;
+         }
+      }
+   }
+
+   public static void addStackToSlot(Container inventory, int slot, ItemStack toAdd) {
+      if (!toAdd.isEmpty()) {
+         ItemStack stack = inventory.getItem(slot);
+         if (stack.isEmpty()) {
+            inventory.setItem(slot, toAdd.copy());
+         } else {
+            if (canMerge(stack, toAdd)) {
+               stack.grow(toAdd.getCount());
+            }
+         }
+      }
+   }
+
+   public static boolean addItemStack(Container inventory, ItemStack stack) {
+      for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+         ItemStack contained = inventory.getItem(slot);
+         if (contained.isEmpty()) {
+            inventory.setItem(slot, stack);
             return true;
          }
       }
@@ -212,61 +293,67 @@ public class MiscUtils {
 
    public static <T extends Enum<T>> T getEnumEntry(Class<T> enumClass, int index) {
       T[] constants = (T[])enumClass.getEnumConstants();
-      return constants[MathHelper.func_76125_a(index, 0, constants.length - 1)];
+      return constants[Mth.clamp(index, 0, constants.length - 1)];
    }
 
-   public static Optional<BlockPos> getEmptyNearby(IWorldReader world, BlockPos pos) {
-      return BlockPos.func_239584_a_(pos, 8, 8, world::func_175623_d);
+   public static Optional<BlockPos> getEmptyNearby(LevelReader world, BlockPos pos) {
+      return BlockPos.findClosestMatch(pos, 8, 8, world::isEmptyBlock);
    }
 
-   public static BlockPos getRandomPos(MutableBoundingBox box, Random r) {
-      return getRandomPos(AxisAlignedBB.func_216363_a(box), r);
+   public static BlockPos getRandomPos(BoundingBox box, Random r) {
+      return getRandomPos(AABB.of(box), r);
    }
 
-   public static BlockPos getRandomPos(AxisAlignedBB box, Random r) {
-      int sizeX = Math.max(1, MathHelper.func_76128_c(box.func_216364_b()));
-      int sizeY = Math.max(1, MathHelper.func_76128_c(box.func_216360_c()));
-      int sizeZ = Math.max(1, MathHelper.func_76128_c(box.func_216362_d()));
-      return new BlockPos(box.field_72340_a + r.nextInt(sizeX), box.field_72338_b + r.nextInt(sizeY), box.field_72339_c + r.nextInt(sizeZ));
+   public static BlockPos getRandomPos(AABB box, Random r) {
+      int sizeX = Math.max(1, Mth.floor(box.getXsize()));
+      int sizeY = Math.max(1, Mth.floor(box.getYsize()));
+      int sizeZ = Math.max(1, Mth.floor(box.getZsize()));
+      return new BlockPos(box.minX + r.nextInt(sizeX), box.minY + r.nextInt(sizeY), box.minZ + r.nextInt(sizeZ));
    }
 
-   public static Vector3d getRandomOffset(AxisAlignedBB box, Random r) {
-      return new Vector3d(
-         box.field_72340_a + r.nextFloat() * (box.field_72336_d - box.field_72340_a),
-         box.field_72338_b + r.nextFloat() * (box.field_72337_e - box.field_72338_b),
-         box.field_72339_c + r.nextFloat() * (box.field_72334_f - box.field_72339_c)
+   public static Vec3 getRandomOffset(AABB box, Random r) {
+      return new Vec3(
+         box.minX + r.nextFloat() * (box.maxX - box.minX), box.minY + r.nextFloat() * (box.maxY - box.minY), box.minZ + r.nextFloat() * (box.maxZ - box.minZ)
       );
    }
 
-   public static Vector3d getRandomOffset(BlockPos pos, Random r) {
-      return new Vector3d(pos.func_177958_n() + r.nextFloat(), pos.func_177956_o() + r.nextFloat(), pos.func_177952_p() + r.nextFloat());
+   public static Vec3 getRandomOffset(BlockPos pos, Random r) {
+      return new Vec3(pos.getX() + r.nextFloat(), pos.getY() + r.nextFloat(), pos.getZ() + r.nextFloat());
    }
 
-   public static Vector3d getRandomOffset(BlockPos pos, Random r, float scale) {
-      float x = pos.func_177958_n() + 0.5F - scale / 2.0F + r.nextFloat() * scale;
-      float y = pos.func_177956_o() + 0.5F - scale / 2.0F + r.nextFloat() * scale;
-      float z = pos.func_177952_p() + 0.5F - scale / 2.0F + r.nextFloat() * scale;
-      return new Vector3d(x, y, z);
+   public static Vec3 getRandomOffset(BlockPos pos, Random r, float scale) {
+      float x = pos.getX() + 0.5F - scale / 2.0F + r.nextFloat() * scale;
+      float y = pos.getY() + 0.5F - scale / 2.0F + r.nextFloat() * scale;
+      float z = pos.getZ() + 0.5F - scale / 2.0F + r.nextFloat() * scale;
+      return new Vec3(x, y, z);
    }
 
-   public static Collection<ChunkPos> getChunksContaining(AxisAlignedBB box) {
-      return getChunksContaining(
-         new Vector3i(box.field_72340_a, box.field_72338_b, box.field_72339_c), new Vector3i(box.field_72336_d, box.field_72337_e, box.field_72334_f)
-      );
+   public static Collection<ChunkPos> getChunksContaining(AABB box) {
+      return getChunksContaining(new Vec3i(box.minX, box.minY, box.minZ), new Vec3i(box.maxX, box.maxY, box.maxZ));
    }
 
-   public static Collection<ChunkPos> getChunksContaining(Vector3i min, Vector3i max) {
+   public static Collection<ChunkPos> getChunksContaining(Vec3i min, Vec3i max) {
       List<ChunkPos> affected = Lists.newArrayList();
-      int maxX = max.func_177958_n() >> 4;
-      int maxZ = max.func_177952_p() >> 4;
+      int maxX = max.getX() >> 4;
+      int maxZ = max.getZ() >> 4;
 
-      for (int chX = min.func_177958_n() >> 4; chX <= maxX; chX++) {
-         for (int chZ = min.func_177952_p() >> 4; chZ <= maxZ; chZ++) {
+      for (int chX = min.getX() >> 4; chX <= maxX; chX++) {
+         for (int chZ = min.getZ() >> 4; chZ <= maxZ; chZ++) {
             affected.add(new ChunkPos(chX, chZ));
          }
       }
 
       return affected;
+   }
+
+   @Nullable
+   public static <T> T getRandomEntry(T... entries) {
+      return getRandomEntry(Lists.newArrayList(entries), rand);
+   }
+
+   @Nullable
+   public static <T> T getRandomEntry(Collection<T> collection) {
+      return getRandomEntry(collection, rand);
    }
 
    @Nullable
@@ -279,75 +366,18 @@ public class MiscUtils {
       }
    }
 
-   public static void broadcast(ITextComponent message) {
-      MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+   public static void broadcast(Component message) {
+      MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
       if (srv != null) {
-         srv.func_184103_al().func_232641_a_(message, ChatType.CHAT, Util.field_240973_b_);
-      }
-   }
-
-   public static Color blendColors(Color color1, Color color2, float color1Ratio) {
-      return new Color(blendColors(color1.getRGB(), color2.getRGB(), color1Ratio), true);
-   }
-
-   public static int blendColors(int color1, int color2, float color1Ratio) {
-      float ratio1 = MathHelper.func_76131_a(color1Ratio, 0.0F, 1.0F);
-      float ratio2 = 1.0F - ratio1;
-      int a1 = (color1 & 0xFF000000) >> 24;
-      int r1 = (color1 & 0xFF0000) >> 16;
-      int g1 = (color1 & 0xFF00) >> 8;
-      int b1 = color1 & 0xFF;
-      int a2 = (color2 & 0xFF000000) >> 24;
-      int r2 = (color2 & 0xFF0000) >> 16;
-      int g2 = (color2 & 0xFF00) >> 8;
-      int b2 = color2 & 0xFF;
-      int a = MathHelper.func_76125_a(Math.round(a1 * ratio1 + a2 * ratio2), 0, 255);
-      int r = MathHelper.func_76125_a(Math.round(r1 * ratio1 + r2 * ratio2), 0, 255);
-      int g = MathHelper.func_76125_a(Math.round(g1 * ratio1 + g2 * ratio2), 0, 255);
-      int b = MathHelper.func_76125_a(Math.round(b1 * ratio1 + b2 * ratio2), 0, 255);
-      return a << 24 | r << 16 | g << 8 | b;
-   }
-
-   public static Color overlayColor(Color base, Color overlay) {
-      return new Color(overlayColor(base.getRGB(), overlay.getRGB()), true);
-   }
-
-   public static int overlayColor(int base, int overlay) {
-      int alpha = (base & 0xFF000000) >> 24;
-      int baseR = (base & 0xFF0000) >> 16;
-      int baseG = (base & 0xFF00) >> 8;
-      int baseB = base & 0xFF;
-      int overlayR = (overlay & 0xFF0000) >> 16;
-      int overlayG = (overlay & 0xFF00) >> 8;
-      int overlayB = overlay & 0xFF;
-      int r = Math.round(baseR * (overlayR / 255.0F)) & 0xFF;
-      int g = Math.round(baseG * (overlayG / 255.0F)) & 0xFF;
-      int b = Math.round(baseB * (overlayB / 255.0F)) & 0xFF;
-      return alpha << 24 | r << 16 | g << 8 | b;
-   }
-
-   @OnlyIn(Dist.CLIENT)
-   public static int getOverlayColor(ItemStack stack) {
-      if (stack.func_190926_b()) {
-         return -1;
-      } else if (stack.func_77973_b() instanceof BlockItem) {
-         Block b = Block.func_149634_a(stack.func_77973_b());
-         if (b == Blocks.field_150350_a) {
-            return -1;
-         } else {
-            BlockState state = b.func_176223_P();
-            return Minecraft.func_71410_x().func_184125_al().func_228054_a_(state, null, null, 0);
-         }
-      } else {
-         return Minecraft.func_71410_x().getItemColors().func_186728_a(stack, 0);
+         srv.getPlayerList().broadcastMessage(message, ChatType.CHAT, Util.NIL_UUID);
       }
    }
 
    @Nullable
-   public static PlayerEntity findPlayerUsingAnvil(ItemStack left, ItemStack right) {
-      for (PlayerEntity player : SidedHelper.getSidedPlayers()) {
-         if (player.field_71070_bA instanceof RepairContainer) {
-            NonNullList<ItemStack> contents = player.field_71070_bA.func_75138_a();
+   public static Player findPlayerUsingAnvil(ItemStack left, ItemStack right) {
+      for (Player player : SidedHelper.getSidedPlayers()) {
+         if (player.containerMenu instanceof AnvilMenu) {
+            NonNullList<ItemStack> contents = player.containerMenu.getItems();
             if (contents.get(0) == left && contents.get(1) == right) {
                return player;
             }
@@ -357,38 +387,55 @@ public class MiscUtils {
       return null;
    }
 
-   public static void fillContainer(Container ct, NonNullList<ItemStack> items) {
-      for (int slot = 0; slot < items.size(); slot++) {
-         ct.func_75141_a(slot, (ItemStack)items.get(slot));
+   public static Optional<Vault> getVault(Player player) {
+      if (!ServerVaults.isInVault(player)) {
+         return Optional.empty();
+      } else {
+         return player.getLevel().isClientSide() ? Optional.ofNullable(ClientVaults.ACTIVE) : ServerVaults.get(player.getLevel());
       }
    }
 
-   public static void giveItem(ServerPlayerEntity player, ItemStack stack) {
-      stack = stack.func_77946_l();
-      if (player.field_71071_by.func_70441_a(stack) && stack.func_190926_b()) {
-         stack.func_190920_e(1);
-         ItemEntity dropped = player.func_71019_a(stack, false);
+   public static <T> Optional<T> getVaultData(Player player, FieldKey<T> key) {
+      return getVault(player).filter(vault -> vault.has(key)).map(vault -> vault.get(key));
+   }
+
+   public static void fillContainer(AbstractContainerMenu ct, NonNullList<ItemStack> items) {
+      for (int slot = 0; slot < items.size(); slot++) {
+         ct.setItem(slot, ct.getStateId(), (ItemStack)items.get(slot));
+      }
+   }
+
+   public static void clearPlayerInventory(Player player) {
+      player.getInventory().clearContent();
+      IntegrationCurios.clearCurios(player);
+   }
+
+   public static void giveItem(ServerPlayer player, ItemStack stack) {
+      stack = stack.copy();
+      if (player.getInventory().add(stack) && stack.isEmpty()) {
+         stack.setCount(1);
+         ItemEntity dropped = player.drop(stack, false);
          if (dropped != null) {
-            dropped.func_174870_v();
+            dropped.makeFakeItem();
          }
 
-         player.field_70170_p
-            .func_184148_a(
+         player.level
+            .playSound(
                null,
-               player.func_226277_ct_(),
-               player.func_226278_cu_(),
-               player.func_226281_cx_(),
-               SoundEvents.field_187638_cR,
-               SoundCategory.PLAYERS,
+               player.getX(),
+               player.getY(),
+               player.getZ(),
+               SoundEvents.ITEM_PICKUP,
+               SoundSource.PLAYERS,
                0.2F,
-               ((player.func_70681_au().nextFloat() - player.func_70681_au().nextFloat()) * 0.7F + 1.0F) * 2.0F
+               ((player.getRandom().nextFloat() - player.getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F
             );
-         player.field_71069_bz.func_75142_b();
+         player.inventoryMenu.broadcastChanges();
       } else {
-         ItemEntity dropped = player.func_71019_a(stack, false);
+         ItemEntity dropped = player.drop(stack, false);
          if (dropped != null) {
-            dropped.func_174868_q();
-            dropped.func_200217_b(player.func_110124_au());
+            dropped.setNoPickUpDelay();
+            dropped.setOwner(player.getUUID());
          }
       }
    }
@@ -399,41 +446,56 @@ public class MiscUtils {
 
    public static Vector3f getCirclePosition(Vector3f centerOffset, Vector3f axis, float radius, float degree) {
       Vector3f circleVec = normalize(perpendicular(axis));
-      circleVec = new Vector3f(circleVec.func_195899_a() * radius, circleVec.func_195900_b() * radius, circleVec.func_195902_c() * radius);
+      circleVec = new Vector3f(circleVec.x() * radius, circleVec.y() * radius, circleVec.z() * radius);
       Quaternion rotQuat = new Quaternion(axis, degree, true);
-      circleVec.func_214905_a(rotQuat);
-      return new Vector3f(
-         circleVec.func_195899_a() + centerOffset.func_195899_a(),
-         circleVec.func_195900_b() + centerOffset.func_195900_b(),
-         circleVec.func_195902_c() + centerOffset.func_195902_c()
-      );
+      circleVec.transform(rotQuat);
+      return new Vector3f(circleVec.x() + centerOffset.x(), circleVec.y() + centerOffset.y(), circleVec.z() + centerOffset.z());
    }
 
    public static Vector3f normalize(Vector3f vec) {
-      float lengthSq = vec.func_195899_a() * vec.func_195899_a() + vec.func_195900_b() * vec.func_195900_b() + vec.func_195902_c() * vec.func_195902_c();
+      float lengthSq = vec.x() * vec.x() + vec.y() * vec.y() + vec.z() * vec.z();
       float length = (float)Math.sqrt(lengthSq);
-      return new Vector3f(vec.func_195899_a() / length, vec.func_195900_b() / length, vec.func_195902_c() / length);
+      return new Vector3f(vec.x() / length, vec.y() / length, vec.z() / length);
    }
 
    public static Vector3f perpendicular(Vector3f vec) {
-      return vec.func_195902_c() == 0.0
-         ? new Vector3f(vec.func_195900_b(), -vec.func_195899_a(), 0.0F)
-         : new Vector3f(0.0F, vec.func_195902_c(), -vec.func_195900_b());
+      return vec.z() == 0.0 ? new Vector3f(vec.y(), -vec.x(), 0.0F) : new Vector3f(0.0F, vec.z(), -vec.y());
    }
 
-   public static boolean isPlayerFakeMP(ServerPlayerEntity player) {
+   public static boolean isPlayerFakeMP(ServerPlayer player) {
       if (player instanceof FakePlayer) {
-         return true;
-      } else if (player.field_71135_a == null) {
          return true;
       } else {
          try {
-            player.func_71114_r().length();
-            player.field_71135_a.field_147371_a.func_74430_c().toString();
-            return !player.field_71135_a.field_147371_a.channel().isOpen();
+            player.getIpAddress().length();
+            player.connection.connection.getRemoteAddress().toString();
+            return !player.connection.connection.channel().isOpen();
          } catch (Exception var2) {
             return true;
          }
       }
+   }
+
+   public static List<TextComponent> splitDescriptionText(String text) {
+      List<TextComponent> tooltip = new ArrayList<>();
+      StringBuilder sb = new StringBuilder();
+
+      for (String word : text.split("\\s+")) {
+         sb.append(word).append(" ");
+         if (sb.length() >= 30) {
+            tooltip.add(new TextComponent(sb.toString().trim()));
+            sb = new StringBuilder();
+         }
+      }
+
+      if (sb.length() > 0) {
+         tooltip.add(new TextComponent(sb.toString().trim()));
+      }
+
+      return tooltip;
+   }
+
+   public static <T> Class<T> cast(Class<?> cls) {
+      return (Class<T>)cls;
    }
 }

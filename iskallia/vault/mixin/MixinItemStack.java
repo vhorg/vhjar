@@ -1,31 +1,33 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.config.DurabilityConfig;
-import iskallia.vault.init.ModAttributes;
+import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.gear.VaultArmorItem;
-import iskallia.vault.item.gear.VaultGear;
-import iskallia.vault.skill.set.PlayerSet;
-import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.skill.talent.type.UnbreakableTalent;
-import iskallia.vault.world.data.PlayerTalentsData;
+import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.item.IConditionalDamageable;
+import iskallia.vault.snapshot.AttributeSnapshot;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(
@@ -34,64 +36,71 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 )
 public abstract class MixinItemStack {
    @Shadow
-   public abstract boolean func_77984_f();
+   public abstract int getMaxDamage();
 
    @Shadow
-   public abstract int func_77952_i();
+   public abstract ItemStack copy();
 
    @Shadow
-   public abstract void func_196085_b(int var1);
+   public abstract Item getItem();
 
    @Shadow
-   public abstract int func_77958_k();
+   public abstract boolean isDamageableItem();
 
    @Shadow
-   public abstract ItemStack func_77946_l();
+   public abstract int getDamageValue();
 
    @Shadow
-   public abstract Item func_77973_b();
+   public abstract void setDamageValue(int var1);
 
    @Overwrite
-   public boolean func_96631_a(int damage, Random rand, @Nullable ServerPlayerEntity damager) {
-      if (!this.func_77984_f()) {
-         return false;
-      } else if (damager != null && this.func_77973_b() instanceof VaultArmorItem && PlayerSet.isActive(VaultGear.Set.ZOD, damager)) {
+   public boolean hurt(int damage, Random rand, @Nullable ServerPlayer damager) {
+      if (!this.isDamageableItem()) {
          return false;
       } else {
          if (damage > 0) {
-            int unbreakingLevel = EnchantmentHelper.func_77506_a(Enchantments.field_185307_s, (ItemStack)this);
-            if (damager != null) {
-               TalentTree abilities = PlayerTalentsData.get(damager.func_71121_q()).getTalents(damager);
-
-               for (UnbreakableTalent talent : abilities.getTalents(UnbreakableTalent.class)) {
-                  unbreakingLevel = (int)(unbreakingLevel + talent.getExtraUnbreaking());
-               }
+            if (this.getItem() instanceof IConditionalDamageable cd && cd.isImmuneToDamage((ItemStack)this, damager)) {
+               return false;
             }
 
-            int damageNegation = 0;
-            boolean isArmor = ((ItemStack)this).func_77973_b() instanceof ArmorItem;
+            int unbreaking = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.UNBREAKING, (ItemStack)this);
+            int durabilityNegation = 0;
+            boolean isArmor = ((ItemStack)this).getItem() instanceof ArmorItem;
             DurabilityConfig cfg = ModConfigs.DURBILITY;
-            float chance = isArmor ? cfg.getArmorDurabilityIgnoreChance(unbreakingLevel) : cfg.getDurabilityIgnoreChance(unbreakingLevel);
+            float chance = isArmor ? cfg.getArmorDurabilityIgnoreChance(unbreaking) : cfg.getDurabilityIgnoreChance(unbreaking);
 
-            for (int k = 0; unbreakingLevel > 0 && k < damage; k++) {
+            for (int k = 0; unbreaking > 0 && k < damage; k++) {
                if (rand.nextFloat() < chance) {
-                  damageNegation++;
+                  durabilityNegation++;
                }
             }
 
-            damage -= damageNegation;
+            int wearReduction = 0;
+            if (damager != null) {
+               AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(damager);
+               float wearReductionChance = snapshot.getAttributeValue(ModGearAttributes.DURABILITY_WEAR_REDUCTION, VaultGearAttributeTypeMerger.floatSum());
+
+               for (int kx = 0; kx < damage; kx++) {
+                  if (rand.nextFloat() < wearReductionChance) {
+                     wearReduction++;
+                  }
+               }
+            }
+
+            damage -= durabilityNegation;
+            damage -= wearReduction;
             if (damage <= 0) {
                return false;
             }
          }
 
          if (damager != null && damage != 0) {
-            CriteriaTriggers.field_193132_s.func_193158_a(damager, (ItemStack)this, this.func_77952_i() + damage);
+            CriteriaTriggers.ITEM_DURABILITY_CHANGED.trigger(damager, (ItemStack)this, this.getDamageValue() + damage);
          }
 
-         int absDamage = this.func_77952_i() + damage;
-         this.func_196085_b(absDamage);
-         return absDamage >= this.func_77958_k();
+         int absDamage = this.getDamageValue() + damage;
+         this.setDamageValue(absDamage);
+         return absDamage >= this.getMaxDamage();
       }
    }
 
@@ -100,16 +109,34 @@ public abstract class MixinItemStack {
       at = {@At("RETURN")},
       cancellable = true
    )
-   public void useGearRarity(CallbackInfoReturnable<ITextComponent> ci) {
-      if (this.func_77973_b() instanceof VaultGear) {
-         ItemStack itemStack = this.func_77946_l();
-         VaultGear.State state = ModAttributes.GEAR_STATE.getOrDefault(itemStack, VaultGear.State.UNIDENTIFIED).getValue(itemStack);
-         VaultGear.Rarity rarity = ModAttributes.GEAR_RARITY.getOrDefault(itemStack, VaultGear.Rarity.COMMON).getValue(itemStack);
-         if (state != VaultGear.State.UNIDENTIFIED) {
-            IFormattableTextComponent returnValue = (IFormattableTextComponent)ci.getReturnValue();
-            Style style = returnValue.func_150256_b().func_240718_a_(rarity.getColor());
-            ci.setReturnValue(returnValue.func_230530_a_(style));
+   public void useGearRarity(CallbackInfoReturnable<Component> ci) {
+      if (this.getItem() instanceof VaultGearItem) {
+         ItemStack itemStack = this.copy();
+         VaultGearData data = VaultGearData.read(itemStack);
+         VaultGearState state = data.getState();
+         if (state != VaultGearState.UNIDENTIFIED) {
+            MutableComponent returnValue = (MutableComponent)ci.getReturnValue();
+            Style style = returnValue.getStyle().withColor(data.getRarity().getColor());
+            ci.setReturnValue(returnValue.setStyle(style));
          }
       }
+   }
+
+   @Redirect(
+      method = {"getTooltipLines"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/item/ItemStack;isDamaged()Z"
+      )
+   )
+   public boolean alwaysShowDamageTooltip(ItemStack stack) {
+      if (stack.getItem() instanceof VaultGearItem) {
+         VaultGearData data = VaultGearData.read(stack);
+         if (data.getState() == VaultGearState.IDENTIFIED) {
+            return true;
+         }
+      }
+
+      return stack.isDamaged();
    }
 }

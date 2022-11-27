@@ -1,26 +1,31 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.item.catalyst.CompoundModifierOutcome;
-import iskallia.vault.item.catalyst.ModifierRollType;
-import iskallia.vault.item.catalyst.SingleModifierOutcome;
+import com.google.gson.annotations.SerializedName;
+import iskallia.vault.VaultMod;
 import iskallia.vault.util.data.WeightedList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.resources.ResourceLocation;
 
 public class VaultCrystalCatalystConfig extends Config {
-   private static final Random rand = new Random();
+   public static final String MODIFIER_POOL_GOOD = "GOOD";
+   public static final String MODIFIER_POOL_BAD = "BAD";
+   public static final String MODIFIER_POOL_CURSE = "CURSE";
    @Expose
-   private final Map<String, VaultCrystalCatalystConfig.TaggedPool> TAGGED_MODIFIER_POOLS = new HashMap<>();
+   @SerializedName("MODIFIER_POOLS")
+   private final Map<String, VaultCrystalCatalystConfig.ModifierPool> MODIFIER_POOLS = new HashMap<>();
    @Expose
-   private final WeightedList<CompoundModifierOutcome> OUTCOMES = new WeightedList<>();
+   @SerializedName("MODIFIER_POOL_GROUPS")
+   private final WeightedList<VaultCrystalCatalystConfig.ModifierPoolGroup> MODIFIER_POOL_GROUPS = new WeightedList<>();
+   private final Map<String, Set<ResourceLocation>> modifierLookupMap = new HashMap<>();
 
    @Override
    public String getName() {
@@ -28,101 +33,144 @@ public class VaultCrystalCatalystConfig extends Config {
    }
 
    @Nullable
-   public CompoundModifierOutcome getModifiers() {
-      return this.OUTCOMES.getRandom(rand);
+   public VaultCrystalCatalystConfig.ModifierPoolGroup getRandomModifierPoolGroup(Random random) {
+      return this.MODIFIER_POOL_GROUPS.getRandom(random);
    }
 
    @Nullable
-   public VaultCrystalCatalystConfig.TaggedPool getPool(String poolName) {
-      return this.TAGGED_MODIFIER_POOLS.get(poolName);
+   public VaultCrystalCatalystConfig.ModifierPool getModifierPoolById(String modifierPoolId) {
+      return this.MODIFIER_POOLS.get(modifierPoolId);
+   }
+
+   public boolean isUnlisted(ResourceLocation resourceLocation) {
+      return this.modifierLookupMap.values().stream().noneMatch(set -> set.contains(resourceLocation));
+   }
+
+   public boolean isGood(ResourceLocation resourceLocation) {
+      return this.modifierPoolHas("GOOD", resourceLocation);
+   }
+
+   public boolean isBad(ResourceLocation resourceLocation) {
+      return this.modifierPoolHas("BAD", resourceLocation);
+   }
+
+   public boolean isCurse(ResourceLocation resourceLocation) {
+      return this.modifierPoolHas("CURSE", resourceLocation);
+   }
+
+   public boolean modifierPoolHas(String modifierPoolId, ResourceLocation resourceLocation) {
+      return this.modifierLookupMap.getOrDefault(modifierPoolId, Collections.emptySet()).contains(resourceLocation);
+   }
+
+   @Override
+   public <T extends Config> T readConfig() {
+      VaultCrystalCatalystConfig config = super.readConfig();
+      config.modifierLookupMap.clear();
+      config.MODIFIER_POOLS.forEach((key, value) -> {
+         Set<ResourceLocation> set = config.modifierLookupMap.computeIfAbsent(key, s -> new HashSet<>());
+         value.modifierIdWeightedList.forEach((resourceLocation, number) -> set.add(resourceLocation));
+      });
+      return (T)config;
    }
 
    @Override
    protected void reset() {
-      this.TAGGED_MODIFIER_POOLS.clear();
-      this.OUTCOMES.clear();
-      this.TAGGED_MODIFIER_POOLS
-         .put(
-            "BAD",
-            new VaultCrystalCatalystConfig.TaggedPool(
-               "negative",
-               15597568,
-               new WeightedList<String>().add("Crowded", 1).add("Fast", 1).add("Rush", 1).add("Hard", 1).add("Unlucky", 1).add("Locked", 1)
-            )
-         );
-      this.TAGGED_MODIFIER_POOLS
+      this.MODIFIER_POOLS.clear();
+      this.MODIFIER_POOL_GROUPS.clear();
+      this.MODIFIER_POOLS
          .put(
             "GOOD",
-            new VaultCrystalCatalystConfig.TaggedPool(
-               "positive", 43520, new WeightedList<String>().add("Lonely", 1).add("Easy", 1).add("Treasure", 1).add("Gilded", 1).add("Hoard", 1)
+            new VaultCrystalCatalystConfig.ModifierPool(
+               new WeightedList<ResourceLocation>()
+                  .add(VaultMod.id("item_rarity"), 1)
+                  .add(VaultMod.id("item_quantity"), 1)
+                  .add(VaultMod.id("soul_hunter"), 1)
+                  .add(VaultMod.id("prismatic"), 1)
+                  .add(VaultMod.id("plentiful"), 1)
+                  .add(VaultMod.id("speedy"), 1)
+                  .add(VaultMod.id("stronk"), 1)
+                  .add(VaultMod.id("extended"), 1)
+                  .add(VaultMod.id("personal_space"), 1)
+                  .add(VaultMod.id("easy"), 1)
+                  .add(VaultMod.id("reinforced"), 1)
             )
          );
-      this.TAGGED_MODIFIER_POOLS
+      this.MODIFIER_POOLS
          .put(
-            "VERY_BAD",
-            new VaultCrystalCatalystConfig.TaggedPool("very negative", 7798784, new WeightedList<String>().add("Chaotic", 1).add("Hard", 1).add("Unlucky", 1))
+            "BAD",
+            new VaultCrystalCatalystConfig.ModifierPool(
+               new WeightedList<ResourceLocation>()
+                  .add(VaultMod.id("draining"), 1)
+                  .add(VaultMod.id("limited"), 1)
+                  .add(VaultMod.id("clumsy"), 1)
+                  .add(VaultMod.id("vulnerable"), 1)
+                  .add(VaultMod.id("inert"), 1)
+                  .add(VaultMod.id("poisonous"), 1)
+                  .add(VaultMod.id("withering"), 1)
+                  .add(VaultMod.id("fatiguing"), 1)
+                  .add(VaultMod.id("freezing"), 1)
+                  .add(VaultMod.id("hunger"), 1)
+                  .add(VaultMod.id("tired"), 1)
+                  .add(VaultMod.id("slowed"), 1)
+                  .add(VaultMod.id("weakened"), 1)
+                  .add(VaultMod.id("chunky_mobs"), 1)
+                  .add(VaultMod.id("furious_mobs"), 1)
+                  .add(VaultMod.id("speedy_mobs"), 1)
+                  .add(VaultMod.id("trapped"), 1)
+                  .add(VaultMod.id("rushed"), 1)
+                  .add(VaultMod.id("crowded"), 1)
+                  .add(VaultMod.id("difficult"), 1)
+                  .add(VaultMod.id("frail"), 1)
+            )
          );
-      this.OUTCOMES.add(new CompoundModifierOutcome().addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_RANDOM_MODIFIER, "GOOD")), 1);
-      this.OUTCOMES
-         .add(
-            new CompoundModifierOutcome()
-               .addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_RANDOM_MODIFIER, "GOOD"))
-               .addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_RANDOM_MODIFIER, "BAD")),
-            1
+      this.MODIFIER_POOLS
+         .put(
+            "CURSE",
+            new VaultCrystalCatalystConfig.ModifierPool(
+               new WeightedList<ResourceLocation>()
+                  .add(VaultMod.id("hunger"), 10)
+                  .add(VaultMod.id("tired"), 3)
+                  .add(VaultMod.id("slowed"), 6)
+                  .add(VaultMod.id("weakened"), 1)
+            )
          );
-      this.OUTCOMES
-         .add(
-            new CompoundModifierOutcome()
-               .addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_RANDOM_MODIFIER, "GOOD"))
-               .addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_SPECIFIC_MODIFIER, "BAD")),
-            1
-         );
-      this.OUTCOMES
-         .add(
-            new CompoundModifierOutcome()
-               .addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_SPECIFIC_MODIFIER, "GOOD"))
-               .addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_RANDOM_MODIFIER, "BAD")),
-            1
-         );
-      this.OUTCOMES
-         .add(
-            new CompoundModifierOutcome()
-               .addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_SPECIFIC_MODIFIER, "GOOD"))
-               .addOutcome(new SingleModifierOutcome(ModifierRollType.ADD_SPECIFIC_MODIFIER, "BAD")),
-            1
-         );
+      this.MODIFIER_POOL_GROUPS.add(new VaultCrystalCatalystConfig.ModifierPoolGroup(List.of("GOOD")), 1);
+      this.MODIFIER_POOL_GROUPS.add(new VaultCrystalCatalystConfig.ModifierPoolGroup(List.of("GOOD", "BAD")), 1);
    }
 
-   public static class TaggedPool {
+   public static class ModifierPool {
       @Expose
-      private final String displayName;
-      @Expose
-      private final int color;
-      @Expose
-      private final WeightedList<String> modifiers;
+      @SerializedName("modifiers")
+      private final WeightedList<ResourceLocation> modifierIdWeightedList;
 
-      public TaggedPool(String displayName, int color, WeightedList<String> modifiers) {
-         this.displayName = displayName;
-         this.color = color;
-         this.modifiers = modifiers;
-      }
-
-      public IFormattableTextComponent getDisplayName() {
-         StringTextComponent cmp = new StringTextComponent(this.displayName);
-         cmp.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(this.color)));
-         return cmp;
+      public ModifierPool(WeightedList<ResourceLocation> modifierIdWeightedList) {
+         this.modifierIdWeightedList = modifierIdWeightedList;
       }
 
       @Nullable
-      public String getModifier(Random random) {
-         return this.getModifier(random, mod -> false);
+      public ResourceLocation getRandomModifier(Random random) {
+         return this.getRandomModifier(random, modifierId -> false);
       }
 
       @Nullable
-      public String getModifier(Random random, Predicate<String> modifierFilter) {
-         WeightedList<String> filteredModifiers = this.modifiers.copy();
+      public ResourceLocation getRandomModifier(Random random, Predicate<ResourceLocation> modifierFilter) {
+         WeightedList<ResourceLocation> filteredModifiers = this.modifierIdWeightedList.copy();
          filteredModifiers.removeIf(entry -> modifierFilter.test(entry.value));
          return filteredModifiers.getRandom(random);
+      }
+   }
+
+   public static class ModifierPoolGroup {
+      @Expose
+      @SerializedName("pools")
+      private final List<String> modifierPoolIdList;
+
+      public ModifierPoolGroup(List<String> modifierPoolIdList) {
+         this.modifierPoolIdList = modifierPoolIdList;
+      }
+
+      public List<String> getModifierPoolIdList() {
+         return this.modifierPoolIdList;
       }
    }
 }

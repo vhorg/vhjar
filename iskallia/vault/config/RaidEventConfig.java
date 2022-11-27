@@ -1,14 +1,15 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.init.ModConfigs;
+import iskallia.vault.VaultMod;
 import iskallia.vault.util.data.WeightedList;
-import iskallia.vault.world.vault.modifier.VaultModifier;
-import java.time.LocalDateTime;
-import java.time.Month;
+import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.world.vault.modifier.spi.VaultModifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class RaidEventConfig extends Config {
-   private static final LocalDateTime EVENT_END_TIME = LocalDateTime.of(2022, Month.JANUARY, 1, 0, 0, 0);
+   @Expose
+   private boolean enabled;
    @Expose
    private int soulShardTradeCost;
    @Expose
@@ -16,10 +17,10 @@ public class RaidEventConfig extends Config {
    @Expose
    private float viewerVoteChance;
    @Expose
-   private WeightedList<String> viewerModifiers;
+   private WeightedList<ResourceLocation> viewerModifiers;
 
    public boolean isEnabled() {
-      return LocalDateTime.now().isBefore(EVENT_END_TIME);
+      return this.enabled;
    }
 
    public int getSoulShardTradeCost() {
@@ -38,7 +39,7 @@ public class RaidEventConfig extends Config {
       VaultModifier modifier = null;
 
       while (modifier == null) {
-         modifier = ModConfigs.VAULT_MODIFIERS.getByName(this.viewerModifiers.getRandom(rand));
+         modifier = VaultModifierRegistry.getOrDefault(this.viewerModifiers.getRandom(rand), null);
       }
 
       return modifier;
@@ -51,13 +52,14 @@ public class RaidEventConfig extends Config {
 
    @Override
    protected void reset() {
+      this.enabled = false;
       this.soulShardTradeCost = 750;
       this.temporaryModifierMinutes = 6;
       this.viewerVoteChance = 0.2F;
       this.viewerModifiers = new WeightedList<>();
-      this.viewerModifiers.add("Gilded", 1);
-      this.viewerModifiers.add("Plentiful", 1);
-      this.viewerModifiers.add("Frail", 1);
-      this.viewerModifiers.add("Trapped", 1);
+      this.viewerModifiers.add(VaultMod.id("gilded"), 1);
+      this.viewerModifiers.add(VaultMod.id("plentiful"), 1);
+      this.viewerModifiers.add(VaultMod.id("frail"), 1);
+      this.viewerModifiers.add(VaultMod.id("trapped"), 1);
    }
 }

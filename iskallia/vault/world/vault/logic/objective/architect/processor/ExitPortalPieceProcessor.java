@@ -8,16 +8,16 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.piece.VaultPiece;
 import iskallia.vault.world.vault.gen.piece.VaultRoom;
 import iskallia.vault.world.vault.logic.objective.architect.ArchitectObjective;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class ExitPortalPieceProcessor extends VaultPieceProcessor {
    private static final PortalPlacer EXIT_PORTAL_PLACER = new PortalPlacer(
-      (pos, random, facing) -> (BlockState)ModBlocks.VAULT_PORTAL.func_176223_P().func_206870_a(VaultPortalBlock.field_176550_a, facing.func_176740_k()),
-      (pos, random, facing) -> MiscUtils.eitherOf(random, Blocks.field_196656_g, Blocks.field_196657_h, Blocks.field_196657_h).func_176223_P()
+      (pos, random, facing) -> (BlockState)ModBlocks.VAULT_PORTAL.defaultBlockState().setValue(VaultPortalBlock.AXIS, facing.getAxis()),
+      (pos, random, facing) -> MiscUtils.eitherOf(random, Blocks.ANDESITE, Blocks.POLISHED_ANDESITE, Blocks.POLISHED_ANDESITE).defaultBlockState()
    );
    private final ArchitectObjective objective;
 
@@ -26,11 +26,11 @@ public class ExitPortalPieceProcessor extends VaultPieceProcessor {
    }
 
    @Override
-   public void postProcess(VaultRaid vault, ServerWorld world, VaultPiece piece, Direction generatedDirection) {
+   public void postProcess(VaultRaid vault, ServerLevel world, VaultPiece piece, Direction generatedDirection) {
       if (piece instanceof VaultRoom) {
-         Direction portalDir = generatedDirection.func_176746_e();
+         Direction portalDir = generatedDirection.getClockWise();
          VaultRoom room = (VaultRoom)piece;
-         BlockPos at = new BlockPos(room.getCenter()).func_177967_a(portalDir, -1);
+         BlockPos at = new BlockPos(room.getCenter()).relative(portalDir, -1);
          this.objective.buildPortal(EXIT_PORTAL_PLACER.place(world, at, portalDir, 3, 5));
       }
    }

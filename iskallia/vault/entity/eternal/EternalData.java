@@ -1,29 +1,36 @@
 package iskallia.vault.entity.eternal;
 
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.snapshot.AttributeSnapshot;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.world.data.EternalsData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.annotation.Nullable;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.EquipmentSlotType.Group;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlot.Type;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
-public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAccess {
+public class EternalData implements INBTSerializable<CompoundTag>, EternalDataAccess {
    private UUID uuid = UUID.randomUUID();
    private String name;
    private String originalName;
    private long eternalSeed = 3274487651937260739L;
-   private final Map<EquipmentSlotType, ItemStack> equipment = new HashMap<>();
+   private final Map<EquipmentSlot, ItemStack> equipment = new HashMap<>();
    private EternalAttributes attributes = new EternalAttributes();
    private EternalAura ability = null;
    private int level = 0;
@@ -32,26 +39,37 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
    private boolean alive = true;
    private boolean ancient = false;
    private final EternalsData dataDelegate;
+   private AttributeSnapshot snapshot = AttributeSnapshot.EMPTY;
+   private EternalsData.EternalVariant variant = EternalsData.EternalVariant.CAVE;
+   private boolean isUsingPlayerSkin = false;
 
-   private EternalData(EternalsData dataDelegate, String name, boolean isAncient) {
+   private EternalData(EternalsData dataDelegate, String name, boolean isAncient, EternalsData.EternalVariant variant, boolean isUsingPlayerSkin) {
       this.dataDelegate = dataDelegate;
       this.name = name;
       this.originalName = name;
       this.ancient = isAncient;
       this.attributes.initializeAttributes();
+      this.variant = variant;
+      this.isUsingPlayerSkin = isUsingPlayerSkin;
+      this.refreshSnapshot();
    }
 
-   private EternalData(EternalsData dataDelegate, CompoundNBT nbt) {
+   private EternalData(EternalsData dataDelegate, CompoundTag nbt) {
       this.dataDelegate = dataDelegate;
       this.deserializeNBT(nbt);
+      this.refreshSnapshot();
    }
 
-   public static EternalData createEternal(EternalsData data, String name, boolean isAncient) {
-      return new EternalData(data, name, isAncient);
+   public static EternalData createEternal(EternalsData data, String name, boolean isAncient, EternalsData.EternalVariant variant, boolean isUsingPlayerSkin) {
+      return new EternalData(data, name, isAncient, variant, isUsingPlayerSkin);
    }
 
-   public static EternalData fromNBT(EternalsData data, CompoundNBT nbt) {
+   public static EternalData fromNBT(EternalsData data, CompoundTag nbt) {
       return new EternalData(data, nbt);
+   }
+
+   private void refreshSnapshot() {
+      this.snapshot = AttributeSnapshotHelper.getInstance().makeGearSnapshot(this::getStack);
    }
 
    @Override
@@ -66,12 +84,12 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
 
    public void shuffleSeed() {
       this.eternalSeed = new Random().nextLong();
-      this.dataDelegate.func_76185_a();
+      this.dataDelegate.setDirty();
    }
 
    public void setName(String name) {
       this.name = name;
-      this.dataDelegate.func_76185_a();
+      this.dataDelegate.setDirty();
    }
 
    @Override
@@ -87,11 +105,15 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
       return this.attributes;
    }
 
+   public AttributeSnapshot getAttributeSnapshot() {
+      return this.snapshot;
+   }
+
    public void addAttributeValue(Attribute attribute, float value) {
       if (this.usedLevels < this.level) {
          this.usedLevels++;
          this.attributes.addAttributeValue(attribute, value);
-         this.dataDelegate.func_76185_a();
+         this.dataDelegate.setDirty();
       }
    }
 
@@ -110,8 +132,16 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
 
    @Override
    public int getMaxLevel() {
+      AtomicInteger integer = new AtomicInteger(0);
+      MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
       UUID playerId = this.dataDelegate.getOwnerOf(this.getId());
-      return playerId == null ? 0 : this.dataDelegate.getEternals(playerId).getNonAncientEternalCount() + (this.isAncient() ? 5 : 0);
+      integer.set(PlayerVaultStatsData.get(srv).getVaultStats(playerId).getVaultLevel());
+      return integer.get();
+   }
+
+   public int getMaxLevel(ServerLevel level) {
+      UUID playerId = this.dataDelegate.getOwnerOf(this.getId());
+      return PlayerVaultStatsData.get(level).getVaultStats(playerId).getVaultLevel();
    }
 
    public float getLevelPercent() {
@@ -126,7 +156,7 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
 
    public void setAlive(boolean alive) {
       this.alive = alive;
-      this.dataDelegate.func_76185_a();
+      this.dataDelegate.setDirty();
    }
 
    @Override
@@ -134,9 +164,23 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
       return this.ancient;
    }
 
+   @Override
+   public EternalsData.EternalVariant getVariant() {
+      return this.variant;
+   }
+
+   @Override
+   public boolean isUsingPlayerSkin() {
+      return this.isUsingPlayerSkin;
+   }
+
+   public void setUsingPlayerSkin(boolean usingPlayerSkin) {
+      this.isUsingPlayerSkin = usingPlayerSkin;
+   }
+
    public void setAncient(boolean ancient) {
       this.ancient = ancient;
-      this.dataDelegate.func_76185_a();
+      this.dataDelegate.setDirty();
    }
 
    public boolean addExp(int xp) {
@@ -150,7 +194,7 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
             this.levelExp -= expNeeded;
          }
 
-         this.dataDelegate.func_76185_a();
+         this.dataDelegate.setDirty();
          return true;
       }
    }
@@ -167,7 +211,7 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
          this.ability = new EternalAura(auraName);
       }
 
-      this.dataDelegate.func_76185_a();
+      this.dataDelegate.setDirty();
    }
 
    @Nullable
@@ -177,17 +221,18 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
    }
 
    @Override
-   public Map<EquipmentSlotType, ItemStack> getEquipment() {
+   public Map<EquipmentSlot, ItemStack> getEquipment() {
       return Collections.unmodifiableMap(this.equipment);
    }
 
-   public ItemStack getStack(EquipmentSlotType slot) {
-      return this.equipment.getOrDefault(slot, ItemStack.field_190927_a);
+   public ItemStack getStack(EquipmentSlot slot) {
+      return this.equipment.getOrDefault(slot, ItemStack.EMPTY);
    }
 
-   public void setStack(EquipmentSlotType slot, ItemStack stack) {
+   public void setStack(EquipmentSlot slot, ItemStack stack) {
       this.equipment.put(slot, stack);
-      this.dataDelegate.func_76185_a();
+      this.dataDelegate.setDirty();
+      this.refreshSnapshot();
    }
 
    @Override
@@ -199,68 +244,72 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
       return new EternalData.EquipmentInventory(this, onChange);
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_186854_a("Id", this.getId());
-      nbt.func_74778_a("Name", this.getName());
-      nbt.func_74778_a("originalName", this.getOriginalName());
-      nbt.func_74772_a("eternalSeed", this.getSeed());
-      CompoundNBT tag = new CompoundNBT();
-      this.equipment.forEach((slot, stack) -> tag.func_218657_a(slot.func_188450_d(), stack.serializeNBT()));
-      nbt.func_218657_a("equipment", tag);
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putUUID("Id", this.getId());
+      nbt.putString("Name", this.getName());
+      nbt.putString("originalName", this.getOriginalName());
+      nbt.putLong("eternalSeed", this.getSeed());
+      CompoundTag tag = new CompoundTag();
+      this.equipment.forEach((slot, stack) -> tag.put(slot.getName(), stack.serializeNBT()));
+      nbt.put("equipment", tag);
       if (this.getAura() != null) {
-         nbt.func_218657_a("ability", this.getAura().serializeNBT());
+         nbt.put("ability", this.getAura().serializeNBT());
       }
 
-      nbt.func_74768_a("level", this.level);
-      nbt.func_74768_a("usedLevels", this.usedLevels);
-      nbt.func_74768_a("levelExp", this.levelExp);
-      nbt.func_74757_a("alive", this.alive);
-      nbt.func_74757_a("ancient", this.ancient);
-      nbt.func_218657_a("attributes", this.attributes.serializeNBT());
+      nbt.putInt("level", this.level);
+      nbt.putInt("usedLevels", this.usedLevels);
+      nbt.putInt("levelExp", this.levelExp);
+      nbt.putBoolean("alive", this.alive);
+      nbt.putBoolean("ancient", this.ancient);
+      nbt.put("attributes", this.attributes.serializeNBT());
+      nbt.putInt("variant", this.variant.getId());
+      nbt.putBoolean("isUsingPlayerSkin", this.isUsingPlayerSkin);
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.uuid = nbt.func_186857_a("Id");
-      this.name = nbt.func_74779_i("Name");
-      this.originalName = nbt.func_150297_b("originalName", 8) ? nbt.func_74779_i("originalName") : this.name;
-      this.eternalSeed = nbt.func_150297_b("eternalSeed", 4) ? nbt.func_74763_f("eternalSeed") : 3274487651937260739L;
+   public void deserializeNBT(CompoundTag nbt) {
+      this.uuid = nbt.getUUID("Id");
+      this.name = nbt.getString("Name");
+      this.originalName = nbt.contains("originalName", 8) ? nbt.getString("originalName") : this.name;
+      this.eternalSeed = nbt.contains("eternalSeed", 4) ? nbt.getLong("eternalSeed") : 3274487651937260739L;
       this.equipment.clear();
-      CompoundNBT equipment = nbt.func_74775_l("equipment");
+      CompoundTag equipment = nbt.getCompound("equipment");
 
-      for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-         if (equipment.func_150297_b(slot.func_188450_d(), 10)) {
-            ItemStack stack = ItemStack.func_199557_a(equipment.func_74775_l(slot.func_188450_d()));
+      for (EquipmentSlot slot : EquipmentSlot.values()) {
+         if (equipment.contains(slot.getName(), 10)) {
+            ItemStack stack = ItemStack.of(equipment.getCompound(slot.getName()));
             this.equipment.put(slot, stack);
          }
       }
 
-      if (nbt.func_150297_b("ability", 10)) {
-         this.ability = new EternalAura(nbt.func_74775_l("ability"));
+      if (nbt.contains("ability", 10)) {
+         this.ability = new EternalAura(nbt.getCompound("ability"));
       } else {
          this.ability = null;
       }
 
-      this.level = nbt.func_150297_b("level", 3) ? nbt.func_74762_e("level") : 0;
-      this.usedLevels = nbt.func_150297_b("usedLevels", 3) ? nbt.func_74762_e("usedLevels") : 0;
-      this.levelExp = nbt.func_74762_e("levelExp");
-      this.alive = !nbt.func_150297_b("alive", 1) || nbt.func_74767_n("alive");
-      this.ancient = nbt.func_150297_b("ancient", 1) && nbt.func_74767_n("ancient");
-      if (!nbt.func_150297_b("attributes", 10)) {
+      this.level = nbt.contains("level", 3) ? nbt.getInt("level") : 0;
+      this.usedLevels = nbt.contains("usedLevels", 3) ? nbt.getInt("usedLevels") : 0;
+      this.levelExp = nbt.getInt("levelExp");
+      this.alive = !nbt.contains("alive", 1) || nbt.getBoolean("alive");
+      this.ancient = nbt.contains("ancient", 1) && nbt.getBoolean("ancient");
+      if (!nbt.contains("attributes", 10)) {
          this.attributes = new EternalAttributes();
          this.attributes.initializeAttributes();
       } else {
-         this.attributes = EternalAttributes.fromNBT(nbt.func_74775_l("attributes"));
+         this.attributes = EternalAttributes.fromNBT(nbt.getCompound("attributes"));
       }
 
-      if (nbt.func_74764_b("MainSlots")) {
-         ListNBT mainSlotsList = nbt.func_150295_c("MainSlots", 10);
+      this.variant = EternalsData.EternalVariant.byId(nbt.getInt("variant"));
+      this.isUsingPlayerSkin = nbt.getBoolean("isUsingPlayerSkin");
+      if (nbt.contains("MainSlots")) {
+         ListTag mainSlotsList = nbt.getList("MainSlots", 10);
 
-         for (int i = 0; i < Math.min(mainSlotsList.size(), EquipmentSlotType.values().length); i++) {
-            EquipmentSlotType slotx = EquipmentSlotType.values()[i];
-            if (slotx != EquipmentSlotType.OFFHAND) {
-               this.equipment.put(slotx, ItemStack.func_199557_a(mainSlotsList.func_150305_b(i)));
+         for (int i = 0; i < Math.min(mainSlotsList.size(), EquipmentSlot.values().length); i++) {
+            EquipmentSlot slotx = EquipmentSlot.values()[i];
+            if (slotx != EquipmentSlot.OFFHAND) {
+               this.equipment.put(slotx, ItemStack.of(mainSlotsList.getCompound(i)));
             }
          }
       }
@@ -270,11 +319,8 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
    public boolean equals(Object o) {
       if (this == o) {
          return true;
-      } else if (!(o instanceof EternalData)) {
-         return false;
       } else {
-         EternalData other = (EternalData)o;
-         return this.uuid.equals(other.uuid);
+         return !(o instanceof EternalData other) ? false : this.uuid.equals(other.uuid);
       }
    }
 
@@ -283,7 +329,7 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
       return this.uuid.hashCode();
    }
 
-   public static class EquipmentInventory implements IInventory {
+   public static class EquipmentInventory implements Container {
       private final EternalData eternal;
       private final Runnable onChange;
 
@@ -292,65 +338,65 @@ public class EternalData implements INBTSerializable<CompoundNBT>, EternalDataAc
          this.onChange = onChange;
       }
 
-      public int func_70302_i_() {
+      public int getContainerSize() {
          return 5;
       }
 
-      public boolean func_191420_l() {
-         return this.eternal.getEquipment().entrySet().stream().anyMatch(entry -> !entry.getValue().func_190926_b());
+      public boolean isEmpty() {
+         return this.eternal.getEquipment().entrySet().stream().anyMatch(entry -> !entry.getValue().isEmpty());
       }
 
-      public ItemStack func_70301_a(int index) {
+      public ItemStack getItem(int index) {
          return this.eternal.getStack(this.getSlotFromIndex(index));
       }
 
-      public ItemStack func_70298_a(int index, int count) {
-         ItemStack stack = this.func_70301_a(index);
-         if (!stack.func_190926_b() && count > 0) {
-            ItemStack split = stack.func_77979_a(count);
-            this.func_70299_a(index, stack);
-            if (!split.func_190926_b()) {
-               this.func_70296_d();
+      public ItemStack removeItem(int index, int count) {
+         ItemStack stack = this.getItem(index);
+         if (!stack.isEmpty() && count > 0) {
+            ItemStack split = stack.split(count);
+            this.setItem(index, stack);
+            if (!split.isEmpty()) {
+               this.setChanged();
             }
 
             return split;
          } else {
-            return ItemStack.field_190927_a;
+            return ItemStack.EMPTY;
          }
       }
 
-      public ItemStack func_70304_b(int index) {
-         EquipmentSlotType slotType = this.getSlotFromIndex(index);
+      public ItemStack removeItemNoUpdate(int index) {
+         EquipmentSlot slotType = this.getSlotFromIndex(index);
          ItemStack equipment = this.eternal.getStack(slotType);
-         this.eternal.setStack(slotType, ItemStack.field_190927_a);
-         this.func_70296_d();
+         this.eternal.setStack(slotType, ItemStack.EMPTY);
+         this.setChanged();
          return equipment;
       }
 
-      public void func_70299_a(int index, ItemStack stack) {
-         this.eternal.setStack(this.getSlotFromIndex(index), stack.func_77946_l());
-         this.func_70296_d();
+      public void setItem(int index, ItemStack stack) {
+         this.eternal.setStack(this.getSlotFromIndex(index), stack.copy());
+         this.setChanged();
       }
 
-      public void func_70296_d() {
+      public void setChanged() {
          this.onChange.run();
-         this.eternal.dataDelegate.func_76185_a();
+         this.eternal.dataDelegate.setDirty();
       }
 
-      public boolean func_70300_a(PlayerEntity player) {
+      public boolean stillValid(Player player) {
          return true;
       }
 
-      public void func_174888_l() {
-         for (EquipmentSlotType slotType : EquipmentSlotType.values()) {
-            this.eternal.setStack(slotType, ItemStack.field_190927_a);
+      public void clearContent() {
+         for (EquipmentSlot slotType : EquipmentSlot.values()) {
+            this.eternal.setStack(slotType, ItemStack.EMPTY);
          }
 
-         this.func_70296_d();
+         this.setChanged();
       }
 
-      private EquipmentSlotType getSlotFromIndex(int index) {
-         return index == 0 ? EquipmentSlotType.MAINHAND : EquipmentSlotType.func_220318_a(Group.ARMOR, index - 1);
+      private EquipmentSlot getSlotFromIndex(int index) {
+         return index == 0 ? EquipmentSlot.MAINHAND : EquipmentSlot.byTypeAndIndex(Type.ARMOR, index - 1);
       }
    }
 }

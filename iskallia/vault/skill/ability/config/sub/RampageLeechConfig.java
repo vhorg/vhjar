@@ -5,10 +5,10 @@ import iskallia.vault.skill.ability.config.RampageConfig;
 
 public class RampageLeechConfig extends RampageConfig {
    @Expose
-   private float leechPercent;
+   private final float leechPercent;
 
-   public RampageLeechConfig(int cost, int durationTicks, int cooldown, float leechPercent) {
-      super(cost, 0.0F, durationTicks, cooldown);
+   public RampageLeechConfig(int learningCost, int regretCost, int cooldownTicks, int levelRequirement, float manaCostPerSecond, float leechPercent) {
+      super(learningCost, regretCost, cooldownTicks, levelRequirement, manaCostPerSecond, 0.0F);
       this.leechPercent = leechPercent;
    }
 

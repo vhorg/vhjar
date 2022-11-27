@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "###",
+      "###",
+      "###"
+    ],
+    "key": {
+      "#": {
+        "item": "the_vault:magic_silk"
+      }
+    },
+    "result": {
+      "item": "the_vault:magic_silk_block",
+      "count": 1
+    }
+  }

@@ -1,31 +1,27 @@
 package iskallia.vault.entity.ai.eyesore;
 
-import iskallia.vault.entity.EyesoreEntity;
+import iskallia.vault.entity.entity.eyesore.EyesoreEntity;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.world.vault.gen.piece.FinalVaultBoss;
-import iskallia.vault.world.vault.player.VaultRunner;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityDamageSource;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceContext.BlockMode;
-import net.minecraft.util.math.RayTraceContext.FluidMode;
-import net.minecraft.util.math.RayTraceResult.Type;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.ClipContext.Block;
+import net.minecraft.world.level.ClipContext.Fluid;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.HitResult.Type;
 
 public class LaserAttackTask extends EyesoreTask<EyesoreEntity> {
    public int tick = 0;
@@ -35,144 +31,104 @@ public class LaserAttackTask extends EyesoreTask<EyesoreEntity> {
       super(entity);
    }
 
-   @Override
    public void tick() {
       if (!this.isFinished()) {
          if (this.target == null) {
-            List<ServerPlayerEntity> players = this.getVault()
+            List<ServerPlayer> players = this.getVault()
                .getPlayers()
                .stream()
-               .filter(player -> player instanceof VaultRunner)
-               .map(p -> p.getServerPlayer(this.getWorld().func_73046_m()))
-               .filter(Optional::isPresent)
-               .map(Optional::get)
-               .collect(Collectors.toList());
+               .map(p -> p.getServerPlayer(this.getWorld().getServer()))
+               .flatMap(Optional::stream)
+               .toList();
             if (players.size() == 0) {
                return;
             }
 
-            ServerPlayerEntity player = players.get(this.getRandom().nextInt(players.size()));
-            this.target = player.func_110124_au();
-            this.getEntity().func_184212_Q().func_187227_b(EyesoreEntity.LASER_TARGET, Optional.of(player.func_110124_au()));
+            ServerPlayer player = players.get(this.getRandom().nextInt(players.size()));
+            this.target = player.getUUID();
+            this.getEntity().getEntityData().set(EyesoreEntity.LASER_TARGET, player.getId());
             this.getVault()
                .getPlayers()
                .stream()
-               .map(p -> p.getServerPlayer(this.getWorld().func_73046_m()))
-               .filter(Optional::isPresent)
-               .map(Optional::get)
-               .forEach(
-                  p -> this.getWorld()
-                     .func_184148_a(
-                        null, p.func_226277_ct_(), p.func_226278_cu_(), p.func_226281_cx_(), SoundEvents.field_187514_aD, SoundCategory.HOSTILE, 10.0F, 1.0F
-                     )
-               );
+               .map(p -> p.getServerPlayer(this.getWorld().getServer()))
+               .flatMap(Optional::stream)
+               .forEach(p -> this.getWorld().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.HOSTILE, 10.0F, 1.0F));
          }
 
-         Entity entity = this.getWorld().func_217461_a(this.target);
+         Entity entity = this.getWorld().getEntity(this.target);
          LivingEntity targetEntity = entity instanceof LivingEntity ? (LivingEntity)entity : null;
          if (targetEntity != null) {
-            double distance = this.getEntity().func_233580_cy_().func_177951_i(targetEntity.func_233580_cy_());
-            Optional<FinalVaultBoss> finalVault = this.getVault().getGenerator().getPieces(FinalVaultBoss.class).stream().findFirst();
-            if (finalVault.isPresent()) {
-               Vector3i center = finalVault.get().getCenter();
-               this.getEntity()
-                  .path
-                  .stayInRange(new Vector3d(center.func_177958_n(), center.func_177956_o(), center.func_177952_p()), targetEntity, 0.15, 30.0, 2.0);
-            } else {
-               this.getEntity().path.stayInRange(this.getEntity(), targetEntity, 0.15, 30.0, 2.0);
-            }
-
-            Vector3d eyePos1 = this.getEntity().func_174824_e(1.0F);
-            Vector3d eyePos2 = this.getPosition(targetEntity);
-            RayTraceContext context = new RayTraceContext(eyePos1, eyePos2, BlockMode.COLLIDER, FluidMode.NONE, this.getEntity());
-            BlockRayTraceResult result = this.getWorld().func_217299_a(context);
-            if (result.func_216346_c() == Type.MISS) {
-               targetEntity.func_195064_c(new EffectInstance(Effects.field_76421_d, 60, 2, false, false));
-               DamageSource source = new EntityDamageSource("laser", this.getEntity()).func_82726_p();
+            double distance = this.getEntity().blockPosition().distSqr(targetEntity.blockPosition());
+            this.getEntity().path.stayInRange(this.getEntity(), targetEntity, 0.15, 30.0, 2.0);
+            this.lookAtTarget(targetEntity);
+            Vec3 eyePos1 = this.getEntity().getEyePosition(1.0F);
+            Vec3 eyePos2 = this.getPosition(targetEntity);
+            ClipContext context = new ClipContext(eyePos1, eyePos2, Block.COLLIDER, Fluid.NONE, this.getEntity());
+            BlockHitResult result = this.getWorld().clip(context);
+            if (result.getType() == Type.MISS) {
+               targetEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 2, false, false));
+               DamageSource source = new EntityDamageSource("laser", this.getEntity()).setMagic();
                float damage = ModConfigs.EYESORE.laserAttack.getDamage(this.getEntity(), this.tick);
                if (damage > 0.0F) {
-                  targetEntity.func_70097_a(source, damage);
+                  targetEntity.hurt(source, damage);
                }
 
-               if (this.getWorld().func_82737_E() % 10L == 0L) {
-                  this.getWorld()
-                     .func_195598_a(
-                        ParticleTypes.field_197601_L,
-                        targetEntity.func_226277_ct_(),
-                        targetEntity.func_226278_cu_(),
-                        targetEntity.func_226281_cx_(),
-                        300,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.001
-                     );
+               if (this.getWorld().getGameTime() % 10L == 0L) {
+                  this.getWorld().sendParticles(ParticleTypes.SMOKE, targetEntity.getX(), targetEntity.getY(), targetEntity.getZ(), 300, 0.0, 0.0, 0.0, 0.001);
                }
             } else {
-               if (this.getWorld().func_82737_E() % 10L == 0L) {
-                  this.getWorld().func_225521_a_(result.func_216350_a(), true, this.getEntity());
+               if (this.getWorld().getGameTime() % 6L == 0L) {
+                  this.getWorld().destroyBlock(result.getBlockPos(), true, this.getEntity());
                }
 
-               if (this.getWorld().func_82737_E() % 10L == 0L) {
+               if (this.getWorld().getGameTime() % 10L == 0L) {
                   this.getWorld()
-                     .func_195598_a(
-                        ParticleTypes.field_197601_L,
-                        result.func_216347_e().field_72450_a,
-                        result.func_216347_e().field_72448_b,
-                        result.func_216347_e().field_72449_c,
-                        300,
-                        0.0,
-                        0.0,
-                        0.0,
-                        0.001
-                     );
+                     .sendParticles(ParticleTypes.SMOKE, result.getLocation().x, result.getLocation().y, result.getLocation().z, 300, 0.0, 0.0, 0.0, 0.001);
                }
             }
          }
 
          this.tick++;
          if (this.isFinished()) {
-            this.getEntity().func_184212_Q().func_187227_b(EyesoreEntity.LASER_TARGET, Optional.empty());
+            this.getEntity().getEntityData().set(EyesoreEntity.LASER_TARGET, -1);
          }
       }
    }
 
    protected void lookAtTarget(LivingEntity target) {
-      this.getEntity().field_70125_A = this.getTargetPitch(target);
-      this.getEntity().field_70759_as = this.getTargetYaw(target);
+      this.getEntity().setXRot(this.getTargetPitch(target));
+      this.getEntity().yHeadRot = this.getTargetYaw(target);
    }
 
    private double getEyePosition(Entity entity) {
-      return entity instanceof LivingEntity ? entity.func_226280_cw_() : (entity.func_174813_aQ().field_72338_b + entity.func_174813_aQ().field_72337_e) / 2.0;
+      return entity instanceof LivingEntity ? entity.getEyeY() : (entity.getBoundingBox().minY + entity.getBoundingBox().maxY) / 2.0;
    }
 
    protected float getTargetPitch(LivingEntity target) {
-      double d0 = target.func_226277_ct_() - this.getEntity().func_226277_ct_();
-      double d1 = this.getEyePosition(target) - this.getEntity().func_226280_cw_();
-      double d2 = target.func_226281_cx_() - this.getEntity().func_226281_cx_();
-      double d3 = MathHelper.func_76133_a(d0 * d0 + d2 * d2);
-      return (float)(-(MathHelper.func_181159_b(d1, d3) * 180.0F / (float)Math.PI));
+      double d0 = target.getX() - this.getEntity().getX();
+      double d1 = this.getEyePosition(target) - this.getEntity().getEyeY();
+      double d2 = target.getZ() - this.getEntity().getZ();
+      double d3 = Mth.sqrt((float)(d0 * d0 + d2 * d2));
+      return (float)(-(Mth.atan2(d1, d3) * 180.0F / (float)Math.PI));
    }
 
    protected float getTargetYaw(LivingEntity target) {
-      double d0 = target.func_226277_ct_() - this.getEntity().func_226277_ct_();
-      double d1 = target.func_226281_cx_() - this.getEntity().func_226281_cx_();
-      return (float)(MathHelper.func_181159_b(d1, d0) * 180.0F / (float)Math.PI) - 90.0F;
+      double d0 = target.getX() - this.getEntity().getX();
+      double d1 = target.getZ() - this.getEntity().getZ();
+      return (float)(Mth.atan2(d1, d0) * 180.0F / (float)Math.PI) - 90.0F;
    }
 
-   private Vector3d getPosition(Entity entityLivingBaseIn) {
-      double d0 = entityLivingBaseIn.func_226277_ct_();
-      double d1 = entityLivingBaseIn.func_226278_cu_() + entityLivingBaseIn.func_213302_cg() / 2.0F;
-      double d2 = entityLivingBaseIn.func_226281_cx_();
-      return new Vector3d(d0, d1, d2);
+   private Vec3 getPosition(Entity entityLivingBaseIn) {
+      double d0 = entityLivingBaseIn.getX();
+      double d1 = entityLivingBaseIn.getY() + entityLivingBaseIn.getBbHeight() / 2.0F;
+      double d2 = entityLivingBaseIn.getZ();
+      return new Vec3(d0, d1, d2);
    }
 
-   @Override
    public boolean isFinished() {
       return this.getVault() == null ? true : this.tick >= 100;
    }
 
-   @Override
    public void reset() {
       this.tick = 0;
       this.target = null;

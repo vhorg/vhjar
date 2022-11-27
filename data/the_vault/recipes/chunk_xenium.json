@@ -1,0 +1,18 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+      {"item": "the_vault:cluster_xenium"},
+      {"item": "the_vault:cluster_xenium"},
+      {"item": "the_vault:cluster_xenium"},
+      {"item": "the_vault:cluster_xenium"},
+      {"item": "the_vault:cluster_xenium"},
+      {"item": "the_vault:cluster_xenium"},
+      {"item": "the_vault:cluster_xenium"},
+      {"item": "the_vault:cluster_xenium"},
+      {"item": "the_vault:cluster_xenium"}
+    ],
+    "result": {
+      "item": "the_vault:chunk_xenium",
+      "count": 1
+    }
+  }

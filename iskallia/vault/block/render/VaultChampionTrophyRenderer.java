@@ -1,63 +1,57 @@
 package iskallia.vault.block.render;
 
 import com.mojang.authlib.GameProfile;
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import iskallia.vault.block.VaultChampionTrophy;
 import iskallia.vault.block.entity.VaultChampionTrophyTileEntity;
 import iskallia.vault.util.McClientHelper;
 import javax.annotation.Nonnull;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IReorderingProcessor;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class VaultChampionTrophyRenderer extends TileEntityRenderer<VaultChampionTrophyTileEntity> {
-   public VaultChampionTrophyRenderer(TileEntityRendererDispatcher rendererDispatcherIn) {
-      super(rendererDispatcherIn);
+public class VaultChampionTrophyRenderer implements BlockEntityRenderer<VaultChampionTrophyTileEntity> {
+   public VaultChampionTrophyRenderer(Context context) {
    }
 
    public void render(
       @Nonnull VaultChampionTrophyTileEntity tileEntity,
       float partialTicks,
-      @Nonnull MatrixStack matrixStack,
-      @Nonnull IRenderTypeBuffer buffer,
+      @Nonnull PoseStack matrixStack,
+      @Nonnull MultiBufferSource buffer,
       int combinedLight,
       int combinedOverlay
    ) {
-      ClientWorld world = (ClientWorld)tileEntity.func_145831_w();
+      ClientLevel world = (ClientLevel)tileEntity.getLevel();
       if (world != null) {
-         BlockState blockState = tileEntity.func_195044_w();
-         Direction facing = (Direction)blockState.func_177229_b(VaultChampionTrophy.FACING);
+         BlockState blockState = tileEntity.getBlockState();
+         Direction facing = (Direction)blockState.getValue(VaultChampionTrophy.FACING);
          String ownerNickname = McClientHelper.getOnlineProfile(tileEntity.getOwnerUUID())
             .<String>map(GameProfile::getName)
             .orElse(tileEntity.getOwnerNickname());
-         int score = tileEntity.getScore();
-         this.drawNameplate(matrixStack, buffer, ownerNickname, score, facing, combinedLight, combinedOverlay);
+         this.drawNameplate(matrixStack, buffer, ownerNickname, facing, combinedLight, combinedOverlay);
       }
    }
 
-   private void drawNameplate(
-      MatrixStack matrixStack, IRenderTypeBuffer buffer, String displayName, int score, Direction direction, int combinedLight, int combinedOverlay
-   ) {
-      IReorderingProcessor text = new StringTextComponent(displayName).func_240699_a_(TextFormatting.BLACK).func_241878_f();
-      IReorderingProcessor scoreText = new StringTextComponent(String.valueOf(score)).func_240699_a_(TextFormatting.BLACK).func_241878_f();
-      FontRenderer fr = this.field_228858_b_.func_147548_a();
-      int width = fr.func_243245_a(text);
-      int scoreWidth = fr.func_243245_a(scoreText);
-      matrixStack.func_227860_a_();
-      matrixStack.func_227861_a_(0.5, 0.2, 0.5);
-      matrixStack.func_227863_a_(Vector3f.field_229180_c_.func_229187_a_(direction.func_185119_l() + 180.0F));
-      matrixStack.func_227861_a_(0.0, 0.0, 0.255);
-      matrixStack.func_227862_a_(0.01F, -0.01F, 0.01F);
-      fr.func_238416_a_(text, -width / 2.0F, 0.0F, -16777216, false, matrixStack.func_227866_c_().func_227870_a_(), buffer, false, 0, combinedLight);
-      fr.func_238416_a_(scoreText, -scoreWidth / 2.0F, 8.0F, -16777216, false, matrixStack.func_227866_c_().func_227870_a_(), buffer, false, 0, combinedLight);
-      matrixStack.func_227865_b_();
+   private void drawNameplate(PoseStack matrixStack, MultiBufferSource buffer, String displayName, Direction direction, int combinedLight, int combinedOverlay) {
+      FormattedCharSequence text = new TextComponent(displayName).withStyle(ChatFormatting.BLACK).getVisualOrderText();
+      Font fr = Minecraft.getInstance().font;
+      int width = fr.width(text);
+      matrixStack.pushPose();
+      matrixStack.translate(0.5, 0.17, 0.5);
+      matrixStack.mulPose(Vector3f.YN.rotationDegrees(direction.toYRot() + 180.0F));
+      matrixStack.translate(0.0, 0.0, 0.27);
+      matrixStack.scale(0.01F, -0.01F, 0.01F);
+      fr.drawInBatch(text, -width / 2.0F, 0.0F, -16777216, false, matrixStack.last().pose(), buffer, false, 0, combinedLight);
+      matrixStack.popPose();
    }
 }

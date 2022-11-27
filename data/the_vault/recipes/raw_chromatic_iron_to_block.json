@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "the_vault:raw_chromatic_iron"},
+    {"item": "the_vault:raw_chromatic_iron"},
+    {"item": "the_vault:raw_chromatic_iron"},
+    {"item": "the_vault:raw_chromatic_iron"},
+    {"item": "the_vault:raw_chromatic_iron"},
+    {"item": "the_vault:raw_chromatic_iron"},
+    {"item": "the_vault:raw_chromatic_iron"},
+    {"item": "the_vault:raw_chromatic_iron"},
+    {"item": "the_vault:raw_chromatic_iron"}
+  ],
+  "result": {
+    "item": "the_vault:raw_chromatic_iron_block",
+    "count": 1
+  }
+}

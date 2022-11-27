@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ppp",
+    "pep",
+    "ppp"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:red_vault_essence"
+    },
+    "p": {
+      "item": "the_vault:memory_powder"
+    }
+  },
+  "result": {
+    "item": "the_vault:memory_shard",
+    "count": 1
+  }
+}

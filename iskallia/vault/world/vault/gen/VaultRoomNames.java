@@ -1,74 +1,74 @@
 package iskallia.vault.world.vault.gen;
 
 import javax.annotation.Nullable;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 public class VaultRoomNames {
    @Nullable
-   public static ITextComponent getName(String filterKey) {
+   public static Component getName(String filterKey) {
       switch (filterKey) {
          case "crystal_caves":
-            return new StringTextComponent("Crystal Cave").func_240699_a_(TextFormatting.DARK_PURPLE);
+            return new TextComponent("Crystal Cave").withStyle(ChatFormatting.DARK_PURPLE);
          case "contest_alien":
-            return new StringTextComponent("Contest: Alien").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Alien").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_birdcage":
-            return new StringTextComponent("Contest: Ancient Temple").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Ancient Temple").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_city":
-            return new StringTextComponent("Contest: City Streets").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: City Streets").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_dragon":
-            return new StringTextComponent("Contest: Dragon").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Dragon").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_fishtank":
-            return new StringTextComponent("Contest: Aquarium").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Aquarium").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_mine":
-            return new StringTextComponent("Contest: Mine").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Mine").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_mustard":
-            return new StringTextComponent("Contest: Yellow Brick Road").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Yellow Brick Road").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_oriental":
-            return new StringTextComponent("Contest: Oriental").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Oriental").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_pixel":
-            return new StringTextComponent("Contest: Pixelart").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Pixelart").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_prismarine":
-            return new StringTextComponent("Contest: Atlantis").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Atlantis").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_tree":
-            return new StringTextComponent("Contest: Tree").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Tree").withStyle(ChatFormatting.DARK_AQUA);
          case "contest_web":
-            return new StringTextComponent("Contest: Spiderweb").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Contest: Spiderweb").withStyle(ChatFormatting.DARK_AQUA);
          case "digsite":
-            return new StringTextComponent("Digsite").func_240699_a_(TextFormatting.YELLOW);
+            return new TextComponent("Digsite").withStyle(ChatFormatting.YELLOW);
          case "dungeons":
-            return new StringTextComponent("Dungeon").func_240699_a_(TextFormatting.WHITE);
+            return new TextComponent("Dungeon").withStyle(ChatFormatting.WHITE);
          case "forest":
-            return new StringTextComponent("Forest").func_240699_a_(TextFormatting.DARK_GREEN);
+            return new TextComponent("Forest").withStyle(ChatFormatting.DARK_GREEN);
          case "graves":
-            return new StringTextComponent("Grave").func_240699_a_(TextFormatting.DARK_GRAY);
+            return new TextComponent("Grave").withStyle(ChatFormatting.DARK_GRAY);
          case "lakes":
-            return new StringTextComponent("Lake").func_240699_a_(TextFormatting.BLUE);
+            return new TextComponent("Lake").withStyle(ChatFormatting.BLUE);
          case "lava":
-            return new StringTextComponent("Lava").func_240699_a_(TextFormatting.RED);
+            return new TextComponent("Lava").withStyle(ChatFormatting.RED);
          case "mineshaft":
-            return new StringTextComponent("Mine").func_240699_a_(TextFormatting.GOLD);
+            return new TextComponent("Mine").withStyle(ChatFormatting.GOLD);
          case "mushroom_forest":
-            return new StringTextComponent("Mushroom Forest").func_240699_a_(TextFormatting.LIGHT_PURPLE);
+            return new TextComponent("Mushroom Forest").withStyle(ChatFormatting.LIGHT_PURPLE);
          case "nether_flowers":
-            return new StringTextComponent("Nether Flowers").func_240699_a_(TextFormatting.RED);
+            return new TextComponent("Nether Flowers").withStyle(ChatFormatting.RED);
          case "pirate_cove":
-            return new StringTextComponent("Pirate Cove").func_240699_a_(TextFormatting.DARK_AQUA);
+            return new TextComponent("Pirate Cove").withStyle(ChatFormatting.DARK_AQUA);
          case "puzzle_cube":
-            return new StringTextComponent("Puzzle").func_240699_a_(TextFormatting.YELLOW);
+            return new TextComponent("Puzzle").withStyle(ChatFormatting.YELLOW);
          case "rainbow_forest":
-            return new StringTextComponent("Rainbow Forest").func_240699_a_(TextFormatting.GREEN);
+            return new TextComponent("Rainbow Forest").withStyle(ChatFormatting.GREEN);
          case "vendor":
-            return new StringTextComponent("Vendor").func_240699_a_(TextFormatting.GOLD);
+            return new TextComponent("Vendor").withStyle(ChatFormatting.GOLD);
          case "viewer":
-            return new StringTextComponent("Viewer").func_240699_a_(TextFormatting.GOLD);
+            return new TextComponent("Viewer").withStyle(ChatFormatting.GOLD);
          case "village":
-            return new StringTextComponent("Village").func_240699_a_(TextFormatting.AQUA);
+            return new TextComponent("Village").withStyle(ChatFormatting.AQUA);
          case "wildwest":
-            return new StringTextComponent("Wild West").func_240699_a_(TextFormatting.YELLOW);
+            return new TextComponent("Wild West").withStyle(ChatFormatting.YELLOW);
          case "x_spot":
-            return new StringTextComponent("X-Mark").func_240699_a_(TextFormatting.YELLOW);
+            return new TextComponent("X-Mark").withStyle(ChatFormatting.YELLOW);
          default:
             return null;
       }

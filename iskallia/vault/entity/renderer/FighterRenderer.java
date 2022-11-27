@@ -1,134 +1,182 @@
 package iskallia.vault.entity.renderer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import iskallia.vault.Vault;
-import iskallia.vault.entity.FighterEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
+import iskallia.vault.VaultMod;
+import iskallia.vault.client.render.DynamicHumanoidModelLayer;
+import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.model.FighterModel;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.LivingRenderer;
-import net.minecraft.client.renderer.entity.layers.ArrowLayer;
-import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
-import net.minecraft.client.renderer.entity.layers.BipedArmorLayer;
+import iskallia.vault.init.ModEntities;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.HumanoidModel.ArmPose;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
-import net.minecraft.client.renderer.entity.layers.HeadLayer;
-import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
-import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.entity.model.BipedModel.ArmPose;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.client.renderer.model.ItemCameraTransforms.TransformType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.entity.Entity;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.UseAction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.phys.Vec3;
 
-public class FighterRenderer extends LivingRenderer<FighterEntity, FighterModel> {
-   public FighterRenderer(EntityRendererManager renderManager) {
-      this(renderManager, false);
+public class FighterRenderer extends LivingEntityRenderer<LivingEntity, HumanoidModel<LivingEntity>> {
+   private final DynamicHumanoidModelLayer<LivingEntity, HumanoidModel<LivingEntity>, HumanoidModel<LivingEntity>> armorLayer;
+   private final HumanoidModel<LivingEntity> thisModel;
+   private final PlayerModel playerModel;
+   private final PlayerModel playerSlimModel;
+
+   public FighterRenderer(Context context, ModelLayerLocation modelLayer) {
+      this(context, modelLayer, false);
    }
 
-   public FighterRenderer(EntityRendererManager renderManager, boolean useSmallArms) {
-      super(renderManager, new FighterModel(0.0F, useSmallArms), 0.5F);
-      this.func_177094_a(new BipedArmorLayer(this, new BipedModel(0.5F), new BipedModel(1.0F)));
-      this.func_177094_a(new HeldItemLayer(this));
-      this.func_177094_a(new ArrowLayer(this));
-      this.func_177094_a(new HeadLayer(this));
-      this.func_177094_a(new ElytraLayer(this));
-      this.func_177094_a(new BeeStingerLayer(this));
+   public FighterRenderer(Context context, ModelLayerLocation modelLayer, boolean slim) {
+      super(context, new FighterModel(context.bakeLayer(modelLayer), slim), 0.5F);
+      this.addLayer(
+         this.armorLayer = new DynamicHumanoidModelLayer<>(
+            this,
+            new HumanoidModel(context.bakeLayer(ModelLayers.PLAYER_INNER_ARMOR)),
+            new HumanoidModel(context.bakeLayer(ModelLayers.PLAYER_OUTER_ARMOR)),
+            new HumanoidModel(context.bakeLayer(ModelLayers.PLAYER_SLIM_INNER_ARMOR)),
+            new HumanoidModel(context.bakeLayer(ModelLayers.PLAYER_SLIM_OUTER_ARMOR))
+         )
+      );
+      this.addLayer(new CustomHeadLayer(this, context.getModelSet()));
+      this.addLayer(new ElytraLayer(this, context.getModelSet()));
+      this.addLayer(new ItemInHandLayer(this));
+      this.thisModel = (HumanoidModel<LivingEntity>)this.model;
+      this.playerModel = new PlayerModel(context.bakeLayer(ModelLayers.PLAYER), false);
+      this.playerSlimModel = new PlayerModel(context.bakeLayer(ModelLayers.PLAYER_SLIM), true);
+      this.armorLayer.setSlim(slim);
    }
 
-   protected void preRenderCallback(FighterEntity entity, MatrixStack matrixStack, float partialTickTime) {
-      float f = entity.sizeMultiplier;
-      matrixStack.func_227862_a_(f, f, f);
+   protected void scale(LivingEntity entity, PoseStack matrixStack, float partialTickTime) {
+      if (entity instanceof FighterEntity fighter) {
+         float sizeMultiplier = fighter.sizeMultiplier;
+         matrixStack.scale(sizeMultiplier, sizeMultiplier, sizeMultiplier);
+      }
    }
 
-   public void render(FighterEntity entity, float entityYaw, float partialTicks, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLightIn) {
-      this.setModelVisibilities(entity);
-      super.func_225623_a_(entity, entityYaw, partialTicks, matrixStack, buffer, packedLightIn);
+   protected boolean shouldShowName(LivingEntity entity) {
+      return entity.isCustomNameVisible() && super.shouldShowName(entity);
    }
 
-   public void renderCrown(FighterEntity entity, MatrixStack matrixStack, IRenderTypeBuffer buffer) {
-      matrixStack.func_227860_a_();
-      float sizeMultiplier = entity.getSizeMultiplier();
-      matrixStack.func_227862_a_(sizeMultiplier, sizeMultiplier, sizeMultiplier);
-      matrixStack.func_227861_a_(0.0, 2.5, 0.0);
-      float scale = 2.5F;
-      matrixStack.func_227862_a_(scale, scale, scale);
-      matrixStack.func_227863_a_(Vector3f.field_229181_d_.func_229187_a_(entity.field_70173_aa));
-      matrixStack.func_227863_a_(Vector3f.field_229183_f_.func_229187_a_(20.0F));
-      ItemStack itemStack = new ItemStack((IItemProvider)Registry.field_212630_s.func_82594_a(Vault.id("mvp_crown")));
-      IBakedModel ibakedmodel = Minecraft.func_71410_x().func_175599_af().func_184393_a(itemStack, null, null);
-      Minecraft.func_71410_x().func_175599_af().func_229111_a_(itemStack, TransformType.GROUND, true, matrixStack, buffer, 15728864, 655360, ibakedmodel);
-      matrixStack.func_227865_b_();
-   }
-
-   public Vector3d getRenderOffset(FighterEntity entityIn, float partialTicks) {
-      return entityIn.func_213453_ef() ? new Vector3d(0.0, -0.125, 0.0) : super.func_225627_b_(entityIn, partialTicks);
-   }
-
-   private void setModelVisibilities(FighterEntity clientPlayer) {
-      FighterModel playermodel = (FighterModel)this.func_217764_d();
-      if (clientPlayer.func_175149_v()) {
-         playermodel.func_178719_a(false);
-         playermodel.field_78116_c.field_78806_j = true;
-         playermodel.field_178720_f.field_78806_j = true;
-      } else {
-         playermodel.func_178719_a(true);
-         playermodel.field_228270_o_ = clientPlayer.func_213453_ef();
-         ArmPose bipedmodel$armpose = func_241741_a_(clientPlayer, Hand.MAIN_HAND);
-         ArmPose bipedmodel$armpose1 = func_241741_a_(clientPlayer, Hand.OFF_HAND);
-         if (bipedmodel$armpose.func_241657_a_()) {
-            bipedmodel$armpose1 = clientPlayer.func_184592_cb().func_190926_b() ? ArmPose.EMPTY : ArmPose.ITEM;
+   public void render(LivingEntity entity, float entityYaw, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int packedLightIn) {
+      if (entity instanceof FighterEntity fighterEntity) {
+         this.setModelVisibilities(fighterEntity);
+         if (fighterEntity.hasSkin()) {
+            if (fighterEntity.isSlimSkin()) {
+               this.model = this.playerSlimModel;
+            } else {
+               this.model = this.playerModel;
+            }
+         } else {
+            this.model = this.thisModel;
          }
 
-         if (clientPlayer.func_184591_cq() == HandSide.RIGHT) {
-            playermodel.field_187076_m = bipedmodel$armpose;
-            playermodel.field_187075_l = bipedmodel$armpose1;
+         this.armorLayer.setSlim(fighterEntity.hasSkin() && fighterEntity.isSlimSkin());
+         super.render(fighterEntity, entityYaw, partialTicks, matrixStack, buffer, packedLightIn);
+      }
+   }
+
+   public Vec3 getRenderOffset(FighterEntity entityIn, float partialTicks) {
+      return entityIn.isCrouching() ? new Vec3(0.0, -0.125, 0.0) : super.getRenderOffset(entityIn, partialTicks);
+   }
+
+   private void setModelVisibilities(LivingEntity entity) {
+      if (entity instanceof FighterEntity fighterEntity) {
+         if (fighterEntity.hasSkin()) {
+            if (fighterEntity.isSlimSkin()) {
+               setVisibilities(this.playerSlimModel, fighterEntity);
+            } else {
+               setVisibilities(this.playerModel, fighterEntity);
+            }
          } else {
-            playermodel.field_187076_m = bipedmodel$armpose1;
-            playermodel.field_187075_l = bipedmodel$armpose;
+            HumanoidModel model = (HumanoidModel)this.getModel();
+            if (model instanceof FighterModel fighterModel) {
+               if (fighterEntity.isSpectator()) {
+                  fighterModel.setAllVisible(false);
+                  fighterModel.head.visible = true;
+                  fighterModel.hat.visible = true;
+               } else {
+                  fighterModel.setAllVisible(true);
+                  fighterModel.crouching = fighterEntity.isCrouching();
+                  ArmPose bipedmodel$armpose = getArmPose(fighterEntity, InteractionHand.MAIN_HAND);
+                  ArmPose bipedmodel$armpose1 = getArmPose(fighterEntity, InteractionHand.OFF_HAND);
+                  if (bipedmodel$armpose.isTwoHanded()) {
+                     bipedmodel$armpose1 = fighterEntity.getOffhandItem().isEmpty() ? ArmPose.EMPTY : ArmPose.ITEM;
+                  }
+
+                  if (fighterEntity.getMainArm() == HumanoidArm.RIGHT) {
+                     fighterModel.rightArmPose = bipedmodel$armpose;
+                     fighterModel.leftArmPose = bipedmodel$armpose1;
+                  } else {
+                     fighterModel.rightArmPose = bipedmodel$armpose1;
+                     fighterModel.leftArmPose = bipedmodel$armpose;
+                  }
+               }
+            }
          }
       }
    }
 
-   private static ArmPose func_241741_a_(FighterEntity p_241741_0_, Hand p_241741_1_) {
-      ItemStack itemstack = p_241741_0_.func_184586_b(p_241741_1_);
-      if (itemstack.func_190926_b()) {
+   private static void setVisibilities(PlayerModel<?> playerModel, LivingEntity entity) {
+      playerModel.setAllVisible(true);
+      playerModel.hat.visible = true;
+      playerModel.jacket.visible = true;
+      playerModel.leftPants.visible = true;
+      playerModel.rightPants.visible = true;
+      playerModel.leftSleeve.visible = true;
+      playerModel.rightSleeve.visible = true;
+      playerModel.crouching = entity.isCrouching();
+      ArmPose mainArmPose = getArmPose(entity, InteractionHand.MAIN_HAND);
+      ArmPose offHandPose = getArmPose(entity, InteractionHand.OFF_HAND);
+      if (mainArmPose.isTwoHanded()) {
+         offHandPose = entity.getOffhandItem().isEmpty() ? ArmPose.EMPTY : ArmPose.ITEM;
+      }
+
+      if (entity.getMainArm() == HumanoidArm.RIGHT) {
+         playerModel.rightArmPose = mainArmPose;
+         playerModel.leftArmPose = offHandPose;
+      } else {
+         playerModel.rightArmPose = offHandPose;
+         playerModel.leftArmPose = mainArmPose;
+      }
+   }
+
+   private static ArmPose getArmPose(LivingEntity entity, InteractionHand hand) {
+      ItemStack itemstack = entity.getItemInHand(hand);
+      if (itemstack.isEmpty()) {
          return ArmPose.EMPTY;
       } else {
-         if (p_241741_0_.func_184600_cs() == p_241741_1_ && p_241741_0_.func_184605_cv() > 0) {
-            UseAction useaction = itemstack.func_77975_n();
-            if (useaction == UseAction.BLOCK) {
+         if (entity.getUsedItemHand() == hand && entity.getUseItemRemainingTicks() > 0) {
+            UseAnim useaction = itemstack.getUseAnimation();
+            if (useaction == UseAnim.BLOCK) {
                return ArmPose.BLOCK;
             }
 
-            if (useaction == UseAction.BOW) {
+            if (useaction == UseAnim.BOW) {
                return ArmPose.BOW_AND_ARROW;
             }
 
-            if (useaction == UseAction.SPEAR) {
+            if (useaction == UseAnim.SPEAR) {
                return ArmPose.THROW_SPEAR;
             }
 
-            if (useaction == UseAction.CROSSBOW && p_241741_1_ == p_241741_0_.func_184600_cs()) {
+            if (useaction == UseAnim.CROSSBOW && hand == entity.getUsedItemHand()) {
                return ArmPose.CROSSBOW_CHARGE;
             }
-         } else if (!p_241741_0_.field_82175_bq && itemstack.func_77973_b() == Items.field_222114_py && CrossbowItem.func_220012_d(itemstack)) {
+         } else if (!entity.swinging && itemstack.getItem() == Items.CROSSBOW && CrossbowItem.isCharged(itemstack)) {
             return ArmPose.CROSSBOW_HOLD;
          }
 
@@ -136,92 +184,53 @@ public class FighterRenderer extends LivingRenderer<FighterEntity, FighterModel>
       }
    }
 
-   public ResourceLocation getEntityTexture(FighterEntity entity) {
-      return entity.getLocationSkin();
-   }
+   public ResourceLocation getTextureLocation(LivingEntity entity) {
+      if (entity instanceof FighterEntity fighterEntity) {
+         if (fighterEntity.hasSkin()) {
+            return fighterEntity.getLocationSkin();
+         } else {
+            for (int i = 0; i < ModEntities.VAULT_FIGHTER_TYPES.size(); i++) {
+               if (fighterEntity.getType().equals(ModEntities.VAULT_FIGHTER_TYPES.get(i))) {
+                  return VaultMod.id("textures/entity/fighter/vaultfightert" + i + ".png");
+               }
+            }
 
-   protected void preRenderCallback(AbstractClientPlayerEntity entitylivingbaseIn, MatrixStack matrixStackIn, float partialTickTime) {
-      float f = 0.9375F;
-      matrixStackIn.func_227862_a_(0.9375F, 0.9375F, 0.9375F);
-   }
-
-   protected void renderName(FighterEntity entityIn, ITextComponent displayNameIn, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
-      double d0 = this.field_76990_c.func_229099_b_(entityIn);
-      matrixStackIn.func_227860_a_();
-      super.func_225629_a_(entityIn, displayNameIn, matrixStackIn, bufferIn, packedLightIn);
-      matrixStackIn.func_227865_b_();
-   }
-
-   public void renderRightArm(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, FighterEntity playerIn) {
-      this.renderItem(
-         matrixStackIn,
-         bufferIn,
-         combinedLightIn,
-         playerIn,
-         ((FighterModel)this.field_77045_g).field_178723_h,
-         ((FighterModel)this.field_77045_g).field_178732_b
-      );
-   }
-
-   public void renderLeftArm(MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int combinedLightIn, FighterEntity playerIn) {
-      this.renderItem(
-         matrixStackIn,
-         bufferIn,
-         combinedLightIn,
-         playerIn,
-         ((FighterModel)this.field_77045_g).field_178724_i,
-         ((FighterModel)this.field_77045_g).field_178734_a
-      );
-   }
-
-   private void renderItem(
-      MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int combinedLight, FighterEntity entity, ModelRenderer rendererArm, ModelRenderer rendererArmWear
-   ) {
-      FighterModel playermodel = (FighterModel)this.func_217764_d();
-      this.setModelVisibilities(entity);
-      playermodel.field_217112_c = 0.0F;
-      playermodel.field_228270_o_ = false;
-      playermodel.field_205061_a = 0.0F;
-      playermodel.func_225597_a_(entity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
-      rendererArm.field_78795_f = 0.0F;
-      rendererArm.func_228308_a_(
-         matrixStackIn, buffer.getBuffer(RenderType.func_228634_a_(this.getEntityTexture(entity))), combinedLight, OverlayTexture.field_229196_a_
-      );
-      rendererArmWear.field_78795_f = 0.0F;
-      rendererArmWear.func_228308_a_(
-         matrixStackIn, buffer.getBuffer(RenderType.func_228644_e_(this.getEntityTexture(entity))), combinedLight, OverlayTexture.field_229196_a_
-      );
-   }
-
-   protected void applyRotations(FighterEntity entityLiving, MatrixStack matrixStack, float ageInTicks, float rotationYaw, float partialTicks) {
-      float f = entityLiving.func_205015_b(partialTicks);
-      if (entityLiving.func_184613_cA()) {
-         super.func_225621_a_(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
-         float f1 = entityLiving.func_184599_cB() + partialTicks;
-         float f2 = MathHelper.func_76131_a(f1 * f1 / 100.0F, 0.0F, 1.0F);
-         if (!entityLiving.func_204805_cN()) {
-            matrixStack.func_227863_a_(Vector3f.field_229179_b_.func_229187_a_(f2 * (-90.0F - entityLiving.field_70125_A)));
-         }
-
-         Vector3d vector3d = entityLiving.func_70676_i(partialTicks);
-         Vector3d vector3d1 = entityLiving.func_213322_ci();
-         double d0 = Entity.func_213296_b(vector3d1);
-         double d1 = Entity.func_213296_b(vector3d);
-         if (d0 > 0.0 && d1 > 0.0) {
-            double d2 = (vector3d1.field_72450_a * vector3d.field_72450_a + vector3d1.field_72449_c * vector3d.field_72449_c) / Math.sqrt(d0 * d1);
-            double d3 = vector3d1.field_72450_a * vector3d.field_72449_c - vector3d1.field_72449_c * vector3d.field_72450_a;
-            matrixStack.func_227863_a_(Vector3f.field_229181_d_.func_229193_c_((float)(Math.signum(d3) * Math.acos(d2))));
-         }
-      } else if (f > 0.0F) {
-         super.func_225621_a_(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
-         float f3 = entityLiving.func_70090_H() ? -90.0F - entityLiving.field_70125_A : -90.0F;
-         float f4 = MathHelper.func_219799_g(f, 0.0F, f3);
-         matrixStack.func_227863_a_(Vector3f.field_229179_b_.func_229187_a_(f4));
-         if (entityLiving.func_213314_bj()) {
-            matrixStack.func_227861_a_(0.0, -1.0, 0.3F);
+            return fighterEntity.getLocationSkin();
          }
       } else {
-         super.func_225621_a_(entityLiving, matrixStack, ageInTicks, rotationYaw, partialTicks);
+         return MissingTextureAtlasSprite.getLocation();
+      }
+   }
+
+   protected void setupRotations(LivingEntity entity, PoseStack matrixStack, float age, float yaw, float pTicks) {
+      float f = entity.getSwimAmount(pTicks);
+      if (entity.isFallFlying()) {
+         super.setupRotations(entity, matrixStack, age, yaw, pTicks);
+         float f1 = entity.getFallFlyingTicks() + pTicks;
+         float f2 = Mth.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
+         if (!entity.isAutoSpinAttack()) {
+            matrixStack.mulPose(Vector3f.XP.rotationDegrees(f2 * (-90.0F - entity.getXRot())));
+         }
+
+         Vec3 vec3 = entity.getViewVector(pTicks);
+         Vec3 vec31 = entity.getDeltaMovement();
+         double d0 = vec31.horizontalDistanceSqr();
+         double d1 = vec3.horizontalDistanceSqr();
+         if (d0 > 0.0 && d1 > 0.0) {
+            double d2 = (vec31.x * vec3.x + vec31.z * vec3.z) / Math.sqrt(d0 * d1);
+            double d3 = vec31.x * vec3.z - vec31.z * vec3.x;
+            matrixStack.mulPose(Vector3f.YP.rotation((float)(Math.signum(d3) * Math.acos(d2))));
+         }
+      } else if (f > 0.0F) {
+         super.setupRotations(entity, matrixStack, age, yaw, pTicks);
+         float f3 = entity.isInWater() ? -90.0F - entity.getXRot() : -90.0F;
+         float f4 = Mth.lerp(f, 0.0F, f3);
+         matrixStack.mulPose(Vector3f.XP.rotationDegrees(f4));
+         if (entity.isVisuallySwimming()) {
+            matrixStack.translate(0.0, -1.0, 0.3F);
+         }
+      } else {
+         super.setupRotations(entity, matrixStack, age, yaw, pTicks);
       }
    }
 }

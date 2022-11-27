@@ -7,8 +7,8 @@ public class VeinMinerFortuneConfig extends VeinMinerConfig {
    @Expose
    private final int additionalFortuneLevel;
 
-   public VeinMinerFortuneConfig(int cost, int blockLimit, int additionalFortuneLevel) {
-      super(cost, blockLimit);
+   public VeinMinerFortuneConfig(int learningCost, int regretCost, int cooldownTicks, int levelRequirement, int blockLimit, int additionalFortuneLevel) {
+      super(learningCost, regretCost, cooldownTicks, levelRequirement, blockLimit);
       this.additionalFortuneLevel = additionalFortuneLevel;
    }
 

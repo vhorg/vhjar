@@ -3,6 +3,7 @@ package iskallia.vault.config.entry;
 import com.google.gson.annotations.Expose;
 import java.awt.Color;
 import javax.annotation.Nullable;
+import net.minecraft.resources.ResourceLocation;
 
 public class ResearchGroupStyle {
    @Expose
@@ -20,7 +21,7 @@ public class ResearchGroupStyle {
    @Expose
    protected int boxHeight = 0;
    @Expose
-   protected ResearchGroupStyle.Icon icon = null;
+   protected ResourceLocation icon = null;
 
    public static ResearchGroupStyle.Builder builder(String group) {
       return new ResearchGroupStyle.Builder(group);
@@ -55,7 +56,7 @@ public class ResearchGroupStyle {
    }
 
    @Nullable
-   public ResearchGroupStyle.Icon getIcon() {
+   public ResourceLocation getIcon() {
       return this.icon;
    }
 
@@ -88,33 +89,13 @@ public class ResearchGroupStyle {
          return this;
       }
 
-      public ResearchGroupStyle.Builder withIcon(int u, int v) {
-         this.groupStyle.icon = new ResearchGroupStyle.Icon(u, v);
+      public ResearchGroupStyle.Builder withIcon(ResourceLocation icon) {
+         this.groupStyle.icon = icon;
          return this;
       }
 
       public ResearchGroupStyle build() {
          return this.groupStyle;
-      }
-   }
-
-   public static class Icon {
-      @Expose
-      private final int u;
-      @Expose
-      private final int v;
-
-      private Icon(int u, int v) {
-         this.u = u;
-         this.v = v;
-      }
-
-      public int getU() {
-         return this.u;
-      }
-
-      public int getV() {
-         return this.v;
       }
    }
 }

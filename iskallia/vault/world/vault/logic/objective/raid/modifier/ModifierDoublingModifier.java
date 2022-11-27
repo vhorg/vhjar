@@ -2,12 +2,12 @@ package iskallia.vault.world.vault.logic.objective.raid.modifier;
 
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.raid.ActiveRaid;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Mob;
 
 public class ModifierDoublingModifier extends RaidModifier {
    public ModifierDoublingModifier(String name) {
@@ -15,15 +15,15 @@ public class ModifierDoublingModifier extends RaidModifier {
    }
 
    @Override
-   public void affectRaidMob(MobEntity mob, float value) {
+   public void affectRaidMob(Mob mob, float value) {
    }
 
    @Override
-   public void onVaultRaidFinish(VaultRaid vault, ServerWorld world, BlockPos controller, ActiveRaid raid, float value) {
+   public void onVaultRaidFinish(VaultRaid vault, ServerLevel world, BlockPos controller, ActiveRaid raid, float value) {
    }
 
    @Override
-   public ITextComponent getDisplay(float value) {
-      return new StringTextComponent("Doubles values of all existing modifiers").func_240699_a_(TextFormatting.GREEN);
+   public Component getDisplay(float value) {
+      return new TextComponent("Doubles values of all existing modifiers").withStyle(ChatFormatting.GREEN);
    }
 }

@@ -1,10 +1,10 @@
 package iskallia.vault.config.entry;
 
 import com.google.gson.annotations.Expose;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.IItemProvider;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 
 public class ItemEntry extends SingleItemEntry {
    @Expose
@@ -15,22 +15,22 @@ public class ItemEntry extends SingleItemEntry {
       this.AMOUNT = amount;
    }
 
-   public ItemEntry(ResourceLocation key, int amount, CompoundNBT nbt) {
+   public ItemEntry(ResourceLocation key, int amount, CompoundTag nbt) {
       this(key.toString(), amount, nbt.toString());
    }
 
-   public ItemEntry(IItemProvider item, int amount) {
-      this(item.func_199767_j().getRegistryName(), amount, new CompoundNBT());
+   public ItemEntry(ItemLike item, int amount) {
+      this(item.asItem().getRegistryName(), amount, new CompoundTag());
    }
 
    public ItemEntry(ItemStack itemStack) {
-      this(itemStack.func_77973_b().getRegistryName(), itemStack.func_190916_E(), itemStack.func_196082_o());
+      this(itemStack.getItem().getRegistryName(), itemStack.getCount(), itemStack.getOrCreateTag());
    }
 
    @Override
    public ItemStack createItemStack() {
       ItemStack stack = super.createItemStack();
-      stack.func_190920_e(this.AMOUNT);
+      stack.setCount(this.AMOUNT);
       return stack;
    }
 }

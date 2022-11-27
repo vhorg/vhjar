@@ -1,7 +1,0 @@
-{
-	"parent": "item/generated",
-	"textures": {
-		"layer0": "the_vault:item/leggings/knight_2_leggings",
-		"layer1": "the_vault:item/leggings/knight_2_leggings_overlay"
-	}
-}

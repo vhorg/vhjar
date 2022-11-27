@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "the_vault:block/vault_crate"
+      "model": "the_vault:block/vault_crate_boss"
     }
   }
 }

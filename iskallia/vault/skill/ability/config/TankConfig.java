@@ -1,25 +1,41 @@
 package iskallia.vault.skill.ability.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.init.ModEffects;
+import iskallia.vault.skill.ability.config.spi.AbstractToggleManaConfig;
 
-public class TankConfig extends EffectConfig {
+public class TankConfig extends AbstractToggleManaConfig {
    @Expose
-   private final int durationTicks;
+   private final int durationTicksPerHit;
    @Expose
-   private final float damageReductionPercent;
+   private final float resistancePercentAddedPerHit;
+   @Expose
+   private final float resistancePercentCap;
 
-   public TankConfig(int cost, int durationTicks, float damageReductionPercent) {
-      super(cost, ModEffects.TANK, 0, EffectConfig.Type.ICON_ONLY, AbilityConfig.Behavior.RELEASE_TO_PERFORM);
-      this.durationTicks = durationTicks;
-      this.damageReductionPercent = damageReductionPercent;
+   public TankConfig(
+      int learningCost,
+      int regretCost,
+      int cooldownTicks,
+      int levelRequirement,
+      float manaCostPerSecond,
+      int durationTicksPerHit,
+      float resistancePercentAddedPerHit,
+      float resistancePercentCap
+   ) {
+      super(learningCost, regretCost, cooldownTicks, levelRequirement, manaCostPerSecond);
+      this.durationTicksPerHit = durationTicksPerHit;
+      this.resistancePercentAddedPerHit = resistancePercentAddedPerHit;
+      this.resistancePercentCap = resistancePercentCap;
    }
 
-   public int getDurationTicks() {
-      return this.durationTicks;
+   public int getDurationTicksPerHit() {
+      return this.durationTicksPerHit;
    }
 
-   public float getDamageReductionPercent() {
-      return this.damageReductionPercent;
+   public float getResistancePercentAddedPerHit() {
+      return this.resistancePercentAddedPerHit;
+   }
+
+   public float getResistancePercentCap() {
+      return this.resistancePercentCap;
    }
 }

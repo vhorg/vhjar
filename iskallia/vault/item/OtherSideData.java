@@ -1,36 +1,36 @@
 package iskallia.vault.item;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class OtherSideData implements INBTSerializable<CompoundNBT> {
-   private CompoundNBT delegate;
+public class OtherSideData implements INBTSerializable<CompoundTag> {
+   private CompoundTag delegate;
    private BlockPos linkedPos;
-   private RegistryKey<World> linkedDim;
+   private ResourceKey<Level> linkedDim;
 
    public OtherSideData() {
    }
 
    public OtherSideData(ItemStack delegate) {
       if (delegate != null) {
-         this.delegate = delegate.func_196082_o();
-         this.deserializeNBT(this.delegate.func_74775_l("OtherSideData"));
+         this.delegate = delegate.getOrCreateTag();
+         this.deserializeNBT(this.delegate.getCompound("OtherSideData"));
       }
    }
 
-   public CompoundNBT getDelegate() {
+   public CompoundTag getDelegate() {
       return this.delegate;
    }
 
    public void updateDelegate() {
       if (this.delegate != null) {
-         this.delegate.func_218657_a("OtherSideData", this.serializeNBT());
+         this.delegate.put("OtherSideData", this.serializeNBT());
       }
    }
 
@@ -38,7 +38,7 @@ public class OtherSideData implements INBTSerializable<CompoundNBT> {
       return this.linkedPos;
    }
 
-   public RegistryKey<World> getLinkedDim() {
+   public ResourceKey<Level> getLinkedDim() {
       return this.linkedDim;
    }
 
@@ -48,7 +48,7 @@ public class OtherSideData implements INBTSerializable<CompoundNBT> {
       return this;
    }
 
-   public OtherSideData setLinkedDim(RegistryKey<World> linkedDim) {
+   public OtherSideData setLinkedDim(ResourceKey<Level> linkedDim) {
       if (this.linkedDim != (this.linkedDim = linkedDim)) {
          this.updateDelegate();
       }
@@ -56,16 +56,16 @@ public class OtherSideData implements INBTSerializable<CompoundNBT> {
       return this;
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74783_a("LinkedPos", new int[]{this.linkedPos.func_177958_n(), this.linkedPos.func_177956_o(), this.linkedPos.func_177952_p()});
-      nbt.func_74778_a("LinkedDim", this.linkedDim.func_240901_a_().toString());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putIntArray("LinkedPos", new int[]{this.linkedPos.getX(), this.linkedPos.getY(), this.linkedPos.getZ()});
+      nbt.putString("LinkedDim", this.linkedDim.location().toString());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      int[] arr = nbt.func_74759_k("LinkedPos");
+   public void deserializeNBT(CompoundTag nbt) {
+      int[] arr = nbt.getIntArray("LinkedPos");
       this.linkedPos = new BlockPos(arr[0], arr[1], arr[2]);
-      this.linkedDim = RegistryKey.func_240903_a_(Registry.field_239699_ae_, new ResourceLocation(nbt.func_74779_i("LinkedDim")));
+      this.linkedDim = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("LinkedDim")));
    }
 }

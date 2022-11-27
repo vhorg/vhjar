@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " # ",
+        "dsd",
+        " w "
+    ],
+    "key": {
+        "#": {
+            "item": "minecraft:netherite_sword"
+        },
+        "d": {
+            "item": "the_vault:vault_diamond"
+        },
+        "s": {
+            "item": "the_vault:crystal_seal_empty"
+        },
+        "w": {
+            "item": "the_vault:perfect_wutodie"
+        }
+    },
+    "result": {
+        "item": "the_vault:crystal_seal_executioner",
+        "count": 1
+    }
+}

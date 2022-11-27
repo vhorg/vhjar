@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "ingredient": {
+    "item": "the_vault:raw_vault_steak"
+  },
+  "result": "the_vault:cooked_vault_steak",
+  "experience": 0.35,
+  "cookingtime": 600
+}

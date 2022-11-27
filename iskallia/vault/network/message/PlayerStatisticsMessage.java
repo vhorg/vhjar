@@ -2,23 +2,23 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientStatisticsData;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class PlayerStatisticsMessage {
-   private final CompoundNBT statisticsData;
+   private final CompoundTag statisticsData;
 
-   public PlayerStatisticsMessage(CompoundNBT statisticsData) {
+   public PlayerStatisticsMessage(CompoundTag statisticsData) {
       this.statisticsData = statisticsData;
    }
 
-   public static void encode(PlayerStatisticsMessage message, PacketBuffer buffer) {
-      buffer.func_150786_a(message.statisticsData);
+   public static void encode(PlayerStatisticsMessage message, FriendlyByteBuf buffer) {
+      buffer.writeNbt(message.statisticsData);
    }
 
-   public static PlayerStatisticsMessage decode(PacketBuffer buffer) {
-      return new PlayerStatisticsMessage(buffer.func_150793_b());
+   public static PlayerStatisticsMessage decode(FriendlyByteBuf buffer) {
+      return new PlayerStatisticsMessage(buffer.readNbt());
    }
 
    public static void handle(PlayerStatisticsMessage message, Supplier<Context> contextSupplier) {

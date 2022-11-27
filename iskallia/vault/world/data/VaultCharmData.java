@@ -5,52 +5,54 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class VaultCharmData extends WorldSavedData {
+public class VaultCharmData extends SavedData {
    protected static final String DATA_NAME = "the_vault_VaultCharm";
    private final HashMap<UUID, VaultCharmData.VaultCharmInventory> whitelistedItems = new HashMap<>();
 
-   public VaultCharmData() {
-      super("the_vault_VaultCharm");
-   }
-
-   public void updateWhitelist(ServerPlayerEntity player, List<ResourceLocation> ids) {
+   public void updateWhitelist(ServerPlayer player, List<ResourceLocation> ids) {
       VaultCharmData.VaultCharmInventory inventory = this.getInventory(player);
       inventory.updateWhitelist(ids);
-      this.func_76185_a();
+      this.setDirty();
    }
 
-   public void upgradeInventorySize(ServerPlayerEntity player, int newSize) {
+   public void upgradeInventorySize(ServerPlayer player, int newSize) {
       this.getInventory(player).setSize(newSize);
-      this.func_76185_a();
+      this.setDirty();
    }
 
-   public List<ResourceLocation> getWhitelistedItems(ServerPlayerEntity player) {
+   public List<ResourceLocation> getWhitelistedItems(ServerPlayer player) {
       VaultCharmData.VaultCharmInventory inventory = this.getInventory(player);
       return inventory.getWhitelist();
    }
 
-   public VaultCharmData.VaultCharmInventory getInventory(ServerPlayerEntity player) {
-      if (this.whitelistedItems.containsKey(player.func_110124_au())) {
-         return this.whitelistedItems.get(player.func_110124_au());
+   public VaultCharmData.VaultCharmInventory getInventory(ServerPlayer player) {
+      if (this.whitelistedItems.containsKey(player.getUUID())) {
+         return this.whitelistedItems.get(player.getUUID());
       } else {
          VaultCharmData.VaultCharmInventory inventory = new VaultCharmData.VaultCharmInventory();
-         this.whitelistedItems.put(player.func_110124_au(), inventory);
-         this.func_76185_a();
+         this.whitelistedItems.put(player.getUUID(), inventory);
+         this.setDirty();
          return inventory;
       }
    }
 
-   public void func_76184_a(CompoundNBT nbt) {
-      for (String key : nbt.func_150296_c()) {
+   private static VaultCharmData create(CompoundTag tag) {
+      VaultCharmData data = new VaultCharmData();
+      data.load(tag);
+      return data;
+   }
+
+   public void load(CompoundTag nbt) {
+      for (String key : nbt.getAllKeys()) {
          UUID playerId;
          try {
             playerId = UUID.fromString(key);
@@ -58,23 +60,26 @@ public class VaultCharmData extends WorldSavedData {
             continue;
          }
 
-         CompoundNBT inventoryNbt = nbt.func_74775_l(key);
+         CompoundTag inventoryNbt = nbt.getCompound(key);
          VaultCharmData.VaultCharmInventory inventory = new VaultCharmData.VaultCharmInventory();
          inventory.deserializeNBT(inventoryNbt);
          this.whitelistedItems.put(playerId, inventory);
       }
    }
 
-   public CompoundNBT func_189551_b(CompoundNBT compound) {
-      this.whitelistedItems.forEach((uuid, inventory) -> compound.func_218657_a(uuid.toString(), inventory.serializeNBT()));
+   public CompoundTag save(CompoundTag compound) {
+      this.whitelistedItems.forEach((uuid, inventory) -> compound.put(uuid.toString(), inventory.serializeNBT()));
       return compound;
    }
 
-   public static VaultCharmData get(ServerWorld world) {
-      return (VaultCharmData)world.func_73046_m().func_241755_D_().func_217481_x().func_215752_a(VaultCharmData::new, "the_vault_VaultCharm");
+   public static VaultCharmData get(ServerLevel world) {
+      return (VaultCharmData)world.getServer()
+         .overworld()
+         .getDataStorage()
+         .computeIfAbsent(VaultCharmData::create, VaultCharmData::new, "the_vault_VaultCharm");
    }
 
-   public static class VaultCharmInventory implements INBTSerializable<CompoundNBT> {
+   public static class VaultCharmInventory implements INBTSerializable<CompoundTag> {
       private int size;
       private List<ResourceLocation> whitelist = new ArrayList<>();
 
@@ -98,21 +103,21 @@ public class VaultCharmData extends WorldSavedData {
          return this.whitelist;
       }
 
-      public CompoundNBT serializeNBT() {
-         CompoundNBT nbt = new CompoundNBT();
-         ListNBT whitelistNbt = new ListNBT();
-         this.whitelist.forEach(id -> whitelistNbt.add(StringNBT.func_229705_a_(id.toString())));
-         nbt.func_74768_a("InventorySize", this.size);
-         nbt.func_218657_a("Whitelist", whitelistNbt);
+      public CompoundTag serializeNBT() {
+         CompoundTag nbt = new CompoundTag();
+         ListTag whitelistNbt = new ListTag();
+         this.whitelist.forEach(id -> whitelistNbt.add(StringTag.valueOf(id.toString())));
+         nbt.putInt("InventorySize", this.size);
+         nbt.put("Whitelist", whitelistNbt);
          return nbt;
       }
 
-      public void deserializeNBT(CompoundNBT nbt) {
-         this.size = nbt.func_74762_e("InventorySize");
-         ListNBT itemList = nbt.func_150295_c("Whitelist", 8);
+      public void deserializeNBT(CompoundTag nbt) {
+         this.size = nbt.getInt("InventorySize");
+         ListTag itemList = nbt.getList("Whitelist", 8);
 
          for (int i = 0; i < itemList.size(); i++) {
-            this.whitelist.add(new ResourceLocation(itemList.func_150307_f(i)));
+            this.whitelist.add(new ResourceLocation(itemList.getString(i)));
          }
       }
 
@@ -120,7 +125,7 @@ public class VaultCharmData extends WorldSavedData {
          this.whitelist = new ArrayList<>(whitelist);
       }
 
-      public static VaultCharmData.VaultCharmInventory fromNbt(CompoundNBT nbt) {
+      public static VaultCharmData.VaultCharmInventory fromNbt(CompoundTag nbt) {
          VaultCharmData.VaultCharmInventory inventory = new VaultCharmData.VaultCharmInventory();
          inventory.deserializeNBT(nbt);
          return inventory;

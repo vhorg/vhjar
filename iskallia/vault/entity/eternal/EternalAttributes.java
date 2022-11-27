@@ -5,13 +5,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class EternalAttributes implements INBTSerializable<CompoundNBT> {
+public class EternalAttributes implements INBTSerializable<CompoundTag> {
    public static final String HEALTH = "health";
    public static final String DAMAGE = "damage";
    public static final String MOVEMENT_SPEED = "movespeed";
@@ -20,11 +20,11 @@ public class EternalAttributes implements INBTSerializable<CompoundNBT> {
    public EternalAttributes() {
    }
 
-   private EternalAttributes(CompoundNBT tag) {
+   private EternalAttributes(CompoundTag tag) {
       this.deserializeNBT(tag);
    }
 
-   public static EternalAttributes fromNBT(CompoundNBT tag) {
+   public static EternalAttributes fromNBT(CompoundTag tag) {
       return new EternalAttributes(tag);
    }
 
@@ -49,18 +49,18 @@ public class EternalAttributes implements INBTSerializable<CompoundNBT> {
       this.setAttributeValue(attribute, existing + value);
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT tag = new CompoundNBT();
-      this.attributes.forEach((attribute, value) -> tag.func_74776_a(attribute.getRegistryName().toString(), value));
+   public CompoundTag serializeNBT() {
+      CompoundTag tag = new CompoundTag();
+      this.attributes.forEach((attribute, value) -> tag.putFloat(attribute.getRegistryName().toString(), value));
       return tag;
    }
 
-   public void deserializeNBT(CompoundNBT tag) {
+   public void deserializeNBT(CompoundTag tag) {
       this.attributes.clear();
-      tag.func_150296_c().forEach(attributeKey -> {
+      tag.getAllKeys().forEach(attributeKey -> {
          Attribute attr = (Attribute)ForgeRegistries.ATTRIBUTES.getValue(new ResourceLocation(attributeKey));
          if (attr != null) {
-            this.attributes.put(attr, tag.func_74760_g(attributeKey));
+            this.attributes.put(attr, tag.getFloat(attributeKey));
          }
       });
    }

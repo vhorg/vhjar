@@ -3,29 +3,28 @@ package iskallia.vault.item;
 import iskallia.vault.init.ModItems;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.CauldronBlock;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BucketItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item.Properties;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceContext.FluidMode;
-import net.minecraft.util.math.RayTraceResult.Type;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult.Type;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
@@ -37,49 +36,49 @@ import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 
 public class InfiniteWaterBucketItem extends BucketItem {
    public InfiniteWaterBucketItem(ResourceLocation id) {
-      super(() -> Fluids.field_204546_a, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(1));
+      super(() -> Fluids.WATER, new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(1));
       this.setRegistryName(id);
    }
 
    public Fluid getFluid() {
-      return Fluids.field_204546_a;
+      return Fluids.WATER;
    }
 
-   public ActionResult<ItemStack> func_77659_a(World world, PlayerEntity player, Hand hand) {
-      ItemStack itemStack = player.func_184586_b(hand);
-      BlockRayTraceResult rayTraceResult = func_219968_a(world, player, FluidMode.NONE);
-      ActionResult<ItemStack> ret = ForgeEventFactory.onBucketUse(player, world, itemStack, rayTraceResult);
+   public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+      ItemStack itemStack = player.getItemInHand(hand);
+      BlockHitResult rayTraceResult = getPlayerPOVHitResult(world, player, net.minecraft.world.level.ClipContext.Fluid.NONE);
+      InteractionResultHolder<ItemStack> ret = ForgeEventFactory.onBucketUse(player, world, itemStack, rayTraceResult);
       if (ret != null) {
          return ret;
-      } else if (rayTraceResult.func_216346_c() == Type.MISS) {
-         return ActionResult.func_226250_c_(itemStack);
-      } else if (rayTraceResult.func_216346_c() != Type.BLOCK) {
-         return ActionResult.func_226250_c_(itemStack);
+      } else if (rayTraceResult.getType() == Type.MISS) {
+         return InteractionResultHolder.pass(itemStack);
+      } else if (rayTraceResult.getType() != Type.BLOCK) {
+         return InteractionResultHolder.pass(itemStack);
       } else {
-         BlockPos pos = rayTraceResult.func_216350_a();
-         Direction direction = rayTraceResult.func_216354_b();
-         if (world.func_175660_a(player, pos) && player.func_175151_a(pos, direction, itemStack)) {
-            BlockState state = world.func_180495_p(pos);
-            if (state.func_203425_a(Blocks.field_150383_bp)) {
-               int cauldronLevel = (Integer)state.func_177229_b(CauldronBlock.field_176591_a);
+         BlockPos pos = rayTraceResult.getBlockPos();
+         Direction direction = rayTraceResult.getDirection();
+         if (world.mayInteract(player, pos) && player.mayUseItemAt(pos, direction, itemStack)) {
+            BlockState state = world.getBlockState(pos);
+            if (state.is(Blocks.CAULDRON)) {
+               int cauldronLevel = (Integer)state.getValue(BlockStateProperties.LEVEL_CAULDRON);
                if (cauldronLevel < 3) {
-                  player.func_195066_a(Stats.field_188077_K);
-                  world.func_180501_a(pos, (BlockState)state.func_206870_a(CauldronBlock.field_176591_a, 3), 3);
-                  world.func_175666_e(pos, state.func_177230_c());
-                  world.func_184133_a(null, pos, SoundEvents.field_187624_K, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                  player.awardStat(Stats.FILL_CAULDRON);
+                  world.setBlock(pos, (BlockState)state.setValue(BlockStateProperties.LEVEL_CAULDRON, 3), 3);
+                  world.updateNeighbourForOutputSignal(pos, state.getBlock());
+                  world.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
                }
 
-               return ActionResult.func_226248_a_(itemStack);
+               return InteractionResultHolder.success(itemStack);
             } else {
-               return super.func_77659_a(world, player, hand);
+               return super.use(world, player, hand);
             }
          } else {
-            return ActionResult.func_226251_d_(itemStack);
+            return InteractionResultHolder.fail(itemStack);
          }
       }
    }
 
-   public boolean func_77616_k(ItemStack stack) {
+   public boolean isEnchantable(ItemStack stack) {
       return false;
    }
 
@@ -91,15 +90,11 @@ public class InfiniteWaterBucketItem extends BucketItem {
       return false;
    }
 
-   protected ItemStack func_203790_a(ItemStack stack, PlayerEntity player) {
-      return stack;
-   }
-
    public ItemStack getContainerItem(ItemStack itemStack) {
       return new ItemStack(ModItems.INFINITE_WATER_BUCKET);
    }
 
-   public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundNBT nbt) {
+   public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
       return new InfiniteWaterBucketItem.InfiniteWaterBucketHandler(stack);
    }
 
@@ -122,7 +117,7 @@ public class InfiniteWaterBucketItem extends BucketItem {
 
       @Nonnull
       public FluidStack getFluidInTank(int tank) {
-         return new FluidStack(Fluids.field_204546_a, 1000);
+         return new FluidStack(Fluids.WATER, 1000);
       }
 
       public int getTankCapacity(int tank) {
@@ -139,14 +134,12 @@ public class InfiniteWaterBucketItem extends BucketItem {
 
       @Nonnull
       public FluidStack drain(FluidStack resource, FluidAction action) {
-         return !resource.isEmpty() && resource.getFluid() == Fluids.field_204546_a
-            ? new FluidStack(Fluids.field_204546_a, resource.getAmount())
-            : FluidStack.EMPTY;
+         return !resource.isEmpty() && resource.getFluid() == Fluids.WATER ? new FluidStack(Fluids.WATER, resource.getAmount()) : FluidStack.EMPTY;
       }
 
       @Nonnull
       public FluidStack drain(int maxDrain, FluidAction action) {
-         return new FluidStack(Fluids.field_204546_a, maxDrain);
+         return new FluidStack(Fluids.WATER, maxDrain);
       }
 
       @Nonnull

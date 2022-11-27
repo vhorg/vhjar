@@ -1,19 +1,19 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "SAS",
-        "ALA",
-        "SAS"
+        " W ",
+        "TST",
+        " T "
     ],
     "key": {
         "S": {
-            "item": "minecraft:soul_sand"
+            "item": "the_vault:eternal_soul"
         },
-        "A": {
+        "W": {
             "item": "minecraft:wither_skeleton_skull"
         },
-        "L": {
-            "item": "minecraft:soul_lantern"
+        "T": {
+            "item": "minecraft:soul_torch"
         }
     },
     "result": {

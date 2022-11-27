@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "vvv",
+      "vpv",
+      "vvv"
+    ],
+    "key": {
+      "v": {
+        "item": "the_vault:vault_essence"
+      },
+      "p": {
+        "item": "the_vault:perfect_wutodie"
+      }
+    },
+    "result": {
+      "item": "the_vault:wutodic_mass",
+      "count": 1
+    }
+  }

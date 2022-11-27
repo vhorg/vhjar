@@ -1,14 +1,15 @@
 package iskallia.vault.client.vault;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.client.ClientVaultRaidData;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.network.message.VaultOverlayMessage;
+import iskallia.vault.world.data.ServerVaults;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.audio.SimpleSound;
-import net.minecraft.client.audio.SoundHandler;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -17,10 +18,11 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber({Dist.CLIENT})
 public class VaultMusicHandler {
-   public static SimpleSound panicSound;
-   public static SimpleSound ambientLoop;
-   public static SimpleSound ambientSound;
-   public static SimpleSound bossLoop;
+   public static final int PANIC_TICKS_THRESHOLD = 600;
+   public static SimpleSoundInstance panicSound;
+   public static SimpleSoundInstance ambientLoop;
+   public static SimpleSoundInstance ambientSound;
+   public static SimpleSoundInstance bossLoop;
    public static boolean playBossMusic;
    private static int ticksBeforeAmbientSound;
 
@@ -29,13 +31,13 @@ public class VaultMusicHandler {
          stopBossLoop();
       }
 
-      bossLoop = SimpleSound.func_184370_a(ModSounds.VAULT_BOSS_LOOP);
-      Minecraft.func_71410_x().func_147118_V().func_147682_a(bossLoop);
+      bossLoop = SimpleSoundInstance.forMusic(ModSounds.VAULT_BOSS_LOOP);
+      Minecraft.getInstance().getSoundManager().play(bossLoop);
    }
 
    public static void stopBossLoop() {
       if (bossLoop != null) {
-         Minecraft.func_71410_x().func_147118_V().func_147683_b(bossLoop);
+         Minecraft.getInstance().getSoundManager().stop(bossLoop);
          bossLoop = null;
       }
 
@@ -45,41 +47,39 @@ public class VaultMusicHandler {
    @SubscribeEvent
    public static void onTick(ClientTickEvent event) {
       if (event.phase != Phase.START) {
-         Minecraft mc = Minecraft.func_71410_x();
-         SoundHandler sh = mc.func_147118_V();
-         if (mc.field_71441_e == null) {
+         Minecraft mc = Minecraft.getInstance();
+         SoundManager sh = mc.getSoundManager();
+         if (mc.level == null) {
             stopBossLoop();
          } else {
-            boolean inVault = mc.field_71441_e.func_234923_W_() == Vault.VAULT_KEY;
-            if (!inVault) {
+            boolean inVault = ServerVaults.isVaultWorld(mc.level);
+            boolean inArena = mc.level.dimension() == VaultMod.ARENA_KEY;
+            if (!inVault && !inArena) {
                stopBossLoop();
             } else {
                VaultOverlayMessage.OverlayType type = ClientVaultRaidData.getOverlayType();
                if (type == VaultOverlayMessage.OverlayType.VAULT && ClientVaultRaidData.showTimer()) {
                   int remainingTicks = ClientVaultRaidData.getRemainingTicks();
-                  int panicTicks = 600;
                   if (remainingTicks < 600) {
-                     panicSound = playNotActive(
-                        panicSound, () -> SimpleSound.func_184371_a(ModSounds.TIMER_PANIC_TICK_SFX, 2.0F - (float)remainingTicks / panicTicks)
-                     );
+                     panicSound = playNotActive(panicSound, () -> SimpleSoundInstance.forUI(ModSounds.TIMER_PANIC_TICK_SFX, 2.0F - remainingTicks / 600.0F));
                   }
 
                   if (!ClientVaultRaidData.isInBossFight()) {
                      stopBossLoop();
-                  } else if (!sh.func_215294_c(bossLoop)) {
+                  } else if (!sh.isActive(bossLoop)) {
                      startBossLoop();
                   }
 
                   if (ClientVaultRaidData.isInBossFight()) {
                      stopSound(ambientLoop);
                   } else {
-                     ambientLoop = playNotActive(ambientLoop, () -> SimpleSound.func_184370_a(ModSounds.VAULT_AMBIENT_LOOP));
+                     ambientLoop = playNotActive(ambientLoop, () -> SimpleSoundInstance.forMusic(ModSounds.VAULT_AMBIENT_LOOP));
                   }
 
                   if (ticksBeforeAmbientSound < 0) {
                      ambientSound = playNotActive(ambientSound, () -> {
                         ticksBeforeAmbientSound = 3600;
-                        return SimpleSound.func_239530_b_(ModSounds.VAULT_AMBIENT);
+                        return SimpleSoundInstance.forAmbientAddition(ModSounds.VAULT_AMBIENT);
                      });
                   }
 
@@ -90,18 +90,18 @@ public class VaultMusicHandler {
       }
    }
 
-   private static void stopSound(SimpleSound sound) {
-      SoundHandler sh = Minecraft.func_71410_x().func_147118_V();
-      if (sound != null && sh.func_215294_c(sound)) {
-         sh.func_147683_b(sound);
+   private static void stopSound(SimpleSoundInstance sound) {
+      SoundManager sh = Minecraft.getInstance().getSoundManager();
+      if (sound != null && sh.isActive(sound)) {
+         sh.stop(sound);
       }
    }
 
-   private static SimpleSound playNotActive(@Nullable SimpleSound existing, Supplier<SimpleSound> playSound) {
-      Minecraft mc = Minecraft.func_71410_x();
-      if (existing == null || !mc.func_147118_V().func_215294_c(existing)) {
+   private static SimpleSoundInstance playNotActive(@Nullable SimpleSoundInstance existing, Supplier<SimpleSoundInstance> playSound) {
+      Minecraft mc = Minecraft.getInstance();
+      if (existing == null || !mc.getSoundManager().isActive(existing)) {
          existing = playSound.get();
-         mc.func_147118_V().func_147682_a(existing);
+         mc.getSoundManager().play(existing);
       }
 
       return existing;

@@ -1,25 +1,27 @@
 package iskallia.vault.client.gui.overlay.goal;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.client.gui.helper.MobHeadTextures;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.client.vault.goal.VaultScavengerData;
-import iskallia.vault.config.ScavengerHuntConfig;
+import iskallia.vault.config.LegacyScavengerHuntConfig;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
+import iskallia.vault.world.vault.logic.objective.LegacyScavengerHuntObjective;
 import java.util.List;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.client.RenderProperties;
 
 public class ScavengerBarOverlay extends BossBarOverlay {
    private final VaultScavengerData data;
@@ -30,89 +32,89 @@ public class ScavengerBarOverlay extends BossBarOverlay {
 
    @Override
    public boolean shouldDisplay() {
-      List<ScavengerHuntObjective.ItemSubmission> items = this.data.getRequiredItemSubmissions();
+      List<LegacyScavengerHuntObjective.ItemSubmission> items = this.data.getRequiredItemSubmissions();
       return !items.isEmpty();
    }
 
    @Override
-   public int drawOverlay(MatrixStack renderStack, float pTicks) {
-      List<ScavengerHuntObjective.ItemSubmission> items = this.data.getRequiredItemSubmissions();
-      Minecraft mc = Minecraft.func_71410_x();
-      int midX = mc.func_228018_at_().func_198107_o() / 2;
+   public int drawOverlay(PoseStack renderStack, float pTicks) {
+      List<LegacyScavengerHuntObjective.ItemSubmission> items = this.data.getRequiredItemSubmissions();
+      Minecraft mc = Minecraft.getInstance();
+      int midX = mc.getWindow().getGuiScaledWidth() / 2;
       int gapWidth = 7;
       int itemBoxWidth = 32;
       int totalWidth = items.size() * itemBoxWidth + (items.size() - 1) * gapWidth;
       int shiftX = -totalWidth / 2 + itemBoxWidth / 2;
-      mc.func_110434_K().func_110577_a(PlayerContainer.field_226615_c_);
-      renderStack.func_227860_a_();
+      RenderSystem.setShader(GameRenderer::getPositionTexShader);
+      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+      RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+      renderStack.pushPose();
       int yOffset = 0;
-      renderStack.func_227860_a_();
-      renderStack.func_227861_a_(midX + shiftX, itemBoxWidth * 0.75F, 0.0);
+      renderStack.pushPose();
+      renderStack.translate(midX + shiftX, itemBoxWidth * 0.75F, 0.0);
 
-      for (ScavengerHuntObjective.ItemSubmission itemRequirement : items) {
+      for (LegacyScavengerHuntObjective.ItemSubmission itemRequirement : items) {
          int reqYOffset = renderItemRequirement(renderStack, itemRequirement, itemBoxWidth);
          if (reqYOffset > yOffset) {
             yOffset = reqYOffset;
          }
 
-         renderStack.func_227861_a_(itemBoxWidth + gapWidth, 0.0, 0.0);
+         renderStack.translate(itemBoxWidth + gapWidth, 0.0, 0.0);
       }
 
-      renderStack.func_227865_b_();
+      renderStack.popPose();
       return yOffset;
    }
 
-   private static int renderItemRequirement(MatrixStack renderStack, ScavengerHuntObjective.ItemSubmission itemRequirement, int itemBoxWidth) {
-      Minecraft mc = Minecraft.func_71410_x();
-      FontRenderer fr = mc.field_71466_p;
+   private static int renderItemRequirement(PoseStack renderStack, LegacyScavengerHuntObjective.ItemSubmission itemRequirement, int itemBoxWidth) {
+      Minecraft mc = Minecraft.getInstance();
+      Font fr = mc.font;
       ItemStack requiredStack = new ItemStack(itemRequirement.getRequiredItem());
-      ScavengerHuntConfig.SourceType source = ModConfigs.SCAVENGER_HUNT.getRequirementSource(requiredStack);
-      ResourceLocation iconPath = source == ScavengerHuntConfig.SourceType.MOB
-         ? MobHeadTextures.get(ModConfigs.SCAVENGER_HUNT.getRequirementMobType(requiredStack)).orElse(source.getIconPath())
+      LegacyScavengerHuntConfig.SourceType source = ModConfigs.LEGACY_SCAVENGER_HUNT.getRequirementSource(requiredStack);
+      ResourceLocation iconPath = source == LegacyScavengerHuntConfig.SourceType.MOB
+         ? MobHeadTextures.get(ModConfigs.LEGACY_SCAVENGER_HUNT.getRequirementMobType(requiredStack)).orElse(source.getIconPath())
          : source.getIconPath();
-      renderStack.func_227860_a_();
-      renderStack.func_227861_a_(0.0, -itemBoxWidth / 2.0F, 0.0);
+      renderStack.pushPose();
+      renderStack.translate(0.0, -itemBoxWidth / 2.0F, 0.0);
       renderItemStack(renderStack, requiredStack);
-      RenderSystem.enableBlend();
-      RenderSystem.defaultBlendFunc();
-      mc.func_110434_K().func_110577_a(iconPath);
-      renderStack.func_227860_a_();
-      renderStack.func_227861_a_(-16.0, -2.4, 0.0);
-      renderStack.func_227862_a_(0.4F, 0.4F, 1.0F);
-      ScreenDrawHelper.drawQuad(buf -> ScreenDrawHelper.rect(buf, renderStack).dim(16.0F, 16.0F).draw());
-      renderStack.func_227865_b_();
-      RenderSystem.disableBlend();
-      renderStack.func_227861_a_(0.0, 10.0, 0.0);
+      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+      RenderSystem.setShaderTexture(0, iconPath);
+      renderStack.pushPose();
+      renderStack.translate(-16.0, -2.4, 0.0);
+      renderStack.scale(0.4F, 0.4F, 1.0F);
+      ScreenDrawHelper.drawTexturedQuads(buf -> ScreenDrawHelper.rect(buf, renderStack).dim(16.0F, 16.0F).draw());
+      renderStack.popPose();
+      renderStack.translate(0.0, 10.0, 0.0);
       String requiredText = itemRequirement.getCurrentAmount() + "/" + itemRequirement.getRequiredAmount();
-      IFormattableTextComponent cmp = new StringTextComponent(requiredText).func_240699_a_(TextFormatting.GREEN);
+      MutableComponent cmp = new TextComponent(requiredText).withStyle(ChatFormatting.GREEN);
       UIHelper.renderCenteredWrappedText(renderStack, cmp, 30, 0);
-      renderStack.func_227861_a_(0.0, 10.0, 0.0);
-      renderStack.func_227860_a_();
-      renderStack.func_227862_a_(0.5F, 0.5F, 1.0F);
-      ITextComponent name = requiredStack.func_200301_q();
-      IFormattableTextComponent display = name.func_230532_e_().func_240699_a_(source.getRequirementColor());
+      renderStack.translate(0.0, 10.0, 0.0);
+      renderStack.pushPose();
+      renderStack.scale(0.5F, 0.5F, 1.0F);
+      Component name = requiredStack.getHoverName();
+      MutableComponent display = name.copy().withStyle(source.getRequirementColor());
       int lines = UIHelper.renderCenteredWrappedText(renderStack, display, 60, 0);
-      renderStack.func_227865_b_();
-      renderStack.func_227865_b_();
+      renderStack.popPose();
+      renderStack.popPose();
       return 25 + lines * 5;
    }
 
-   private static void renderItemStack(MatrixStack renderStack, ItemStack item) {
-      Minecraft mc = Minecraft.func_71410_x();
-      ItemRenderer ir = mc.func_175599_af();
-      FontRenderer fr = item.func_77973_b().getFontRenderer(item);
+   private static void renderItemStack(PoseStack renderStack, ItemStack item) {
+      Minecraft mc = Minecraft.getInstance();
+      ItemRenderer ir = mc.getItemRenderer();
+      Font fr = RenderProperties.get(item).getFont(item);
       if (fr == null) {
-         fr = mc.field_71466_p;
+         fr = mc.font;
       }
 
-      renderStack.func_227861_a_(-8.0, -8.0, 0.0);
-      RenderSystem.pushMatrix();
-      RenderSystem.multMatrix(renderStack.func_227866_c_().func_227870_a_());
-      ir.field_77023_b = 200.0F;
-      ir.func_180450_b(item, 0, 0);
-      ir.func_180453_a(fr, item, 0, 0, null);
-      ir.field_77023_b = 0.0F;
-      RenderSystem.popMatrix();
-      renderStack.func_227861_a_(8.0, 8.0, 0.0);
+      renderStack.translate(-8.0, -8.0, 0.0);
+      renderStack.pushPose();
+      renderStack.mulPoseMatrix(renderStack.last().pose());
+      ir.blitOffset = 200.0F;
+      ir.renderAndDecorateItem(item, 0, 0);
+      ir.renderGuiItemDecorations(fr, item, 0, 0, null);
+      ir.blitOffset = 0.0F;
+      renderStack.popPose();
+      renderStack.translate(8.0, 8.0, 0.0);
    }
 }

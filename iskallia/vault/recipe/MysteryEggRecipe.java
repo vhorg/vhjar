@@ -2,31 +2,31 @@ package iskallia.vault.recipe;
 
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModRecipes;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 
-public class MysteryEggRecipe extends SpecialRecipe {
+public class MysteryEggRecipe extends CustomRecipe {
    public MysteryEggRecipe(ResourceLocation id) {
       super(id);
    }
 
-   public boolean matches(CraftingInventory inv, World world) {
+   public boolean matches(CraftingContainer inv, Level world) {
       int foundEggs = 0;
       int foundAlex = 0;
 
-      for (int i = 0; i < inv.func_70302_i_(); i++) {
-         ItemStack stack = inv.func_70301_a(i);
-         if (!stack.func_190926_b()) {
-            if (stack.func_77973_b() == ModItems.ALEXANDRITE_GEM) {
+      for (int i = 0; i < inv.getContainerSize(); i++) {
+         ItemStack stack = inv.getItem(i);
+         if (!stack.isEmpty()) {
+            if (stack.getItem() == ModItems.PERFECT_WUTODIE) {
                foundAlex++;
             }
 
-            if (stack.func_77973_b() instanceof SpawnEggItem) {
+            if (stack.getItem() instanceof SpawnEggItem) {
                foundEggs++;
             }
          }
@@ -35,15 +35,15 @@ public class MysteryEggRecipe extends SpecialRecipe {
       return foundEggs == 4 && foundAlex == 1;
    }
 
-   public ItemStack getCraftingResult(CraftingInventory inv) {
+   public ItemStack assemble(CraftingContainer inv) {
       return new ItemStack(ModItems.MYSTERY_EGG, 4);
    }
 
-   public boolean func_194133_a(int width, int height) {
+   public boolean canCraftInDimensions(int width, int height) {
       return width * height >= 5;
    }
 
-   public IRecipeSerializer<?> func_199559_b() {
+   public RecipeSerializer<?> getSerializer() {
       return ModRecipes.Serializer.MYSTERY_EGG_RECIPE;
    }
 }

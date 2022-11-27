@@ -1,34 +1,34 @@
 package iskallia.vault.world.vault.time.extension;
 
-import iskallia.vault.Vault;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import iskallia.vault.VaultMod;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 public class FallbackExtension extends TimeExtension {
-   public static final ResourceLocation ID = Vault.id("fallback");
-   protected CompoundNBT fallback;
+   public static final ResourceLocation ID = VaultMod.id("fallback");
+   protected CompoundTag fallback;
 
    public FallbackExtension() {
    }
 
-   public FallbackExtension(CompoundNBT fallback) {
+   public FallbackExtension(CompoundTag fallback) {
       super(ID, 0L);
       this.deserializeNBT(fallback);
    }
 
-   public CompoundNBT getFallback() {
+   public CompoundTag getFallback() {
       return this.fallback;
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
+   public CompoundTag serializeNBT() {
       return this.fallback;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       this.fallback = nbt;
-      this.extraTime = this.getFallback().func_74763_f("ExtraTime");
-      this.executionTime = this.getFallback().func_74763_f("ExecutionTime");
+      this.extraTime = this.getFallback().getLong("ExtraTime");
+      this.executionTime = this.getFallback().getLong("ExecutionTime");
    }
 }

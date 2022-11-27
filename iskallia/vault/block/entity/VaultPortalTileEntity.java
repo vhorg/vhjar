@@ -2,38 +2,39 @@ package iskallia.vault.block.entity;
 
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.crystal.CrystalData;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
+import iskallia.vault.world.data.ServerVaults;
+import java.util.UUID;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
 
-public class VaultPortalTileEntity extends TileEntity {
-   private CrystalData data;
+public class VaultPortalTileEntity extends BlockEntity {
+   private CrystalData data = new CrystalData();
 
-   public VaultPortalTileEntity() {
-      super(ModBlocks.VAULT_PORTAL_TILE_ENTITY);
+   public VaultPortalTileEntity(BlockPos pos, BlockState state) {
+      super(ModBlocks.VAULT_PORTAL_TILE_ENTITY, pos, state);
    }
 
    public void sendUpdates() {
-      this.field_145850_b.func_184138_a(this.field_174879_c, this.func_195044_w(), this.func_195044_w(), 3);
-      this.field_145850_b.func_195593_d(this.field_174879_c, this.func_195044_w().func_177230_c());
-      this.func_70296_d();
+      this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
+      this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
+      this.setChanged();
    }
 
-   public CompoundNBT func_189515_b(CompoundNBT compound) {
-      if (this.data != null) {
-         compound.func_218657_a("Data", this.data.serializeNBT());
-      }
-
-      return super.func_189515_b(compound);
+   protected void saveAdditional(@NotNull CompoundTag nbt) {
+      super.saveAdditional(nbt);
+      nbt.put("Data", this.data.serializeNBT());
    }
 
-   public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-      if (nbt.func_150297_b("Data", 10)) {
-         this.data = new CrystalData(null);
-         this.data.deserializeNBT(nbt.func_74775_l("Data"));
+   public void load(@NotNull CompoundTag nbt) {
+      super.load(nbt);
+      if (nbt.contains("Data", 10)) {
+         this.data.deserializeNBT(nbt.getCompound("Data"));
       }
-
-      super.func_230337_a_(state, nbt);
    }
 
    public CrystalData getData() {
@@ -42,6 +43,15 @@ public class VaultPortalTileEntity extends TileEntity {
 
    public void setCrystalData(CrystalData data) {
       this.data = data;
-      this.func_70296_d();
+      this.setChanged();
+   }
+
+   public static void tick(Level level, BlockPos pos, BlockState state, VaultPortalTileEntity te) {
+      UUID vaultId = te.getData().getVaultId();
+      if (vaultId != null) {
+         if (ServerVaults.get(vaultId).isEmpty()) {
+            level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+         }
+      }
    }
 }

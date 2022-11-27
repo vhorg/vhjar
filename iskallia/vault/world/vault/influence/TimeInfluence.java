@@ -1,16 +1,16 @@
 package iskallia.vault.world.vault.influence;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.time.extension.ModifierExtension;
 import java.util.Random;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 
 public class TimeInfluence extends VaultInfluence {
-   public static final ResourceLocation ID = Vault.id("time");
+   public static final ResourceLocation ID = VaultMod.id("time");
    private int timeChange;
 
    TimeInfluence() {
@@ -23,25 +23,25 @@ public class TimeInfluence extends VaultInfluence {
    }
 
    @Override
-   public void apply(VaultRaid vault, VaultPlayer player, ServerWorld world, Random random) {
+   public void apply(VaultRaid vault, VaultPlayer player, ServerLevel world, Random random) {
       player.getTimer().addTime(new ModifierExtension(this.timeChange), 0);
    }
 
    @Override
-   public void remove(VaultRaid vault, VaultPlayer player, ServerWorld world, Random random) {
+   public void remove(VaultRaid vault, VaultPlayer player, ServerLevel world, Random random) {
       player.getTimer().addTime(new ModifierExtension(-this.timeChange), 0);
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT tag = super.serializeNBT();
-      tag.func_74768_a("timeChange", this.timeChange);
+   public CompoundTag serializeNBT() {
+      CompoundTag tag = super.serializeNBT();
+      tag.putInt("timeChange", this.timeChange);
       return tag;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT tag) {
+   public void deserializeNBT(CompoundTag tag) {
       super.deserializeNBT(tag);
-      this.timeChange = tag.func_74762_e("timeChange");
+      this.timeChange = tag.getInt("timeChange");
    }
 }

@@ -1,0 +1,14 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "the_vault:vaulterite_ingot"
+        },
+        {
+            "item": "the_vault:chromatic_steel_ingot"
+        }
+    ],
+    "result": {
+        "item": "the_vault:vault_alloy"
+    }
+}

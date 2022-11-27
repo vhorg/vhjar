@@ -1,28 +1,13 @@
 package iskallia.vault.mixin;
 
-import iskallia.vault.util.IBiomeGen;
-import net.minecraft.world.biome.provider.BiomeProvider;
-import net.minecraft.world.gen.ChunkGenerator;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin({ChunkGenerator.class})
-public class MixinChunkGenerator implements IBiomeGen {
-   @Shadow
-   @Final
-   protected BiomeProvider field_222542_c;
-   @Shadow
-   @Final
-   protected BiomeProvider field_235949_c_;
-
-   @Override
-   public BiomeProvider getProvider1() {
-      return this.field_222542_c;
-   }
-
-   @Override
-   public BiomeProvider getProvider2() {
-      return this.field_235949_c_;
+public abstract class MixinChunkGenerator {
+   public void generate(WorldGenLevel world, ChunkAccess chunk, StructureFeatureManager manager, CallbackInfo ci) {
+      new BlockPos(chunk.getPos().x * 16, 0, chunk.getPos().z * 16);
    }
 }

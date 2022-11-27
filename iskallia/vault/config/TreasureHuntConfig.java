@@ -14,22 +14,18 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import javax.annotation.Nullable;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class TreasureHuntConfig extends Config {
    @Expose
-   public int startTicks;
+   public int startTicks = 2400;
    @Expose
-   public int sandPerRoom;
+   public int sandPerRoom = 1;
    @Expose
-   public int ticksPerSand;
-   @Expose
-   public int spSandTrigger;
-   @Expose
-   public int mpSandTrigger;
+   public int ticksPerSand = 1200;
    @Expose
    private TreasureHuntConfig.ItemPool requiredItems;
    @Expose
@@ -40,7 +36,7 @@ public class TreasureHuntConfig extends Config {
    private final Map<String, TreasureHuntConfig.ItemPool> mobDropItems = new HashMap<>();
 
    @Nullable
-   public ScavengerHuntConfig.ItemEntry getRandomRequiredItem(Predicate<Item> excludedItems) {
+   public LegacyScavengerHuntConfig.ItemEntry getRandomRequiredItem(Predicate<Item> excludedItems) {
       return this.requiredItems.pool.copyFiltered(entry -> !excludedItems.test(entry.getItem())).getRandom(rand);
    }
 
@@ -48,42 +44,42 @@ public class TreasureHuntConfig extends Config {
       return this.requiredItems.getRandomAmount();
    }
 
-   public List<ScavengerHuntConfig.ItemEntry> generateChestLoot(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {
+   public List<LegacyScavengerHuntConfig.ItemEntry> generateChestLoot(Predicate<LegacyScavengerHuntConfig.ItemEntry> dropFilter) {
       return this.chestItems.getRandomEntries(dropFilter);
    }
 
-   public List<ScavengerHuntConfig.ItemEntry> generateTreasureLoot(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {
+   public List<LegacyScavengerHuntConfig.ItemEntry> generateTreasureLoot(Predicate<LegacyScavengerHuntConfig.ItemEntry> dropFilter) {
       return this.treasureItems.getRandomEntries(dropFilter);
    }
 
-   public List<ScavengerHuntConfig.ItemEntry> generateMobDropLoot(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter, EntityType<?> mobType) {
+   public List<LegacyScavengerHuntConfig.ItemEntry> generateMobDropLoot(Predicate<LegacyScavengerHuntConfig.ItemEntry> dropFilter, EntityType<?> mobType) {
       return this.mobDropItems.getOrDefault(mobType.getRegistryName().toString(), TreasureHuntConfig.ItemPool.EMPTY).getRandomEntries(dropFilter);
    }
 
-   public ScavengerHuntConfig.SourceType getRequirementSource(ItemStack stack) {
-      Item requiredItem = stack.func_77973_b();
+   public LegacyScavengerHuntConfig.SourceType getRequirementSource(ItemStack stack) {
+      Item requiredItem = stack.getItem();
 
-      for (WeightedList.Entry<ScavengerHuntConfig.ItemEntry> entry : this.chestItems.pool) {
+      for (WeightedList.Entry<LegacyScavengerHuntConfig.ItemEntry> entry : this.chestItems.pool) {
          if (requiredItem.equals(entry.value.getItem())) {
-            return ScavengerHuntConfig.SourceType.CHEST;
+            return LegacyScavengerHuntConfig.SourceType.CHEST;
          }
       }
 
-      for (WeightedList.Entry<ScavengerHuntConfig.ItemEntry> entryx : this.treasureItems.pool) {
+      for (WeightedList.Entry<LegacyScavengerHuntConfig.ItemEntry> entryx : this.treasureItems.pool) {
          if (requiredItem.equals(entryx.value.getItem())) {
-            return ScavengerHuntConfig.SourceType.TREASURE;
+            return LegacyScavengerHuntConfig.SourceType.TREASURE;
          }
       }
 
-      return ScavengerHuntConfig.SourceType.MOB;
+      return LegacyScavengerHuntConfig.SourceType.MOB;
    }
 
    @Nullable
    public ResourceLocation getRequirementMobType(ItemStack stack) {
-      Item requiredItem = stack.func_77973_b();
+      Item requiredItem = stack.getItem();
 
       for (Entry<String, TreasureHuntConfig.ItemPool> mobDropEntry : this.mobDropItems.entrySet()) {
-         for (WeightedList.Entry<ScavengerHuntConfig.ItemEntry> entry : mobDropEntry.getValue().getPool()) {
+         for (WeightedList.Entry<LegacyScavengerHuntConfig.ItemEntry> entry : mobDropEntry.getValue().getPool()) {
             if (requiredItem.equals(entry.value.getItem())) {
                return new ResourceLocation(mobDropEntry.getKey());
             }
@@ -100,11 +96,6 @@ public class TreasureHuntConfig extends Config {
 
    @Override
    protected void reset() {
-      this.startTicks = 2400;
-      this.sandPerRoom = 1;
-      this.ticksPerSand = 1200;
-      this.spSandTrigger = 10;
-      this.mpSandTrigger = 100;
       this.requiredItems = new TreasureHuntConfig.ItemPool(5, 5);
       this.chestItems = new TreasureHuntConfig.ItemPool(1, 3);
       this.treasureItems = new TreasureHuntConfig.ItemPool(1, 3);
@@ -187,7 +178,7 @@ public class TreasureHuntConfig extends Config {
       this.addDropItem(creeperPool, ModItems.SCAVENGER_CREEPER_TNT);
       this.addDropItem(creeperPool, ModItems.SCAVENGER_CREEPER_VIAL);
       this.addDropItem(creeperPool, ModItems.SCAVENGER_CREEPER_CHARM);
-      this.mobDropItems.put(EntityType.field_200797_k.getRegistryName().toString(), creeperPool);
+      this.mobDropItems.put(EntityType.CREEPER.getRegistryName().toString(), creeperPool);
       TreasureHuntConfig.ItemPool zombiePool = new TreasureHuntConfig.ItemPool(1, 3);
       this.addDropItem(zombiePool, ModItems.SCAVENGER_ZOMBIE_BRAIN);
       this.addDropItem(zombiePool, ModItems.SCAVENGER_ZOMBIE_ARM);
@@ -196,8 +187,8 @@ public class TreasureHuntConfig extends Config {
       this.addDropItem(zombiePool, ModItems.SCAVENGER_ZOMBIE_HIDE);
       this.addDropItem(zombiePool, ModItems.SCAVENGER_ZOMBIE_NOSE);
       this.addDropItem(zombiePool, ModItems.SCAVENGER_ZOMBIE_VIAL);
-      this.mobDropItems.put(EntityType.field_200725_aD.getRegistryName().toString(), zombiePool);
-      this.mobDropItems.put(EntityType.field_200763_C.getRegistryName().toString(), zombiePool);
+      this.mobDropItems.put(EntityType.ZOMBIE.getRegistryName().toString(), zombiePool);
+      this.mobDropItems.put(EntityType.HUSK.getRegistryName().toString(), zombiePool);
       TreasureHuntConfig.ItemPool drownedPool = new TreasureHuntConfig.ItemPool(1, 3);
       drownedPool.pool.addAll(zombiePool.pool.copy());
       this.addDropItem(drownedPool, ModItems.SCAVENGER_DROWNED_BARNACLE);
@@ -205,7 +196,7 @@ public class TreasureHuntConfig extends Config {
       this.addDropItem(drownedPool, ModItems.SCAVENGER_DROWNED_HIDE);
       this.addDropItem(drownedPool, ModItems.SCAVENGER_DROWNED_VIAL);
       this.addDropItem(drownedPool, ModItems.SCAVENGER_DROWNED_CHARM);
-      this.mobDropItems.put(EntityType.field_204724_o.getRegistryName().toString(), drownedPool);
+      this.mobDropItems.put(EntityType.DROWNED.getRegistryName().toString(), drownedPool);
       TreasureHuntConfig.ItemPool spiderPool = new TreasureHuntConfig.ItemPool(1, 3);
       this.addDropItem(spiderPool, ModItems.SCAVENGER_SPIDER_FANGS);
       this.addDropItem(spiderPool, ModItems.SCAVENGER_SPIDER_LEG);
@@ -213,8 +204,8 @@ public class TreasureHuntConfig extends Config {
       this.addDropItem(spiderPool, ModItems.SCAVENGER_SPIDER_CURSED_CHARM);
       this.addDropItem(spiderPool, ModItems.SCAVENGER_SPIDER_VIAL);
       this.addDropItem(spiderPool, ModItems.SCAVENGER_SPIDER_CHARM);
-      this.mobDropItems.put(EntityType.field_200748_an.getRegistryName().toString(), spiderPool);
-      this.mobDropItems.put(EntityType.field_200794_h.getRegistryName().toString(), spiderPool);
+      this.mobDropItems.put(EntityType.SPIDER.getRegistryName().toString(), spiderPool);
+      this.mobDropItems.put(EntityType.CAVE_SPIDER.getRegistryName().toString(), spiderPool);
       TreasureHuntConfig.ItemPool skeletonPool = new TreasureHuntConfig.ItemPool(1, 3);
       this.addDropItem(skeletonPool, ModItems.SCAVENGER_SKELETON_SHARD);
       this.addDropItem(skeletonPool, ModItems.SCAVENGER_SKELETON_EYE);
@@ -223,22 +214,22 @@ public class TreasureHuntConfig extends Config {
       this.addDropItem(skeletonPool, ModItems.SCAVENGER_SKELETON_WISHBONE);
       this.addDropItem(skeletonPool, ModItems.SCAVENGER_SKELETON_VIAL);
       this.addDropItem(skeletonPool, ModItems.SCAVENGER_SKELETON_CHARM);
-      this.mobDropItems.put(EntityType.field_200741_ag.getRegistryName().toString(), skeletonPool);
-      this.mobDropItems.put(EntityType.field_200722_aA.getRegistryName().toString(), skeletonPool);
+      this.mobDropItems.put(EntityType.SKELETON.getRegistryName().toString(), skeletonPool);
+      this.mobDropItems.put(EntityType.WITHER_SKELETON.getRegistryName().toString(), skeletonPool);
    }
 
    private void addRequiredItem(TreasureHuntConfig.ItemPool out, Item i) {
-      out.pool.add(new ScavengerHuntConfig.ItemEntry(i, 10, 15), 1);
+      out.pool.add(new LegacyScavengerHuntConfig.ItemEntry(i, 10, 15), 1);
    }
 
    private void addDropItem(TreasureHuntConfig.ItemPool out, Item i) {
-      out.pool.add(new ScavengerHuntConfig.ItemEntry(i, 1, 1), 1);
+      out.pool.add(new LegacyScavengerHuntConfig.ItemEntry(i, 1, 1), 1);
    }
 
    public static class ItemPool {
       private static final TreasureHuntConfig.ItemPool EMPTY = new TreasureHuntConfig.ItemPool(0, 0);
       @Expose
-      private final WeightedList<ScavengerHuntConfig.ItemEntry> pool = new WeightedList<>();
+      private final WeightedList<LegacyScavengerHuntConfig.ItemEntry> pool = new WeightedList<>();
       @Expose
       private final int min;
       @Expose
@@ -249,11 +240,11 @@ public class TreasureHuntConfig extends Config {
          this.max = max;
       }
 
-      public List<WeightedList.Entry<ScavengerHuntConfig.ItemEntry>> getPool() {
+      public List<WeightedList.Entry<LegacyScavengerHuntConfig.ItemEntry>> getPool() {
          return Collections.unmodifiableList(this.pool);
       }
 
-      public ScavengerHuntConfig.ItemEntry getRandomEntry(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {
+      public LegacyScavengerHuntConfig.ItemEntry getRandomEntry(Predicate<LegacyScavengerHuntConfig.ItemEntry> dropFilter) {
          return this.pool.copyFiltered(dropFilter).getRandom(Config.rand);
       }
 
@@ -261,7 +252,7 @@ public class TreasureHuntConfig extends Config {
          return MathUtilities.getRandomInt(this.min, this.max + 1);
       }
 
-      public List<ScavengerHuntConfig.ItemEntry> getRandomEntries(Predicate<ScavengerHuntConfig.ItemEntry> dropFilter) {
+      public List<LegacyScavengerHuntConfig.ItemEntry> getRandomEntries(Predicate<LegacyScavengerHuntConfig.ItemEntry> dropFilter) {
          return IntStream.range(0, this.getRandomAmount())
             .mapToObj(index -> this.getRandomEntry(dropFilter))
             .filter(Objects::nonNull)

@@ -2,9 +2,10 @@ package iskallia.vault.research.type;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.research.Restrictions;
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
+import java.util.List;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public abstract class Research {
    @Expose
@@ -12,9 +13,9 @@ public abstract class Research {
    @Expose
    protected int cost;
    @Expose
-   protected boolean usesKnowledge;
-   @Expose
    protected String gatedBy;
+   @Expose
+   protected List<String> discoversModels;
 
    public Research(String name, int cost) {
       this.name = name;
@@ -37,8 +38,8 @@ public abstract class Research {
       return this.gatedBy;
    }
 
-   public boolean usesKnowledge() {
-      return this.usesKnowledge;
+   public List<String> getDiscoversModels() {
+      return this.discoversModels;
    }
 
    public abstract boolean restricts(Item var1, Restrictions.Type var2);

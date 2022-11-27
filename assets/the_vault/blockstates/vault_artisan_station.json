@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=south": {
+      "model": "the_vault:block/vault_artisan_station",
+      "y": 90
+    },
+    "facing=east": {
+      "model": "the_vault:block/vault_artisan_station"
+    },
+    "facing=north": {
+      "model": "the_vault:block/vault_artisan_station",
+      "y": 270
+    },
+    "facing=west": {
+      "model": "the_vault:block/vault_artisan_station",
+      "y": 180
+    }
+  }
+}

@@ -2,7 +2,7 @@ package iskallia.vault.entity.eternal;
 
 import com.mojang.datafixers.util.Either;
 import iskallia.vault.config.EternalAuraConfig;
-import iskallia.vault.entity.EternalEntity;
+import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ActiveEternalMessage;
@@ -16,18 +16,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 @EventBusSubscriber
 public class ActiveEternalData {
@@ -43,11 +42,11 @@ public class ActiveEternalData {
    }
 
    public void updateEternal(EternalEntity eternal) {
-      Either<UUID, ServerPlayerEntity> owner = eternal.getOwner();
+      Either<UUID, ServerPlayer> owner = eternal.getOwner();
       if (!owner.left().isPresent()) {
-         ServerPlayerEntity sPlayer = (ServerPlayerEntity)owner.right().get();
-         if (sPlayer.func_130014_f_().func_234923_W_().equals(eternal.func_130014_f_().func_234923_W_())) {
-            UUID ownerId = sPlayer.func_110124_au();
+         ServerPlayer sPlayer = (ServerPlayer)owner.right().get();
+         if (sPlayer.getCommandSenderWorld().dimension().equals(eternal.getCommandSenderWorld().dimension())) {
+            UUID ownerId = sPlayer.getUUID();
             boolean update = false;
             ActiveEternalData.ActiveEternal active = this.getActive(ownerId, eternal);
             if (active == null) {
@@ -58,7 +57,7 @@ public class ActiveEternalData {
 
             active.timeout = ETERNAL_TIMEOUT;
             float current = active.health;
-            float healthToSet = eternal.func_110143_aJ();
+            float healthToSet = eternal.getHealth();
             if (healthToSet <= 0.0F || Math.abs(current - healthToSet) >= 0.3F) {
                active.health = healthToSet;
                update = true;
@@ -121,29 +120,29 @@ public class ActiveEternalData {
 
    @SubscribeEvent
    public static void onChangeDim(EntityTravelToDimensionEvent event) {
-      if (event.getEntity() instanceof ServerPlayerEntity) {
-         UUID playerId = event.getEntity().func_110124_au();
+      if (event.getEntity() instanceof ServerPlayer) {
+         UUID playerId = event.getEntity().getUUID();
          if (INSTANCE.eternals.containsKey(playerId)) {
             Set<ActiveEternalData.ActiveEternal> eternals = INSTANCE.eternals.remove(playerId);
             if (eternals != null && !eternals.isEmpty()) {
-               INSTANCE.syncActives((ServerPlayerEntity)event.getEntity(), Collections.emptySet());
+               INSTANCE.syncActives((ServerPlayer)event.getEntity(), Collections.emptySet());
             }
          }
       }
    }
 
    private void syncActives(UUID playerId, Set<ActiveEternalData.ActiveEternal> eternals) {
-      MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+      MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
       if (srv != null) {
-         ServerPlayerEntity sPlayer = srv.func_184103_al().func_177451_a(playerId);
+         ServerPlayer sPlayer = srv.getPlayerList().getPlayer(playerId);
          if (sPlayer != null) {
             this.syncActives(sPlayer, eternals);
          }
       }
    }
 
-   private void syncActives(ServerPlayerEntity sPlayer, Set<ActiveEternalData.ActiveEternal> eternals) {
-      ModNetwork.CHANNEL.sendTo(new ActiveEternalMessage(eternals), sPlayer.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT);
+   private void syncActives(ServerPlayer sPlayer, Set<ActiveEternalData.ActiveEternal> eternals) {
+      ModNetwork.CHANNEL.sendTo(new ActiveEternalMessage(eternals), sPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
    }
 
    public static class ActiveEternal {
@@ -165,26 +164,22 @@ public class ActiveEternalData {
 
       public static ActiveEternalData.ActiveEternal create(EternalEntity eternal) {
          return new ActiveEternalData.ActiveEternal(
-            eternal.getEternalId(), eternal.getSkinName(), eternal.getProvidedAura(), eternal.isAncient(), eternal.func_110143_aJ()
+            eternal.getEternalId(), eternal.getSkinName(), eternal.getProvidedAura(), eternal.isAncient(), eternal.getHealth()
          );
       }
 
-      public static ActiveEternalData.ActiveEternal read(PacketBuffer buffer) {
+      public static ActiveEternalData.ActiveEternal read(FriendlyByteBuf buffer) {
          return new ActiveEternalData.ActiveEternal(
-            buffer.func_179253_g(),
-            buffer.func_150789_c(32767),
-            buffer.readBoolean() ? buffer.func_150789_c(32767) : null,
-            buffer.readBoolean(),
-            buffer.readFloat()
+            buffer.readUUID(), buffer.readUtf(32767), buffer.readBoolean() ? buffer.readUtf(32767) : null, buffer.readBoolean(), buffer.readFloat()
          );
       }
 
-      public void write(PacketBuffer buffer) {
-         buffer.func_179252_a(this.eternalId);
-         buffer.func_211400_a(this.eternalName, 32767);
+      public void write(FriendlyByteBuf buffer) {
+         buffer.writeUUID(this.eternalId);
+         buffer.writeUtf(this.eternalName, 32767);
          buffer.writeBoolean(this.abilityName != null);
          if (this.abilityName != null) {
-            buffer.func_211400_a(this.abilityName, 32767);
+            buffer.writeUtf(this.abilityName, 32767);
          }
 
          buffer.writeBoolean(this.ancient);

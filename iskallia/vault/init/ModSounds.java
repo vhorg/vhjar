@@ -1,9 +1,10 @@
 package iskallia.vault.init;
 
-import iskallia.vault.Vault;
-import iskallia.vault.util.LazySoundType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
+import iskallia.vault.VaultMod;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraftforge.common.util.ForgeSoundType;
 import net.minecraftforge.event.RegistryEvent.Register;
 
 public class ModSounds {
@@ -22,8 +23,12 @@ public class ModSounds {
    public static SoundEvent SKILL_TREE_LEARN_SFX;
    public static SoundEvent SKILL_TREE_UPGRADE_SFX;
    public static SoundEvent VENDING_MACHINE_SFX;
+   public static SoundEvent ARENA_HORNS_SFX;
    public static SoundEvent BOOSTER_PACK_SUCCESS_SFX;
    public static SoundEvent BOOSTER_PACK_FAIL_SFX;
+   public static SoundEvent GIFT_BOMB_SFX;
+   public static SoundEvent GIFT_BOMB_GAIN_SFX;
+   public static SoundEvent MEGA_GIFT_BOMB_GAIN_SFX;
    public static SoundEvent BOSS_TP_SFX;
    public static SoundEvent VAULT_GEM_HIT;
    public static SoundEvent VAULT_GEM_BREAK;
@@ -39,7 +44,12 @@ public class ModSounds {
    public static SoundEvent INVISIBILITY_SFX;
    public static SoundEvent NIGHT_VISION_SFX;
    public static SoundEvent RAMPAGE_SFX;
-   public static SoundEvent TANK_SFX;
+   public static SoundEvent TANK;
+   public static SoundEvent TANK_HIT;
+   public static SoundEvent TANK_PROJECTILE;
+   public static SoundEvent TANK_PROJECTILE_HIT;
+   public static SoundEvent TANK_REFLECT;
+   public static SoundEvent TANK_REFLECT_HIT;
    public static SoundEvent VAMPIRE_HISSING_SFX;
    public static SoundEvent CAULDRON_BUBBLES_SFX;
    public static SoundEvent EXECUTION_SFX;
@@ -55,8 +65,23 @@ public class ModSounds {
    public static SoundEvent VAULT_CHEST_RARE_OPEN;
    public static SoundEvent WITCHSKALL_IDLE;
    public static SoundEvent FAVOUR_UP;
-   public static SoundEvent EYESORE_GRAWL;
-   public static LazySoundType VAULT_GEM = new LazySoundType();
+   public static SoundEvent COIN_PILE_PLACE;
+   public static SoundEvent COIN_PILE_BREAK;
+   public static SoundEvent CRATE_OPEN;
+   public static SoundEvent MAGNET_TABLE;
+   public static SoundEvent NOVA_SPEED;
+   public static SoundEvent HEAL;
+   public static SoundEvent MANA_SHIELD;
+   public static SoundEvent MANA_SHIELD_HIT;
+   public static SoundEvent TAUNT;
+   public static SoundEvent TAUNT_REPEL;
+   public static SoundEvent ARTISAN_SMITHING;
+   public static ForgeSoundType VAULT_GET_SOUND_TYPE = new ForgeSoundType(
+      0.25F, 1.0F, () -> VAULT_GEM_BREAK, SoundType.STONE::getStepSound, SoundType.STONE::getPlaceSound, () -> VAULT_GEM_HIT, SoundType.STONE::getFallSound
+   );
+   public static ForgeSoundType COIN_PILE_SOUND_TYPE = new ForgeSoundType(
+      1.0F, 1.0F, () -> COIN_PILE_BREAK, SoundType.CHAIN::getStepSound, () -> COIN_PILE_PLACE, SoundType.CHAIN::getHitSound, SoundType.CHAIN::getFallSound
+   );
 
    public static void registerSounds(Register<SoundEvent> event) {
       GRASSHOPPER_BRRR = registerSound(event, "grasshopper_brrr");
@@ -74,8 +99,12 @@ public class ModSounds {
       SKILL_TREE_LEARN_SFX = registerSound(event, "skill_tree_learn");
       SKILL_TREE_UPGRADE_SFX = registerSound(event, "skill_tree_upgrade");
       VENDING_MACHINE_SFX = registerSound(event, "vending_machine");
+      ARENA_HORNS_SFX = registerSound(event, "arena_horns");
       BOOSTER_PACK_SUCCESS_SFX = registerSound(event, "booster_pack");
       BOOSTER_PACK_FAIL_SFX = registerSound(event, "booster_pack_fail");
+      GIFT_BOMB_SFX = registerSound(event, "gift_bomb");
+      GIFT_BOMB_GAIN_SFX = registerSound(event, "sub_bomb_gain");
+      MEGA_GIFT_BOMB_GAIN_SFX = registerSound(event, "sub_bomb_gain_mega");
       BOSS_TP_SFX = registerSound(event, "boss_tp");
       VAULT_GEM_HIT = registerSound(event, "vault_gem_hit");
       VAULT_GEM_BREAK = registerSound(event, "vault_gem_break");
@@ -91,7 +120,12 @@ public class ModSounds {
       INVISIBILITY_SFX = registerSound(event, "invisibility");
       NIGHT_VISION_SFX = registerSound(event, "night_vision");
       RAMPAGE_SFX = registerSound(event, "rampage");
-      TANK_SFX = registerSound(event, "tank");
+      TANK = registerSound(event, "tank");
+      TANK_HIT = registerSound(event, "tank_hit");
+      TANK_PROJECTILE = registerSound(event, "tank_projectile");
+      TANK_PROJECTILE_HIT = registerSound(event, "tank_projectile_hit");
+      TANK_REFLECT = registerSound(event, "tank_reflect");
+      TANK_REFLECT_HIT = registerSound(event, "tank_reflect_hit");
       VAMPIRE_HISSING_SFX = registerSound(event, "vampire_hissing");
       CAULDRON_BUBBLES_SFX = registerSound(event, "cauldron_bubbles");
       EXECUTION_SFX = registerSound(event, "execution");
@@ -107,15 +141,21 @@ public class ModSounds {
       VAULT_CHEST_RARE_OPEN = registerSound(event, "vault_chest_rare_open");
       WITCHSKALL_IDLE = registerSound(event, "witchskall_idle");
       FAVOUR_UP = registerSound(event, "favour_up");
-      EYESORE_GRAWL = registerSound(event, "eyesore_grawl");
-   }
-
-   public static void registerSoundTypes() {
-      VAULT_GEM.initialize(0.25F, 1.0F, VAULT_GEM_BREAK, null, null, VAULT_GEM_HIT, null);
+      COIN_PILE_BREAK = registerSound(event, "coin_pile_break");
+      COIN_PILE_PLACE = registerSound(event, "coin_pile_place");
+      CRATE_OPEN = registerSound(event, "crate_open");
+      MAGNET_TABLE = registerSound(event, "magnet_table");
+      NOVA_SPEED = registerSound(event, "nova_speed");
+      HEAL = registerSound(event, "heal");
+      MANA_SHIELD = registerSound(event, "mana_shield");
+      MANA_SHIELD_HIT = registerSound(event, "mana_shield_hit");
+      TAUNT = registerSound(event, "taunt");
+      TAUNT_REPEL = registerSound(event, "taunt_repel");
+      ARTISAN_SMITHING = registerSound(event, "artisan_smithing");
    }
 
    private static SoundEvent registerSound(Register<SoundEvent> event, String soundName) {
-      ResourceLocation location = Vault.id(soundName);
+      ResourceLocation location = VaultMod.id(soundName);
       SoundEvent soundEvent = new SoundEvent(location);
       soundEvent.setRegistryName(location);
       event.getRegistry().register(soundEvent);

@@ -1,0 +1,9 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_vault:item/magnets/magnet_base",
+    "layer1": "the_vault:item/magnets/magnet_overlay_immortal",
+    "layer2": "the_vault:item/magnets/immortal_perk"
+
+  }
+}

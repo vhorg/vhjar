@@ -1,0 +1,9 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "the_vault:block/vault_cobblestone"
+      }
+    ]
+  }
+}

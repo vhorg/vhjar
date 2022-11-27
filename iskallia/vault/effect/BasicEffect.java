@@ -1,16 +1,16 @@
 package iskallia.vault.effect;
 
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
 
-public class BasicEffect extends Effect {
-   public BasicEffect(EffectType typeIn, int liquidColorIn, ResourceLocation id) {
+public class BasicEffect extends MobEffect {
+   public BasicEffect(MobEffectCategory typeIn, int liquidColorIn, ResourceLocation id) {
       super(typeIn, liquidColorIn);
       this.setRegistryName(id);
    }
 
-   public boolean func_76397_a(int duration, int amplifier) {
+   public boolean isDurationEffectTick(int duration, int amplifier) {
       return true;
    }
 }

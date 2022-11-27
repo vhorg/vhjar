@@ -1,13 +1,13 @@
 package iskallia.vault.util;
 
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameter;
-import net.minecraft.loot.LootParameterSet;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 
 public class LootUtils {
-   public static boolean doesContextFulfillSet(LootContext ctx, LootParameterSet set) {
-      for (LootParameter<?> required : set.func_216277_a()) {
-         if (!ctx.func_216033_a(required)) {
+   public static boolean doesContextFulfillSet(LootContext ctx, LootContextParamSet set) {
+      for (LootContextParam<?> required : set.getRequired()) {
+         if (!ctx.hasParam(required)) {
             return false;
          }
       }

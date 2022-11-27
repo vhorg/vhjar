@@ -2,16 +2,16 @@ package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.ItemEntry;
 import iskallia.vault.config.entry.SingleItemEntry;
 import iskallia.vault.init.ModItems;
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class KeyPressRecipesConfig extends Config {
@@ -46,24 +46,24 @@ public class KeyPressRecipesConfig extends Config {
    public ItemStack getResultFor(Item keyItem, Item clusterItem) {
       KeyPressRecipesConfig.Recipe recipe = this.getRecipeFor(keyItem, clusterItem);
       if (recipe == null) {
-         return ItemStack.field_190927_a;
+         return ItemStack.EMPTY;
       } else {
          ResourceLocation resultID = new ResourceLocation(recipe.RESULT_ITEM.ITEM);
          Item item = (Item)ForgeRegistries.ITEMS.getValue(resultID);
          if (item == null) {
-            Vault.LOGGER.warn("Invalid Key Press recipe result -> {}", recipe.RESULT_ITEM.ITEM);
-            return ItemStack.field_190927_a;
+            VaultMod.LOGGER.warn("Invalid Key Press recipe result -> {}", recipe.RESULT_ITEM.ITEM);
+            return ItemStack.EMPTY;
          } else {
             try {
                ItemStack resultStack = new ItemStack(item, recipe.RESULT_ITEM.AMOUNT);
                if (recipe.RESULT_ITEM.NBT != null && !recipe.RESULT_ITEM.NBT.isEmpty()) {
-                  resultStack.func_77982_d(JsonToNBT.func_180713_a(recipe.RESULT_ITEM.NBT));
+                  resultStack.setTag(TagParser.parseTag(recipe.RESULT_ITEM.NBT));
                }
 
                return resultStack;
             } catch (CommandSyntaxException var7) {
-               Vault.LOGGER.warn("Malformed NBT at Key Press recipe result -> {} NBT: {}", recipe.RESULT_ITEM.ITEM, recipe.RESULT_ITEM.NBT);
-               return ItemStack.field_190927_a;
+               VaultMod.LOGGER.warn("Malformed NBT at Key Press recipe result -> {} NBT: {}", recipe.RESULT_ITEM.ITEM, recipe.RESULT_ITEM.NBT);
+               return ItemStack.EMPTY;
             }
          }
       }

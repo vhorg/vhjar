@@ -1,66 +1,243 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.client.gui.helper.SkillFrame;
-import iskallia.vault.config.entry.SkillStyle;
+import iskallia.vault.VaultMod;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import javax.annotation.Nullable;
+import net.minecraft.resources.ResourceLocation;
 
 public class AbilitiesGUIConfig extends Config {
    @Expose
-   private HashMap<String, SkillStyle> styles;
+   private Map<String, AbilitiesGUIConfig.AbilityStyle> styles;
+   private final Map<String, AbilitiesGUIConfig.SpecializationStyle> specializationStyleLookup = new HashMap<>();
 
    @Override
    public String getName() {
       return "abilities_gui_styles";
    }
 
-   public HashMap<String, SkillStyle> getStyles() {
+   @Override
+   public <T extends Config> T readConfig() {
+      AbilitiesGUIConfig config = super.readConfig();
+      config.specializationStyleLookup.clear();
+
+      for (AbilitiesGUIConfig.AbilityStyle abilityStyle : config.styles.values()) {
+         Map<String, AbilitiesGUIConfig.SpecializationStyle> specializationStyles = abilityStyle.getSpecializationStyles();
+         if (specializationStyles != null) {
+            config.specializationStyleLookup.putAll(specializationStyles);
+         }
+      }
+
+      return (T)config;
+   }
+
+   @Nullable
+   public ResourceLocation getIcon(String key) {
+      if (this.styles.containsKey(key)) {
+         return this.styles.get(key).getIcon();
+      } else {
+         return this.specializationStyleLookup.containsKey(key) ? this.specializationStyleLookup.get(key).getIcon() : null;
+      }
+   }
+
+   public Map<String, AbilitiesGUIConfig.AbilityStyle> getStyles() {
       return this.styles;
    }
 
    @Override
    protected void reset() {
       this.styles = new HashMap<>();
-      this.styles.put("Vein Miner", new SkillStyle(40, -130, 16, 0));
-      this.styles.put("Rampage", new SkillStyle(80, -80, 128, 0));
-      this.styles.put("Ghost Walk", new SkillStyle(120, -30, 112, 0));
-      this.styles.put("Dash", new SkillStyle(80, 20, 0, 0));
-      this.styles.put("Mega Jump", new SkillStyle(30, 50, 48, 0));
-      this.styles.put("Execute", new SkillStyle(-40, -130, 176, 0));
-      this.styles.put("Cleanse", new SkillStyle(-80, -80, 144, 0));
-      this.styles.put("Tank", new SkillStyle(-120, -30, 160, 0));
-      this.styles.put("Summon Eternal", new SkillStyle(-80, 20, 192, 0));
-      this.styles.put("Hunter", new SkillStyle(-25, 60, 208, 0));
-      this.styles.put("Vein Miner_Size", new SkillStyle(10, -170, 16, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Vein Miner_Fortune", new SkillStyle(35, -200, 32, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Vein Miner_Durability", new SkillStyle(70, -160, 48, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Vein Miner_Void", new SkillStyle(120, -160, 64, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Rampage_Dot", new SkillStyle(100, -120, 128, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Rampage_Leech", new SkillStyle(150, -110, 128, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Rampage_Time", new SkillStyle(140, -70, 128, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Ghost Walk_Damage", new SkillStyle(180, -50, 112, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Ghost Walk_Regen", new SkillStyle(200, -20, 112, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Ghost Walk_Parry", new SkillStyle(160, 0, 112, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Dash_Buff", new SkillStyle(130, 40, 0, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Dash_Damage", new SkillStyle(100, 90, 0, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Dash_Heal", new SkillStyle(140, 80, 0, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Mega Jump_Break", new SkillStyle(70, 100, 48, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Mega Jump_Damage", new SkillStyle(50, 130, 48, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Mega Jump_Knockback", new SkillStyle(20, 110, 48, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Execute_Buff", new SkillStyle(-30, -190, 176, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Execute_Damage", new SkillStyle(-70, -170, 176, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Cleanse_Applynearby", new SkillStyle(-90, -130, 144, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Cleanse_Effect", new SkillStyle(-130, -120, 144, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Cleanse_Heal", new SkillStyle(-140, -90, 144, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Cleanse_Immune", new SkillStyle(-175, -120, 144, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Tank_Parry", new SkillStyle(-160, -60, 160, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Tank_Reflect", new SkillStyle(-180, -20, 160, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Tank_Slow", new SkillStyle(-150, 10, 160, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Summon Eternal_Additional", new SkillStyle(-130, 40, 192, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Summon Eternal_Damage", new SkillStyle(-140, 80, 192, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Summon Eternal_Debuffs", new SkillStyle(-90, 90, 192, 0, SkillFrame.RECTANGULAR));
-      this.styles.put("Hunter_Spawners", new SkillStyle(-10, 120, 208, 16, SkillFrame.RECTANGULAR));
-      this.styles.put("Hunter_Chests", new SkillStyle(-40, 150, 208, 32, SkillFrame.RECTANGULAR));
-      this.styles.put("Hunter_Blocks", new SkillStyle(-55, 100, 208, 48, SkillFrame.RECTANGULAR));
+      int x = 0;
+      int y = 0;
+      this.styles
+         .put(
+            "Nova",
+            new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/nova"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+               {
+                  this.put("Nova_Speed", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/nova_speed")));
+                  this.put("Nova_Dot", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/nova_dot")));
+               }
+            })
+         );
+      x += 38;
+      this.styles
+         .put(
+            "Vein Miner",
+            new AbilitiesGUIConfig.AbilityStyle(
+               x, y, VaultMod.id("gui/abilities/vein_miner"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+                  {
+                     this.put("Vein Miner_Fortune", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/vein_miner_fortune")));
+                     this.put("Vein Miner_Durability", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/vein_miner_durability")));
+                     this.put("Vein Miner_Void", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/vein_miner_void")));
+                  }
+               }
+            )
+         );
+      x += 38;
+      this.styles
+         .put(
+            "Rampage",
+            new AbilitiesGUIConfig.AbilityStyle(
+               x, y, VaultMod.id("gui/abilities/rampage"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+                  {
+                     this.put("Rampage_Leech", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/rampage_leech")));
+                     this.put("Rampage_Chain", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/rampage_chain")));
+                  }
+               }
+            )
+         );
+      x += 38;
+      this.styles.put("Ghost Walk", new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/ghost_walk")));
+      x += 38;
+      this.styles
+         .put(
+            "Dash",
+            new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/dash"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+               {
+                  this.put("Dash_Damage", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/dash_damage")));
+               }
+            })
+         );
+      x += 38;
+      this.styles
+         .put(
+            "Mega Jump",
+            new AbilitiesGUIConfig.AbilityStyle(
+               x, y, VaultMod.id("gui/abilities/mega_jump"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+                  {
+                     this.put("Mega Jump_Break_Up", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/mega_jump_break_up")));
+                     this.put("Mega Jump_Break_Down", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/mega_jump_break_down")));
+                  }
+               }
+            )
+         );
+      x += 38;
+      this.styles.put("Mana Shield", new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/mana_shield")));
+      x += 38;
+      this.styles.put("Execute", new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/execute")));
+      x += 38;
+      this.styles
+         .put(
+            "Heal",
+            new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/heal"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+               {
+                  this.put("Heal_Group", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/heal_group")));
+                  this.put("Heal_Effect", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/heal_effect")));
+               }
+            })
+         );
+      x += 38;
+      this.styles
+         .put(
+            "Tank",
+            new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/tank"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+               {
+                  this.put("Tank_Projectile", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/tank_projectile")));
+                  this.put("Tank_Reflect", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/tank_reflect")));
+               }
+            })
+         );
+      x += 38;
+      this.styles.put("Summon Eternal", new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/summon_eternal")));
+      x += 38;
+      this.styles
+         .put(
+            "Hunter",
+            new AbilitiesGUIConfig.AbilityStyle(
+               x, y, VaultMod.id("gui/abilities/hunter"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+                  {
+                     this.put("Hunter_Blocks", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/hunter_blocks")));
+                  }
+               }
+            )
+         );
+      x += 38;
+      this.styles
+         .put(
+            "Farmer",
+            new AbilitiesGUIConfig.AbilityStyle(
+               x, y, VaultMod.id("gui/abilities/farmer"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+                  {
+                     this.put("Farmer_Melon", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/farmer_melon")));
+                     this.put("Farmer_Cactus", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/farmer_cactus")));
+                     this.put("Farmer_Animal", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/farmer_animal")));
+                  }
+               }
+            )
+         );
+      x += 38;
+      this.styles
+         .put(
+            "Taunt",
+            new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/taunt"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+               {
+                  this.put("Taunt_Repel", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/taunt_repel")));
+               }
+            })
+         );
+   }
+
+   public static class AbilityStyle extends AbilitiesGUIConfig.IconStyle {
+      @Expose
+      private final int x;
+      @Expose
+      private final int y;
+      @Expose
+      private final LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle> specializationStyles;
+
+      public AbilityStyle(int x, int y, ResourceLocation icon) {
+         this(x, y, icon, new LinkedHashMap<>());
+      }
+
+      public AbilityStyle(int x, int y, ResourceLocation icon, LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle> specializationStyles) {
+         super(icon);
+         this.x = x;
+         this.y = y;
+         this.specializationStyles = specializationStyles;
+      }
+
+      public List<ResourceLocation> getIcons() {
+         return this.specializationStyles
+            .values()
+            .stream()
+            .map(AbilitiesGUIConfig.IconStyle::getIcon)
+            .collect(Collectors.toCollection(() -> new ArrayList<>(List.of(this.getIcon()))));
+      }
+
+      public int getX() {
+         return this.x;
+      }
+
+      public int getY() {
+         return this.y;
+      }
+
+      public Map<String, AbilitiesGUIConfig.SpecializationStyle> getSpecializationStyles() {
+         return this.specializationStyles;
+      }
+   }
+
+   public static class IconStyle {
+      @Expose
+      private final ResourceLocation icon;
+
+      public IconStyle(ResourceLocation icon) {
+         this.icon = icon;
+      }
+
+      public ResourceLocation getIcon() {
+         return this.icon;
+      }
+   }
+
+   public static class SpecializationStyle extends AbilitiesGUIConfig.IconStyle {
+      public SpecializationStyle(ResourceLocation icon) {
+         super(icon);
+      }
    }
 }

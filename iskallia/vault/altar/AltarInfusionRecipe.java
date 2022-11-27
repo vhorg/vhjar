@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nonnull;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class AltarInfusionRecipe {
    private final UUID player;
@@ -31,8 +31,8 @@ public class AltarInfusionRecipe {
       this(uuid, items, null, pogInfused);
    }
 
-   public AltarInfusionRecipe(ServerWorld world, BlockPos pos, ServerPlayerEntity player) {
-      this(player.func_110124_au(), ModConfigs.VAULT_ALTAR.getRequiredItemsFromConfig(world, pos, player), false);
+   public AltarInfusionRecipe(ServerLevel world, BlockPos pos, ServerPlayer player) {
+      this(player.getUUID(), ModConfigs.VAULT_ALTAR.getRequiredItemsFromConfig(world, pos, player), false);
    }
 
    public boolean isPogInfused() {
@@ -53,31 +53,31 @@ public class AltarInfusionRecipe {
       this.cachedItems = new ArrayList<>();
    }
 
-   public static AltarInfusionRecipe deserialize(CompoundNBT nbt) {
-      UUID player = nbt.func_186857_a("player");
-      ListNBT requiredItemsNBT = nbt.func_150295_c("requiredItems", 10);
-      ListNBT cachedItemsNBT = nbt.func_150295_c("cachedItems", 10);
+   public static AltarInfusionRecipe deserialize(CompoundTag nbt) {
+      UUID player = nbt.getUUID("player");
+      ListTag requiredItemsNBT = nbt.getList("requiredItems", 10);
+      ListTag cachedItemsNBT = nbt.getList("cachedItems", 10);
       List<RequiredItem> requiredItems = new ArrayList<>();
       List<RequiredItem> cachedItems = new ArrayList<>();
 
-      for (INBT tag : requiredItemsNBT) {
-         CompoundNBT compound = (CompoundNBT)tag;
+      for (Tag tag : requiredItemsNBT) {
+         CompoundTag compound = (CompoundTag)tag;
          requiredItems.add(RequiredItem.deserializeNBT(compound));
       }
 
-      for (INBT tag : cachedItemsNBT) {
-         CompoundNBT compound = (CompoundNBT)tag;
+      for (Tag tag : cachedItemsNBT) {
+         CompoundTag compound = (CompoundTag)tag;
          cachedItems.add(RequiredItem.deserializeNBT(compound));
       }
 
-      boolean pogInfused = nbt.func_74767_n("pogInfused");
+      boolean pogInfused = nbt.getBoolean("pogInfused");
       return new AltarInfusionRecipe(player, requiredItems, cachedItems, pogInfused);
    }
 
-   public CompoundNBT serialize() {
-      CompoundNBT nbt = new CompoundNBT();
-      ListNBT requiredItems = new ListNBT();
-      ListNBT cachedItems = new ListNBT();
+   public CompoundTag serialize() {
+      CompoundTag nbt = new CompoundTag();
+      ListTag requiredItems = new ListTag();
+      ListTag cachedItems = new ListTag();
 
       for (RequiredItem item : this.getRequiredItems()) {
          requiredItems.add(RequiredItem.serializeNBT(item));
@@ -87,10 +87,10 @@ public class AltarInfusionRecipe {
          cachedItems.add(RequiredItem.serializeNBT(item));
       }
 
-      nbt.func_186854_a("player", this.getPlayer());
-      nbt.func_218657_a("requiredItems", requiredItems);
-      nbt.func_218657_a("cachedItems", cachedItems);
-      nbt.func_74757_a("pogInfused", this.pogInfused);
+      nbt.putUUID("player", this.getPlayer());
+      nbt.put("requiredItems", requiredItems);
+      nbt.put("cachedItems", cachedItems);
+      nbt.putBoolean("pogInfused", this.pogInfused);
       return nbt;
    }
 

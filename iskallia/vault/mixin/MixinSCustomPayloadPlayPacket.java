@@ -1,14 +1,14 @@
 package iskallia.vault.mixin;
 
-import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin({SCustomPayloadPlayPacket.class})
+@Mixin({ClientboundCustomPayloadPacket.class})
 public class MixinSCustomPayloadPlayPacket {
    @ModifyConstant(
-      method = {"readPacketData"},
+      method = {"<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"},
       constant = {@Constant(
          intValue = 1048576
       )},
@@ -19,7 +19,7 @@ public class MixinSCustomPayloadPlayPacket {
    }
 
    @ModifyConstant(
-      method = {"<init>(Lnet/minecraft/util/ResourceLocation;Lnet/minecraft/network/PacketBuffer;)V"},
+      method = {"<init>(Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/network/FriendlyByteBuf;)V"},
       constant = {@Constant(
          intValue = 1048576
       )},

@@ -2,8 +2,8 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientVaultRaidData;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class VaultOverlayMessage {
    private VaultOverlayMessage.OverlayType type;
@@ -33,17 +33,17 @@ public class VaultOverlayMessage {
       return new VaultOverlayMessage(0, false, VaultOverlayMessage.OverlayType.NONE, true);
    }
 
-   public static void encode(VaultOverlayMessage message, PacketBuffer buffer) {
+   public static void encode(VaultOverlayMessage message, FriendlyByteBuf buffer) {
       buffer.writeInt(message.remainingTicks);
-      buffer.func_179249_a(message.type);
+      buffer.writeEnum(message.type);
       buffer.writeBoolean(message.earlyKill);
       buffer.writeBoolean(message.showTimer);
    }
 
-   public static VaultOverlayMessage decode(PacketBuffer buffer) {
+   public static VaultOverlayMessage decode(FriendlyByteBuf buffer) {
       VaultOverlayMessage message = new VaultOverlayMessage();
       message.remainingTicks = buffer.readInt();
-      message.type = (VaultOverlayMessage.OverlayType)buffer.func_179257_a(VaultOverlayMessage.OverlayType.class);
+      message.type = (VaultOverlayMessage.OverlayType)buffer.readEnum(VaultOverlayMessage.OverlayType.class);
       message.earlyKill = buffer.readBoolean();
       message.showTimer = buffer.readBoolean();
       return message;

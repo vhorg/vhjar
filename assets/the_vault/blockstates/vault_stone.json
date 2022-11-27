@@ -1,7 +1,78 @@
 {
   "variants": {
-    "": {
-      "model": "the_vault:block/vault_stone"
-    }
+    "": [
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone"
+      },
+      {
+        "model": "the_vault:block/vault_stone_orange"
+      },
+      {
+        "model": "the_vault:block/vault_stone_lime"
+      },
+      {
+        "model": "the_vault:block/vault_stone_pink"
+      },
+      {
+        "model": "the_vault:block/vault_stone_teal"
+      }
+    ]
   }
 }

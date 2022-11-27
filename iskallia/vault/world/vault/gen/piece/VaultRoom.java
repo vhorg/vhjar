@@ -1,27 +1,27 @@
 package iskallia.vault.world.vault.gen.piece;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.nbt.VListNBT;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.vault.VaultRaid;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class VaultRoom extends VaultPiece {
-   public static final ResourceLocation ID = Vault.id("room");
+   public static final ResourceLocation ID = VaultMod.id("room");
    private boolean cakeEaten = false;
    private BlockPos cakePos = null;
-   private VListNBT<UUID, StringNBT> sandIds = VListNBT.ofUUID();
+   private VListNBT<UUID, StringTag> sandIds = VListNBT.ofUUID();
 
    protected VaultRoom(ResourceLocation id) {
       super(id);
@@ -31,16 +31,16 @@ public class VaultRoom extends VaultPiece {
       this(ID);
    }
 
-   protected VaultRoom(ResourceLocation id, ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
+   protected VaultRoom(ResourceLocation id, ResourceLocation template, BoundingBox boundingBox, Rotation rotation) {
       super(id, template, boundingBox, rotation);
    }
 
-   public VaultRoom(ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
+   public VaultRoom(ResourceLocation template, BoundingBox boundingBox, Rotation rotation) {
       this(ID, template, boundingBox, rotation);
    }
 
    @Override
-   public void tick(ServerWorld world, VaultRaid vault) {
+   public void tick(ServerLevel world, VaultRaid vault) {
    }
 
    public void setCakeEaten(boolean cakeEaten) {
@@ -68,32 +68,36 @@ public class VaultRoom extends VaultPiece {
       return this.cakePos;
    }
 
+   public Vec3i getCenter() {
+      return this.getBoundingBox().getCenter();
+   }
+
    public BlockPos getTunnelConnectorPos(Direction dir) {
-      Vector3i center = this.getCenter();
-      BlockPos size = new BlockPos(this.getBoundingBox().func_175896_b()).func_177982_a(2, 2, 2);
-      return new BlockPos(center).func_177982_a(dir.func_82601_c() * size.func_177958_n(), 0, dir.func_82599_e() * size.func_177952_p());
+      Vec3i center = this.getCenter();
+      BlockPos size = new BlockPos(this.getBoundingBox().getLength()).offset(2, 2, 2);
+      return new BlockPos(center).offset(dir.getStepX() * size.getX(), 0, dir.getStepZ() * size.getZ());
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT tag = super.serializeNBT();
-      tag.func_74757_a("cakeEaten", this.cakeEaten);
+   public CompoundTag serializeNBT() {
+      CompoundTag tag = super.serializeNBT();
+      tag.putBoolean("cakeEaten", this.cakeEaten);
       if (this.cakePos != null) {
-         tag.func_218657_a("cakePos", NBTHelper.serializeBlockPos(this.cakePos));
+         tag.put("cakePos", NBTHelper.serializeBlockPos(this.cakePos));
       }
 
-      tag.func_218657_a("sandIds", this.sandIds.serializeNBT());
+      tag.put("sandIds", this.sandIds.serializeNBT());
       return tag;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT tag) {
+   public void deserializeNBT(CompoundTag tag) {
       super.deserializeNBT(tag);
-      this.cakeEaten = tag.func_74767_n("cakeEaten");
-      if (tag.func_150297_b("cakePos", 10)) {
-         this.cakePos = NBTHelper.deserializeBlockPos(tag.func_74775_l("cakePos"));
+      this.cakeEaten = tag.getBoolean("cakeEaten");
+      if (tag.contains("cakePos", 10)) {
+         this.cakePos = NBTHelper.deserializeBlockPos(tag.getCompound("cakePos"));
       }
 
-      this.sandIds.deserializeNBT(tag.func_150295_c("sandIds", 8));
+      this.sandIds.deserializeNBT(tag.getList("sandIds", 8));
    }
 }

@@ -5,10 +5,10 @@ import iskallia.vault.research.Restrictions;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public class ModResearch extends Research {
    @Expose
@@ -44,7 +44,7 @@ public class ModResearch extends Research {
          return false;
       } else {
          ResourceLocation registryName = item.getRegistryName();
-         return registryName == null ? false : this.modIds.contains(registryName.func_110624_b());
+         return registryName == null ? false : this.modIds.contains(registryName.getNamespace());
       }
    }
 
@@ -54,7 +54,7 @@ public class ModResearch extends Research {
          return false;
       } else {
          ResourceLocation registryName = block.getRegistryName();
-         return registryName == null ? false : this.modIds.contains(registryName.func_110624_b());
+         return registryName == null ? false : this.modIds.contains(registryName.getNamespace());
       }
    }
 
@@ -64,7 +64,7 @@ public class ModResearch extends Research {
          return false;
       } else {
          ResourceLocation registryName = entityType.getRegistryName();
-         return registryName == null ? false : this.modIds.contains(registryName.func_110624_b());
+         return registryName == null ? false : this.modIds.contains(registryName.getNamespace());
       }
    }
 }

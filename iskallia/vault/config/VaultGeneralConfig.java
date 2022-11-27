@@ -1,7 +1,8 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
+import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.GlobUtils;
 import iskallia.vault.util.data.WeightedList;
@@ -11,28 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.Items;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.event.world.BlockEvent.EntityPlaceEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
-@EventBusSubscriber(
-   bus = Bus.FORGE
-)
 public class VaultGeneralConfig extends Config {
    @Expose
    private int TICK_COUNTER;
-   @Expose
-   private int NO_EXIT_CHANCE;
-   @Expose
-   private int OBELISK_DROP_CHANCE;
    @Expose
    private List<String> ITEM_BLACKLIST;
    @Expose
@@ -44,9 +32,9 @@ public class VaultGeneralConfig extends Config {
    @Expose
    public boolean SAVE_PLAYER_SNAPSHOTS;
    @Expose
-   private final List<VaultGeneralConfig.Level> VAULT_OBJECTIVES = new ArrayList<>();
+   private final LevelEntryList<VaultGeneralConfig.Level> VAULT_OBJECTIVES = new LevelEntryList<>();
    @Expose
-   private final List<VaultGeneralConfig.Level> VAULT_COOP_OBJECTIVES = new ArrayList<>();
+   private final LevelEntryList<VaultGeneralConfig.Level> VAULT_COOP_OBJECTIVES = new LevelEntryList<>();
 
    @Override
    public String getName() {
@@ -55,14 +43,6 @@ public class VaultGeneralConfig extends Config {
 
    public int getTickCounter() {
       return this.TICK_COUNTER;
-   }
-
-   public int getNoExitChance() {
-      return this.NO_EXIT_CHANCE;
-   }
-
-   public int getObeliskDropChance() {
-      return this.OBELISK_DROP_CHANCE;
    }
 
    public VaultObjective generateObjective(int vaultLevel) {
@@ -76,84 +56,23 @@ public class VaultGeneralConfig extends Config {
    @Override
    protected void reset() {
       this.TICK_COUNTER = 30000;
-      this.NO_EXIT_CHANCE = 10;
       this.ITEM_BLACKLIST = new ArrayList<>();
-      this.ITEM_BLACKLIST.add(Items.field_221735_dD.getRegistryName().toString());
+      this.ITEM_BLACKLIST.add(Items.ENDER_CHEST.getRegistryName().toString());
       this.BLOCK_BLACKLIST = new ArrayList<>();
-      this.BLOCK_BLACKLIST.add(Blocks.field_150477_bB.getRegistryName().toString());
-      this.OBELISK_DROP_CHANCE = 2;
+      this.BLOCK_BLACKLIST.add(Blocks.ENDER_CHEST.getRegistryName().toString());
       this.VAULT_EXIT_TNL_MIN = 0.0F;
       this.VAULT_EXIT_TNL_MAX = 0.0F;
       this.SAVE_PLAYER_SNAPSHOTS = false;
       this.VAULT_OBJECTIVES.clear();
       WeightedList<String> objectives = new WeightedList<>();
-      objectives.add(Vault.id("summon_and_kill_boss").toString(), 1);
-      objectives.add(Vault.id("scavenger_hunt").toString(), 1);
+      objectives.add(VaultMod.id("summon_and_kill_boss").toString(), 1);
+      objectives.add(VaultMod.id("scavenger_hunt").toString(), 1);
       this.VAULT_OBJECTIVES.add(new VaultGeneralConfig.Level(0, objectives));
       this.VAULT_COOP_OBJECTIVES.clear();
       objectives = new WeightedList<>();
-      objectives.add(Vault.id("summon_and_kill_boss").toString(), 1);
-      objectives.add(Vault.id("scavenger_hunt").toString(), 1);
+      objectives.add(VaultMod.id("summon_and_kill_boss").toString(), 1);
+      objectives.add(VaultMod.id("scavenger_hunt").toString(), 1);
       this.VAULT_COOP_OBJECTIVES.add(new VaultGeneralConfig.Level(0, objectives));
-   }
-
-   @SubscribeEvent
-   public static void cancelItemInteraction(PlayerInteractEvent event) {
-      if (event.getPlayer().field_70170_p.func_234923_W_() == Vault.VAULT_KEY) {
-         if (event.isCancelable()) {
-            ResourceLocation registryName = event.getItemStack().func_77973_b().getRegistryName();
-            if (registryName != null) {
-               String itemId = registryName.toString();
-
-               for (String blacklistGlob : ModConfigs.VAULT_GENERAL.ITEM_BLACKLIST) {
-                  if (GlobUtils.matches(blacklistGlob, itemId)) {
-                     event.setCanceled(true);
-                  }
-               }
-            }
-         }
-      }
-   }
-
-   @SubscribeEvent
-   public static void cancelBlockInteraction(PlayerInteractEvent event) {
-      if (event.getPlayer().field_70170_p.func_234923_W_() == Vault.VAULT_KEY) {
-         if (event.isCancelable()) {
-            BlockState state = event.getWorld().func_180495_p(event.getPos());
-            ResourceLocation registryName = state.func_177230_c().getRegistryName();
-            if (registryName != null) {
-               String blockId = registryName.toString();
-
-               for (String blacklistGlob : ModConfigs.VAULT_GENERAL.BLOCK_BLACKLIST) {
-                  if (GlobUtils.matches(blacklistGlob, blockId)) {
-                     event.setCanceled(true);
-                  }
-               }
-            }
-         }
-      }
-   }
-
-   @SubscribeEvent
-   public static void cancelBlockPlacement(EntityPlaceEvent event) {
-      IWorld world = event.getWorld();
-      if (!world.func_201670_d()) {
-         if (((ServerWorld)world).func_234923_W_() == Vault.VAULT_KEY) {
-            if (event.isCancelable()) {
-               BlockState state = world.func_180495_p(event.getPos());
-               ResourceLocation registryName = state.func_177230_c().getRegistryName();
-               if (registryName != null) {
-                  String blockId = registryName.toString();
-
-                  for (String blacklistGlob : ModConfigs.VAULT_GENERAL.BLOCK_BLACKLIST) {
-                     if (GlobUtils.matches(blacklistGlob, blockId)) {
-                        event.setCanceled(true);
-                     }
-                  }
-               }
-            }
-         }
-      }
    }
 
    @Nonnull
@@ -168,24 +87,45 @@ public class VaultGeneralConfig extends Config {
    }
 
    @Nullable
-   public VaultGeneralConfig.Level getForLevel(List<VaultGeneralConfig.Level> levels, int level) {
-      for (int i = 0; i < levels.size(); i++) {
-         if (level < levels.get(i).level) {
-            if (i != 0) {
-               return levels.get(i - 1);
-            }
-            break;
-         }
-
-         if (i == levels.size() - 1) {
-            return levels.get(i);
-         }
-      }
-
-      return null;
+   public VaultGeneralConfig.Level getForLevel(LevelEntryList<VaultGeneralConfig.Level> levels, int level) {
+      return levels.getForLevel(level).orElse(null);
    }
 
-   public static class Level {
+   public boolean isBlacklisted(ItemStack stack) {
+      ResourceLocation registryName = stack.getItem().getRegistryName();
+      if (registryName == null) {
+         return false;
+      } else {
+         String itemId = registryName.toString();
+
+         for (String blacklistGlob : ModConfigs.VAULT_GENERAL.ITEM_BLACKLIST) {
+            if (GlobUtils.matches(blacklistGlob, itemId)) {
+               return true;
+            }
+         }
+
+         return false;
+      }
+   }
+
+   public boolean isBlacklisted(BlockState state) {
+      ResourceLocation registryName = state.getBlock().getRegistryName();
+      if (registryName == null) {
+         return false;
+      } else {
+         String blockId = registryName.toString();
+
+         for (String blacklistGlob : ModConfigs.VAULT_GENERAL.BLOCK_BLACKLIST) {
+            if (GlobUtils.matches(blacklistGlob, blockId)) {
+               return true;
+            }
+         }
+
+         return false;
+      }
+   }
+
+   public static class Level implements LevelEntryList.ILevelEntry {
       @Expose
       private final int level;
       @Expose
@@ -194,6 +134,11 @@ public class VaultGeneralConfig extends Config {
       public Level(int level, WeightedList<String> outcomes) {
          this.level = level;
          this.outcomes = outcomes;
+      }
+
+      @Override
+      public int getLevel() {
+         return this.level;
       }
    }
 }

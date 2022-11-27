@@ -1,19 +1,19 @@
 package iskallia.vault.entity.ai;
 
 import java.util.Random;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
-public class ThrowProjectilesGoal<T extends MobEntity> extends GoalTask<T> {
+public class ThrowProjectilesGoal<T extends Mob> extends GoalTask<T> {
    private final int chance;
    private final int count;
    private final ThrowProjectilesGoal.Projectile projectile;
@@ -27,40 +27,40 @@ public class ThrowProjectilesGoal<T extends MobEntity> extends GoalTask<T> {
       this.projectile = projectile;
    }
 
-   public boolean func_75250_a() {
-      return this.getEntity().func_70638_az() != null && this.getWorld().field_73012_v.nextInt(this.chance) == 0;
+   public boolean canUse() {
+      return this.getEntity().getTarget() != null && this.getWorld().random.nextInt(this.chance) == 0;
    }
 
-   public boolean func_75253_b() {
-      return this.getEntity().func_70638_az() != null && this.progress < this.count;
+   public boolean canContinueToUse() {
+      return this.getEntity().getTarget() != null && this.progress < this.count;
    }
 
-   public void func_75249_e() {
-      this.oldStack = this.getEntity().func_184582_a(EquipmentSlotType.OFFHAND);
-      this.getEntity().func_184201_a(EquipmentSlotType.OFFHAND, new ItemStack(Items.field_151126_ay));
+   public void start() {
+      this.oldStack = this.getEntity().getItemBySlot(EquipmentSlot.OFFHAND);
+      this.getEntity().setItemSlot(EquipmentSlot.OFFHAND, new ItemStack(Items.SNOWBALL));
    }
 
-   public void func_75246_d() {
-      if (this.getWorld().field_73012_v.nextInt(3) == 0) {
+   public void tick() {
+      if (this.getWorld().random.nextInt(3) == 0) {
          Entity throwEntity = this.projectile.create(this.getWorld(), this.getEntity());
-         LivingEntity target = this.getEntity().func_70638_az();
+         LivingEntity target = this.getEntity().getTarget();
          if (target != null) {
-            double d0 = target.func_226280_cw_() - 1.1F;
-            double d1 = target.func_226277_ct_() - this.getEntity().func_226277_ct_();
-            double d2 = d0 - throwEntity.func_226278_cu_();
-            double d3 = target.func_226281_cx_() - this.getEntity().func_226281_cx_();
-            float f = MathHelper.func_76133_a(d1 * d1 + d3 * d3) * 0.2F;
-            this.shoot(throwEntity, d1, d2 + f, d3, 1.6F, 4.0F, this.getWorld().field_73012_v);
+            double d0 = target.getEyeY() - 1.1F;
+            double d1 = target.getX() - this.getEntity().getX();
+            double d2 = d0 - throwEntity.getY();
+            double d3 = target.getZ() - this.getEntity().getZ();
+            float f = Mth.sqrt((float)(d1 * d1 + d3 * d3)) * 0.2F;
+            this.shoot(throwEntity, d1, d2 + f, d3, 1.6F, 4.0F, this.getWorld().random);
             this.getWorld()
-               .func_184133_a(
+               .playSound(
                   null,
-                  this.getEntity().func_233580_cy_(),
-                  SoundEvents.field_187805_fE,
-                  SoundCategory.HOSTILE,
+                  this.getEntity().blockPosition(),
+                  SoundEvents.SNOW_GOLEM_SHOOT,
+                  SoundSource.HOSTILE,
                   1.0F,
-                  0.4F / (this.getWorld().field_73012_v.nextFloat() * 0.4F + 0.8F)
+                  0.4F / (this.getWorld().random.nextFloat() * 0.4F + 0.8F)
                );
-            this.getWorld().func_217376_c(throwEntity);
+            this.getWorld().addFreshEntity(throwEntity);
          }
 
          this.progress++;
@@ -68,25 +68,25 @@ public class ThrowProjectilesGoal<T extends MobEntity> extends GoalTask<T> {
    }
 
    public void shoot(Entity projectile, double x, double y, double z, float velocity, float inaccuracy, Random rand) {
-      Vector3d vector3d = new Vector3d(x, y, z)
-         .func_72432_b()
-         .func_72441_c(rand.nextGaussian() * 0.0075F * inaccuracy, rand.nextGaussian() * 0.0075F * inaccuracy, rand.nextGaussian() * 0.0075F * inaccuracy)
-         .func_186678_a(velocity);
-      projectile.func_213317_d(vector3d);
-      float f = MathHelper.func_76133_a(Entity.func_213296_b(vector3d));
-      projectile.field_70177_z = (float)(MathHelper.func_181159_b(vector3d.field_72450_a, vector3d.field_72449_c) * 180.0F / (float)Math.PI);
-      projectile.field_70125_A = (float)(MathHelper.func_181159_b(vector3d.field_72448_b, f) * 180.0F / (float)Math.PI);
-      projectile.field_70126_B = projectile.field_70177_z;
-      projectile.field_70127_C = projectile.field_70125_A;
+      Vec3 vector3d = new Vec3(x, y, z)
+         .normalize()
+         .add(rand.nextGaussian() * 0.0075F * inaccuracy, rand.nextGaussian() * 0.0075F * inaccuracy, rand.nextGaussian() * 0.0075F * inaccuracy)
+         .scale(velocity);
+      projectile.setDeltaMovement(vector3d);
+      float f = Mth.sqrt((float)vector3d.horizontalDistanceSqr());
+      projectile.setYRot((float)(Mth.atan2(vector3d.x, vector3d.z) * 180.0F / (float)Math.PI));
+      projectile.setXRot((float)(Mth.atan2(vector3d.y, f) * 180.0F / (float)Math.PI));
+      projectile.yRotO = projectile.getYRot();
+      projectile.xRotO = projectile.getXRot();
    }
 
-   public void func_75251_c() {
-      this.getEntity().func_184201_a(EquipmentSlotType.OFFHAND, this.oldStack);
-      this.oldStack = ItemStack.field_190927_a;
+   public void stop() {
+      this.getEntity().setItemSlot(EquipmentSlot.OFFHAND, this.oldStack);
+      this.oldStack = ItemStack.EMPTY;
       this.progress = 0;
    }
 
    public interface Projectile {
-      Entity create(World var1, LivingEntity var2);
+      Entity create(Level var1, LivingEntity var2);
    }
 }

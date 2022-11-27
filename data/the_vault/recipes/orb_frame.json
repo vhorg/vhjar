@@ -1,19 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "bpb",
-    "pap",
-    "bpb"
+    "ese",
+    "sgs",
+    "ese"
   ],
   "key": {
-    "a": {
-      "item": "the_vault:vault_diamond_block"
+    "e": {
+      "item": "the_vault:vault_essence"
     },
-    "b": {
+    "s": {
       "item": "the_vault:gem_black_opal"
     },
-    "p": {
-      "item": "the_vault:perfect_black_opal"
+    "g": {
+      "item": "the_vault:extraordinary_benitoite"
     }
   },
   "result": {

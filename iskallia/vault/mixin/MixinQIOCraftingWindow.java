@@ -8,8 +8,8 @@ import mekanism.common.content.qio.QIOCraftingWindow;
 import mekanism.common.inventory.container.slot.HotBarSlot;
 import mekanism.common.inventory.container.slot.MainInventorySlot;
 import mekanism.common.inventory.slot.CraftingWindowOutputInventorySlot;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,35 +25,35 @@ public class MixinQIOCraftingWindow {
    private CraftingWindowOutputInventorySlot outputSlot;
 
    @Inject(
-      method = {"performCraft(Lnet/minecraft/entity/player/PlayerEntity;Ljava/util/List;Ljava/util/List;)V"},
+      method = {"performCraft(Lnet/minecraft/world/entity/player/Player;Ljava/util/List;Ljava/util/List;)V"},
       at = {@At(
          value = "INVOKE",
-         target = "Lmekanism/common/content/qio/IQIOCraftingWindowHolder;getHolderWorld()Lnet/minecraft/world/World;"
+         target = "Lmekanism/common/content/qio/IQIOCraftingWindowHolder;getHolderWorld()Lnet/minecraft/world/level/Level;"
       )},
       cancellable = true,
       remap = false
    )
-   public void preventShiftCrafting(PlayerEntity player, List<HotBarSlot> hotBarSlots, List<MainInventorySlot> mainInventorySlots, CallbackInfo ci) {
-      ItemStack resultStack = this.outputSlot.getStack().func_77946_l();
+   public void preventShiftCrafting(Player player, List<HotBarSlot> hotBarSlots, List<MainInventorySlot> mainInventorySlots, CallbackInfo ci) {
+      ItemStack resultStack = this.outputSlot.getStack().copy();
       ResearchTree researchTree = StageManager.getResearchTree(player);
-      String restrictedBy = researchTree.restrictedBy(resultStack.func_77973_b(), Restrictions.Type.CRAFTABILITY);
+      String restrictedBy = researchTree.restrictedBy(resultStack.getItem(), Restrictions.Type.CRAFTABILITY);
       if (restrictedBy != null) {
          ci.cancel();
       }
    }
 
    @Inject(
-      method = {"performCraft(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/item/ItemStack;I)Lnet/minecraft/item/ItemStack;"},
+      method = {"performCraft(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;I)Lnet/minecraft/world/item/ItemStack;"},
       at = {@At("HEAD")},
       cancellable = true,
       remap = false
    )
-   public void preventCrafting(PlayerEntity player, ItemStack result, int amountCrafted, CallbackInfoReturnable<ItemStack> cir) {
-      if (!result.func_190926_b()) {
+   public void preventCrafting(Player player, ItemStack result, int amountCrafted, CallbackInfoReturnable<ItemStack> cir) {
+      if (!result.isEmpty()) {
          ResearchTree researchTree = StageManager.getResearchTree(player);
-         String restrictedBy = researchTree.restrictedBy(result.func_77973_b(), Restrictions.Type.CRAFTABILITY);
+         String restrictedBy = researchTree.restrictedBy(result.getItem(), Restrictions.Type.CRAFTABILITY);
          if (restrictedBy != null) {
-            cir.setReturnValue(ItemStack.field_190927_a);
+            cir.setReturnValue(ItemStack.EMPTY);
          }
       }
    }

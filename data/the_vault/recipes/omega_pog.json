@@ -5,11 +5,11 @@
     {"item": "the_vault:chunk_iskallium"},
     {"item": "the_vault:chunk_sparkletine"},
     {"item": "the_vault:chunk_bomignite"},
-    {"item": "the_vault:chunk_funsoide"},
+    {"item": "the_vault:chunk_xenium"},
     {"item": "the_vault:chunk_tubium"},
     {"item": "the_vault:chunk_upaline"},
     {"item": "the_vault:chunk_ashium"},
-    {"item": "the_vault:chunk_puffium"}
+    {"item": "the_vault:chunk_petzanite"}
   ],
   "result": {
     "item": "the_vault:omega_pog",

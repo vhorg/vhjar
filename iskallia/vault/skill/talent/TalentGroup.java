@@ -3,19 +3,19 @@ package iskallia.vault.skill.talent;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.annotations.Expose;
+import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.skill.talent.type.AttributeTalent;
 import iskallia.vault.skill.talent.type.EffectTalent;
-import iskallia.vault.skill.talent.type.PlayerTalent;
+import iskallia.vault.skill.talent.type.VanillaAttributeTalent;
 import iskallia.vault.util.RomanNumber;
 import java.util.function.IntFunction;
 import java.util.function.IntToDoubleFunction;
-import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
-import net.minecraft.potion.Effect;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 
-public class TalentGroup<T extends PlayerTalent> {
+public class TalentGroup<T extends Talent> {
    @Expose
    private final String name;
    @Expose
@@ -48,11 +48,11 @@ public class TalentGroup<T extends PlayerTalent> {
    }
 
    public int learningCost() {
-      return this.levels[0].getCost();
+      return this.levels[0].getLearningCost();
    }
 
    public int cost(int level) {
-      return level > this.getMaxLevel() ? -1 : this.levels[level - 1].getCost();
+      return level > this.getMaxLevel() ? -1 : this.levels[level - 1].getLearningCost();
    }
 
    public BiMap<String, T> getRegistry() {
@@ -70,32 +70,35 @@ public class TalentGroup<T extends PlayerTalent> {
       return this.registry;
    }
 
-   public static TalentGroup<EffectTalent> ofEffect(
-      String name, Effect effect, EffectTalent.Type type, int maxLevel, IntUnaryOperator cost, EffectTalent.Operator operator
-   ) {
-      EffectTalent[] talents = IntStream.range(0, maxLevel)
-         .mapToObj(i -> new EffectTalent(cost.applyAsInt(i + 1), effect, i, type, operator))
-         .toArray(EffectTalent[]::new);
-      return new TalentGroup<>(name, talents);
-   }
-
-   public static TalentGroup<AttributeTalent> ofAttribute(
-      String name, Attribute attribute, String modifierName, int maxLevel, IntUnaryOperator cost, IntToDoubleFunction amount, IntFunction<Operation> operation
-   ) {
+   public static TalentGroup<AttributeTalent> ofGearAttribute(String name, VaultGearAttribute<?> attribute, int maxLevel, IntToDoubleFunction valueFn) {
       AttributeTalent[] talents = IntStream.range(0, maxLevel)
-         .mapToObj(
-            i -> new AttributeTalent(
-               cost.applyAsInt(i + 1),
-               attribute,
-               new AttributeTalent.Modifier(modifierName + " " + RomanNumber.toRoman(i + 1), amount.applyAsDouble(i + 1), operation.apply(i + 1))
-            )
-         )
+         .mapToObj(i -> new AttributeTalent(i + 1, attribute, valueFn.applyAsDouble(i)))
          .toArray(AttributeTalent[]::new);
       return new TalentGroup<>(name, talents);
    }
 
-   public static <T extends PlayerTalent> TalentGroup<T> of(String name, int maxLevel, IntFunction<T> supplier) {
-      PlayerTalent[] talents = IntStream.range(0, maxLevel).mapToObj(supplier).toArray(PlayerTalent[]::new);
+   public static TalentGroup<EffectTalent> ofEffect(String name, MobEffect effect, int maxLevel) {
+      EffectTalent[] talents = IntStream.range(0, maxLevel).mapToObj(i -> new EffectTalent(i + 1, effect, i + 1)).toArray(EffectTalent[]::new);
+      return new TalentGroup<>(name, talents);
+   }
+
+   public static TalentGroup<VanillaAttributeTalent> ofAttribute(
+      String name, Attribute attribute, Operation operation, int maxLevel, IntToDoubleFunction amount
+   ) {
+      VanillaAttributeTalent[] talents = IntStream.range(0, maxLevel)
+         .mapToObj(
+            i -> new VanillaAttributeTalent(
+               i + 1,
+               attribute,
+               new VanillaAttributeTalent.Modifier(attribute.getDescriptionId() + " " + RomanNumber.toRoman(i + 1), amount.applyAsDouble(i + 1), operation)
+            )
+         )
+         .toArray(VanillaAttributeTalent[]::new);
+      return new TalentGroup<>(name, talents);
+   }
+
+   public static <T extends Talent> TalentGroup<T> of(String name, int maxLevel, IntFunction<T> supplier) {
+      Talent[] talents = IntStream.range(0, maxLevel).mapToObj(supplier).toArray(Talent[]::new);
       return new TalentGroup<>(name, (T[])talents);
    }
 }

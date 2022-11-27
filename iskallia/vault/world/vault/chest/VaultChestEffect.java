@@ -1,9 +1,9 @@
 package iskallia.vault.world.vault.chest;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.player.VaultPlayer;
-import net.minecraft.world.server.ServerWorld;
+import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.world.storage.VirtualWorld;
+import net.minecraft.server.level.ServerPlayer;
 
 public abstract class VaultChestEffect {
    @Expose
@@ -17,9 +17,5 @@ public abstract class VaultChestEffect {
       return this.name;
    }
 
-   public boolean isTrapEffect() {
-      return true;
-   }
-
-   public abstract void apply(VaultRaid var1, VaultPlayer var2, ServerWorld var3);
+   public abstract void apply(VirtualWorld var1, Vault var2, ServerPlayer var3);
 }

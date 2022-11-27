@@ -1,6 +1,7 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.MathUtilities;
@@ -46,7 +47,7 @@ public class FinalRaidModifierConfig extends Config {
    @Expose
    private List<ModifierDoublingModifier> MODIFIER_DOUBLING_MODIFIERS = new ArrayList<>();
    @Expose
-   private List<FinalRaidModifierConfig.Level> levels = new ArrayList<>();
+   private LevelEntryList<FinalRaidModifierConfig.Level> levels = new LevelEntryList<>();
 
    public List<RaidModifier> getAll() {
       return Stream.of(
@@ -71,7 +72,7 @@ public class FinalRaidModifierConfig extends Config {
    }
 
    public Optional<FinalRaidModifierConfig.RollableModifier> getRandomModifier(int level, boolean preventArtifacts) {
-      return this.getForLevel(this.levels, level).map(modifierLevel -> {
+      return this.levels.getForLevel(level).map(modifierLevel -> {
          WeightedList<FinalRaidModifierConfig.RollableModifier> modifierList = modifierLevel.modifiers;
          if (preventArtifacts) {
             modifierList = modifierList.copyFiltered(modifierName -> {
@@ -104,14 +105,14 @@ public class FinalRaidModifierConfig extends Config {
       this.MONSTER_LEVEL_MODIFIERS = new ArrayList<>();
       this.MONSTER_LEVEL_MODIFIERS.add(new MonsterLevelModifier("monsterLevel"));
       this.BLOCK_PLACEMENT_MODIFIERS = new ArrayList<>();
-      this.BLOCK_PLACEMENT_MODIFIERS.add(new BlockPlacementModifier("gildedChests", ModBlocks.VAULT_BONUS_CHEST, 5, "Gilded Chests"));
+      this.BLOCK_PLACEMENT_MODIFIERS.add(new BlockPlacementModifier("gildedChests", ModBlocks.GILDED_CHEST, 5, "Gilded Chests"));
       this.ITEM_PLACEMENT_MODIFIERS = new ArrayList<>();
       this.ITEM_PLACEMENT_MODIFIERS.add(new FloatingItemModifier("vaultGems", 10, FloatingItemModifier.defaultGemList(), "Vault Gems"));
       this.ARTIFACT_FRAGMENT_MODIFIERS = new ArrayList<>();
       this.ARTIFACT_FRAGMENT_MODIFIERS.add(new ArtifactFragmentModifier("artifactFragment"));
       this.MODIFIER_DOUBLING_MODIFIERS = new ArrayList<>();
       this.MODIFIER_DOUBLING_MODIFIERS.add(new ModifierDoublingModifier("modifierDoubling"));
-      this.levels = new ArrayList<>();
+      this.levels = new LevelEntryList<>();
       this.levels
          .add(
             new FinalRaidModifierConfig.Level(
@@ -124,24 +125,7 @@ public class FinalRaidModifierConfig extends Config {
          );
    }
 
-   private Optional<FinalRaidModifierConfig.Level> getForLevel(List<FinalRaidModifierConfig.Level> levels, int level) {
-      for (int i = 0; i < levels.size(); i++) {
-         if (level < levels.get(i).level) {
-            if (i != 0) {
-               return Optional.of(levels.get(i - 1));
-            }
-            break;
-         }
-
-         if (i == levels.size() - 1) {
-            return Optional.of(levels.get(i));
-         }
-      }
-
-      return Optional.empty();
-   }
-
-   public static class Level {
+   public static class Level implements LevelEntryList.ILevelEntry {
       @Expose
       private final int level;
       @Expose
@@ -150,6 +134,11 @@ public class FinalRaidModifierConfig extends Config {
       public Level(int level, WeightedList<FinalRaidModifierConfig.RollableModifier> modifiers) {
          this.level = level;
          this.modifiers = modifiers;
+      }
+
+      @Override
+      public int getLevel() {
+         return this.level;
       }
    }
 

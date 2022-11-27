@@ -1,6 +1,6 @@
 package iskallia.vault.client.gui.overlay.goal;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 public class CompoundBossBarOverlay extends BossBarOverlay {
    private final BossBarOverlay first;
@@ -17,7 +17,7 @@ public class CompoundBossBarOverlay extends BossBarOverlay {
    }
 
    @Override
-   public int drawOverlay(MatrixStack renderStack, float pTicks) {
+   public int drawOverlay(PoseStack renderStack, float pTicks) {
       int height = 0;
       if (this.first != null && this.first.shouldDisplay()) {
          height += this.first.drawOverlay(renderStack, pTicks);

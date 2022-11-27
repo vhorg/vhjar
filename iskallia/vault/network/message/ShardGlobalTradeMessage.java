@@ -2,11 +2,11 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientShardTradeData;
 import iskallia.vault.config.SoulShardConfig;
-import iskallia.vault.config.entry.SingleItemEntry;
+import iskallia.vault.config.entry.ItemEntry;
 import iskallia.vault.util.data.WeightedList;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class ShardGlobalTradeMessage {
    private final WeightedList<SoulShardConfig.ShardTrade> shardTrades;
@@ -19,14 +19,15 @@ public class ShardGlobalTradeMessage {
       return this.shardTrades;
    }
 
-   public static void encode(ShardGlobalTradeMessage message, PacketBuffer buffer) {
+   public static void encode(ShardGlobalTradeMessage message, FriendlyByteBuf buffer) {
       buffer.writeInt(message.shardTrades.size());
       message.shardTrades.forEach((trade, nbr) -> {
-         SingleItemEntry entry = trade.getItemEntry();
-         buffer.func_180714_a(entry.ITEM);
+         ItemEntry entry = trade.getItemEntry();
+         buffer.writeUtf(entry.ITEM);
+         buffer.writeInt(entry.AMOUNT);
          buffer.writeBoolean(entry.NBT != null);
          if (entry.NBT != null) {
-            buffer.func_180714_a(trade.getItemEntry().NBT);
+            buffer.writeUtf(trade.getItemEntry().NBT);
          }
 
          buffer.writeInt(trade.getMinPrice());
@@ -35,21 +36,22 @@ public class ShardGlobalTradeMessage {
       });
    }
 
-   public static ShardGlobalTradeMessage decode(PacketBuffer buffer) {
+   public static ShardGlobalTradeMessage decode(FriendlyByteBuf buffer) {
       WeightedList<SoulShardConfig.ShardTrade> trades = new WeightedList<>();
       int tradeCount = buffer.readInt();
 
       for (int i = 0; i < tradeCount; i++) {
-         String item = buffer.func_150789_c(32767);
+         String item = buffer.readUtf(32767);
+         int amount = buffer.readInt();
          String nbt = null;
          if (buffer.readBoolean()) {
-            nbt = buffer.func_150789_c(32767);
+            nbt = buffer.readUtf(32767);
          }
 
          int min = buffer.readInt();
          int max = buffer.readInt();
          int weight = buffer.readInt();
-         SoulShardConfig.ShardTrade trade = new SoulShardConfig.ShardTrade(new SingleItemEntry(item, nbt), min, max);
+         SoulShardConfig.ShardTrade trade = new SoulShardConfig.ShardTrade(new ItemEntry(item, amount, nbt), min, max);
          trades.add(trade, weight);
       }
 

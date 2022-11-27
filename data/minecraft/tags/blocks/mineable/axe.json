@@ -1,0 +1,8 @@
+{
+    "replace": "false",
+    "values": [
+        "the_vault:wooden_chest",
+        "the_vault:bounty_block",
+        "the_vault:wooden_chest_placeable"
+    ]
+}

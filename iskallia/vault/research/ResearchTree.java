@@ -6,42 +6,68 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ResearchTreeMessage;
 import iskallia.vault.research.group.ResearchGroup;
 import iskallia.vault.research.type.Research;
-import iskallia.vault.util.NetcodeUtils;
-import java.util.LinkedList;
+import iskallia.vault.util.PlayerReference;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.UUID;
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.network.NetworkDirection;
 
-public class ResearchTree implements INBTSerializable<CompoundNBT> {
-   protected UUID playerUUID;
-   protected List<String> researchesDone;
+public class ResearchTree implements INBTSerializable<CompoundTag> {
+   protected final List<String> researchesDone = new ArrayList<>();
+   protected final List<PlayerReference> researchShares = new ArrayList<>();
 
-   public ResearchTree(UUID playerUUID) {
-      this.playerUUID = playerUUID;
-      this.researchesDone = new LinkedList<>();
+   private ResearchTree() {
+   }
+
+   public ResearchTree(CompoundTag tag) {
+      this.deserializeNBT(tag);
+   }
+
+   public static ResearchTree empty() {
+      return new ResearchTree();
    }
 
    public List<String> getResearchesDone() {
-      return this.researchesDone;
+      return Collections.unmodifiableList(this.researchesDone);
+   }
+
+   public boolean isResearched(Research research) {
+      return this.isResearched(research.getName());
    }
 
    public boolean isResearched(String researchName) {
       return this.researchesDone.contains(researchName);
    }
 
-   public void research(String researchName) {
-      this.researchesDone.add(researchName);
+   public void research(Research research) {
+      this.researchesDone.add(research.getName());
    }
 
-   public void resetAll() {
+   public void removeResearch(Research research) {
+      this.researchesDone.remove(research.getName());
+   }
+
+   public void resetResearches() {
       this.researchesDone.clear();
+   }
+
+   public List<PlayerReference> getResearchShares() {
+      return Collections.unmodifiableList(this.researchShares);
+   }
+
+   public void addShare(PlayerReference reference) {
+      this.researchShares.add(reference);
+   }
+
+   public void resetShares() {
+      this.researchShares.clear();
    }
 
    public int getResearchCost(Research research) {
@@ -57,7 +83,12 @@ public class ResearchTree implements INBTSerializable<CompoundNBT> {
          }
       }
 
+      cost *= 1.0F + this.getTeamResearchCostIncreaseMultiplier();
       return Math.max(1, Math.round(cost));
+   }
+
+   public float getTeamResearchCostIncreaseMultiplier() {
+      return this.researchShares.size() * 0.5F;
    }
 
    public String restrictedBy(Item item, Restrictions.Type restrictionType) {
@@ -90,39 +121,40 @@ public class ResearchTree implements INBTSerializable<CompoundNBT> {
       return null;
    }
 
-   public void sync(MinecraftServer server) {
-      NetcodeUtils.runIfPresent(
-         server,
-         this.playerUUID,
-         player -> ModNetwork.CHANNEL
-            .sendTo(new ResearchTreeMessage(this, player.func_110124_au()), player.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT)
-      );
+   public void sync(ServerPlayer player) {
+      ModNetwork.CHANNEL.sendTo(new ResearchTreeMessage(this), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_186854_a("playerUUID", this.playerUUID);
-      ListNBT researches = new ListNBT();
-
-      for (int i = 0; i < this.researchesDone.size(); i++) {
-         CompoundNBT research = new CompoundNBT();
-         research.func_74778_a("name", this.researchesDone.get(i));
-         researches.add(i, research);
-      }
-
-      nbt.func_218657_a("researches", researches);
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      ListTag researches = new ListTag();
+      this.researchesDone.forEach(researchName -> {
+         CompoundTag research = new CompoundTag();
+         research.putString("name", researchName);
+         researches.add(research);
+      });
+      nbt.put("researches", researches);
+      ListTag shares = new ListTag();
+      this.researchShares.forEach(share -> shares.add(share.serialize()));
+      nbt.put("shares", shares);
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.playerUUID = nbt.func_186857_a("playerUUID");
-      ListNBT researches = nbt.func_150295_c("researches", 10);
-      this.researchesDone = new LinkedList<>();
+   public void deserializeNBT(CompoundTag nbt) {
+      ListTag researches = nbt.getList("researches", 10);
+      this.researchesDone.clear();
 
       for (int i = 0; i < researches.size(); i++) {
-         CompoundNBT researchNBT = researches.func_150305_b(i);
-         String name = researchNBT.func_74779_i("name");
+         CompoundTag researchNBT = researches.getCompound(i);
+         String name = researchNBT.getString("name");
          this.researchesDone.add(name);
+      }
+
+      ListTag shares = nbt.getList("shares", 10);
+      this.researchShares.clear();
+
+      for (int i = 0; i < shares.size(); i++) {
+         this.researchShares.add(new PlayerReference(shares.getCompound(i)));
       }
    }
 }

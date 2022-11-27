@@ -9,8 +9,8 @@ import iskallia.vault.world.vault.logic.objective.architect.processor.ExitPortal
 import iskallia.vault.world.vault.logic.objective.architect.processor.VaultPieceProcessor;
 import java.util.Random;
 import javax.annotation.Nullable;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 
 public class BossExitModifier extends VoteModifier {
    @Expose
@@ -30,7 +30,7 @@ public class BossExitModifier extends VoteModifier {
 
    @Nullable
    @Override
-   public JigsawPiece getSpecialRoom(ArchitectObjective objective, VaultRaid vault) {
+   public StructurePoolElement getSpecialRoom(ArchitectObjective objective, VaultRaid vault) {
       return this.generatePortal(vault) ? VaultJigsawHelper.getArchitectRoom() : super.getSpecialRoom(objective, vault);
    }
 
@@ -41,7 +41,7 @@ public class BossExitModifier extends VoteModifier {
    }
 
    @Override
-   public void onApply(ArchitectObjective objective, VaultRaid vault, ServerWorld world) {
+   public void onApply(ArchitectObjective objective, VaultRaid vault, ServerLevel world) {
       super.onApply(objective, vault, world);
       objective.setVotingLocked();
    }

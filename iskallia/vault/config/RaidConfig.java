@@ -1,7 +1,7 @@
 package iskallia.vault.config;
 
-import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
+import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.util.data.WeightedList;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javax.annotation.Nullable;
-import net.minecraft.entity.EntityType;
+import net.minecraft.world.entity.EntityType;
 
 public class RaidConfig extends Config {
-   public static final RaidConfig.Level DEFAULT = new RaidConfig.Level(0, new RaidConfig.MobPool());
+   private static final RaidConfig.Level DEFAULT = new RaidConfig.Level(0, new RaidConfig.MobPool());
    @Expose
-   private final Map<String, List<RaidConfig.Level>> mobPools = new HashMap<>();
+   private final Map<String, LevelEntryList<RaidConfig.Level>> mobPools = new HashMap<>();
    @Expose
    private final WeightedList<RaidConfig.WaveSetup> raidWaves = new WeightedList<>();
    @Expose
@@ -23,8 +23,8 @@ public class RaidConfig extends Config {
 
    @Nullable
    public RaidConfig.MobPool getPool(String pool, int level) {
-      List<RaidConfig.Level> mobLevelPool = this.mobPools.get(pool);
-      return mobLevelPool == null ? null : this.getForLevel(mobLevelPool, level).orElse(DEFAULT).mobPool;
+      LevelEntryList<RaidConfig.Level> mobLevelPool = this.mobPools.get(pool);
+      return mobLevelPool == null ? null : mobLevelPool.getForLevel(level).orElse(DEFAULT).mobPool;
    }
 
    public float getMobCountMultiplier(int level) {
@@ -48,21 +48,17 @@ public class RaidConfig extends Config {
       this.mobPools
          .put(
             "ranged",
-            Lists.newArrayList(
-               new RaidConfig.Level[]{
-                  new RaidConfig.Level(0, new RaidConfig.MobPool().add(EntityType.field_200741_ag, 1)),
-                  new RaidConfig.Level(75, new RaidConfig.MobPool().add(EntityType.field_200741_ag, 1).add(EntityType.field_200750_ap, 1))
-               }
+            LevelEntryList.of(
+               new RaidConfig.Level(0, new RaidConfig.MobPool().add(EntityType.SKELETON, 1)),
+               new RaidConfig.Level(75, new RaidConfig.MobPool().add(EntityType.SKELETON, 1).add(EntityType.STRAY, 1))
             )
          );
       this.mobPools
          .put(
             "melee",
-            Lists.newArrayList(
-               new RaidConfig.Level[]{
-                  new RaidConfig.Level(0, new RaidConfig.MobPool().add(EntityType.field_200725_aD, 1)),
-                  new RaidConfig.Level(50, new RaidConfig.MobPool().add(EntityType.field_200725_aD, 2).add(EntityType.field_200758_ax, 1))
-               }
+            LevelEntryList.of(
+               new RaidConfig.Level(0, new RaidConfig.MobPool().add(EntityType.ZOMBIE, 1)),
+               new RaidConfig.Level(50, new RaidConfig.MobPool().add(EntityType.ZOMBIE, 2).add(EntityType.VINDICATOR, 1))
             )
          );
       RaidConfig.WaveSetup waveSetup = new RaidConfig.WaveSetup()
@@ -77,23 +73,6 @@ public class RaidConfig extends Config {
       this.amountLevels.add(new RaidConfig.AmountLevel(150, 2.5F));
       this.amountLevels.add(new RaidConfig.AmountLevel(200, 3.0F));
       this.amountLevels.add(new RaidConfig.AmountLevel(250, 4.0F));
-   }
-
-   private Optional<RaidConfig.Level> getForLevel(List<RaidConfig.Level> levels, int level) {
-      for (int i = 0; i < levels.size(); i++) {
-         if (level < levels.get(i).level) {
-            if (i != 0) {
-               return Optional.of(levels.get(i - 1));
-            }
-            break;
-         }
-
-         if (i == levels.size() - 1) {
-            return Optional.of(levels.get(i));
-         }
-      }
-
-      return Optional.empty();
    }
 
    private Optional<RaidConfig.AmountLevel> getAmountLevel(List<RaidConfig.AmountLevel> levels, int level) {
@@ -169,15 +148,20 @@ public class RaidConfig extends Config {
       }
    }
 
-   public static class Level {
+   public static class Level implements LevelEntryList.ILevelEntry {
       @Expose
-      public final int level;
+      private final int level;
       @Expose
-      public final RaidConfig.MobPool mobPool;
+      private final RaidConfig.MobPool mobPool;
 
       public Level(int level, RaidConfig.MobPool mobPool) {
          this.level = level;
          this.mobPool = mobPool;
+      }
+
+      @Override
+      public int getLevel() {
+         return this.level;
       }
    }
 

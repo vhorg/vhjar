@@ -4,42 +4,43 @@ import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.init.ModBlocks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
 
-public class VaultCrateTileEntity extends TileEntity {
-   private ItemStackHandler itemHandler = this.createHandler();
-   private LazyOptional<IItemHandler> handler = LazyOptional.of(() -> this.itemHandler);
+public class VaultCrateTileEntity extends BlockEntity {
+   private final ItemStackHandler itemHandler = this.createHandler();
+   private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> this.itemHandler);
 
-   public VaultCrateTileEntity() {
-      super(ModBlocks.VAULT_CRATE_TILE_ENTITY);
+   public VaultCrateTileEntity(BlockPos pos, BlockState state) {
+      super(ModBlocks.VAULT_CRATE_TILE_ENTITY, pos, state);
    }
 
    public void sendUpdates() {
-      this.field_145850_b.func_184138_a(this.field_174879_c, this.func_195044_w(), this.func_195044_w(), 3);
-      this.field_145850_b.func_195593_d(this.field_174879_c, this.func_195044_w().func_177230_c());
-      this.func_70296_d();
+      this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
+      this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
+      this.setChanged();
    }
 
-   public CompoundNBT func_189515_b(CompoundNBT compound) {
-      compound.func_218657_a("inv", this.itemHandler.serializeNBT());
-      return super.func_189515_b(compound);
+   protected void saveAdditional(CompoundTag pTag) {
+      super.saveAdditional(pTag);
+      pTag.put("inv", this.itemHandler.serializeNBT());
    }
 
-   public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-      nbt.func_74775_l("inv").func_82580_o("Size");
-      this.itemHandler.deserializeNBT(nbt.func_74775_l("inv"));
-      super.func_230337_a_(state, nbt);
+   public void load(CompoundTag pTag) {
+      super.load(pTag);
+      pTag.getCompound("inv").remove("Size");
+      this.itemHandler.deserializeNBT(pTag.getCompound("inv"));
    }
 
    private ItemStackHandler createHandler() {
@@ -49,8 +50,9 @@ public class VaultCrateTileEntity extends TileEntity {
          }
 
          public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-            return !(Block.func_149634_a(stack.func_77973_b()) instanceof ShulkerBoxBlock)
-               && !(Block.func_149634_a(stack.func_77973_b()) instanceof VaultCrateBlock);
+            return !stack.getItem().canFitInsideContainerItems()
+               ? false
+               : !(Block.byItem(stack.getItem()) instanceof ShulkerBoxBlock) && !(Block.byItem(stack.getItem()) instanceof VaultCrateBlock);
          }
 
          @Nonnull
@@ -65,11 +67,11 @@ public class VaultCrateTileEntity extends TileEntity {
       return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.handler.cast() : super.getCapability(cap, side);
    }
 
-   public CompoundNBT saveToNbt() {
+   public CompoundTag saveToNbt() {
       return this.itemHandler.serializeNBT();
    }
 
-   public void loadFromNBT(CompoundNBT nbt) {
+   public void loadFromNBT(CompoundTag nbt) {
       this.itemHandler.deserializeNBT(nbt);
    }
 }

@@ -1,87 +1,82 @@
 package iskallia.vault.block;
 
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.scoreboard.Score;
-import net.minecraft.scoreboard.ScoreCriteria;
-import net.minecraft.scoreboard.ScoreObjective;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.ScoreCriteria.RenderType;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.Property;
-import net.minecraft.state.StateContainer.Builder;
-import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.Score;
+import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria.RenderType;
 
 public class MazeBlock extends Block {
-   public static final EnumProperty<MazeBlock.MazeColor> COLOR = EnumProperty.func_177709_a("color", MazeBlock.MazeColor.class);
+   public static final EnumProperty<MazeBlock.MazeColor> COLOR = EnumProperty.create("color", MazeBlock.MazeColor.class);
 
    public MazeBlock() {
-      super(
-         Properties.func_200949_a(Material.field_151573_f, MaterialColor.field_151668_h)
-            .func_200948_a(-1.0F, 3600000.0F)
-            .func_200947_a(SoundType.field_185852_e)
-      );
-      this.func_180632_j((BlockState)((BlockState)this.field_176227_L.func_177621_b()).func_206870_a(COLOR, MazeBlock.MazeColor.RED));
+      super(Properties.of(Material.METAL, MaterialColor.METAL).strength(-1.0F, 3600000.0F).sound(SoundType.METAL));
+      this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(COLOR, MazeBlock.MazeColor.RED));
    }
 
-   protected void func_206840_a(Builder<Block, BlockState> builder) {
-      builder.func_206894_a(new Property[]{COLOR});
+   protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+      builder.add(new Property[]{COLOR});
    }
 
    @Nullable
-   public BlockState func_196258_a(BlockItemUseContext context) {
-      return super.func_196258_a(context);
+   public BlockState getStateForPlacement(BlockPlaceContext context) {
+      return super.getStateForPlacement(context);
    }
 
-   public void func_176199_a(World worldIn, BlockPos pos, Entity entityIn) {
-      if (!worldIn.field_72995_K) {
-         if (entityIn instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity)entityIn;
-            Scoreboard scoreboard = worldIn.func_96441_U();
-            if (scoreboard.func_96518_b("Color") == null) {
-               scoreboard.func_199868_a("Color", ScoreCriteria.field_96641_b, new StringTextComponent("Color"), RenderType.INTEGER);
+   public void stepOn(Level level, BlockPos pos, BlockState state, Entity entity) {
+      if (!level.isClientSide) {
+         if (entity instanceof Player player) {
+            Scoreboard scoreboard = level.getScoreboard();
+            if (scoreboard.getObjective("Color") == null) {
+               scoreboard.addObjective("Color", ObjectiveCriteria.DUMMY, new TextComponent("Color"), RenderType.INTEGER);
             }
 
-            ScoreObjective colorObjective = scoreboard.func_96518_b("Color");
+            Objective colorObjective = scoreboard.getObjective("Color");
 
             assert colorObjective != null;
 
-            Score colorScore = worldIn.func_96441_U().func_96529_a(player.func_145748_c_().getString(), colorObjective);
-            MazeBlock.MazeColor playerColor = MazeBlock.MazeColor.values()[colorScore.func_96652_c()];
-            MazeBlock.MazeColor blockColor = (MazeBlock.MazeColor)worldIn.func_180495_p(pos).func_177229_b(COLOR);
+            Score colorScore = level.getScoreboard().getOrCreatePlayerScore(player.getDisplayName().getString(), colorObjective);
+            MazeBlock.MazeColor playerColor = MazeBlock.MazeColor.values()[colorScore.getScore()];
+            MazeBlock.MazeColor blockColor = (MazeBlock.MazeColor)level.getBlockState(pos).getValue(COLOR);
             if (playerColor != blockColor) {
-               BlockPos nextPosition = player.func_233580_cy_().func_177967_a(player.func_174811_aO(), 1);
-               colorScore.func_96647_c(playerColor == MazeBlock.MazeColor.RED ? MazeBlock.MazeColor.BLUE.ordinal() : MazeBlock.MazeColor.RED.ordinal());
-               player.func_70634_a(nextPosition.func_177958_n() + 0.5, nextPosition.func_177956_o(), nextPosition.func_177952_p() + 0.5);
+               BlockPos nextPosition = player.blockPosition().relative(player.getDirection(), 1);
+               colorScore.setScore(playerColor == MazeBlock.MazeColor.RED ? MazeBlock.MazeColor.BLUE.ordinal() : MazeBlock.MazeColor.RED.ordinal());
+               player.teleportTo(nextPosition.getX() + 0.5, nextPosition.getY(), nextPosition.getZ() + 0.5);
             }
 
-            super.func_176199_a(worldIn, pos, entityIn);
+            super.stepOn(level, pos, state, entity);
          }
       }
    }
 
-   public static enum MazeColor implements IStringSerializable {
+   public static enum MazeColor implements StringRepresentable {
       RED("red"),
       BLUE("blue");
 
-      private String name;
+      private final String name;
 
       private MazeColor(String name) {
          this.name = name;
       }
 
-      public String func_176610_l() {
+      public String getSerializedName() {
          return this.name;
       }
    }

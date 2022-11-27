@@ -1,0 +1,243 @@
+{
+  "variants": {
+    "facing=down,type=wooden_chest": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_wooden_chest"
+    },
+    "facing=down,type=gilded_chest": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_gilded_chest"
+    },
+    "facing=down,type=living_chest": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_living_chest"
+    },
+    "facing=down,type=ornate_chest": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_ornate_chest"
+    },
+    "facing=down,type=objective": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_objective"
+    },
+    "facing=down,type=ore": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_ore"
+    },
+    "facing=down,type=coin_stacks": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_coin_stacks"
+    },
+    "facing=down,type=vendor_pedestal": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_vendor_pedestal"
+    },
+    "facing=down,type=treasure_door": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_treasure_door"
+    },
+
+    "facing=east,type=wooden_chest": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_wooden_chest"
+    },
+    "facing=east,type=gilded_chest": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_gilded_chest"
+    },
+    "facing=east,type=living_chest": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_living_chest"
+    },
+    "facing=east,type=ornate_chest": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_ornate_chest"
+    },
+    "facing=east,type=objective": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_objective"
+    },
+    "facing=east,type=ore": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_ore"
+    },
+    "facing=east,type=coin_stacks": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_coin_stacks"
+    },
+    "facing=east,type=vendor_pedestal": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_vendor_pedestal"
+    },
+    "facing=east,type=treasure_door": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_treasure_door"
+    },
+
+    "facing=north,type=wooden_chest": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_wooden_chest"
+    },
+    "facing=north,type=gilded_chest": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_gilded_chest"
+    },
+    "facing=north,type=living_chest": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_living_chest"
+    },
+    "facing=north,type=ornate_chest": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_ornate_chest"
+    },
+    "facing=north,type=objective": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_objective"
+    },
+    "facing=north,type=ore": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_ore"
+    },
+    "facing=north,type=coin_stacks": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_coin_stacks"
+    },
+    "facing=north,type=vendor_pedestal": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_vendor_pedestal"
+    },
+    "facing=north,type=treasure_door": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_treasure_door"
+    },
+
+    "facing=south,type=wooden_chest": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_wooden_chest"
+    },
+    "facing=south,type=gilded_chest": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_gilded_chest"
+    },
+    "facing=south,type=living_chest": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_living_chest"
+    },
+    "facing=south,type=ornate_chest": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_ornate_chest"
+    },
+    "facing=south,type=objective": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_objective"
+    },
+    "facing=south,type=ore": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_ore"
+    },
+    "facing=south,type=coin_stacks": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_coin_stacks"
+    },
+    "facing=south,type=vendor_pedestal": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_vendor_pedestal"
+    },
+    "facing=south,type=treasure_door": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_treasure_door"
+    },
+
+    "facing=up,type=wooden_chest": {
+      "model": "the_vault:block/placeholder_wooden_chest"
+    },
+    "facing=up,type=gilded_chest": {
+      "model": "the_vault:block/placeholder_gilded_chest"
+    },
+    "facing=up,type=living_chest": {
+      "model": "the_vault:block/placeholder_living_chest"
+    },
+    "facing=up,type=ornate_chest": {
+      "model": "the_vault:block/placeholder_ornate_chest"
+    },
+    "facing=up,type=objective": {
+      "model": "the_vault:block/placeholder_objective"
+    },
+    "facing=up,type=ore": {
+      "model": "the_vault:block/placeholder_ore"
+    },
+    "facing=up,type=coin_stacks": {
+      "model": "the_vault:block/placeholder_coin_stacks"
+    },
+    "facing=up,type=vendor_pedestal": {
+      "model": "the_vault:block/placeholder_vendor_pedestal"
+    },
+    "facing=up,type=treasure_door": {
+      "model": "the_vault:block/placeholder_treasure_door"
+    },
+
+    "facing=west,type=wooden_chest": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_wooden_chest"
+    },
+    "facing=west,type=gilded_chest": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_gilded_chest"
+    },
+    "facing=west,type=living_chest": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_living_chest"
+    },
+    "facing=west,type=ornate_chest": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_ornate_chest"
+    },
+    "facing=west,type=objective": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_objective"
+    },
+    "facing=west,type=ore": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_ore"
+    },
+    "facing=west,type=coin_stacks": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_coin_stacks"
+    },
+    "facing=west,type=vendor_pedestal": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_vendor_pedestal"
+    },
+    "facing=west,type=treasure_door": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_treasure_door"
+    }
+  }
+}

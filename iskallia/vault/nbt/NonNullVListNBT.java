@@ -6,12 +6,11 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class NonNullVListNBT<T, N extends INBT> extends VListNBT<T, N> {
+public class NonNullVListNBT<T, N extends Tag> extends VListNBT<T, N> {
    public NonNullVListNBT(List<T> list, Function<T, N> write, Function<N, T> read) {
       super(list, write, read);
    }
@@ -34,12 +33,12 @@ public class NonNullVListNBT<T, N extends INBT> extends VListNBT<T, N> {
 
    @Override
    public boolean addAll(Collection<? extends T> c) {
-      return super.addAll(c.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+      return super.addAll(c.stream().filter(Objects::nonNull).toList());
    }
 
    @Override
    public boolean addAll(int index, Collection<? extends T> c) {
-      return super.addAll(index, c.stream().filter(Objects::nonNull).collect(Collectors.toList()));
+      return super.addAll(index, c.stream().filter(Objects::nonNull).toList());
    }
 
    @Override
@@ -47,15 +46,15 @@ public class NonNullVListNBT<T, N extends INBT> extends VListNBT<T, N> {
       return element == null ? null : super.set(index, element);
    }
 
-   public static <T extends INBTSerializable<N>, N extends INBT> VListNBT<T, N> of(Function<N, T> read) {
+   public static <T extends INBTSerializable<N>, N extends Tag> VListNBT<T, N> of(Function<N, T> read) {
       return new NonNullVListNBT<>(INBTSerializable::serializeNBT, read);
    }
 
-   public static <T extends INBTSerializable<N>, N extends INBT> VListNBT<T, N> of(List<T> list, Function<N, T> read) {
+   public static <T extends INBTSerializable<N>, N extends Tag> VListNBT<T, N> of(List<T> list, Function<N, T> read) {
       return new NonNullVListNBT<>(list, INBTSerializable::serializeNBT, read);
    }
 
-   public static <T extends INBTSerializable<N>, N extends INBT> VListNBT<T, N> of(Supplier<T> supplier) {
+   public static <T extends INBTSerializable<N>, N extends Tag> VListNBT<T, N> of(Supplier<T> supplier) {
       return new NonNullVListNBT<>(INBTSerializable::serializeNBT, n -> {
          T value = supplier.get();
          value.deserializeNBT(n);
@@ -63,7 +62,7 @@ public class NonNullVListNBT<T, N extends INBT> extends VListNBT<T, N> {
       });
    }
 
-   public static VListNBT<UUID, StringNBT> ofUUID() {
-      return new NonNullVListNBT<>(uuid -> (N)StringNBT.func_229705_a_(uuid.toString()), stringNBT -> UUID.fromString(stringNBT.func_150285_a_()));
+   public static VListNBT<UUID, StringTag> ofUUID() {
+      return new NonNullVListNBT<>(uuid -> (N)StringTag.valueOf(uuid.toString()), stringNBT -> UUID.fromString(stringNBT.getAsString()));
    }
 }

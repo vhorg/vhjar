@@ -1,18 +1,20 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.util.MiscUtils;
+import iskallia.vault.util.VHSmpUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,58 +22,56 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber
-public class ScheduledItemDropData extends WorldSavedData {
+public class ScheduledItemDropData extends SavedData {
    protected static final String DATA_NAME = "the_vault_ScheduledItemDrops";
    private final Map<UUID, List<ItemStack>> scheduledItems = new HashMap<>();
 
-   public ScheduledItemDropData() {
-      super("the_vault_ScheduledItemDrops");
-   }
-
-   public void addDrop(PlayerEntity player, ItemStack toDrop) {
-      this.addDrop(player.func_110124_au(), toDrop);
+   public void addDrop(Player player, ItemStack toDrop) {
+      this.addDrop(player.getUUID(), toDrop);
    }
 
    public void addDrop(UUID playerUUID, ItemStack toDrop) {
-      this.scheduledItems.computeIfAbsent(playerUUID, key -> new ArrayList<>()).add(toDrop.func_77946_l());
-      this.func_76185_a();
+      this.scheduledItems.computeIfAbsent(playerUUID, key -> new ArrayList<>()).add(toDrop.copy());
+      this.setDirty();
    }
 
    @SubscribeEvent
    public static void onPlayerTick(PlayerTickEvent event) {
       if (event.side == LogicalSide.SERVER && event.phase == Phase.END) {
-         ServerPlayerEntity player = (ServerPlayerEntity)event.player;
-         ScheduledItemDropData data = get(player.func_71121_q());
-         if (data.scheduledItems.isEmpty()) {
+         ServerPlayer player = (ServerPlayer)event.player;
+         if (VHSmpUtil.isArenaWorld(player)) {
             return;
          }
 
-         if (data.scheduledItems.containsKey(player.func_110124_au())) {
-            List<ItemStack> drops = data.scheduledItems.get(player.func_110124_au());
+         ScheduledItemDropData data = get(player.getLevel());
+         if (data.scheduledItems.containsKey(player.getUUID())) {
+            List<ItemStack> drops = data.scheduledItems.get(player.getUUID());
 
-            while (!drops.isEmpty() && player.field_71071_by.func_70447_i() != -1) {
-               ItemStack drop = drops.get(0);
-               if (!player.field_71071_by.func_70441_a(drop)) {
-                  break;
-               }
-
-               drops.remove(0);
-               data.func_76185_a();
+            while (!drops.isEmpty() && MiscUtils.hasEmptySlot(player.getInventory())) {
+               ItemStack drop = drops.remove(0);
+               player.getInventory().add(drop);
+               data.setDirty();
             }
 
             if (drops.isEmpty()) {
-               data.scheduledItems.remove(player.func_110124_au());
-               data.func_76185_a();
+               data.scheduledItems.remove(player.getUUID());
+               data.setDirty();
             }
          }
       }
    }
 
-   public void func_76184_a(CompoundNBT tag) {
-      this.scheduledItems.clear();
-      CompoundNBT savTag = tag.func_74775_l("drops");
+   private static ScheduledItemDropData create(CompoundTag tag) {
+      ScheduledItemDropData data = new ScheduledItemDropData();
+      data.load(tag);
+      return data;
+   }
 
-      for (String key : savTag.func_150296_c()) {
+   public void load(CompoundTag tag) {
+      this.scheduledItems.clear();
+      CompoundTag savTag = tag.getCompound("drops");
+
+      for (String key : savTag.getAllKeys()) {
          UUID playerUUID;
          try {
             playerUUID = UUID.fromString(key);
@@ -80,32 +80,34 @@ public class ScheduledItemDropData extends WorldSavedData {
          }
 
          List<ItemStack> drops = new ArrayList<>();
-         ListNBT dropsList = savTag.func_150295_c(key, 10);
+         ListTag dropsList = savTag.getList(key, 10);
 
          for (int i = 0; i < dropsList.size(); i++) {
-            drops.add(ItemStack.func_199557_a(dropsList.func_150305_b(i)));
+            drops.add(ItemStack.of(dropsList.getCompound(i)));
          }
 
          this.scheduledItems.put(playerUUID, drops);
       }
    }
 
-   public CompoundNBT func_189551_b(CompoundNBT tag) {
-      CompoundNBT savTag = new CompoundNBT();
+   public CompoundTag save(CompoundTag tag) {
+      CompoundTag savTag = new CompoundTag();
       this.scheduledItems.forEach((uuid, drops) -> {
-         ListNBT dropsList = new ListNBT();
+         ListTag dropsList = new ListTag();
          drops.forEach(stack -> dropsList.add(stack.serializeNBT()));
-         savTag.func_218657_a(uuid.toString(), dropsList);
+         savTag.put(uuid.toString(), dropsList);
       });
-      tag.func_218657_a("drops", savTag);
+      tag.put("drops", savTag);
       return tag;
    }
 
-   public static ScheduledItemDropData get(ServerWorld world) {
-      return get(world.func_73046_m());
+   public static ScheduledItemDropData get(ServerLevel world) {
+      return get(world.getServer());
    }
 
    public static ScheduledItemDropData get(MinecraftServer srv) {
-      return (ScheduledItemDropData)srv.func_241755_D_().func_217481_x().func_215752_a(ScheduledItemDropData::new, "the_vault_ScheduledItemDrops");
+      return (ScheduledItemDropData)srv.overworld()
+         .getDataStorage()
+         .computeIfAbsent(ScheduledItemDropData::create, ScheduledItemDropData::new, "the_vault_ScheduledItemDrops");
    }
 }

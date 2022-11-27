@@ -3,19 +3,10 @@
     "half=upper": {
       "model": "the_vault:block/empty"
     },
-    "half=lower,completion=0": {
+    "half=lower,filled=false": {
       "model": "the_vault:block/obelisk_inactive"
     },
-    "half=lower,completion=1": {
-      "model": "the_vault:block/obelisk_inactive"
-    },
-    "half=lower,completion=2": {
-      "model": "the_vault:block/obelisk_inactive"
-    },
-    "half=lower,completion=3": {
-      "model": "the_vault:block/obelisk_inactive"
-    },
-    "half=lower,completion=4": {
+    "half=lower,filled=true": {
       "model": "the_vault:block/obelisk_active"
     }
   }

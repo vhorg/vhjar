@@ -1,12 +1,12 @@
 package iskallia.vault.entity.ai;
 
 import iskallia.vault.init.ModSounds;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class TeleportRandomly<T extends LivingEntity> implements INBTSerializable<CompoundNBT> {
+public class TeleportRandomly<T extends LivingEntity> implements INBTSerializable<CompoundTag> {
    protected T entity;
    private final TeleportRandomly.Condition<T>[] conditions;
 
@@ -22,21 +22,12 @@ public class TeleportRandomly<T extends LivingEntity> implements INBTSerializabl
    public boolean attackEntityFrom(DamageSource source, float amount) {
       for (TeleportRandomly.Condition<T> condition : this.conditions) {
          double chance = condition.getChance(this.entity, source, amount);
-         if (this.entity.field_70170_p.field_73012_v.nextDouble() < chance) {
+         if (this.entity.level.random.nextDouble() < chance) {
             for (int i = 0; i < 64; i++) {
                if (this.teleportRandomly()) {
                   this.entity
-                     .field_70170_p
-                     .func_184148_a(
-                        null,
-                        this.entity.field_70169_q,
-                        this.entity.field_70167_r,
-                        this.entity.field_70166_s,
-                        ModSounds.BOSS_TP_SFX,
-                        this.entity.func_184176_by(),
-                        1.0F,
-                        1.0F
-                     );
+                     .level
+                     .playSound(null, this.entity.xo, this.entity.yo, this.entity.zo, ModSounds.BOSS_TP_SFX, this.entity.getSoundSource(), 1.0F, 1.0F);
                   return true;
                }
             }
@@ -47,24 +38,24 @@ public class TeleportRandomly<T extends LivingEntity> implements INBTSerializabl
    }
 
    private boolean teleportRandomly() {
-      if (!this.entity.field_70170_p.func_201670_d() && this.entity.func_70089_S()) {
-         double d0 = this.entity.func_226277_ct_() + (this.entity.field_70170_p.field_73012_v.nextDouble() - 0.5) * 64.0;
-         double d1 = this.entity.func_226278_cu_() + (this.entity.field_70170_p.field_73012_v.nextInt(64) - 32);
-         double d2 = this.entity.func_226281_cx_() + (this.entity.field_70170_p.field_73012_v.nextDouble() - 0.5) * 64.0;
-         return this.entity.func_213373_a(d0, d1, d2, true);
+      if (!this.entity.level.isClientSide() && this.entity.isAlive()) {
+         double d0 = this.entity.getX() + (this.entity.level.random.nextDouble() - 0.5) * 64.0;
+         double d1 = this.entity.getY() + (this.entity.level.random.nextInt(64) - 32);
+         double d2 = this.entity.getZ() + (this.entity.level.random.nextDouble() - 0.5) * 64.0;
+         return this.entity.randomTeleport(d0, d1, d2, true);
       } else {
          return false;
       }
    }
 
-   public CompoundNBT serializeNBT() {
-      return new CompoundNBT();
+   public CompoundTag serializeNBT() {
+      return new CompoundTag();
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
    }
 
-   public static <T extends LivingEntity> TeleportRandomly<T> fromNBT(T entity, CompoundNBT nbt) {
+   public static <T extends LivingEntity> TeleportRandomly<T> fromNBT(T entity, CompoundTag nbt) {
       TeleportRandomly<T> tp = new TeleportRandomly<>(entity);
       tp.deserializeNBT(nbt);
       return tp;

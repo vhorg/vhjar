@@ -7,9 +7,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
+@Deprecated(
+   forRemoval = true
+)
 public class EffectTalentAttribute extends PooledAttribute<List<EffectTalent>> {
    public EffectTalentAttribute() {
    }
@@ -19,38 +22,32 @@ public class EffectTalentAttribute extends PooledAttribute<List<EffectTalent>> {
    }
 
    @Override
-   public void write(CompoundNBT nbt) {
+   public void write(CompoundTag nbt) {
       if (this.getBaseValue() != null) {
-         CompoundNBT tag = new CompoundNBT();
-         ListNBT effectsList = new ListNBT();
+         CompoundTag tag = new CompoundTag();
+         ListTag effectsList = new ListTag();
          this.getBaseValue().forEach(effect -> {
-            CompoundNBT effectTag = new CompoundNBT();
-            tag.func_74778_a("Id", effect.getEffect().getRegistryName().toString());
-            tag.func_74768_a("Amplifier", effect.getAmplifier());
-            tag.func_74778_a("Type", effect.getType().name);
-            tag.func_74778_a("Operator", effect.getOperator().name);
+            CompoundTag effectTag = new CompoundTag();
+            tag.putString("Id", effect.getEffect().getRegistryName().toString());
+            tag.putInt("Amplifier", effect.getAmplifier());
             effectsList.add(effectTag);
          });
-         tag.func_218657_a("EffectTalents", effectsList);
-         nbt.func_218657_a("BaseValue", tag);
+         tag.put("EffectTalents", effectsList);
+         nbt.put("BaseValue", tag);
       }
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      if (!nbt.func_150297_b("BaseValue", 10)) {
+   public void read(CompoundTag nbt) {
+      if (!nbt.contains("BaseValue", 10)) {
          this.setBaseValue(new ArrayList<>());
       } else {
-         CompoundNBT tag = nbt.func_74775_l("BaseValue");
-         ListNBT effectsList = tag.func_150295_c("EffectTalents", 10);
+         CompoundTag tag = nbt.getCompound("BaseValue");
+         ListTag effectsList = tag.getList("EffectTalents", 10);
          this.setBaseValue(
             effectsList.stream()
-               .map(inbt -> (CompoundNBT)inbt)
-               .map(
-                  compoundNBT -> new EffectTalent(
-                     0, tag.func_74779_i("Id"), tag.func_74762_e("Amplifier"), tag.func_74779_i("Type"), tag.func_74779_i("Operator")
-                  )
-               )
+               .map(inbt -> (CompoundTag)inbt)
+               .map(compoundNBT -> new EffectTalent(0, tag.getString("Id"), tag.getInt("Amplifier")))
                .collect(Collectors.toList())
          );
       }

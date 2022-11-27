@@ -4,8 +4,8 @@ import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.VaultLogic;
 import iskallia.vault.world.vault.player.VaultPlayerType;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class RaidCommandVaultBuilder extends VaultRaidBuilder {
    private RaidCommandVaultBuilder() {
@@ -16,7 +16,7 @@ public class RaidCommandVaultBuilder extends VaultRaidBuilder {
    }
 
    @Override
-   public VaultRaid.Builder initializeBuilder(ServerWorld world, ServerPlayerEntity player, CrystalData crystal) {
+   public VaultRaid.Builder initializeBuilder(ServerLevel world, ServerPlayer player, CrystalData crystal) {
       return VaultRaid.builder(VaultLogic.CLASSIC, 0, VaultRaid.SUMMON_AND_KILL_BOSS.get())
          .setInitializer(this.getDefaultInitializer())
          .addEvents(this.getDefaultEvents())

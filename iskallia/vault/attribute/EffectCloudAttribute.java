@@ -1,14 +1,14 @@
 package iskallia.vault.attribute;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.entity.EffectCloudEntity;
+import iskallia.vault.entity.entity.EffectCloudEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 public class EffectCloudAttribute extends PooledAttribute<List<EffectCloudEntity.Config>> {
    public EffectCloudAttribute() {
@@ -19,24 +19,24 @@ public class EffectCloudAttribute extends PooledAttribute<List<EffectCloudEntity
    }
 
    @Override
-   public void write(CompoundNBT nbt) {
+   public void write(CompoundTag nbt) {
       if (this.getBaseValue() != null) {
-         CompoundNBT tag = new CompoundNBT();
-         ListNBT effectsList = new ListNBT();
+         CompoundTag tag = new CompoundTag();
+         ListTag effectsList = new ListTag();
          this.getBaseValue().forEach(effect -> effectsList.add(effect.serializeNBT()));
-         tag.func_218657_a("EffectClouds", effectsList);
-         nbt.func_218657_a("BaseValue", tag);
+         tag.put("EffectClouds", effectsList);
+         nbt.put("BaseValue", tag);
       }
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      if (!nbt.func_150297_b("BaseValue", 10)) {
+   public void read(CompoundTag nbt) {
+      if (!nbt.contains("BaseValue", 10)) {
          this.setBaseValue(new ArrayList<>());
       } else {
-         CompoundNBT tag = nbt.func_74775_l("BaseValue");
-         ListNBT effectsList = tag.func_150295_c("EffectClouds", 10);
-         this.setBaseValue(effectsList.stream().map(inbt -> EffectCloudEntity.Config.fromNBT((CompoundNBT)inbt)).collect(Collectors.toList()));
+         CompoundTag tag = nbt.getCompound("BaseValue");
+         ListTag effectsList = tag.getList("EffectClouds", 10);
+         this.setBaseValue(effectsList.stream().map(inbt -> EffectCloudEntity.Config.fromNBT((CompoundTag)inbt)).collect(Collectors.toList()));
       }
    }
 

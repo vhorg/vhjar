@@ -1,10 +1,13 @@
 package iskallia.vault.world.vault.chest;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.world.vault.VaultRaid;
+import iskallia.vault.core.vault.NaturalSpawner;
+import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.player.Listener;
+import iskallia.vault.core.vault.player.Runner;
+import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.world.vault.logic.VaultSpawner;
-import iskallia.vault.world.vault.player.VaultPlayer;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerPlayer;
 
 public class MobTrapEffect extends VaultChestEffect {
    @Expose
@@ -27,16 +30,20 @@ public class MobTrapEffect extends VaultChestEffect {
    }
 
    @Override
-   public void apply(VaultRaid vault, VaultPlayer player, ServerWorld world) {
-      player.getProperties().getBase(VaultRaid.SPAWNER).ifPresent(spawner -> {
-         VaultSpawner.Config oldConfig = spawner.getConfig();
-         spawner.configure(this.getAppliedConfig());
+   public void apply(VirtualWorld world, Vault vault, ServerPlayer player) {
+      vault.ifPresent(Vault.LISTENERS, listeners -> {
+         Listener listener = listeners.get(player.getUUID());
+         if (listener != null) {
+            listener.ifPresent(Runner.SPAWNER, spawner -> {
+               spawner.modify(NaturalSpawner.EXTRA_MAX_MOBS, ix -> ix + this.attempts);
 
-         for (int i = 0; i < this.getAttempts(); i++) {
-            spawner.execute(vault, player, world);
+               for (int i = 0; i < this.attempts; i++) {
+                  spawner.tickServer(world, vault, listener);
+               }
+
+               spawner.modify(NaturalSpawner.EXTRA_MAX_MOBS, ix -> ix - this.attempts);
+            });
          }
-
-         spawner.configure(oldConfig);
       });
    }
 }

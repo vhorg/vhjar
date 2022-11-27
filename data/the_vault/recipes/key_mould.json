@@ -1,16 +1,19 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " # ",
-        "#n#",
-        " # "
+        "ddd",
+        "igi",
+        "ddd"
     ],
     "key": {
-        "#": {
-            "item": "the_vault:gem_echo"
+        "d": {
+            "item": "the_vault:driftwood"
         },
-        "n": {
-            "item": "the_vault:cluster_netherite"
+        "g": {
+            "item": "the_vault:perfect_echo_gem"
+        },
+        "i": {
+            "item": "the_vault:black_chromatic_steel_ingot"
         }
     },
     "result": {

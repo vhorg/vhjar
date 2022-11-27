@@ -1,6 +1,12 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "the_vault:item/vault_platinum"
-  }
+    "layer0": "the_vault:item/coins/plat/plat1"
+  },
+  "overrides": [
+    { "predicate": { "the_vault:count": 2 }, "model": "the_vault:item/vault_platinum2" },
+    { "predicate": { "the_vault:count": 8 }, "model": "the_vault:item/vault_platinum3" },
+    { "predicate": { "the_vault:count": 16 }, "model": "the_vault:item/vault_platinum4" },
+    { "predicate": { "the_vault:count": 32 }, "model": "the_vault:item/vault_platinum5" }
+  ]
 }

@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.ToIntBiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class PooledAttribute<T> extends VAttribute.Instance<T> {
    protected PooledAttribute() {

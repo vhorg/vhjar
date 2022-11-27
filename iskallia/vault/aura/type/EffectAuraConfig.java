@@ -5,17 +5,17 @@ import iskallia.vault.aura.ActiveAura;
 import iskallia.vault.aura.EntityAuraProvider;
 import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.skill.talent.type.EffectTalent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.world.World;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 public class EffectAuraConfig extends EternalAuraConfig.AuraConfig {
    @Expose
    private final EffectTalent effect;
 
-   public EffectAuraConfig(Effect effect, String name, String icon) {
-      this(new EffectTalent(0, effect, 1, EffectTalent.Type.ICON_ONLY, EffectTalent.Operator.ADD), name, icon);
+   public EffectAuraConfig(MobEffect effect, String name, String icon) {
+      this(new EffectTalent(0, effect, 1), name, icon);
    }
 
    public EffectAuraConfig(EffectTalent effect, String name, String icon) {
@@ -28,13 +28,13 @@ public class EffectAuraConfig extends EternalAuraConfig.AuraConfig {
    }
 
    @Override
-   public void onTick(World world, ActiveAura aura) {
+   public void onTick(Level world, ActiveAura aura) {
       super.onTick(world, aura);
       if (aura.getAuraProvider() instanceof EntityAuraProvider) {
-         EffectInstance effect = this.getEffect().makeEffect(259);
+         MobEffectInstance effect = this.getEffect().makeEffect(259);
          LivingEntity auraTarget = ((EntityAuraProvider)aura.getAuraProvider()).getSource();
-         if (!auraTarget.func_70644_a(effect.func_188419_a()) || auraTarget.func_70660_b(effect.func_188419_a()).func_76459_b() < 40) {
-            auraTarget.func_195064_c(effect);
+         if (!auraTarget.hasEffect(effect.getEffect()) || auraTarget.getEffect(effect.getEffect()).getDuration() < 40) {
+            auraTarget.addEffect(effect);
          }
       }
    }

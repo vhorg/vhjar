@@ -1,14 +1,14 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.entity.EternalEntity;
-import iskallia.vault.entity.FighterEntity;
+import iskallia.vault.entity.entity.EternalEntity;
+import iskallia.vault.entity.entity.FighterEntity;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class FighterSizeMessage {
    private int entityId;
@@ -23,15 +23,15 @@ public class FighterSizeMessage {
    }
 
    public FighterSizeMessage(Entity entity, float size) {
-      this(entity.func_145782_y(), size);
+      this(entity.getId(), size);
    }
 
-   public static void encode(FighterSizeMessage message, PacketBuffer buffer) {
+   public static void encode(FighterSizeMessage message, FriendlyByteBuf buffer) {
       buffer.writeInt(message.entityId);
       buffer.writeFloat(message.size);
    }
 
-   public static FighterSizeMessage decode(PacketBuffer buffer) {
+   public static FighterSizeMessage decode(FriendlyByteBuf buffer) {
       FighterSizeMessage message = new FighterSizeMessage();
       message.entityId = buffer.readInt();
       message.size = buffer.readFloat();
@@ -41,11 +41,11 @@ public class FighterSizeMessage {
    public static void handle(FighterSizeMessage message, Supplier<Context> contextSupplier) {
       Context context = contextSupplier.get();
       context.enqueueWork(() -> {
-         Minecraft minecraft = Minecraft.func_71410_x();
-         ClientPlayerEntity player = minecraft.field_71439_g;
-         World world = player.field_70170_p;
-         Entity entity = world.func_73045_a(message.entityId);
-         if (entity != null && entity.func_70089_S()) {
+         Minecraft minecraft = Minecraft.getInstance();
+         LocalPlayer player = minecraft.player;
+         Level world = player.level;
+         Entity entity = world.getEntity(message.entityId);
+         if (entity != null && entity.isAlive()) {
             if (entity instanceof FighterEntity) {
                ((FighterEntity)entity).changeSize(message.size);
             }

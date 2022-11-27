@@ -1,15 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "g",
-    "p"
+    "ede",
+    "ebe",
+    "ede"
   ],
   "key": {
-    "p": {
-      "item": "minecraft:book"
+    "e": {
+      "item": "the_vault:vault_essence"
     },
-    "g": {
-      "item": "the_vault:gear_charm"
+    "d": {
+      "item": "the_vault:vault_diamond"
+    },
+    "b": {
+      "item": "minecraft:book"
     }
   },
   "result": {

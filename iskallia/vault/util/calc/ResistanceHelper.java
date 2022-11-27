@@ -3,101 +3,48 @@ package iskallia.vault.util.calc;
 import iskallia.vault.aura.ActiveAura;
 import iskallia.vault.aura.AuraManager;
 import iskallia.vault.aura.type.ResistanceAuraConfig;
-import iskallia.vault.init.ModAttributes;
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModEffects;
-import iskallia.vault.item.gear.VaultGear;
-import iskallia.vault.skill.set.DreamSet;
-import iskallia.vault.skill.set.GolemSet;
-import iskallia.vault.skill.set.SetNode;
-import iskallia.vault.skill.set.SetTree;
-import iskallia.vault.util.PlayerFilter;
-import iskallia.vault.world.data.PlayerSetsData;
-import iskallia.vault.world.data.VaultRaidData;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.influence.VaultAttributeInfluence;
-import iskallia.vault.world.vault.modifier.StatModifier;
-import java.util.function.Function;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.server.ServerWorld;
+import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.talent.type.LowHealthResistanceTalent;
+import iskallia.vault.snapshot.AttributeSnapshot;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
+import iskallia.vault.world.data.PlayerTalentsData;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ResistanceHelper {
-   public static float getPlayerResistancePercent(ServerPlayerEntity player) {
-      return MathHelper.func_76131_a(getPlayerResistancePercentUnlimited(player), 0.0F, AttributeLimitHelper.getResistanceLimit(player));
+   public static float getResistance(LivingEntity entity) {
+      return Mth.clamp(getResistanceUnlimited(entity), 0.0F, AttributeLimitHelper.getResistanceLimit(entity));
    }
 
-   public static float getPlayerResistancePercentUnlimited(ServerPlayerEntity player) {
+   public static float getResistanceUnlimited(LivingEntity entity) {
       float resistancePercent = 0.0F;
-      resistancePercent += getResistancePercent(player);
+      AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
+      resistancePercent += snapshot.getAttributeValue(ModGearAttributes.RESISTANCE, VaultGearAttributeTypeMerger.floatSum());
+      if (entity.hasEffect(ModEffects.RESISTANCE)) {
+         resistancePercent += (entity.getEffect(ModEffects.RESISTANCE).getAmplifier() + 1) / 100.0F;
+      }
 
-      for (ActiveAura aura : AuraManager.getInstance().getAurasAffecting(player)) {
+      for (ActiveAura aura : AuraManager.getInstance().getAurasAffecting(entity)) {
          if (aura.getAura() instanceof ResistanceAuraConfig) {
             resistancePercent += ((ResistanceAuraConfig)aura.getAura()).getAdditionalResistance();
          }
       }
 
-      VaultRaid vault = VaultRaidData.get(player.func_71121_q()).getActiveFor(player);
-      if (vault != null) {
-         for (VaultAttributeInfluence influence : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
-            if (influence.getType() == VaultAttributeInfluence.Type.RESISTANCE && !influence.isMultiplicative()) {
-               resistancePercent += influence.getValue();
-            }
-         }
+      if (entity instanceof ServerPlayer sPlayer) {
+         TalentTree tree = PlayerTalentsData.get(sPlayer.getLevel()).getTalents(sPlayer);
 
-         for (StatModifier modifier : vault.getActiveModifiersFor(PlayerFilter.of(player), StatModifier.class)) {
-            if (modifier.getStat() == StatModifier.Statistic.RESISTANCE) {
-               resistancePercent *= modifier.getMultiplier();
-            }
-         }
-
-         for (VaultAttributeInfluence influencex : vault.getInfluences().getInfluences(VaultAttributeInfluence.class)) {
-            if (influencex.getType() == VaultAttributeInfluence.Type.PARRY && influencex.isMultiplicative()) {
-               resistancePercent += influencex.getValue();
+         for (LowHealthResistanceTalent talent : tree.getTalents(LowHealthResistanceTalent.class)) {
+            if (talent.shouldGetBenefits(sPlayer)) {
+               resistancePercent += talent.getAdditionalResistance();
             }
          }
       }
 
-      SetTree sets = PlayerSetsData.get((ServerWorld)player.field_70170_p).getSets(player);
-
-      for (SetNode<?> node : sets.getNodes()) {
-         if (node.getSet() instanceof GolemSet) {
-            GolemSet set = (GolemSet)node.getSet();
-            resistancePercent += set.getBonusResistance();
-         }
-
-         if (node.getSet() instanceof DreamSet) {
-            DreamSet set = (DreamSet)node.getSet();
-            resistancePercent += set.getIncreasedResistance();
-         }
-      }
-
-      return resistancePercent;
-   }
-
-   public static float getResistancePercent(LivingEntity entity) {
-      float resistancePercent = 0.0F;
-      resistancePercent += getGearResistanceChance(entity::func_184582_a);
-      if (entity.func_70644_a(ModEffects.RESISTANCE)) {
-         resistancePercent += (entity.func_70660_b(ModEffects.RESISTANCE).func_76458_c() + 1) / 100.0F;
-      }
-
-      return resistancePercent;
-   }
-
-   public static float getGearResistanceChance(Function<EquipmentSlotType, ItemStack> gearProvider) {
-      float resistancePercent = 0.0F;
-
-      for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-         ItemStack stack = gearProvider.apply(slot);
-         if (!(stack.func_77973_b() instanceof VaultGear) || ((VaultGear)stack.func_77973_b()).isIntendedForSlot(slot)) {
-            resistancePercent += ModAttributes.EXTRA_RESISTANCE.get(stack).map(attribute -> attribute.getValue(stack)).orElse(0.0F);
-            resistancePercent += ModAttributes.ADD_EXTRA_RESISTANCE.get(stack).map(attribute -> attribute.getValue(stack)).orElse(0.0F);
-         }
-      }
-
-      return MathHelper.func_76131_a(resistancePercent, 0.0F, 1.0F);
+      return CommonEvents.PLAYER_STAT.invoke(PlayerStat.RESISTANCE, entity, resistancePercent).getValue();
    }
 }

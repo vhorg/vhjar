@@ -1,29 +1,53 @@
 package iskallia.vault.easteregg;
 
-import iskallia.vault.Vault;
-import iskallia.vault.init.ModAttributes;
-import iskallia.vault.init.ModModels;
+import iskallia.vault.VaultMod;
+import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.init.ModDynamicModels;
+import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.gear.VaultArmorItem;
-import iskallia.vault.skill.set.PlayerSet;
 import iskallia.vault.util.AdvancementHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class GrasshopperNinja {
-   public static void achieve(ServerPlayerEntity playerEntity) {
-      AdvancementHelper.grantCriterion(playerEntity, Vault.id("main/grasshopper_ninja"), "hopped");
+   public static void achieve(ServerPlayer playerEntity) {
+      AdvancementHelper.grantCriterion(playerEntity, VaultMod.id("main/grasshopper_ninja"), "hopped");
    }
 
-   public static boolean isGrasshopperShape(PlayerEntity playerEntity) {
-      return PlayerSet.allMatch(playerEntity, (slotType, stack) -> {
-         if (!(stack.func_77973_b() instanceof VaultArmorItem)) {
-            return false;
+   public static boolean isGrasshopperShape(Player playerEntity) {
+      return ModDynamicModels.Armor.FAIRY.getPieces().entrySet().stream().allMatch(entry -> {
+         EquipmentSlot equipmentSlot = entry.getKey();
+         ArmorPieceModel pieceModel = entry.getValue();
+         ItemStack equipmentStack = (ItemStack)playerEntity.getInventory().armor.get(equipmentSlotToInventoryIndex(equipmentSlot));
+         if (equipmentStack.getItem() instanceof VaultArmorItem vaultArmorItem) {
+            VaultGearData gearData = VaultGearData.read(equipmentStack);
+            ResourceLocation modelId = gearData.getFirstValue(ModGearAttributes.GEAR_MODEL).orElse(null);
+            if (modelId == null) {
+               return false;
+            } else if (!pieceModel.getId().equals(modelId)) {
+               return false;
+            } else {
+               Integer gearColor = gearData.getFirstValue(ModGearAttributes.GEAR_COLOR).orElse(vaultArmorItem.getColor(equipmentStack));
+               return isGrasshopperGreen(gearColor);
+            }
          } else {
-            Integer gearSpecialModel = ModAttributes.GEAR_SPECIAL_MODEL.getOrDefault(stack, -1).getValue(stack);
-            int gearColor = ((VaultArmorItem)stack.func_77973_b()).func_200886_f(stack);
-            return gearSpecialModel == ModModels.SpecialGearModel.FAIRY_SET.modelForSlot(slotType).getId() && isGrasshopperGreen(gearColor);
+            return false;
          }
       });
+   }
+
+   private static int equipmentSlotToInventoryIndex(EquipmentSlot equipmentSlot) {
+      return switch (equipmentSlot) {
+         case HEAD -> 3;
+         case CHEST -> 2;
+         case LEGS -> 1;
+         case FEET -> 0;
+         default -> -1;
+      };
    }
 
    public static boolean isGrasshopperGreen(int color) {

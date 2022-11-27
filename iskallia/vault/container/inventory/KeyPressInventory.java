@@ -1,9 +1,9 @@
 package iskallia.vault.container.inventory;
 
-import iskallia.vault.container.base.RecipeInventory;
+import iskallia.vault.container.spi.RecipeInventory;
 import iskallia.vault.init.ModConfigs;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class KeyPressInventory extends RecipeInventory {
    public static final int KEY_SLOT = 0;
@@ -15,15 +15,15 @@ public class KeyPressInventory extends RecipeInventory {
 
    @Override
    public boolean recipeFulfilled() {
-      Item keyItem = this.func_70301_a(0).func_77973_b();
-      Item clusterItem = this.func_70301_a(1).func_77973_b();
-      return !ModConfigs.KEY_PRESS.getResultFor(keyItem, clusterItem).func_190926_b();
+      Item keyItem = this.getItem(0).getItem();
+      Item clusterItem = this.getItem(1).getItem();
+      return !ModConfigs.KEY_PRESS.getResultFor(keyItem, clusterItem).isEmpty();
    }
 
    @Override
    public ItemStack resultingItemStack() {
-      Item keyItem = this.func_70301_a(0).func_77973_b();
-      Item clusterItem = this.func_70301_a(1).func_77973_b();
+      Item keyItem = this.getItem(0).getItem();
+      Item clusterItem = this.getItem(1).getItem();
       return ModConfigs.KEY_PRESS.getResultFor(keyItem, clusterItem);
    }
 }

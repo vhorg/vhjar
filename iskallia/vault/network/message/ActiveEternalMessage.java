@@ -5,8 +5,8 @@ import iskallia.vault.entity.eternal.ActiveEternalData;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class ActiveEternalMessage {
    private final Set<ActiveEternalData.ActiveEternal> activeEternals;
@@ -19,12 +19,12 @@ public class ActiveEternalMessage {
       return this.activeEternals;
    }
 
-   public static void encode(ActiveEternalMessage message, PacketBuffer buffer) {
+   public static void encode(ActiveEternalMessage message, FriendlyByteBuf buffer) {
       buffer.writeInt(message.activeEternals.size());
       message.activeEternals.forEach(activeEternal -> activeEternal.write(buffer));
    }
 
-   public static ActiveEternalMessage decode(PacketBuffer buffer) {
+   public static ActiveEternalMessage decode(FriendlyByteBuf buffer) {
       int eternalCount = buffer.readInt();
       Set<ActiveEternalData.ActiveEternal> activeEternals = new LinkedHashSet<>();
 

@@ -1,7 +1,9 @@
 package iskallia.vault.skill.talent.type;
 
-import iskallia.vault.Vault;
-import net.minecraft.entity.player.PlayerEntity;
+import iskallia.vault.util.VHSmpUtil;
+import iskallia.vault.world.data.ServerVaults;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public class AngelTalent extends PlayerTalent {
    public AngelTalent(int cost) {
@@ -9,23 +11,23 @@ public class AngelTalent extends PlayerTalent {
    }
 
    @Override
-   public void tick(PlayerEntity player) {
-      if (player.field_70170_p.func_234923_W_() == Vault.VAULT_KEY && !player.func_175149_v() && !player.func_184812_l_()) {
-         player.field_71075_bZ.field_75101_c = false;
-         player.field_71075_bZ.field_75100_b = false;
-      } else if (!player.field_71075_bZ.field_75101_c) {
-         player.field_71075_bZ.field_75101_c = true;
+   public void tick(ServerPlayer player) {
+      if ((ServerVaults.isVaultWorld(player.level) || VHSmpUtil.isArenaWorld(player.level)) && !player.isSpectator() && !player.isCreative()) {
+         player.getAbilities().mayfly = false;
+         player.getAbilities().flying = false;
+      } else if (!player.getAbilities().mayfly) {
+         player.getAbilities().mayfly = true;
       }
 
-      player.func_71016_p();
+      player.onUpdateAbilities();
    }
 
    @Override
-   public void onRemoved(PlayerEntity player) {
-      if (!player.func_175149_v()) {
-         player.field_71075_bZ.field_75101_c = false;
-         player.field_71075_bZ.field_75100_b = false;
-         player.func_71016_p();
+   public void onRemoved(Player player) {
+      if (!player.isSpectator() && !player.isCreative()) {
+         player.getAbilities().mayfly = false;
+         player.getAbilities().flying = false;
+         player.onUpdateAbilities();
       }
    }
 }

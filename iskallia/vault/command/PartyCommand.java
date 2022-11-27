@@ -9,25 +9,25 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.util.text.event.HoverEvent.Action;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.HoverEvent.Action;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.entity.player.Player;
 
 public class PartyCommand extends Command {
    @Override
-   public void registerCommand(CommandDispatcher<CommandSource> dispatcher) {
-      LiteralArgumentBuilder<CommandSource> builder = Commands.func_197057_a(this.getName());
-      builder.requires(sender -> sender.func_197034_c(this.getRequiredPermissionLevel()));
+   public void registerCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+      LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal(this.getName());
+      builder.requires(sender -> sender.hasPermission(this.getRequiredPermissionLevel()));
       this.build(builder);
       dispatcher.register(builder);
    }
@@ -43,133 +43,126 @@ public class PartyCommand extends Command {
    }
 
    @Override
-   public void build(LiteralArgumentBuilder<CommandSource> builder) {
-      builder.then(Commands.func_197057_a("create").executes(this::create));
-      builder.then(Commands.func_197057_a("invite").then(Commands.func_197056_a("target", EntityArgument.func_197096_c()).executes(this::invite)));
-      builder.then(Commands.func_197057_a("accept_invite").then(Commands.func_197056_a("target", EntityArgument.func_197096_c()).executes(this::accept)));
-      builder.then(Commands.func_197057_a("remove").then(Commands.func_197056_a("target", EntityArgument.func_197096_c()).executes(this::remove)));
-      builder.then(Commands.func_197057_a("leave").executes(this::leave));
-      builder.then(Commands.func_197057_a("disband").executes(this::disband));
-      builder.then(Commands.func_197057_a("list").executes(this::list));
+   public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
+      builder.then(Commands.literal("create").executes(this::create));
+      builder.then(Commands.literal("invite").then(Commands.argument("target", EntityArgument.player()).executes(this::invite)));
+      builder.then(Commands.literal("accept_invite").then(Commands.argument("target", EntityArgument.player()).executes(this::accept)));
+      builder.then(Commands.literal("remove").then(Commands.argument("target", EntityArgument.player()).executes(this::remove)));
+      builder.then(Commands.literal("leave").executes(this::leave));
+      builder.then(Commands.literal("disband").executes(this::disband));
+      builder.then(Commands.literal("list").executes(this::list));
    }
 
-   private int list(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-      VaultPartyData data = VaultPartyData.get(((CommandSource)ctx.getSource()).func_197023_e());
-      ServerPlayerEntity player = ((CommandSource)ctx.getSource()).func_197035_h();
-      Optional<VaultPartyData.Party> party = data.getParty(player.func_110124_au());
+   private int list(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      VaultPartyData data = VaultPartyData.get(((CommandSourceStack)ctx.getSource()).getLevel());
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      Optional<VaultPartyData.Party> party = data.getParty(player.getUUID());
       if (!party.isPresent()) {
-         player.func_145747_a(new StringTextComponent("You are not in a party!").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+         player.sendMessage(new TextComponent("You are not in a party!").withStyle(ChatFormatting.RED), player.getUUID());
          return 0;
       } else {
-         PlayerList players = player.func_184102_h().func_184103_al();
-         IFormattableTextComponent members = new StringTextComponent("Members: ").func_240699_a_(TextFormatting.GREEN);
-         List<ITextComponent> playerNames = party.get()
+         PlayerList players = player.getServer().getPlayerList();
+         MutableComponent members = new TextComponent("Members: ").withStyle(ChatFormatting.GREEN);
+         List<Component> playerNames = party.get()
             .getMembers()
             .stream()
-            .<ServerPlayerEntity>map(players::func_177451_a)
+            .<ServerPlayer>map(players::getPlayer)
             .filter(Objects::nonNull)
-            .<ITextComponent>map(PlayerEntity::func_200200_C_)
+            .<Component>map(Player::getName)
             .collect(Collectors.toList());
 
          for (int i = 0; i < playerNames.size(); i++) {
             if (i != 0) {
-               members.func_240702_b_(", ");
+               members.append(", ");
             }
 
-            members.func_230529_a_(playerNames.get(i));
+            members.append(playerNames.get(i));
          }
 
-         player.func_145747_a(members, player.func_110124_au());
+         player.sendMessage(members, player.getUUID());
          return 0;
       }
    }
 
-   private int invite(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-      VaultPartyData data = VaultPartyData.get(((CommandSource)ctx.getSource()).func_197023_e());
-      ServerPlayerEntity player = ((CommandSource)ctx.getSource()).func_197035_h();
-      ServerPlayerEntity target = EntityArgument.func_197089_d(ctx, "target");
-      Optional<VaultPartyData.Party> party = data.getParty(player.func_110124_au());
+   private int invite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      VaultPartyData data = VaultPartyData.get(((CommandSourceStack)ctx.getSource()).getLevel());
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      ServerPlayer target = EntityArgument.getPlayer(ctx, "target");
+      Optional<VaultPartyData.Party> party = data.getParty(player.getUUID());
       if (!party.isPresent()) {
-         player.func_145747_a(new StringTextComponent("You are not in a party!").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+         player.sendMessage(new TextComponent("You are not in a party!").withStyle(ChatFormatting.RED), player.getUUID());
          return 0;
       } else {
-         if (data.getParty(target.func_110124_au()).isPresent()) {
-            player.func_145747_a(
-               new StringTextComponent("This player is already in another party.").func_240699_a_(TextFormatting.RED), player.func_110124_au()
-            );
+         if (data.getParty(target.getUUID()).isPresent()) {
+            player.sendMessage(new TextComponent("This player is already in another party.").withStyle(ChatFormatting.RED), player.getUUID());
          } else {
             party.get()
                .getMembers()
                .forEach(
                   uuid -> {
-                     ServerPlayerEntity player2 = ((CommandSource)ctx.getSource()).func_197028_i().func_184103_al().func_177451_a(uuid);
+                     ServerPlayer player2 = ((CommandSourceStack)ctx.getSource()).getServer().getPlayerList().getPlayer(uuid);
                      if (player2 != null) {
-                        player2.func_145747_a(
-                           new StringTextComponent("Inviting " + target.func_200200_C_().getString() + " to the party.").func_240699_a_(TextFormatting.GREEN),
-                           player.func_110124_au()
+                        player2.sendMessage(
+                           new TextComponent("Inviting " + target.getName().getString() + " to the party.").withStyle(ChatFormatting.GREEN), player.getUUID()
                         );
                      }
                   }
                );
-            String partyAccept = "/party accept_invite " + player.func_200200_C_().getString();
-            IFormattableTextComponent acceptTxt = new StringTextComponent(partyAccept).func_240699_a_(TextFormatting.AQUA);
-            acceptTxt.func_240700_a_(
-               style -> style.func_240716_a_(new HoverEvent(Action.field_230550_a_, new StringTextComponent("Click to accept!")))
-                  .func_240715_a_(new ClickEvent(net.minecraft.util.text.event.ClickEvent.Action.RUN_COMMAND, partyAccept))
+            String partyAccept = "/party accept_invite " + player.getName().getString();
+            MutableComponent acceptTxt = new TextComponent(partyAccept).withStyle(ChatFormatting.AQUA);
+            acceptTxt.withStyle(
+               style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, new TextComponent("Click to accept!")))
+                  .withClickEvent(new ClickEvent(net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND, partyAccept))
             );
-            ITextComponent acceptMessage = new StringTextComponent("")
-               .func_230529_a_(new StringTextComponent("Run '").func_240699_a_(TextFormatting.GREEN))
-               .func_230529_a_(acceptTxt)
-               .func_230529_a_(new StringTextComponent("' to accept their invite!").func_240699_a_(TextFormatting.GREEN));
-            party.get().invite(target.func_110124_au());
-            target.func_145747_a(
-               new StringTextComponent(player.func_200200_C_().getString() + " has invited you to their party.").func_240699_a_(TextFormatting.GREEN),
-               player.func_110124_au()
+            Component acceptMessage = new TextComponent("")
+               .append(new TextComponent("Run '").withStyle(ChatFormatting.GREEN))
+               .append(acceptTxt)
+               .append(new TextComponent("' to accept their invite!").withStyle(ChatFormatting.GREEN));
+            party.get().invite(target.getUUID());
+            target.sendMessage(
+               new TextComponent(player.getName().getString() + " has invited you to their party.").withStyle(ChatFormatting.GREEN), player.getUUID()
             );
-            target.func_145747_a(acceptMessage, player.func_110124_au());
+            target.sendMessage(acceptMessage, player.getUUID());
          }
 
          return 0;
       }
    }
 
-   private int accept(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-      VaultPartyData data = VaultPartyData.get(((CommandSource)ctx.getSource()).func_197023_e());
-      ServerPlayerEntity player = ((CommandSource)ctx.getSource()).func_197035_h();
-      ServerPlayerEntity target = EntityArgument.func_197089_d(ctx, "target");
-      Optional<VaultPartyData.Party> party = data.getParty(player.func_110124_au());
+   private int accept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      VaultPartyData data = VaultPartyData.get(((CommandSourceStack)ctx.getSource()).getLevel());
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      ServerPlayer target = EntityArgument.getPlayer(ctx, "target");
+      Optional<VaultPartyData.Party> party = data.getParty(player.getUUID());
       if (party.isPresent()) {
-         player.func_145747_a(new StringTextComponent("You already are in a party!").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+         player.sendMessage(new TextComponent("You already are in a party!").withStyle(ChatFormatting.RED), player.getUUID());
          return 0;
       } else {
-         if (!data.getParty(target.func_110124_au()).isPresent()) {
-            player.func_145747_a(new StringTextComponent("This player has left their party.").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+         if (!data.getParty(target.getUUID()).isPresent()) {
+            player.sendMessage(new TextComponent("This player has left their party.").withStyle(ChatFormatting.RED), player.getUUID());
          } else {
-            data.getParty(target.func_110124_au())
+            data.getParty(target.getUUID())
                .get()
                .getMembers()
                .forEach(
                   uuid -> {
-                     ServerPlayerEntity player2 = ((CommandSource)ctx.getSource()).func_197028_i().func_184103_al().func_177451_a(uuid);
+                     ServerPlayer player2 = ((CommandSourceStack)ctx.getSource()).getServer().getPlayerList().getPlayer(uuid);
                      if (player2 != null) {
-                        player2.func_145747_a(
-                           new StringTextComponent("Successfully added " + player.func_200200_C_().getString() + " to the party.")
-                              .func_240699_a_(TextFormatting.GREEN),
-                           player.func_110124_au()
+                        player2.sendMessage(
+                           new TextComponent("Successfully added " + player.getName().getString() + " to the party.").withStyle(ChatFormatting.GREEN),
+                           player.getUUID()
                         );
                      }
                   }
                );
-            if (data.getParty(target.func_110124_au()).get().confirmInvite(player.func_110124_au())) {
-               VaultPartyData.broadcastPartyData(player.func_71121_q());
-               player.func_145747_a(
-                  new StringTextComponent("You have been added to " + target.func_200200_C_().getString() + "'s party.").func_240699_a_(TextFormatting.GREEN),
-                  player.func_110124_au()
+            if (data.getParty(target.getUUID()).get().confirmInvite(player.getUUID())) {
+               VaultPartyData.broadcastPartyData(player.getLevel());
+               player.sendMessage(
+                  new TextComponent("You have been added to " + target.getName().getString() + "'s party.").withStyle(ChatFormatting.GREEN), player.getUUID()
                );
             } else {
-               player.func_145747_a(
-                  new StringTextComponent("You are not invited to " + target.func_200200_C_().getString() + "'s party.").func_240699_a_(TextFormatting.RED),
-                  player.func_110124_au()
+               player.sendMessage(
+                  new TextComponent("You are not invited to " + target.getName().getString() + "'s party.").withStyle(ChatFormatting.RED), player.getUUID()
                );
             }
          }
@@ -178,106 +171,100 @@ public class PartyCommand extends Command {
       }
    }
 
-   private int remove(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-      VaultPartyData data = VaultPartyData.get(((CommandSource)ctx.getSource()).func_197023_e());
-      ServerPlayerEntity player = ((CommandSource)ctx.getSource()).func_197035_h();
-      ServerPlayerEntity target = EntityArgument.func_197089_d(ctx, "target");
-      Optional<VaultPartyData.Party> party = data.getParty(player.func_110124_au());
+   private int remove(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      VaultPartyData data = VaultPartyData.get(((CommandSourceStack)ctx.getSource()).getLevel());
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      ServerPlayer target = EntityArgument.getPlayer(ctx, "target");
+      Optional<VaultPartyData.Party> party = data.getParty(player.getUUID());
       if (!party.isPresent()) {
-         player.func_145747_a(new StringTextComponent("You are not in a party!").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+         player.sendMessage(new TextComponent("You are not in a party!").withStyle(ChatFormatting.RED), player.getUUID());
          return 0;
       } else {
-         Optional<VaultPartyData.Party> other = data.getParty(target.func_110124_au());
+         Optional<VaultPartyData.Party> other = data.getParty(target.getUUID());
          if (other.isPresent() && other.get() != party.get()) {
-            player.func_145747_a(new StringTextComponent("This player is in another party.").func_240699_a_(TextFormatting.RED), player.func_110124_au());
-         } else if (party.get().remove(target.func_110124_au())) {
+            player.sendMessage(new TextComponent("This player is in another party.").withStyle(ChatFormatting.RED), player.getUUID());
+         } else if (party.get().remove(target.getUUID())) {
             party.get()
                .getMembers()
                .forEach(
                   uuid -> {
-                     ServerPlayerEntity player2 = ((CommandSource)ctx.getSource()).func_197028_i().func_184103_al().func_177451_a(uuid);
+                     ServerPlayer player2 = ((CommandSourceStack)ctx.getSource()).getServer().getPlayerList().getPlayer(uuid);
                      if (player2 != null) {
-                        player2.func_145747_a(
-                           new StringTextComponent(target.func_200200_C_().getString() + " was removed from the party.").func_240699_a_(TextFormatting.GREEN),
-                           player.func_110124_au()
+                        player2.sendMessage(
+                           new TextComponent(target.getName().getString() + " was removed from the party.").withStyle(ChatFormatting.GREEN), player.getUUID()
                         );
                      }
                   }
                );
-            target.func_145747_a(
-               new StringTextComponent("You have been removed from " + player.func_200200_C_().getString() + "'s party.").func_240699_a_(TextFormatting.GREEN),
-               player.func_110124_au()
+            target.sendMessage(
+               new TextComponent("You have been removed from " + player.getName().getString() + "'s party.").withStyle(ChatFormatting.GREEN), player.getUUID()
             );
-            VaultPartyData.broadcastPartyData(player.func_71121_q());
+            VaultPartyData.broadcastPartyData(player.getLevel());
          } else {
-            player.func_145747_a(new StringTextComponent("This player not in your party.").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+            player.sendMessage(new TextComponent("This player not in your party.").withStyle(ChatFormatting.RED), player.getUUID());
          }
 
          return 0;
       }
    }
 
-   private int create(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-      VaultPartyData data = VaultPartyData.get(((CommandSource)ctx.getSource()).func_197023_e());
-      ServerPlayerEntity player = ((CommandSource)ctx.getSource()).func_197035_h();
-      if (data.createParty(player.func_110124_au())) {
-         player.func_145747_a(new StringTextComponent("Successfully created a party.").func_240699_a_(TextFormatting.GREEN), player.func_110124_au());
-         VaultPartyData.broadcastPartyData(player.func_71121_q());
+   private int create(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      VaultPartyData data = VaultPartyData.get(((CommandSourceStack)ctx.getSource()).getLevel());
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      if (data.createParty(player.getUUID())) {
+         player.sendMessage(new TextComponent("Successfully created a party.").withStyle(ChatFormatting.GREEN), player.getUUID());
+         VaultPartyData.broadcastPartyData(player.getLevel());
       } else {
-         player.func_145747_a(
-            new StringTextComponent("You are already in a party! Please leave or disband it first.").func_240699_a_(TextFormatting.RED),
-            player.func_110124_au()
-         );
+         player.sendMessage(new TextComponent("You are already in a party! Please leave or disband it first.").withStyle(ChatFormatting.RED), player.getUUID());
       }
 
       return 0;
    }
 
-   private int leave(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-      VaultPartyData data = VaultPartyData.get(((CommandSource)ctx.getSource()).func_197023_e());
-      ServerPlayerEntity player = ((CommandSource)ctx.getSource()).func_197035_h();
-      Optional<VaultPartyData.Party> party = data.getParty(player.func_110124_au());
+   private int leave(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      VaultPartyData data = VaultPartyData.get(((CommandSourceStack)ctx.getSource()).getLevel());
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      Optional<VaultPartyData.Party> party = data.getParty(player.getUUID());
       if (party.isPresent()) {
-         if (party.get().remove(player.func_110124_au())) {
+         if (party.get().remove(player.getUUID())) {
             party.get()
                .getMembers()
                .forEach(
                   uuid -> {
-                     ServerPlayerEntity player2 = ((CommandSource)ctx.getSource()).func_197028_i().func_184103_al().func_177451_a(uuid);
+                     ServerPlayer player2 = ((CommandSourceStack)ctx.getSource()).getServer().getPlayerList().getPlayer(uuid);
                      if (player2 != null) {
-                        player2.func_145747_a(
-                           new StringTextComponent(player.func_200200_C_().getString() + " has left the party.").func_240699_a_(TextFormatting.GREEN),
-                           player.func_110124_au()
+                        player2.sendMessage(
+                           new TextComponent(player.getName().getString() + " has left the party.").withStyle(ChatFormatting.GREEN), player.getUUID()
                         );
                      }
                   }
                );
-            player.func_145747_a(new StringTextComponent("Successfully left the party.").func_240699_a_(TextFormatting.GREEN), player.func_110124_au());
-            VaultPartyData.broadcastPartyData(player.func_71121_q());
+            player.sendMessage(new TextComponent("Successfully left the party.").withStyle(ChatFormatting.GREEN), player.getUUID());
+            VaultPartyData.broadcastPartyData(player.getLevel());
          } else {
-            player.func_145747_a(new StringTextComponent("You are not in a party!").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+            player.sendMessage(new TextComponent("You are not in a party!").withStyle(ChatFormatting.RED), player.getUUID());
          }
       } else {
-         player.func_145747_a(new StringTextComponent("You are not in a party!").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+         player.sendMessage(new TextComponent("You are not in a party!").withStyle(ChatFormatting.RED), player.getUUID());
       }
 
       return 0;
    }
 
-   private int disband(CommandContext<CommandSource> ctx) throws CommandSyntaxException {
-      VaultPartyData data = VaultPartyData.get(((CommandSource)ctx.getSource()).func_197023_e());
-      ServerPlayerEntity player = ((CommandSource)ctx.getSource()).func_197035_h();
-      VaultPartyData.Party party = data.getParty(player.func_110124_au()).orElse(null);
-      if (party != null && data.disbandParty(player.func_110124_au())) {
+   private int disband(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      VaultPartyData data = VaultPartyData.get(((CommandSourceStack)ctx.getSource()).getLevel());
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      VaultPartyData.Party party = data.getParty(player.getUUID()).orElse(null);
+      if (party != null && data.disbandParty(player.getUUID())) {
          party.getMembers().forEach(uuid -> {
-            ServerPlayerEntity player2 = ((CommandSource)ctx.getSource()).func_197028_i().func_184103_al().func_177451_a(uuid);
+            ServerPlayer player2 = ((CommandSourceStack)ctx.getSource()).getServer().getPlayerList().getPlayer(uuid);
             if (player2 != null) {
-               player2.func_145747_a(new StringTextComponent("The party was disbanded.").func_240699_a_(TextFormatting.GREEN), player.func_110124_au());
+               player2.sendMessage(new TextComponent("The party was disbanded.").withStyle(ChatFormatting.GREEN), player.getUUID());
             }
          });
-         VaultPartyData.broadcastPartyData(player.func_71121_q());
+         VaultPartyData.broadcastPartyData(player.getLevel());
       } else {
-         player.func_145747_a(new StringTextComponent("You are not in a party!").func_240699_a_(TextFormatting.RED), player.func_110124_au());
+         player.sendMessage(new TextComponent("You are not in a party!").withStyle(ChatFormatting.RED), player.getUUID());
       }
 
       return 0;

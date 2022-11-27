@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public class CryoChamberConfig extends Config {
    @Expose
@@ -25,9 +25,9 @@ public class CryoChamberConfig extends Config {
    }
 
    public int getPlayerCoreCount(String name, int createdEternals) {
-      int index = MathHelper.func_76125_a(createdEternals, 0, this.TRADERS_REQ.size() - 1);
+      int index = Mth.clamp(createdEternals, 0, this.TRADERS_REQ.size() - 1);
       int requiredCount = this.TRADERS_REQ.get(index);
-      return MathHelper.func_76141_d(this.PLAYER_TRADER_REQ_MULTIPLIER.getOrDefault(name, 1.0F) * requiredCount);
+      return Mth.floor(this.PLAYER_TRADER_REQ_MULTIPLIER.getOrDefault(name, 1.0F) * requiredCount);
    }
 
    public float getUnusedTraderRewardChance() {

@@ -1,12 +1,13 @@
 package iskallia.vault.entity.eternal;
 
+import iskallia.vault.world.data.EternalsData;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.item.ItemStack;
 
 public interface EternalDataAccess {
    UUID getId();
@@ -23,7 +24,11 @@ public interface EternalDataAccess {
 
    boolean isAncient();
 
-   Map<EquipmentSlotType, ItemStack> getEquipment();
+   EternalsData.EternalVariant getVariant();
+
+   boolean isUsingPlayerSkin();
+
+   Map<EquipmentSlot, ItemStack> getEquipment();
 
    Map<Attribute, Float> getEntityAttributes();
 

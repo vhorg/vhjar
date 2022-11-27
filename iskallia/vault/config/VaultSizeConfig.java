@@ -1,14 +1,13 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.util.data.WeightedList;
 import iskallia.vault.world.vault.gen.layout.DiamondRoomLayout;
 import iskallia.vault.world.vault.gen.layout.SquareRoomLayout;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class VaultSizeConfig extends Config {
    @Expose
@@ -16,7 +15,7 @@ public class VaultSizeConfig extends Config {
    @Expose
    private VaultSizeConfig.SizeLayout raffleLayout;
    @Expose
-   private final List<VaultSizeConfig.Level> levels = new ArrayList<>();
+   private final LevelEntryList<VaultSizeConfig.Level> levels = new LevelEntryList<>();
 
    @Override
    public String getName() {
@@ -53,35 +52,17 @@ public class VaultSizeConfig extends Config {
       if (isRaffle) {
          return this.raffleLayout;
       } else {
-         VaultSizeConfig.Level levelConfig = this.getForLevel(this.levels, vaultLevel);
-         if (levelConfig == null) {
+         Optional<VaultSizeConfig.Level> levelConfig = this.levels.getForLevel(vaultLevel);
+         if (levelConfig.isEmpty()) {
             return this.defaultLayout;
          } else {
-            VaultSizeConfig.SizeLayout layout = levelConfig.outcomes.getRandom(rand);
+            VaultSizeConfig.SizeLayout layout = levelConfig.get().outcomes.getRandom(rand);
             return layout == null ? this.defaultLayout : layout;
          }
       }
    }
 
-   @Nullable
-   public VaultSizeConfig.Level getForLevel(List<VaultSizeConfig.Level> levels, int level) {
-      for (int i = 0; i < levels.size(); i++) {
-         if (level < levels.get(i).level) {
-            if (i != 0) {
-               return levels.get(i - 1);
-            }
-            break;
-         }
-
-         if (i == levels.size() - 1) {
-            return levels.get(i);
-         }
-      }
-
-      return null;
-   }
-
-   public static class Level {
+   public static class Level implements LevelEntryList.ILevelEntry {
       @Expose
       private final int level;
       @Expose
@@ -90,6 +71,11 @@ public class VaultSizeConfig extends Config {
       public Level(int level, WeightedList<VaultSizeConfig.SizeLayout> outcomes) {
          this.level = level;
          this.outcomes = outcomes;
+      }
+
+      @Override
+      public int getLevel() {
+         return this.level;
       }
    }
 

@@ -1,7 +1,6 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.SkillGates;
 
 public class SkillGatesConfig extends Config {
@@ -21,15 +20,6 @@ public class SkillGatesConfig extends Config {
    protected void reset() {
       this.SKILL_GATES = new SkillGates();
       SkillGates.Entry gateEntry = new SkillGates.Entry();
-      gateEntry.setLockedBy(ModConfigs.TALENTS.TREASURE_HUNTER.getParentName());
-      this.SKILL_GATES.addEntry(ModConfigs.TALENTS.ARTISAN.getParentName(), gateEntry);
-      gateEntry = new SkillGates.Entry();
-      gateEntry.setLockedBy(ModConfigs.TALENTS.ARTISAN.getParentName());
-      this.SKILL_GATES.addEntry(ModConfigs.TALENTS.TREASURE_HUNTER.getParentName(), gateEntry);
-      gateEntry = new SkillGates.Entry();
-      gateEntry.setDependsOn(ModConfigs.TALENTS.LOOTER.getParentName());
-      this.SKILL_GATES.addEntry(ModConfigs.TALENTS.TREASURE_HUNTER.getParentName(), gateEntry);
-      gateEntry = new SkillGates.Entry();
       gateEntry.setDependsOn("Storage Noob");
       this.SKILL_GATES.addEntry("Storage Master", gateEntry);
       gateEntry = new SkillGates.Entry();

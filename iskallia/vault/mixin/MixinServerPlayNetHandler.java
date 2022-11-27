@@ -1,7 +1,7 @@
 package iskallia.vault.mixin;
 
-import net.minecraft.network.play.ServerPlayNetHandler;
-import net.minecraft.network.play.client.CPlayerPacket;
+import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -9,24 +9,24 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({ServerPlayNetHandler.class})
+@Mixin({ServerGamePacketListenerImpl.class})
 public class MixinServerPlayNetHandler {
    private boolean doesOwnerCheck = false;
 
    @Inject(
-      method = {"processPlayer"},
+      method = {"handleMovePlayer"},
       at = {@At(
          value = "INVOKE",
-         target = "Lnet/minecraft/network/play/ServerPlayNetHandler;func_217264_d()Z",
+         target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;isSingleplayerOwner()Z",
          shift = Shift.BEFORE
       )}
    )
-   public void onSpeedCheck(CPlayerPacket packetIn, CallbackInfo ci) {
+   public void onSpeedCheck(ServerboundMovePlayerPacket packetIn, CallbackInfo ci) {
       this.doesOwnerCheck = true;
    }
 
    @Inject(
-      method = {"func_217264_d"},
+      method = {"isSingleplayerOwner"},
       at = {@At("HEAD")},
       cancellable = true
    )

@@ -1,17 +1,17 @@
 package iskallia.vault.world.vault.logic.objective.raid.modifier;
 
-import iskallia.vault.entity.FloatingItemEntity;
+import iskallia.vault.entity.entity.FloatingItemEntity;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.raid.ActiveRaid;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.item.ItemStack;
 
 public class ArtifactFragmentModifier extends RaidModifier {
    public ArtifactFragmentModifier(String name) {
@@ -19,21 +19,21 @@ public class ArtifactFragmentModifier extends RaidModifier {
    }
 
    @Override
-   public void affectRaidMob(MobEntity mob, float value) {
+   public void affectRaidMob(Mob mob, float value) {
    }
 
    @Override
-   public void onVaultRaidFinish(VaultRaid vault, ServerWorld world, BlockPos controller, ActiveRaid raid, float value) {
+   public void onVaultRaidFinish(VaultRaid vault, ServerLevel world, BlockPos controller, ActiveRaid raid, float value) {
       if (!(rand.nextFloat() >= value)) {
-         BlockPos at = controller.func_177967_a(Direction.UP, 3);
+         BlockPos at = controller.relative(Direction.UP, 3);
          FloatingItemEntity itemEntity = FloatingItemEntity.create(world, at, new ItemStack(ModItems.ARTIFACT_FRAGMENT));
-         world.func_217376_c(itemEntity);
+         world.addFreshEntity(itemEntity);
       }
    }
 
    @Override
-   public ITextComponent getDisplay(float value) {
+   public Component getDisplay(float value) {
       int percDisplay = Math.round(value * 100.0F);
-      return new StringTextComponent("+" + percDisplay + "% Artifact Fragment chance").func_240699_a_(TextFormatting.GOLD);
+      return new TextComponent("+" + percDisplay + "% Artifact Fragment chance").withStyle(ChatFormatting.GOLD);
    }
 }

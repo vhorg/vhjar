@@ -1,22 +1,15 @@
 package iskallia.vault.skill.ability.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.init.ModEffects;
+import iskallia.vault.skill.ability.config.spi.AbstractToggleManaConfig;
 
-public class RampageConfig extends EffectConfig {
-   @Expose
-   private final int durationTicks;
+public class RampageConfig extends AbstractToggleManaConfig {
    @Expose
    private final float damageIncrease;
 
-   public RampageConfig(int cost, float damageIncrease, int durationTicks, int cooldown) {
-      super(cost, ModEffects.RAMPAGE, 0, EffectConfig.Type.ICON_ONLY, AbilityConfig.Behavior.RELEASE_TO_PERFORM, cooldown);
+   public RampageConfig(int learningCost, int regretCost, int cooldownTicks, int levelRequirement, float manaCostPerSecond, float damageIncrease) {
+      super(learningCost, regretCost, cooldownTicks, levelRequirement, manaCostPerSecond);
       this.damageIncrease = damageIncrease;
-      this.durationTicks = durationTicks;
-   }
-
-   public int getDurationTicks() {
-      return this.durationTicks;
    }
 
    public float getDamageIncrease() {

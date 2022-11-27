@@ -1,3 +1,28 @@
 {
-  "type": "the_vault:mystery_egg"
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "srs",
+    "eae",
+    "sds"
+  ],
+  "key": {
+    "d": {
+      "item": "the_vault:vault_diamond"
+    },
+    "a": {
+      "item": "the_vault:perfect_alexandrite"
+    },
+    "s": {
+      "item": "the_vault:vault_essence"
+    },
+    "r": {
+      "item": "the_vault:regret_chunk"
+    },
+    "e": {
+      "tag": "the_vault:spawnegg"
+    }
+  },
+  "result": {
+    "item": "the_vault:mystery_egg"
+  }
 }

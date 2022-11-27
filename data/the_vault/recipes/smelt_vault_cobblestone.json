@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "the_vault:vault_cobblestone"
+  },
+  "result": "the_vault:polished_vault_stone",
+  "experience": 1.0,
+  "cookingtime": 200
+}

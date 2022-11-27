@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " d ",
+        "dsd",
+        " w "
+    ],
+    "key": {
+        "d": {
+            "item": "minecraft:diamond"
+        },
+        "s": {
+            "item": "the_vault:crystal_seal_empty"
+        },
+        "w": {
+            "item": "the_vault:gem_wutodie"
+        }
+    },
+    "result": {
+        "item": "the_vault:crystal_seal_speedrun",
+        "count": 1
+    }
+}

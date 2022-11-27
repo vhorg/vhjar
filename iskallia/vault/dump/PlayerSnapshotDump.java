@@ -2,17 +2,17 @@ package iskallia.vault.dump;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import iskallia.vault.Vault;
 import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.entity.eternal.EternalData;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.skill.PlayerVaultStats;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.CooldownHelper;
 import iskallia.vault.util.calc.FatalStrikeHelper;
-import iskallia.vault.util.calc.ParryHelper;
 import iskallia.vault.util.calc.PlayerStatisticsCollector;
 import iskallia.vault.util.calc.ResistanceHelper;
 import iskallia.vault.util.calc.ThornsHelper;
@@ -22,6 +22,7 @@ import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.world.data.ServerVaults;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -29,48 +30,53 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifierManager;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class PlayerSnapshotDump {
    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-   public static String createAndSerializeSnapshot(ServerPlayerEntity sPlayer) {
+   public static String createAndSerializeSnapshot(ServerPlayer sPlayer) {
       return GSON.toJson(createSnapshot(sPlayer));
    }
 
-   public static PlayerSnapshotDump.PlayerSnapshot createSnapshot(ServerPlayerEntity sPlayer) {
+   public static PlayerSnapshotDump.PlayerSnapshot createSnapshot(ServerPlayer sPlayer) {
       PlayerSnapshotDump.PlayerSnapshot snapshot = new PlayerSnapshotDump.PlayerSnapshot(sPlayer);
-      ServerWorld sWorld = sPlayer.func_71121_q();
-      snapshot.inVault = sWorld.func_234923_W_() == Vault.VAULT_KEY;
+      ServerLevel sWorld = sPlayer.getLevel();
+      snapshot.inVault = ServerVaults.isInVault(sPlayer);
       PlayerVaultStats stats = PlayerVaultStatsData.get(sWorld).getVaultStats(sPlayer);
       snapshot.vaultLevel = stats.getVaultLevel();
-      snapshot.levelPercent = (float)stats.getExp() / stats.getTnl();
-      AttributeModifierManager mgr = sPlayer.func_233645_dx_();
+      if (snapshot.vaultLevel >= ModConfigs.LEVELS_META.getMaxLevel()) {
+         snapshot.levelPercent = 1.0F;
+      } else {
+         snapshot.levelPercent = (float)stats.getExp() / stats.getExpNeededToNextLevel();
+      }
+
+      AttributeMap mgr = sPlayer.getAttributes();
 
       for (Attribute attribute : ForgeRegistries.ATTRIBUTES) {
-         if (mgr.func_233790_b_(attribute)) {
+         if (mgr.hasAttribute(attribute)) {
             ResourceLocation attrId = attribute.getRegistryName();
-            snapshot.attributes.put(attrId == null ? attribute.func_233754_c_() : attrId.toString(), mgr.func_233795_c_(attribute));
+            snapshot.attributes.put(attrId == null ? attribute.getDescriptionId() : attrId.toString(), mgr.getValue(attribute));
          }
       }
 
-      snapshot.parry = ParryHelper.getPlayerParryChance(sPlayer);
-      snapshot.resistance = ResistanceHelper.getPlayerResistancePercent(sPlayer);
-      snapshot.cooldownReduction = CooldownHelper.getCooldownMultiplier(sPlayer, null);
-      snapshot.fatalStrikeChance = FatalStrikeHelper.getPlayerFatalStrikeChance(sPlayer);
-      snapshot.fatalStrikeDamage = FatalStrikeHelper.getPlayerFatalStrikeDamage(sPlayer);
+      snapshot.blockChance = BlockChanceHelper.getBlockChance(sPlayer);
+      snapshot.resistance = ResistanceHelper.getResistance(sPlayer);
+      snapshot.cooldownReduction = CooldownHelper.getCooldownMultiplier(sPlayer);
+      snapshot.fatalStrikeChance = FatalStrikeHelper.getFatalStrikeChance(sPlayer);
+      snapshot.fatalStrikeDamage = FatalStrikeHelper.getFatalStrikeDamage(sPlayer);
       snapshot.thornsChance = ThornsHelper.getThornsChance(sPlayer);
       snapshot.thornsDamage = ThornsHelper.getThornsDamage(sPlayer);
-      Arrays.stream(EquipmentSlotType.values()).forEach(slotType -> {
-         ItemStack stack = sPlayer.func_184582_a(slotType);
-         if (!stack.func_190926_b()) {
+      Arrays.stream(EquipmentSlot.values()).forEach(slotType -> {
+         ItemStack stack = sPlayer.getItemBySlot(slotType);
+         if (!stack.isEmpty()) {
             snapshot.equipment.put(slotType.name(), new PlayerSnapshotDump.SerializableItemStack(stack));
          }
       });
@@ -91,11 +97,11 @@ public class PlayerSnapshotDump {
       snapshot.vaultWins = vaultRunsSnapshot.bossKills;
       snapshot.vaultDeaths = vaultRunsSnapshot.deaths;
       snapshot.artifactCount = vaultRunsSnapshot.artifacts;
-      snapshot.powerLevel = stats.getTotalSpentSkillPoints() + stats.getUnspentSkillPts();
+      snapshot.powerLevel = stats.getTotalSpentSkillPoints() + stats.getUnspentSkillPoints();
       PlayerFavourData favourData = PlayerFavourData.get(sWorld);
 
       for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {
-         snapshot.favors.put(type.getName(), favourData.getFavour(sPlayer.func_110124_au(), type));
+         snapshot.favors.put(type.getName(), favourData.getFavour(sPlayer.getUUID(), type));
       }
 
       EternalsData.EternalGroup group = EternalsData.get(sWorld).getEternals(sPlayer);
@@ -113,7 +119,7 @@ public class PlayerSnapshotDump {
             eternal.getName(), eternal.getLevel(), eternal.isAncient(), auraName
          );
          eternal.getEquipment().forEach((slot, stack) -> {
-            if (!stack.func_190926_b()) {
+            if (!stack.isEmpty()) {
                eternalSnapshot.equipment.put(slot.name(), new PlayerSnapshotDump.SerializableItemStack(stack));
             }
          });
@@ -152,7 +158,7 @@ public class PlayerSnapshotDump {
       protected float levelPercent = 0.0F;
       protected Map<String, Double> attributes = new LinkedHashMap<>();
       protected Map<String, Integer> favors = new LinkedHashMap<>();
-      protected float parry;
+      protected float blockChance;
       protected float resistance;
       protected float cooldownReduction;
       protected float fatalStrikeChance;
@@ -165,9 +171,9 @@ public class PlayerSnapshotDump {
       protected Set<String> researches = new LinkedHashSet<>();
       protected Set<PlayerSnapshotDump.EternalInformation> eternals = new LinkedHashSet<>();
 
-      public PlayerSnapshot(ServerPlayerEntity playerEntity) {
-         this.playerUUID = playerEntity.func_110124_au();
-         this.playerNickname = playerEntity.func_200200_C_().getString();
+      public PlayerSnapshot(ServerPlayer playerEntity) {
+         this.playerUUID = playerEntity.getUUID();
+         this.playerNickname = playerEntity.getName().getString();
          this.timestamp = Instant.now().getEpochSecond();
       }
    }
@@ -176,15 +182,18 @@ public class PlayerSnapshotDump {
       private final String itemKey;
       private final int count;
       private final String nbt;
+      private final String gearData;
 
       private SerializableItemStack(ItemStack stack) {
-         this.itemKey = stack.func_77973_b().getRegistryName().toString();
-         this.count = stack.func_190916_E();
-         if (stack.func_77942_o()) {
-            this.nbt = stack.func_77978_p().toString();
+         this.itemKey = stack.getItem().getRegistryName().toString();
+         this.count = stack.getCount();
+         if (stack.hasTag()) {
+            this.nbt = stack.getTag().toString();
          } else {
             this.nbt = null;
          }
+
+         this.gearData = VaultGearItem.serializeGearData(stack).toString();
       }
    }
 }

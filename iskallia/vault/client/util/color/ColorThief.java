@@ -24,13 +24,13 @@ public class ColorThief {
    @Nullable
    public static int[][] getPalette(BufferedImage sourceImage, int colorCount) {
       MMCQ.CMap cmap = getColorMap(sourceImage, colorCount);
-      return cmap == null ? (int[][])null : cmap.palette();
+      return cmap == null ? null : cmap.palette();
    }
 
    @Nullable
    public static int[][] getPalette(BufferedImage sourceImage, int colorCount, int quality, boolean ignoreWhite) {
       MMCQ.CMap cmap = getColorMap(sourceImage, colorCount, quality, ignoreWhite);
-      return cmap == null ? (int[][])null : cmap.palette();
+      return cmap == null ? null : cmap.palette();
    }
 
    @Nullable
@@ -40,17 +40,10 @@ public class ColorThief {
 
    @Nullable
    public static MMCQ.CMap getColorMap(BufferedImage sourceImage, int colorCount, int quality, boolean ignoreWhite) {
-      int[][] pixelArray;
-      switch (sourceImage.getType()) {
-         case 5:
-         case 6:
-            pixelArray = getPixelsFast(sourceImage, quality, ignoreWhite);
-            break;
-         default:
-            pixelArray = getPixelsSlow(sourceImage, quality, ignoreWhite);
-      }
-
-      return MMCQ.quantize(pixelArray, colorCount);
+      return MMCQ.quantize(switch (sourceImage.getType()) {
+         case 5, 6 -> getPixelsFast(sourceImage, quality, ignoreWhite);
+         default -> getPixelsSlow(sourceImage, quality, ignoreWhite);
+      }, colorCount);
    }
 
    private static int[][] getPixelsFast(BufferedImage sourceImage, int quality, boolean ignoreWhite) {
@@ -58,19 +51,12 @@ public class ColorThief {
       byte[] pixels = imageData.getData();
       int pixelCount = sourceImage.getWidth() * sourceImage.getHeight();
       int type = sourceImage.getType();
-      int colorDepth;
-      switch (type) {
-         case 5:
-            colorDepth = 3;
-            break;
-         case 6:
-            colorDepth = 4;
-            break;
-         default:
-            throw new IllegalArgumentException("Unhandled type: " + type);
-      }
 
-      int expectedDataLength = pixelCount * colorDepth;
+      int expectedDataLength = pixelCount * switch (type) {
+         case 5 -> 3;
+         case 6 -> 4;
+         default -> throw new IllegalArgumentException("Unhandled type: " + type);
+      };
       if (expectedDataLength != pixels.length) {
          throw new IllegalArgumentException("(expectedDataLength = " + expectedDataLength + ") != (pixels.length = " + pixels.length + ")");
       } else {

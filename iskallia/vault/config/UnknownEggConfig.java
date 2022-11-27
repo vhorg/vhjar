@@ -1,14 +1,14 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.util.data.WeightedList;
-import java.util.ArrayList;
-import java.util.List;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.Nullable;
 
 public class UnknownEggConfig extends Config {
    @Expose
-   private List<UnknownEggConfig.Level> OVERRIDES = new ArrayList<>();
+   private LevelEntryList<UnknownEggConfig.Level> OVERRIDES = new LevelEntryList<>();
 
    @Override
    public String getName() {
@@ -21,29 +21,19 @@ public class UnknownEggConfig extends Config {
          .add(
             new UnknownEggConfig.Level(
                0,
-               new WeightedList<String>().add(Items.field_196177_df.getRegistryName().toString(), 2).add(Items.field_196138_cT.getRegistryName().toString(), 1)
+               new WeightedList<String>()
+                  .add(Items.ZOMBIE_SPAWN_EGG.getRegistryName().toString(), 2)
+                  .add(Items.SKELETON_SPAWN_EGG.getRegistryName().toString(), 1)
             )
          );
    }
 
+   @Nullable
    public UnknownEggConfig.Level getForLevel(int level) {
-      for (int i = 0; i < this.OVERRIDES.size(); i++) {
-         if (level < this.OVERRIDES.get(i).MIN_LEVEL) {
-            if (i != 0) {
-               return this.OVERRIDES.get(i - 1);
-            }
-            break;
-         }
-
-         if (i == this.OVERRIDES.size() - 1) {
-            return this.OVERRIDES.get(i);
-         }
-      }
-
-      return null;
+      return this.OVERRIDES.getForLevel(level).orElse(null);
    }
 
-   public static class Level {
+   public static class Level implements LevelEntryList.ILevelEntry {
       @Expose
       public int MIN_LEVEL;
       @Expose
@@ -52,6 +42,11 @@ public class UnknownEggConfig extends Config {
       public Level(int level, WeightedList<String> pool) {
          this.MIN_LEVEL = level;
          this.EGG_POOL = pool;
+      }
+
+      @Override
+      public int getLevel() {
+         return this.MIN_LEVEL;
       }
    }
 }

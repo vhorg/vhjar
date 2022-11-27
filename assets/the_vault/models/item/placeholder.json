@@ -1,0 +1,14 @@
+{
+  "parent": "the_vault:block/placeholder_wooden_chest",
+  "overrides": [
+    { "predicate": { "the_vault:placeholder_type": 0 }, "model": "the_vault:item/placeholder_wooden_chest" },
+    { "predicate": { "the_vault:placeholder_type": 1 }, "model": "the_vault:item/placeholder_gilded_chest" },
+    { "predicate": { "the_vault:placeholder_type": 2 }, "model": "the_vault:item/placeholder_living_chest" },
+    { "predicate": { "the_vault:placeholder_type": 3 }, "model": "the_vault:item/placeholder_ornate_chest" },
+    { "predicate": { "the_vault:placeholder_type": 4 }, "model": "the_vault:item/placeholder_objective" },
+    { "predicate": { "the_vault:placeholder_type": 5 }, "model": "the_vault:item/placeholder_ore" },
+    { "predicate": { "the_vault:placeholder_type": 6 }, "model": "the_vault:item/placeholder_coin_stacks" },
+    { "predicate": { "the_vault:placeholder_type": 7 }, "model": "the_vault:item/placeholder_vendor_pedestal" },
+    { "predicate": { "the_vault:placeholder_type": 8 }, "model": "the_vault:item/placeholder_treasure_door" }
+  ]
+}

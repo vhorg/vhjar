@@ -2,57 +2,56 @@ package iskallia.vault.block;
 
 import iskallia.vault.init.ModBlocks;
 import java.util.Random;
-import javax.annotation.Nullable;
-import net.minecraft.block.BarrierBlock;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.pathfinding.PathType;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BarrierBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import org.jetbrains.annotations.Nullable;
 
-public class FloatingTextBlock extends BarrierBlock {
+public class FloatingTextBlock extends BarrierBlock implements EntityBlock {
    public FloatingTextBlock() {
-      super(Properties.func_200945_a(Material.field_175972_I).func_200948_a(-1.0F, 3.6E8F).func_222380_e().func_226896_b_().func_200942_a());
+      super(Properties.of(Material.BARRIER).strength(-1.0F, 3.6E8F).noDrops().noOcclusion().noCollission());
    }
 
-   public boolean func_181623_g() {
+   public boolean isPossibleToRespawnInThis() {
       return true;
    }
 
-   public BlockRenderType func_149645_b(BlockState state) {
-      return BlockRenderType.INVISIBLE;
+   public RenderShape getRenderShape(BlockState state) {
+      return RenderShape.INVISIBLE;
    }
 
-   public boolean func_196266_a(BlockState state, IBlockReader worldIn, BlockPos pos, PathType type) {
+   public boolean isPathfindable(BlockState state, BlockGetter worldIn, BlockPos pos, PathComputationType type) {
       return true;
    }
 
-   public void func_180655_c(BlockState stateIn, World worldIn, BlockPos pos, Random rand) {
-      Minecraft minecraft = Minecraft.func_71410_x();
-      ClientPlayerEntity player = minecraft.field_71439_g;
-      ClientWorld world = minecraft.field_71441_e;
-      if (player != null && world != null && player.func_184614_ca().func_77973_b() == ModBlocks.FLOATING_TEXT.func_199767_j()) {
-         int i = pos.func_177958_n();
-         int j = pos.func_177956_o();
-         int k = pos.func_177952_p();
-         world.func_195594_a(ParticleTypes.field_197610_c, i + 0.5, j + 0.5, k + 0.5, 0.0, 0.0, 0.0);
+   public void animateTick(BlockState stateIn, Level worldIn, BlockPos pos, Random rand) {
+      Minecraft minecraft = Minecraft.getInstance();
+      LocalPlayer player = minecraft.player;
+      ClientLevel world = minecraft.level;
+      if (player != null && world != null && player.getMainHandItem().getItem() == ModBlocks.FLOATING_TEXT.asItem()) {
+         int i = pos.getX();
+         int j = pos.getY();
+         int k = pos.getZ();
+         world.addParticle(new BlockParticleOption(ParticleTypes.BLOCK_MARKER, Blocks.BARRIER.defaultBlockState()), i + 0.5, j + 0.5, k + 0.5, 0.0, 0.0, 0.0);
       }
    }
 
-   public boolean hasTileEntity(BlockState state) {
-      return true;
-   }
-
    @Nullable
-   public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-      return ModBlocks.FLOATING_TEXT_TILE_ENTITY.func_200968_a();
+   public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+      return ModBlocks.FLOATING_TEXT_TILE_ENTITY.create(pPos, pState);
    }
 }

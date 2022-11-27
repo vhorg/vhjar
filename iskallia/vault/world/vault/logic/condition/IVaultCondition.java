@@ -3,11 +3,11 @@ package iskallia.vault.world.vault.logic.condition;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import java.util.Objects;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 
 @FunctionalInterface
 public interface IVaultCondition {
-   boolean test(VaultRaid var1, VaultPlayer var2, ServerWorld var3);
+   boolean test(VaultRaid var1, VaultPlayer var2, ServerLevel var3);
 
    default IVaultCondition negate() {
       return (vault, player, world) -> !this.test(vault, player, world);

@@ -12,18 +12,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class EternalInteractionMessage {
    private final EternalInteractionMessage.Action action;
-   private CompoundNBT extraData = new CompoundNBT();
+   private CompoundTag extraData = new CompoundTag();
 
    private EternalInteractionMessage(EternalInteractionMessage.Action action) {
       this.action = action;
@@ -31,32 +31,30 @@ public class EternalInteractionMessage {
 
    public static EternalInteractionMessage feedItem(ItemStack stack) {
       EternalInteractionMessage pkt = new EternalInteractionMessage(EternalInteractionMessage.Action.FEED_SELECTED);
-      pkt.extraData.func_218657_a("stack", stack.serializeNBT());
+      pkt.extraData.put("stack", stack.serializeNBT());
       return pkt;
    }
 
    public static EternalInteractionMessage levelUp(String attribute) {
       EternalInteractionMessage pkt = new EternalInteractionMessage(EternalInteractionMessage.Action.LEVEL_UP);
-      pkt.extraData.func_74778_a("attribute", attribute);
+      pkt.extraData.putString("attribute", attribute);
       return pkt;
    }
 
    public static EternalInteractionMessage selectEffect(String effectName) {
       EternalInteractionMessage pkt = new EternalInteractionMessage(EternalInteractionMessage.Action.SELECT_EFFECT);
-      pkt.extraData.func_74778_a("effectName", effectName);
+      pkt.extraData.putString("effectName", effectName);
       return pkt;
    }
 
-   public static void encode(EternalInteractionMessage pkt, PacketBuffer buffer) {
-      buffer.func_179249_a(pkt.action);
-      buffer.func_150786_a(pkt.extraData);
+   public static void encode(EternalInteractionMessage pkt, FriendlyByteBuf buffer) {
+      buffer.writeEnum(pkt.action);
+      buffer.writeNbt(pkt.extraData);
    }
 
-   public static EternalInteractionMessage decode(PacketBuffer buffer) {
-      EternalInteractionMessage pkt = new EternalInteractionMessage(
-         (EternalInteractionMessage.Action)buffer.func_179257_a(EternalInteractionMessage.Action.class)
-      );
-      pkt.extraData = buffer.func_150793_b();
+   public static EternalInteractionMessage decode(FriendlyByteBuf buffer) {
+      EternalInteractionMessage pkt = new EternalInteractionMessage((EternalInteractionMessage.Action)buffer.readEnum(EternalInteractionMessage.Action.class));
+      pkt.extraData = buffer.readNbt();
       return pkt;
    }
 
@@ -64,70 +62,70 @@ public class EternalInteractionMessage {
       Context context = contextSupplier.get();
       context.enqueueWork(
          () -> {
-            ServerPlayerEntity player = contextSupplier.get().getSender();
-            if (player.field_71070_bA instanceof CryochamberContainer) {
-               CryoChamberTileEntity tile = ((CryochamberContainer)player.field_71070_bA).getCryoChamber(player.func_71121_q());
+            ServerPlayer player = contextSupplier.get().getSender();
+            if (player.containerMenu instanceof CryochamberContainer) {
+               CryoChamberTileEntity tile = ((CryochamberContainer)player.containerMenu).getCryoChamber(player.getLevel());
                if (tile != null) {
                   UUID eternalId = tile.getEternalId();
-                  EternalsData data = EternalsData.get(player.func_71121_q());
+                  EternalsData data = EternalsData.get(player.getLevel());
                   EternalsData.EternalGroup eternals = data.getEternals(player);
                   EternalData eternal = eternals.get(eternalId);
                   if (eternal != null) {
                      switch (pkt.action) {
                         case FEED_SELECTED:
-                           ItemStack activeStack = player.field_71071_by.func_70445_o();
-                           if (activeStack.func_190926_b() || !canBeFed(eternal, activeStack)) {
+                           ItemStack activeStack = player.containerMenu.getCarried();
+                           if (activeStack.isEmpty() || !canBeFed(eternal, activeStack)) {
                               return;
                            }
 
                            if (eternal.getLevel() < eternal.getMaxLevel()) {
                               ModConfigs.ETERNAL
-                                 .getFoodExp(activeStack.func_77973_b())
+                                 .getFoodExp(activeStack.getItem())
                                  .ifPresent(
                                     foodExp -> {
-                                       if (eternal.addExp(foodExp) && !player.func_184812_l_()) {
-                                          activeStack.func_190918_g(1);
-                                          player.field_71070_bA.func_75142_b();
-                                          player.field_70170_p
-                                             .func_184133_a(
+                                       if (eternal.addExp(foodExp) && !player.isCreative()) {
+                                          activeStack.shrink(1);
+                                          player.containerMenu.broadcastChanges();
+                                          player.level
+                                             .playSound(
                                                 null,
-                                                tile.func_174877_v(),
-                                                SoundEvents.field_187537_bA,
-                                                SoundCategory.PLAYERS,
+                                                tile.getBlockPos(),
+                                                SoundEvents.GENERIC_EAT,
+                                                SoundSource.PLAYERS,
                                                 0.5F,
-                                                player.field_70170_p.field_73012_v.nextFloat() * 0.1F + 0.9F
+                                                player.level.random.nextFloat() * 0.1F + 0.9F
                                              );
-                                          player.field_70170_p
-                                             .func_184133_a(
+                                          player.level
+                                             .playSound(
                                                 null,
-                                                tile.func_174877_v(),
-                                                SoundEvents.field_187739_dZ,
-                                                SoundCategory.PLAYERS,
+                                                tile.getBlockPos(),
+                                                SoundEvents.PLAYER_BURP,
+                                                SoundSource.PLAYERS,
                                                 0.5F,
-                                                player.field_70170_p.field_73012_v.nextFloat() * 0.1F + 0.9F
+                                                player.level.random.nextFloat() * 0.1F + 0.9F
                                              );
                                        }
                                     }
                                  );
                            }
 
-                           if (!eternal.isAlive() && activeStack.func_77973_b().equals(ModItems.LIFE_SCROLL)) {
+                           if (!eternal.isAlive() && activeStack.getItem().equals(ModItems.LIFE_SCROLL)) {
                               eternal.setAlive(true);
-                              if (!player.func_184812_l_()) {
-                                 activeStack.func_190918_g(1);
-                                 player.field_71070_bA.func_75142_b();
+                              if (!player.isCreative()) {
+                                 activeStack.shrink(1);
+                                 player.containerMenu.broadcastChanges();
                               }
                            }
 
-                           if (activeStack.func_77973_b().equals(ModItems.AURA_SCROLL)) {
+                           if (activeStack.getItem().equals(ModItems.AURA_SCROLL)) {
                               eternal.shuffleSeed();
                               if (eternal.getAura() != null) {
                                  eternal.setAura(null);
                               }
 
-                              if (!player.func_184812_l_()) {
-                                 activeStack.func_190918_g(1);
-                                 player.field_71070_bA.func_75142_b();
+                              if (!player.isCreative()) {
+                                 activeStack.shrink(1);
+                                 player.containerMenu.broadcastChanges();
                               }
                            }
                            break;
@@ -136,21 +134,21 @@ public class EternalInteractionMessage {
                               return;
                            }
 
-                           String attribute = pkt.extraData.func_74779_i("attribute");
+                           String attribute = pkt.extraData.getString("attribute");
                            switch (attribute) {
                               case "health": {
                                  float added = ModConfigs.ETERNAL_ATTRIBUTES.getHealthRollRange().getRandom();
-                                 eternal.addAttributeValue(Attributes.field_233818_a_, added);
+                                 eternal.addAttributeValue(Attributes.MAX_HEALTH, added);
                                  return;
                               }
                               case "damage": {
                                  float added = ModConfigs.ETERNAL_ATTRIBUTES.getDamageRollRange().getRandom();
-                                 eternal.addAttributeValue(Attributes.field_233823_f_, added);
+                                 eternal.addAttributeValue(Attributes.ATTACK_DAMAGE, added);
                                  return;
                               }
                               case "movespeed": {
                                  float added = ModConfigs.ETERNAL_ATTRIBUTES.getMoveSpeedRollRange().getRandom();
-                                 eternal.addAttributeValue(Attributes.field_233821_d_, added);
+                                 eternal.addAttributeValue(Attributes.MOVEMENT_SPEED, added);
                                  return;
                               }
                               default:
@@ -166,7 +164,7 @@ public class EternalInteractionMessage {
                               .stream()
                               .map(EternalAuraConfig.AuraConfig::getName)
                               .collect(Collectors.toList());
-                           String selectedEffect = pkt.extraData.func_74779_i("effectName");
+                           String selectedEffect = pkt.extraData.getString("effectName");
                            if (!options.contains(selectedEffect)) {
                               return;
                            }
@@ -182,14 +180,14 @@ public class EternalInteractionMessage {
    }
 
    public static boolean canBeFed(EternalDataAccess eternal, ItemStack stack) {
-      if (stack.func_190926_b()) {
+      if (stack.isEmpty()) {
          return false;
-      } else if (!eternal.isAlive() && stack.func_77973_b().equals(ModItems.LIFE_SCROLL)) {
+      } else if (!eternal.isAlive() && stack.getItem().equals(ModItems.LIFE_SCROLL)) {
          return true;
       } else {
-         return stack.func_77973_b().equals(ModItems.AURA_SCROLL)
+         return stack.getItem().equals(ModItems.AURA_SCROLL)
             ? true
-            : eternal.getLevel() < eternal.getMaxLevel() && ModConfigs.ETERNAL.getFoodExp(stack.func_77973_b()).isPresent();
+            : eternal.getLevel() < eternal.getMaxLevel() && ModConfigs.ETERNAL.getFoodExp(stack.getItem()).isPresent();
       }
    }
 

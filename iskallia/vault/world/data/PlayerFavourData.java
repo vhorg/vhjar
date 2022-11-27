@@ -6,39 +6,31 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nonnull;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.IStringSerializable;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.util.text.event.HoverEvent.Action;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.HoverEvent.Action;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.saveddata.SavedData;
 
-public class PlayerFavourData extends WorldSavedData {
+public class PlayerFavourData extends SavedData {
    protected static final String DATA_NAME = "the_vault_PlayerFavour";
    protected Map<UUID, Map<PlayerFavourData.VaultGodType, Integer>> favourStats = new HashMap<>();
 
-   public PlayerFavourData() {
-      this("the_vault_PlayerFavour");
-   }
-
-   public PlayerFavourData(String name) {
-      super(name);
-   }
-
-   public boolean addFavour(PlayerEntity player, PlayerFavourData.VaultGodType type, int count) {
-      UUID playerUUID = player.func_110124_au();
+   public boolean addFavour(Player player, PlayerFavourData.VaultGodType type, int count) {
+      UUID playerUUID = player.getUUID();
       int favour = this.favourStats.computeIfAbsent(playerUUID, key -> new HashMap<>()).getOrDefault(type, 0);
       if (Math.abs(favour + count) > 16) {
          return false;
       } else {
          favour += count;
          this.favourStats.computeIfAbsent(playerUUID, key -> new HashMap<>()).put(type, favour);
-         this.func_76185_a();
+         this.setDirty();
          return true;
       }
    }
@@ -47,10 +39,16 @@ public class PlayerFavourData extends WorldSavedData {
       return this.favourStats.getOrDefault(playerUUID, Collections.emptyMap()).getOrDefault(type, 0);
    }
 
-   public void func_76184_a(CompoundNBT nbt) {
+   private static PlayerFavourData create(CompoundTag tag) {
+      PlayerFavourData data = new PlayerFavourData();
+      data.load(tag);
+      return data;
+   }
+
+   public void load(CompoundTag nbt) {
       this.favourStats.clear();
 
-      for (String key : nbt.func_150296_c()) {
+      for (String key : nbt.getAllKeys()) {
          UUID playerUUID;
          try {
             playerUUID = UUID.fromString(key);
@@ -59,11 +57,11 @@ public class PlayerFavourData extends WorldSavedData {
          }
 
          Map<PlayerFavourData.VaultGodType, Integer> playerFavour = new HashMap<>();
-         CompoundNBT favourTag = nbt.func_74775_l(key);
+         CompoundTag favourTag = nbt.getCompound(key);
 
-         for (String godKey : favourTag.func_150296_c()) {
+         for (String godKey : favourTag.getAllKeys()) {
             try {
-               playerFavour.put(PlayerFavourData.VaultGodType.valueOf(godKey), favourTag.func_74762_e(godKey));
+               playerFavour.put(PlayerFavourData.VaultGodType.valueOf(godKey), favourTag.getInt(godKey));
             } catch (IllegalArgumentException var10) {
             }
          }
@@ -72,30 +70,33 @@ public class PlayerFavourData extends WorldSavedData {
       }
    }
 
-   public CompoundNBT func_189551_b(CompoundNBT compound) {
+   public CompoundTag save(CompoundTag compound) {
       this.favourStats.forEach((uuid, playerFavour) -> {
-         CompoundNBT favourTag = new CompoundNBT();
-         playerFavour.forEach((type, count) -> favourTag.func_74768_a(type.name(), count));
-         compound.func_218657_a(uuid.toString(), favourTag);
+         CompoundTag favourTag = new CompoundTag();
+         playerFavour.forEach((type, count) -> favourTag.putInt(type.name(), count));
+         compound.put(uuid.toString(), favourTag);
       });
       return compound;
    }
 
-   public static PlayerFavourData get(ServerWorld world) {
-      return (PlayerFavourData)world.func_73046_m().func_241755_D_().func_217481_x().func_215752_a(PlayerFavourData::new, "the_vault_PlayerFavour");
+   public static PlayerFavourData get(ServerLevel world) {
+      return (PlayerFavourData)world.getServer()
+         .overworld()
+         .getDataStorage()
+         .computeIfAbsent(PlayerFavourData::create, PlayerFavourData::new, "the_vault_PlayerFavour");
    }
 
-   public static enum VaultGodType implements IStringSerializable {
-      BENEVOLENT("Velara", "The Benevolent", TextFormatting.GREEN),
-      OMNISCIENT("Tenos", "The Omniscient", TextFormatting.AQUA),
-      TIMEKEEPER("Wendarr", "The Timekeeper", TextFormatting.GOLD),
-      MALEVOLENCE("Idona", "The Malevolence", TextFormatting.RED);
+   public static enum VaultGodType implements StringRepresentable {
+      BENEVOLENT("Velara", "The Benevolent", ChatFormatting.GREEN),
+      OMNISCIENT("Tenos", "The Omniscient", ChatFormatting.AQUA),
+      TIMEKEEPER("Wendarr", "The Timekeeper", ChatFormatting.GOLD),
+      MALEVOLENT("Idona", "The Malevolent", ChatFormatting.RED);
 
       private final String name;
       private final String title;
-      private final TextFormatting color;
+      private final ChatFormatting color;
 
-      private VaultGodType(String name, String title, TextFormatting color) {
+      private VaultGodType(String name, String title, ChatFormatting color) {
          this.name = name;
          this.title = title;
          this.color = color;
@@ -119,32 +120,32 @@ public class PlayerFavourData extends WorldSavedData {
          return this.title;
       }
 
-      public TextFormatting getChatColor() {
+      public ChatFormatting getChatColor() {
          return this.color;
       }
 
       @Nonnull
-      public String func_176610_l() {
+      public String getSerializedName() {
          return this.getName().toLowerCase();
       }
 
-      public ITextComponent getHoverChatComponent() {
-         return new StringTextComponent("[Vault God] ")
-            .func_240699_a_(TextFormatting.WHITE)
-            .func_230529_a_(new StringTextComponent(this.name + ", " + this.title).func_240699_a_(this.color));
+      public Component getHoverChatComponent() {
+         return new TextComponent("[Vault God] ")
+            .withStyle(ChatFormatting.WHITE)
+            .append(new TextComponent(this.name + ", " + this.title).withStyle(this.color));
       }
 
-      public ITextComponent getIdolDescription() {
+      public Component getIdolDescription() {
          String s = this.getName().endsWith("s") ? "" : "s";
-         return new StringTextComponent(String.format("%s'%s Idol", this.getName(), s)).func_240699_a_(this.getChatColor());
+         return new TextComponent(String.format("%s'%s Idol", this.getName(), s)).withStyle(this.getChatColor());
       }
 
-      public IFormattableTextComponent getChosenPrefix() {
+      public MutableComponent getChosenPrefix() {
          String prefix = "[" + this.getName().charAt(0) + "C] ";
-         IFormattableTextComponent cmp = new StringTextComponent(prefix).func_240699_a_(this.color);
+         MutableComponent cmp = new TextComponent(prefix).withStyle(this.color);
          String s = this.getName().endsWith("s") ? "" : "s";
-         IFormattableTextComponent hover = new StringTextComponent(String.format("%s'%s Chosen", this.getName(), s)).func_240699_a_(this.getChatColor());
-         cmp.func_240700_a_(style -> style.func_240716_a_(new HoverEvent(Action.field_230550_a_, hover)));
+         MutableComponent hover = new TextComponent(String.format("%s'%s Chosen", this.getName(), s)).withStyle(this.getChatColor());
+         cmp.withStyle(style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, hover)));
          return cmp;
       }
 

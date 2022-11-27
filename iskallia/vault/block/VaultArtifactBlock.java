@@ -9,108 +9,103 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.Property;
-import net.minecraft.state.StateContainer.Builder;
-import net.minecraft.util.Direction;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class VaultArtifactBlock extends FacedBlock {
    public static final int ARTIFACT_COUNT = 25;
    public static final IntegerProperty ORDER_PROPERTY = HiddenIntegerProperty.create("order", 1, 25);
-   public static final VoxelShape EAST_SHAPE = Block.func_208617_a(15.75, 0.0, 0.0, 16.0, 16.0, 16.0);
-   public static final VoxelShape NORTH_SHAPE = Block.func_208617_a(0.0, 0.0, 0.0, 16.0, 16.0, 0.25);
-   public static final VoxelShape WEST_SHAPE = Block.func_208617_a(0.0, 0.0, 0.0, 0.25, 16.0, 16.0);
-   public static final VoxelShape SOUTH_SHAPE = Block.func_208617_a(0.0, 0.0, 15.75, 16.0, 16.0, 16.0);
+   public static final VoxelShape EAST_SHAPE = Block.box(15.75, 0.0, 0.0, 16.0, 16.0, 16.0);
+   public static final VoxelShape NORTH_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 0.25);
+   public static final VoxelShape WEST_SHAPE = Block.box(0.0, 0.0, 0.0, 0.25, 16.0, 16.0);
+   public static final VoxelShape SOUTH_SHAPE = Block.box(0.0, 0.0, 15.75, 16.0, 16.0, 16.0);
 
    public VaultArtifactBlock() {
-      super(Properties.func_200949_a(Material.field_151571_B, MaterialColor.field_151663_o).func_200947_a(SoundType.field_185854_g).func_226896_b_());
-      this.func_180632_j((BlockState)((BlockState)this.field_176227_L.func_177621_b()).func_206870_a(FACING, Direction.SOUTH));
+      super(Properties.of(Material.CLAY, MaterialColor.WOOD).sound(SoundType.WOOL).noOcclusion());
+      this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.SOUTH));
    }
 
-   public void func_149666_a(ItemGroup group, NonNullList<ItemStack> items) {
+   public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
    }
 
    public int getOrder(ItemStack stack) {
-      CompoundNBT nbt = stack.func_196082_o();
-      return nbt.func_74764_b("CustomModelData") ? nbt.func_74762_e("CustomModelData") : 1;
+      CompoundTag nbt = stack.getOrCreateTag();
+      return nbt.contains("CustomModelData") ? nbt.getInt("CustomModelData") : 1;
    }
 
-   public VoxelShape func_220053_a(BlockState state, IBlockReader world, BlockPos pos, ISelectionContext context) {
-      switch ((Direction)state.func_177229_b(FACING)) {
-         case EAST:
-            return EAST_SHAPE;
-         case NORTH:
-            return NORTH_SHAPE;
-         case WEST:
-            return WEST_SHAPE;
-         default:
-            return SOUTH_SHAPE;
-      }
+   public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+      return switch ((Direction)state.getValue(FACING)) {
+         case EAST -> EAST_SHAPE;
+         case NORTH -> NORTH_SHAPE;
+         case WEST -> WEST_SHAPE;
+         default -> SOUTH_SHAPE;
+      };
    }
 
    @Nonnull
    @Override
-   public BlockState func_196258_a(BlockItemUseContext context) {
-      ItemStack artifactBlockItem = context.func_195996_i();
-      return (BlockState)super.func_196258_a(context).func_206870_a(ORDER_PROPERTY, this.getOrder(artifactBlockItem));
+   public BlockState getStateForPlacement(BlockPlaceContext context) {
+      ItemStack artifactBlockItem = context.getItemInHand();
+      return (BlockState)super.getStateForPlacement(context).setValue(ORDER_PROPERTY, this.getOrder(artifactBlockItem));
    }
 
    @Override
-   protected void func_206840_a(Builder<Block, BlockState> builder) {
-      super.func_206840_a(builder);
-      builder.func_206894_a(new Property[]{ORDER_PROPERTY});
+   protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+      super.createBlockStateDefinition(builder);
+      builder.add(new Property[]{ORDER_PROPERTY});
    }
 
-   public void onBlockExploded(BlockState state, World world, BlockPos pos, Explosion explosion) {
-      if (world instanceof ServerWorld) {
-         ServerWorld sWorld = (ServerWorld)world;
+   public void onBlockExploded(BlockState state, Level world, BlockPos pos, Explosion explosion) {
+      if (world instanceof ServerLevel sWorld) {
          List<BlockPos> validPositions = isValidArtifactSetup(sWorld, pos, state);
          if (!validPositions.isEmpty()) {
-            validPositions.forEach(at -> world.func_217377_a(at, false));
+            validPositions.forEach(at -> world.removeBlock(at, false));
             ServerScheduler.INSTANCE.schedule(5, () -> {
                ItemStack frameStack = new ItemStack(ModBlocks.FINAL_VAULT_FRAME_BLOCK_ITEM);
-               Block.func_180635_a(sWorld, pos, frameStack);
+               Block.popResource(sWorld, pos, frameStack);
             });
          }
       }
    }
 
-   public boolean canDropFromExplosion(BlockState state, IBlockReader world, BlockPos pos, Explosion explosion) {
+   public boolean canDropFromExplosion(BlockState state, BlockGetter world, BlockPos pos, Explosion explosion) {
       return false;
    }
 
-   public static List<BlockPos> isValidArtifactSetup(ServerWorld world, BlockPos at, BlockState state) {
-      int order = (25 - (Integer)state.func_177229_b(ORDER_PROPERTY) + 24) % 25;
+   public static List<BlockPos> isValidArtifactSetup(ServerLevel world, BlockPos at, BlockState state) {
+      int order = (25 - (Integer)state.getValue(ORDER_PROPERTY) + 24) % 25;
       int shiftVertical = order / 5;
       int shiftHorizontal = order % 5;
-      BlockPos yPos = at.func_177981_b(shiftVertical);
+      BlockPos yPos = at.above(shiftVertical);
 
       for (Direction dir : Direction.values()) {
-         if (!dir.func_176740_k().func_200128_b()) {
-            BlockPos startPos = yPos.func_177967_a(dir, -shiftHorizontal);
+         if (!dir.getAxis().isVertical()) {
+            BlockPos startPos = yPos.relative(dir, -shiftHorizontal);
             List<BlockPos> artifactPositions = hasFullArtifactSet(world, startPos, dir);
             if (!artifactPositions.isEmpty()) {
                return artifactPositions;
@@ -121,17 +116,17 @@ public class VaultArtifactBlock extends FacedBlock {
       return Collections.emptyList();
    }
 
-   private static List<BlockPos> hasFullArtifactSet(ServerWorld world, BlockPos start, Direction facing) {
+   private static List<BlockPos> hasFullArtifactSet(ServerLevel world, BlockPos start, Direction facing) {
       List<BlockPos> positions = new ArrayList<>();
 
       for (int order = 0; order < 25; order++) {
-         BlockPos at = start.func_177979_c(order / 5).func_177967_a(facing, order % 5);
-         BlockState offsetState = world.func_180495_p(at);
-         if (!(offsetState.func_177230_c() instanceof VaultArtifactBlock)) {
+         BlockPos at = start.below(order / 5).relative(facing, order % 5);
+         BlockState offsetState = world.getBlockState(at);
+         if (!(offsetState.getBlock() instanceof VaultArtifactBlock)) {
             return Collections.emptyList();
          }
 
-         int orderAt = (25 - (Integer)offsetState.func_177229_b(ORDER_PROPERTY) + 24) % 25;
+         int orderAt = (25 - (Integer)offsetState.getValue(ORDER_PROPERTY) + 24) % 25;
          if (order != orderAt) {
             return Collections.emptyList();
          }
@@ -142,14 +137,14 @@ public class VaultArtifactBlock extends FacedBlock {
       return positions;
    }
 
-   public List<ItemStack> func_220076_a(BlockState state, net.minecraft.loot.LootContext.Builder builder) {
-      Integer order = (Integer)state.func_177229_b(ORDER_PROPERTY);
+   public List<ItemStack> getDrops(BlockState state, net.minecraft.world.level.storage.loot.LootContext.Builder builder) {
+      Integer order = (Integer)state.getValue(ORDER_PROPERTY);
       ItemStack artifactStack = createArtifact(order);
       return new ArrayList<>(Collections.singletonList(artifactStack));
    }
 
-   public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-      Integer order = (Integer)state.func_177229_b(ORDER_PROPERTY);
+   public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+      Integer order = (Integer)state.getValue(ORDER_PROPERTY);
       return createArtifact(order);
    }
 
@@ -160,9 +155,9 @@ public class VaultArtifactBlock extends FacedBlock {
    public static ItemStack createArtifact(int order) {
       Item artifactItem = (Item)ForgeRegistries.ITEMS.getValue(ModBlocks.VAULT_ARTIFACT.getRegistryName());
       ItemStack itemStack = new ItemStack(artifactItem, 1);
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74768_a("CustomModelData", MathHelper.func_76125_a(order, 0, 25));
-      itemStack.func_77982_d(nbt);
+      CompoundTag nbt = new CompoundTag();
+      nbt.putInt("CustomModelData", Mth.clamp(order, 0, 25));
+      itemStack.setTag(nbt);
       return itemStack;
    }
 }

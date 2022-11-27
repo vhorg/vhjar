@@ -5,7 +5,7 @@
       "predicate": {
         "custom_model_data": 0
       },
-      "model": "the_vault:block/final_trophy/silver"
+      "model": "the_vault:block/final_trophy/golden"
     },
     {
       "predicate": {
@@ -17,13 +17,13 @@
       "predicate": {
         "custom_model_data": 2
       },
-      "model": "the_vault:block/final_trophy/golden"
+      "model": "the_vault:block/final_trophy/platinum"
     },
     {
       "predicate": {
         "custom_model_data": 3
       },
-      "model": "the_vault:block/final_trophy/platinum"
+      "model": "the_vault:block/final_trophy/silver"
     }
   ]
 }

@@ -1,55 +1,54 @@
 package iskallia.vault.client.particles;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import iskallia.vault.client.gui.helper.LightmapHelper;
-import iskallia.vault.util.MiscUtils;
+import iskallia.vault.client.util.color.ColorUtil;
 import java.awt.Color;
 import java.util.Random;
-import net.minecraft.client.particle.IAnimatedSprite;
-import net.minecraft.client.particle.IParticleRenderType;
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
-import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class BaseFloatingCubeParticle extends Particle {
    private static final Random rand = new Random();
    private final BlockPos originPos;
    private final float size;
-   private final IAnimatedSprite spriteSet;
+   private final SpriteSet spriteSet;
    private float effectPercent = 0.0F;
    private float prevEffectPercent = 0.0F;
-   private final Vector3d rotationChange;
-   private Vector3d rotationDegreeAxis;
-   private Vector3d prevRotationDegreeAxis = Vector3d.field_186680_a;
+   private final Vec3 rotationChange;
+   private Vec3 rotationDegreeAxis;
+   private Vec3 prevRotationDegreeAxis = Vec3.ZERO;
 
-   protected BaseFloatingCubeParticle(ClientWorld world, IAnimatedSprite spriteSet, double x, double y, double z) {
+   protected BaseFloatingCubeParticle(ClientLevel world, SpriteSet spriteSet, double x, double y, double z) {
       super(world, x, y, z);
       this.spriteSet = spriteSet;
       this.originPos = new BlockPos(x, y, z);
       this.size = 0.45F;
-      Vector3d change = new Vector3d(
+      Vec3 change = new Vec3(
          rand.nextFloat() * (rand.nextBoolean() ? 1 : -1), rand.nextFloat() * (rand.nextBoolean() ? 1 : -1), rand.nextFloat() * (rand.nextBoolean() ? 1 : -1)
       );
-      this.rotationChange = change.func_216372_d(5.0, 5.0, 5.0);
-      Vector3d axis = new Vector3d(rand.nextFloat() * (rand.nextBoolean() ? 1 : -1), rand.nextFloat(), rand.nextFloat() * (rand.nextBoolean() ? 1 : -1));
-      this.rotationDegreeAxis = axis.func_216372_d(18.0, 18.0, 18.0);
+      this.rotationChange = change.multiply(5.0, 5.0, 5.0);
+      Vec3 axis = new Vec3(rand.nextFloat() * (rand.nextBoolean() ? 1 : -1), rand.nextFloat(), rand.nextFloat() * (rand.nextBoolean() ? 1 : -1));
+      this.rotationDegreeAxis = axis.multiply(18.0, 18.0, 18.0);
    }
 
-   public void func_189213_a() {
-      this.field_187123_c = this.field_187126_f;
-      this.field_187124_d = this.field_187127_g;
-      this.field_187125_e = this.field_187128_h;
-      this.field_190015_G = this.field_190014_F;
-      if (this.func_187113_k()) {
+   public void tick() {
+      this.xo = this.x;
+      this.yo = this.y;
+      this.zo = this.z;
+      this.oRoll = this.roll;
+      if (this.isAlive()) {
          if (!this.isValid()) {
-            this.func_187112_i();
+            this.remove();
          } else {
             this.prevEffectPercent = this.effectPercent;
             if (this.isActive()) {
@@ -64,18 +63,16 @@ public abstract class BaseFloatingCubeParticle extends Particle {
    }
 
    private void updateRotations() {
-      if (this.effectPercent > 0.0F && this.rotationChange.func_189985_c() > 0.0) {
-         Vector3d modify = this.rotationChange.func_216372_d(this.effectPercent, this.effectPercent, this.effectPercent);
-         this.prevRotationDegreeAxis = this.rotationDegreeAxis.func_186678_a(1.0);
-         this.rotationDegreeAxis = this.rotationDegreeAxis.func_178787_e(modify);
-         this.rotationDegreeAxis = new Vector3d(
-            this.rotationDegreeAxis.func_82615_a() % 360.0, this.rotationDegreeAxis.func_82617_b() % 360.0, this.rotationDegreeAxis.func_82616_c() % 360.0
-         );
-         if (!this.rotationDegreeAxis.func_178787_e(modify).equals(this.rotationDegreeAxis)) {
-            this.prevRotationDegreeAxis = this.rotationDegreeAxis.func_178788_d(modify);
+      if (this.effectPercent > 0.0F && this.rotationChange.lengthSqr() > 0.0) {
+         Vec3 modify = this.rotationChange.multiply(this.effectPercent, this.effectPercent, this.effectPercent);
+         this.prevRotationDegreeAxis = this.rotationDegreeAxis.scale(1.0);
+         this.rotationDegreeAxis = this.rotationDegreeAxis.add(modify);
+         this.rotationDegreeAxis = new Vec3(this.rotationDegreeAxis.x() % 360.0, this.rotationDegreeAxis.y() % 360.0, this.rotationDegreeAxis.z() % 360.0);
+         if (!this.rotationDegreeAxis.add(modify).equals(this.rotationDegreeAxis)) {
+            this.prevRotationDegreeAxis = this.rotationDegreeAxis.subtract(modify);
          }
       } else {
-         this.prevRotationDegreeAxis = this.rotationDegreeAxis.func_186678_a(1.0);
+         this.prevRotationDegreeAxis = this.rotationDegreeAxis.scale(1.0);
       }
    }
 
@@ -83,80 +80,78 @@ public abstract class BaseFloatingCubeParticle extends Particle {
 
    protected abstract boolean isActive();
 
-   private Vector3d getInterpolatedRotation(float partialTicks) {
-      return new Vector3d(
-         MathHelper.func_219803_d(partialTicks, this.prevRotationDegreeAxis.func_82615_a(), this.rotationDegreeAxis.func_82615_a()),
-         MathHelper.func_219803_d(partialTicks, this.prevRotationDegreeAxis.func_82617_b(), this.rotationDegreeAxis.func_82617_b()),
-         MathHelper.func_219803_d(partialTicks, this.prevRotationDegreeAxis.func_82616_c(), this.rotationDegreeAxis.func_82616_c())
+   private Vec3 getInterpolatedRotation(float partialTicks) {
+      return new Vec3(
+         Mth.lerp(partialTicks, this.prevRotationDegreeAxis.x(), this.rotationDegreeAxis.x()),
+         Mth.lerp(partialTicks, this.prevRotationDegreeAxis.y(), this.rotationDegreeAxis.y()),
+         Mth.lerp(partialTicks, this.prevRotationDegreeAxis.z(), this.rotationDegreeAxis.z())
       );
    }
 
    private double getYOffset(float partialTicks) {
       double offset = (Math.sin(this.effectPercent * Math.PI + (Math.PI * 3.0 / 2.0)) + 1.0) / 2.0;
       double offsetPrev = (Math.sin(this.prevEffectPercent * Math.PI + (Math.PI * 3.0 / 2.0)) + 1.0) / 2.0;
-      return MathHelper.func_219803_d(partialTicks, offsetPrev, offset);
+      return Mth.lerp(partialTicks, offsetPrev, offset);
    }
 
-   public void func_225606_a_(IVertexBuilder buffer, ActiveRenderInfo ari, float partialTicks) {
-      RenderSystem.disableAlphaTest();
-      float effectPart = MathHelper.func_219799_g(partialTicks, this.prevEffectPercent, this.effectPercent);
-      Color color = new Color(MiscUtils.blendColors(this.getActiveColor(), 5263440, effectPart));
-      float x = (float)MathHelper.func_219803_d(partialTicks, this.field_187123_c, this.field_187126_f);
-      float y = (float)MathHelper.func_219803_d(partialTicks, this.field_187124_d, this.field_187127_g);
-      float z = (float)MathHelper.func_219803_d(partialTicks, this.field_187125_e, this.field_187128_h);
-      Vector3d cameraPos = ari.func_216785_c();
-      x = (float)(x - cameraPos.func_82615_a());
-      y = (float)(y - cameraPos.func_82617_b());
-      z = (float)(z - cameraPos.func_82616_c());
-      Vector3d iRotation = this.getInterpolatedRotation(partialTicks);
+   public void render(VertexConsumer buffer, Camera ari, float partialTicks) {
+      float effectPart = Mth.lerp(partialTicks, this.prevEffectPercent, this.effectPercent);
+      Color color = new Color(ColorUtil.blendColors(this.getActiveColor(), 5263440, effectPart));
+      float x = (float)Mth.lerp(partialTicks, this.xo, this.x);
+      float y = (float)Mth.lerp(partialTicks, this.yo, this.y);
+      float z = (float)Mth.lerp(partialTicks, this.zo, this.z);
+      Vec3 cameraPos = ari.getPosition();
+      x = (float)(x - cameraPos.x());
+      y = (float)(y - cameraPos.y());
+      z = (float)(z - cameraPos.z());
+      Vec3 iRotation = this.getInterpolatedRotation(partialTicks);
       Matrix4f offsetMatrix = new Matrix4f();
-      offsetMatrix.func_226591_a_();
-      offsetMatrix.func_226595_a_(Matrix4f.func_226599_b_(x, (float)(y + 1.25 + this.getYOffset(partialTicks) * 0.4), z));
-      offsetMatrix.func_226596_a_(Vector3f.field_229179_b_.func_229187_a_((float)iRotation.func_82615_a()));
-      offsetMatrix.func_226596_a_(Vector3f.field_229181_d_.func_229187_a_((float)iRotation.func_82617_b()));
-      offsetMatrix.func_226596_a_(Vector3f.field_229183_f_.func_229187_a_((float)iRotation.func_82616_c()));
-      offsetMatrix.func_226595_a_(Matrix4f.func_226593_a_(this.size, this.size, this.size));
+      offsetMatrix.setIdentity();
+      offsetMatrix.multiply(Matrix4f.createTranslateMatrix(x, (float)(y + 1.25 + this.getYOffset(partialTicks) * 0.4), z));
+      offsetMatrix.multiply(Vector3f.XP.rotationDegrees((float)iRotation.x()));
+      offsetMatrix.multiply(Vector3f.YP.rotationDegrees((float)iRotation.y()));
+      offsetMatrix.multiply(Vector3f.ZP.rotationDegrees((float)iRotation.z()));
+      offsetMatrix.multiply(Matrix4f.createScaleMatrix(this.size, this.size, this.size));
       this.renderTexturedCube(buffer, offsetMatrix, color.getRed(), color.getGreen(), color.getBlue(), 255);
-      RenderSystem.enableAlphaTest();
    }
 
    protected abstract int getActiveColor();
 
-   public IParticleRenderType func_217558_b() {
-      return IParticleRenderType.field_217603_c;
+   public ParticleRenderType getRenderType() {
+      return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
    }
 
-   private void renderTexturedCube(IVertexBuilder buf, Matrix4f offset, int r, int g, int b, int a) {
+   private void renderTexturedCube(VertexConsumer buf, Matrix4f offset, int r, int g, int b, int a) {
       int combinedLight = LightmapHelper.getPackedFullbrightCoords();
-      TextureAtlasSprite tas = this.spriteSet.func_217590_a(rand);
-      float minU = tas.func_94209_e();
-      float minV = tas.func_94206_g();
-      float maxU = tas.func_94212_f();
-      float maxV = tas.func_94210_h();
-      buf.func_227888_a_(offset, -0.5F, -0.5F, -0.5F).func_225583_a_(minU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, -0.5F, -0.5F).func_225583_a_(maxU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, -0.5F, 0.5F).func_225583_a_(maxU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, -0.5F, 0.5F).func_225583_a_(minU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, 0.5F, 0.5F).func_225583_a_(minU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, 0.5F, 0.5F).func_225583_a_(maxU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, 0.5F, -0.5F).func_225583_a_(maxU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, 0.5F, -0.5F).func_225583_a_(minU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, -0.5F, 0.5F).func_225583_a_(maxU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, 0.5F, 0.5F).func_225583_a_(maxU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, 0.5F, -0.5F).func_225583_a_(minU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, -0.5F, -0.5F).func_225583_a_(minU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, -0.5F, -0.5F).func_225583_a_(maxU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, 0.5F, -0.5F).func_225583_a_(maxU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, 0.5F, 0.5F).func_225583_a_(minU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, -0.5F, 0.5F).func_225583_a_(minU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, -0.5F, -0.5F).func_225583_a_(minU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, -0.5F, -0.5F).func_225583_a_(maxU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, 0.5F, -0.5F).func_225583_a_(maxU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, 0.5F, -0.5F).func_225583_a_(minU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, -0.5F, 0.5F).func_225583_a_(minU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, -0.5F, 0.5F).func_225583_a_(maxU, minV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, 0.5F, 0.5F, 0.5F).func_225583_a_(maxU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
-      buf.func_227888_a_(offset, -0.5F, 0.5F, 0.5F).func_225583_a_(minU, maxV).func_225586_a_(r, g, b, a).func_227886_a_(combinedLight).func_181675_d();
+      TextureAtlasSprite tas = this.spriteSet.get(rand);
+      float minU = tas.getU0();
+      float minV = tas.getV0();
+      float maxU = tas.getU1();
+      float maxV = tas.getV1();
+      buf.vertex(offset, -0.5F, -0.5F, -0.5F).uv(minU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, -0.5F, -0.5F).uv(maxU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, -0.5F, 0.5F).uv(maxU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, -0.5F, 0.5F).uv(minU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, 0.5F, 0.5F).uv(minU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, 0.5F, 0.5F).uv(maxU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, 0.5F, -0.5F).uv(maxU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, 0.5F, -0.5F).uv(minU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, -0.5F, 0.5F).uv(maxU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, 0.5F, 0.5F).uv(maxU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, 0.5F, -0.5F).uv(minU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, -0.5F, -0.5F).uv(minU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, -0.5F, -0.5F).uv(maxU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, 0.5F, -0.5F).uv(maxU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, 0.5F, 0.5F).uv(minU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, -0.5F, 0.5F).uv(minU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, -0.5F, -0.5F).uv(minU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, -0.5F, -0.5F).uv(maxU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, 0.5F, -0.5F).uv(maxU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, 0.5F, -0.5F).uv(minU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, -0.5F, 0.5F).uv(minU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, -0.5F, 0.5F).uv(maxU, minV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, 0.5F, 0.5F, 0.5F).uv(maxU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
+      buf.vertex(offset, -0.5F, 0.5F, 0.5F).uv(minU, maxV).color(r, g, b, a).uv2(combinedLight).endVertex();
    }
 
    public boolean shouldCull() {

@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 
 public class FinalLobbyBuilder extends VaultRaidBuilder {
    private static final FinalLobbyBuilder INSTANCE = new FinalLobbyBuilder();
@@ -24,26 +24,26 @@ public class FinalLobbyBuilder extends VaultRaidBuilder {
    }
 
    @Override
-   public VaultRaid.Builder initializeBuilder(ServerWorld world, ServerPlayerEntity player, CrystalData crystal) {
+   public VaultRaid.Builder initializeBuilder(ServerLevel world, ServerPlayer player, CrystalData crystal) {
       VaultRaid.Builder builder = this.getDefaultBuilder(crystal, world, player);
       Set<UUID> players = crystal.getFrameData()
          .tiles
          .stream()
          .filter(tile -> tile.block == ModBlocks.FINAL_VAULT_FRAME)
-         .filter(tile -> tile.data.func_150297_b("OwnerUUID", 8))
-         .map(tile -> UUID.fromString(tile.data.func_74779_i("OwnerUUID")))
+         .filter(tile -> tile.data.contains("OwnerUUID", 8))
+         .map(tile -> UUID.fromString(tile.data.getString("OwnerUUID")))
          .collect(Collectors.toSet());
-      if (!players.contains(player.func_110124_au())) {
+      if (!players.contains(player.getUUID())) {
          return null;
       } else {
          for (UUID uuid : players) {
-            ServerPlayerEntity vaultPlayer = world.func_73046_m().func_184103_al().func_177451_a(uuid);
+            ServerPlayer vaultPlayer = world.getServer().getPlayerList().getPlayer(uuid);
             if (vaultPlayer == null) {
                return null;
             }
          }
 
-         if (world.func_82736_K().func_223586_b(ModGameRules.FINAL_VAULT_ALLOW_PARTY)) {
+         if (world.getGameRules().getBoolean(ModGameRules.FINAL_VAULT_ALLOW_PARTY)) {
             VaultPartyData data = VaultPartyData.get(world);
 
             for (UUID uuidx : new ArrayList<>(players)) {
@@ -52,13 +52,13 @@ public class FinalLobbyBuilder extends VaultRaidBuilder {
          }
 
          for (UUID uuidx : players) {
-            ServerPlayerEntity partyPlayer = world.func_73046_m().func_184103_al().func_177451_a(uuidx);
+            ServerPlayer partyPlayer = world.getServer().getPlayerList().getPlayer(uuidx);
             if (partyPlayer != null) {
                builder.addPlayer(VaultPlayerType.RUNNER, partyPlayer);
             }
          }
 
-         builder.set(VaultRaid.HOST, player.func_110124_au());
+         builder.set(VaultRaid.HOST, player.getUUID());
          builder.setGenerator(VaultRaid.FINAL_LOBBY);
          return builder;
       }

@@ -5,11 +5,11 @@ import iskallia.vault.config.VaultSizeConfig;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModFeatures;
-import iskallia.vault.init.ModStructures;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.gen.FragmentedJigsawGenerator;
 import iskallia.vault.world.gen.PortalPlacer;
+import iskallia.vault.world.gen.structure.VaultStructure;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.layout.DiamondRoomLayout;
 import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutGenerator;
@@ -23,21 +23,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.BlockPos.Mutable;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.gen.feature.structure.StructurePiece;
-import net.minecraft.world.gen.feature.structure.StructureStart;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 public class FragmentedVaultGenerator extends VaultGenerator {
    public static final int REGION_SIZE = 8192;
@@ -65,9 +66,9 @@ public class FragmentedVaultGenerator extends VaultGenerator {
    }
 
    @Override
-   public boolean generate(ServerWorld world, VaultRaid vault, Mutable pos) {
-      MutableBoundingBox vaultBox = this.generateBoundingBox(vault, pos.func_185334_h());
-      pos.func_189534_c(Direction.EAST, 8192);
+   public boolean generate(ServerLevel world, VaultRaid vault, MutableBlockPos pos) {
+      BoundingBox vaultBox = this.generateBoundingBox(vault, pos.immutable());
+      pos.move(Direction.EAST, 8192);
       boolean raffle = vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false);
       int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
       boolean generatesTreasureRooms = vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).map(CrystalData::canGenerateTreasureRooms).orElse(true);
@@ -79,16 +80,16 @@ public class FragmentedVaultGenerator extends VaultGenerator {
       VaultRoomLayoutGenerator.Layout vaultLayout = this.layoutGenerator.generateLayout();
       this.setGuaranteedRooms(vaultLayout, vault);
       VaultRoomLevelRestrictions.addGenerationPreventions(vaultLayout, level);
-      this.startChunk = new ChunkPos(new BlockPos(vaultBox.func_215126_f()));
+      this.startChunk = new ChunkPos(new BlockPos(vaultBox.getCenter()));
       FragmentedJigsawGenerator gen = new FragmentedJigsawGenerator(
-         vaultBox, this.startChunk.func_206849_h().func_177982_a(0, 19, 0), generatesTreasureRooms, this.layoutGenerator, vaultLayout
+         vaultBox, this.startChunk.getWorldPosition().offset(0, 19, 0), generatesTreasureRooms, this.layoutGenerator, vaultLayout
       );
-      StructureStart<?> start = ModFeatures.VAULT_FEATURE
-         .generate(gen, world.func_241828_r(), world.func_72863_F().field_186029_c, world.func_184163_y(), 0, world.func_72905_C());
+      StructureStart start = ((VaultStructure.Feature)ModFeatures.VAULT_FEATURE.value())
+         .generate(gen, world.registryAccess(), world.getChunkSource().getGenerator(), world.getStructureManager(), 0, world.getSeed(), world);
       gen.getGeneratedPieces().stream().flatMap(piece -> VaultPiece.of(piece).stream()).forEach(this.pieces::add);
       this.removeRandomObjectivePieces(vault, gen, layout.getObjectiveRoomRatio());
-      world.func_217353_a(this.startChunk.field_77276_a, this.startChunk.field_77275_b, ChunkStatus.field_223226_a_, true)
-         .func_230344_a_(ModStructures.VAULT_STAR, start);
+      world.getChunk(this.startChunk.x, this.startChunk.z, ChunkStatus.EMPTY, true)
+         .setStartForFeature((ConfiguredStructureFeature)ModFeatures.VAULT_FEATURE.value(), start);
       this.tick(world, vault);
       return vault.getProperties().exists(VaultRaid.START_POS) && vault.getProperties().exists(VaultRaid.START_FACING)
          ? false
@@ -97,10 +98,8 @@ public class FragmentedVaultGenerator extends VaultGenerator {
             vault,
             this.startChunk,
             () -> new PortalPlacer(
-               (pos1, random, facing) -> (BlockState)ModBlocks.VAULT_PORTAL
-                  .func_176223_P()
-                  .func_206870_a(VaultPortalBlock.field_176550_a, facing.func_176740_k()),
-               (pos1, random, facing) -> Blocks.field_235406_np_.func_176223_P()
+               (pos1, random, facing) -> (BlockState)ModBlocks.VAULT_PORTAL.defaultBlockState().setValue(VaultPortalBlock.AXIS, facing.getAxis()),
+               (pos1, random, facing) -> Blocks.BLACKSTONE.defaultBlockState()
             )
          );
    }
@@ -113,7 +112,7 @@ public class FragmentedVaultGenerator extends VaultGenerator {
          roomKeys = roomKeys.subList(0, rooms.size());
       }
 
-      Set<Vector3i> usedRooms = new HashSet<>();
+      Set<Vec3i> usedRooms = new HashSet<>();
       roomKeys.forEach(roomKey -> {
          if (VaultRoomNames.getName(roomKey) != null) {
             VaultRoomLayoutGenerator.Room room;
@@ -122,7 +121,7 @@ public class FragmentedVaultGenerator extends VaultGenerator {
             } while (room == null || usedRooms.contains(room.getRoomPosition()));
 
             usedRooms.add(room.getRoomPosition());
-            room.andFilter(key -> key.func_110623_a().contains(roomKey));
+            room.andFilter(key -> key.getPath().contains(roomKey));
          }
       });
    }
@@ -130,46 +129,38 @@ public class FragmentedVaultGenerator extends VaultGenerator {
    private void removeRandomObjectivePieces(VaultRaid vault, FragmentedJigsawGenerator generator, float objectiveRatio) {
       List<StructurePiece> obeliskPieces = generator.getGeneratedPieces().stream().filter(this::isObjectivePiece).collect(Collectors.toList());
       Collections.shuffle(obeliskPieces);
-      int maxObjectives = MathHelper.func_76141_d(obeliskPieces.size() / objectiveRatio);
+      int maxObjectives = Mth.floor(obeliskPieces.size() / objectiveRatio);
       int objectiveCount = vault.getAllObjectives().stream().findFirst().map(objective -> objective.modifyObjectiveCount(maxObjectives)).orElse(maxObjectives);
-      int requiredCount = vault.getProperties().getBaseOrDefault(VaultRaid.CRYSTAL_DATA, CrystalData.EMPTY).getTargetObjectiveCount();
-      if (requiredCount != -1) {
-         objectiveCount = vault.getAllObjectives()
-            .stream()
-            .findFirst()
-            .map(objective -> objective.modifyMinimumObjectiveCount(maxObjectives, requiredCount))
-            .orElse(objectiveCount);
-      }
 
       for (int i = objectiveCount; i < obeliskPieces.size(); i++) {
          generator.removePiece(obeliskPieces.get(i));
       }
    }
 
-   private MutableBoundingBox generateBoundingBox(VaultRaid vault, BlockPos pos) {
-      MutableBoundingBox box = vault.getProperties().getBase(VaultRaid.BOUNDING_BOX).orElseGet(() -> {
-         BlockPos max = pos.func_177982_a(8192, 0, 8192);
-         return new MutableBoundingBox(pos.func_177958_n(), 0, pos.func_177952_p(), max.func_177958_n(), 256, max.func_177952_p());
+   private BoundingBox generateBoundingBox(VaultRaid vault, BlockPos pos) {
+      BoundingBox box = vault.getProperties().getBase(VaultRaid.BOUNDING_BOX).orElseGet(() -> {
+         BlockPos max = pos.offset(8192, 0, 8192);
+         return new BoundingBox(pos.getX(), 0, pos.getZ(), max.getX(), 256, max.getZ());
       });
       vault.getProperties().create(VaultRaid.BOUNDING_BOX, box);
       return box;
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT tag = super.serializeNBT();
+   public CompoundTag serializeNBT() {
+      CompoundTag tag = super.serializeNBT();
       if (this.layoutGenerator != null) {
-         tag.func_218657_a("Layout", VaultRoomLayoutRegistry.serialize(this.layoutGenerator));
+         tag.put("Layout", VaultRoomLayoutRegistry.serialize(this.layoutGenerator));
       }
 
       return tag;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       super.deserializeNBT(nbt);
-      if (nbt.func_150297_b("Layout", 10)) {
-         VaultRoomLayoutGenerator layout = VaultRoomLayoutRegistry.deserialize(nbt.func_74775_l("Layout"));
+      if (nbt.contains("Layout", 10)) {
+         VaultRoomLayoutGenerator layout = VaultRoomLayoutRegistry.deserialize(nbt.getCompound("Layout"));
          if (layout != null) {
             this.layoutGenerator = layout;
          }

@@ -1,17 +1,17 @@
 package iskallia.vault.world.vault.player;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.network.message.VaultOverlayMessage;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.SummonAndKillBossObjective;
 import iskallia.vault.world.vault.time.VaultTimer;
 import java.util.UUID;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 
 public class VaultRunner extends VaultPlayer {
-   public static final ResourceLocation ID = Vault.id("runner");
+   public static final ResourceLocation ID = VaultMod.id("runner");
 
    public VaultRunner() {
    }
@@ -25,17 +25,17 @@ public class VaultRunner extends VaultPlayer {
    }
 
    @Override
-   public void tickTimer(VaultRaid vault, ServerWorld world, VaultTimer timer) {
+   public void tickTimer(VaultRaid vault, ServerLevel world, VaultTimer timer) {
       timer.tick();
-      this.runIfPresent(world.func_73046_m(), player -> {
+      this.runIfPresent(world.getServer(), player -> {
          this.addedExtensions.clear();
          this.appliedExtensions.clear();
       });
    }
 
    @Override
-   public void tickObjectiveUpdates(VaultRaid vault, ServerWorld world) {
-      this.runIfPresent(world.func_73046_m(), player -> {
+   public void tickObjectiveUpdates(VaultRaid vault, ServerLevel world) {
+      this.runIfPresent(world.getServer(), player -> {
          boolean earlyKill = false;
          if (vault.hasActiveObjective(this, SummonAndKillBossObjective.class)) {
             boolean isRaffle = vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false);
@@ -46,7 +46,7 @@ public class VaultRunner extends VaultPlayer {
          }
 
          boolean showTimer = this.getProperties().getBaseOrDefault(VaultRaid.SHOW_TIMER, true);
-         this.sendIfPresent(world.func_73046_m(), VaultOverlayMessage.forVault(!showTimer ? 0 : this.timer.getTimeLeft(), earlyKill, showTimer));
+         this.sendIfPresent(world.getServer(), VaultOverlayMessage.forVault(!showTimer ? 0 : this.timer.getTimeLeft(), earlyKill, showTimer));
       });
    }
 }

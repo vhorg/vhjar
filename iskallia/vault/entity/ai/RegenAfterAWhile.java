@@ -1,6 +1,6 @@
 package iskallia.vault.entity.ai;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 public class RegenAfterAWhile<T extends LivingEntity> {
    private final int startTicksUntilRegen;
@@ -37,9 +37,9 @@ public class RegenAfterAWhile<T extends LivingEntity> {
    public void tick() {
       if (this.ticksUntilRegen <= 0) {
          if (this.ticksUntilNextPulse <= 0) {
-            float maxHealth = this.entity.func_110138_aP();
-            float currentHealth = this.entity.func_110143_aJ();
-            this.entity.func_70606_j(Math.min(maxHealth, currentHealth + maxHealth * this.regenPercentage));
+            float maxHealth = this.entity.getMaxHealth();
+            float currentHealth = this.entity.getHealth();
+            this.entity.setHealth(Math.min(maxHealth, currentHealth + maxHealth * this.regenPercentage));
             this.resetPulseTicks();
          } else {
             this.ticksUntilNextPulse--;

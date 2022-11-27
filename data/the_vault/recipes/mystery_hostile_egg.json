@@ -1,20 +1,22 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-      "###",
-      "#e#",
-      "###"
-    ],
-    "key": {
-      "#": {
-        "item": "the_vault:mystery_egg"
-      },
-      "e": {
-        "item": "minecraft:wither_skeleton_skull"
-      }
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ses",
+    "eme",
+    "ses"
+  ],
+  "key": {
+    "m": {
+      "item": "the_vault:mystery_egg"
     },
-    "result": {
-      "item": "the_vault:mystery_hostile_egg",
-      "count": 8
+    "e": {
+      "item": "the_vault:eternal_soul"
+    },
+    "s": {
+      "item": "the_vault:vault_essence"
     }
+  },
+  "result": {
+    "item": "the_vault:mystery_hostile_egg"
   }
+}

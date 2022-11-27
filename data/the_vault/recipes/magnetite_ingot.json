@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " m ",
+    "mcm",
+    " m "
+  ],
+  "key": {
+    "m": {
+      "item": "the_vault:magnetite"
+    },
+    "c": {
+      "item": "the_vault:chromatic_iron_ingot"
+    }
+  },
+  "result": {
+    "item": "the_vault:magnetite_ingot",
+    "count": 1
+  }
+}

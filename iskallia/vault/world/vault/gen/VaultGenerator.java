@@ -12,26 +12,25 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import net.minecraft.block.Blocks;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Direction.Plane;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.math.BlockPos.Mutable;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
-import net.minecraft.world.gen.feature.structure.AbstractVillagePiece;
-import net.minecraft.world.gen.feature.structure.StructurePiece;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.server.TicketType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.core.Direction.Plane;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public abstract class VaultGenerator implements INBTSerializable<CompoundNBT> {
+public abstract class VaultGenerator implements INBTSerializable<CompoundTag> {
    public static Map<ResourceLocation, Supplier<? extends VaultGenerator>> REGISTRY = new HashMap<>();
    protected static final Random rand = new Random();
-   protected VListNBT<VaultPiece, CompoundNBT> pieces = VListNBT.of(VaultPiece::fromNBT);
+   protected VListNBT<VaultPiece, CompoundTag> pieces = VListNBT.of(VaultPiece::fromNBT);
    private ResourceLocation id;
    protected ChunkPos startChunk;
 
@@ -47,10 +46,10 @@ public abstract class VaultGenerator implements INBTSerializable<CompoundNBT> {
       return this.startChunk;
    }
 
-   public abstract boolean generate(ServerWorld var1, VaultRaid var2, Mutable var3);
+   public abstract boolean generate(ServerLevel var1, VaultRaid var2, MutableBlockPos var3);
 
-   public void tick(ServerWorld world, VaultRaid vault) {
-      world.func_72863_F().func_217228_a(TicketType.field_219493_f, this.startChunk, 3, this.startChunk.func_206849_h());
+   public void tick(ServerLevel world, VaultRaid vault) {
+      world.getChunkSource().addRegionTicket(TicketType.PORTAL, this.startChunk, 3, this.startChunk.getWorldPosition());
       this.pieces.forEach(piece -> piece.tick(world, vault));
    }
 
@@ -79,39 +78,33 @@ public abstract class VaultGenerator implements INBTSerializable<CompoundNBT> {
       return this.pieces.stream().filter(piece -> pieceClass.isAssignableFrom(piece.getClass())).map(piece -> (VaultPiece)piece).collect(Collectors.toSet());
    }
 
-   public boolean intersectsWithAnyPiece(MutableBoundingBox box) {
-      return this.pieces.stream().map(VaultPiece::getBoundingBox).anyMatch(pieceBox -> pieceBox.func_78884_a(box));
+   public boolean intersectsWithAnyPiece(BoundingBox box) {
+      return this.pieces.stream().map(VaultPiece::getBoundingBox).anyMatch(pieceBox -> pieceBox.intersects(box));
    }
 
    public boolean isObjectivePiece(StructurePiece piece) {
-      if (!(piece instanceof AbstractVillagePiece)) {
+      if (!(piece instanceof PoolElementStructurePiece)) {
          return false;
       } else {
-         JigsawPiece jigsaw = ((AbstractVillagePiece)piece).func_214826_b();
-         if (!(jigsaw instanceof PalettedSinglePoolElement)) {
-            return false;
-         } else {
-            PalettedSinglePoolElement element = (PalettedSinglePoolElement)jigsaw;
-            return ((ResourceLocation)element.getTemplate().left().get()).toString().startsWith("the_vault:vault/prefab/decor/generic/obelisk");
-         }
+         return ((PoolElementStructurePiece)piece).getElement() instanceof PalettedSinglePoolElement element
+            ? ((ResourceLocation)element.getTemplate().left().get()).toString().startsWith("the_vault:vault/prefab/decor/generic/obelisk")
+            : false;
       }
    }
 
-   protected boolean findStartPosition(ServerWorld world, VaultRaid vault, ChunkPos startChunk, Supplier<PortalPlacer> portalPlacer) {
-      BlockPos start = startChunk.func_206849_h();
-
+   protected boolean findStartPosition(ServerLevel world, VaultRaid vault, ChunkPos startChunk, Supplier<PortalPlacer> portalPlacer) {
       for (int x = -96; x < 96; x++) {
          for (int z = -96; z < 96; z++) {
             for (int y = 0; y < 48; y++) {
-               BlockPos pos = start.func_177982_a(x, 19 + y, z);
-               if (world.func_180495_p(pos).func_177230_c() == Blocks.field_235348_mG_) {
-                  world.func_175656_a(pos, Blocks.field_150350_a.func_176223_P());
+               BlockPos pos = startChunk.getWorldPosition().offset(x, 19 + y, z);
+               if (world.getBlockState(pos).getBlock() == Blocks.CRIMSON_PRESSURE_PLATE) {
+                  world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
                   vault.getProperties().create(VaultRaid.START_POS, pos);
 
                   for (Direction direction : Plane.HORIZONTAL) {
                      int count;
-                     for (count = 1; world.func_180495_p(pos.func_177967_a(direction, count)).func_177230_c() == Blocks.field_235349_mH_; count++) {
-                        world.func_175656_a(pos.func_177967_a(direction, count), Blocks.field_150350_a.func_176223_P());
+                     for (count = 1; world.getBlockState(pos.relative(direction, count)).getBlock() == Blocks.WARPED_PRESSURE_PLATE; count++) {
+                        world.setBlockAndUpdate(pos.relative(direction, count), Blocks.AIR.defaultBlockState());
                      }
 
                      if (count > 1) {
@@ -133,26 +126,26 @@ public abstract class VaultGenerator implements INBTSerializable<CompoundNBT> {
       return false;
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Id", this.getId().toString());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putString("Id", this.getId().toString());
       if (this.startChunk != null) {
-         nbt.func_74768_a("StartChunkX", this.startChunk.field_77276_a);
-         nbt.func_74768_a("StartChunkZ", this.startChunk.field_77275_b);
+         nbt.putInt("StartChunkX", this.startChunk.x);
+         nbt.putInt("StartChunkZ", this.startChunk.z);
       }
 
-      nbt.func_218657_a("Pieces", this.pieces.serializeNBT());
+      nbt.put("Pieces", this.pieces.serializeNBT());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.id = new ResourceLocation(nbt.func_74779_i("Id"));
-      this.startChunk = new ChunkPos(nbt.func_74762_e("StartChunkX"), nbt.func_74762_e("StartChunkZ"));
-      this.pieces.deserializeNBT(nbt.func_150295_c("Pieces", 10));
+   public void deserializeNBT(CompoundTag nbt) {
+      this.id = new ResourceLocation(nbt.getString("Id"));
+      this.startChunk = new ChunkPos(nbt.getInt("StartChunkX"), nbt.getInt("StartChunkZ"));
+      this.pieces.deserializeNBT(nbt.getList("Pieces", 10));
    }
 
-   public static VaultGenerator fromNBT(CompoundNBT nbt) {
-      VaultGenerator generator = REGISTRY.get(new ResourceLocation(nbt.func_74779_i("Id"))).get();
+   public static VaultGenerator fromNBT(CompoundTag nbt) {
+      VaultGenerator generator = REGISTRY.get(new ResourceLocation(nbt.getString("Id"))).get();
       generator.deserializeNBT(nbt);
       return generator;
    }

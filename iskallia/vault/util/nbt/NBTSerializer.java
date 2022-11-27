@@ -7,23 +7,23 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
-import net.minecraft.nbt.ByteArrayNBT;
-import net.minecraft.nbt.ByteNBT;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.DoubleNBT;
-import net.minecraft.nbt.FloatNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.IntArrayNBT;
-import net.minecraft.nbt.IntNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.LongNBT;
-import net.minecraft.nbt.ShortNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.ByteArrayTag;
+import net.minecraft.nbt.ByteTag;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.LongTag;
+import net.minecraft.nbt.ShortTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class NBTSerializer {
-   public static final <T extends INBTSerializable> CompoundNBT serialize(T object) throws IllegalAccessException, UnserializableClassException {
-      CompoundNBT t = new CompoundNBT();
+   public static final <T extends INBTSerializable> CompoundTag serialize(T object) throws IllegalAccessException, UnserializableClassException {
+      CompoundTag t = new CompoundTag();
       Class<?> definition = object.getClass();
       Field[] df = definition.getDeclaredFields();
 
@@ -39,21 +39,21 @@ public class NBTSerializer {
 
                Class fc = f.getType();
                if (fc.isAssignableFrom(byte.class)) {
-                  t.func_74774_a(tn, (Byte)fv);
+                  t.putByte(tn, (Byte)fv);
                } else if (fc.isAssignableFrom(boolean.class)) {
-                  t.func_74757_a(tn, (Boolean)fv);
+                  t.putBoolean(tn, (Boolean)fv);
                } else if (fc.isAssignableFrom(short.class)) {
-                  t.func_74777_a(tn, (Short)fv);
+                  t.putShort(tn, (Short)fv);
                } else if (fc.isAssignableFrom(int.class)) {
-                  t.func_74768_a(tn, (Integer)fv);
+                  t.putInt(tn, (Integer)fv);
                } else if (fc.isAssignableFrom(long.class)) {
-                  t.func_74772_a(tn, (Long)fv);
+                  t.putLong(tn, (Long)fv);
                } else if (fc.isAssignableFrom(float.class)) {
-                  t.func_74776_a(tn, (Float)fv);
+                  t.putFloat(tn, (Float)fv);
                } else if (fc.isAssignableFrom(double.class)) {
-                  t.func_74780_a(tn, (Double)fv);
+                  t.putDouble(tn, (Double)fv);
                } else {
-                  t.func_218657_a(tn, objectToTag(fc, fv));
+                  t.put(tn, objectToTag(fc, fv));
                }
             }
          }
@@ -62,33 +62,33 @@ public class NBTSerializer {
       return t;
    }
 
-   private static final <T, U extends T> INBT objectToTag(Class<T> clazz, U obj) throws IllegalAccessException, UnserializableClassException {
+   private static final <T, U extends T> Tag objectToTag(Class<T> clazz, U obj) throws IllegalAccessException, UnserializableClassException {
       if (obj == null) {
          return null;
       } else if (clazz.isAssignableFrom(Byte.class)) {
-         return ByteNBT.func_229671_a_((Byte)obj);
+         return ByteTag.valueOf((Byte)obj);
       } else if (clazz.isAssignableFrom(Boolean.class)) {
-         return ByteNBT.func_229671_a_((byte)((Boolean)obj ? 1 : 0));
+         return ByteTag.valueOf((byte)((Boolean)obj ? 1 : 0));
       } else if (clazz.isAssignableFrom(Short.class)) {
-         return ShortNBT.func_229701_a_((Short)obj);
+         return ShortTag.valueOf((Short)obj);
       } else if (clazz.isAssignableFrom(Integer.class)) {
-         return IntNBT.func_229692_a_((Integer)obj);
+         return IntTag.valueOf((Integer)obj);
       } else if (clazz.isAssignableFrom(Long.class)) {
-         return LongNBT.func_229698_a_((Long)obj);
+         return LongTag.valueOf((Long)obj);
       } else if (clazz.isAssignableFrom(Float.class)) {
-         return FloatNBT.func_229689_a_((Float)obj);
+         return FloatTag.valueOf((Float)obj);
       } else if (clazz.isAssignableFrom(Double.class)) {
-         return DoubleNBT.func_229684_a_((Double)obj);
+         return DoubleTag.valueOf((Double)obj);
       } else if (clazz.isAssignableFrom(byte[].class)) {
-         return new ByteArrayNBT((byte[])obj);
+         return new ByteArrayTag((byte[])obj);
       } else if (clazz.isAssignableFrom(Byte[].class)) {
-         return new ByteArrayNBT(ArrayUtils.toPrimitive((Byte[])obj));
+         return new ByteArrayTag(ArrayUtils.toPrimitive((Byte[])obj));
       } else if (clazz.isAssignableFrom(String.class)) {
-         return StringNBT.func_229705_a_((String)obj);
+         return StringTag.valueOf((String)obj);
       } else if (clazz.isAssignableFrom(int[].class)) {
-         return new IntArrayNBT((int[])obj);
+         return new IntArrayTag((int[])obj);
       } else if (clazz.isAssignableFrom(Integer[].class)) {
-         return new IntArrayNBT(ArrayUtils.toPrimitive((Integer[])obj));
+         return new IntArrayTag(ArrayUtils.toPrimitive((Integer[])obj));
       } else if (INBTSerializable.class.isAssignableFrom(clazz)) {
          return serialize((U)((INBTSerializable)obj));
       } else if (Collection.class.isAssignableFrom(clazz)) {
@@ -102,15 +102,15 @@ public class NBTSerializer {
       }
    }
 
-   private static final <T> ListNBT serializeCollection(Collection<T> col) throws IllegalAccessException, UnserializableClassException {
-      ListNBT c = new ListNBT();
+   private static final <T> ListTag serializeCollection(Collection<T> col) throws IllegalAccessException, UnserializableClassException {
+      ListTag c = new ListTag();
       if (col.size() <= 0) {
          return c;
       } else {
          Class<T> subclass = (Class<T>)col.iterator().next().getClass();
 
          for (T element : col) {
-            INBT tag = objectToTag(subclass, element);
+            Tag tag = objectToTag(subclass, element);
             if (tag != null) {
                c.add(tag);
             }
@@ -120,34 +120,34 @@ public class NBTSerializer {
       }
    }
 
-   private static final <K, V> CompoundNBT serializeEntry(Entry<K, V> entry) throws UnserializableClassException, IllegalAccessException {
+   private static final <K, V> CompoundTag serializeEntry(Entry<K, V> entry) throws UnserializableClassException, IllegalAccessException {
       Class<K> keyClass = (Class<K>)entry.getKey().getClass();
       Class<V> valueClass = (Class<V>)entry.getValue().getClass();
       return serializeEntry(entry, keyClass, valueClass);
    }
 
-   private static final <K, V> CompoundNBT serializeEntry(Entry<? extends K, ? extends V> entry, Class<K> keyClass, Class<V> valueClass) throws IllegalAccessException, UnserializableClassException {
-      CompoundNBT te = new CompoundNBT();
+   private static final <K, V> CompoundTag serializeEntry(Entry<? extends K, ? extends V> entry, Class<K> keyClass, Class<V> valueClass) throws IllegalAccessException, UnserializableClassException {
+      CompoundTag te = new CompoundTag();
       if (entry.getKey() != null) {
-         INBT keyTag = objectToTag(keyClass, entry.getKey());
-         te.func_218657_a("k", keyTag);
+         Tag keyTag = objectToTag(keyClass, entry.getKey());
+         te.put("k", keyTag);
       }
 
       if (entry.getValue() != null) {
-         INBT valueTag = objectToTag(valueClass, entry.getValue());
-         te.func_218657_a("v", valueTag);
+         Tag valueTag = objectToTag(valueClass, entry.getValue());
+         te.put("v", valueTag);
       }
 
       return te;
    }
 
-   public static final <T extends INBTSerializable> T deserialize(Class<T> definition, CompoundNBT data) throws IllegalAccessException, InstantiationException, UnserializableClassException {
+   public static final <T extends INBTSerializable> T deserialize(Class<T> definition, CompoundTag data) throws IllegalAccessException, InstantiationException, UnserializableClassException {
       T instance = (T)definition.newInstance();
       deserialize(instance, data, true);
       return instance;
    }
 
-   public static final <T extends INBTSerializable> void deserialize(T instance, CompoundNBT data, boolean interpretMissingFieldValuesAsNull) throws IllegalAccessException, InstantiationException, UnserializableClassException {
+   public static final <T extends INBTSerializable> void deserialize(T instance, CompoundTag data, boolean interpretMissingFieldValuesAsNull) throws IllegalAccessException, InstantiationException, UnserializableClassException {
       Field[] df = instance.getClass().getDeclaredFields();
 
       for (Field f : df) {
@@ -157,7 +157,7 @@ public class NBTSerializer {
                tn = f.getName();
             }
 
-            if (!data.func_74764_b(tn)) {
+            if (!data.contains(tn)) {
                if (interpretMissingFieldValuesAsNull) {
                   f.setAccessible(true);
                   if (f.getType().equals(boolean.class)) {
@@ -179,28 +179,28 @@ public class NBTSerializer {
                }
 
                if (fc.isAssignableFrom(byte.class)) {
-                  f.setByte(instance, data.func_74771_c(tn));
+                  f.setByte(instance, data.getByte(tn));
                } else if (fc.isAssignableFrom(boolean.class)) {
-                  f.setBoolean(instance, data.func_74767_n(tn));
+                  f.setBoolean(instance, data.getBoolean(tn));
                } else if (fc.isAssignableFrom(short.class)) {
-                  f.setShort(instance, data.func_74765_d(tn));
+                  f.setShort(instance, data.getShort(tn));
                } else if (fc.isAssignableFrom(int.class)) {
-                  f.setInt(instance, data.func_74762_e(tn));
+                  f.setInt(instance, data.getInt(tn));
                } else if (fc.isAssignableFrom(long.class)) {
-                  f.setLong(instance, data.func_74763_f(tn));
+                  f.setLong(instance, data.getLong(tn));
                } else if (fc.isAssignableFrom(float.class)) {
-                  f.setFloat(instance, data.func_74760_g(tn));
+                  f.setFloat(instance, data.getFloat(tn));
                } else if (fc.isAssignableFrom(double.class)) {
-                  f.setDouble(instance, data.func_74769_h(tn));
+                  f.setDouble(instance, data.getDouble(tn));
                } else {
-                  f.set(instance, tagToObject(data.func_74781_a(tn), fc, f.getGenericType()));
+                  f.set(instance, tagToObject(data.get(tn), fc, f.getGenericType()));
                }
             }
          }
       }
    }
 
-   private static <T> Collection<T> deserializeCollection(ListNBT list, Class<? extends Collection> colClass, Class<T> subclass, Type subtype) throws InstantiationException, IllegalAccessException, UnserializableClassException {
+   private static <T> Collection<T> deserializeCollection(ListTag list, Class<? extends Collection> colClass, Class<T> subclass, Type subtype) throws InstantiationException, IllegalAccessException, UnserializableClassException {
       Collection<T> c = (Collection<T>)colClass.newInstance();
 
       for (int i = 0; i < list.size(); i++) {
@@ -211,22 +211,22 @@ public class NBTSerializer {
    }
 
    private static <K, V> Map<K, V> deserializeMap(
-      ListNBT map, Class<? extends Map> mapClass, Class<K> keyClass, Type keyType, Class<V> valueClass, Type valueType
+      ListTag map, Class<? extends Map> mapClass, Class<K> keyClass, Type keyType, Class<V> valueClass, Type valueType
    ) throws InstantiationException, IllegalAccessException, UnserializableClassException {
       Map<K, V> e = (Map<K, V>)mapClass.newInstance();
 
       for (int i = 0; i < map.size(); i++) {
-         CompoundNBT kvp = (CompoundNBT)map.get(i);
+         CompoundTag kvp = (CompoundTag)map.get(i);
          K key;
-         if (kvp.func_74764_b("k")) {
-            key = tagToObject(kvp.func_74781_a("k"), keyClass, keyType);
+         if (kvp.contains("k")) {
+            key = tagToObject(kvp.get("k"), keyClass, keyType);
          } else {
             key = null;
          }
 
          V value;
-         if (kvp.func_74764_b("v")) {
-            value = tagToObject(kvp.func_74781_a("v"), valueClass, valueType);
+         if (kvp.contains("v")) {
+            value = tagToObject(kvp.get("v"), valueClass, valueType);
          } else {
             value = null;
          }
@@ -237,7 +237,7 @@ public class NBTSerializer {
       return e;
    }
 
-   private static <T> T tagToObject(INBT tag, Class<T> clazz, Type subtype) throws IllegalAccessException, InstantiationException, UnserializableClassException {
+   private static <T> T tagToObject(Tag tag, Class<T> clazz, Type subtype) throws IllegalAccessException, InstantiationException, UnserializableClassException {
       if (clazz.isAssignableFrom(Object.class)
          || clazz.isAssignableFrom(Number.class)
          || clazz.isAssignableFrom(CharSequence.class)
@@ -245,31 +245,31 @@ public class NBTSerializer {
          || clazz.isAssignableFrom(Comparable.class)) {
          throw new UnserializableClassException(clazz);
       } else if (clazz.isAssignableFrom(Byte.class)) {
-         return (T)((ByteNBT)tag).func_150290_f();
+         return (T)((ByteTag)tag).getAsByte();
       } else if (clazz.isAssignableFrom(Boolean.class)) {
-         return (T)((ByteNBT)tag).func_150290_f() != 0;
+         return (T)((ByteTag)tag).getAsByte() != 0;
       } else if (clazz.isAssignableFrom(Short.class)) {
-         return (T)((ShortNBT)tag).func_150289_e();
+         return (T)((ShortTag)tag).getAsShort();
       } else if (clazz.isAssignableFrom(Integer.class)) {
-         return (T)((IntNBT)tag).func_150287_d();
+         return (T)((IntTag)tag).getAsInt();
       } else if (clazz.isAssignableFrom(Long.class)) {
-         return (T)((LongNBT)tag).func_150291_c();
+         return (T)((LongTag)tag).getAsLong();
       } else if (clazz.isAssignableFrom(Float.class)) {
-         return (T)((FloatNBT)tag).func_150288_h();
+         return (T)((FloatTag)tag).getAsFloat();
       } else if (clazz.isAssignableFrom(Double.class)) {
-         return (T)((DoubleNBT)tag).func_150286_g();
+         return (T)((DoubleTag)tag).getAsDouble();
       } else if (clazz.isAssignableFrom(byte[].class)) {
-         return (T)((ByteArrayNBT)tag).func_150292_c();
+         return (T)((ByteArrayTag)tag).getAsByteArray();
       } else if (clazz.isAssignableFrom(Byte[].class)) {
-         return (T)ArrayUtils.toObject(((ByteArrayNBT)tag).func_150292_c());
+         return (T)ArrayUtils.toObject(((ByteArrayTag)tag).getAsByteArray());
       } else if (clazz.isAssignableFrom(String.class)) {
-         return (T)((StringNBT)tag).func_150285_a_();
+         return (T)((StringTag)tag).getAsString();
       } else if (clazz.isAssignableFrom(int[].class)) {
-         return (T)((IntArrayNBT)tag).func_150302_c();
+         return (T)((IntArrayTag)tag).getAsIntArray();
       } else if (clazz.isAssignableFrom(Integer[].class)) {
-         return (T)ArrayUtils.toObject(((IntArrayNBT)tag).func_150302_c());
+         return (T)ArrayUtils.toObject(((IntArrayTag)tag).getAsIntArray());
       } else if (INBTSerializable.class.isAssignableFrom(clazz)) {
-         CompoundNBT ntc = (CompoundNBT)tag;
+         CompoundTag ntc = (CompoundTag)tag;
          return deserialize(clazz, ntc);
       } else if (Collection.class.isAssignableFrom(clazz)) {
          Type listType = ((ParameterizedType)subtype).getActualTypeArguments()[0];
@@ -280,7 +280,7 @@ public class NBTSerializer {
             lct = (Class<?>)listType;
          }
 
-         ListNBT ntl = (ListNBT)tag;
+         ListTag ntl = (ListTag)tag;
          return (T)deserializeCollection(ntl, clazz, lct, listType);
       } else if (Map.class.isAssignableFrom(clazz)) {
          Type[] types = ((ParameterizedType)subtype).getActualTypeArguments();
@@ -300,7 +300,7 @@ public class NBTSerializer {
             valueClass = (Class<?>)valueType;
          }
 
-         ListNBT ntl = (ListNBT)tag;
+         ListTag ntl = (ListTag)tag;
          return (T)deserializeMap(ntl, clazz, keyClass, keyType, valueClass, valueType);
       } else {
          throw new UnserializableClassException(clazz);

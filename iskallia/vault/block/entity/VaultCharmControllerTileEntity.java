@@ -5,40 +5,40 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.world.data.VaultCharmData;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class VaultCharmControllerTileEntity extends TileEntity implements INamedContainerProvider {
-   public VaultCharmControllerTileEntity() {
-      super(ModBlocks.VAULT_CHARM_CONTROLLER_TILE_ENTITY);
+public class VaultCharmControllerTileEntity extends BlockEntity implements MenuProvider {
+   public VaultCharmControllerTileEntity(BlockPos pos, BlockState state) {
+      super(ModBlocks.VAULT_CHARM_CONTROLLER_TILE_ENTITY, pos, state);
    }
 
    @Nonnull
-   public ITextComponent func_145748_c_() {
-      return new StringTextComponent("Vault Charm Inscription Table");
+   public Component getDisplayName() {
+      return new TextComponent("Vault Charm Inscription Table");
    }
 
    @Nullable
-   public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-      if (!(this.func_145831_w() instanceof ServerWorld)) {
-         return null;
-      } else {
-         ServerWorld world = (ServerWorld)this.func_145831_w();
-         if (!(playerEntity instanceof ServerPlayerEntity)) {
-            return null;
-         } else {
-            ServerPlayerEntity player = (ServerPlayerEntity)playerEntity;
-            CompoundNBT inventoryNbt = VaultCharmData.get(world).getInventory(player).serializeNBT();
+   public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player playerEntity) {
+      if (this.getLevel() instanceof ServerLevel world) {
+         if (playerEntity instanceof ServerPlayer player) {
+            CompoundTag inventoryNbt = VaultCharmData.get(world).getInventory(player).serializeNBT();
             return new VaultCharmControllerContainer(windowId, playerInventory, inventoryNbt);
+         } else {
+            return null;
          }
+      } else {
+         return null;
       }
    }
 }

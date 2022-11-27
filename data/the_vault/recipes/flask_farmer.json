@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "dad",
+    "dbd",
+    "dcd"
+  ],
+  "key": {
+    "a": {
+      "item": "the_vault:poisonous_mushroom"
+    },
+    "b": {
+      "item": "the_vault:empty_flask"
+    },
+    "c": {
+      "item": "the_vault:red_vault_essence"
+    },
+    "d": {
+      "item": "the_vault:driftwood"
+    }
+  },
+  "result": {
+    "item": "the_vault:respec_flask",
+    "count": 1,
+    "nbt": "{Ability:\"Farmer\"}"
+  }
+}

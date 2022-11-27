@@ -4,10 +4,11 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.util.MathUtilities;
 
 public class RangeEntry {
+   public static final RangeEntry EMPTY = new RangeEntry(0, 0);
    @Expose
-   private final int min;
+   public final int min;
    @Expose
-   private final int max;
+   public final int max;
 
    public RangeEntry(int min, int max) {
       this.min = min;

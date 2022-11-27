@@ -1,37 +1,37 @@
 package iskallia.vault.client.gui.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import iskallia.vault.Vault;
+import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.VaultMod;
 import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
 import iskallia.vault.container.inventory.EtchingTradeContainer;
-import iskallia.vault.entity.EtchingVendorEntity;
-import iskallia.vault.init.ModItems;
+import iskallia.vault.entity.entity.EtchingVendorEntity;
+import iskallia.vault.init.ModBlocks;
 import java.awt.Rectangle;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 
-public class EtchingTradeScreen extends ContainerScreen<EtchingTradeContainer> {
-   private static final ResourceLocation TEXTURE = Vault.id("textures/gui/etching_trade.png");
+public class EtchingTradeScreen extends AbstractContainerScreen<EtchingTradeContainer> {
+   private static final ResourceLocation TEXTURE = VaultMod.id("textures/gui/etching_trade.png");
 
-   public EtchingTradeScreen(EtchingTradeContainer screenContainer, PlayerInventory inv, ITextComponent title) {
-      super(screenContainer, inv, StringTextComponent.field_240750_d_);
-      this.field_146999_f = 176;
-      this.field_147000_g = 184;
-      this.field_238745_s_ = 90;
+   public EtchingTradeScreen(EtchingTradeContainer screenContainer, Inventory inv, Component title) {
+      super(screenContainer, inv, TextComponent.EMPTY);
+      this.imageWidth = 176;
+      this.imageHeight = 184;
+      this.inventoryLabelY = 90;
    }
 
-   protected void func_230450_a_(MatrixStack matrixStack, float partialTicks, int x, int y) {
-      RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-      this.field_230706_i_.func_110434_K().func_110577_a(TEXTURE);
-      int offsetX = (this.field_230708_k_ - this.field_146999_f) / 2;
-      int offsetY = (this.field_230709_l_ - this.field_147000_g) / 2;
-      func_238464_a_(matrixStack, offsetX, offsetY, this.func_230927_p_(), 0.0F, 0.0F, this.field_146999_f, this.field_147000_g, 256, 512);
-      EtchingTradeContainer container = (EtchingTradeContainer)this.func_212873_a_();
+   protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
+      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+      RenderSystem.setShaderTexture(0, TEXTURE);
+      int offsetX = (this.width - this.imageWidth) / 2;
+      int offsetY = (this.height - this.imageHeight) / 2;
+      blit(matrixStack, offsetX, offsetY, this.getBlitOffset(), 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 512);
+      EtchingTradeContainer container = (EtchingTradeContainer)this.getMenu();
       EtchingVendorEntity vendor = container.getVendor();
       if (vendor != null) {
          EtchingVendorControllerTileEntity controllerTile = vendor.getControllerTile();
@@ -54,17 +54,17 @@ public class EtchingTradeScreen extends ContainerScreen<EtchingTradeContainer> {
                   vOffset = 57;
                }
 
-               func_238464_a_(matrixStack, xx, yy, this.func_230927_p_(), 177.0F, vOffset, 88, 27, 256, 512);
-               func_238464_a_(matrixStack, slotInXX, slotInYY, this.func_230927_p_(), 177.0F, 85.0F, 18, 18, 256, 512);
-               func_238464_a_(matrixStack, slotOutXX, slotOutYY, this.func_230927_p_(), 177.0F, 85.0F, 18, 18, 256, 512);
+               blit(matrixStack, xx, yy, this.getBlitOffset(), 177.0F, vOffset, 88, 27, 256, 512);
+               blit(matrixStack, slotInXX, slotInYY, this.getBlitOffset(), 177.0F, 85.0F, 18, 18, 256, 512);
+               blit(matrixStack, slotOutXX, slotOutYY, this.getBlitOffset(), 177.0F, 85.0F, 18, 18, 256, 512);
             }
          }
       }
    }
 
-   protected void func_230451_b_(MatrixStack matrixStack, int x, int y) {
-      super.func_230451_b_(matrixStack, x, y);
-      EtchingTradeContainer container = (EtchingTradeContainer)this.func_212873_a_();
+   protected void renderLabels(PoseStack matrixStack, int x, int y) {
+      super.renderLabels(matrixStack, x, y);
+      EtchingTradeContainer container = (EtchingTradeContainer)this.getMenu();
       EtchingVendorEntity vendor = container.getVendor();
       if (vendor != null) {
          EtchingVendorControllerTileEntity controllerTile = vendor.getControllerTile();
@@ -74,22 +74,22 @@ public class EtchingTradeScreen extends ContainerScreen<EtchingTradeContainer> {
                if (trade != null && !trade.isSold()) {
                   int xx = 71;
                   int yy = 10 + i * 28;
-                  ItemStack stack = new ItemStack(ModItems.VAULT_PLATINUM, trade.getRequiredPlatinum());
-                  this.field_230707_j_.func_175042_a(stack, xx, yy);
-                  this.field_230707_j_.func_180453_a(this.field_230712_o_, stack, xx, yy, null);
+                  ItemStack stack = new ItemStack(ModBlocks.VAULT_PLATINUM, trade.getRequiredPlatinum());
+                  this.itemRenderer.renderGuiItem(stack, xx, yy);
+                  this.itemRenderer.renderGuiItemDecorations(this.font, stack, xx, yy, null);
                }
             }
          }
       }
    }
 
-   public void func_230430_a_(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-      this.func_230446_a_(matrixStack);
-      super.func_230430_a_(matrixStack, mouseX, mouseY, partialTicks);
-      this.func_230459_a_(matrixStack, mouseX, mouseY);
+   public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+      this.renderBackground(matrixStack);
+      super.render(matrixStack, mouseX, mouseY, partialTicks);
+      this.renderTooltip(matrixStack, mouseX, mouseY);
    }
 
-   public boolean func_231177_au__() {
+   public boolean isPauseScreen() {
       return false;
    }
 }

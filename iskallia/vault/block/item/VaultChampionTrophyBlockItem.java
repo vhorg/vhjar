@@ -9,21 +9,21 @@ import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item.Properties;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -31,14 +31,13 @@ public class VaultChampionTrophyBlockItem extends BlockItem {
    public static final String NBT_OWNER_UUID = "OwnerUUID";
    public static final String NBT_OWNER_NICK = "OwnerNickname";
    public static final String NBT_VARIANT = "Variant";
-   public static final String NBT_SCORE = "Score";
 
    public VaultChampionTrophyBlockItem(Block block) {
-      super(block, new Properties().func_200916_a(ModItems.VAULT_MOD_GROUP).func_200917_a(1));
+      super(block, new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(1));
    }
 
-   public void func_150895_a(@Nonnull ItemGroup group, @Nonnull NonNullList<ItemStack> items) {
-      if (this.func_194125_a(group)) {
+   public void fillItemCategory(@Nonnull CreativeModeTab group, @Nonnull NonNullList<ItemStack> items) {
+      if (this.allowdedIn(group)) {
          items.add(create(null, VaultChampionTrophy.Variant.GOLDEN));
          items.add(create(null, VaultChampionTrophy.Variant.PLATINUM));
          items.add(create(null, VaultChampionTrophy.Variant.BLUE_SILVER));
@@ -46,64 +45,51 @@ public class VaultChampionTrophyBlockItem extends BlockItem {
       }
    }
 
-   public void func_77663_a(@Nonnull ItemStack itemStack, @Nonnull World world, @Nonnull Entity entity, int itemSlot, boolean isSelected) {
-      if (!world.field_72995_K) {
-         if (entity instanceof ServerPlayerEntity) {
-            CompoundNBT blockEntityTag = itemStack.func_190925_c("BlockEntityTag");
-            if (!blockEntityTag.func_74764_b("OwnerUUID")) {
-               ServerPlayerEntity player = (ServerPlayerEntity)entity;
-               blockEntityTag.func_74778_a("OwnerUUID", player.func_110124_au().toString());
-               blockEntityTag.func_74778_a("OwnerNickname", player.func_200200_C_().getString());
-               super.func_77663_a(itemStack, world, entity, itemSlot, isSelected);
+   public void inventoryTick(@Nonnull ItemStack itemStack, @Nonnull Level world, @Nonnull Entity entity, int itemSlot, boolean isSelected) {
+      if (!world.isClientSide) {
+         if (entity instanceof ServerPlayer player) {
+            CompoundTag blockEntityTag = itemStack.getOrCreateTagElement("BlockEntityTag");
+            if (!blockEntityTag.contains("OwnerUUID")) {
+               blockEntityTag.putString("OwnerUUID", player.getUUID().toString());
+               blockEntityTag.putString("OwnerNickname", player.getName().getString());
+               super.inventoryTick(itemStack, world, entity, itemSlot, isSelected);
             }
          }
       }
    }
 
    @OnlyIn(Dist.CLIENT)
-   public void func_77624_a(@Nonnull ItemStack stack, @Nullable World worldIn, @Nonnull List<ITextComponent> tooltip, @Nonnull ITooltipFlag flag) {
-      super.func_77624_a(stack, worldIn, tooltip, flag);
-      CompoundNBT blockEntityTag = stack.func_190925_c("BlockEntityTag");
-      String uuidString = blockEntityTag.func_74779_i("OwnerUUID");
+   public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level worldIn, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
+      super.appendHoverText(stack, worldIn, tooltip, flag);
+      CompoundTag blockEntityTag = stack.getOrCreateTagElement("BlockEntityTag");
+      String uuidString = blockEntityTag.getString("OwnerUUID");
       UUID ownerUUID = uuidString.isEmpty() ? null : UUID.fromString(uuidString);
-      String ownerNickname = McClientHelper.getOnlineProfile(ownerUUID).<String>map(GameProfile::getName).orElse(blockEntityTag.func_74779_i("OwnerNickname"));
-      int score = blockEntityTag.func_74762_e("Score");
-      IFormattableTextComponent titleText = new StringTextComponent("Vault Champion").func_240699_a_(TextFormatting.GOLD);
-      IFormattableTextComponent championText = new StringTextComponent("Mighty " + ownerNickname)
-         .func_240699_a_(TextFormatting.GOLD)
-         .func_240699_a_(TextFormatting.BOLD);
-      IFormattableTextComponent scoreText = new StringTextComponent("Score: ")
-         .func_240699_a_(TextFormatting.GOLD)
-         .func_230529_a_(new StringTextComponent(String.valueOf(score)).func_240699_a_(TextFormatting.AQUA));
-      tooltip.add(new StringTextComponent(""));
+      String ownerNickname = McClientHelper.getOnlineProfile(ownerUUID).<String>map(GameProfile::getName).orElse(blockEntityTag.getString("OwnerNickname"));
+      MutableComponent titleText = new TextComponent("Vault Champion").withStyle(ChatFormatting.GOLD);
+      MutableComponent championText = new TextComponent("Mighty " + ownerNickname).withStyle(ChatFormatting.GOLD).withStyle(ChatFormatting.BOLD);
+      tooltip.add(new TextComponent(""));
       tooltip.add(titleText);
       tooltip.add(championText);
-      tooltip.add(scoreText);
    }
 
-   public static void setScore(ItemStack itemStack, int score) {
-      CompoundNBT blockEntityTag = itemStack.func_190925_c("BlockEntityTag");
-      blockEntityTag.func_74768_a("Score", score);
-   }
-
-   public static ItemStack create(ServerPlayerEntity owner, VaultChampionTrophy.Variant variant) {
-      return create(owner == null ? null : owner.func_110124_au(), owner == null ? null : owner.func_200200_C_().getString(), variant);
+   public static ItemStack create(ServerPlayer owner, VaultChampionTrophy.Variant variant) {
+      return create(owner == null ? null : owner.getUUID(), owner == null ? null : owner.getName().getString(), variant);
    }
 
    public static ItemStack create(UUID ownerUUID, String ownerNickname, VaultChampionTrophy.Variant variant) {
       ItemStack itemStack = new ItemStack(ModBlocks.VAULT_CHAMPION_TROPHY_BLOCK_ITEM);
-      CompoundNBT nbt = itemStack.func_196082_o();
-      CompoundNBT blockEntityTag = itemStack.func_190925_c("BlockEntityTag");
+      CompoundTag nbt = itemStack.getOrCreateTag();
+      CompoundTag blockEntityTag = itemStack.getOrCreateTagElement("BlockEntityTag");
       if (ownerUUID != null) {
-         blockEntityTag.func_74778_a("OwnerUUID", ownerUUID.toString());
+         blockEntityTag.putString("OwnerUUID", ownerUUID.toString());
       }
 
       if (ownerNickname != null) {
-         blockEntityTag.func_74778_a("OwnerNickname", ownerNickname);
+         blockEntityTag.putString("OwnerNickname", ownerNickname);
       }
 
-      blockEntityTag.func_74778_a("Variant", variant.func_176610_l());
-      nbt.func_74768_a("CustomModelData", variant.ordinal());
+      blockEntityTag.putString("Variant", variant.getSerializedName());
+      nbt.putInt("CustomModelData", variant.ordinal());
       return itemStack;
    }
 }

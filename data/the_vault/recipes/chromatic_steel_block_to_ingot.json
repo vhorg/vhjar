@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "the_vault:chromatic_steel_block"}
+  ],
+  "result": {
+    "item": "the_vault:chromatic_steel_ingot",
+    "count": 9
+  }
+}

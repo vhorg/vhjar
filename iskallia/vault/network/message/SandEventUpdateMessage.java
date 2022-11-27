@@ -2,8 +2,8 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientSandEventData;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class SandEventUpdateMessage {
    private final float percentFilled;
@@ -28,13 +28,13 @@ public class SandEventUpdateMessage {
       return this.sandCollected;
    }
 
-   public static void encode(SandEventUpdateMessage message, PacketBuffer buffer) {
+   public static void encode(SandEventUpdateMessage message, FriendlyByteBuf buffer) {
       buffer.writeFloat(message.percentFilled);
       buffer.writeInt(message.sandSpawned);
       buffer.writeInt(message.sandCollected);
    }
 
-   public static SandEventUpdateMessage decode(PacketBuffer buffer) {
+   public static SandEventUpdateMessage decode(FriendlyByteBuf buffer) {
       return new SandEventUpdateMessage(buffer.readFloat(), buffer.readInt(), buffer.readInt());
    }
 

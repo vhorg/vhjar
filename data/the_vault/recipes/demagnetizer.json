@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "iii",
+    "ici",
+    "sss"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:polished_vault_stone"
+    },
+    "i": {
+      "item": "the_vault:magnetite_ingot"
+    },
+    "c": {
+      "item": "minecraft:copper_block"
+    }
+  },
+  "result": {
+    "item": "the_vault:demagnetizer",
+    "count": 1
+  }
+}

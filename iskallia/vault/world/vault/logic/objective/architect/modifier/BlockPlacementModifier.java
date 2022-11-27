@@ -6,11 +6,11 @@ import iskallia.vault.world.vault.logic.objective.architect.ArchitectObjective;
 import iskallia.vault.world.vault.logic.objective.architect.processor.BlockPlacementPostProcessor;
 import iskallia.vault.world.vault.logic.objective.architect.processor.VaultPieceProcessor;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BlockPlacementModifier extends VoteModifier {
    @Expose
@@ -25,7 +25,7 @@ public class BlockPlacementModifier extends VoteModifier {
    }
 
    public BlockState getBlock() {
-      return Registry.field_212618_g.func_241873_b(new ResourceLocation(this.block)).orElse(Blocks.field_150350_a).func_176223_P();
+      return Registry.BLOCK.getOptional(new ResourceLocation(this.block)).orElse(Blocks.AIR).defaultBlockState();
    }
 
    public int getBlocksPerSpawn() {

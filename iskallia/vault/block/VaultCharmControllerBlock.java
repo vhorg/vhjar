@@ -4,92 +4,87 @@ import iskallia.vault.block.entity.VaultCharmControllerTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.VaultCharmUpgrade;
 import iskallia.vault.world.data.VaultCharmData;
-import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.block.material.Material;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.Nullable;
 
-public class VaultCharmControllerBlock extends Block {
+public class VaultCharmControllerBlock extends Block implements EntityBlock {
    public VaultCharmControllerBlock() {
-      super(Properties.func_200945_a(Material.field_151573_f).func_200948_a(2.0F, 3600000.0F).func_226896_b_());
-   }
-
-   public boolean hasTileEntity(BlockState state) {
-      return true;
+      super(Properties.of(Material.METAL).strength(2.0F, 3600000.0F).noOcclusion());
    }
 
    @Nullable
-   public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-      return ModBlocks.VAULT_CHARM_CONTROLLER_TILE_ENTITY.func_200968_a();
+   public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+      return ModBlocks.VAULT_CHARM_CONTROLLER_TILE_ENTITY.create(pPos, pState);
    }
 
-   public ActionResultType func_225533_a_(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult) {
-      if (world.func_201670_d()) {
-         return ActionResultType.SUCCESS;
-      } else if (hand != Hand.MAIN_HAND) {
-         return ActionResultType.SUCCESS;
+   public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
+      if (world.isClientSide()) {
+         return InteractionResult.SUCCESS;
+      } else if (hand != InteractionHand.MAIN_HAND) {
+         return InteractionResult.SUCCESS;
       } else {
-         TileEntity te = world.func_175625_s(pos);
+         BlockEntity te = world.getBlockEntity(pos);
          if (!(te instanceof VaultCharmControllerTileEntity)) {
-            return ActionResultType.SUCCESS;
-         } else if (!(player instanceof ServerPlayerEntity)) {
-            return ActionResultType.SUCCESS;
-         } else {
-            ServerPlayerEntity sPlayer = (ServerPlayerEntity)player;
-            VaultCharmData data = VaultCharmData.get(sPlayer.func_71121_q());
+            return InteractionResult.SUCCESS;
+         } else if (player instanceof ServerPlayer sPlayer) {
+            VaultCharmData data = VaultCharmData.get(sPlayer.getLevel());
             VaultCharmData.VaultCharmInventory inventory = data.getInventory(sPlayer);
-            ItemStack heldItem = player.func_184614_ca();
-            if (heldItem.func_77973_b() instanceof VaultCharmUpgrade) {
-               VaultCharmUpgrade item = (VaultCharmUpgrade)heldItem.func_77973_b();
+            ItemStack heldItem = player.getMainHandItem();
+            if (heldItem.getItem() instanceof VaultCharmUpgrade item) {
                int newSize = item.getTier().getSlotAmount();
                System.out.println(newSize);
                System.out.println(inventory.canUpgrade(newSize));
                if (inventory.canUpgrade(newSize)) {
-                  player.field_70170_p.func_184133_a(null, pos, SoundEvents.field_187604_bf, SoundCategory.BLOCKS, 1.0F, 1.0F);
+                  player.level.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
                   data.upgradeInventorySize(sPlayer, item.getTier().getSlotAmount());
-                  heldItem.func_190918_g(1);
-                  return ActionResultType.SUCCESS;
+                  heldItem.shrink(1);
+                  return InteractionResult.SUCCESS;
                } else {
-                  player.field_70170_p.func_184133_a(null, pos, SoundEvents.field_187646_bt, SoundCategory.BLOCKS, 1.0F, 1.0F);
-                  return ActionResultType.SUCCESS;
+                  player.level.playSound(null, pos, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, 1.0F);
+                  return InteractionResult.SUCCESS;
                }
             } else {
                NetworkHooks.openGui(
-                  (ServerPlayerEntity)player, (VaultCharmControllerTileEntity)te, buffer -> buffer.func_150786_a(data.getInventory(sPlayer).serializeNBT())
+                  (ServerPlayer)player, (VaultCharmControllerTileEntity)te, buffer -> buffer.writeNbt(data.getInventory(sPlayer).serializeNBT())
                );
-               return ActionResultType.SUCCESS;
+               return InteractionResult.SUCCESS;
             }
+         } else {
+            return InteractionResult.SUCCESS;
          }
       }
    }
 
-   public VoxelShape func_220053_a(BlockState p_220053_1_, IBlockReader p_220053_2_, BlockPos p_220053_3_, ISelectionContext p_220053_4_) {
-      return VoxelShapes.func_216384_a(
-         Block.func_208617_a(5.0, 0.0, 5.0, 11.0, 1.0, 11.0),
+   public VoxelShape getShape(BlockState p_220053_1_, BlockGetter p_220053_2_, BlockPos p_220053_3_, CollisionContext p_220053_4_) {
+      return Shapes.or(
+         Block.box(5.0, 0.0, 5.0, 11.0, 1.0, 11.0),
          new VoxelShape[]{
-            Block.func_208617_a(5.0, 0.0, 5.0, 11.0, 1.0, 11.0),
-            Block.func_208617_a(6.0, 1.0, 6.0, 10.0, 4.0, 10.0),
-            Block.func_208617_a(5.0, 4.0, 5.0, 11.0, 7.0, 11.0),
-            Block.func_208617_a(4.0, 7.0, 4.0, 12.0, 9.0, 12.0),
-            Block.func_208617_a(1.0, 9.0, 1.0, 15.0, 11.0, 15.0),
-            Block.func_208617_a(5.0, 11.0, 5.0, 11.0, 15.0, 11.0)
+            Block.box(5.0, 0.0, 5.0, 11.0, 1.0, 11.0),
+            Block.box(6.0, 1.0, 6.0, 10.0, 4.0, 10.0),
+            Block.box(5.0, 4.0, 5.0, 11.0, 7.0, 11.0),
+            Block.box(4.0, 7.0, 4.0, 12.0, 9.0, 12.0),
+            Block.box(1.0, 9.0, 1.0, 15.0, 11.0, 15.0),
+            Block.box(5.0, 11.0, 5.0, 11.0, 15.0, 11.0)
          }
       );
    }

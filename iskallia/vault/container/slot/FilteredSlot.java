@@ -1,7 +1,7 @@
 package iskallia.vault.container.slot;
 
 import java.util.function.Predicate;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
@@ -13,7 +13,7 @@ public class FilteredSlot extends SlotItemHandler {
       this.stackFilter = stackFilter;
    }
 
-   public boolean func_75214_a(ItemStack stack) {
-      return !this.stackFilter.test(stack) ? false : super.func_75214_a(stack);
+   public boolean mayPlace(ItemStack stack) {
+      return !this.stackFilter.test(stack) ? false : super.mayPlace(stack);
    }
 }

@@ -1,12 +1,12 @@
 package iskallia.vault.world.vault.chest;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.util.DamageUtil;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.player.VaultPlayer;
-import net.minecraft.util.DamageSource;
-import net.minecraft.world.Explosion.Mode;
-import net.minecraft.world.server.ServerWorld;
+import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.util.damage.DamageUtil;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.level.Explosion.BlockInteraction;
 
 public class ExplosionEffect extends VaultChestEffect {
    @Expose
@@ -24,7 +24,7 @@ public class ExplosionEffect extends VaultChestEffect {
    @Expose
    private final String mode;
 
-   public ExplosionEffect(String name, float radius, double xOffset, double yOffset, double zOffset, boolean causesFire, float damage, Mode mode) {
+   public ExplosionEffect(String name, float radius, double xOffset, double yOffset, double zOffset, boolean causesFire, float damage, BlockInteraction mode) {
       super(name);
       this.radius = radius;
       this.xOffset = xOffset;
@@ -59,26 +59,21 @@ public class ExplosionEffect extends VaultChestEffect {
       return this.damage;
    }
 
-   public Mode getMode() {
-      return Enum.valueOf(Mode.class, this.mode);
+   public BlockInteraction getMode() {
+      return Enum.valueOf(BlockInteraction.class, this.mode);
    }
 
    @Override
-   public void apply(VaultRaid vault, VaultPlayer player, ServerWorld world) {
-      player.runIfPresent(
-         world.func_73046_m(),
-         playerEntity -> {
-            world.func_217398_a(
-               playerEntity,
-               playerEntity.func_226277_ct_() + this.getXOffset(),
-               playerEntity.func_226278_cu_() + this.getYOffset(),
-               playerEntity.func_226281_cx_() + this.getZOffset(),
-               this.getRadius(),
-               this.causesFire(),
-               this.getMode()
-            );
-            DamageUtil.shotgunAttack(playerEntity, entity -> entity.func_70097_a(new DamageSource("explosion").func_94540_d(), this.getDamage()));
-         }
+   public void apply(VirtualWorld world, Vault vault, ServerPlayer player) {
+      world.explode(
+         player,
+         player.getX() + this.getXOffset(),
+         player.getY() + this.getYOffset(),
+         player.getZ() + this.getZOffset(),
+         this.getRadius(),
+         this.causesFire(),
+         this.getMode()
       );
+      DamageUtil.shotgunAttack(player, entity -> entity.hurt(new DamageSource("explosion").setExplosion(), this.getDamage()));
    }
 }

@@ -3,7 +3,7 @@ package iskallia.vault.attribute;
 import com.google.gson.annotations.Expose;
 import java.util.Optional;
 import java.util.Random;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class EnumAttribute<E extends Enum<E>> extends PooledAttribute<E> {
    private final Class<E> enumClass;
@@ -22,13 +22,13 @@ public class EnumAttribute<E extends Enum<E>> extends PooledAttribute<E> {
    }
 
    @Override
-   public void write(CompoundNBT nbt) {
-      nbt.func_74778_a("BaseValue", this.getBaseValue().name());
+   public void write(CompoundTag nbt) {
+      nbt.putString("BaseValue", this.getBaseValue().name());
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      this.setBaseValue(this.getEnumConstant(nbt.func_74779_i("BaseValue")));
+   public void read(CompoundTag nbt) {
+      this.setBaseValue(this.getEnumConstant(nbt.getString("BaseValue")));
    }
 
    public E getEnumConstant(String value) {

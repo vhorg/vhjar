@@ -1,99 +1,43 @@
 package iskallia.vault.block;
 
-import iskallia.vault.config.ScavengerHuntConfig;
+import iskallia.vault.block.entity.ScavengerTreasureTileEntity;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.BasicScavengerItem;
-import iskallia.vault.world.data.VaultRaidData;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.logic.objective.ScavengerHuntObjective;
-import iskallia.vault.world.vault.logic.objective.TreasureHuntObjective;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ContainerBlock;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.LootContext.Builder;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.ToolType;
+import iskallia.vault.util.BlockHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
-public class ScavengerTreasureBlock extends ContainerBlock {
-   private static final VoxelShape BOX = Block.func_208617_a(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
+public class ScavengerTreasureBlock extends BaseEntityBlock {
+   private static final VoxelShape BOX = Block.box(0.0, 0.0, 0.0, 16.0, 5.0, 16.0);
 
    public ScavengerTreasureBlock() {
-      super(
-         Properties.func_200949_a(Material.field_151573_f, MaterialColor.field_151647_F)
-            .harvestLevel(0)
-            .harvestTool(ToolType.PICKAXE)
-            .func_200948_a(10.0F, 1.0F)
-            .func_200947_a(ModSounds.VAULT_GEM)
-      );
+      super(Properties.of(Material.METAL, MaterialColor.GOLD).strength(10.0F, 1.0F).sound(ModSounds.VAULT_GET_SOUND_TYPE));
    }
 
-   public VoxelShape func_220053_a(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
+   public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
       return BOX;
    }
 
    @Nullable
-   public TileEntity func_196283_a_(IBlockReader worldIn) {
-      return ModBlocks.SCAVENGER_TREASURE_TILE_ENTITY.func_200968_a();
+   public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+      return ModBlocks.SCAVENGER_TREASURE_TILE_ENTITY.create(pPos, pState);
    }
 
-   public BlockRenderType func_149645_b(BlockState state) {
-      return BlockRenderType.MODEL;
-   }
-
-   public List<ItemStack> func_220076_a(BlockState state, Builder builder) {
-      ServerWorld world = builder.func_216018_a();
-      BlockPos pos = new BlockPos((Vector3d)builder.func_216019_b(LootParameters.field_237457_g_));
-      VaultRaid vault = VaultRaidData.get(world).getAt(world, pos);
-      List<ItemStack> drops = new ArrayList<>(super.func_220076_a(state, builder));
-      if (vault == null) {
-         return drops;
-      } else {
-         vault.getActiveObjective(ScavengerHuntObjective.class)
-            .ifPresent(
-               objective -> ModConfigs.SCAVENGER_HUNT
-                  .generateTreasureLoot(objective.getGenerationDropFilter())
-                  .stream()
-                  .map(ScavengerHuntConfig.ItemEntry::createItemStack)
-                  .filter(stack -> !stack.func_190926_b())
-                  .peek(
-                     stack -> vault.getProperties()
-                        .getBase(VaultRaid.IDENTIFIER)
-                        .ifPresent(identifier -> BasicScavengerItem.setVaultIdentifier(stack, identifier))
-                  )
-                  .forEach(drops::add)
-            );
-         vault.getActiveObjective(TreasureHuntObjective.class)
-            .ifPresent(
-               objective -> ModConfigs.TREASURE_HUNT
-                  .generateTreasureLoot(objective.getGenerationDropFilter())
-                  .stream()
-                  .map(ScavengerHuntConfig.ItemEntry::createItemStack)
-                  .filter(stack -> !stack.func_190926_b())
-                  .peek(
-                     stack -> vault.getProperties()
-                        .getBase(VaultRaid.IDENTIFIER)
-                        .ifPresent(identifier -> BasicScavengerItem.setVaultIdentifier(stack, identifier))
-                  )
-                  .forEach(drops::add)
-            );
-         return drops;
-      }
+   @Nullable
+   public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
+      return BlockHelper.getTicker(pBlockEntityType, ModBlocks.SCAVENGER_TREASURE_TILE_ENTITY, ScavengerTreasureTileEntity::tick);
    }
 }
