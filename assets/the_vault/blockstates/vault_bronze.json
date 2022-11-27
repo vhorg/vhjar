@@ -1,0 +1,225 @@
+{
+  "variants": {
+    "size=1": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_1"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_1",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_1",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_1",
+        "y": 270
+      }
+    ],
+    "size=2": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_2"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_2",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_2",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_2",
+        "y": 270
+      }
+    ],
+    "size=3": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_3"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_3",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_3",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_3",
+        "y": 270
+      }
+    ],
+    "size=4": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_4"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_4",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_4",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_4",
+        "y": 270
+      }
+    ],
+    "size=5": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_5"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_5",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_5",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_5",
+        "y": 270
+      }
+    ],
+    "size=6": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_6"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_6",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_6",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_6",
+        "y": 270
+      }
+    ],
+    "size=7": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_7"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_7",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_7",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_7",
+        "y": 270
+      }
+    ],
+    "size=8": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_8"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_8",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_8",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_8",
+        "y": 270
+      }
+    ],
+    "size=9": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_9"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_9",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_9",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_9",
+        "y": 270
+      }
+    ],
+    "size=10": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_10"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_10",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_10",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_10",
+        "y": 270
+      }
+    ],
+    "size=11": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_11"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_11",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_11",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_11",
+        "y": 270
+      }
+    ],
+    "size=12": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_12"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_12",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_12",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_12",
+        "y": 270
+      }
+    ],
+    "size=13": [
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_13"
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_13",
+        "y": 90
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_13",
+        "y": 180
+      },
+      {
+        "model": "the_vault:block/coins/bronze/coin_pile_13",
+        "y": 270
+      }
+    ]
+  }
+}

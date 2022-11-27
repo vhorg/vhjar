@@ -1,9 +1,9 @@
 package iskallia.vault.client;
 
 import iskallia.vault.network.message.KnownTalentsMessage;
+import iskallia.vault.skill.talent.Talent;
 import iskallia.vault.skill.talent.TalentGroup;
 import iskallia.vault.skill.talent.TalentNode;
-import iskallia.vault.skill.talent.type.PlayerTalent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,12 +19,12 @@ public class ClientTalentData {
    }
 
    @Nullable
-   public static <T extends PlayerTalent> TalentNode<T> getLearnedTalentNode(TalentGroup<T> talent) {
+   public static <T extends Talent> TalentNode<T> getLearnedTalentNode(TalentGroup<T> talent) {
       return getLearnedTalentNode(talent.getParentName());
    }
 
    @Nullable
-   public static <T extends PlayerTalent> TalentNode<T> getLearnedTalentNode(String talentName) {
+   public static <T extends Talent> TalentNode<T> getLearnedTalentNode(String talentName) {
       for (TalentNode<?> node : getLearnedTalentNodes()) {
          if (node.getGroup().getParentName().equals(talentName)) {
             return (TalentNode<T>)node;

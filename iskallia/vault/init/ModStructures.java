@@ -1,58 +1,60 @@
 package iskallia.vault.init;
 
 import com.mojang.serialization.Codec;
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.gen.structure.ArchitectEventStructure;
-import iskallia.vault.world.gen.structure.FinalVaultBossStructure;
+import iskallia.vault.world.gen.structure.ArenaStructure;
 import iskallia.vault.world.gen.structure.FinalVaultLobbyStructure;
 import iskallia.vault.world.gen.structure.RaidChallengeStructure;
 import iskallia.vault.world.gen.structure.VaultStructure;
 import iskallia.vault.world.gen.structure.VaultTroveStructure;
 import iskallia.vault.world.gen.structure.pool.PalettedListPoolElement;
 import iskallia.vault.world.gen.structure.pool.PalettedSinglePoolElement;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.feature.jigsaw.IJigsawDeserializer;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
-import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class ModStructures {
-   public static Structure<VaultStructure.Config> VAULT_STAR;
-   public static Structure<ArchitectEventStructure.Config> ARCHITECT_EVENT;
-   public static Structure<RaidChallengeStructure.Config> RAID_CHALLENGE;
-   public static Structure<VaultTroveStructure.Config> VAULT_TROVE;
-   public static Structure<FinalVaultLobbyStructure.Config> FINAL_VAULT_LOBBY;
-   public static Structure<FinalVaultBossStructure.Config> FINAL_VAULT_BOSS;
+   public static final TagKey<Biome> EMPTY = TagKey.create(Registry.BIOME_REGISTRY, VaultMod.id("empty"));
+   public static VaultStructure VAULT_STAR;
+   public static ArenaStructure ARENA;
+   public static ArchitectEventStructure ARCHITECT_EVENT;
+   public static RaidChallengeStructure RAID_CHALLENGE;
+   public static VaultTroveStructure VAULT_TROVE;
+   public static FinalVaultLobbyStructure FINAL_VAULT_LOBBY;
 
-   public static void register(Register<Structure<?>> event) {
-      VAULT_STAR = register(event.getRegistry(), "vault_star", new VaultStructure(VaultStructure.Config.CODEC));
-      ARCHITECT_EVENT = register(event.getRegistry(), "architect_event", new ArchitectEventStructure(ArchitectEventStructure.Config.CODEC));
-      RAID_CHALLENGE = register(event.getRegistry(), "raid_challenge", new RaidChallengeStructure(RaidChallengeStructure.Config.CODEC));
-      VAULT_TROVE = register(event.getRegistry(), "trove", new VaultTroveStructure(VaultTroveStructure.Config.CODEC));
-      FINAL_VAULT_LOBBY = register(event.getRegistry(), "final_vault_lobby", new FinalVaultLobbyStructure(FinalVaultLobbyStructure.Config.CODEC));
-      FINAL_VAULT_BOSS = register(event.getRegistry(), "final_vault_boss", new FinalVaultBossStructure(FinalVaultBossStructure.Config.CODEC));
+   public static void register(Register<StructureFeature<?>> event) {
+      VAULT_STAR = register(event.getRegistry(), "vault_star", new VaultStructure());
+      ARENA = register(event.getRegistry(), "arena", new ArenaStructure());
+      ARCHITECT_EVENT = register(event.getRegistry(), "architect_event", new ArchitectEventStructure());
+      RAID_CHALLENGE = register(event.getRegistry(), "raid_challenge", new RaidChallengeStructure());
+      VAULT_TROVE = register(event.getRegistry(), "trove", new VaultTroveStructure());
+      FINAL_VAULT_LOBBY = register(event.getRegistry(), "final_vault_lobby", new FinalVaultLobbyStructure());
       ModStructures.PoolElements.register(event);
    }
 
-   private static <T extends Structure<?>> T register(IForgeRegistry<Structure<?>> registry, String name, T structure) {
-      Structure.field_236365_a_.put(name, structure);
-      structure.setRegistryName(Vault.id(name));
+   private static <T extends StructureFeature<?>> T register(IForgeRegistry<StructureFeature<?>> registry, String name, T structure) {
+      structure.setRegistryName(VaultMod.id(name));
       registry.register(structure);
       return structure;
    }
 
    public static class PoolElements {
-      public static IJigsawDeserializer<PalettedSinglePoolElement> PALETTED_SINGLE_POOL_ELEMENT;
-      public static IJigsawDeserializer<PalettedListPoolElement> PALETTED_LIST_POOL_ELEMENT;
+      public static StructurePoolElementType<PalettedSinglePoolElement> PALETTED_SINGLE_POOL_ELEMENT;
+      public static StructurePoolElementType<PalettedListPoolElement> PALETTED_LIST_POOL_ELEMENT;
 
-      public static void register(Register<Structure<?>> event) {
+      public static void register(Register<StructureFeature<?>> event) {
          PALETTED_SINGLE_POOL_ELEMENT = register("paletted_single_pool_element", PalettedSinglePoolElement.CODEC);
          PALETTED_LIST_POOL_ELEMENT = register("paletted_list_pool_element", PalettedListPoolElement.CODEC);
       }
 
-      static <P extends JigsawPiece> IJigsawDeserializer<P> register(String name, Codec<P> codec) {
-         return (IJigsawDeserializer<P>)Registry.func_218322_a(Registry.field_218365_F, Vault.id(name), (IJigsawDeserializer)() -> codec);
+      static <P extends StructurePoolElement> StructurePoolElementType<P> register(String name, Codec<P> codec) {
+         return (StructurePoolElementType<P>)Registry.register(Registry.STRUCTURE_POOL_ELEMENT, VaultMod.id(name), (StructurePoolElementType)() -> codec);
       }
    }
 }

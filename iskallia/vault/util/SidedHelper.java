@@ -5,19 +5,18 @@ import iskallia.vault.client.gui.overlay.VaultBarOverlay;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.List;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class SidedHelper {
-   public static int getVaultLevel(PlayerEntity player) {
-      return player instanceof ServerPlayerEntity
-         ? PlayerVaultStatsData.get(((ServerPlayerEntity)player).func_71121_q()).getVaultStats(player).getVaultLevel()
+   public static int getVaultLevel(Player player) {
+      return player instanceof ServerPlayer
+         ? PlayerVaultStatsData.get(((ServerPlayer)player).getLevel()).getVaultStats(player).getVaultLevel()
          : getClientVaultLevel();
    }
 
@@ -26,17 +25,17 @@ public class SidedHelper {
       return VaultBarOverlay.vaultLevel;
    }
 
-   public static List<PlayerEntity> getSidedPlayers() {
+   public static List<Player> getSidedPlayers() {
       if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
-         MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-         return srv.func_184103_al().func_181057_v();
+         MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+         return srv.getPlayerList().getPlayers();
       } else {
          return getClientSidePlayers();
       }
    }
 
    @OnlyIn(Dist.CLIENT)
-   private static List<PlayerEntity> getClientSidePlayers() {
-      return Lists.newArrayList(new PlayerEntity[]{Minecraft.func_71410_x().field_71439_g});
+   private static List<Player> getClientSidePlayers() {
+      return Lists.newArrayList(new Player[]{Minecraft.getInstance().player});
    }
 }

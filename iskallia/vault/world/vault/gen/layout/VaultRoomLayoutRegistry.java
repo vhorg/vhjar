@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 public class VaultRoomLayoutRegistry {
    private static final Map<ResourceLocation, Supplier<VaultRoomLayoutGenerator>> layoutRegistry = new HashMap<>();
@@ -21,7 +21,6 @@ public class VaultRoomLayoutRegistry {
       layoutRegistry.put(DebugVaultLayout.ID, DebugVaultLayout::new);
       layoutRegistry.put(DenseDiamondRoomLayout.ID, DenseDiamondRoomLayout::new);
       layoutRegistry.put(DenseSquareRoomLayout.ID, DenseSquareRoomLayout::new);
-      layoutRegistry.put(EmptyVaultLayout.ID, EmptyVaultLayout::new);
    }
 
    @Nullable
@@ -30,25 +29,25 @@ public class VaultRoomLayoutRegistry {
    }
 
    @Nullable
-   public static VaultRoomLayoutGenerator deserialize(CompoundNBT tag) {
-      if (!tag.func_150297_b("Id", 8)) {
+   public static VaultRoomLayoutGenerator deserialize(CompoundTag tag) {
+      if (!tag.contains("Id", 8)) {
          return null;
       } else {
-         VaultRoomLayoutGenerator layout = getLayoutGenerator(new ResourceLocation(tag.func_74779_i("Id")));
+         VaultRoomLayoutGenerator layout = getLayoutGenerator(new ResourceLocation(tag.getString("Id")));
          if (layout == null) {
             return null;
          } else {
-            layout.deserialize(tag.func_74775_l("Data"));
+            layout.deserialize(tag.getCompound("Data"));
             layout.generateLayout();
             return layout;
          }
       }
    }
 
-   public static CompoundNBT serialize(VaultRoomLayoutGenerator roomLayout) {
-      CompoundNBT layoutTag = new CompoundNBT();
-      layoutTag.func_74778_a("Id", roomLayout.getId().toString());
-      layoutTag.func_218657_a("Data", roomLayout.serialize());
+   public static CompoundTag serialize(VaultRoomLayoutGenerator roomLayout) {
+      CompoundTag layoutTag = new CompoundTag();
+      layoutTag.putString("Id", roomLayout.getId().toString());
+      layoutTag.put("Data", roomLayout.serialize());
       return layoutTag;
    }
 }

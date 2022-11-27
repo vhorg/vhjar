@@ -1,66 +1,80 @@
 package iskallia.vault.block;
 
 import iskallia.vault.block.entity.VaultChestTileEntity;
+import iskallia.vault.core.vault.stat.VaultChestType;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.util.BlockHelper;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.properties.ChestType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
-import net.minecraft.tileentity.ChestTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.material.FluidState;
 
 public class VaultChestBlock extends ChestBlock {
-   protected VaultChestBlock(Properties builder, Supplier<TileEntityType<? extends ChestTileEntity>> tileSupplier) {
+   private final VaultChestType type;
+
+   protected VaultChestBlock(VaultChestType type, Properties builder, Supplier<BlockEntityType<? extends ChestBlockEntity>> tileSupplier) {
       super(builder, tileSupplier);
+      this.type = type;
    }
 
-   public VaultChestBlock(Properties builder) {
-      this(builder, () -> ModBlocks.VAULT_CHEST_TILE_ENTITY);
+   public VaultChestBlock(VaultChestType type, Properties builder) {
+      this(type, builder, () -> ModBlocks.VAULT_CHEST_TILE_ENTITY);
    }
 
-   public boolean removedByPlayer(BlockState state, World world, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid) {
-      TileEntity te = world.func_175625_s(pos);
-      if (!(te instanceof VaultChestTileEntity) || player.func_184812_l_()) {
-         return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
-      } else if (this != ModBlocks.VAULT_BONUS_CHEST && this != ModBlocks.VAULT_COOP_CHEST) {
-         return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
+   public VaultChestType getType() {
+      return this.type;
+   }
+
+   @Nullable
+   public <A extends BlockEntity> BlockEntityTicker<A> getTicker(Level pLevel, BlockState state, BlockEntityType<A> tBlockEntityType) {
+      return BlockHelper.getTicker(tBlockEntityType, ModBlocks.VAULT_CHEST_TILE_ENTITY, pLevel.isClientSide ? VaultChestTileEntity::tick : null);
+   }
+
+   public boolean onDestroyedByPlayer(BlockState state, Level world, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
+      if (!(world.getBlockEntity(pos) instanceof VaultChestTileEntity chest && !player.isCreative())) {
+         return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
+      } else if (this != ModBlocks.GILDED_CHEST && this != ModBlocks.LIVING_CHEST && this != ModBlocks.ORNATE_CHEST) {
+         return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
+      } else if (chest.isEmpty()) {
+         return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
       } else {
-         VaultChestTileEntity chest = (VaultChestTileEntity)te;
-         if (chest.func_191420_l()) {
-            return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
-         } else {
-            this.getBlock().func_176208_a(world, pos, state, player);
-            return true;
-         }
+         this.playerWillDestroy(world, pos, state, player);
+         return true;
       }
    }
 
-   public void func_180657_a(World world, PlayerEntity player, BlockPos pos, BlockState state, @Nullable TileEntity te, ItemStack stack) {
-      if (this != ModBlocks.VAULT_BONUS_CHEST && this != ModBlocks.VAULT_COOP_CHEST) {
-         super.func_180657_a(world, player, pos, state, te, stack);
+   public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity te, ItemStack stack) {
+      if (this != ModBlocks.GILDED_CHEST && this != ModBlocks.LIVING_CHEST && this != ModBlocks.ORNATE_CHEST) {
+         super.playerDestroy(world, player, pos, state, te, stack);
       } else {
-         player.func_71029_a(Stats.field_188065_ae.func_199076_b(this));
-         player.func_71020_j(0.005F);
-         if (te instanceof VaultChestTileEntity) {
-            VaultChestTileEntity chest = (VaultChestTileEntity)te;
-
-            for (int slot = 0; slot < chest.func_70302_i_(); slot++) {
-               ItemStack invStack = chest.func_70301_a(slot);
-               if (!invStack.func_190926_b()) {
-                  Block.func_180635_a(world, pos, invStack);
-                  chest.func_70299_a(slot, ItemStack.field_190927_a);
+         player.awardStat(Stats.BLOCK_MINED.get(this));
+         player.causeFoodExhaustion(0.005F);
+         if (te instanceof VaultChestTileEntity chest) {
+            for (int slot = 0; slot < chest.getContainerSize(); slot++) {
+               ItemStack invStack = chest.getItem(slot);
+               if (!invStack.isEmpty()) {
+                  Block.popResource(world, pos, invStack);
+                  chest.setItem(slot, ItemStack.EMPTY);
                   break;
                }
             }
@@ -68,12 +82,65 @@ public class VaultChestBlock extends ChestBlock {
       }
    }
 
-   public TileEntity func_196283_a_(IBlockReader world) {
-      return new VaultChestTileEntity();
+   public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
+      return new VaultChestTileEntity(pPos, pState);
    }
 
-   public BlockState func_196258_a(BlockItemUseContext context) {
-      BlockState state = super.func_196258_a(context);
-      return state == null ? null : (BlockState)state.func_206870_a(field_196314_b, ChestType.SINGLE);
+   public BlockState getStateForPlacement(BlockPlaceContext context) {
+      BlockState state = super.getStateForPlacement(context);
+      return state == null ? null : (BlockState)state.setValue(TYPE, ChestType.SINGLE);
+   }
+
+   @org.jetbrains.annotations.Nullable
+   public MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
+      if ((
+            state.getBlock() == ModBlocks.ALTAR_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.GILDED_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.LIVING_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.ORNATE_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.TREASURE_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.WOODEN_CHEST_PLACEABLE
+         )
+         && level.getBlockEntity(pos) instanceof VaultChestTileEntity te) {
+         return new MenuProvider() {
+            public Component getDisplayName() {
+               return te.getDisplayName();
+            }
+
+            @Nullable
+            public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+               if (te.canOpen(player)) {
+                  switch (te.getContainerSize()) {
+                     case 36:
+                        return new ChestMenu(MenuType.GENERIC_9x4, containerId, playerInventory, te, 4);
+                     case 45:
+                        return new ChestMenu(MenuType.GENERIC_9x5, containerId, playerInventory, te, 5);
+                     case 54:
+                        return new ChestMenu(MenuType.GENERIC_9x6, containerId, playerInventory, te, 6);
+                     default:
+                        return new ChestMenu(MenuType.GENERIC_9x3, containerId, playerInventory, te, 3);
+                  }
+               } else {
+                  return null;
+               }
+            }
+         };
+      } else {
+         return this == ModBlocks.TREASURE_CHEST && level.getBlockEntity(pos) instanceof ChestBlockEntity chest ? new MenuProvider() {
+            public Component getDisplayName() {
+               return chest.getDisplayName();
+            }
+
+            @Nullable
+            public AbstractContainerMenu createMenu(int containerId, Inventory playerInventory, Player player) {
+               if (chest.canOpen(player)) {
+                  chest.unpackLootTable(player);
+                  return ChestMenu.sixRows(containerId, playerInventory, chest);
+               } else {
+                  return null;
+               }
+            }
+         } : super.getMenuProvider(state, level, pos);
+      }
    }
 }

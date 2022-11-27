@@ -1,9 +1,9 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class OtherSideConfig extends Config {
@@ -18,11 +18,11 @@ public class OtherSideConfig extends Config {
    @Override
    protected void reset() {
       this.VALID_BLOCKS = new String[]{
-         Blocks.field_150371_ca.getRegistryName().toString(),
-         Blocks.field_235395_nI_.getRegistryName().toString(),
-         Blocks.field_196770_fj.getRegistryName().toString(),
-         Blocks.field_196581_bI.getRegistryName().toString(),
-         Blocks.field_196772_fk.getRegistryName().toString()
+         Blocks.QUARTZ_BLOCK.getRegistryName().toString(),
+         Blocks.QUARTZ_BRICKS.getRegistryName().toString(),
+         Blocks.QUARTZ_PILLAR.getRegistryName().toString(),
+         Blocks.SMOOTH_QUARTZ.getRegistryName().toString(),
+         Blocks.CHISELED_QUARTZ_BLOCK.getRegistryName().toString()
       };
    }
 

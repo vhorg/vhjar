@@ -1,39 +1,44 @@
 package iskallia.vault.item.gear;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.ImmutableMultimap.Builder;
+import iskallia.vault.gear.VaultGearClassification;
+import iskallia.vault.gear.VaultGearHelper;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.crafting.ProficiencyType;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.gear.tooltip.GearTooltip;
+import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
+import iskallia.vault.init.ModDynamicModels;
+import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.world.data.PlayerFavourData;
 import java.util.List;
-import java.util.UUID;
+import java.util.Random;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item.Properties;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.item.ItemStack.TooltipPart;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.NotNull;
 
-public class IdolItem extends BasicItem implements VaultGear<IdolItem> {
-   private static final UUID ATTACK_DAMAGE_MODIFIER = UUID.fromString("CB3F55D3-645C-4F38-A497-2C13A33D1234");
-   private static final UUID ATTACK_SPEED_MODIFIER = UUID.fromString("FA233E1C-4180-4865-B01B-4CCE97851234");
+public class IdolItem extends BasicItem implements VaultGearItem {
    private final PlayerFavourData.VaultGodType type;
 
    public IdolItem(ResourceLocation id, PlayerFavourData.VaultGodType type, Properties properties) {
@@ -45,32 +50,48 @@ public class IdolItem extends BasicItem implements VaultGear<IdolItem> {
       return this.type;
    }
 
+   @Nullable
    @Override
-   public int getModelsFor(VaultGear.Rarity rarity) {
-      return 1;
+   public ResourceLocation getRandomModel(ItemStack stack, Random random) {
+      return switch (this.type) {
+         case BENEVOLENT -> ModDynamicModels.Idols.VELARA.getId();
+         case OMNISCIENT -> ModDynamicModels.Idols.TENOS.getId();
+         case TIMEKEEPER -> ModDynamicModels.Idols.WENDARR.getId();
+         case MALEVOLENT -> ModDynamicModels.Idols.IDONA.getId();
+         default -> null;
+      };
    }
 
    @Nullable
    @Override
-   public EquipmentSlotType getIntendedSlot() {
-      return EquipmentSlotType.OFFHAND;
+   public EquipmentSlot getIntendedSlot(ItemStack stack) {
+      return EquipmentSlot.OFFHAND;
    }
 
-   public void func_150895_a(ItemGroup group, NonNullList<ItemStack> items) {
-      if (this.func_194125_a(group)) {
-         this.fillItemGroup(items);
+   @NotNull
+   @Override
+   public VaultGearClassification getClassification(ItemStack stack) {
+      return VaultGearClassification.IDOL;
+   }
+
+   @Nonnull
+   @Override
+   public ProficiencyType getCraftingProficiencyType(ItemStack stack) {
+      return ProficiencyType.IDOL;
+   }
+
+   public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
+      if (this.allowdedIn(group)) {
+         items.add(this.defaultItem());
       }
    }
 
-   public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType slot, ItemStack stack) {
-      if (this.isIntendedForSlot(slot)) {
-         Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-         builder.put(Attributes.field_233823_f_, new AttributeModifier(ATTACK_DAMAGE_MODIFIER, "Idol modifier", 0.0, Operation.ADDITION));
-         builder.put(Attributes.field_233825_h_, new AttributeModifier(ATTACK_SPEED_MODIFIER, "Idol modifier", 0.0, Operation.ADDITION));
-         return this.getAttributeModifiers(this, slot, stack, builder.build());
-      } else {
-         return ImmutableMultimap.of();
-      }
+   public int getDefaultTooltipHideFlags(@NotNull ItemStack stack) {
+      return super.getDefaultTooltipHideFlags(stack) | TooltipPart.MODIFIERS.getMask();
+   }
+
+   public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
+      return VaultGearHelper.getModifiers(stack, slot);
    }
 
    public boolean isRepairable(ItemStack stack) {
@@ -78,41 +99,32 @@ public class IdolItem extends BasicItem implements VaultGear<IdolItem> {
    }
 
    public boolean isDamageable(ItemStack stack) {
-      return this.isDamageable(this, stack);
+      return true;
    }
 
    public int getMaxDamage(ItemStack stack) {
-      return this.getMaxDamage(this, stack, super.getMaxDamage(stack));
+      return VaultGearData.read(stack).get(ModGearAttributes.DURABILITY, VaultGearAttributeTypeMerger.intSum());
    }
 
-   public ITextComponent func_200295_i(ItemStack stack) {
-      return this.getDisplayName(this, stack, super.func_200295_i(stack));
+   public Component getName(ItemStack stack) {
+      return VaultGearHelper.getDisplayName(stack, super.getName(stack));
    }
 
-   public ActionResult<ItemStack> func_77659_a(World world, PlayerEntity player, Hand hand) {
-      return this.onItemRightClick(this, world, player, hand, super.func_77659_a(world, player, hand));
+   public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+      return VaultGearHelper.rightClick(world, player, hand, super.use(world, player, hand));
    }
 
-   public void func_77663_a(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
-      super.func_77663_a(stack, world, entity, itemSlot, isSelected);
-      this.splitStack(this, stack, world, entity);
-      if (entity instanceof ServerPlayerEntity) {
-         this.inventoryTick(this, stack, world, (ServerPlayerEntity)entity, itemSlot, isSelected);
+   public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
+      super.inventoryTick(stack, world, entity, itemSlot, isSelected);
+      if (entity instanceof ServerPlayer player) {
+         this.vaultGearTick(stack, player);
       }
    }
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public void func_77624_a(ItemStack stack, World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
-      super.func_77624_a(stack, world, tooltip, flag);
-      this.addInformation(this, stack, tooltip, Screen.func_231173_s_());
-   }
-
-   public boolean canElytraFly(ItemStack stack, LivingEntity entity) {
-      return this.canElytraFly(this, stack, entity);
-   }
-
-   public boolean elytraFlightTick(ItemStack stack, LivingEntity entity, int flightTicks) {
-      return this.elytraFlightTick(this, stack, entity, flightTicks);
+   public void appendHoverText(ItemStack stack, Level world, List<Component> tooltip, TooltipFlag flag) {
+      super.appendHoverText(stack, world, tooltip, flag);
+      tooltip.addAll(VaultGearDataTooltip.createTooltip(stack, GearTooltip.itemTooltip()));
    }
 }

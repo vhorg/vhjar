@@ -1,56 +1,59 @@
 package iskallia.vault.client.gui.helper;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
+import com.mojang.math.Matrix4f;
 import java.awt.Color;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.util.math.vector.Matrix4f;
 
 public class ScreenDrawHelper {
-   public static void drawQuad(Consumer<BufferBuilder> fn) {
-      draw(7, DefaultVertexFormats.field_227851_o_, fn);
+   public static void drawTexturedQuads(Consumer<BufferBuilder> fn) {
+      draw(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR_TEX, fn);
    }
 
-   public static void draw(int drawMode, VertexFormat format, Consumer<BufferBuilder> fn) {
+   public static void draw(Mode drawMode, VertexFormat format, Consumer<BufferBuilder> fn) {
       draw(drawMode, format, bufferBuilder -> {
          fn.accept(bufferBuilder);
          return null;
       });
    }
 
-   public static <R> R draw(int drawMode, VertexFormat format, Function<BufferBuilder, R> fn) {
-      BufferBuilder buf = Tessellator.func_178181_a().func_178180_c();
-      buf.func_181668_a(drawMode, format);
+   public static <R> R draw(Mode drawMode, VertexFormat format, Function<BufferBuilder, R> fn) {
+      BufferBuilder buf = Tesselator.getInstance().getBuilder();
+      buf.begin(drawMode, format);
       R result = fn.apply(buf);
-      buf.func_178977_d();
-      WorldVertexBufferUploader.func_181679_a(buf);
+      buf.end();
+      BufferUploader.end(buf);
       return result;
    }
 
-   public static ScreenDrawHelper.QuadBuilder rect(IVertexBuilder buf, MatrixStack renderStack) {
+   public static ScreenDrawHelper.QuadBuilder rect(VertexConsumer buf, PoseStack renderStack) {
       return new ScreenDrawHelper.QuadBuilder(buf, renderStack);
    }
 
-   public static ScreenDrawHelper.QuadBuilder rect(IVertexBuilder buf, MatrixStack renderStack, float width, float height) {
+   public static ScreenDrawHelper.QuadBuilder rect(VertexConsumer buf, PoseStack renderStack, float width, float height) {
       return rect(buf, renderStack, 0.0F, 0.0F, 0.0F, width, height);
    }
 
    public static ScreenDrawHelper.QuadBuilder rect(
-      IVertexBuilder buf, MatrixStack renderStack, float offsetX, float offsetY, float offsetZ, float width, float height
+      VertexConsumer buf, PoseStack renderStack, float offsetX, float offsetY, float offsetZ, float width, float height
    ) {
       return new ScreenDrawHelper.QuadBuilder(buf, renderStack, offsetX, offsetY, offsetZ, width, height);
    }
 
    public static class QuadBuilder {
-      private final IVertexBuilder buf;
-      private final MatrixStack renderStack;
+      private final VertexConsumer buf;
+      private final PoseStack renderStack;
       private float offsetX;
       private float offsetY;
       private float offsetZ;
@@ -62,12 +65,12 @@ public class ScreenDrawHelper {
       private float vWidth = 1.0F;
       private Color color = Color.WHITE;
 
-      private QuadBuilder(IVertexBuilder buf, MatrixStack renderStack) {
+      private QuadBuilder(VertexConsumer buf, PoseStack renderStack) {
          this.buf = buf;
          this.renderStack = renderStack;
       }
 
-      private QuadBuilder(IVertexBuilder buf, MatrixStack renderStack, float offsetX, float offsetY, float offsetZ, float width, float height) {
+      private QuadBuilder(VertexConsumer buf, PoseStack renderStack, float offsetX, float offsetY, float offsetZ, float width, float height) {
          this.buf = buf;
          this.renderStack = renderStack;
          this.offsetX = offsetX;
@@ -95,7 +98,7 @@ public class ScreenDrawHelper {
       }
 
       public ScreenDrawHelper.QuadBuilder tex(TextureAtlasSprite tas) {
-         return this.tex(tas.func_94209_e(), tas.func_94206_g(), tas.func_94212_f() - tas.func_94209_e(), tas.func_94210_h() - tas.func_94206_g());
+         return this.tex(tas.getU0(), tas.getV0(), tas.getU1() - tas.getU0(), tas.getV1() - tas.getV0());
       }
 
       public ScreenDrawHelper.QuadBuilder texVanilla(float pxU, float pxV, float pxWidth, float pxHeight) {
@@ -131,28 +134,35 @@ public class ScreenDrawHelper {
          return this.color(new Color(r, g, b, a));
       }
 
-      public ScreenDrawHelper.QuadBuilder draw() {
+      public ScreenDrawHelper.QuadBuilder drawColored() {
+         RenderSystem.setShader(GameRenderer::getPositionColorShader);
          int r = this.color.getRed();
          int g = this.color.getGreen();
          int b = this.color.getBlue();
          int a = this.color.getAlpha();
-         Matrix4f offset = this.renderStack.func_227866_c_().func_227870_a_();
+         Matrix4f offset = this.renderStack.last().pose();
+         this.buf.vertex(offset, this.offsetX, this.offsetY + this.height, this.offsetZ).color(r, g, b, a).endVertex();
+         this.buf.vertex(offset, this.offsetX + this.width, this.offsetY + this.height, this.offsetZ).color(r, g, b, a).endVertex();
+         this.buf.vertex(offset, this.offsetX + this.width, this.offsetY, this.offsetZ).color(r, g, b, a).endVertex();
+         this.buf.vertex(offset, this.offsetX, this.offsetY, this.offsetZ).color(r, g, b, a).endVertex();
+         return this;
+      }
+
+      public ScreenDrawHelper.QuadBuilder draw() {
+         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
+         int r = this.color.getRed();
+         int g = this.color.getGreen();
+         int b = this.color.getBlue();
+         int a = this.color.getAlpha();
+         Matrix4f offset = this.renderStack.last().pose();
+         this.buf.vertex(offset, this.offsetX, this.offsetY + this.height, this.offsetZ).color(r, g, b, a).uv(this.u, this.v + this.vWidth).endVertex();
          this.buf
-            .func_227888_a_(offset, this.offsetX, this.offsetY + this.height, this.offsetZ)
-            .func_225586_a_(r, g, b, a)
-            .func_225583_a_(this.u, this.v + this.vWidth)
-            .func_181675_d();
-         this.buf
-            .func_227888_a_(offset, this.offsetX + this.width, this.offsetY + this.height, this.offsetZ)
-            .func_225586_a_(r, g, b, a)
-            .func_225583_a_(this.u + this.uWidth, this.v + this.vWidth)
-            .func_181675_d();
-         this.buf
-            .func_227888_a_(offset, this.offsetX + this.width, this.offsetY, this.offsetZ)
-            .func_225586_a_(r, g, b, a)
-            .func_225583_a_(this.u + this.uWidth, this.v)
-            .func_181675_d();
-         this.buf.func_227888_a_(offset, this.offsetX, this.offsetY, this.offsetZ).func_225586_a_(r, g, b, a).func_225583_a_(this.u, this.v).func_181675_d();
+            .vertex(offset, this.offsetX + this.width, this.offsetY + this.height, this.offsetZ)
+            .color(r, g, b, a)
+            .uv(this.u + this.uWidth, this.v + this.vWidth)
+            .endVertex();
+         this.buf.vertex(offset, this.offsetX + this.width, this.offsetY, this.offsetZ).color(r, g, b, a).uv(this.u + this.uWidth, this.v).endVertex();
+         this.buf.vertex(offset, this.offsetX, this.offsetY, this.offsetZ).color(r, g, b, a).uv(this.u, this.v).endVertex();
          return this;
       }
    }

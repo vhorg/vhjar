@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.LinkedList;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -73,7 +73,7 @@ public class ClientSandEventData {
       this.timeout = 60;
    }
 
-   public void addContributor(ITextComponent contributorDisplay) {
+   public void addContributor(Component contributorDisplay) {
       synchronized (this.contributors) {
          this.contributors.addFirst(new ClientSandEventData.ContributorDisplay(contributorDisplay));
          if (this.contributors.size() > 6) {
@@ -84,15 +84,15 @@ public class ClientSandEventData {
 
    public static class ContributorDisplay {
       public static final int TICK_TOTAL_DISPLAY = 30;
-      private final ITextComponent contributorDisplay;
+      private final Component contributorDisplay;
       private int timeout;
 
-      public ContributorDisplay(ITextComponent contributorDisplay) {
+      public ContributorDisplay(Component contributorDisplay) {
          this.contributorDisplay = contributorDisplay;
          this.timeout = 40;
       }
 
-      public ITextComponent getContributorDisplay() {
+      public Component getContributorDisplay() {
          return this.contributorDisplay;
       }
 

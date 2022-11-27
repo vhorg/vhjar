@@ -18,14 +18,14 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.storage.FolderName;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.LevelResource;
 import net.minecraftforge.fml.ModList;
 
 public class BackupManager {
@@ -35,16 +35,16 @@ public class BackupManager {
    private BackupManager() {
    }
 
-   public static boolean createPlayerInventorySnapshot(ServerPlayerEntity playerEntity) {
-      MinecraftServer srv = playerEntity.func_184102_h();
+   public static boolean createPlayerInventorySnapshot(ServerPlayer playerEntity) {
+      MinecraftServer srv = playerEntity.getServer();
       if (srv == null) {
          return false;
       } else {
-         ListNBT list = new ListNBT();
+         ListTag list = new ListTag();
 
-         for (int index = 0; index < playerEntity.field_71071_by.func_70302_i_(); index++) {
-            ItemStack stack = playerEntity.field_71071_by.func_70301_a(index);
-            if (!stack.func_190926_b()) {
+         for (int index = 0; index < playerEntity.getInventory().getContainerSize(); index++) {
+            ItemStack stack = playerEntity.getInventory().getItem(index);
+            if (!stack.isEmpty()) {
                list.add(stack.serializeNBT());
             }
          }
@@ -53,12 +53,12 @@ public class BackupManager {
             list.addAll(IntegrationCurios.getSerializedCuriosItemStacks(playerEntity));
          }
 
-         CompoundNBT tag = new CompoundNBT();
-         tag.func_218657_a("data", list);
-         File datFile = getStoredFile(srv, playerEntity.func_110124_au(), DATE_FORMAT.format(LocalDateTime.now()));
+         CompoundTag tag = new CompoundTag();
+         tag.put("data", list);
+         File datFile = getStoredFile(srv, playerEntity.getUUID(), DATE_FORMAT.format(LocalDateTime.now()));
 
          try {
-            CompressedStreamTools.func_74795_b(tag, datFile);
+            NbtIo.write(tag, datFile);
             return true;
          } catch (IOException var6) {
             var6.printStackTrace();
@@ -72,20 +72,20 @@ public class BackupManager {
       if (!storedFile.exists()) {
          return Optional.empty();
       } else {
-         CompoundNBT tag;
+         CompoundTag tag;
          try {
-            tag = CompressedStreamTools.func_74797_a(storedFile);
+            tag = NbtIo.read(storedFile);
          } catch (IOException var9) {
             var9.printStackTrace();
             return Optional.empty();
          }
 
-         ListNBT data = tag.func_150295_c("data", 10);
+         ListTag data = tag.getList("data", 10);
          List<ItemStack> stacks = new ArrayList<>();
 
          for (int i = 0; i < data.size(); i++) {
-            ItemStack stack = ItemStack.func_199557_a(data.func_150305_b(i));
-            if (!stack.func_190926_b()) {
+            ItemStack stack = ItemStack.of(data.getCompound(i));
+            if (!stack.isEmpty()) {
                stacks.add(stack);
             }
          }
@@ -104,7 +104,7 @@ public class BackupManager {
       if (files == null) {
          return Collections.emptyList();
       } else {
-         Comparator<? super Tuple<File, LocalDateTime>> tplTimeComparator = Comparator.comparing(Tuple::func_76340_b);
+         Comparator<? super Tuple<File, LocalDateTime>> tplTimeComparator = Comparator.comparing(Tuple::getB);
          tplTimeComparator = tplTimeComparator.reversed();
          long limit = count < 0 ? Long.MAX_VALUE : count;
          return Arrays.asList(files)
@@ -129,7 +129,7 @@ public class BackupManager {
             .filter(Objects::nonNull)
             .sorted(tplTimeComparator)
             .limit(limit)
-            .map(tpl -> DATE_FORMAT.format((TemporalAccessor)tpl.func_76340_b()))
+            .map(tpl -> DATE_FORMAT.format((TemporalAccessor)tpl.getB()))
             .collect(Collectors.toList());
       }
    }
@@ -139,7 +139,7 @@ public class BackupManager {
    }
 
    private static File getStorageDir(MinecraftServer server, UUID playerUUID) {
-      File dir = server.func_240776_a_(FolderName.field_237253_i_).resolve("vault_inventory_backup").resolve(playerUUID.toString()).toFile();
+      File dir = server.getWorldPath(LevelResource.ROOT).resolve("vault_inventory_backup").resolve(playerUUID.toString()).toFile();
       if (!dir.exists()) {
          dir.mkdirs();
       }

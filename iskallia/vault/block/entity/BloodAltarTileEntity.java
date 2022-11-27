@@ -6,17 +6,19 @@ import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.vault.VaultRaid;
 import java.awt.Color;
 import java.util.Optional;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BloodAltarTileEntity extends FillableAltarTileEntity {
-   public BloodAltarTileEntity() {
-      super(ModBlocks.BLOOD_ALTAR_TILE_ENTITY);
+   public BloodAltarTileEntity(BlockPos pos, BlockState state) {
+      super(ModBlocks.BLOOD_ALTAR_TILE_ENTITY, pos, state);
    }
 
    @Override
-   public ITextComponent getRequirementName() {
-      return new StringTextComponent("Health Points");
+   public Component getRequirementName() {
+      return new TextComponent("Health Points");
    }
 
    @Override
@@ -25,8 +27,8 @@ public class BloodAltarTileEntity extends FillableAltarTileEntity {
    }
 
    @Override
-   public ITextComponent getRequirementUnit() {
-      return new StringTextComponent("hearts");
+   public Component getRequirementUnit() {
+      return new TextComponent("hearts");
    }
 
    @Override
@@ -37,7 +39,7 @@ public class BloodAltarTileEntity extends FillableAltarTileEntity {
    @Override
    protected Optional<Integer> calcMaxProgress(VaultRaid vault) {
       return vault.getProperties().getBase(VaultRaid.LEVEL).map(vaultLevel -> {
-         float multiplier = vault.getProperties().getBase(VaultRaid.HOST).map(this::getMaxProgressMultiplier).orElse(1.0F);
+         float multiplier = vault.getProperties().getBase(VaultRaid.HOST).map(x$0 -> this.getMaxProgressMultiplier(x$0)).orElse(1.0F);
          int progress = 3 + vaultLevel / 5;
          return Math.round(progress * multiplier);
       });

@@ -1,6 +1,7 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.MathUtilities;
@@ -46,9 +47,9 @@ public class RaidModifierConfig extends Config {
    @Expose
    private List<ModifierDoublingModifier> MODIFIER_DOUBLING_MODIFIERS = new ArrayList<>();
    @Expose
-   private List<RaidModifierConfig.Level> positiveLevels = new ArrayList<>();
+   private LevelEntryList<RaidModifierConfig.Level> positiveLevels = new LevelEntryList<>();
    @Expose
-   private List<RaidModifierConfig.Level> negativeLevels = new ArrayList<>();
+   private LevelEntryList<RaidModifierConfig.Level> negativeLevels = new LevelEntryList<>();
 
    public List<RaidModifier> getAll() {
       return Stream.of(
@@ -73,8 +74,8 @@ public class RaidModifierConfig extends Config {
    }
 
    public Optional<RaidModifierConfig.RollableModifier> getRandomModifier(int level, boolean positive, boolean preventArtifacts) {
-      List<RaidModifierConfig.Level> levels = positive ? this.positiveLevels : this.negativeLevels;
-      return this.getForLevel(levels, level).map(modifierLevel -> {
+      LevelEntryList<RaidModifierConfig.Level> levels = positive ? this.positiveLevels : this.negativeLevels;
+      return levels.getForLevel(level).map(modifierLevel -> {
          WeightedList<RaidModifierConfig.RollableModifier> modifierList = modifierLevel.modifiers;
          if (preventArtifacts) {
             modifierList = modifierList.copyFiltered(modifierName -> {
@@ -107,14 +108,14 @@ public class RaidModifierConfig extends Config {
       this.MONSTER_LEVEL_MODIFIERS = new ArrayList<>();
       this.MONSTER_LEVEL_MODIFIERS.add(new MonsterLevelModifier("monsterLevel"));
       this.BLOCK_PLACEMENT_MODIFIERS = new ArrayList<>();
-      this.BLOCK_PLACEMENT_MODIFIERS.add(new BlockPlacementModifier("gildedChests", ModBlocks.VAULT_BONUS_CHEST, 5, "Gilded Chests"));
+      this.BLOCK_PLACEMENT_MODIFIERS.add(new BlockPlacementModifier("gildedChests", ModBlocks.GILDED_CHEST, 5, "Gilded Chests"));
       this.ITEM_PLACEMENT_MODIFIERS = new ArrayList<>();
       this.ITEM_PLACEMENT_MODIFIERS.add(new FloatingItemModifier("vaultGems", 10, FloatingItemModifier.defaultGemList(), "Vault Gems"));
       this.ARTIFACT_FRAGMENT_MODIFIERS = new ArrayList<>();
       this.ARTIFACT_FRAGMENT_MODIFIERS.add(new ArtifactFragmentModifier("artifactFragment"));
       this.MODIFIER_DOUBLING_MODIFIERS = new ArrayList<>();
       this.MODIFIER_DOUBLING_MODIFIERS.add(new ModifierDoublingModifier("modifierDoubling"));
-      this.positiveLevels = new ArrayList<>();
+      this.positiveLevels = new LevelEntryList<>();
       this.positiveLevels
          .add(
             new RaidModifierConfig.Level(
@@ -125,7 +126,7 @@ public class RaidModifierConfig extends Config {
                   .add(new RaidModifierConfig.RollableModifier("artifactFragment", 0.01F, 0.05F), 1)
             )
          );
-      this.negativeLevels = new ArrayList<>();
+      this.negativeLevels = new LevelEntryList<>();
       this.negativeLevels
          .add(
             new RaidModifierConfig.Level(
@@ -137,24 +138,7 @@ public class RaidModifierConfig extends Config {
          );
    }
 
-   private Optional<RaidModifierConfig.Level> getForLevel(List<RaidModifierConfig.Level> levels, int level) {
-      for (int i = 0; i < levels.size(); i++) {
-         if (level < levels.get(i).level) {
-            if (i != 0) {
-               return Optional.of(levels.get(i - 1));
-            }
-            break;
-         }
-
-         if (i == levels.size() - 1) {
-            return Optional.of(levels.get(i));
-         }
-      }
-
-      return Optional.empty();
-   }
-
-   public static class Level {
+   public static class Level implements LevelEntryList.ILevelEntry {
       @Expose
       private final int level;
       @Expose
@@ -163,6 +147,11 @@ public class RaidModifierConfig extends Config {
       public Level(int level, WeightedList<RaidModifierConfig.RollableModifier> modifiers) {
          this.level = level;
          this.modifiers = modifiers;
+      }
+
+      @Override
+      public int getLevel() {
+         return this.level;
       }
    }
 

@@ -1,6 +1,0 @@
-{
-  "parent": "the_vault:block/base/nothing",
-  "textures": {
-    "particle": "the_vault:block/vending_machine_bottom_front"
-  }
-}

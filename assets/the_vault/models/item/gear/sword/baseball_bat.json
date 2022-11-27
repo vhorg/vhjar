@@ -1,0 +1,81 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "the_vault:item/gear/sword/baseball_bat"
+	},
+	"elements": [
+		{
+			"from": [7, 12, 6],
+			"to": [11, 31, 10],
+			"faces": {
+				"north": {"uv": [0, 0, 2, 9.5], "texture": "#0"},
+				"east": {"uv": [2, 0, 4, 9.5], "texture": "#0"},
+				"south": {"uv": [4, 0, 6, 9.5], "texture": "#0"},
+				"west": {"uv": [6, 0, 8, 9.5], "texture": "#0"},
+				"up": {"uv": [2, 11.5, 0, 9.5], "texture": "#0"},
+				"down": {"uv": [4, 9.5, 2, 11.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [7.5, 0, 6.5],
+			"to": [10.5, 3, 9.5],
+			"faces": {
+				"north": {"uv": [4, 9.5, 5.5, 11], "texture": "#0"},
+				"east": {"uv": [5.5, 9.5, 7, 11], "texture": "#0"},
+				"south": {"uv": [10, 0, 11.5, 1.5], "texture": "#0"},
+				"west": {"uv": [10, 1.5, 11.5, 3], "texture": "#0"},
+				"up": {"uv": [11.5, 4.5, 10, 3], "texture": "#0"},
+				"down": {"uv": [11.5, 4.5, 10, 6], "texture": "#0"}
+			}
+		},
+		{
+			"from": [8, 3, 7],
+			"to": [10, 14, 9],
+			"faces": {
+				"north": {"uv": [8, 0, 9, 5.5], "texture": "#0"},
+				"east": {"uv": [8, 5.5, 9, 11], "texture": "#0"},
+				"south": {"uv": [9, 0, 10, 5.5], "texture": "#0"},
+				"west": {"uv": [9, 5.5, 10, 11], "texture": "#0"},
+				"up": {"uv": [8, 10.5, 7, 9.5], "texture": "#0"},
+				"down": {"uv": [11, 6, 10, 7], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [-0.75, -0.5, 1.75]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0.75, -0.5, 1.75]
+		},
+		"firstperson_righthand": {
+			"rotation": [16, 0, 0],
+			"translation": [0, 1.25, 0],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"firstperson_lefthand": {
+			"rotation": [16, 0, 0],
+			"translation": [0, 1.25, 0],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"ground": {
+			"rotation": [0, 0, 45],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [0, 0, -45],
+			"translation": [-4.25, -3, 0],
+			"scale": [0.6582, 0.6582, 0.6582]
+		},
+		"head": {
+			"rotation": [0, 0, 140.5],
+			"translation": [3.5, 15.75, 0]
+		},
+		"fixed": {
+			"rotation": [0, 0, 45],
+			"translation": [4, -4.75, 0],
+			"scale": [0.74414, 0.74414, 0.74414]
+		}
+	}
+}

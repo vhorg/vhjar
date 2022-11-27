@@ -1,6 +1,6 @@
 package iskallia.vault.util;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class ResourceBoundary {
    ResourceLocation resource;
@@ -29,11 +29,11 @@ public class ResourceBoundary {
       return this.v;
    }
 
-   public int getW() {
+   public int getWidth() {
       return this.w;
    }
 
-   public int getH() {
+   public int getHeight() {
       return this.h;
    }
 }

@@ -6,14 +6,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item.Properties;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -25,24 +25,24 @@ public class VaultCharmUpgrade extends BasicItem {
       this.tier = tier;
    }
 
-   public ITextComponent func_200295_i(ItemStack stack) {
-      return new StringTextComponent("Vault Charm Upgrade (" + this.tier.getName() + ")");
+   public Component getName(ItemStack stack) {
+      return new TextComponent("Vault Charm Upgrade (" + this.tier.getName() + ")");
    }
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public void func_77624_a(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
-      tooltip.add(StringTextComponent.field_240750_d_);
+   public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+      tooltip.add(TextComponent.EMPTY);
       tooltip.addAll(getTooltipForTier(this.tier));
    }
 
-   private static List<ITextComponent> getTooltipForTier(VaultCharmUpgrade.Tier tier) {
-      List<ITextComponent> tooltip = new ArrayList<>();
+   private static List<Component> getTooltipForTier(VaultCharmUpgrade.Tier tier) {
+      List<Component> tooltip = new ArrayList<>();
       if (ModConfigs.VAULT_CHARM != null) {
          int slotCount = tier.getSlotAmount();
-         tooltip.add(new StringTextComponent("Increases the amount of slots"));
-         tooltip.add(new StringTextComponent("that items can be added to the"));
-         tooltip.add(new StringTextComponent("Vault Charm Whitelist to " + TextFormatting.YELLOW + slotCount));
+         tooltip.add(new TextComponent("Increases the amount of slots"));
+         tooltip.add(new TextComponent("that items can be added to the"));
+         tooltip.add(new TextComponent("Vault Charm Whitelist to " + ChatFormatting.YELLOW + slotCount));
       }
 
       return tooltip;
@@ -96,16 +96,12 @@ public class VaultCharmUpgrade extends BasicItem {
       }
 
       public VaultCharmUpgrade.Tier getNext() {
-         switch (this) {
-            case ONE:
-               return TWO;
-            case TWO:
-               return THREE;
-            case THREE:
-               return FOUR;
-            default:
-               return null;
-         }
+         return switch (this) {
+            case ONE -> TWO;
+            case TWO -> THREE;
+            case THREE -> FOUR;
+            default -> null;
+         };
       }
    }
 }

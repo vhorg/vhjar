@@ -1,28 +1,30 @@
 package iskallia.vault.init;
 
-import iskallia.vault.skill.ability.AbilityGroup;
+import com.mojang.blaze3d.platform.InputConstants;
+import iskallia.vault.skill.ability.group.AbilityGroup;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.client.util.InputMappings;
+import net.minecraft.client.KeyMapping;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
+import net.minecraftforge.client.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 @OnlyIn(Dist.CLIENT)
 public class ModKeybinds {
-   public static KeyBinding openAbilityTree;
-   public static KeyBinding openShardTraderScreen;
-   public static KeyBinding abilityKey;
-   public static KeyBinding abilityWheelKey;
-   public static Map<String, KeyBinding> abilityQuickfireKey = new HashMap<>();
+   public static KeyMapping openAbilityTree;
+   public static KeyMapping openShardTraderScreen;
+   public static KeyMapping abilityKey;
+   public static KeyMapping abilityWheelKey;
+   public static KeyMapping bountyStatusKey;
+   public static Map<String, KeyMapping> abilityQuickfireKey = new HashMap<>();
 
    public static void register(FMLClientSetupEvent event) {
       openAbilityTree = createKeyBinding("open_ability_tree", 72);
       openShardTraderScreen = createKeyBinding("open_shard_trader_screen", 296);
       abilityKey = createKeyBinding("ability_key", 71);
       abilityWheelKey = createKeyBinding("ability_wheel_key", 342);
+      bountyStatusKey = createKeyBinding("bounty_status_key");
 
       for (AbilityGroup<?, ?> group : ModConfigs.ABILITIES.getAll()) {
          String abilityDescription = group.getParentName().toLowerCase().replace(' ', '_');
@@ -30,12 +32,12 @@ public class ModKeybinds {
       }
    }
 
-   private static KeyBinding createKeyBinding(String name) {
-      return createKeyBinding(name, InputMappings.field_197958_a.func_197937_c());
+   private static KeyMapping createKeyBinding(String name) {
+      return createKeyBinding(name, InputConstants.UNKNOWN.getValue());
    }
 
-   private static KeyBinding createKeyBinding(String name, int key) {
-      KeyBinding keyBind = new KeyBinding("key.the_vault." + name, key, "key.category.the_vault");
+   private static KeyMapping createKeyBinding(String name, int key) {
+      KeyMapping keyBind = new KeyMapping("key.the_vault." + name, key, "key.category.the_vault");
       ClientRegistry.registerKeyBinding(keyBind);
       return keyBind;
    }

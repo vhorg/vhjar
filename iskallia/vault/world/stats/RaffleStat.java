@@ -1,11 +1,11 @@
 package iskallia.vault.world.stats;
 
 import iskallia.vault.util.data.WeightedList;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class RaffleStat implements INBTSerializable<CompoundNBT> {
+public class RaffleStat implements INBTSerializable<CompoundTag> {
    private WeightedList<String> contributors = new WeightedList<>();
    private String winner = "";
 
@@ -17,27 +17,27 @@ public class RaffleStat implements INBTSerializable<CompoundNBT> {
       this.winner = winner;
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      ListNBT contributorsList = new ListNBT();
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      ListTag contributorsList = new ListTag();
       this.contributors.forEach(entry -> {
-         CompoundNBT tag = new CompoundNBT();
-         tag.func_74778_a("Value", entry.value);
-         tag.func_74768_a("Weight", entry.weight);
+         CompoundTag tag = new CompoundTag();
+         tag.putString("Value", entry.value);
+         tag.putInt("Weight", entry.weight);
          contributorsList.add(tag);
       });
-      nbt.func_218657_a("Contributors", contributorsList);
+      nbt.put("Contributors", contributorsList);
       if (this.winner != null) {
-         nbt.func_74778_a("Winner", this.winner);
+         nbt.putString("Winner", this.winner);
       }
 
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       this.contributors.clear();
-      ListNBT contributorsList = nbt.func_150295_c("Contributors", 9);
-      contributorsList.stream().map(inbt -> (CompoundNBT)inbt).forEach(tag -> this.contributors.add(tag.func_74779_i("Value"), tag.func_74762_e("Weight")));
-      this.winner = nbt.func_74779_i("Winner");
+      ListTag contributorsList = nbt.getList("Contributors", 9);
+      contributorsList.stream().map(inbt -> (CompoundTag)inbt).forEach(tag -> this.contributors.add(tag.getString("Value"), tag.getInt("Weight")));
+      this.winner = nbt.getString("Winner");
    }
 }

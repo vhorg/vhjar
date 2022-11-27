@@ -8,20 +8,21 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
+import iskallia.vault.item.crystal.objective.SpeedrunCrystalObjective;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import javax.annotation.Nullable;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapedRecipe;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public class NonRaffleCrystalShapedRecipe extends ShapedRecipe {
@@ -34,61 +35,61 @@ public class NonRaffleCrystalShapedRecipe extends ShapedRecipe {
       super(idIn, groupIn, recipeWidthIn, recipeHeightIn, recipeItemsIn, recipeOutputIn);
    }
 
-   public boolean func_77569_a(CraftingInventory inv, World worldIn) {
-      for (int i = 0; i < inv.func_70302_i_(); i++) {
-         ItemStack stack = inv.func_70301_a(i);
-         if (stack.func_77973_b() instanceof VaultCrystalItem) {
+   public boolean matches(CraftingContainer inv, Level worldIn) {
+      for (int i = 0; i < inv.getContainerSize(); i++) {
+         ItemStack stack = inv.getItem(i);
+         if (stack.getItem() instanceof VaultCrystalItem) {
             CrystalData data = VaultCrystalItem.getData(stack);
-            if (data.getType() == CrystalData.Type.RAFFLE) {
+            if (data.getObjective() instanceof SpeedrunCrystalObjective) {
                return false;
             }
          }
       }
 
-      return super.func_77569_a(inv, worldIn);
+      return super.matches(inv, worldIn);
    }
 
-   public static class Serializer extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<ShapedRecipe> {
-      public ShapedRecipe read(ResourceLocation recipeId, JsonObject json) {
-         String s = JSONUtils.func_151219_a(json, "group", "");
-         Map<String, Ingredient> map = deserializeKey(JSONUtils.func_152754_s(json, "key"));
-         String[] astring = shrink(patternFromJson(JSONUtils.func_151214_t(json, "pattern")));
+   public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<ShapedRecipe> {
+      public ShapedRecipe fromJson(ResourceLocation recipeId, JsonObject json) {
+         String s = GsonHelper.getAsString(json, "group", "");
+         Map<String, Ingredient> map = deserializeKey(GsonHelper.getAsJsonObject(json, "key"));
+         String[] astring = shrink(patternFromJson(GsonHelper.getAsJsonArray(json, "pattern")));
          int i = astring[0].length();
          int j = astring.length;
          NonNullList<Ingredient> nonnulllist = deserializeIngredients(astring, map, i, j);
-         ItemStack itemstack = ShapedRecipe.func_199798_a(JSONUtils.func_152754_s(json, "result"));
+         ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
          return new NonRaffleCrystalShapedRecipe(recipeId, s, i, j, nonnulllist, itemstack);
       }
 
       @Nullable
-      public ShapedRecipe read(ResourceLocation recipeId, PacketBuffer buffer) {
-         int i = buffer.func_150792_a();
-         int j = buffer.func_150792_a();
-         String s = buffer.func_150789_c(32767);
-         NonNullList<Ingredient> nonnulllist = NonNullList.func_191197_a(i * j, Ingredient.field_193370_a);
+      public ShapedRecipe fromNetwork(ResourceLocation recipeId, FriendlyByteBuf buffer) {
+         int i = buffer.readVarInt();
+         int j = buffer.readVarInt();
+         String s = buffer.readUtf(32767);
+         NonNullList<Ingredient> nonnulllist = NonNullList.withSize(i * j, Ingredient.EMPTY);
 
          for (int k = 0; k < nonnulllist.size(); k++) {
-            nonnulllist.set(k, Ingredient.func_199566_b(buffer));
+            nonnulllist.set(k, Ingredient.fromNetwork(buffer));
          }
 
-         ItemStack itemstack = buffer.func_150791_c();
+         ItemStack itemstack = buffer.readItem();
          return new NonRaffleCrystalShapedRecipe(recipeId, s, i, j, nonnulllist, itemstack);
       }
 
-      public void write(PacketBuffer buffer, ShapedRecipe recipe) {
-         buffer.func_150787_b(recipe.getRecipeWidth());
-         buffer.func_150787_b(recipe.getRecipeHeight());
-         buffer.func_180714_a(recipe.func_193358_e());
+      public void toNetwork(FriendlyByteBuf buffer, ShapedRecipe recipe) {
+         buffer.writeVarInt(recipe.getRecipeWidth());
+         buffer.writeVarInt(recipe.getRecipeHeight());
+         buffer.writeUtf(recipe.getGroup());
 
-         for (Ingredient ingredient : recipe.func_192400_c()) {
-            ingredient.func_199564_a(buffer);
+         for (Ingredient ingredient : recipe.getIngredients()) {
+            ingredient.toNetwork(buffer);
          }
 
-         buffer.func_150788_a(recipe.func_77571_b());
+         buffer.writeItem(recipe.getResultItem());
       }
 
       private static NonNullList<Ingredient> deserializeIngredients(String[] pattern, Map<String, Ingredient> keys, int patternWidth, int patternHeight) {
-         NonNullList<Ingredient> nonnulllist = NonNullList.func_191197_a(patternWidth * patternHeight, Ingredient.field_193370_a);
+         NonNullList<Ingredient> nonnulllist = NonNullList.withSize(patternWidth * patternHeight, Ingredient.EMPTY);
          Set<String> set = Sets.newHashSet(keys.keySet());
          set.remove(" ");
 
@@ -175,7 +176,7 @@ public class NonRaffleCrystalShapedRecipe extends ShapedRecipe {
             throw new JsonSyntaxException("Invalid pattern: empty pattern not allowed");
          } else {
             for (int i = 0; i < astring.length; i++) {
-               String s = JSONUtils.func_151206_a(jsonArr.get(i), "pattern[" + i + "]");
+               String s = GsonHelper.convertToString(jsonArr.get(i), "pattern[" + i + "]");
                if (s.length() > NonRaffleCrystalShapedRecipe.MAX_WIDTH) {
                   throw new JsonSyntaxException("Invalid pattern: too many columns, " + NonRaffleCrystalShapedRecipe.MAX_WIDTH + " is maximum");
                }
@@ -203,10 +204,10 @@ public class NonRaffleCrystalShapedRecipe extends ShapedRecipe {
                throw new JsonSyntaxException("Invalid key entry: ' ' is a reserved symbol.");
             }
 
-            map.put(entry.getKey(), Ingredient.func_199802_a(entry.getValue()));
+            map.put(entry.getKey(), Ingredient.fromJson(entry.getValue()));
          }
 
-         map.put(" ", Ingredient.field_193370_a);
+         map.put(" ", Ingredient.EMPTY);
          return map;
       }
    }

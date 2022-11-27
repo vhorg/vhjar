@@ -1,19 +1,21 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " p ",
-    "nnn",
-    " s "
+    "nc",
+    "sg"
   ],
   "key": {
-    "p": {
+    "g": {
       "item": "the_vault:gem_painite"
     },
-    "s": {
+    "n": {
       "item": "minecraft:netherite_scrap"
     },
-    "n": {
+    "s": {
       "item": "the_vault:vault_scrap"
+    },
+    "c": {
+      "item": "the_vault:chromatic_iron_ingot"
     }
   },
   "result": {

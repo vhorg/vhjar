@@ -1,7 +1,7 @@
 package iskallia.vault.entity;
 
-import net.minecraft.world.server.ServerBossInfo;
+import net.minecraft.server.level.ServerBossEvent;
 
 public interface VaultBoss {
-   ServerBossInfo getServerBossInfo();
+   ServerBossEvent getServerBossInfo();
 }

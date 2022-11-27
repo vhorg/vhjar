@@ -2,46 +2,43 @@ package iskallia.vault.block.entity;
 
 import com.mojang.authlib.GameProfile;
 import iskallia.vault.client.ClientEternalData;
+import iskallia.vault.container.RenamingContainer;
 import iskallia.vault.container.inventory.CryochamberContainer;
 import iskallia.vault.entity.eternal.EternalData;
 import iskallia.vault.entity.eternal.EternalDataSnapshot;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.ItemTraderCore;
-import iskallia.vault.util.MiscUtils;
+import iskallia.vault.util.RenameType;
 import iskallia.vault.util.SkinProfile;
-import iskallia.vault.vending.TraderCore;
 import iskallia.vault.world.data.EternalsData;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
@@ -49,8 +46,9 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.network.NetworkHooks;
 
-public class CryoChamberTileEntity extends TileEntity implements ITickableTileEntity, INamedContainerProvider {
+public class CryoChamberTileEntity extends BlockEntity implements MenuProvider {
    protected SkinProfile skin;
    private UUID owner;
    public List<String> coreNames = new ArrayList<>();
@@ -61,29 +59,33 @@ public class CryoChamberTileEntity extends TileEntity implements ITickableTileEn
    private int growEternalTimeRemaining = 0;
    protected UUID eternalId;
    public float lastCoreCount;
+   public int eternalSoulsConsumed;
+   public EternalsData.EternalVariant variant;
+   public boolean usingPlayerSkin = false;
    private final ItemStackHandler itemHandler = new ItemStackHandler(1) {
       protected void onContentsChanged(int slot) {
-         if (this.getStackInSlot(slot).func_77973_b() == ModItems.TRADER_CORE) {
-            CryoChamberTileEntity.this.addTraderCore(ItemTraderCore.getCoreFromStack(this.getStackInSlot(slot)));
-            this.setStackInSlot(slot, ItemStack.field_190927_a);
+         if (this.getStackInSlot(slot).getItem() == ModItems.ETERNAL_SOUL) {
+            CryoChamberTileEntity.this.addEternalSoul();
+            this.setStackInSlot(slot, ItemStack.EMPTY);
          }
 
          CryoChamberTileEntity.this.sendUpdates();
       }
 
       public boolean isItemValid(int slot, ItemStack stack) {
-         return stack.func_77973_b() == ModItems.TRADER_CORE && !CryoChamberTileEntity.this.isFull() && !CryoChamberTileEntity.this.isInfusing();
+         return stack.getItem() == ModItems.ETERNAL_SOUL && !CryoChamberTileEntity.this.isFull() && !CryoChamberTileEntity.this.isInfusing();
       }
    };
    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> this.itemHandler);
 
-   protected CryoChamberTileEntity(TileEntityType<?> tileEntityType) {
-      super(tileEntityType);
+   protected CryoChamberTileEntity(BlockEntityType<?> tileEntityType, BlockPos pos, BlockState state) {
+      super(tileEntityType, pos, state);
       this.skin = new SkinProfile();
+      this.eternalSoulsConsumed = 0;
    }
 
-   public CryoChamberTileEntity() {
-      this(ModBlocks.CRYO_CHAMBER_TILE_ENTITY);
+   public CryoChamberTileEntity(BlockPos pos, BlockState state) {
+      this(ModBlocks.CRYO_CHAMBER_TILE_ENTITY, pos, state);
    }
 
    public UUID getOwner() {
@@ -123,89 +125,61 @@ public class CryoChamberTileEntity extends TileEntity implements ITickableTileEn
    }
 
    public int getCoreCount() {
-      return this.coreNames.size();
+      return this.eternalSoulsConsumed;
    }
 
-   public List<String> getCoreNames() {
-      return this.coreNames;
-   }
-
-   public boolean addTraderCore(TraderCore core) {
-      if (this.isFull() || this.isInfusing() || this.getOwner() == null) {
-         return false;
-      } else if (!(this.field_145850_b instanceof ServerWorld)) {
-         return false;
-      } else {
-         ServerWorld sWorld = (ServerWorld)this.field_145850_b;
-         sWorld.func_184148_a(
-            null,
-            this.field_174879_c.func_177958_n(),
-            this.field_174879_c.func_177956_o(),
-            this.field_174879_c.func_177952_p(),
-            SoundEvents.field_232831_nS_,
-            SoundCategory.PLAYERS,
-            1.0F,
-            1.0F
-         );
-         GameProfile knownProfile = sWorld.func_73046_m().func_152358_ax().func_152652_a(this.getOwner());
-         if (knownProfile == null) {
-            return false;
-         } else {
-            int eternals = EternalsData.get(sWorld).getEternals(this.getOwner()).getNonAncientEternalCount();
-            int cores = this.getMaxCores();
-            int newCores = ModConfigs.CRYO_CHAMBER.getPlayerCoreCount(knownProfile.getName(), eternals);
-            if (cores != newCores) {
-               this.setMaxCores(newCores);
-               this.sendUpdates();
-            }
-
-            this.coreNames.add(core.getName());
-            if (core.getTrade() != null
-               && !core.getTrade().wasTradeUsed()
-               && sWorld.field_73012_v.nextFloat() < ModConfigs.CRYO_CHAMBER.getUnusedTraderRewardChance()) {
-               PlayerEntity player = sWorld.func_217366_a(
-                  this.field_174879_c.func_177958_n(), this.field_174879_c.func_177956_o(), this.field_174879_c.func_177952_p(), 3.0, false
-               );
-               if (player instanceof ServerPlayerEntity) {
-                  MiscUtils.giveItem((ServerPlayerEntity)player, new ItemStack(ModItems.PANDORAS_BOX));
-               } else {
-                  BlockPos.func_239584_a_(this.func_174877_v(), 7, 2, sWorld::func_175623_d)
-                     .ifPresent(airPos -> Block.func_180635_a(sWorld, airPos, new ItemStack(ModItems.PANDORAS_BOX)));
+   public boolean addEternalSoul() {
+      if (!this.isFull() && !this.isInfusing() && this.getOwner() != null) {
+         if (this.level instanceof ServerLevel sWorld) {
+            sWorld.playSound(
+               null, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), SoundEvents.SOUL_ESCAPE, SoundSource.PLAYERS, 1.0F, 1.0F
+            );
+            Optional<GameProfile> knownProfile = sWorld.getServer().getProfileCache().get(this.getOwner());
+            if (knownProfile.isEmpty()) {
+               return false;
+            } else {
+               int eternals = EternalsData.get(sWorld).getEternals(this.getOwner()).getNonAncientEternalCount();
+               int cores = this.getMaxCores();
+               int newCores = ModConfigs.CRYO_CHAMBER.getPlayerCoreCount(knownProfile.get().getName(), eternals);
+               if (cores != newCores) {
+                  this.setMaxCores(newCores);
+                  this.sendUpdates();
                }
-            }
 
-            this.infusing = true;
-            this.infusionTimeRemaining = ModConfigs.CRYO_CHAMBER.getInfusionTime();
-            this.sendUpdates();
-            return true;
+               this.eternalSoulsConsumed++;
+               this.infusing = true;
+               this.infusionTimeRemaining = ModConfigs.CRYO_CHAMBER.getInfusionTime();
+               this.sendUpdates();
+               return true;
+            }
+         } else {
+            return false;
          }
+      } else {
+         return false;
       }
    }
 
    @OnlyIn(Dist.CLIENT)
    public void updateSkin() {
-      if (this.infusing && !this.coreNames.isEmpty()) {
-         this.skin.updateSkin(this.coreNames.get(this.coreNames.size() - 1));
-      } else {
-         EternalDataSnapshot snapshot = ClientEternalData.getSnapshot(this.getEternalId());
-         if (snapshot != null && snapshot.getName() != null) {
-            this.skin.updateSkin(snapshot.getName());
-         }
+      EternalDataSnapshot snapshot = ClientEternalData.getSnapshot(this.getEternalId());
+      if (snapshot != null && snapshot.getName() != null) {
+         this.skin.updateSkin(snapshot.getName());
       }
    }
 
    public void sendUpdates() {
-      this.field_145850_b.func_184138_a(this.field_174879_c, this.func_195044_w(), this.func_195044_w(), 3);
-      this.field_145850_b.func_195593_d(this.field_174879_c, this.func_195044_w().func_177230_c());
-      this.func_70296_d();
+      this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
+      this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
+      this.setChanged();
    }
 
    @Nullable
    public EternalData getEternal() {
-      if (this.func_145831_w() == null) {
+      if (this.getLevel() == null) {
          return null;
-      } else if (!this.func_145831_w().func_201670_d()) {
-         return this.eternalId == null ? null : EternalsData.get((ServerWorld)this.func_145831_w()).getEternals(this.owner).get(this.eternalId);
+      } else if (!this.getLevel().isClientSide()) {
+         return this.eternalId == null ? null : EternalsData.get((ServerLevel)this.getLevel()).getEternals(this.owner).get(this.eternalId);
       } else {
          return null;
       }
@@ -216,130 +190,124 @@ public class CryoChamberTileEntity extends TileEntity implements ITickableTileEn
    }
 
    protected boolean isFull() {
-      return !this.coreNames.isEmpty() && this.coreNames.size() >= this.maxCores;
+      return this.eternalSoulsConsumed != 0 && this.eternalSoulsConsumed >= this.maxCores;
    }
 
-   public void func_73660_a() {
-      if (this.field_145850_b != null && !this.field_145850_b.field_72995_K && this.owner != null) {
-         if (this.isFull() && !this.growingEternal && this.eternalId == null) {
-            this.growingEternal = true;
-            this.growEternalTimeRemaining = ModConfigs.CRYO_CHAMBER.getGrowEternalTime();
+   public static void tick(Level level, BlockPos pos, BlockState state, CryoChamberTileEntity tile) {
+      if (level != null && !level.isClientSide && tile.owner != null) {
+         if (tile.isFull() && !tile.growingEternal && tile.eternalId == null) {
+            tile.growingEternal = true;
+            tile.growEternalTimeRemaining = ModConfigs.CRYO_CHAMBER.getGrowEternalTime();
          }
 
-         if (this.isFull() && !this.growingEternal && this.field_145850_b.func_82737_E() % 40L == 0L) {
-            this.field_145850_b
-               .func_184148_a(
-                  null,
-                  this.field_174879_c.func_177958_n(),
-                  this.field_174879_c.func_177956_o(),
-                  this.field_174879_c.func_177952_p(),
-                  SoundEvents.field_206934_aN,
-                  SoundCategory.PLAYERS,
-                  0.25F,
-                  1.0F
-               );
+         if (tile.isFull() && !tile.growingEternal && level.getGameTime() % 40L == 0L) {
+            level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.CONDUIT_AMBIENT, SoundSource.PLAYERS, 0.25F, 1.0F);
          }
 
-         if (this.infusing) {
-            if (this.infusionTimeRemaining-- <= 0) {
-               this.infusionTimeRemaining = 0;
-               this.infusing = false;
+         if (tile.infusing) {
+            if (tile.infusionTimeRemaining-- <= 0) {
+               tile.infusionTimeRemaining = 0;
+               tile.infusing = false;
             }
 
-            this.sendUpdates();
-         } else if (this.growingEternal) {
-            if (this.growEternalTimeRemaining-- <= 0) {
-               this.growEternalTimeRemaining = 0;
-               this.growingEternal = false;
-               this.createEternal();
+            tile.sendUpdates();
+         } else if (tile.growingEternal) {
+            if (tile.growEternalTimeRemaining-- <= 0) {
+               tile.growEternalTimeRemaining = 0;
+               tile.growingEternal = false;
+               tile.createEternal();
             }
 
-            this.sendUpdates();
+            tile.sendUpdates();
          }
       }
    }
 
+   public void renameEternal(ServerPlayer player) {
+      final CompoundTag nbt = new CompoundTag();
+      nbt.putInt("RenameType", RenameType.CRYO_CHAMBER.ordinal());
+      nbt.put("Data", this.getRenameNBT());
+      NetworkHooks.openGui(player, new MenuProvider() {
+         public Component getDisplayName() {
+            return new TextComponent("Rename Eternal");
+         }
+
+         @Nullable
+         public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player playerEntity) {
+            return new RenamingContainer(windowId, nbt);
+         }
+      }, buffer -> buffer.writeNbt(nbt));
+   }
+
    private void createEternal() {
-      EternalsData.EternalGroup eternals = EternalsData.get((ServerWorld)this.func_145831_w()).getEternals(this.owner);
-      int attempts = 100;
+      EternalsData.EternalGroup eternals = EternalsData.get((ServerLevel)this.getLevel()).getEternals(this.owner);
+      int attempts = 50;
 
       String name;
       do {
          attempts--;
-         name = this.coreNames.get(this.func_145831_w().func_201674_k().nextInt(this.coreNames.size()));
+         name = ModConfigs.ETERNALS_NAMEPOOL.getRandomName();
       } while (attempts > 0 && eternals.containsEternal(name));
 
-      this.eternalId = EternalsData.get((ServerWorld)this.func_145831_w()).add(this.owner, name, false);
+      EternalsData.EternalVariant variant = EternalsData.EternalVariant.byId(new Random().nextInt(EternalsData.EternalVariant.values().length));
+      this.variant = variant;
+      this.eternalId = EternalsData.get((ServerLevel)this.getLevel()).add(this.owner, name, false, variant, false);
    }
 
-   public ITextComponent func_145748_c_() {
+   public Component getDisplayName() {
       EternalData eternal = this.getEternal();
-      return eternal != null ? new StringTextComponent(eternal.getName()) : new StringTextComponent("Cryo Chamber");
+      return eternal != null ? new TextComponent(eternal.getName()) : new TextComponent("Cryo Chamber");
    }
 
    @Nullable
-   public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity player) {
-      return this.func_145831_w() == null ? null : new CryochamberContainer(windowId, this.func_145831_w(), this.func_174877_v(), playerInventory);
+   public AbstractContainerMenu createMenu(int windowId, Inventory playerInventory, Player player) {
+      return this.getLevel() == null ? null : new CryochamberContainer(windowId, this.getLevel(), this.getBlockPos(), playerInventory);
    }
 
-   public CompoundNBT func_189515_b(CompoundNBT nbt) {
-      super.func_189515_b(nbt);
+   protected void saveAdditional(CompoundTag nbt) {
+      super.saveAdditional(nbt);
       if (this.owner != null) {
-         nbt.func_186854_a("Owner", this.owner);
+         nbt.putUUID("Owner", this.owner);
       }
 
       if (this.eternalId != null) {
-         nbt.func_186854_a("EternalId", this.eternalId);
+         nbt.putUUID("EternalId", this.eternalId);
       }
 
-      if (!this.coreNames.isEmpty()) {
-         ListNBT list = new ListNBT();
-
-         for (int i = 0; i < this.coreNames.size(); i++) {
-            CompoundNBT nameNbt = new CompoundNBT();
-            String name = this.coreNames.get(i);
-            nameNbt.func_74778_a("name" + i, name);
-            list.add(nameNbt);
-         }
-
-         nbt.func_218657_a("CoresList", list);
+      nbt.putInt("MaxCoreCount", this.maxCores);
+      nbt.putBoolean("Infusing", this.infusing);
+      nbt.putInt("InfusionTimeRemaining", this.infusionTimeRemaining);
+      nbt.putBoolean("GrowingEternal", this.growingEternal);
+      nbt.putInt("GrowEternalTimeRemaining", this.growEternalTimeRemaining);
+      nbt.put("Inventory", this.itemHandler.serializeNBT());
+      nbt.putInt("EternalSoulsConsumed", this.eternalSoulsConsumed);
+      nbt.putBoolean("UsingPlayerSkin", this.usingPlayerSkin);
+      if (this.variant != null) {
+         nbt.putInt("EternalVariant", this.variant.getId());
       }
-
-      nbt.func_74768_a("MaxCoreCount", this.maxCores);
-      nbt.func_74757_a("Infusing", this.infusing);
-      nbt.func_74768_a("InfusionTimeRemaining", this.infusionTimeRemaining);
-      nbt.func_74757_a("GrowingEternal", this.growingEternal);
-      nbt.func_74768_a("GrowEternalTimeRemaining", this.growEternalTimeRemaining);
-      nbt.func_218657_a("Inventory", this.itemHandler.serializeNBT());
-      return nbt;
    }
 
-   public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-      super.func_230337_a_(state, nbt);
-      if (nbt.func_74764_b("Owner")) {
-         this.owner = nbt.func_186857_a("Owner");
+   public void load(CompoundTag nbt) {
+      super.load(nbt);
+      if (nbt.contains("Owner")) {
+         this.owner = nbt.getUUID("Owner");
       }
 
-      if (nbt.func_74764_b("EternalId")) {
-         this.eternalId = nbt.func_186857_a("EternalId");
+      if (nbt.contains("EternalId")) {
+         this.eternalId = nbt.getUUID("EternalId");
       }
 
-      if (nbt.func_74764_b("CoresList")) {
-         ListNBT list = nbt.func_150295_c("CoresList", 10);
-         this.coreNames = new LinkedList<>();
-
-         for (int i = 0; i < list.size(); i++) {
-            CompoundNBT nameTag = list.func_150305_b(i);
-            this.coreNames.add(nameTag.func_74779_i("name" + i));
-         }
+      this.maxCores = nbt.getInt("MaxCoreCount");
+      this.infusing = nbt.getBoolean("Infusing");
+      this.infusionTimeRemaining = nbt.getInt("InfusionTimeRemaining");
+      this.growingEternal = nbt.getBoolean("GrowingEternal");
+      this.growEternalTimeRemaining = nbt.getInt("GrowEternalTimeRemaining");
+      this.itemHandler.deserializeNBT(nbt.getCompound("Inventory"));
+      this.eternalSoulsConsumed = nbt.getInt("EternalSoulsConsumed");
+      this.usingPlayerSkin = nbt.getBoolean("UsingPlayerSkin");
+      if (nbt.contains("EternalVariant")) {
+         this.variant = EternalsData.EternalVariant.byId(nbt.getInt("EternalVariant"));
       }
-
-      this.maxCores = nbt.func_74762_e("MaxCoreCount");
-      this.infusing = nbt.func_74767_n("Infusing");
-      this.infusionTimeRemaining = nbt.func_74762_e("InfusionTimeRemaining");
-      this.growingEternal = nbt.func_74767_n("GrowingEternal");
-      this.growEternalTimeRemaining = nbt.func_74762_e("GrowEternalTimeRemaining");
-      this.itemHandler.deserializeNBT(nbt.func_74775_l("Inventory"));
    }
 
    @Nonnull
@@ -347,31 +315,22 @@ public class CryoChamberTileEntity extends TileEntity implements ITickableTileEn
       return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.handler.cast() : super.getCapability(cap, side);
    }
 
-   public CompoundNBT func_189517_E_() {
-      return this.func_189515_b(new CompoundNBT());
+   public CompoundTag getUpdateTag() {
+      return this.saveWithoutMetadata();
    }
 
-   public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-      this.func_230337_a_(state, tag);
+   public ClientboundBlockEntityDataPacket getUpdatePacket() {
+      return ClientboundBlockEntityDataPacket.create(this);
    }
 
-   public SUpdateTileEntityPacket func_189518_D_() {
-      return new SUpdateTileEntityPacket(this.field_174879_c, 1, this.func_189517_E_());
-   }
-
-   public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-      CompoundNBT nbt = pkt.func_148857_g();
-      this.handleUpdateTag(this.func_195044_w(), nbt);
-   }
-
-   public CompoundNBT getRenameNBT() {
-      CompoundNBT nbt = new CompoundNBT();
+   public CompoundTag getRenameNBT() {
+      CompoundTag nbt = new CompoundTag();
       EternalData eternal = this.getEternal();
       if (eternal == null) {
          return nbt;
       } else {
-         nbt.func_218657_a("BlockPos", NBTUtil.func_186859_a(this.func_174877_v()));
-         nbt.func_74778_a("EternalName", eternal.getName());
+         nbt.put("BlockPos", NbtUtils.writeBlockPos(this.getBlockPos()));
+         nbt.putString("EternalName", eternal.getName());
          return nbt;
       }
    }

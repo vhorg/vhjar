@@ -1,8 +1,8 @@
 package iskallia.vault.altar;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class RequiredItem {
    private ItemStack item;
@@ -19,18 +19,16 @@ public class RequiredItem {
       this(new ItemStack(item), currentAmount, amountRequired);
    }
 
-   public static CompoundNBT serializeNBT(RequiredItem requiredItem) {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_218657_a("item", requiredItem.getItem().serializeNBT());
-      nbt.func_74768_a("currentAmount", requiredItem.getCurrentAmount());
-      nbt.func_74768_a("amountRequired", requiredItem.getAmountRequired());
+   public static CompoundTag serializeNBT(RequiredItem requiredItem) {
+      CompoundTag nbt = new CompoundTag();
+      nbt.put("item", requiredItem.getItem().serializeNBT());
+      nbt.putInt("currentAmount", requiredItem.getCurrentAmount());
+      nbt.putInt("amountRequired", requiredItem.getAmountRequired());
       return nbt;
    }
 
-   public static RequiredItem deserializeNBT(CompoundNBT nbt) {
-      return !nbt.func_74764_b("item")
-         ? null
-         : new RequiredItem(ItemStack.func_199557_a(nbt.func_74775_l("item")), nbt.func_74762_e("currentAmount"), nbt.func_74762_e("amountRequired"));
+   public static RequiredItem deserializeNBT(CompoundTag nbt) {
+      return !nbt.contains("item") ? null : new RequiredItem(ItemStack.of(nbt.getCompound("item")), nbt.getInt("currentAmount"), nbt.getInt("amountRequired"));
    }
 
    public ItemStack getItem() {
@@ -70,10 +68,10 @@ public class RequiredItem {
    }
 
    public boolean isItemEqual(ItemStack stack) {
-      return ItemStack.func_185132_d(this.getItem(), stack);
+      return ItemStack.isSameIgnoreDurability(this.getItem(), stack);
    }
 
    public RequiredItem copy() {
-      return new RequiredItem(this.item.func_77946_l(), this.currentAmount, this.amountRequired);
+      return new RequiredItem(this.item.copy(), this.currentAmount, this.amountRequired);
    }
 }

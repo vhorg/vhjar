@@ -5,26 +5,31 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.network.message.VaultLevelMessage;
 import iskallia.vault.util.NetcodeUtils;
+import iskallia.vault.world.data.EternalsData;
 import java.util.UUID;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.network.NetworkDirection;
 
-public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
+public class PlayerVaultStats implements INBTSerializable<CompoundTag> {
    private final UUID uuid;
    private int vaultLevel;
    private int exp;
-   private int unspentSkillPts = 5;
-   private int unspentKnowledgePts;
+   private int unspentSkillPoints;
+   private int unspentKnowledgePoints;
+   private int unspentArchetypePoints;
+   private int unspentRegretPoints;
    private int totalSpentSkillPoints;
    private int totalSpentKnowledgePoints;
+   private int totalSpentArchetypePoints;
+   private int totalSpentRegretPoints;
 
    public PlayerVaultStats(UUID uuid) {
       this.uuid = uuid;
@@ -38,12 +43,20 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
       return this.exp;
    }
 
-   public int getUnspentSkillPts() {
-      return this.unspentSkillPts;
+   public int getUnspentSkillPoints() {
+      return this.unspentSkillPoints;
    }
 
-   public int getUnspentKnowledgePts() {
-      return this.unspentKnowledgePts;
+   public int getUnspentKnowledgePoints() {
+      return this.unspentKnowledgePoints;
+   }
+
+   public int getUnspentArchetypePoints() {
+      return this.unspentArchetypePoints;
+   }
+
+   public int getUnspentRegretPoints() {
+      return this.unspentRegretPoints;
    }
 
    public int getTotalSpentSkillPoints() {
@@ -54,95 +67,127 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
       return this.totalSpentKnowledgePoints;
    }
 
-   public int getTnl() {
-      return ModConfigs.LEVELS_META.getLevelMeta(this.vaultLevel).tnl;
+   public int getTotalSpentArchetypePoints() {
+      return this.totalSpentArchetypePoints;
    }
 
-   public PlayerVaultStats setVaultLevel(MinecraftServer server, int level) {
-      this.vaultLevel = level;
+   public int getTotalSpentRegretPoints() {
+      return this.totalSpentRegretPoints;
+   }
+
+   public int getExpNeededToNextLevel() {
+      return this.getVaultLevel() >= ModConfigs.LEVELS_META.getMaxLevel() ? 0 : ModConfigs.LEVELS_META.getLevelMeta(this.vaultLevel).tnl;
+   }
+
+   public void setVaultLevel(MinecraftServer server, int level) {
+      this.vaultLevel = Mth.clamp(level, 0, ModConfigs.LEVELS_META.getMaxLevel());
       this.exp = 0;
       this.sync(server);
-      return this;
    }
 
-   public PlayerVaultStats addVaultExp(MinecraftServer server, int exp) {
-      this.exp = Math.max(this.exp, 0);
-      this.exp += exp;
-      int initialLevel = this.vaultLevel;
+   public void addVaultExp(MinecraftServer server, int exp) {
+      int maxLevel = ModConfigs.LEVELS_META.getMaxLevel();
+      if (this.getVaultLevel() < maxLevel) {
+         this.exp = Math.max(this.exp, 0);
+         this.exp += exp;
+         int initialLevel = this.vaultLevel;
 
-      int tnl;
-      while (this.exp >= (tnl = this.getTnl())) {
-         this.vaultLevel++;
-         if (this.vaultLevel <= 200) {
-            this.unspentSkillPts++;
+         int neededExp;
+         while (this.exp >= (neededExp = this.getExpNeededToNextLevel())) {
+            this.vaultLevel++;
+            this.unspentSkillPoints++;
+            this.exp -= neededExp;
+            if (this.getVaultLevel() >= maxLevel) {
+               this.vaultLevel = maxLevel;
+               this.exp = 0;
+               break;
+            }
          }
 
-         this.exp -= tnl;
-      }
+         if (this.vaultLevel > initialLevel) {
+            NetcodeUtils.runIfPresent(server, this.uuid, this::fancyLevelUpEffects);
+         }
 
-      if (this.vaultLevel > initialLevel) {
-         NetcodeUtils.runIfPresent(server, this.uuid, this::fancyLevelUpEffects);
+         this.sync(server);
       }
-
-      this.sync(server);
-      return this;
    }
 
-   protected void fancyLevelUpEffects(ServerPlayerEntity player) {
-      World world = player.field_70170_p;
-      Vector3d pos = player.func_213303_ch();
+   protected void fancyLevelUpEffects(ServerPlayer player) {
+      ServerLevel world = player.getLevel();
+      Vec3 pos = player.position();
 
       for (int i = 0; i < 20; i++) {
-         double d0 = world.field_73012_v.nextGaussian() * 1.0;
-         double d1 = world.field_73012_v.nextGaussian() * 1.0;
-         double d2 = world.field_73012_v.nextGaussian() * 1.0;
-         ((ServerWorld)world)
-            .func_195598_a(
-               ParticleTypes.field_197604_O,
-               pos.func_82615_a() + world.field_73012_v.nextDouble() - 0.5,
-               pos.func_82617_b() + world.field_73012_v.nextDouble() - 0.5 + 3.0,
-               pos.func_82616_c() + world.field_73012_v.nextDouble() - 0.5,
-               10,
-               d0,
-               d1,
-               d2,
-               0.25
-            );
+         double d0 = world.random.nextGaussian();
+         double d1 = world.random.nextGaussian();
+         double d2 = world.random.nextGaussian();
+         world.sendParticles(
+            ParticleTypes.TOTEM_OF_UNDYING,
+            pos.x() + world.random.nextDouble() - 0.5,
+            pos.y() + world.random.nextDouble() - 0.5 + 3.0,
+            pos.z() + world.random.nextDouble() - 0.5,
+            10,
+            d0,
+            d1,
+            d2,
+            0.25
+         );
       }
 
-      world.func_184133_a(null, player.func_233580_cy_(), ModSounds.VAULT_LEVEL_UP_SFX, SoundCategory.PLAYERS, 1.0F, 2.0F);
+      world.playSound(null, player.blockPosition(), ModSounds.VAULT_LEVEL_UP_SFX, SoundSource.PLAYERS, 1.0F, 2.0F);
    }
 
-   public PlayerVaultStats spendSkillPoints(MinecraftServer server, int amount) {
-      this.unspentSkillPts -= amount;
+   public void spendSkillPoints(MinecraftServer server, int amount) {
+      this.unspentSkillPoints -= amount;
       this.totalSpentSkillPoints += amount;
       this.sync(server);
-      return this;
    }
 
-   public PlayerVaultStats spendKnowledgePoints(MinecraftServer server, int amount) {
-      this.unspentKnowledgePts -= amount;
+   public void spendKnowledgePoints(MinecraftServer server, int amount) {
+      this.unspentKnowledgePoints -= amount;
       this.totalSpentKnowledgePoints += amount;
       this.sync(server);
-      return this;
+   }
+
+   public void spendArchetypePoints(MinecraftServer server, int amount) {
+      this.unspentArchetypePoints -= amount;
+      this.totalSpentArchetypePoints += amount;
+      this.sync(server);
+   }
+
+   public void spendRegretPoints(MinecraftServer server, int amount) {
+      this.unspentRegretPoints -= amount;
+      this.totalSpentRegretPoints += amount;
+      this.sync(server);
    }
 
    public PlayerVaultStats reset(MinecraftServer server) {
       this.vaultLevel = 0;
       this.exp = 0;
-      this.unspentSkillPts = 0;
-      this.unspentKnowledgePts = 0;
+      this.unspentSkillPoints = 0;
+      this.unspentKnowledgePoints = 0;
+      this.unspentArchetypePoints = 0;
+      this.unspentRegretPoints = 0;
       this.sync(server);
       return this;
    }
 
    public PlayerVaultStats addSkillPoints(int amount) {
-      this.unspentSkillPts += amount;
+      this.unspentSkillPoints += amount;
       return this;
    }
 
    public PlayerVaultStats addKnowledgePoints(int amount) {
-      this.unspentKnowledgePts += amount;
+      this.unspentKnowledgePoints += amount;
+      return this;
+   }
+
+   public PlayerVaultStats addArchetypePoints(int amount) {
+      this.unspentArchetypePoints += amount;
+      return this;
+   }
+
+   public PlayerVaultStats addRegretPoints(int amount) {
+      this.unspentRegretPoints += amount;
       return this;
    }
 
@@ -150,33 +195,51 @@ public class PlayerVaultStats implements INBTSerializable<CompoundNBT> {
       NetcodeUtils.runIfPresent(
          server,
          this.uuid,
-         player -> ModNetwork.CHANNEL
-            .sendTo(
-               new VaultLevelMessage(this.vaultLevel, this.exp, this.getTnl(), this.unspentSkillPts, this.unspentKnowledgePts),
-               player.field_71135_a.field_147371_a,
-               NetworkDirection.PLAY_TO_CLIENT
-            )
+         player -> {
+            ModNetwork.CHANNEL
+               .sendTo(
+                  new VaultLevelMessage(
+                     this.vaultLevel,
+                     this.exp,
+                     this.getExpNeededToNextLevel(),
+                     this.unspentSkillPoints,
+                     this.unspentKnowledgePoints,
+                     this.unspentArchetypePoints,
+                     this.unspentRegretPoints
+                  ),
+                  player.connection.connection,
+                  NetworkDirection.PLAY_TO_CLIENT
+               );
+            EternalsData.get(server).setDirty();
+         }
       );
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74768_a("vaultLevel", this.vaultLevel);
-      nbt.func_74768_a("exp", this.exp);
-      nbt.func_74768_a("unspentSkillPts", this.unspentSkillPts);
-      nbt.func_74768_a("unspentKnowledgePts", this.unspentKnowledgePts);
-      nbt.func_74768_a("totalSpentSkillPoints", this.totalSpentSkillPoints);
-      nbt.func_74768_a("totalSpentKnowledgePoints", this.totalSpentKnowledgePoints);
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putInt("vaultLevel", this.vaultLevel);
+      nbt.putInt("exp", this.exp);
+      nbt.putInt("unspentSkillPts", this.unspentSkillPoints);
+      nbt.putInt("unspentKnowledgePts", this.unspentKnowledgePoints);
+      nbt.putInt("unspentArchetypePoints", this.unspentArchetypePoints);
+      nbt.putInt("unspentRegretPoints", this.unspentRegretPoints);
+      nbt.putInt("totalSpentSkillPoints", this.totalSpentSkillPoints);
+      nbt.putInt("totalSpentKnowledgePoints", this.totalSpentKnowledgePoints);
+      nbt.putInt("totalSpentArchetypePoints", this.totalSpentArchetypePoints);
+      nbt.putInt("totalSpentRegretPoints", this.totalSpentRegretPoints);
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.vaultLevel = nbt.func_74762_e("vaultLevel");
-      this.exp = nbt.func_74762_e("exp");
-      this.unspentSkillPts = nbt.func_74762_e("unspentSkillPts");
-      this.unspentKnowledgePts = nbt.func_74762_e("unspentKnowledgePts");
-      this.totalSpentSkillPoints = nbt.func_74762_e("totalSpentSkillPoints");
-      this.totalSpentKnowledgePoints = nbt.func_74762_e("totalSpentKnowledgePoints");
-      this.vaultLevel = nbt.func_74762_e("vaultLevel");
+   public void deserializeNBT(CompoundTag nbt) {
+      this.vaultLevel = nbt.getInt("vaultLevel");
+      this.exp = nbt.getInt("exp");
+      this.unspentSkillPoints = nbt.getInt("unspentSkillPts");
+      this.unspentKnowledgePoints = nbt.getInt("unspentKnowledgePts");
+      this.unspentArchetypePoints = nbt.getInt("unspentArchetypePoints");
+      this.unspentRegretPoints = nbt.getInt("unspentRegretPoints");
+      this.totalSpentSkillPoints = nbt.getInt("totalSpentSkillPoints");
+      this.totalSpentKnowledgePoints = nbt.getInt("totalSpentKnowledgePoints");
+      this.totalSpentArchetypePoints = nbt.getInt("totalSpentArchetypePoints");
+      this.totalSpentRegretPoints = nbt.getInt("totalSpentRegretPoints");
    }
 }

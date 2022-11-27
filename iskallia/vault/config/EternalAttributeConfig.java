@@ -4,9 +4,9 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.FloatRangeEntry;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class EternalAttributeConfig extends Config {
@@ -50,9 +50,9 @@ public class EternalAttributeConfig extends Config {
    @Override
    protected void reset() {
       this.initialAttributes.clear();
-      this.initialAttributes.put(Attributes.field_233818_a_.getRegistryName().toString(), new FloatRangeEntry(20.0F, 30.0F));
-      this.initialAttributes.put(Attributes.field_233823_f_.getRegistryName().toString(), new FloatRangeEntry(4.0F, 7.0F));
-      this.initialAttributes.put(Attributes.field_233821_d_.getRegistryName().toString(), new FloatRangeEntry(0.2F, 0.23F));
+      this.initialAttributes.put(Attributes.MAX_HEALTH.getRegistryName().toString(), new FloatRangeEntry(20.0F, 30.0F));
+      this.initialAttributes.put(Attributes.ATTACK_DAMAGE.getRegistryName().toString(), new FloatRangeEntry(4.0F, 7.0F));
+      this.initialAttributes.put(Attributes.MOVEMENT_SPEED.getRegistryName().toString(), new FloatRangeEntry(0.2F, 0.23F));
       this.healthPerLevel = new FloatRangeEntry(4.0F, 8.0F);
       this.damagePerLevel = new FloatRangeEntry(2.0F, 3.0F);
       this.moveSpeedPerLevel = new FloatRangeEntry(0.02F, 0.03F);

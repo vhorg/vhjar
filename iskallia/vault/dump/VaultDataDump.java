@@ -8,16 +8,16 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.forgespi.language.IModInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 public class VaultDataDump {
    private static final Gson GSON = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().setPrettyPrinting().create();
 
-   public static void onStart(FMLServerStartedEvent event) {
+   public static void onStart(ServerStartedEvent event) {
       dumpModData();
    }
 

@@ -1,11 +1,11 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import iskallia.vault.Vault;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
+import iskallia.vault.VaultMod;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 
 public class DenseSquareRoomLayout extends DenseVaultLayout {
-   public static final ResourceLocation ID = Vault.id("dense_square");
+   public static final ResourceLocation ID = VaultMod.id("dense_square");
 
    public DenseSquareRoomLayout() {
       this(11);
@@ -22,7 +22,7 @@ public class DenseSquareRoomLayout extends DenseVaultLayout {
       for (int x = -halfSize; x <= halfSize; x++) {
          for (int z = -halfSize; z <= halfSize; z++) {
             if (x != -1 || z != 0) {
-               layout.putRoom(new DenseVaultLayout.DensePackedRoom(new Vector3i(x, 0, z)));
+               layout.putRoom(new DenseVaultLayout.DensePackedRoom(new Vec3i(x, 0, z)));
             }
          }
       }

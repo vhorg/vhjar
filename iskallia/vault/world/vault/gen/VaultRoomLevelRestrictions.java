@@ -1,12 +1,12 @@
 package iskallia.vault.world.vault.gen;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.gen.structure.pool.PalettedListPoolElement;
 import iskallia.vault.world.gen.structure.pool.PalettedSinglePoolElement;
 import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutGenerator;
 import java.util.List;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 
 public class VaultRoomLevelRestrictions {
    public static void addGenerationPreventions(VaultRoomLayoutGenerator.Layout layout, int vaultLevel) {
@@ -19,21 +19,21 @@ public class VaultRoomLevelRestrictions {
       }
    }
 
-   public static boolean canGenerate(JigsawPiece vaultPiece, int vaultLevel) {
+   public static boolean canGenerate(StructurePoolElement vaultPiece, int vaultLevel) {
       return vaultLevel < 250 && isJigsawPieceOfName(vaultPiece, getVaultRoomPrefix("vendor"))
          ? false
          : vaultLevel >= 100 || !isJigsawPieceOfName(vaultPiece, getVaultRoomPrefix("contest_pixel"));
    }
 
    private static String getVaultRoomPrefix(String roomName) {
-      return Vault.sId("vault/enigma/rooms/" + roomName);
+      return VaultMod.sId("vault/enigma/rooms/" + roomName);
    }
 
-   private static boolean isJigsawPieceOfName(JigsawPiece piece, String name) {
+   private static boolean isJigsawPieceOfName(StructurePoolElement piece, String name) {
       if (piece instanceof PalettedListPoolElement) {
-         List<JigsawPiece> elements = ((PalettedListPoolElement)piece).getElements();
+         List<StructurePoolElement> elements = ((PalettedListPoolElement)piece).getElements();
 
-         for (JigsawPiece elementPiece : elements) {
+         for (StructurePoolElement elementPiece : elements) {
             if (!isJigsawPieceOfName(elementPiece, name)) {
                return false;
             }

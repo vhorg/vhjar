@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.architect.ArchitectObjective;
 import iskallia.vault.world.vault.time.extension.RoomGenerationExtension;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 
 public class TimeModifyModifier extends VoteModifier {
    @Expose
@@ -16,7 +16,7 @@ public class TimeModifyModifier extends VoteModifier {
    }
 
    @Override
-   public void onApply(ArchitectObjective objective, VaultRaid vault, ServerWorld world) {
+   public void onApply(ArchitectObjective objective, VaultRaid vault, ServerLevel world) {
       super.onApply(objective, vault, world);
       vault.getPlayers().forEach(vPlayer -> vPlayer.getTimer().addTime(new RoomGenerationExtension(this.timeChange), 0));
    }

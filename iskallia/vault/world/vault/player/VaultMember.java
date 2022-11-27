@@ -1,14 +1,14 @@
 package iskallia.vault.world.vault.player;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.time.VaultTimer;
 import java.util.UUID;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 
 public class VaultMember extends VaultPlayer {
-   public static final ResourceLocation ID = Vault.id("member");
+   public static final ResourceLocation ID = VaultMod.id("member");
 
    public VaultMember() {
    }
@@ -22,10 +22,10 @@ public class VaultMember extends VaultPlayer {
    }
 
    @Override
-   public void tickTimer(VaultRaid vault, ServerWorld world, VaultTimer timer) {
+   public void tickTimer(VaultRaid vault, ServerLevel world, VaultTimer timer) {
    }
 
    @Override
-   public void tickObjectiveUpdates(VaultRaid vault, ServerWorld world) {
+   public void tickObjectiveUpdates(VaultRaid vault, ServerLevel world) {
    }
 }

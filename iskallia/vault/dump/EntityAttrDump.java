@@ -5,13 +5,13 @@ import com.google.gson.JsonObject;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.GlobalEntityTypeAttributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class EntityAttrDump extends JsonDump {
@@ -38,7 +38,7 @@ public class EntityAttrDump extends JsonDump {
       this.getAttributes(entityType).forEach((attr, attrInstance) -> {
          JsonObject jsonEntry = new JsonObject();
          jsonEntry.addProperty("attributeId", attr.getRegistryName().toString());
-         jsonEntry.addProperty("value", attrInstance.func_111126_e());
+         jsonEntry.addProperty("value", attrInstance.getValue());
          attributesJson.add(jsonEntry);
       });
       if (entityId == null) {
@@ -48,12 +48,12 @@ public class EntityAttrDump extends JsonDump {
       }
    }
 
-   private <T extends LivingEntity> Map<Attribute, ModifiableAttributeInstance> getAttributes(EntityType<T> entityType) {
+   private <T extends LivingEntity> Map<Attribute, AttributeInstance> getAttributes(EntityType<T> entityType) {
       try {
-         AttributeModifierMap attributes = GlobalEntityTypeAttributes.func_233835_a_(entityType);
-         Field attributeMapField = AttributeModifierMap.class.getDeclaredField("attributeMap");
+         AttributeSupplier attributes = DefaultAttributes.getSupplier(entityType);
+         Field attributeMapField = AttributeSupplier.class.getDeclaredField("attributeMap");
          attributeMapField.setAccessible(true);
-         return (Map<Attribute, ModifiableAttributeInstance>)attributeMapField.get(attributes);
+         return (Map<Attribute, AttributeInstance>)attributeMapField.get(attributes);
       } catch (NoSuchFieldException | IllegalAccessException var4) {
          return new HashMap<>();
       }

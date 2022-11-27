@@ -11,7 +11,7 @@ import iskallia.vault.world.vault.logic.objective.architect.processor.VaultPiece
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class FloatingItemPlacementModifier extends VoteModifier {
    @Expose

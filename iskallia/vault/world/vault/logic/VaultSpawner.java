@@ -2,13 +2,12 @@ package iskallia.vault.world.vault.logic;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.JsonAdapter;
-import iskallia.vault.entity.AggressiveCowEntity;
-import iskallia.vault.entity.EntityScaler;
+import iskallia.vault.entity.LegacyEntityScaler;
+import iskallia.vault.entity.entity.AggressiveCowEntity;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.nbt.VListNBT;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.util.gson.IgnoreEmpty;
-import iskallia.vault.world.data.GlobalDifficultyData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import iskallia.vault.world.vault.logic.task.IVaultTask;
@@ -22,27 +21,28 @@ import java.util.function.IntUnaryOperator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.Entity.RemovalReason;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
+public class VaultSpawner implements INBTSerializable<CompoundTag>, IVaultTask {
    private VaultSpawner.Config config = new VaultSpawner.Config();
    private VaultSpawner.Config oldConfig = new VaultSpawner.Config();
    private VMapNBT<Integer, VaultSpawner.Config> configHistory = VMapNBT.ofInt(new LinkedHashMap(), VaultSpawner.Config::new);
-   private VListNBT<UUID, StringNBT> spawnedMobIds = VListNBT.ofUUID();
+   private VListNBT<UUID, StringTag> spawnedMobIds = VListNBT.ofUUID();
 
    public VaultSpawner.Config getConfig() {
       return this.config;
@@ -67,19 +67,19 @@ public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
    }
 
    @Override
-   public void execute(VaultRaid vault, VaultPlayer player, ServerWorld world) {
+   public void execute(VaultRaid vault, VaultPlayer player, ServerLevel world) {
       if (!this.config.equals(this.oldConfig)) {
          this.configHistory.put(player.getTimer().getRunTime(), this.config.copy());
          this.oldConfig = this.config;
       }
 
-      if (world.func_82736_K().func_223586_b(GameRules.field_223601_d)) {
+      if (world.getGameRules().getBoolean(GameRules.RULE_DOMOBSPAWNING)) {
          if (!vault.getAllObjectives().stream().anyMatch(VaultObjective::preventsMobSpawning)) {
-            player.runIfPresent(world.func_73046_m(), playerEntity -> {
+            player.runIfPresent(world.getServer(), playerEntity -> {
                this.updateMobIds(world, playerEntity);
                if (this.spawnedMobIds.size() <= this.getMaxMobs() && !(this.getConfig().getMaxDistance() <= 0.0)) {
                   for (int i = 0; i < 50 && this.spawnedMobIds.size() < this.getMaxMobs(); i++) {
-                     this.attemptSpawn(vault, world, player, world.func_201674_k());
+                     this.attemptSpawn(vault, world, player, world.getRandom());
                   }
                }
             });
@@ -87,21 +87,21 @@ public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
       }
    }
 
-   protected void updateMobIds(ServerWorld world, ServerPlayerEntity player) {
-      this.spawnedMobIds = this.spawnedMobIds.stream().<Entity>map(world::func_217461_a).filter(Objects::nonNull).filter(entity -> {
-         double distanceSq = entity.func_70068_e(player);
+   protected void updateMobIds(ServerLevel world, ServerPlayer player) {
+      this.spawnedMobIds = this.spawnedMobIds.stream().<Entity>map(world::getEntity).filter(Objects::nonNull).filter(entity -> {
+         double distanceSq = entity.distanceToSqr(player);
          double despawnDistance = this.getConfig().getDespawnDistance();
          if (distanceSq > despawnDistance * despawnDistance) {
-            entity.func_70106_y();
+            entity.remove(RemovalReason.DISCARDED);
             return false;
          } else {
             return true;
          }
-      }).<UUID>map(Entity::func_110124_au).collect(Collectors.toCollection(VListNBT::ofUUID));
+      }).<UUID>map(Entity::getUUID).collect(Collectors.toCollection(VListNBT::ofUUID));
    }
 
-   protected void attemptSpawn(VaultRaid vault, ServerWorld world, VaultPlayer player, Random random) {
-      player.runIfPresent(world.func_73046_m(), playerEntity -> {
+   protected void attemptSpawn(VaultRaid vault, ServerLevel world, VaultPlayer player, Random random) {
+      player.runIfPresent(world.getServer(), playerEntity -> {
          double min = this.getConfig().getMinDistance();
          double max = this.getConfig().getMaxDistance();
          double angle = (Math.PI * 2) * random.nextDouble();
@@ -111,17 +111,17 @@ public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
          double xzRadius = Math.sqrt(x * x + z * z);
          double yRange = Math.sqrt(max * max - xzRadius * xzRadius);
          int y = random.nextInt((int)Math.ceil(yRange) * 2 + 1) - (int)Math.ceil(yRange);
-         BlockPos pos = playerEntity.func_233580_cy_();
+         BlockPos pos = playerEntity.blockPosition();
          int level = player.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
-         LivingEntity spawned = spawnMob(vault, world, level, pos.func_177958_n() + x, pos.func_177956_o() + y, pos.func_177952_p() + z, random);
+         LivingEntity spawned = spawnMob(vault, world, level, pos.getX() + x, pos.getY() + y, pos.getZ() + z, random);
          if (spawned != null) {
-            this.spawnedMobIds.add(spawned.func_110124_au());
+            this.spawnedMobIds.add(spawned.getUUID());
          }
       });
    }
 
    @Nullable
-   public static LivingEntity spawnMob(VaultRaid vault, ServerWorld world, int vaultLevel, int x, int y, int z, Random random) {
+   public static LivingEntity spawnMob(VaultRaid vault, ServerLevel world, int vaultLevel, int x, int y, int z, Random random) {
       LivingEntity entity = createMob(world, vaultLevel, random);
       if (vault.getProperties().getBaseOrDefault(VaultRaid.COW_VAULT, false)) {
          AggressiveCowEntity replaced = VaultCowOverrides.replaceVaultEntity(vault, entity, world);
@@ -130,54 +130,53 @@ public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
          }
       }
 
-      BlockState state = world.func_180495_p(new BlockPos(x, y - 1, z));
-      if (!state.func_215688_a(world, new BlockPos(x, y - 1, z), entity.func_200600_R())) {
+      BlockState state = world.getBlockState(new BlockPos(x, y - 1, z));
+      if (!state.isValidSpawn(world, new BlockPos(x, y - 1, z), entity.getType())) {
          return null;
       } else {
-         AxisAlignedBB entityBox = entity.func_200600_R().func_220328_a(x + 0.5, y, z + 0.5);
-         if (!world.func_226664_a_(entityBox)) {
+         AABB entityBox = entity.getType().getAABB(x + 0.5, y, z + 0.5);
+         if (!world.noCollision(entityBox)) {
             return null;
          } else {
-            entity.func_70012_b(x + 0.5F, y + 0.2F, z + 0.5F, (float)(random.nextDouble() * 2.0 * Math.PI), 0.0F);
-            if (entity instanceof MobEntity) {
-               ((MobEntity)entity).func_70656_aK();
-               ((MobEntity)entity).func_213386_a(world, new DifficultyInstance(Difficulty.PEACEFUL, 13000L, 0L, 0.0F), SpawnReason.STRUCTURE, null, null);
+            entity.moveTo(x + 0.5F, y + 0.2F, z + 0.5F, (float)(random.nextDouble() * 2.0 * Math.PI), 0.0F);
+            if (entity instanceof Mob) {
+               ((Mob)entity).spawnAnim();
+               ((Mob)entity).finalizeSpawn(world, new DifficultyInstance(Difficulty.PEACEFUL, 13000L, 0L, 0.0F), MobSpawnType.STRUCTURE, null, null);
             }
 
-            GlobalDifficultyData.Difficulty difficulty = GlobalDifficultyData.get(world).getVaultDifficulty();
-            EntityScaler.setScaledEquipment(entity, vault, difficulty, vaultLevel, random, EntityScaler.Type.MOB);
-            EntityScaler.setScaled(entity);
-            world.func_217470_d(entity);
+            LegacyEntityScaler.setScaledEquipmentLegacy(entity, vault, vaultLevel, random, LegacyEntityScaler.Type.MOB);
+            LegacyEntityScaler.setScaled(entity);
+            world.addWithUUID(entity);
             return entity;
          }
       }
    }
 
-   private static LivingEntity createMob(ServerWorld world, int vaultLevel, Random random) {
-      return ModConfigs.VAULT_MOBS.getForLevel(vaultLevel).MOB_POOL.getRandom(random).create(world);
+   private static LivingEntity createMob(ServerLevel world, int vaultLevel, Random random) {
+      return ModConfigs.VAULT_MOBS.getForLevel(vaultLevel).MOB_POOL.getRandom(random).orElseThrow().create(world);
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_218657_a("Config", this.getConfig().serializeNBT());
-      nbt.func_218657_a("ConfigHistory", this.configHistory.serializeNBT());
-      nbt.func_218657_a("SpawnedMobsIds", this.spawnedMobIds.serializeNBT());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.put("Config", this.getConfig().serializeNBT());
+      nbt.put("ConfigHistory", this.configHistory.serializeNBT());
+      nbt.put("SpawnedMobsIds", this.spawnedMobIds.serializeNBT());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.config.deserializeNBT(nbt.func_74775_l("Config"));
-      this.configHistory.deserializeNBT(nbt.func_150295_c("ConfigHistory", 10));
-      this.spawnedMobIds.deserializeNBT(nbt.func_150295_c("SpawnedMobsIds", 8));
+   public void deserializeNBT(CompoundTag nbt) {
+      this.config.deserializeNBT(nbt.getCompound("Config"));
+      this.configHistory.deserializeNBT(nbt.getList("ConfigHistory", 10));
+      this.spawnedMobIds.deserializeNBT(nbt.getList("SpawnedMobsIds", 8));
    }
 
-   public static VaultSpawner fromNBT(CompoundNBT nbt) {
+   public static VaultSpawner fromNBT(CompoundTag nbt) {
       VaultSpawner spawner = new VaultSpawner();
       spawner.deserializeNBT(nbt);
       return spawner;
    }
 
-   public static class Config implements INBTSerializable<CompoundNBT> {
+   public static class Config implements INBTSerializable<CompoundTag> {
       @Expose
       @JsonAdapter(IgnoreEmpty.IntegerAdapter.class)
       private int startMaxMobs;
@@ -269,37 +268,36 @@ public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
          return new VaultSpawner.Config(this.startMaxMobs, this.extraMaxMobs, this.minDistance, this.maxDistance, this.despawnDistance);
       }
 
-      public CompoundNBT serializeNBT() {
-         CompoundNBT nbt = new CompoundNBT();
-         nbt.func_74768_a("StartMaxMobs", this.startMaxMobs);
-         nbt.func_74768_a("ExtraMaxMobs", this.extraMaxMobs);
-         nbt.func_74780_a("MinDistance", this.minDistance);
-         nbt.func_74780_a("MaxDistance", this.maxDistance);
-         nbt.func_74780_a("DespawnDistance", this.despawnDistance);
+      public CompoundTag serializeNBT() {
+         CompoundTag nbt = new CompoundTag();
+         nbt.putInt("StartMaxMobs", this.startMaxMobs);
+         nbt.putInt("ExtraMaxMobs", this.extraMaxMobs);
+         nbt.putDouble("MinDistance", this.minDistance);
+         nbt.putDouble("MaxDistance", this.maxDistance);
+         nbt.putDouble("DespawnDistance", this.despawnDistance);
          return nbt;
       }
 
-      public void deserializeNBT(CompoundNBT nbt) {
-         this.startMaxMobs = nbt.func_74762_e("StartMaxMobs");
-         this.extraMaxMobs = nbt.func_74762_e("ExtraMaxMobs");
-         this.minDistance = nbt.func_74769_h("MinDistance");
-         this.maxDistance = nbt.func_74769_h("MaxDistance");
-         this.despawnDistance = nbt.func_74769_h("DespawnDistance");
+      public void deserializeNBT(CompoundTag nbt) {
+         this.startMaxMobs = nbt.getInt("StartMaxMobs");
+         this.extraMaxMobs = nbt.getInt("ExtraMaxMobs");
+         this.minDistance = nbt.getDouble("MinDistance");
+         this.maxDistance = nbt.getDouble("MaxDistance");
+         this.despawnDistance = nbt.getDouble("DespawnDistance");
       }
 
       @Override
       public boolean equals(Object other) {
          if (this == other) {
             return true;
-         } else if (!(other instanceof VaultSpawner.Config)) {
-            return false;
          } else {
-            VaultSpawner.Config config = (VaultSpawner.Config)other;
-            return this.getStartMaxMobs() == config.getStartMaxMobs()
-               && this.getExtraMaxMobs() == config.getExtraMaxMobs()
-               && this.getMinDistance() == config.getMinDistance()
-               && this.getMaxDistance() == config.getMaxDistance()
-               && this.getDespawnDistance() == config.getDespawnDistance();
+            return !(other instanceof VaultSpawner.Config config)
+               ? false
+               : this.getStartMaxMobs() == config.getStartMaxMobs()
+                  && this.getExtraMaxMobs() == config.getExtraMaxMobs()
+                  && this.getMinDistance() == config.getMinDistance()
+                  && this.getMaxDistance() == config.getMaxDistance()
+                  && this.getDespawnDistance() == config.getDespawnDistance();
          }
       }
 
@@ -308,7 +306,7 @@ public class VaultSpawner implements INBTSerializable<CompoundNBT>, IVaultTask {
          return Objects.hash(this.getStartMaxMobs(), this.getExtraMaxMobs(), this.getMinDistance(), this.getMaxDistance(), this.getDespawnDistance());
       }
 
-      public static VaultSpawner.Config fromNBT(CompoundNBT nbt) {
+      public static VaultSpawner.Config fromNBT(CompoundTag nbt) {
          VaultSpawner.Config config = new VaultSpawner.Config();
          config.deserializeNBT(nbt);
          return config;

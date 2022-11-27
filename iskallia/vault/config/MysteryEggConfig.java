@@ -4,10 +4,10 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.vending.ProductEntry;
 import iskallia.vault.util.data.WeightedList;
 import java.util.stream.StreamSupport;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.item.SpawnEggItem;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.SpawnEggItem;
 
 public class MysteryEggConfig extends Config {
    @Expose
@@ -20,15 +20,15 @@ public class MysteryEggConfig extends Config {
 
    @Override
    protected void reset() {
-      this.POOL.add(new ProductEntry(this.getEgg(EntityType.field_200796_j)), 3);
-      this.POOL.add(new ProductEntry(this.getEgg(EntityType.field_200784_X)), 1);
+      this.POOL.add(new ProductEntry(this.getEgg(EntityType.COW)), 3);
+      this.POOL.add(new ProductEntry(this.getEgg(EntityType.PIG)), 1);
    }
 
    private Item getEgg(EntityType<?> type) {
-      return StreamSupport.<SpawnEggItem>stream(SpawnEggItem.func_195985_g().spliterator(), false)
-         .filter(eggItem -> type.equals(eggItem.func_208076_b(null)))
+      return StreamSupport.<SpawnEggItem>stream(SpawnEggItem.eggs().spliterator(), false)
+         .filter(eggItem -> type.equals(eggItem.getType(null)))
          .findAny()
          .map(eggItem -> (Item)eggItem)
-         .orElse(Items.field_190931_a);
+         .orElse(Items.AIR);
    }
 }

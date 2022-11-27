@@ -1,16 +1,22 @@
 package iskallia.vault.network.message;
 
+import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.research.type.Research;
 import iskallia.vault.skill.PlayerVaultStats;
+import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import java.util.List;
 import java.util.function.Supplier;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class ResearchMessage {
    public String researchName;
@@ -22,42 +28,53 @@ public class ResearchMessage {
       this.researchName = researchName;
    }
 
-   public static void encode(ResearchMessage message, PacketBuffer buffer) {
-      buffer.func_211400_a(message.researchName, 32767);
+   public static void encode(ResearchMessage message, FriendlyByteBuf buffer) {
+      buffer.writeUtf(message.researchName, 32767);
    }
 
-   public static ResearchMessage decode(PacketBuffer buffer) {
+   public static ResearchMessage decode(FriendlyByteBuf buffer) {
       ResearchMessage message = new ResearchMessage();
-      message.researchName = buffer.func_150789_c(32767);
+      message.researchName = buffer.readUtf(32767);
       return message;
    }
 
    public static void handle(ResearchMessage message, Supplier<Context> contextSupplier) {
       Context context = contextSupplier.get();
-      context.enqueueWork(() -> {
-         ServerPlayerEntity sender = context.getSender();
-         if (sender != null) {
-            Research research = ModConfigs.RESEARCHES.getByName(message.researchName);
-            if (research != null) {
-               PlayerVaultStatsData statsData = PlayerVaultStatsData.get((ServerWorld)sender.field_70170_p);
-               PlayerResearchesData researchesData = PlayerResearchesData.get((ServerWorld)sender.field_70170_p);
-               ResearchTree researchTree = researchesData.getResearches(sender);
-               int researchCost = researchTree.getResearchCost(research);
-               if (!ModConfigs.SKILL_GATES.getGates().isLocked(research.getName(), researchTree)) {
-                  PlayerVaultStats stats = statsData.getVaultStats(sender);
-                  int currentPoints = research.usesKnowledge() ? stats.getUnspentKnowledgePts() : stats.getUnspentSkillPts();
-                  if (currentPoints >= researchCost) {
-                     researchesData.research(sender, research);
-                     if (research.usesKnowledge()) {
-                        statsData.spendKnowledgePts(sender, researchCost);
-                     } else {
-                        statsData.spendSkillPts(sender, researchCost);
+      context.enqueueWork(
+         () -> {
+            ServerPlayer sender = context.getSender();
+            if (sender != null) {
+               Research research = ModConfigs.RESEARCHES.getByName(message.researchName);
+               if (research != null) {
+                  PlayerVaultStatsData statsData = PlayerVaultStatsData.get((ServerLevel)sender.level);
+                  PlayerResearchesData researchesData = PlayerResearchesData.get((ServerLevel)sender.level);
+                  ResearchTree researchTree = researchesData.getResearches(sender);
+                  if (!researchTree.isResearched(research)) {
+                     int researchCost = researchTree.getResearchCost(research);
+                     if (!ModConfigs.SKILL_GATES.getGates().isLocked(research.getName(), researchTree)) {
+                        PlayerVaultStats stats = statsData.getVaultStats(sender);
+                        int currentPoints = stats.getUnspentKnowledgePoints();
+                        if (currentPoints >= researchCost) {
+                           researchesData.research(sender, research);
+                           List<String> discoversModels = research.getDiscoversModels();
+                           statsData.spendKnowledgePoints(sender, researchCost);
+                           if (discoversModels != null && !discoversModels.isEmpty()) {
+                              DiscoveredModelsData discoveredModelsData = DiscoveredModelsData.get(sender.server);
+                              discoversModels.stream()
+                                 .<ResourceLocation>map(ResourceLocation::new)
+                                 .forEach(modelId -> ModDynamicModels.REGISTRIES.getModelAndAssociatedItem(modelId).ifPresent(pair -> {
+                                    DynamicModel gearModel = (DynamicModel)pair.getFirst();
+                                    Item associatedItem = (Item)pair.getSecond();
+                                    discoveredModelsData.discoverModelAndBroadcast(associatedItem, gearModel.getId(), sender);
+                                 }));
+                           }
+                        }
                      }
                   }
                }
             }
          }
-      });
+      );
       context.setPacketHandled(true);
    }
 }

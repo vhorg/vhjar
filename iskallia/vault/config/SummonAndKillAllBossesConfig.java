@@ -1,21 +1,24 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.init.ModConfigs;
+import iskallia.vault.VaultMod;
+import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.util.data.WeightedList;
-import iskallia.vault.world.vault.modifier.VaultModifier;
+import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.resources.ResourceLocation;
 
 public class SummonAndKillAllBossesConfig extends Config {
    @Expose
-   public List<SummonAndKillAllBossesConfig.Level> LEVELS;
+   public LevelEntryList<SummonAndKillAllBossesConfig.Level> LEVELS;
 
    @Override
    public String getName() {
@@ -24,35 +27,38 @@ public class SummonAndKillAllBossesConfig extends Config {
 
    @Override
    protected void reset() {
-      this.LEVELS = new ArrayList<>();
+      this.LEVELS = new LevelEntryList<>();
       SummonAndKillAllBossesConfig.Level level = new SummonAndKillAllBossesConfig.Level(5);
       level.POOLS
          .addAll(
             Arrays.asList(
                new SummonAndKillAllBossesConfig.Pool(2, 2)
-                  .add("Crowded", 1)
-                  .add("Chaos", 1)
-                  .add("Fast", 1)
-                  .add("Rush", 1)
-                  .add("Easy", 1)
-                  .add("Hard", 1)
-                  .add("Treasure", 1)
-                  .add("Unlucky", 1),
-               new SummonAndKillAllBossesConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
+                  .add(VaultMod.id("mobs"), 1)
+                  .add(VaultMod.id("frail"), 1)
+                  .add(VaultMod.id("rushed"), 1)
+                  .add(VaultMod.id("difficult"), 1)
+                  .add(VaultMod.id("extended"), 1)
+                  .add(VaultMod.id("rotten"), 1)
+                  .add(VaultMod.id("treasure_hunter"), 1),
+               new SummonAndKillAllBossesConfig.Pool(1, 1).add(VaultMod.id("default"), 1).add(VaultMod.id("dummy"), 3)
             )
          );
       this.LEVELS.add(level);
    }
 
-   public Set<VaultModifier> getRandom(Random random, int level) {
-      SummonAndKillAllBossesConfig.Level override = this.getForLevel(level);
-      List<SummonAndKillAllBossesConfig.Pool> pools = override.POOLS;
-      if (pools == null) {
+   public Set<VaultModifier<?>> getRandom(Random random, int level) {
+      Optional<SummonAndKillAllBossesConfig.Level> override = this.LEVELS.getForLevel(level);
+      if (override.isEmpty()) {
          return new HashSet<>();
       } else {
-         Set<VaultModifier> modifiers = new HashSet<>();
-         pools.stream().map(pool -> pool.getRandom(random)).forEach(modifiers::addAll);
-         return modifiers;
+         List<SummonAndKillAllBossesConfig.Pool> pools = override.get().POOLS;
+         if (pools == null) {
+            return new HashSet<>();
+         } else {
+            Set<VaultModifier<?>> modifiers = new HashSet<>();
+            pools.stream().map(pool -> pool.getRandom(random)).forEach(modifiers::addAll);
+            return modifiers;
+         }
       }
    }
 
@@ -73,7 +79,7 @@ public class SummonAndKillAllBossesConfig extends Config {
       return SummonAndKillAllBossesConfig.Level.EMPTY;
    }
 
-   public static class Level {
+   public static class Level implements LevelEntryList.ILevelEntry {
       public static SummonAndKillAllBossesConfig.Level EMPTY = new SummonAndKillAllBossesConfig.Level(0);
       @Expose
       public int MIN_LEVEL;
@@ -84,6 +90,11 @@ public class SummonAndKillAllBossesConfig extends Config {
          this.MIN_LEVEL = minLevel;
          this.POOLS = new ArrayList<>();
       }
+
+      @Override
+      public int getLevel() {
+         return this.MIN_LEVEL;
+      }
    }
 
    public static class Pool {
@@ -92,7 +103,7 @@ public class SummonAndKillAllBossesConfig extends Config {
       @Expose
       public int MAX_ROLLS;
       @Expose
-      public WeightedList<String> POOL;
+      public WeightedList<ResourceLocation> POOL;
 
       public Pool(int min, int max) {
          this.MIN_ROLLS = min;
@@ -100,20 +111,20 @@ public class SummonAndKillAllBossesConfig extends Config {
          this.POOL = new WeightedList<>();
       }
 
-      public SummonAndKillAllBossesConfig.Pool add(String name, int weight) {
-         this.POOL.add(name, weight);
+      public SummonAndKillAllBossesConfig.Pool add(ResourceLocation modifierId, int weight) {
+         this.POOL.add(modifierId, weight);
          return this;
       }
 
-      public Set<VaultModifier> getRandom(Random random) {
+      public Set<VaultModifier<?>> getRandom(Random random) {
          int rolls = Math.min(this.MIN_ROLLS, this.MAX_ROLLS) + random.nextInt(Math.abs(this.MIN_ROLLS - this.MAX_ROLLS) + 1);
-         Set<String> res = new HashSet<>();
+         Set<ResourceLocation> res = new HashSet<>();
 
          while (res.size() < rolls && res.size() < this.POOL.size()) {
             res.add(this.POOL.getRandom(random));
          }
 
-         return res.stream().map(s -> ModConfigs.VAULT_MODIFIERS.getByName(s)).filter(Objects::nonNull).collect(Collectors.toSet());
+         return res.stream().map(VaultModifierRegistry::getOpt).flatMap(Optional::stream).collect(Collectors.toSet());
       }
    }
 }

@@ -5,14 +5,14 @@ import iskallia.vault.world.vault.time.extension.TimeExtension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class VaultTimer implements INBTSerializable<CompoundNBT> {
+public class VaultTimer implements INBTSerializable<CompoundTag> {
    public int startTime;
    public int totalTime;
    public int runTime;
-   protected VListNBT<TimeExtension, CompoundNBT> extensions = VListNBT.of(TimeExtension::fromNBT);
+   protected VListNBT<TimeExtension, CompoundTag> extensions = VListNBT.of(TimeExtension::fromNBT);
    protected List<BiConsumer<VaultTimer, TimeExtension>> extensionAddedListeners = new ArrayList<>();
    protected List<BiConsumer<VaultTimer, TimeExtension>> extensionAppliedListeners = new ArrayList<>();
 
@@ -66,19 +66,19 @@ public class VaultTimer implements INBTSerializable<CompoundNBT> {
       this.runTime++;
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74768_a("StartTime", this.startTime);
-      nbt.func_74768_a("TotalTime", this.totalTime);
-      nbt.func_74768_a("RunTime", this.runTime);
-      nbt.func_218657_a("TimeExtensions", this.extensions.serializeNBT());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putInt("StartTime", this.startTime);
+      nbt.putInt("TotalTime", this.totalTime);
+      nbt.putInt("RunTime", this.runTime);
+      nbt.put("TimeExtensions", this.extensions.serializeNBT());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.startTime = nbt.func_74762_e("StartTime");
-      this.totalTime = nbt.func_74762_e("TotalTime");
-      this.runTime = nbt.func_74762_e("RunTime");
-      this.extensions.deserializeNBT(nbt.func_150295_c("TimeExtensions", 10));
+   public void deserializeNBT(CompoundTag nbt) {
+      this.startTime = nbt.getInt("StartTime");
+      this.totalTime = nbt.getInt("TotalTime");
+      this.runTime = nbt.getInt("RunTime");
+      this.extensions.deserializeNBT(nbt.getList("TimeExtensions", 10));
    }
 }

@@ -1,0 +1,1084 @@
+{
+  "variants": {
+    "facing=east,half=lower,hinge=left,open=false,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=iskallium": {
+      "model": "the_vault:block/treasure_door/iskallium",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=iskallium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=gorginite": {
+      "model": "the_vault:block/treasure_door/gorginite",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=gorginite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=sparkletine": {
+      "model": "the_vault:block/treasure_door/sparkletine",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=sparkletine": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=ashium": {
+      "model": "the_vault:block/treasure_door/ashium",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=ashium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=bomignite": {
+      "model": "the_vault:block/treasure_door/bomignite",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=bomignite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=tubium": {
+      "model": "the_vault:block/treasure_door/tubium",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=tubium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=upaline": {
+      "model": "the_vault:block/treasure_door/upaline",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=upaline": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=puffium": {
+      "model": "the_vault:block/treasure_door/puffium",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=puffium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=petzanite": {
+      "model": "the_vault:block/treasure_door/petzanite",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=petzanite": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=xenium": {
+      "model": "the_vault:block/treasure_door/xenium",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=xenium": {
+      "model": "the_vault:block/empty"
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=xenium": {
+      "model": "the_vault:block/empty"
+    }
+  }
+}

@@ -1,15 +1,16 @@
 package iskallia.vault.skill.ability.effect.sub;
 
-import iskallia.vault.Vault;
 import iskallia.vault.skill.ability.config.sub.VeinMinerVoidConfig;
 import iskallia.vault.skill.ability.effect.VeinMinerAbility;
-import net.minecraft.block.Block;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.server.ServerWorld;
+import iskallia.vault.tags.ModBlockTags;
+import iskallia.vault.world.data.ServerVaults;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class VeinMinerVoidAbility extends VeinMinerAbility<VeinMinerVoidConfig> {
    @Override
-   public boolean shouldVoid(ServerWorld world, Block targetBlock) {
-      return world.func_234923_W_() == Vault.VAULT_KEY && !targetBlock.func_203417_a(BlockTags.func_199896_a().func_241834_b(Vault.id("voidmine_exclusions")));
+   public boolean shouldVoid(ServerLevel level, ServerPlayer player, BlockState target) {
+      return ServerVaults.isInVault(player) && !target.is(ModBlockTags.VOIDMINE_EXCLUSIONS);
    }
 }

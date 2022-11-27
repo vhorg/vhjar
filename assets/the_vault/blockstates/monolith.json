@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "half=upper": {
+      "model": "the_vault:block/monolith_top"
+    },
+    "half=lower,filled=false": {
+      "model": "the_vault:block/monolith_inactive"
+    },
+    "half=lower,filled=true": {
+      "model": "the_vault:block/monolith_active"
+    }
+  }
+}

@@ -1,19 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "pep",
-    "ece",
-    "pep"
+    "sss",
+    "cpc",
+    "ccc"
   ],
   "key": {
-    "p": {
-      "item": "the_vault:vault_stone"
+    "s": {
+      "item": "the_vault:magic_silk_block"
     },
-    "c": {
+    "p": {
       "item": "the_vault:echo_pog"
     },
-    "e": {
-      "item": "the_vault:perfect_black_opal"
+    "c": {
+      "item": "the_vault:black_chromatic_steel_ingot"
     }
   },
   "result": {

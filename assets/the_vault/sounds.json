@@ -1,4 +1,40 @@
 {
+  "heal": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/heal"
+    ]
+  },
+  "taunt": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/taunt"
+    ]
+  },
+  "taunt_repel": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/taunt_repel"
+    ]
+  },
+  "mana_shield": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/mana_shield"
+    ]
+  },
+  "mana_shield_hit": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/mana_shield_hit"
+    ]
+  },
+  "nova_speed": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/nova_speed"
+    ]
+  },
   "dash": {
     "category": "master",
     "sounds": [
@@ -9,6 +45,12 @@
     "category": "master",
     "sounds": [
       "the_vault:ability/mega_jump"
+    ]
+  },
+  "magnet_table": {
+    "category": "blocks",
+    "sounds": [
+      "the_vault:magnet_table"
     ]
   },
   "cleanse": {
@@ -53,6 +95,37 @@
       "the_vault:ability/tank"
     ]
   },
+  "tank_hit": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/tank_hit"
+    ]
+  },
+  "tank_projectile": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/tank_projectile"
+    ]
+  },
+  "tank_projectile_hit": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/tank_projectile_hit",
+      "the_vault:ability/tank_projectile_hit_2"
+    ]
+  },
+  "tank_reflect": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/tank_reflect"
+    ]
+  },
+  "tank_reflect_hit": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/tank_reflect_hit"
+    ]
+  },
   "robot_hurt": {
     "category": "hostile",
     "sounds": [
@@ -73,6 +146,21 @@
     "sounds": [
       "the_vault:boogie/ambient_1",
       "the_vault:boogie/ambient_2"
+    ]
+  },
+  "coin_pile_break": {
+    "category": "block",
+    "sounds": [
+      "the_vault:coin_pile/coin4",
+      "the_vault:coin_pile/coin5",
+      "the_vault:coin_pile/coin6"
+    ]
+  },
+  "coin_pile_place": {
+    "category": "block",
+    "sounds": [
+      "the_vault:coin_pile/coin1",
+      "the_vault:coin_pile/coin2"
     ]
   },
   "boogie_hurt": {
@@ -171,6 +259,12 @@
       "the_vault:timer_kill"
     ]
   },
+  "arena_horns": {
+    "category": "master",
+    "sounds": [
+      "the_vault:arena/horns"
+    ]
+  },
   "vault_ambient_loop": {
     "category": "music",
     "sounds": [
@@ -214,6 +308,12 @@
     "category": "master",
     "sounds": [
       "the_vault:confetti"
+    ]
+  },
+  "gift_bomb": {
+    "category": "master",
+    "sounds": [
+      "the_vault:gift_bomb"
     ]
   },
   "vault_exp": {
@@ -353,10 +453,19 @@
       "the_vault:favour_up"
     ]
   },
-  "eyesore_grawl": {
-    "category": "hostile",
+  "crate_open": {
+    "category": "block",
     "sounds": [
-      "the_vault:eyesore/grawl"
+      "the_vault:crate_open"
+    ]
+  },
+  "artisan_smithing": {
+    "category": "block",
+    "sounds": [
+      "the_vault:smithing/smithing1",
+      "the_vault:smithing/smithing2",
+      "the_vault:smithing/smithing3",
+      "the_vault:smithing/smithing4"
     ]
   }
 }

@@ -5,23 +5,27 @@ import iskallia.vault.client.ClientEternalData;
 import iskallia.vault.entity.eternal.EternalDataSnapshot;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.world.data.EternalsData;
+import java.util.Random;
 import javax.annotation.Nonnull;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class AncientCryoChamberTileEntity extends CryoChamberTileEntity {
-   public AncientCryoChamberTileEntity() {
-      super(ModBlocks.ANCIENT_CRYO_CHAMBER_TILE_ENTITY);
+   public AncientCryoChamberTileEntity(BlockPos pos, BlockState state) {
+      super(ModBlocks.ANCIENT_CRYO_CHAMBER_TILE_ENTITY, pos, state);
       this.setMaxCores(1);
    }
 
    public void setEternalName(String coreName) {
       this.coreNames.clear();
       this.coreNames.add(coreName);
-      this.func_70296_d();
+      this.setChanged();
    }
 
    @Nonnull
@@ -29,26 +33,15 @@ public class AncientCryoChamberTileEntity extends CryoChamberTileEntity {
       return (String)Iterables.getFirst(this.coreNames, "Unknown");
    }
 
-   @Override
-   public void func_73660_a() {
-      if (this.field_145850_b != null && !this.field_145850_b.field_72995_K && this.getOwner() != null) {
-         if (this.getEternalId() != null && this.field_145850_b.func_82737_E() % 40L == 0L) {
-            this.field_145850_b
-               .func_184148_a(
-                  null,
-                  this.field_174879_c.func_177958_n(),
-                  this.field_174879_c.func_177956_o(),
-                  this.field_174879_c.func_177952_p(),
-                  SoundEvents.field_206934_aN,
-                  SoundCategory.PLAYERS,
-                  0.25F,
-                  1.0F
-               );
+   public static void tick(Level level, BlockPos pos, BlockState state, AncientCryoChamberTileEntity tile) {
+      if (level != null && !level.isClientSide && tile.getOwner() != null) {
+         if (tile.getEternalId() != null && level.getGameTime() % 40L == 0L) {
+            level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.CONDUIT_AMBIENT, SoundSource.PLAYERS, 0.25F, 1.0F);
          }
 
-         if (this.getEternalId() == null && !this.coreNames.isEmpty()) {
-            this.createAncient();
-            this.sendUpdates();
+         if (tile.getEternalId() == null && !tile.coreNames.isEmpty()) {
+            tile.createAncient();
+            tile.sendUpdates();
          }
       }
    }
@@ -68,6 +61,8 @@ public class AncientCryoChamberTileEntity extends CryoChamberTileEntity {
 
    private void createAncient() {
       String name = (String)Iterables.getFirst(this.coreNames, "Unknown");
-      this.eternalId = EternalsData.get((ServerWorld)this.func_145831_w()).add(this.getOwner(), name, true);
+      EternalsData.EternalVariant variant = EternalsData.EternalVariant.byId(new Random().nextInt(EternalsData.EternalVariant.values().length));
+      this.variant = variant;
+      this.eternalId = EternalsData.get((ServerLevel)this.getLevel()).add(this.getOwner(), name, true, variant, false);
    }
 }

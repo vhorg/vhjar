@@ -2,23 +2,27 @@
   "type": "minecraft:crafting_shaped",
   "pattern":
   [
-    "pop",
-    "odo",
-    "pop"
+    "idi",
+    "oso",
+    "sss"
   ],
   "key":
   {
-    "p":
+    "i":
     {
-      "item": "minecraft:purpur_block"
+      "item": "the_vault:chromatic_iron_ingot"
     },
     "d":
     {
-      "item": "minecraft:diamond_block"
+      "item": "minecraft:diamond"
     },
     "o":
     {
       "item": "minecraft:obsidian"
+    },
+    "s":
+    {
+      "item": "minecraft:stone_bricks"
     }
   },
   "result":

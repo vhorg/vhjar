@@ -7,21 +7,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPattern;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
-import net.minecraft.world.gen.feature.jigsaw.JigsawManager.IPieceFactory;
-import net.minecraft.world.gen.feature.structure.AbstractVillagePiece;
-import net.minecraft.world.gen.feature.structure.StructurePiece;
-import net.minecraft.world.gen.feature.structure.VillageConfig;
-import net.minecraft.world.gen.feature.template.TemplateManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.pieces.PieceGeneratorSupplier.Context;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.pools.JigsawPlacement.PieceFactory;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.phys.AABB;
 
 public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
    public static final int START_X_Z = 21;
@@ -30,7 +31,7 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
    public static final int TUNNEL_Z = 48;
    public static final int TUNNEL_X = 11;
    public static final int TUNNEL_Y_OFFSET = 6;
-   private final MutableBoundingBox structureBoundingBox;
+   private final BoundingBox structureBoundingBox;
    private final BlockPos startPos;
    private final boolean generateTreasureRooms;
    private final JigsawPoolProvider jigsawPoolProvider;
@@ -38,7 +39,7 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
    private List<StructurePiece> pieces = new ArrayList<>();
 
    public FragmentedJigsawGenerator(
-      MutableBoundingBox structureBoundingBox,
+      BoundingBox structureBoundingBox,
       BlockPos startPos,
       boolean generateTreasureRooms,
       JigsawPoolProvider jigsawPoolProvider,
@@ -52,7 +53,7 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
    }
 
    @Override
-   public MutableBoundingBox getStructureBox() {
+   public BoundingBox getStructureBox() {
       return this.structureBoundingBox;
    }
 
@@ -85,61 +86,61 @@ public class FragmentedJigsawGenerator implements VaultJigsawGenerator {
 
    @Override
    public void generate(
-      DynamicRegistries registries,
-      VillageConfig config,
-      IPieceFactory pieceFactory,
+      RegistryAccess registries,
+      Context<JigsawConfiguration> config,
+      PieceFactory pieceFactory,
       ChunkGenerator gen,
-      TemplateManager manager,
+      StructureManager manager,
       List<StructurePiece> pieceList,
       Random random,
       boolean flag1,
       boolean generateOnSurface
    ) {
       BlockPos startPos = this.getStartPos();
-      Registry<JigsawPattern> registry = registries.func_243612_b(Registry.field_243555_ax);
-      Rotation startRotation = Rotation.func_222466_a(random);
-      Rotation vaultGenerationRotation = startRotation.func_185830_a(Rotation.CLOCKWISE_90);
-      JigsawPattern starts = this.getJigsawPoolProvider().getStartRoomPool(registry);
-      JigsawPiece startPiece = starts.func_214944_a(random);
-      MutableBoundingBox startBoundingBox = startPiece.func_214852_a(manager, startPos, startRotation);
-      AbstractVillagePiece start = pieceFactory.create(manager, startPiece, startPos, startPiece.func_214850_d(), startRotation, startBoundingBox);
+      Registry<StructureTemplatePool> registry = registries.registryOrThrow(Registry.TEMPLATE_POOL_REGISTRY);
+      Rotation startRotation = Rotation.getRandom(random);
+      Rotation vaultGenerationRotation = startRotation.getRotated(Rotation.CLOCKWISE_90);
+      StructureTemplatePool starts = this.getJigsawPoolProvider().getStartRoomPool(registry);
+      StructurePoolElement startPiece = starts.getRandomTemplate(random);
+      BoundingBox startBoundingBox = startPiece.getBoundingBox(manager, startPos, startRotation);
+      PoolElementStructurePiece start = pieceFactory.create(manager, startPiece, startPos, startPiece.getGroundLevelDelta(), startRotation, startBoundingBox);
       pieceList.add(start);
-      BlockPos centerRoomPos = startPos.func_177971_a(new BlockPos(10, 0, 10).func_190942_a(startRotation))
-         .func_177967_a(vaultGenerationRotation.func_185831_a(Direction.EAST), 11)
-         .func_177967_a(vaultGenerationRotation.func_185831_a(Direction.EAST), 23);
+      BlockPos centerRoomPos = startPos.offset(new BlockPos(10, 0, 10).rotate(startRotation))
+         .relative(vaultGenerationRotation.rotate(Direction.EAST), 11)
+         .relative(vaultGenerationRotation.rotate(Direction.EAST), 23);
       List<StructurePiece> synchronizedPieces = Collections.synchronizedList(pieceList);
-      JigsawPattern rooms = this.getJigsawPoolProvider().getRoomPool(registry);
+      StructureTemplatePool rooms = this.getJigsawPoolProvider().getRoomPool(registry);
       this.generatedLayout
          .getRooms()
          .parallelStream()
          .forEach(
             room -> {
-               JigsawPiece roomPiece = room.getRandomPiece(rooms, random);
-               Rotation roomRotation = Rotation.func_222466_a(random);
-               BlockPos roomPos = centerRoomPos.func_177971_a(room.getAbsoluteOffset(vaultGenerationRotation, roomRotation));
+               StructurePoolElement roomPiece = room.getRandomPiece(rooms, random);
+               Rotation roomRotation = Rotation.getRandom(random);
+               BlockPos roomPos = centerRoomPos.offset(room.getAbsoluteOffset(vaultGenerationRotation, roomRotation));
                JigsawPieceResolver resolverx = JigsawPieceResolver.newResolver(roomPiece, roomPos)
                   .withRotation(roomRotation)
-                  .andJigsawFilter(key -> !key.func_110623_a().contains("tunnels"));
-               if (room.getRoomOffset().equals(BlockPos.field_177992_a)) {
-                  resolverx.addStructureBox(AxisAlignedBB.func_216363_a(startBoundingBox).func_72314_b(1.0, 3.0, 1.0));
+                  .andJigsawFilter(key -> !key.getPath().contains("tunnels"));
+               if (room.getRoomOffset().equals(BlockPos.ZERO)) {
+                  resolverx.addStructureBox(AABB.of(startBoundingBox).inflate(1.0, 3.0, 1.0));
                }
 
                if (!this.generatesTreasureRooms() || !room.canGenerateTreasureRooms()) {
-                  resolverx.andJigsawFilter(key -> !key.func_110623_a().contains("treasure_rooms"));
+                  resolverx.andJigsawFilter(key -> !key.getPath().contains("treasure_rooms"));
                }
 
                synchronizedPieces.addAll(resolverx.resolveJigsawPieces(manager, registry));
             }
          );
-      JigsawPattern tunnels = this.getJigsawPoolProvider().getTunnelPool(registry);
+      StructureTemplatePool tunnels = this.getJigsawPoolProvider().getTunnelPool(registry);
 
       for (VaultRoomLayoutGenerator.Tunnel tunnel : this.generatedLayout.getTunnels()) {
-         JigsawPiece tunnelPiece = tunnel.getRandomPiece(tunnels, random);
-         Rotation tunnelRotation = tunnel.getRandomConnectingRotation(random).func_185830_a(vaultGenerationRotation);
-         BlockPos tunnelPos = centerRoomPos.func_177971_a(tunnel.getAbsoluteOffset(vaultGenerationRotation, tunnelRotation));
+         StructurePoolElement tunnelPiece = tunnel.getRandomPiece(tunnels, random);
+         Rotation tunnelRotation = tunnel.getRandomConnectingRotation(random).getRotated(vaultGenerationRotation);
+         BlockPos tunnelPos = centerRoomPos.offset(tunnel.getAbsoluteOffset(vaultGenerationRotation, tunnelRotation));
          JigsawPieceResolver resolver = JigsawPieceResolver.newResolver(tunnelPiece, tunnelPos)
             .withRotation(tunnelRotation)
-            .andJigsawFilter(key -> !key.func_110623_a().contains("rooms"));
+            .andJigsawFilter(key -> !key.getPath().contains("rooms"));
          pieceList.addAll(resolver.resolveJigsawPieces(manager, registry));
       }
 

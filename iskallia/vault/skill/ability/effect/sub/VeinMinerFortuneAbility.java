@@ -3,12 +3,12 @@ package iskallia.vault.skill.ability.effect.sub;
 import iskallia.vault.skill.ability.config.sub.VeinMinerFortuneConfig;
 import iskallia.vault.skill.ability.effect.VeinMinerAbility;
 import iskallia.vault.util.OverlevelEnchantHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class VeinMinerFortuneAbility extends VeinMinerAbility<VeinMinerFortuneConfig> {
-   protected ItemStack getVeinMiningItem(PlayerEntity player, VeinMinerFortuneConfig config) {
-      ItemStack stack = super.getVeinMiningItem(player, config).func_77946_l();
+   protected ItemStack getVeinMiningItemProxy(Player player, VeinMinerFortuneConfig config) {
+      ItemStack stack = super.getVeinMiningItemProxy(player, config).copy();
       return OverlevelEnchantHelper.increaseFortuneBy(stack, config.getAdditionalFortuneLevel());
    }
 }

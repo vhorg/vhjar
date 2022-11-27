@@ -1,7 +1,7 @@
 package iskallia.vault.attribute;
 
 import java.util.function.Supplier;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public abstract class VModifier<T, I extends VAttribute.Instance<T>> extends VAttribute<T, I> {
    public VModifier(ResourceLocation id, Supplier<I> instance) {

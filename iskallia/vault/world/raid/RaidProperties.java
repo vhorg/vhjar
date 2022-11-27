@@ -3,13 +3,13 @@ package iskallia.vault.world.raid;
 import iskallia.vault.attribute.VAttribute;
 import java.util.Optional;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class RaidProperties implements INBTSerializable<CompoundNBT> {
-   protected CompoundNBT data = new CompoundNBT();
+public class RaidProperties implements INBTSerializable<CompoundTag> {
+   protected CompoundTag data = new CompoundTag();
 
-   public CompoundNBT getData() {
+   public CompoundTag getData() {
       return this.data;
    }
 
@@ -61,11 +61,11 @@ public class RaidProperties implements INBTSerializable<CompoundNBT> {
       return attribute.create(this.getData(), value);
    }
 
-   public CompoundNBT serializeNBT() {
+   public CompoundTag serializeNBT() {
       return this.data;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       this.data = nbt;
    }
 }

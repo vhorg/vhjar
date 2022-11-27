@@ -2,17 +2,17 @@ package iskallia.vault.attribute;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class CompoundAttribute<T extends INBTSerializable<CompoundNBT>> extends VAttribute.Instance<T> {
-   protected Function<CompoundNBT, T> read;
+public class CompoundAttribute<T extends INBTSerializable<CompoundTag>> extends VAttribute.Instance<T> {
+   protected Function<CompoundTag, T> read;
 
-   public CompoundAttribute(Function<CompoundNBT, T> read) {
+   public CompoundAttribute(Function<CompoundTag, T> read) {
       this.read = read;
    }
 
-   public static <T extends INBTSerializable<CompoundNBT>> CompoundAttribute<T> of(Supplier<T> supplier) {
+   public static <T extends INBTSerializable<CompoundTag>> CompoundAttribute<T> of(Supplier<T> supplier) {
       return new CompoundAttribute<>(nbt -> {
          T value = supplier.get();
          value.deserializeNBT(nbt);
@@ -21,16 +21,16 @@ public class CompoundAttribute<T extends INBTSerializable<CompoundNBT>> extends 
    }
 
    @Override
-   public void write(CompoundNBT nbt) {
+   public void write(CompoundTag nbt) {
       if (this.getBaseValue() != null) {
-         nbt.func_218657_a("BaseValue", this.getBaseValue().serializeNBT());
+         nbt.put("BaseValue", this.getBaseValue().serializeNBT());
       }
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      if (nbt.func_150297_b("BaseValue", 10)) {
-         this.setBaseValue(this.read.apply(nbt.func_74775_l("BaseValue")));
+   public void read(CompoundTag nbt) {
+      if (nbt.contains("BaseValue", 10)) {
+         this.setBaseValue(this.read.apply(nbt.getCompound("BaseValue")));
       }
    }
 }

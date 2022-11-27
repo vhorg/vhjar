@@ -1,86 +1,172 @@
 package iskallia.vault.item.crystal;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.item.crystal.layout.CrystalLayout;
+import iskallia.vault.item.crystal.objective.CrystalObjective;
+import iskallia.vault.item.crystal.theme.CrystalTheme;
+import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.builder.ClassicVaultBuilder;
 import iskallia.vault.world.vault.builder.CoopVaultBuilder;
-import iskallia.vault.world.vault.builder.FinalBossBuilder;
 import iskallia.vault.world.vault.builder.FinalLobbyBuilder;
 import iskallia.vault.world.vault.builder.RaffleVaultBuilder;
 import iskallia.vault.world.vault.builder.TroveVaultBuilder;
 import iskallia.vault.world.vault.builder.VaultRaidBuilder;
 import iskallia.vault.world.vault.gen.VaultRoomNames;
 import iskallia.vault.world.vault.logic.VaultLogic;
-import iskallia.vault.world.vault.logic.objective.VaultObjective;
-import iskallia.vault.world.vault.modifier.VaultModifier;
-import iskallia.vault.world.vault.modifier.VaultModifiers;
+import iskallia.vault.world.vault.modifier.VaultModifierStack;
+import iskallia.vault.world.vault.modifier.spi.VaultModifier;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.INBTSerializable;
-import org.apache.commons.lang3.StringUtils;
 
-public class CrystalData implements INBTSerializable<CompoundNBT> {
+public class CrystalData implements INBTSerializable<CompoundTag> {
    public static final CrystalData EMPTY = new CrystalData.EmptyCrystalData();
-   private CompoundNBT delegate = new CompoundNBT();
+   private CompoundTag delegate = new CompoundTag();
+   protected UUID vaultId;
+   protected int level;
+   protected CrystalTheme theme;
+   protected CrystalLayout layout;
+   protected CrystalObjective objective;
+   protected CrystalModifiers modifiers = new CrystalModifiers();
+   protected CrystalData.Model model = CrystalData.Model.DEFAULT;
    protected CrystalData.Type type = CrystalData.Type.CLASSIC;
-   protected String playerBossName = "";
-   protected List<CrystalData.Modifier> modifiers = new ArrayList<>();
    protected boolean preventsRandomModifiers = false;
-   protected ResourceLocation selectedObjective = null;
-   protected int targetObjectiveCount = -1;
    protected boolean canBeModified = true;
    protected boolean canTriggerInfluences = true;
    protected boolean canGenerateTreasureRooms = true;
    protected List<String> guaranteedRoomFilters = new ArrayList<>();
    protected CrystalData.EchoData echoData;
    protected FrameData frameData;
-   protected boolean challenge;
+   protected int instabilityCounter;
+   protected boolean clarity;
 
    public CrystalData() {
    }
 
+   public CrystalData(CompoundTag delegate) {
+      this.delegate = delegate;
+      this.deserializeNBT(this.delegate.getCompound("CrystalData"));
+   }
+
    public CrystalData(ItemStack delegate) {
       if (delegate != null) {
-         this.delegate = delegate.func_196082_o();
-         this.deserializeNBT(this.delegate.func_74775_l("CrystalData"));
+         this.delegate = delegate.getOrCreateTag();
+         this.deserializeNBT(this.delegate.getCompound("CrystalData"));
       }
    }
 
-   public CompoundNBT getDelegate() {
+   public CompoundTag getDelegate() {
       return this.delegate;
    }
 
    public void updateDelegate() {
       if (this.delegate != null) {
-         this.delegate.func_218657_a("CrystalData", this.serializeNBT());
+         this.delegate.put("CrystalData", this.serializeNBT());
+      }
+   }
+
+   public UUID getVaultId() {
+      return this.vaultId;
+   }
+
+   public CrystalData setVaultId(UUID uuid) {
+      if (!uuid.equals(this.vaultId)) {
+         this.vaultId = uuid;
+         this.updateDelegate();
+      }
+
+      return this;
+   }
+
+   public int getLevel() {
+      return this.level;
+   }
+
+   public CrystalData setLevel(int level) {
+      if (level != this.level) {
+         this.level = level;
+         this.updateDelegate();
+      }
+
+      return this;
+   }
+
+   public CrystalTheme getTheme() {
+      return this.theme;
+   }
+
+   public CrystalData setTheme(CrystalTheme theme) {
+      if (!theme.equals(this.theme)) {
+         this.theme = theme;
+         this.updateDelegate();
+      }
+
+      return this;
+   }
+
+   public CrystalLayout getLayout() {
+      return this.layout;
+   }
+
+   public CrystalData setLayout(CrystalLayout layout) {
+      this.layout = layout;
+      this.updateDelegate();
+      return this;
+   }
+
+   public CrystalObjective getObjective() {
+      return this.objective;
+   }
+
+   public CrystalData setObjective(CrystalObjective objective) {
+      if (!objective.equals(this.objective)) {
+         this.objective = objective;
+         this.updateDelegate();
+      }
+
+      return this;
+   }
+
+   public CrystalData.Model getModel() {
+      return this.model;
+   }
+
+   public void setModel(CrystalData.Model model) {
+      if (this.model != model) {
+         this.model = model;
+         this.updateDelegate();
       }
    }
 
@@ -95,93 +181,125 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
    }
 
-   public String getPlayerBossName() {
-      return this.playerBossName;
-   }
-
-   public void setPlayerBossName(String playerBossName) {
-      boolean nameChanged = !StringUtils.equalsIgnoreCase(this.playerBossName, playerBossName);
-      this.playerBossName = playerBossName;
-      if (nameChanged) {
-         this.updateDelegate();
-      }
-
-      if (!playerBossName.isEmpty()) {
-         this.setType(CrystalData.Type.RAFFLE);
-         this.setSelectedObjective(VaultRaid.SUMMON_AND_KILL_BOSS.get().getId());
-      } else if (this.getType() == CrystalData.Type.RAFFLE) {
-         this.setType(CrystalData.Type.CLASSIC);
-      }
-   }
-
    public boolean canModifyWithCrafting() {
       if (!this.canBeModified()) {
          return false;
       } else {
-         List<String> modifierNames = this.getModifiers().stream().map(CrystalData.Modifier::getModifierName).collect(Collectors.toList());
-         if (modifierNames.contains("Afterlife")) {
-            return false;
-         } else if (Vault.id("raid_challenge").equals(this.getSelectedObjective())) {
-            return false;
-         } else {
-            return Vault.id("cake_hunt").equals(this.getSelectedObjective()) ? false : this.getType().canCraft();
-         }
+         List<ResourceLocation> modifierNames = this.getModifiers().stream().map(VaultModifierStack::getModifierId).toList();
+         return modifierNames.contains(VaultMod.id("afterlife")) ? false : this.getType().canCraft();
       }
    }
 
-   public boolean canAddModifier(String name, CrystalData.Modifier.Operation operation) {
-      return this.canBeModified() && this.getModifiers().stream().noneMatch(mod -> name.equals(mod.name));
+   protected boolean canAddModifier(VaultModifierStack modifierStack) {
+      return this.canBeModified();
    }
 
-   public boolean addCatalystModifier(String name, boolean preventsRandomModifiers, CrystalData.Modifier.Operation operation) {
-      if (!this.canAddModifier(name, operation)) {
-         return false;
-      } else {
-         this.addModifier(name, operation);
-         if (preventsRandomModifiers) {
-            this.setPreventsRandomModifiers(true);
+   public boolean addModifiersByCrafting(List<VaultModifierStack> modifierStackList, CrystalData.Simulate simulate) {
+      for (VaultModifierStack modifierStack : modifierStackList) {
+         if (!this.addModifierByCrafting(modifierStack, true, CrystalData.Simulate.TRUE)) {
+            return false;
+         }
+      }
+
+      if (simulate == CrystalData.Simulate.FALSE) {
+         for (VaultModifierStack modifierStackx : modifierStackList) {
+            this.addModifierByCrafting(modifierStackx, true, simulate);
+         }
+      }
+
+      return true;
+   }
+
+   public boolean addModifierByCrafting(VaultModifierStack modifierStack, boolean preventsRandomModifiers, CrystalData.Simulate simulate) {
+      if (this.canModifyWithCrafting() && this.canAddModifier(modifierStack)) {
+         if (simulate == CrystalData.Simulate.FALSE) {
+            if (preventsRandomModifiers) {
+               this.setPreventsRandomModifiers(true);
+            }
+
+            this.instabilityCounter++;
+            this.addModifier(modifierStack);
          }
 
          return true;
+      } else {
+         return false;
       }
    }
 
-   public void addModifier(String name) {
-      this.addModifier(name, CrystalData.Modifier.Operation.ADD);
-   }
+   public void addModifier(VaultModifierStack modifierStack) {
+      boolean found = false;
+      ResourceLocation modifierId = modifierStack.getModifierId();
 
-   public void addModifier(String name, CrystalData.Modifier.Operation operation) {
-      this.modifiers.add(new CrystalData.Modifier(name, operation));
+      for (VaultModifierStack modifier : this.modifiers) {
+         if (modifier.getModifierId().equals(modifierId)) {
+            modifier.grow(modifierStack.getSize());
+            found = true;
+            break;
+         }
+      }
+
+      if (!found) {
+         this.modifiers.add(modifierStack.copy());
+      }
+
+      this.sortModifiers();
       this.updateDelegate();
    }
 
-   public boolean canRemoveModifier(String name, CrystalData.Modifier.Operation operation) {
-      return this.canBeModified() && this.getModifiers().stream().anyMatch(mod -> name.equals(mod.name));
+   private void sortModifiers() {
+      this.modifiers.sort(Comparator.comparing(VaultModifierStack::getSize).reversed());
    }
 
-   public boolean removeCatalystModifier(String name, boolean preventsRandomModifiers, CrystalData.Modifier.Operation operation) {
-      if (!this.canRemoveModifier(name, operation)) {
-         return false;
+   public void setInstabilityCounter(int value) {
+      this.instabilityCounter = Math.max(0, value);
+      this.updateDelegate();
+   }
+
+   public int getInstability() {
+      if (ModConfigs.VAULT_CRYSTAL == null) {
+         return 0;
       } else {
-         this.removeModifier(name, operation);
-         if (preventsRandomModifiers) {
-            this.setPreventsRandomModifiers(true);
-         }
-
-         return true;
+         int craftsBeforeInstability = ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.craftsBeforeInstability;
+         float instabilityPerCraft = ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.instabilityPerCraft;
+         float instabilityCap = ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.instabilityCap;
+         int instability = this.instabilityCounter - craftsBeforeInstability;
+         return instability < 1 ? 0 : (int)(Math.min(instability * instabilityPerCraft, instabilityCap) * 100.0F);
       }
    }
 
-   public void removeModifier(String name, CrystalData.Modifier.Operation operation) {
-      CrystalData.Modifier modifier = this.modifiers.stream().filter(mod -> mod.name.equals(name)).findFirst().orElse(null);
-      if (modifier != null) {
-         this.modifiers.remove(modifier);
-         this.updateDelegate();
+   private TextColor getInstabilityTextColor(int instability) {
+      float threshold = ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.instabilityCap * 0.5F;
+      float instabilityScaled = instability * 0.01F;
+      float hueDarkGreen = 0.3334F;
+      float hueGold = 0.1111F;
+      float hue;
+      float saturation;
+      float value;
+      if (instabilityScaled <= threshold) {
+         float p = instabilityScaled / threshold;
+         hue = (1.0F - p) * 0.3334F + p * 0.1111F;
+         saturation = 1.0F;
+         value = (1.0F - p) * 0.8F + p;
+      } else {
+         float p = (instabilityScaled - threshold) / threshold;
+         hue = (1.0F - p) * 0.1111F;
+         saturation = 1.0F - p + p * 0.8F;
+         value = 1.0F - p + p * 0.8F;
       }
+
+      return TextColor.fromRgb(Color.HSBtoRGB(hue, saturation, value));
    }
 
-   public List<CrystalData.Modifier> getModifiers() {
+   public List<VaultModifierStack> getModifiers() {
       return Collections.unmodifiableList(this.modifiers);
+   }
+
+   public void setModifiers(CrystalModifiers modifiers) {
+      this.modifiers.clear();
+      this.modifiers.addAll(modifiers);
+      this.sortModifiers();
+      this.updateDelegate();
    }
 
    public void clearModifiers() {
@@ -190,18 +308,11 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
    }
 
    public boolean canAddRoom(String roomKey) {
-      return !VaultRaid.ARCHITECT_EVENT.get().getId().equals(this.getSelectedObjective());
+      return true;
    }
 
    public void addGuaranteedRoom(String roomKey) {
-      this.addGuaranteedRoom(roomKey, 1);
-   }
-
-   public void addGuaranteedRoom(String roomKey, int amount) {
-      for (int i = 0; i < amount; i++) {
-         this.guaranteedRoomFilters.add(roomKey);
-      }
-
+      this.guaranteedRoomFilters.add(roomKey);
       this.updateDelegate();
    }
 
@@ -236,15 +347,6 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       this.updateDelegate();
    }
 
-   public boolean isChallenge() {
-      return this.challenge;
-   }
-
-   public void setChallenge(boolean challenge) {
-      this.challenge = challenge;
-      this.updateDelegate();
-   }
-
    public boolean canBeModified() {
       return this.canBeModified;
    }
@@ -254,40 +356,59 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       this.updateDelegate();
    }
 
-   public void setSelectedObjective(ResourceLocation selectedObjective) {
-      if (!Objects.equals(this.selectedObjective, selectedObjective)) {
-         this.selectedObjective = selectedObjective;
+   public int getCurseCount() {
+      return this.modifiers
+         .stream()
+         .filter(vaultModifierStack -> ModConfigs.VAULT_CRYSTAL_CATALYST.isCurse(vaultModifierStack.getModifierId()))
+         .map(VaultModifierStack::getSize)
+         .reduce(0, Integer::sum);
+   }
+
+   public boolean isCursed() {
+      return this.getCurseCount() > 0;
+   }
+
+   public void setClarity(boolean clarity) {
+      this.clarity = clarity;
+      this.updateDelegate();
+   }
+
+   public boolean hasClarity() {
+      return this.clarity;
+   }
+
+   public void removeAllCurses() {
+      this.modifiers.removeIf(vaultModifierStack -> ModConfigs.VAULT_CRYSTAL_CATALYST.isCurse(vaultModifierStack.getModifierId()));
+      this.updateDelegate();
+   }
+
+   public void removeRandomCurse(Random random) {
+      List<VaultModifierStack> curseList = this.modifiers
+         .stream()
+         .filter(vaultModifierStack -> ModConfigs.VAULT_CRYSTAL_CATALYST.isCurse(vaultModifierStack.getModifierId()))
+         .toList();
+      if (!curseList.isEmpty()) {
+         VaultModifierStack modifierStack = curseList.get(random.nextInt(curseList.size()));
+         if (modifierStack.shrink(1).isEmpty()) {
+            this.modifiers.remove(modifierStack);
+         }
+
          this.updateDelegate();
       }
    }
 
-   @Nullable
-   public ResourceLocation getSelectedObjective() {
-      return this.selectedObjective;
+   public void apply(VaultRaid vault) {
+      vault.getModifiers().addPermanentModifiers(this.modifiers);
    }
 
-   public void setTargetObjectiveCount(int targetObjectiveCount) {
-      this.targetObjectiveCount = targetObjectiveCount;
-      this.updateDelegate();
-   }
-
-   public int getTargetObjectiveCount() {
-      return this.targetObjectiveCount;
-   }
-
-   public void apply(VaultRaid vault, Random random) {
-      this.modifiers.forEach(modifier -> modifier.apply(vault.getModifiers(), random));
-   }
-
-   public VaultRaid.Builder createVault(ServerWorld world, ServerPlayerEntity player) {
+   public VaultRaid.Builder createVault(ServerLevel world, ServerPlayer player) {
       return this.getType().getVaultBuilder().initializeBuilder(world, player, this);
    }
 
    public static boolean shouldForceCowVault(CrystalData data) {
-      List<String> requiredModifiers = Arrays.asList("hoard", "hunger", "raging");
-      List<CrystalData.Modifier> existingModifiers = data.getModifiers();
-      return existingModifiers.size() == 3
-         && existingModifiers.stream().allMatch(modifier -> requiredModifiers.contains(modifier.getModifierName().toLowerCase()));
+      List<ResourceLocation> requiredModifiers = Arrays.asList(VaultMod.id("hoard"), VaultMod.id("hunger"), VaultMod.id("raging"));
+      List<VaultModifierStack> existingModifiers = data.getModifiers();
+      return existingModifiers.size() == 3 && existingModifiers.stream().allMatch(modifier -> requiredModifiers.contains(modifier.getModifierId()));
    }
 
    public CrystalData.EchoData getEchoData() {
@@ -309,43 +430,28 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
    }
 
    @OnlyIn(Dist.CLIENT)
-   public void addInformation(World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+   public void addInformation(Level world, List<Component> tooltip, TooltipFlag flag) {
+      tooltip.add(new TextComponent("Level: ").append(new TextComponent(this.getLevel() + "").setStyle(Style.EMPTY.withColor(11583738))));
       CrystalData.Type crystalType = this.getType();
       if (crystalType.showTypePrefix()) {
-         tooltip.add(new StringTextComponent("Type: ").func_230529_a_(this.getType().getDisplayName()));
+      }
+
+      if (this.objective == null) {
+         tooltip.add(new TextComponent("Objective: ???").withStyle(ChatFormatting.GRAY));
       } else {
-         tooltip.add(this.getType().getDisplayName());
+         this.objective.addText(tooltip, flag);
       }
 
-      if (crystalType.showObjective()) {
-         ResourceLocation objectiveKey = this.getSelectedObjective();
-         ITextComponent objectiveCountDescription = null;
-         ITextComponent objective;
-         if (objectiveKey == null) {
-            objective = new StringTextComponent("???").func_240699_a_(TextFormatting.GRAY);
-         } else {
-            VaultRaid.ARCHITECT_EVENT.get();
-            VaultObjective vObjective = VaultObjective.getObjective(objectiveKey);
-            if (vObjective == null) {
-               objective = new StringTextComponent("???").func_240699_a_(TextFormatting.GRAY);
-            } else {
-               objective = vObjective.getObjectiveDisplayName();
-               if (this.targetObjectiveCount >= 0) {
-                  objectiveCountDescription = vObjective.getObjectiveTargetDescription(this.targetObjectiveCount);
-               }
-            }
-         }
-
-         tooltip.add(new StringTextComponent("Objective: ").func_230529_a_(objective));
-         if (objectiveCountDescription != null) {
-            tooltip.add(objectiveCountDescription);
-         }
+      if (this.theme != null && !(this.theme instanceof PoolCrystalTheme)) {
+         this.theme.addText(tooltip, flag);
+      } else {
+         tooltip.add(new TextComponent("Theme: ???").withStyle(ChatFormatting.GRAY));
       }
 
-      if (!this.getPlayerBossName().isEmpty()) {
-         tooltip.add(
-            new StringTextComponent("Player Boss: ").func_230529_a_(new StringTextComponent(this.getPlayerBossName()).func_240699_a_(TextFormatting.GREEN))
-         );
+      if (this.layout == null) {
+         tooltip.add(new TextComponent("Layout: ???").withStyle(ChatFormatting.GRAY));
+      } else {
+         this.layout.addText(tooltip, flag);
       }
 
       Map<String, Integer> collapsedFilters = new HashMap<>();
@@ -357,127 +463,196 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
 
       collapsedFilters.forEach(
          (roomFilter, count) -> {
-            ITextComponent roomName = VaultRoomNames.getName(roomFilter);
+            Component roomName = VaultRoomNames.getName(roomFilter);
             if (roomName != null) {
                String roomStr = count > 1 ? "Rooms" : "Room";
-               ITextComponent txtx = new StringTextComponent("- Has ")
-                  .func_240699_a_(TextFormatting.GRAY)
-                  .func_230529_a_(new StringTextComponent(String.valueOf(count)).func_240699_a_(TextFormatting.GOLD))
-                  .func_240702_b_(" ")
-                  .func_230529_a_(roomName)
-                  .func_230529_a_(new StringTextComponent(" " + roomStr).func_240699_a_(TextFormatting.GRAY));
-               tooltip.add(txtx);
+               Component txt = new TextComponent("- Has ")
+                  .withStyle(ChatFormatting.GRAY)
+                  .append(new TextComponent(String.valueOf(count)).withStyle(ChatFormatting.GOLD))
+                  .append(" ")
+                  .append(roomName)
+                  .append(new TextComponent(" " + roomStr).withStyle(ChatFormatting.GRAY));
+               tooltip.add(txt);
             }
          }
       );
-
-      for (CrystalData.Modifier modifier : this.modifiers) {
-         StringTextComponent modifierName = new StringTextComponent(modifier.name);
-         VaultModifier vModifier = ModConfigs.VAULT_MODIFIERS.getByName(modifier.name);
-         if (vModifier != null) {
-            modifierName.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(vModifier.getColor())));
-         }
-
-         ITextComponent type = new StringTextComponent(modifier.operation.title).func_240699_a_(modifier.operation.color);
-         tooltip.add(new StringTextComponent("- ").func_230529_a_(type).func_240702_b_(" ").func_230529_a_(modifierName));
-         if (Screen.func_231173_s_() && vModifier != null) {
-            ITextComponent description = new StringTextComponent("   " + vModifier.getDescription()).func_240699_a_(TextFormatting.DARK_GRAY);
-            tooltip.add(description);
-         }
+      int instability = this.getInstability();
+      if (instability > 0) {
+         TextComponent instabilityComponent = new TextComponent(instability + "%");
+         instabilityComponent.setStyle(Style.EMPTY.withColor(this.getInstabilityTextColor(instability)));
+         tooltip.add(new TextComponent("Instability: ").append(instabilityComponent));
       }
 
       if (this.getEchoData().getEchoCount() > 0) {
          int count = this.getEchoData().getEchoCount();
-         StringTextComponent txt = new StringTextComponent("Echoed");
-         txt.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(2491465)));
-         tooltip.add(new StringTextComponent("- ").func_230529_a_(txt));
-         if (Screen.func_231173_s_()) {
-            ITextComponent description = new StringTextComponent("   " + count + "% Echo Rate").func_240699_a_(TextFormatting.DARK_GRAY);
+         tooltip.add(new TextComponent("Echoed").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(2491465))));
+         if (Screen.hasShiftDown()) {
+            Component description = new TextComponent("  " + count + "% Echo Rate").withStyle(ChatFormatting.DARK_GRAY);
             tooltip.add(description);
          }
       }
 
       if (!this.canBeModified()) {
-         StringTextComponent txt = new StringTextComponent("Exhausted");
-         txt.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(3084959)));
-         tooltip.add(new StringTextComponent("- ").func_230529_a_(txt));
-         if (Screen.func_231173_s_()) {
-            ITextComponent description = new StringTextComponent("   Crystal can not be modified.").func_240699_a_(TextFormatting.DARK_GRAY);
+         tooltip.add(new TextComponent("Exhausted").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(3084959))));
+         if (Screen.hasShiftDown()) {
+            Component description = new TextComponent("  Crystal can not be modified.").withStyle(ChatFormatting.DARK_GRAY);
             tooltip.add(description);
          }
       }
 
-      if (this.delegate.func_74767_n("Cloned")) {
-         StringTextComponent txt = new StringTextComponent("Cloned");
-         txt.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(2491465)));
-         tooltip.add(new StringTextComponent("- ").func_230529_a_(txt));
-         if (Screen.func_231173_s_()) {
-            ITextComponent description = new StringTextComponent("   Crystal has been cloned with an Echoed Crystal.").func_240699_a_(TextFormatting.DARK_GRAY);
+      if (this.delegate.getBoolean("Cloned")) {
+         tooltip.add(new TextComponent("Cloned").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(2491465))));
+         if (Screen.hasShiftDown()) {
+            Component description = new TextComponent("  Crystal has been cloned with an Echoed Crystal.").withStyle(ChatFormatting.DARK_GRAY);
             tooltip.add(description);
+         }
+      }
+
+      if (this.hasClarity()) {
+         tooltip.add(new TextComponent("Clarity").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(4973509))));
+         if (Screen.hasShiftDown()) {
+            Component description = new TextComponent("  All curses on this crystal are revealed.").withStyle(ChatFormatting.DARK_GRAY);
+            tooltip.add(description);
+         }
+      }
+
+      int curseCount = this.getCurseCount();
+      if (curseCount > 0) {
+         Style style = Style.EMPTY.withColor(ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.curseColor);
+         if (this.hasClarity()) {
+            this.addCatalystModifierInformation(
+               vaultModifierStack -> ModConfigs.VAULT_CRYSTAL_CATALYST.isCurse(vaultModifierStack.getModifierId()),
+               new TextComponent("Cursed").withStyle(style),
+               tooltip
+            );
+         } else {
+            MutableComponent component = new TextComponent("Cursed ").withStyle(style);
+            tooltip.add(component.append("☠".repeat(curseCount)));
+         }
+      }
+
+      this.addCatalystModifierInformation(
+         vaultModifierStack -> ModConfigs.VAULT_CRYSTAL_CATALYST.isGood(vaultModifierStack.getModifierId()),
+         new TextComponent("Positive Modifiers").withStyle(ChatFormatting.GREEN),
+         tooltip
+      );
+      this.addCatalystModifierInformation(
+         vaultModifierStack -> ModConfigs.VAULT_CRYSTAL_CATALYST.isBad(vaultModifierStack.getModifierId()),
+         new TextComponent("Negative Modifiers").withStyle(ChatFormatting.RED),
+         tooltip
+      );
+      this.addNonCatalystModifierInformation(
+         vaultModifierStack -> ModConfigs.VAULT_CRYSTAL_CATALYST.isUnlisted(vaultModifierStack.getModifierId()),
+         new TextComponent("Other Modifiers").withStyle(ChatFormatting.WHITE),
+         tooltip
+      );
+   }
+
+   private void addNonCatalystModifierInformation(Predicate<VaultModifierStack> filter, Component headerComponent, List<Component> tooltip) {
+      List<VaultModifierStack> modifierList = this.modifiers.stream().filter(filter).toList();
+      if (!modifierList.isEmpty()) {
+         tooltip.add(headerComponent);
+
+         for (VaultModifierStack modifierStack : modifierList) {
+            VaultModifier<?> vaultModifier = modifierStack.getModifier();
+            TextComponent modifierName = new TextComponent(vaultModifier.getDisplayNameFormatted(modifierStack.getSize()));
+            modifierName.setStyle(Style.EMPTY.withColor(vaultModifier.getDisplayTextColor()));
+            tooltip.add(new TextComponent("  ").append(modifierName));
+            if (Screen.hasShiftDown()) {
+               Component description = new TextComponent("  " + vaultModifier.getDisplayDescriptionFormatted(modifierStack.getSize()))
+                  .withStyle(ChatFormatting.DARK_GRAY);
+               tooltip.add(description);
+            }
          }
       }
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Type", this.type.name());
-      nbt.func_74778_a("PlayerBossName", this.playerBossName);
-      ListNBT modifiersList = new ListNBT();
-      this.modifiers.forEach(modifier -> modifiersList.add(modifier.toNBT()));
-      nbt.func_218657_a("Modifiers", modifiersList);
-      nbt.func_74757_a("preventsRandomModifiers", this.preventsRandomModifiers);
-      nbt.func_74757_a("canBeModified", this.canBeModified);
-      nbt.func_74757_a("canTriggerInfluences", this.canTriggerInfluences);
-      nbt.func_74757_a("canGenerateTreasureRooms", this.canGenerateTreasureRooms);
-      if (this.selectedObjective != null) {
-         nbt.func_74778_a("Objective", this.selectedObjective.toString());
+   private void addCatalystModifierInformation(Predicate<VaultModifierStack> filter, Component headerComponent, List<Component> tooltip) {
+      List<VaultModifierStack> modifierList = this.modifiers.stream().filter(filter).toList();
+      if (!modifierList.isEmpty()) {
+         tooltip.add(headerComponent);
+
+         for (VaultModifierStack modifierStack : modifierList) {
+            VaultModifier<?> vaultModifier = modifierStack.getModifier();
+            TextComponent modifierName = new TextComponent(vaultModifier.getDisplayNameFormatted(modifierStack.getSize()));
+            modifierName.setStyle(Style.EMPTY.withColor(vaultModifier.getDisplayTextColor()));
+            Component stackSize = new TextComponent("%dx".formatted(modifierStack.getSize())).withStyle(ChatFormatting.GRAY);
+            tooltip.add(new TextComponent("  ").withStyle(ChatFormatting.GRAY).append(stackSize).append(" ").append(modifierName));
+            if (Screen.hasShiftDown()) {
+               Component description = new TextComponent("  " + vaultModifier.getDisplayDescriptionFormatted(modifierStack.getSize()))
+                  .withStyle(ChatFormatting.DARK_GRAY);
+               tooltip.add(description);
+            }
+         }
+      }
+   }
+
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      if (this.vaultId != null) {
+         nbt.putString("VaultId", this.vaultId.toString());
       }
 
-      nbt.func_74768_a("targetObjectiveCount", this.targetObjectiveCount);
-      nbt.func_218657_a("echoData", this.getEchoData().toNBT());
-      ListNBT roomList = new ListNBT();
-      this.guaranteedRoomFilters.forEach(roomKey -> roomList.add(StringNBT.func_229705_a_(roomKey)));
-      nbt.func_218657_a("rooms", roomList);
+      nbt.putInt("Level", this.level);
+      if (this.theme != null) {
+         nbt.put("Theme", this.theme.serializeNBT());
+      }
+
+      if (this.layout != null) {
+         nbt.put("Layout", this.layout.serializeNBT());
+      }
+
+      if (this.objective != null) {
+         nbt.put("Objective", this.objective.serializeNBT());
+      }
+
+      nbt.put("Modifiers", this.modifiers.serializeNBT());
+      nbt.putByte("Model", this.model.serializedId);
+      nbt.putString("Type", this.type.name());
+      nbt.putBoolean("preventsRandomModifiers", this.preventsRandomModifiers);
+      nbt.putBoolean("canBeModified", this.canBeModified);
+      nbt.putBoolean("canTriggerInfluences", this.canTriggerInfluences);
+      nbt.putBoolean("canGenerateTreasureRooms", this.canGenerateTreasureRooms);
+      nbt.put("echoData", this.getEchoData().toNBT());
+      ListTag roomList = new ListTag();
+      this.guaranteedRoomFilters.forEach(roomKey -> roomList.add(StringTag.valueOf(roomKey)));
+      nbt.put("rooms", roomList);
       if (this.frameData != null) {
-         nbt.func_218657_a("Frame", this.frameData.serializeNBT());
+         nbt.put("Frame", this.frameData.serializeNBT());
       }
 
-      nbt.func_74757_a("Challenge", this.challenge);
+      nbt.putInt("instabilityCounter", this.instabilityCounter);
+      nbt.putBoolean("clarity", this.clarity);
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.type = nbt.func_150297_b("Type", 8) ? Enum.valueOf(CrystalData.Type.class, nbt.func_74779_i("Type")) : CrystalData.Type.CLASSIC;
+   public void deserializeNBT(CompoundTag nbt) {
+      this.vaultId = nbt.contains("VaultId", 8) ? UUID.fromString(nbt.getString("VaultId")) : null;
+      this.level = nbt.getInt("Level");
+      this.theme = nbt.contains("Theme", 10) ? CrystalTheme.fromNBT(nbt.getCompound("Theme")) : null;
+      this.layout = nbt.contains("Layout", 10) ? CrystalLayout.fromNBT(nbt.getCompound("Layout")) : null;
+      this.objective = nbt.contains("Objective", 10) ? CrystalObjective.fromNBT(nbt.getCompound("Objective")) : null;
+      this.modifiers.deserializeNBT(nbt.getList("Modifiers", 10));
+      this.sortModifiers();
+      this.model = nbt.contains("Model", 1) ? CrystalData.Model.fromSerializedId(nbt.getByte("Model")) : CrystalData.Model.DEFAULT;
+      this.type = nbt.contains("Type", 8) ? Enum.valueOf(CrystalData.Type.class, nbt.getString("Type")) : CrystalData.Type.CLASSIC;
       if (this.type == CrystalData.Type.COOP) {
          this.type = CrystalData.Type.CLASSIC;
       }
 
-      this.playerBossName = nbt.func_74779_i("PlayerBossName");
-      ListNBT modifiersList = nbt.func_150295_c("Modifiers", 10);
-      modifiersList.forEach(inbt -> this.modifiers.add(CrystalData.Modifier.fromNBT((CompoundNBT)inbt)));
-      this.migrateModifiers(this.modifiers);
-      this.preventsRandomModifiers = nbt.func_150297_b("preventsRandomModifiers", 1) ? nbt.func_74767_n("preventsRandomModifiers") : !this.modifiers.isEmpty();
-      this.canBeModified = !nbt.func_150297_b("canBeModified", 1) || nbt.func_74767_n("canBeModified");
-      this.canTriggerInfluences = !nbt.func_150297_b("canTriggerInfluences", 1) || nbt.func_74767_n("canTriggerInfluences");
-      this.canGenerateTreasureRooms = !nbt.func_150297_b("canGenerateTreasureRooms", 1) || nbt.func_74767_n("canGenerateTreasureRooms");
-      this.selectedObjective = null;
-      if (nbt.func_150297_b("Objective", 8)) {
-         this.selectedObjective = new ResourceLocation(nbt.func_74779_i("Objective"));
+      this.preventsRandomModifiers = nbt.contains("preventsRandomModifiers", 1) ? nbt.getBoolean("preventsRandomModifiers") : !this.modifiers.isEmpty();
+      this.canBeModified = !nbt.contains("canBeModified", 1) || nbt.getBoolean("canBeModified");
+      this.canTriggerInfluences = !nbt.contains("canTriggerInfluences", 1) || nbt.getBoolean("canTriggerInfluences");
+      this.canGenerateTreasureRooms = !nbt.contains("canGenerateTreasureRooms", 1) || nbt.getBoolean("canGenerateTreasureRooms");
+      if (nbt.contains("echoData")) {
+         this.echoData = CrystalData.EchoData.fromNBT(nbt.getCompound("echoData"));
       }
 
-      this.targetObjectiveCount = nbt.func_150297_b("targetObjectiveCount", 3) ? nbt.func_74762_e("targetObjectiveCount") : -1;
-      if (nbt.func_74764_b("echoData")) {
-         this.echoData = CrystalData.EchoData.fromNBT(nbt.func_74775_l("echoData"));
-      }
-
-      ListNBT roomList = nbt.func_150295_c("rooms", 8);
-      roomList.forEach(inbt -> this.guaranteedRoomFilters.add(this.migrateRoomName(inbt.func_150285_a_())));
-      this.frameData = FrameData.fromNBT(nbt.func_74775_l("Frame"));
-      this.challenge = nbt.func_74767_n("Challenge");
-   }
-
-   private void migrateModifiers(List<CrystalData.Modifier> modifiers) {
-      modifiers.forEach(modifier -> modifier.name = VaultModifier.migrateModifierName(modifier.name));
+      ListTag roomList = nbt.getList("rooms", 8);
+      roomList.forEach(inbt -> this.guaranteedRoomFilters.add(this.migrateRoomName(inbt.getAsString())));
+      this.frameData = FrameData.fromNBT(nbt.getCompound("Frame"));
+      this.instabilityCounter = nbt.getInt("instabilityCounter");
+      this.clarity = nbt.getBoolean("clarity");
    }
 
    private String migrateRoomName(String roomName) {
@@ -486,6 +661,12 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       return roomName;
+   }
+
+   public CrystalData copy() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.put("CrystalData", this.serializeNBT());
+      return new CrystalData(nbt);
    }
 
    public static class EchoData {
@@ -525,28 +706,25 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
          return (100 - this.echoCount) / 100.0F;
       }
 
-      public CompoundNBT toNBT() {
-         CompoundNBT nbt = new CompoundNBT();
-         nbt.func_74768_a("echoCount", this.echoCount);
+      public CompoundTag toNBT() {
+         CompoundTag nbt = new CompoundTag();
+         nbt.putInt("echoCount", this.echoCount);
          return nbt;
       }
 
-      public static CrystalData.EchoData fromNBT(CompoundNBT nbt) {
-         return new CrystalData.EchoData(nbt.func_74762_e("echoCount"));
+      public static CrystalData.EchoData fromNBT(CompoundTag nbt) {
+         return new CrystalData.EchoData(nbt.getInt("echoCount"));
       }
    }
 
    private static class EmptyCrystalData extends CrystalData {
-      private EmptyCrystalData() {
-      }
-
       @Override
-      public boolean addCatalystModifier(String name, boolean preventsRandomModifiers, CrystalData.Modifier.Operation operation) {
+      public boolean addModifierByCrafting(VaultModifierStack modifierStack, boolean preventsRandomModifiers, CrystalData.Simulate simulate) {
          return false;
       }
 
       @Override
-      public boolean canAddModifier(String name, CrystalData.Modifier.Operation operation) {
+      protected boolean canAddModifier(VaultModifierStack id) {
          return false;
       }
 
@@ -560,97 +738,67 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       @Override
-      public void setPlayerBossName(String playerBossName) {
-      }
-
-      @Override
-      public void setSelectedObjective(ResourceLocation selectedObjective) {
-      }
-
-      @Override
-      public VaultRaid.Builder createVault(ServerWorld world, ServerPlayerEntity player) {
+      public VaultRaid.Builder createVault(ServerLevel world, ServerPlayer player) {
          return null;
       }
    }
 
-   public static class Modifier {
-      public String name;
-      public final CrystalData.Modifier.Operation operation;
+   public static enum Model {
+      DEFAULT((byte)0),
+      RAW((byte)1);
 
-      public Modifier(String name, CrystalData.Modifier.Operation operation) {
-         this.name = name;
-         this.operation = operation;
+      private final byte serializedId;
+      private static Map<Byte, CrystalData.Model> MAP = Arrays.stream(values())
+         .collect(Collectors.toMap(CrystalData.Model::getSerializedId, m -> (CrystalData.Model)m));
+
+      private Model(byte serializedId) {
+         this.serializedId = serializedId;
       }
 
-      public void apply(VaultModifiers modifiers, Random random) {
-         if (this.operation == CrystalData.Modifier.Operation.ADD) {
-            modifiers.addPermanentModifier(this.name);
-         }
+      public byte getSerializedId() {
+         return this.serializedId;
       }
 
-      public CompoundNBT toNBT() {
-         CompoundNBT nbt = new CompoundNBT();
-         nbt.func_74778_a("Name", this.name);
-         nbt.func_74768_a("Operation", this.operation.ordinal());
-         return nbt;
+      public static CrystalData.Model fromSerializedId(byte serializedId) {
+         return MAP.getOrDefault(serializedId, DEFAULT);
       }
+   }
 
-      public static CrystalData.Modifier fromNBT(CompoundNBT nbt) {
-         return new CrystalData.Modifier(nbt.func_74779_i("Name"), CrystalData.Modifier.Operation.values()[nbt.func_74762_e("Operation")]);
-      }
-
-      public String getModifierName() {
-         return this.name;
-      }
-
-      public CrystalData.Modifier.Operation getOperation() {
-         return this.operation;
-      }
-
-      public static enum Operation {
-         ADD("Has", TextFormatting.GRAY);
-
-         private final String title;
-         private final TextFormatting color;
-
-         private Operation(String title, TextFormatting color) {
-            this.title = title;
-            this.color = color;
-         }
-      }
+   public static enum Simulate {
+      TRUE,
+      FALSE;
    }
 
    public static enum Type {
       CLASSIC(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Normal"),
       RAFFLE(VaultLogic.RAFFLE, RaffleVaultBuilder.getInstance(), "Raffle"),
       COOP(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Cooperative"),
-      TROVE(VaultLogic.CLASSIC, TroveVaultBuilder.getInstance(), "Vault Trove", TextFormatting.GOLD),
+      TROVE(VaultLogic.CLASSIC, TroveVaultBuilder.getInstance(), "Vault Trove", ChatFormatting.GOLD),
       BOSS_BENEVOLENT_PREP("Velara's Sacrifice", PlayerFavourData.VaultGodType.BENEVOLENT.getChatColor()),
       BOSS_BENEVOLENT("Velara's Demand", PlayerFavourData.VaultGodType.BENEVOLENT.getChatColor()),
       BOSS_OMNISCIENT("Tenos' Oblivion", PlayerFavourData.VaultGodType.OMNISCIENT.getChatColor()),
       BOSS_TIMEKEEPER("Wendarr's Transience", PlayerFavourData.VaultGodType.TIMEKEEPER.getChatColor()),
-      BOSS_MALEVOLENCE("Idona's Wrath", PlayerFavourData.VaultGodType.MALEVOLENCE.getChatColor()),
-      FINAL_LOBBY(VaultLogic.FINAL_LOBBY, FinalLobbyBuilder.getInstance(), "Final Vault", TextFormatting.DARK_PURPLE),
-      FINAL_BOSS(VaultLogic.FINAL_BOSS, FinalBossBuilder.getInstance(), "Final Vault - Boss", TextFormatting.DARK_PURPLE),
-      FINAL_VELARA(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Velara Challenge", TextFormatting.GREEN),
-      FINAL_TENOS(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Tenos Challenge", TextFormatting.AQUA),
-      FINAL_WENDARR(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Wendarr Challenge", TextFormatting.GOLD),
-      FINAL_IDONA(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Idona Challenge", TextFormatting.RED);
+      BOSS_MALEVOLENCE("Idona's Wrath", PlayerFavourData.VaultGodType.MALEVOLENT.getChatColor()),
+      FINAL_LOBBY(VaultLogic.FINAL_LOBBY, FinalLobbyBuilder.getInstance(), "Final Vault", ChatFormatting.DARK_PURPLE),
+      FINAL_VELARA(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Velara Challenge", ChatFormatting.GREEN),
+      FINAL_TENOS(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Tenos Challenge", ChatFormatting.AQUA),
+      FINAL_WENDARR(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Wendarr Challenge", ChatFormatting.GOLD),
+      FINAL_IDONA(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Idona Challenge", ChatFormatting.RED);
 
       private final VaultLogic logic;
       private final VaultRaidBuilder vaultBuilder;
       private final String name;
-      private final TextFormatting color;
+      private final ChatFormatting color;
 
-      private Type(String name, TextFormatting color) {
+      private Type(String name, ChatFormatting color) {
          this(VaultLogic.CLASSIC, ClassicVaultBuilder.getInstance(), name, color);
       }
 
       private Type(VaultLogic logic, VaultRaidBuilder vaultBuilder, String name) {
-         this(logic, vaultBuilder, name, TextFormatting.GOLD);
+         this(logic, vaultBuilder, name, ChatFormatting.GOLD);
       }
 
-      private Type(VaultLogic logic, VaultRaidBuilder vaultBuilder, String name, TextFormatting color) {
+      private Type(VaultLogic logic, VaultRaidBuilder vaultBuilder, String name, ChatFormatting color) {
          this.logic = logic;
          this.vaultBuilder = vaultBuilder;
          this.name = name;
@@ -658,23 +806,23 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
       }
 
       public boolean canCraft() {
-         return this == CLASSIC;
+         return this == CLASSIC || this == COOP;
       }
 
       public boolean showTypePrefix() {
-         return this == CLASSIC || this == RAFFLE;
+         return this == CLASSIC || this == RAFFLE || this == COOP;
       }
 
       public boolean showObjective() {
-         return this == CLASSIC || this == RAFFLE;
+         return this == CLASSIC || this == RAFFLE || this == COOP;
       }
 
       public boolean visibleInCreative() {
-         return this == CLASSIC || this == RAFFLE || this == TROVE || this == FINAL_LOBBY;
+         return this == RAFFLE || this == COOP || this == TROVE || this == FINAL_LOBBY;
       }
 
       public boolean canBeCowVault() {
-         return this == CLASSIC || this == RAFFLE;
+         return this == CLASSIC || this == RAFFLE || this == COOP;
       }
 
       public boolean canGenerateRandomModifiers() {
@@ -687,12 +835,8 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
             || this == FINAL_TENOS;
       }
 
-      public boolean isFinalType() {
-         return this == FINAL_BOSS || this == FINAL_IDONA || this == FINAL_TENOS || this == FINAL_WENDARR || this == FINAL_VELARA;
-      }
-
       public boolean canTriggerInfluences() {
-         return this == CLASSIC;
+         return this == CLASSIC || this == COOP;
       }
 
       public VaultLogic getLogic() {
@@ -703,8 +847,8 @@ public class CrystalData implements INBTSerializable<CompoundNBT> {
          return this.vaultBuilder;
       }
 
-      public ITextComponent getDisplayName() {
-         return new StringTextComponent(this.name).func_240699_a_(this.color);
+      public Component getDisplayName() {
+         return new TextComponent(this.name).withStyle(this.color);
       }
    }
 }

@@ -3,64 +3,57 @@ package iskallia.vault.skill.ability.effect;
 import iskallia.vault.easteregg.GrasshopperNinja;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.DashConfig;
+import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
+import iskallia.vault.skill.ability.effect.spi.core.AbstractInstantManaAbility;
 import iskallia.vault.util.MathUtilities;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.phys.Vec3;
 
-public class DashAbility<C extends DashConfig> extends AbilityEffect<C> {
+public class DashAbility<C extends DashConfig> extends AbstractInstantManaAbility<C> {
    @Override
    public String getAbilityGroupName() {
       return "Dash";
    }
 
-   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
-      Vector3d lookVector = player.func_70040_Z();
-      double magnitude = (10 + config.getExtraRadius()) * 0.15;
+   protected AbilityActionResult doAction(C config, ServerPlayer player, boolean active) {
+      Vec3 lookVector = player.getLookAngle();
+      double magnitude = (10 + config.getExtraDistance()) * 0.15;
       double extraPitch = 10.0;
-      Vector3d dashVector = new Vector3d(lookVector.func_82615_a(), lookVector.func_82617_b(), lookVector.func_82616_c());
+      Vec3 dashVector = new Vec3(lookVector.x(), lookVector.y(), lookVector.z());
       float initialYaw = (float)MathUtilities.extractYaw(dashVector);
       dashVector = MathUtilities.rotateYaw(dashVector, initialYaw);
       double dashPitch = Math.toDegrees(MathUtilities.extractPitch(dashVector));
       if (dashPitch + extraPitch > 90.0) {
-         dashVector = new Vector3d(0.0, 1.0, 0.0);
+         dashVector = new Vec3(0.0, 1.0, 0.0);
          dashPitch = 90.0;
       } else {
          dashVector = MathUtilities.rotateRoll(dashVector, (float)Math.toRadians(-extraPitch));
          dashVector = MathUtilities.rotateYaw(dashVector, -initialYaw);
-         dashVector = dashVector.func_72432_b();
+         dashVector = dashVector.normalize();
       }
 
-      double coef = 1.6 - MathUtilities.map(Math.abs(dashPitch), 0.0, 90.0, 0.6, 1.0);
-      dashVector = dashVector.func_186678_a(magnitude * coef);
-      player.func_70024_g(dashVector.func_82615_a(), dashVector.func_82617_b(), dashVector.func_82616_c());
-      player.field_70133_I = true;
-      ((ServerWorld)player.field_70170_p)
-         .func_195598_a(ParticleTypes.field_197598_I, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), 50, 1.0, 0.5, 1.0, 0.0);
+      double coeff = 1.6 - MathUtilities.map(Math.abs(dashPitch), 0.0, 90.0, 0.6, 1.0);
+      dashVector = dashVector.scale(magnitude * coeff);
+      player.push(dashVector.x(), dashVector.y(), dashVector.z());
+      player.hurtMarked = true;
+      return AbilityActionResult.SUCCESS_COOLDOWN;
+   }
+
+   protected void doParticles(C config, ServerPlayer player) {
+      ((ServerLevel)player.level).sendParticles(ParticleTypes.POOF, player.getX(), player.getY(), player.getZ(), 50, 1.0, 0.5, 1.0, 0.0);
+   }
+
+   protected void doSound(C config, ServerPlayer player) {
       if (GrasshopperNinja.isGrasshopperShape(player)) {
-         player.field_70170_p
-            .func_184148_a(
-               player,
-               player.func_226277_ct_(),
-               player.func_226278_cu_(),
-               player.func_226281_cx_(),
-               ModSounds.GRASSHOPPER_BRRR,
-               SoundCategory.PLAYERS,
-               0.2F,
-               1.0F
-            );
-         player.func_213823_a(ModSounds.GRASSHOPPER_BRRR, SoundCategory.PLAYERS, 0.2F, 1.0F);
+         player.level.playSound(player, player.getX(), player.getY(), player.getZ(), ModSounds.GRASSHOPPER_BRRR, SoundSource.PLAYERS, 0.2F, 1.0F);
+         player.playNotifySound(ModSounds.GRASSHOPPER_BRRR, SoundSource.PLAYERS, 0.2F, 1.0F);
          GrasshopperNinja.achieve(player);
       } else {
-         player.field_70170_p
-            .func_184148_a(
-               player, player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), ModSounds.DASH_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F
-            );
-         player.func_213823_a(ModSounds.DASH_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F);
+         player.level.playSound(player, player.getX(), player.getY(), player.getZ(), ModSounds.DASH_SFX, SoundSource.PLAYERS, 0.2F, 1.0F);
+         player.playNotifySound(ModSounds.DASH_SFX, SoundSource.PLAYERS, 0.2F, 1.0F);
       }
-
-      return true;
    }
 }

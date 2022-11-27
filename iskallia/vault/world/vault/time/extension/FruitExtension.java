@@ -1,13 +1,13 @@
 package iskallia.vault.world.vault.time.extension;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.item.ItemVaultFruit;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 public class FruitExtension extends TimeExtension {
-   public static final ResourceLocation ID = Vault.id("fruit");
+   public static final ResourceLocation ID = VaultMod.id("fruit");
    protected ItemVaultFruit fruit;
 
    public FruitExtension() {
@@ -27,21 +27,21 @@ public class FruitExtension extends TimeExtension {
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = super.serializeNBT();
-      nbt.func_74778_a("Fruit", this.getFruit().getRegistryName().toString());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = super.serializeNBT();
+      nbt.putString("Fruit", this.getFruit().getRegistryName().toString());
       return nbt;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       super.deserializeNBT(nbt);
-      this.fruit = Registry.field_212630_s
-         .func_241873_b(new ResourceLocation(nbt.func_74779_i("Fruit")))
+      this.fruit = Registry.ITEM
+         .getOptional(new ResourceLocation(nbt.getString("Fruit")))
          .filter(item -> item instanceof ItemVaultFruit)
          .map(item -> (ItemVaultFruit)item)
          .orElseThrow(() -> {
-            Vault.LOGGER.error("Fruit item <" + nbt.func_74779_i("Fruit") + "> is not defined.");
+            VaultMod.LOGGER.error("Fruit item <" + nbt.getString("Fruit") + "> is not defined.");
             return new IllegalStateException();
          });
    }

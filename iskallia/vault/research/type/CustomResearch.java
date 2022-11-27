@@ -4,10 +4,10 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.research.Restrictions;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.block.Block;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 public class CustomResearch extends Research {
    @Expose
@@ -39,7 +39,7 @@ public class CustomResearch extends Research {
       if (registryName == null) {
          return false;
       } else {
-         String sid = registryName.func_110624_b() + ":" + registryName.func_110623_a();
+         String sid = registryName.getNamespace() + ":" + registryName.getPath();
          Restrictions restrictions = this.itemRestrictions.get(sid);
          return restrictions == null ? false : restrictions.restricts(restrictionType);
       }
@@ -51,7 +51,7 @@ public class CustomResearch extends Research {
       if (registryName == null) {
          return false;
       } else {
-         String sid = registryName.func_110624_b() + ":" + registryName.func_110623_a();
+         String sid = registryName.getNamespace() + ":" + registryName.getPath();
          Restrictions restrictions = this.blockRestrictions.get(sid);
          return restrictions == null ? false : restrictions.restricts(restrictionType);
       }
@@ -63,7 +63,7 @@ public class CustomResearch extends Research {
       if (registryName == null) {
          return false;
       } else {
-         String sid = registryName.func_110624_b() + ":" + registryName.func_110623_a();
+         String sid = registryName.getNamespace() + ":" + registryName.getPath();
          Restrictions restrictions = this.entityRestrictions.get(sid);
          return restrictions == null ? false : restrictions.restricts(restrictionType);
       }

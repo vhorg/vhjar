@@ -7,13 +7,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class VaultInfluences implements INBTSerializable<CompoundNBT>, Iterable<VaultInfluence> {
+public class VaultInfluences implements INBTSerializable<CompoundTag>, Iterable<VaultInfluence> {
    private final List<VaultInfluence> influences = new ArrayList<>();
    protected boolean initialized = false;
 
@@ -25,13 +25,13 @@ public class VaultInfluences implements INBTSerializable<CompoundNBT>, Iterable<
       this.initialized = true;
    }
 
-   public void addInfluence(VaultInfluence influence, VaultRaid vault, ServerWorld world) {
+   public void addInfluence(VaultInfluence influence, VaultRaid vault, ServerLevel world) {
       this.influences.add(influence);
-      Random rand = world.func_201674_k();
+      Random rand = world.getRandom();
       vault.getPlayers().forEach(vPlayer -> influence.apply(vault, vPlayer, world, rand));
    }
 
-   public void tick(VaultRaid vault, VaultPlayer vPlayer, ServerWorld world) {
+   public void tick(VaultRaid vault, VaultPlayer vPlayer, ServerLevel world) {
       this.forEach(influence -> influence.tick(vault, vPlayer, world));
    }
 
@@ -48,29 +48,29 @@ public class VaultInfluences implements INBTSerializable<CompoundNBT>, Iterable<
       return this.influences.iterator();
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT tag = new CompoundNBT();
-      tag.func_74757_a("initialized", this.initialized);
-      ListNBT influenceList = new ListNBT();
+   public CompoundTag serializeNBT() {
+      CompoundTag tag = new CompoundTag();
+      tag.putBoolean("initialized", this.initialized);
+      ListTag influenceList = new ListTag();
 
       for (VaultInfluence influence : this.influences) {
-         CompoundNBT ct = new CompoundNBT();
-         ct.func_74778_a("id", influence.getKey().toString());
-         ct.func_218657_a("data", influence.serializeNBT());
+         CompoundTag ct = new CompoundTag();
+         ct.putString("id", influence.getKey().toString());
+         ct.put("data", influence.serializeNBT());
       }
 
-      tag.func_218657_a("influences", influenceList);
+      tag.put("influences", influenceList);
       return tag;
    }
 
-   public void deserializeNBT(CompoundNBT tag) {
-      this.initialized = tag.func_74767_n("initialized");
-      ListNBT influenceList = tag.func_150295_c("influences", 10);
+   public void deserializeNBT(CompoundTag tag) {
+      this.initialized = tag.getBoolean("initialized");
+      ListTag influenceList = tag.getList("influences", 10);
 
       for (int i = 0; i < influenceList.size(); i++) {
-         CompoundNBT ct = influenceList.func_150305_b(i);
-         VaultInfluenceRegistry.getInfluence(new ResourceLocation(ct.func_74779_i("id"))).ifPresent(influence -> {
-            influence.deserializeNBT(ct.func_74775_l("data"));
+         CompoundTag ct = influenceList.getCompound(i);
+         VaultInfluenceRegistry.getInfluence(new ResourceLocation(ct.getString("id"))).ifPresent(influence -> {
+            influence.deserializeNBT(ct.getCompound("data"));
             this.influences.add(influence);
          });
       }

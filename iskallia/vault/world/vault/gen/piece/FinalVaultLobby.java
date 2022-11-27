@@ -1,14 +1,14 @@
 package iskallia.vault.world.vault.gen.piece;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.vault.VaultRaid;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 public class FinalVaultLobby extends VaultPiece {
-   public static final ResourceLocation ID = Vault.id("final_lobby");
+   public static final ResourceLocation ID = VaultMod.id("final_lobby");
 
    protected FinalVaultLobby(ResourceLocation id) {
       super(id);
@@ -18,15 +18,15 @@ public class FinalVaultLobby extends VaultPiece {
       this(ID);
    }
 
-   protected FinalVaultLobby(ResourceLocation id, ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
+   protected FinalVaultLobby(ResourceLocation id, ResourceLocation template, BoundingBox boundingBox, Rotation rotation) {
       super(id, template, boundingBox, rotation);
    }
 
-   public FinalVaultLobby(ResourceLocation template, MutableBoundingBox boundingBox, Rotation rotation) {
+   public FinalVaultLobby(ResourceLocation template, BoundingBox boundingBox, Rotation rotation) {
       this(ID, template, boundingBox, rotation);
    }
 
    @Override
-   public void tick(ServerWorld world, VaultRaid vault) {
+   public void tick(ServerLevel world, VaultRaid vault) {
    }
 }

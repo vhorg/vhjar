@@ -1,9 +1,11 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.world.gen.structure.JigsawPiecePlacer;
-import net.minecraft.block.FallingBlock;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ITickList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.FallingBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -11,28 +13,28 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin({FallingBlock.class})
 public class MixinFallingBlock {
    @Redirect(
-      method = {"onBlockAdded"},
+      method = {"onPlace"},
       at = @At(
          value = "INVOKE",
-         target = "Lnet/minecraft/world/ITickList;scheduleTick(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"
+         target = "Lnet/minecraft/world/level/Level;scheduleTick(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;I)V"
       )
    )
-   public <T> void interceptBlockAddedTick(ITickList<T> iTickList, BlockPos pos, T itemIn, int scheduledTime) {
+   public <T> void interceptBlockAddedTick(Level instance, BlockPos blockPos, Block block, int i) {
       if (!JigsawPiecePlacer.isPlacingRoom()) {
-         iTickList.func_205360_a(pos, itemIn, scheduledTime);
+         instance.scheduleTick(blockPos, block, i);
       }
    }
 
    @Redirect(
-      method = {"updatePostPlacement"},
+      method = {"updateShape"},
       at = @At(
          value = "INVOKE",
-         target = "Lnet/minecraft/world/ITickList;scheduleTick(Lnet/minecraft/util/math/BlockPos;Ljava/lang/Object;I)V"
+         target = "Lnet/minecraft/world/level/LevelAccessor;scheduleTick(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/Block;I)V"
       )
    )
-   public <T> void interceptPostPlacementTick(ITickList<T> iTickList, BlockPos pos, T itemIn, int scheduledTime) {
+   public <T> void interceptPostPlacementTick(LevelAccessor instance, BlockPos pos, Block block, int scheduledTime) {
       if (!JigsawPiecePlacer.isPlacingRoom()) {
-         iTickList.func_205360_a(pos, itemIn, scheduledTime);
+         instance.scheduleTick(pos, block, scheduledTime);
       }
    }
 }

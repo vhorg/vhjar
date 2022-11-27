@@ -23,7 +23,7 @@ public enum Easing {
       }
    });
 
-   Function<Float, Float> function;
+   final Function<Float, Float> function;
 
    private Easing(Function<Float, Float> function) {
       this.function = function;

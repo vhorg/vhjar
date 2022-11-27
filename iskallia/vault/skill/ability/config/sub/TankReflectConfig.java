@@ -5,21 +5,29 @@ import iskallia.vault.skill.ability.config.TankConfig;
 
 public class TankReflectConfig extends TankConfig {
    @Expose
-   private final float damageReflectChance;
+   private final float additionalThornsChance;
    @Expose
-   private final float damageReflectPercent;
+   private final float thornsDamageMultiplier;
 
-   public TankReflectConfig(int cost, int durationTicks, float damageReductionPercent, float damageReflectChance, float damageReflectPercent) {
-      super(cost, durationTicks, damageReductionPercent);
-      this.damageReflectChance = damageReflectChance;
-      this.damageReflectPercent = damageReflectPercent;
+   public TankReflectConfig(
+      int learningCost,
+      int regretCost,
+      int cooldownTicks,
+      int levelRequirement,
+      float manaCostPerSecond,
+      float additionalThornsChance,
+      float thornsDamageMultiplier
+   ) {
+      super(learningCost, regretCost, cooldownTicks, levelRequirement, manaCostPerSecond, 0, 0.0F, 0.0F);
+      this.additionalThornsChance = additionalThornsChance;
+      this.thornsDamageMultiplier = thornsDamageMultiplier;
    }
 
-   public float getDamageReflectChance() {
-      return this.damageReflectChance;
+   public float getAdditionalThornsChance() {
+      return this.additionalThornsChance;
    }
 
-   public float getDamageReflectPercent() {
-      return this.damageReflectPercent;
+   public float getThornsDamageMultiplier() {
+      return this.thornsDamageMultiplier;
    }
 }

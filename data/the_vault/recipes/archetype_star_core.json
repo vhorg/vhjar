@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ddd",
+    "ded",
+    "ddd"
+  ],
+  "key": {
+    "d": {
+      "item": "the_vault:vault_diamond"
+    },
+    "e": {
+      "item": "the_vault:extraordinary_echo_gem"
+    }
+  },
+  "result": {
+    "item": "the_vault:archetype_star_core",
+    "count": 1
+  }
+}

@@ -1,6 +1,5 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import iskallia.vault.Vault;
 import iskallia.vault.world.gen.structure.JigsawPatternFilter;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,19 +10,16 @@ import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPattern;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
    private final ResourceLocation id;
-   private ResourceLocation startRoomId = Vault.id("vault/starts");
-   private ResourceLocation roomId = Vault.id("vault/rooms");
-   private ResourceLocation tunnelId = Vault.id("vault/tunnels");
 
    protected VaultRoomLayoutGenerator(ResourceLocation id) {
       this.id = id;
@@ -33,64 +29,22 @@ public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
       return this.id;
    }
 
-   @Override
-   public ResourceLocation getStartRoomId() {
-      return this.startRoomId;
-   }
-
-   @Override
-   public ResourceLocation getRoomId() {
-      return this.roomId;
-   }
-
-   @Override
-   public ResourceLocation getTunnelId() {
-      return this.tunnelId;
-   }
-
-   public void setStartRoomId(ResourceLocation startRoomId) {
-      this.startRoomId = startRoomId;
-   }
-
-   public void setRoomId(ResourceLocation roomId) {
-      this.roomId = roomId;
-   }
-
-   public void setTunnelId(ResourceLocation tunnelId) {
-      this.tunnelId = tunnelId;
-   }
-
    public abstract void setSize(int var1);
 
    public abstract VaultRoomLayoutGenerator.Layout generateLayout();
 
-   protected CompoundNBT serialize() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("startRoomId", this.startRoomId.toString());
-      nbt.func_74778_a("roomId", this.roomId.toString());
-      nbt.func_74778_a("tunnelId", this.tunnelId.toString());
-      return nbt;
+   protected CompoundTag serialize() {
+      return new CompoundTag();
    }
 
-   protected void deserialize(CompoundNBT tag) {
-      if (tag.func_150297_b("startRoomId", 8)) {
-         this.startRoomId = new ResourceLocation(tag.func_74779_i("startRoomId"));
-      }
-
-      if (tag.func_150297_b("roomId", 8)) {
-         this.roomId = new ResourceLocation(tag.func_74779_i("roomId"));
-      }
-
-      if (tag.func_150297_b("tunnelId", 8)) {
-         this.tunnelId = new ResourceLocation(tag.func_74779_i("tunnelId"));
-      }
+   protected void deserialize(CompoundTag tag) {
    }
 
    public static class Layout {
-      private final Map<Vector3i, VaultRoomLayoutGenerator.Room> rooms = new HashMap<>();
+      private final Map<Vec3i, VaultRoomLayoutGenerator.Room> rooms = new HashMap<>();
       private final Set<VaultRoomLayoutGenerator.Tunnel> tunnels = new HashSet<>();
 
-      protected void putRoom(Vector3i roomPosition) {
+      protected void putRoom(Vec3i roomPosition) {
          this.putRoom(new VaultRoomLayoutGenerator.Room(roomPosition));
       }
 
@@ -99,7 +53,7 @@ public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
       }
 
       @Nullable
-      public VaultRoomLayoutGenerator.Room getRoom(Vector3i v) {
+      public VaultRoomLayoutGenerator.Room getRoom(Vec3i v) {
          return this.rooms.get(v);
       }
 
@@ -121,10 +75,10 @@ public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
    }
 
    public static class Room {
-      protected final Vector3i roomPosition;
+      protected final Vec3i roomPosition;
       private final JigsawPatternFilter jigsawFilter = new JigsawPatternFilter();
 
-      public Room(Vector3i roomPosition) {
+      public Room(Vec3i roomPosition) {
          this.roomPosition = roomPosition;
       }
 
@@ -133,7 +87,7 @@ public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
          return this;
       }
 
-      public Vector3i getRoomPosition() {
+      public Vec3i getRoomPosition() {
          return this.roomPosition;
       }
 
@@ -143,17 +97,15 @@ public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
 
       public BlockPos getRoomOffset() {
          return new BlockPos(
-            this.getRoomPosition().func_177958_n() * 47 + this.getRoomPosition().func_177958_n() * 48,
-            0,
-            this.getRoomPosition().func_177952_p() * 47 + this.getRoomPosition().func_177952_p() * 48
+            this.getRoomPosition().getX() * 47 + this.getRoomPosition().getX() * 48, 0, this.getRoomPosition().getZ() * 47 + this.getRoomPosition().getZ() * 48
          );
       }
 
       public BlockPos getAbsoluteOffset(Rotation vaultRotation, Rotation roomRotation) {
-         return this.getRoomOffset().func_190942_a(vaultRotation).func_177971_a(new BlockPos(-23, -13, -23).func_190942_a(roomRotation));
+         return this.getRoomOffset().rotate(vaultRotation).offset(new BlockPos(-23, -13, -23).rotate(roomRotation));
       }
 
-      public JigsawPiece getRandomPiece(JigsawPattern pattern, Random random) {
+      public StructurePoolElement getRandomPiece(StructureTemplatePool pattern, Random random) {
          return this.jigsawFilter.getRandomPiece(pattern, random);
       }
 
@@ -199,28 +151,26 @@ public abstract class VaultRoomLayoutGenerator implements JigsawPoolProvider {
       }
 
       public Rotation getRandomConnectingRotation(Random random) {
-         return this.getFrom().getRoomPosition().func_177958_n() - this.getTo().getRoomPosition().func_177958_n() == 0
-            ? Rotation.CLOCKWISE_180
-            : Rotation.CLOCKWISE_90;
+         return this.getFrom().getRoomPosition().getX() - this.getTo().getRoomPosition().getX() == 0 ? Rotation.CLOCKWISE_180 : Rotation.CLOCKWISE_90;
       }
 
       public BlockPos getAbsoluteOffset(Rotation vaultRotation, Rotation tunnelRotation) {
-         Vector3i from = this.getFrom().getRoomPosition();
-         Vector3i to = this.getTo().getRoomPosition();
-         Vector3i dir = new Vector3i(to.func_177958_n() - from.func_177958_n(), 0, to.func_177952_p() - from.func_177952_p());
-         BlockPos relativeOffset = this.getFrom().getRoomOffset().func_177982_a(dir.func_177958_n() * 47, 0, dir.func_177952_p() * 47);
-         if (dir.func_177958_n() < 0) {
-            relativeOffset = relativeOffset.func_177982_a(-1, 0, 0);
+         Vec3i from = this.getFrom().getRoomPosition();
+         Vec3i to = this.getTo().getRoomPosition();
+         Vec3i dir = new Vec3i(to.getX() - from.getX(), 0, to.getZ() - from.getZ());
+         BlockPos relativeOffset = this.getFrom().getRoomOffset().offset(dir.getX() * 47, 0, dir.getZ() * 47);
+         if (dir.getX() < 0) {
+            relativeOffset = relativeOffset.offset(-1, 0, 0);
          }
 
-         if (dir.func_177952_p() < 0) {
-            relativeOffset = relativeOffset.func_177982_a(0, 0, -1);
+         if (dir.getZ() < 0) {
+            relativeOffset = relativeOffset.offset(0, 0, -1);
          }
 
-         return relativeOffset.func_190942_a(vaultRotation).func_177971_a(new BlockPos(-5, 6, -24).func_190942_a(tunnelRotation));
+         return relativeOffset.rotate(vaultRotation).offset(new BlockPos(-5, 6, -24).rotate(tunnelRotation));
       }
 
-      public JigsawPiece getRandomPiece(JigsawPattern pattern, Random random) {
+      public StructurePoolElement getRandomPiece(StructureTemplatePool pattern, Random random) {
          return this.jigsawFilter.getRandomPiece(pattern, random);
       }
 

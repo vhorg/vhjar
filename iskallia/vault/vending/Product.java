@@ -3,17 +3,17 @@ package iskallia.vault.vending;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.util.nbt.INBTSerializable;
 import iskallia.vault.util.nbt.NBTSerialize;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class Product implements INBTSerializable {
    protected Item itemCache;
-   protected CompoundNBT nbtCache;
+   protected CompoundTag nbtCache;
    @Expose
    @NBTSerialize
    protected String id;
@@ -27,7 +27,7 @@ public class Product implements INBTSerializable {
    public Product() {
    }
 
-   public Product(Item item, int amount, CompoundNBT nbt) {
+   public Product(Item item, int amount, CompoundTag nbt) {
       this.itemCache = item;
       if (this.itemCache != null) {
          this.id = item.getRegistryName().toString();
@@ -83,13 +83,13 @@ public class Product implements INBTSerializable {
       return this.id;
    }
 
-   public CompoundNBT getNBT() {
+   public CompoundTag getNBT() {
       if (this.nbt == null) {
          return null;
       } else {
          try {
             if (this.nbtCache == null) {
-               this.nbtCache = JsonToNBT.func_180713_a(this.nbt);
+               this.nbtCache = TagParser.parseTag(this.nbt);
             }
          } catch (Exception var2) {
             this.nbtCache = null;
@@ -105,21 +105,21 @@ public class Product implements INBTSerializable {
          return false;
       } else if (this.getItem() == null) {
          return false;
-      } else if (this.getItem() == Items.field_190931_a) {
+      } else if (this.getItem() == Items.AIR) {
          return false;
       } else {
-         return this.getAmount() > this.getItem().func_77639_j() ? false : this.nbt == null || this.getNBT() != null;
+         return this.getAmount() > this.getItem().getMaxStackSize() ? false : this.nbt == null || this.getNBT() != null;
       }
    }
 
    public ItemStack toStack() {
       ItemStack stack = new ItemStack(this.getItem(), this.getAmount());
-      stack.func_77982_d(this.getNBT());
+      stack.setTag(this.getNBT());
       return stack;
    }
 
    @Override
    public String toString() {
-      return "{ id='" + this.id + '\'' + ", nbt='" + this.nbt + '\'' + ", amount=" + this.amount + '}';
+      return "{ id='" + this.id + "', nbt='" + this.nbt + "', amount=" + this.amount + "}";
    }
 }

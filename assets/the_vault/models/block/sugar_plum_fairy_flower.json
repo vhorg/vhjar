@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "the_vault:item/sugar_plum_fairy_flower"
+  }
+}

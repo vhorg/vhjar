@@ -1,20 +1,20 @@
 package iskallia.vault.attribute;
 
 import java.util.UUID;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class UUIDAttribute extends VAttribute.Instance<UUID> {
    @Override
-   public void write(CompoundNBT nbt) {
+   public void write(CompoundTag nbt) {
       if (this.getBaseValue() != null) {
-         nbt.func_74778_a("BaseValue", this.getBaseValue().toString());
+         nbt.putString("BaseValue", this.getBaseValue().toString());
       }
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      if (nbt.func_150297_b("BaseValue", 8)) {
-         this.setBaseValue(UUID.fromString(nbt.func_74779_i("BaseValue")));
+   public void read(CompoundTag nbt) {
+      if (nbt.contains("BaseValue", 8)) {
+         this.setBaseValue(UUID.fromString(nbt.getString("BaseValue")));
       }
    }
 }

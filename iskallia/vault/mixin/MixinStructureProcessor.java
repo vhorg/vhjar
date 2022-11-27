@@ -1,12 +1,12 @@
 package iskallia.vault.mixin;
 
 import javax.annotation.Nullable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.gen.feature.template.PlacementSettings;
-import net.minecraft.world.gen.feature.template.StructureProcessor;
-import net.minecraft.world.gen.feature.template.Template;
-import net.minecraft.world.gen.feature.template.Template.BlockInfo;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,7 +18,9 @@ public abstract class MixinStructureProcessor {
    @Shadow
    @Deprecated
    @Nullable
-   public abstract BlockInfo func_230386_a_(IWorldReader var1, BlockPos var2, BlockPos var3, BlockInfo var4, BlockInfo var5, PlacementSettings var6);
+   public abstract StructureBlockInfo processBlock(
+      LevelReader var1, BlockPos var2, BlockPos var3, StructureBlockInfo var4, StructureBlockInfo var5, StructurePlaceSettings var6
+   );
 
    @Inject(
       method = {"process"},
@@ -27,17 +29,17 @@ public abstract class MixinStructureProcessor {
       remap = false
    )
    protected void process(
-      IWorldReader world,
+      LevelReader world,
       BlockPos pos1,
       BlockPos pos2,
-      BlockInfo info1,
-      BlockInfo info2,
-      PlacementSettings settings,
-      @Nullable Template template,
-      CallbackInfoReturnable<BlockInfo> ci
+      StructureBlockInfo info1,
+      StructureBlockInfo info2,
+      StructurePlaceSettings settings,
+      @Nullable StructureTemplate template,
+      CallbackInfoReturnable<StructureBlockInfo> ci
    ) {
       try {
-         ci.setReturnValue(this.func_230386_a_(world, pos1, pos2, info1, info2, settings));
+         ci.setReturnValue(this.processBlock(world, pos1, pos2, info1, info2, settings));
       } catch (Exception var10) {
          ci.setReturnValue(null);
       }

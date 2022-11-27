@@ -1,15 +1,15 @@
 package iskallia.vault.aura;
 
 import iskallia.vault.config.EternalAuraConfig;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class ActiveAura {
    private final AuraProvider auraProvider;
-   private RegistryKey<World> worldKey;
-   private Vector3d offset;
+   private ResourceKey<Level> worldKey;
+   private Vec3 offset;
    private float radius;
    private float radiusSq;
 
@@ -30,20 +30,20 @@ public class ActiveAura {
    }
 
    public boolean isAffected(Entity entity) {
-      RegistryKey<World> entityWorld = entity.func_130014_f_().func_234923_W_();
+      ResourceKey<Level> entityWorld = entity.getCommandSenderWorld().dimension();
       if (!this.worldKey.equals(entityWorld)) {
          return false;
       } else {
-         Vector3d pos = entity.func_213303_ch();
-         return this.offset.func_72436_e(pos) < this.radiusSq;
+         Vec3 pos = entity.position();
+         return this.offset.distanceToSqr(pos) < this.radiusSq;
       }
    }
 
-   public RegistryKey<World> getWorldKey() {
+   public ResourceKey<Level> getWorldKey() {
       return this.worldKey;
    }
 
-   public Vector3d getOffset() {
+   public Vec3 getOffset() {
       return this.offset;
    }
 

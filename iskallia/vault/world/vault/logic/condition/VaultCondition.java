@@ -4,12 +4,12 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class VaultCondition implements IVaultCondition, INBTSerializable<CompoundNBT> {
+public class VaultCondition implements IVaultCondition, INBTSerializable<CompoundTag> {
    public static final Map<ResourceLocation, VaultCondition> REGISTRY = new HashMap<>();
    private ResourceLocation id;
    protected IVaultCondition condition;
@@ -27,7 +27,7 @@ public class VaultCondition implements IVaultCondition, INBTSerializable<Compoun
    }
 
    @Override
-   public boolean test(VaultRaid vault, VaultPlayer player, ServerWorld world) {
+   public boolean test(VaultRaid vault, VaultPlayer player, ServerLevel world) {
       return this.condition.test(vault, player, world);
    }
 
@@ -47,18 +47,18 @@ public class VaultCondition implements IVaultCondition, INBTSerializable<Compoun
       return new CompoundVaultCondition(this, other, "^", this.condition.xor(other));
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Id", this.getId().toString());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putString("Id", this.getId().toString());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.id = new ResourceLocation(nbt.func_74779_i("Id"));
+   public void deserializeNBT(CompoundTag nbt) {
+      this.id = new ResourceLocation(nbt.getString("Id"));
    }
 
-   public static VaultCondition fromNBT(CompoundNBT nbt) {
-      return (VaultCondition)(nbt.func_150297_b("Id", 8) ? REGISTRY.get(new ResourceLocation(nbt.func_74779_i("Id"))) : CompoundVaultCondition.fromNBT(nbt));
+   public static VaultCondition fromNBT(CompoundTag nbt) {
+      return (VaultCondition)(nbt.contains("Id", 8) ? REGISTRY.get(new ResourceLocation(nbt.getString("Id"))) : CompoundVaultCondition.fromNBT(nbt));
    }
 
    public static VaultCondition register(ResourceLocation id, IVaultCondition condition) {

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public class VaultInfluenceRegistry {
    private static final Map<ResourceLocation, Supplier<VaultInfluence>> influences = new HashMap<>();

@@ -1,46 +1,46 @@
 package iskallia.vault.mixin;
 
-import java.util.function.Supplier;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
-import net.minecraft.world.gen.feature.jigsaw.SingleJigsawPiece;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPattern.PlacementBehaviour;
-import net.minecraft.world.gen.feature.template.JigsawReplacementStructureProcessor;
-import net.minecraft.world.gen.feature.template.PlacementSettings;
-import net.minecraft.world.gen.feature.template.StructureProcessorList;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool.Projection;
+import net.minecraft.world.level.levelgen.structure.templatesystem.JigsawReplacementProcessor;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(
-   value = {SingleJigsawPiece.class},
+   value = {SinglePoolElement.class},
    priority = 1001
 )
-public abstract class MixinSingleJigsawPiece extends JigsawPiece {
+public abstract class MixinSingleJigsawPiece extends StructurePoolElement {
    @Shadow
    @Final
-   protected Supplier<StructureProcessorList> field_214862_b;
+   protected Holder<StructureProcessorList> processors;
 
-   protected MixinSingleJigsawPiece(PlacementBehaviour projection) {
+   protected MixinSingleJigsawPiece(Projection projection) {
       super(projection);
    }
 
    @Overwrite
-   protected PlacementSettings func_230379_a_(Rotation p_230379_1_, MutableBoundingBox p_230379_2_, boolean p_230379_3_) {
-      PlacementSettings placementsettings = new PlacementSettings();
-      placementsettings.func_186223_a(p_230379_2_);
-      placementsettings.func_186220_a(p_230379_1_);
-      placementsettings.func_215223_c(true);
-      placementsettings.func_186222_a(false);
-      placementsettings.func_237133_d_(true);
+   protected StructurePlaceSettings getSettings(Rotation p_230379_1_, BoundingBox p_230379_2_, boolean p_230379_3_) {
+      StructurePlaceSettings placementsettings = new StructurePlaceSettings();
+      placementsettings.setBoundingBox(p_230379_2_);
+      placementsettings.setRotation(p_230379_1_);
+      placementsettings.setKnownShape(true);
+      placementsettings.setIgnoreEntities(false);
+      placementsettings.setFinalizeEntities(true);
       if (!p_230379_3_) {
-         placementsettings.func_215222_a(JigsawReplacementStructureProcessor.field_215196_a);
+         placementsettings.addProcessor(JigsawReplacementProcessor.INSTANCE);
       }
 
-      this.field_214862_b.get().func_242919_a().forEach(placementsettings::func_215222_a);
-      this.func_214854_c().func_214937_b().forEach(placementsettings::func_215222_a);
+      ((StructureProcessorList)this.processors.value()).list().forEach(placementsettings::addProcessor);
+      this.getProjection().getProcessors().forEach(placementsettings::addProcessor);
       return placementsettings;
    }
 }

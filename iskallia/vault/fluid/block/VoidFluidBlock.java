@@ -5,97 +5,87 @@ import iskallia.vault.fluid.VoidFluid;
 import iskallia.vault.init.ModEffects;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 
-public class VoidFluidBlock extends FlowingFluidBlock {
+public class VoidFluidBlock extends LiquidBlock {
    public VoidFluidBlock(Supplier<? extends VoidFluid> supplier, Properties properties) {
       super(supplier, properties);
    }
 
-   public void func_196262_a(BlockState state, World world, BlockPos pos, Entity entity) {
-      super.func_196262_a(state, world, pos, entity);
-      entity.func_70066_B();
-      if (!world.field_72995_K && entity instanceof PlayerEntity) {
-         ServerPlayerEntity player = (ServerPlayerEntity)entity;
+   public void entityInside(BlockState state, Level world, BlockPos pos, Entity entity) {
+      super.entityInside(state, world, pos, entity);
+      entity.clearFire();
+      if (!world.isClientSide && entity instanceof Player) {
+         ServerPlayer player = (ServerPlayer)entity;
          affectPlayer(player);
-      } else if (entity instanceof ItemEntity && state.func_204520_s().func_206889_d()) {
-         ItemEntity itemEntity = (ItemEntity)entity;
-         ItemStack itemStack = itemEntity.func_92059_d();
-         Item item = itemStack.func_77973_b();
-         if (item instanceof BlockItem) {
-            BlockItem blockItem = (BlockItem)item;
-            if (blockItem.func_179223_d() instanceof VaultOreBlock) {
-               world.func_180501_a(pos, Blocks.field_150350_a.func_176223_P(), 3);
-               transformOre(itemEntity, (VaultOreBlock)blockItem.func_179223_d());
-            }
+      } else if (entity instanceof ItemEntity itemEntity && state.getFluidState().isSource()) {
+         ItemStack itemStack = itemEntity.getItem();
+         if (itemStack.getItem() instanceof BlockItem blockItem && blockItem.getBlock() instanceof VaultOreBlock) {
+            world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+            transformOre(itemEntity, (VaultOreBlock)blockItem.getBlock());
          }
       }
    }
 
-   public static void affectPlayer(ServerPlayerEntity player) {
-      if (!player.func_70644_a(ModEffects.TIMER_ACCELERATION) || player.func_70660_b(ModEffects.TIMER_ACCELERATION).func_76459_b() < 40) {
+   public static void affectPlayer(ServerPlayer player) {
+      if (!player.hasEffect(ModEffects.TIMER_ACCELERATION) || player.getEffect(ModEffects.TIMER_ACCELERATION).getDuration() < 40) {
          int duration = 100;
          int amplifier = 1;
-         EffectInstance acceleration = new EffectInstance(ModEffects.TIMER_ACCELERATION, duration, amplifier);
-         EffectInstance blindness = new EffectInstance(Effects.field_76440_q, duration, amplifier);
-         player.func_195064_c(acceleration);
-         player.func_195064_c(blindness);
+         MobEffectInstance acceleration = new MobEffectInstance(ModEffects.TIMER_ACCELERATION, duration, amplifier);
+         MobEffectInstance blindness = new MobEffectInstance(MobEffects.BLINDNESS, duration, amplifier);
+         player.addEffect(acceleration);
+         player.addEffect(blindness);
       }
    }
 
    public static void transformOre(ItemEntity itemEntity, VaultOreBlock oreBlock) {
-      World world = itemEntity.field_70170_p;
-      BlockPos pos = itemEntity.func_233580_cy_();
-      ItemStack itemStack = itemEntity.func_92059_d();
-      itemStack.func_190918_g(1);
-      if (itemStack.func_190916_E() <= 0) {
-         itemEntity.func_70106_y();
+      Level world = itemEntity.level;
+      BlockPos pos = itemEntity.blockPosition();
+      ItemStack itemStack = itemEntity.getItem();
+      itemStack.shrink(1);
+      if (itemStack.getCount() <= 0) {
+         itemEntity.discard();
       }
 
-      if (!world.field_72995_K) {
-         ServerWorld serverWorld = (ServerWorld)world;
-         serverWorld.func_184148_a(
-            null, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), SoundEvents.field_187629_cO, SoundCategory.MASTER, 1.0F, (float)Math.random()
-         );
-         serverWorld.func_195598_a(
-            ParticleTypes.field_197607_R, pos.func_177958_n() + 0.5, pos.func_177956_o() + 0.5, pos.func_177952_p() + 0.5, 100, 0.0, 0.0, 0.0, Math.PI
-         );
+      if (!world.isClientSide) {
+         ServerLevel serverWorld = (ServerLevel)world;
+         serverWorld.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.MASTER, 1.0F, (float)Math.random());
+         serverWorld.sendParticles(ParticleTypes.WITCH, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 100, 0.0, 0.0, 0.0, Math.PI);
       }
 
       ItemEntity gemEntity = createGemEntity(world, oreBlock, pos);
-      world.func_217376_c(gemEntity);
+      world.addFreshEntity(gemEntity);
    }
 
    @Nonnull
-   private static ItemEntity createGemEntity(World world, VaultOreBlock oreBlock, BlockPos pos) {
-      double x = pos.func_177958_n() + 0.5F;
-      double y = pos.func_177956_o() + 0.5F;
-      double z = pos.func_177952_p() + 0.5F;
+   private static ItemEntity createGemEntity(Level world, VaultOreBlock oreBlock, BlockPos pos) {
+      double x = pos.getX() + 0.5F;
+      double y = pos.getY() + 0.5F;
+      double z = pos.getZ() + 0.5F;
       ItemStack itemStack = new ItemStack(oreBlock.getAssociatedGem(), 2);
       ItemEntity itemEntity = new ItemEntity(world, x, y, z, itemStack);
-      itemEntity.func_174867_a(40);
-      float mag = world.field_73012_v.nextFloat() * 0.2F;
-      float angle = world.field_73012_v.nextFloat() * (float) (Math.PI * 2);
-      itemEntity.func_213293_j(-MathHelper.func_76126_a(angle) * mag, 0.2F, MathHelper.func_76134_b(angle) * mag);
+      itemEntity.setPickUpDelay(40);
+      float mag = world.random.nextFloat() * 0.2F;
+      float angle = world.random.nextFloat() * (float) (Math.PI * 2);
+      itemEntity.setDeltaMovement(-Mth.sin(angle) * mag, 0.2F, Mth.cos(angle) * mag);
       return itemEntity;
    }
 }

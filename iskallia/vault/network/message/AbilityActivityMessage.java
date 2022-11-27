@@ -1,15 +1,15 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientAbilityData;
-import iskallia.vault.skill.ability.AbilityGroup;
 import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.ability.group.AbilityGroup;
 import iskallia.vault.util.MiscUtils;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class AbilityActivityMessage {
-   private final String selectedAbility;
+   private final String ability;
    private final int cooldownTicks;
    private final int maxCooldownTicks;
    private final AbilityTree.ActivityFlag activeFlag;
@@ -18,15 +18,15 @@ public class AbilityActivityMessage {
       this(ability.getParentName(), cooldownTicks, maxCooldownTicks, activeFlag);
    }
 
-   private AbilityActivityMessage(String selectedAbility, int cooldownTicks, int maxCooldownTicks, AbilityTree.ActivityFlag activeFlag) {
-      this.selectedAbility = selectedAbility;
+   private AbilityActivityMessage(String ability, int cooldownTicks, int maxCooldownTicks, AbilityTree.ActivityFlag activeFlag) {
+      this.ability = ability;
       this.cooldownTicks = cooldownTicks;
       this.maxCooldownTicks = maxCooldownTicks;
       this.activeFlag = activeFlag;
    }
 
-   public String getSelectedAbility() {
-      return this.selectedAbility;
+   public String getAbility() {
+      return this.ability;
    }
 
    public int getCooldownTicks() {
@@ -41,15 +41,15 @@ public class AbilityActivityMessage {
       return this.activeFlag;
    }
 
-   public static void encode(AbilityActivityMessage message, PacketBuffer buffer) {
-      buffer.func_180714_a(message.selectedAbility);
+   public static void encode(AbilityActivityMessage message, FriendlyByteBuf buffer) {
+      buffer.writeUtf(message.ability);
       buffer.writeInt(message.cooldownTicks);
       buffer.writeInt(message.maxCooldownTicks);
       buffer.writeInt(message.activeFlag.ordinal());
    }
 
-   public static AbilityActivityMessage decode(PacketBuffer buffer) {
-      String selectedAbility = buffer.func_150789_c(32767);
+   public static AbilityActivityMessage decode(FriendlyByteBuf buffer) {
+      String selectedAbility = buffer.readUtf(32767);
       int cooldownTicks = buffer.readInt();
       int maxCooldownTicks = buffer.readInt();
       AbilityTree.ActivityFlag activeFlag = MiscUtils.getEnumEntry(AbilityTree.ActivityFlag.class, buffer.readInt());

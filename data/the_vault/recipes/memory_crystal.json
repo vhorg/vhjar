@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sss",
+    "sss",
+    "sss"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:memory_shard"
+    }
+  },
+  "result": {
+    "item": "the_vault:memory_crystal",
+    "count": 1
+  }
+}

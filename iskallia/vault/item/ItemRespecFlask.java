@@ -2,46 +2,46 @@ package iskallia.vault.item;
 
 import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.AbilityGroup;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.ability.group.AbilityGroup;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Rarity;
-import net.minecraft.item.UseAction;
-import net.minecraft.item.Item.Properties;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemRespecFlask extends Item {
-   public ItemRespecFlask(ItemGroup group, ResourceLocation id) {
-      super(new Properties().func_200916_a(group).func_200917_a(2));
+   public ItemRespecFlask(CreativeModeTab group, ResourceLocation id) {
+      super(new Properties().tab(group).stacksTo(2));
       this.setRegistryName(id);
    }
 
-   public void func_150895_a(ItemGroup group, NonNullList<ItemStack> items) {
+   public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
       if (ModConfigs.ABILITIES != null) {
-         if (this.func_194125_a(group)) {
+         if (this.allowdedIn(group)) {
             for (AbilityGroup<?, ?> abilityGroup : ModConfigs.ABILITIES.getAll()) {
                ItemStack stack = new ItemStack(this);
                setAbility(stack, abilityGroup.getParentName());
@@ -52,80 +52,79 @@ public class ItemRespecFlask extends Item {
    }
 
    @OnlyIn(Dist.CLIENT)
-   public void func_77624_a(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+   public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
       String abilityStr = getAbility(stack);
       if (abilityStr != null) {
          AbilityGroup<?, ?> grp = ModConfigs.ABILITIES.getAbilityGroupByName(abilityStr);
-         ITextComponent ability = new StringTextComponent(grp.getParentName()).func_240699_a_(TextFormatting.GOLD);
-         tooltip.add(StringTextComponent.field_240750_d_);
-         tooltip.add(new StringTextComponent("Use to remove selected specialization"));
-         tooltip.add(new StringTextComponent("of ability ").func_230529_a_(ability));
+         Component ability = new TextComponent(grp.getParentName()).withStyle(ChatFormatting.GOLD);
+         tooltip.add(TextComponent.EMPTY);
+         tooltip.add(new TextComponent("Use to remove selected specialization"));
+         tooltip.add(new TextComponent("of ability ").append(ability));
       }
    }
 
-   public void func_77663_a(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
+   public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
       if (getAbility(stack) == null) {
-         if (world instanceof ServerWorld && entity instanceof ServerPlayerEntity) {
-            ServerPlayerEntity player = (ServerPlayerEntity)entity;
-            if (stack.func_190916_E() > 1) {
-               while (stack.func_190916_E() > 1) {
-                  stack.func_190918_g(1);
+         if (world instanceof ServerLevel && entity instanceof ServerPlayer player) {
+            if (stack.getCount() > 1) {
+               while (stack.getCount() > 1) {
+                  stack.shrink(1);
                   ItemStack flask = new ItemStack(this);
                   MiscUtils.giveItem(player, flask);
                }
             }
 
             List<AbilityGroup<?, ?>> abilities = ModConfigs.ABILITIES.getAll();
-            AbilityGroup<?, ?> group = abilities.get(field_77697_d.nextInt(abilities.size()));
+            AbilityGroup<?, ?> group = abilities.get(world.random.nextInt(abilities.size()));
             setAbility(stack, group.getParentName());
          }
       }
    }
 
-   public Rarity func_77613_e(ItemStack stack) {
+   public Rarity getRarity(ItemStack stack) {
       return Rarity.UNCOMMON;
    }
 
    public static void setAbility(ItemStack stack, @Nullable String ability) {
-      if (stack.func_77973_b() instanceof ItemRespecFlask) {
-         stack.func_196082_o().func_74778_a("Ability", ability);
+      if (stack.getItem() instanceof ItemRespecFlask) {
+         stack.getOrCreateTag().putString("Ability", ability);
       }
    }
 
    @Nullable
    public static String getAbility(ItemStack stack) {
-      if (!(stack.func_77973_b() instanceof ItemRespecFlask)) {
+      if (!(stack.getItem() instanceof ItemRespecFlask)) {
          return null;
       } else {
-         CompoundNBT tag = stack.func_196082_o();
-         return tag.func_150297_b("Ability", 8) ? tag.func_74779_i("Ability") : null;
+         CompoundTag tag = stack.getOrCreateTag();
+         return tag.contains("Ability", 8) ? tag.getString("Ability") : null;
       }
    }
 
-   public ActionResult<ItemStack> func_77659_a(World world, PlayerEntity player, Hand hand) {
-      ItemStack held = player.func_184586_b(hand);
+   public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+      ItemStack held = player.getItemInHand(hand);
       String abilityStr = getAbility(held);
       if (abilityStr == null) {
-         return ActionResult.func_226250_c_(held);
+         return InteractionResultHolder.pass(held);
       } else {
-         if (world.func_201670_d()) {
+         if (world.isClientSide()) {
             if (!this.hasAbilityClient(abilityStr)) {
-               return ActionResult.func_226250_c_(held);
+               return InteractionResultHolder.pass(held);
             }
          } else {
-            if (!(player instanceof ServerPlayerEntity)) {
-               return ActionResult.func_226250_c_(held);
+            if (!(player instanceof ServerPlayer)) {
+               return InteractionResultHolder.pass(held);
             }
 
-            AbilityTree tree = PlayerAbilitiesData.get(((ServerPlayerEntity)player).func_71121_q()).getAbilities(player);
+            AbilityTree tree = PlayerAbilitiesData.get(((ServerPlayer)player).getLevel()).getAbilities(player);
             AbilityNode<?, ?> node = tree.getNodeByName(abilityStr);
             if (!node.isLearned() || node.getSpecialization() == null) {
-               return ActionResult.func_226250_c_(held);
+               return InteractionResultHolder.pass(held);
             }
          }
 
-         player.func_184598_c(hand);
-         return ActionResult.func_226249_b_(held);
+         player.startUsingItem(hand);
+         return InteractionResultHolder.consume(held);
       }
    }
 
@@ -135,29 +134,27 @@ public class ItemRespecFlask extends Item {
       return node == null ? false : node.isLearned() && node.getSpecialization() != null;
    }
 
-   public UseAction func_77661_b(ItemStack stack) {
-      return UseAction.DRINK;
+   public UseAnim getUseAnimation(ItemStack stack) {
+      return UseAnim.DRINK;
    }
 
-   public int func_77626_a(ItemStack stack) {
+   public int getUseDuration(ItemStack stack) {
       return 24;
    }
 
-   public ItemStack func_77654_b(ItemStack stack, World world, LivingEntity entityLiving) {
-      if (world instanceof ServerWorld && entityLiving instanceof ServerPlayerEntity) {
+   public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity entityLiving) {
+      if (world instanceof ServerLevel sWorld && entityLiving instanceof ServerPlayer player) {
          String abilityStr = getAbility(stack);
          if (abilityStr == null) {
             return stack;
          }
 
-         ServerPlayerEntity player = (ServerPlayerEntity)entityLiving;
-         ServerWorld sWorld = (ServerWorld)world;
          PlayerAbilitiesData data = PlayerAbilitiesData.get(sWorld);
          AbilityNode<?, ?> node = data.getAbilities(player).getNodeByName(abilityStr);
          if (node.isLearned() && node.getSpecialization() != null) {
-            data.selectSpecialization(player, abilityStr, null);
-            if (!player.func_184812_l_()) {
-               stack.func_190918_g(1);
+            data.selectSpecialization(player, node, null);
+            if (!player.isCreative()) {
+               stack.shrink(1);
             }
 
             return stack;

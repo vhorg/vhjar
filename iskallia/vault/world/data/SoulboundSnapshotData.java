@@ -1,10 +1,12 @@
 package iskallia.vault.world.data;
 
-import iskallia.vault.init.ModAttributes;
-import iskallia.vault.world.vault.VaultRaid;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.server.ServerWorld;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.init.ModGearAttributes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -18,20 +20,16 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 public class SoulboundSnapshotData extends InventorySnapshotData {
    protected static final String DATA_NAME = "the_vault_Soulbound";
 
-   public SoulboundSnapshotData() {
-      super("the_vault_Soulbound");
-   }
-
    @Override
-   protected boolean shouldSnapshotItem(PlayerEntity player, ItemStack stack) {
-      return ModAttributes.SOULBOUND.getOrDefault(stack, false).getValue(stack);
+   protected boolean shouldSnapshotItem(Player player, ItemStack stack) {
+      return !stack.isEmpty() && AttributeGearData.<AttributeGearData>read(stack).get(ModGearAttributes.SOULBOUND, VaultGearAttributeTypeMerger.anyTrue());
    }
 
    @SubscribeEvent
    public static void onTick(PlayerTickEvent event) {
-      PlayerEntity player = event.player;
-      if (player.func_70089_S() && player.field_70170_p instanceof ServerWorld) {
-         ServerWorld world = (ServerWorld)event.player.field_70170_p;
+      Player player = event.player;
+      if (player.isAlive() && player.level instanceof ServerLevel) {
+         ServerLevel world = (ServerLevel)event.player.level;
          SoulboundSnapshotData data = get(world);
          if (data.hasSnapshot(player)) {
             data.restoreSnapshot(player);
@@ -43,20 +41,26 @@ public class SoulboundSnapshotData extends InventorySnapshotData {
       priority = EventPriority.HIGH
    )
    public static void onDeath(LivingDeathEvent event) {
-      if (event.getEntity() instanceof PlayerEntity && event.getEntity().field_70170_p instanceof ServerWorld) {
-         PlayerEntity player = (PlayerEntity)event.getEntity();
-         ServerWorld world = (ServerWorld)player.field_70170_p;
-         VaultRaid vault = VaultRaidData.get(world).getAt(world, player.func_233580_cy_());
-         if (vault == null || !vault.getProperties().exists(VaultRaid.PARENT)) {
-            SoulboundSnapshotData data = get(world);
-            if (!data.hasSnapshot(player)) {
-               data.createSnapshot(player);
-            }
+      if (event.getEntity() instanceof Player && event.getEntity().level instanceof ServerLevel) {
+         Player player = (Player)event.getEntity();
+         ServerLevel world = (ServerLevel)player.level;
+         SoulboundSnapshotData data = get(world);
+         if (!data.hasSnapshot(player)) {
+            data.createSnapshot(player);
          }
       }
    }
 
-   public static SoulboundSnapshotData get(ServerWorld world) {
-      return (SoulboundSnapshotData)world.func_73046_m().func_241755_D_().func_217481_x().func_215752_a(SoulboundSnapshotData::new, "the_vault_Soulbound");
+   private static SoulboundSnapshotData create(CompoundTag tag) {
+      SoulboundSnapshotData data = new SoulboundSnapshotData();
+      data.load(tag);
+      return data;
+   }
+
+   public static SoulboundSnapshotData get(ServerLevel world) {
+      return (SoulboundSnapshotData)world.getServer()
+         .overworld()
+         .getDataStorage()
+         .computeIfAbsent(SoulboundSnapshotData::create, SoulboundSnapshotData::new, "the_vault_Soulbound");
    }
 }

@@ -7,26 +7,26 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.AbstractBlock.IPositionPredicate;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockPos.Mutable;
-import net.minecraft.world.IWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos.MutableBlockPos;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.StatePredicate;
 
 public class VaultPortalSize {
-   private final IWorld world;
+   private final LevelAccessor world;
    private final Axis axis;
    private final Direction rightDir;
    private int portalBlockCount;
    @Nullable
    private BlockPos bottomLeft;
    private int height;
-   private int width;
-   private IPositionPredicate positionPredicate;
+   private final int width;
+   private final StatePredicate positionPredicate;
 
-   public VaultPortalSize(IWorld worldIn, BlockPos pos, Axis axisIn, IPositionPredicate positionPredicate) {
+   public VaultPortalSize(LevelAccessor worldIn, BlockPos pos, Axis axisIn, StatePredicate positionPredicate) {
       this.world = worldIn;
       this.axis = axisIn;
       this.rightDir = axisIn == Axis.X ? Direction.WEST : Direction.SOUTH;
@@ -44,12 +44,12 @@ public class VaultPortalSize {
       }
    }
 
-   public static Optional<VaultPortalSize> getPortalSize(IWorld world, BlockPos pos, Axis axis, IPositionPredicate positionPredicate) {
+   public static Optional<VaultPortalSize> getPortalSize(LevelAccessor world, BlockPos pos, Axis axis, StatePredicate positionPredicate) {
       return getPortalSize(world, pos, size -> size.isValid() && size.portalBlockCount == 0, axis, positionPredicate);
    }
 
    public static Optional<VaultPortalSize> getPortalSize(
-      IWorld world, BlockPos pos, Predicate<VaultPortalSize> sizePredicate, Axis axis, IPositionPredicate positionPredicate
+      LevelAccessor world, BlockPos pos, Predicate<VaultPortalSize> sizePredicate, Axis axis, StatePredicate positionPredicate
    ) {
       Optional<VaultPortalSize> optional = Optional.of(new VaultPortalSize(world, pos, axis, positionPredicate)).filter(sizePredicate);
       if (optional.isPresent()) {
@@ -60,12 +60,12 @@ public class VaultPortalSize {
       }
    }
 
-   public static List<BlockPos> getFrame(IWorld world, BlockPos pos) {
+   public static List<BlockPos> getFrame(LevelAccessor world, BlockPos pos) {
       List<BlockPos> positions = new ArrayList<>();
       Optional<VaultPortalSize> portalSize = findPortalSizeFromPortalBlock(world, pos);
       if (portalSize.isPresent()) {
          VaultPortalSize size = portalSize.get();
-         BlockPos current = size.bottomLeft == null ? null : size.bottomLeft.func_177972_a(size.rightDir.func_176734_d()).func_177977_b();
+         BlockPos current = size.bottomLeft == null ? null : size.bottomLeft.relative(size.rightDir.getOpposite()).below();
          if (current != null) {
             positions.add(current);
             findAndAddPositions(world, positions, size, current);
@@ -75,84 +75,84 @@ public class VaultPortalSize {
       return positions;
    }
 
-   private static void findAndAddPositions(IWorld world, List<BlockPos> positions, VaultPortalSize size, BlockPos current) {
+   private static void findAndAddPositions(LevelAccessor world, List<BlockPos> positions, VaultPortalSize size, BlockPos current) {
       for (int up = 0; up <= size.height; up++) {
-         if (!VaultPortalBlock.FRAME.test(world.func_180495_p(current.func_177984_a()), world, current.func_177984_a())) {
-            current = current.func_177984_a();
+         if (!VaultPortalBlock.FRAME.test(world.getBlockState(current.above()), world, current.above())) {
+            current = current.above();
             positions.add(current);
             break;
          }
 
-         current = current.func_177984_a();
+         current = current.above();
          positions.add(current);
       }
 
       for (int right = 0; right <= size.width; right++) {
-         if (!VaultPortalBlock.FRAME.test(world.func_180495_p(current.func_177972_a(size.rightDir)), world, current.func_177972_a(size.rightDir))) {
-            current = current.func_177972_a(size.rightDir);
+         if (!VaultPortalBlock.FRAME.test(world.getBlockState(current.relative(size.rightDir)), world, current.relative(size.rightDir))) {
+            current = current.relative(size.rightDir);
             positions.add(current);
             break;
          }
 
-         current = current.func_177972_a(size.rightDir);
+         current = current.relative(size.rightDir);
          positions.add(current);
       }
 
       for (int down = 0; down <= size.height; down++) {
-         if (!VaultPortalBlock.FRAME.test(world.func_180495_p(current.func_177977_b()), world, current.func_177977_b())) {
-            current = current.func_177977_b();
+         if (!VaultPortalBlock.FRAME.test(world.getBlockState(current.below()), world, current.below())) {
+            current = current.below();
             positions.add(current);
             break;
          }
 
-         current = current.func_177977_b();
+         current = current.below();
          positions.add(current);
       }
 
       for (int left = 0; left < size.width; left++) {
          if (!VaultPortalBlock.FRAME
-            .test(world.func_180495_p(current.func_177972_a(size.rightDir.func_176734_d())), world, current.func_177972_a(size.rightDir.func_176734_d()))) {
-            positions.add(current.func_177984_a());
+            .test(world.getBlockState(current.relative(size.rightDir.getOpposite())), world, current.relative(size.rightDir.getOpposite()))) {
+            positions.add(current.above());
             break;
          }
 
-         current = current.func_177972_a(size.rightDir.func_176734_d());
+         current = current.relative(size.rightDir.getOpposite());
          positions.add(current);
       }
    }
 
-   private static Optional<VaultPortalSize> findPortalSizeFromPortalBlock(IWorld world, BlockPos pos) {
-      Optional<VaultPortalSize> portalSize = getPortalSize(world, pos.func_177978_c(), VaultPortalSize::isValid, Axis.Z, VaultPortalBlock.FRAME);
+   private static Optional<VaultPortalSize> findPortalSizeFromPortalBlock(LevelAccessor world, BlockPos pos) {
+      Optional<VaultPortalSize> portalSize = getPortalSize(world, pos.north(), VaultPortalSize::isValid, Axis.Z, VaultPortalBlock.FRAME);
       if (!portalSize.isPresent()) {
-         portalSize = getPortalSize(world, pos.func_177968_d(), VaultPortalSize::isValid, Axis.Z, VaultPortalBlock.FRAME);
+         portalSize = getPortalSize(world, pos.south(), VaultPortalSize::isValid, Axis.Z, VaultPortalBlock.FRAME);
       }
 
       if (!portalSize.isPresent()) {
-         portalSize = getPortalSize(world, pos.func_177974_f(), VaultPortalSize::isValid, Axis.X, VaultPortalBlock.FRAME);
+         portalSize = getPortalSize(world, pos.east(), VaultPortalSize::isValid, Axis.X, VaultPortalBlock.FRAME);
       }
 
       if (!portalSize.isPresent()) {
-         portalSize = getPortalSize(world, pos.func_177976_e(), VaultPortalSize::isValid, Axis.X, VaultPortalBlock.FRAME);
+         portalSize = getPortalSize(world, pos.west(), VaultPortalSize::isValid, Axis.X, VaultPortalBlock.FRAME);
       }
 
       return portalSize;
    }
 
    private static boolean canConnect(BlockState state) {
-      return state.func_196958_f() || state.func_203425_a(ModBlocks.VAULT_PORTAL) || state.func_203425_a(ModBlocks.OTHER_SIDE_PORTAL);
+      return state.isAir() || state.is(ModBlocks.VAULT_PORTAL) || state.is(ModBlocks.OTHER_SIDE_PORTAL);
    }
 
    @Nullable
    private BlockPos computeBottomLeft(BlockPos pos) {
-      int i = Math.max(0, pos.func_177956_o() - 21);
+      int i = Math.max(0, pos.getY() - 21);
 
-      while (pos.func_177956_o() > i && canConnect(this.world.func_180495_p(pos.func_177977_b()))) {
-         pos = pos.func_177977_b();
+      while (pos.getY() > i && canConnect(this.world.getBlockState(pos.below()))) {
+         pos = pos.below();
       }
 
-      Direction direction = this.rightDir.func_176734_d();
+      Direction direction = this.rightDir.getOpposite();
       int j = this.computeWidth(pos, direction) - 1;
-      return j < 0 ? null : pos.func_177967_a(direction, j);
+      return j < 0 ? null : pos.relative(direction, j);
    }
 
    public Axis getAxis() {
@@ -177,11 +177,11 @@ public class VaultPortalSize {
    }
 
    private int computeWidth(BlockPos pos, Direction direction) {
-      Mutable blockpos$mutable = new Mutable();
+      MutableBlockPos blockpos$mutable = new MutableBlockPos();
 
       for (int i = 0; i <= 21; i++) {
-         blockpos$mutable.func_189533_g(pos).func_189534_c(direction, i);
-         BlockState blockstate = this.world.func_180495_p(blockpos$mutable);
+         blockpos$mutable.set(pos).move(direction, i);
+         BlockState blockstate = this.world.getBlockState(blockpos$mutable);
          if (!canConnect(blockstate)) {
             if (this.positionPredicate.test(blockstate, this.world, blockpos$mutable)) {
                return i;
@@ -189,7 +189,7 @@ public class VaultPortalSize {
             break;
          }
 
-         BlockState blockstate1 = this.world.func_180495_p(blockpos$mutable.func_189536_c(Direction.DOWN));
+         BlockState blockstate1 = this.world.getBlockState(blockpos$mutable.move(Direction.DOWN));
          if (!this.positionPredicate.test(blockstate1, this.world, blockpos$mutable)) {
             break;
          }
@@ -199,15 +199,15 @@ public class VaultPortalSize {
    }
 
    private int computeHeight() {
-      Mutable blockpos$mutable = new Mutable();
+      MutableBlockPos blockpos$mutable = new MutableBlockPos();
       int i = this.getFrameColumnCount(blockpos$mutable);
       return i >= 3 && i <= 21 && this.computeHeight(blockpos$mutable, i) ? i : 0;
    }
 
-   private boolean computeHeight(Mutable mutablePos, int upDisplacement) {
+   private boolean computeHeight(MutableBlockPos mutablePos, int upDisplacement) {
       for (int i = 0; i < this.width; i++) {
-         Mutable blockpos$mutable = mutablePos.func_189533_g(this.bottomLeft).func_189534_c(Direction.UP, upDisplacement).func_189534_c(this.rightDir, i);
-         if (!this.positionPredicate.test(this.world.func_180495_p(blockpos$mutable), this.world, blockpos$mutable)) {
+         MutableBlockPos blockpos$mutable = mutablePos.set(this.bottomLeft).move(Direction.UP, upDisplacement).move(this.rightDir, i);
+         if (!this.positionPredicate.test(this.world.getBlockState(blockpos$mutable), this.world, blockpos$mutable)) {
             return false;
          }
       }
@@ -215,26 +215,26 @@ public class VaultPortalSize {
       return true;
    }
 
-   private int getFrameColumnCount(Mutable mutablePos) {
+   private int getFrameColumnCount(MutableBlockPos mutablePos) {
       for (int i = 0; i < 21; i++) {
-         mutablePos.func_189533_g(this.bottomLeft).func_189534_c(Direction.UP, i).func_189534_c(this.rightDir, -1);
-         if (!this.positionPredicate.test(this.world.func_180495_p(mutablePos), this.world, mutablePos)) {
+         mutablePos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, -1);
+         if (!this.positionPredicate.test(this.world.getBlockState(mutablePos), this.world, mutablePos)) {
             return i;
          }
 
-         mutablePos.func_189533_g(this.bottomLeft).func_189534_c(Direction.UP, i).func_189534_c(this.rightDir, this.width);
-         if (!this.positionPredicate.test(this.world.func_180495_p(mutablePos), this.world, mutablePos)) {
+         mutablePos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, this.width);
+         if (!this.positionPredicate.test(this.world.getBlockState(mutablePos), this.world, mutablePos)) {
             return i;
          }
 
          for (int j = 0; j < this.width; j++) {
-            mutablePos.func_189533_g(this.bottomLeft).func_189534_c(Direction.UP, i).func_189534_c(this.rightDir, j);
-            BlockState blockstate = this.world.func_180495_p(mutablePos);
+            mutablePos.set(this.bottomLeft).move(Direction.UP, i).move(this.rightDir, j);
+            BlockState blockstate = this.world.getBlockState(mutablePos);
             if (!canConnect(blockstate)) {
                return i;
             }
 
-            if (blockstate.func_203425_a(ModBlocks.VAULT_PORTAL) || blockstate.func_203425_a(ModBlocks.OTHER_SIDE_PORTAL)) {
+            if (blockstate.is(ModBlocks.VAULT_PORTAL) || blockstate.is(ModBlocks.OTHER_SIDE_PORTAL)) {
                this.portalBlockCount++;
             }
          }
@@ -248,8 +248,7 @@ public class VaultPortalSize {
    }
 
    public void placePortalBlocks(Consumer<BlockPos> placer) {
-      BlockPos.func_218278_a(this.bottomLeft, this.bottomLeft.func_177967_a(Direction.UP, this.height - 1).func_177967_a(this.rightDir, this.width - 1))
-         .forEach(placer);
+      BlockPos.betweenClosed(this.bottomLeft, this.bottomLeft.relative(Direction.UP, this.height - 1).relative(this.rightDir, this.width - 1)).forEach(placer);
    }
 
    public boolean validatePortal() {

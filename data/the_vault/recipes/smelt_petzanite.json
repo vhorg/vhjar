@@ -1,0 +1,9 @@
+{
+    "type": "minecraft:smelting",
+    "ingredient": {
+      "item": "the_vault:ore_petzanite"
+    },
+    "result": "the_vault:gem_petzanite",
+    "experience": 1.0,
+    "cookingtime": 200
+  }

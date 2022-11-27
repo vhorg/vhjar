@@ -1,28 +1,22 @@
 package iskallia.vault.world.vault.gen.layout;
 
+import iskallia.vault.VaultMod;
 import java.util.Random;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPattern;
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public interface JigsawPoolProvider {
    Random rand = new Random();
 
-   ResourceLocation getStartRoomId();
-
-   ResourceLocation getRoomId();
-
-   ResourceLocation getTunnelId();
-
-   default JigsawPattern getStartRoomPool(Registry<JigsawPattern> jigsawRegistry) {
-      return (JigsawPattern)jigsawRegistry.func_82594_a(this.getStartRoomId());
+   default StructureTemplatePool getStartRoomPool(Registry<StructureTemplatePool> jigsawRegistry) {
+      return (StructureTemplatePool)jigsawRegistry.get(VaultMod.id("vault/starts"));
    }
 
-   default JigsawPattern getRoomPool(Registry<JigsawPattern> jigsawRegistry) {
-      return (JigsawPattern)jigsawRegistry.func_82594_a(this.getRoomId());
+   default StructureTemplatePool getRoomPool(Registry<StructureTemplatePool> jigsawRegistry) {
+      return (StructureTemplatePool)jigsawRegistry.get(VaultMod.id("vault/rooms"));
    }
 
-   default JigsawPattern getTunnelPool(Registry<JigsawPattern> jigsawRegistry) {
-      return (JigsawPattern)jigsawRegistry.func_82594_a(this.getTunnelId());
+   default StructureTemplatePool getTunnelPool(Registry<StructureTemplatePool> jigsawRegistry) {
+      return (StructureTemplatePool)jigsawRegistry.get(VaultMod.id("vault/tunnels"));
    }
 }

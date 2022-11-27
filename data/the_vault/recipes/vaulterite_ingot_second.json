@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "cvc",
+    "vnv",
+    "cvc"
+  ],
+  "key": {
+    "c": {
+      "item": "the_vault:chromatic_iron_ingot"
+    },
+    "n": {
+      "item": "minecraft:netherite_scrap"
+    },
+    "v": {
+      "item": "the_vault:vault_scrap"
+    }
+  },
+  "result": {
+    "item": "the_vault:vaulterite_ingot",
+    "count": 1
+  }
+}

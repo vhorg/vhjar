@@ -3,15 +3,15 @@ package iskallia.vault.entity.ai;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 
 public class TeleportGoal<T extends LivingEntity> extends GoalTask<T> {
    private final Predicate<T> startCondition;
-   private final Function<T, Vector3d> targetSupplier;
+   private final Function<T, Vec3> targetSupplier;
    private final Consumer<T> postTeleport;
 
-   protected TeleportGoal(T entity, Predicate<T> startCondition, Function<T, Vector3d> targetSupplier, Consumer<T> postTeleport) {
+   protected TeleportGoal(T entity, Predicate<T> startCondition, Function<T, Vec3> targetSupplier, Consumer<T> postTeleport) {
       super(entity);
       this.startCondition = startCondition;
       this.targetSupplier = targetSupplier;
@@ -22,14 +22,14 @@ public class TeleportGoal<T extends LivingEntity> extends GoalTask<T> {
       return new TeleportGoal.Builder<>(entity);
    }
 
-   public boolean func_75250_a() {
+   public boolean canUse() {
       return this.startCondition.test(this.getEntity());
    }
 
-   public void func_75249_e() {
-      Vector3d target = this.targetSupplier.apply(this.getEntity());
+   public void start() {
+      Vec3 target = this.targetSupplier.apply(this.getEntity());
       if (target != null) {
-         boolean teleported = this.getEntity().func_213373_a(target.func_82615_a(), target.func_82617_b(), target.func_82616_c(), true);
+         boolean teleported = this.getEntity().randomTeleport(target.x(), target.y(), target.z(), true);
          if (teleported) {
             this.postTeleport.accept(this.getEntity());
          }
@@ -39,7 +39,7 @@ public class TeleportGoal<T extends LivingEntity> extends GoalTask<T> {
    public static class Builder<T extends LivingEntity> {
       private final T entity;
       private Predicate<T> startCondition = entityx -> false;
-      private Function<T, Vector3d> targetSupplier = entityx -> null;
+      private Function<T, Vec3> targetSupplier = entityx -> null;
       private Consumer<T> postTeleport = entityx -> {};
 
       private Builder(T entity) {
@@ -51,7 +51,7 @@ public class TeleportGoal<T extends LivingEntity> extends GoalTask<T> {
          return this;
       }
 
-      public TeleportGoal.Builder<T> to(Function<T, Vector3d> targetSupplier) {
+      public TeleportGoal.Builder<T> to(Function<T, Vec3> targetSupplier) {
          this.targetSupplier = targetSupplier;
          return this;
       }

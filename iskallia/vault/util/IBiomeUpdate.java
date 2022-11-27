@@ -1,7 +1,7 @@
 package iskallia.vault.util;
 
-import net.minecraft.world.biome.provider.BiomeProvider;
+import net.minecraft.world.level.biome.BiomeSource;
 
 public interface IBiomeUpdate {
-   void update(BiomeProvider var1);
+   void update(BiomeSource var1);
 }

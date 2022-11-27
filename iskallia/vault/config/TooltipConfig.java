@@ -5,7 +5,7 @@ import iskallia.vault.init.ModItems;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 public class TooltipConfig extends Config {
    @Expose

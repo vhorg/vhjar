@@ -5,14 +5,14 @@ import iskallia.vault.skill.ability.config.VeinMinerConfig;
 
 public class VeinMinerDurabilityConfig extends VeinMinerConfig {
    @Expose
-   private final float noDurabilityUsageChance;
+   private final int additionalUnbreakingLevel;
 
-   public VeinMinerDurabilityConfig(int cost, int blockLimit, float noDurabilityUsageChance) {
-      super(cost, blockLimit);
-      this.noDurabilityUsageChance = noDurabilityUsageChance;
+   public VeinMinerDurabilityConfig(int learningCost, int regretCost, int cooldownTicks, int levelRequirement, int blockLimit, int additionalUnbreakingLevel) {
+      super(learningCost, regretCost, cooldownTicks, levelRequirement, blockLimit);
+      this.additionalUnbreakingLevel = additionalUnbreakingLevel;
    }
 
-   public float getNoDurabilityUsageChance() {
-      return this.noDurabilityUsageChance;
+   public int getAdditionalUnbreakingLevel() {
+      return this.additionalUnbreakingLevel;
    }
 }

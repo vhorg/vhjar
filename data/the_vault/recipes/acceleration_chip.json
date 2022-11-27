@@ -1,19 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "beb",
-    "ede",
-    "beb"
+    "iei",
+    "wdw",
+    "iei"
   ],
   "key": {
     "d": {
       "item": "the_vault:vault_diamond_block"
     },
-    "b": {
-      "item": "the_vault:perfect_benitoite"
+    "w": {
+      "item": "the_vault:wutodic_mass"
     },
     "e": {
       "item": "the_vault:gem_echo"
+    },
+    "i": {
+      "item": "the_vault:black_chromatic_steel_ingot"
     }
   },
   "result": {

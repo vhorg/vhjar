@@ -4,19 +4,19 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.raid.ActiveRaid;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 public class BlockPlacementModifier extends RaidModifier {
    @Expose
@@ -38,29 +38,29 @@ public class BlockPlacementModifier extends RaidModifier {
    }
 
    @Override
-   public void affectRaidMob(MobEntity mob, float value) {
+   public void affectRaidMob(Mob mob, float value) {
    }
 
    @Override
-   public void onVaultRaidFinish(VaultRaid vault, ServerWorld world, BlockPos controller, ActiveRaid raid, float value) {
-      BlockState placementState = Registry.field_212618_g.func_241873_b(new ResourceLocation(this.block)).orElse(Blocks.field_150350_a).func_176223_P();
+   public void onVaultRaidFinish(VaultRaid vault, ServerLevel world, BlockPos controller, ActiveRaid raid, float value) {
+      BlockState placementState = Registry.BLOCK.getOptional(new ResourceLocation(this.block)).orElse(Blocks.AIR).defaultBlockState();
       int toPlace = this.blocksToSpawn * Math.round(value);
-      AxisAlignedBB placementBox = raid.getRaidBoundingBox();
+      AABB placementBox = raid.getRaidBoundingBox();
 
       for (int i = 0; i < toPlace; i++) {
          BlockPos at;
          do {
             at = MiscUtils.getRandomPos(placementBox, rand);
-         } while (!world.func_175623_d(at) || !world.func_180495_p(at.func_177977_b()).func_224755_d(world, at, Direction.UP));
+         } while (!world.isEmptyBlock(at) || !world.getBlockState(at.below()).isFaceSturdy(world, at, Direction.UP));
 
-         world.func_180501_a(at, placementState, 2);
+         world.setBlock(at, placementState, 2);
       }
    }
 
    @Override
-   public ITextComponent getDisplay(float value) {
+   public Component getDisplay(float value) {
       int sets = Math.round(value);
       String set = sets > 1 ? "sets" : "set";
-      return new StringTextComponent("+" + sets + " " + set + " of " + this.blockDescription).func_240699_a_(TextFormatting.GREEN);
+      return new TextComponent("+" + sets + " " + set + " of " + this.blockDescription).withStyle(ChatFormatting.GREEN);
    }
 }

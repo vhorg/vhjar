@@ -1,11 +1,11 @@
 package iskallia.vault.world.vault.event;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.vault.VaultRaid;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 
 public class VaultListener {
    public static final Map<VaultRaid, Void> REGISTRY = new WeakHashMap<>();
@@ -24,7 +24,7 @@ public class VaultListener {
                }
             }));
          } catch (Exception var2) {
-            Vault.LOGGER.error("Upsie, you know what causes this but are lazy to fix it :(");
+            VaultMod.LOGGER.error("Upsie, you know what causes this but are lazy to fix it :(");
             var2.printStackTrace();
          }
       }

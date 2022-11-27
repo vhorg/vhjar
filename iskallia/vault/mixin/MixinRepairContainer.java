@@ -1,14 +1,14 @@
 package iskallia.vault.mixin;
 
-import net.minecraft.inventory.container.RepairContainer;
+import net.minecraft.world.inventory.AnvilMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin({RepairContainer.class})
+@Mixin({AnvilMenu.class})
 public class MixinRepairContainer {
    @ModifyConstant(
-      method = {"updateRepairOutput"},
+      method = {"createResult"},
       constant = {@Constant(
          intValue = 40,
          ordinal = 2

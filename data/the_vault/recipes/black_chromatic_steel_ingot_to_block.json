@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "the_vault:black_chromatic_steel_ingot"},
+    {"item": "the_vault:black_chromatic_steel_ingot"},
+    {"item": "the_vault:black_chromatic_steel_ingot"},
+    {"item": "the_vault:black_chromatic_steel_ingot"},
+    {"item": "the_vault:black_chromatic_steel_ingot"},
+    {"item": "the_vault:black_chromatic_steel_ingot"},
+    {"item": "the_vault:black_chromatic_steel_ingot"},
+    {"item": "the_vault:black_chromatic_steel_ingot"},
+    {"item": "the_vault:black_chromatic_steel_ingot"}
+  ],
+  "result": {
+    "item": "the_vault:black_chromatic_steel_block",
+    "count": 1
+  }
+}

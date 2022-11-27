@@ -5,7 +5,7 @@ import com.google.gson.annotations.JsonAdapter;
 import iskallia.vault.util.gson.IgnoreEmpty;
 import java.util.Optional;
 import java.util.Random;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class StringAttribute extends PooledAttribute<String> {
    public StringAttribute() {
@@ -16,13 +16,13 @@ public class StringAttribute extends PooledAttribute<String> {
    }
 
    @Override
-   public void write(CompoundNBT nbt) {
-      nbt.func_74778_a("BaseValue", this.getBaseValue());
+   public void write(CompoundTag nbt) {
+      nbt.putString("BaseValue", this.getBaseValue());
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      this.setBaseValue(nbt.func_74779_i("BaseValue"));
+   public void read(CompoundTag nbt) {
+      this.setBaseValue(nbt.getString("BaseValue"));
    }
 
    public static class Generator extends PooledAttribute.Generator<String, StringAttribute.Generator.Operator> {

@@ -1,14 +1,16 @@
 package iskallia.vault.mixin;
 
-import net.minecraft.world.GameRules.BooleanValue;
-import net.minecraft.world.GameRules.RuleType;
+import java.util.function.BiConsumer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.GameRules.BooleanValue;
+import net.minecraft.world.level.GameRules.Type;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin({BooleanValue.class})
 public interface MixinBooleanValue {
    @Invoker("create")
-   static RuleType<BooleanValue> create(boolean defaultValue) {
+   static Type<BooleanValue> create(boolean defaultValue, BiConsumer<MinecraftServer, BooleanValue> changeListener) {
       throw new AssertionError();
    }
 }

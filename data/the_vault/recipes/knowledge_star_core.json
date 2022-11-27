@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ddd",
+    "dgd",
+    "ddd"
+  ],
+  "key": {
+    "d": {
+      "item": "the_vault:vault_diamond"
+    },
+    "g": {
+      "item": "the_vault:extraordinary_benitoite"
+    }
+  },
+  "result": {
+    "item": "the_vault:knowledge_star_core",
+    "count": 1
+  }
+}

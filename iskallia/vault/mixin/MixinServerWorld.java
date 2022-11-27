@@ -1,84 +1,52 @@
 package iskallia.vault.mixin;
 
-import iskallia.vault.Vault;
-import iskallia.vault.util.IBiomeUpdate;
-import java.util.List;
-import java.util.concurrent.Executor;
+import iskallia.vault.world.data.ServerVaults;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import net.minecraft.profiler.IProfiler;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.listener.IChunkStatusListener;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.spawner.ISpecialSpawner;
-import net.minecraft.world.storage.IServerWorldInfo;
-import net.minecraft.world.storage.ISpawnWorldInfo;
-import net.minecraft.world.storage.SaveFormat.LevelSave;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.storage.WritableLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin({ServerWorld.class})
-public abstract class MixinServerWorld extends World {
+@Mixin({ServerLevel.class})
+public abstract class MixinServerWorld extends Level {
    @Shadow
-   public abstract ServerChunkProvider func_72863_F();
+   public abstract ServerChunkCache getChunkSource();
 
    @Shadow
    @Nonnull
-   public abstract MinecraftServer func_73046_m();
+   public abstract MinecraftServer getServer();
 
    protected MixinServerWorld(
-      ISpawnWorldInfo worldInfo,
-      RegistryKey<World> dimension,
-      DimensionType dimensionType,
-      Supplier<IProfiler> profiler,
-      boolean isRemote,
-      boolean isDebug,
-      long seed
+      WritableLevelData p_204149_,
+      ResourceKey<Level> p_204150_,
+      Holder<DimensionType> p_204151_,
+      Supplier<ProfilerFiller> p_204152_,
+      boolean p_204153_,
+      boolean p_204154_,
+      long p_204155_
    ) {
-      super(worldInfo, dimension, dimensionType, profiler, isRemote, isDebug, seed);
+      super(p_204149_, p_204150_, p_204151_, p_204152_, p_204153_, p_204154_, p_204155_);
    }
 
    @Inject(
-      method = {"<init>"},
-      at = {@At("RETURN")}
-   )
-   public void ctor(
-      MinecraftServer server,
-      Executor executor,
-      LevelSave save,
-      IServerWorldInfo info,
-      RegistryKey<World> key,
-      DimensionType type,
-      IChunkStatusListener listener,
-      ChunkGenerator gen,
-      boolean p_i241885_9_,
-      long p_i241885_10_,
-      List<ISpecialSpawner> spawners,
-      boolean p_i241885_13_,
-      CallbackInfo ci
-   ) {
-      if (key == Vault.OTHER_SIDE_KEY) {
-         ((IBiomeUpdate)this.func_72863_F().func_201711_g())
-            .update(this.func_73046_m().func_71218_a(World.field_234918_g_).func_72863_F().func_201711_g().func_202090_b());
-      }
-   }
-
-   @Inject(
-      method = {"tickEnvironment"},
+      method = {"tickChunk"},
       at = {@At("HEAD")},
       cancellable = true
    )
-   public void tickEnvironment(Chunk chunk, int randomTickSpeed, CallbackInfo ci) {
-      if (this.func_234923_W_() == Vault.VAULT_KEY) {
+   public void tickEnvironment(LevelChunk chunk, int randomTickSpeed, CallbackInfo ci) {
+      if (ServerVaults.isVaultWorld(this)) {
          ci.cancel();
       }
    }

@@ -1,35 +1,27 @@
 package iskallia.vault.mixin;
 
-import iskallia.vault.world.data.VaultRaidData;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.player.VaultPlayer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.FoodStats;
-import net.minecraft.world.server.ServerWorld;
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.util.VHSmpUtil;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin({FoodStats.class})
-public class MixinFoodStats {
-   @Redirect(
+@Mixin({FoodData.class})
+public abstract class MixinFoodStats {
+   @Inject(
       method = {"tick"},
-      at = @At(
-         value = "INVOKE",
-         target = "Lnet/minecraft/entity/player/PlayerEntity;shouldHeal()Z"
-      )
+      at = {@At(
+         value = "INVOKE_ASSIGN",
+         target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"
+      )},
+      cancellable = true
    )
-   public boolean shouldHeal(PlayerEntity player) {
-      if (!player.field_70170_p.field_72995_K) {
-         VaultRaid vault = VaultRaidData.get((ServerWorld)player.field_70170_p).getActiveFor(player.func_110124_au());
-         if (vault != null) {
-            VaultPlayer vPlayer = vault.getPlayer(player.func_110124_au()).orElse(null);
-            if (vPlayer != null && !vPlayer.getProperties().getBase(VaultRaid.CAN_HEAL).orElse(false)) {
-               return false;
-            }
-         }
+   public void preventNaturalHealing(Player player, CallbackInfo ci) {
+      if (player.getFoodData().getFoodLevel() > 0 && (CommonEvents.PLAYER_REGEN.invoke(player, 1.0F).getAmount() <= 0.0F || VHSmpUtil.isArenaWorld(player))) {
+         ci.cancel();
       }
-
-      return player.func_70996_bM();
    }
 }

@@ -1,9 +1,10 @@
 package iskallia.vault.client.util;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import java.util.Optional;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.vertex.VertexFormat;
 
 public class RenderTypeDecorator extends RenderType {
    private final RenderType decorated;
@@ -11,7 +12,7 @@ public class RenderTypeDecorator extends RenderType {
    private final Runnable beforeClean;
 
    private RenderTypeDecorator(RenderType type, Runnable afterSetup, Runnable beforeClean) {
-      super(type.toString(), type.func_228663_p_(), type.func_228664_q_(), type.func_228662_o_(), type.func_228665_s_(), false, () -> {}, () -> {});
+      super(type.toString(), type.format(), type.mode(), type.bufferSize(), type.affectsCrumbling(), false, () -> {}, () -> {});
       this.decorated = type;
       this.afterSetup = afterSetup;
       this.beforeClean = beforeClean;
@@ -25,49 +26,49 @@ public class RenderTypeDecorator extends RenderType {
       return new RenderTypeDecorator(type, setup, clean);
    }
 
-   public void func_228547_a_() {
-      this.decorated.func_228547_a_();
+   public void setupRenderState() {
+      this.decorated.setupRenderState();
       this.afterSetup.run();
    }
 
-   public void func_228549_b_() {
+   public void clearRenderState() {
       this.beforeClean.run();
-      this.decorated.func_228549_b_();
+      this.decorated.clearRenderState();
    }
 
-   public void func_228631_a_(BufferBuilder buf, int sortOffsetX, int sortOffsetY, int sortOffsetZ) {
-      super.func_228631_a_(buf, sortOffsetX, sortOffsetY, sortOffsetZ);
+   public void end(BufferBuilder buf, int sortOffsetX, int sortOffsetY, int sortOffsetZ) {
+      super.end(buf, sortOffsetX, sortOffsetY, sortOffsetZ);
    }
 
    public String toString() {
       return this.decorated.toString();
    }
 
-   public int func_228662_o_() {
-      return this.decorated.func_228662_o_();
+   public int bufferSize() {
+      return this.decorated.bufferSize();
    }
 
-   public VertexFormat func_228663_p_() {
-      return this.decorated.func_228663_p_();
+   public VertexFormat format() {
+      return this.decorated.format();
    }
 
-   public int func_228664_q_() {
-      return this.decorated.func_228664_q_();
+   public Mode mode() {
+      return this.decorated.mode();
    }
 
-   public Optional<RenderType> func_225612_r_() {
-      return this.decorated.func_225612_r_().map(type -> decorate(type, this.afterSetup, this.beforeClean));
+   public Optional<RenderType> outline() {
+      return this.decorated.outline().map(type -> decorate(type, this.afterSetup, this.beforeClean));
    }
 
-   public boolean func_230041_s_() {
-      return this.decorated.func_230041_s_();
+   public boolean isOutline() {
+      return this.decorated.isOutline();
    }
 
-   public boolean func_228665_s_() {
-      return this.decorated.func_228665_s_();
+   public boolean affectsCrumbling() {
+      return this.decorated.affectsCrumbling();
    }
 
-   public Optional<RenderType> func_230169_u_() {
+   public Optional<RenderType> asOptional() {
       return Optional.of(this);
    }
 }

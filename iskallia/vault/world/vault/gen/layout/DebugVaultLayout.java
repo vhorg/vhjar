@@ -1,16 +1,16 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.util.data.WeightedList;
 import iskallia.vault.world.gen.structure.VaultJigsawHelper;
 import java.util.Random;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPattern;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
 
 public class DebugVaultLayout extends VaultRoomLayoutGenerator {
-   public static final ResourceLocation ID = Vault.id("debug");
+   public static final ResourceLocation ID = VaultMod.id("debug");
 
    public DebugVaultLayout() {
       super(ID);
@@ -26,11 +26,11 @@ public class DebugVaultLayout extends VaultRoomLayoutGenerator {
       int xx = 0;
       VaultRoomLayoutGenerator.Room previousRoom = null;
 
-      for (WeightedList.Entry<JigsawPiece> weightedEntry : VaultJigsawHelper.getVaultRoomList(Integer.MAX_VALUE)) {
-         final JigsawPiece piece = weightedEntry.value;
-         VaultRoomLayoutGenerator.Room room = new VaultRoomLayoutGenerator.Room(new Vector3i(xx, 0, 0)) {
+      for (WeightedList.Entry<StructurePoolElement> weightedEntry : VaultJigsawHelper.getVaultRoomList(Integer.MAX_VALUE)) {
+         final StructurePoolElement piece = weightedEntry.value;
+         VaultRoomLayoutGenerator.Room room = new VaultRoomLayoutGenerator.Room(new Vec3i(xx, 0, 0)) {
             @Override
-            public JigsawPiece getRandomPiece(JigsawPattern pattern, Random random) {
+            public StructurePoolElement getRandomPiece(StructureTemplatePool pattern, Random random) {
                return piece;
             }
          };

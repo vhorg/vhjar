@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "the_vault:raw_chromatic_iron"
+  },
+  "result": "the_vault:chromatic_iron_ingot",
+  "experience": 0.7,
+  "cookingtime": 200
+}

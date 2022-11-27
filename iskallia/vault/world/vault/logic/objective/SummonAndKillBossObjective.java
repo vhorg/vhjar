@@ -1,18 +1,17 @@
 package iskallia.vault.world.vault.logic.objective;
 
 import iskallia.vault.block.VaultCrateBlock;
-import iskallia.vault.config.LootTablesConfig;
+import iskallia.vault.config.LegacyLootTablesConfig;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
+import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.BossMusicMessage;
 import iskallia.vault.network.message.VaultGoalMessage;
 import iskallia.vault.util.PlayerFilter;
+import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.VaultUtils;
 import iskallia.vault.world.vault.logic.task.VaultTask;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.player.VaultRunner;
@@ -22,52 +21,44 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootParameterSets;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.LootTable;
-import net.minecraft.loot.LootContext.Builder;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ChatType;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.ITextComponent.Serializer;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component.Serializer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.LootContext.Builder;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.network.NetworkDirection;
 
-@EventBusSubscriber(
-   modid = "the_vault",
-   bus = Bus.FORGE
-)
 public class SummonAndKillBossObjective extends VaultObjective {
    protected int progressCount;
    protected int targetCount = rand.nextInt(4) + 3;
    protected UUID bossId = null;
-   protected ITextComponent bossName = null;
-   protected Vector3d bossPos = null;
+   protected Component bossName = null;
+   protected Vec3 bossPos = null;
    protected boolean isBossDead = false;
 
    public SummonAndKillBossObjective(ResourceLocation id) {
@@ -94,16 +85,16 @@ public class SummonAndKillBossObjective extends VaultObjective {
       return this.bossId != null;
    }
 
-   public ITextComponent getBossName() {
+   public Component getBossName() {
       return this.bossName;
    }
 
-   public Vector3d getBossPos() {
+   public Vec3 getBossPos() {
       return this.bossPos;
    }
 
    public void setBoss(LivingEntity boss) {
-      this.bossId = boss.func_110124_au();
+      this.bossId = boss.getUUID();
    }
 
    @Override
@@ -113,36 +104,31 @@ public class SummonAndKillBossObjective extends VaultObjective {
 
    @Nullable
    @Override
-   public ITextComponent getObjectiveTargetDescription(int amount) {
-      return new StringTextComponent("Required Obelisks: ").func_230529_a_(new StringTextComponent(String.valueOf(amount)).func_240699_a_(TextFormatting.GOLD));
+   public Component getObjectiveTargetDescription(int amount) {
+      return new TextComponent("Required Obelisks: ").append(new TextComponent(String.valueOf(amount)).withStyle(ChatFormatting.GOLD));
    }
 
    @Nonnull
    @Override
-   public BlockState getObjectiveRelevantBlock(VaultRaid vault, ServerWorld world, BlockPos pos) {
-      return ModBlocks.OBELISK.func_176223_P();
+   public BlockState getObjectiveRelevantBlock(VaultRaid vault, ServerLevel world, BlockPos pos) {
+      return ModBlocks.OBELISK.defaultBlockState();
    }
 
    @Nullable
    @Override
    public LootTable getRewardLootTable(VaultRaid vault, Function<ResourceLocation, LootTable> tblResolver) {
       int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
-      LootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(level);
-      return config != null ? tblResolver.apply(config.getBossCrate()) : LootTable.field_186464_a;
+      LegacyLootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(level);
+      return null;
    }
 
    @Override
-   public ITextComponent getObjectiveDisplayName() {
-      return new StringTextComponent("Kill the Boss").func_240699_a_(TextFormatting.GOLD);
+   public Component getObjectiveDisplayName() {
+      return new TextComponent("Kill the Boss").withStyle(ChatFormatting.GOLD);
    }
 
    @Override
-   public int modifyMinimumObjectiveCount(int objectives, int requiredAmount) {
-      return Math.max(objectives, requiredAmount);
-   }
-
-   @Override
-   public void tick(VaultRaid vault, PlayerFilter filter, ServerWorld world) {
+   public void tick(VaultRaid vault, PlayerFilter filter, ServerLevel world) {
       super.tick(vault, filter, world);
       if (!this.isCompleted()) {
          vault.getPlayers()
@@ -151,16 +137,16 @@ public class SummonAndKillBossObjective extends VaultObjective {
             .forEach(
                vPlayer -> {
                   vPlayer.runIfPresent(
-                     world.func_73046_m(),
+                     world.getServer(),
                      playerEntity -> {
                         VaultGoalMessage pkt = this.allObelisksClicked()
                            ? VaultGoalMessage.killBossGoal()
                            : VaultGoalMessage.obeliskGoal(this.progressCount, this.targetCount);
-                        ModNetwork.CHANNEL.sendTo(pkt, playerEntity.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT);
+                        ModNetwork.CHANNEL.sendTo(pkt, playerEntity.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
                      }
                   );
                   if (this.isBossSpawned()) {
-                     vPlayer.sendIfPresent(world.func_73046_m(), new BossMusicMessage(true));
+                     vPlayer.sendIfPresent(world.getServer(), new BossMusicMessage(true));
                   }
                }
             );
@@ -171,35 +157,35 @@ public class SummonAndKillBossObjective extends VaultObjective {
    }
 
    @Override
-   public void complete(VaultRaid vault, VaultPlayer player, ServerWorld world) {
+   public void complete(VaultRaid vault, VaultPlayer player, ServerLevel world) {
       super.complete(vault, player, world);
-      player.sendIfPresent(world.func_73046_m(), new BossMusicMessage(false));
-      player.sendIfPresent(world.func_73046_m(), VaultGoalMessage.clear());
+      player.sendIfPresent(world.getServer(), new BossMusicMessage(false));
+      player.sendIfPresent(world.getServer(), VaultGoalMessage.clear());
    }
 
    @Override
-   public void complete(VaultRaid vault, ServerWorld world) {
+   public void complete(VaultRaid vault, ServerLevel world) {
       super.complete(vault, world);
       vault.getPlayers().forEach(player -> {
-         player.sendIfPresent(world.func_73046_m(), new BossMusicMessage(false));
-         player.sendIfPresent(world.func_73046_m(), VaultGoalMessage.clear());
+         player.sendIfPresent(world.getServer(), new BossMusicMessage(false));
+         player.sendIfPresent(world.getServer(), VaultGoalMessage.clear());
       });
    }
 
-   public void spawnBossLoot(VaultRaid vault, VaultPlayer player, ServerWorld world) {
+   public void spawnBossLoot(VaultRaid vault, VaultPlayer player, ServerLevel world) {
       player.runIfPresent(
-         world.func_73046_m(),
+         world.getServer(),
          playerEntity -> {
             Builder builder = new Builder(world)
-               .func_216023_a(world.field_73012_v)
-               .func_216015_a(LootParameters.field_216281_a, playerEntity)
-               .func_216015_a(LootParameters.field_237457_g_, this.getBossPos())
-               .func_216015_a(LootParameters.field_216283_c, DamageSource.func_76365_a(playerEntity))
-               .func_216021_b(LootParameters.field_216284_d, playerEntity)
-               .func_216021_b(LootParameters.field_216285_e, playerEntity)
-               .func_216015_a(LootParameters.field_216282_b, playerEntity)
-               .func_186469_a(playerEntity.func_184817_da());
-            LootContext ctx = builder.func_216022_a(LootParameterSets.field_216263_d);
+               .withRandom(world.random)
+               .withParameter(LootContextParams.THIS_ENTITY, playerEntity)
+               .withParameter(LootContextParams.ORIGIN, this.getBossPos())
+               .withParameter(LootContextParams.DAMAGE_SOURCE, DamageSource.playerAttack(playerEntity))
+               .withOptionalParameter(LootContextParams.KILLER_ENTITY, playerEntity)
+               .withOptionalParameter(LootContextParams.DIRECT_KILLER_ENTITY, playerEntity)
+               .withParameter(LootContextParams.LAST_DAMAGE_PLAYER, playerEntity)
+               .withLuck(playerEntity.getLuck());
+            LootContext ctx = builder.create(LootContextParamSets.ENTITY);
             this.dropBossCrate(world, vault, player, ctx);
 
             for (int i = 1; i < vault.getPlayers().size(); i++) {
@@ -208,19 +194,19 @@ public class SummonAndKillBossObjective extends VaultObjective {
                }
             }
 
-            world.func_73046_m().func_184103_al().func_232641_a_(this.getBossKillMessage(playerEntity), ChatType.CHAT, player.getPlayerId());
+            world.getServer().getPlayerList().broadcastMessage(this.getBossKillMessage(playerEntity), ChatType.CHAT, player.getPlayerId());
          }
       );
    }
 
-   private ITextComponent getBossKillMessage(PlayerEntity player) {
-      IFormattableTextComponent msgContainer = new StringTextComponent("").func_240699_a_(TextFormatting.WHITE);
-      IFormattableTextComponent playerName = player.func_145748_c_().func_230532_e_();
-      playerName.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(9974168)));
-      return msgContainer.func_230529_a_(playerName).func_240702_b_(" defeated ").func_230529_a_(this.getBossName()).func_240702_b_("!");
+   private Component getBossKillMessage(Player player) {
+      MutableComponent msgContainer = new TextComponent("").withStyle(ChatFormatting.WHITE);
+      MutableComponent playerName = player.getDisplayName().copy();
+      playerName.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(9974168)));
+      return msgContainer.append(playerName).append(" defeated ").append(this.getBossName()).append("!");
    }
 
-   private void dropBossCrate(ServerWorld world, VaultRaid vault, VaultPlayer rewardPlayer, LootContext context) {
+   private void dropBossCrate(ServerLevel world, VaultRaid vault, VaultPlayer rewardPlayer, LootContext context) {
       NonNullList<ItemStack> stacks = this.createLoot(world, vault, context);
       vault.getProperties()
          .getBase(VaultRaid.IS_RAFFLE)
@@ -235,37 +221,29 @@ public class SummonAndKillBossObjective extends VaultObjective {
                         VaultTimer timer = vPlayer.getTimer();
                         PlayerVaultStatsData data = PlayerVaultStatsData.get(world);
                         if (timer.getRunTime() < data.getFastestVaultTime().getTickCount()) {
-                           vPlayer.runIfPresent(world.func_73046_m(), sPlayer -> data.updateFastestVaultTime(sPlayer, timer.getRunTime()));
+                           vPlayer.runIfPresent(world.getServer(), sPlayer -> data.updateFastestVaultTime(sPlayer, timer.getRunTime()));
                         }
                      });
                }
             }
          );
-      BlockPos dropPos = rewardPlayer.getServerPlayer(world.func_73046_m()).<BlockPos>map(Entity::func_233580_cy_).orElse(new BlockPos(this.getBossPos()));
-      ItemStack crate = VaultCrateBlock.getCrateWithLoot(ModBlocks.VAULT_CRATE, stacks);
-      ItemEntity item = new ItemEntity(world, dropPos.func_177958_n(), dropPos.func_177956_o(), dropPos.func_177952_p(), crate);
-      item.func_174869_p();
-      world.func_217376_c(item);
+      BlockPos dropPos = rewardPlayer.getServerPlayer(world.getServer()).<BlockPos>map(Entity::blockPosition).orElse(new BlockPos(this.getBossPos()));
+      ItemStack crate = VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.BOSS, stacks);
+      ItemEntity item = new ItemEntity(world, dropPos.getX(), dropPos.getY(), dropPos.getZ(), crate);
+      item.setDefaultPickUpDelay();
+      world.addFreshEntity(item);
       this.crates.add(new VaultObjective.Crate(stacks));
    }
 
-   @Override
-   protected void addSpecialLoot(ServerWorld world, VaultRaid vault, LootContext context, NonNullList<ItemStack> stacks) {
-      super.addSpecialLoot(world, vault, context, stacks);
-      boolean isCowVault = vault.getProperties().getBaseOrDefault(VaultRaid.COW_VAULT, false);
-      if (isCowVault) {
-         stacks.add(new ItemStack(ModItems.ARMOR_CRATE_HELLCOW));
-      }
-   }
-
-   protected void onBossDeath(LivingDeathEvent event, VaultRaid vault, ServerWorld world, boolean dropCrate) {
+   protected void onBossDeath(LivingDeathEvent event, VaultRaid vault, ServerLevel world, boolean dropCrate) {
+      MinecraftServer srv = world.getServer();
       LivingEntity boss = event.getEntityLiving();
-      if (boss.func_110124_au().equals(this.getBossId())) {
-         this.bossName = boss.func_200201_e();
-         this.bossPos = boss.func_213303_ch();
+      if (boss.getUUID().equals(this.getBossId())) {
+         this.bossName = boss.getCustomName();
+         this.bossPos = boss.position();
          this.isBossDead = true;
          if (dropCrate) {
-            Optional<UUID> source = Optional.ofNullable(event.getSource().func_76346_g()).map(Entity::func_110124_au);
+            Optional<UUID> source = Optional.ofNullable(event.getSource().getEntity()).map(Entity::getUUID);
             Optional<VaultPlayer> killer = source.flatMap(vault::getPlayer);
             Optional<VaultPlayer> host = vault.getProperties().getBase(VaultRaid.HOST).flatMap(vault::getPlayer);
             if (killer.isPresent()) {
@@ -280,31 +258,16 @@ public class SummonAndKillBossObjective extends VaultObjective {
                   .ifPresent(player -> this.spawnBossLoot(vault, player, world));
             }
          }
-      }
-   }
 
-   @SubscribeEvent(
-      priority = EventPriority.HIGH
-   )
-   public static void onBossDeath(LivingDeathEvent event) {
-      if (!event.getEntity().field_70170_p.func_201670_d()) {
-         ServerWorld world = (ServerWorld)event.getEntity().field_70170_p;
-         VaultRaid vault = VaultRaidData.get(world).getAt(world, event.getEntity().func_233580_cy_());
-         if (VaultUtils.inVault(vault, event.getEntity())) {
-            List<SummonAndKillBossObjective> matchingObjectives = vault.getPlayers()
-               .stream()
-               .map(player -> player.getActiveObjective(SummonAndKillBossObjective.class))
-               .filter(Optional::isPresent)
-               .map(Optional::get)
-               .filter(o -> !o.isCompleted())
-               .filter(SummonAndKillBossObjective::allObelisksClicked)
-               .filter(o -> o.getBossId().equals(event.getEntity().func_110124_au()))
-               .collect(Collectors.toList());
-            if (matchingObjectives.isEmpty()) {
-               vault.getActiveObjective(SummonAndKillBossObjective.class).ifPresent(objective -> objective.onBossDeath(event, vault, world, true));
-            } else {
-               matchingObjectives.forEach(objective -> objective.onBossDeath(event, vault, world, false));
-            }
+         boolean isCowVault = vault.getProperties().getBaseOrDefault(VaultRaid.COW_VAULT, false);
+         if (isCowVault) {
+            DiscoveredModelsData discoveredModelsData = DiscoveredModelsData.get(world);
+            vault.getPlayers()
+               .forEach(
+                  vPlayer -> vPlayer.runIfPresent(
+                     srv, serverPlayer -> discoveredModelsData.discoverAllArmorPieceAndBroadcast(serverPlayer, ModDynamicModels.Armor.HELL_COW)
+                  )
+               );
          }
       }
    }
@@ -313,53 +276,52 @@ public class SummonAndKillBossObjective extends VaultObjective {
       List<SummonAndKillBossObjective> matchingObjectives = vault.getPlayers()
          .stream()
          .map(player -> player.getActiveObjective(SummonAndKillBossObjective.class))
-         .filter(Optional::isPresent)
-         .map(Optional::get)
+         .flatMap(Optional::stream)
          .filter(o -> !o.isCompleted())
          .filter(SummonAndKillBossObjective::allObelisksClicked)
-         .filter(o -> o.getBossId().equals(entity.func_110124_au()))
-         .collect(Collectors.toList());
+         .filter(o -> o.getBossId().equals(entity.getUUID()))
+         .toList();
       vault.getActiveObjective(SummonAndKillBossObjective.class).ifPresent(matchingObjectives::add);
-      return matchingObjectives.stream().anyMatch(o -> entity.func_110124_au().equals(o.getBossId()));
+      return matchingObjectives.stream().anyMatch(o -> entity.getUUID().equals(o.getBossId()));
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = super.serializeNBT();
-      nbt.func_74768_a("ProgressCount", this.progressCount);
-      nbt.func_74768_a("TargetCount", this.targetCount);
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = super.serializeNBT();
+      nbt.putInt("ProgressCount", this.progressCount);
+      nbt.putInt("TargetCount", this.targetCount);
       if (this.getBossId() != null) {
-         nbt.func_74778_a("BossId", this.getBossId().toString());
+         nbt.putString("BossId", this.getBossId().toString());
       }
 
       if (this.getBossName() != null) {
-         nbt.func_74778_a("BossName", Serializer.func_150696_a(this.getBossName()));
+         nbt.putString("BossName", Serializer.toJson(this.getBossName()));
       }
 
       if (this.getBossPos() != null) {
-         nbt.func_74780_a("BossPosX", this.getBossPos().func_82615_a());
-         nbt.func_74780_a("BossPosY", this.getBossPos().func_82617_b());
-         nbt.func_74780_a("BossPosZ", this.getBossPos().func_82616_c());
+         nbt.putDouble("BossPosX", this.getBossPos().x());
+         nbt.putDouble("BossPosY", this.getBossPos().y());
+         nbt.putDouble("BossPosZ", this.getBossPos().z());
       }
 
-      nbt.func_74757_a("IsBossDead", this.isBossDead());
+      nbt.putBoolean("IsBossDead", this.isBossDead());
       return nbt;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       super.deserializeNBT(nbt);
-      this.progressCount = nbt.func_74762_e("ProgressCount");
-      this.targetCount = nbt.func_74762_e("TargetCount");
-      if (nbt.func_150297_b("BossId", 8)) {
-         this.bossId = UUID.fromString(nbt.func_74779_i("BossId"));
+      this.progressCount = nbt.getInt("ProgressCount");
+      this.targetCount = nbt.getInt("TargetCount");
+      if (nbt.contains("BossId", 8)) {
+         this.bossId = UUID.fromString(nbt.getString("BossId"));
       }
 
-      if (nbt.func_150297_b("BossName", 8)) {
-         this.bossName = Serializer.func_240643_a_(nbt.func_74779_i("BossName"));
+      if (nbt.contains("BossName", 8)) {
+         this.bossName = Serializer.fromJson(nbt.getString("BossName"));
       }
 
-      this.bossPos = new Vector3d(nbt.func_74769_h("BossPosX"), nbt.func_74769_h("BossPosY"), nbt.func_74769_h("BossPosZ"));
-      this.isBossDead = nbt.func_74767_n("IsBossDead");
+      this.bossPos = new Vec3(nbt.getDouble("BossPosX"), nbt.getDouble("BossPosY"), nbt.getDouble("BossPosZ"));
+      this.isBossDead = nbt.getBoolean("IsBossDead");
    }
 }

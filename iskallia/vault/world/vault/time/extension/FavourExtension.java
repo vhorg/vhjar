@@ -1,10 +1,10 @@
 package iskallia.vault.world.vault.time.extension;
 
-import iskallia.vault.Vault;
-import net.minecraft.util.ResourceLocation;
+import iskallia.vault.VaultMod;
+import net.minecraft.resources.ResourceLocation;
 
 public class FavourExtension extends TimeExtension {
-   public static final ResourceLocation ID = Vault.id("favour");
+   public static final ResourceLocation ID = VaultMod.id("favour");
 
    public FavourExtension() {
    }

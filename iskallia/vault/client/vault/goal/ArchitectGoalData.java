@@ -5,7 +5,7 @@ import iskallia.vault.client.gui.overlay.goal.BossBarOverlay;
 import iskallia.vault.network.message.VaultGoalMessage;
 import iskallia.vault.world.vault.logic.objective.architect.VotingSession;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class ArchitectGoalData extends VaultGoalData {
    private float completedPercent = 0.0F;
@@ -15,12 +15,12 @@ public class ArchitectGoalData extends VaultGoalData {
 
    @Override
    public void receive(VaultGoalMessage pkt) {
-      CompoundNBT tag = pkt.payload;
-      this.completedPercent = tag.func_74760_g("completedPercent");
-      this.ticksUntilNextVote = tag.func_74762_e("ticksUntilNextVote");
-      this.totalTicksUntilNextVote = tag.func_74762_e("totalTicksUntilNextVote");
-      if (tag.func_150297_b("votingSession", 10)) {
-         this.activeSession = VotingSession.deserialize(tag.func_74775_l("votingSession"));
+      CompoundTag tag = pkt.payload;
+      this.completedPercent = tag.getFloat("completedPercent");
+      this.ticksUntilNextVote = tag.getInt("ticksUntilNextVote");
+      this.totalTicksUntilNextVote = tag.getInt("totalTicksUntilNextVote");
+      if (tag.contains("votingSession", 10)) {
+         this.activeSession = VotingSession.deserialize(tag.getCompound("votingSession"));
       }
    }
 

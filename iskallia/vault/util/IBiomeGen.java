@@ -1,9 +1,9 @@
 package iskallia.vault.util;
 
-import net.minecraft.world.biome.provider.BiomeProvider;
+import net.minecraft.world.level.biome.BiomeSource;
 
 public interface IBiomeGen {
-   BiomeProvider getProvider1();
+   BiomeSource getProvider1();
 
-   BiomeProvider getProvider2();
+   BiomeSource getProvider2();
 }

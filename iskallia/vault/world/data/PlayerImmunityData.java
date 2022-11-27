@@ -9,75 +9,76 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
-public class PlayerImmunityData extends WorldSavedData {
+@Deprecated(
+   forRemoval = true
+)
+public class PlayerImmunityData extends SavedData {
    protected static final String DATA_NAME = "the_vault_PlayerImmunity";
    protected Map<UUID, List<String>> effects = new HashMap<>();
 
-   public PlayerImmunityData() {
-      this("the_vault_PlayerImmunity");
+   public void addEffect(Player player, MobEffectInstance effectInstance) {
+      this.addEffect(player.getUUID(), effectInstance);
    }
 
-   public PlayerImmunityData(String name) {
-      super(name);
+   private void addEffect(UUID playerUUID, MobEffectInstance effectInstance) {
+      this.effects.put(playerUUID, Collections.singletonList(effectInstance.getEffect().getRegistryName().toString()));
+      this.setDirty();
    }
 
-   public void addEffect(PlayerEntity player, EffectInstance effectInstance) {
-      this.addEffect(player.func_110124_au(), effectInstance);
+   public void addEffects(Player player, List<MobEffectInstance> effects) {
+      this.addEffects(player.getUUID(), effects);
    }
 
-   private void addEffect(UUID playerUUID, EffectInstance effectInstance) {
-      this.effects.put(playerUUID, Collections.singletonList(effectInstance.func_188419_a().getRegistryName().toString()));
-      this.func_76185_a();
-   }
-
-   public void addEffects(PlayerEntity player, List<EffectInstance> effects) {
-      this.addEffects(player.func_110124_au(), effects);
-   }
-
-   public void addEffects(UUID playerUUID, List<EffectInstance> effects) {
+   public void addEffects(UUID playerUUID, List<MobEffectInstance> effects) {
       this.effects
          .put(
             playerUUID,
             effects.stream()
-               .map(EffectInstance::func_188419_a)
+               .map(MobEffectInstance::getEffect)
                .<ResourceLocation>map(ForgeRegistryEntry::getRegistryName)
                .filter(Objects::nonNull)
                .<String>map(ResourceLocation::toString)
                .collect(Collectors.toList())
          );
-      this.func_76185_a();
+      this.setDirty();
    }
 
-   public List<Effect> getEffects(UUID playerUUID) {
-      return Registry.field_212631_t
-         .func_201756_e()
+   public List<MobEffect> getEffects(UUID playerUUID) {
+      return Registry.MOB_EFFECT
+         .stream()
          .filter(effect -> this.effects.get(playerUUID).contains(effect.getRegistryName().toString()))
          .collect(Collectors.toList());
    }
 
-   public void removeEffects(PlayerEntity player) {
-      this.removeEffects(player.func_110124_au());
+   public void removeEffects(Player player) {
+      this.removeEffects(player.getUUID());
    }
 
    public void removeEffects(UUID playerUUID) {
       this.effects.remove(playerUUID);
-      this.func_76185_a();
+      this.setDirty();
    }
 
-   public void func_76184_a(CompoundNBT nbt) {
+   private static PlayerImmunityData create(CompoundTag tag) {
+      PlayerImmunityData data = new PlayerImmunityData();
+      data.load(tag);
+      return data;
+   }
+
+   public void load(CompoundTag nbt) {
       this.effects.clear();
 
-      for (String key : nbt.func_150296_c()) {
+      for (String key : nbt.getAllKeys()) {
          UUID uuid;
          try {
             uuid = UUID.fromString(key);
@@ -86,23 +87,26 @@ public class PlayerImmunityData extends WorldSavedData {
          }
 
          List<String> effects = new ArrayList<>();
-         CompoundNBT effectTag = nbt.func_74775_l(key);
-         effectTag.func_150296_c().forEach(effectKey -> effects.add(effectTag.func_74779_i(effectKey)));
+         CompoundTag effectTag = nbt.getCompound(key);
+         effectTag.getAllKeys().forEach(effectKey -> effects.add(effectTag.getString(effectKey)));
          this.effects.put(uuid, effects);
       }
    }
 
-   public CompoundNBT func_189551_b(CompoundNBT compound) {
+   public CompoundTag save(CompoundTag compound) {
       this.effects.forEach((uuid, effects) -> {
-         CompoundNBT effectTag = new CompoundNBT();
+         CompoundTag effectTag = new CompoundTag();
          AtomicInteger index = new AtomicInteger();
-         effects.forEach(effectId -> effectTag.func_74778_a("Effect" + index.getAndIncrement(), effectId));
-         compound.func_218657_a(uuid.toString(), effectTag);
+         effects.forEach(effectId -> effectTag.putString("Effect" + index.getAndIncrement(), effectId));
+         compound.put(uuid.toString(), effectTag);
       });
       return compound;
    }
 
-   public static PlayerImmunityData get(ServerWorld world) {
-      return (PlayerImmunityData)world.func_73046_m().func_241755_D_().func_217481_x().func_215752_a(PlayerImmunityData::new, "the_vault_PlayerImmunity");
+   public static PlayerImmunityData get(ServerLevel world) {
+      return (PlayerImmunityData)world.getServer()
+         .overworld()
+         .getDataStorage()
+         .computeIfAbsent(PlayerImmunityData::create, PlayerImmunityData::new, "the_vault_PlayerImmunity");
    }
 }

@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.world.gen.feature.template.Template.BlockInfo;
-import net.minecraft.world.gen.feature.template.Template.Palette;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.Palette;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -17,38 +17,30 @@ import org.spongepowered.asm.mixin.Shadow;
 public class MixinTemplatePalette {
    @Shadow
    @Final
-   private Map<Block, List<BlockInfo>> field_237156_b_;
+   private Map<Block, List<StructureBlockInfo>> cache;
    @Shadow
    @Final
-   private List<BlockInfo> field_237155_a_;
+   private List<StructureBlockInfo> blocks;
 
    @Overwrite
-   public List<BlockInfo> func_237158_a_(Block block) {
-      return this.field_237156_b_
-         .computeIfAbsent(
-            block,
-            filterBlock -> {
-               if (block == Blocks.field_226904_lY_) {
-                  List<BlockInfo> prioritizedJigsawPieces = new ArrayList<>();
-                  List<BlockInfo> jigsawBlocks = this.field_237155_a_
-                     .stream()
-                     .filter(blockInfo -> blockInfo.field_186243_b.func_203425_a(filterBlock))
-                     .filter(blockInfo -> {
-                        String registryKey = blockInfo.field_186244_c.func_74779_i("pool");
-                        if (registryKey.contains("vault") && registryKey.contains("omega")) {
-                           prioritizedJigsawPieces.add(blockInfo);
-                           return false;
-                        } else {
-                           return true;
-                        }
-                     })
-                     .collect(Collectors.toList());
-                  prioritizedJigsawPieces.addAll(jigsawBlocks);
-                  return prioritizedJigsawPieces;
+   public List<StructureBlockInfo> blocks(Block block) {
+      return this.cache.computeIfAbsent(block, filterBlock -> {
+         if (block == Blocks.JIGSAW) {
+            List<StructureBlockInfo> prioritizedJigsawPieces = new ArrayList<>();
+            List<StructureBlockInfo> jigsawBlocks = this.blocks.stream().filter(blockInfo -> blockInfo.state.is(filterBlock)).filter(blockInfo -> {
+               String registryKey = blockInfo.nbt.getString("pool");
+               if (registryKey.contains("vault") && registryKey.contains("omega")) {
+                  prioritizedJigsawPieces.add(blockInfo);
+                  return false;
                } else {
-                  return this.field_237155_a_.stream().filter(blockInfo -> blockInfo.field_186243_b.func_203425_a(filterBlock)).collect(Collectors.toList());
+                  return true;
                }
-            }
-         );
+            }).toList();
+            prioritizedJigsawPieces.addAll(jigsawBlocks);
+            return prioritizedJigsawPieces;
+         } else {
+            return this.blocks.stream().filter(blockInfo -> blockInfo.state.is(filterBlock)).collect(Collectors.toList());
+         }
+      });
    }
 }

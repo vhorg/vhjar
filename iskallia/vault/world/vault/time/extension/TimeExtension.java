@@ -1,15 +1,15 @@
 package iskallia.vault.world.vault.time.extension;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.world.vault.time.VaultTimer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public abstract class TimeExtension implements INBTSerializable<CompoundNBT> {
+public abstract class TimeExtension implements INBTSerializable<CompoundTag> {
    public static final Map<ResourceLocation, Supplier<TimeExtension>> REGISTRY = new HashMap<>();
    protected ResourceLocation id;
    protected long extraTime;
@@ -43,25 +43,25 @@ public abstract class TimeExtension implements INBTSerializable<CompoundNBT> {
       timer.totalTime = (int)(timer.totalTime + this.extraTime);
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Id", this.getId().toString());
-      nbt.func_74772_a("ExtraTime", this.getExtraTime());
-      nbt.func_74772_a("ExecutionTime", this.getExecutionTime());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putString("Id", this.getId().toString());
+      nbt.putLong("ExtraTime", this.getExtraTime());
+      nbt.putLong("ExecutionTime", this.getExecutionTime());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.id = new ResourceLocation(nbt.func_74779_i("Id"));
-      this.extraTime = nbt.func_74763_f("ExtraTime");
-      this.executionTime = nbt.func_74763_f("ExecutionTime");
+   public void deserializeNBT(CompoundTag nbt) {
+      this.id = new ResourceLocation(nbt.getString("Id"));
+      this.extraTime = nbt.getLong("ExtraTime");
+      this.executionTime = nbt.getLong("ExecutionTime");
    }
 
-   public static TimeExtension fromNBT(CompoundNBT nbt) {
-      ResourceLocation id = new ResourceLocation(nbt.func_74779_i("Id"));
+   public static TimeExtension fromNBT(CompoundTag nbt) {
+      ResourceLocation id = new ResourceLocation(nbt.getString("Id"));
       TimeExtension extension = REGISTRY.getOrDefault(id, () -> null).get();
       if (extension == null) {
-         Vault.LOGGER.error("Vault time extension <" + id.toString() + "> is not defined, using fallback.");
+         VaultMod.LOGGER.error("Vault time extension <" + id.toString() + "> is not defined, using fallback.");
          return new FallbackExtension(nbt);
       } else {
          try {
@@ -69,7 +69,7 @@ public abstract class TimeExtension implements INBTSerializable<CompoundNBT> {
             return extension;
          } catch (Exception var4) {
             var4.printStackTrace();
-            Vault.LOGGER.error("Vault time extension <" + id.toString() + "> could not be deserialized, using fallback.");
+            VaultMod.LOGGER.error("Vault time extension <" + id.toString() + "> could not be deserialized, using fallback.");
             return new FallbackExtension(nbt);
          }
       }

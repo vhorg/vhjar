@@ -1,20 +1,21 @@
 package iskallia.vault.attribute;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.MutableBoundingBox;
+import iskallia.vault.util.nbt.NBTHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
-public class BoundingBoxAttribute extends VAttribute.Instance<MutableBoundingBox> {
+public class BoundingBoxAttribute extends VAttribute.Instance<BoundingBox> {
    @Override
-   public void write(CompoundNBT nbt) {
+   public void write(CompoundTag nbt) {
       if (this.getBaseValue() != null) {
-         nbt.func_218657_a("BaseValue", this.getBaseValue().func_151535_h());
+         nbt.put("BaseValue", NBTHelper.serializeBoundingBox(this.getBaseValue()));
       }
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      if (nbt.func_150297_b("BaseValue", 11)) {
-         this.setBaseValue(new MutableBoundingBox(nbt.func_74759_k("BaseValue")));
+   public void read(CompoundTag nbt) {
+      if (nbt.contains("BaseValue", 11)) {
+         this.setBaseValue(NBTHelper.deserializeBoundingBox(nbt.getIntArray("BaseValue")));
       }
    }
 }

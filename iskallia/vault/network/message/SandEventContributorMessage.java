@@ -2,23 +2,23 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientSandEventData;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class SandEventContributorMessage {
-   private final ITextComponent contributor;
+   private final Component contributor;
 
-   public SandEventContributorMessage(ITextComponent contributor) {
+   public SandEventContributorMessage(Component contributor) {
       this.contributor = contributor;
    }
 
-   public static void encode(SandEventContributorMessage message, PacketBuffer buffer) {
-      buffer.func_179256_a(message.contributor);
+   public static void encode(SandEventContributorMessage message, FriendlyByteBuf buffer) {
+      buffer.writeComponent(message.contributor);
    }
 
-   public static SandEventContributorMessage decode(PacketBuffer buffer) {
-      return new SandEventContributorMessage(buffer.func_179258_d());
+   public static SandEventContributorMessage decode(FriendlyByteBuf buffer) {
+      return new SandEventContributorMessage(buffer.readComponent());
    }
 
    public static void handle(SandEventContributorMessage message, Supplier<Context> contextSupplier) {

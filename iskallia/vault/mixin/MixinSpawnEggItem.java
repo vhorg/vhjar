@@ -1,8 +1,8 @@
 package iskallia.vault.mixin;
 
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.util.ActionResultType;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.context.UseOnContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,17 +12,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin({SpawnEggItem.class})
 public class MixinSpawnEggItem {
    @Inject(
-      method = {"onItemUse"},
+      method = {"useOn"},
       at = {@At(
          value = "INVOKE",
-         target = "Lnet/minecraft/world/spawner/AbstractSpawner;setEntityType(Lnet/minecraft/entity/EntityType;)V",
+         target = "Lnet/minecraft/world/level/BaseSpawner;setEntityId(Lnet/minecraft/world/entity/EntityType;)V",
          shift = Shift.BEFORE
       )},
       cancellable = true
    )
-   public void onItemUse(ItemUseContext context, CallbackInfoReturnable<ActionResultType> cir) {
-      if (context.func_195999_j() != null && !context.func_195999_j().func_184812_l_()) {
-         cir.setReturnValue(ActionResultType.PASS);
+   public void onItemUse(UseOnContext context, CallbackInfoReturnable<InteractionResult> cir) {
+      if (context.getPlayer() != null && !context.getPlayer().isCreative()) {
+         cir.setReturnValue(InteractionResult.PASS);
       }
    }
 }

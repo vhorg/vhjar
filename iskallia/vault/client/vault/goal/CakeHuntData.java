@@ -3,7 +3,7 @@ package iskallia.vault.client.vault.goal;
 import iskallia.vault.client.gui.overlay.goal.BossBarOverlay;
 import iskallia.vault.network.message.VaultGoalMessage;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class CakeHuntData extends VaultGoalData {
    private int totalCakes;
@@ -11,9 +11,9 @@ public class CakeHuntData extends VaultGoalData {
 
    @Override
    public void receive(VaultGoalMessage pkt) {
-      CompoundNBT tag = pkt.payload;
-      this.totalCakes = tag.func_74762_e("total");
-      this.foundCakes = tag.func_74762_e("found");
+      CompoundTag tag = pkt.payload;
+      this.totalCakes = tag.getInt("total");
+      this.foundCakes = tag.getInt("found");
    }
 
    @Nullable

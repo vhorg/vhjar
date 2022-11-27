@@ -1,9 +1,9 @@
 package iskallia.vault.entity.ai;
 
 import java.util.Random;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.Level;
 import org.apache.commons.lang3.ObjectUtils;
 
 public abstract class GoalTask<T extends LivingEntity> extends Goal {
@@ -17,11 +17,11 @@ public abstract class GoalTask<T extends LivingEntity> extends Goal {
       return this.entity;
    }
 
-   public World getWorld() {
-      return this.getEntity().field_70170_p;
+   public Level getWorld() {
+      return this.getEntity().level;
    }
 
    public Random getRandom() {
-      return (Random)ObjectUtils.firstNonNull(new Random[]{this.getWorld().func_201674_k(), this.getEntity().func_70681_au()});
+      return (Random)ObjectUtils.firstNonNull(new Random[]{this.getWorld().getRandom(), this.getEntity().getRandom()});
    }
 }

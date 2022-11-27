@@ -1,32 +1,34 @@
 package iskallia.vault.mixin;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModAttributes;
-import iskallia.vault.item.gear.IdolItem;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
+import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.calc.ResistanceHelper;
 import javax.annotation.Nullable;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Pose;
-import net.minecraft.entity.ai.attributes.Attribute;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap.MutableAttribute;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.potion.Effect;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.stats.Stats;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,84 +40,70 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin({LivingEntity.class})
 public abstract class MixinLivingEntity extends Entity {
    private float prevSize = -1.0F;
-   @Shadow
-   @Final
-   protected static EntitySize field_213377_as;
 
-   public MixinLivingEntity(EntityType<?> entityType, World world) {
+   public MixinLivingEntity(EntityType<?> entityType, Level world) {
       super(entityType, world);
    }
 
    @Shadow
-   public abstract EffectInstance func_70660_b(Effect var1);
+   public abstract EntityDimensions getDimensions(Pose var1);
+
+   @Shadow
+   public abstract boolean hasEffect(MobEffect var1);
 
    @Shadow
    @Nullable
-   public abstract ModifiableAttributeInstance func_110148_a(Attribute var1);
+   public abstract MobEffectInstance getEffect(MobEffect var1);
 
    @Shadow
-   public abstract boolean func_70644_a(Effect var1);
+   @Nullable
+   public abstract AttributeInstance getAttribute(Attribute var1);
 
    @Shadow
-   public abstract float func_213355_cm();
-
-   @Shadow
-   public abstract boolean func_225503_b_(float var1, float var2);
-
-   @Shadow
-   public abstract ItemStack func_184586_b(Hand var1);
-
-   @Shadow
-   public abstract EntitySize func_213305_a(Pose var1);
+   public abstract ItemStack getItemInHand(InteractionHand var1);
 
    @Redirect(
-      method = {"registerAttributes"},
+      method = {"createLivingAttributes"},
       at = @At(
          value = "INVOKE",
-         target = "Lnet/minecraft/entity/ai/attributes/AttributeModifierMap;createMutableAttribute()Lnet/minecraft/entity/ai/attributes/AttributeModifierMap$MutableAttribute;"
+         target = "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;builder()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;"
       )
    )
-   private static MutableAttribute registerAttributes() {
-      return AttributeModifierMap.func_233803_a_()
-         .func_233814_a_(Attributes.field_233818_a_)
-         .func_233814_a_(Attributes.field_233820_c_)
-         .func_233814_a_(Attributes.field_233821_d_)
-         .func_233814_a_(Attributes.field_233826_i_)
-         .func_233814_a_(Attributes.field_233827_j_)
-         .func_233814_a_((Attribute)ForgeMod.SWIM_SPEED.get())
-         .func_233814_a_((Attribute)ForgeMod.NAMETAG_DISTANCE.get())
-         .func_233814_a_((Attribute)ForgeMod.ENTITY_GRAVITY.get())
-         .func_233814_a_(ModAttributes.CRIT_CHANCE)
-         .func_233814_a_(ModAttributes.CRIT_MULTIPLIER)
-         .func_233814_a_(ModAttributes.TP_CHANCE)
-         .func_233814_a_(ModAttributes.TP_INDIRECT_CHANCE)
-         .func_233814_a_(ModAttributes.TP_RANGE)
-         .func_233814_a_(ModAttributes.POTION_RESISTANCE)
-         .func_233814_a_(ModAttributes.SIZE_SCALE)
-         .func_233814_a_(ModAttributes.BREAK_ARMOR_CHANCE);
+   private static Builder registerAttributes() {
+      return AttributeSupplier.builder()
+         .add(Attributes.MAX_HEALTH)
+         .add(Attributes.KNOCKBACK_RESISTANCE)
+         .add(Attributes.MOVEMENT_SPEED)
+         .add(Attributes.ARMOR)
+         .add(Attributes.ARMOR_TOUGHNESS)
+         .add((Attribute)ForgeMod.SWIM_SPEED.get())
+         .add((Attribute)ForgeMod.NAMETAG_DISTANCE.get())
+         .add((Attribute)ForgeMod.ENTITY_GRAVITY.get())
+         .add(ModAttributes.CRIT_CHANCE)
+         .add(ModAttributes.CRIT_MULTIPLIER)
+         .add(ModAttributes.TP_CHANCE)
+         .add(ModAttributes.TP_INDIRECT_CHANCE)
+         .add(ModAttributes.TP_RANGE)
+         .add(ModAttributes.POTION_RESISTANCE)
+         .add(ModAttributes.SIZE_SCALE)
+         .add(ModAttributes.BREAK_ARMOR_CHANCE)
+         .add(ModAttributes.MANA_MAX)
+         .add(ModAttributes.MANA_REGEN);
    }
 
-   @Redirect(
-      method = {"applyPotionDamageCalculations"},
-      at = @At(
-         value = "INVOKE",
-         target = "Ljava/lang/Math;max(FF)F"
-      )
+   @Inject(
+      method = {"getDamageAfterMagicAbsorb"},
+      at = {@At("RETURN")},
+      cancellable = true
    )
-   protected float applyPotionDamageCalculations(float a, float b) {
-      if (!this.field_70170_p.field_72995_K) {
-         int resistance = this.func_70644_a(Effects.field_76429_m) ? 0 : this.func_70660_b(Effects.field_76429_m).func_76458_c() + 1;
-         float damageCancel = resistance * 5 / 25.0F;
-         float damage = a * 25.0F / (25 - resistance * 5);
-         if (this instanceof ServerPlayerEntity) {
-            damageCancel += ResistanceHelper.getPlayerResistancePercent((ServerPlayerEntity)this);
-         } else {
-            damageCancel += ResistanceHelper.getResistancePercent((LivingEntity)this);
+   public void applyResistance(DamageSource pSource, float pDamage, CallbackInfoReturnable<Float> cir) {
+      LivingEntity entity = (LivingEntity)this;
+      if (AttributeSnapshotHelper.canHaveSnapshot(entity)) {
+         float resistance = ResistanceHelper.getResistance(entity);
+         if (resistance > 1.0E-4) {
+            float damage = (Float)cir.getReturnValue();
+            cir.setReturnValue(Math.max(damage - damage * resistance, 0.0F));
          }
-
-         return Math.max(damage - damage * damageCancel, 0.0F);
-      } else {
-         return Math.max(a, b);
       }
    }
 
@@ -124,66 +112,46 @@ public abstract class MixinLivingEntity extends Entity {
       at = {@At("RETURN")}
    )
    public void tick(CallbackInfo ci) {
-      ModifiableAttributeInstance scale = this.func_110148_a(ModAttributes.SIZE_SCALE);
+      AttributeInstance scale = this.getAttribute(ModAttributes.SIZE_SCALE);
       if (scale != null) {
-         if (this.prevSize != scale.func_111126_e()) {
-            this.prevSize = (float)scale.func_111126_e();
-            this.field_213325_aI = this.func_213305_a(Pose.STANDING).func_220313_a(this.prevSize);
-            this.func_213323_x_();
+         if (this.prevSize != scale.getValue()) {
+            this.prevSize = (float)scale.getValue();
+            this.dimensions = this.getDimensions(Pose.STANDING).scale(this.prevSize);
+            this.refreshDimensions();
          }
       }
    }
 
    @Inject(
-      method = {"addPotionEffect"},
+      method = {"addEffect(Lnet/minecraft/world/effect/MobEffectInstance;)Z"},
       at = {@At("HEAD")},
       cancellable = true
    )
-   private void addPotionEffect(EffectInstance effect, CallbackInfoReturnable<Boolean> ci) {
-      ModifiableAttributeInstance attribute = this.func_110148_a(ModAttributes.POTION_RESISTANCE);
+   private void addPotionEffect(MobEffectInstance effect, CallbackInfoReturnable<Boolean> ci) {
+      AttributeInstance attribute = this.getAttribute(ModAttributes.POTION_RESISTANCE);
       if (attribute != null) {
-         if (!(this.field_70146_Z.nextDouble() >= attribute.func_111126_e())) {
+         if (!(this.random.nextDouble() >= attribute.getValue())) {
             ci.setReturnValue(false);
          }
       }
    }
 
-   @Inject(
-      method = {"checkTotemDeathProtection"},
-      at = {@At(
-         value = "RETURN",
-         ordinal = 1
-      )},
-      cancellable = true
+   @Redirect(
+      method = {"collectEquipmentChanges"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/item/ItemStack;getAttributeModifiers(Lnet/minecraft/world/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;"
+      )
    )
-   private void checkTotemDeathProtection(DamageSource damageSourceIn, CallbackInfoReturnable<Boolean> cir) {
-      if (!(Boolean)cir.getReturnValue() && !damageSourceIn.func_76357_e()) {
-         ItemStack idol = ItemStack.field_190927_a;
-
-         for (Hand hand : Hand.values()) {
-            ItemStack it = this.func_184586_b(hand);
-            if (it.func_77973_b() instanceof IdolItem) {
-               idol = it.func_77946_l();
-               it.func_190918_g(1);
-               break;
-            }
-         }
-
-         if (!idol.func_190926_b()) {
-            if (this instanceof ServerPlayerEntity) {
-               ServerPlayerEntity serverplayerentity = (ServerPlayerEntity)this;
-               serverplayerentity.func_71029_a(Stats.field_75929_E.func_199076_b(Items.field_190929_cY));
-               CriteriaTriggers.field_193130_A.func_193187_a(serverplayerentity, idol);
-            }
-
-            ((LivingEntity)this).func_70606_j(1.0F);
-            ((LivingEntity)this).func_195061_cb();
-            ((LivingEntity)this).func_195064_c(new EffectInstance(Effects.field_76428_l, 900, 1));
-            ((LivingEntity)this).func_195064_c(new EffectInstance(Effects.field_76444_x, 100, 1));
-            ((LivingEntity)this).func_195064_c(new EffectInstance(Effects.field_76426_n, 800, 0));
-            this.field_70170_p.func_72960_a(this, (byte)35);
-            cir.setReturnValue(true);
+   private Multimap<Attribute, AttributeModifier> preventVanillaAttributes(ItemStack stack, EquipmentSlot slot) {
+      LivingEntity entity = (LivingEntity)this;
+      if (stack.getItem() instanceof VaultGearItem && entity instanceof Player player) {
+         int playerLevel = SidedHelper.getVaultLevel(player);
+         if (VaultGearData.read(stack).getItemLevel() > playerLevel) {
+            return HashMultimap.create();
          }
       }
+
+      return stack.getAttributeModifiers(slot);
    }
 }

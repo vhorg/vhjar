@@ -2,9 +2,9 @@ package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.init.ModBlocks;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class VaultPortalConfig extends Config {
@@ -19,10 +19,10 @@ public class VaultPortalConfig extends Config {
    @Override
    protected void reset() {
       this.VALID_BLOCKS = new String[]{
-         Blocks.field_235406_np_.getRegistryName().toString(),
-         Blocks.field_235410_nt_.getRegistryName().toString(),
-         Blocks.field_235411_nu_.getRegistryName().toString(),
-         Blocks.field_235412_nv_.getRegistryName().toString(),
+         Blocks.BLACKSTONE.getRegistryName().toString(),
+         Blocks.POLISHED_BLACKSTONE.getRegistryName().toString(),
+         Blocks.POLISHED_BLACKSTONE_BRICKS.getRegistryName().toString(),
+         Blocks.CRACKED_POLISHED_BLACKSTONE_BRICKS.getRegistryName().toString(),
          ModBlocks.FINAL_VAULT_FRAME.getRegistryName().toString()
       };
    }

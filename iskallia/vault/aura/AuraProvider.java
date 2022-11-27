@@ -3,20 +3,20 @@ package iskallia.vault.aura;
 import iskallia.vault.config.EternalAuraConfig;
 import java.util.Objects;
 import java.util.UUID;
-import net.minecraft.util.RegistryKey;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class AuraProvider {
    private final UUID id;
-   private final RegistryKey<World> world;
+   private final ResourceKey<Level> world;
 
-   protected AuraProvider(UUID id, RegistryKey<World> world) {
+   protected AuraProvider(UUID id, ResourceKey<Level> world) {
       this.id = id;
       this.world = world;
    }
 
-   public final RegistryKey<World> getWorld() {
+   public final ResourceKey<Level> getWorld() {
       return this.world;
    }
 
@@ -26,7 +26,7 @@ public abstract class AuraProvider {
 
    public abstract boolean isValid();
 
-   public abstract Vector3d getLocation();
+   public abstract Vec3 getLocation();
 
    public abstract EternalAuraConfig.AuraConfig getAura();
 

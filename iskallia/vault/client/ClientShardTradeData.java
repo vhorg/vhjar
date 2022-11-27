@@ -8,8 +8,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.item.ItemStack;
 
 public class ClientShardTradeData {
    private static int randomTradeCost;

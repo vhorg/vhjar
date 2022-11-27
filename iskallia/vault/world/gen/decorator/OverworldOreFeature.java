@@ -1,42 +1,49 @@
 package iskallia.vault.world.gen.decorator;
 
 import com.mojang.serialization.Codec;
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import java.util.Random;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.OreFeature;
-import net.minecraft.world.gen.feature.OreFeatureConfig;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
+import net.minecraft.world.level.levelgen.feature.OreFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration.TargetBlockState;
 import net.minecraftforge.event.RegistryEvent.Register;
 
 public class OverworldOreFeature extends OreFeature {
-   public static Feature<OreFeatureConfig> INSTANCE;
+   public static Feature<OreConfiguration> INSTANCE;
 
-   public OverworldOreFeature(Codec<OreFeatureConfig> codec) {
+   public OverworldOreFeature(Codec<OreConfiguration> codec) {
       super(codec);
    }
 
-   public boolean func_241855_a(ISeedReader world, ChunkGenerator gen, Random random, BlockPos pos, OreFeatureConfig config) {
-      if (world.func_201672_e().func_234923_W_() != World.field_234918_g_) {
+   public boolean place(FeaturePlaceContext<OreConfiguration> context) {
+      WorldGenLevel world = context.level();
+      OreConfiguration config = (OreConfiguration)context.config();
+      BlockPos pos = context.origin();
+      Random random = context.random();
+      if (world.getLevel().dimension() != Level.OVERWORLD) {
          return false;
-      } else if (config.field_202443_c == 1) {
-         if (config.field_202442_b.func_215181_a(world.func_180495_p(pos), random)) {
-            world.func_180501_a(pos, config.field_202444_d, 2);
-            return true;
-         } else {
-            return false;
+      } else if (config.size == 1) {
+         for (TargetBlockState targetState : config.targetStates) {
+            if (targetState.target.test(world.getBlockState(pos), random)) {
+               world.setBlock(pos, targetState.state, 2);
+               return true;
+            }
          }
+
+         return false;
       } else {
-         return super.func_241855_a(world, gen, random, pos, config);
+         return super.place(context);
       }
    }
 
    public static void register(Register<Feature<?>> event) {
-      INSTANCE = new OverworldOreFeature(OreFeatureConfig.field_236566_a_);
-      INSTANCE.setRegistryName(Vault.id("overworld_ore"));
+      INSTANCE = new OverworldOreFeature(OreConfiguration.CODEC);
+      INSTANCE.setRegistryName(VaultMod.id("overworld_ore"));
       event.getRegistry().register(INSTANCE);
    }
 }

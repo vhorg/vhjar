@@ -1,0 +1,104 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "the_vault:item/gear/sword/alliumblade"
+	},
+	"elements": [
+		{
+			"from": [7, 0, 7],
+			"to": [9, 12, 9],
+			"faces": {
+				"north": {"uv": [9, 9, 10, 15], "texture": "#0"},
+				"east": {"uv": [0, 10, 1, 16], "texture": "#0"},
+				"south": {"uv": [1, 10, 2, 16], "texture": "#0"},
+				"west": {"uv": [2, 10, 3, 16], "texture": "#0"},
+				"up": {"uv": [9, 7, 8, 6], "texture": "#0"},
+				"down": {"uv": [12, 4, 11, 5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [6, 12, 6],
+			"to": [10, 14, 10],
+			"faces": {
+				"north": {"uv": [11, 0, 13, 1], "texture": "#0"},
+				"east": {"uv": [11, 1, 13, 2], "texture": "#0"},
+				"south": {"uv": [11, 2, 13, 3], "texture": "#0"},
+				"west": {"uv": [11, 3, 13, 4], "texture": "#0"},
+				"up": {"uv": [9, 12, 7, 10], "texture": "#0"},
+				"down": {"uv": [12, 9, 10, 11], "texture": "#0"}
+			}
+		},
+		{
+			"from": [4, 0, 5.75],
+			"to": [12, 14, 5.76],
+			"faces": {
+				"north": {"uv": [0, 0, 4, 7], "texture": "#0"},
+				"east": {"uv": [0, 0, 0, 7], "texture": "#0"},
+				"south": {"uv": [4, 0, 8, 7], "texture": "#0"},
+				"west": {"uv": [0, 0, 0, 7], "texture": "#0"},
+				"up": {"uv": [4, 0, 0, 0], "texture": "#0"},
+				"down": {"uv": [4, 0, 0, 0], "texture": "#0"}
+			}
+		},
+		{
+			"from": [7, 14, 7],
+			"to": [9, 26, 9],
+			"faces": {
+				"north": {"uv": [3, 10, 4, 16], "texture": "#0"},
+				"east": {"uv": [4, 10, 5, 16], "texture": "#0"},
+				"south": {"uv": [5, 10, 6, 16], "texture": "#0"},
+				"west": {"uv": [6, 10, 7, 16], "texture": "#0"},
+				"up": {"uv": [12, 6, 11, 5], "texture": "#0"},
+				"down": {"uv": [11, 11, 10, 12], "texture": "#0"}
+			}
+		},
+		{
+			"from": [5, 24, 5],
+			"to": [11, 30, 11],
+			"faces": {
+				"north": {"uv": [0, 7, 3, 10], "texture": "#0"},
+				"east": {"uv": [3, 7, 6, 10], "texture": "#0"},
+				"south": {"uv": [6, 7, 9, 10], "texture": "#0"},
+				"west": {"uv": [8, 0, 11, 3], "texture": "#0"},
+				"up": {"uv": [11, 6, 8, 3], "texture": "#0"},
+				"down": {"uv": [12, 6, 9, 9], "texture": "#0"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, -3.25, 1.75]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, -3.25, 1.75]
+		},
+		"firstperson_righthand": {
+			"rotation": [16, 90, 0],
+			"translation": [0, 1.25, 0],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"firstperson_lefthand": {
+			"rotation": [16, 90, 0],
+			"translation": [0, 1.25, 0],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"ground": {
+			"rotation": [0, 0, 45],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [179.52, 0.56, -137.75],
+			"translation": [-3, -3.75, 0],
+			"scale": [0.63, 0.63, 0.63]
+		},
+		"head": {
+			"translation": [0, -4.25, 0]
+		},
+		"fixed": {
+			"rotation": [0, 0, 45],
+			"translation": [3.75, -3.75, 0],
+			"scale": [0.7, 0.7, 0.7]
+		}
+	}
+}

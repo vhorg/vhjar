@@ -1,15 +1,15 @@
 package iskallia.vault.aura;
 
 import iskallia.vault.config.EternalAuraConfig;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 
 public class EntityAuraProvider extends AuraProvider {
    private final EternalAuraConfig.AuraConfig aura;
    private final LivingEntity entity;
 
    protected EntityAuraProvider(LivingEntity entity, EternalAuraConfig.AuraConfig aura) {
-      super(entity.func_110124_au(), entity.func_130014_f_().func_234923_W_());
+      super(entity.getUUID(), entity.getCommandSenderWorld().dimension());
       this.aura = aura;
       this.entity = entity;
    }
@@ -24,12 +24,12 @@ public class EntityAuraProvider extends AuraProvider {
 
    @Override
    public boolean isValid() {
-      return this.entity.func_70089_S();
+      return this.entity.isAlive();
    }
 
    @Override
-   public Vector3d getLocation() {
-      return new Vector3d(this.entity.func_226277_ct_(), this.entity.func_226278_cu_(), this.entity.func_226281_cx_());
+   public Vec3 getLocation() {
+      return new Vec3(this.entity.getX(), this.entity.getY(), this.entity.getZ());
    }
 
    @Override

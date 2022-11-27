@@ -3,9 +3,8 @@ package iskallia.vault.skill.talent;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.KnownTalentsMessage;
-import iskallia.vault.skill.talent.type.PlayerTalent;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.NetcodeUtils;
-import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,20 +12,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
-import net.minecraftforge.fml.common.thread.SidedThreadGroups;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.network.NetworkDirection;
 
-public class TalentTree {
-   public static final int CURRENT_VERSION = 2;
+public class TalentTree implements INBTSerializable<CompoundTag> {
    private final UUID uuid;
    private final List<TalentNode<?>> nodes = new ArrayList<>();
-   private int version;
 
    public TalentTree(UUID uuid) {
       this.uuid = uuid;
@@ -41,7 +35,7 @@ public class TalentTree {
       return this.getNodes().stream().filter(TalentNode::isLearned).collect(Collectors.toList());
    }
 
-   public <T extends PlayerTalent> List<TalentNode<T>> getLearnedNodes(Class<T> talentGroupType) {
+   public <T extends Talent> List<TalentNode<T>> getLearnedNodes(Class<T> talentGroupType) {
       return this.getNodes()
          .stream()
          .filter(TalentNode::isLearned)
@@ -54,23 +48,23 @@ public class TalentTree {
       return this.getLearnedNodes().stream().anyMatch(node -> node.getGroup().getParentName().equals(talentGroup.getParentName()));
    }
 
-   public <T extends PlayerTalent> Collection<T> getTalents(Class<T> talentType) {
+   public <T extends Talent> Collection<T> getTalents(Class<T> talentType) {
       return this.getNodes()
          .stream()
          .filter(TalentNode::isLearned)
          .map(TalentNode::getTalent)
          .filter(talent -> talentType.isAssignableFrom(talent.getClass()))
-         .map(talent -> (PlayerTalent)talent)
+         .map(talent -> (Talent)talent)
          .collect(Collectors.toList());
    }
 
    @Nonnull
-   public <T extends PlayerTalent> TalentNode<T> getNodeOf(TalentGroup<T> talentGroup) {
+   public <T extends Talent> TalentNode<T> getNodeOf(TalentGroup<T> talentGroup) {
       return this.getNodeByName(talentGroup.getParentName());
    }
 
    @Nonnull
-   public <T extends PlayerTalent> TalentNode<T> getNodeByName(String name) {
+   public <T extends Talent> TalentNode<T> getNodeByName(String name) {
       Optional<TalentNode<T>> talentWrapped = this.nodes
          .stream()
          .filter(node -> node.getGroup().getParentName().equals(name))
@@ -106,6 +100,8 @@ public class TalentTree {
             if (node.isLearned()) {
                node.getTalent().onAdded(player);
             }
+
+            AttributeSnapshotHelper.getInstance().refreshSnapshotDelayed(player);
          });
          this.nodes.add(node);
       }
@@ -124,6 +120,8 @@ public class TalentTree {
             if (node.isLearned()) {
                node.getTalent().onRemoved(player);
             }
+
+            AttributeSnapshotHelper.getInstance().refreshSnapshotDelayed(player);
          });
          this.nodes.remove(node);
       }
@@ -137,79 +135,27 @@ public class TalentTree {
 
    public void syncTree(MinecraftServer server) {
       NetcodeUtils.runIfPresent(
-         server,
-         this.uuid,
-         player -> ModNetwork.CHANNEL.sendTo(new KnownTalentsMessage(this), player.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT)
+         server, this.uuid, player -> ModNetwork.CHANNEL.sendTo(new KnownTalentsMessage(this), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT)
       );
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74768_a("version", this.version);
-      ListNBT list = new ListNBT();
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      ListTag list = new ListTag();
       this.nodes.stream().map(TalentNode::serializeNBT).forEach(list::add);
-      nbt.func_218657_a("Nodes", list);
+      nbt.put("Nodes", list);
       return nbt;
    }
 
-   public void deserialize(CompoundNBT nbt, boolean migrateData) {
-      int currentVersion = nbt.func_150297_b("version", 3) ? nbt.func_74762_e("version") : 0;
-      ListNBT list = nbt.func_150295_c("Nodes", 10);
+   public void deserializeNBT(CompoundTag nbt) {
+      ListTag list = nbt.getList("Nodes", 10);
       this.nodes.clear();
 
       for (int i = 0; i < list.size(); i++) {
-         TalentNode<?> talent = TalentNode.fromNBT(this.uuid, list.func_150305_b(i), migrateData ? currentVersion : 2);
+         TalentNode<?> talent = new TalentNode(list.getCompound(i));
          if (talent != null) {
             this.add(null, talent);
          }
       }
-
-      this.version = 2;
-   }
-
-   @Nullable
-   static TalentNode<?> migrate(@Nullable UUID playerId, String talentName, int talentLevel, int vFrom) {
-      TalentGroup<?> group = ModConfigs.TALENTS.getTalent(talentName).orElse(null);
-      if (vFrom >= 2) {
-         return group == null ? null : new TalentNode<>(group, talentLevel);
-      } else {
-         int refundedCost = 0;
-         MinecraftServer srv = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-         if (vFrom <= 0
-            && (
-               talentName.equalsIgnoreCase("Commander")
-                  || talentName.equalsIgnoreCase("Ward")
-                  || talentName.equalsIgnoreCase("Barbaric")
-                  || talentName.equalsIgnoreCase("Frenzy")
-                  || talentName.equalsIgnoreCase("Glass Cannon")
-            )) {
-            refundedCost += getRefundAmount(talentLevel, new int[]{3, 5, 6, 7, 9});
-            talentLevel = 0;
-         }
-
-         if (vFrom <= 1 && talentName.equalsIgnoreCase("Soul Hunter")) {
-            refundedCost += getRefundAmount(talentLevel, new int[]{1, 2, 3, 5});
-            talentLevel = 0;
-         }
-
-         if (vFrom <= 2) {
-         }
-
-         if (playerId != null && srv != null && Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
-            PlayerVaultStatsData.get(srv).addSkillPointNoSync(playerId, refundedCost);
-         }
-
-         return group == null ? null : new TalentNode<>(group, talentLevel);
-      }
-   }
-
-   private static int getRefundAmount(int currentLevel, int[] levelCost) {
-      int totalRefund = 0;
-
-      for (int i = 0; i < Math.min(currentLevel, levelCost.length); i++) {
-         totalRefund += levelCost[i];
-      }
-
-      return totalRefund;
    }
 }

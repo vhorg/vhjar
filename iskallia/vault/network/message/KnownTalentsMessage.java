@@ -6,10 +6,10 @@ import iskallia.vault.skill.talent.TalentTree;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class KnownTalentsMessage {
    private final List<TalentNode<?>> learnedTalents;
@@ -26,21 +26,21 @@ public class KnownTalentsMessage {
       return this.learnedTalents;
    }
 
-   public static void encode(KnownTalentsMessage message, PacketBuffer buffer) {
-      CompoundNBT nbt = new CompoundNBT();
-      ListNBT talents = new ListNBT();
+   public static void encode(KnownTalentsMessage message, FriendlyByteBuf buffer) {
+      CompoundTag nbt = new CompoundTag();
+      ListTag talents = new ListTag();
       message.learnedTalents.stream().map(TalentNode::serializeNBT).forEach(talents::add);
-      nbt.func_218657_a("LearnedTalents", talents);
-      buffer.func_150786_a(nbt);
+      nbt.put("LearnedTalents", talents);
+      buffer.writeNbt(nbt);
    }
 
-   public static KnownTalentsMessage decode(PacketBuffer buffer) {
+   public static KnownTalentsMessage decode(FriendlyByteBuf buffer) {
       List<TalentNode<?>> abilities = new ArrayList<>();
-      CompoundNBT nbt = buffer.func_150793_b();
-      ListNBT learnedTalents = nbt.func_150295_c("LearnedTalents", 10);
+      CompoundTag nbt = buffer.readNbt();
+      ListTag learnedTalents = nbt.getList("LearnedTalents", 10);
 
       for (int i = 0; i < learnedTalents.size(); i++) {
-         abilities.add(TalentNode.fromNBT(null, learnedTalents.func_150305_b(i), 2));
+         abilities.add(new TalentNode(learnedTalents.getCompound(i)));
       }
 
       return new KnownTalentsMessage(abilities);

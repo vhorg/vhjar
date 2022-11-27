@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "did",
+    "ici",
+    "did"
+  ],
+  "key": {
+    "d": {
+      "item": "the_vault:vault_diamond"
+    },
+    "i": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "c": {
+      "item": "minecraft:compass"
+    }
+  },
+  "result": {
+    "item": "the_vault:vault_compass",
+    "count": 1
+  }
+}

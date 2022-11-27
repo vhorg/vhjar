@@ -1,7 +1,7 @@
 package iskallia.vault.client.gui.helper;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 public interface Renderable {
-   void render(MatrixStack var1, int var2, int var3, float var4);
+   void render(PoseStack var1, int var2, int var3, float var4);
 }

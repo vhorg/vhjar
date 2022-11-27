@@ -9,15 +9,15 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.architect.ArchitectObjective;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
 
 public class PieceSelectionModifier extends VoteModifier {
    @Expose
    private final float filterChance;
    @Expose
    private final List<String> selectedRoomPrefixes;
-   private WeightedList<JigsawPiece> filteredPieces = null;
+   private WeightedList<StructurePoolElement> filteredPieces = null;
 
    public PieceSelectionModifier(String name, String description, int voteLockDurationChangeSeconds, float filterChance, List<String> selectedRoomPrefixes) {
       super(name, description, voteLockDurationChangeSeconds);
@@ -27,7 +27,7 @@ public class PieceSelectionModifier extends VoteModifier {
 
    @Nullable
    @Override
-   public JigsawPiece getSpecialRoom(ArchitectObjective objective, VaultRaid vault) {
+   public StructurePoolElement getSpecialRoom(ArchitectObjective objective, VaultRaid vault) {
       if (rand.nextFloat() >= this.filterChance) {
          return super.getSpecialRoom(objective, vault);
       } else if (this.filteredPieces != null) {
@@ -39,11 +39,11 @@ public class PieceSelectionModifier extends VoteModifier {
       }
    }
 
-   private boolean isApplicable(JigsawPiece piece) {
+   private boolean isApplicable(StructurePoolElement piece) {
       if (piece instanceof PalettedListPoolElement) {
-         List<JigsawPiece> elements = ((PalettedListPoolElement)piece).getElements();
+         List<StructurePoolElement> elements = ((PalettedListPoolElement)piece).getElements();
 
-         for (JigsawPiece elementPiece : elements) {
+         for (StructurePoolElement elementPiece : elements) {
             if (!this.isApplicable(elementPiece)) {
                return false;
             }

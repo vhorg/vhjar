@@ -1,19 +1,25 @@
 package iskallia.vault.skill.ability;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.config.AbilityConfig;
-import iskallia.vault.skill.ability.effect.AbilityEffect;
+import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
+import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
+import iskallia.vault.skill.ability.effect.spi.core.AbilityTickResult;
+import iskallia.vault.skill.ability.effect.spi.core.AbstractAbility;
+import iskallia.vault.skill.ability.group.AbilityGroup;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class AbilityNode<T extends AbilityConfig, E extends AbilityEffect<T>> implements INBTSerializable<CompoundNBT> {
+public class AbilityNode<T extends AbstractAbilityConfig, E extends AbstractAbility<T>> implements INBTSerializable<CompoundTag> {
    private String groupName;
    private int level = 0;
    private String specialization = null;
+   private static final String TAG_NAME = "Name";
+   public static final String TAG_LEVEL = "Level";
+   public static final String TAG_SPECIALIZATION = "Specialization";
 
    public AbilityNode(String groupName, int level, @Nullable String specialization) {
       this.groupName = groupName;
@@ -21,7 +27,7 @@ public class AbilityNode<T extends AbilityConfig, E extends AbilityEffect<T>> im
       this.specialization = specialization;
    }
 
-   private AbilityNode(CompoundNBT nbt) {
+   private AbilityNode(CompoundTag nbt) {
       this.deserializeNBT(nbt);
    }
 
@@ -65,62 +71,65 @@ public class AbilityNode<T extends AbilityConfig, E extends AbilityEffect<T>> im
       return this.getGroup().getAbility(this.getSpecialization());
    }
 
-   public void onAdded(PlayerEntity player) {
+   public KeyBehavior getKeyBehavior() {
+      return this.getAbility().getKeyBehavior();
+   }
+
+   public void onAdded(Player player) {
       if (this.isLearned() && this.getAbility() != null) {
          this.getAbility().onAdded(this.getAbilityConfig(), player);
       }
    }
 
-   public void onRemoved(PlayerEntity player) {
+   public void onRemoved(Player player) {
       if (this.isLearned() && this.getAbility() != null) {
          this.getAbility().onRemoved(this.getAbilityConfig(), player);
       }
    }
 
-   public void onFocus(PlayerEntity player) {
+   public void onFocus(Player player) {
       if (this.isLearned() && this.getAbility() != null) {
          this.getAbility().onFocus(this.getAbilityConfig(), player);
       }
    }
 
-   public void onBlur(PlayerEntity player) {
+   public void onBlur(Player player) {
       if (this.isLearned() && this.getAbility() != null) {
          this.getAbility().onBlur(this.getAbilityConfig(), player);
       }
    }
 
-   public void onTick(PlayerEntity player, boolean active) {
-      if (this.isLearned() && this.getAbility() != null) {
-         this.getAbility().onTick(this.getAbilityConfig(), player, active);
-      }
+   public AbilityTickResult onTick(ServerPlayer player, boolean active) {
+      return this.isLearned() && this.getAbility() != null ? this.getAbility().onTick(this.getAbilityConfig(), player, active) : AbilityTickResult.PASS;
    }
 
-   public boolean onAction(ServerPlayerEntity player, boolean active) {
-      return this.isLearned() && this.getAbility() != null ? this.getAbility().onAction(this.getAbilityConfig(), player, active) : false;
+   public AbilityActionResult onAction(ServerPlayer player, boolean active) {
+      return this.isLearned() && this.getAbility() != null ? this.getAbility().onAction(this.getAbilityConfig(), player, active) : AbilityActionResult.FAIL;
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Name", this.getGroup().getParentName());
-      nbt.func_74768_a("Level", this.getLevel());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putString("Name", this.getGroup().getParentName());
+      nbt.putInt("Level", this.getLevel());
       if (this.getSpecialization() != null) {
-         nbt.func_74778_a("Specialization", this.getSpecialization());
+         nbt.putString("Specialization", this.getSpecialization());
       }
 
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.groupName = nbt.func_74779_i("Name");
-      this.level = nbt.func_74762_e("Level");
-      if (nbt.func_150297_b("Specialization", 8)) {
-         this.specialization = nbt.func_74779_i("Specialization");
-         if (this.specialization.equals("Rampage_Nocrit") || this.specialization.equals("Ghost Walk_Duration")) {
-            this.specialization = null;
-         }
+   public void deserializeNBT(CompoundTag nbt) {
+      this.groupName = nbt.getString("Name");
+      this.level = nbt.getInt("Level");
+      if (nbt.contains("Specialization", 8)) {
+         this.specialization = nbt.getString("Specialization");
       } else {
          this.specialization = null;
       }
+   }
+
+   public static <T extends AbstractAbilityConfig, E extends AbstractAbility<T>> AbilityNode<T, E> fromNBT(CompoundTag nbt) {
+      return new AbilityNode<>(nbt);
    }
 
    @Override
@@ -138,9 +147,5 @@ public class AbilityNode<T extends AbilityConfig, E extends AbilityEffect<T>> im
    @Override
    public int hashCode() {
       return Objects.hash(this.getGroup(), this.level);
-   }
-
-   public static <T extends AbilityConfig, E extends AbilityEffect<T>> AbilityNode<T, E> fromNBT(CompoundNBT nbt) {
-      return new AbilityNode<>(nbt);
    }
 }

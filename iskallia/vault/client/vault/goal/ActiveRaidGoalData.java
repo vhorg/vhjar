@@ -3,13 +3,14 @@ package iskallia.vault.client.vault.goal;
 import iskallia.vault.client.gui.overlay.goal.ActiveRaidOverlay;
 import iskallia.vault.client.gui.overlay.goal.BossBarOverlay;
 import iskallia.vault.network.message.VaultGoalMessage;
+import iskallia.vault.world.vault.logic.objective.VaultModifierVotingSession;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.ITextComponent.Serializer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Component.Serializer;
 
 public class ActiveRaidGoalData extends VaultGoalData {
    private int wave;
@@ -19,8 +20,9 @@ public class ActiveRaidGoalData extends VaultGoalData {
    private int tickWaveDelay;
    private int raidsCompleted;
    private int targetRaids;
-   private List<ITextComponent> positives = new ArrayList<>();
-   private List<ITextComponent> negatives = new ArrayList<>();
+   private List<Component> positives = new ArrayList<>();
+   private List<Component> negatives = new ArrayList<>();
+   private VaultModifierVotingSession session;
 
    @Nullable
    @Override
@@ -56,36 +58,45 @@ public class ActiveRaidGoalData extends VaultGoalData {
       return this.targetRaids;
    }
 
-   public List<ITextComponent> getPositives() {
+   public List<Component> getPositives() {
       return this.positives;
    }
 
-   public List<ITextComponent> getNegatives() {
+   public List<Component> getNegatives() {
       return this.negatives;
+   }
+
+   @Nullable
+   public VaultModifierVotingSession getVotingSession() {
+      return this.session;
    }
 
    @Override
    public void receive(VaultGoalMessage pkt) {
-      CompoundNBT tag = pkt.payload;
-      this.wave = tag.func_74762_e("wave");
-      this.totalWaves = tag.func_74762_e("totalWaves");
-      this.aliveMobs = tag.func_74762_e("aliveMobs");
-      this.totalMobs = tag.func_74762_e("totalMobs");
-      this.tickWaveDelay = tag.func_74762_e("tickWaveDelay");
-      this.raidsCompleted = tag.func_74762_e("completedRaids");
-      this.targetRaids = tag.func_74762_e("targetRaids");
-      ListNBT positives = tag.func_150295_c("positives", 8);
+      CompoundTag tag = pkt.payload;
+      this.wave = tag.getInt("wave");
+      this.totalWaves = tag.getInt("totalWaves");
+      this.aliveMobs = tag.getInt("aliveMobs");
+      this.totalMobs = tag.getInt("totalMobs");
+      this.tickWaveDelay = tag.getInt("tickWaveDelay");
+      this.raidsCompleted = tag.getInt("completedRaids");
+      this.targetRaids = tag.getInt("targetRaids");
+      ListTag positives = tag.getList("positives", 8);
       this.positives = new ArrayList<>();
 
       for (int i = 0; i < positives.size(); i++) {
-         this.positives.add(Serializer.func_240643_a_(positives.func_150307_f(i)));
+         this.positives.add(Serializer.fromJson(positives.getString(i)));
       }
 
-      ListNBT negatives = tag.func_150295_c("negatives", 8);
+      ListTag negatives = tag.getList("negatives", 8);
       this.negatives = new ArrayList<>();
 
       for (int i = 0; i < negatives.size(); i++) {
-         this.negatives.add(Serializer.func_240643_a_(negatives.func_150307_f(i)));
+         this.negatives.add(Serializer.fromJson(negatives.getString(i)));
+      }
+
+      if (tag.contains("votingSession", 10)) {
+         this.session = VaultModifierVotingSession.deserialize(tag.getCompound("votingSession"));
       }
    }
 }

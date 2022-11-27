@@ -1,84 +1,123 @@
 package iskallia.vault.init;
 
-import iskallia.vault.Vault;
-import iskallia.vault.world.gen.decorator.ArchitectEventFeature;
+import iskallia.vault.VaultMod;
+import iskallia.vault.core.SkyVaultsChunkGenerator;
+import iskallia.vault.core.world.generator.DummyChunkGenerator;
 import iskallia.vault.world.gen.decorator.BreadcrumbFeature;
-import iskallia.vault.world.gen.decorator.FinalVaultBossFeature;
-import iskallia.vault.world.gen.decorator.FinalVaultLobbyFeature;
 import iskallia.vault.world.gen.decorator.OverworldOreFeature;
-import iskallia.vault.world.gen.decorator.RaidChallengeFeature;
-import iskallia.vault.world.gen.decorator.VaultFeature;
-import iskallia.vault.world.gen.decorator.VaultTroveFeature;
 import iskallia.vault.world.gen.structure.ArchitectEventStructure;
-import iskallia.vault.world.gen.structure.FinalVaultBossStructure;
+import iskallia.vault.world.gen.structure.ArenaStructure;
 import iskallia.vault.world.gen.structure.FinalVaultLobbyStructure;
+import iskallia.vault.world.gen.structure.IRegistryIdentifiable;
 import iskallia.vault.world.gen.structure.RaidChallengeStructure;
 import iskallia.vault.world.gen.structure.VaultStructure;
 import iskallia.vault.world.gen.structure.VaultTroveStructure;
-import net.minecraft.util.registry.WorldGenRegistries;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.Feature;
-import net.minecraft.world.gen.feature.IFeatureConfig;
-import net.minecraft.world.gen.feature.NoFeatureConfig;
-import net.minecraft.world.gen.feature.OreFeatureConfig;
-import net.minecraft.world.gen.feature.StructureFeature;
-import net.minecraft.world.gen.feature.OreFeatureConfig.FillerBlockType;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.gen.placement.Placement;
-import net.minecraft.world.gen.placement.TopSolidRangeConfig;
+import java.util.Arrays;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.worldgen.features.OreFeatures;
+import net.minecraft.world.level.levelgen.VerticalAnchor;
+import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
+import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
+import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import net.minecraft.world.level.levelgen.placement.PlacementModifier;
+import net.minecraft.world.level.levelgen.placement.RarityFilter;
 import net.minecraftforge.event.RegistryEvent.Register;
 
 public class ModFeatures {
-   public static VaultFeature VAULT_FEATURE;
-   public static ArchitectEventFeature ARCHITECT_EVENT_FEATURE;
-   public static RaidChallengeFeature RAID_CHALLENGE_FEATURE;
-   public static VaultTroveFeature VAULT_TROVE_FEATURE;
-   public static FinalVaultLobbyFeature FINAL_VAULT_LOBBY_FEATURE;
-   public static FinalVaultBossFeature FINAL_VAULT_BOSS_FEATURE;
-   public static ConfiguredFeature<?, ?> BREADCRUMB_CHEST;
-   public static ConfiguredFeature<?, ?> VAULT_ROCK_ORE;
+   public static Holder<VaultStructure.Feature> VAULT_FEATURE;
+   public static Holder<ArchitectEventStructure.Feature> ARCHITECT_EVENT_FEATURE;
+   public static Holder<RaidChallengeStructure.Feature> RAID_CHALLENGE_FEATURE;
+   public static Holder<VaultTroveStructure.Feature> VAULT_TROVE_FEATURE;
+   public static Holder<FinalVaultLobbyStructure.Feature> FINAL_VAULT_LOBBY_FEATURE;
+   public static Holder<ArenaStructure.Feature> ARENA_FEATURE;
+   public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_BREADCRUMB_CHEST;
+   public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_VAULT_ROCK_ORE;
+   public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_CHROMATIC_IRON_ORE_SMALL;
+   public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_CHROMATIC_IRON_ORE_LARGE;
+   public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_VAULT_STONE;
+   public static Holder<PlacedFeature> PLACED_BREADCRUMB_CHEST;
+   public static Holder<PlacedFeature> PLACED_VAULT_ROCK_ORE;
+   public static Holder<PlacedFeature> PLACED_CHROMATIC_IRON_ORE_SMALL;
+   public static Holder<PlacedFeature> PLACED_CHROMATIC_IRON_ORE_LARGE;
+   public static Holder<PlacedFeature> PLACED_VAULT_STONE;
 
    public static void registerStructureFeatures() {
-      VAULT_FEATURE = register("vault", new VaultFeature(ModStructures.VAULT_STAR, new VaultStructure.Config(() -> VaultStructure.Pools.FINAL_START, 11)));
-      ARCHITECT_EVENT_FEATURE = register(
-         "architect_event",
-         new ArchitectEventFeature(ModStructures.ARCHITECT_EVENT, new ArchitectEventStructure.Config(() -> ArchitectEventStructure.Pools.START, 1))
-      );
-      RAID_CHALLENGE_FEATURE = register(
-         "raid_challenge",
-         new RaidChallengeFeature(ModStructures.RAID_CHALLENGE, new RaidChallengeStructure.Config(() -> RaidChallengeStructure.Pools.START, 1))
-      );
-      VAULT_TROVE_FEATURE = register(
-         "trove", new VaultTroveFeature(ModStructures.VAULT_TROVE, new VaultTroveStructure.Config(() -> VaultTroveStructure.Pools.START, 1))
-      );
-      FINAL_VAULT_LOBBY_FEATURE = register(
-         "final_vault_lobby",
-         new FinalVaultLobbyFeature(ModStructures.FINAL_VAULT_LOBBY, new FinalVaultLobbyStructure.Config(() -> FinalVaultLobbyStructure.Pools.START, 1))
-      );
-      FINAL_VAULT_BOSS_FEATURE = register(
-         "final_vault_boss",
-         new FinalVaultBossFeature(ModStructures.FINAL_VAULT_BOSS, new FinalVaultBossStructure.Config(() -> FinalVaultBossStructure.Pools.START, 1))
-      );
+      VAULT_FEATURE = register("vault", ModStructures.VAULT_STAR.configured());
+      ARENA_FEATURE = register("arena", ModStructures.ARENA.configured(new JigsawConfiguration(ArenaStructure.Pools.START, 5)));
+      ARCHITECT_EVENT_FEATURE = register("architect_event", ModStructures.ARCHITECT_EVENT.configured());
+      RAID_CHALLENGE_FEATURE = register("raid_challenge", ModStructures.RAID_CHALLENGE.configured());
+      VAULT_TROVE_FEATURE = register("trove", ModStructures.VAULT_TROVE.configured());
+      FINAL_VAULT_LOBBY_FEATURE = register("final_vault_lobby", ModStructures.FINAL_VAULT_LOBBY.configured());
+      Registry.register(Registry.CHUNK_GENERATOR, VaultMod.id("dummy"), DummyChunkGenerator.CODEC);
+      Registry.register(Registry.CHUNK_GENERATOR, VaultMod.id("sky_vaults"), SkyVaultsChunkGenerator.CODEC);
    }
 
    public static void registerFeatures(Register<Feature<?>> event) {
       BreadcrumbFeature.register(event);
       OverworldOreFeature.register(event);
-      BREADCRUMB_CHEST = register("breadcrumb_chest", BreadcrumbFeature.INSTANCE.func_225566_b_(NoFeatureConfig.field_236559_b_));
-      VAULT_ROCK_ORE = register(
-         "vault_rock_ore",
-         (ConfiguredFeature)OverworldOreFeature.INSTANCE
-            .func_225566_b_(new OreFeatureConfig(FillerBlockType.field_241882_a, ModBlocks.VAULT_ROCK_ORE.func_176223_P(), 1))
-            .func_227228_a_(Placement.field_242907_l.func_227446_a_(new TopSolidRangeConfig(5, 0, 6)))
-            .func_242728_a()
+      CONFIGURED_BREADCRUMB_CHEST = register("breadcrumb_chest", BreadcrumbFeature.INSTANCE, NoneFeatureConfiguration.INSTANCE);
+      CONFIGURED_CHROMATIC_IRON_ORE_SMALL = register(
+         "chromatic_iron_ore_small",
+         OverworldOreFeature.INSTANCE,
+         new OreConfiguration(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, ModBlocks.CHROMATIC_IRON_ORE.defaultBlockState(), 12, 1.0F)
+      );
+      CONFIGURED_CHROMATIC_IRON_ORE_LARGE = register(
+         "chromatic_iron_ore_large",
+         OverworldOreFeature.INSTANCE,
+         new OreConfiguration(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, ModBlocks.CHROMATIC_IRON_ORE.defaultBlockState(), 36, 1.0F)
+      );
+      CONFIGURED_VAULT_STONE = register(
+         "vault_stone",
+         OverworldOreFeature.INSTANCE,
+         new OreConfiguration(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, ModBlocks.VAULT_STONE.defaultBlockState(), 64)
+      );
+      PLACED_BREADCRUMB_CHEST = register("breadcrumb_chest", CONFIGURED_BREADCRUMB_CHEST);
+      PLACED_CHROMATIC_IRON_ORE_SMALL = register(
+         "placed_chromatic_iron_ore_small",
+         CONFIGURED_CHROMATIC_IRON_ORE_SMALL,
+         RarityFilter.onAverageOnceEvery(8),
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-30))
+      );
+      PLACED_CHROMATIC_IRON_ORE_LARGE = register(
+         "placed_chromatic_iron_ore_large",
+         CONFIGURED_CHROMATIC_IRON_ORE_LARGE,
+         RarityFilter.onAverageOnceEvery(8),
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-30))
+      );
+      PLACED_VAULT_STONE = register(
+         "placed_vault_stone",
+         CONFIGURED_VAULT_STONE,
+         RarityFilter.onAverageOnceEvery(10),
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-32))
       );
    }
 
-   private static <FC extends IFeatureConfig, F extends Feature<FC>> ConfiguredFeature<FC, F> register(String name, ConfiguredFeature<FC, F> feature) {
-      return (ConfiguredFeature<FC, F>)WorldGenRegistries.func_243664_a(WorldGenRegistries.field_243653_e, Vault.id(name), feature);
+   private static <FC extends FeatureConfiguration, F extends Feature<FC>> Holder<ConfiguredFeature<?, ?>> register(String name, F feature, FC config) {
+      return BuiltinRegistries.register(BuiltinRegistries.CONFIGURED_FEATURE, VaultMod.id(name), new ConfiguredFeature(feature, config));
    }
 
-   private static <SF extends StructureFeature<FC, F>, FC extends IFeatureConfig, F extends Structure<FC>> SF register(String name, SF feature) {
-      return (SF)WorldGenRegistries.func_243664_a(WorldGenRegistries.field_243654_f, Vault.id(name), feature);
+   private static <SF extends ConfiguredStructureFeature<FC, F>, FC extends FeatureConfiguration, F extends StructureFeature<FC>> Holder<SF> register(
+      String name, SF feature
+   ) {
+      if (feature instanceof IRegistryIdentifiable) {
+         ((IRegistryIdentifiable)feature).setId(VaultMod.id(name));
+      }
+
+      return BuiltinRegistries.register(BuiltinRegistries.CONFIGURED_STRUCTURE_FEATURE, VaultMod.id(name), feature);
+   }
+
+   public static Holder<PlacedFeature> register(String name, Holder<? extends ConfiguredFeature<?, ?>> configured, PlacementModifier... modifiers) {
+      return BuiltinRegistries.register(
+         BuiltinRegistries.PLACED_FEATURE, VaultMod.id(name), new PlacedFeature(Holder.hackyErase(configured), Arrays.asList(modifiers))
+      );
    }
 }

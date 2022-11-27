@@ -3,7 +3,7 @@ package iskallia.vault.util;
 import java.time.LocalDateTime;
 import java.time.temporal.IsoFields;
 import java.util.Objects;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class WeekKey {
    private final int year;
@@ -33,22 +33,15 @@ public class WeekKey {
       return new WeekKey(year, week);
    }
 
-   public static WeekKey previous() {
-      LocalDateTime ldt = LocalDateTime.now().minusWeeks(1L);
-      int year = ldt.get(IsoFields.WEEK_BASED_YEAR);
-      int week = ldt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
-      return new WeekKey(year, week);
-   }
-
-   public CompoundNBT serialize() {
-      CompoundNBT tag = new CompoundNBT();
-      tag.func_74768_a("year", this.year);
-      tag.func_74768_a("week", this.week);
+   public CompoundTag serialize() {
+      CompoundTag tag = new CompoundTag();
+      tag.putInt("year", this.year);
+      tag.putInt("week", this.week);
       return tag;
    }
 
-   public static WeekKey deserialize(CompoundNBT tag) {
-      return new WeekKey(tag.func_74762_e("year"), tag.func_74762_e("week"));
+   public static WeekKey deserialize(CompoundTag tag) {
+      return new WeekKey(tag.getInt("year"), tag.getInt("week"));
    }
 
    @Override

@@ -1,144 +1,116 @@
 package iskallia.vault.skill.ability.effect;
 
-import iskallia.vault.Vault;
-import iskallia.vault.entity.EternalEntity;
+import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.eternal.ActiveEternalData;
 import iskallia.vault.entity.eternal.EternalData;
 import iskallia.vault.entity.eternal.EternalHelper;
 import iskallia.vault.skill.ability.config.SummonEternalConfig;
-import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.skill.talent.type.archetype.CommanderTalent;
+import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
+import iskallia.vault.skill.ability.effect.spi.core.AbstractInstantManaAbility;
+import iskallia.vault.skill.archetype.archetype.CommanderArchetype;
 import iskallia.vault.world.data.EternalsData;
-import iskallia.vault.world.data.PlayerTalentsData;
+import iskallia.vault.world.data.PlayerArchetypeData;
+import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class SummonEternalAbility<C extends SummonEternalConfig> extends AbilityEffect<C> {
+public class SummonEternalAbility<C extends SummonEternalConfig> extends AbstractInstantManaAbility<C> {
    @Override
    public String getAbilityGroupName() {
       return "Summon Eternal";
    }
 
-   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
-      if (!player.func_130014_f_().func_201670_d() && player.func_130014_f_() instanceof ServerWorld) {
-         ServerWorld sWorld = (ServerWorld)player.func_130014_f_();
-         EternalsData.EternalGroup playerEternals = EternalsData.get(sWorld).getEternals(player);
+   protected boolean canDoAction(C config, ServerPlayer player, boolean active) {
+      if (!player.getCommandSenderWorld().isClientSide() && player.getCommandSenderWorld() instanceof ServerLevel serverLevel) {
+         EternalsData.EternalGroup playerEternals = EternalsData.get(serverLevel).getEternals(player);
          if (playerEternals.getEternals().isEmpty()) {
-            player.func_145747_a(new StringTextComponent("You have no eternals to summon.").func_240699_a_(TextFormatting.RED), Util.field_240973_b_);
+            player.sendMessage(new TextComponent("You have no eternals to summon.").withStyle(ChatFormatting.RED), Util.NIL_UUID);
             return false;
-         } else if (player.func_130014_f_().func_234923_W_() != Vault.VAULT_KEY && config.isVaultOnly()) {
-            player.func_145747_a(new StringTextComponent("You can only summon eternals in the Vault!").func_240699_a_(TextFormatting.RED), Util.field_240973_b_);
+         } else if (!ServerVaults.isInVault(player) && config.isVaultOnly()) {
+            player.sendMessage(new TextComponent("You can only summon eternals in the Vault!").withStyle(ChatFormatting.RED), Util.NIL_UUID);
             return false;
          } else {
-            List<EternalData> eternals = new ArrayList<>();
-            int count = this.getEternalCount(playerEternals, config);
-            List<EternalEntity> summonedEternals = player.func_71121_q()
-               .getEntities()
-               .filter(entity -> entity instanceof EternalEntity)
-               .map(entity -> (EternalEntity)entity)
-               .filter(eternalx -> eternalx.getOwnerUUID().equals(player.func_110124_au()))
-               .collect(Collectors.toList());
-            int maxToSummon = config.getSummonedEternalsCap() - summonedEternals.size();
-            count = Math.min(count, maxToSummon);
-
-            for (int i = 0; i < count; i++) {
-               EternalData eternal = null;
-               if (rand.nextFloat() < config.getAncientChance()) {
-                  eternal = playerEternals.getRandomAliveAncient(
-                     rand, eternalDatax -> !eternals.contains(eternalDatax) && !ActiveEternalData.getInstance().isEternalActive(eternalDatax.getId())
-                  );
-               }
-
-               if (eternal == null) {
-                  eternal = playerEternals.getRandomAlive(
-                     rand, eternalDatax -> !eternals.contains(eternalDatax) && !ActiveEternalData.getInstance().isEternalActive(eternalDatax.getId())
-                  );
-               }
-
-               if (eternal != null) {
-                  eternals.add(eternal);
-               }
-            }
-
-            if (eternals.isEmpty()) {
-               if (count > 0) {
-                  player.func_145747_a(
-                     new StringTextComponent("You have no (alive) eternals to summon.").func_240699_a_(TextFormatting.RED), Util.field_240973_b_
-                  );
-               } else {
-                  player.func_145747_a(new StringTextComponent("You have reached the eternal cap.").func_240699_a_(TextFormatting.RED), Util.field_240973_b_);
-               }
-
-               return false;
-            } else {
-               TalentTree talents = PlayerTalentsData.get(sWorld).getTalents(player);
-               double damageMultiplier = talents.getLearnedNodes(CommanderTalent.class)
-                  .stream()
-                  .mapToDouble(node -> node.getTalent().getSummonEternalDamageDealtMultiplier())
-                  .max()
-                  .orElse(1.0);
-               AttributeModifier modifier = new AttributeModifier(
-                  CommanderTalent.ETERNAL_DAMAGE_INCREASE_MODIFIER, "CommanderTalent", damageMultiplier, Operation.MULTIPLY_TOTAL
-               );
-
-               for (EternalData eternalData : eternals) {
-                  EternalEntity eternalx = EternalHelper.spawnEternal(sWorld, eternalData);
-                  eternalx.func_70012_b(
-                     player.func_226277_ct_(), player.func_226278_cu_(), player.func_226281_cx_(), player.field_70177_z, player.field_70125_A
-                  );
-                  eternalx.setDespawnTime(sWorld.func_73046_m().func_71259_af() + config.getDespawnTime());
-                  eternalx.setOwner(player.func_110124_au());
-                  eternalx.setEternalId(eternalData.getId());
-                  eternalx.func_110148_a(Attributes.field_233823_f_).func_233769_c_(modifier);
-                  eternalx.func_195064_c(new EffectInstance(Effects.field_188423_x, Integer.MAX_VALUE, 0, true, false));
-                  this.postProcessEternal(eternalx, config);
-                  if (eternalData.getAura() != null) {
-                     eternalx.setProvidedAura(eternalData.getAura().getAuraName());
-                  }
-
-                  sWorld.func_217376_c(eternalx);
-               }
-
-               return true;
-            }
+            return super.canDoAction(config, player, active);
          }
       } else {
          return false;
       }
    }
 
-   protected int getEternalCount(EternalsData.EternalGroup eternals, C config) {
-      return config.getNumberOfEternals();
+   protected AbilityActionResult doAction(C config, ServerPlayer player, boolean active) {
+      if (player.getCommandSenderWorld() instanceof ServerLevel serverLevel) {
+         EternalsData.EternalGroup var11 = EternalsData.get(serverLevel).getEternals(player);
+         ArrayList eternals = new ArrayList();
+         int count = config.getNumberOfEternals();
+
+         for (int i = 0; i < count; i++) {
+            EternalData eternal = null;
+            if (RANDOM.nextFloat() < config.getAncientChance()) {
+               eternal = var11.getRandomAliveAncient(
+                  RANDOM, eternalDatax -> !eternals.contains(eternalDatax) && !ActiveEternalData.getInstance().isEternalActive(eternalDatax.getId())
+               );
+            }
+
+            if (eternal == null) {
+               eternal = var11.getRandomAlive(
+                  RANDOM, eternalDatax -> !eternals.contains(eternalDatax) && !ActiveEternalData.getInstance().isEternalActive(eternalDatax.getId())
+               );
+            }
+
+            if (eternal != null) {
+               eternals.add(eternal);
+            }
+         }
+
+         if (eternals.isEmpty()) {
+            player.sendMessage(new TextComponent("You have no (alive) eternals to summon.").withStyle(ChatFormatting.RED), Util.NIL_UUID);
+            return AbilityActionResult.FAIL;
+         } else {
+            for (EternalData eternalData : eternals) {
+               EternalEntity eternalx = EternalHelper.spawnEternal(serverLevel, eternalData);
+               eternalx.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
+               eternalx.setDespawnTime(serverLevel.getServer().getTickCount() + config.getDespawnTime());
+               eternalx.setOwner(player.getUUID());
+               eternalx.setEternalId(eternalData.getId());
+               eternalx.addEffect(new MobEffectInstance(MobEffects.GLOWING, Integer.MAX_VALUE, 0, true, false));
+               PlayerArchetypeData.get(serverLevel)
+                  .getArchetypeContainer(player)
+                  .ifCurrentArchetype(CommanderArchetype.class, archetype -> archetype.applyToEternal(eternal));
+               if (eternalData.getAura() != null) {
+                  eternalx.setProvidedAura(eternalData.getAura().getAuraName());
+               }
+
+               serverLevel.addFreshEntity(eternalx);
+            }
+
+            return AbilityActionResult.SUCCESS_COOLDOWN;
+         }
+      } else {
+         return AbilityActionResult.FAIL;
+      }
    }
 
-   protected void postProcessEternal(EternalEntity eternalEntity, C config) {
+   protected void doParticles(C config, ServerPlayer player) {
+   }
+
+   protected void doSound(C config, ServerPlayer player) {
    }
 
    @SubscribeEvent
    public void onDamage(LivingAttackEvent event) {
       LivingEntity damagedEntity = event.getEntityLiving();
-      Entity dealerEntity = event.getSource().func_76346_g();
-      if (damagedEntity instanceof EternalEntity && dealerEntity instanceof PlayerEntity) {
-         PlayerEntity player = (PlayerEntity)dealerEntity;
-         if (!player.func_184812_l_()) {
-            event.setCanceled(true);
-         }
+      if (damagedEntity instanceof EternalEntity && event.getSource().getEntity() instanceof Player player && !player.isCreative()) {
+         event.setCanceled(true);
       }
    }
 }

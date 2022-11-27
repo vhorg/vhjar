@@ -8,12 +8,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class VotingSession {
    private static final int VOTING_DURATION = 410;
@@ -28,43 +28,36 @@ public class VotingSession {
       this.directions.addAll(directions);
    }
 
-   VotingSession(CompoundNBT tag) {
-      this.stabilizerPos = CodecUtils.readNBT(BlockPos.field_239578_a_, tag, "pos", BlockPos.field_177992_a);
-      this.voteTicks = tag.func_74762_e("voteTicks");
-      ListNBT directions = tag.func_150295_c("directions", 10);
+   VotingSession(CompoundTag tag) {
+      this.stabilizerPos = CodecUtils.readNBT(BlockPos.CODEC, tag, "pos", BlockPos.ZERO);
+      this.voteTicks = tag.getInt("voteTicks");
+      ListTag directions = tag.getList("directions", 10);
 
       for (int i = 0; i < directions.size(); i++) {
-         this.directions.add(new DirectionChoice(directions.func_150305_b(i)));
+         this.directions.add(new DirectionChoice(directions.getCompound(i)));
       }
    }
 
-   boolean acceptVote(String voter, Direction dir) {
+   void acceptVote(String voter, Direction dir) {
       if (this.voted.add(voter)) {
          for (DirectionChoice choice : this.directions) {
             if (choice.getDirection() == dir) {
                choice.addVote();
-               return true;
             }
          }
       }
-
-      return false;
    }
 
-   void tick(ServerWorld world) {
+   void tick(ServerLevel world) {
       if (!this.isFinished()) {
          this.voteTicks--;
-         if (world.func_175667_e(this.getStabilizerPos())) {
-            TileEntity tile = world.func_175625_s(this.getStabilizerPos());
+         if (world.hasChunkAt(this.getStabilizerPos())) {
+            BlockEntity tile = world.getBlockEntity(this.getStabilizerPos());
             if (tile instanceof StabilizerTileEntity) {
-               this.setStabilizerActive((StabilizerTileEntity)tile);
+               ((StabilizerTileEntity)tile).setActive();
             }
          }
       }
-   }
-
-   protected void setStabilizerActive(StabilizerTileEntity tile) {
-      tile.setActive();
    }
 
    public BlockPos getStabilizerPos() {
@@ -85,16 +78,6 @@ public class VotingSession {
 
    public List<DirectionChoice> getDirections() {
       return this.directions;
-   }
-
-   public boolean hasDirectionChoice(Direction direction) {
-      for (DirectionChoice directionChoice : this.getDirections()) {
-         if (directionChoice.getDirection() == direction) {
-            return true;
-         }
-      }
-
-      return false;
    }
 
    public float getChoicePercentage(DirectionChoice choice) {
@@ -121,21 +104,21 @@ public class VotingSession {
       return votedChoice;
    }
 
-   public CompoundNBT serialize() {
-      CompoundNBT tag = new CompoundNBT();
-      CodecUtils.writeNBT(BlockPos.field_239578_a_, this.stabilizerPos, tag, "pos");
-      tag.func_74768_a("voteTicks", this.voteTicks);
-      ListNBT directions = new ListNBT();
+   public CompoundTag serialize() {
+      CompoundTag tag = new CompoundTag();
+      CodecUtils.writeNBT(BlockPos.CODEC, this.stabilizerPos, tag, "pos");
+      tag.putInt("voteTicks", this.voteTicks);
+      ListTag directions = new ListTag();
 
       for (DirectionChoice choice : this.directions) {
          directions.add(choice.serialize());
       }
 
-      tag.func_218657_a("directions", directions);
+      tag.put("directions", directions);
       return tag;
    }
 
-   public static VotingSession deserialize(CompoundNBT tag) {
-      return (VotingSession)(tag.func_74767_n("isFinal") ? new SummonAndKillBossesVotingSession(tag) : new VotingSession(tag));
+   public static VotingSession deserialize(CompoundTag tag) {
+      return new VotingSession(tag);
    }
 }

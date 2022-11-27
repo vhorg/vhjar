@@ -1,11 +1,11 @@
 package iskallia.vault.mixin;
 
-import iskallia.vault.Vault;
+import iskallia.vault.world.data.ServerVaults;
 import java.util.Random;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FireBlock;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.FireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,8 +18,8 @@ public class MixinFireBlock {
       at = {@At("HEAD")},
       cancellable = true
    )
-   public void onFireTick(BlockState state, ServerWorld world, BlockPos pos, Random rand, CallbackInfo ci) {
-      if (world.func_234923_W_() == Vault.VAULT_KEY) {
+   public void onFireTick(BlockState state, ServerLevel world, BlockPos pos, Random rand, CallbackInfo ci) {
+      if (ServerVaults.isVaultWorld(world)) {
          ci.cancel();
       }
    }

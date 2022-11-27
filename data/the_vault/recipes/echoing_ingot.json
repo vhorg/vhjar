@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ppp",
+        "pcp",
+        "ppp"
+    ],
+    "key": {
+        "p": {
+            "item": "the_vault:gem_echo"
+        },
+        "c": {
+            "item": "minecraft:netherite_ingot"
+        }
+    },
+    "result": {
+        "item": "the_vault:echoing_ingot",
+        "count": 1
+    }
+}

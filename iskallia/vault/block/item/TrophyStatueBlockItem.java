@@ -2,74 +2,83 @@ package iskallia.vault.block.item;
 
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.util.StatueType;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.util.WeekKey;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.List;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.StringUtils;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
+import javax.annotation.Nullable;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.StringUtil;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class TrophyStatueBlockItem extends LootStatueBlockItem {
+public class TrophyStatueBlockItem extends BlockItem {
    public TrophyStatueBlockItem(Block block) {
-      super(block, StatueType.TROPHY);
+      super(block, new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(1));
    }
 
    @OnlyIn(Dist.CLIENT)
-   @Override
-   protected void addStatueInformation(CompoundNBT dataTag, List<ITextComponent> toolTip) {
-      super.addStatueInformation(dataTag, toolTip);
-      if (dataTag.func_150297_b("recordEntry", 10) && dataTag.func_150297_b("trophyWeek", 10)) {
-         WeekKey week = WeekKey.deserialize(dataTag.func_74775_l("trophyWeek"));
-         PlayerVaultStatsData.PlayerRecordEntry recordEntry = PlayerVaultStatsData.PlayerRecordEntry.deserialize(dataTag.func_74775_l("recordEntry"));
-         ITextComponent weekCmp = new StringTextComponent(week.getWeek() + " / " + week.getYear());
-         ITextComponent recordCmp = new StringTextComponent(UIHelper.formatTimeString(recordEntry.getTickCount())).func_240699_a_(TextFormatting.GOLD);
-         toolTip.add(StringTextComponent.field_240750_d_);
-         toolTip.add(new StringTextComponent("Week: ").func_230529_a_(weekCmp));
-         toolTip.add(new StringTextComponent("Record: ").func_230529_a_(recordCmp));
+   public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> toolTip, TooltipFlag flagIn) {
+      CompoundTag nbt = stack.getTag();
+      if (nbt != null && nbt.contains("BlockEntityTag", 10)) {
+         this.addStatueInformation(nbt.getCompound("BlockEntityTag"), toolTip);
       }
+
+      super.appendHoverText(stack, worldIn, toolTip, flagIn);
    }
 
-   public static ItemStack getTrophy(ServerWorld serverWorld, WeekKey week) {
+   @OnlyIn(Dist.CLIENT)
+   protected void addStatueInformation(CompoundTag dataTag, List<Component> toolTip) {
+      WeekKey week = WeekKey.deserialize(dataTag.getCompound("trophyWeek"));
+      PlayerVaultStatsData.PlayerRecordEntry recordEntry = PlayerVaultStatsData.PlayerRecordEntry.deserialize(dataTag.getCompound("recordEntry"));
+      Component weekCmp = new TextComponent(week.getWeek() + " / " + week.getYear());
+      Component recordCmp = new TextComponent(UIHelper.formatTimeString(recordEntry.getTickCount())).withStyle(ChatFormatting.GOLD);
+      toolTip.add(TextComponent.EMPTY);
+      toolTip.add(new TextComponent("Week: ").append(weekCmp));
+      toolTip.add(new TextComponent("Record: ").append(recordCmp));
+   }
+
+   public static ItemStack getTrophy(ServerLevel serverWorld, WeekKey week) {
       PlayerVaultStatsData statsData = PlayerVaultStatsData.get(serverWorld);
       PlayerVaultStatsData.PlayerRecordEntry record = statsData.getFastestVaultTime(week);
-      if (StringUtils.func_151246_b(record.getPlayerName())) {
-         return ItemStack.field_190927_a;
+      if (StringUtil.isNullOrEmpty(record.getPlayerName())) {
+         return ItemStack.EMPTY;
       } else {
          ItemStack stack = new ItemStack(ModBlocks.TROPHY_STATUE);
-         CompoundNBT nbt = new CompoundNBT();
-         nbt.func_74778_a("PlayerNickname", record.getPlayerName());
-         nbt.func_74768_a("StatueType", StatueType.TROPHY.ordinal());
-         nbt.func_74768_a("Interval", -1);
-         nbt.func_218657_a("LootItem", ItemStack.field_190927_a.serializeNBT());
-         nbt.func_74768_a("ItemsRemaining", -1);
-         nbt.func_74768_a("TotalItems", -1);
-         nbt.func_218657_a("trophyWeek", week.serialize());
-         nbt.func_218657_a("recordEntry", record.serialize());
-         CompoundNBT stackNBT = new CompoundNBT();
-         stackNBT.func_218657_a("BlockEntityTag", nbt);
-         stack.func_77982_d(stackNBT);
+         CompoundTag nbt = new CompoundTag();
+         nbt.putString("PlayerNickname", record.getPlayerName());
+         nbt.put("TrophyWeek", week.serialize());
+         nbt.put("RecordEntry", record.serialize());
+         CompoundTag stackNBT = new CompoundTag();
+         stackNBT.put("BlockEntityTag", nbt);
+         stack.setTag(stackNBT);
          return stack;
       }
    }
 
-   @Override
-   protected boolean func_195944_a(BlockItemUseContext ctx, BlockState state) {
-      if (!ctx.func_195996_i().func_77942_o()) {
+   public ItemStack getDefaultInstance() {
+      return super.getDefaultInstance();
+   }
+
+   protected boolean canPlace(BlockPlaceContext ctx, BlockState state) {
+      if (!ctx.getItemInHand().hasTag()) {
          return false;
       } else {
-         CompoundNBT tag = ctx.func_195996_i().func_196082_o();
-         CompoundNBT blockTag = tag.func_74775_l("BlockEntityTag");
-         return blockTag.func_150297_b("PlayerNickname", 8) && blockTag.func_150297_b("StatueType", 3) ? super.func_195944_a(ctx, state) : false;
+         CompoundTag tag = ctx.getItemInHand().getOrCreateTag();
+         CompoundTag blockTag = tag.getCompound("BlockEntityTag");
+         return blockTag.contains("PlayerNickname", 8) && blockTag.contains("StatueType", 3) ? super.canPlace(ctx, state) : false;
       }
    }
 }

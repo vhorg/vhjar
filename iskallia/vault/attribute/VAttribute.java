@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class VAttribute<T, I extends VAttribute.Instance<T>> {
@@ -36,11 +36,11 @@ public class VAttribute<T, I extends VAttribute.Instance<T>> {
       return "Attributes";
    }
 
-   public Optional<I> get(CompoundNBT nbt) {
-      if (nbt != null && nbt.func_150297_b(this.getTagKey(), 9)) {
-         for (INBT element : nbt.func_150295_c(this.getTagKey(), 10)) {
-            CompoundNBT tag = (CompoundNBT)element;
-            if (tag.func_74779_i("Id").equals(this.getId().toString())) {
+   public Optional<I> get(CompoundTag nbt) {
+      if (nbt != null && nbt.contains(this.getTagKey(), 9)) {
+         for (Tag element : nbt.getList(this.getTagKey(), 10)) {
+            CompoundTag tag = (CompoundTag)element;
+            if (tag.getString("Id").equals(this.getId().toString())) {
                I instance = this.instance.get();
                instance.parent = this;
                instance.delegate = tag;
@@ -55,42 +55,42 @@ public class VAttribute<T, I extends VAttribute.Instance<T>> {
       }
    }
 
-   public boolean exists(CompoundNBT nbt) {
+   public boolean exists(CompoundTag nbt) {
       return this.get(nbt).isPresent();
    }
 
-   public I getOrDefault(CompoundNBT nbt, T value) {
+   public I getOrDefault(CompoundTag nbt, T value) {
       return this.getOrDefault(nbt, () -> value);
    }
 
-   public I getOrDefault(CompoundNBT nbt, Supplier<T> value) {
+   public I getOrDefault(CompoundTag nbt, Supplier<T> value) {
       return this.get(nbt).orElse((I)this.instance.get().setBaseValue(value.get()));
    }
 
-   public I getOrCreate(CompoundNBT nbt, T value) {
+   public I getOrCreate(CompoundTag nbt, T value) {
       return this.getOrCreate(nbt, () -> value);
    }
 
-   public I getOrCreate(CompoundNBT nbt, Supplier<T> value) {
+   public I getOrCreate(CompoundTag nbt, Supplier<T> value) {
       return this.get(nbt).orElseGet(() -> this.create(nbt, value));
    }
 
-   public I create(CompoundNBT nbt, T value) {
+   public I create(CompoundTag nbt, T value) {
       return this.create(nbt, () -> value);
    }
 
-   public I create(CompoundNBT nbt, Supplier<T> value) {
-      if (!nbt.func_150297_b(this.getTagKey(), 9)) {
-         nbt.func_218657_a(this.getTagKey(), new ListNBT());
+   public I create(CompoundTag nbt, Supplier<T> value) {
+      if (!nbt.contains(this.getTagKey(), 9)) {
+         nbt.put(this.getTagKey(), new ListTag());
       }
 
-      ListNBT attributesList = nbt.func_150295_c(this.getTagKey(), 10);
-      CompoundNBT attributeNBT = attributesList.stream()
-         .map(element -> (CompoundNBT)element)
-         .filter(tag -> tag.func_74779_i("Id").equals(this.getId().toString()))
+      ListTag attributesList = nbt.getList(this.getTagKey(), 10);
+      CompoundTag attributeNBT = attributesList.stream()
+         .map(element -> (CompoundTag)element)
+         .filter(tag -> tag.getString("Id").equals(this.getId().toString()))
          .findFirst()
          .orElseGet(() -> {
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             attributesList.add(tag);
             return tag;
          });
@@ -102,11 +102,11 @@ public class VAttribute<T, I extends VAttribute.Instance<T>> {
    }
 
    public Optional<I> get(ItemStack stack) {
-      CompoundNBT nbt = stack.func_179543_a("Vault");
-      if (nbt != null && nbt.func_150297_b(this.getTagKey(), 9)) {
-         for (INBT element : nbt.func_150295_c(this.getTagKey(), 10)) {
-            CompoundNBT tag = (CompoundNBT)element;
-            if (tag.func_74779_i("Id").equals(this.getId().toString())) {
+      CompoundTag nbt = stack.getTagElement("Vault");
+      if (nbt != null && nbt.contains(this.getTagKey(), 9)) {
+         for (Tag element : nbt.getList(this.getTagKey(), 10)) {
+            CompoundTag tag = (CompoundTag)element;
+            if (tag.getString("Id").equals(this.getId().toString())) {
                I instance = this.instance.get();
                instance.parent = this;
                instance.delegate = tag;
@@ -166,18 +166,18 @@ public class VAttribute<T, I extends VAttribute.Instance<T>> {
    }
 
    public I create(ItemStack stack, Supplier<T> value) {
-      CompoundNBT nbt = stack.func_190925_c("Vault");
-      if (!nbt.func_150297_b(this.getTagKey(), 9)) {
-         nbt.func_218657_a(this.getTagKey(), new ListNBT());
+      CompoundTag nbt = stack.getOrCreateTagElement("Vault");
+      if (!nbt.contains(this.getTagKey(), 9)) {
+         nbt.put(this.getTagKey(), new ListTag());
       }
 
-      ListNBT attributesList = nbt.func_150295_c(this.getTagKey(), 10);
-      CompoundNBT attributeNBT = attributesList.stream()
-         .map(element -> (CompoundNBT)element)
-         .filter(tag -> tag.func_74779_i("Id").equals(this.getId().toString()))
+      ListTag attributesList = nbt.getList(this.getTagKey(), 10);
+      CompoundTag attributeNBT = attributesList.stream()
+         .map(element -> (CompoundTag)element)
+         .filter(tag -> tag.getString("Id").equals(this.getId().toString()))
          .findFirst()
          .orElseGet(() -> {
-            CompoundNBT tag = new CompoundNBT();
+            CompoundTag tag = new CompoundTag();
             attributesList.add(tag);
             return tag;
          });
@@ -188,11 +188,11 @@ public class VAttribute<T, I extends VAttribute.Instance<T>> {
       return instance;
    }
 
-   public abstract static class Instance<T> implements INBTSerializable<CompoundNBT>, VAttribute.Modifier<T> {
+   public abstract static class Instance<T> implements INBTSerializable<CompoundTag>, VAttribute.Modifier<T> {
       protected VAttribute<T, ? extends VAttribute.Instance<T>> parent;
       protected T baseValue;
       private VAttribute.Modifier<T> modifier;
-      protected CompoundNBT delegate;
+      protected CompoundTag delegate;
 
       protected Instance() {
       }
@@ -201,20 +201,20 @@ public class VAttribute<T, I extends VAttribute.Instance<T>> {
          this.modifier = modifier;
       }
 
-      public final CompoundNBT serializeNBT() {
-         CompoundNBT nbt = new CompoundNBT();
-         nbt.func_74778_a("Id", this.parent.id.toString());
+      public final CompoundTag serializeNBT() {
+         CompoundTag nbt = new CompoundTag();
+         nbt.putString("Id", this.parent.id.toString());
          this.write(nbt);
          return nbt;
       }
 
-      public final void deserializeNBT(CompoundNBT nbt) {
+      public final void deserializeNBT(CompoundTag nbt) {
          this.read(nbt);
       }
 
-      public abstract void write(CompoundNBT var1);
+      public abstract void write(CompoundTag var1);
 
-      public abstract void read(CompoundNBT var1);
+      public abstract void read(CompoundTag var1);
 
       public T getBaseValue() {
          return this.baseValue;
@@ -249,12 +249,12 @@ public class VAttribute<T, I extends VAttribute.Instance<T>> {
 
       public void updateNBT() {
          if (this.delegate != null) {
-            CompoundNBT nbt = this.serializeNBT();
+            CompoundTag nbt = this.serializeNBT();
 
-            for (String key : nbt.func_150296_c()) {
-               INBT value = nbt.func_74781_a(key);
+            for (String key : nbt.getAllKeys()) {
+               Tag value = nbt.get(key);
                if (value != null) {
-                  this.delegate.func_218657_a(key, value);
+                  this.delegate.put(key, value);
                }
             }
          }

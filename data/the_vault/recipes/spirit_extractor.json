@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " s ",
+    "lel",
+    "ccc"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:eternal_soul"
+    },
+    "l": {
+      "item": "the_vault:gem_larimar"
+    },
+    "e": {
+      "item": "the_vault:hunter_eye"
+    },
+    "c": {
+      "item": "the_vault:chromatic_steel_ingot"
+    }
+  },
+  "result": {
+    "item": "the_vault:spirit_extractor",
+    "count": 1
+  }
+}

@@ -5,10 +5,10 @@ import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.raid.ActiveRaid;
 import java.util.Objects;
 import java.util.Random;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Mob;
 
 public abstract class RaidModifier {
    protected static final Random rand = new Random();
@@ -37,11 +37,11 @@ public abstract class RaidModifier {
       return this.name;
    }
 
-   public abstract void affectRaidMob(MobEntity var1, float var2);
+   public abstract void affectRaidMob(Mob var1, float var2);
 
-   public abstract void onVaultRaidFinish(VaultRaid var1, ServerWorld var2, BlockPos var3, ActiveRaid var4, float var5);
+   public abstract void onVaultRaidFinish(VaultRaid var1, ServerLevel var2, BlockPos var3, ActiveRaid var4, float var5);
 
-   public abstract ITextComponent getDisplay(float var1);
+   public abstract Component getDisplay(float var1);
 
    @Override
    public boolean equals(Object o) {

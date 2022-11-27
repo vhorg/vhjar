@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ada",
+    "aba",
+    "aca"
+  ],
+  "key": {
+    "a": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "b": {
+      "item": "the_vault:empty_flask"
+    },
+    "c": {
+      "item": "the_vault:red_vault_essence"
+    },
+    "d": {
+      "item": "the_vault:vault_diamond_block"
+    }
+  },
+  "result": {
+    "item": "the_vault:respec_flask",
+    "count": 1,
+    "nbt": "{Ability:\"Vein Miner\"}"
+  }
+}

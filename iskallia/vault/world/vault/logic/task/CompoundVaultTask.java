@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Stack;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 public class CompoundVaultTask extends VaultTask {
    private List<String> postfix = new ArrayList<>();
@@ -50,16 +50,16 @@ public class CompoundVaultTask extends VaultTask {
    }
 
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Postfix", String.join(" ", this.postfix));
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putString("Postfix", String.join(" ", this.postfix));
       return nbt;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT nbt) {
+   public void deserializeNBT(CompoundTag nbt) {
       Stack<Object> stack = new Stack<>();
-      String[] data = nbt.func_74779_i("Postfix").split(Pattern.quote(" "));
+      String[] data = nbt.getString("Postfix").split(Pattern.quote(" "));
 
       for (String s : data) {
          this.postfix.add(s);
@@ -81,7 +81,7 @@ public class CompoundVaultTask extends VaultTask {
       }
    }
 
-   public static CompoundVaultTask fromNBT(CompoundNBT nbt) {
+   public static CompoundVaultTask fromNBT(CompoundTag nbt) {
       CompoundVaultTask condition = new CompoundVaultTask();
       condition.deserializeNBT(nbt);
       return condition;

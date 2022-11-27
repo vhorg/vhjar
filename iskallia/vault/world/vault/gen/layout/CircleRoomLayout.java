@@ -1,12 +1,12 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import java.awt.geom.Point2D.Float;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
 
 public class CircleRoomLayout extends ConnectedRoomGenerator {
-   public static final ResourceLocation ID = Vault.id("circle");
+   public static final ResourceLocation ID = VaultMod.id("circle");
    private int size;
 
    public CircleRoomLayout() {
@@ -43,7 +43,7 @@ public class CircleRoomLayout extends ConnectedRoomGenerator {
          for (int z = -halfSize; z <= halfSize; z++) {
             Float roomPos = new Float(x + 0.5F, z + 0.5F);
             if (center.distance(roomPos) <= halfSize) {
-               layout.putRoom(new Vector3i(x, 0, z));
+               layout.putRoom(new Vec3i(x, 0, z));
             }
          }
       }

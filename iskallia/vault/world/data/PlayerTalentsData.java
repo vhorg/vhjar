@@ -5,14 +5,14 @@ import iskallia.vault.skill.talent.TalentTree;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,56 +23,48 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 @EventBusSubscriber(
    bus = Bus.FORGE
 )
-public class PlayerTalentsData extends WorldSavedData {
+public class PlayerTalentsData extends SavedData {
    protected static final String DATA_NAME = "the_vault_PlayerTalents";
    private Map<UUID, TalentTree> playerMap = new HashMap<>();
 
-   public PlayerTalentsData() {
-      this("the_vault_PlayerTalents");
-   }
-
-   public PlayerTalentsData(String name) {
-      super(name);
-   }
-
-   public TalentTree getTalents(PlayerEntity player) {
-      return this.getTalents(player.func_110124_au());
+   public TalentTree getTalents(Player player) {
+      return this.getTalents(player.getUUID());
    }
 
    public TalentTree getTalents(UUID uuid) {
       return this.playerMap.computeIfAbsent(uuid, TalentTree::new);
    }
 
-   public PlayerTalentsData add(ServerPlayerEntity player, TalentNode<?>... nodes) {
-      this.getTalents(player).add(player.func_184102_h(), nodes);
-      this.func_76185_a();
+   public PlayerTalentsData add(ServerPlayer player, TalentNode<?>... nodes) {
+      this.getTalents(player).add(player.getServer(), nodes);
+      this.setDirty();
       return this;
    }
 
-   public PlayerTalentsData remove(ServerPlayerEntity player, TalentNode<?>... nodes) {
-      this.getTalents(player).remove(player.func_184102_h(), nodes);
-      this.func_76185_a();
+   public PlayerTalentsData remove(ServerPlayer player, TalentNode<?>... nodes) {
+      this.getTalents(player).remove(player.getServer(), nodes);
+      this.setDirty();
       return this;
    }
 
-   public PlayerTalentsData upgradeTalent(ServerPlayerEntity player, TalentNode<?> talentNode) {
+   public PlayerTalentsData upgradeTalent(ServerPlayer player, TalentNode<?> talentNode) {
       TalentTree talentTree = this.getTalents(player);
-      talentTree.upgradeTalent(player.func_184102_h(), talentNode);
-      talentTree.sync(player.func_184102_h());
-      this.func_76185_a();
+      talentTree.upgradeTalent(player.getServer(), talentNode);
+      talentTree.sync(player.getServer());
+      this.setDirty();
       return this;
    }
 
-   public PlayerTalentsData downgradeTalent(ServerPlayerEntity player, TalentNode<?> talentNode) {
+   public PlayerTalentsData downgradeTalent(ServerPlayer player, TalentNode<?> talentNode) {
       TalentTree talentTree = this.getTalents(player);
-      talentTree.downgradeTalent(player.func_184102_h(), talentNode);
-      talentTree.sync(player.func_184102_h());
-      this.func_76185_a();
+      talentTree.downgradeTalent(player.getServer(), talentNode);
+      talentTree.sync(player.getServer());
+      this.setDirty();
       return this;
    }
 
-   public PlayerTalentsData resetTalentTree(ServerPlayerEntity player) {
-      UUID uniqueID = player.func_110124_au();
+   public PlayerTalentsData resetTalentTree(ServerPlayer player) {
+      UUID uniqueID = player.getUUID();
       TalentTree oldTalentTree = this.playerMap.get(uniqueID);
       if (oldTalentTree != null) {
          for (TalentNode<?> node : oldTalentTree.getNodes()) {
@@ -84,8 +76,8 @@ public class PlayerTalentsData extends WorldSavedData {
 
       TalentTree talentTree = new TalentTree(uniqueID);
       this.playerMap.put(uniqueID, talentTree);
-      talentTree.sync(player.func_184102_h());
-      this.func_76185_a();
+      talentTree.sync(player.getServer());
+      this.setDirty();
       return this;
    }
 
@@ -97,49 +89,55 @@ public class PlayerTalentsData extends WorldSavedData {
    @SubscribeEvent
    public static void onTick(WorldTickEvent event) {
       if (event.side == LogicalSide.SERVER) {
-         get((ServerWorld)event.world).tick(((ServerWorld)event.world).func_73046_m());
+         get((ServerLevel)event.world).tick(((ServerLevel)event.world).getServer());
       }
    }
 
    @SubscribeEvent
    public static void onTick(PlayerTickEvent event) {
       if (event.side == LogicalSide.SERVER) {
-         get((ServerWorld)event.player.field_70170_p).getTalents(event.player);
+         get((ServerLevel)event.player.level).getTalents(event.player);
       }
    }
 
-   public void func_76184_a(CompoundNBT nbt) {
-      ListNBT playerList = nbt.func_150295_c("PlayerEntries", 8);
-      ListNBT talentList = nbt.func_150295_c("TalentEntries", 10);
+   private static PlayerTalentsData create(CompoundTag tag) {
+      PlayerTalentsData data = new PlayerTalentsData();
+      data.load(tag);
+      return data;
+   }
+
+   public void load(CompoundTag nbt) {
+      ListTag playerList = nbt.getList("PlayerEntries", 8);
+      ListTag talentList = nbt.getList("TalentEntries", 10);
       if (playerList.size() != talentList.size()) {
          throw new IllegalStateException("Map doesn't have the same amount of keys as values");
       } else {
          for (int i = 0; i < playerList.size(); i++) {
-            UUID playerUUID = UUID.fromString(playerList.func_150307_f(i));
-            this.getTalents(playerUUID).deserialize(talentList.func_150305_b(i), true);
+            UUID playerUUID = UUID.fromString(playerList.getString(i));
+            this.getTalents(playerUUID).deserializeNBT(talentList.getCompound(i));
          }
 
-         this.func_76185_a();
+         this.setDirty();
       }
    }
 
-   public CompoundNBT func_189551_b(CompoundNBT nbt) {
-      ListNBT playerList = new ListNBT();
-      ListNBT talentList = new ListNBT();
+   public CompoundTag save(CompoundTag nbt) {
+      ListTag playerList = new ListTag();
+      ListTag talentList = new ListTag();
       this.playerMap.forEach((uuid, talentTree) -> {
-         playerList.add(StringNBT.func_229705_a_(uuid.toString()));
+         playerList.add(StringTag.valueOf(uuid.toString()));
          talentList.add(talentTree.serializeNBT());
       });
-      nbt.func_218657_a("PlayerEntries", playerList);
-      nbt.func_218657_a("TalentEntries", talentList);
+      nbt.put("PlayerEntries", playerList);
+      nbt.put("TalentEntries", talentList);
       return nbt;
    }
 
-   public static PlayerTalentsData get(ServerWorld world) {
-      return get(world.func_73046_m());
+   public static PlayerTalentsData get(ServerLevel world) {
+      return get(world.getServer());
    }
 
    public static PlayerTalentsData get(MinecraftServer srv) {
-      return (PlayerTalentsData)srv.func_241755_D_().func_217481_x().func_215752_a(PlayerTalentsData::new, "the_vault_PlayerTalents");
+      return (PlayerTalentsData)srv.overworld().getDataStorage().computeIfAbsent(PlayerTalentsData::create, PlayerTalentsData::new, "the_vault_PlayerTalents");
    }
 }

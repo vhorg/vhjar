@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smoking",
+  "ingredient": {
+    "item": "the_vault:raw_vault_steak"
+  },
+  "result": "the_vault:cooked_vault_steak",
+  "experience": 1.0,
+  "cookingtime": 100
+}

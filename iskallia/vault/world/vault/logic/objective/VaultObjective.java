@@ -2,26 +2,21 @@ package iskallia.vault.world.vault.logic.objective;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Iterables;
-import iskallia.vault.block.entity.VaultLootableTileEntity;
 import iskallia.vault.block.item.LootStatueBlockItem;
-import iskallia.vault.config.LootTablesConfig;
-import iskallia.vault.init.ModBlocks;
+import iskallia.vault.config.LegacyLootTablesConfig;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.nbt.VListNBT;
 import iskallia.vault.util.PlayerFilter;
-import iskallia.vault.util.StatueType;
-import iskallia.vault.util.VaultRarity;
 import iskallia.vault.world.data.EternalsData;
-import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.VaultGenerator;
 import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutGenerator;
 import iskallia.vault.world.vault.logic.task.IVaultTask;
 import iskallia.vault.world.vault.logic.task.VaultTask;
-import iskallia.vault.world.vault.modifier.ArtifactChanceModifier;
-import iskallia.vault.world.vault.modifier.InventoryRestoreModifier;
+import iskallia.vault.world.vault.modifier.VaultModifiers;
+import iskallia.vault.world.vault.modifier.modifier.ChanceArtifactModifier;
+import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.player.VaultRunner;
 import iskallia.vault.world.vault.time.VaultTimer;
@@ -30,38 +25,36 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootTable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, IVaultTask {
+public abstract class VaultObjective implements INBTSerializable<CompoundTag>, IVaultTask {
    public static final BiMap<ResourceLocation, Supplier<? extends VaultObjective>> REGISTRY = HashBiMap.create();
    public static final float COOP_DOUBLE_CRATE_CHANCE = 0.5F;
    protected static final Random rand = new Random();
    private ResourceLocation id;
-   protected VaultTask onTick;
+   private VaultTask onTick;
    private VaultTask onComplete;
    private boolean completed;
    private int completionTime = -1;
-   protected VListNBT<VaultObjective.Crate, CompoundNBT> crates = VListNBT.of(() -> new VaultObjective.Crate());
+   protected VListNBT<VaultObjective.Crate, CompoundTag> crates = VListNBT.of(VaultObjective.Crate::new);
 
    protected VaultObjective() {
    }
@@ -99,20 +92,20 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
    }
 
    @Nullable
-   public ITextComponent getObjectiveTargetDescription(int amount) {
+   public Component getObjectiveTargetDescription(int amount) {
       return null;
    }
 
    @Nonnull
-   public abstract BlockState getObjectiveRelevantBlock(VaultRaid var1, ServerWorld var2, BlockPos var3);
+   public abstract BlockState getObjectiveRelevantBlock(VaultRaid var1, ServerLevel var2, BlockPos var3);
 
-   public void postProcessObjectiveRelevantBlock(ServerWorld world, BlockPos pos) {
+   public void postProcessObjectiveRelevantBlock(ServerLevel world, BlockPos pos) {
    }
 
    @Nullable
    public abstract LootTable getRewardLootTable(VaultRaid var1, Function<ResourceLocation, LootTable> var2);
 
-   public abstract ITextComponent getObjectiveDisplayName();
+   public abstract Component getObjectiveDisplayName();
 
    @Nonnull
    public Supplier<? extends VaultGenerator> getVaultGenerator() {
@@ -124,8 +117,8 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
       return null;
    }
 
-   public ITextComponent getVaultName() {
-      return new StringTextComponent("Vault");
+   public Component getVaultName() {
+      return new TextComponent("Vault");
    }
 
    @Deprecated
@@ -134,10 +127,6 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
    }
 
    public int modifyObjectiveCount(int objectives) {
-      return objectives;
-   }
-
-   public int modifyMinimumObjectiveCount(int objectives, int requiredAmount) {
       return objectives;
    }
 
@@ -177,10 +166,10 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
       return false;
    }
 
-   public void notifyBail(VaultRaid vault, VaultPlayer player, ServerWorld world) {
+   public void notifyBail(VaultRaid vault, VaultPlayer player, ServerLevel world) {
    }
 
-   public void tick(VaultRaid vault, PlayerFilter filter, ServerWorld world) {
+   public void tick(VaultRaid vault, PlayerFilter filter, ServerLevel world) {
       if (!this.isCompleted()) {
          vault.getPlayers().forEach(vPlayer -> {
             if (filter.test(vPlayer.getPlayerId())) {
@@ -191,15 +180,15 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
    }
 
    @Override
-   public void execute(VaultRaid vault, VaultPlayer player, ServerWorld world) {
+   public void execute(VaultRaid vault, VaultPlayer player, ServerLevel world) {
       this.onComplete.execute(vault, player, world);
    }
 
-   public void complete(VaultRaid vault, VaultPlayer player, ServerWorld world) {
+   public void complete(VaultRaid vault, VaultPlayer player, ServerLevel world) {
       this.onComplete.execute(vault, player, world);
    }
 
-   public void complete(VaultRaid vault, ServerWorld world) {
+   public void complete(VaultRaid vault, ServerLevel world) {
       vault.getPlayers().forEach(player -> this.onComplete.execute(vault, player, world));
    }
 
@@ -213,30 +202,30 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
       return this;
    }
 
-   protected NonNullList<ItemStack> createLoot(ServerWorld world, VaultRaid vault, LootContext context) {
-      LootTable rewardLootTable = this.getRewardLootTable(vault, world.func_73046_m().func_200249_aQ()::func_186521_a);
+   protected NonNullList<ItemStack> createLoot(ServerLevel world, VaultRaid vault, LootContext context) {
+      LootTable rewardLootTable = this.getRewardLootTable(vault, world.getServer().getLootTables()::get);
       if (rewardLootTable == null) {
-         return NonNullList.func_191196_a();
+         return NonNullList.create();
       } else {
-         NonNullList<ItemStack> stacks = NonNullList.func_191196_a();
-         NonNullList<ItemStack> specialLoot = NonNullList.func_191196_a();
+         NonNullList<ItemStack> stacks = NonNullList.create();
+         NonNullList<ItemStack> specialLoot = NonNullList.create();
          this.addSpecialLoot(world, vault, context, specialLoot);
-         stacks.addAll(rewardLootTable.func_216113_a(context));
+         stacks.addAll(rewardLootTable.getRandomItems(context));
          vault.getPlayers().stream().filter(player -> player instanceof VaultRunner).findAny().ifPresent(vPlayer -> {
             VaultTimer timer = vPlayer.getTimer();
-            float pTimeLeft = MathHelper.func_76131_a(1.0F - (float)timer.getRunTime() / timer.getTotalTime(), 0.0F, 1.0F);
+            float pTimeLeft = Mth.clamp(1.0F - (float)timer.getRunTime() / timer.getTotalTime(), 0.0F, 1.0F);
             List<ItemStack> additionalLoot = new ArrayList<>();
-            additionalLoot.addAll(rewardLootTable.func_216113_a(context));
-            additionalLoot.addAll(rewardLootTable.func_216113_a(context));
+            additionalLoot.addAll(rewardLootTable.getRandomItems(context));
+            additionalLoot.addAll(rewardLootTable.getRandomItems(context));
             int rolls = Math.round(additionalLoot.size() * pTimeLeft);
             if (rolls > 0) {
                stacks.addAll(additionalLoot.subList(0, rolls));
             }
          });
-         stacks.removeIf(ItemStack::func_190926_b);
+         stacks.removeIf(ItemStack::isEmpty);
 
          for (int i = 0; i < stacks.size() - 54 + specialLoot.size(); i++) {
-            stacks.remove(world.field_73012_v.nextInt(stacks.size()));
+            stacks.remove(world.random.nextInt(stacks.size()));
          }
 
          stacks.addAll(specialLoot);
@@ -245,86 +234,69 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
       }
    }
 
-   protected void addSpecialLoot(ServerWorld world, VaultRaid vault, LootContext context, NonNullList<ItemStack> stacks) {
+   protected void addSpecialLoot(ServerLevel world, VaultRaid vault, LootContext context, NonNullList<ItemStack> stacks) {
       int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
-      LootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(level);
+      LegacyLootTablesConfig.Level config = ModConfigs.LOOT_TABLES.getForLevel(level);
       int eternals = EternalsData.get(world).getTotalEternals();
       if (eternals > 0) {
-         stacks.add(new ItemStack(ModItems.ETERNAL_SOUL, Math.min(world.field_73012_v.nextInt(eternals) + 1, 64)));
+         stacks.add(new ItemStack(ModItems.ETERNAL_SOUL, Math.min(world.random.nextInt(eternals) + 1, 64)));
       }
 
       if (vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false)) {
          String name = vault.getProperties().getValue(VaultRaid.PLAYER_BOSS_NAME);
-         stacks.add(LootStatueBlockItem.getStatueBlockItem(name, StatueType.VAULT_BOSS));
-         if (world.field_73012_v.nextInt(4) != 0) {
+         stacks.add(LootStatueBlockItem.getStatueBlockItem(name));
+         if (world.random.nextInt(4) != 0) {
          }
       }
 
-      int traders = ModConfigs.SCALING_CHEST_REWARDS.traderCount(this.getId(), VaultRarity.COMMON, level);
-
-      for (int i = 0; i < traders; i++) {
-         stacks.add(new ItemStack(ModItems.TRADER_CORE));
-      }
-
-      int statues = ModConfigs.SCALING_CHEST_REWARDS.statueCount(this.getId(), VaultRarity.COMMON, level);
-
-      for (int i = 0; i < statues; i++) {
-         ItemStack statue = new ItemStack(ModBlocks.GIFT_NORMAL_STATUE);
-         if (ModConfigs.SCALING_CHEST_REWARDS.isMegaStatue()) {
-            statue = new ItemStack(ModBlocks.GIFT_MEGA_STATUE);
-         }
-
-         stacks.add(statue);
-      }
-
-      boolean cannotGetArtifact = vault.getActiveModifiersFor(PlayerFilter.any(), InventoryRestoreModifier.class)
-         .stream()
-         .anyMatch(InventoryRestoreModifier::preventsArtifact);
+      boolean cannotGetArtifact = vault.hasActiveModifierFor(PlayerFilter.any(), PlayerInventoryRestoreModifier.class, m -> m.properties().preventsArtifact());
       if (!cannotGetArtifact && config != null) {
          float chance = config.getArtifactChance();
 
-         for (ArtifactChanceModifier modifier : vault.getActiveModifiersFor(PlayerFilter.any(), ArtifactChanceModifier.class)) {
-            chance += modifier.getArtifactChanceIncrease();
+         for (VaultModifiers.ActiveModifierStack<ChanceArtifactModifier> activeModifier : vault.getActiveModifiersFor(
+            PlayerFilter.any(), ChanceArtifactModifier.class
+         )) {
+            chance += activeModifier.getModifier().properties().getChance() * activeModifier.getSize();
          }
 
          if (vault.getProperties().getBaseOrDefault(VaultRaid.COW_VAULT, false)) {
             chance *= 2.0F;
          }
 
-         if (world.func_201674_k().nextFloat() < chance) {
+         if (world.getRandom().nextFloat() < chance) {
             stacks.add(new ItemStack(ModItems.UNIDENTIFIED_ARTIFACT));
          }
       }
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Id", this.getId().toString());
-      nbt.func_74757_a("Completed", this.isCompleted());
-      nbt.func_218657_a("OnTick", this.onTick.serializeNBT());
-      nbt.func_218657_a("OnComplete", this.onComplete.serializeNBT());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putString("Id", this.getId().toString());
+      nbt.putBoolean("Completed", this.isCompleted());
+      nbt.put("OnTick", this.onTick.serializeNBT());
+      nbt.put("OnComplete", this.onComplete.serializeNBT());
       if (this.getCompletionTime() != -1) {
-         nbt.func_74768_a("CompletionTime", this.getCompletionTime());
+         nbt.putInt("CompletionTime", this.getCompletionTime());
       }
 
-      nbt.func_218657_a("Crates", this.crates.serializeNBT());
+      nbt.put("Crates", this.crates.serializeNBT());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      this.id = new ResourceLocation(nbt.func_74779_i("Id"));
-      this.completed = nbt.func_74767_n("Completed");
-      this.onTick = VaultTask.fromNBT(nbt.func_74775_l("OnTick"));
-      this.onComplete = VaultTask.fromNBT(nbt.func_74775_l("OnComplete"));
-      if (nbt.func_150297_b("CompletionTime", 3)) {
-         this.completionTime = nbt.func_74762_e("CompletionTime");
+   public void deserializeNBT(CompoundTag nbt) {
+      this.id = new ResourceLocation(nbt.getString("Id"));
+      this.completed = nbt.getBoolean("Completed");
+      this.onTick = VaultTask.fromNBT(nbt.getCompound("OnTick"));
+      this.onComplete = VaultTask.fromNBT(nbt.getCompound("OnComplete"));
+      if (nbt.contains("CompletionTime", 3)) {
+         this.completionTime = nbt.getInt("CompletionTime");
       }
 
-      this.crates.deserializeNBT(nbt.func_150295_c("Crates", 10));
+      this.crates.deserializeNBT(nbt.getList("Crates", 10));
    }
 
-   public static VaultObjective fromNBT(CompoundNBT nbt) {
-      VaultObjective objective = (VaultObjective)((Supplier)REGISTRY.get(new ResourceLocation(nbt.func_74779_i("Id")))).get();
+   public static VaultObjective fromNBT(CompoundTag nbt) {
+      VaultObjective objective = (VaultObjective)((Supplier)REGISTRY.get(new ResourceLocation(nbt.getString("Id")))).get();
       objective.deserializeNBT(nbt);
       return objective;
    }
@@ -339,28 +311,7 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
       return objective;
    }
 
-   public static VaultLootableTileEntity.ExtendedGenerator getObjectiveBlock() {
-      return new VaultLootableTileEntity.ExtendedGenerator() {
-         @Nonnull
-         @Override
-         public BlockState generate(ServerWorld world, BlockPos pos, Random random, String poolName, UUID playerUUID) {
-            VaultRaid vault = VaultRaidData.get(world).getAt(world, pos);
-            VaultObjective objective = (VaultObjective)Iterables.getFirst(vault.getAllObjectives(), null);
-            return objective == null ? Blocks.field_150350_a.func_176223_P() : objective.getObjectiveRelevantBlock(vault, world, pos);
-         }
-
-         @Override
-         public void postProcess(ServerWorld world, BlockPos pos) {
-            VaultRaid vault = VaultRaidData.get(world).getAt(world, pos);
-            VaultObjective objective = (VaultObjective)Iterables.getFirst(vault.getAllObjectives(), null);
-            if (objective != null) {
-               objective.postProcessObjectiveRelevantBlock(world, pos);
-            }
-         }
-      };
-   }
-
-   public static class Crate implements INBTSerializable<CompoundNBT> {
+   public static class Crate implements INBTSerializable<CompoundTag> {
       private List<ItemStack> contents = new ArrayList<>();
 
       private Crate() {
@@ -374,18 +325,18 @@ public abstract class VaultObjective implements INBTSerializable<CompoundNBT>, I
          return this.contents;
       }
 
-      public CompoundNBT serializeNBT() {
-         CompoundNBT nbt = new CompoundNBT();
-         ListNBT contentsList = new ListNBT();
-         this.contents.forEach(stack -> contentsList.add(stack.func_77955_b(new CompoundNBT())));
-         nbt.func_218657_a("Contents", contentsList);
+      public CompoundTag serializeNBT() {
+         CompoundTag nbt = new CompoundTag();
+         ListTag contentsList = new ListTag();
+         this.contents.forEach(stack -> contentsList.add(stack.save(new CompoundTag())));
+         nbt.put("Contents", contentsList);
          return nbt;
       }
 
-      public void deserializeNBT(CompoundNBT nbt) {
+      public void deserializeNBT(CompoundTag nbt) {
          this.contents.clear();
-         ListNBT contentsList = nbt.func_150295_c("Contents", 10);
-         contentsList.stream().map(inbt -> (CompoundNBT)inbt).forEach(compoundNBT -> this.contents.add(ItemStack.func_199557_a(compoundNBT)));
+         ListTag contentsList = nbt.getList("Contents", 10);
+         contentsList.stream().map(inbt -> (CompoundTag)inbt).forEach(compoundNBT -> this.contents.add(ItemStack.of(compoundNBT)));
       }
    }
 }

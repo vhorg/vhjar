@@ -4,11 +4,11 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.EnchantedBookEntry;
 import java.util.LinkedList;
 import java.util.List;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
 
 public class OverLevelEnchantConfig extends Config {
    @Expose
@@ -28,24 +28,24 @@ public class OverLevelEnchantConfig extends Config {
       return null;
    }
 
-   public IFormattableTextComponent getPrefixFor(int overlevel) {
+   public MutableComponent getPrefixFor(int overlevel) {
       EnchantedBookEntry tier = this.getTier(overlevel);
       if (tier == null) {
          return null;
       } else {
-         StringTextComponent prefix = new StringTextComponent(tier.getPrefix() + " ");
-         prefix.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240745_a_(tier.getColorHex())));
+         TextComponent prefix = new TextComponent(tier.getPrefix() + " ");
+         prefix.setStyle(Style.EMPTY.withColor(TextColor.parseColor(tier.getColorHex())));
          return prefix;
       }
    }
 
-   public IFormattableTextComponent format(ITextComponent baseName, int overlevel) {
+   public MutableComponent format(Component baseName, int overlevel) {
       EnchantedBookEntry tier = this.getTier(overlevel);
       if (tier == null) {
          return null;
       } else {
-         IFormattableTextComponent prefix = new StringTextComponent(tier.getPrefix() + " ").func_230529_a_(baseName);
-         prefix.func_230530_a_(Style.field_240709_b_.func_240718_a_(Color.func_240745_a_(tier.getColorHex())));
+         MutableComponent prefix = new TextComponent(tier.getPrefix() + " ").append(baseName);
+         prefix.setStyle(Style.EMPTY.withColor(TextColor.parseColor(tier.getColorHex())));
          return prefix;
       }
    }

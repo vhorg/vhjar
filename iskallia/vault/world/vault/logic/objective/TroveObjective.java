@@ -7,16 +7,16 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.loot.LootTable;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootTable;
 
 public class TroveObjective extends VaultObjective {
    public TroveObjective(ResourceLocation id) {
@@ -25,8 +25,8 @@ public class TroveObjective extends VaultObjective {
 
    @Nonnull
    @Override
-   public BlockState getObjectiveRelevantBlock(VaultRaid vault, ServerWorld world, BlockPos pos) {
-      return Blocks.field_150350_a.func_176223_P();
+   public BlockState getObjectiveRelevantBlock(VaultRaid vault, ServerLevel world, BlockPos pos) {
+      return Blocks.AIR.defaultBlockState();
    }
 
    @Nullable
@@ -36,13 +36,13 @@ public class TroveObjective extends VaultObjective {
    }
 
    @Override
-   public ITextComponent getObjectiveDisplayName() {
+   public Component getObjectiveDisplayName() {
       return this.getVaultName();
    }
 
    @Override
-   public ITextComponent getVaultName() {
-      return new StringTextComponent("Vault Trove").func_240699_a_(TextFormatting.GOLD);
+   public Component getVaultName() {
+      return new TextComponent("Vault Trove").withStyle(ChatFormatting.GOLD);
    }
 
    @Override

@@ -4,57 +4,57 @@ import iskallia.vault.block.entity.FinalVaultFrameTileEntity;
 import iskallia.vault.init.ModBlocks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalBlock;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.PushReaction;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.Property;
-import net.minecraft.state.StateContainer.Builder;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber
-public class FinalVaultFrameBlock extends Block {
-   public static final DirectionProperty FACING = HorizontalBlock.field_185512_D;
+public class FinalVaultFrameBlock extends Block implements EntityBlock {
+   public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
    public FinalVaultFrameBlock() {
-      super(Properties.func_200945_a(Material.field_151576_e).func_200947_a(SoundType.field_185851_d).func_200948_a(2.0F, 3600000.0F).func_226896_b_());
+      super(Properties.of(Material.STONE).sound(SoundType.STONE).strength(2.0F, 3600000.0F).noOcclusion());
    }
 
-   protected void func_206840_a(Builder<Block, BlockState> builder) {
-      builder.func_206894_a(new Property[]{FACING});
+   protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+      builder.add(new Property[]{FACING});
    }
 
    @Nullable
-   public BlockState func_196258_a(BlockItemUseContext context) {
-      return (BlockState)this.func_176223_P().func_206870_a(FACING, context.func_195992_f().func_176734_d());
+   public BlockState getStateForPlacement(BlockPlaceContext context) {
+      return (BlockState)this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
    }
 
    @SubscribeEvent
    public static void onBlockHit(LeftClickBlock event) {
       if (event.isCancelable()) {
-         PlayerEntity player = event.getPlayer();
-         if (!player.func_184812_l_()) {
-            FinalVaultFrameTileEntity tileEntity = FinalVaultFrameTileEntity.get(player.field_70170_p, event.getPos());
+         Player player = event.getPlayer();
+         if (!player.isCreative()) {
+            FinalVaultFrameTileEntity tileEntity = FinalVaultFrameTileEntity.get(player.level, event.getPos());
             if (tileEntity != null) {
-               if (!tileEntity.getOwnerUUID().equals(player.func_110124_au())) {
+               if (!tileEntity.getOwnerUUID().equals(player.getUUID())) {
                   event.setCanceled(true);
                }
             }
@@ -62,63 +62,54 @@ public class FinalVaultFrameBlock extends Block {
       }
    }
 
-   public boolean isToolEffective(BlockState state, ToolType tool) {
-      return tool == ToolType.PICKAXE;
-   }
-
    @Nonnull
-   public PushReaction func_149656_h(@Nonnull BlockState state) {
+   public PushReaction getPistonPushReaction(@Nonnull BlockState state) {
       return PushReaction.BLOCK;
    }
 
-   public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader world, BlockPos pos, PlayerEntity player) {
-      ItemStack itemStack = new ItemStack(this.getBlock());
-      FinalVaultFrameTileEntity tileEntity = FinalVaultFrameTileEntity.get(world, pos);
-      CompoundNBT entityNBT = new CompoundNBT();
+   public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+      ItemStack itemStack = new ItemStack(this);
+      FinalVaultFrameTileEntity tileEntity = FinalVaultFrameTileEntity.get(level, pos);
+      CompoundTag entityNBT = new CompoundTag();
       if (tileEntity != null) {
          tileEntity.writeToEntityTag(entityNBT);
       }
 
-      itemStack.func_196082_o().func_218657_a("BlockEntityTag", entityNBT);
+      itemStack.getOrCreateTag().put("BlockEntityTag", entityNBT);
       return itemStack;
    }
 
-   public void func_180633_a(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nullable LivingEntity placer, @Nonnull ItemStack stack) {
-      if (!world.func_201670_d()) {
-         CompoundNBT tag = stack.func_179543_a("BlockEntityTag");
+   public void setPlacedBy(@Nonnull Level world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nullable LivingEntity placer, @Nonnull ItemStack stack) {
+      if (!world.isClientSide()) {
+         CompoundTag tag = stack.getTagElement("BlockEntityTag");
          if (tag != null) {
             FinalVaultFrameTileEntity tileEntity = FinalVaultFrameTileEntity.get(world, pos);
             if (tileEntity != null) {
                tileEntity.loadFromNBT(tag);
-               super.func_180633_a(world, pos, state, placer, stack);
+               super.setPlacedBy(world, pos, state, placer, stack);
             }
          }
       }
    }
 
-   public void func_176208_a(@Nonnull World world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull PlayerEntity player) {
-      if (!world.field_72995_K && !player.func_184812_l_()) {
+   public void playerWillDestroy(@Nonnull Level world, @Nonnull BlockPos pos, @Nonnull BlockState state, @Nonnull Player player) {
+      if (!world.isClientSide && !player.isCreative()) {
          FinalVaultFrameTileEntity tileEntity = FinalVaultFrameTileEntity.get(world, pos);
          if (tileEntity != null) {
-            ItemStack itemStack = new ItemStack(this.getBlock());
-            CompoundNBT entityNBT = new CompoundNBT();
+            ItemStack itemStack = new ItemStack(this);
+            CompoundTag entityNBT = new CompoundTag();
             tileEntity.writeToEntityTag(entityNBT);
-            itemStack.func_196082_o().func_218657_a("BlockEntityTag", entityNBT);
-            ItemEntity itemEntity = new ItemEntity(world, pos.func_177958_n() + 0.5, pos.func_177956_o() + 0.5, pos.func_177952_p() + 0.5, itemStack);
-            itemEntity.func_174869_p();
-            world.func_217376_c(itemEntity);
+            itemStack.getOrCreateTag().put("BlockEntityTag", entityNBT);
+            ItemEntity itemEntity = new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, itemStack);
+            itemEntity.setDefaultPickUpDelay();
+            world.addFreshEntity(itemEntity);
          }
       }
 
-      super.func_176208_a(world, pos, state, player);
+      super.playerWillDestroy(world, pos, state, player);
    }
 
-   public boolean hasTileEntity(BlockState state) {
-      return true;
-   }
-
-   @Nullable
-   public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-      return ModBlocks.FINAL_VAULT_FRAME_TILE_ENTITY.func_200968_a();
+   public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+      return ModBlocks.FINAL_VAULT_FRAME_TILE_ENTITY.create(pos, state);
    }
 }

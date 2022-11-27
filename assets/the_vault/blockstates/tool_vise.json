@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "the_vault:block/tool_vise"
+    },
+    "axis=z": {
+      "model": "the_vault:block/tool_vise",
+      "y": 90
+    }
+  }
+}

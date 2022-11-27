@@ -1,80 +1,59 @@
 package iskallia.vault.block.entity;
 
-import iskallia.vault.Vault;
-import iskallia.vault.config.EtchingConfig;
-import iskallia.vault.entity.EtchingVendorEntity;
+import iskallia.vault.entity.entity.EtchingVendorEntity;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
-import iskallia.vault.item.gear.EtchingItem;
-import iskallia.vault.item.gear.VaultGear;
-import iskallia.vault.util.MathUtilities;
+import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
-public class EtchingVendorControllerTileEntity extends TileEntity implements ITickableTileEntity {
+public class EtchingVendorControllerTileEntity extends BlockEntity {
    private int monitoredEntityId = -1;
    private final List<EtchingVendorControllerTileEntity.EtchingTrade> trades = new ArrayList<>();
 
-   public EtchingVendorControllerTileEntity() {
-      super(ModBlocks.ETCHING_CONTROLLER_TILE_ENTITY);
+   public EtchingVendorControllerTileEntity(BlockPos pos, BlockState state) {
+      super(ModBlocks.ETCHING_CONTROLLER_TILE_ENTITY, pos, state);
    }
 
-   public void func_73660_a() {
-      if (!this.func_145831_w().func_201670_d() && this.func_145831_w() instanceof ServerWorld) {
-         if (this.func_145831_w().func_234923_W_() == Vault.VAULT_KEY) {
-            if (this.trades.isEmpty()) {
-               this.generateTrades();
-               this.sendUpdates();
+   public static void tick(Level level, BlockPos pos, BlockState state, EtchingVendorControllerTileEntity tile) {
+      if (!level.isClientSide()) {
+         if (ServerVaults.isVaultWorld(level)) {
+            if (tile.trades.isEmpty()) {
+               tile.sendUpdates();
             }
 
             Entity monitoredEntity;
-            if (this.monitoredEntityId == -1) {
-               monitoredEntity = this.createVendor();
-            } else if ((monitoredEntity = this.field_145850_b.func_73045_a(this.monitoredEntityId)) == null) {
-               monitoredEntity = this.createVendor();
+            if (tile.monitoredEntityId == -1) {
+               monitoredEntity = tile.createVendor();
+            } else if ((monitoredEntity = level.getEntity(tile.monitoredEntityId)) == null) {
+               monitoredEntity = tile.createVendor();
             }
 
-            monitoredEntity.func_70107_b(
-               this.field_174879_c.func_177958_n() + 0.5, this.field_174879_c.func_177956_o(), this.field_174879_c.func_177952_p() + 0.5
-            );
+            monitoredEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
          }
       }
    }
 
    private Entity createVendor() {
-      ServerWorld sWorld = (ServerWorld)this.func_145831_w();
+      ServerLevel sWorld = (ServerLevel)this.getLevel();
       EtchingVendorEntity vendor = (EtchingVendorEntity)ModEntities.ETCHING_VENDOR
-         .func_220349_b(sWorld, null, null, null, this.func_174877_v(), SpawnReason.STRUCTURE, false, false);
-      vendor.setVendorPos(this.func_174877_v());
-      sWorld.func_217376_c(vendor);
-      this.monitoredEntityId = vendor.func_145782_y();
+         .create(sWorld, null, null, null, this.getBlockPos(), MobSpawnType.STRUCTURE, false, false);
+      vendor.setVendorPos(this.getBlockPos());
+      sWorld.addFreshEntity(vendor);
+      this.monitoredEntityId = vendor.getId();
       return vendor;
-   }
-
-   private void generateTrades() {
-      new Random();
-
-      for (int i = 0; i < 3; i++) {
-         VaultGear.Set etchingSet = ModConfigs.ETCHING.getRandomSet();
-         EtchingConfig.Etching etching = ModConfigs.ETCHING.getFor(etchingSet);
-         ItemStack etchingStack = EtchingItem.createEtchingStack(etchingSet);
-         int amount = MathUtilities.getRandomInt(etching.minValue, etching.maxValue + 1);
-         this.trades.add(new EtchingVendorControllerTileEntity.EtchingTrade(etchingStack, amount, false));
-      }
    }
 
    public int getMonitoredEntityId() {
@@ -92,50 +71,40 @@ public class EtchingVendorControllerTileEntity extends TileEntity implements ITi
       return id >= 0 && id < this.trades.size() ? this.trades.get(id) : null;
    }
 
-   public void func_230337_a_(BlockState state, CompoundNBT nbt) {
-      super.func_230337_a_(state, nbt);
-      ListNBT trades = nbt.func_150295_c("trades", 10);
+   public void load(CompoundTag nbt) {
+      super.load(nbt);
+      ListTag trades = nbt.getList("trades", 10);
 
       for (int i = 0; i < trades.size(); i++) {
-         CompoundNBT tradeTag = trades.func_150305_b(i);
+         CompoundTag tradeTag = trades.getCompound(i);
          this.trades.add(EtchingVendorControllerTileEntity.EtchingTrade.deserialize(tradeTag));
       }
    }
 
-   public CompoundNBT func_189515_b(CompoundNBT compound) {
-      CompoundNBT tag = super.func_189515_b(compound);
-      ListNBT trades = new ListNBT();
+   protected void saveAdditional(CompoundTag pTag) {
+      super.saveAdditional(pTag);
+      ListTag trades = new ListTag();
 
       for (EtchingVendorControllerTileEntity.EtchingTrade trade : this.trades) {
          trades.add(trade.serialize());
       }
 
-      compound.func_218657_a("trades", trades);
-      return tag;
+      pTag.put("trades", trades);
    }
 
-   public CompoundNBT func_189517_E_() {
-      return this.func_189515_b(new CompoundNBT());
-   }
-
-   public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-      this.func_230337_a_(state, tag);
+   public CompoundTag getUpdateTag() {
+      return this.saveWithFullMetadata();
    }
 
    @Nullable
-   public SUpdateTileEntityPacket func_189518_D_() {
-      return new SUpdateTileEntityPacket(this.field_174879_c, 1, this.func_189517_E_());
-   }
-
-   public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-      CompoundNBT tag = pkt.func_148857_g();
-      this.handleUpdateTag(this.func_195044_w(), tag);
+   public ClientboundBlockEntityDataPacket getUpdatePacket() {
+      return ClientboundBlockEntityDataPacket.create(this);
    }
 
    public void sendUpdates() {
-      this.field_145850_b.func_184138_a(this.field_174879_c, this.func_195044_w(), this.func_195044_w(), 11);
-      this.field_145850_b.func_195593_d(this.field_174879_c, this.func_195044_w().func_177230_c());
-      this.func_70296_d();
+      this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 11);
+      this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
+      this.setChanged();
    }
 
    public static class EtchingTrade {
@@ -165,18 +134,18 @@ public class EtchingVendorControllerTileEntity extends TileEntity implements ITi
          return this.sold;
       }
 
-      public CompoundNBT serialize() {
-         CompoundNBT nbt = new CompoundNBT();
-         nbt.func_218657_a("stack", this.soldEtching.serializeNBT());
-         nbt.func_74768_a("amount", this.requiredPlatinum);
-         nbt.func_74757_a("sold", this.sold);
+      public CompoundTag serialize() {
+         CompoundTag nbt = new CompoundTag();
+         nbt.put("stack", this.soldEtching.serializeNBT());
+         nbt.putInt("amount", this.requiredPlatinum);
+         nbt.putBoolean("sold", this.sold);
          return nbt;
       }
 
-      public static EtchingVendorControllerTileEntity.EtchingTrade deserialize(CompoundNBT nbt) {
-         ItemStack stack = ItemStack.func_199557_a(nbt.func_74775_l("stack"));
-         int amount = nbt.func_74762_e("amount");
-         boolean sold = nbt.func_74767_n("sold");
+      public static EtchingVendorControllerTileEntity.EtchingTrade deserialize(CompoundTag nbt) {
+         ItemStack stack = ItemStack.of(nbt.getCompound("stack"));
+         int amount = nbt.getInt("amount");
+         boolean sold = nbt.getBoolean("sold");
          return new EtchingVendorControllerTileEntity.EtchingTrade(stack, amount, sold);
       }
    }

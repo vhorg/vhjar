@@ -2,107 +2,102 @@ package iskallia.vault.world.gen.structure;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-import iskallia.vault.Vault;
-import java.util.function.Supplier;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MutableBoundingBox;
-import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.ChunkGenerator;
-import net.minecraft.world.gen.GenerationStage.Decoration;
-import net.minecraft.world.gen.feature.IFeatureConfig;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPattern;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPatternRegistry;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPiece;
-import net.minecraft.world.gen.feature.jigsaw.JigsawPattern.PlacementBehaviour;
-import net.minecraft.world.gen.feature.structure.AbstractVillagePiece;
-import net.minecraft.world.gen.feature.structure.MarginedStructureStart;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.gen.feature.structure.VillageConfig;
-import net.minecraft.world.gen.feature.structure.Structure.IStartFactory;
-import net.minecraft.world.gen.feature.template.ProcessorLists;
-import net.minecraft.world.gen.feature.template.TemplateManager;
+import iskallia.vault.VaultMod;
+import iskallia.vault.init.ModStructures;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.data.worldgen.ProcessorLists;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.levelgen.GenerationStep.Decoration;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfiguration;
+import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructurePiece;
+import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.pieces.PiecesContainer;
+import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElement;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool.Projection;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
-public class ArenaStructure extends Structure<ArenaStructure.Config> {
+public class ArenaStructure extends StructureFeature<JigsawConfiguration> {
    public static final int START_Y = 32;
 
-   public ArenaStructure(Codec<ArenaStructure.Config> config) {
-      super(config);
+   public ArenaStructure() {
+      super(JigsawConfiguration.CODEC, context -> Optional.empty());
    }
 
-   public Decoration func_236396_f_() {
+   public Decoration step() {
       return Decoration.UNDERGROUND_STRUCTURES;
    }
 
-   public IStartFactory<ArenaStructure.Config> func_214557_a() {
-      return (p_242778_1_, p_242778_2_, p_242778_3_, p_242778_4_, p_242778_5_, p_242778_6_) -> new ArenaStructure.Start(
-         this, p_242778_2_, p_242778_3_, p_242778_4_, p_242778_5_, p_242778_6_
-      );
+   public ArenaStructure.Feature configured(JigsawConfiguration config) {
+      return new ArenaStructure.Feature(this, config, BuiltinRegistries.BIOME.getOrCreateTag(ModStructures.EMPTY), false, new HashMap<>());
    }
 
-   public static class Config implements IFeatureConfig {
-      public static final Codec<ArenaStructure.Config> CODEC = RecordCodecBuilder.create(
-         builder -> builder.group(
-               JigsawPattern.field_244392_b_.fieldOf("start_pool").forGetter(ArenaStructure.Config::getStartPool),
-               Codec.intRange(0, Integer.MAX_VALUE).fieldOf("size").forGetter(ArenaStructure.Config::getSize)
-            )
-            .apply(builder, ArenaStructure.Config::new)
-      );
-      private final Supplier<JigsawPattern> startPool;
-      private final int size;
+   public static class Feature extends ConfiguredStructureFeature<JigsawConfiguration, ArenaStructure> implements IRegistryIdentifiable {
+      private ResourceLocation id;
 
-      public Config(Supplier<JigsawPattern> startPool, int size) {
-         this.startPool = startPool;
-         this.size = size;
+      public Feature(
+         ArenaStructure structure,
+         JigsawConfiguration config,
+         HolderSet<Biome> biomes,
+         boolean adaptNoise,
+         Map<MobCategory, StructureSpawnOverride> spawnOverrides
+      ) {
+         super(structure, config, biomes, adaptNoise, spawnOverrides);
       }
 
-      public int getSize() {
-         return this.size;
+      @Override
+      public ResourceLocation getId() {
+         return this.id;
       }
 
-      public Supplier<JigsawPattern> getStartPool() {
-         return this.startPool;
+      @Override
+      public void setId(ResourceLocation id) {
+         this.id = id;
       }
 
-      public VillageConfig toVillageConfig() {
-         return new VillageConfig(this.getStartPool(), this.getSize());
+      public StructureStart generate(
+         ChunkPos chunkPos, RegistryAccess registry, ChunkGenerator gen, StructureManager manager, int references, long worldSeed, LevelHeightAccessor height
+      ) {
+         BlockPos blockPos = new BlockPos(chunkPos.x * 16, 32, chunkPos.z * 16);
+         List<StructurePiece> pieceList = new ArrayList<>();
+         JigsawGeneratorLegacy.addPieces(
+            registry, (JigsawConfiguration)this.config, PoolElementStructurePiece::new, gen, manager, blockPos, pieceList, new Random(), false, false, height
+         );
+         StructureStart start = new StructureStart(this, chunkPos, references, new PiecesContainer(pieceList));
+         return start.isValid() ? start : StructureStart.INVALID_START;
       }
    }
 
    public static class Pools {
-      public static final JigsawPattern START = JigsawPatternRegistry.func_244094_a(
-         new JigsawPattern(
-            Vault.id("arena/starts"),
+      public static Holder<StructureTemplatePool> START = net.minecraft.data.worldgen.Pools.register(
+         new StructureTemplatePool(
+            VaultMod.id("arena/starts"),
             new ResourceLocation("empty"),
-            ImmutableList.of(Pair.of(JigsawPiece.func_242861_b(Vault.sId("arena/arena1/p_p"), ProcessorLists.field_244101_a), 1)),
-            PlacementBehaviour.RIGID
+            ImmutableList.of(Pair.of(StructurePoolElement.single(VaultMod.sId("arena/arena1/p_p"), ProcessorLists.EMPTY), 1)),
+            Projection.RIGID
          )
       );
 
       public static void init() {
-      }
-   }
-
-   public static class Start extends MarginedStructureStart<ArenaStructure.Config> {
-      private final ArenaStructure structure;
-
-      public Start(ArenaStructure structure, int chunkX, int chunkZ, MutableBoundingBox box, int references, long worldSeed) {
-         super(structure, chunkX, chunkZ, box, references, worldSeed);
-         this.structure = structure;
-      }
-
-      public void func_230364_a_(
-         DynamicRegistries registry, ChunkGenerator gen, TemplateManager manager, int chunkX, int chunkZ, Biome biome, ArenaStructure.Config config
-      ) {
-         BlockPos blockpos = new BlockPos(chunkX * 16, 32, chunkZ * 16);
-         ArenaStructure.Pools.init();
-         JigsawGeneratorLegacy.func_242837_a(
-            registry, config.toVillageConfig(), AbstractVillagePiece::new, gen, manager, blockpos, this.field_75075_a, this.field_214631_d, false, false
-         );
-         this.func_202500_a();
       }
    }
 }

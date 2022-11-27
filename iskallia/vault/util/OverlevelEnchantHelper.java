@@ -3,24 +3,24 @@ package iskallia.vault.util;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class OverlevelEnchantHelper {
    public static int getOverlevels(ItemStack enchantedBookStack) {
-      Map<Enchantment, Integer> enchantments = EnchantmentHelper.func_82781_a(enchantedBookStack);
+      Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(enchantedBookStack);
 
       for (Enchantment enchantment : enchantments.keySet()) {
          int level = enchantments.get(enchantment);
-         if (level > enchantment.func_77325_b()) {
-            return level - enchantment.func_77325_b();
+         if (level > enchantment.getMaxLevel()) {
+            return level - enchantment.getMaxLevel();
          }
       }
 
@@ -28,14 +28,14 @@ public class OverlevelEnchantHelper {
    }
 
    public static Map<Enchantment, Integer> getEnchantments(ItemStack stack) {
-      CompoundNBT nbt = Optional.ofNullable(stack.func_77978_p()).orElseGet(CompoundNBT::new);
-      ListNBT enchantmentsNBT = nbt.func_150295_c(stack.func_77973_b() == Items.field_151134_bR ? "StoredEnchantments" : "Enchantments", 10);
+      CompoundTag nbt = Optional.ofNullable(stack.getTag()).orElseGet(CompoundTag::new);
+      ListTag enchantmentsNBT = nbt.getList(stack.getItem() == Items.ENCHANTED_BOOK ? "StoredEnchantments" : "Enchantments", 10);
       HashMap<Enchantment, Integer> enchantments = new HashMap<>();
 
       for (int i = 0; i < enchantmentsNBT.size(); i++) {
-         CompoundNBT enchantmentNBT = enchantmentsNBT.func_150305_b(i);
-         ResourceLocation id = new ResourceLocation(enchantmentNBT.func_74779_i("id"));
-         int level = enchantmentNBT.func_74762_e("lvl");
+         CompoundTag enchantmentNBT = enchantmentsNBT.getCompound(i);
+         ResourceLocation id = new ResourceLocation(enchantmentNBT.getString("id"));
+         int level = enchantmentNBT.getInt("lvl");
          Enchantment enchantment = (Enchantment)ForgeRegistries.ENCHANTMENTS.getValue(id);
          if (enchantment != null) {
             enchantments.put(enchantment, level);
@@ -46,10 +46,18 @@ public class OverlevelEnchantHelper {
    }
 
    public static ItemStack increaseFortuneBy(ItemStack itemStack, int amount) {
-      Map<Enchantment, Integer> enchantments = EnchantmentHelper.func_82781_a(itemStack);
-      int level = enchantments.getOrDefault(Enchantments.field_185308_t, 0);
-      enchantments.put(Enchantments.field_185308_t, level + amount);
-      EnchantmentHelper.func_82782_a(enchantments, itemStack);
+      Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+      int level = enchantments.getOrDefault(Enchantments.BLOCK_FORTUNE, 0);
+      enchantments.put(Enchantments.BLOCK_FORTUNE, level + amount);
+      EnchantmentHelper.setEnchantments(enchantments, itemStack);
+      return itemStack;
+   }
+
+   public static ItemStack increaseUnbreakingBy(ItemStack itemStack, int amount) {
+      Map<Enchantment, Integer> enchantments = EnchantmentHelper.getEnchantments(itemStack);
+      int level = enchantments.getOrDefault(Enchantments.UNBREAKING, 0);
+      enchantments.put(Enchantments.UNBREAKING, level + amount);
+      EnchantmentHelper.setEnchantments(enchantments, itemStack);
       return itemStack;
    }
 }

@@ -25,9 +25,9 @@ public class ServerScheduler {
 
             while (iterator.hasNext()) {
                Tuple<Runnable, Counter> r = iterator.next();
-               ((Counter)r.func_76340_b()).decrement();
-               if (((Counter)r.func_76340_b()).getValue() <= 0) {
-                  ((Runnable)r.func_76341_a()).run();
+               ((Counter)r.getB()).decrement();
+               if (((Counter)r.getB()).getValue() <= 0) {
+                  ((Runnable)r.getA()).run();
                   iterator.remove();
                }
             }
@@ -35,7 +35,7 @@ public class ServerScheduler {
             this.inTick = false;
 
             for (Tuple<Runnable, Integer> wait : this.waiting) {
-               this.queue.addLast(new Tuple(wait.func_76341_a(), new Counter((Integer)wait.func_76340_b())));
+               this.queue.addLast(new Tuple((Runnable)wait.getA(), new Counter((Integer)wait.getB())));
             }
          }
 

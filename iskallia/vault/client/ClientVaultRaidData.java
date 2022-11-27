@@ -1,14 +1,15 @@
 package iskallia.vault.client;
 
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.client.vault.VaultMusicHandler;
 import iskallia.vault.client.vault.goal.VaultGoalData;
 import iskallia.vault.network.message.BossMusicMessage;
 import iskallia.vault.network.message.VaultModifierMessage;
 import iskallia.vault.network.message.VaultOverlayMessage;
+import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.vault.modifier.VaultModifiers;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
@@ -60,8 +61,8 @@ public class ClientVaultRaidData {
    @SubscribeEvent
    public static void onTick(ClientTickEvent event) {
       if (event.phase != Phase.END) {
-         World clientWorld = Minecraft.func_71410_x().field_71441_e;
-         if (clientWorld != null && clientWorld.func_234923_W_() != Vault.VAULT_KEY) {
+         Level clientWorld = Minecraft.getInstance().level;
+         if (clientWorld != null && !ServerVaults.isVaultWorld(clientWorld.dimension()) && clientWorld.dimension() != VaultMod.ARENA_KEY) {
             type = VaultOverlayMessage.OverlayType.NONE;
             modifiers = new VaultModifiers();
             inBossFight = false;
@@ -84,7 +85,15 @@ public class ClientVaultRaidData {
 
    public static void receiveModifierUpdate(VaultModifierMessage message) {
       modifiers = new VaultModifiers();
-      message.getGlobalModifiers().forEach(modifier -> modifiers.addTemporaryModifier(modifier, 0));
-      message.getPlayerModifiers().forEach(modifier -> modifiers.addTemporaryModifier(modifier, 0));
+      message.getGlobalModifiers()
+         .stream()
+         .forEach(
+            immutableVaultModifierStack -> modifiers.addPermanentModifier(immutableVaultModifierStack.getModifier(), immutableVaultModifierStack.getSize())
+         );
+      message.getPlayerModifiers()
+         .stream()
+         .forEach(
+            immutableVaultModifierStack -> modifiers.addPermanentModifier(immutableVaultModifierStack.getModifier(), immutableVaultModifierStack.getSize())
+         );
    }
 }

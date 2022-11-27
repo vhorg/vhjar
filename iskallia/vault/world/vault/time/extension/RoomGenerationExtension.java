@@ -1,10 +1,10 @@
 package iskallia.vault.world.vault.time.extension;
 
-import iskallia.vault.Vault;
-import net.minecraft.util.ResourceLocation;
+import iskallia.vault.VaultMod;
+import net.minecraft.resources.ResourceLocation;
 
 public class RoomGenerationExtension extends TimeExtension {
-   public static final ResourceLocation ID = Vault.id("room_generation");
+   public static final ResourceLocation ID = VaultMod.id("room_generation");
 
    public RoomGenerationExtension() {
    }

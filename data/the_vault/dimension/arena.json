@@ -1,0 +1,14 @@
+{
+  "type": "the_vault:arena",
+  "generator": {
+    "type": "minecraft:flat",
+    "seed": 0,
+    "settings": {
+      "biome": "the_vault:yarrr",
+      "features": true,
+      "layers": [
+      ],
+      "structure_overrides": []
+    }
+  }
+}

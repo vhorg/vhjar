@@ -2,6 +2,9 @@ package iskallia.vault.config.entry;
 
 import com.google.gson.annotations.Expose;
 
+@Deprecated(
+   forRemoval = true
+)
 public class MagnetEntry {
    @Expose
    private float speed;

@@ -7,10 +7,10 @@
   ],
   "key": {
     "s": {
-      "item": "the_vault:star_shard"
+      "item": "the_vault:knowledge_star_shard"
     },
     "c": {
-      "item": "the_vault:star_core"
+      "item": "the_vault:knowledge_star_core"
     }
   },
   "result": {

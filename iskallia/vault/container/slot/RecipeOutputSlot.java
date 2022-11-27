@@ -1,15 +1,15 @@
 package iskallia.vault.container.slot;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public class RecipeOutputSlot extends Slot {
-   public RecipeOutputSlot(IInventory inventory, int index, int x, int y) {
+   public RecipeOutputSlot(Container inventory, int index, int x, int y) {
       super(inventory, index, x, y);
    }
 
-   public boolean func_75214_a(ItemStack itemStack) {
+   public boolean mayPlace(ItemStack itemStack) {
       return false;
    }
 }

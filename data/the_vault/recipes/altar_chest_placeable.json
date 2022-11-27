@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "###",
+      "#a#",
+      "###"
+    ],
+    "key": {
+      "#": {
+        "item": "the_vault:driftwood"
+      },
+      "a": {
+          "item": "the_vault:altar_chest_scroll"
+      }
+    },
+    "result": {
+      "item": "the_vault:altar_chest_placeable",
+      "count": 1
+    }
+  }

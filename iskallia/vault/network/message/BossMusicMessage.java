@@ -2,8 +2,8 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientVaultRaidData;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class BossMusicMessage {
    private final boolean state;
@@ -12,11 +12,11 @@ public class BossMusicMessage {
       this.state = state;
    }
 
-   public static void encode(BossMusicMessage message, PacketBuffer buffer) {
+   public static void encode(BossMusicMessage message, FriendlyByteBuf buffer) {
       buffer.writeBoolean(message.state);
    }
 
-   public static BossMusicMessage decode(PacketBuffer buffer) {
+   public static BossMusicMessage decode(FriendlyByteBuf buffer) {
       return new BossMusicMessage(buffer.readBoolean());
    }
 

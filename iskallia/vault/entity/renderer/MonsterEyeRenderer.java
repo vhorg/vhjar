@@ -1,25 +1,25 @@
 package iskallia.vault.entity.renderer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import iskallia.vault.Vault;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
+import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.VaultMod;
 import net.minecraft.client.renderer.entity.SlimeRenderer;
-import net.minecraft.entity.monster.SlimeEntity;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.monster.Slime;
 
 public class MonsterEyeRenderer extends SlimeRenderer {
-   public static final ResourceLocation TEXTURE = Vault.id("textures/entity/monster_eye.png");
+   public static final ResourceLocation TEXTURE = VaultMod.id("textures/entity/monster_eye.png");
 
-   public MonsterEyeRenderer(EntityRendererManager renderManagerIn) {
-      super(renderManagerIn);
+   public MonsterEyeRenderer(Context context) {
+      super(context);
    }
 
-   protected void func_225620_a_(SlimeEntity entitylivingbase, MatrixStack matrixStack, float partialTickTime) {
-      super.func_225620_a_(entitylivingbase, matrixStack, partialTickTime);
-      matrixStack.func_227862_a_(2.0F, 2.0F, 2.0F);
+   protected void scale(Slime entitylivingbase, PoseStack matrixStack, float partialTickTime) {
+      super.scale(entitylivingbase, matrixStack, partialTickTime);
+      matrixStack.scale(2.0F, 2.0F, 2.0F);
    }
 
-   public ResourceLocation func_110775_a(SlimeEntity entity) {
+   public ResourceLocation getTextureLocation(Slime entity) {
       return TEXTURE;
    }
 }

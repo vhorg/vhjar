@@ -1,17 +1,17 @@
 package iskallia.vault.entity.renderer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.entity.CowRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.entity.passive.CowEntity;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.world.entity.animal.Cow;
 
 public class AggressiveCowBossRenderer extends CowRenderer {
-   public AggressiveCowBossRenderer(EntityRendererManager renderManagerIn) {
-      super(renderManagerIn);
+   public AggressiveCowBossRenderer(Context context) {
+      super(context);
    }
 
-   protected void preRenderCallback(CowEntity entitylivingbaseIn, MatrixStack matrixStackIn, float partialTickTime) {
-      super.func_225620_a_(entitylivingbaseIn, matrixStackIn, partialTickTime);
-      matrixStackIn.func_227862_a_(3.0F, 3.0F, 3.0F);
+   protected void scale(Cow entitylivingbaseIn, PoseStack matrixStackIn, float partialTickTime) {
+      super.scale(entitylivingbaseIn, matrixStackIn, partialTickTime);
+      matrixStackIn.scale(3.0F, 3.0F, 3.0F);
    }
 }

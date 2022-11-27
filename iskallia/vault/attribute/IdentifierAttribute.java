@@ -1,20 +1,20 @@
 package iskallia.vault.attribute;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 public class IdentifierAttribute extends VAttribute.Instance<ResourceLocation> {
    @Override
-   public void write(CompoundNBT nbt) {
+   public void write(CompoundTag nbt) {
       if (this.getBaseValue() != null) {
-         nbt.func_74778_a("BaseValue", this.getBaseValue().toString());
+         nbt.putString("BaseValue", this.getBaseValue().toString());
       }
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      if (nbt.func_150297_b("BaseValue", 8)) {
-         this.setBaseValue(new ResourceLocation(nbt.func_74779_i("BaseValue")));
+   public void read(CompoundTag nbt) {
+      if (nbt.contains("BaseValue", 8)) {
+         this.setBaseValue(new ResourceLocation(nbt.getString("BaseValue")));
       }
    }
 }

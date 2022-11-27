@@ -1,13 +1,13 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import iskallia.vault.Vault;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
+import iskallia.vault.VaultMod;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 public class TriangleRoomLayout extends ConnectedRoomGenerator {
-   public static final ResourceLocation ID = Vault.id("triangle");
+   public static final ResourceLocation ID = VaultMod.id("triangle");
    private int size;
 
    public TriangleRoomLayout() {
@@ -38,11 +38,11 @@ public class TriangleRoomLayout extends ConnectedRoomGenerator {
 
    private void calculateRooms(VaultRoomLayoutGenerator.Layout layout, int size) {
       int halfSize = size / 2;
-      Direction facing = Direction.func_176731_b(rand.nextInt(4));
-      Vector3i directionVec = facing.func_176730_m();
-      Vector3i offset = directionVec.func_177967_a(facing, -halfSize);
-      Direction edgeFacing = facing.func_176746_e();
-      Vector3i corner = offset.func_177967_a(edgeFacing, -halfSize);
+      Direction facing = Direction.from2DDataValue(rand.nextInt(4));
+      Vec3i directionVec = facing.getNormal();
+      Vec3i offset = directionVec.relative(facing, -halfSize);
+      Direction edgeFacing = facing.getClockWise();
+      Vec3i corner = offset.relative(edgeFacing, -halfSize);
 
       for (int hItr = 0; hItr <= size; hItr++) {
          float allowedDst = (float)(size - hItr) / size;
@@ -50,7 +50,7 @@ public class TriangleRoomLayout extends ConnectedRoomGenerator {
          for (int wItr = 0; wItr <= size; wItr++) {
             float dst = (float)Math.abs(wItr - halfSize) / halfSize;
             if (!(dst > allowedDst)) {
-               Vector3i roomPos = corner.func_177967_a(edgeFacing, wItr).func_177967_a(facing, hItr);
+               Vec3i roomPos = corner.relative(edgeFacing, wItr).relative(facing, hItr);
                layout.putRoom(roomPos);
             }
          }
@@ -58,17 +58,17 @@ public class TriangleRoomLayout extends ConnectedRoomGenerator {
    }
 
    @Override
-   protected void deserialize(CompoundNBT tag) {
+   protected void deserialize(CompoundTag tag) {
       super.deserialize(tag);
-      if (tag.func_150297_b("size", 3)) {
-         this.size = tag.func_74762_e("size");
+      if (tag.contains("size", 3)) {
+         this.size = tag.getInt("size");
       }
    }
 
    @Override
-   protected CompoundNBT serialize() {
-      CompoundNBT tag = super.serialize();
-      tag.func_74768_a("size", this.size);
+   protected CompoundTag serialize() {
+      CompoundTag tag = super.serialize();
+      tag.putInt("size", this.size);
       return tag;
    }
 }

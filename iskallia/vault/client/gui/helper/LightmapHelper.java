@@ -1,8 +1,8 @@
 package iskallia.vault.client.gui.helper;
 
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
+import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
 
 public class LightmapHelper {
    public static int getPackedFullbrightCoords() {
@@ -17,8 +17,8 @@ public class LightmapHelper {
       return skyLight << 20 | blockLight << 4;
    }
 
-   public static int getPackedLightCoords(IBlockDisplayReader world, BlockPos at) {
-      return WorldRenderer.func_228421_a_(world, at);
+   public static int getPackedLightCoords(BlockAndTintGetter world, BlockPos at) {
+      return LevelRenderer.getLightColor(world, at);
    }
 
    public static int getUnpackedSkyCoords(int packed) {

@@ -1,15 +1,15 @@
 package iskallia.vault.container.slot;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public class SellSlot extends Slot {
-   public SellSlot(IInventory inventoryIn, int index, int xPosition, int yPosition) {
+   public SellSlot(Container inventoryIn, int index, int xPosition, int yPosition) {
       super(inventoryIn, index, xPosition, yPosition);
    }
 
-   public boolean func_75214_a(ItemStack stack) {
+   public boolean mayPlace(ItemStack stack) {
       return false;
    }
 }

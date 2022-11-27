@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+      "www",
+      "www",
+      "www"
+    ],
+    "key": {
+      "w": {
+        "item": "the_vault:wutodic_mass"
+      }
+    },
+    "result": {
+      "item": "the_vault:hardened_wutodic_mass",
+      "count": 1
+    }
+  }

@@ -5,84 +5,88 @@ import iskallia.vault.init.ModItems;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item.Properties;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.common.util.NonNullSupplier;
-import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.network.NetworkHooks;
 
 public class ItemShardPouch extends Item {
    public ItemShardPouch(ResourceLocation id) {
-      super(new Properties().func_200917_a(1).func_200916_a(ModItems.VAULT_MOD_GROUP));
+      super(new Properties().stacksTo(1).tab(ModItems.VAULT_MOD_GROUP));
       this.setRegistryName(id);
    }
 
    @OnlyIn(Dist.CLIENT)
-   public void func_77624_a(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+   public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
       ItemStack contained = getContainedStack(stack);
-      if (!contained.func_190926_b()) {
-         int count = contained.func_190916_E();
-         tooltip.add(new StringTextComponent(count + " Shard" + (count > 1 ? "s" : "")).func_240699_a_(TextFormatting.GOLD));
+      if (!contained.isEmpty()) {
+         int count = contained.getCount();
+         tooltip.add(new TextComponent(count + " Shard" + (count > 1 ? "s" : "")).withStyle(ChatFormatting.GOLD));
       } else {
-         tooltip.add(new StringTextComponent("Empty").func_240699_a_(TextFormatting.GOLD));
+         tooltip.add(new TextComponent("Empty").withStyle(ChatFormatting.GOLD));
       }
    }
 
-   public static int getShardCount(PlayerInventory playerInventory) {
+   public static int getShardCount(Player player) {
+      return getShardCount(player.getInventory());
+   }
+
+   public static int getShardCount(Inventory playerInventory) {
       int shards = 0;
 
-      for (int slot = 0; slot < playerInventory.func_70302_i_(); slot++) {
-         ItemStack stack = playerInventory.func_70301_a(slot);
-         if (stack.func_77973_b() instanceof ItemShardPouch) {
-            shards += getContainedStack(stack).func_190916_E();
-         } else if (stack.func_77973_b() == ModItems.SOUL_SHARD) {
-            shards += stack.func_190916_E();
+      for (int slot = 0; slot < playerInventory.getContainerSize(); slot++) {
+         ItemStack stack = playerInventory.getItem(slot);
+         if (stack.getItem() instanceof ItemShardPouch) {
+            shards += getContainedStack(stack).getCount();
+         } else if (stack.getItem() == ModItems.SOUL_SHARD) {
+            shards += stack.getCount();
          }
       }
 
       return shards;
    }
 
-   public static boolean reduceShardAmount(PlayerInventory playerInventory, int count, boolean simulate) {
-      for (int slot = 0; slot < playerInventory.func_70302_i_(); slot++) {
-         ItemStack stack = playerInventory.func_70301_a(slot);
-         if (stack.func_77973_b() instanceof ItemShardPouch) {
+   public static boolean reduceShardAmount(Inventory playerInventory, int count, boolean simulate) {
+      for (int slot = 0; slot < playerInventory.getContainerSize(); slot++) {
+         ItemStack stack = playerInventory.getItem(slot);
+         if (stack.getItem() instanceof ItemShardPouch) {
             ItemStack shardStack = getContainedStack(stack);
-            int toReduce = Math.min(count, shardStack.func_190916_E());
+            int toReduce = Math.min(count, shardStack.getCount());
             if (!simulate) {
-               shardStack.func_190920_e(shardStack.func_190916_E() - toReduce);
+               shardStack.setCount(shardStack.getCount() - toReduce);
                setContainedStack(stack, shardStack);
             }
 
             count -= toReduce;
-         } else if (stack.func_77973_b() == ModItems.SOUL_SHARD) {
-            int toReduce = Math.min(count, stack.func_190916_E());
+         } else if (stack.getItem() == ModItems.SOUL_SHARD) {
+            int toReduce = Math.min(count, stack.getCount());
             if (!simulate) {
-               stack.func_190918_g(toReduce);
-               playerInventory.func_70299_a(slot, stack);
+               stack.shrink(toReduce);
+               playerInventory.setItem(slot, stack);
             }
 
             count -= toReduce;
@@ -97,45 +101,43 @@ public class ItemShardPouch extends Item {
    }
 
    public static ItemStack getContainedStack(ItemStack pouch) {
-      CompoundNBT invTag = pouch.func_190925_c("Inventory");
-      ItemStack stack = ItemStack.func_199557_a(invTag.func_74775_l("Stack"));
-      stack.func_190920_e(invTag.func_74762_e("StackSize"));
-      return stack;
+      CompoundTag invTag = pouch.getOrCreateTagElement("Inventory");
+      int count = invTag.getInt("StackSize");
+      return count > 0 ? new ItemStack(ModItems.SOUL_SHARD, count) : ItemStack.EMPTY;
    }
 
    public static void setContainedStack(ItemStack pouch, ItemStack contained) {
-      CompoundNBT invTag = pouch.func_190925_c("Inventory");
-      invTag.func_218657_a("Stack", contained.serializeNBT());
-      invTag.func_74768_a("StackSize", contained.func_190916_E());
+      CompoundTag invTag = pouch.getOrCreateTagElement("Inventory");
+      invTag.putInt("StackSize", contained.getCount());
    }
 
-   public ActionResult<ItemStack> func_77659_a(World world, PlayerEntity player, Hand hand) {
-      ItemStack stack = player.func_184586_b(hand);
-      if (!world.func_201670_d() && player instanceof ServerPlayerEntity) {
+   public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+      ItemStack stack = player.getItemInHand(hand);
+      if (!world.isClientSide() && player instanceof ServerPlayer) {
          final int pouchSlot;
-         if (hand == Hand.OFF_HAND) {
+         if (hand == InteractionHand.OFF_HAND) {
             pouchSlot = 40;
          } else {
-            pouchSlot = player.field_71071_by.field_70461_c;
+            pouchSlot = player.getInventory().selected;
          }
 
-         NetworkHooks.openGui((ServerPlayerEntity)player, new INamedContainerProvider() {
-            public ITextComponent func_145748_c_() {
-               return new StringTextComponent("Shard Pouch");
+         NetworkHooks.openGui((ServerPlayer)player, new MenuProvider() {
+            public Component getDisplayName() {
+               return new TextComponent("Shard Pouch");
             }
 
             @Nullable
-            public Container createMenu(int windowId, PlayerInventory inventory, PlayerEntity playerx) {
+            public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player playerx) {
                return new ShardPouchContainer(windowId, inventory, pouchSlot);
             }
          }, buf -> buf.writeInt(pouchSlot));
       }
 
-      return ActionResult.func_226250_c_(stack);
+      return InteractionResultHolder.pass(stack);
    }
 
    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-      return oldStack.func_77973_b() != newStack.func_77973_b();
+      return oldStack.getItem() != newStack.getItem();
    }
 
    public static NonNullSupplier<IItemHandler> getInventorySupplier(final ItemStack stack) {
@@ -148,7 +150,7 @@ public class ItemShardPouch extends Item {
    }
 
    @Nullable
-   public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable CompoundNBT nbt) {
+   public ICapabilityProvider initCapabilities(final ItemStack stack, @Nullable CompoundTag nbt) {
       return new ICapabilityProvider() {
          @Nonnull
          public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
@@ -182,7 +184,7 @@ public class ItemShardPouch extends Item {
       }
 
       public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-         return stack.func_77973_b() == ModItems.SOUL_SHARD;
+         return stack.getItem() == ModItems.SOUL_SHARD;
       }
    }
 }

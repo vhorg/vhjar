@@ -3,27 +3,27 @@ package iskallia.vault.item;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.entity.VaultPearlEntity;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.EnderPearlItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Item.Properties;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.EnderpearlItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item.Properties;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
 
-public class VaultPearlItem extends EnderPearlItem {
+public class VaultPearlItem extends EnderpearlItem {
    public VaultPearlItem(ResourceLocation id) {
-      super(new Properties().func_200917_a(1).func_200916_a(ModItems.VAULT_MOD_GROUP).func_200918_c(0));
+      super(new Properties().stacksTo(1).tab(ModItems.VAULT_MOD_GROUP).durability(0));
       this.setRegistryName(id);
    }
 
-   public boolean showDurabilityBar(ItemStack stack) {
-      return stack.func_77952_i() > 0;
+   public boolean isBarVisible(ItemStack pStack) {
+      return pStack.getDamageValue() > 0;
    }
 
    public void setDamage(ItemStack stack, int damage) {
@@ -33,48 +33,48 @@ public class VaultPearlItem extends EnderPearlItem {
       }
    }
 
-   public double getDurabilityForDisplay(ItemStack stack) {
-      return (double)stack.func_77952_i() / this.getMaxDamage(stack);
+   public int getBarWidth(ItemStack pStack) {
+      return (int)((double)pStack.getDamageValue() / this.getMaxDamage(pStack));
    }
 
    public int getMaxDamage(ItemStack stack) {
       return ModConfigs.VAULT_UTILITIES != null ? ModConfigs.VAULT_UTILITIES.getVaultPearlMaxUses() : 0;
    }
 
-   public boolean func_77645_m() {
+   public boolean canBeDepleted() {
       return true;
    }
 
-   public ActionResult<ItemStack> func_77659_a(World world, PlayerEntity player, Hand hand) {
-      if (hand != Hand.MAIN_HAND) {
-         return ActionResult.func_226250_c_(player.func_184586_b(hand));
+   public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
+      if (hand != InteractionHand.MAIN_HAND) {
+         return InteractionResultHolder.pass(player.getItemInHand(hand));
       } else {
-         ItemStack stack = player.func_184586_b(hand);
-         world.func_184148_a(
+         ItemStack stack = player.getItemInHand(hand);
+         world.playSound(
             null,
-            player.func_226277_ct_(),
-            player.func_226278_cu_(),
-            player.func_226281_cx_(),
-            SoundEvents.field_187595_bc,
-            SoundCategory.NEUTRAL,
+            player.getX(),
+            player.getY(),
+            player.getZ(),
+            SoundEvents.ENDER_PEARL_THROW,
+            SoundSource.NEUTRAL,
             0.5F,
-            0.4F / (field_77697_d.nextFloat() * 0.4F + 0.8F)
+            0.4F / (world.random.nextFloat() * 0.4F + 0.8F)
          );
-         player.func_184811_cZ().func_185145_a(this, 20);
-         if (!world.field_72995_K) {
+         player.getCooldowns().addCooldown(this, 20);
+         if (!world.isClientSide) {
             VaultPearlEntity pearl = new VaultPearlEntity(world, player);
-            pearl.func_213884_b(stack);
-            pearl.func_234612_a_(player, player.field_70125_A, player.field_70177_z, 0.0F, 1.5F, 1.0F);
-            world.func_217376_c(pearl);
-            stack.func_222118_a(1, player, e -> e.func_213334_d(hand));
+            pearl.setItem(stack);
+            pearl.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 1.5F, 1.0F);
+            world.addFreshEntity(pearl);
+            stack.hurtAndBreak(1, player, e -> e.broadcastBreakEvent(hand));
          }
 
-         player.func_71029_a(Stats.field_75929_E.func_199076_b(this));
-         return ActionResult.func_233538_a_(stack, world.func_201670_d());
+         player.awardStat(Stats.ITEM_USED.get(this));
+         return InteractionResultHolder.sidedSuccess(stack, world.isClientSide());
       }
    }
 
-   public boolean func_77616_k(ItemStack stack) {
+   public boolean isEnchantable(ItemStack stack) {
       return false;
    }
 

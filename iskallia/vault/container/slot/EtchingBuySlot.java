@@ -2,13 +2,13 @@ package iskallia.vault.container.slot;
 
 import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
 import iskallia.vault.container.inventory.EtchingTradeContainer;
-import iskallia.vault.entity.EtchingVendorEntity;
+import iskallia.vault.entity.entity.EtchingVendorEntity;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.SoundEvents;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 
@@ -22,22 +22,22 @@ public class EtchingBuySlot extends SlotItemHandler {
       this.tradeId = tradeId;
    }
 
-   public boolean func_75214_a(@Nonnull ItemStack stack) {
+   public boolean mayPlace(@Nonnull ItemStack stack) {
       return false;
    }
 
-   public boolean func_82869_a(PlayerEntity player) {
+   public boolean mayPickup(Player player) {
       EtchingVendorControllerTileEntity.EtchingTrade trade = this.getAssociatedTrade();
       if (trade == null) {
          return false;
       } else {
-         int count = this.getInputSlot().func_75211_c().func_190916_E();
+         int count = this.getInputSlot().getItem().getCount();
          return trade.getRequiredPlatinum() <= count && !trade.isSold();
       }
    }
 
    public Slot getInputSlot() {
-      return this.etchingTradeContainer.func_75139_a(36 + this.tradeId * 2);
+      return this.etchingTradeContainer.getSlot(36 + this.tradeId * 2);
    }
 
    @Nullable
@@ -51,29 +51,18 @@ public class EtchingBuySlot extends SlotItemHandler {
       }
    }
 
-   public ItemStack func_190901_a(PlayerEntity player, ItemStack stack) {
+   public void onTake(Player player, ItemStack stack) {
       EtchingVendorEntity vendor = this.etchingTradeContainer.getVendor();
-      if (vendor == null) {
-         return ItemStack.field_190927_a;
-      } else {
+      if (vendor != null) {
          EtchingVendorControllerTileEntity controllerTile = vendor.getControllerTile();
-         if (controllerTile == null) {
-            return ItemStack.field_190927_a;
-         } else {
+         if (controllerTile != null) {
             EtchingVendorControllerTileEntity.EtchingTrade trade = this.getAssociatedTrade();
-            if (trade == null) {
-               return ItemStack.field_190927_a;
-            } else {
-               this.getInputSlot().func_75209_a(trade.getRequiredPlatinum());
-               this.func_75215_d(ItemStack.field_190927_a);
+            if (trade != null) {
+               this.getInputSlot().remove(trade.getRequiredPlatinum());
+               this.set(ItemStack.EMPTY);
                trade.setSold(true);
                controllerTile.sendUpdates();
-               vendor.func_184185_a(
-                  SoundEvents.field_219721_mv,
-                  1.0F,
-                  (vendor.field_70170_p.field_73012_v.nextFloat() - vendor.field_70170_p.field_73012_v.nextFloat()) * 0.2F + 1.0F
-               );
-               return stack;
+               vendor.playSound(SoundEvents.VILLAGER_CELEBRATE, 1.0F, (vendor.level.random.nextFloat() - vendor.level.random.nextFloat()) * 0.2F + 1.0F);
             }
          }
       }

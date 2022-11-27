@@ -12,55 +12,52 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.network.NetworkDirection;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 @EventBusSubscriber
-public class VaultPartyData extends WorldSavedData {
+public class VaultPartyData extends SavedData {
    private static final Random rand = new Random();
    protected static final String DATA_NAME = "the_vault_VaultParty";
-   protected VListNBT<VaultPartyData.Party, CompoundNBT> activeParties = VListNBT.of(VaultPartyData.Party::new);
+   protected VListNBT<VaultPartyData.Party, CompoundTag> activeParties = VListNBT.of(VaultPartyData.Party::new);
 
-   public VaultPartyData() {
-      this("the_vault_VaultParty");
+   private static VaultPartyData create(CompoundTag tag) {
+      VaultPartyData data = new VaultPartyData();
+      data.load(tag);
+      return data;
    }
 
-   public VaultPartyData(String name) {
-      super(name);
+   public void load(CompoundTag nbt) {
+      this.activeParties.deserializeNBT(nbt.getList("ActiveParties", 10));
    }
 
-   public void func_76184_a(CompoundNBT nbt) {
-      this.activeParties.deserializeNBT(nbt.func_150295_c("ActiveParties", 10));
-   }
-
-   public CompoundNBT func_189551_b(CompoundNBT nbt) {
-      nbt.func_218657_a("ActiveParties", this.activeParties.serializeNBT());
+   public CompoundTag save(CompoundTag nbt) {
+      nbt.put("ActiveParties", this.activeParties.serializeNBT());
       return nbt;
    }
 
-   public static VaultPartyData get(ServerWorld world) {
-      return get(world.func_73046_m());
+   public static VaultPartyData get(ServerLevel world) {
+      return get(world.getServer());
    }
 
    public static VaultPartyData get(MinecraftServer server) {
-      return (VaultPartyData)server.func_241755_D_().func_217481_x().func_215752_a(VaultPartyData::new, "the_vault_VaultParty");
+      return (VaultPartyData)server.overworld().getDataStorage().computeIfAbsent(VaultPartyData::create, VaultPartyData::new, "the_vault_VaultParty");
    }
 
-   public static void broadcastPartyData(ServerWorld world) {
+   public static void broadcastPartyData(ServerLevel world) {
       VaultPartyData data = get(world);
       ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new PartyStatusMessage(data.activeParties.serializeNBT()));
    }
@@ -92,17 +89,17 @@ public class VaultPartyData extends WorldSavedData {
 
    @SubscribeEvent
    public static void onServerTick(ServerTickEvent event) {
-      MinecraftServer serverInstance = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
+      MinecraftServer serverInstance = ServerLifecycleHooks.getCurrentServer();
       if (event.phase == Phase.END) {
-         if (serverInstance.func_71259_af() % 20 == 0) {
+         if (serverInstance.getTickCount() % 20 == 0) {
             VaultPartyData vaultPartyData = get(serverInstance);
             vaultPartyData.activeParties.forEach(party -> {
-               ListNBT partyMembers = party.toClientMemberList();
+               ListTag partyMembers = party.toClientMemberList();
                PartyMembersMessage pkt = new PartyMembersMessage(partyMembers);
                party.members.forEach(uuid -> {
-                  ServerPlayerEntity player = serverInstance.func_184103_al().func_177451_a(uuid);
+                  ServerPlayer player = serverInstance.getPlayerList().getPlayer(uuid);
                   if (player != null) {
-                     ModNetwork.CHANNEL.sendTo(pkt, player.field_71135_a.field_147371_a, NetworkDirection.PLAY_TO_CLIENT);
+                     ModNetwork.CHANNEL.sendTo(pkt, player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
                   }
                });
             });
@@ -110,10 +107,10 @@ public class VaultPartyData extends WorldSavedData {
       }
    }
 
-   public static class Party implements INBTSerializable<CompoundNBT> {
+   public static class Party implements INBTSerializable<CompoundTag> {
       private UUID leader = null;
-      private final VListNBT<UUID, StringNBT> members = VListNBT.ofUUID();
-      private final VListNBT<UUID, StringNBT> invites = VListNBT.ofUUID();
+      private final VListNBT<UUID, StringTag> members = VListNBT.ofUUID();
+      private final VListNBT<UUID, StringTag> invites = VListNBT.ofUUID();
 
       public List<UUID> getMembers() {
          return Collections.unmodifiableList(this.members);
@@ -163,12 +160,12 @@ public class VaultPartyData extends WorldSavedData {
          return this.members.contains(member);
       }
 
-      public ListNBT toClientMemberList() {
-         MinecraftServer serverInstance = (MinecraftServer)LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
-         ListNBT partyMembers = new ListNBT();
+      public ListTag toClientMemberList() {
+         MinecraftServer serverInstance = ServerLifecycleHooks.getCurrentServer();
+         ListTag partyMembers = new ListTag();
 
          for (UUID uuid : this.members) {
-            ServerPlayerEntity player = serverInstance.func_184103_al().func_177451_a(uuid);
+            ServerPlayer player = serverInstance.getPlayerList().getPlayer(uuid);
             if (player != null) {
                ClientPartyData.PartyMember partyMember = new ClientPartyData.PartyMember(player);
                partyMembers.add(partyMember.serializeNBT());
@@ -178,25 +175,25 @@ public class VaultPartyData extends WorldSavedData {
          return partyMembers;
       }
 
-      public CompoundNBT serializeNBT() {
-         CompoundNBT nbt = new CompoundNBT();
+      public CompoundTag serializeNBT() {
+         CompoundTag nbt = new CompoundTag();
          if (this.leader != null) {
-            nbt.func_186854_a("leader", this.leader);
+            nbt.putUUID("leader", this.leader);
          }
 
-         nbt.func_218657_a("Members", this.members.serializeNBT());
-         nbt.func_218657_a("Invites", this.invites.serializeNBT());
+         nbt.put("Members", this.members.serializeNBT());
+         nbt.put("Invites", this.invites.serializeNBT());
          return nbt;
       }
 
-      public void deserializeNBT(CompoundNBT nbt) {
+      public void deserializeNBT(CompoundTag nbt) {
          this.leader = null;
-         if (nbt.func_186855_b("leader")) {
-            this.leader = nbt.func_186857_a("leader");
+         if (nbt.hasUUID("leader")) {
+            this.leader = nbt.getUUID("leader");
          }
 
-         this.members.deserializeNBT(nbt.func_150295_c("Members", 8));
-         this.invites.deserializeNBT(nbt.func_150295_c("Invites", 8));
+         this.members.deserializeNBT(nbt.getList("Members", 8));
+         this.invites.deserializeNBT(nbt.getList("Invites", 8));
       }
    }
 }

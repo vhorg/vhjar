@@ -1,9 +1,9 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 public abstract class DenseVaultLayout extends VaultRoomLayoutGenerator {
    private int size;
@@ -32,22 +32,22 @@ public abstract class DenseVaultLayout extends VaultRoomLayoutGenerator {
    protected abstract void generateLayoutRooms(VaultRoomLayoutGenerator.Layout var1, int var2);
 
    @Override
-   protected void deserialize(CompoundNBT tag) {
+   protected void deserialize(CompoundTag tag) {
       super.deserialize(tag);
-      if (tag.func_150297_b("size", 3)) {
-         this.size = tag.func_74762_e("size");
+      if (tag.contains("size", 3)) {
+         this.size = tag.getInt("size");
       }
    }
 
    @Override
-   protected CompoundNBT serialize() {
-      CompoundNBT tag = super.serialize();
-      tag.func_74768_a("size", this.size);
+   protected CompoundTag serialize() {
+      CompoundTag tag = super.serialize();
+      tag.putInt("size", this.size);
       return tag;
    }
 
    public static class DensePackedRoom extends VaultRoomLayoutGenerator.Room {
-      public DensePackedRoom(Vector3i roomPosition) {
+      public DensePackedRoom(Vec3i roomPosition) {
          super(roomPosition);
       }
 
@@ -58,7 +58,7 @@ public abstract class DenseVaultLayout extends VaultRoomLayoutGenerator {
 
       @Override
       public BlockPos getRoomOffset() {
-         return new BlockPos(this.getRoomPosition().func_177958_n() * 47, 0, this.getRoomPosition().func_177952_p() * 47);
+         return new BlockPos(this.getRoomPosition().getX() * 47, 0, this.getRoomPosition().getZ() * 47);
       }
    }
 }

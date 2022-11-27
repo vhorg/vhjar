@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "dsd",
+        " w "
+    ],
+    "key": {
+        "c": {
+            "item": "minecraft:cake"
+        },
+        "d": {
+            "item": "the_vault:vault_diamond"
+        },
+        "s": {
+            "item": "the_vault:crystal_seal_empty"
+        },
+        "w": {
+            "item": "the_vault:perfect_wutodie"
+        }
+    },
+    "result": {
+        "item": "the_vault:crystal_seal_cake",
+        "count": 1
+    }
+}

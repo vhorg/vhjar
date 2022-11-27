@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Supplier;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class EternalSyncMessage {
    private final Map<UUID, List<EternalDataSnapshot>> eternalData;
@@ -22,21 +22,21 @@ public class EternalSyncMessage {
       return this.eternalData;
    }
 
-   public static void encode(EternalSyncMessage pkt, PacketBuffer buffer) {
+   public static void encode(EternalSyncMessage pkt, FriendlyByteBuf buffer) {
       buffer.writeInt(pkt.eternalData.size());
       pkt.eternalData.forEach((playerUUID, playerEternals) -> {
-         buffer.func_179252_a(playerUUID);
+         buffer.writeUUID(playerUUID);
          buffer.writeInt(playerEternals.size());
-         playerEternals.forEach(eternalData -> eternalData.serialize(buffer, false));
+         playerEternals.forEach(eternalData -> eternalData.serialize(buffer, true));
       });
    }
 
-   public static EternalSyncMessage decode(PacketBuffer buffer) {
+   public static EternalSyncMessage decode(FriendlyByteBuf buffer) {
       Map<UUID, List<EternalDataSnapshot>> eternalData = new HashMap<>();
       int playerEternals = buffer.readInt();
 
       for (int i = 0; i < playerEternals; i++) {
-         UUID playerUUID = buffer.func_179253_g();
+         UUID playerUUID = buffer.readUUID();
          List<EternalDataSnapshot> snapshots = new ArrayList<>();
          int eternals = buffer.readInt();
 

@@ -1,11 +1,10 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.Vault;
+import iskallia.vault.VaultMod;
 import iskallia.vault.aura.ActiveAura;
 import iskallia.vault.aura.type.EffectAuraConfig;
 import iskallia.vault.aura.type.MobEffectAuraConfig;
-import iskallia.vault.aura.type.ParryAuraConfig;
 import iskallia.vault.aura.type.ResistanceAuraConfig;
 import iskallia.vault.aura.type.TauntAuraConfig;
 import iskallia.vault.util.data.WeightedList;
@@ -20,16 +19,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.Level;
 
 public class EternalAuraConfig extends Config {
    @Expose
    private final List<EffectAuraConfig> EFFECT_AURAS = new ArrayList<>();
-   @Expose
-   private final List<ParryAuraConfig> PARRY_AURAS = new ArrayList<>();
    @Expose
    private final List<ResistanceAuraConfig> RESISTANCE_AURAS = new ArrayList<>();
    @Expose
@@ -40,7 +37,7 @@ public class EternalAuraConfig extends Config {
    private final WeightedList<String> availableAuras = new WeightedList<>();
 
    public List<EternalAuraConfig.AuraConfig> getAll() {
-      return Stream.of(this.EFFECT_AURAS, this.PARRY_AURAS, this.RESISTANCE_AURAS, this.TAUNT_AURAS, this.MOB_EFFECT_AURAS)
+      return Stream.of(this.EFFECT_AURAS, this.RESISTANCE_AURAS, this.TAUNT_AURAS, this.MOB_EFFECT_AURAS)
          .flatMap(Collection::stream)
          .collect(Collectors.toList());
    }
@@ -53,22 +50,20 @@ public class EternalAuraConfig extends Config {
    @Override
    protected void reset() {
       this.EFFECT_AURAS.clear();
-      this.EFFECT_AURAS.add(new EffectAuraConfig(Effects.field_76428_l, "Regeneration", "regeneration"));
-      this.EFFECT_AURAS.add(new EffectAuraConfig(Effects.field_188425_z, "Luck", "lucky"));
-      this.EFFECT_AURAS.add(new EffectAuraConfig(Effects.field_76422_e, "Haste", "haste"));
-      this.EFFECT_AURAS.add(new EffectAuraConfig(Effects.field_76424_c, "Speed", "speed"));
-      this.EFFECT_AURAS.add(new EffectAuraConfig(Effects.field_76420_g, "Strength", "strength"));
-      this.EFFECT_AURAS.add(new EffectAuraConfig(Effects.field_76443_y, "Saturation", "saturation"));
-      this.PARRY_AURAS.clear();
-      this.PARRY_AURAS.add(new ParryAuraConfig(0.1F));
+      this.EFFECT_AURAS.add(new EffectAuraConfig(MobEffects.REGENERATION, "Regeneration", "regeneration"));
+      this.EFFECT_AURAS.add(new EffectAuraConfig(MobEffects.LUCK, "Luck", "lucky"));
+      this.EFFECT_AURAS.add(new EffectAuraConfig(MobEffects.DIG_SPEED, "Haste", "haste"));
+      this.EFFECT_AURAS.add(new EffectAuraConfig(MobEffects.MOVEMENT_SPEED, "Speed", "speed"));
+      this.EFFECT_AURAS.add(new EffectAuraConfig(MobEffects.DAMAGE_BOOST, "Strength", "strength"));
+      this.EFFECT_AURAS.add(new EffectAuraConfig(MobEffects.SATURATION, "Saturation", "saturation"));
       this.RESISTANCE_AURAS.clear();
       this.RESISTANCE_AURAS.add(new ResistanceAuraConfig(0.1F));
       this.TAUNT_AURAS.clear();
       this.TAUNT_AURAS.add(new TauntAuraConfig(60));
       this.MOB_EFFECT_AURAS.clear();
-      this.MOB_EFFECT_AURAS.add(new MobEffectAuraConfig(Effects.field_76421_d, 2, "Slowness", "slowness"));
-      this.MOB_EFFECT_AURAS.add(new MobEffectAuraConfig(Effects.field_76437_t, 2, "Weakness", "weakness"));
-      this.MOB_EFFECT_AURAS.add(new MobEffectAuraConfig(Effects.field_82731_v, 2, "Wither", "withering"));
+      this.MOB_EFFECT_AURAS.add(new MobEffectAuraConfig(MobEffects.MOVEMENT_SLOWDOWN, 2, "Slowness", "slowness"));
+      this.MOB_EFFECT_AURAS.add(new MobEffectAuraConfig(MobEffects.WEAKNESS, 2, "Weakness", "weakness"));
+      this.MOB_EFFECT_AURAS.add(new MobEffectAuraConfig(MobEffects.WITHER, 2, "Wither", "withering"));
       this.availableAuras.clear();
       this.availableAuras.add("Regeneration", 1);
       this.availableAuras.add("Luck", 1);
@@ -130,7 +125,7 @@ public class EternalAuraConfig extends Config {
          this.name = name;
          this.displayName = displayName;
          this.description = description;
-         this.iconPath = Vault.sId("textures/entity/aura/aura_" + iconPath + ".png");
+         this.iconPath = VaultMod.sId("textures/entity/aura/aura_" + iconPath + ".png");
          this.radius = radius;
       }
 
@@ -154,14 +149,14 @@ public class EternalAuraConfig extends Config {
          return this.radius;
       }
 
-      public List<ITextComponent> getTooltip() {
-         List<ITextComponent> ttip = new ArrayList<>();
-         ttip.add(new StringTextComponent(this.getDisplayName()));
-         ttip.add(new StringTextComponent(this.getDescription()));
+      public List<Component> getTooltip() {
+         List<Component> ttip = new ArrayList<>();
+         ttip.add(new TextComponent(this.getDisplayName()));
+         ttip.add(new TextComponent(this.getDescription()));
          return ttip;
       }
 
-      public void onTick(World world, ActiveAura aura) {
+      public void onTick(Level world, ActiveAura aura) {
       }
    }
 }

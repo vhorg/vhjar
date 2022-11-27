@@ -5,11 +5,11 @@ import iskallia.vault.util.MathUtilities;
 import iskallia.vault.vending.Product;
 import java.util.Objects;
 import javax.annotation.Nullable;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ProductEntry {
@@ -30,14 +30,14 @@ public class ProductEntry {
    }
 
    public ProductEntry(ItemStack stack) {
-      this(stack.func_77973_b(), stack.func_190916_E(), stack.func_77978_p());
+      this(stack.getItem(), stack.getCount(), stack.getTag());
    }
 
-   public ProductEntry(Item item, int amount, @Nullable CompoundNBT nbt) {
+   public ProductEntry(Item item, int amount, @Nullable CompoundTag nbt) {
       this(item, amount, amount, nbt);
    }
 
-   public ProductEntry(Item item, int amountMin, int amountMax, @Nullable CompoundNBT nbt) {
+   public ProductEntry(Item item, int amountMin, int amountMax, @Nullable CompoundTag nbt) {
       this.id = Objects.requireNonNull(item.getRegistryName()).toString();
       this.nbt = nbt == null ? null : nbt.toString();
       this.amountMin = amountMin;
@@ -52,12 +52,12 @@ public class ProductEntry {
       return MathUtilities.getRandomInt(this.amountMin, this.amountMax);
    }
 
-   public CompoundNBT getNBT() {
+   public CompoundTag getNBT() {
       if (this.nbt == null) {
          return null;
       } else {
          try {
-            return JsonToNBT.func_180713_a(this.nbt);
+            return TagParser.parseTag(this.nbt);
          } catch (Exception var2) {
             return null;
          }
@@ -70,7 +70,11 @@ public class ProductEntry {
 
    public ItemStack generateItemStack() {
       ItemStack itemStack = new ItemStack(this.getItem(), this.generateAmount());
-      itemStack.func_77982_d(this.getNBT());
+      CompoundTag tag = this.getNBT();
+      if (tag != null && !tag.isEmpty()) {
+         itemStack.setTag(tag);
+      }
+
       return itemStack;
    }
 }

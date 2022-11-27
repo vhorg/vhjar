@@ -1,6 +1,6 @@
 package iskallia.vault.block.property;
 
-import net.minecraft.state.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class HiddenIntegerProperty extends IntegerProperty {
    protected HiddenIntegerProperty(String name, int min, int max) {

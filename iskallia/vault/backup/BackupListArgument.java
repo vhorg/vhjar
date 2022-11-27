@@ -5,12 +5,12 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import java.util.UUID;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.command.arguments.UUIDArgument;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 
 public abstract class BackupListArgument implements ArgumentType<String> {
-   protected abstract UUID getPlayerRef(CommandContext<CommandSource> var1);
+   protected abstract UUID getPlayerRef(CommandContext<CommandSourceStack> var1);
 
    public String parse(StringReader reader) throws CommandSyntaxException {
       return reader.readUnquotedString();
@@ -18,9 +18,9 @@ public abstract class BackupListArgument implements ArgumentType<String> {
 
    public static class Player extends BackupListArgument {
       @Override
-      protected UUID getPlayerRef(CommandContext<CommandSource> ctx) {
+      protected UUID getPlayerRef(CommandContext<CommandSourceStack> ctx) {
          try {
-            return EntityArgument.func_197089_d(ctx, "player").func_110124_au();
+            return EntityArgument.getPlayer(ctx, "player").getUUID();
          } catch (CommandSyntaxException var3) {
             throw new RuntimeException(var3);
          }
@@ -29,8 +29,8 @@ public abstract class BackupListArgument implements ArgumentType<String> {
 
    public static class UUIDRef extends BackupListArgument {
       @Override
-      protected UUID getPlayerRef(CommandContext<CommandSource> ctx) {
-         return UUIDArgument.func_239195_a_(ctx, "player");
+      protected UUID getPlayerRef(CommandContext<CommandSourceStack> ctx) {
+         return UuidArgument.getUuid(ctx, "player");
       }
    }
 }

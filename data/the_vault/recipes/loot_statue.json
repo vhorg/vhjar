@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sss",
+    "vse",
+    "shs"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:infused_eternal_soul"
+    },
+    "h": {
+      "item": "the_vault:sublime_vault_substance"
+    },
+    "v": {
+      "item": "the_vault:sublime_vault_vision"
+    },
+    "e": {
+      "item": "the_vault:sublime_vault_elixir"
+    }
+  },
+  "result": {
+    "item": "the_vault:loot_statue",
+    "count": 1
+  }
+}

@@ -1,117 +1,163 @@
 package iskallia.vault.client.gui.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
-import iskallia.vault.Vault;
 import iskallia.vault.client.ClientShardTradeData;
-import iskallia.vault.client.gui.helper.FontHelper;
+import iskallia.vault.client.gui.framework.ScreenRenderers;
+import iskallia.vault.client.gui.framework.ScreenTextures;
+import iskallia.vault.client.gui.framework.element.ButtonElement;
+import iskallia.vault.client.gui.framework.element.FakeItemSlotElement;
+import iskallia.vault.client.gui.framework.element.ItemStackDisplayElement;
+import iskallia.vault.client.gui.framework.element.LabelElement;
+import iskallia.vault.client.gui.framework.element.NineSliceElement;
+import iskallia.vault.client.gui.framework.element.SlotsElement;
+import iskallia.vault.client.gui.framework.element.TextureAtlasElement;
+import iskallia.vault.client.gui.framework.render.ScreenTooltipRenderer;
+import iskallia.vault.client.gui.framework.render.TooltipDirection;
+import iskallia.vault.client.gui.framework.screen.AbstractElementContainerScreen;
+import iskallia.vault.client.gui.framework.spatial.Spatials;
+import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.container.inventory.ShardTradeContainer;
+import iskallia.vault.event.InputEvents;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.ItemShardPouch;
-import java.awt.Rectangle;
+import iskallia.vault.network.message.ShardTradeTradeMessage;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 
-public class ShardTradeScreen extends ContainerScreen<ShardTradeContainer> {
-   private static final ResourceLocation TEXTURE = Vault.id("textures/gui/shard_trade.png");
+public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeContainer> {
+   private final LabelElement<?> labelRandomTrade;
+   private final LabelElement<?>[] labelShopTrades = new LabelElement[3];
 
-   public ShardTradeScreen(ShardTradeContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
-      super(screenContainer, inv, titleIn);
-      this.field_146999_f = 176;
-      this.field_147000_g = 184;
-      this.field_238745_s_ = 90;
+   public ShardTradeScreen(ShardTradeContainer container, Inventory inventory, Component title) {
+      super(container, inventory, title, ScreenRenderers.getImmediate(), ScreenTooltipRenderer::create);
+      this.setGuiSize(Spatials.size(176, 184));
+      this.addElement(
+         (NineSliceElement)new NineSliceElement(this.getGuiSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)
+            .layout((screen, gui, parent, world) -> world.translateXY(gui))
+      );
+      this.addElement((SlotsElement)new SlotsElement(this).layout((screen, gui, parent, world) -> world.positionXY(gui)));
+      this.addElement(
+         (LabelElement)new LabelElement(
+               Spatials.positionXY(8, 7), new TextComponent("Soul Shards").withStyle(Style.EMPTY.withColor(-12632257)), LabelTextStyle.defaultStyle()
+            )
+            .layout((screen, gui, parent, world) -> world.translateXY(gui))
+      );
+      MutableComponent inventoryName = inventory.getDisplayName().copy();
+      inventoryName.withStyle(Style.EMPTY.withColor(-12632257));
+      this.addElement(
+         (LabelElement)new LabelElement(Spatials.positionXY(8, 90), inventoryName, LabelTextStyle.defaultStyle())
+            .layout((screen, gui, parent, world) -> world.translateXY(gui))
+      );
+      this.addElement(
+         (TextureAtlasElement)new TextureAtlasElement(Spatials.positionXY(18, 20), ScreenTextures.SOUL_SHARD_TRADE_ORNAMENT)
+            .layout((screen, gui, parent, world) -> world.translateXY(gui))
+      );
+      ((FakeItemSlotElement)this.addElement(
+            (FakeItemSlotElement)new FakeItemSlotElement(
+                  Spatials.positionXY(34, 36), () -> new ItemStack(ModItems.UNKNOWN_ITEM), () -> !this.canBuyRandomTrade()
+               )
+               .layout((screen, gui, parent, world) -> world.translateXY(gui))
+         ))
+         .whenClicked(this::buyRandomTrade)
+         .tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+            tooltipRenderer.renderTooltip(poseStack, new ItemStack(ModItems.UNKNOWN_ITEM), mouseX, mouseY, TooltipDirection.RIGHT);
+            return true;
+         });
+      this.addElement(
+         (ItemStackDisplayElement)new ItemStackDisplayElement(Spatials.positionXY(34, 56), new ItemStack(ModItems.SOUL_SHARD))
+            .layout((screen, gui, parent, world) -> world.translateXY(gui))
+      );
+      this.labelRandomTrade = this.addElement(
+         new LabelElement(Spatials.positionXYZ(42, 66, 200), TextComponent.EMPTY, LabelTextStyle.border8().center())
+            .layout((screen, gui, parent, world) -> world.translateXYZ(gui))
+      );
+
+      for (int i = 0; i < 3; i++) {
+         int tradeIndex = i;
+         int yOffsetTrade = 6 + i * 28;
+         this.addElement(
+               ((ButtonElement)new ButtonElement(Spatials.positionXY(83, yOffsetTrade), ScreenTextures.BUTTON_TRADE_WIDE_TEXTURES, () -> {})
+                     .layout((screen, gui, parent, world) -> world.translateXY(gui)))
+                  .setDisabled(() -> !this.canBuyTrade(tradeIndex))
+            )
+            .setEnabled(false);
+         int yOffset = 10 + i * 28;
+         ((FakeItemSlotElement)this.addElement((FakeItemSlotElement)new FakeItemSlotElement(Spatials.positionXY(146, yOffset), () -> {
+               Tuple<ItemStack, Integer> trade = ClientShardTradeData.getTradeInfo(tradeIndex);
+               return trade == null ? ItemStack.EMPTY : ((ItemStack)trade.getA()).copy();
+            }, () -> !this.canBuyTrade(tradeIndex)).layout((screen, gui, parent, world) -> world.translateXY(gui))))
+            .whenClicked(() -> this.buyTrade(tradeIndex))
+            .tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+               Tuple<ItemStack, Integer> trade = ClientShardTradeData.getTradeInfo(tradeIndex);
+               if (trade != null && !((ItemStack)trade.getA()).isEmpty()) {
+                  tooltipRenderer.renderTooltip(poseStack, (ItemStack)trade.getA(), mouseX, mouseY, TooltipDirection.RIGHT);
+               }
+
+               return true;
+            });
+         this.addElement(
+            (ItemStackDisplayElement)new ItemStackDisplayElement(Spatials.positionXY(94, yOffset), new ItemStack(ModItems.SOUL_SHARD))
+               .layout((screen, gui, parent, world) -> world.translateXY(gui))
+         );
+         this.labelShopTrades[i] = this.addElement(
+            new LabelElement(Spatials.positionXYZ(102, yOffset + 10, 200), TextComponent.EMPTY, LabelTextStyle.border8().center())
+               .layout((screen, gui, parent, world) -> world.translateXYZ(gui))
+         );
+      }
+
+      this.updateTradeLabels();
    }
 
-   protected void func_230450_a_(MatrixStack matrixStack, float partialTicks, int x, int y) {
-      RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-      this.field_230706_i_.func_110434_K().func_110577_a(TEXTURE);
-      int offsetX = (this.field_230708_k_ - this.field_146999_f) / 2;
-      int offsetY = (this.field_230709_l_ - this.field_147000_g) / 2;
-      func_238464_a_(matrixStack, offsetX, offsetY, this.func_230927_p_(), 0.0F, 0.0F, this.field_146999_f, this.field_147000_g, 256, 512);
+   protected void containerTick() {
+      super.containerTick();
+      this.updateTradeLabels();
+   }
 
-      for (int tradeIndex = 0; tradeIndex < 3; tradeIndex++) {
-         int xx = offsetX + 83;
-         int yy = offsetY + 5 + tradeIndex * 28;
-         int slotXX = offsetX + 145;
-         int slotYY = offsetY + 9 + tradeIndex * 28;
-         int vOffset = 1;
-         if (ClientShardTradeData.getTradeInfo(tradeIndex) == null) {
-            vOffset = 57;
+   private void updateTradeLabels() {
+      int playerShards = ItemShardPouch.getShardCount(Minecraft.getInstance().player);
+      int randomCost = ClientShardTradeData.getRandomTradeCost();
+      int randomCostColor = playerShards >= randomCost ? 16777215 : 8257536;
+      Component randomCostComponent = new TextComponent(String.valueOf(randomCost)).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(randomCostColor)));
+      this.labelRandomTrade.set(randomCostComponent);
+
+      for (int i = 0; i < 3; i++) {
+         Tuple<ItemStack, Integer> tradeInfo = ClientShardTradeData.getTradeInfo(i);
+         if (tradeInfo == null) {
+            this.labelShopTrades[i].set(TextComponent.EMPTY);
          } else {
-            Rectangle tradeBox = new Rectangle(xx, yy, 88, 27);
-            if (tradeBox.contains(x, y)) {
-               vOffset = 29;
-            }
-         }
-
-         func_238464_a_(matrixStack, xx, yy, this.func_230927_p_(), 177.0F, vOffset, 88, 27, 256, 512);
-         func_238464_a_(matrixStack, slotXX, slotYY, this.func_230927_p_(), 177.0F, 85.0F, 18, 18, 256, 512);
-      }
-   }
-
-   protected void func_230451_b_(MatrixStack matrixStack, int x, int y) {
-      matrixStack.func_227860_a_();
-      matrixStack.func_227861_a_(this.field_238742_p_, this.field_238743_q_, 0.0);
-      matrixStack.func_227862_a_(0.75F, 0.75F, 1.0F);
-      this.field_230712_o_.func_243248_b(matrixStack, this.field_230704_d_, 0.0F, 0.0F, 4210752);
-      matrixStack.func_227865_b_();
-      this.field_230712_o_.func_243248_b(matrixStack, this.field_213127_e.func_145748_c_(), this.field_238744_r_, this.field_238745_s_, 4210752);
-      int shardCount = ItemShardPouch.getShardCount(Minecraft.func_71410_x().field_71439_g.field_71071_by);
-      ItemStack stack = new ItemStack(ModItems.SOUL_SHARD);
-
-      for (int tradeIndex = 0; tradeIndex < 3; tradeIndex++) {
-         Tuple<ItemStack, Integer> trade = ClientShardTradeData.getTradeInfo(tradeIndex);
-         if (trade != null) {
-            int xx = 94;
-            int yy = 10 + tradeIndex * 28;
-            this.field_230707_j_.func_175042_a(stack, xx, yy);
-            String text = String.valueOf(trade.func_76340_b());
-            int width = this.field_230712_o_.func_78256_a(text);
-            int color = 16777215;
-            if (shardCount < (Integer)trade.func_76340_b()) {
-               color = 8257536;
-            }
-
-            matrixStack.func_227860_a_();
-            matrixStack.func_227861_a_(0.0, 0.0, 400.0);
-            FontHelper.drawStringWithBorder(matrixStack, text, xx + 8 - width / 2.0F, (float)(yy + 8), color, 0);
-            matrixStack.func_227865_b_();
+            int tradeCost = (Integer)tradeInfo.getB();
+            int tradeCostColor = playerShards >= tradeCost ? 16777215 : 8257536;
+            Component tradeCostComponent = new TextComponent(String.valueOf(tradeCost)).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(tradeCostColor)));
+            this.labelShopTrades[i].set(tradeCostComponent);
          }
       }
+   }
 
-      int xx = 34;
-      int yy = 56;
-      this.field_230707_j_.func_175042_a(stack, xx, yy);
-      String text = String.valueOf(ClientShardTradeData.getRandomTradeCost());
-      int width = this.field_230712_o_.func_78256_a(text);
-      int color = 16777215;
-      if (shardCount < ClientShardTradeData.getRandomTradeCost()) {
-         color = 8257536;
+   private boolean canBuyRandomTrade() {
+      return ItemShardPouch.getShardCount(Minecraft.getInstance().player) >= ClientShardTradeData.getRandomTradeCost();
+   }
+
+   private boolean canBuyTrade(int tradeIndex) {
+      Tuple<ItemStack, Integer> tradeInfo = ClientShardTradeData.getTradeInfo(tradeIndex);
+      return tradeInfo == null ? false : ItemShardPouch.getShardCount(Minecraft.getInstance().player) >= (Integer)tradeInfo.getB();
+   }
+
+   private void buyRandomTrade() {
+      if (this.canBuyRandomTrade()) {
+         ModNetwork.CHANNEL.sendToServer(new ShardTradeTradeMessage(-1, InputEvents.isShiftDown()));
       }
-
-      matrixStack.func_227860_a_();
-      matrixStack.func_227861_a_(0.0, 0.0, 400.0);
-      FontHelper.drawStringWithBorder(matrixStack, text, xx + 9 - width / 2.0F, (float)(yy + 8), color, 0);
-      matrixStack.func_227865_b_();
    }
 
-   public void func_230430_a_(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-      this.func_230446_a_(matrixStack);
-      super.func_230430_a_(matrixStack, mouseX, mouseY, partialTicks);
-      this.func_230459_a_(matrixStack, mouseX, mouseY);
-   }
-
-   public boolean func_231048_c_(double mouseX, double mouseY, int button) {
-      this.field_146993_M = false;
-      return super.func_231048_c_(mouseX, mouseY, button);
-   }
-
-   public boolean func_231177_au__() {
-      return false;
+   private void buyTrade(int tradeIndex) {
+      if (this.canBuyTrade(tradeIndex)) {
+         ModNetwork.CHANNEL.sendToServer(new ShardTradeTradeMessage(tradeIndex, InputEvents.isShiftDown()));
+      }
    }
 }

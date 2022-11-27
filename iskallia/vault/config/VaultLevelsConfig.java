@@ -1,12 +1,14 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VaultLevelsConfig extends Config {
    @Expose
-   public List<VaultLevelsConfig.VaultLevelMeta> levelMetas;
+   private int maxLevel;
+   @Expose
+   private final List<VaultLevelsConfig.VaultLevelMeta> levelMetas = new ArrayList<>();
 
    @Override
    public String getName() {
@@ -18,20 +20,25 @@ public class VaultLevelsConfig extends Config {
       return level >= 0 && level <= maxLevelTNLAvailable ? this.levelMetas.get(level) : this.levelMetas.get(maxLevelTNLAvailable);
    }
 
+   public int getMaxLevel() {
+      return this.maxLevel;
+   }
+
    @Override
    protected void reset() {
-      this.levelMetas = new LinkedList<>();
+      this.maxLevel = 100;
+      this.levelMetas.clear();
 
-      for (int i = 0; i < 80; i++) {
+      for (int i = 0; i < this.maxLevel; i++) {
          VaultLevelsConfig.VaultLevelMeta vaultLevel = new VaultLevelsConfig.VaultLevelMeta();
          vaultLevel.level = i;
-         vaultLevel.tnl = this.defaultTNLFunction(i);
+         vaultLevel.tnl = (int)this.defaultTNLFunction(i);
          this.levelMetas.add(vaultLevel);
       }
    }
 
-   public int defaultTNLFunction(int level) {
-      return level * 500 + 10000;
+   public long defaultTNLFunction(int level) {
+      return 10000L + 400L * level + Math.round(Math.pow(level / 59.0F, 28.0));
    }
 
    public static class VaultLevelMeta {

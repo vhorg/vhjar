@@ -1,64 +1,69 @@
 package iskallia.vault.block;
 
+import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
 import iskallia.vault.init.ModBlocks;
-import javax.annotation.Nullable;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ContainerBlock;
-import net.minecraft.block.AbstractBlock.Properties;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.EntitySelectionContext;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
+import iskallia.vault.util.BlockHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.EntityCollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
-public class EtchingVendorControllerBlock extends ContainerBlock {
+public class EtchingVendorControllerBlock extends BaseEntityBlock {
    public EtchingVendorControllerBlock() {
       super(
-         Properties.func_200950_a(Blocks.field_180401_cv)
-            .func_200942_a()
-            .func_235828_a_(EtchingVendorControllerBlock::nonSolid)
-            .func_235847_c_(EtchingVendorControllerBlock::nonSolid)
+         Properties.copy(Blocks.BARRIER)
+            .noCollission()
+            .isRedstoneConductor(EtchingVendorControllerBlock::nonSolid)
+            .isViewBlocking(EtchingVendorControllerBlock::nonSolid)
       );
    }
 
-   private static boolean nonSolid(BlockState state, IBlockReader reader, BlockPos pos) {
+   @Nullable
+   public <A extends BlockEntity> BlockEntityTicker<A> getTicker(Level p_153212_, BlockState state, BlockEntityType<A> tBlockEntityType) {
+      return BlockHelper.getTicker(tBlockEntityType, ModBlocks.ETCHING_CONTROLLER_TILE_ENTITY, EtchingVendorControllerTileEntity::tick);
+   }
+
+   private static boolean nonSolid(BlockState state, BlockGetter reader, BlockPos pos) {
       return false;
    }
 
-   public boolean func_200123_i(BlockState state, IBlockReader reader, BlockPos pos) {
+   public boolean propagatesSkylightDown(BlockState state, BlockGetter reader, BlockPos pos) {
       return true;
    }
 
-   public VoxelShape func_220053_a(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-      if (context instanceof EntitySelectionContext) {
-         Entity e = context.getEntity();
-         if (e instanceof PlayerEntity && ((PlayerEntity)e).func_184812_l_()) {
-            return VoxelShapes.func_197868_b();
-         }
-      }
-
-      return VoxelShapes.func_197880_a();
+   public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+      return context instanceof EntityCollisionContext entityCollisionContext
+            && entityCollisionContext.getEntity() instanceof Player player
+            && player.isCreative()
+         ? Shapes.block()
+         : Shapes.empty();
    }
 
-   public BlockRenderType func_149645_b(BlockState state) {
-      return BlockRenderType.INVISIBLE;
+   public RenderShape getRenderShape(BlockState state) {
+      return RenderShape.INVISIBLE;
    }
 
    @OnlyIn(Dist.CLIENT)
-   public float func_220080_a(BlockState state, IBlockReader worldIn, BlockPos pos) {
+   public float getShadeBrightness(BlockState state, BlockGetter worldIn, BlockPos pos) {
       return 1.0F;
    }
 
-   @Nullable
-   public TileEntity func_196283_a_(IBlockReader world) {
-      return ModBlocks.ETCHING_CONTROLLER_TILE_ENTITY.func_200968_a();
+   public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+      return ModBlocks.ETCHING_CONTROLLER_TILE_ENTITY.create(pos, state);
    }
 }

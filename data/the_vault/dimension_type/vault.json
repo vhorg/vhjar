@@ -1,4 +1,6 @@
 {
+  "height": 256,
+  "min_y": 0,
   "ultrawarm": false,
   "natural": false,
   "piglin_safe": true,
@@ -12,5 +14,5 @@
   "fixed_time": 18000,
   "logical_height": 256,
   "effects": "minecraft:the_nether",
-  "infiniburn": "minecraft:infiniburn_overworld"
+  "infiniburn": "#minecraft:infiniburn_overworld"
 }

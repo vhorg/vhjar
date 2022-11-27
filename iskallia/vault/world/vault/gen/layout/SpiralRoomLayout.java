@@ -1,12 +1,12 @@
 package iskallia.vault.world.vault.gen.layout;
 
-import iskallia.vault.Vault;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
+import iskallia.vault.VaultMod;
+import net.minecraft.core.Vec3i;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 
 public class SpiralRoomLayout extends VaultRoomLayoutGenerator {
-   public static final ResourceLocation ID = Vault.id("spiral");
+   public static final ResourceLocation ID = VaultMod.id("spiral");
    private int size;
 
    public SpiralRoomLayout() {
@@ -34,7 +34,7 @@ public class SpiralRoomLayout extends VaultRoomLayoutGenerator {
 
       for (int i = 0; i < this.size * this.size; i++) {
          if (-this.size / 2 <= x && x <= this.size / 2 && -this.size / 2 <= y && y <= this.size / 2) {
-            VaultRoomLayoutGenerator.Room room = new VaultRoomLayoutGenerator.Room(new Vector3i(x, 0, y));
+            VaultRoomLayoutGenerator.Room room = new VaultRoomLayoutGenerator.Room(new Vec3i(x, 0, y));
             layout.putRoom(room);
             if (previousRoom != null) {
                layout.addTunnel(new VaultRoomLayoutGenerator.Tunnel(previousRoom, room));
@@ -57,17 +57,17 @@ public class SpiralRoomLayout extends VaultRoomLayoutGenerator {
    }
 
    @Override
-   protected void deserialize(CompoundNBT tag) {
+   protected void deserialize(CompoundTag tag) {
       super.deserialize(tag);
-      if (tag.func_150297_b("size", 3)) {
-         this.size = tag.func_74762_e("size");
+      if (tag.contains("size", 3)) {
+         this.size = tag.getInt("size");
       }
    }
 
    @Override
-   protected CompoundNBT serialize() {
-      CompoundNBT tag = super.serialize();
-      tag.func_74768_a("size", this.size);
+   protected CompoundTag serialize() {
+      CompoundTag tag = super.serialize();
+      tag.putInt("size", this.size);
       return tag;
    }
 }

@@ -6,41 +6,33 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.saveddata.SavedData;
 
-public class PlayerVaultAltarData extends WorldSavedData {
+public class PlayerVaultAltarData extends SavedData {
    protected static final String DATA_NAME = "the_vault_PlayerAltarRecipes";
    private Map<UUID, AltarInfusionRecipe> playerMap = new HashMap<>();
    private HashMap<UUID, List<BlockPos>> playerAltars = new HashMap<>();
 
-   public PlayerVaultAltarData() {
-      super("the_vault_PlayerAltarRecipes");
-   }
-
-   public PlayerVaultAltarData(String name) {
-      super(name);
-   }
-
-   public AltarInfusionRecipe getRecipe(PlayerEntity player) {
-      return this.getRecipe(player.func_110124_au());
+   public AltarInfusionRecipe getRecipe(Player player) {
+      return this.getRecipe(player.getUUID());
    }
 
    public AltarInfusionRecipe getRecipe(UUID uuid) {
       return this.playerMap.get(uuid);
    }
 
-   public AltarInfusionRecipe getRecipe(ServerWorld world, BlockPos pos, ServerPlayerEntity player) {
-      AltarInfusionRecipe recipe = this.playerMap.computeIfAbsent(player.func_110124_au(), k -> new AltarInfusionRecipe(world, pos, player));
-      this.func_76185_a();
+   public AltarInfusionRecipe getRecipe(ServerLevel world, BlockPos pos, ServerPlayer player) {
+      AltarInfusionRecipe recipe = this.playerMap.computeIfAbsent(player.getUUID(), k -> new AltarInfusionRecipe(world, pos, player));
+      this.setDirty();
       return recipe;
    }
 
@@ -50,56 +42,58 @@ public class PlayerVaultAltarData extends WorldSavedData {
 
    public PlayerVaultAltarData addRecipe(UUID uuid, AltarInfusionRecipe recipe) {
       this.playerMap.put(uuid, recipe);
-      this.func_76185_a();
+      this.setDirty();
       return this;
    }
 
    public PlayerVaultAltarData removeRecipe(UUID uuid) {
       this.playerMap.remove(uuid);
-      this.func_76185_a();
+      this.setDirty();
       return this;
    }
 
    public List<BlockPos> getAltars(UUID uuid) {
-      if (uuid == null) {
-         return new ArrayList<>();
-      } else {
-         this.playerAltars.computeIfAbsent(uuid, k -> new ArrayList<>());
-         this.func_76185_a();
-         return this.playerAltars.get(uuid);
-      }
+      this.playerAltars.computeIfAbsent(uuid, k -> new ArrayList<>());
+      this.setDirty();
+      return this.playerAltars.get(uuid);
    }
 
    public PlayerVaultAltarData addAltar(UUID uuid, BlockPos altarPos) {
       this.getAltars(uuid).add(altarPos);
-      this.func_76185_a();
+      this.setDirty();
       return this;
    }
 
    public PlayerVaultAltarData removeAltar(UUID uuid, BlockPos altarPos) {
       this.getAltars(uuid).remove(altarPos);
-      this.func_76185_a();
+      this.setDirty();
       return this;
    }
 
-   public void func_76184_a(CompoundNBT nbt) {
-      ListNBT playerList = nbt.func_150295_c("PlayerEntries", 8);
-      ListNBT recipeList = nbt.func_150295_c("AltarRecipeEntries", 10);
-      ListNBT playerBlockPosList = nbt.func_150295_c("PlayerBlockPosEntries", 8);
-      ListNBT blockPosList = nbt.func_150295_c("BlockPosEntries", 9);
+   private static PlayerVaultAltarData create(CompoundTag tag) {
+      PlayerVaultAltarData data = new PlayerVaultAltarData();
+      data.load(tag);
+      return data;
+   }
+
+   public void load(CompoundTag nbt) {
+      ListTag playerList = nbt.getList("PlayerEntries", 8);
+      ListTag recipeList = nbt.getList("AltarRecipeEntries", 10);
+      ListTag playerBlockPosList = nbt.getList("PlayerBlockPosEntries", 8);
+      ListTag blockPosList = nbt.getList("BlockPosEntries", 9);
       if (playerList.size() == recipeList.size() && playerBlockPosList.size() == blockPosList.size()) {
          for (int i = 0; i < playerList.size(); i++) {
-            UUID playerUUID = UUID.fromString(playerList.func_150307_f(i));
-            this.playerMap.put(playerUUID, AltarInfusionRecipe.deserialize(recipeList.func_150305_b(i)));
+            UUID playerUUID = UUID.fromString(playerList.getString(i));
+            this.playerMap.put(playerUUID, AltarInfusionRecipe.deserialize(recipeList.getCompound(i)));
          }
 
          for (int i = 0; i < playerBlockPosList.size(); i++) {
-            UUID playerUUID = UUID.fromString(playerBlockPosList.func_150307_f(i));
+            UUID playerUUID = UUID.fromString(playerBlockPosList.getString(i));
             List<BlockPos> positions = new ArrayList<>();
 
-            for (INBT compound : blockPosList.func_202169_e(i)) {
-               CompoundNBT posTag = (CompoundNBT)compound;
-               BlockPos pos = NBTUtil.func_186861_c(posTag);
+            for (Tag compound : blockPosList.getList(i)) {
+               CompoundTag posTag = (CompoundTag)compound;
+               BlockPos pos = NbtUtils.readBlockPos(posTag);
                positions.add(pos);
             }
 
@@ -110,32 +104,32 @@ public class PlayerVaultAltarData extends WorldSavedData {
       }
    }
 
-   public CompoundNBT func_189551_b(CompoundNBT nbt) {
-      ListNBT playerList = new ListNBT();
-      ListNBT recipeList = new ListNBT();
-      ListNBT playerBlockPosList = new ListNBT();
-      ListNBT blockPosList = new ListNBT();
+   public CompoundTag save(CompoundTag nbt) {
+      ListTag playerList = new ListTag();
+      ListTag recipeList = new ListTag();
+      ListTag playerBlockPosList = new ListTag();
+      ListTag blockPosList = new ListTag();
       this.playerMap.forEach((uuid, recipe) -> {
-         playerList.add(StringNBT.func_229705_a_(uuid.toString()));
+         playerList.add(StringTag.valueOf(uuid.toString()));
          recipeList.add(recipe.serialize());
       });
       this.playerAltars.forEach((uuid, altarPositions) -> {
-         playerBlockPosList.add(StringNBT.func_229705_a_(uuid.toString()));
-         ListNBT positions = new ListNBT();
-         altarPositions.forEach(pos -> positions.add(NBTUtil.func_186859_a(pos)));
+         playerBlockPosList.add(StringTag.valueOf(uuid.toString()));
+         ListTag positions = new ListTag();
+         altarPositions.forEach(pos -> positions.add(NbtUtils.writeBlockPos(pos)));
          blockPosList.add(positions);
       });
-      nbt.func_218657_a("PlayerEntries", playerList);
-      nbt.func_218657_a("AltarRecipeEntries", recipeList);
-      nbt.func_218657_a("PlayerBlockPosEntries", playerBlockPosList);
-      nbt.func_218657_a("BlockPosEntries", blockPosList);
+      nbt.put("PlayerEntries", playerList);
+      nbt.put("AltarRecipeEntries", recipeList);
+      nbt.put("PlayerBlockPosEntries", playerBlockPosList);
+      nbt.put("BlockPosEntries", blockPosList);
       return nbt;
    }
 
-   public static PlayerVaultAltarData get(ServerWorld world) {
-      return (PlayerVaultAltarData)world.func_73046_m()
-         .func_241755_D_()
-         .func_217481_x()
-         .func_215752_a(PlayerVaultAltarData::new, "the_vault_PlayerAltarRecipes");
+   public static PlayerVaultAltarData get(ServerLevel world) {
+      return (PlayerVaultAltarData)world.getServer()
+         .overworld()
+         .getDataStorage()
+         .computeIfAbsent(PlayerVaultAltarData::create, PlayerVaultAltarData::new, "the_vault_PlayerAltarRecipes");
    }
 }

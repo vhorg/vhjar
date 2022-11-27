@@ -1,7 +1,7 @@
 package iskallia.vault.attribute;
 
 import java.util.Random;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 
 public class IntegerAttribute extends NumberAttribute<Integer> {
    public IntegerAttribute() {
@@ -12,13 +12,13 @@ public class IntegerAttribute extends NumberAttribute<Integer> {
    }
 
    @Override
-   public void write(CompoundNBT nbt) {
-      nbt.func_74768_a("BaseValue", this.getBaseValue());
+   public void write(CompoundTag nbt) {
+      nbt.putInt("BaseValue", this.getBaseValue());
    }
 
    @Override
-   public void read(CompoundNBT nbt) {
-      this.setBaseValue(Integer.valueOf(nbt.func_74762_e("BaseValue")));
+   public void read(CompoundTag nbt) {
+      this.setBaseValue(Integer.valueOf(nbt.getInt("BaseValue")));
    }
 
    public static IntegerAttribute.Generator generator() {

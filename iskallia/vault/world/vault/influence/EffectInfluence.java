@@ -1,28 +1,27 @@
 package iskallia.vault.world.vault.influence;
 
-import iskallia.vault.Vault;
-import iskallia.vault.skill.talent.type.EffectTalent;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.Effect;
-import net.minecraft.util.ResourceLocation;
+import iskallia.vault.VaultMod;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class EffectInfluence extends VaultInfluence {
-   public static final ResourceLocation ID = Vault.id("effect");
-   private Effect effect;
+   public static final ResourceLocation ID = VaultMod.id("effect");
+   private MobEffect effect;
    private int amplifier;
 
    EffectInfluence() {
       super(ID);
    }
 
-   public EffectInfluence(Effect effect, int amplifier) {
+   public EffectInfluence(MobEffect effect, int amplifier) {
       this();
       this.effect = effect;
       this.amplifier = amplifier;
    }
 
-   public Effect getEffect() {
+   public MobEffect getEffect() {
       return this.effect;
    }
 
@@ -30,22 +29,18 @@ public class EffectInfluence extends VaultInfluence {
       return this.amplifier;
    }
 
-   public EffectTalent makeTalent() {
-      return new EffectTalent(0, this.getEffect(), this.getAmplifier(), EffectTalent.Type.HIDDEN, EffectTalent.Operator.ADD);
-   }
-
    @Override
-   public CompoundNBT serializeNBT() {
-      CompoundNBT tag = super.serializeNBT();
-      tag.func_74778_a("effect", this.effect.getRegistryName().toString());
-      tag.func_74768_a("amplifier", this.amplifier);
+   public CompoundTag serializeNBT() {
+      CompoundTag tag = super.serializeNBT();
+      tag.putString("effect", this.effect.getRegistryName().toString());
+      tag.putInt("amplifier", this.amplifier);
       return tag;
    }
 
    @Override
-   public void deserializeNBT(CompoundNBT tag) {
+   public void deserializeNBT(CompoundTag tag) {
       super.deserializeNBT(tag);
-      this.effect = (Effect)ForgeRegistries.POTIONS.getValue(new ResourceLocation(tag.func_74779_i("effect")));
-      this.amplifier = tag.func_74762_e("amplifier");
+      this.effect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(tag.getString("effect")));
+      this.amplifier = tag.getInt("amplifier");
    }
 }

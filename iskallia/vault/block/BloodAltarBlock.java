@@ -3,29 +3,27 @@ package iskallia.vault.block;
 import iskallia.vault.block.base.FillableAltarBlock;
 import iskallia.vault.block.entity.BloodAltarTileEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.world.data.PlayerFavourData;
-import javax.annotation.Nonnull;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class BloodAltarBlock extends FillableAltarBlock<BloodAltarTileEntity> {
-   public BloodAltarTileEntity createTileEntity(BlockState state, IBlockReader world) {
-      return (BloodAltarTileEntity)ModBlocks.BLOOD_ALTAR_TILE_ENTITY.func_200968_a();
+   public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+      return ModBlocks.BLOOD_ALTAR_TILE_ENTITY.create(pos, state);
    }
 
    @Override
-   public IParticleData getFlameParticle() {
-      return (IParticleData)ModParticles.GREEN_FLAME.get();
+   public ParticleOptions getFlameParticle() {
+      return (ParticleOptions)ModParticles.GREEN_FLAME.get();
    }
 
    @Override
@@ -33,25 +31,23 @@ public class BloodAltarBlock extends FillableAltarBlock<BloodAltarTileEntity> {
       return PlayerFavourData.VaultGodType.BENEVOLENT;
    }
 
-   @Nonnull
    @Override
-   public BlockState func_196258_a(BlockItemUseContext context) {
-      BlockState state = super.func_196258_a(context);
-      return (BlockState)state.func_206870_a(FACING, ((Direction)state.func_177229_b(FACING)).func_176734_d());
+   public ItemStack getAssociatedVaultGodShard() {
+      return new ItemStack(ModItems.CRYSTAL_SHARD_BENEVOLENT);
    }
 
-   public ActionResultType rightClicked(
-      BlockState state, ServerWorld world, BlockPos pos, BloodAltarTileEntity tileEntity, ServerPlayerEntity player, ItemStack heldStack
+   public InteractionResult rightClicked(
+      BlockState state, ServerLevel world, BlockPos pos, BloodAltarTileEntity tileEntity, ServerPlayer player, ItemStack heldStack
    ) {
       if (!tileEntity.initialized()) {
-         return ActionResultType.SUCCESS;
-      } else if (player.func_184812_l_()) {
+         return InteractionResult.SUCCESS;
+      } else if (player.isCreative()) {
          tileEntity.makeProgress(player, 1, sPlayer -> {});
-         return ActionResultType.SUCCESS;
+         return InteractionResult.SUCCESS;
       } else {
          EntityHelper.changeHealth(player, -2);
          tileEntity.makeProgress(player, 1, sPlayer -> {
-            PlayerFavourData data = PlayerFavourData.get(sPlayer.func_71121_q());
+            PlayerFavourData data = PlayerFavourData.get(sPlayer.getLevel());
             if (rand.nextFloat() < getFavourChance(sPlayer, PlayerFavourData.VaultGodType.BENEVOLENT)) {
                PlayerFavourData.VaultGodType vg = this.getAssociatedVaultGod();
                if (data.addFavour(sPlayer, vg, 1)) {
@@ -60,7 +56,7 @@ public class BloodAltarBlock extends FillableAltarBlock<BloodAltarTileEntity> {
                }
             }
          });
-         return ActionResultType.SUCCESS;
+         return InteractionResult.SUCCESS;
       }
    }
 }

@@ -4,9 +4,11 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.network.message.AbilityActivityMessage;
 import iskallia.vault.network.message.AbilityFocusMessage;
 import iskallia.vault.network.message.AbilityKnownOnesMessage;
-import iskallia.vault.skill.ability.AbilityGroup;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.ability.group.AbilityGroup;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,16 +19,16 @@ import javax.annotation.Nullable;
 
 public class ClientAbilityData {
    private static final Map<String, ClientAbilityData.CooldownData> cooldowns = new HashMap<>();
+   private static final Object2BooleanMap<String> active = new Object2BooleanOpenHashMap();
    private static List<AbilityNode<?, ?>> learnedAbilities = new ArrayList<>();
    private static AbilityGroup<?, ?> selectedAbility;
-   private static boolean active;
 
    public static AbilityGroup<?, ?> getSelectedAbility() {
       return selectedAbility;
    }
 
-   public static boolean isActive() {
-      return active;
+   public static boolean isActive(String abilityGroup) {
+      return active.getBoolean(abilityGroup);
    }
 
    @Nonnull
@@ -88,14 +90,18 @@ public class ClientAbilityData {
    }
 
    public static void updateActivity(AbilityActivityMessage pkt) {
-      cooldowns.put(pkt.getSelectedAbility(), new ClientAbilityData.CooldownData(pkt.getCooldownTicks(), pkt.getMaxCooldownTicks()));
+      cooldowns.put(pkt.getAbility(), new ClientAbilityData.CooldownData(pkt.getCooldownTicks(), pkt.getMaxCooldownTicks()));
       if (pkt.getActiveFlag() != AbilityTree.ActivityFlag.NO_OP) {
-         active = pkt.getActiveFlag() == AbilityTree.ActivityFlag.ACTIVATE_ABILITY;
+         active.put(pkt.getAbility(), pkt.getActiveFlag() == AbilityTree.ActivityFlag.ACTIVATE_ABILITY);
       }
    }
 
    public static void updateSelectedAbility(AbilityFocusMessage pkt) {
       selectedAbility = ModConfigs.ABILITIES.getAbilityGroupByName(pkt.getSelectedAbility());
+   }
+
+   static {
+      active.defaultReturnValue(false);
    }
 
    public static class CooldownData {

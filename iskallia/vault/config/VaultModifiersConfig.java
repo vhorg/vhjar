@@ -1,450 +1,827 @@
 package iskallia.vault.config;
 
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
-import iskallia.vault.Vault;
-import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.config.EffectConfig;
-import iskallia.vault.util.data.WeightedList;
-import iskallia.vault.world.vault.modifier.ArtifactChanceModifier;
-import iskallia.vault.world.vault.modifier.CatalystChanceModifier;
-import iskallia.vault.world.vault.modifier.ChestModifier;
-import iskallia.vault.world.vault.modifier.ChestTrapModifier;
-import iskallia.vault.world.vault.modifier.CurseOnHitModifier;
-import iskallia.vault.world.vault.modifier.DurabilityDamageModifier;
-import iskallia.vault.world.vault.modifier.EffectModifier;
-import iskallia.vault.world.vault.modifier.FrenzyModifier;
-import iskallia.vault.world.vault.modifier.InventoryRestoreModifier;
-import iskallia.vault.world.vault.modifier.LevelModifier;
-import iskallia.vault.world.vault.modifier.LootableModifier;
-import iskallia.vault.world.vault.modifier.MaxMobsModifier;
-import iskallia.vault.world.vault.modifier.NoExitModifier;
-import iskallia.vault.world.vault.modifier.ScaleModifier;
-import iskallia.vault.world.vault.modifier.StatModifier;
-import iskallia.vault.world.vault.modifier.TimerModifier;
-import iskallia.vault.world.vault.modifier.VaultFruitPreventionModifier;
-import iskallia.vault.world.vault.modifier.VaultModifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
+import com.google.gson.annotations.SerializedName;
+import iskallia.vault.VaultMod;
+import iskallia.vault.block.PlaceholderBlock;
+import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.init.ModBlocks;
+import iskallia.vault.util.calc.PlayerStat;
+import iskallia.vault.world.vault.modifier.modifier.ChanceArtifactModifier;
+import iskallia.vault.world.vault.modifier.modifier.ChanceCatalystModifier;
+import iskallia.vault.world.vault.modifier.modifier.ChanceChestTrapModifier;
+import iskallia.vault.world.vault.modifier.modifier.ChanceSoulShardModifier;
+import iskallia.vault.world.vault.modifier.modifier.DecoratorAddModifier;
+import iskallia.vault.world.vault.modifier.modifier.EmptyModifier;
+import iskallia.vault.world.vault.modifier.modifier.LootItemQuantityModifier;
+import iskallia.vault.world.vault.modifier.modifier.LootItemRarityModifier;
+import iskallia.vault.world.vault.modifier.modifier.MobAttributeModifier;
+import iskallia.vault.world.vault.modifier.modifier.MobCurseOnHitModifier;
+import iskallia.vault.world.vault.modifier.modifier.MobFrenzyModifier;
+import iskallia.vault.world.vault.modifier.modifier.MobSpawnCountModifier;
+import iskallia.vault.world.vault.modifier.modifier.PlayerAttributeModifier;
+import iskallia.vault.world.vault.modifier.modifier.PlayerDurabilityDamageModifier;
+import iskallia.vault.world.vault.modifier.modifier.PlayerEffectModifier;
+import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
+import iskallia.vault.world.vault.modifier.modifier.PlayerNoExitModifier;
+import iskallia.vault.world.vault.modifier.modifier.PlayerNoVaultFruitModifier;
+import iskallia.vault.world.vault.modifier.modifier.PlayerStatModifier;
+import iskallia.vault.world.vault.modifier.modifier.VaultLevelModifier;
+import iskallia.vault.world.vault.modifier.modifier.VaultLootableWeightModifier;
+import iskallia.vault.world.vault.modifier.modifier.VaultTimeModifier;
+import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.world.vault.modifier.registry.VaultModifierTypeRegistry;
+import iskallia.vault.world.vault.modifier.spi.AbstractChanceModifier;
+import iskallia.vault.world.vault.modifier.spi.EntityAttributeModifier;
+import iskallia.vault.world.vault.modifier.spi.VaultModifier;
+import java.lang.reflect.Type;
+import java.util.Comparator;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Random;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.annotation.Nullable;
-import net.minecraft.potion.Effects;
-import net.minecraft.util.ResourceLocation;
+import java.util.TreeMap;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class VaultModifiersConfig extends Config {
+   public static final String KEY_MODIFIERS = "modifiers";
    @Expose
-   public List<MaxMobsModifier> MAX_MOBS_MODIFIERS;
-   @Expose
-   public List<TimerModifier> TIMER_MODIFIERS;
-   @Expose
-   public List<LevelModifier> LEVEL_MODIFIERS;
-   @Expose
-   public List<EffectModifier> EFFECT_MODIFIERS;
-   @Expose
-   public List<NoExitModifier> NO_EXIT_MODIFIERS;
-   @Expose
-   public List<ChestModifier> ADDITIONAL_CHEST_MODIFIERS;
-   @Expose
-   public List<ScaleModifier> SCALE_MODIFIERS;
-   @Expose
-   public List<FrenzyModifier> FRENZY_MODIFIERS;
-   @Expose
-   public List<ChestTrapModifier> TRAPPED_CHESTS_MODIFIERS;
-   @Expose
-   public List<ArtifactChanceModifier> ARTIFACT_MODIFIERS;
-   @Expose
-   public List<CatalystChanceModifier> CATALYST_MODIFIERS;
-   @Expose
-   public List<LootableModifier> LOOTABLE_MODIFIERS;
-   @Expose
-   public List<InventoryRestoreModifier> INV_RESTORE_MODIFIERS;
-   @Expose
-   public List<CurseOnHitModifier> CURSE_ON_HIT_MODIFIERS;
-   @Expose
-   public List<DurabilityDamageModifier> DURABILITY_DAMAGE_MODIFIERS;
-   @Expose
-   public List<StatModifier> STAT_MODIFIERS;
-   @Expose
-   public List<VaultFruitPreventionModifier> VAULT_FRUIT_PREVENTION_MODIFIERS;
-   @Expose
-   public List<VaultModifiersConfig.Level> LEVELS;
-   @Expose
-   public Map<String, List<String>> MODIFIER_PREVENTIONS;
+   @SerializedName("modifiers")
+   private VaultModifiersConfig.ModifierTypeGroups modifierTypeGroups;
 
    @Override
    public String getName() {
       return "vault_modifiers";
    }
 
-   public List<VaultModifier> getAll() {
-      return Stream.of(
-            this.MAX_MOBS_MODIFIERS,
-            this.TIMER_MODIFIERS,
-            this.LEVEL_MODIFIERS,
-            this.EFFECT_MODIFIERS,
-            this.NO_EXIT_MODIFIERS,
-            this.ADDITIONAL_CHEST_MODIFIERS,
-            this.SCALE_MODIFIERS,
-            this.FRENZY_MODIFIERS,
-            this.TRAPPED_CHESTS_MODIFIERS,
-            this.ARTIFACT_MODIFIERS,
-            this.CATALYST_MODIFIERS,
-            this.LOOTABLE_MODIFIERS,
-            this.INV_RESTORE_MODIFIERS,
-            this.CURSE_ON_HIT_MODIFIERS,
-            this.DURABILITY_DAMAGE_MODIFIERS,
-            this.STAT_MODIFIERS,
-            this.VAULT_FRUIT_PREVENTION_MODIFIERS
-         )
-         .flatMap(Collection::stream)
-         .collect(Collectors.toList());
-   }
-
-   public VaultModifier getByName(String name) {
-      return this.getAll().stream().filter(group -> group.getName().equals(name)).findFirst().orElse(null);
+   @Override
+   public <T extends Config> T readConfig() {
+      VaultModifiersConfig config = super.readConfig();
+      VaultModifierRegistry.clear();
+      config.modifierTypeGroups
+         .values()
+         .stream()
+         .flatMap(map -> map.entrySet().stream())
+         .forEach(entry -> VaultModifierRegistry.register(entry.getKey(), entry.getValue()));
+      VaultModifierRegistry.register(EmptyModifier.INSTANCE.getId(), EmptyModifier.INSTANCE);
+      return (T)config;
    }
 
    @Override
    protected void reset() {
-      this.LEVELS = new ArrayList<>();
-      this.MAX_MOBS_MODIFIERS = Arrays.asList(
-         new MaxMobsModifier("Silent", Vault.id("textures/gui/modifiers/silent.png"), -2),
-         new MaxMobsModifier("Lonely", Vault.id("textures/gui/modifiers/lonely.png"), -1),
-         new MaxMobsModifier("Crowded", Vault.id("textures/gui/modifiers/crowded.png"), 1),
-         new MaxMobsModifier("Chaotic", Vault.id("textures/gui/modifiers/chaotic.png"), 2)
-      );
-      this.TIMER_MODIFIERS = Arrays.asList(
-         new TimerModifier("Fast", Vault.id("textures/gui/modifiers/fast.png"), -6000),
-         new TimerModifier("Rush", Vault.id("textures/gui/modifiers/rush.png"), -12000)
-      );
-      this.LEVEL_MODIFIERS = Arrays.asList(
-         new LevelModifier("Easy", Vault.id("textures/gui/modifiers/easy.png"), -5), new LevelModifier("Hard", Vault.id("textures/gui/modifiers/hard.png"), 5)
-      );
-      this.EFFECT_MODIFIERS = Arrays.asList(
-         new EffectModifier("Treasure", Vault.id("textures/gui/modifiers/treasure.png"), Effects.field_188425_z, 1, "ADD", EffectConfig.Type.ICON_ONLY),
-         new EffectModifier("Unlucky", Vault.id("textures/gui/modifiers/unlucky.png"), Effects.field_189112_A, 1, "ADD", EffectConfig.Type.ICON_ONLY)
-      );
-      this.NO_EXIT_MODIFIERS = Arrays.asList(
-         new NoExitModifier("Raffle", Vault.id("textures/gui/modifiers/no_exit.png")),
-         new NoExitModifier("Locked", Vault.id("textures/gui/modifiers/no_exit.png"))
-      );
-      this.ADDITIONAL_CHEST_MODIFIERS = Arrays.asList(
-         new ChestModifier("Gilded", Vault.id("textures/gui/modifiers/treasure.png"), 1),
-         new ChestModifier("Hoard", Vault.id("textures/gui/modifiers/treasure.png"), 2)
-      );
-      this.SCALE_MODIFIERS = Arrays.asList(
-         new ScaleModifier("Daycare", Vault.id("textures/gui/modifiers/daycare.png"), 0.5F),
-         new ScaleModifier("Me Me Big Boi", Vault.id("textures/gui/modifiers/daycare.png"), 1.5F)
-      );
-      this.FRENZY_MODIFIERS = Arrays.asList(new FrenzyModifier("Frenzy", Vault.id("textures/gui/modifiers/frenzy.png"), 4.0F, 0.1F, true));
-      this.TRAPPED_CHESTS_MODIFIERS = Arrays.asList(
-         new ChestTrapModifier("Safe Zone", Vault.id("textures/gui/modifiers/safezone.png"), 0.0),
-         new ChestTrapModifier("Trapped", Vault.id("textures/gui/modifiers/trapped.png"), 1.5)
-      );
-      this.ARTIFACT_MODIFIERS = Arrays.asList(
-         new ArtifactChanceModifier("Exploration", Vault.id("textures/gui/modifiers/more-artifact1.png"), 0.25F),
-         new ArtifactChanceModifier("Odyssey", Vault.id("textures/gui/modifiers/more-artifact2.png"), 0.5F)
-      );
-      this.CATALYST_MODIFIERS = Arrays.asList(new CatalystChanceModifier("Prismatic", Vault.id("textures/gui/modifiers/more-catalyst.png"), 0.25F));
-      this.LOOTABLE_MODIFIERS = Arrays.asList(
-         new LootableModifier("Plentiful", Vault.id("textures/gui/modifiers/treasure.png"), "ORE", LootableModifier.getDefaultOreModifiers(2.0F)),
-         new LootableModifier("Rich", Vault.id("textures/gui/modifiers/treasure.png"), "ORE", LootableModifier.getDefaultOreModifiers(3.0F)),
-         new LootableModifier("Copious", Vault.id("textures/gui/modifiers/treasure.png"), "ORE", LootableModifier.getDefaultOreModifiers(4.0F))
-      );
-      this.INV_RESTORE_MODIFIERS = Arrays.asList(
-         new InventoryRestoreModifier("Phoenix", Vault.id("textures/gui/modifiers/phoenix.png"), false),
-         new InventoryRestoreModifier("Afterlife", Vault.id("textures/gui/modifiers/afterlife.png"), true)
-      );
-      this.CURSE_ON_HIT_MODIFIERS = Arrays.asList(
-         new CurseOnHitModifier("Poison", Vault.id("textures/gui/modifiers/hex_poison.png"), Effects.field_76436_u),
-         new CurseOnHitModifier("Wither", Vault.id("textures/gui/modifiers/hex_wither.png"), Effects.field_82731_v),
-         new CurseOnHitModifier("Chilling", Vault.id("textures/gui/modifiers/hex_chilling.png"), Effects.field_76419_f),
-         new CurseOnHitModifier("Slow", Vault.id("textures/gui/modifiers/hex_slow.png"), Effects.field_76421_d)
-      );
-      this.DURABILITY_DAMAGE_MODIFIERS = Arrays.asList(
-         new DurabilityDamageModifier("Resilient", Vault.id("textures/gui/modifiers/resilient.png"), 0.7F),
-         new DurabilityDamageModifier("Reinforced", Vault.id("textures/gui/modifiers/reinforced.png"), 0.4F),
-         new DurabilityDamageModifier("Indestructible", Vault.id("textures/gui/modifiers/indestructible.png"), 0.0F)
-      );
-      this.STAT_MODIFIERS = Arrays.asList(
-         new StatModifier("NoParry", Vault.id("textures/gui/modifiers/phoenix.png"), StatModifier.Statistic.PARRY, 0.0F),
-         new StatModifier("NoResistance", Vault.id("textures/gui/modifiers/phoenix.png"), StatModifier.Statistic.RESISTANCE, 0.0F),
-         new StatModifier("NoCdr", Vault.id("textures/gui/modifiers/phoenix.png"), StatModifier.Statistic.COOLDOWN_REDUCTION, 0.0F)
-      );
-      this.VAULT_FRUIT_PREVENTION_MODIFIERS = Arrays.asList(new VaultFruitPreventionModifier("NoFruit", Vault.id("textures/gui/modifiers/phoenix.png")));
-      VaultModifiersConfig.Level level = new VaultModifiersConfig.Level(5);
-      level.DEFAULT_POOLS
-         .addAll(
-            Arrays.asList(
-               new VaultModifiersConfig.Pool(2, 2)
-                  .add("Crowded", 1)
-                  .add("Chaos", 1)
-                  .add("Fast", 1)
-                  .add("Rush", 1)
-                  .add("Easy", 1)
-                  .add("Hard", 1)
-                  .add("Treasure", 1)
-                  .add("Unlucky", 1),
-               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
-            )
-         );
-      level.RAFFLE_POOLS
-         .addAll(
-            Arrays.asList(
-               new VaultModifiersConfig.Pool(2, 2)
-                  .add("Crowded", 1)
-                  .add("Chaos", 1)
-                  .add("Fast", 1)
-                  .add("Rush", 1)
-                  .add("Easy", 1)
-                  .add("Hard", 1)
-                  .add("Treasure", 1)
-                  .add("Unlucky", 1),
-               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
-            )
-         );
-      level.RAID_POOLS
-         .addAll(
-            Arrays.asList(
-               new VaultModifiersConfig.Pool(2, 2)
-                  .add("Crowded", 1)
-                  .add("Chaos", 1)
-                  .add("Fast", 1)
-                  .add("Rush", 1)
-                  .add("Easy", 1)
-                  .add("Hard", 1)
-                  .add("Treasure", 1)
-                  .add("Unlucky", 1),
-               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
-            )
-         );
-      level.FINAL_IDONA_POOLS
-         .addAll(
-            Arrays.asList(
-               new VaultModifiersConfig.Pool(2, 2)
-                  .add("Crowded", 1)
-                  .add("Chaos", 1)
-                  .add("Fast", 1)
-                  .add("Rush", 1)
-                  .add("Easy", 1)
-                  .add("Hard", 1)
-                  .add("Treasure", 1)
-                  .add("Unlucky", 1),
-               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
-            )
-         );
-      level.FINAL_TENOS_POOLS
-         .addAll(
-            Arrays.asList(
-               new VaultModifiersConfig.Pool(2, 2)
-                  .add("Crowded", 1)
-                  .add("Chaos", 1)
-                  .add("Fast", 1)
-                  .add("Rush", 1)
-                  .add("Easy", 1)
-                  .add("Hard", 1)
-                  .add("Treasure", 1)
-                  .add("Unlucky", 1),
-               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
-            )
-         );
-      level.FINAL_VELARA_POOLS
-         .addAll(
-            Arrays.asList(
-               new VaultModifiersConfig.Pool(2, 2)
-                  .add("Crowded", 1)
-                  .add("Chaos", 1)
-                  .add("Fast", 1)
-                  .add("Rush", 1)
-                  .add("Easy", 1)
-                  .add("Hard", 1)
-                  .add("Treasure", 1)
-                  .add("Unlucky", 1),
-               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
-            )
-         );
-      level.FINAL_WENDARR_POOLS
-         .addAll(
-            Arrays.asList(
-               new VaultModifiersConfig.Pool(2, 2)
-                  .add("Crowded", 1)
-                  .add("Chaos", 1)
-                  .add("Fast", 1)
-                  .add("Rush", 1)
-                  .add("Easy", 1)
-                  .add("Hard", 1)
-                  .add("Treasure", 1)
-                  .add("Unlucky", 1),
-               new VaultModifiersConfig.Pool(1, 1).add("Locked", 1).add("Dummy", 3)
-            )
-         );
-      this.LEVELS.add(level);
-      this.MODIFIER_PREVENTIONS = new HashMap<>();
-      List<String> preventedModifiers = new ArrayList<>();
-      preventedModifiers.add("Locked");
-      this.MODIFIER_PREVENTIONS.put(Vault.id("scavenger_hunt").toString(), preventedModifiers);
+      this.modifierTypeGroups = new VaultModifiersConfig.ModifierTypeGroups();
+      this.generateChanceArtifactModifiers();
+      this.generateChanceCatalystModifiers();
+      this.generateChanceChestTrapModifier();
+      this.generateChanceSoulShardModifiers();
+      this.generateDecoratorAddModifiers();
+      this.generateLootItemQuantityModifiers();
+      this.generateLootItemRarityModifiers();
+      this.generateMobAttributeModifiers();
+      this.generateMobCurseOnHitModifiers();
+      this.generateMobFrenzyModifiers();
+      this.generateMobSpawnCountModifiers();
+      this.generatePlayerAttributeModifiers();
+      this.generatePlayerDurabilityDamageModifiers();
+      this.generatePlayerEffectModifier();
+      this.generatePlayerInventoryRestoreModifiers();
+      this.generatePlayerNoExitModifiers();
+      this.generatePlayerNoVaultFruitModifiers();
+      this.generatePlayerStatModifier();
+      this.generateVaultLevelModifiers();
+      this.generateVaultLootableWeightModifiers();
+      this.generateVaultTimeModifiers();
    }
 
-   public Set<VaultModifier> getRandom(Random random, int level, VaultModifiersConfig.ModifierPoolType type, @Nullable ResourceLocation objectiveKey) {
-      VaultModifiersConfig.Level override = this.getForLevel(level);
-      List<VaultModifiersConfig.Pool> pools;
-      switch (type) {
-         case RAFFLE:
-            pools = override.RAFFLE_POOLS;
-            break;
-         case RAID:
-            pools = override.RAID_POOLS;
-            break;
-         case FINAL_VELARA:
-            pools = override.FINAL_VELARA_POOLS;
-            break;
-         case FINAL_VELARA_ADDS:
-            pools = override.FINAL_VELARA_ADDS_POOLS;
-            break;
-         case FINAL_TENOS:
-            pools = override.FINAL_TENOS_POOLS;
-            break;
-         case FINAL_TENOS_ADDS:
-            pools = override.FINAL_TENOS_ADDS_POOLS;
-            break;
-         case FINAL_WENDARR:
-            pools = override.FINAL_WENDARR_POOLS;
-            break;
-         case FINAL_WENDARR_ADDS:
-            pools = override.FINAL_WENDARR_ADDS_POOLS;
-            break;
-         case FINAL_IDONA:
-            pools = override.FINAL_IDONA_POOLS;
-            break;
-         default:
-            pools = override.DEFAULT_POOLS;
-      }
-
-      if (pools == null) {
-         return new HashSet<>();
-      } else {
-         Set<VaultModifier> modifiers = new HashSet<>();
-         pools.stream().map(pool -> pool.getRandom(random)).forEach(modifiers::addAll);
-         if (objectiveKey != null) {
-            List<String> preventedModifiers = this.MODIFIER_PREVENTIONS.getOrDefault(objectiveKey.toString(), Collections.emptyList());
-            if (!preventedModifiers.isEmpty()) {
-               modifiers.removeIf(modifier -> preventedModifiers.contains(modifier.getName()));
-            }
-         }
-
-         return modifiers;
-      }
+   private void generateLootItemRarityModifiers() {
+      VaultModifierTypeRegistry.getIdFor(LootItemRarityModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new LootItemRarityModifier(
+                     VaultMod.id("item_rarity"),
+                     new LootItemRarityModifier.Properties(0.1),
+                     new VaultModifier.Display(
+                        "Item Rarity", TextColor.parseColor("#7738c9"), "+10% Item Rarity", "+%d%% Item Rarity", VaultMod.id("gui/modifiers/item_rarity")
+                     )
+                  )
+               )
+         );
    }
 
-   public VaultModifiersConfig.Level getForLevel(int level) {
-      for (int i = 0; i < this.LEVELS.size(); i++) {
-         if (level < this.LEVELS.get(i).MIN_LEVEL) {
-            if (i != 0) {
-               return this.LEVELS.get(i - 1);
-            }
-            break;
-         }
-
-         if (i == this.LEVELS.size() - 1) {
-            return this.LEVELS.get(i);
-         }
-      }
-
-      return VaultModifiersConfig.Level.EMPTY;
+   private void generateLootItemQuantityModifiers() {
+      VaultModifierTypeRegistry.getIdFor(LootItemQuantityModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new LootItemQuantityModifier(
+                     VaultMod.id("item_quantity"),
+                     new LootItemQuantityModifier.Properties(0.1),
+                     new VaultModifier.Display(
+                        "Item Quantity",
+                        TextColor.parseColor("#38c9c0"),
+                        "+10% Item Quantity",
+                        "+%d%% Item Quantity",
+                        VaultMod.id("gui/modifiers/item_quantity")
+                     )
+                  )
+               )
+         );
    }
 
-   public static class Level {
-      public static VaultModifiersConfig.Level EMPTY = new VaultModifiersConfig.Level(0);
-      @Expose
-      public int MIN_LEVEL;
-      @Expose
-      public List<VaultModifiersConfig.Pool> DEFAULT_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> RAFFLE_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> RAID_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> FINAL_VELARA_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> FINAL_VELARA_ADDS_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> FINAL_TENOS_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> FINAL_TENOS_ADDS_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> FINAL_WENDARR_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> FINAL_WENDARR_ADDS_POOLS;
-      @Expose
-      public List<VaultModifiersConfig.Pool> FINAL_IDONA_POOLS;
-
-      public Level(int minLevel) {
-         this.MIN_LEVEL = minLevel;
-         this.DEFAULT_POOLS = new ArrayList<>();
-         this.RAFFLE_POOLS = new ArrayList<>();
-         this.RAID_POOLS = new ArrayList<>();
-         this.FINAL_VELARA_POOLS = new ArrayList<>();
-         this.FINAL_VELARA_ADDS_POOLS = new ArrayList<>();
-         this.FINAL_TENOS_POOLS = new ArrayList<>();
-         this.FINAL_TENOS_ADDS_POOLS = new ArrayList<>();
-         this.FINAL_WENDARR_POOLS = new ArrayList<>();
-         this.FINAL_WENDARR_ADDS_POOLS = new ArrayList<>();
-         this.FINAL_IDONA_POOLS = new LinkedList<>();
-      }
+   private void generateMobFrenzyModifiers() {
+      VaultModifierTypeRegistry.getIdFor(MobFrenzyModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new MobFrenzyModifier(
+                     VaultMod.id("frenzy"),
+                     new MobFrenzyModifier.Properties(3.0F, 0.1F, 1.0F),
+                     new VaultModifier.Display(
+                        "Frenzy",
+                        TextColor.parseColor("#FC7C5C"),
+                        "+300% Mob Damage, +10% Mob Speed, Mob Health reduced to 1",
+                        VaultMod.id("gui/modifiers/frenzy")
+                     )
+                  )
+               )
+         );
    }
 
-   public static enum ModifierPoolType {
-      DEFAULT,
-      RAFFLE,
-      RAID,
-      FINAL_VELARA,
-      FINAL_VELARA_ADDS,
-      FINAL_TENOS,
-      FINAL_TENOS_ADDS,
-      FINAL_WENDARR,
-      FINAL_WENDARR_ADDS,
-      FINAL_IDONA,
-      FINAL_IDONA_ADDS;
+   private void generatePlayerAttributeModifiers() {
+      VaultModifierTypeRegistry.getIdFor(PlayerAttributeModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new PlayerAttributeModifier(
+                     VaultMod.id("limited"),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MAX_HEALTH_ADDITIVE, -2.0),
+                     new VaultModifier.Display("Limited", TextColor.parseColor("#631f1f"), "-2 Max HP", "-%d Max HP", VaultMod.id("gui/modifiers/limited"))
+                  )
+               )
+               .put(
+                  new PlayerAttributeModifier(
+                     VaultMod.id("draining"),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MANA_REGEN_ADDITIVE_PERCENTILE, -0.2F),
+                     new VaultModifier.Display(
+                        "Draining", TextColor.parseColor("#7738c9"), "-20% Mana Regeneration", "-%d%% Mana Regeneration", VaultMod.id("gui/modifiers/draining")
+                     )
+                  )
+               )
+         );
    }
 
-   public static class Pool {
-      @Expose
-      public int MIN_ROLLS;
-      @Expose
-      public int MAX_ROLLS;
-      @Expose
-      public WeightedList<String> POOL;
+   private void generateChanceSoulShardModifiers() {
+      VaultModifierTypeRegistry.getIdFor(ChanceSoulShardModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new ChanceSoulShardModifier(
+                     VaultMod.id("soul_hunter"),
+                     new AbstractChanceModifier.Properties(0.1F),
+                     new VaultModifier.Display(
+                        "Soul Hunter", TextColor.parseColor("#6410a1"), "+10% Soul Shards", "+%d%% Soul Shards", VaultMod.id("gui/modifiers/soul_hunter")
+                     )
+                  )
+               )
+         );
+   }
 
-      public Pool(int min, int max) {
-         this.MIN_ROLLS = min;
-         this.MAX_ROLLS = max;
-         this.POOL = new WeightedList<>();
+   private void generateChanceCatalystModifiers() {
+      VaultModifierTypeRegistry.getIdFor(ChanceCatalystModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new ChanceCatalystModifier(
+                     VaultMod.id("prismatic"),
+                     new AbstractChanceModifier.Properties(0.1F),
+                     new VaultModifier.Display(
+                        "Prismatic",
+                        TextColor.parseColor("#FC00E3"),
+                        "+10% Catalyst Fragments",
+                        "+%d%% Catalyst Fragments",
+                        VaultMod.id("gui/modifiers/more_catalyst")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generateVaultLootableWeightModifiers() {
+      VaultModifierTypeRegistry.getIdFor(VaultLootableWeightModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new VaultLootableWeightModifier(
+                     VaultMod.id("plentiful"),
+                     new VaultLootableWeightModifier.Properties(PlaceholderBlock.Type.ORE, 2.0),
+                     new VaultModifier.Display(
+                        "Plentiful",
+                        TextColor.parseColor("#FF85FF"),
+                        "Multiplies Vault Ore generation by 2",
+                        "Multiplies Vault Ore generation by %d",
+                        VaultMod.id("gui/modifiers/plentiful")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generatePlayerStatModifier() {
+      VaultModifierTypeRegistry.getIdFor(PlayerStatModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new PlayerStatModifier(
+                     VaultMod.id("clumsy"),
+                     new PlayerStatModifier.Properties(PlayerStat.BLOCK_CHANCE, -0.1F),
+                     new VaultModifier.Display("Clumsy", TextColor.parseColor("#CB866D"), "-10% Parry", "-%d%% Parry", VaultMod.id("gui/modifiers/clumsy"))
+                  )
+               )
+               .put(
+                  new PlayerStatModifier(
+                     VaultMod.id("vulnerable"),
+                     new PlayerStatModifier.Properties(PlayerStat.RESISTANCE, -0.1F),
+                     new VaultModifier.Display(
+                        "Vulnerable", TextColor.parseColor("#CA9A5B"), "-10% Resistance", "-%d%% Resistance", VaultMod.id("gui/modifiers/vulnerable")
+                     )
+                  )
+               )
+               .put(
+                  new PlayerStatModifier(
+                     VaultMod.id("inert"),
+                     new PlayerStatModifier.Properties(PlayerStat.COOLDOWN_REDUCTION, -0.1F),
+                     new VaultModifier.Display(
+                        "Inert", TextColor.parseColor("#6DACB5"), "-10% Cooldown Reduction", "-%d%% Cooldown Reduction", VaultMod.id("gui/modifiers/inert")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generateMobCurseOnHitModifiers() {
+      VaultModifierTypeRegistry.getIdFor(MobCurseOnHitModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new MobCurseOnHitModifier(
+                     VaultMod.id("poisonous"),
+                     new MobCurseOnHitModifier.Properties(MobEffects.POISON, 3, 120, 0.1F),
+                     new VaultModifier.Display(
+                        "Poisonous",
+                        TextColor.parseColor("#84BF17"),
+                        "+10% increased chance mobs Poison on hit",
+                        "+%d%% increased chance mobs Poison on hit",
+                        VaultMod.id("gui/modifiers/hex_poison")
+                     )
+                  )
+               )
+               .put(
+                  new MobCurseOnHitModifier(
+                     VaultMod.id("wither"),
+                     new MobCurseOnHitModifier.Properties(MobEffects.WITHER, 3, 120, 0.1F),
+                     new VaultModifier.Display(
+                        "Withering",
+                        TextColor.parseColor("#5A5851"),
+                        "+10% increased chance mobs Wither on hit",
+                        "+%d%% increased chance mobs Wither on hit",
+                        VaultMod.id("gui/modifiers/hex_wither")
+                     )
+                  )
+               )
+               .put(
+                  new MobCurseOnHitModifier(
+                     VaultMod.id("fatiguing"),
+                     new MobCurseOnHitModifier.Properties(MobEffects.DIG_SLOWDOWN, 4, 200, 0.1F),
+                     new VaultModifier.Display(
+                        "Fatiguing",
+                        TextColor.parseColor("#9B3E56"),
+                        "+10% increased chance mobs Fatigue on hit",
+                        "+%d%% increased chance mobs Fatigue on hit",
+                        VaultMod.id("gui/modifiers/hex_chaining")
+                     )
+                  )
+               )
+               .put(
+                  new MobCurseOnHitModifier(
+                     VaultMod.id("freezing"),
+                     new MobCurseOnHitModifier.Properties(MobEffects.MOVEMENT_SLOWDOWN, 5, 200, 0.1F),
+                     new VaultModifier.Display(
+                        "Freezing",
+                        TextColor.parseColor("#2FFBF4"),
+                        "+10% increased chance mobs Slow on hit",
+                        "+%d%% increased chance mobs Slow on hit",
+                        VaultMod.id("gui/modifiers/hex_chilling")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generatePlayerEffectModifier() {
+      VaultModifierTypeRegistry.getIdFor(PlayerEffectModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new PlayerEffectModifier(
+                     VaultMod.id("lucky"),
+                     new PlayerEffectModifier.Properties(MobEffects.LUCK, 1),
+                     new VaultModifier.Display("Lucky", TextColor.parseColor("#FFE900"), "+1 Luck", "+%d Luck", VaultMod.id("gui/modifiers/lucky"))
+                  )
+               )
+               .put(
+                  new PlayerEffectModifier(
+                     VaultMod.id("unlucky"),
+                     new PlayerEffectModifier.Properties(MobEffects.UNLUCK, 1),
+                     new VaultModifier.Display("Unlucky", TextColor.parseColor("#9F5300"), "-1 Luck", "-%d Luck", VaultMod.id("gui/modifiers/unlucky"))
+                  )
+               )
+               .put(
+                  new PlayerEffectModifier(
+                     VaultMod.id("hunger"),
+                     new PlayerEffectModifier.Properties(MobEffects.HUNGER, 1),
+                     new VaultModifier.Display("Hunger", TextColor.parseColor("#E8DACD"), "+1 Hunger", "+%d Hunger", VaultMod.id("gui/modifiers/hunger"))
+                  )
+               )
+               .put(
+                  new PlayerEffectModifier(
+                     VaultMod.id("tired"),
+                     new PlayerEffectModifier.Properties(MobEffects.DIG_SLOWDOWN, 1),
+                     new VaultModifier.Display(
+                        "Tired", TextColor.parseColor("#E8E9E1"), "+1 Mining Fatigue", "+%d Mining Fatigue", VaultMod.id("gui/modifiers/tired")
+                     )
+                  )
+               )
+               .put(
+                  new PlayerEffectModifier(
+                     VaultMod.id("slowed"),
+                     new PlayerEffectModifier.Properties(MobEffects.MOVEMENT_SLOWDOWN, 1),
+                     new VaultModifier.Display("Slowed", TextColor.parseColor("#4C6786"), "+1 Slowness", "+%d Slowness", VaultMod.id("gui/modifiers/slowed"))
+                  )
+               )
+               .put(
+                  new PlayerEffectModifier(
+                     VaultMod.id("weakened"),
+                     new PlayerEffectModifier.Properties(MobEffects.WEAKNESS, 1),
+                     new VaultModifier.Display(
+                        "Weakened", TextColor.parseColor("#9F5300"), "+1 Weakness", "+%d Weakness", VaultMod.id("gui/modifiers/weakness")
+                     )
+                  )
+               )
+               .put(
+                  new PlayerEffectModifier(
+                     VaultMod.id("speedy"),
+                     new PlayerEffectModifier.Properties(MobEffects.MOVEMENT_SPEED, 1),
+                     new VaultModifier.Display("Speedy", TextColor.parseColor("#00CDFF"), "+1 Speed", "+%d Speed", VaultMod.id("gui/modifiers/speed"))
+                  )
+               )
+               .put(
+                  new PlayerEffectModifier(
+                     VaultMod.id("stronk"),
+                     new PlayerEffectModifier.Properties(MobEffects.DAMAGE_BOOST, 1),
+                     new VaultModifier.Display("Stronk", TextColor.parseColor("#5E12E5"), "+1 Strength", "+%d Strength", VaultMod.id("gui/modifiers/stronk"))
+                  )
+               )
+         );
+   }
+
+   private void generateMobAttributeModifiers() {
+      VaultModifierTypeRegistry.getIdFor(MobAttributeModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new MobAttributeModifier(
+                     VaultMod.id("chunky_mobs"),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MAX_HEALTH_ADDITIVE_PERCENTILE, 0.2),
+                     new VaultModifier.Display(
+                        "Chunky Mobs", TextColor.parseColor("#00FFFF"), "+20% Mob Health", "+%d%% Mob Health", VaultMod.id("gui/modifiers/chunky_mobs")
+                     )
+                  )
+               )
+               .put(
+                  new MobAttributeModifier(
+                     VaultMod.id("furious_mobs"),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.ATTACK_DAMAGE_ADDITIVE_PERCENTILE, 0.2),
+                     new VaultModifier.Display(
+                        "Furious Mobs", TextColor.parseColor("#00FFFF"), "+20% Mob Damage", "+%d%% Mob Damage", VaultMod.id("gui/modifiers/furious_mobs")
+                     )
+                  )
+               )
+               .put(
+                  new MobAttributeModifier(
+                     VaultMod.id("speedy_mobs"),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.SPEED_ADDITIVE_PERCENTILE, 0.05),
+                     new VaultModifier.Display(
+                        "Speedy Mobs", TextColor.parseColor("#00FFFF"), "+5% Mob Speed", "+%d%% Mob Speed", VaultMod.id("gui/modifiers/speedy_mobs")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generateChanceChestTrapModifier() {
+      VaultModifierTypeRegistry.getIdFor(ChanceChestTrapModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new ChanceChestTrapModifier(
+                     VaultMod.id("trapped"),
+                     new AbstractChanceModifier.Properties(0.1F),
+                     new VaultModifier.Display(
+                        "Trapped", TextColor.parseColor("#D35B00"), "+10% Trap Chance", "+%d%% Trap Chance", VaultMod.id("gui/modifiers/trapped")
+                     )
+                  )
+               )
+               .put(
+                  new ChanceChestTrapModifier(
+                     VaultMod.id("looters_dream"),
+                     new AbstractChanceModifier.Properties(0.0F),
+                     new VaultModifier.Display("Looter's Dream", TextColor.parseColor("#A3E2F5"), "No Trap Chance", VaultMod.id("gui/modifiers/safezone"))
+                  )
+               )
+         );
+   }
+
+   private void generatePlayerNoVaultFruitModifiers() {
+      VaultModifierTypeRegistry.getIdFor(PlayerNoVaultFruitModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new PlayerNoVaultFruitModifier(
+                     VaultMod.id("rotten"),
+                     new PlayerNoVaultFruitModifier.Properties(),
+                     new VaultModifier.Display("Rotten", TextColor.parseColor("#A0AF5B"), "Vault Powerups have no effect", VaultMod.id("gui/modifiers/rotten"))
+                  )
+               )
+         );
+   }
+
+   private void generateVaultTimeModifiers() {
+      VaultModifierTypeRegistry.getIdFor(VaultTimeModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new VaultTimeModifier(
+                     VaultMod.id("extended"),
+                     new VaultTimeModifier.Properties(1200),
+                     new VaultModifier.Display(
+                        "Extended", TextColor.parseColor("#2F86AE"), "+1 minute Vault Time", "+%d minute%s Vault Time", VaultMod.id("gui/modifiers/extended")
+                     )
+                  )
+               )
+               .put(
+                  new VaultTimeModifier(
+                     VaultMod.id("rushed"),
+                     new VaultTimeModifier.Properties(-1200),
+                     new VaultModifier.Display(
+                        "Rushed", TextColor.parseColor("#FFCD6F"), "-1 minute Vault Time", "-%d minute%s Vault Time", VaultMod.id("gui/modifiers/rush")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generatePlayerNoExitModifiers() {
+      VaultModifierTypeRegistry.getIdFor(PlayerNoExitModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new PlayerNoExitModifier(
+                     VaultMod.id("raffle"),
+                     new PlayerNoExitModifier.Properties(),
+                     new VaultModifier.Display("Raffle", TextColor.parseColor("#C5001B"), "Locks the vault", VaultMod.id("gui/modifiers/raffle"))
+                  )
+               )
+               .put(
+                  new PlayerNoExitModifier(
+                     VaultMod.id("locked"),
+                     new PlayerNoExitModifier.Properties(),
+                     new VaultModifier.Display("Locked", TextColor.parseColor("#FF0000"), "Locks the vault", VaultMod.id("gui/modifiers/locked"))
+                  )
+               )
+         );
+   }
+
+   private void generateMobSpawnCountModifiers() {
+      VaultModifierTypeRegistry.getIdFor(MobSpawnCountModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new MobSpawnCountModifier(
+                     VaultMod.id("crowded"),
+                     new MobSpawnCountModifier.Properties(1),
+                     new VaultModifier.Display(
+                        "Crowded", TextColor.parseColor("#E83F24"), "+1 Mob Spawns", "+%d Mob Spawns", VaultMod.id("gui/modifiers/crowded")
+                     )
+                  )
+               )
+               .put(
+                  new MobSpawnCountModifier(
+                     VaultMod.id("personal_space"),
+                     new MobSpawnCountModifier.Properties(1),
+                     new VaultModifier.Display(
+                        "Personal Space", TextColor.parseColor("#F9B1FF"), "-1 Mob Spawns", "-%d Mob Spawns", VaultMod.id("gui/modifiers/personalspace")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generateVaultLevelModifiers() {
+      VaultModifierTypeRegistry.getIdFor(VaultLevelModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new VaultLevelModifier(
+                     VaultMod.id("difficult"),
+                     new VaultLevelModifier.Properties(3),
+                     new VaultModifier.Display(
+                        "Difficult", TextColor.parseColor("#E20000"), "+3 Vault Level", "+%d Vault Level", VaultMod.id("gui/modifiers/difficult")
+                     )
+                  )
+               )
+               .put(
+                  new VaultLevelModifier(
+                     VaultMod.id("easy"),
+                     new VaultLevelModifier.Properties(3),
+                     new VaultModifier.Display("Easy", TextColor.parseColor("#70FF2A"), "-3 Vault Level", "-%d Vault Level", VaultMod.id("gui/modifiers/easy"))
+                  )
+               )
+         );
+   }
+
+   private void generatePlayerInventoryRestoreModifiers() {
+      VaultModifierTypeRegistry.getIdFor(PlayerInventoryRestoreModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new PlayerInventoryRestoreModifier(
+                     VaultMod.id("phoenix"),
+                     new PlayerInventoryRestoreModifier.Properties(false, 1.0F, 1.0F),
+                     new VaultModifier.Display(
+                        "Phoenix",
+                        TextColor.parseColor("#FF8900"),
+                        "All items you entered with will be restored on death",
+                        VaultMod.id("gui/modifiers/phoenix")
+                     )
+                  )
+               )
+               .put(
+                  new PlayerInventoryRestoreModifier(
+                     VaultMod.id("afterlife"),
+                     new PlayerInventoryRestoreModifier.Properties(true, 1.0F, 0.5F),
+                     new VaultModifier.Display(
+                        "Afterlife",
+                        TextColor.parseColor("#0FA6E3"),
+                        "All items you entered with will be restored on death; No artifact can be found",
+                        VaultMod.id("gui/modifiers/afterlife")
+                     )
+                  )
+               )
+               .put(
+                  new PlayerInventoryRestoreModifier(
+                     VaultMod.id("beginners_grace"),
+                     new PlayerInventoryRestoreModifier.Properties(false, 0.0F, 1.0F),
+                     new VaultModifier.Display(
+                        "Beginners Grace",
+                        TextColor.parseColor("#FF8900"),
+                        "All items you entered with will be restored on death; No experience on death",
+                        VaultMod.id("gui/modifiers/beginners_grace")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generatePlayerDurabilityDamageModifiers() {
+      VaultModifierTypeRegistry.getIdFor(PlayerDurabilityDamageModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new PlayerDurabilityDamageModifier(
+                     VaultMod.id("frail"),
+                     new PlayerDurabilityDamageModifier.Properties(0.2F),
+                     new VaultModifier.Display(
+                        "Frail", TextColor.parseColor("#7B7E7F"), "+20% Durability Damage", "+%d%% Durability Damage", VaultMod.id("gui/modifiers/frail")
+                     )
+                  )
+               )
+               .put(
+                  new PlayerDurabilityDamageModifier(
+                     VaultMod.id("reinforced"),
+                     new PlayerDurabilityDamageModifier.Properties(-0.2F),
+                     new VaultModifier.Display(
+                        "Reinforced",
+                        TextColor.parseColor("#9550FF"),
+                        "-20% Durability Damage",
+                        "-%d%% Durability Damage",
+                        VaultMod.id("gui/modifiers/reinforced")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generateChanceArtifactModifiers() {
+      VaultModifierTypeRegistry.getIdFor(ChanceArtifactModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new ChanceArtifactModifier(
+                     VaultMod.id("treasure_hunting"),
+                     new AbstractChanceModifier.Properties(0.1F),
+                     new VaultModifier.Display(
+                        "Treasure Hunting",
+                        TextColor.parseColor("#EBFF8D"),
+                        "+10% Artifact Chance",
+                        "+%d%% Artifact Chance",
+                        VaultMod.id("gui/modifiers/more_artifact1")
+                     )
+                  )
+               )
+         );
+   }
+
+   private void generateDecoratorAddModifiers() {
+      VaultModifierTypeRegistry.getIdFor(DecoratorAddModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new DecoratorAddModifier(
+                     VaultMod.id("gilded"),
+                     new DecoratorAddModifier.Properties(
+                        PartialTile.of(
+                           (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.GILDED_CHEST)
+                        ),
+                        1
+                     ),
+                     new VaultModifier.Display("Gilded", TextColor.parseColor("#FFEC00"), "Adds Gilded Chests", VaultMod.id("gui/modifiers/gilded"))
+                  )
+               )
+               .put(
+                  new DecoratorAddModifier(
+                     VaultMod.id("living"),
+                     new DecoratorAddModifier.Properties(
+                        PartialTile.of(
+                           (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.LIVING_CHEST)
+                        ),
+                        1
+                     ),
+                     new VaultModifier.Display("Living", TextColor.parseColor("#5FC76A"), "Adds Living Chests", VaultMod.id("gui/modifiers/living"))
+                  )
+               )
+               .put(
+                  new DecoratorAddModifier(
+                     VaultMod.id("ornate"),
+                     new DecoratorAddModifier.Properties(
+                        PartialTile.of(
+                           (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.ORNATE_CHEST)
+                        ),
+                        1
+                     ),
+                     new VaultModifier.Display("Ornate", TextColor.parseColor("#8E5fC7"), "Adds Ornate Chests", VaultMod.id("gui/modifiers/ornate"))
+                  )
+               )
+               .put(
+                  new DecoratorAddModifier(
+                     VaultMod.id("coin_pile"),
+                     new DecoratorAddModifier.Properties(
+                        PartialTile.of((BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.COIN_STACKS)),
+                        1
+                     ),
+                     new VaultModifier.Display("Coins", TextColor.parseColor("#C7C05F"), "Adds Coin Piles to the vault", VaultMod.id("gui/modifiers/coins"))
+                  )
+               )
+         );
+   }
+
+   private static class ModifierTypeGroup extends TreeMap<ResourceLocation, VaultModifier<?>> {
+      private ModifierTypeGroup() {
+         super(Comparator.comparing(ResourceLocation::getPath));
       }
 
-      public VaultModifiersConfig.Pool add(String name, int weight) {
-         this.POOL.add(name, weight);
+      private VaultModifiersConfig.ModifierTypeGroup put(VaultModifier<?> modifier) {
+         this.put(modifier.getId(), modifier);
          return this;
       }
+   }
 
-      public Set<VaultModifier> getRandom(Random random) {
-         int rolls = Math.min(this.MIN_ROLLS, this.MAX_ROLLS) + random.nextInt(Math.abs(this.MIN_ROLLS - this.MAX_ROLLS) + 1);
-         Set<String> res = new HashSet<>();
+   public static class ModifierTypeGroups extends TreeMap<ResourceLocation, Map<ResourceLocation, VaultModifier<?>>> {
+      private ModifierTypeGroups() {
+         super(Comparator.comparing(ResourceLocation::getPath));
+      }
 
-         while (res.size() < rolls && res.size() < this.POOL.size()) {
-            res.add(this.POOL.getRandom(random));
+      private ModifierTypeGroups(Comparator<? super ResourceLocation> comparator) {
+         super(comparator);
+      }
+
+      private VaultModifiersConfig.ModifierTypeGroup group(ResourceLocation type) {
+         VaultModifiersConfig.ModifierTypeGroup modifierTypeGroup = new VaultModifiersConfig.ModifierTypeGroup();
+         this.put(type, modifierTypeGroup);
+         return modifierTypeGroup;
+      }
+
+      public static class Serializer
+         implements JsonDeserializer<VaultModifiersConfig.ModifierTypeGroups>,
+         JsonSerializer<VaultModifiersConfig.ModifierTypeGroups> {
+         public static final String KEY_PROPERTIES = "properties";
+         public static final String KEY_DISPLAY = "display";
+
+         public VaultModifiersConfig.ModifierTypeGroups deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+            if (!json.isJsonObject()) {
+               throw new JsonParseException("Not a json object: %s".formatted(json));
+            } else {
+               VaultModifiersConfig.ModifierTypeGroups modifierTypeGroups = new VaultModifiersConfig.ModifierTypeGroups(
+                  Comparator.comparing(ResourceLocation::getPath)
+               );
+               JsonObject object = json.getAsJsonObject();
+               object.keySet()
+                  .forEach(
+                     modifierTypeKey -> {
+                        ResourceLocation modifierTypeResourceLocation = new ResourceLocation(modifierTypeKey);
+                        VaultModifierTypeRegistry.get(modifierTypeResourceLocation)
+                           .ifPresentOrElse(
+                              modifierType -> {
+                                 VaultModifiersConfig.ModifierTypeGroup modifierTypeGroup = new VaultModifiersConfig.ModifierTypeGroup();
+                                 JsonObject modifierTypeGroupObject = object.getAsJsonObject(modifierTypeKey);
+                                 modifierTypeGroupObject.keySet()
+                                    .forEach(
+                                       modifierId -> {
+                                          JsonObject modifierObject = modifierTypeGroupObject.getAsJsonObject(modifierId);
+                                          JsonObject modifierPropertiesObject = modifierObject.getAsJsonObject("properties");
+                                          JsonObject modifierDisplayObject = modifierObject.getAsJsonObject("display");
+                                          VaultModifier<?> vaultModifier = modifierType.factory()
+                                             .createVaultModifier(
+                                                new ResourceLocation(modifierId),
+                                                context.deserialize(modifierPropertiesObject, modifierType.modifierPropertyClass()),
+                                                (VaultModifier.Display)context.deserialize(modifierDisplayObject, VaultModifier.Display.class)
+                                             );
+                                          modifierTypeGroup.put(vaultModifier);
+                                       }
+                                    );
+                                 modifierTypeGroups.put(modifierTypeResourceLocation, modifierTypeGroup);
+                              },
+                              () -> VaultMod.LOGGER
+                                 .error(
+                                    "%s missing registration for modifier type %s"
+                                       .formatted(VaultModifierTypeRegistry.class.getSimpleName(), modifierTypeResourceLocation)
+                                 )
+                           );
+                     }
+                  );
+               return modifierTypeGroups;
+            }
          }
 
-         return res.stream().map(s -> ModConfigs.VAULT_MODIFIERS.getByName(s)).filter(Objects::nonNull).collect(Collectors.toSet());
+         public JsonElement serialize(VaultModifiersConfig.ModifierTypeGroups src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject modifierGroupsObject = new JsonObject();
+            src.forEach(
+               (modifierTypeResourceLocation, modifierConfigGroup) -> VaultModifierTypeRegistry.get(modifierTypeResourceLocation)
+                  .ifPresentOrElse(
+                     modifierType -> {
+                        JsonObject modifierGroupObject = new JsonObject();
+                        modifierConfigGroup.forEach(
+                           (modifierId, config) -> modifierGroupObject.add(modifierId.toString(), context.serialize(config, modifierType.modifierClass()))
+                        );
+                        modifierGroupsObject.add(modifierTypeResourceLocation.toString(), modifierGroupObject);
+                     },
+                     () -> VaultMod.LOGGER
+                        .error(
+                           "%s missing registration for modifier type %s"
+                              .formatted(VaultModifierTypeRegistry.class.getSimpleName(), modifierTypeResourceLocation)
+                        )
+                  )
+            );
+            return modifierGroupsObject;
+         }
       }
    }
 }

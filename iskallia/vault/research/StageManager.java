@@ -5,20 +5,20 @@ import iskallia.vault.world.data.PlayerResearchesData;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.Color;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.network.chat.BaseComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -38,57 +38,55 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
    modid = "the_vault"
 )
 public class StageManager {
-   public static ResearchTree RESEARCH_TREE;
+   public static ResearchTree RESEARCH_TREE = ResearchTree.empty();
 
-   public static ResearchTree getResearchTree(PlayerEntity player) {
-      if (player.field_70170_p.field_72995_K) {
-         return RESEARCH_TREE != null ? RESEARCH_TREE : new ResearchTree(player.func_110124_au());
-      } else {
-         return PlayerResearchesData.get((ServerWorld)player.field_70170_p).getResearches(player);
-      }
+   public static ResearchTree getResearchTree(Player player) {
+      return player.level.isClientSide ? RESEARCH_TREE : PlayerResearchesData.get((ServerLevel)player.level).getResearches(player);
    }
 
    private static void warnResearchRequirement(String researchName, String i18nKey) {
-      TextComponent name = new StringTextComponent(researchName);
-      Style style = Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(-203978));
-      name.func_230530_a_(style);
-      TextComponent text = new TranslationTextComponent("overlay.requires_research." + i18nKey, new Object[]{name});
-      Minecraft.func_71410_x().field_71456_v.func_175188_a(text, false);
+      BaseComponent name = new TextComponent(researchName);
+      Style style = Style.EMPTY.withColor(TextColor.fromRgb(-203978));
+      name.setStyle(style);
+      BaseComponent text = new TranslatableComponent("overlay.requires_research." + i18nKey, new Object[]{name});
+      Minecraft.getInstance().gui.setOverlayMessage(text, false);
    }
 
    @SubscribeEvent(
       priority = EventPriority.LOWEST
    )
    public static void onItemCrafted(ItemCraftedEvent event) {
-      PlayerEntity player = event.getPlayer();
-      ResearchTree researchTree = getResearchTree(player);
-      ItemStack craftedItemStack = event.getCrafting();
-      IInventory craftingMatrix = event.getInventory();
-      String restrictedBy = researchTree.restrictedBy(craftedItemStack.func_77973_b(), Restrictions.Type.CRAFTABILITY);
-      if (restrictedBy != null) {
-         if (event.getPlayer().field_70170_p.field_72995_K) {
-            warnResearchRequirement(restrictedBy, "craft");
-         }
-
-         for (int i = 0; i < craftingMatrix.func_70302_i_(); i++) {
-            ItemStack itemStack = craftingMatrix.func_70301_a(i);
-            if (itemStack != ItemStack.field_190927_a) {
-               ItemStack itemStackToDrop = itemStack.func_77946_l();
-               itemStackToDrop.func_190920_e(1);
-               player.func_146097_a(itemStackToDrop, false, false);
-            }
-         }
-
-         int slot = SideOnlyFixer.getSlotFor(player.field_71071_by, craftedItemStack);
-         if (slot != -1) {
-            ItemStack stackInSlot = player.field_71071_by.func_70301_a(slot);
-            if (stackInSlot.func_190916_E() < craftedItemStack.func_190916_E()) {
-               craftedItemStack.func_190920_e(stackInSlot.func_190916_E());
+      Player player = event.getPlayer();
+      if (!player.isCreative()) {
+         ResearchTree researchTree = getResearchTree(player);
+         ItemStack craftedItemStack = event.getCrafting();
+         Container craftingMatrix = event.getInventory();
+         String restrictedBy = researchTree.restrictedBy(craftedItemStack.getItem(), Restrictions.Type.CRAFTABILITY);
+         if (restrictedBy != null) {
+            if (event.getPlayer().level.isClientSide) {
+               warnResearchRequirement(restrictedBy, "craft");
             }
 
-            stackInSlot.func_190918_g(craftedItemStack.func_190916_E());
-         } else {
-            craftedItemStack.func_190918_g(craftedItemStack.func_190916_E());
+            for (int i = 0; i < craftingMatrix.getContainerSize(); i++) {
+               ItemStack itemStack = craftingMatrix.getItem(i);
+               if (itemStack != ItemStack.EMPTY) {
+                  ItemStack itemStackToDrop = itemStack.copy();
+                  itemStackToDrop.setCount(1);
+                  player.drop(itemStackToDrop, false, false);
+               }
+            }
+
+            int slot = SideOnlyFixer.getSlotFor(player.getInventory(), craftedItemStack);
+            if (slot != -1) {
+               ItemStack stackInSlot = player.getInventory().getItem(slot);
+               if (stackInSlot.getCount() < craftedItemStack.getCount()) {
+                  craftedItemStack.setCount(stackInSlot.getCount());
+               }
+
+               stackInSlot.shrink(craftedItemStack.getCount());
+            } else {
+               craftedItemStack.shrink(craftedItemStack.getCount());
+            }
          }
       }
    }
@@ -96,16 +94,18 @@ public class StageManager {
    @SubscribeEvent
    public static void onItemUse(RightClickItem event) {
       if (event.isCancelable()) {
-         PlayerEntity player = event.getPlayer();
-         ResearchTree researchTree = getResearchTree(player);
-         Item usedItem = event.getItemStack().func_77973_b();
-         String restrictedBy = researchTree.restrictedBy(usedItem, Restrictions.Type.USABILITY);
-         if (restrictedBy != null) {
-            if (event.getSide() == LogicalSide.CLIENT) {
-               warnResearchRequirement(restrictedBy, "usage");
-            }
+         Player player = event.getPlayer();
+         if (!player.isCreative()) {
+            ResearchTree researchTree = getResearchTree(player);
+            Item usedItem = event.getItemStack().getItem();
+            String restrictedBy = researchTree.restrictedBy(usedItem, Restrictions.Type.USABILITY);
+            if (restrictedBy != null) {
+               if (event.getSide() == LogicalSide.CLIENT) {
+                  warnResearchRequirement(restrictedBy, "usage");
+               }
 
-            event.setCanceled(true);
+               event.setCanceled(true);
+            }
          }
       }
    }
@@ -113,16 +113,18 @@ public class StageManager {
    @SubscribeEvent
    public static void onRightClickEmpty(RightClickEmpty event) {
       if (event.isCancelable()) {
-         PlayerEntity player = event.getPlayer();
-         ResearchTree researchTree = getResearchTree(player);
-         Item usedItem = event.getItemStack().func_77973_b();
-         String restrictedBy = researchTree.restrictedBy(usedItem, Restrictions.Type.USABILITY);
-         if (restrictedBy != null) {
-            if (event.getSide() == LogicalSide.CLIENT) {
-               warnResearchRequirement(restrictedBy, "usage");
-            }
+         Player player = event.getPlayer();
+         if (!player.isCreative()) {
+            ResearchTree researchTree = getResearchTree(player);
+            Item usedItem = event.getItemStack().getItem();
+            String restrictedBy = researchTree.restrictedBy(usedItem, Restrictions.Type.USABILITY);
+            if (restrictedBy != null) {
+               if (event.getSide() == LogicalSide.CLIENT) {
+                  warnResearchRequirement(restrictedBy, "usage");
+               }
 
-            event.setCanceled(true);
+               event.setCanceled(true);
+            }
          }
       }
    }
@@ -130,27 +132,29 @@ public class StageManager {
    @SubscribeEvent
    public static void onBlockInteraction(RightClickBlock event) {
       if (event.isCancelable()) {
-         PlayerEntity player = event.getPlayer();
-         ResearchTree researchTree = getResearchTree(player);
-         BlockState blockState = player.field_70170_p.func_180495_p(event.getPos());
-         String restrictedBy = researchTree.restrictedBy(blockState.func_177230_c(), Restrictions.Type.BLOCK_INTERACTABILITY);
-         if (restrictedBy != null) {
-            if (event.getSide() == LogicalSide.CLIENT) {
-               warnResearchRequirement(restrictedBy, "interact_block");
-            }
+         Player player = event.getPlayer();
+         if (!player.isCreative()) {
+            ResearchTree researchTree = getResearchTree(player);
+            BlockState blockState = player.level.getBlockState(event.getPos());
+            String restrictedBy = researchTree.restrictedBy(blockState.getBlock(), Restrictions.Type.BLOCK_INTERACTABILITY);
+            if (restrictedBy != null) {
+               if (event.getSide() == LogicalSide.CLIENT) {
+                  warnResearchRequirement(restrictedBy, "interact_block");
+               }
 
-            event.setCanceled(true);
-         } else {
-            ItemStack itemStack = event.getItemStack();
-            if (itemStack != ItemStack.field_190927_a) {
-               Item item = itemStack.func_77973_b();
-               restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
-               if (restrictedBy != null) {
-                  if (event.getSide() == LogicalSide.CLIENT) {
-                     warnResearchRequirement(restrictedBy, "usage");
+               event.setCanceled(true);
+            } else {
+               ItemStack itemStack = event.getItemStack();
+               if (itemStack != ItemStack.EMPTY) {
+                  Item item = itemStack.getItem();
+                  restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
+                  if (restrictedBy != null) {
+                     if (event.getSide() == LogicalSide.CLIENT) {
+                        warnResearchRequirement(restrictedBy, "usage");
+                     }
+
+                     event.setCanceled(true);
                   }
-
-                  event.setCanceled(true);
                }
             }
          }
@@ -160,27 +164,29 @@ public class StageManager {
    @SubscribeEvent
    public static void onBlockHit(LeftClickBlock event) {
       if (event.isCancelable()) {
-         PlayerEntity player = event.getPlayer();
-         ResearchTree researchTree = getResearchTree(player);
-         BlockState blockState = player.field_70170_p.func_180495_p(event.getPos());
-         String restrictedBy = researchTree.restrictedBy(blockState.func_177230_c(), Restrictions.Type.HITTABILITY);
-         if (restrictedBy != null) {
-            if (event.getSide() == LogicalSide.CLIENT) {
-               warnResearchRequirement(restrictedBy, "hit");
-            }
+         Player player = event.getPlayer();
+         if (!player.isCreative()) {
+            ResearchTree researchTree = getResearchTree(player);
+            BlockState blockState = player.level.getBlockState(event.getPos());
+            String restrictedBy = researchTree.restrictedBy(blockState.getBlock(), Restrictions.Type.HITTABILITY);
+            if (restrictedBy != null) {
+               if (event.getSide() == LogicalSide.CLIENT) {
+                  warnResearchRequirement(restrictedBy, "hit");
+               }
 
-            event.setCanceled(true);
-         } else {
-            ItemStack itemStack = event.getItemStack();
-            if (itemStack != ItemStack.field_190927_a) {
-               Item item = itemStack.func_77973_b();
-               restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
-               if (restrictedBy != null) {
-                  if (event.getSide() == LogicalSide.CLIENT) {
-                     warnResearchRequirement(restrictedBy, "usage");
+               event.setCanceled(true);
+            } else {
+               ItemStack itemStack = event.getItemStack();
+               if (itemStack != ItemStack.EMPTY) {
+                  Item item = itemStack.getItem();
+                  restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
+                  if (restrictedBy != null) {
+                     if (event.getSide() == LogicalSide.CLIENT) {
+                        warnResearchRequirement(restrictedBy, "usage");
+                     }
+
+                     event.setCanceled(true);
                   }
-
-                  event.setCanceled(true);
                }
             }
          }
@@ -190,27 +196,29 @@ public class StageManager {
    @SubscribeEvent
    public static void onEntityInteraction(EntityInteract event) {
       if (event.isCancelable()) {
-         PlayerEntity player = event.getPlayer();
-         ResearchTree researchTree = getResearchTree(player);
-         Entity entity = event.getEntity();
-         String restrictedBy = researchTree.restrictedBy(entity.func_200600_R(), Restrictions.Type.ENTITY_INTERACTABILITY);
-         if (restrictedBy != null) {
-            if (event.getSide() == LogicalSide.CLIENT) {
-               warnResearchRequirement(restrictedBy, "interact_entity");
-            }
+         Player player = event.getPlayer();
+         if (!player.isCreative()) {
+            ResearchTree researchTree = getResearchTree(player);
+            Entity entity = event.getEntity();
+            String restrictedBy = researchTree.restrictedBy(entity.getType(), Restrictions.Type.ENTITY_INTERACTABILITY);
+            if (restrictedBy != null) {
+               if (event.getSide() == LogicalSide.CLIENT) {
+                  warnResearchRequirement(restrictedBy, "interact_entity");
+               }
 
-            event.setCanceled(true);
-         } else {
-            ItemStack itemStack = event.getItemStack();
-            if (itemStack != ItemStack.field_190927_a) {
-               Item item = itemStack.func_77973_b();
-               restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
-               if (restrictedBy != null) {
-                  if (event.getSide() == LogicalSide.CLIENT) {
-                     warnResearchRequirement(restrictedBy, "usage");
+               event.setCanceled(true);
+            } else {
+               ItemStack itemStack = event.getItemStack();
+               if (itemStack != ItemStack.EMPTY) {
+                  Item item = itemStack.getItem();
+                  restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
+                  if (restrictedBy != null) {
+                     if (event.getSide() == LogicalSide.CLIENT) {
+                        warnResearchRequirement(restrictedBy, "usage");
+                     }
+
+                     event.setCanceled(true);
                   }
-
-                  event.setCanceled(true);
                }
             }
          }
@@ -220,27 +228,29 @@ public class StageManager {
    @SubscribeEvent
    public static void onPlayerAttack(AttackEntityEvent event) {
       if (event.isCancelable()) {
-         PlayerEntity player = event.getPlayer();
-         ResearchTree researchTree = getResearchTree(player);
-         Entity entity = event.getEntity();
-         String restrictedBy = researchTree.restrictedBy(entity.func_200600_R(), Restrictions.Type.ENTITY_INTERACTABILITY);
-         if (restrictedBy != null) {
-            if (player.field_70170_p.field_72995_K) {
-               warnResearchRequirement(restrictedBy, "interact_entity");
-            }
+         Player player = event.getPlayer();
+         if (!player.isCreative()) {
+            ResearchTree researchTree = getResearchTree(player);
+            Entity entity = event.getEntity();
+            String restrictedBy = researchTree.restrictedBy(entity.getType(), Restrictions.Type.ENTITY_INTERACTABILITY);
+            if (restrictedBy != null) {
+               if (player.level.isClientSide) {
+                  warnResearchRequirement(restrictedBy, "interact_entity");
+               }
 
-            event.setCanceled(true);
-         } else {
-            ItemStack itemStack = player.func_184614_ca();
-            if (itemStack != ItemStack.field_190927_a) {
-               Item item = itemStack.func_77973_b();
-               restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
-               if (restrictedBy != null) {
-                  if (player.field_70170_p.field_72995_K) {
-                     warnResearchRequirement(restrictedBy, "usage");
+               event.setCanceled(true);
+            } else {
+               ItemStack itemStack = player.getMainHandItem();
+               if (itemStack != ItemStack.EMPTY) {
+                  Item item = itemStack.getItem();
+                  restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
+                  if (restrictedBy != null) {
+                     if (player.level.isClientSide) {
+                        warnResearchRequirement(restrictedBy, "usage");
+                     }
+
+                     event.setCanceled(true);
                   }
-
-                  event.setCanceled(true);
                }
             }
          }
@@ -252,24 +262,24 @@ public class StageManager {
       priority = EventPriority.LOWEST
    )
    public static void onItemTooltip(ItemTooltipEvent event) {
-      PlayerEntity player = event.getPlayer();
+      Player player = event.getPlayer();
       if (player != null) {
          ResearchTree researchTree = getResearchTree(player);
-         Item item = event.getItemStack().func_77973_b();
+         Item item = event.getItemStack().getItem();
          String restrictionCausedBy = Arrays.stream(Restrictions.Type.values())
             .map(type -> researchTree.restrictedBy(item, type))
             .filter(Objects::nonNull)
             .findFirst()
             .orElseGet(() -> null);
          if (restrictionCausedBy != null) {
-            List<ITextComponent> toolTip = event.getToolTip();
-            Style textStyle = Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(-5723992));
-            Style style = Style.field_240709_b_.func_240718_a_(Color.func_240743_a_(-203978));
-            TextComponent text = new TranslationTextComponent("tooltip.requires_research");
-            TextComponent name = new StringTextComponent(" " + restrictionCausedBy);
-            text.func_230530_a_(textStyle);
-            name.func_230530_a_(style);
-            toolTip.add(new StringTextComponent(""));
+            List<Component> toolTip = event.getToolTip();
+            Style textStyle = Style.EMPTY.withColor(TextColor.fromRgb(-5723992));
+            Style style = Style.EMPTY.withColor(TextColor.fromRgb(-203978));
+            BaseComponent text = new TranslatableComponent("tooltip.requires_research");
+            BaseComponent name = new TextComponent(" " + restrictionCausedBy);
+            text.setStyle(textStyle);
+            name.setStyle(style);
+            toolTip.add(new TextComponent(""));
             toolTip.add(text);
             toolTip.add(name);
          }

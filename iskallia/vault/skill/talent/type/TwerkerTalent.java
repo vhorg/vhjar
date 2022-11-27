@@ -1,26 +1,29 @@
 package iskallia.vault.skill.talent.type;
 
 import com.google.gson.annotations.Expose;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CactusBlock;
-import net.minecraft.block.CropsBlock;
-import net.minecraft.block.SaplingBlock;
-import net.minecraft.block.StemBlock;
-import net.minecraft.block.SugarCaneBlock;
-import net.minecraft.entity.AgeableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BoneMealItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.TickPriority;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.item.BoneMealItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.StemBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.ticks.TickPriority;
 import net.minecraftforge.common.ForgeHooks;
 
+@Deprecated(
+   forRemoval = true
+)
 public class TwerkerTalent extends PlayerTalent {
    @Expose
    private final int tickDelay = 5;
@@ -58,71 +61,70 @@ public class TwerkerTalent extends PlayerTalent {
    }
 
    @Override
-   public void tick(PlayerEntity player) {
-      if (player.func_213453_ef() && player.func_130014_f_() instanceof ServerWorld) {
-         ServerWorld world = (ServerWorld)player.func_130014_f_();
-         BlockPos playerPos = player.func_233580_cy_();
+   public void tick(ServerPlayer player) {
+      if (player.isCrouching() && player.getCommandSenderWorld() instanceof ServerLevel world) {
+         BlockPos playerPos = player.blockPosition();
          BlockPos pos = new BlockPos(
-            playerPos.func_177958_n() + player.func_70681_au().nextInt(this.getXRange() * 2 + 1) - this.getXRange(),
-            playerPos.func_177956_o() - player.func_70681_au().nextInt(this.getYRange() * 2 + 1) + this.getYRange(),
-            playerPos.func_177952_p() + player.func_70681_au().nextInt(this.getZRange() * 2 + 1) - this.getZRange()
+            playerPos.getX() + player.getRandom().nextInt(this.getXRange() * 2 + 1) - this.getXRange(),
+            playerPos.getY() - player.getRandom().nextInt(this.getYRange() * 2 + 1) + this.getYRange(),
+            playerPos.getZ() + player.getRandom().nextInt(this.getZRange() * 2 + 1) - this.getZRange()
          );
-         BlockState state = world.func_180495_p(pos);
-         Block block = world.func_180495_p(pos).func_177230_c();
-         if (block instanceof CropsBlock || block instanceof SaplingBlock) {
-            BoneMealItem.applyBonemeal(new ItemStack(Items.field_196106_bc), world, pos, player);
-            world.func_195598_a(ParticleTypes.field_197632_y, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), 100, 1.0, 0.5, 1.0, 0.0);
+         BlockState state = world.getBlockState(pos);
+         Block block = world.getBlockState(pos).getBlock();
+         if (block instanceof CropBlock || block instanceof SaplingBlock) {
+            BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), world, pos, player);
+            world.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX(), pos.getY(), pos.getZ(), 100, 1.0, 0.5, 1.0, 0.0);
          }
 
          if (this.growsPumpkinsMelons && block instanceof StemBlock) {
-            if (((StemBlock)block).func_176473_a(world, pos, state, false)) {
-               BoneMealItem.applyBonemeal(new ItemStack(Items.field_196106_bc), world, pos, player);
+            if (((StemBlock)block).isValidBonemealTarget(world, pos, state, false)) {
+               BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), world, pos, player);
             } else {
                for (int i = 0; i < 40; i++) {
-                  state.func_227034_b_(world, pos, world.field_73012_v);
+                  state.randomTick(world, pos, world.random);
                }
             }
 
-            world.func_195598_a(ParticleTypes.field_197632_y, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), 100, 1.0, 0.5, 1.0, 0.0);
+            world.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX(), pos.getY(), pos.getZ(), 100, 1.0, 0.5, 1.0, 0.0);
          }
 
          if (this.growsSugarcaneCactus) {
-            BlockPos above = new BlockPos(pos).func_177984_a();
-            if (!world.func_175623_d(above)) {
+            BlockPos above = new BlockPos(pos).above();
+            if (!world.isEmptyBlock(above)) {
                return;
             }
 
             if (block instanceof SugarCaneBlock || block instanceof CactusBlock) {
                int height = 1;
 
-               while (world.func_180495_p(pos.func_177979_c(height)).func_203425_a(block)) {
+               while (world.getBlockState(pos.below(height)).is(block)) {
                   height++;
                }
 
                if (height < 3 && rand.nextInt(3) == 0 && ForgeHooks.onCropsGrowPre(world, pos, state, true)) {
-                  world.func_175656_a(above, block.func_176223_P());
-                  BlockState newState = (BlockState)state.func_206870_a(BlockStateProperties.field_208171_X, 0);
-                  world.func_180501_a(pos, newState, 4);
-                  newState.func_215697_a(world, above, block, pos, false);
-                  world.func_205220_G_().func_205362_a(above, block, 1, TickPriority.EXTREMELY_HIGH);
+                  world.setBlockAndUpdate(above, block.defaultBlockState());
+                  BlockState newState = (BlockState)state.setValue(BlockStateProperties.AGE_15, 0);
+                  world.setBlock(pos, newState, 4);
+                  newState.neighborChanged(world, above, block, pos, false);
+                  world.scheduleTick(above, block, 1, TickPriority.EXTREMELY_HIGH);
                   ForgeHooks.onCropsGrowPost(world, above, state);
-                  world.func_195598_a(ParticleTypes.field_197632_y, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), 100, 1.0, 0.5, 1.0, 0.0);
+                  world.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX(), pos.getY(), pos.getZ(), 100, 1.0, 0.5, 1.0, 0.0);
                }
             }
          }
 
          if (this.growsAnimals) {
-            AxisAlignedBB searchBox = player.func_174813_aQ().func_72314_b(this.getXRange(), this.getYRange(), this.getZRange());
+            AABB searchBox = player.getBoundingBox().inflate(this.getXRange(), this.getYRange(), this.getZRange());
 
-            for (AgeableEntity entity : world.func_225316_b(
-               AgeableEntity.class, searchBox, entityx -> entityx.func_70089_S() && !entityx.func_175149_v() && entityx.func_70631_g_()
+            for (AgeableMob entity : world.getEntitiesOfClass(
+               AgeableMob.class, searchBox, entityx -> entityx.isAlive() && !entityx.isSpectator() && entityx.isBaby()
             )) {
                if (rand.nextFloat() < 0.4F) {
-                  world.func_195598_a(ParticleTypes.field_197632_y, pos.func_177958_n(), pos.func_177956_o(), pos.func_177952_p(), 100, 1.0, 0.5, 1.0, 0.0);
+                  world.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX(), pos.getY(), pos.getZ(), 100, 1.0, 0.5, 1.0, 0.0);
                }
 
                if (rand.nextFloat() < 0.05F) {
-                  entity.func_82227_f(false);
+                  entity.setBaby(false);
                }
             }
          }

@@ -1,0 +1,11 @@
+{
+  "parent": "the_vault:item/crystal_bud",
+  "textures": {
+    "layer0": "the_vault:block/crystal_bud_large"
+  },
+  "display": {
+    "fixed": {
+      "translation": [ 0, 4, 0 ]
+    }
+  }
+}

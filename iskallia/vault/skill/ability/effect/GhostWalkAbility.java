@@ -5,16 +5,24 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.GhostWalkConfig;
+import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
+import iskallia.vault.skill.ability.effect.spi.core.AbstractInstantManaAbility;
+import iskallia.vault.util.damage.PlayerDamageHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
+import java.util.UUID;
 import javax.annotation.Nullable;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.world.server.ServerWorld;
+import javax.annotation.ParametersAreNonnullByDefault;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -22,51 +30,40 @@ import net.minecraftforge.event.entity.living.LivingSetAttackTargetEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class GhostWalkAbility<C extends GhostWalkConfig> extends AbilityEffect<C> {
+public class GhostWalkAbility<C extends GhostWalkConfig> extends AbstractInstantManaAbility<C> {
    @Override
    public String getAbilityGroupName() {
       return "Ghost Walk";
    }
 
-   public boolean onAction(C config, ServerPlayerEntity player, boolean active) {
-      if (player.func_70644_a(ModEffects.GHOST_WALK)) {
-         return false;
+   protected AbilityActionResult doAction(C config, ServerPlayer player, boolean active) {
+      if (player.hasEffect(ModEffects.GHOST_WALK)) {
+         return AbilityActionResult.FAIL;
       } else {
-         EffectInstance newEffect = new EffectInstance(
-            config.getEffect(), config.getDurationTicks(), config.getAmplifier(), false, config.getType().showParticles, config.getType().showIcon
-         );
-         player.field_70170_p
-            .func_184148_a(
-               player,
-               player.func_226277_ct_(),
-               player.func_226278_cu_(),
-               player.func_226281_cx_(),
-               ModSounds.GHOST_WALK_SFX,
-               SoundCategory.PLAYERS,
-               0.2F,
-               1.0F
-            );
-         player.func_213823_a(ModSounds.GHOST_WALK_SFX, SoundCategory.PLAYERS, 0.2F, 1.0F);
-         player.func_195064_c(newEffect);
-         return false;
+         MobEffectInstance newEffect = new MobEffectInstance(ModEffects.GHOST_WALK, config.getDurationTicks(), 0, false, false, true);
+         player.addEffect(newEffect);
+         return AbilityActionResult.SUCCESS_COOLDOWN_DEFERRED;
       }
+   }
+
+   protected void doSound(C config, ServerPlayer player) {
+      player.level.playSound(player, player.getX(), player.getY(), player.getZ(), ModSounds.GHOST_WALK_SFX, SoundSource.PLAYERS, 0.2F, 1.0F);
+      player.playNotifySound(ModSounds.GHOST_WALK_SFX, SoundSource.PLAYERS, 0.2F, 1.0F);
    }
 
    @SubscribeEvent(
       priority = EventPriority.LOW
    )
    public void onDamage(LivingDamageEvent event) {
-      Entity attacker = event.getSource().func_76346_g();
-      if (attacker instanceof ServerPlayerEntity && this.doRemoveWhenDealingDamage()) {
-         ServerPlayerEntity player = (ServerPlayerEntity)attacker;
-         EffectInstance ghostWalk = player.func_70660_b(ModEffects.GHOST_WALK);
+      if (event.getSource().getEntity() instanceof ServerPlayer serverPlayer && this.doRemoveWhenDealingDamage()) {
+         MobEffectInstance ghostWalk = serverPlayer.getEffect(ModEffects.GHOST_WALK);
          if (ghostWalk != null) {
-            ServerWorld world = (ServerWorld)player.func_130014_f_();
+            ServerLevel world = (ServerLevel)serverPlayer.getCommandSenderWorld();
             PlayerAbilitiesData data = PlayerAbilitiesData.get(world);
-            AbilityTree abilities = data.getAbilities(player);
+            AbilityTree abilities = data.getAbilities(serverPlayer);
             AbilityNode<?, ?> node = abilities.getNodeOf(this);
             if (node.getAbility() == this && node.isLearned()) {
-               player.func_195063_d(ModEffects.GHOST_WALK);
+               serverPlayer.removeEffect(ModEffects.GHOST_WALK);
             }
          }
       }
@@ -92,23 +89,20 @@ public class GhostWalkAbility<C extends GhostWalkConfig> extends AbilityEffect<C
 
    @SubscribeEvent
    public void onTarget(LivingSetAttackTargetEvent event) {
-      if (event.getEntityLiving() instanceof MobEntity && this.isInvulnerable(event.getTarget(), null)) {
-         ((MobEntity)event.getEntityLiving()).func_70624_b(null);
+      if (event.getEntityLiving() instanceof Mob && this.isInvulnerable(event.getTarget(), null)) {
+         ((Mob)event.getEntityLiving()).setTarget(null);
       }
    }
 
    private boolean isInvulnerable(@Nullable LivingEntity entity, @Nullable DamageSource source) {
-      if (entity instanceof ServerPlayerEntity) {
-         ServerPlayerEntity player = (ServerPlayerEntity)entity;
-         EffectInstance ghostWalk = player.func_70660_b(ModEffects.GHOST_WALK);
-         if (ghostWalk != null && this.preventsDamage() && (source == null || !source.func_76357_e())) {
-            ServerWorld world = (ServerWorld)player.func_130014_f_();
+      if (entity instanceof ServerPlayer serverPlayer) {
+         MobEffectInstance ghostWalk = serverPlayer.getEffect(ModEffects.GHOST_WALK);
+         if (ghostWalk != null && this.preventsDamage() && (source == null || !source.isBypassInvul())) {
+            ServerLevel world = (ServerLevel)serverPlayer.getCommandSenderWorld();
             PlayerAbilitiesData data = PlayerAbilitiesData.get(world);
-            AbilityTree abilities = data.getAbilities(player);
+            AbilityTree abilities = data.getAbilities(serverPlayer);
             AbilityNode<?, ?> node = abilities.getNodeOf(this);
-            if (node.getAbility() == this && node.isLearned()) {
-               return true;
-            }
+            return node.getAbility() == this && node.isLearned();
          }
       }
 
@@ -121,5 +115,44 @@ public class GhostWalkAbility<C extends GhostWalkConfig> extends AbilityEffect<C
 
    protected boolean doRemoveWhenDealingDamage() {
       return true;
+   }
+
+   public static class GhostWalkEffect extends MobEffect {
+      private static final UUID DAMAGE_MULTIPLIER_ID = UUID.fromString("d0476bd8-d306-4a40-9229-a0933b830617");
+
+      public GhostWalkEffect(MobEffectCategory typeIn, int liquidColorIn, ResourceLocation id) {
+         super(typeIn, liquidColorIn);
+         this.setRegistryName(id);
+      }
+
+      public boolean isDurationEffectTick(int duration, int amplifier) {
+         return true;
+      }
+
+      @ParametersAreNonnullByDefault
+      public void addAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int amplifier) {
+         if (livingEntity instanceof ServerPlayer player) {
+            this.removeExistingDamageBuff(player);
+         }
+
+         super.addAttributeModifiers(livingEntity, attributeMap, amplifier);
+      }
+
+      @ParametersAreNonnullByDefault
+      public void removeAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int amplifier) {
+         if (livingEntity instanceof ServerPlayer player) {
+            this.removeExistingDamageBuff(player);
+            PlayerAbilitiesData.setAbilityOnCooldown(player, "Ghost Walk");
+         }
+
+         super.removeAttributeModifiers(livingEntity, attributeMap, amplifier);
+      }
+
+      private void removeExistingDamageBuff(ServerPlayer player) {
+         PlayerDamageHelper.DamageMultiplier existing = PlayerDamageHelper.getMultiplier(player, DAMAGE_MULTIPLIER_ID);
+         if (existing != null) {
+            PlayerDamageHelper.removeMultiplier(player, existing);
+         }
+      }
    }
 }

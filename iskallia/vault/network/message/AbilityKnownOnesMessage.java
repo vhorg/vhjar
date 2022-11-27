@@ -6,10 +6,10 @@ import iskallia.vault.skill.ability.AbilityTree;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent.Context;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent.Context;
 
 public class AbilityKnownOnesMessage {
    private final List<AbilityNode<?, ?>> learnedAbilities;
@@ -26,21 +26,21 @@ public class AbilityKnownOnesMessage {
       return this.learnedAbilities;
    }
 
-   public static void encode(AbilityKnownOnesMessage message, PacketBuffer buffer) {
-      CompoundNBT nbt = new CompoundNBT();
-      ListNBT abilities = new ListNBT();
+   public static void encode(AbilityKnownOnesMessage message, FriendlyByteBuf buffer) {
+      CompoundTag nbt = new CompoundTag();
+      ListTag abilities = new ListTag();
       message.learnedAbilities.stream().map(AbilityNode::serializeNBT).forEach(abilities::add);
-      nbt.func_218657_a("LearnedAbilities", abilities);
-      buffer.func_150786_a(nbt);
+      nbt.put("LearnedAbilities", abilities);
+      buffer.writeNbt(nbt);
    }
 
-   public static AbilityKnownOnesMessage decode(PacketBuffer buffer) {
+   public static AbilityKnownOnesMessage decode(FriendlyByteBuf buffer) {
       ArrayList<AbilityNode<?, ?>> abilities = new ArrayList<>();
-      CompoundNBT nbt = buffer.func_150793_b();
-      ListNBT learnedAbilities = nbt.func_150295_c("LearnedAbilities", 10);
+      CompoundTag nbt = buffer.readNbt();
+      ListTag learnedAbilities = nbt.getList("LearnedAbilities", 10);
 
       for (int i = 0; i < learnedAbilities.size(); i++) {
-         abilities.add(AbilityNode.fromNBT(learnedAbilities.func_150305_b(i)));
+         abilities.add(AbilityNode.fromNBT(learnedAbilities.getCompound(i)));
       }
 
       return new AbilityKnownOnesMessage(abilities);

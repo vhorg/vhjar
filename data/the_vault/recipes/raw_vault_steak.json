@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "mm ",
+    "mm "
+  ],
+  "key": {
+    "m": {
+      "item": "the_vault:vault_meat"
+    }
+  },
+  "result": {
+    "item": "the_vault:raw_vault_steak",
+    "count": 1
+  }
+}

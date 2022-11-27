@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " e ",
+    "ede",
+    " e "
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "d": {
+      "item": "the_vault:dreamstone"
+    }
+  },
+  "result": {
+    "item": "the_vault:mystical_powder"
+  }
+}

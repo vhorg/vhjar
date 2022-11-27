@@ -1,0 +1,23 @@
+{
+    "type": "the_vault:non_raffle_crystal_shaped",
+    "pattern": [
+        "EPE",
+        "PIP",
+        "EPE"
+    ],
+    "key": {
+        "E": {
+            "item": "the_vault:vault_essence"
+        },
+        "P": {
+            "item": "the_vault:vault_plating"
+        },
+        "I": {
+            "item": "the_vault:black_chromatic_steel_ingot"
+        }
+    },
+    "result": {
+        "item": "the_vault:crystal_seal_empty",
+        "count": 1
+    }
+}

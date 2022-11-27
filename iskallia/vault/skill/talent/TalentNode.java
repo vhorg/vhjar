@@ -1,20 +1,21 @@
 package iskallia.vault.skill.talent;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.talent.type.PlayerTalent;
-import java.util.UUID;
-import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class TalentNode<T extends PlayerTalent> implements INBTSerializable<CompoundNBT> {
+public class TalentNode<T extends Talent> implements INBTSerializable<CompoundTag> {
    private TalentGroup<T> group;
    private int level;
 
    public TalentNode(TalentGroup<T> group, int level) {
       this.group = group;
-      this.level = MathHelper.func_76125_a(level, 0, group.getMaxLevel());
+      this.level = Mth.clamp(level, 0, group.getMaxLevel());
+   }
+
+   public TalentNode(CompoundTag nbt) {
+      this.deserializeNBT(nbt);
    }
 
    public TalentGroup<T> getGroup() {
@@ -37,17 +38,17 @@ public class TalentNode<T extends PlayerTalent> implements INBTSerializable<Comp
       return this.getLevel() > 0;
    }
 
-   public CompoundNBT serializeNBT() {
-      CompoundNBT nbt = new CompoundNBT();
-      nbt.func_74778_a("Name", this.getGroup().getParentName());
-      nbt.func_74768_a("Level", this.getLevel());
+   public CompoundTag serializeNBT() {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putString("Name", this.getGroup().getParentName());
+      nbt.putInt("Level", this.getLevel());
       return nbt;
    }
 
-   public void deserializeNBT(CompoundNBT nbt) {
-      String groupName = nbt.func_74779_i("Name");
+   public void deserializeNBT(CompoundTag nbt) {
+      String groupName = nbt.getString("Name");
       this.group = (TalentGroup<T>)ModConfigs.TALENTS.getByName(groupName);
-      this.level = nbt.func_74762_e("Level");
+      this.level = nbt.getInt("Level");
    }
 
    @Override
@@ -60,12 +61,5 @@ public class TalentNode<T extends PlayerTalent> implements INBTSerializable<Comp
       } else {
          return false;
       }
-   }
-
-   @Nullable
-   public static TalentNode<?> fromNBT(@Nullable UUID playerId, CompoundNBT nbt, int currentVersion) {
-      String talentName = nbt.func_74779_i("Name");
-      int level = nbt.func_74762_e("Level");
-      return TalentTree.migrate(playerId, talentName, level, currentVersion);
    }
 }

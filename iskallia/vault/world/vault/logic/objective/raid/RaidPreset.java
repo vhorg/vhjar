@@ -6,8 +6,8 @@ import iskallia.vault.util.MathUtilities;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 
 public class RaidPreset {
    private final List<RaidPreset.CompoundWaveSpawn> waves = new ArrayList<>();
@@ -17,28 +17,7 @@ public class RaidPreset {
 
    @Nullable
    public static RaidPreset randomFromConfig() {
-      RaidConfig.WaveSetup configSetup = ModConfigs.RAID.getRandomWaveSetup();
-      if (configSetup == null) {
-         return null;
-      } else {
-         RaidPreset preset = new RaidPreset();
-
-         for (RaidConfig.CompoundWave wave : configSetup.getWaves()) {
-            RaidPreset.CompoundWaveSpawn compoundWave = new RaidPreset.CompoundWaveSpawn();
-
-            for (RaidConfig.ConfiguredWave waveSpawnSet : wave.getWaveMobs()) {
-               compoundWave.waveSpawns.add(RaidPreset.WaveSpawn.fromConfig(waveSpawnSet));
-            }
-
-            preset.waves.add(compoundWave);
-         }
-
-         return preset;
-      }
-   }
-
-   public static RaidPreset randomFromFinalConfig(int index) {
-      RaidConfig.WaveSetup configSetup = ModConfigs.FINAL_RAID.getWaveSetup(index);
+      RaidConfig.WaveSetup configSetup = ModConfigs.RAID_CONFIG.getRandomWaveSetup();
       if (configSetup == null) {
          return null;
       } else {
@@ -67,20 +46,20 @@ public class RaidPreset {
       return step >= 0 && step < this.waves.size() ? this.waves.get(step) : null;
    }
 
-   public CompoundNBT serialize() {
-      CompoundNBT tag = new CompoundNBT();
-      ListNBT waveTag = new ListNBT();
+   public CompoundTag serialize() {
+      CompoundTag tag = new CompoundTag();
+      ListTag waveTag = new ListTag();
       this.waves.forEach(wave -> waveTag.add(wave.serialize()));
-      tag.func_218657_a("waves", waveTag);
+      tag.put("waves", waveTag);
       return tag;
    }
 
-   public static RaidPreset deserialize(CompoundNBT tag) {
+   public static RaidPreset deserialize(CompoundTag tag) {
       RaidPreset preset = new RaidPreset();
-      ListNBT waveTag = tag.func_150295_c("waves", 10);
+      ListTag waveTag = tag.getList("waves", 10);
 
       for (int i = 0; i < waveTag.size(); i++) {
-         preset.waves.add(RaidPreset.CompoundWaveSpawn.deserialize(waveTag.func_150305_b(i)));
+         preset.waves.add(RaidPreset.CompoundWaveSpawn.deserialize(waveTag.getCompound(i)));
       }
 
       return preset;
@@ -93,20 +72,20 @@ public class RaidPreset {
          return this.waveSpawns;
       }
 
-      public CompoundNBT serialize() {
-         CompoundNBT tag = new CompoundNBT();
-         ListNBT waveTag = new ListNBT();
+      public CompoundTag serialize() {
+         CompoundTag tag = new CompoundTag();
+         ListTag waveTag = new ListTag();
          this.waveSpawns.forEach(wave -> waveTag.add(wave.serialize()));
-         tag.func_218657_a("waves", waveTag);
+         tag.put("waves", waveTag);
          return tag;
       }
 
-      public static RaidPreset.CompoundWaveSpawn deserialize(CompoundNBT tag) {
+      public static RaidPreset.CompoundWaveSpawn deserialize(CompoundTag tag) {
          RaidPreset.CompoundWaveSpawn compound = new RaidPreset.CompoundWaveSpawn();
-         ListNBT waveTag = tag.func_150295_c("waves", 10);
+         ListTag waveTag = tag.getList("waves", 10);
 
          for (int i = 0; i < waveTag.size(); i++) {
-            compound.waveSpawns.add(RaidPreset.WaveSpawn.deserialize(waveTag.func_150305_b(i)));
+            compound.waveSpawns.add(RaidPreset.WaveSpawn.deserialize(waveTag.getCompound(i)));
          }
 
          return compound;
@@ -134,15 +113,15 @@ public class RaidPreset {
          return this.mobPool;
       }
 
-      public CompoundNBT serialize() {
-         CompoundNBT tag = new CompoundNBT();
-         tag.func_74768_a("mobCount", this.mobCount);
-         tag.func_74778_a("mobPool", this.mobPool);
+      public CompoundTag serialize() {
+         CompoundTag tag = new CompoundTag();
+         tag.putInt("mobCount", this.mobCount);
+         tag.putString("mobPool", this.mobPool);
          return tag;
       }
 
-      public static RaidPreset.WaveSpawn deserialize(CompoundNBT tag) {
-         return new RaidPreset.WaveSpawn(tag.func_74762_e("mobCount"), tag.func_74779_i("mobPool"));
+      public static RaidPreset.WaveSpawn deserialize(CompoundTag tag) {
+         return new RaidPreset.WaveSpawn(tag.getInt("mobCount"), tag.getString("mobPool"));
       }
    }
 }

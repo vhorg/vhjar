@@ -1,25 +1,29 @@
 package iskallia.vault.entity.renderer;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import iskallia.vault.Vault;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.entity.PiglinRenderer;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.util.ResourceLocation;
+import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.VaultMod;
+import iskallia.vault.entity.entity.VaultGuardianEntity;
+import javax.annotation.Nonnull;
+import net.minecraft.client.model.PiglinModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider.Context;
+import net.minecraft.resources.ResourceLocation;
 
-public class VaultGuardianRenderer extends PiglinRenderer {
-   public static final ResourceLocation TEXTURE = Vault.id("textures/entity/vault_guardian.png");
+public class VaultGuardianRenderer extends HumanoidMobRenderer<VaultGuardianEntity, PiglinModel<VaultGuardianEntity>> {
+   public static final ResourceLocation TEXTURE = VaultMod.id("textures/entity/vault_guardian.png");
 
-   public VaultGuardianRenderer(EntityRendererManager renderManager) {
-      super(renderManager, false);
+   public VaultGuardianRenderer(Context context) {
+      super(context, new PiglinModel(context.bakeLayer(ModelLayers.PIGLIN)), 1.0F);
    }
 
-   protected void preRenderCallback(MobEntity entity, MatrixStack matrixStack, float partialTickTime) {
-      super.func_225620_a_(entity, matrixStack, partialTickTime);
-      matrixStack.func_227862_a_(1.5F, 1.5F, 1.5F);
+   protected void scale(@Nonnull VaultGuardianEntity entity, @Nonnull PoseStack matrixStack, float partialTickTime) {
+      super.scale(entity, matrixStack, partialTickTime);
+      matrixStack.scale(1.5F, 1.5F, 1.5F);
    }
 
-   public ResourceLocation func_110775_a(MobEntity entity) {
+   @Nonnull
+   public ResourceLocation getTextureLocation(@Nonnull VaultGuardianEntity entity) {
       return TEXTURE;
    }
 }

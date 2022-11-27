@@ -2,6 +2,7 @@ package iskallia.vault.config.entry;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.client.gui.helper.SkillFrame;
+import net.minecraft.resources.ResourceLocation;
 
 public class SkillStyle {
    @Expose
@@ -11,19 +12,16 @@ public class SkillStyle {
    @Expose
    public SkillFrame frameType;
    @Expose
-   public int u;
-   @Expose
-   public int v;
+   public ResourceLocation icon;
 
-   public SkillStyle(int x, int y, int u, int v) {
-      this(x, y, u, v, SkillFrame.STAR);
+   public SkillStyle(int x, int y, ResourceLocation icon) {
+      this(x, y, icon, SkillFrame.STAR);
    }
 
-   public SkillStyle(int x, int y, int u, int v, SkillFrame skillFrame) {
+   public SkillStyle(int x, int y, ResourceLocation icon, SkillFrame skillFrame) {
       this.x = x;
       this.y = y;
       this.frameType = skillFrame;
-      this.u = u;
-      this.v = v;
+      this.icon = icon;
    }
 }

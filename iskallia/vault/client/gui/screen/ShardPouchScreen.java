@@ -1,40 +1,40 @@
 package iskallia.vault.client.gui.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import iskallia.vault.Vault;
+import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.VaultMod;
 import iskallia.vault.container.inventory.ShardPouchContainer;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
 
-public class ShardPouchScreen extends ContainerScreen<ShardPouchContainer> {
-   private static final ResourceLocation TEXTURE = Vault.id("textures/gui/shard_pouch.png");
+public class ShardPouchScreen extends AbstractContainerScreen<ShardPouchContainer> {
+   private static final ResourceLocation TEXTURE = VaultMod.id("textures/gui/shard_pouch.png");
 
-   public ShardPouchScreen(ShardPouchContainer screenContainer, PlayerInventory inv, ITextComponent titleIn) {
+   public ShardPouchScreen(ShardPouchContainer screenContainer, Inventory inv, Component titleIn) {
       super(screenContainer, inv, titleIn);
-      this.field_146999_f = 176;
-      this.field_147000_g = 137;
-      this.field_238742_p_ = 33;
-      this.field_238745_s_ = 45;
+      this.imageWidth = 176;
+      this.imageHeight = 137;
+      this.titleLabelX = 33;
+      this.inventoryLabelY = 45;
    }
 
-   protected void func_230450_a_(MatrixStack matrixStack, float partialTicks, int x, int y) {
-      RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-      this.field_230706_i_.func_110434_K().func_110577_a(TEXTURE);
-      int offsetX = (this.field_230708_k_ - this.field_146999_f) / 2;
-      int offsetY = (this.field_230709_l_ - this.field_147000_g) / 2;
-      this.func_238474_b_(matrixStack, offsetX, offsetY, 0, 0, this.field_146999_f, this.field_147000_g);
+   protected void renderBg(PoseStack matrixStack, float partialTicks, int x, int y) {
+      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+      RenderSystem.setShaderTexture(0, TEXTURE);
+      int offsetX = (this.width - this.imageWidth) / 2;
+      int offsetY = (this.height - this.imageHeight) / 2;
+      this.blit(matrixStack, offsetX, offsetY, 0, 0, this.imageWidth, this.imageHeight);
    }
 
-   public void func_230430_a_(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-      this.func_230446_a_(matrixStack);
-      super.func_230430_a_(matrixStack, mouseX, mouseY, partialTicks);
-      this.func_230459_a_(matrixStack, mouseX, mouseY);
+   public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+      this.renderBackground(matrixStack);
+      super.render(matrixStack, mouseX, mouseY, partialTicks);
+      this.renderTooltip(matrixStack, mouseX, mouseY);
    }
 
-   public boolean func_231177_au__() {
+   public boolean isPauseScreen() {
       return false;
    }
 }

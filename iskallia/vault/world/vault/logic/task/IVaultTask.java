@@ -2,13 +2,13 @@ package iskallia.vault.world.vault.logic.task;
 
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.player.VaultPlayer;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 
 @FunctionalInterface
 public interface IVaultTask {
-   void execute(VaultRaid var1, VaultPlayer var2, ServerWorld var3);
+   void execute(VaultRaid var1, VaultPlayer var2, ServerLevel var3);
 
-   default void executeForAllPlayers(VaultRaid vault, ServerWorld world) {
+   default void executeForAllPlayers(VaultRaid vault, ServerLevel world) {
       vault.getPlayers().forEach(vPlayer -> this.execute(vault, vPlayer, world));
    }
 
