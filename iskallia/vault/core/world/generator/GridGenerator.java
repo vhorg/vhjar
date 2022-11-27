@@ -103,7 +103,7 @@ public class GridGenerator extends VaultGenerator {
    public void generate(Vault vault, ServerLevelAccessor world, RegionPos region) {
       ChunkRandom random = ChunkRandom.any();
       random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890);
-      PlacementSettings settings = new PlacementSettings().setFlags(19);
+      PlacementSettings settings = new PlacementSettings().setFlags(18);
       settings.getProcessorContext().random = random;
       settings.getProcessorContext().vault = vault;
       ConfiguredTemplate template = this.get(LAYOUT).getAt(vault, region, random, settings).configure(ConfiguredTemplate::new, settings);

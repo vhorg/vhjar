@@ -34,6 +34,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -88,7 +89,9 @@ public class MonolithObjective extends Objective {
          .register(
             this,
             data -> {
-               if (this.get(COUNT) < this.get(TARGET)) {
+               if (data.getHand() != InteractionHand.MAIN_HAND) {
+                  data.setResult(InteractionResult.SUCCESS);
+               } else if (this.get(COUNT) < this.get(TARGET)) {
                   BlockPos pos = data.getPos();
                   if (!(Boolean)data.getState().getValue(MonolithBlock.FILLED)) {
                      if (data.getState().getValue(MonolithBlock.HALF) != DoubleBlockHalf.UPPER

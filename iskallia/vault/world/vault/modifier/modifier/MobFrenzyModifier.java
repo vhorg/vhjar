@@ -12,6 +12,7 @@ import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 public class MobFrenzyModifier extends VaultModifier<MobFrenzyModifier.Properties> {
    private final EntityAttributeModifier<?> attackDamageAttributeModifier;
@@ -33,9 +34,9 @@ public class MobFrenzyModifier extends VaultModifier<MobFrenzyModifier.Propertie
 
    @Override
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
-      CommonEvents.ENTITY_CREATION.register(context.getUUID(), event -> {
+      CommonEvents.ENTITY_SPAWN.register(context.getUUID(), event -> {
          if (event.getEntity() instanceof LivingEntity entity) {
-            if (entity.level == world) {
+            if (entity.level == world && !(entity instanceof Player)) {
                long upperBits = context.getUUID().getMostSignificantBits();
                long lowerBits = context.getUUID().getLeastSignificantBits();
                this.attackDamageAttributeModifier.applyToEntity(entity, new UUID(upperBits++, lowerBits));
@@ -45,7 +46,7 @@ public class MobFrenzyModifier extends VaultModifier<MobFrenzyModifier.Propertie
       });
       CommonEvents.ENTITY_TICK.register(context.getUUID(), event -> {
          LivingEntity entity = event.getEntityLiving();
-         if (entity.level == world) {
+         if (entity.level == world && !(entity instanceof Player)) {
             boolean isBoss = vault.map(Vault.OBJECTIVES, objectives -> objectives.forEach(KillBossObjective.class, objective -> {
                UUID bossId = objective.get(KillBossObjective.BOSS_ID);
                return event.getEntity().getUUID().equals(bossId);
