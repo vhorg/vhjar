@@ -228,23 +228,27 @@ public class CrystalData implements INBTSerializable<CompoundTag> {
    }
 
    public void addModifier(VaultModifierStack modifierStack) {
-      boolean found = false;
-      ResourceLocation modifierId = modifierStack.getModifierId();
+      if (modifierStack.isEmpty()) {
+         VaultMod.LOGGER.error("Attempted to add Empty modifier to crystal. If you see this stacktrace, please share it with the devs.", new Exception());
+      } else {
+         boolean found = false;
+         ResourceLocation modifierId = modifierStack.getModifierId();
 
-      for (VaultModifierStack modifier : this.modifiers) {
-         if (modifier.getModifierId().equals(modifierId)) {
-            modifier.grow(modifierStack.getSize());
-            found = true;
-            break;
+         for (VaultModifierStack modifier : this.modifiers) {
+            if (modifier.getModifierId().equals(modifierId)) {
+               modifier.grow(modifierStack.getSize());
+               found = true;
+               break;
+            }
          }
-      }
 
-      if (!found) {
-         this.modifiers.add(modifierStack.copy());
-      }
+         if (!found) {
+            this.modifiers.add(modifierStack.copy());
+         }
 
-      this.sortModifiers();
-      this.updateDelegate();
+         this.sortModifiers();
+         this.updateDelegate();
+      }
    }
 
    private void sortModifiers() {

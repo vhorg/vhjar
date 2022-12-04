@@ -217,12 +217,12 @@ public class ObeliskObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Objective objective) {
+   public boolean isActive(Vault vault, Objective objective) {
       if (this.get(COUNT) < this.get(TARGET)) {
          return objective == this;
       } else {
          for (Objective child : this.get(CHILDREN)) {
-            if (child.isActive(objective)) {
+            if (child.isActive(vault, objective)) {
                return true;
             }
          }

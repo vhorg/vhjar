@@ -48,6 +48,9 @@
       "Lnet/minecraft/world/level/Level;getBestNeighborSignal(Lnet/minecraft/core/BlockPos;)I": "Lnet/minecraft/world/level/Level;m_46755_(Lnet/minecraft/core/BlockPos;)I",
       "calculateTargetStrength": "Lnet/minecraft/world/level/block/RedStoneWireBlock;m_55527_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)I"
     },
+    "iskallia/vault/mixin/MixinServerPlayerGameMode": {
+      "useItemOn": "Lnet/minecraft/server/level/ServerPlayerGameMode;m_7179_(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"
+    },
     "iskallia/vault/mixin/MixinLightTexture": {
       "getBrightness": "Lnet/minecraft/client/renderer/LightTexture;m_109888_(Lnet/minecraft/world/level/Level;I)F"
     },
@@ -227,6 +230,9 @@
       "shootProjectile": "Lnet/minecraft/world/item/CrossbowItem;m_40894_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;FZFFF)V",
       "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z": "Lnet/minecraft/world/level/Level;m_7967_(Lnet/minecraft/world/entity/Entity;)Z"
     },
+    "iskallia/vault/mixin/MixinBlockItem": {
+      "canPlace": "Lnet/minecraft/world/item/BlockItem;m_40610_(Lnet/minecraft/world/item/context/BlockPlaceContext;Lnet/minecraft/world/level/block/state/BlockState;)Z"
+    },
     "iskallia/vault/mixin/AccessorServerChunkCache": {
       "mainThread": "f_8330_:Ljava/lang/Thread;"
     },
@@ -354,6 +360,9 @@
       "iskallia/vault/mixin/MixinRedStoneWireBlock": {
         "Lnet/minecraft/world/level/Level;getBestNeighborSignal(Lnet/minecraft/core/BlockPos;)I": "Lnet/minecraft/world/level/Level;m_46755_(Lnet/minecraft/core/BlockPos;)I",
         "calculateTargetStrength": "Lnet/minecraft/world/level/block/RedStoneWireBlock;m_55527_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)I"
+      },
+      "iskallia/vault/mixin/MixinServerPlayerGameMode": {
+        "useItemOn": "Lnet/minecraft/server/level/ServerPlayerGameMode;m_7179_(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;"
       },
       "iskallia/vault/mixin/MixinLightTexture": {
         "getBrightness": "Lnet/minecraft/client/renderer/LightTexture;m_109888_(Lnet/minecraft/world/level/Level;I)F"
@@ -533,6 +542,9 @@
       "iskallia/vault/mixin/MixinCrossbowItem": {
         "shootProjectile": "Lnet/minecraft/world/item/CrossbowItem;m_40894_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;FZFFF)V",
         "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z": "Lnet/minecraft/world/level/Level;m_7967_(Lnet/minecraft/world/entity/Entity;)Z"
+      },
+      "iskallia/vault/mixin/MixinBlockItem": {
+        "canPlace": "Lnet/minecraft/world/item/BlockItem;m_40610_(Lnet/minecraft/world/item/context/BlockPlaceContext;Lnet/minecraft/world/level/block/state/BlockState;)Z"
       },
       "iskallia/vault/mixin/AccessorServerChunkCache": {
         "mainThread": "f_8330_:Ljava/lang/Thread;"

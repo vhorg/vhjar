@@ -5,17 +5,19 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public abstract class Event<E extends Event<E, T>, T> {
    protected E parent;
    protected boolean child;
-   protected Map<Object, List<Consumer<T>>> listeners;
+   protected Map<Integer, Map<Object, List<Consumer<T>>>> listeners;
    protected List<Predicate<T>> conditions;
 
    protected Event() {
-      this.listeners = Collections.synchronizedMap(new LinkedHashMap<>());
+      this.listeners = Collections.synchronizedMap(new TreeMap<>());
+      this.listeners.put(0, Collections.synchronizedMap(new LinkedHashMap<>()));
       this.child = false;
    }
 
@@ -25,8 +27,10 @@ public abstract class Event<E extends Event<E, T>, T> {
       this.child = true;
    }
 
-   public Map<Object, List<Consumer<T>>> getListeners() {
-      return this.listeners;
+   public TreeMap<Integer, Map<Object, List<Consumer<T>>>> getListeners() {
+      TreeMap<Integer, Map<Object, List<Consumer<T>>>> map = new TreeMap<>(Collections.reverseOrder());
+      map.putAll(this.listeners);
+      return map;
    }
 
    public boolean isChild() {
@@ -43,19 +47,25 @@ public abstract class Event<E extends Event<E, T>, T> {
       if (this.isChild()) {
          this.parent.invoke(data);
       } else {
-         new ArrayList<>(this.listeners.values()).forEach(list -> list.forEach(consumer -> {
-            try {
-               consumer.accept(data);
-            } catch (Exception var3) {
-               var3.printStackTrace();
-            }
-         }));
+         for (Integer priority : this.getListeners().keySet()) {
+            new ArrayList<>(this.getListeners().get(priority).values()).forEach(list -> list.forEach(consumer -> {
+               try {
+                  consumer.accept(data);
+               } catch (Exception var3x) {
+                  var3x.printStackTrace();
+               }
+            }));
+         }
       }
 
       return data;
    }
 
    public E register(Object reference, Consumer<T> listener) {
+      return this.register(reference, listener, 0);
+   }
+
+   public E register(Object reference, Consumer<T> listener, int priority) {
       if (this.isChild()) {
          this.parent.register(reference, t -> {
             for (Predicate<T> condition : this.conditions) {
@@ -65,10 +75,11 @@ public abstract class Event<E extends Event<E, T>, T> {
             }
 
             listener.accept(t);
-         });
+         }, priority);
          return (E)this;
       } else {
-         this.listeners.computeIfAbsent(reference, r -> new ArrayList<>()).add(listener);
+         this.listeners.computeIfAbsent(priority, p -> Collections.synchronizedMap(new LinkedHashMap<>()));
+         this.listeners.get(priority).computeIfAbsent(reference, r -> new ArrayList<>()).add(listener);
          return (E)this;
       }
    }
@@ -78,7 +89,7 @@ public abstract class Event<E extends Event<E, T>, T> {
          this.parent.release(reference);
          return (E)this;
       } else {
-         this.listeners.remove(reference);
+         this.listeners.values().forEach(map -> map.remove(reference));
          return (E)this;
       }
    }

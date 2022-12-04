@@ -239,9 +239,7 @@ public class StatisticsElementContainerScreenData {
    protected List<StatLabelElementBuilder<?>> getStatListPlayer() {
       return List.of(
          GearAttributeStatLabel.of(this.player, ModGearAttributes.ARMOR, LivingEntity::getArmorValue),
-         GearAttributeStatLabel.of(
-            this.player, ModGearAttributes.ATTACK_DAMAGE, player -> StatUtils.modifyWeaponDamage(player, player.getAttributeValue(Attributes.ATTACK_DAMAGE))
-         ),
+         GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_DAMAGE, player -> player.getAttributeValue(Attributes.ATTACK_DAMAGE)),
          GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_SPEED, player -> player.getAttributeValue(Attributes.ATTACK_SPEED) - 4.0),
          GearAttributeStatLabel.ofDouble(this.player, ModGearAttributes.ATTACK_SPEED_PERCENT),
          GearAttributeStatLabel.of(this.player, ModGearAttributes.REACH, IForgePlayer::getReachDistance),

@@ -7,6 +7,7 @@ import iskallia.vault.dynamodel.DynamicModelProperties;
 import iskallia.vault.dynamodel.baked.JsonFileBakedModel;
 import iskallia.vault.dynamodel.model.armor.ArmorLayers;
 import iskallia.vault.dynamodel.model.armor.ArmorModel;
+import iskallia.vault.dynamodel.model.item.CoconutShieldModel;
 import iskallia.vault.dynamodel.model.item.HandHeldModel;
 import iskallia.vault.dynamodel.model.item.PlainItemModel;
 import iskallia.vault.dynamodel.model.item.ShieldModel;
@@ -1077,6 +1078,10 @@ public class ModDynamicModels {
       );
       public static final ShieldModel INFERNO = REGISTRY.register(
          new ShieldModel(VaultMod.id("gear/shield/inferno"), "Inferno Shield")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel COCONUT = REGISTRY.register(
+         new CoconutShieldModel(VaultMod.id("gear/shield/coconut"), VaultMod.id("gear/shield/coconut_orange"), "Coconut Shield")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }

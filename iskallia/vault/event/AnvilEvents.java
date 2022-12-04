@@ -172,6 +172,20 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
+   public static void onApplyWitherSkull(AnvilUpdateEvent event) {
+      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == Items.WITHER_SKELETON_SKULL) {
+         ItemStack output = event.getLeft().copy();
+         CrystalData data = VaultCrystalItem.getData(output);
+         if (data.canBeModified()) {
+            VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddRandomCursesTask(1, 1), output);
+            event.setOutput(output);
+            event.setCost(1);
+            event.setMaterialCost(1);
+         }
+      }
+   }
+
+   @SubscribeEvent
    public static void onApplyMote(AnvilUpdateEvent event) {
       if (event.getLeft().getItem() instanceof VaultCrystalItem) {
          Item item = event.getRight().getItem();
@@ -232,6 +246,14 @@ public class AnvilEvents {
          ItemStack output = event.getLeft().copy();
          CrystalData data = VaultCrystalItem.getData(output);
          int crystalLevel = data.getLevel();
+         if (data.isCursed()) {
+            return;
+         }
+
+         if (!data.canBeModified()) {
+            return;
+         }
+
          if (data.getLevel() > 1) {
             int count = event.getRight().getCount();
             int diff = crystalLevel - count;

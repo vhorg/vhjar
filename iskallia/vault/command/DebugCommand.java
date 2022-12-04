@@ -44,11 +44,14 @@ import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutGenerator;
 import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutRegistry;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandRuntimeException;
 import net.minecraft.commands.CommandSourceStack;
@@ -146,15 +149,55 @@ public class DebugCommand extends Command {
 
    private int debugEvents(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      player.sendMessage(new TextComponent("~ Listing events ordered by highest priority ~").withStyle(ChatFormatting.GREEN), ChatType.SYSTEM, player.getUUID());
+      List<Event<?, ?>> valid = new ArrayList<>();
 
       for (Event<?, ?> event : CommonEvents.REGISTRY) {
-         if (event.getListeners().size() != 0) {
-            for (Entry<Object, ? extends List<? extends Consumer<?>>> entry : event.getListeners().entrySet()) {
-               ((CommandSourceStack)ctx.getSource())
-                  .getPlayerOrException()
-                  .sendMessage(
-                     new TextComponent(entry.getKey().getClass().getSimpleName() + " has " + entry.getValue().size()), ChatType.SYSTEM, player.getUUID()
+         for (Integer priority : event.getListeners().keySet()) {
+            Map<Object, ? extends List<? extends Consumer<?>>> map = event.getListeners().get(priority);
+
+            for (List<? extends Consumer<?>> listeners : map.values()) {
+               if (!listeners.isEmpty()) {
+                  valid.add(event);
+               }
+            }
+         }
+      }
+
+      for (Event<?, ?> event : CommonEvents.REGISTRY) {
+         if (valid.contains(event)) {
+            player.sendMessage(
+               new TextComponent("=== ")
+                  .append(new TextComponent(event.getClass().getSimpleName()).withStyle(ChatFormatting.AQUA))
+                  .append(new TextComponent(" ===").withStyle(ChatFormatting.WHITE)),
+               ChatType.SYSTEM,
+               player.getUUID()
+            );
+
+            for (Integer priority : event.getListeners().keySet()) {
+               if (!event.getListeners().get(priority).isEmpty()) {
+                  player.sendMessage(
+                     new TextComponent("Priority: ")
+                        .withStyle(ChatFormatting.WHITE)
+                        .append(
+                           new TextComponent(String.valueOf(priority))
+                              .withStyle(priority == 0 ? ChatFormatting.GRAY : (priority < 0 ? ChatFormatting.RED : ChatFormatting.GREEN))
+                        ),
+                     ChatType.SYSTEM,
+                     player.getUUID()
                   );
+
+                  for (Entry<Object, ? extends List<? extends Consumer<?>>> map : event.getListeners().get(priority).entrySet()) {
+                     player.sendMessage(
+                        new TextComponent("   " + map.getKey().getClass().getSimpleName())
+                           .withStyle(ChatFormatting.DARK_PURPLE)
+                           .append(new TextComponent(" has ").withStyle(ChatFormatting.WHITE))
+                           .append(new TextComponent(map.getValue().size() + "").withStyle(ChatFormatting.GOLD)),
+                        ChatType.SYSTEM,
+                        player.getUUID()
+                     );
+                  }
+               }
             }
          }
       }

@@ -13,6 +13,7 @@ import iskallia.vault.skill.ability.config.ManaShieldConfig;
 import iskallia.vault.skill.ability.config.MegaJumpConfig;
 import iskallia.vault.skill.ability.config.NovaConfig;
 import iskallia.vault.skill.ability.config.RampageConfig;
+import iskallia.vault.skill.ability.config.StonefallConfig;
 import iskallia.vault.skill.ability.config.SummonEternalConfig;
 import iskallia.vault.skill.ability.config.TankConfig;
 import iskallia.vault.skill.ability.config.TauntConfig;
@@ -259,6 +260,7 @@ public class ModAbilityLabelBindings {
          )
       );
       register(VeinMinerVoidConfig.class, Map.of("blocks", config -> AbilityLabelFormatters.decimal((float)config.getBlockLimit())));
+      register(StonefallConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
    }
 
    public static <C extends AbstractAbilityConfig> void register(Class<C> configClass) {

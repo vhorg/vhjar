@@ -156,7 +156,7 @@ public class ScavengerObjective extends Objective {
 
    @Override
    public void tickServer(VirtualWorld world, Vault vault) {
-      if (this.get(GOALS).areAllCompleted()) {
+      if (this.get(GOALS).areAllCompleted(vault)) {
          super.tickServer(world, vault);
       }
    }
@@ -281,12 +281,12 @@ public class ScavengerObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Objective objective) {
-      if (!this.get(GOALS).areAllCompleted()) {
+   public boolean isActive(Vault vault, Objective objective) {
+      if (!this.get(GOALS).areAllCompleted(vault)) {
          return objective == this;
       } else {
          for (Objective child : this.get(CHILDREN)) {
-            if (child.isActive(objective)) {
+            if (child.isActive(vault, objective)) {
                return true;
             }
          }
@@ -300,8 +300,14 @@ public class ScavengerObjective extends Objective {
          super(new HashMap<>(), Adapter.ofUUID(), Adapter.ofCompound(ScavengerGoal.ObjList::new));
       }
 
-      public boolean areAllCompleted() {
-         return this.values().stream().allMatch(ScavengerGoal.ObjList::areAllCompleted);
+      public boolean areAllCompleted(Vault vault) {
+         for (Runner runner : vault.get(Vault.LISTENERS).getAll(Runner.class)) {
+            if (this.containsKey(runner.getId()) && !this.get(runner.getId()).areAllCompleted()) {
+               return false;
+            }
+         }
+
+         return true;
       }
    }
 }

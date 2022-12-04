@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.compound.ItemStackList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -62,6 +63,7 @@ public class DeathObjective extends Objective {
                vault.ifPresent(Vault.STATS, collector -> {
                   StatCollector stats = collector.get(listener.get(Listener.ID));
                   stats.set(StatCollector.COMPLETION, Completion.FAILED);
+                  stats.set(StatCollector.REWARD, ItemStackList.create());
                });
                vault.get(Vault.LISTENERS).remove(world, vault, listener);
                player.getInventory().clearContent();
@@ -77,7 +79,7 @@ public class DeathObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Objective objective) {
+   public boolean isActive(Vault vault, Objective objective) {
       return objective == this;
    }
 }

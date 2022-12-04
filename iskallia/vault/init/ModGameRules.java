@@ -5,6 +5,7 @@ import iskallia.vault.mixin.MixinIntegerValue;
 import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
 import java.util.function.BiConsumer;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameRules.BooleanValue;
 import net.minecraft.world.level.GameRules.Category;
@@ -12,8 +13,13 @@ import net.minecraft.world.level.GameRules.IntegerValue;
 import net.minecraft.world.level.GameRules.Key;
 import net.minecraft.world.level.GameRules.Type;
 import net.minecraft.world.level.GameRules.Value;
+import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.network.PacketDistributor;
 
+@EventBusSubscriber
 public class ModGameRules {
    public static Key<BooleanValue> FINAL_VAULT_ALLOW_PARTY;
    public static Key<BooleanValue> VAULT_JOIN_REQUIRE_PARTY;
@@ -49,5 +55,26 @@ public class ModGameRules {
 
    public static Type<IntegerValue> integerRule(int defaultValue) {
       return MixinIntegerValue.create(defaultValue);
+   }
+
+   @SubscribeEvent
+   public static void syncGameRules(OnDatapackSyncEvent event) {
+      ServerPlayer player = event.getPlayer();
+      ModNetwork.CHANNEL
+         .send(
+            PacketDistributor.PLAYER.with(() -> player),
+            new ClientboundSyncVaultAllowWaypointsMessage(player.getLevel().getGameRules().getBoolean(VAULT_ALLOW_WAYPOINTS))
+         );
+   }
+
+   @SubscribeEvent
+   public static void syncGameRulesOnDimensionChange(PlayerChangedDimensionEvent event) {
+      if (event.getPlayer() instanceof ServerPlayer serverPlayer) {
+         ModNetwork.CHANNEL
+            .send(
+               PacketDistributor.PLAYER.with(() -> serverPlayer),
+               new ClientboundSyncVaultAllowWaypointsMessage(serverPlayer.getLevel().getGameRules().getBoolean(VAULT_ALLOW_WAYPOINTS))
+            );
+      }
    }
 }

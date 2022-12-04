@@ -2,6 +2,7 @@ package iskallia.vault.init;
 
 import iskallia.vault.VaultMod;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -19,6 +20,8 @@ public class ModAttributes {
    public static Attribute MANA_MAX;
 
    public static void register(Register<Attribute> event) {
+      Attributes.ATTACK_DAMAGE.setSyncable(true);
+      Attributes.KNOCKBACK_RESISTANCE.setSyncable(true);
       CRIT_CHANCE = register(event.getRegistry(), "generic.crit_chance", new RangedAttribute("attribute.name.generic.crit_chance", 0.0, 0.0, 1.0))
          .setSyncable(true);
       CRIT_MULTIPLIER = register(

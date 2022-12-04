@@ -180,6 +180,8 @@ public class AbilitiesGUIConfig extends Config {
                }
             })
          );
+      x += 38;
+      this.styles.put("Stonefall", new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/stonefall")));
    }
 
    public static class AbilityStyle extends AbilitiesGUIConfig.IconStyle {

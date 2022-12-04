@@ -43,7 +43,7 @@ public class CompletionTask extends Task<CompletionProperties> {
    protected <E> boolean doValidate(ServerPlayer player, E event) {
       if (event instanceof VaultLeaveForgeEvent e) {
          Objectives objectives = e.getVault().get(Vault.OBJECTIVES);
-         if (!this.getProperties().getId().equals(VaultMod.id("the_vault"))
+         if (!this.getProperties().getId().equals(VaultMod.id("vault"))
             && objectives.get(Objectives.LIST).stream().noneMatch(objective -> isValidObjective(this.getProperties().getId(), objective))) {
             return false;
          } else if (e.getVault().has(Vault.STATS)) {

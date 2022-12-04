@@ -120,7 +120,7 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    }
 
    public static boolean isUsableInVault(ItemStack stack, UUID vaultId) {
-      if (!stack.isEmpty() && stack.getItem() instanceof TrinketItem) {
+      if (!stack.isEmpty() && stack.getItem() instanceof TrinketItem && vaultId != null) {
          ListTag list = stack.getOrCreateTag().getList("usedVaults", 10);
 
          for (int i = 0; i < list.size(); i++) {

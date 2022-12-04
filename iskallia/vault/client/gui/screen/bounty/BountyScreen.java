@@ -44,7 +44,9 @@ public class BountyScreen extends AbstractElementContainerScreen<BountyContainer
       VaultMod.id("scavenger"),
       new TextComponent("Scavenger Hunt"),
       VaultMod.id("vault"),
-      new TextComponent("Any Vault")
+      new TextComponent("Any Vault"),
+      VaultMod.id("monolith"),
+      new TextComponent("Light the Monoliths")
    );
    private final BountyTableContainerElement bountyTableContainerElement;
    private static final boolean debug = false;

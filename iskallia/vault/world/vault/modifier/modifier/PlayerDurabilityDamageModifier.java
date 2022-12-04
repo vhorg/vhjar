@@ -17,9 +17,11 @@ public class PlayerDurabilityDamageModifier extends VaultModifier<PlayerDurabili
 
    @Override
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
-      CommonEvents.PLAYER_STAT
-         .of(PlayerStat.DURABILITY_DAMAGE)
-         .register(context.getUUID(), data -> data.setValue(data.getValue() * this.properties.durabilityDamageTakenMultiplier));
+      CommonEvents.PLAYER_STAT.of(PlayerStat.DURABILITY_DAMAGE).register(context.getUUID(), data -> {
+         if (data.getEntity().level == world) {
+            data.setValue(data.getValue() * this.properties.durabilityDamageTakenMultiplier);
+         }
+      });
    }
 
    public static class Properties {

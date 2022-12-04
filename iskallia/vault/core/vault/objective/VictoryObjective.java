@@ -132,7 +132,7 @@ public class VictoryObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Objective objective) {
+   public boolean isActive(Vault vault, Objective objective) {
       return objective == this;
    }
 

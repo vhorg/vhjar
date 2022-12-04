@@ -63,7 +63,7 @@ public abstract class Objective extends DataObject<Objective> implements ISuppli
       return this;
    }
 
-   public abstract boolean isActive(Objective var1);
+   public abstract boolean isActive(Vault var1, Objective var2);
 
    public static class IdList extends DataList<Objective.IdList, Integer> {
       public IdList() {

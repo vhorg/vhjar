@@ -1,14 +1,12 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.client.gui.screen.summary.VaultEndScreen;
 import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.vault.stat.VaultSnapshot;
+import iskallia.vault.util.scheduler.EndScreenScheduler;
 import iskallia.vault.world.data.VaultPlayerStats;
 import java.util.UUID;
 import java.util.function.Supplier;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkEvent.Context;
@@ -66,7 +64,7 @@ public class VaultPlayerStatsMessage {
 
       @OnlyIn(Dist.CLIENT)
       private static void openEndScreen(VaultPlayerStatsMessage.S2C message) {
-         Minecraft.getInstance().setScreen(new VaultEndScreen(message.snapshot, new TextComponent("Vault Exit")));
+         EndScreenScheduler.getInstance().snapshot = message.snapshot;
       }
    }
 }

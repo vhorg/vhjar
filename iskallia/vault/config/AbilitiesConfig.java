@@ -14,6 +14,7 @@ import iskallia.vault.skill.ability.group.ManaShieldAbilityGroup;
 import iskallia.vault.skill.ability.group.MegaJumpAbilityGroup;
 import iskallia.vault.skill.ability.group.NovaAbilityGroup;
 import iskallia.vault.skill.ability.group.RampageAbilityGroup;
+import iskallia.vault.skill.ability.group.StonefallAbilityGroup;
 import iskallia.vault.skill.ability.group.SummonEternalAbilityGroup;
 import iskallia.vault.skill.ability.group.TankAbilityGroup;
 import iskallia.vault.skill.ability.group.TauntAbilityGroup;
@@ -53,6 +54,8 @@ public class AbilitiesConfig extends Config {
    public ManaShieldAbilityGroup MANA_SHIELD;
    @Expose
    public TauntAbilityGroup TAUNT;
+   @Expose
+   public StonefallAbilityGroup STONEFALL;
 
    @Override
    public String getName() {
@@ -74,7 +77,8 @@ public class AbilitiesConfig extends Config {
          this.HUNTER,
          this.FARMER,
          this.MANA_SHIELD,
-         this.TAUNT
+         this.TAUNT,
+         this.STONEFALL
       );
    }
 
@@ -110,6 +114,7 @@ public class AbilitiesConfig extends Config {
       this.FARMER = FarmerAbilityGroup.defaultConfig();
       this.MANA_SHIELD = ManaShieldAbilityGroup.defaultConfig();
       this.TAUNT = TauntAbilityGroup.defaultConfig();
+      this.STONEFALL = StonefallAbilityGroup.defaultConfig();
    }
 
    @Override

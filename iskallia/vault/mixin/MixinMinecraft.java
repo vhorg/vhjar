@@ -38,7 +38,6 @@ public abstract class MixinMinecraft extends ReentrantBlockableEventLoop<Runnabl
    @Shadow
    @Final
    private static Logger LOGGER;
-   private boolean bypassLoading = false;
 
    public MixinMinecraft(String p_18765_) {
       super(p_18765_);
@@ -56,30 +55,12 @@ public abstract class MixinMinecraft extends ReentrantBlockableEventLoop<Runnabl
 
    @Inject(
       method = {"createLevel"},
-      at = {@At("HEAD")}
-   )
-   private void createLevelHead(String worldName, LevelSettings settings, RegistryAccess registries, WorldGenSettings worldGenSettings, CallbackInfo ci) {
-      LevelStem overworld = (LevelStem)worldGenSettings.dimensions().get(new ResourceLocation("overworld"));
-      if (overworld != null && overworld.generator() instanceof SkyVaultsChunkGenerator) {
-         this.bypassLoading = true;
-      }
-   }
-
-   @Inject(
-      method = {"createLevel"},
-      at = {@At("RETURN")}
-   )
-   private void createLevelReturn(String worldName, LevelSettings settings, RegistryAccess registries, WorldGenSettings worldGenSettings, CallbackInfo ci) {
-      this.bypassLoading = false;
-   }
-
-   @Inject(
-      method = {"createLevel"},
       at = {@At("HEAD")},
       cancellable = true
    )
    private void createLevel(String worldName, LevelSettings worldSettings, RegistryAccess registries, WorldGenSettings worldGenSettings, CallbackInfo ci) {
-      if (this.bypassLoading) {
+      LevelStem overworld = (LevelStem)worldGenSettings.dimensions().get(new ResourceLocation("overworld"));
+      if (overworld != null && overworld.generator() instanceof SkyVaultsChunkGenerator) {
          this.doLoadLevel(
             worldName,
             p_210684_ -> worldSettings::getDataPackConfig,

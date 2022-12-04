@@ -17,8 +17,10 @@ public class VaultLootableWeightModifier extends VaultModifier<VaultLootableWeig
    @Override
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
       CommonEvents.PLACEHOLDER_GENERATION.register(context.getUUID(), data -> {
-         if (data.getParent().target == data.getTile().getState().get(PlaceholderBlock.TYPE)) {
-            data.setProbability(data.getProbability() * this.properties.multiplier);
+         if (data.getVault() == vault) {
+            if (data.getParent().target == data.getTile().getState().get(PlaceholderBlock.TYPE)) {
+               data.setProbability(data.getProbability() + this.properties.chance);
+            }
          }
       });
    }
@@ -27,19 +29,19 @@ public class VaultLootableWeightModifier extends VaultModifier<VaultLootableWeig
       @Expose
       private final PlaceholderBlock.Type type;
       @Expose
-      private final double multiplier;
+      private final double chance;
 
-      public Properties(PlaceholderBlock.Type type, double multiplier) {
+      public Properties(PlaceholderBlock.Type type, double chance) {
          this.type = type;
-         this.multiplier = multiplier;
+         this.chance = chance;
       }
 
       public PlaceholderBlock.Type getType() {
          return this.type;
       }
 
-      public double getMultiplier() {
-         return this.multiplier;
+      public double getChance() {
+         return this.chance;
       }
    }
 }
