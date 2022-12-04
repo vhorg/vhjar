@@ -27,6 +27,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.JigsawConfigura
 import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.configurations.OreConfiguration;
 import net.minecraft.world.level.levelgen.placement.HeightRangePlacement;
+import net.minecraft.world.level.levelgen.placement.InSquarePlacement;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.levelgen.placement.PlacementModifier;
 import net.minecraft.world.level.levelgen.placement.RarityFilter;
@@ -40,12 +41,10 @@ public class ModFeatures {
    public static Holder<FinalVaultLobbyStructure.Feature> FINAL_VAULT_LOBBY_FEATURE;
    public static Holder<ArenaStructure.Feature> ARENA_FEATURE;
    public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_BREADCRUMB_CHEST;
-   public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_VAULT_ROCK_ORE;
    public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_CHROMATIC_IRON_ORE_SMALL;
    public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_CHROMATIC_IRON_ORE_LARGE;
    public static Holder<ConfiguredFeature<?, ?>> CONFIGURED_VAULT_STONE;
    public static Holder<PlacedFeature> PLACED_BREADCRUMB_CHEST;
-   public static Holder<PlacedFeature> PLACED_VAULT_ROCK_ORE;
    public static Holder<PlacedFeature> PLACED_CHROMATIC_IRON_ORE_SMALL;
    public static Holder<PlacedFeature> PLACED_CHROMATIC_IRON_ORE_LARGE;
    public static Holder<PlacedFeature> PLACED_VAULT_STONE;
@@ -85,19 +84,22 @@ public class ModFeatures {
          "placed_chromatic_iron_ore_small",
          CONFIGURED_CHROMATIC_IRON_ORE_SMALL,
          RarityFilter.onAverageOnceEvery(8),
-         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-30))
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-30)),
+         InSquarePlacement.spread()
       );
       PLACED_CHROMATIC_IRON_ORE_LARGE = register(
          "placed_chromatic_iron_ore_large",
          CONFIGURED_CHROMATIC_IRON_ORE_LARGE,
          RarityFilter.onAverageOnceEvery(8),
-         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-30))
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-30)),
+         InSquarePlacement.spread()
       );
       PLACED_VAULT_STONE = register(
          "placed_vault_stone",
          CONFIGURED_VAULT_STONE,
          RarityFilter.onAverageOnceEvery(10),
-         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-32))
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-32)),
+         InSquarePlacement.spread()
       );
    }
 

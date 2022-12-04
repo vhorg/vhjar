@@ -82,36 +82,10 @@ public class CoinPileDecorBlock extends Block {
    }
 
    @Nullable
-   public BlockState getStateForPlacement(BlockPlaceContext pContext) {
-      BlockState blockstate = pContext.getLevel().getBlockState(pContext.getClickedPos());
-      if (blockstate.is(this)) {
-         int existingCoins = (Integer)blockstate.getValue(COINS);
-         ItemStack stack = pContext.getItemInHand();
-         int stackSize = stack.getCount();
-         int itemsTilFull = 64 - existingCoins;
-         int newCoins = Math.min(64, (Integer)blockstate.getValue(COINS) + 1);
-
-         int size = switch (newCoins) {
-            case 2 -> 2;
-            case 3 -> 3;
-            case 4 -> 4;
-            case 5, 6, 7 -> 5;
-            case 8, 9, 10, 11, 12, 13, 14, 15 -> 6;
-            case 16, 17, 18, 19, 20, 21, 22, 23 -> 7;
-            case 24, 25, 26, 27, 28, 29, 30, 31 -> 8;
-            case 32, 33, 34, 35, 36, 37, 38, 39 -> 9;
-            case 40, 41, 42, 43, 44, 45, 46, 47 -> 10;
-            case 48, 49, 50, 51, 52, 53, 54, 55 -> 11;
-            case 56, 57, 58, 59, 60, 61, 62, 63 -> 12;
-            case 64 -> 13;
-            default -> 1;
-         };
-         return (BlockState)((BlockState)blockstate.setValue(SIZE, size)).setValue(COINS, Math.min(64, (Integer)blockstate.getValue(COINS) + 1));
-      } else {
-         FluidState fluidstate = pContext.getLevel().getFluidState(pContext.getClickedPos());
-         boolean flag = fluidstate.getType() == Fluids.WATER;
-         return (BlockState)Objects.requireNonNull(super.getStateForPlacement(pContext)).setValue(WATERLOGGED, flag);
-      }
+   public BlockState getStateForPlacement(BlockPlaceContext context) {
+      FluidState fluidstate = context.getLevel().getFluidState(context.getClickedPos());
+      boolean flag = fluidstate.getType() == Fluids.WATER;
+      return (BlockState)Objects.requireNonNull(super.getStateForPlacement(context)).setValue(WATERLOGGED, flag);
    }
 
    public BlockState updateShape(BlockState pState, Direction pFacing, BlockState pFacingState, LevelAccessor pLevel, BlockPos pCurrentPos, BlockPos pFacingPos) {

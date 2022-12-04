@@ -11,6 +11,7 @@ import iskallia.vault.skill.ability.effect.ManaShieldAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpAbility;
 import iskallia.vault.skill.ability.effect.NovaAbility;
 import iskallia.vault.skill.ability.effect.RampageAbility;
+import iskallia.vault.skill.ability.effect.StonefallAbility;
 import iskallia.vault.skill.ability.effect.SummonEternalAbility;
 import iskallia.vault.skill.ability.effect.TankAbility;
 import iskallia.vault.skill.ability.effect.TauntAbility;
@@ -69,6 +70,7 @@ public class ModAbilities {
    public static final String MANA_SHIELD = "Mana Shield";
    public static final String TAUNT = "Taunt";
    public static final String TAUNT_REPEL = "Taunt_Repel";
+   public static final String STONEFALL = "Stonefall";
 
    public static void init() {
       AbilityRegistry.register("Heal", new HealAbility());
@@ -104,5 +106,6 @@ public class ModAbilities {
       AbilityRegistry.register("Vein Miner_Fortune", new VeinMinerFortuneAbility());
       AbilityRegistry.register("Vein Miner_Durability", new VeinMinerDurabilityAbility());
       AbilityRegistry.register("Vein Miner_Void", new VeinMinerVoidAbility());
+      AbilityRegistry.register("Stonefall", new StonefallAbility());
    }
 }

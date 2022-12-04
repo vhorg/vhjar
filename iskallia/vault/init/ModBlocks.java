@@ -132,6 +132,7 @@ import iskallia.vault.block.render.VaultPortalRenderer;
 import iskallia.vault.block.render.VaultRaidControllerRenderer;
 import iskallia.vault.core.vault.stat.VaultChestType;
 import iskallia.vault.fluid.block.VoidFluidBlock;
+import iskallia.vault.item.CoinBlockItem;
 import iskallia.vault.item.VaultChestBlockItem;
 import java.util.List;
 import java.util.function.Consumer;
@@ -346,10 +347,10 @@ public class ModBlocks {
    public static final BlockItem ALTAR_CHEST_ITEM_PLACEABLE = new VaultChestBlockItem(ALTAR_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem SCAVENGER_CHEST_ITEM = new VaultChestBlockItem(SCAVENGER_CHEST, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem SCAVENGER_ALTAR_ITEM = new BlockItem(SCAVENGER_ALTAR, new Properties().tab(ModItems.VAULT_MOD_GROUP));
-   public static BlockItem VAULT_BRONZE = new BlockItem(BRONZE_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
-   public static BlockItem VAULT_SILVER = new BlockItem(SILVER_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
-   public static BlockItem VAULT_GOLD = new BlockItem(GOLD_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
-   public static BlockItem VAULT_PLATINUM = new BlockItem(PLATINUM_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static BlockItem VAULT_BRONZE = new CoinBlockItem(BRONZE_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static BlockItem VAULT_SILVER = new CoinBlockItem(SILVER_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static BlockItem VAULT_GOLD = new CoinBlockItem(GOLD_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static BlockItem VAULT_PLATINUM = new CoinBlockItem(PLATINUM_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockEntityType<FloatingTextTileEntity> FLOATING_TEXT_TILE_ENTITY = Builder.of(FloatingTextTileEntity::new, new Block[]{FLOATING_TEXT})
       .build(null);
    public static final BlockEntityType<VaultAltarTileEntity> VAULT_ALTAR_TILE_ENTITY = Builder.of(VaultAltarTileEntity::new, new Block[]{VAULT_ALTAR})

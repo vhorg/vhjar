@@ -217,12 +217,12 @@ public class MonolithObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Objective objective) {
+   public boolean isActive(Vault vault, Objective objective) {
       if (this.get(COUNT) < this.get(TARGET)) {
          return objective == this;
       } else {
          for (Objective child : this.get(CHILDREN)) {
-            if (child.isActive(objective)) {
+            if (child.isActive(vault, objective)) {
                return true;
             }
          }
@@ -233,6 +233,6 @@ public class MonolithObjective extends Objective {
 
    protected void playActivationEffects(VirtualWorld world, BlockPos pos) {
       ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new MonolithIgniteMessage(pos));
-      world.playSound(null, pos, SoundEvents.CONDUIT_ACTIVATE, SoundSource.BLOCKS, 1.0F, 1.0F);
+      world.playSound(null, pos, SoundEvents.FIRECHARGE_USE, SoundSource.BLOCKS, 1.0F, 1.0F);
    }
 }

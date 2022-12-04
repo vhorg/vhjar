@@ -1,12 +1,15 @@
 package iskallia.vault.item;
 
 import com.mojang.authlib.GameProfile;
+import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.client.render.DollISTER;
 import iskallia.vault.core.event.CommonEvents;
-import iskallia.vault.core.event.common.LootGenerationEvent;
+import iskallia.vault.core.event.common.ChestGenerationEvent;
+import iskallia.vault.core.event.common.CoinStacksGenerationEvent;
+import iskallia.vault.core.event.common.CrateAwardEvent;
+import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
@@ -17,13 +20,13 @@ import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.world.data.DollLootData;
 import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.data.VaultPartyData;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
@@ -36,6 +39,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Player;
@@ -50,7 +54,6 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.IItemRenderProperties;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.ItemCraftedEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -70,7 +73,67 @@ public class VaultDollItem extends BasicItem {
 
    public VaultDollItem(ResourceLocation id, Properties properties) {
       super(id, properties);
-      CommonEvents.LOOT_GENERATION.register(this, this::handleLootGeneration);
+      CommonEvents.CHEST_LOOT_GENERATION.register(this, this::handleChestLoot);
+      CommonEvents.COIN_STACK_LOOT_GENERATION.register(this, this::handleCoinStackLoot);
+      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.register(this, this::handleLootableBlockLoot);
+      CommonEvents.CRATE_AWARD_EVENT.register(this, this::handleCrateLoot);
+   }
+
+   private void handleCrateLoot(CrateAwardEvent.Data data) {
+      if (data.getPhase() == CrateAwardEvent.Phase.PRE) {
+         ServerPlayer player = data.getPlayer();
+         ServerLevel serverLevel = player.getLevel();
+         Vault vault = data.getVault();
+         UUID vaultId = vault.get(Vault.ID);
+         ItemStack doll = getFirstDollMatching(player, stack -> isDollOwnedByDifferentPlayer(serverLevel, stack, player) && this.isTheSameVault(stack, vaultId));
+         if (doll.isEmpty()) {
+            return;
+         }
+
+         getDollUUID(doll).ifPresent(dollId -> {
+            float percentage = getLootPercent(doll);
+            if (data.getRandom().nextFloat() < percentage) {
+               NonNullList<ItemStack> items = data.getCrateLootGenerator().createLoot(vault, data.getListener(), data.getRandom());
+               ItemStack crate = VaultCrateBlock.getCrateWithLoot(data.getCrateType(), items);
+               DollLootData.get(serverLevel, dollId).addLoot(crate);
+            }
+         });
+      }
+   }
+
+   private void handleLootableBlockLoot(LootableBlockGenerationEvent.Data data) {
+      if (data.getPhase() == LootableBlockGenerationEvent.Phase.POST) {
+         this.handleLoot(data.getPlayer(), data::getLoot);
+      }
+   }
+
+   private void handleCoinStackLoot(CoinStacksGenerationEvent.Data data) {
+      if (data.getPhase() == CoinStacksGenerationEvent.Phase.POST) {
+         this.handleLoot(data.getPlayer(), data::getLoot);
+      }
+   }
+
+   private void handleChestLoot(ChestGenerationEvent.Data data) {
+      if (data.getPhase() == ChestGenerationEvent.Phase.POST) {
+         this.handleLoot(data.getPlayer(), data::getLoot);
+      }
+   }
+
+   private void handleLoot(ServerPlayer player, Supplier<List<ItemStack>> getLoot) {
+      if (player != null) {
+         ServerLevel serverLevel = player.getLevel();
+         getPlayerVaultId(serverLevel)
+            .ifPresent(
+               vaultId -> {
+                  ItemStack doll = getFirstDollMatching(
+                     player, stack -> isDollOwnedByDifferentPlayer(serverLevel, stack, player) && this.isTheSameVault(stack, vaultId)
+                  );
+                  if (!doll.isEmpty()) {
+                     getDollUUID(doll).ifPresent(dollId -> addPercentageOfLoot(serverLevel, doll, dollId, getLoot.get()));
+                  }
+               }
+            );
+      }
    }
 
    @SubscribeEvent
@@ -156,7 +219,7 @@ public class VaultDollItem extends BasicItem {
                   .withOptionalParameter(LootContextParams.THIS_ENTITY, player)
                   .withOptionalParameter(LootContextParams.BLOCK_ENTITY, null);
                List<ItemStack> drops = state.getBlock().getDrops(state, lootContext);
-               addPercentageOfLoot(serverLevel, doll, dollId, drops.iterator());
+               addPercentageOfLoot(serverLevel, doll, dollId, drops);
             }
          );
    }
@@ -170,34 +233,8 @@ public class VaultDollItem extends BasicItem {
       }
    }
 
-   @SubscribeEvent
-   public static void onPlayerCraftedDoll(ItemCraftedEvent event) {
-      if (event.getCrafting().getItem() == ModItems.VAULT_DOLL) {
-         setNewDollAttributes(event.getCrafting(), event.getPlayer());
-      }
-   }
-
-   private void handleLootGeneration(LootGenerationEvent.Data data) {
-      LootTableGenerator lootTableGenerator = (LootTableGenerator)data.getGenerator();
-      if (data.getPhase() == LootGenerationEvent.Phase.POST && lootTableGenerator != null) {
-         Player player = (Player)lootTableGenerator.source;
-         if (player != null) {
-            ServerLevel serverLevel = (ServerLevel)player.level;
-            if (serverLevel != null) {
-               getPlayerVaultId(serverLevel)
-                  .ifPresent(
-                     vaultId -> {
-                        ItemStack doll = getFirstDollMatching(
-                           player, stack -> isDollOwnedByDifferentPlayer(serverLevel, stack, player) && this.isTheSameVault(stack, vaultId)
-                        );
-                        if (!doll.isEmpty()) {
-                           getDollUUID(doll).ifPresent(dollId -> addPercentageOfLoot(serverLevel, doll, dollId, lootTableGenerator.getItems()));
-                        }
-                     }
-                  );
-            }
-         }
-      }
+   public void onCraftedBy(ItemStack stack, Level level, Player player) {
+      setNewDollAttributes(stack, player);
    }
 
    private static Optional<UUID> getPlayerVaultId(ServerLevel serverLevel) {
@@ -233,11 +270,11 @@ public class VaultDollItem extends BasicItem {
       return tag.getInt("xpPoints");
    }
 
-   private static void addPercentageOfLoot(ServerLevel serverLevel, ItemStack doll, UUID dollId, Iterator<ItemStack> items) {
+   private static void addPercentageOfLoot(ServerLevel serverLevel, ItemStack doll, UUID dollId, List<ItemStack> items) {
       float percentage = getLootPercent(doll);
-      items.forEachRemaining(stack -> {
+      items.forEach(stack -> {
          if (serverLevel.random.nextFloat() < percentage) {
-            DollLootData.get(serverLevel, dollId).addLoot(stack);
+            DollLootData.get(serverLevel, dollId).addLoot(stack.copy());
          }
       });
    }

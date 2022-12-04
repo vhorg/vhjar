@@ -681,7 +681,8 @@ public class VaultModifiersConfig extends Config {
                         PartialTile.of(
                            (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.GILDED_CHEST)
                         ),
-                        1
+                        1,
+                        true
                      ),
                      new VaultModifier.Display("Gilded", TextColor.parseColor("#FFEC00"), "Adds Gilded Chests", VaultMod.id("gui/modifiers/gilded"))
                   )
@@ -693,7 +694,8 @@ public class VaultModifiersConfig extends Config {
                         PartialTile.of(
                            (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.LIVING_CHEST)
                         ),
-                        1
+                        1,
+                        true
                      ),
                      new VaultModifier.Display("Living", TextColor.parseColor("#5FC76A"), "Adds Living Chests", VaultMod.id("gui/modifiers/living"))
                   )
@@ -705,7 +707,8 @@ public class VaultModifiersConfig extends Config {
                         PartialTile.of(
                            (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.ORNATE_CHEST)
                         ),
-                        1
+                        1,
+                        true
                      ),
                      new VaultModifier.Display("Ornate", TextColor.parseColor("#8E5fC7"), "Adds Ornate Chests", VaultMod.id("gui/modifiers/ornate"))
                   )
@@ -715,7 +718,8 @@ public class VaultModifiersConfig extends Config {
                      VaultMod.id("coin_pile"),
                      new DecoratorAddModifier.Properties(
                         PartialTile.of((BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.COIN_STACKS)),
-                        1
+                        1,
+                        true
                      ),
                      new VaultModifier.Display("Coins", TextColor.parseColor("#C7C05F"), "Adds Coin Piles to the vault", VaultMod.id("gui/modifiers/coins"))
                   )

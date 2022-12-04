@@ -1,5 +1,6 @@
 package iskallia.vault.integration;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.p3pp3rf1y.sophisticatedbackpacks.api.CapabilityBackpackWrapper;
 import net.p3pp3rf1y.sophisticatedbackpacks.backpack.BackpackItem;
@@ -25,7 +26,14 @@ public class IntegrationSB {
       stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).ifPresent(backpackWrapper -> {
          backpackWrapper.getContentsUuid().ifPresent(backpackUuid -> {
             if (stack.getTag() != null && stack.getTag().contains("VHSnapshot")) {
-               BackpackStorage.get().setBackpackContents(backpackUuid, stack.getTag().getCompound("VHSnapshot"));
+               CompoundTag tag = stack.getTag().getCompound("VHSnapshot");
+               BackpackStorage storage = BackpackStorage.get();
+               if (tag.isEmpty()) {
+                  storage.removeBackpackContents(backpackUuid);
+               } else {
+                  storage.setBackpackContents(backpackUuid, tag);
+               }
+
                stack.getTag().remove("VHSnapshot");
             }
          });

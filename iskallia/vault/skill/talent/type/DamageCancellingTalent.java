@@ -6,22 +6,15 @@ import iskallia.vault.world.data.PlayerTalentsData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
 @Deprecated(
    forRemoval = true
-)
-@EventBusSubscriber(
-   bus = Bus.FORGE
 )
 public abstract class DamageCancellingTalent extends PlayerTalent {
    public DamageCancellingTalent(int cost) {
       super(cost);
    }
 
-   @SubscribeEvent
    public static void onLivingHurt(LivingAttackEvent event) {
       if (!event.getEntity().getCommandSenderWorld().isClientSide()) {
          if (event.getEntityLiving() instanceof ServerPlayer player) {

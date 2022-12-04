@@ -12,21 +12,18 @@ import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.event.common.CrateAwardEvent;
 import iskallia.vault.core.random.ChunkRandom;
-import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.vault.CrateLootGenerator;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.world.loot.LootTable;
-import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLootItem;
-import java.util.Collections;
+import java.util.List;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -108,56 +105,25 @@ public class AwardCrateObjective extends Objective {
       if (vault.has(Vault.STATS)) {
          StatCollector stats = vault.get(Vault.STATS).get(listener.get(Listener.ID));
          if (stats != null) {
-            NonNullList<ItemStack> items = this.createLoot(vault, listener, random);
-            items.forEach(stackx -> {
-               if (stackx.getItem() instanceof VaultLootItem lootItemx) {
-                  lootItemx.initializeLoot(vault, stackx);
-               }
-            });
-
-            for (int i = 0; i < items.size(); i++) {
-               ItemStack stack = (ItemStack)items.get(i);
-               if (stack.getItem() instanceof DataTransferItem lootItem) {
-                  items.set(i, lootItem.convertStack(stack));
-               }
-            }
-
-            ItemStack crate = VaultCrateBlock.getCrateWithLoot(this.get(TYPE), items);
+            CrateLootGenerator crateLootGenerator = new CrateLootGenerator(this.get(LOOT_TABLE), this.has(ADD_ARTIFACT), this.get(ARTIFACT_CHANCE));
+            VaultCrateBlock.Type crateType = this.get(TYPE);
+            listener.getPlayer()
+               .ifPresent(
+                  player -> CommonEvents.CRATE_AWARD_EVENT
+                     .invoke(
+                        player, ItemStack.EMPTY, crateLootGenerator, vault, listener, crateType, List.of(), Version.latest(), random, CrateAwardEvent.Phase.PRE
+                     )
+               );
+            NonNullList<ItemStack> items = crateLootGenerator.generate(vault, listener, random);
+            ItemStack crate = VaultCrateBlock.getCrateWithLoot(crateType, items);
+            listener.getPlayer()
+               .ifPresent(
+                  player -> CommonEvents.CRATE_AWARD_EVENT
+                     .invoke(player, crate, crateLootGenerator, vault, listener, crateType, items, Version.latest(), random, CrateAwardEvent.Phase.POST)
+               );
             stats.get(StatCollector.REWARD).add(crate);
          }
       }
-   }
-
-   public NonNullList<ItemStack> createLoot(Vault vault, Listener listener, RandomSource random) {
-      NonNullList<ItemStack> loot = NonNullList.create();
-      if (this.get(LOOT_TABLE) != null) {
-         LootTableGenerator generator = new LootTableGenerator(vault.get(Vault.VERSION), this.get(LOOT_TABLE));
-         generator.generate(random);
-         generator.getItems().forEachRemaining(loot::add);
-      }
-
-      loot.removeIf(ItemStack::isEmpty);
-      NonNullList<ItemStack> specialLoot = this.createSpecialLoot(vault, listener, random);
-
-      for (int i = 0; i < loot.size() - 54 + specialLoot.size(); i++) {
-         loot.remove(random.nextInt(loot.size()));
-      }
-
-      loot.addAll(specialLoot);
-      Collections.shuffle(loot);
-      return loot;
-   }
-
-   public NonNullList<ItemStack> createSpecialLoot(Vault vault, Listener listener, RandomSource random) {
-      NonNullList<ItemStack> loot = NonNullList.create();
-      if (this.has(ADD_ARTIFACT)) {
-         float probability = CommonEvents.ARTIFACT_CHANCE.invoke(listener, this.get(ARTIFACT_CHANCE)).getProbability();
-         if (random.nextFloat() < probability) {
-            loot.add(new ItemStack(ModItems.UNIDENTIFIED_ARTIFACT));
-         }
-      }
-
-      return loot;
    }
 
    @Override
@@ -166,7 +132,7 @@ public class AwardCrateObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Objective objective) {
+   public boolean isActive(Vault vault, Objective objective) {
       return objective == this;
    }
 }

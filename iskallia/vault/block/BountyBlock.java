@@ -43,7 +43,7 @@ public class BountyBlock extends HorizontalDirectionalBlock implements EntityBlo
    public static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 10.0, 16.0);
 
    public BountyBlock() {
-      super(Properties.copy(Blocks.OAK_PLANKS).requiresCorrectToolForDrops().strength(0.5F).noOcclusion());
+      super(Properties.copy(Blocks.OAK_PLANKS).strength(0.5F).noOcclusion());
       this.registerDefaultState(
          (BlockState)((BlockState)((BlockState)this.getStateDefinition().any()).setValue(FACING, Direction.NORTH))
             .setValue(BlockStateProperties.WATERLOGGED, false)

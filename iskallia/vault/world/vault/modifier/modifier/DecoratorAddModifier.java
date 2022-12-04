@@ -17,6 +17,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -45,10 +46,14 @@ public class DecoratorAddModifier extends VaultModifier<DecoratorAddModifier.Pro
                         int z = data.getRandom().nextInt(16) + data.getChunkPos().z * 16;
                         int y = data.getRandom().nextInt(64);
                         BlockPos pos = new BlockPos(x, y, z);
-                        BlockState state = data.getWorld().getBlockState(pos);
+                        ServerLevelAccessor serverLevelAccessor = data.getWorld();
+                        BlockState state = serverLevelAccessor.getBlockState(pos);
                         if (state.getBlock() == Blocks.AIR
-                           && data.getWorld().getBlockState(pos.above()).isAir()
-                           && data.getWorld().getBlockState(pos.below()).isFaceSturdy(data.getWorld(), pos, Direction.UP)) {
+                           && (
+                              !this.properties.requireConditions
+                                 || serverLevelAccessor.getBlockState(pos.above()).isAir()
+                                    && serverLevelAccessor.getBlockState(pos.below()).isFaceSturdy(serverLevelAccessor, pos, Direction.UP)
+                           )) {
                            PartialTile tile = this.properties.output.copy().setPos(pos);
                            PlacementSettings settings = data.getTemplate().getSettings().copy();
                            if (data.getTemplate().getParent() instanceof JigsawTemplate jigsaw) {
@@ -63,9 +68,9 @@ public class DecoratorAddModifier extends VaultModifier<DecoratorAddModifier.Pro
                            }
 
                            if (tile != null) {
-                              data.getWorld().setBlock(pos, tile.getState().asBlockState(), 3);
+                              serverLevelAccessor.setBlock(pos, tile.getState().asBlockState(), 3);
                               if (tile.getNbt() != null) {
-                                 BlockEntity blockEntity = data.getWorld().getBlockEntity(pos);
+                                 BlockEntity blockEntity = serverLevelAccessor.getBlockEntity(pos);
                                  if (blockEntity != null) {
                                     blockEntity.load(tile.getNbt());
                                  }
@@ -84,14 +89,17 @@ public class DecoratorAddModifier extends VaultModifier<DecoratorAddModifier.Pro
       private final PartialTile output;
       @Expose
       private final int attemptsPerChunk;
+      @Expose
+      private final boolean requireConditions;
 
       public Properties(PartialTile output) {
-         this(output, 48);
+         this(output, 48, true);
       }
 
-      public Properties(PartialTile output, int attemptsPerChunk) {
+      public Properties(PartialTile output, int attemptsPerChunk, boolean requireConditions) {
          this.output = output;
          this.attemptsPerChunk = attemptsPerChunk;
+         this.requireConditions = requireConditions;
       }
 
       public PartialTile getOutput() {
@@ -100,6 +108,10 @@ public class DecoratorAddModifier extends VaultModifier<DecoratorAddModifier.Pro
 
       public int getAttemptsPerChunk() {
          return this.attemptsPerChunk;
+      }
+
+      public boolean requireConditions() {
+         return this.requireConditions;
       }
    }
 }

@@ -8,6 +8,7 @@ import iskallia.vault.skill.ability.effect.ExecuteAbility;
 import iskallia.vault.skill.ability.effect.GhostWalkAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldAbility;
 import iskallia.vault.skill.ability.effect.RampageAbility;
+import iskallia.vault.skill.ability.effect.StonefallAbility;
 import iskallia.vault.skill.ability.effect.TankAbility;
 import iskallia.vault.skill.ability.effect.TauntAbility;
 import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
@@ -31,6 +32,7 @@ public class ModEffects {
    public static final MobEffect TARGET_OVERRIDE = new TauntAbility.TargetOverrideEffect(Color.RED.getRGB(), VaultMod.id("target_override"));
    public static final MobEffect TAUNT_REPEL_PLAYER = new TauntRepelAbility.TauntRepelPlayerEffect(Color.DARK_GRAY.getRGB(), VaultMod.id("taunt_repel_player"));
    public static final MobEffect TAUNT_REPEL_MOB = new TauntRepelAbility.TauntRepelMobEffect(Color.DARK_GRAY.getRGB(), VaultMod.id("taunt_repel_mob"));
+   public static final MobEffect STONEFALL = new StonefallAbility.StonefallEffect(Color.GRAY.getRGB(), VaultMod.id("stonefall"));
    public static final ToggleAbilityEffect RAMPAGE = new RampageAbility.RampageEffect(Color.RED.getRGB(), VaultMod.id("rampage"));
    public static final ToggleAbilityEffect RAMPAGE_LEECH = new RampageLeechAbility.RampageLeechEffect(Color.RED.getRGB(), VaultMod.id("rampage_leech"));
    public static final ToggleAbilityEffect RAMPAGE_CHAIN = new RampageChainAbility.RampageChainEffect(Color.RED.getRGB(), VaultMod.id("rampage_chain"));
@@ -66,7 +68,8 @@ public class ModEffects {
                TAUNT,
                TAUNT_REPEL_MOB,
                TAUNT_REPEL_PLAYER,
-               TARGET_OVERRIDE
+               TARGET_OVERRIDE,
+               STONEFALL
             }
          );
       MobEffects.POISON = POISON_OVERRIDE;

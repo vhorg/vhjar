@@ -39,7 +39,10 @@ public class CompletionTaskElement extends AbstractTaskElement<CompletionTask> {
       components.add(new TextComponent("Complete Vaults!").withStyle(Style.EMPTY.withColor(ChatFormatting.BLACK)));
       components.add(EMPTY_LINE);
       components.add(new TextComponent("Objective:"));
-      components.add(new TextComponent(" - ").append((Component)BountyScreen.OBJECTIVE_NAME.get(this.getTask().getProperties().getId())));
+      components.add(
+         new TextComponent(" - ")
+            .append((Component)BountyScreen.OBJECTIVE_NAME.getOrDefault(this.getTask().getProperties().getId(), new TextComponent("Empty - Report to Dev")))
+      );
       return components;
    }
 

@@ -4,13 +4,17 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
+import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -33,6 +37,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -131,8 +136,11 @@ public class CrystalClusterBlock extends Block implements SimpleWaterloggedBlock
       if (blockState.getBlock() == ModBlocks.CRYSTAL_CLUSTER) {
          ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
          CrystalData crystal = new CrystalData(stack);
+         Entity entity = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
+         int level = entity instanceof Player player ? PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player).getVaultLevel() : 0;
+         crystal.setLevel(level);
          crystal.setModel(CrystalData.Model.RAW);
-         crystal.setTheme(new PoolCrystalTheme(VaultMod.id("raw")));
+         crystal.setTheme(new ValueCrystalTheme(VaultMod.id("raw_vault_cave")));
          drops.add(stack);
       }
 

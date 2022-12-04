@@ -52,7 +52,7 @@ public class DifficultyCommand extends Command {
    }
 
    public static int setDifficulty(CommandSourceStack source, VaultDifficulty vaultDifficulty) throws CommandSyntaxException {
-      WorldSettings worldSettings = WorldSettings.get(source.getPlayerOrException().getLevel());
+      WorldSettings worldSettings = WorldSettings.get(source.getLevel());
       if (worldSettings.getVaultDifficulty() == vaultDifficulty) {
          throw ERROR_ALREADY_DIFFICULT.create(vaultDifficulty.getKey());
       } else {

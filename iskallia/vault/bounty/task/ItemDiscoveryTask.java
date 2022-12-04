@@ -1,25 +1,34 @@
 package iskallia.vault.bounty.task;
 
+import iskallia.vault.VaultMod;
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.bounty.task.properties.ItemDiscoveryProperties;
-import iskallia.vault.core.event.common.LootGenerationEvent;
-import iskallia.vault.core.world.loot.generator.LootTableGenerator;
+import iskallia.vault.core.event.common.ChestGenerationEvent;
+import iskallia.vault.core.event.common.CoinStacksGenerationEvent;
+import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.world.data.BountyData;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
+   private List<ItemStack> cachedItems;
+   static long time = 0L;
+   static int iterations = 100;
+   static List<Long> times = new ArrayList<>();
+
    public ItemDiscoveryTask(UUID bountyId, ItemDiscoveryProperties properties, TaskReward taskReward) {
       super(TaskRegistry.ITEM_DISCOVERY, bountyId, properties, taskReward);
    }
@@ -28,22 +37,26 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
       this.deserializeNBT(tag);
    }
 
+   public void setCachedItems(List<ItemStack> cachedItems) {
+      this.cachedItems = cachedItems;
+   }
+
    @Override
    protected <E> boolean doValidate(ServerPlayer player, E event) {
-      AtomicBoolean valid = new AtomicBoolean(false);
-      if (event instanceof LootGenerationEvent.Data data) {
-         LootTableGenerator lootTableGenerator = (LootTableGenerator)data.getGenerator();
-         Iterator<ItemStack> items = lootTableGenerator.getItems();
-         items.forEachRemaining(stack -> {
-            ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(stack.getItem());
+      if (this.cachedItems != null && !this.cachedItems.isEmpty()) {
+         for (ItemStack stack : this.cachedItems) {
+            Item item = stack.getItem();
+            ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
             ResourceLocation requiredItem = this.getProperties().getItemId();
             if (itemId != null && itemId.equals(requiredItem)) {
-               valid.set(true);
+               return true;
             }
-         });
-      }
+         }
 
-      return valid.get();
+         return false;
+      } else {
+         return false;
+      }
    }
 
    @Override
@@ -64,31 +77,62 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
       this.properties = new ItemDiscoveryProperties(tag.getCompound("properties"));
    }
 
-   public static void onLootGeneration(LootGenerationEvent.Data event) {
-      LootTableGenerator generator = (LootTableGenerator)event.getGenerator();
-      if (generator.source instanceof ServerPlayer player && event.getPhase() == LootGenerationEvent.Phase.POST) {
-         BountyData data = BountyData.get();
-         data.getAllActiveTasksById(player, TaskRegistry.ITEM_DISCOVERY)
-            .stream()
-            .filter(task -> !task.isComplete())
-            .filter(task -> task.validate(player, event))
-            .peek(task -> {
-               AtomicInteger count = new AtomicInteger();
-               Iterator<ItemStack> items = event.getGenerator().getItems();
-               items.forEachRemaining(stack -> {
-                  ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(stack.getItem());
-                  ResourceLocation requiredItem = ((ItemDiscoveryTask)task).getProperties().getItemId();
+   public static <T> void onLootGeneration(T event) {
+      time = System.currentTimeMillis();
+      ServerPlayer player;
+      List<ItemStack> items;
+      if (event instanceof ChestGenerationEvent.Data e) {
+         player = e.getPlayer();
+         items = e.getLoot();
+      } else if (event instanceof LivingDropsEvent e) {
+         if (!(e.getSource().getEntity() instanceof ServerPlayer)) {
+            return;
+         }
+
+         player = (ServerPlayer)e.getSource().getEntity();
+         items = e.getDrops().stream().<ItemStack>map(ItemEntity::getItem).toList();
+      } else if (event instanceof CoinStacksGenerationEvent.Data e) {
+         player = e.getPlayer();
+         items = e.getLoot();
+      } else {
+         if (!(event instanceof LootableBlockGenerationEvent.Data e)) {
+            VaultMod.LOGGER.warn("Attempted to validate an unregistered event.");
+            return;
+         }
+
+         player = e.getPlayer();
+         items = e.getLoot();
+      }
+
+      BountyData data = BountyData.get();
+
+      for (ItemDiscoveryTask task : data.getAllActiveTasksById(player, TaskRegistry.ITEM_DISCOVERY)) {
+         if (!task.isComplete()) {
+            task.setCachedItems(items);
+            if (task.validate(player, event)) {
+               for (ItemStack stack : items) {
+                  Item item = stack.getItem();
+                  ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
+                  ResourceLocation requiredItem = task.getProperties().getItemId();
                   if (itemId != null && itemId.equals(requiredItem)) {
-                     count.addAndGet(stack.getCount());
+                     task.increment(stack.getCount());
+                     if (task.isComplete()) {
+                        ModNetwork.CHANNEL
+                           .sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                        break;
+                     }
                   }
-               });
-               task.increment(count.get());
-            })
-            .filter(Task::isComplete)
-            .forEach(
-               task -> ModNetwork.CHANNEL
-                  .sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT)
-            );
+               }
+            }
+         }
+      }
+
+      if (times.size() < iterations) {
+         times.add(System.currentTimeMillis() - time);
+      } else {
+         long average = (long)times.stream().mapToLong(value -> value).average().orElse(0.0);
+         VaultMod.LOGGER.debug("ItemDiscovery Last {} Iteration Time: {}ms", iterations, average);
+         times.clear();
       }
    }
 }

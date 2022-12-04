@@ -333,6 +333,13 @@ public class AbilitiesDescriptionsConfig extends Config {
                this.defaultDescription("Vein Miner_Void"), List.of("cooldown", "blocks"), List.of("level", "cooldown", "blocks")
             )
          );
+      this.data
+         .put(
+            "Stonefall",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Stonefall"), List.of("cooldown", "manaCost", "duration"), List.of("level", "cooldown", "manaCost", "duration")
+            )
+         );
    }
 
    private JsonElement defaultDescription(String skillName) {

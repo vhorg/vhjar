@@ -91,7 +91,7 @@ public class BountyData extends SavedData {
       return bounties;
    }
 
-   public List<? extends Task<?>> getAllActiveTasksById(ServerPlayer player, ResourceLocation taskId) {
+   public <T extends Task<?>> List<T> getAllActiveTasksById(ServerPlayer player, ResourceLocation taskId) {
       return this.active
          .values()
          .stream()
@@ -190,7 +190,10 @@ public class BountyData extends SavedData {
 
    public static BountyData create(CompoundTag nbt) {
       BountyData data = new BountyData();
-      CommonEvents.LOOT_GENERATION.register(data, ItemDiscoveryTask::onLootGeneration);
+      CommonEvents.ENTITY_DROPS.register(data, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.CHEST_LOOT_GENERATION.post().register(data, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.COIN_STACK_LOOT_GENERATION.post().register(data, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.post().register(data, ItemDiscoveryTask::onLootGeneration, -1);
       data.load(nbt);
       return data;
    }

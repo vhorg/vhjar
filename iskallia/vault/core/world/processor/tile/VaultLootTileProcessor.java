@@ -45,7 +45,7 @@ public class VaultLootTileProcessor extends TileProcessor {
 
          if (processor instanceof BernoulliWeightedTileProcessor bernoulli) {
             PlaceholderGenerationEvent.Data result = CommonEvents.PLACEHOLDER_GENERATION
-               .invoke(this, tile, bernoulli.probability, bernoulli.success, bernoulli.failure);
+               .invoke(context.vault, this, tile, bernoulli.probability, bernoulli.success, bernoulli.failure);
             return bernoulli.process(tile, result.getProbability(), context);
          } else {
             return processor == null ? tile : processor.process(tile, context);

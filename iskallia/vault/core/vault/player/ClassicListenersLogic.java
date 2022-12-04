@@ -164,23 +164,23 @@ public class ClassicListenersLogic extends ListenersLogic {
             vault.set(Vault.OWNER, listener.get(Listener.ID));
             if (!this.has(ADDED_BONUS_TIME) && listener instanceof Runner) {
                vault.get(Vault.CLOCK).addModifier(new RelicExtension(listener.get(Listener.ID), 600));
-               listener.getPlayer().ifPresent(player -> {
-                  TrinketHelper.getTrinkets(player).forEach(trinket -> {
-                     if (TrinketItem.hasUsesLeft(trinket.stack())) {
-                        if (TrinketItem.isIdentified(trinket.stack())) {
-                           TrinketItem.addUsedVault(trinket.stack(), vault.get(Vault.ID));
-                        }
-                     }
-                  });
-                  TrinketHelper.getTrinkets(player, VaultTimeExtensionTrinket.class).forEach(timeTrinket -> {
-                     if (timeTrinket.isUsable(player)) {
-                        vault.get(Vault.CLOCK).addModifier(new TrinketExtension(player, timeTrinket.trinket().getConfig().getTimeAdded()));
-                     }
-                  });
-               });
                this.set(ADDED_BONUS_TIME);
             }
 
+            listener.getPlayer().ifPresent(player -> {
+               TrinketHelper.getTrinkets(player).forEach(trinket -> {
+                  if (TrinketItem.hasUsesLeft(trinket.stack())) {
+                     if (TrinketItem.isIdentified(trinket.stack())) {
+                        TrinketItem.addUsedVault(trinket.stack(), vault.get(Vault.ID));
+                     }
+                  }
+               });
+               TrinketHelper.getTrinkets(player, VaultTimeExtensionTrinket.class).forEach(timeTrinket -> {
+                  if (timeTrinket.isUsable(player)) {
+                     vault.get(Vault.CLOCK).addModifier(new TrinketExtension(player, timeTrinket.trinket().getConfig().getTimeAdded()));
+                  }
+               });
+            });
             MinecraftForge.EVENT_BUS.post(new VaultJoinForgeEvent(vault));
             return true;
          }
