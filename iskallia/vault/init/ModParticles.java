@@ -2,10 +2,13 @@ package iskallia.vault.init;
 
 import iskallia.vault.client.particles.AltarFlameParticle;
 import iskallia.vault.client.particles.DepthFireworkParticle;
+import iskallia.vault.client.particles.DiffuserCompleteParticle;
+import iskallia.vault.client.particles.DiffuserParticle;
 import iskallia.vault.client.particles.HealParticle;
 import iskallia.vault.client.particles.NovaDotParticle;
 import iskallia.vault.client.particles.NovaSpeedParticle;
 import iskallia.vault.client.particles.RaidCubeParticle;
+import iskallia.vault.client.particles.ReverseDiffuserParticle;
 import iskallia.vault.client.particles.ScavengerAltarConsumeParticle;
 import iskallia.vault.client.particles.ScavengerAltarParticle;
 import iskallia.vault.client.particles.StabilizerCubeParticle;
@@ -42,6 +45,9 @@ public class ModParticles {
    public static final RegistryObject<SimpleParticleType> SCAVENGER_CORE_CONSUME = REGISTRY.register(
       "scavenger_core_consume", () -> new SimpleParticleType(true)
    );
+   public static final RegistryObject<SimpleParticleType> DIFFUSER = REGISTRY.register("diffuser", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> DIFFUSER_COMPLETE = REGISTRY.register("diffuser_complete", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> REVERSE_DIFFUSER = REGISTRY.register("reverse_diffuser", () -> new SimpleParticleType(true));
 
    @SubscribeEvent(
       priority = EventPriority.LOWEST
@@ -60,5 +66,8 @@ public class ModParticles {
       particleManager.register((ParticleType)NOVA_SPEED.get(), NovaSpeedParticle.Provider::new);
       particleManager.register((ParticleType)NOVA_DOT.get(), NovaDotParticle.Provider::new);
       particleManager.register((ParticleType)HEAL.get(), HealParticle.Provider::new);
+      particleManager.register((ParticleType)DIFFUSER.get(), DiffuserParticle.Provider::new);
+      particleManager.register((ParticleType)DIFFUSER_COMPLETE.get(), DiffuserCompleteParticle.Provider::new);
+      particleManager.register((ParticleType)REVERSE_DIFFUSER.get(), ReverseDiffuserParticle.Provider::new);
    }
 }

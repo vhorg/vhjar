@@ -60,11 +60,23 @@ public class ModGameRules {
    @SubscribeEvent
    public static void syncGameRules(OnDatapackSyncEvent event) {
       ServerPlayer player = event.getPlayer();
-      ModNetwork.CHANNEL
-         .send(
-            PacketDistributor.PLAYER.with(() -> player),
-            new ClientboundSyncVaultAllowWaypointsMessage(player.getLevel().getGameRules().getBoolean(VAULT_ALLOW_WAYPOINTS))
-         );
+      if (player == null) {
+         event.getPlayerList()
+            .getPlayers()
+            .forEach(
+               serverPlayer -> ModNetwork.CHANNEL
+                  .send(
+                     PacketDistributor.PLAYER.with(() -> serverPlayer),
+                     new ClientboundSyncVaultAllowWaypointsMessage(serverPlayer.getLevel().getGameRules().getBoolean(VAULT_ALLOW_WAYPOINTS))
+                  )
+            );
+      } else {
+         ModNetwork.CHANNEL
+            .send(
+               PacketDistributor.PLAYER.with(() -> player),
+               new ClientboundSyncVaultAllowWaypointsMessage(player.getLevel().getGameRules().getBoolean(VAULT_ALLOW_WAYPOINTS))
+            );
+      }
    }
 
    @SubscribeEvent

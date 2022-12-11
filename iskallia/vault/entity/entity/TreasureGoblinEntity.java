@@ -91,11 +91,11 @@ public class TreasureGoblinEntity extends Monster {
       return ModSounds.GOBLIN_IDLE;
    }
 
-   protected SoundEvent getDeathSound() {
+   public SoundEvent getDeathSound() {
       return ModSounds.GOBLIN_DEATH;
    }
 
-   protected SoundEvent getHurtSound(@Nonnull DamageSource damageSourceIn) {
+   public SoundEvent getHurtSound(@Nonnull DamageSource damageSourceIn) {
       return ModSounds.GOBLIN_HURT;
    }
 }

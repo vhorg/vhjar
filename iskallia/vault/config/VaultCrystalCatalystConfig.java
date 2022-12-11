@@ -132,6 +132,9 @@ public class VaultCrystalCatalystConfig extends Config {
                   .add(VaultMod.id("tired"), 3)
                   .add(VaultMod.id("slowed"), 6)
                   .add(VaultMod.id("weakened"), 1)
+                  .add(VaultMod.id("jupiter_gravity"), 1)
+                  .add(VaultMod.id("crab_walk"), 1)
+                  .add(VaultMod.id("confused"), 1)
             )
          );
       this.MODIFIER_POOL_GROUPS.add(new VaultCrystalCatalystConfig.ModifierPoolGroup(List.of("GOOD")), 1);

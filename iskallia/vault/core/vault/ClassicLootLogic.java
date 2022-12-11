@@ -96,7 +96,7 @@ public class ClassicLootLogic extends LootLogic {
       for (int i = 0; i < loot.size(); i++) {
          ItemStack stack = loot.get(i);
          if (stack.getItem() instanceof DataTransferItem lootItem) {
-            loot.set(i, lootItem.convertStack(stack));
+            loot.set(i, lootItem.convertStack(stack, data.getRandom()));
          }
       }
    }

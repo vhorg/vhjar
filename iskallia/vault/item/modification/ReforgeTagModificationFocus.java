@@ -1,6 +1,7 @@
 package iskallia.vault.item.modification;
 
 import iskallia.vault.config.gear.VaultGearTagConfig;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.gear.DataTransferItem;
@@ -28,8 +29,8 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
    }
 
    @Override
-   public ItemStack convertStack(ItemStack stack) {
-      ItemStack result = DataTransferItem.super.convertStack(stack);
+   public ItemStack convertStack(ItemStack stack, RandomSource random) {
+      ItemStack result = DataTransferItem.super.convertStack(stack, random);
       if (getModifierTag(result) == null) {
          String randomTag = ModConfigs.VAULT_GEAR_TAG_CONFIG.getRandomTag();
          if (randomTag != null) {

@@ -4,7 +4,11 @@ import com.google.gson.annotations.Expose;
 
 public class CrystalBuddingConfig extends Config {
    @Expose
-   private float growthChancePerRandomTick;
+   private float maxSecondsBetweenGrowthUpdates;
+   @Expose
+   private float minSecondsBetweenGrowthUpdates;
+   @Expose
+   private boolean showParticles;
 
    public CrystalBuddingConfig() {
       this.reset();
@@ -17,10 +21,22 @@ public class CrystalBuddingConfig extends Config {
 
    @Override
    protected void reset() {
-      this.growthChancePerRandomTick = 0.25F;
+      int average = 340;
+      int variance = 60;
+      this.maxSecondsBetweenGrowthUpdates = average + variance;
+      this.minSecondsBetweenGrowthUpdates = average - variance;
+      this.showParticles = true;
    }
 
-   public float getGrowthChancePerRandomTick() {
-      return this.growthChancePerRandomTick;
+   public float getMaxSecondsBetweenGrowthUpdates() {
+      return this.maxSecondsBetweenGrowthUpdates;
+   }
+
+   public float getMinSecondsBetweenGrowthUpdates() {
+      return this.minSecondsBetweenGrowthUpdates;
+   }
+
+   public boolean showParticles() {
+      return this.showParticles;
    }
 }

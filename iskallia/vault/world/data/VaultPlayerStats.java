@@ -83,7 +83,7 @@ public class VaultPlayerStats extends SavedData {
             VaultDollItem.giveDollExperience(player, vaultId, experience);
 
             for (ItemStack stack : stats.get(StatCollector.REWARD)) {
-               ScheduledItemDropData.get(ServerLifecycleHooks.getCurrentServer()).addDrop(player, stack.copy());
+               player.getInventory().placeItemBackInInventory(stack.copy());
             }
 
             ids.remove(vaultId);

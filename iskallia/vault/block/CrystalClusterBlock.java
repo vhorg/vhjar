@@ -2,22 +2,26 @@ package iskallia.vault.block;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.List;
+import java.util.Random;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -145,5 +149,17 @@ public class CrystalClusterBlock extends Block implements SimpleWaterloggedBlock
       }
 
       return drops;
+   }
+
+   @ParametersAreNonnullByDefault
+   public void animateTick(BlockState blockState, Level level, BlockPos blockPos, Random random) {
+      if (ModConfigs.CRYSTAL_BUDDING.showParticles() && this == ModBlocks.CRYSTAL_CLUSTER) {
+         double x = blockPos.getX() + random.nextFloat();
+         double y = blockPos.getY() + random.nextFloat();
+         double z = blockPos.getZ() + random.nextFloat();
+         if (random.nextInt(5) == 0) {
+            level.addParticle(ParticleTypes.END_ROD, x, y, z, 0.0, 0.0125F, 0.0);
+         }
+      }
    }
 }

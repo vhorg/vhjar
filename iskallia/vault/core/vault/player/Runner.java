@@ -166,14 +166,4 @@ public class Runner extends Listener {
             }
          );
    }
-
-   @Override
-   public void onLeave(VirtualWorld world, Vault vault) {
-      super.onLeave(world, vault);
-      this.getPlayer().ifPresent(player -> {
-         if (!player.isDeadOrDying()) {
-            VaultJoinSnapshotData.get(player.getLevel()).removeLastSnapshot(player);
-         }
-      });
-   }
 }

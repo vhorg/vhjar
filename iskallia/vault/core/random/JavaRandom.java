@@ -22,6 +22,10 @@ public class JavaRandom extends LCGRandom {
       return new JavaRandom(seed ^ MULTIPLIER);
    }
 
+   public static JavaRandom ofNanoTime() {
+      return new JavaRandom(new Random().nextLong());
+   }
+
    @Override
    public void setSeed(long seed) {
       super.setSeed(seed ^ MULTIPLIER);

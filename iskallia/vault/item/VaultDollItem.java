@@ -93,7 +93,7 @@ public class VaultDollItem extends BasicItem {
          getDollUUID(doll).ifPresent(dollId -> {
             float percentage = getLootPercent(doll);
             if (data.getRandom().nextFloat() < percentage) {
-               NonNullList<ItemStack> items = data.getCrateLootGenerator().createLoot(vault, data.getListener(), data.getRandom());
+               NonNullList<ItemStack> items = data.getCrateLootGenerator().generate(vault, data.getListener(), data.getRandom());
                ItemStack crate = VaultCrateBlock.getCrateWithLoot(data.getCrateType(), items);
                DollLootData.get(serverLevel, dollId).addLoot(crate);
             }

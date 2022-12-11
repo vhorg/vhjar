@@ -20,7 +20,6 @@ import iskallia.vault.util.calc.ItemRarityHelper;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
@@ -149,7 +148,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
                   loot,
                   this.rarity,
                   Version.latest(),
-                  JavaRandom.ofInternal(new Random().nextLong()),
+                  JavaRandom.ofNanoTime(),
                   ChestGenerationEvent.Phase.PRE
                );
             if ((this.lootTable = data.getLootTable()) == null) {

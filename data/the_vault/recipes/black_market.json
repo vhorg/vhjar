@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ccc",
+    "dsd",
+    "d d"
+  ],
+  "key": {
+    "d": {
+      "item": "the_vault:driftwood"
+    },
+    "c": {
+      "item": "the_vault:chromatic_iron_block"
+    },
+    "s": {
+      "item": "the_vault:soul_shard"
+    }
+  },
+  "result": {
+    "item": "the_vault:black_market",
+    "count": 1
+  }
+}

@@ -15,6 +15,7 @@ import iskallia.vault.core.vault.player.Listeners;
 import iskallia.vault.core.vault.stat.StatsCollector;
 import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.world.vault.modifier.modifier.GameControlsModifier;
 import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.nbt.CompoundTag;
@@ -103,6 +104,14 @@ public class Vault extends DataObject<Vault> {
       ClientEvents.CLIENT_TICK.at(Phase.END).register(this, data -> this.tickClient());
       this.ifPresent(WORLD, worldManager -> worldManager.initClient(this));
       this.ifPresent(OVERLAY, overlay -> overlay.initClient(this));
+      this.get(MODIFIERS).getModifiers().stream().filter(m -> m instanceof GameControlsModifier).forEach(m -> {
+         GameControlsModifier modifier = (GameControlsModifier)m;
+         GameControlsModifier.Properties currentProps = ClientVaults.CONTROLS_PROPERTIES;
+         currentProps.setForward(currentProps.canMoveForward() && modifier.properties().canMoveForward());
+         currentProps.setBackward(currentProps.canMoveBackward() && modifier.properties().canMoveBackward());
+         currentProps.setJump(currentProps.canJump() && modifier.properties().canJump());
+         currentProps.setSwapLeftAndRight(currentProps.isLeftAndRightSwapped() || modifier.properties().isLeftAndRightSwapped());
+      });
    }
 
    @OnlyIn(Dist.CLIENT)
@@ -118,5 +127,6 @@ public class Vault extends DataObject<Vault> {
       CommonEvents.release(this);
       ClientEvents.release(this);
       ClientVaults.ACTIVE = new Vault();
+      ClientVaults.CONTROLS_PROPERTIES = new GameControlsModifier.Properties(true, true, true, false);
    }
 }

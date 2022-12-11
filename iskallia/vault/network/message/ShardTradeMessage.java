@@ -1,7 +1,9 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientShardTradeData;
-import iskallia.vault.world.data.SoulShardTraderData;
+import iskallia.vault.world.data.PlayerBlackMarketData;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -13,20 +15,23 @@ import net.minecraftforge.network.NetworkEvent.Context;
 public class ShardTradeMessage {
    private final int randomTradeCost;
    private final long seed;
+   private final LocalDateTime nextReset;
    private final Map<Integer, Tuple<ItemStack, Integer>> availableTrades = new HashMap<>();
 
-   private ShardTradeMessage(int randomTradeCost, long seed) {
+   private ShardTradeMessage(int randomTradeCost, long seed, String nextReset) {
       this.randomTradeCost = randomTradeCost;
       this.seed = seed;
+      this.nextReset = LocalDateTime.parse(nextReset, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
    }
 
-   public ShardTradeMessage(int randomTradeCost, long seed, Map<Integer, SoulShardTraderData.SelectedTrade> trades) {
+   public ShardTradeMessage(int randomTradeCost, long seed, Map<Integer, PlayerBlackMarketData.BlackMarket.SelectedTrade> trades, LocalDateTime nextReset) {
       this.randomTradeCost = randomTradeCost;
       this.seed = seed;
       trades.forEach((index, trade) -> {
          Tuple<ItemStack, Integer> tradeTpl = new Tuple(trade.getStack(), trade.getShardCost());
          this.availableTrades.put(index, tradeTpl);
       });
+      this.nextReset = nextReset;
    }
 
    public int getRandomTradeCost() {
@@ -37,6 +42,10 @@ public class ShardTradeMessage {
       return this.seed;
    }
 
+   public LocalDateTime getNextReset() {
+      return this.nextReset;
+   }
+
    public Map<Integer, Tuple<ItemStack, Integer>> getAvailableTrades() {
       return this.availableTrades;
    }
@@ -44,6 +53,7 @@ public class ShardTradeMessage {
    public static void encode(ShardTradeMessage message, FriendlyByteBuf buffer) {
       buffer.writeInt(message.randomTradeCost);
       buffer.writeLong(message.seed);
+      buffer.writeUtf(message.nextReset.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
       buffer.writeInt(message.availableTrades.size());
       message.availableTrades.forEach((index, tradeTpl) -> {
          buffer.writeInt(index);
@@ -53,7 +63,7 @@ public class ShardTradeMessage {
    }
 
    public static ShardTradeMessage decode(FriendlyByteBuf buffer) {
-      ShardTradeMessage message = new ShardTradeMessage(buffer.readInt(), buffer.readLong());
+      ShardTradeMessage message = new ShardTradeMessage(buffer.readInt(), buffer.readLong(), buffer.readUtf());
       int trades = buffer.readInt();
 
       for (int i = 0; i < trades; i++) {

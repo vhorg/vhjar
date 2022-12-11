@@ -31,6 +31,7 @@ import iskallia.vault.client.gui.screen.block.RelicPedestalScreen;
 import iskallia.vault.client.gui.screen.block.SpiritExtractorScreen;
 import iskallia.vault.client.gui.screen.block.TransmogTableScreen;
 import iskallia.vault.client.gui.screen.block.VaultArtisanStationScreen;
+import iskallia.vault.client.gui.screen.block.VaultDiffuserScreen;
 import iskallia.vault.client.gui.screen.block.VaultForgeScreen;
 import iskallia.vault.client.gui.screen.block.VaultRecyclerScreen;
 import iskallia.vault.client.gui.screen.bounty.BountyScreen;
@@ -73,6 +74,7 @@ public class ModScreens {
       MenuScreens.register(ModContainers.VAULT_FORGE_CONTAINER, VaultForgeScreen::new);
       MenuScreens.register(ModContainers.VAULT_ARTISAN_STATION_CONTAINER, VaultArtisanStationScreen::new);
       MenuScreens.register(ModContainers.VAULT_RECYCLER_CONTAINER, VaultRecyclerScreen::new);
+      MenuScreens.register(ModContainers.VAULT_DIFFUSER_CONTAINER, VaultDiffuserScreen::new);
       MenuScreens.register(ModContainers.RELIC_PEDESTAL_CONTAINER, RelicPedestalScreen::new);
       MenuScreens.register(ModContainers.SPIRIT_EXTRACTOR_CONTAINER, SpiritExtractorScreen::new);
       MenuScreens.register(ModContainers.BOUNTY_CONTAINER, BountyScreen::new);

@@ -17,6 +17,7 @@ import iskallia.vault.util.SidedHelper;
 import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -41,6 +42,7 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -69,11 +71,15 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       super(entityType, level);
    }
 
-   public void transferPlayerData(Player player, EntityState joinState) {
+   public void transferPlayerData(Player player, Collection<ItemEntity> drops, EntityState joinState) {
       this.setGameProfile(player.getGameProfile());
       this.setVaultLevel(SidedHelper.getVaultLevel(player));
-      this.addPlayersItems(player);
+      this.addDrops(drops);
       this.setJoinState(joinState);
+   }
+
+   private void addDrops(Collection<ItemEntity> drops) {
+      drops.stream().<ItemStack>map(ItemEntity::getItem).filter(this::shouldAddItem).forEach(this.items::add);
    }
 
    public void setJoinState(EntityState joinState) {
@@ -81,7 +87,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    }
 
    @SubscribeEvent(
-      priority = EventPriority.HIGHEST
+      priority = EventPriority.LOW
    )
    public static void onPlayerInVaultDrops(LivingDropsEvent event) {
       if (event.getEntity() instanceof Player player && !player.level.isClientSide()) {
@@ -96,8 +102,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                      )
                    {
                      EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
-                     spirit.transferPlayerData(player, joinState);
-                     event.setCanceled(true);
+                     spirit.transferPlayerData(player, event.getDrops(), joinState);
                   }
                }
             );

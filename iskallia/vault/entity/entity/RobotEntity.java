@@ -102,11 +102,11 @@ public class RobotEntity extends IronGolem implements VaultBoss {
       return SoundSource.HOSTILE;
    }
 
-   protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+   public SoundEvent getHurtSound(DamageSource damageSourceIn) {
       return ModSounds.ROBOT_HURT;
    }
 
-   protected SoundEvent getDeathSound() {
+   public SoundEvent getDeathSound() {
       return ModSounds.ROBOT_DEATH;
    }
 }

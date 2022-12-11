@@ -4,7 +4,9 @@ import com.google.gson.annotations.Expose;
 import com.mojang.datafixers.util.Pair;
 import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.dynamodel.DynamicModel;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModDynamicModels;
+import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
@@ -16,7 +18,6 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.extensions.IForgeItemStack;
@@ -49,7 +50,7 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
 
    public void apply(ServerPlayer player) {
       PlayerVaultStatsData.get(player.getLevel()).addVaultExp(player, this.vaultExp);
-      ItemHandlerHelper.giveItemToPlayer(player, this.createRewardCrate(player));
+      ItemHandlerHelper.giveItemToPlayer(player, this.createRewardCrate());
       player.inventoryMenu.broadcastChanges();
       if (this.discoverModels != null) {
          this.discoverModels
@@ -65,13 +66,13 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
       DiscoveredModelsData.get(player.getLevel()).discoverModelAndBroadcast((Item)itemPair.getSecond(), ((DynamicModel)itemPair.getFirst()).getId(), player);
    }
 
-   private ItemStack createRewardCrate(Player player) {
-      NonNullList<ItemStack> rewardItemStacks = this.createRewardItems(player);
+   public ItemStack createRewardCrate() {
+      NonNullList<ItemStack> rewardItemStacks = this.createRewardItems();
       return VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.BOUNTY, rewardItemStacks);
    }
 
    @Nonnull
-   public NonNullList<ItemStack> createRewardItems(Player player) {
+   public NonNullList<ItemStack> createRewardItems() {
       NonNullList<ItemStack> rewardItemStacks = NonNullList.create();
       this.rewardItems.forEach(stack -> rewardItemStacks.add(stack.copy()));
       return rewardItemStacks;
@@ -79,6 +80,20 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
 
    public int getVaultExp() {
       return this.vaultExp;
+   }
+
+   public List<ItemStack> getRewardItems() {
+      return this.rewardItems;
+   }
+
+   public void setGearToPlayerLevel(ServerPlayer player) {
+      for (ItemStack stack : this.rewardItems) {
+         if (player != null && stack.getItem() instanceof VaultGearItem gearItem) {
+            gearItem.setPlayerLevel(stack, player);
+         }
+
+         DataTransferItem.doConvertStack(stack);
+      }
    }
 
    public List<ResourceLocation> getDiscoverModels() {

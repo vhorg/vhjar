@@ -281,6 +281,7 @@ public class StatisticsElementContainerScreenData {
    protected List<StatLabelElementBuilder<?>> getStatListVault(StatTotals data) {
       MenuPlayerStatDescriptionConfig config = ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS;
       return List.of(
+         StatLabel.ofInteger(() -> "Total Vaults", () -> config.getVaultStatDescriptionFor("vaults_total"), data::getTotalVaults),
          StatLabel.ofInteger(() -> "Completed", () -> config.getVaultStatDescriptionFor("vaults_completed"), data::getCompleted),
          StatLabel.ofInteger(() -> "Survived", () -> config.getVaultStatDescriptionFor("vaults_bailed"), data::getBailed),
          StatLabel.ofInteger(() -> "Failed", () -> config.getVaultStatDescriptionFor("vaults_failed"), data::getFailed),

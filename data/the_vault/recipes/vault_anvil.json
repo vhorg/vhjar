@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "bbb",
+    " i ",
+    "iii"
+  ],
+  "key": {
+    "b": {
+      "item": "the_vault:chromatic_steel_block"
+    },
+    "i": {
+      "item": "the_vault:black_chromatic_steel_ingot"
+    }
+  },
+  "result": {
+    "item": "the_vault:vault_anvil",
+    "count": 1
+  }
+}

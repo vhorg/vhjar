@@ -19,6 +19,7 @@ import iskallia.vault.client.gui.framework.render.Tooltips;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.util.TextUtil;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -85,14 +86,40 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
       int stackX = 2;
       int stackY = vaultExpLabel.y() + vaultExpLabel.height() + 1;
 
-      for (ItemStack stack : this.taskReward.createRewardItems(Minecraft.getInstance().player)) {
+      for (ItemStack stack : this.taskReward.getRewardItems()) {
          this.addElement(
             (FakeItemSlotElement)new FakeItemSlotElement(Spatials.positionXY(stackX, stackY), () -> stack, () -> false)
                .setLabelStackCount()
                .tooltip(
                   Tooltips.shift(
-                     Tooltips.multi(() -> stack.getTooltipLines(Minecraft.getInstance().player, Default.NORMAL)),
-                     Tooltips.multi(() -> stack.getTooltipLines(Minecraft.getInstance().player, Default.ADVANCED))
+                     Tooltips.multi(
+                        () -> {
+                           List<Component> tooltipLines = stack.getTooltipLines(Minecraft.getInstance().player, Default.NORMAL);
+                           if (stack.getItem() instanceof VaultGearItem) {
+                              tooltipLines.add(new TextComponent(" "));
+                              tooltipLines.add(
+                                 new TextComponent("Vault Gear level is locked to your Vault Level at the time of Bounty generation.")
+                                    .withStyle(ChatFormatting.DARK_GRAY)
+                              );
+                           }
+
+                           return tooltipLines;
+                        }
+                     ),
+                     Tooltips.multi(
+                        () -> {
+                           List<Component> tooltipLines = stack.getTooltipLines(Minecraft.getInstance().player, Default.ADVANCED);
+                           if (stack.getItem() instanceof VaultGearItem) {
+                              tooltipLines.add(new TextComponent(" "));
+                              tooltipLines.add(
+                                 new TextComponent("Vault Gear level is locked to your Vault Level at the time of Bounty generation.")
+                                    .withStyle(ChatFormatting.DARK_GRAY)
+                              );
+                           }
+
+                           return tooltipLines;
+                        }
+                     )
                   )
                )
          );

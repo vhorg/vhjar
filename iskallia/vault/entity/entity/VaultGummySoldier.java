@@ -219,11 +219,11 @@ public class VaultGummySoldier extends Monster {
       return null;
    }
 
-   protected SoundEvent getHurtSound(DamageSource pDamageSource) {
+   public SoundEvent getHurtSound(DamageSource pDamageSource) {
       return SoundEvents.SLIME_ATTACK;
    }
 
-   protected SoundEvent getDeathSound() {
+   public SoundEvent getDeathSound() {
       return SoundEvents.SLIME_DEATH;
    }
 

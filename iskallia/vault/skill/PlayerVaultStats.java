@@ -106,6 +106,10 @@ public class PlayerVaultStats implements INBTSerializable<CompoundTag> {
 
          if (this.vaultLevel > initialLevel) {
             NetcodeUtils.runIfPresent(server, this.uuid, this::fancyLevelUpEffects);
+            ServerPlayer player = server.getPlayerList().getPlayer(this.uuid);
+            if (player != null) {
+               player.refreshTabListName();
+            }
          }
 
          this.sync(server);

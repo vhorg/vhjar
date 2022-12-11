@@ -184,11 +184,11 @@ public class FighterEntity extends Zombie {
       return null;
    }
 
-   protected SoundEvent getDeathSound() {
+   public SoundEvent getDeathSound() {
       return SoundEvents.PLAYER_DEATH;
    }
 
-   protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+   public SoundEvent getHurtSound(DamageSource damageSourceIn) {
       return SoundEvents.PLAYER_HURT;
    }
 

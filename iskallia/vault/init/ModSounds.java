@@ -76,6 +76,7 @@ public class ModSounds {
    public static SoundEvent TAUNT;
    public static SoundEvent TAUNT_REPEL;
    public static SoundEvent ARTISAN_SMITHING;
+   public static SoundEvent HUNTER_SFX;
    public static ForgeSoundType VAULT_GET_SOUND_TYPE = new ForgeSoundType(
       0.25F, 1.0F, () -> VAULT_GEM_BREAK, SoundType.STONE::getStepSound, SoundType.STONE::getPlaceSound, () -> VAULT_GEM_HIT, SoundType.STONE::getFallSound
    );
@@ -152,6 +153,7 @@ public class ModSounds {
       TAUNT = registerSound(event, "taunt");
       TAUNT_REPEL = registerSound(event, "taunt_repel");
       ARTISAN_SMITHING = registerSound(event, "artisan_smithing");
+      HUNTER_SFX = registerSound(event, "hunter");
    }
 
    private static SoundEvent registerSound(Register<SoundEvent> event, String soundName) {

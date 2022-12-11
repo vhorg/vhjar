@@ -20,6 +20,7 @@ import iskallia.vault.world.vault.modifier.modifier.ChanceChestTrapModifier;
 import iskallia.vault.world.vault.modifier.modifier.ChanceSoulShardModifier;
 import iskallia.vault.world.vault.modifier.modifier.DecoratorAddModifier;
 import iskallia.vault.world.vault.modifier.modifier.EmptyModifier;
+import iskallia.vault.world.vault.modifier.modifier.GameControlsModifier;
 import iskallia.vault.world.vault.modifier.modifier.LootItemQuantityModifier;
 import iskallia.vault.world.vault.modifier.modifier.LootItemRarityModifier;
 import iskallia.vault.world.vault.modifier.modifier.MobAttributeModifier;
@@ -98,6 +99,46 @@ public class VaultModifiersConfig extends Config {
       this.generateVaultLevelModifiers();
       this.generateVaultLootableWeightModifiers();
       this.generateVaultTimeModifiers();
+      this.generateGameControlsModifiers();
+   }
+
+   private void generateGameControlsModifiers() {
+      VaultModifierTypeRegistry.getIdFor(GameControlsModifier.class)
+         .ifPresent(
+            typeId -> this.modifierTypeGroups
+               .group(typeId)
+               .put(
+                  new GameControlsModifier(
+                     VaultMod.id("jupiter_gravity"),
+                     new GameControlsModifier.Properties(true, true, false, false),
+                     new VaultModifier.Display(
+                        "Jupiter Gravity", TextColor.parseColor("#7738c9"), "No Jump", "No Jump", VaultMod.id("gui/modifiers/jupiter_gravity")
+                     )
+                  )
+               )
+               .put(
+                  new GameControlsModifier(
+                     VaultMod.id("crab_walk"),
+                     new GameControlsModifier.Properties(false, false, true, false),
+                     new VaultModifier.Display(
+                        "Crab Walk",
+                        TextColor.parseColor("#7738c9"),
+                        "The only way is sideways",
+                        "The only way is sideways",
+                        VaultMod.id("gui/modifiers/crab_walk")
+                     )
+                  )
+               )
+               .put(
+                  new GameControlsModifier(
+                     VaultMod.id("confused"),
+                     new GameControlsModifier.Properties(true, true, true, true),
+                     new VaultModifier.Display(
+                        "Confused", TextColor.parseColor("#7738c9"), "Left and Right swapped", "Left and Right swapped", VaultMod.id("gui/modifiers/confused")
+                     )
+                  )
+               )
+         );
    }
 
    private void generateLootItemRarityModifiers() {

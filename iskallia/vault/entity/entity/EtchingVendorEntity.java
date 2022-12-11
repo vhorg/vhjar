@@ -115,11 +115,11 @@ public class EtchingVendorEntity extends Mob {
       return SoundEvents.VILLAGER_AMBIENT;
    }
 
-   protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+   public SoundEvent getHurtSound(DamageSource damageSourceIn) {
       return SoundEvents.VILLAGER_HURT;
    }
 
-   protected SoundEvent getDeathSound() {
+   public SoundEvent getDeathSound() {
       return SoundEvents.VILLAGER_DEATH;
    }
 }

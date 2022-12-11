@@ -6,7 +6,6 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
 import iskallia.vault.network.message.ServerboundAbilityKeyMessage;
 import iskallia.vault.network.message.ServerboundOpenStatisticsMessage;
-import iskallia.vault.network.message.ShardTraderScreenMessage;
 import iskallia.vault.network.message.bounty.ServerboundBountyProgressMessage;
 import java.util.Map.Entry;
 import net.minecraft.client.KeyMapping;
@@ -72,8 +71,6 @@ public class InputEvents {
 
             minecraft.setScreen(new AbilitySelectionScreen());
             ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.CancelKeyDown);
-         } else if (ModKeybinds.openShardTraderScreen.consumeClick()) {
-            ModNetwork.CHANNEL.sendToServer(new ShardTraderScreenMessage());
          } else if (ModKeybinds.openAbilityTree.consumeClick()) {
             ModNetwork.CHANNEL.sendToServer(ServerboundOpenStatisticsMessage.INSTANCE);
          } else if (ModKeybinds.abilityKey.getKey().getValue() == key) {

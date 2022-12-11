@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "the_vault:block/black_market",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "the_vault:block/black_market"
+    },
+    "facing=south": {
+      "model": "the_vault:block/black_market",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "the_vault:block/black_market",
+      "y": 270
+    }
+  }
+}

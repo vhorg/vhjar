@@ -3,7 +3,8 @@ package iskallia.vault.config.gear;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.Config;
 import iskallia.vault.config.entry.LevelEntryList;
-import iskallia.vault.util.data.WeightedList;
+import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.util.WeightedList;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -20,13 +21,13 @@ public class VaultGearTypePoolConfig extends Config {
    }
 
    @Nullable
-   public String getGearRollType(String pool, int playerLevel) {
+   public String getGearRollType(String pool, int playerLevel, RandomSource random) {
       List<VaultGearTypePoolConfig.RollTypeLevel> rollTypeConfigs = this.pooledOutcomes.get(pool);
       if (rollTypeConfigs == null) {
          return null;
       } else {
          VaultGearTypePoolConfig.RollTypeLevel level = this.getForLevel(rollTypeConfigs, playerLevel);
-         return level == null ? null : level.rollTypeOutcomes.getRandom(rand);
+         return level == null ? null : level.rollTypeOutcomes.getRandom(random).orElse(null);
       }
    }
 

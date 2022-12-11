@@ -1,5 +1,7 @@
 package iskallia.vault.item.gear;
 
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.data.AttributeGearData;
@@ -15,10 +17,10 @@ import net.minecraft.world.item.ItemStack;
 
 public interface DataTransferItem {
    static ItemStack doConvertStack(ItemStack stack) {
-      return stack.getItem() instanceof DataTransferItem transferItem ? transferItem.convertStack(stack) : stack;
+      return stack.getItem() instanceof DataTransferItem transferItem ? transferItem.convertStack(stack, JavaRandom.ofNanoTime()) : stack;
    }
 
-   default ItemStack convertStack(ItemStack stack) {
+   default ItemStack convertStack(ItemStack stack, RandomSource random) {
       this.convertData(stack);
       return stack;
    }

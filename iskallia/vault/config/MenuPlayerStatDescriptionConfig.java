@@ -55,6 +55,7 @@ public class MenuPlayerStatDescriptionConfig extends Config {
          {
             this.put("treasure_rooms_opened", "The total number of treasure rooms you've opened.");
             this.put("crystals_crafted", "The total number of Vault Crystals you've crafted.");
+            this.put("vaults_total", "The total number of vaults you've run.");
             this.put("vaults_completed", "The total number of vaults you've successfully completed.");
             this.put("vaults_bailed", "The total number of vaults you've survived.");
             this.put("vaults_failed", "The total number of vaults you've failed.");

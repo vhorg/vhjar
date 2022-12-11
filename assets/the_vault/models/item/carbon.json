@@ -1,6 +1,6 @@
 {
       "parent": "item/generated",
       "textures": {
-          "layer0": "the_vault:item/carbon"
+          "layer0": "the_vault:item/refined_carbon"
       }
   }

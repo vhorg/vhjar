@@ -15,11 +15,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public abstract class BaseSpawnerTileEntity extends BlockEntity {
-   public BaseSpawnerTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+   protected BaseSpawnerTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
       super(type, pos, state);
    }
 
-   protected static void spawnEntity(
+   @Nullable
+   protected static Entity spawnEntity(
       BlockPos blockPos,
       ServerLevel serverLevel,
       ResourceLocation entityName,
@@ -30,6 +31,7 @@ public abstract class BaseSpawnerTileEntity extends BlockEntity {
       EntityType<?> entityType = (EntityType<?>)ForgeRegistries.ENTITIES.getValue(entityName);
       if (entityType == null) {
          logEntityTypeMissing.run();
+         return null;
       } else {
          Entity entity = entityType.spawn(serverLevel, null, null, blockPos, MobSpawnType.SPAWNER, false, false);
          if (entityNbt != null) {
@@ -41,6 +43,8 @@ public abstract class BaseSpawnerTileEntity extends BlockEntity {
          if (entity instanceof Mob mob && isPersistent) {
             mob.setPersistenceRequired();
          }
+
+         return entity;
       }
    }
 }

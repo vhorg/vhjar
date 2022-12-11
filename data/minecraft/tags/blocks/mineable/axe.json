@@ -3,6 +3,8 @@
     "values": [
         "the_vault:wooden_chest",
         "the_vault:bounty_block",
-        "the_vault:wooden_chest_placeable"
+        "the_vault:wooden_chest_placeable",
+        "the_vault:black_market",
+        "the_vault:animal_pen"
     ]
 }

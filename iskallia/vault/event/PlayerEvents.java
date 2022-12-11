@@ -14,6 +14,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.item.AnimalJarItem;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.mana.Mana;
 import iskallia.vault.network.message.FighterSizeMessage;
@@ -38,7 +39,10 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.Entity.RemovalReason;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.animal.horse.Horse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -49,6 +53,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
+import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
@@ -56,6 +61,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -148,6 +154,44 @@ public class PlayerEvents {
          player.setHealth(player.getMaxHealth());
          if (player instanceof ServerPlayer sPlayer) {
             sPlayer.lastSentHealth = player.getHealth();
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void itemInteractionForEntity(EntityInteract event) {
+      if (!event.getWorld().isClientSide() && event.getTarget() instanceof Animal && !(event.getTarget() instanceof Player)) {
+         Player player = event.getPlayer();
+         if (player.isCrouching() && player.getItemInHand(event.getHand()).getItem() == ModItems.ANIMAL_JAR && event.getTarget() instanceof Animal animal) {
+            if (!AnimalJarItem.canAddEntity(event.getItemStack(), animal)) {
+               player.displayClientMessage(new TextComponent("Cannot add to jar."), true);
+               return;
+            }
+
+            if (animal.isBaby()) {
+               player.displayClientMessage(new TextComponent("This animal is too small to fit in this jar.."), true);
+               return;
+            }
+
+            if (event.getTarget() instanceof TamableAnimal tamableAnimal && tamableAnimal.getOwner() != null) {
+               player.displayClientMessage(new TextComponent("Cannot jar up tamed animals"), true);
+               return;
+            }
+
+            if (event.getTarget() instanceof Horse horse && horse.isTamed()) {
+               player.displayClientMessage(new TextComponent("Cannot jar up tamed animals"), true);
+               return;
+            }
+
+            if (player.getItemInHand(event.getHand()).getCount() > 1) {
+               ItemStack jar = event.getItemStack().copy();
+               event.getItemStack().shrink(1);
+               jar.setCount(1);
+               ItemStack output = AnimalJarItem.AddEntity(jar, animal);
+               player.getInventory().add(output);
+            } else {
+               AnimalJarItem.AddEntity(event.getItemStack(), animal);
+            }
          }
       }
    }
@@ -258,6 +302,15 @@ public class PlayerEvents {
             ModNetwork.CHANNEL
                .sendTo(new InvalidConfigsMessage(ModConfigs.INVALID_CONFIGS), serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
          }
+      }
+   }
+
+   @SubscribeEvent(
+      priority = EventPriority.LOWEST
+   )
+   public static void onPlayerDrops(LivingDropsEvent event) {
+      if (event.getEntity() instanceof Player player && ServerVaults.isInVault(player)) {
+         event.setCanceled(true);
       }
    }
 }

@@ -42,7 +42,7 @@ public class NovaSpeedAbility extends AbstractNovaAbility<NovaSpeedConfig> {
             player.getZ(),
             particleCount,
             config.getRadius() * 0.5,
-            0.5,
+            0.25,
             config.getRadius() * 0.5,
             0.0
          );

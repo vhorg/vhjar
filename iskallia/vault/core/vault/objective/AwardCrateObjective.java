@@ -25,6 +25,7 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
 import java.util.List;
 import net.minecraft.core.NonNullList;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -105,7 +106,9 @@ public class AwardCrateObjective extends Objective {
       if (vault.has(Vault.STATS)) {
          StatCollector stats = vault.get(Vault.STATS).get(listener.get(Listener.ID));
          if (stats != null) {
-            CrateLootGenerator crateLootGenerator = new CrateLootGenerator(this.get(LOOT_TABLE), this.has(ADD_ARTIFACT), this.get(ARTIFACT_CHANCE));
+            float xpMul = Mth.clamp(stats.getExpMultiplier(), 0.0F, 1.0F);
+            float artifactChance = this.get(ARTIFACT_CHANCE) * xpMul;
+            CrateLootGenerator crateLootGenerator = new CrateLootGenerator(this.get(LOOT_TABLE), this.has(ADD_ARTIFACT), artifactChance);
             VaultCrateBlock.Type crateType = this.get(TYPE);
             listener.getPlayer()
                .ifPresent(

@@ -1,0 +1,7 @@
+{
+    "parent": "minecraft:block/cube_all",
+    "textures": {
+        "all": "the_vault:block/custom_entity_spawner",
+        "particle": "the_vault:block/custom_entity_spawner"
+    }
+}

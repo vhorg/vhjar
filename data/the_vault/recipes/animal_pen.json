@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    "g g",
+    "vvv"
+  ],
+  "key": {
+    "g": {
+      "tag": "minecraft:wooden_fences"
+    },
+    "v": {
+      "item": "the_vault:polished_vault_stone"
+    }
+  },
+  "result": {
+    "item": "the_vault:animal_pen",
+    "count": 1
+  }
+}

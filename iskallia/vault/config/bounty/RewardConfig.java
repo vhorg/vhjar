@@ -11,9 +11,7 @@ import iskallia.vault.item.gear.DataTransferItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -40,7 +38,7 @@ public class RewardConfig extends Config {
       }
    }
 
-   public TaskReward generateReward(@Nullable Player player, int vaultLevel) {
+   public TaskReward generateReward(int vaultLevel) {
       Optional<RewardConfig.RewardEntry> entry = this.LEVELS.getForLevel(vaultLevel);
       if (entry.isEmpty()) {
          throw new IllegalArgumentException("No Reward Entry found for level: " + vaultLevel);
@@ -51,8 +49,8 @@ public class RewardConfig extends Config {
          List<ItemStack> items = new ArrayList<>();
 
          for (ItemStack reward : rewardEntry.itemPool.getRandomStacks()) {
-            if (player != null && reward.getItem() instanceof VaultGearItem gearItem) {
-               gearItem.setPlayerLevel(reward, player);
+            if (reward.getItem() instanceof VaultGearItem gearItem) {
+               gearItem.setLevel(reward, vaultLevel);
             }
 
             reward = DataTransferItem.doConvertStack(reward);
