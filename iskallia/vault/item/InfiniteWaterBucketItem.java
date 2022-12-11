@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
@@ -70,7 +71,10 @@ public class InfiniteWaterBucketItem extends BucketItem {
 
                return InteractionResultHolder.success(itemStack);
             } else {
-               return super.use(world, player, hand);
+               InteractionResultHolder<ItemStack> result = super.use(world, player, hand);
+               return result.getResult() != InteractionResult.SUCCESS && result.getResult() != InteractionResult.CONSUME
+                  ? result
+                  : InteractionResultHolder.sidedSuccess(itemStack, world.isClientSide());
             }
          } else {
             return InteractionResultHolder.fail(itemStack);

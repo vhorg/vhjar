@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " e ",
     "ede",
-    " e "
+    "dwd",
+    "ede"
   ],
   "key": {
     "e": {
@@ -11,6 +11,9 @@
     },
     "d": {
       "item": "the_vault:dreamstone"
+    },
+    "w": {
+      "item": "the_vault:gem_wutodie"
     }
   },
   "result": {

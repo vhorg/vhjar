@@ -115,8 +115,7 @@ public class BountyData extends SavedData {
       ResourceLocation taskId = ModConfigs.BOUNTY_CONFIG.getRandomTask();
       TaskConfig<?, ?> config = TaskConfig.getConfig(taskId);
       TaskProperties properties = config.getGeneratedTaskProperties(vaultLevel);
-      ServerPlayer sPlayer = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId);
-      TaskReward reward = ModConfigs.REWARD_CONFIG.generateReward(sPlayer, vaultLevel);
+      TaskReward reward = ModConfigs.REWARD_CONFIG.generateReward(vaultLevel);
       UUID bountyId = UUID.randomUUID();
       return new Bounty(bountyId, playerId, TaskRegistry.createTask(taskId, bountyId, properties, reward));
    }

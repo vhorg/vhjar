@@ -66,6 +66,8 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.MEDIUM_CRYSTAL_BUD, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.SMALL_CRYSTAL_BUD, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.MONOLITH, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLACK_MARKET, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANIMAL_JAR, RenderType.translucent());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.HOURGLASS, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.solid(), RenderType.translucent());

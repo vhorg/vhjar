@@ -16,9 +16,9 @@ import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.EventTeamData;
 import iskallia.vault.world.data.PlayerAliasData;
+import iskallia.vault.world.data.PlayerBlackMarketData;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.data.SoulShardTraderData;
 import iskallia.vault.world.data.StreamData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -142,7 +142,8 @@ public class InternalCommand extends Command {
                   .then(Commands.argument("amount", IntegerArgumentType.integer()).executes(this::modifyScore))
             )
       );
-      builder.then(Commands.literal("reset_shard_trades").executes(this::resetShardTrader));
+      builder.then(Commands.literal("reset_black_market").then(Commands.argument("player", EntityArgument.player()).executes(this::resetBlackMarket)));
+      builder.then(Commands.literal("reset_black_markets").executes(this::resetBlackMarkets));
       builder.then(
          Commands.literal("remove_research")
             .then(
@@ -164,8 +165,14 @@ public class InternalCommand extends Command {
       }
    }
 
-   private int resetShardTrader(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      SoulShardTraderData.get(((CommandSourceStack)ctx.getSource()).getServer()).resetTrades();
+   private int resetBlackMarket(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
+      PlayerBlackMarketData.get(((CommandSourceStack)ctx.getSource()).getServer()).getBlackMarket(target).resetTrades();
+      return 0;
+   }
+
+   private int resetBlackMarkets(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      PlayerBlackMarketData.get(((CommandSourceStack)ctx.getSource()).getServer()).getPlayerMap().forEach((uuid, blackMarket) -> blackMarket.resetTrades());
       return 0;
    }
 

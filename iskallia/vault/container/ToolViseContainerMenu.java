@@ -142,9 +142,10 @@ public class ToolViseContainerMenu extends AbstractContainerMenu {
       } else {
          PaxelItem.Stat stat = PaxelItem.Stat.values()[pId];
          PaxelConfigs.Upgrade upgrade = this.upgrades.get(stat);
-
-         for (int i = 1; i <= 6; i++) {
-            ((Slot)this.slots.get(i)).getItem().shrink(upgrade.getMaterialCost(i - 1));
+         if (!pPlayer.isCreative()) {
+            for (int i = 1; i <= 6; i++) {
+               ((Slot)this.slots.get(i)).getItem().shrink(upgrade.getMaterialCost(i - 1));
+            }
          }
 
          ItemStack paxel = ((Slot)this.slots.get(0)).getItem();
@@ -155,7 +156,7 @@ public class ToolViseContainerMenu extends AbstractContainerMenu {
             int level = PaxelItem.getLevel(paxel);
             int delta = ModConfigs.PAXEL_CONFIGS.getTierValues(paxel).getLevelsPerSocket();
             PaxelItem.setLevel(paxel, level + 1);
-            if (sturdiness < tile.getLevel().random.nextFloat() * 100.0F) {
+            if (sturdiness < tile.getLevel().random.nextFloat() * 100.0F && !pPlayer.isCreative()) {
                tile.getLevel().playSound(null, tile.getBlockPos(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.0F, 1.1F);
                ((Slot)this.slots.get(0)).set(ItemStack.EMPTY);
                playSound = false;

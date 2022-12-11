@@ -112,11 +112,11 @@ public class BoogiemanEntity extends Zombie implements VaultBoss {
       return ModSounds.BOOGIE_AMBIENT;
    }
 
-   protected SoundEvent getHurtSound(DamageSource damageSourceIn) {
+   public SoundEvent getHurtSound(DamageSource damageSourceIn) {
       return ModSounds.BOOGIE_HURT;
    }
 
-   protected SoundEvent getDeathSound() {
+   public SoundEvent getDeathSound() {
       return ModSounds.BOOGIE_DEATH;
    }
 }

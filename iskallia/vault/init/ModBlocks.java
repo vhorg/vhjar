@@ -2,6 +2,8 @@ package iskallia.vault.init;
 
 import com.mojang.datafixers.util.Pair;
 import iskallia.vault.VaultMod;
+import iskallia.vault.block.AnimalPenBlock;
+import iskallia.vault.block.BlackMarketBlock;
 import iskallia.vault.block.BloodAltarBlock;
 import iskallia.vault.block.BountyBlock;
 import iskallia.vault.block.CakeBlock;
@@ -12,6 +14,7 @@ import iskallia.vault.block.CryoChamberBlock;
 import iskallia.vault.block.CrystalBuddingBlock;
 import iskallia.vault.block.CrystalClusterBlock;
 import iskallia.vault.block.CubeBlock;
+import iskallia.vault.block.CustomEntitySpawnerBlock;
 import iskallia.vault.block.DemagnetizerBlock;
 import iskallia.vault.block.EliteSpawnerBlock;
 import iskallia.vault.block.ErrorBlock;
@@ -45,6 +48,7 @@ import iskallia.vault.block.TreasureDoorBlock;
 import iskallia.vault.block.TreasureSandBlock;
 import iskallia.vault.block.TrophyBlock;
 import iskallia.vault.block.VaultAltarBlock;
+import iskallia.vault.block.VaultAnvilBlock;
 import iskallia.vault.block.VaultArtifactBlock;
 import iskallia.vault.block.VaultArtisanStationBlock;
 import iskallia.vault.block.VaultBedrockBlock;
@@ -52,6 +56,7 @@ import iskallia.vault.block.VaultChampionTrophy;
 import iskallia.vault.block.VaultCharmControllerBlock;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.VaultCrateBlock;
+import iskallia.vault.block.VaultDiffuserBlock;
 import iskallia.vault.block.VaultForgeBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.VaultPortalBlock;
@@ -62,12 +67,16 @@ import iskallia.vault.block.WildSpawnerBlock;
 import iskallia.vault.block.XPAltarBlock;
 import iskallia.vault.block.discoverable.DiscoverTriggeringBlock;
 import iskallia.vault.block.entity.AncientCryoChamberTileEntity;
+import iskallia.vault.block.entity.AnimalPenTileEntity;
+import iskallia.vault.block.entity.BlackMarketTileEntity;
 import iskallia.vault.block.entity.BloodAltarTileEntity;
 import iskallia.vault.block.entity.BountyTableTileEntity;
 import iskallia.vault.block.entity.CatalystInfusionTableTileEntity;
 import iskallia.vault.block.entity.CoinPilesTileEntity;
 import iskallia.vault.block.entity.CryoChamberTileEntity;
+import iskallia.vault.block.entity.CrystalBuddingBlockEntity;
 import iskallia.vault.block.entity.CubeTileEntity;
+import iskallia.vault.block.entity.CustomEntitySpawnerTileEntity;
 import iskallia.vault.block.entity.DemagnetizerTileEntity;
 import iskallia.vault.block.entity.EliteSpawnerTileEntity;
 import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
@@ -98,6 +107,7 @@ import iskallia.vault.block.entity.VaultChampionTrophyTileEntity;
 import iskallia.vault.block.entity.VaultCharmControllerTileEntity;
 import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.block.entity.VaultCrateTileEntity;
+import iskallia.vault.block.entity.VaultDiffuserTileEntity;
 import iskallia.vault.block.entity.VaultForgeTileEntity;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.block.entity.VaultRaidControllerTileEntity;
@@ -111,6 +121,8 @@ import iskallia.vault.block.item.PlaceholderBlockItem;
 import iskallia.vault.block.item.TreasureDoorBlockItem;
 import iskallia.vault.block.item.TrophyStatueBlockItem;
 import iskallia.vault.block.item.VaultChampionTrophyBlockItem;
+import iskallia.vault.block.render.AnimalPenRenderer;
+import iskallia.vault.block.render.BlackMarketRenderer;
 import iskallia.vault.block.render.CryoChamberRenderer;
 import iskallia.vault.block.render.FillableAltarRenderer;
 import iskallia.vault.block.render.FinalVaultFrameRenderer;
@@ -128,6 +140,7 @@ import iskallia.vault.block.render.TrophyRenderer;
 import iskallia.vault.block.render.VaultAltarRenderer;
 import iskallia.vault.block.render.VaultChampionTrophyRenderer;
 import iskallia.vault.block.render.VaultChestRenderer;
+import iskallia.vault.block.render.VaultDiffuserRenderer;
 import iskallia.vault.block.render.VaultPortalRenderer;
 import iskallia.vault.block.render.VaultRaidControllerRenderer;
 import iskallia.vault.core.vault.stat.VaultChestType;
@@ -220,6 +233,7 @@ public class ModBlocks {
    public static final VaultForgeBlock VAULT_FORGE = new VaultForgeBlock();
    public static final VaultArtisanStationBlock VAULT_ARTISAN_STATION = new VaultArtisanStationBlock();
    public static final VaultRecyclerBlock VAULT_RECYCLER = new VaultRecyclerBlock();
+   public static final VaultDiffuserBlock VAULT_DIFFUSER = new VaultDiffuserBlock();
    public static final Block WOODEN_CHEST = new VaultChestBlock(
       VaultChestType.WOODEN, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(40.0F, 5.0F)
    );
@@ -299,6 +313,7 @@ public class ModBlocks {
    public static final TreasureSandBlock TREASURE_SAND = new TreasureSandBlock();
    public static final EliteSpawnerBlock ELITE_SPAWNER = new EliteSpawnerBlock();
    public static final WildSpawnerBlock WILD_SPAWNER = new WildSpawnerBlock();
+   public static final CustomEntitySpawnerBlock CUSTOM_ENTITY_SPAWNER = new CustomEntitySpawnerBlock();
    public static final SpiritExtractorBlock SPIRIT_EXTRACTOR = new SpiritExtractorBlock();
    public static final CakeBlock CAKE = new CakeBlock(
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.CAKE).strength(-1.0F, 3600000.0F).sound(SoundType.WOOL)
@@ -314,11 +329,15 @@ public class ModBlocks {
    );
    public static final CubeBlock CUBE_BLOCK = new CubeBlock();
    public static final BountyBlock BOUNTY_BLOCK = new BountyBlock();
+   public static final BlackMarketBlock BLACK_MARKET = new BlackMarketBlock();
+   public static final AnimalPenBlock ANIMAL_PEN = new AnimalPenBlock();
+   public static final AnimalPenBlock ANIMAL_JAR = new AnimalPenBlock();
    public static final CrystalBuddingBlock CRYSTAL_BUDDING = new CrystalBuddingBlock();
    public static final CrystalClusterBlock CRYSTAL_CLUSTER = new CrystalClusterBlock(SoundType.AMETHYST_CLUSTER, 5, 7, 3.0);
    public static final CrystalClusterBlock LARGE_CRYSTAL_BUD = new CrystalClusterBlock(SoundType.MEDIUM_AMETHYST_BUD, 4, 5, 3.0);
    public static final CrystalClusterBlock MEDIUM_CRYSTAL_BUD = new CrystalClusterBlock(SoundType.LARGE_AMETHYST_BUD, 2, 4, 3.0);
    public static final CrystalClusterBlock SMALL_CRYSTAL_BUD = new CrystalClusterBlock(SoundType.SMALL_AMETHYST_BUD, 1, 3, 4.0);
+   public static final VaultAnvilBlock VAULT_ANVIL = new VaultAnvilBlock();
    public static final LiquidBlock VOID_LIQUID_BLOCK = new VoidFluidBlock(
       ModFluids.VOID_LIQUID,
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.WATER, MaterialColor.COLOR_BLACK)
@@ -471,9 +490,16 @@ public class ModBlocks {
       .build(null);
    public static final BlockEntityType<VaultRecyclerTileEntity> VAULT_RECYCLER_ENTITY = Builder.of(VaultRecyclerTileEntity::new, new Block[]{VAULT_RECYCLER})
       .build(null);
+   public static final BlockEntityType<VaultDiffuserTileEntity> VAULT_DIFFUSER_ENTITY = Builder.of(VaultDiffuserTileEntity::new, new Block[]{VAULT_DIFFUSER})
+      .build(null);
+   public static final BlockEntityType<AnimalPenTileEntity> ANIMAL_PEN_ENTITY = Builder.of(AnimalPenTileEntity::new, new Block[]{ANIMAL_PEN}).build(null);
    public static final BlockEntityType<EliteSpawnerTileEntity> ELITE_SPAWNER_TILE_ENTITY = Builder.of(EliteSpawnerTileEntity::new, new Block[]{ELITE_SPAWNER})
       .build(null);
    public static final BlockEntityType<WildSpawnerTileEntity> WILD_SPAWNER_TILE_ENTITY = Builder.of(WildSpawnerTileEntity::new, new Block[]{WILD_SPAWNER})
+      .build(null);
+   public static final BlockEntityType<CustomEntitySpawnerTileEntity> CUSTOM_ENTITY_SPAWNER_TILE_ENTITY = Builder.of(
+         CustomEntitySpawnerTileEntity::new, new Block[]{CUSTOM_ENTITY_SPAWNER}
+      )
       .build(null);
    public static final BlockEntityType<CubeTileEntity> CUBE_BLOCK_TILE_ENTITY = Builder.of(CubeTileEntity::new, new Block[]{CUBE_BLOCK}).build(null);
    public static final BlockEntityType<SpiritExtractorTileEntity> SPIRIT_EXTRACTOR_TILE_ENTITY = Builder.of(
@@ -481,6 +507,12 @@ public class ModBlocks {
       )
       .build(null);
    public static final BlockEntityType<BountyTableTileEntity> BOUNTY_TABLE_TILE_ENTITY = Builder.of(BountyTableTileEntity::new, new Block[]{BOUNTY_BLOCK})
+      .build(null);
+   public static final BlockEntityType<CrystalBuddingBlockEntity> CRYSTAL_BUDDING_TILE_ENTITY = Builder.of(
+         CrystalBuddingBlockEntity::new, new Block[]{CRYSTAL_BUDDING}
+      )
+      .build(null);
+   public static final BlockEntityType<BlackMarketTileEntity> BLACK_MARKET_TILE_ENTITY = Builder.of(BlackMarketTileEntity::new, new Block[]{BLACK_MARKET})
       .build(null);
 
    public static void registerBlocks(Register<Block> event) {
@@ -541,6 +573,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_FORGE, VaultMod.id("vault_forge"));
       registerBlock(event, VAULT_ARTISAN_STATION, VaultMod.id("vault_artisan_station"));
       registerBlock(event, VAULT_RECYCLER, VaultMod.id("vault_recycler"));
+      registerBlock(event, VAULT_DIFFUSER, VaultMod.id("vault_diffuser"));
       registerBlock(event, WOODEN_CHEST, VaultMod.id("wooden_chest"));
       registerBlock(event, GILDED_CHEST, VaultMod.id("gilded_chest"));
       registerBlock(event, LIVING_CHEST, VaultMod.id("living_chest"));
@@ -586,6 +619,7 @@ public class ModBlocks {
       registerBlock(event, TREASURE_SAND, VaultMod.id("treasure_sand"));
       registerBlock(event, ELITE_SPAWNER, VaultMod.id("elite_spawner"));
       registerBlock(event, WILD_SPAWNER, VaultMod.id("wild_spawner"));
+      registerBlock(event, CUSTOM_ENTITY_SPAWNER, VaultMod.id("custom_entity_spawner"));
       registerBlock(event, SPIRIT_EXTRACTOR, VaultMod.id("spirit_extractor"));
       registerBlock(event, CAKE, VaultMod.id("cake"));
       registerBlock(event, MAGIC_SILK_BLOCK, VaultMod.id("magic_silk_block"));
@@ -596,11 +630,15 @@ public class ModBlocks {
       registerBlock(event, SUGAR_PLUM_FAIRY_FLOWER, VaultMod.id("sugar_plum_fairy_flower"));
       registerBlock(event, CUBE_BLOCK, VaultMod.id("cube_block"));
       registerBlock(event, BOUNTY_BLOCK, VaultMod.id("bounty_block"));
+      registerBlock(event, BLACK_MARKET, VaultMod.id("black_market"));
+      registerBlock(event, ANIMAL_PEN, VaultMod.id("animal_pen"));
+      registerBlock(event, ANIMAL_JAR, VaultMod.id("animal_jar"));
       registerBlock(event, CRYSTAL_BUDDING, VaultMod.id("crystal_budding"));
       registerBlock(event, CRYSTAL_CLUSTER, VaultMod.id("crystal_cluster"));
       registerBlock(event, LARGE_CRYSTAL_BUD, VaultMod.id("crystal_bud_large"));
       registerBlock(event, MEDIUM_CRYSTAL_BUD, VaultMod.id("crystal_bud_medium"));
       registerBlock(event, SMALL_CRYSTAL_BUD, VaultMod.id("crystal_bud_small"));
+      registerBlock(event, VAULT_ANVIL, VaultMod.id("vault_anvil"));
    }
 
    public static void registerTileEntities(Register<BlockEntityType<?>> event) {
@@ -642,11 +680,16 @@ public class ModBlocks {
       registerTileEntity(event, VAULT_FORGE_TILE_ENTITY, VaultMod.id("vault_forge_tile_entity"));
       registerTileEntity(event, VAULT_ARTISAN_STATION_ENTITY, VaultMod.id("vault_artisan_station_tile_entity"));
       registerTileEntity(event, VAULT_RECYCLER_ENTITY, VaultMod.id("vault_recycler_tile_entity"));
+      registerTileEntity(event, VAULT_DIFFUSER_ENTITY, VaultMod.id("vault_diffuser_tile_entity"));
+      registerTileEntity(event, ANIMAL_PEN_ENTITY, VaultMod.id("animal_pen_tile_entity"));
       registerTileEntity(event, ELITE_SPAWNER_TILE_ENTITY, VaultMod.id("elite_spawner_tile_entity"));
       registerTileEntity(event, WILD_SPAWNER_TILE_ENTITY, VaultMod.id("wild_spawner_tile_entity"));
+      registerTileEntity(event, CUSTOM_ENTITY_SPAWNER_TILE_ENTITY, VaultMod.id("custom_entity_spawner_tile_entity"));
       registerTileEntity(event, CUBE_BLOCK_TILE_ENTITY, VaultMod.id("cube_block_tile_entity"));
       registerTileEntity(event, SPIRIT_EXTRACTOR_TILE_ENTITY, VaultMod.id("spirit_extractor_tile_entity"));
       registerTileEntity(event, BOUNTY_TABLE_TILE_ENTITY, VaultMod.id("bounty_table_tile_entity"));
+      registerTileEntity(event, BLACK_MARKET_TILE_ENTITY, VaultMod.id("black_market_tile_entity"));
+      registerTileEntity(event, CRYSTAL_BUDDING_TILE_ENTITY, VaultMod.id("crystal_budding_tile_entity"));
    }
 
    public static void registerTileEntityRenderers(RegisterRenderers event) {
@@ -674,7 +717,11 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(TOOL_VISE_TILE_ENTITY, ToolViseRenderer::new);
       event.registerBlockEntityRenderer(ELITE_SPAWNER_TILE_ENTITY, SpawnerRenderer::new);
       event.registerBlockEntityRenderer(WILD_SPAWNER_TILE_ENTITY, SpawnerRenderer::new);
+      event.registerBlockEntityRenderer(CUSTOM_ENTITY_SPAWNER_TILE_ENTITY, SpawnerRenderer::new);
       event.registerBlockEntityRenderer(SPIRIT_EXTRACTOR_TILE_ENTITY, SpiritExtractorRenderer::new);
+      event.registerBlockEntityRenderer(VAULT_DIFFUSER_ENTITY, VaultDiffuserRenderer::new);
+      event.registerBlockEntityRenderer(BLACK_MARKET_TILE_ENTITY, BlackMarketRenderer::new);
+      event.registerBlockEntityRenderer(ANIMAL_PEN_ENTITY, AnimalPenRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
@@ -774,8 +821,10 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_FORGE);
       registerBlockItem(event, VAULT_ARTISAN_STATION);
       registerBlockItem(event, VAULT_RECYCLER);
+      registerBlockItem(event, VAULT_DIFFUSER);
       registerBlockItem(event, ELITE_SPAWNER);
       registerBlockItem(event, WILD_SPAWNER);
+      registerBlockItem(event, CUSTOM_ENTITY_SPAWNER);
       registerBlockItem(event, SPIRIT_EXTRACTOR);
       registerBlockItem(event, MAGIC_SILK_BLOCK);
       registerBlockItem(event, YELLOW_PUZZLE_CONCRETE);
@@ -785,10 +834,13 @@ public class ModBlocks {
       registerBlockItem(event, SUGAR_PLUM_FAIRY_FLOWER);
       registerBlockItem(event, CUBE_BLOCK);
       registerBlockItem(event, BOUNTY_BLOCK);
+      registerBlockItem(event, BLACK_MARKET);
+      registerBlockItem(event, ANIMAL_PEN);
       registerBlockItem(event, CRYSTAL_BUDDING);
       registerBlockItem(event, SMALL_CRYSTAL_BUD);
       registerBlockItem(event, MEDIUM_CRYSTAL_BUD);
       registerBlockItem(event, LARGE_CRYSTAL_BUD);
+      registerBlockItem(event, VAULT_ANVIL);
    }
 
    private static void registerBlock(Register<Block> event, Block block, ResourceLocation id) {

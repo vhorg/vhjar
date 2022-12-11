@@ -1,11 +1,13 @@
 package iskallia.vault.command;
 
 import com.google.common.collect.Streams;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import iskallia.vault.VaultMod;
+import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.VersionedKey;
 import iskallia.vault.core.event.CommonEvents;
@@ -34,6 +36,7 @@ import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.world.data.PlayerProficiencyData;
+import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.data.StreamData;
 import iskallia.vault.world.data.VaultPlayerStats;
@@ -48,7 +51,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
@@ -128,6 +130,10 @@ public class DebugCommand extends Command {
       );
       builder.then(Commands.literal("debug_events").executes(this::debugEvents));
       builder.then(Commands.literal("prompt_vault_stats").executes(this::promptVaultStats));
+      builder.then(
+         ((LiteralArgumentBuilder)Commands.literal("altar_level").then(Commands.literal("get").executes(this::getAltarLevel)))
+            .then(Commands.literal("set").then(Commands.argument("level", IntegerArgumentType.integer()).executes(this::setAltarLevel)))
+      );
    }
 
    private int resetProficiencies(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
@@ -139,6 +145,34 @@ public class DebugCommand extends Command {
       }
 
       data.sendProficiencyInformation(player);
+      return 0;
+   }
+
+   private int getAltarLevel(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      int level = PlayerStatsData.get().get(player).getCrystals().size();
+      player.sendMessage(new TextComponent("Altar Level: " + level), player.getUUID());
+      return 0;
+   }
+
+   private int setAltarLevel(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      int level = IntegerArgumentType.getInteger(ctx, "level");
+      PlayerStatsData playerStatsData = PlayerStatsData.get();
+      playerStatsData.clearCrystals(player.getUUID());
+
+      for (int i = 0; i <= level; i++) {
+         playerStatsData.onCrystalCrafted(
+            player.getUUID(),
+            List.of(
+               new RequiredItems("resource", List.of(ItemStack.EMPTY), 100),
+               new RequiredItems("mob", List.of(ItemStack.EMPTY), 100),
+               new RequiredItems("farmable", List.of(ItemStack.EMPTY), 100),
+               new RequiredItems("misc", List.of(ItemStack.EMPTY), 100)
+            )
+         );
+      }
+
       return 0;
    }
 
@@ -212,7 +246,7 @@ public class DebugCommand extends Command {
       if (blockEntity != null) {
          blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
             LootTableGenerator generator = new LootTableGenerator(Version.latest(), VaultRegistry.LOOT_TABLE.getKey(id));
-            generator.generate(JavaRandom.ofInternal(new Random().nextLong()));
+            generator.generate(JavaRandom.ofNanoTime());
             generator.getItems().forEachRemaining(stack -> ItemHandlerHelper.insertItem(handler, stack, false));
          });
       }

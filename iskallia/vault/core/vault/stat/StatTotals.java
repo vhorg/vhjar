@@ -140,6 +140,10 @@ public class StatTotals implements INBTSerializable<CompoundTag> {
       return this.completed;
    }
 
+   public int getTotalVaults() {
+      return this.getBailed() + this.getFailed() + this.getCompleted();
+   }
+
    public int getExperience() {
       return this.experience;
    }

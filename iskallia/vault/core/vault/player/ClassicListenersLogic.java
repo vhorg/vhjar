@@ -181,7 +181,6 @@ public class ClassicListenersLogic extends ListenersLogic {
                   }
                });
             });
-            MinecraftForge.EVENT_BUS.post(new VaultJoinForgeEvent(vault));
             return true;
          }
       }
@@ -189,6 +188,7 @@ public class ClassicListenersLogic extends ListenersLogic {
 
    @Override
    protected void onTeleport(VirtualWorld world, Vault vault, ServerPlayer player) {
+      MinecraftForge.EVENT_BUS.post(new VaultJoinForgeEvent(vault));
       TextComponent title = new TextComponent("The Vault");
       title.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(14536734)));
       MutableComponent subtitle = new TextComponent("Good luck, ").append(player.getName()).append(new TextComponent("!"));

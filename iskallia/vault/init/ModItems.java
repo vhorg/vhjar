@@ -2,6 +2,7 @@ package iskallia.vault.init;
 
 import com.google.common.collect.Lists;
 import iskallia.vault.VaultMod;
+import iskallia.vault.item.AnimalJarItem;
 import iskallia.vault.item.ArchetypeStarItem;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.item.BasicMobEggItem;
@@ -445,12 +446,14 @@ public class ModItems {
    public static CrystalShardItem CRYSTAL_SHARD_MALEVOLENCE = new CrystalShardItem(
       VaultMod.id("shard_malevolence"), VAULT_MOD_GROUP, new TranslatableComponent("tooltip.the_vault.shard_malevolence")
    );
+   public static AnimalJarItem ANIMAL_JAR = new AnimalJarItem(VaultMod.id("animal_jar"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BasicItem DRILL_ARROW_PART = new BasicItem(VaultMod.id("drill_arrow_part"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(8));
    public static ItemDrillArrow DRILL_ARROW = new ItemDrillArrow(VAULT_MOD_GROUP, VaultMod.id("drill_arrow"));
    public static RokkitLaunchaItem ROKKIT_LAUNCHA = new RokkitLaunchaItem(
       VaultMod.id("rokkit_launcha"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).durability(465)
    );
    public static BasicItem SOUL_SHARD = new BasicItem(VaultMod.id("soul_shard"));
+   public static BasicItem SOUL_DUST = new BasicItem(VaultMod.id("soul_dust"));
    public static ItemShardPouch SHARD_POUCH = new ItemShardPouch(VaultMod.id("shard_pouch"));
    public static BasicItem UNKNOWN_ITEM = new BasicItem(VaultMod.id("unknown_item"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BasicScavengerItem SCAVENGER_CREEPER_EYE = new BasicScavengerItem("creeper_eye");
@@ -931,6 +934,7 @@ public class ModItems {
       registry.register(IDENTIFICATION_TOME);
       registry.register(UNKNOWN_ITEM);
       registry.register(SOUL_SHARD);
+      registry.register(SOUL_DUST);
       registry.register(SHARD_POUCH);
       registry.register(TRINKET);
       registry.register(VAULTERITE_PICKAXE);
@@ -1098,5 +1102,6 @@ public class ModItems {
       registry.register(MEMORY_CRYSTAL);
       registry.register(SUBLIME_VAULT_VISION);
       registry.register(MYSTICAL_POWDER);
+      registry.register(ANIMAL_JAR);
    }
 }

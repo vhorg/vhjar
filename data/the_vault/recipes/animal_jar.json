@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "gvg",
+    "g g",
+    "ggg"
+  ],
+  "key": {
+    "g": {
+      "tag": "forge:glass"
+    },
+    "v": {
+      "item": "the_vault:polished_vault_stone"
+    }
+  },
+  "result": {
+    "item": "the_vault:animal_jar",
+    "count": 1
+  }
+}

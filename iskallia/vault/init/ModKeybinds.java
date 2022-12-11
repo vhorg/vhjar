@@ -13,7 +13,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 @OnlyIn(Dist.CLIENT)
 public class ModKeybinds {
    public static KeyMapping openAbilityTree;
-   public static KeyMapping openShardTraderScreen;
    public static KeyMapping abilityKey;
    public static KeyMapping abilityWheelKey;
    public static KeyMapping bountyStatusKey;
@@ -21,7 +20,6 @@ public class ModKeybinds {
 
    public static void register(FMLClientSetupEvent event) {
       openAbilityTree = createKeyBinding("open_ability_tree", 72);
-      openShardTraderScreen = createKeyBinding("open_shard_trader_screen", 296);
       abilityKey = createKeyBinding("ability_key", 71);
       abilityWheelKey = createKeyBinding("ability_wheel_key", 342);
       bountyStatusKey = createKeyBinding("bounty_status_key");

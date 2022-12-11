@@ -4,6 +4,7 @@ import iskallia.vault.config.SoulShardConfig;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.util.data.WeightedList;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,7 @@ import net.minecraft.world.item.ItemStack;
 public class ClientShardTradeData {
    private static int randomTradeCost;
    private static long tradeSeed;
+   private static LocalDateTime nextReset;
    private static Map<Integer, Tuple<ItemStack, Integer>> availableTrades = new HashMap<>();
    private static WeightedList<SoulShardConfig.ShardTrade> shardTrades = new WeightedList<>();
 
@@ -21,6 +23,7 @@ public class ClientShardTradeData {
       randomTradeCost = message.getRandomTradeCost();
       tradeSeed = message.getTradeSeed();
       availableTrades = message.getAvailableTrades();
+      nextReset = message.getNextReset();
    }
 
    public static void receiveGlobal(ShardGlobalTradeMessage message) {
@@ -33,6 +36,10 @@ public class ClientShardTradeData {
 
    public static long getTradeSeed() {
       return tradeSeed;
+   }
+
+   public static LocalDateTime getNextReset() {
+      return nextReset;
    }
 
    public static void nextSeed() {

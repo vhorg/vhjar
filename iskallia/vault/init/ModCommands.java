@@ -17,7 +17,6 @@ import iskallia.vault.command.GearDebugCommand;
 import iskallia.vault.command.GiveLootCommand;
 import iskallia.vault.command.GlobalTimerCommand;
 import iskallia.vault.command.InternalCommand;
-import iskallia.vault.command.InvRestoreCommand;
 import iskallia.vault.command.MagnetCommand;
 import iskallia.vault.command.ModelDebugCommand;
 import iskallia.vault.command.PartyCommand;
@@ -29,6 +28,7 @@ import iskallia.vault.command.SandEventCommand;
 import iskallia.vault.command.SnapshotCommand;
 import iskallia.vault.command.SpiritCommand;
 import iskallia.vault.command.TeamScoreCommand;
+import iskallia.vault.command.VaultAltarCommand;
 import iskallia.vault.command.VaultGodSayCommand;
 import iskallia.vault.command.VaultLevelCommand;
 import java.util.function.Supplier;
@@ -46,7 +46,6 @@ public class ModCommands {
    public static DebugCommand DEBUG;
    public static ModelDebugCommand MODEL_DEBUG;
    public static AbilityCommand ABILITY_COMMAND;
-   public static InvRestoreCommand INV_RESTORE;
    public static GiveLootCommand GIVE_LOOT;
    public static VaultGodSayCommand VAULTGOD_SAY;
    public static SandEventCommand SAND_EVENT;
@@ -65,6 +64,7 @@ public class ModCommands {
    public static SnapshotCommand SNAPSHOT;
    public static BountyCommand BOUNTY;
    public static DifficultyCommand DIFFICULTY;
+   public static VaultAltarCommand VAULT_ALTAR;
 
    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandSelection env) {
       RELOAD_CONFIGS = registerCommand(ReloadConfigsCommand::new, dispatcher, env);
@@ -75,7 +75,6 @@ public class ModCommands {
       DEBUG = registerCommand(DebugCommand::new, dispatcher, env);
       MODEL_DEBUG = registerCommand(ModelDebugCommand::new, dispatcher, env);
       ABILITY_COMMAND = registerCommand(AbilityCommand::new, dispatcher, env);
-      INV_RESTORE = registerCommand(InvRestoreCommand::new, dispatcher, env);
       GIVE_LOOT = registerCommand(GiveLootCommand::new, dispatcher, env);
       VAULTGOD_SAY = registerCommand(VaultGodSayCommand::new, dispatcher, env);
       SAND_EVENT = registerCommand(SandEventCommand::new, dispatcher, env);
@@ -94,6 +93,7 @@ public class ModCommands {
       SNAPSHOT = registerCommand(SnapshotCommand::new, dispatcher, env);
       DIFFICULTY = registerCommand(DifficultyCommand::new, dispatcher, env);
       BOUNTY = registerCommand(BountyCommand::new, dispatcher, env);
+      VAULT_ALTAR = registerCommand(VaultAltarCommand::new, dispatcher, env);
    }
 
    public static void registerArgumentTypes() {

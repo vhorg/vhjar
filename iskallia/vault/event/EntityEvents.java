@@ -209,7 +209,7 @@ public class EntityEvents {
    }
 
    private static boolean shouldDropDefaultInVault(Entity entity) {
-      return entity instanceof VaultGuardianEntity || entity instanceof TreasureGoblinEntity;
+      return entity instanceof VaultGuardianEntity || entity instanceof TreasureGoblinEntity || entity instanceof Player;
    }
 
    private static boolean addShardDrops(Level world, Entity killed, ServerPlayer killer, Collection<ItemEntity> drops) {

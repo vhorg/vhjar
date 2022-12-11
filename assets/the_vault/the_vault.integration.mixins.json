@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "iskallia.vault.integration.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "the_vault.refmap.json",
+  "mixins": [],
+  "client": ["MixinMiniMapControlHandler", "MixinWorldMapControlHandler"],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
+

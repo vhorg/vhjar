@@ -3,6 +3,8 @@ package iskallia.vault.gear;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -35,15 +37,19 @@ import net.minecraftforge.common.ForgeMod;
 
 public class VaultGearHelper {
    public static void initializeGearRollType(ItemStack stack, ServerPlayer player) {
-      int playerLevel = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player.getUUID()).getVaultLevel();
-      initializeGearRollType(stack, playerLevel);
+      initializeGearRollType(stack, player, JavaRandom.ofNanoTime());
    }
 
-   public static void initializeGearRollType(ItemStack stack, int gearLevel) {
+   public static void initializeGearRollType(ItemStack stack, ServerPlayer player, RandomSource random) {
+      int playerLevel = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player.getUUID()).getVaultLevel();
+      initializeGearRollType(stack, playerLevel, random);
+   }
+
+   public static void initializeGearRollType(ItemStack stack, int gearLevel, RandomSource random) {
       VaultGearData data = VaultGearData.read(stack);
       if (data.has(ModGearAttributes.GEAR_ROLL_TYPE_POOL) && !data.has(ModGearAttributes.GEAR_ROLL_TYPE)) {
          data.getFirstValue(ModGearAttributes.GEAR_ROLL_TYPE_POOL).ifPresent(typePool -> {
-            String rollType = ModConfigs.VAULT_GEAR_TYPE_POOL_CONFIG.getGearRollType(typePool, gearLevel);
+            String rollType = ModConfigs.VAULT_GEAR_TYPE_POOL_CONFIG.getGearRollType(typePool, gearLevel, random);
             if (rollType != null) {
                data.updateAttribute(ModGearAttributes.GEAR_ROLL_TYPE, rollType);
                data.write(stack);

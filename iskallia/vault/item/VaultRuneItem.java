@@ -8,7 +8,6 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.item.gear.VaultLootItem;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
@@ -89,7 +88,7 @@ public class VaultRuneItem extends Item implements VaultLootItem {
             CompoundTag entry = list.getCompound(i);
             if (entry.contains("count", 10)) {
                LootRoll roll = LootRoll.fromNBT(entry.getCompound("count"));
-               JavaRandom random = JavaRandom.ofInternal(new Random().nextLong());
+               JavaRandom random = JavaRandom.ofNanoTime();
                entry.putInt("count", roll.get(random));
             }
          }

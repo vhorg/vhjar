@@ -11,11 +11,13 @@ import iskallia.vault.config.ArchetypeGUIConfig;
 import iskallia.vault.config.ArchetypesConfig;
 import iskallia.vault.config.ArchitectEventConfig;
 import iskallia.vault.config.ArenaGeneralConfig;
+import iskallia.vault.config.BlackMarketConfig;
 import iskallia.vault.config.CatalystInfusionTableConfig;
 import iskallia.vault.config.ColorsConfig;
 import iskallia.vault.config.CompressionBlocksConfig;
 import iskallia.vault.config.CryoChamberConfig;
 import iskallia.vault.config.CrystalBuddingConfig;
+import iskallia.vault.config.CustomEntitySpawnerConfig;
 import iskallia.vault.config.DurabilityConfig;
 import iskallia.vault.config.EliteSpawnerConfig;
 import iskallia.vault.config.EtchingConfig;
@@ -77,6 +79,7 @@ import iskallia.vault.config.VaultCharmConfig;
 import iskallia.vault.config.VaultChestConfig;
 import iskallia.vault.config.VaultCrystalCatalystConfig;
 import iskallia.vault.config.VaultCrystalConfig;
+import iskallia.vault.config.VaultDiffuserConfig;
 import iskallia.vault.config.VaultEntitiesConfig;
 import iskallia.vault.config.VaultGeneralConfig;
 import iskallia.vault.config.VaultItemsConfig;
@@ -94,6 +97,7 @@ import iskallia.vault.config.VaultSizeConfig;
 import iskallia.vault.config.VaultStatsConfig;
 import iskallia.vault.config.VaultUtilitiesConfig;
 import iskallia.vault.config.WildSpawnerConfig;
+import iskallia.vault.config.altar.VaultAltarIngredientsConfig;
 import iskallia.vault.config.bounty.BountyConfig;
 import iskallia.vault.config.bounty.RewardConfig;
 import iskallia.vault.config.bounty.task.TaskConfig;
@@ -194,6 +198,7 @@ public class ModConfigs {
    public static UnidentifiedTreasureKeyConfig UNIDENTIFIED_TREASURE_KEY;
    public static VaultSizeConfig VAULT_SIZE;
    public static SoulShardConfig SOUL_SHARD;
+   public static BlackMarketConfig BLACK_MARKET;
    public static EternalAttributeConfig ETERNAL_ATTRIBUTES;
    public static EternalAuraConfig ETERNAL_AURAS;
    public static RaidConfig RAID_CONFIG;
@@ -218,10 +223,12 @@ public class ModConfigs {
    public static TrinketConfig TRINKET;
    public static EliteSpawnerConfig ELITE_SPAWNER;
    public static WildSpawnerConfig WILD_SPAWNER;
+   public static CustomEntitySpawnerConfig CUSTOM_ENTITY_SPAWNER;
    public static EternalsNamepoolConfig ETERNALS_NAMEPOOL;
    public static ScavengerConfig SCAVENGER;
    public static VaultStatsConfig VAULT_STATS;
    public static VaultRecyclerConfig VAULT_RECYCLER;
+   public static VaultDiffuserConfig VAULT_DIFFUSER;
    public static SpiritConfig SPIRIT;
    public static VaultEntitiesConfig VAULT_ENTITIES;
    public static MenuPlayerStatDescriptionConfig MENU_PLAYER_STAT_DESCRIPTIONS;
@@ -236,6 +243,7 @@ public class ModConfigs {
    public static VaultGearCraftingConfig VAULT_GEAR_CRAFTING_CONFIG;
    public static VaultGearRecipesConfig VAULT_GEAR_RECIPES_CONFIG;
    public static VaultGearModificationConfig VAULT_GEAR_MODIFICATION_CONFIG;
+   public static VaultAltarIngredientsConfig VAULT_ALTAR_INGREDIENTS;
 
    public static void registerCompressionConfigs() {
       COMPRESSION_BLOCKS = new CompressionBlocksConfig().readConfig();
@@ -306,6 +314,7 @@ public class ModConfigs {
       UNIDENTIFIED_TREASURE_KEY = new UnidentifiedTreasureKeyConfig().readConfig();
       VAULT_SIZE = new VaultSizeConfig().readConfig();
       SOUL_SHARD = new SoulShardConfig().readConfig();
+      BLACK_MARKET = new BlackMarketConfig().readConfig();
       ETERNAL_ATTRIBUTES = new EternalAttributeConfig().readConfig();
       ETERNAL_AURAS = new EternalAuraConfig().readConfig();
       RAID_CONFIG = new RaidConfig().readConfig();
@@ -330,10 +339,12 @@ public class ModConfigs {
       TRINKET = new TrinketConfig().readConfig();
       ELITE_SPAWNER = new EliteSpawnerConfig().readConfig();
       WILD_SPAWNER = new WildSpawnerConfig().readConfig();
+      CUSTOM_ENTITY_SPAWNER = new CustomEntitySpawnerConfig().readConfig();
       ETERNALS_NAMEPOOL = new EternalsNamepoolConfig().readConfig();
       SCAVENGER = new ScavengerConfig().readConfig();
       VAULT_STATS = new VaultStatsConfig().readConfig();
       VAULT_RECYCLER = new VaultRecyclerConfig().readConfig();
+      VAULT_DIFFUSER = new VaultDiffuserConfig().readConfig();
       SPIRIT = new SpiritConfig().readConfig();
       VAULT_ENTITIES = new VaultEntitiesConfig().readConfig();
       MENU_PLAYER_STAT_DESCRIPTIONS = new MenuPlayerStatDescriptionConfig().readConfig();
@@ -346,6 +357,7 @@ public class ModConfigs {
       VAULT_GEAR_CRAFTING_CONFIG = new VaultGearCraftingConfig().readConfig();
       VAULT_GEAR_RECIPES_CONFIG = new VaultGearRecipesConfig().readConfig();
       VAULT_GEAR_MODIFICATION_CONFIG = new VaultGearModificationConfig().readConfig();
+      VAULT_ALTAR_INGREDIENTS = new VaultAltarIngredientsConfig().readConfig();
       registerBountyConfigs();
       VaultMod.LOGGER.info("Vault Configs are loaded successfully!");
    }

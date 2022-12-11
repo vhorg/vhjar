@@ -95,7 +95,7 @@ public abstract class Config {
                config.onLoad(this);
                if (!config.isValid()) {
                   VaultMod.LOGGER.error("Invalid config {}, using defaults", this);
-                  ModConfigs.INVALID_CONFIGS.add(this.getConfigFile().toString());
+                  ModConfigs.INVALID_CONFIGS.add(this.getConfigFile().getName() + " - There was an invalid setting in this config.");
                   config.reset();
                }
 
@@ -103,7 +103,7 @@ public abstract class Config {
             } catch (Exception var5) {
                VaultMod.LOGGER.warn("Invalid config {}, using defaults", this, var5);
                this.reset();
-               ModConfigs.INVALID_CONFIGS.add(this.getConfigFile().toString());
+               ModConfigs.INVALID_CONFIGS.add(this.getConfigFile().getName() + " - Exception: " + var5.getMessage());
                var3 = this;
             }
          }

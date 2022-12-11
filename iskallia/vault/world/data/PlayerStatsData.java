@@ -1,6 +1,6 @@
 package iskallia.vault.world.data;
 
-import iskallia.vault.altar.RequiredItem;
+import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.nbt.VListNBT;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.util.data.WeightedList;
@@ -34,8 +34,13 @@ public class PlayerStatsData extends SavedData {
       this.setDirty();
    }
 
-   public void onCrystalCrafted(UUID playerId, List<RequiredItem> recipe) {
+   public void onCrystalCrafted(UUID playerId, List<RequiredItems> recipe) {
       this.get(playerId).crystals.add(new CrystalStat(recipe));
+      this.setDirty();
+   }
+
+   public void clearCrystals(UUID playerId) {
+      this.get(playerId).crystals.clear();
       this.setDirty();
    }
 

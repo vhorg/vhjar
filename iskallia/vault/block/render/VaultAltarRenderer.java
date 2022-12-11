@@ -5,10 +5,12 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import iskallia.vault.altar.AltarInfusionRecipe;
-import iskallia.vault.altar.RequiredItem;
+import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
 import iskallia.vault.init.ModItems;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.player.LocalPlayer;
@@ -32,61 +34,60 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
    }
 
    public void render(VaultAltarTileEntity altar, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlay) {
-      if (altar.getAltarState() != VaultAltarTileEntity.AltarState.IDLE) {
-         LocalPlayer player = this.mc.player;
-         int lightLevel = this.getLightAtPos(altar.getLevel(), altar.getBlockPos().above());
-         this.renderItem(
-            new ItemStack(ModItems.VAULT_ROCK),
-            new double[]{0.5, 1.35, 0.5},
-            Vector3f.YP.rotationDegrees(180.0F - player.getYRot()),
-            matrixStack,
-            buffer,
-            partialTicks,
-            combinedOverlay,
-            lightLevel
-         );
-         if (altar.getRecipe() != null && !altar.getRecipe().getRequiredItems().isEmpty()) {
-            AltarInfusionRecipe recipe = altar.getRecipe();
-            List<RequiredItem> items = recipe.getRequiredItems();
-
-            for (int i = 0; i < items.size(); i++) {
-               double[] translation = this.getTranslation(i);
-               RequiredItem requiredItem = items.get(i);
-               ItemStack stack = requiredItem.getItem();
-               TextComponent text = new TextComponent(String.valueOf(requiredItem.getAmountRequired() - requiredItem.getCurrentAmount()));
-               int textColor = 16777215;
-               if (requiredItem.reachedAmountRequired()) {
-                  text = new TextComponent("Complete");
-                  textColor = 65280;
-               }
-
+      if (altar.getAltarState() != null && altar.getAltarState() != VaultAltarTileEntity.AltarState.IDLE) {
+         Level level = altar.getLevel();
+         if (level != null) {
+            LocalPlayer player = this.mc.player;
+            if (player != null) {
+               int lightLevel = this.getLightAtPos(altar.getLevel(), altar.getBlockPos().above());
                this.renderItem(
-                  stack,
-                  translation,
-                  Vector3f.YP.rotationDegrees(this.getAngle(player, partialTicks) * 5.0F),
+                  new ItemStack(ModItems.VAULT_ROCK),
+                  new double[]{0.5, 1.35, 0.5},
+                  Vector3f.YP.rotationDegrees(180.0F - player.getYRot()),
                   matrixStack,
                   buffer,
                   partialTicks,
                   combinedOverlay,
                   lightLevel
                );
-               this.renderLabel(requiredItem, matrixStack, buffer, lightLevel, translation, text, textColor);
-            }
+               if (altar.getRecipe() != null && !altar.getRecipe().getRequiredItems().isEmpty()) {
+                  AltarInfusionRecipe recipe = altar.getRecipe();
+                  List<RequiredItems> items = recipe.getRequiredItems();
+                  Map<String, RequiredItems> itemMap = new HashMap<>();
+                  items.forEach(requiredItemsx -> itemMap.put(requiredItemsx.getPoolId(), requiredItemsx));
 
-            if (recipe.isPogInfused()) {
-               boolean infusing = altar.getAltarState() == VaultAltarTileEntity.AltarState.INFUSING;
-               ItemStack pogStack = new ItemStack(ModItems.POG);
-               BakedModel ibakedmodel = this.mc.getItemRenderer().getModel(pogStack, null, null, 0);
+                  for (int idIndex = 0; idIndex < itemMap.keySet().size(); idIndex++) {
+                     String id = (String)itemMap.keySet().toArray()[idIndex];
+                     RequiredItems requiredItems = itemMap.get(id);
+                     double[] translation = this.getTranslation(idIndex);
+                     List<ItemStack> stacks = requiredItems.getItems();
+                     TextComponent text = new TextComponent(String.valueOf(requiredItems.getAmountRequired() - requiredItems.getCurrentAmount()));
+                     int textColor = 16777215;
+                     if (requiredItems.reachedAmountRequired()) {
+                        text = new TextComponent("Complete");
+                        textColor = 65280;
+                     }
 
-               for (int i = 0; i < 3; i++) {
-                  double r = 1.0;
-                  matrixStack.pushPose();
-                  matrixStack.translate(0.5, 0.85, 0.5);
-                  matrixStack.mulPose(Vector3f.YP.rotationDegrees(i * 120 + this.getAngle(player, partialTicks) * (infusing ? 25.0F : 15.0F)));
-                  matrixStack.translate(r, Math.sin(this.getAngle(player, partialTicks) * 0.25 + i) * 0.2, 0.0);
-                  matrixStack.mulPose(Vector3f.YP.rotationDegrees(this.getAngle(player, partialTicks) * 10.0F));
-                  this.mc.getItemRenderer().render(pogStack, TransformType.GROUND, true, matrixStack, buffer, lightLevel, combinedOverlay, ibakedmodel);
-                  matrixStack.popPose();
+                     if (!stacks.isEmpty() && !altar.getDisplayedIndex().isEmpty() && altar.getDisplayedIndex().containsKey(id)) {
+                        int index = altar.getDisplayedIndex().get(id);
+                        ItemStack toRender = ItemStack.EMPTY;
+                        if (index >= 0 && index < stacks.size()) {
+                           toRender = stacks.get(index);
+                        }
+
+                        this.renderItem(
+                           toRender,
+                           translation,
+                           Vector3f.YP.rotationDegrees(this.getAngle(player, partialTicks) * 5.0F),
+                           matrixStack,
+                           buffer,
+                           partialTicks,
+                           combinedOverlay,
+                           lightLevel
+                        );
+                        this.renderLabel(toRender, matrixStack, buffer, lightLevel, translation, text, textColor);
+                     }
+                  }
                }
             }
          }
@@ -115,7 +116,7 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
       matrixStack.popPose();
    }
 
-   private void renderLabel(RequiredItem item, PoseStack matrixStack, MultiBufferSource buffer, int lightLevel, double[] corner, TextComponent text, int color) {
+   private void renderLabel(ItemStack stack, PoseStack matrixStack, MultiBufferSource buffer, int lightLevel, double[] corner, TextComponent text, int color) {
       Font fontRenderer = this.mc.font;
       LocalPlayer player = Minecraft.getInstance().player;
       if (player != null) {
@@ -130,11 +131,11 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
          matrixStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
          fontRenderer.drawInBatch(text, offset, 0.0F, color, false, matrix4f, buffer, false, opacity, lightLevel);
          if (player.isShiftKeyDown()) {
-            Component itemName = item.getItem().getHoverName();
+            Component itemName = stack.getHoverName();
             offset = -fontRenderer.width(itemName) / 2;
             matrixStack.translate(0.0, 1.4F, 0.0);
             matrix4f.translate(new Vector3f(0.0F, 0.15F, 0.0F));
-            fontRenderer.drawInBatch(item.getItem().getHoverName(), offset, 0.0F, color, false, matrix4f, buffer, false, opacity, lightLevel);
+            fontRenderer.drawInBatch(stack.getHoverName(), offset, 0.0F, color, false, matrix4f, buffer, false, opacity, lightLevel);
          }
 
          matrixStack.popPose();

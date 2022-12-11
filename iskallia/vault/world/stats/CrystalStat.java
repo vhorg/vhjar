@@ -1,19 +1,19 @@
 package iskallia.vault.world.stats;
 
-import iskallia.vault.altar.RequiredItem;
+import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.nbt.VListNBT;
 import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.util.INBTSerializable;
 
 public class CrystalStat implements INBTSerializable<CompoundTag> {
-   public VListNBT<RequiredItem, CompoundTag> recipe = new VListNBT<>(RequiredItem::serializeNBT, RequiredItem::deserializeNBT);
+   public VListNBT<RequiredItems, CompoundTag> recipe = new VListNBT<>(RequiredItems::serializeNBT, RequiredItems::new);
    public long time;
 
    public CrystalStat() {
    }
 
-   public CrystalStat(List<RequiredItem> recipe) {
+   public CrystalStat(List<RequiredItems> recipe) {
       recipe.forEach(item -> this.recipe.add(item.copy()));
       this.time = System.currentTimeMillis();
    }

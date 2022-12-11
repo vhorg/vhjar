@@ -3,7 +3,7 @@ package iskallia.vault.block.entity;
 import com.mojang.math.Vector3f;
 import iskallia.vault.VaultMod;
 import iskallia.vault.altar.AltarInfusionRecipe;
-import iskallia.vault.altar.RequiredItem;
+import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
@@ -13,6 +13,8 @@ import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.PlayerVaultAltarData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import javax.annotation.Nonnull;
@@ -22,6 +24,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -41,11 +44,13 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
+import org.jetbrains.annotations.NotNull;
 
 public class VaultAltarTileEntity extends BlockEntity {
    private UUID owner;
    private AltarInfusionRecipe recipe;
    private VaultAltarTileEntity.AltarState altarState;
+   private HashMap<String, Integer> displayedIndex = new HashMap<>();
    private int infusionTimer = -666;
    private final ItemStackHandler itemHandler = this.createHandler();
    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> this.itemHandler);
@@ -80,6 +85,10 @@ public class VaultAltarTileEntity extends BlockEntity {
 
    public int getInfusionTimer() {
       return this.infusionTimer;
+   }
+
+   public HashMap<String, Integer> getDisplayedIndex() {
+      return this.displayedIndex;
    }
 
    public void sendUpdates() {
@@ -119,8 +128,25 @@ public class VaultAltarTileEntity extends BlockEntity {
             }
 
             tile.recipe = PlayerVaultAltarData.get((ServerLevel)world).getRecipe(tile.owner);
+            if (world.getGameTime() % ModConfigs.VAULT_ALTAR.GROUP_DISPLAY_TICKS == 0L) {
+               updateDisplayedItems(tile);
+            }
+
             if (world.getGameTime() % 20L == 0L) {
                tile.sendUpdates();
+            }
+         }
+      }
+   }
+
+   private static void updateDisplayedItems(VaultAltarTileEntity altar) {
+      if (altar.getLevel() != null) {
+         if (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING || altar.getAltarState() == VaultAltarTileEntity.AltarState.INFUSING) {
+            for (RequiredItems required : altar.getRecipe().getRequiredItems()) {
+               String id = required.getPoolId();
+               List<ItemStack> stacks = required.getItems();
+               int index = altar.displayedIndex.computeIfAbsent(id, poolId -> 0);
+               altar.displayedIndex.put(id, index + 1 >= stacks.size() ? 0 : index + 1);
             }
          }
       }
@@ -160,13 +186,14 @@ public class VaultAltarTileEntity extends BlockEntity {
          }
 
          PlayerVaultAltarData altarData = PlayerVaultAltarData.get(world);
-         this.recipe = altarData.getRecipe(world, this.worldPosition, player);
+         this.recipe = altarData.getRecipe(player, this.worldPosition);
          this.setAltarState(VaultAltarTileEntity.AltarState.ACCEPTING);
          if (!player.isCreative()) {
             heldItem.shrink(1);
          }
 
          this.sendUpdates();
+         player.connection.send(this.getUpdatePacket());
          return InteractionResult.SUCCESS;
       }
    }
@@ -185,15 +212,7 @@ public class VaultAltarTileEntity extends BlockEntity {
                }
             }
 
-            List<RequiredItem> idolRequirements = new ArrayList<>();
-            ItemStack benevolent = new ItemStack(ModItems.IDOL_BENEVOLENT);
-            ItemStack malevolence = new ItemStack(ModItems.IDOL_MALEVOLENCE);
-            ItemStack omniscient = new ItemStack(ModItems.IDOL_OMNISCIENT);
-            ItemStack timekeeper = new ItemStack(ModItems.IDOL_TIMEKEEPER);
-            idolRequirements.add(new RequiredItem(benevolent, 0, 1));
-            idolRequirements.add(new RequiredItem(malevolence, 0, 1));
-            idolRequirements.add(new RequiredItem(omniscient, 0, 1));
-            idolRequirements.add(new RequiredItem(timekeeper, 0, 1));
+            List<RequiredItems> idolRequirements = new ArrayList<>();
             this.recipe.cacheRequiredItems(idolRequirements);
             this.recipe.setPogInfused(true);
             PlayerVaultAltarData.get(world).setDirty();
@@ -260,9 +279,6 @@ public class VaultAltarTileEntity extends BlockEntity {
       crystal.setTheme(new PoolCrystalTheme(VaultMod.id("default")));
       int level = PlayerVaultStatsData.get((ServerLevel)world).getVaultStats(this.owner).getVaultLevel();
       crystal.setLevel(level);
-      if (this.recipe.isPogInfused()) {
-      }
-
       world.addFreshEntity(new ItemEntity(world, this.getBlockPos().getX() + 0.5, this.worldPosition.getY() + 1.5, this.worldPosition.getZ() + 0.5, stack));
       PlayerStatsData.get(serverWorld.getServer()).onCrystalCrafted(this.owner, this.recipe.getRequiredItems());
       this.resetAltar((ServerLevel)world);
@@ -318,27 +334,34 @@ public class VaultAltarTileEntity extends BlockEntity {
             float speed = ModConfigs.VAULT_ALTAR.PULL_SPEED / 20.0F;
 
             for (ItemEntity itemEntity : world.getEntitiesOfClass(ItemEntity.class, this.getAABB(range, x, y, z))) {
-               for (RequiredItem required : data.getRecipe(this.owner).getRequiredItems()) {
-                  if (!required.reachedAmountRequired() && required.isItemEqual(itemEntity.getItem())) {
-                     int excess = required.getRemainder(itemEntity.getItem().getCount());
-                     this.moveItemTowardPedestal(itemEntity, speed);
-                     if (this.isItemInRange(itemEntity.blockPosition())) {
-                        if (excess > 0) {
-                           required.setCurrentAmount(required.getAmountRequired());
-                           itemEntity.getItem().setCount(excess);
-                        } else {
-                           required.addAmount(itemEntity.getItem().getCount());
-                           itemEntity.getItem().setCount(excess);
-                           itemEntity.discard();
-                        }
-
-                        data.setDirty();
-                        this.sendUpdates();
+               if (this.itemHandler.isItemValid(0, itemEntity.getItem())) {
+                  List<RequiredItems> itemsToPull = data.getRecipe(this.owner).getRequiredItems();
+                  itemsToPull.stream().filter(requiredItem -> !requiredItem.reachedAmountRequired()).forEach(requiredItem -> {
+                     if (!requiredItem.getItems().stream().noneMatch(itemStack -> ItemStack.isSameIgnoreDurability(itemStack, itemEntity.getItem()))) {
+                        this.moveStacksAndUpdate(data, speed, itemEntity, requiredItem);
                      }
-                  }
+                  });
                }
             }
          }
+      }
+   }
+
+   private void moveStacksAndUpdate(PlayerVaultAltarData data, float speed, ItemEntity itemEntity, RequiredItems requiredItems) {
+      int excess = requiredItems.getRemainder(itemEntity.getItem().getCount());
+      this.moveItemTowardPedestal(itemEntity, speed);
+      if (this.isItemInRange(itemEntity.blockPosition())) {
+         if (excess > 0) {
+            requiredItems.setCurrentAmount(requiredItems.getAmountRequired());
+            itemEntity.getItem().setCount(excess);
+         } else {
+            requiredItems.addAmount(itemEntity.getItem().getCount());
+            itemEntity.getItem().setCount(excess);
+            itemEntity.discard();
+         }
+
+         data.setDirty();
+         this.sendUpdates();
       }
    }
 
@@ -368,7 +391,7 @@ public class VaultAltarTileEntity extends BlockEntity {
       }
 
       if (this.recipe != null) {
-         compound.put("Recipe", this.recipe.serialize());
+         compound.put("Recipe", this.recipe.serializeNBT());
       }
 
       compound.putInt("InfusionTimer", this.infusionTimer);
@@ -389,7 +412,7 @@ public class VaultAltarTileEntity extends BlockEntity {
       }
 
       if (compound.contains("Recipe")) {
-         this.recipe = AltarInfusionRecipe.deserialize(compound.getCompound("Recipe"));
+         this.recipe = new AltarInfusionRecipe(compound.getCompound("Recipe"));
       }
 
       if (compound.contains("InfusionTimer")) {
@@ -401,12 +424,39 @@ public class VaultAltarTileEntity extends BlockEntity {
       this.altarState = containsVaultRock ? VaultAltarTileEntity.AltarState.ACCEPTING : VaultAltarTileEntity.AltarState.IDLE;
    }
 
+   @NotNull
    public CompoundTag getUpdateTag() {
-      return this.saveWithoutMetadata();
+      CompoundTag tag = this.saveWithoutMetadata();
+      CompoundTag displayed = new CompoundTag();
+      this.displayedIndex.forEach(displayed::putInt);
+      tag.put("displayed", displayed);
+      return tag;
+   }
+
+   public void handleUpdateTag(CompoundTag tag) {
+      this.updateDisplayed(tag);
+      super.handleUpdateTag(tag);
    }
 
    public ClientboundBlockEntityDataPacket getUpdatePacket() {
       return ClientboundBlockEntityDataPacket.create(this);
+   }
+
+   public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+      CompoundTag tag = pkt.getTag();
+      if (tag != null) {
+         this.updateDisplayed(tag);
+      }
+
+      super.onDataPacket(net, pkt);
+   }
+
+   private void updateDisplayed(CompoundTag tag) {
+      CompoundTag displayed = tag.getCompound("displayed");
+
+      for (String poolId : displayed.getAllKeys()) {
+         this.displayedIndex.put(poolId, displayed.getInt(poolId));
+      }
    }
 
    private ItemStackHandler createHandler() {
@@ -416,49 +466,64 @@ public class VaultAltarTileEntity extends BlockEntity {
          }
 
          public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-            if (PlayerVaultAltarData.get((ServerLevel)VaultAltarTileEntity.this.level).getRecipe(VaultAltarTileEntity.this.owner) != null
-               && !PlayerVaultAltarData.get((ServerLevel)VaultAltarTileEntity.this.level).getRecipe(VaultAltarTileEntity.this.owner).isComplete()) {
-               for (RequiredItem item : PlayerVaultAltarData.get((ServerLevel)VaultAltarTileEntity.this.level)
-                  .getRecipe(VaultAltarTileEntity.this.owner)
-                  .getRequiredItems()) {
-                  if (item.isItemEqual(stack)) {
-                     return true;
-                  }
+            if (VaultAltarTileEntity.this.level instanceof ServerLevel serverLevel) {
+               AltarInfusionRecipe altarInfusionRecipe = PlayerVaultAltarData.get(serverLevel).getRecipe(VaultAltarTileEntity.this.owner);
+               if (altarInfusionRecipe == null) {
+                  return false;
+               } else {
+                  return altarInfusionRecipe.isComplete()
+                     ? false
+                     : altarInfusionRecipe.getRequiredItems()
+                        .stream()
+                        .filter(requiredItem -> !requiredItem.reachedAmountRequired())
+                        .map(RequiredItems::getItems)
+                        .flatMap(Collection::stream)
+                        .anyMatch(requiredStack -> ItemStack.isSameIgnoreDurability(stack, requiredStack));
                }
+            } else {
+               return false;
             }
-
-            return false;
          }
 
          @Nonnull
          public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-            PlayerVaultAltarData data = PlayerVaultAltarData.get((ServerLevel)VaultAltarTileEntity.this.level);
-            AltarInfusionRecipe recipe = data.getRecipe(VaultAltarTileEntity.this.owner);
-            if (recipe != null && !recipe.isComplete()) {
-               for (RequiredItem item : recipe.getRequiredItems()) {
-                  if (!item.reachedAmountRequired() && item.isItemEqual(stack)) {
-                     int amount = stack.getCount();
-                     int excess = item.getRemainder(amount);
-                     if (excess > 0) {
+            if (!this.isItemValid(slot, stack)) {
+               return stack;
+            } else if (VaultAltarTileEntity.this.level instanceof ServerLevel serverLevel) {
+               PlayerVaultAltarData data = PlayerVaultAltarData.get(serverLevel);
+               AltarInfusionRecipe altarInfusionRecipe = data.getRecipe(VaultAltarTileEntity.this.owner);
+               if (altarInfusionRecipe == null) {
+                  return stack;
+               } else if (altarInfusionRecipe.isComplete()) {
+                  return stack;
+               } else {
+                  for (RequiredItems item : altarInfusionRecipe.getRequiredItems()) {
+                     if (!item.reachedAmountRequired()) {
+                        int amount = stack.getCount();
+                        int excess = item.getRemainder(amount);
+                        if (excess > 0) {
+                           if (!simulate) {
+                              item.setCurrentAmount(item.getAmountRequired());
+                              data.setDirty();
+                           }
+
+                           return ItemHandlerHelper.copyStackWithSize(stack, excess);
+                        }
+
                         if (!simulate) {
-                           item.setCurrentAmount(item.getAmountRequired());
+                           item.addAmount(amount);
                            data.setDirty();
                         }
 
-                        return ItemHandlerHelper.copyStackWithSize(stack, excess);
+                        return ItemStack.EMPTY;
                      }
-
-                     if (!simulate) {
-                        item.addAmount(amount);
-                        data.setDirty();
-                     }
-
-                     return ItemStack.EMPTY;
                   }
-               }
-            }
 
-            return stack;
+                  return stack;
+               }
+            } else {
+               return stack;
+            }
          }
       };
    }

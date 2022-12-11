@@ -7,12 +7,14 @@ import iskallia.vault.network.message.AbilityLevelMessage;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
 import iskallia.vault.network.message.AbilitySelectSpecializationMessage;
 import iskallia.vault.network.message.ActiveEternalMessage;
+import iskallia.vault.network.message.AnimalPenParticleMessage;
 import iskallia.vault.network.message.BossMusicMessage;
 import iskallia.vault.network.message.CheerReceiveMessage;
 import iskallia.vault.network.message.ClientboundArchetypeMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
 import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
+import iskallia.vault.network.message.DiffuserParticleMessage;
 import iskallia.vault.network.message.EffectMessage;
 import iskallia.vault.network.message.EternalInteractionMessage;
 import iskallia.vault.network.message.EternalSyncMessage;
@@ -54,7 +56,6 @@ import iskallia.vault.network.message.ServerboundToggleEternalPlayerSkinMessage;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.network.message.ShardTradeTradeMessage;
-import iskallia.vault.network.message.ShardTraderScreenMessage;
 import iskallia.vault.network.message.SpiritExtractorBuyItemsMessage;
 import iskallia.vault.network.message.StepHeightMessage;
 import iskallia.vault.network.message.SyncOverSizedContentMessage;
@@ -200,9 +201,6 @@ public class ModNetwork {
       CHANNEL.registerMessage(nextId(), EffectMessage.class, EffectMessage::encode, EffectMessage::decode, EffectMessage::handle);
       CHANNEL.registerMessage(nextId(), KnownTalentsMessage.class, KnownTalentsMessage::encode, KnownTalentsMessage::decode, KnownTalentsMessage::handle);
       CHANNEL.registerMessage(nextId(), ShardTradeMessage.class, ShardTradeMessage::encode, ShardTradeMessage::decode, ShardTradeMessage::handle);
-      CHANNEL.registerMessage(
-         nextId(), ShardTraderScreenMessage.class, ShardTraderScreenMessage::encode, ShardTraderScreenMessage::decode, ShardTraderScreenMessage::handle
-      );
       CHANNEL.registerMessage(
          nextId(), ShardTradeTradeMessage.class, ShardTradeTradeMessage::encode, ShardTradeTradeMessage::decode, ShardTradeTradeMessage::handle
       );
@@ -441,6 +439,12 @@ public class ModNetwork {
       CHANNEL.registerMessage(nextId(), ForgeParticleMessage.class, ForgeParticleMessage::encode, ForgeParticleMessage::decode, ForgeParticleMessage::handle);
       CHANNEL.registerMessage(
          nextId(), MonolithIgniteMessage.class, MonolithIgniteMessage::encode, MonolithIgniteMessage::decode, MonolithIgniteMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), DiffuserParticleMessage.class, DiffuserParticleMessage::encode, DiffuserParticleMessage::decode, DiffuserParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), AnimalPenParticleMessage.class, AnimalPenParticleMessage::encode, AnimalPenParticleMessage::decode, AnimalPenParticleMessage::handle
       );
    }
 

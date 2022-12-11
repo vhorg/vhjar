@@ -27,6 +27,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.CapabilityItemHandler;
 
+@Deprecated
 public class InvRestoreCommand extends Command {
    @Override
    public String getName() {

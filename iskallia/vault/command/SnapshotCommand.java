@@ -84,7 +84,7 @@ public class SnapshotCommand extends Command {
                                  ((CommandSourceStack)ctx.getSource()).getPlayerOrException(),
                                  StringArgumentType.getString(ctx, "playerIGN"),
                                  IntegerArgumentType.getInteger(ctx, "timestamp"),
-                                 ((CommandSourceStack)ctx.getSource()).getPlayerOrException()
+                                 EntityArgument.getPlayer(ctx, "restoreToPlayer")
                               )
                            )
                      )

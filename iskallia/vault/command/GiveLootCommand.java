@@ -14,6 +14,9 @@ import iskallia.vault.block.item.LootStatueBlockItem;
 import iskallia.vault.block.item.TrophyStatueBlockItem;
 import iskallia.vault.block.item.VaultChampionTrophyBlockItem;
 import iskallia.vault.config.LegacyLootTablesConfig;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.vault.CrateLootGenerator;
+import iskallia.vault.core.vault.objective.AwardCrateObjective;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
@@ -26,11 +29,13 @@ import iskallia.vault.util.WeekKey;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -44,6 +49,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootContext.Builder;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.server.command.EnumArgument;
 
 public class GiveLootCommand extends Command {
@@ -175,6 +181,50 @@ public class GiveLootCommand extends Command {
                   .executes(ctx -> this.giveVaultDoll(ctx, StringArgumentType.getString(ctx, "playerIGN")))
             )
       );
+      builder.then(
+         Commands.literal("crate")
+            .then(
+               Commands.argument("crateType", EnumArgument.enumArgument(VaultCrateBlock.Type.class))
+                  .then(
+                     ((RequiredArgumentBuilder)Commands.argument("level", IntegerArgumentType.integer(0))
+                           .then(Commands.argument("player", EntityArgument.player()).executes(this::giveCrate)))
+                        .executes(this::giveCrate)
+                  )
+            )
+      );
+   }
+
+   private int giveCrate(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      VaultCrateBlock.Type type = (VaultCrateBlock.Type)ctx.getArgument("crateType", VaultCrateBlock.Type.class);
+      ItemStack crate = ItemStack.EMPTY;
+
+      ServerPlayer player;
+      try {
+         player = EntityArgument.getPlayer(ctx, "player");
+      } catch (CommandSyntaxException var8) {
+         player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
+      }
+
+      int level = IntegerArgumentType.getInteger(ctx, "level");
+      switch (type) {
+         case BOUNTY:
+            crate = ModConfigs.REWARD_CONFIG.generateReward(level).createRewardCrate();
+            break;
+         case CAKE:
+         case MONOLITH:
+         case SCAVENGER:
+         case BOSS:
+            AwardCrateObjective objective = AwardCrateObjective.ofConfig(type, type.toString().toLowerCase(), level, true);
+            CrateLootGenerator crateLootGenerator = new CrateLootGenerator(
+               objective.get(AwardCrateObjective.LOOT_TABLE),
+               objective.has(AwardCrateObjective.ADD_ARTIFACT),
+               objective.get(AwardCrateObjective.ARTIFACT_CHANCE)
+            );
+            crate = VaultCrateBlock.getCrateWithLoot(type, crateLootGenerator.createLootForCommand(JavaRandom.ofInternal(new Random().nextLong()), level));
+      }
+
+      ItemHandlerHelper.giveItemToPlayer(player, crate);
+      return 0;
    }
 
    private int setGearName(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

@@ -9,7 +9,6 @@ import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -38,7 +37,7 @@ public abstract class LootableTileEntity extends BlockEntity {
             this,
             loot,
             Version.latest(),
-            JavaRandom.ofInternal(new Random().nextLong()),
+            JavaRandom.ofNanoTime(),
             LootableBlockGenerationEvent.Phase.PRE
          );
       LootTableKey key = VaultRegistry.LOOT_TABLE.getKey(data.getLootTable());

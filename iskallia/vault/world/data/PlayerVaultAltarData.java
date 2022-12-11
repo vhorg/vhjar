@@ -30,8 +30,8 @@ public class PlayerVaultAltarData extends SavedData {
       return this.playerMap.get(uuid);
    }
 
-   public AltarInfusionRecipe getRecipe(ServerLevel world, BlockPos pos, ServerPlayer player) {
-      AltarInfusionRecipe recipe = this.playerMap.computeIfAbsent(player.getUUID(), k -> new AltarInfusionRecipe(world, pos, player));
+   public AltarInfusionRecipe getRecipe(ServerPlayer player, BlockPos pos) {
+      AltarInfusionRecipe recipe = this.playerMap.computeIfAbsent(player.getUUID(), k -> new AltarInfusionRecipe(player, pos));
       this.setDirty();
       return recipe;
    }
@@ -84,7 +84,7 @@ public class PlayerVaultAltarData extends SavedData {
       if (playerList.size() == recipeList.size() && playerBlockPosList.size() == blockPosList.size()) {
          for (int i = 0; i < playerList.size(); i++) {
             UUID playerUUID = UUID.fromString(playerList.getString(i));
-            this.playerMap.put(playerUUID, AltarInfusionRecipe.deserialize(recipeList.getCompound(i)));
+            this.playerMap.put(playerUUID, new AltarInfusionRecipe(recipeList.getCompound(i)));
          }
 
          for (int i = 0; i < playerBlockPosList.size(); i++) {
@@ -111,7 +111,7 @@ public class PlayerVaultAltarData extends SavedData {
       ListTag blockPosList = new ListTag();
       this.playerMap.forEach((uuid, recipe) -> {
          playerList.add(StringTag.valueOf(uuid.toString()));
-         recipeList.add(recipe.serialize());
+         recipeList.add(recipe.serializeNBT());
       });
       this.playerAltars.forEach((uuid, altarPositions) -> {
          playerBlockPosList.add(StringTag.valueOf(uuid.toString()));

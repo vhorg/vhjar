@@ -10,6 +10,7 @@ import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
 
 public class VaultLevelCommand extends Command {
    @Override
@@ -37,7 +38,9 @@ public class VaultLevelCommand extends Command {
    private int setLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       int level = IntegerArgumentType.getInteger(context, "level");
       CommandSourceStack source = (CommandSourceStack)context.getSource();
-      PlayerVaultStatsData.get(source.getLevel()).setVaultLevel(source.getPlayerOrException(), level);
+      ServerPlayer player = source.getPlayerOrException();
+      PlayerVaultStatsData.get(source.getLevel()).setVaultLevel(player, level);
+      player.refreshTabListName();
       return 0;
    }
 

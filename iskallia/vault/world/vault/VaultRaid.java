@@ -11,14 +11,12 @@ import iskallia.vault.attribute.RegistryKeyAttribute;
 import iskallia.vault.attribute.StringAttribute;
 import iskallia.vault.attribute.UUIDAttribute;
 import iskallia.vault.attribute.VAttribute;
-import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.entity.LegacyEntityScaler;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.nbt.NonNullVListNBT;
 import iskallia.vault.nbt.VListNBT;
@@ -121,7 +119,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.NonNullList;
 import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatType;
@@ -141,15 +138,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -158,15 +152,11 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent.CheckSpawn;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.Event.Result;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
@@ -610,45 +600,7 @@ public class VaultRaid implements INBTSerializable<CompoundTag> {
          player.runIfPresent(world.getServer(), playerEntity -> {});
       }
    });
-   public static final VaultTask REMOVE_SCAVENGER_ITEMS = VaultTask.register(
-      VaultMod.id("remove_scavenger_items"), (vault, player, world) -> player.runIfPresent(world.getServer(), playerEntity -> {
-         Inventory inventory = playerEntity.getInventory();
-
-         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-            ItemStack stack = inventory.getItem(slot);
-            if (stack.getItem() instanceof BasicScavengerItem) {
-               inventory.setItem(slot, ItemStack.EMPTY);
-            }
-
-            LazyOptional<IItemHandler> itemHandler = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
-            itemHandler.ifPresent(handler -> {
-               if (handler instanceof IItemHandlerModifiable invHandler) {
-                  for (int nestedSlot = 0; nestedSlot < invHandler.getSlots(); nestedSlot++) {
-                     ItemStack nestedStack = invHandler.getStackInSlot(nestedSlot);
-                     if (nestedStack.getItem() instanceof BasicScavengerItem) {
-                        invHandler.setStackInSlot(nestedSlot, ItemStack.EMPTY);
-                     }
-                  }
-               }
-            });
-            if (stack.getItem() instanceof BlockItem && ((BlockItem)stack.getItem()).getBlock() instanceof VaultCrateBlock) {
-               CompoundTag tag = stack.getTagElement("BlockEntityTag");
-               if (tag != null) {
-                  NonNullList<ItemStack> stacks = NonNullList.withSize(54, ItemStack.EMPTY);
-                  ContainerHelper.loadAllItems(tag, stacks);
-
-                  for (int i = 0; i < stacks.size(); i++) {
-                     if (((ItemStack)stacks.get(i)).getItem() instanceof BasicScavengerItem) {
-                        stacks.set(i, ItemStack.EMPTY);
-                     }
-                  }
-
-                  ContainerHelper.saveAllItems(tag, stacks);
-               }
-            }
-         }
-      })
-   );
+   public static final VaultTask REMOVE_SCAVENGER_ITEMS = VaultTask.register(VaultMod.id("remove_scavenger_items"), (vault, player, world) -> {});
    public static final VaultTask SAVE_SOULBOUND_GEAR = VaultTask.register(
       VaultMod.id("save_soulbound_gear"), (vault, player, world) -> player.runIfPresent(world.getServer(), sPlayer -> {
          SoulboundSnapshotData data = SoulboundSnapshotData.get(world);

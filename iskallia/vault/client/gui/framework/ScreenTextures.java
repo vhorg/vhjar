@@ -38,6 +38,9 @@ public final class ScreenTextures {
    public static final TextureAtlasRegion SOUL_SHARD_TRADE_ORNAMENT = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/soul_shard_trade_ornament")
    );
+   public static final TextureAtlasRegion BLACK_MARKET_ORNAMENT = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/black_market_ornament")
+   );
    public static final TextureAtlasRegion INSET_ITEM_SLOT_BACKGROUND = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/inset_item_slot_background")
    );
@@ -162,6 +165,9 @@ public final class ScreenTextures {
    public static final TextureAtlasRegion TAB_ICON_LOOT = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_loot"));
    public static final TextureAtlasRegion TAB_ICON_MOBS_KILLED = TextureAtlasRegion.of(ModTextureAtlases.SCAVENGER, VaultMod.id("gui/scavenger/mob"));
    public static final TextureAtlasRegion TAB_ICON_COOP = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_coop"));
+   public static final TextureAtlasRegion TAB_COUNTDOWN_BACKGROUND = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_countdown_background")
+   );
    public static final TextureAtlasRegion ICON_COIN_STACKS = TextureAtlasRegion.of(ModTextureAtlases.SCAVENGER, VaultMod.id("gui/scavenger/coin_stacks"));
    public static final TextureAtlasRegion ICON_GILDED_CHEST = TextureAtlasRegion.of(ModTextureAtlases.SCAVENGER, VaultMod.id("gui/scavenger/gilded_chest"));
    public static final TextureAtlasRegion ICON_LIVING_CHEST = TextureAtlasRegion.of(ModTextureAtlases.SCAVENGER, VaultMod.id("gui/scavenger/living_chest"));

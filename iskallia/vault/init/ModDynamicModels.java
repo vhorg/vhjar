@@ -1084,6 +1084,12 @@ public class ModDynamicModels {
          new CoconutShieldModel(VaultMod.id("gear/shield/coconut"), VaultMod.id("gear/shield/coconut_orange"), "Coconut Shield")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
+      public static final ShieldModel BELL = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/bell"), "Bell Shield").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel TURTLE = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/turtle"), "Turtle Shell").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
    }
 
    public static class Swords {

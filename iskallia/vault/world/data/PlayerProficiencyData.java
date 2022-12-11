@@ -63,7 +63,7 @@ public class PlayerProficiencyData extends SavedData {
          int availableProficiencyGain = Math.max(cfg.getTotalCategoryProficiency() - thisProficiency, 0);
          int valueToAdd = Math.min(availableProficiencyGain, value);
          this.playerProficiencies.computeIfAbsent(playerId, id -> new EnumMap<>(ProficiencyType.class)).put(type, thisProficiency + valueToAdd);
-         int valueToCut = Math.min(totalProficiency + valueToAdd - cfg.getTotalMaximumProficiency(), 0);
+         int valueToCut = Math.max(totalProficiency + valueToAdd - cfg.getTotalMaximumProficiency(), 0);
          this.removeRandomProficiencyExcluding(playerId, valueToCut, type);
          this.sendProficiencyInformation(player);
          this.setDirty();

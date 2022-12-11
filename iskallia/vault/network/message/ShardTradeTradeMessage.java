@@ -4,23 +4,28 @@ import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.ItemShardPouch;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.util.MiscUtils;
-import iskallia.vault.world.data.SoulShardTraderData;
+import iskallia.vault.world.data.PlayerBlackMarketData;
+import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 public class ShardTradeTradeMessage {
    private final int tradeIndex;
+   private final UUID uuid;
    private final boolean shift;
 
-   public ShardTradeTradeMessage(int tradeIndex, boolean shift) {
+   public ShardTradeTradeMessage(int tradeIndex, boolean shift, UUID uuid) {
       this.tradeIndex = tradeIndex;
       this.shift = shift;
+      this.uuid = uuid;
    }
 
    public boolean isRandom() {
@@ -30,10 +35,11 @@ public class ShardTradeTradeMessage {
    public static void encode(ShardTradeTradeMessage message, FriendlyByteBuf buffer) {
       buffer.writeInt(message.tradeIndex);
       buffer.writeBoolean(message.shift);
+      buffer.writeUUID(message.uuid);
    }
 
    public static ShardTradeTradeMessage decode(FriendlyByteBuf buffer) {
-      return new ShardTradeTradeMessage(buffer.readInt(), buffer.readBoolean());
+      return new ShardTradeTradeMessage(buffer.readInt(), buffer.readBoolean(), buffer.readUUID());
    }
 
    public static void handle(ShardTradeTradeMessage message, Supplier<Context> contextSupplier) {
@@ -41,7 +47,7 @@ public class ShardTradeTradeMessage {
       context.enqueueWork(() -> {
          ServerPlayer sender = context.getSender();
          if (sender != null && sender.containerMenu instanceof ShardTradeContainer tradeContainer) {
-            SoulShardTraderData var10 = SoulShardTraderData.get(sender.getLevel());
+            PlayerBlackMarketData var10 = PlayerBlackMarketData.get(sender.getLevel());
             int shardCount = ItemShardPouch.getShardCount(sender.getInventory());
             int shardCost;
             ItemStack resultStack;
@@ -53,7 +59,7 @@ public class ShardTradeTradeMessage {
                shardCost = ModConfigs.SOUL_SHARD.getShardTradePrice();
                resultStack = ModConfigs.SOUL_SHARD.getRandomTrade().getItem().copy();
             } else {
-               SoulShardTraderData.SelectedTrade trade = var10.getTrades().get(message.tradeIndex);
+               PlayerBlackMarketData.BlackMarket.SelectedTrade trade = var10.getBlackMarket(message.uuid).getTrades().get(message.tradeIndex);
                if (trade == null || shardCount < trade.getShardCost()) {
                   return;
                }
@@ -83,7 +89,7 @@ public class ShardTradeTradeMessage {
 
                   if (ItemShardPouch.reduceShardAmount(sender.getInventory(), shardCost, false)) {
                      if (!message.isRandom()) {
-                        var10.useTrade(message.tradeIndex);
+                        var10.getBlackMarket(message.uuid).useTrade(message.tradeIndex);
                      }
 
                      if (message.shift) {
@@ -99,6 +105,9 @@ public class ShardTradeTradeMessage {
 
                      tradeContainer.broadcastChanges();
                   }
+
+                  sender.level.playSound(null, sender.blockPosition(), ModSounds.VAULT_CHEST_RARE_OPEN, SoundSource.PLAYERS, 1.0F, 0.5F);
+                  var10.getBlackMarket(sender).syncToClient(sender.server);
                }
             }
          }

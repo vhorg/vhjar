@@ -10,7 +10,6 @@ import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.init.ModBlocks;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -37,7 +36,7 @@ public class CoinPilesTileEntity extends BlockEntity {
             this,
             loot,
             Version.latest(),
-            JavaRandom.ofInternal(new Random().nextLong()),
+            JavaRandom.ofNanoTime(),
             CoinStacksGenerationEvent.Phase.PRE
          );
       LootTableKey key = VaultRegistry.LOOT_TABLE.getKey(data.getLootTable());

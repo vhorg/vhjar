@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "the_vault:soul_dust"},
+    {"item": "the_vault:soul_dust"},
+    {"item": "the_vault:soul_dust"},
+    {"item": "the_vault:soul_dust"},
+    {"item": "the_vault:soul_dust"},
+    {"item": "the_vault:soul_dust"},
+    {"item": "the_vault:soul_dust"},
+    {"item": "the_vault:soul_dust"},
+    {"item": "the_vault:soul_dust"}
+  ],
+  "result": {
+    "item": "the_vault:soul_shard",
+    "count": 1
+  }
+}

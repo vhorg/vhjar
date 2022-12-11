@@ -1,6 +1,7 @@
 package iskallia.vault.gear.item;
 
 import com.google.gson.JsonObject;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.dynamodel.DynamicModelItem;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
@@ -18,18 +19,15 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.IConditionalDamageable;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.item.gear.VaultLootItem;
-import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -86,7 +84,7 @@ public interface VaultGearItem extends IForgeItem, DataTransferItem, VaultLootIt
    }
 
    @Override
-   default ItemStack convertStack(ItemStack stack) {
+   default ItemStack convertStack(ItemStack stack, RandomSource random) {
       EquipmentSlot slot = this.getIntendedSlot(stack);
       if (stack.hasTag() && slot != null) {
          CompoundTag tag = stack.getOrCreateTag();
@@ -108,9 +106,8 @@ public interface VaultGearItem extends IForgeItem, DataTransferItem, VaultLootIt
                   .map(model -> model.getPiece(slot))
                   .filter(Optional::isPresent)
                   .map(Optional::get)
-                  .collect(Collectors.toList());
-               Collections.shuffle(armorModelSet);
-               ArmorPieceModel randomModel = MiscUtils.getRandomEntry(armorModelSet);
+                  .toList();
+               ArmorPieceModel randomModel = armorModelSet.isEmpty() ? null : armorModelSet.get(random.nextInt(armorModelSet.size()));
                if (randomModel != null) {
                   VaultGearData data = VaultGearData.read(stack);
                   data.updateAttribute(ModGearAttributes.GEAR_MODEL, randomModel.getId());
@@ -122,14 +119,20 @@ public interface VaultGearItem extends IForgeItem, DataTransferItem, VaultLootIt
          }
       }
 
-      ItemStack result = DataTransferItem.super.convertStack(stack);
-      VaultGearHelper.initializeGearRollType(result, VaultGearData.read(result).getItemLevel());
+      ItemStack result = DataTransferItem.super.convertStack(stack, random);
+      VaultGearHelper.initializeGearRollType(result, VaultGearData.read(result).getItemLevel(), random);
       return result;
    }
 
    default void setPlayerLevel(ItemStack stack, Player player) {
       VaultGearData data = VaultGearData.read(stack);
       data.setItemLevel(SidedHelper.getVaultLevel(player));
+      data.write(stack);
+   }
+
+   default void setLevel(ItemStack stack, int level) {
+      VaultGearData data = VaultGearData.read(stack);
+      data.setItemLevel(level);
       data.write(stack);
    }
 

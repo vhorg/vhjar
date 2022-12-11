@@ -1,5 +1,6 @@
 package iskallia.vault.skill.ability.effect;
 
+import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.HunterConfig;
 import iskallia.vault.skill.ability.effect.spi.AbstractHunterAbility;
 import java.awt.Color;
@@ -7,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 
 public class HunterAbility<C extends HunterConfig> extends AbstractHunterAbility<C> {
    @Override
@@ -19,5 +21,10 @@ public class HunterAbility<C extends HunterConfig> extends AbstractHunterAbility
          }
       });
       return result;
+   }
+
+   @Override
+   protected void doSound(C config, ServerPlayer player) {
+      player.level.playSound(null, player.position().x, player.position().y, player.position().z, ModSounds.HUNTER_SFX, SoundSource.PLAYERS, 1.0F, 1.0F);
    }
 }

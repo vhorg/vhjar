@@ -29,10 +29,25 @@ public class VaultLevelsConfig extends Config {
       this.maxLevel = 100;
       this.levelMetas.clear();
 
-      for (int i = 0; i < this.maxLevel; i++) {
+      for (int x = 0; x < this.maxLevel; x++) {
          VaultLevelsConfig.VaultLevelMeta vaultLevel = new VaultLevelsConfig.VaultLevelMeta();
-         vaultLevel.level = i;
-         vaultLevel.tnl = (int)this.defaultTNLFunction(i);
+         vaultLevel.level = x;
+         if (x < 6) {
+            vaultLevel.tnl = 1000 * x + 1000;
+         } else if (x < 8) {
+            vaultLevel.tnl = 2000 * x - 5000;
+         } else if (x < 10) {
+            vaultLevel.tnl = 1500 * x - 1000;
+         } else if (x < 40) {
+            vaultLevel.tnl = 400 * x + 10000;
+         } else if (x < 60) {
+            vaultLevel.tnl = 1200 * x - 22000;
+         } else if (x < 90) {
+            vaultLevel.tnl = 2000 * x - 70000;
+         } else if (x < 100) {
+            vaultLevel.tnl = 54810 * x - 4822900;
+         }
+
          this.levelMetas.add(vaultLevel);
       }
    }

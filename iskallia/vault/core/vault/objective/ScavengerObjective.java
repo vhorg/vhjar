@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.block.PlaceholderBlock;
-import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.core.Version;
@@ -24,7 +23,6 @@ import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.BasicScavengerItem;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +32,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -42,21 +39,14 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.RenderProperties;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
 
 public class ScavengerObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("scavenger", Objective.class).with(Version.v1_0, ScavengerObjective::new);
@@ -103,47 +93,6 @@ public class ScavengerObjective extends Objective {
                   }
                }
             }
-         }
-      });
-      CommonEvents.LISTENER_LEAVE.register(this, data -> {
-         if (data.getVault() == vault) {
-            data.getListener().getPlayer().ifPresent(player -> {
-               Inventory inventory = player.getInventory();
-
-               for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-                  ItemStack stack = inventory.getItem(slot);
-                  if (stack.getItem() instanceof BasicScavengerItem) {
-                     inventory.setItem(slot, ItemStack.EMPTY);
-                  }
-
-                  LazyOptional<IItemHandler> itemHandler = stack.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY);
-                  itemHandler.ifPresent(handler -> {
-                     if (handler instanceof IItemHandlerModifiable invHandler) {
-                        for (int nestedSlot = 0; nestedSlot < invHandler.getSlots(); nestedSlot++) {
-                           ItemStack nestedStack = invHandler.getStackInSlot(nestedSlot);
-                           if (nestedStack.getItem() instanceof BasicScavengerItem) {
-                              invHandler.setStackInSlot(nestedSlot, ItemStack.EMPTY);
-                           }
-                        }
-                     }
-                  });
-                  if (stack.getItem() instanceof BlockItem && ((BlockItem)stack.getItem()).getBlock() instanceof VaultCrateBlock) {
-                     CompoundTag tag = stack.getTagElement("BlockEntityTag");
-                     if (tag != null) {
-                        NonNullList<ItemStack> stacks = NonNullList.withSize(54, ItemStack.EMPTY);
-                        ContainerHelper.loadAllItems(tag, stacks);
-
-                        for (int i = 0; i < stacks.size(); i++) {
-                           if (((ItemStack)stacks.get(i)).getItem() instanceof BasicScavengerItem) {
-                              stacks.set(i, ItemStack.EMPTY);
-                           }
-                        }
-
-                        ContainerHelper.saveAllItems(tag, stacks);
-                     }
-                  }
-               }
-            });
          }
       });
 

@@ -126,6 +126,12 @@
       "the_vault:ability/tank_reflect_hit"
     ]
   },
+  "hunter": {
+    "category": "player",
+    "sounds": [
+      "the_vault:ability/hunter"
+    ]
+  },
   "robot_hurt": {
     "category": "hostile",
     "sounds": [

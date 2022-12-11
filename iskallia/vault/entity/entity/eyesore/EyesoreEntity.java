@@ -143,7 +143,7 @@ public class EyesoreEntity extends Ghast implements VaultBoss {
       return SoundSource.HOSTILE;
    }
 
-   protected SoundEvent getDeathSound() {
+   public SoundEvent getDeathSound() {
       return super.getDeathSound();
    }
 
@@ -151,7 +151,7 @@ public class EyesoreEntity extends Ghast implements VaultBoss {
       return SoundEvents.ENDER_DRAGON_AMBIENT;
    }
 
-   protected SoundEvent getHurtSound(DamageSource damageSource) {
+   public SoundEvent getHurtSound(DamageSource damageSource) {
       return SoundEvents.ENDER_DRAGON_HURT;
    }
 

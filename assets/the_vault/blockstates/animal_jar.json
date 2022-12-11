@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "the_vault:block/animal_jar",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "the_vault:block/animal_jar"
+    },
+    "facing=south": {
+      "model": "the_vault:block/animal_jar",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "the_vault:block/animal_jar",
+      "y": 270
+    }
+  }
+}
