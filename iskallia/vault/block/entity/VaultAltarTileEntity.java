@@ -17,10 +17,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -38,12 +35,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.NotNull;
 
 public class VaultAltarTileEntity extends BlockEntity {
@@ -52,8 +43,6 @@ public class VaultAltarTileEntity extends BlockEntity {
    private VaultAltarTileEntity.AltarState altarState;
    private HashMap<String, Integer> displayedIndex = new HashMap<>();
    private int infusionTimer = -666;
-   private final ItemStackHandler itemHandler = this.createHandler();
-   private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> this.itemHandler);
 
    public VaultAltarTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.VAULT_ALTAR_TILE_ENTITY, pos, state);
@@ -142,7 +131,12 @@ public class VaultAltarTileEntity extends BlockEntity {
    private static void updateDisplayedItems(VaultAltarTileEntity altar) {
       if (altar.getLevel() != null) {
          if (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING || altar.getAltarState() == VaultAltarTileEntity.AltarState.INFUSING) {
-            for (RequiredItems required : altar.getRecipe().getRequiredItems()) {
+            AltarInfusionRecipe infusionRecipe = altar.getRecipe();
+            if (infusionRecipe == null) {
+               return;
+            }
+
+            for (RequiredItems required : infusionRecipe.getRequiredItems()) {
                String id = required.getPoolId();
                List<ItemStack> stacks = required.getItems();
                int index = altar.displayedIndex.computeIfAbsent(id, poolId -> 0);
@@ -334,7 +328,7 @@ public class VaultAltarTileEntity extends BlockEntity {
             float speed = ModConfigs.VAULT_ALTAR.PULL_SPEED / 20.0F;
 
             for (ItemEntity itemEntity : world.getEntitiesOfClass(ItemEntity.class, this.getAABB(range, x, y, z))) {
-               if (this.itemHandler.isItemValid(0, itemEntity.getItem())) {
+               if (this.isItemValid(itemEntity.getItem())) {
                   List<RequiredItems> itemsToPull = data.getRecipe(this.owner).getRequiredItems();
                   itemsToPull.stream().filter(requiredItem -> !requiredItem.reachedAmountRequired()).forEach(requiredItem -> {
                      if (!requiredItem.getItems().stream().noneMatch(itemStack -> ItemStack.isSameIgnoreDurability(itemStack, itemEntity.getItem()))) {
@@ -344,6 +338,26 @@ public class VaultAltarTileEntity extends BlockEntity {
                }
             }
          }
+      }
+   }
+
+   public boolean isItemValid(ItemStack stack) {
+      if (this.level instanceof ServerLevel serverLevel) {
+         AltarInfusionRecipe altarInfusionRecipe = PlayerVaultAltarData.get(serverLevel).getRecipe(this.owner);
+         if (altarInfusionRecipe == null) {
+            return false;
+         } else {
+            return altarInfusionRecipe.isComplete()
+               ? false
+               : altarInfusionRecipe.getRequiredItems()
+                  .stream()
+                  .filter(requiredItem -> !requiredItem.reachedAmountRequired())
+                  .map(RequiredItems::getItems)
+                  .flatMap(Collection::stream)
+                  .anyMatch(requiredStack -> ItemStack.isSameIgnoreDurability(stack, requiredStack));
+         }
+      } else {
+         return false;
       }
    }
 
@@ -457,80 +471,6 @@ public class VaultAltarTileEntity extends BlockEntity {
       for (String poolId : displayed.getAllKeys()) {
          this.displayedIndex.put(poolId, displayed.getInt(poolId));
       }
-   }
-
-   private ItemStackHandler createHandler() {
-      return new ItemStackHandler(1) {
-         protected void onContentsChanged(int slot) {
-            VaultAltarTileEntity.this.sendUpdates();
-         }
-
-         public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-            if (VaultAltarTileEntity.this.level instanceof ServerLevel serverLevel) {
-               AltarInfusionRecipe altarInfusionRecipe = PlayerVaultAltarData.get(serverLevel).getRecipe(VaultAltarTileEntity.this.owner);
-               if (altarInfusionRecipe == null) {
-                  return false;
-               } else {
-                  return altarInfusionRecipe.isComplete()
-                     ? false
-                     : altarInfusionRecipe.getRequiredItems()
-                        .stream()
-                        .filter(requiredItem -> !requiredItem.reachedAmountRequired())
-                        .map(RequiredItems::getItems)
-                        .flatMap(Collection::stream)
-                        .anyMatch(requiredStack -> ItemStack.isSameIgnoreDurability(stack, requiredStack));
-               }
-            } else {
-               return false;
-            }
-         }
-
-         @Nonnull
-         public ItemStack insertItem(int slot, @Nonnull ItemStack stack, boolean simulate) {
-            if (!this.isItemValid(slot, stack)) {
-               return stack;
-            } else if (VaultAltarTileEntity.this.level instanceof ServerLevel serverLevel) {
-               PlayerVaultAltarData data = PlayerVaultAltarData.get(serverLevel);
-               AltarInfusionRecipe altarInfusionRecipe = data.getRecipe(VaultAltarTileEntity.this.owner);
-               if (altarInfusionRecipe == null) {
-                  return stack;
-               } else if (altarInfusionRecipe.isComplete()) {
-                  return stack;
-               } else {
-                  for (RequiredItems item : altarInfusionRecipe.getRequiredItems()) {
-                     if (!item.reachedAmountRequired()) {
-                        int amount = stack.getCount();
-                        int excess = item.getRemainder(amount);
-                        if (excess > 0) {
-                           if (!simulate) {
-                              item.setCurrentAmount(item.getAmountRequired());
-                              data.setDirty();
-                           }
-
-                           return ItemHandlerHelper.copyStackWithSize(stack, excess);
-                        }
-
-                        if (!simulate) {
-                           item.addAmount(amount);
-                           data.setDirty();
-                        }
-
-                        return ItemStack.EMPTY;
-                     }
-                  }
-
-                  return stack;
-               }
-            } else {
-               return stack;
-            }
-         }
-      };
-   }
-
-   @Nonnull
-   public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-      return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.handler.cast() : super.getCapability(cap, side);
    }
 
    public static enum AltarState {
