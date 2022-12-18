@@ -24,7 +24,7 @@ public class BernoulliWeightedTileProcessor extends TargetTileProcessor<Weighted
          }
 
          Optional<PartialTile> output = pool.getRandom(context.random);
-         output.ifPresent(partialTile -> partialTile.copyInto(tile));
+         output.ifPresent(out -> out.copyInto(tile));
       }
 
       return tile;

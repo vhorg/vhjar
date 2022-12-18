@@ -7,9 +7,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class PartialNBT extends CompoundTag {
-   public static final PartialNBT EMPTY = new PartialNBT();
-
    protected PartialNBT() {
+   }
+
+   public static PartialNBT empty() {
+      return new PartialNBT();
    }
 
    public static PartialNBT of(CompoundTag delegate) {
@@ -20,7 +22,7 @@ public class PartialNBT extends CompoundTag {
 
    public static PartialNBT of(Entity entity) {
       if (entity == null) {
-         return EMPTY;
+         return empty();
       } else {
          CompoundTag nbt = new CompoundTag();
          nbt.putString("id", EntityType.getKey(entity.getType()).toString());
@@ -29,7 +31,7 @@ public class PartialNBT extends CompoundTag {
    }
 
    public static PartialNBT of(BlockEntity blockEntity) {
-      return blockEntity == null ? EMPTY : of(blockEntity.saveWithFullMetadata());
+      return blockEntity == null ? empty() : of(blockEntity.saveWithFullMetadata());
    }
 
    public boolean isSubsetOf(CompoundTag nbt) {
@@ -81,11 +83,12 @@ public class PartialNBT extends CompoundTag {
       for (String key : this.getAllKeys()) {
          Tag e = this.get(key);
          if (e != null) {
+            e = e.copy();
             if (e.getId() == 10) {
                if (!target.contains(key)) {
                   target.put(key, e);
                } else {
-                  of(this.getCompound(key)).copyInto(target.getCompound(key));
+                  of((CompoundTag)e).copyInto(target.getCompound(key));
                }
             } else {
                target.put(key, e);
