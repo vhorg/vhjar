@@ -134,7 +134,7 @@ public class TileParser {
    }
 
    public PartialTile toTile() {
-      return new PartialTile(this.partialState, this.hasNBT ? PartialNBT.of(this.nbt) : PartialNBT.EMPTY, null);
+      return new PartialTile(this.partialState, this.hasNBT ? PartialNBT.of(this.nbt) : PartialNBT.empty(), null);
    }
 
    public void parseTag() throws CommandSyntaxException {

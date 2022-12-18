@@ -52,15 +52,15 @@ public class PartialTile {
    }
 
    public static PartialTile of(Block block) {
-      return of(block, PartialNBT.EMPTY);
+      return of(block, PartialNBT.empty());
    }
 
    public static PartialTile of(BlockState state) {
-      return of(state, PartialNBT.EMPTY);
+      return of(state, PartialNBT.empty());
    }
 
    public static PartialTile of(PartialState state) {
-      return of(state, PartialNBT.EMPTY);
+      return of(state, PartialNBT.empty());
    }
 
    public static PartialTile of(Block block, CompoundTag nbt) {

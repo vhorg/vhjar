@@ -88,7 +88,7 @@ public class WeightedTileProcessor extends TargetTileProcessor<WeightedTileProce
    public PartialTile process(PartialTile tile, ProcessorContext context) {
       if (this.predicate.test(tile)) {
          Optional<PartialTile> output = this.output.getRandom(context.random);
-         output.ifPresent(partialTile -> partialTile.copyInto(tile));
+         output.ifPresent(out -> out.copyInto(tile));
       }
 
       return tile;
