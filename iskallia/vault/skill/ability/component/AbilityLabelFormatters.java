@@ -3,7 +3,11 @@ package iskallia.vault.skill.ability.component;
 import java.util.Locale;
 
 public final class AbilityLabelFormatters {
-   public static String percent(float value) {
+   public static String percentTwoDecimalPlaces(float value) {
+      return Math.round(value * 10000.0F) / 100.0F + "%";
+   }
+
+   public static String percentRounded(float value) {
       return Math.round(value * 100.0F) + "%";
    }
 

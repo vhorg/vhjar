@@ -54,14 +54,14 @@ public class ModAbilityLabelBindings {
             "distance",
             config -> AbilityLabelFormatters.integer(config.getExtraDistance()),
             "damage",
-            config -> AbilityLabelFormatters.percent(config.getAttackDamagePercentPerDash())
+            config -> AbilityLabelFormatters.percentRounded(config.getAttackDamagePercentPerDash())
          )
       );
       register(
          ExecuteConfig.class,
          Map.of(
             "damage",
-            config -> AbilityLabelFormatters.percent(config.getDamageHealthPercentage()),
+            config -> AbilityLabelFormatters.percentRounded(config.getDamageHealthPercentage()),
             "duration",
             config -> AbilityLabelFormatters.ticks(config.getEffectDurationTicks())
          )
@@ -109,7 +109,7 @@ public class ModAbilityLabelBindings {
             "rangeVertical",
             config -> AbilityLabelFormatters.integer(config.getVerticalRange()),
             "chance",
-            config -> AbilityLabelFormatters.percent(config.getAdultChance())
+            config -> AbilityLabelFormatters.percentRounded(config.getAdultChance())
          )
       );
       register(GhostWalkConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
@@ -142,7 +142,7 @@ public class ModAbilityLabelBindings {
             config -> AbilityLabelFormatters.ticks(config.getDurationTicks())
          )
       );
-      register(ManaShieldConfig.class, Map.of("absorb", config -> AbilityLabelFormatters.percent(config.getPercentageDamageAbsorbed())));
+      register(ManaShieldConfig.class, Map.of("absorb", config -> AbilityLabelFormatters.percentRounded(config.getPercentageDamageAbsorbed())));
       register(MegaJumpConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
       register(MegaJumpBreakUpConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
       register(MegaJumpBreakDownConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
@@ -152,9 +152,9 @@ public class ModAbilityLabelBindings {
             "radius",
             config -> AbilityLabelFormatters.decimal(config.getRadius()),
             "damage",
-            config -> AbilityLabelFormatters.percent(config.getPercentAttackDamageDealt()),
+            config -> AbilityLabelFormatters.percentRounded(config.getPercentAttackDamageDealt()),
             "knockback",
-            config -> AbilityLabelFormatters.percent(config.getKnockbackStrengthMultiplier())
+            config -> AbilityLabelFormatters.percentRounded(config.getKnockbackStrengthMultiplier())
          )
       );
       register(
@@ -163,7 +163,7 @@ public class ModAbilityLabelBindings {
             "radius",
             config -> AbilityLabelFormatters.decimal(config.getRadius()),
             "damage",
-            config -> AbilityLabelFormatters.percent(config.getPercentAttackDamageDealt()),
+            config -> AbilityLabelFormatters.percentRounded(config.getPercentAttackDamageDealt()),
             "duration",
             config -> AbilityLabelFormatters.seconds(config.getDurationSeconds())
          )
@@ -179,9 +179,9 @@ public class ModAbilityLabelBindings {
             config -> AbilityLabelFormatters.integer(config.getAmplifier())
          )
       );
-      register(RampageConfig.class, Map.of("damage", config -> AbilityLabelFormatters.percent(config.getDamageIncrease())));
+      register(RampageConfig.class, Map.of("damage", config -> AbilityLabelFormatters.percentRounded(config.getDamageIncrease())));
       register(RampageChainConfig.class, Map.of("chains", config -> AbilityLabelFormatters.integer(config.getAdditionalChainCount())));
-      register(RampageLeechConfig.class, Map.of("leech", config -> AbilityLabelFormatters.percent(config.getLeechPercent())));
+      register(RampageLeechConfig.class, Map.of("leech", config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getLeechPercent())));
       register(
          SummonEternalConfig.class,
          Map.of(
@@ -190,7 +190,7 @@ public class ModAbilityLabelBindings {
             "duration",
             config -> AbilityLabelFormatters.ticks(config.getDespawnTime()),
             "chance",
-            config -> AbilityLabelFormatters.percent(config.getAncientChance())
+            config -> AbilityLabelFormatters.percentRounded(config.getAncientChance())
          )
       );
       register(
@@ -199,25 +199,25 @@ public class ModAbilityLabelBindings {
             "duration",
             config -> AbilityLabelFormatters.ticks(config.getDurationTicksPerHit()),
             "resistance",
-            config -> AbilityLabelFormatters.percent(config.getResistancePercentAddedPerHit())
+            config -> AbilityLabelFormatters.percentRounded(config.getResistancePercentAddedPerHit())
          )
       );
       register(
          TankProjectileConfig.class,
          Map.of(
             "resistance",
-            config -> AbilityLabelFormatters.percent(config.getKnockbackResistance()),
+            config -> AbilityLabelFormatters.percentRounded(config.getKnockbackResistance()),
             "projectileDamageTaken",
-            config -> AbilityLabelFormatters.percent(config.getPercentageReducedProjectileDamage())
+            config -> AbilityLabelFormatters.percentRounded(config.getPercentageReducedProjectileDamage())
          )
       );
       register(
          TankReflectConfig.class,
          Map.of(
             "chance",
-            config -> AbilityLabelFormatters.percent(config.getAdditionalThornsChance()),
+            config -> AbilityLabelFormatters.percentRounded(config.getAdditionalThornsChance()),
             "damage",
-            config -> AbilityLabelFormatters.percent(config.getThornsDamageMultiplier())
+            config -> AbilityLabelFormatters.percentRounded(config.getThornsDamageMultiplier())
          )
       );
       register(

@@ -1,7 +1,10 @@
 {
-    "variants": {
-      "": {
-        "model": "the_vault:block/ore_petzanite"
-      }
+  "variants": {
+    "type=stone": {
+      "model": "the_vault:block/ore_petzanite"
+    },
+    "type=vault_stone": {
+      "model": "the_vault:block/vaultstone_ore_petzanite"
     }
   }
+}

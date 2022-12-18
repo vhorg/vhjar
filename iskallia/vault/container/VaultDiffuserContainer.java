@@ -2,9 +2,9 @@ package iskallia.vault.container;
 
 import iskallia.vault.block.entity.VaultDiffuserTileEntity;
 import iskallia.vault.container.base.SimpleSidedContainer;
-import iskallia.vault.container.slot.RecipeOutputSlot;
+import iskallia.vault.container.oversized.OverSizedSlotContainer;
+import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
-import iskallia.vault.container.spi.AbstractElementContainer;
 import iskallia.vault.init.ModContainers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
@@ -13,7 +13,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
-public class VaultDiffuserContainer extends AbstractElementContainer {
+public class VaultDiffuserContainer extends OverSizedSlotContainer {
    private final VaultDiffuserTileEntity tileEntity;
    private final BlockPos tilePos;
 
@@ -39,38 +39,40 @@ public class VaultDiffuserContainer extends AbstractElementContainer {
          this.addSlot(new TabSlot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 112));
       }
 
-      SimpleSidedContainer ct = this.tileEntity.getInventory();
-      this.addSlot(new Slot(ct, 0, 20, 22) {
+      SimpleSidedContainer ct = this.tileEntity.getInputInv();
+      this.addSlot(new Slot(ct, 0, 55, 22) {
          public boolean mayPlace(ItemStack stack) {
             return VaultDiffuserContainer.this.tileEntity.isValidInput(stack);
          }
       });
-      this.addSlot(new RecipeOutputSlot(ct, 1, 70, 22));
-      this.addSlot(new RecipeOutputSlot(ct, 2, 88, 22));
-      this.addSlot(new RecipeOutputSlot(ct, 3, 106, 22));
-      this.addSlot(new RecipeOutputSlot(ct, 4, 124, 22));
-      this.addSlot(new RecipeOutputSlot(ct, 5, 142, 22));
+      VaultDiffuserTileEntity.DiffuserOutput out = this.tileEntity.getOutputInv();
+      this.addSlot(new OverSizedTabSlot(out, 0, 105, 22) {
+         @Override
+         public boolean mayPlace(ItemStack stack) {
+            return false;
+         }
+      });
    }
 
-   public ItemStack quickMoveStack(Player playerIn, int index) {
+   public ItemStack quickMoveStack(Player player, int index) {
       ItemStack itemstack = ItemStack.EMPTY;
       Slot slot = (Slot)this.slots.get(index);
-      if (slot != null && slot.hasItem()) {
+      if (slot.hasItem()) {
          ItemStack slotStack = slot.getItem();
          itemstack = slotStack.copy();
-         if (index >= 0 && index < 36 && this.moveItemStackTo(slotStack, 36, 37, false)) {
+         if (index >= 0 && index < 36 && this.moveOverSizedItemStackTo(slotStack, slot, 36, this.slots.size() - 1, false)) {
             return itemstack;
          }
 
          if (index >= 0 && index < 27) {
-            if (!this.moveItemStackTo(slotStack, 27, 36, false)) {
+            if (!this.moveOverSizedItemStackTo(slotStack, slot, 27, 36, false)) {
                return ItemStack.EMPTY;
             }
          } else if (index >= 27 && index < 36) {
-            if (!this.moveItemStackTo(slotStack, 0, 27, false)) {
+            if (!this.moveOverSizedItemStackTo(slotStack, slot, 0, 27, false)) {
                return ItemStack.EMPTY;
             }
-         } else if (!this.moveItemStackTo(slotStack, 0, 36, false)) {
+         } else if (!this.moveOverSizedItemStackTo(slotStack, slot, 0, 36, false)) {
             return ItemStack.EMPTY;
          }
 
@@ -84,7 +86,7 @@ public class VaultDiffuserContainer extends AbstractElementContainer {
             return ItemStack.EMPTY;
          }
 
-         slot.onTake(playerIn, slotStack);
+         slot.onTake(player, slotStack);
       }
 
       return itemstack;
@@ -99,6 +101,6 @@ public class VaultDiffuserContainer extends AbstractElementContainer {
    }
 
    public boolean stillValid(Player player) {
-      return this.tileEntity == null ? false : this.tileEntity.getInventory().stillValid(this.player);
+      return this.tileEntity == null ? false : this.tileEntity.getInputInv().stillValid(this.player);
    }
 }

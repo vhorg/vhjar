@@ -37,6 +37,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Cow;
+import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -471,6 +472,10 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
 
                   return true;
                }
+            }
+
+            if (!player.isCrouching() && !itemInPen.isEmpty() && this.animalToReference instanceof MushroomCow && level instanceof ServerLevel) {
+               this.animalToReference.mobInteract(player, hand);
             }
 
             if (!player.isCrouching()

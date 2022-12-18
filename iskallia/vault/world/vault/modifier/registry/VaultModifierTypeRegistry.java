@@ -6,6 +6,7 @@ import iskallia.vault.world.vault.modifier.modifier.ChanceCatalystModifier;
 import iskallia.vault.world.vault.modifier.modifier.ChanceChestTrapModifier;
 import iskallia.vault.world.vault.modifier.modifier.ChanceSoulShardModifier;
 import iskallia.vault.world.vault.modifier.modifier.DecoratorAddModifier;
+import iskallia.vault.world.vault.modifier.modifier.ExperienceModifier;
 import iskallia.vault.world.vault.modifier.modifier.GameControlsModifier;
 import iskallia.vault.world.vault.modifier.modifier.LootItemQuantityModifier;
 import iskallia.vault.world.vault.modifier.modifier.LootItemRarityModifier;
@@ -120,6 +121,10 @@ public final class VaultModifierTypeRegistry {
          this.put(
             VaultMod.id("modifier_type/game_controls"),
             VaultModifierType.of(GameControlsModifier.class, GameControlsModifier.Properties.class, GameControlsModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/experience"),
+            VaultModifierType.of(ExperienceModifier.class, ExperienceModifier.Properties.class, ExperienceModifier::new)
          );
       }
    };

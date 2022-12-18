@@ -22,7 +22,6 @@ import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.skill.PlayerVaultStats;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultJoinSnapshotData;
-import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
 import net.minecraft.server.level.ServerPlayer;
 
 public class Runner extends Listener {
@@ -155,14 +154,6 @@ public class Runner extends Listener {
                      .map(s -> s.get(player.getUUID()))
                      .ifPresent(stats -> stats.modify(StatCollector.EXP_MULTIPLIER, m -> Math.max(0.0F, m - 0.1F * diff)));
                }
-
-               vault.get(Vault.MODIFIERS)
-                  .getModifiers()
-                  .forEach(modifier -> vault.getOptional(Vault.STATS).map(s -> s.get(player.getUUID())).ifPresent(stats -> {
-                     if (modifier instanceof PlayerInventoryRestoreModifier playerInventoryRestoreModifier) {
-                        stats.modify(StatCollector.EXP_MULTIPLIER, m -> m * playerInventoryRestoreModifier.properties().experienceMultiplierOnSuccess());
-                     }
-                  }));
             }
          );
    }

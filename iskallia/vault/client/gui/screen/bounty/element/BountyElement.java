@@ -100,14 +100,14 @@ public class BountyElement extends ContainerElement<BountyElement> {
                ModNetwork.CHANNEL.sendToServer(new ServerboundClaimRewardMessage(this.bounty.getId()));
                this.container.getActive().removeById(this.bounty.getId());
                this.container.getComplete().add(this.bounty);
-               this.bounty.setExpiration(Instant.now().plus((long)ModConfigs.BOUNTY_CONFIG.getWaitingPeriodInHours(), ChronoUnit.HOURS).toEpochMilli());
+               this.bounty.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getWaitingPeriodSeconds(), ChronoUnit.SECONDS).toEpochMilli());
                Minecraft.getInstance().player.playSound(SoundEvents.PLAYER_LEVELUP, 0.7F, 1.0F);
             } else if (this.actionButton.getTimeHeld() > 60.0) {
                this.status = BountyElement.Status.COMPLETE;
                ModNetwork.CHANNEL.sendToServer(new ServerboundAbandonBountyMessage(this.bounty.getId()));
                this.container.getActive().removeById(this.bounty.getId());
                this.container.getComplete().add(this.bounty);
-               this.bounty.setExpiration(Instant.now().plus((long)ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltyInHours(), ChronoUnit.HOURS).toEpochMilli());
+               this.bounty.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltySeconds(), ChronoUnit.SECONDS).toEpochMilli());
             }
 
             if (this.bounty != null) {

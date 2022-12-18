@@ -63,7 +63,7 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
                      List<ItemStack> stacks = requiredItems.getItems();
                      TextComponent text = new TextComponent(String.valueOf(requiredItems.getAmountRequired() - requiredItems.getCurrentAmount()));
                      int textColor = 16777215;
-                     if (requiredItems.reachedAmountRequired()) {
+                     if (requiredItems.isComplete()) {
                         text = new TextComponent("Complete");
                         textColor = 65280;
                      }
@@ -154,15 +154,11 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
    }
 
    private double[] getTranslation(int index) {
-      switch (index) {
-         case 0:
-            return new double[]{0.95, 1.35, 0.05};
-         case 1:
-            return new double[]{0.95, 1.35, 0.95};
-         case 2:
-            return new double[]{0.05, 1.35, 0.95};
-         default:
-            return new double[]{0.05, 1.35, 0.05};
-      }
+      return switch (index) {
+         case 0 -> new double[]{0.95, 1.35, 0.05};
+         case 1 -> new double[]{0.95, 1.35, 0.95};
+         case 2 -> new double[]{0.05, 1.35, 0.95};
+         default -> new double[]{0.05, 1.35, 0.05};
+      };
    }
 }

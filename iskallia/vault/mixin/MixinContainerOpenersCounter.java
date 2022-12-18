@@ -26,7 +26,7 @@ public abstract class MixinContainerOpenersCounter {
       return (int)players.stream().filter(player -> {
          double reach = player.getReachDistance();
          if (reach != 0.0) {
-            reach += 0.5;
+            reach += 2.0;
          }
 
          return player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) <= reach * reach;

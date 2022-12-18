@@ -3,7 +3,6 @@ package iskallia.vault.block.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import iskallia.vault.block.entity.VaultDiffuserTileEntity;
-import java.util.Random;
 import javax.annotation.Nonnull;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -31,18 +30,16 @@ public class VaultDiffuserRenderer implements BlockEntityRenderer<VaultDiffuserT
       if (world != null) {
          float lerp = Mth.lerp(partialTicks, diffuser.getProgressLastPercent(), diffuser.getProgressPercent());
          if (lerp < 0.4) {
-            ItemStack itemStack = diffuser.getInventory().getItem(0);
+            ItemStack itemStack = diffuser.getInputInv().getItem(0);
             matrixStack.pushPose();
             this.renderInputItem(matrixStack, buffer, combinedLight, combinedOverlay, 0.6F, 0.35F - lerp / 2.0F, itemStack, diffuser, partialTicks);
             matrixStack.popPose();
          }
 
-         for (int i = 1; i < diffuser.getInventory().getContainerSize(); i++) {
-            ItemStack itemStack = diffuser.getInventory().getItem(i);
-            matrixStack.pushPose();
-            this.renderOutputItem(matrixStack, buffer, combinedLight, combinedOverlay, 1.4F, 0.35F, itemStack, diffuser, partialTicks, i);
-            matrixStack.popPose();
-         }
+         ItemStack itemStack = diffuser.getOutputInv().getItem(0);
+         matrixStack.pushPose();
+         this.renderOutputItem(matrixStack, buffer, combinedLight, combinedOverlay, 1.4F, 0.35F, itemStack, diffuser, partialTicks);
+         matrixStack.popPose();
       }
    }
 
@@ -79,20 +76,11 @@ public class VaultDiffuserRenderer implements BlockEntityRenderer<VaultDiffuserT
       float scale,
       ItemStack itemStack,
       VaultDiffuserTileEntity diffuser,
-      float partialTicks,
-      int i
+      float partialTicks
    ) {
-      Random random = new Random(420L * i);
       Minecraft minecraft = Minecraft.getInstance();
       matrixStack.pushPose();
-      if (i != 1) {
-         matrixStack.translate(
-            0.5F + random.nextFloat() * 0.25F - 0.125F, yOffset + random.nextFloat() * 0.125F - 0.0625F, 0.5F + random.nextFloat() * 0.25F - 0.125F
-         );
-      } else {
-         matrixStack.translate(0.5, yOffset, 0.5);
-      }
-
+      matrixStack.translate(0.5, yOffset, 0.5);
       matrixStack.scale(scale, scale, scale);
       double rotation = -10.0 * (System.currentTimeMillis() / 200.0) % 360.0 * (Math.PI / 180.0);
       matrixStack.mulPose(Quaternion.fromXYZ(0.0F, (float)rotation, 0.0F));

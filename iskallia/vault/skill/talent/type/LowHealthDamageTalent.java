@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.util.damage.PlayerDamageHelper;
 import java.util.UUID;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
 public class LowHealthDamageTalent extends LowHealthTalent {
@@ -27,7 +28,7 @@ public class LowHealthDamageTalent extends LowHealthTalent {
          this.removeExistingDamageBuff(sPlayer);
       } else {
          PlayerDamageHelper.DamageMultiplier existing = PlayerDamageHelper.getMultiplier(sPlayer, DAMAGE_MULTIPLIER_ID);
-         if (existing != null && existing.getMultiplier() != this.getDamageIncrease()) {
+         if (existing != null && !Mth.equal(existing.getMultiplier(), this.getDamageIncrease())) {
             PlayerDamageHelper.removeMultiplier(sPlayer, existing);
             existing = null;
          }

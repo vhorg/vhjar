@@ -169,6 +169,14 @@
       "the_vault:coin_pile/coin2"
     ]
   },
+  "coin_single_place": {
+    "category": "block",
+    "sounds": [
+      "the_vault:coin_pile/coin_single1",
+      "the_vault:coin_pile/coin_single2",
+      "the_vault:coin_pile/coin_single3"
+    ]
+  },
   "boogie_hurt": {
     "category": "hostile",
     "sounds": [

@@ -1,7 +1,10 @@
 {
-    "variants": {
-      "": {
-        "model": "the_vault:block/ore_puffium"
-      }
+  "variants": {
+    "type=stone": {
+      "model": "the_vault:block/ore_puffium"
+    },
+    "type=vault_stone": {
+      "model": "the_vault:block/vaultstone_ore_puffium"
     }
   }
+}

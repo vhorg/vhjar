@@ -88,7 +88,7 @@ public class RequiredItems implements INBTSerializable<CompoundTag> {
       this.amountRequired = amountRequired;
    }
 
-   public boolean reachedAmountRequired() {
+   public boolean isComplete() {
       return this.getCurrentAmount() >= this.getAmountRequired();
    }
 

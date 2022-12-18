@@ -6,9 +6,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
 public class CompletionProperties extends TaskProperties {
-   private ResourceLocation id;
+   private String id;
 
-   public CompletionProperties(ResourceLocation id, List<ResourceLocation> validDimensions, boolean isVaultOnly, double amount) {
+   public CompletionProperties(String id, List<ResourceLocation> validDimensions, boolean isVaultOnly, double amount) {
       super(TaskRegistry.COMPLETION, validDimensions, isVaultOnly, amount);
       this.id = id;
    }
@@ -18,20 +18,30 @@ public class CompletionProperties extends TaskProperties {
       this.deserializeNBT(tag);
    }
 
-   public ResourceLocation getId() {
+   public String getId() {
       return this.id;
    }
 
    @Override
    public CompoundTag serializeNBT() {
       CompoundTag tag = super.serializeNBT();
-      tag.putString("id", this.id.toString());
+      tag.putString("id", this.id);
       return tag;
    }
 
    @Override
    public void deserializeNBT(CompoundTag tag) {
       super.deserializeNBT(tag);
-      this.id = new ResourceLocation(tag.getString("id"));
+      this.id = tag.getString("id");
+      String var2 = this.id;
+
+      this.id = switch (var2) {
+         case "the_vault:vault" -> "vault";
+         case "the_vault:boss" -> "boss";
+         case "the_vault:cake" -> "cake";
+         case "the_vault:scavenger" -> "scavenger";
+         case "the_vault:monolith" -> "monolith";
+         default -> this.id;
+      };
    }
 }

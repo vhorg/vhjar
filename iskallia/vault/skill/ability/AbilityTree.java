@@ -121,6 +121,10 @@ public class AbilityTree implements INBTSerializable<CompoundTag> {
       return this.activeAbilitySet.remove(node);
    }
 
+   public void deactivateAllAbilities() {
+      this.toDeactivateAbilitySet.addAll(this.activeAbilitySet);
+   }
+
    private void deactivateAbilityDeferred(AbilityNode<?, ?> node) {
       this.toDeactivateAbilitySet.add(node);
    }
@@ -308,6 +312,16 @@ public class AbilityTree implements INBTSerializable<CompoundTag> {
 
    public void downgradeAbility(MinecraftServer server, AbilityNode<?, ?> abilityNode) {
       this.remove(server, abilityNode);
+      NetcodeUtils.runIfPresent(server, this.uuid, player -> {
+         if (abilityNode.getLevel() == 1) {
+            this.selectSpecialization(player, abilityNode, null);
+         }
+
+         if (this.isAbilityActive(abilityNode)) {
+            this.deactivateAbility(abilityNode);
+            this.putOnCooldown(player, abilityNode);
+         }
+      });
       int targetLevel = abilityNode.getLevel() - 1;
       AbilityNode<?, ?> downgradedAbilityNode = new AbilityNode(
          abilityNode.getGroup().getParentName(), Math.max(targetLevel, 0), abilityNode.getSpecialization()

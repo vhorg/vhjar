@@ -41,7 +41,7 @@ public class AbilityQuickselectMessage {
                   if (abilityNode.isLearned()) {
                      abilityTree.quickSelectAbility(sender.server, ability.getParentName());
                      if (abilityNode.equals(abilityTree.getSelectedAbility())
-                        && abilityNode.getKeyBehavior() == KeyBehavior.INSTANT_ON_RELEASE
+                        && (abilityNode.getKeyBehavior() == KeyBehavior.INSTANT_ON_RELEASE || abilityNode.getKeyBehavior() == KeyBehavior.TOGGLE_ON_RELEASE)
                         && !abilityTree.isOnCooldown(abilityNode)) {
                         abilityTree.keyUp(sender.server);
                      }

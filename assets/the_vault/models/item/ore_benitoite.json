@@ -1,3 +1,7 @@
 {
-  "parent": "the_vault:block/ore_benitoite"
+  "parent": "the_vault:block/ore_benitoite",
+  "overrides": [
+    { "predicate": { "the_vault:vault_ore_type": 0 }, "model": "the_vault:item/ore_benitoite" },
+    { "predicate": { "the_vault:vault_ore_type": 1 }, "model": "the_vault:item/vaultstone_ore_benitoite" }
+  ]
 }

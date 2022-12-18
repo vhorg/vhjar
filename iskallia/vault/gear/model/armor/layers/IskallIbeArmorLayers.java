@@ -1,8 +1,5 @@
 package iskallia.vault.gear.model.armor.layers;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Vector3f;
 import iskallia.vault.dynamodel.model.armor.ArmorLayers;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import java.util.function.Supplier;
@@ -40,18 +37,10 @@ public class IskallIbeArmorLayers extends ArmorLayers {
          PartDefinition partdefinition = meshdefinition.getRoot();
          PartDefinition head = partdefinition.addOrReplaceChild(
             "head",
-            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(1.0F)),
+            CubeListBuilder.create().texOffs(7, 5).addBox(1.0F, -5.0F, -4.0F, 3.0F, 3.0F, 6.0F, new CubeDeformation(1.0F)),
             PartPose.offset(0.0F, 0.0F, 0.0F)
          );
-         return LayerDefinition.create(meshdefinition, 64, 32);
-      }
-
-      @Override
-      protected void adjustForRender(
-         PoseStack matrixStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha
-      ) {
-         super.adjustForRender(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-         matrixStack.mulPose(Vector3f.YP.rotation((float) Math.PI));
+         return LayerDefinition.create(meshdefinition, 32, 32);
       }
    }
 }

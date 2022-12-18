@@ -40,12 +40,16 @@ public class VaultLevelsConfig extends Config {
             vaultLevel.tnl = 1500 * x - 1000;
          } else if (x < 40) {
             vaultLevel.tnl = 400 * x + 10000;
-         } else if (x < 60) {
+         } else if (x < 50) {
             vaultLevel.tnl = 1200 * x - 22000;
+         } else if (x < 65) {
+            vaultLevel.tnl = 98700;
+         } else if (x < 80) {
+            vaultLevel.tnl = 246750;
          } else if (x < 90) {
-            vaultLevel.tnl = 2000 * x - 70000;
-         } else if (x < 100) {
-            vaultLevel.tnl = 54810 * x - 4822900;
+            vaultLevel.tnl = 493500;
+         } else {
+            vaultLevel.tnl = 1110375;
          }
 
          this.levelMetas.add(vaultLevel);

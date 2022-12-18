@@ -1,7 +1,10 @@
 {
-    "variants": {
-      "": {
-        "model": "the_vault:block/ore_xenium"
-      }
+  "variants": {
+    "type=stone": {
+      "model": "the_vault:block/ore_xenium"
+    },
+    "type=vault_stone": {
+      "model": "the_vault:block/vaultstone_ore_xenium"
     }
   }
+}

@@ -58,6 +58,8 @@ public class VignetteOverlay implements IIngameOverlay {
                   AbilitiesVignetteConfig.VignetteData data = ModConfigs.ABILITIES_VIGNETTE.RAGE;
                   this.render(data.color, data.alpha * (rage / 100.0F), data.style, matrixStack, width, height);
                }
+            } else if (minecraft.player.hasEffect(ModEffects.STONEFALL)) {
+               this.render(ModConfigs.ABILITIES_VIGNETTE.STONEFALL, matrixStack, width, height);
             }
          }
       }
@@ -83,6 +85,7 @@ public class VignetteOverlay implements IIngameOverlay {
    protected void renderVignette(TextColor color, float alpha, PoseStack matrixStack, int width, int height) {
       RenderSystem.disableDepthTest();
       RenderSystem.depthMask(false);
+      RenderSystem.enableBlend();
       RenderSystem.defaultBlendFunc();
       int colorValue = color.getValue();
       float b = (colorValue & 0xFF) / 255.0F;

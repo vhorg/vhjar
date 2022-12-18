@@ -139,7 +139,7 @@ public class SnapshotCommand extends Command {
                if (timestamps.isEmpty()) {
                   player.sendMessage(new TextComponent("No snapshot exists for " + playerIGN).withStyle(ChatFormatting.RED), Util.NIL_UUID);
                } else {
-                  timestamps.sort(Comparator.reverseOrder());
+                  timestamps.sort(Comparator.naturalOrder());
                   SimpleDateFormat dateFormat = new SimpleDateFormat();
                   source.sendSuccess(new TextComponent("Timestamps"), false);
                   timestamps.forEach(

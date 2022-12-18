@@ -4,6 +4,8 @@ import com.google.common.collect.Lists;
 import iskallia.vault.VaultMod;
 import iskallia.vault.container.VaultDiffuserContainer;
 import iskallia.vault.container.base.SimpleSidedContainer;
+import iskallia.vault.container.oversized.OverSizedInventory;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
@@ -12,8 +14,17 @@ import iskallia.vault.network.message.DiffuserParticleMessage;
 import iskallia.vault.util.nbt.NBTHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -27,6 +38,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -51,14 +63,15 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
    private static final BlockPos[] list = new BlockPos[]{
       BlockPos.ZERO.north().east(), BlockPos.ZERO.north().west(), BlockPos.ZERO.south().east(), BlockPos.ZERO.south().west()
    };
-   private final VaultDiffuserTileEntity.DiffuserInventory inventory = new VaultDiffuserTileEntity.DiffuserInventory();
+   private final VaultDiffuserTileEntity.DiffuserInput inputInv = new VaultDiffuserTileEntity.DiffuserInput();
+   private final VaultDiffuserTileEntity.DiffuserOutput outputInv = new VaultDiffuserTileEntity.DiffuserOutput(1, this);
    private ItemStack prevInput = ItemStack.EMPTY;
    private int processTick = 0;
    private int processTickLast = 0;
    private LazyOptional<? extends IItemHandler>[] handlers = SidedInvWrapper.create(
-      this.inventory, new Direction[]{Direction.UP, Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH}
+      this.inputInv, new Direction[]{Direction.UP, Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH}
    );
-   private LazyOptional<? extends IItemHandler>[] outputHandlers = SidedInvWrapper.create(this.inventory, new Direction[]{Direction.DOWN});
+   private LazyOptional<? extends IItemHandler>[] outputHandlers = SidedInvWrapper.create(this.outputInv, new Direction[]{Direction.DOWN});
 
    public VaultDiffuserTileEntity(BlockPos pWorldPosition, BlockState pBlockState) {
       super(ModBlocks.VAULT_DIFFUSER_ENTITY, pWorldPosition, pBlockState);
@@ -66,11 +79,11 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
 
    public static void tick(Level world, BlockPos pos, BlockState state, VaultDiffuserTileEntity tile) {
       tile.processTickLast = tile.processTick;
-      if (!tile.prevInput.sameItem(tile.inventory.getItem(0))) {
+      if (!tile.prevInput.sameItem(tile.inputInv.getItem(0))) {
          tile.triggerItemChange();
       }
 
-      tile.prevInput = tile.inventory.getItem(0);
+      tile.prevInput = tile.inputInv.getItem(0);
       if (world.isClientSide()) {
          if (tile.getProgressPercent() > 0.0F && tile.getProgressPercent() < 0.3F) {
             Vec3 vec3 = new Vec3(pos.getX() + 0.5, pos.getY() + 0.65, pos.getZ() + 0.5);
@@ -106,7 +119,7 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
                      tile.getBlockPos(),
                      SoundEvents.CONDUIT_ACTIVATE,
                      SoundSource.BLOCKS,
-                     0.5F + new Random().nextFloat() * 0.05F,
+                     0.15F + new Random().nextFloat() * 0.05F,
                      0.85F + new Random().nextFloat() * 0.05F
                   );
             }
@@ -134,16 +147,22 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
                   this.getBlockPos(),
                   SoundEvents.BEACON_POWER_SELECT,
                   SoundSource.BLOCKS,
-                  0.5F + new Random().nextFloat() * 0.05F,
+                  0.15F + new Random().nextFloat() * 0.05F,
                   0.85F + new Random().nextFloat() * 0.05F
                );
          }
 
          this.processTick = 0;
-         ItemStack input = this.inventory.getItem(0).copy();
-         this.inventory.removeItem(0, 1);
+         ItemStack input = this.inputInv.getItem(0).copy();
+         this.inputInv.removeItem(0, 1);
          List<ItemStack> stacksToAdd = this.getUseRelatedOutput(ModConfigs.VAULT_DIFFUSER.generateOutput(output));
-         stacksToAdd.forEach(this.inventory::addItem);
+         if (this.outputInv.getItem(0).isEmpty()) {
+            this.outputInv.setOverSizedStack(0, new OverSizedItemStack(stacksToAdd.get(0), output));
+         } else {
+            this.outputInv.setOverSizedStack(0, ((OverSizedItemStack)this.outputInv.getOverSizedContents().get(0)).addCopy(output));
+         }
+
+         this.outputInv.setChanged();
          ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new DiffuserParticleMessage(this.getBlockPos()));
       }
    }
@@ -166,30 +185,18 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
 
    private boolean canCraft() {
       int output = this.getRecipeOutput();
-      return output == 0 ? false : this.canAddItem(output);
+      return output == 0 ? false : this.canAddItem();
    }
 
-   private boolean canAddItem(int count) {
+   private boolean canAddItem() {
       ItemStack stack = new ItemStack((ItemLike)ForgeRegistries.ITEMS.getValue(ModConfigs.VAULT_DIFFUSER.getOutputItem()));
-      int openSpace = 0;
-
-      for (int i = 1; i < this.inventory.getContainerSize(); i++) {
-         ItemStack slotItem = this.inventory.getItem(i);
-         if (ItemStack.isSameItemSameTags(slotItem, stack) || slotItem.isEmpty()) {
-            if (slotItem.isEmpty()) {
-               openSpace += 64;
-            } else {
-               openSpace += 64 - slotItem.getCount();
-            }
-         }
-      }
-
-      return openSpace >= count;
+      ItemStack slotItem = this.outputInv.getItem(0);
+      return slotItem.isEmpty() || ItemStack.isSameItemSameTags(slotItem, stack);
    }
 
    @Nullable
    private int getRecipeOutput() {
-      ItemStack input = this.inventory.getItem(0);
+      ItemStack input = this.inputInv.getItem(0);
       if (!this.isValidInput(input)) {
          return 0;
       } else {
@@ -205,7 +212,7 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
    }
 
    private void triggerItemChange() {
-      ItemStack input = this.inventory.getItem(0).copy();
+      ItemStack input = this.inputInv.getItem(0).copy();
       if (!this.isValidInput(input) && !input.sameItem(this.prevInput)) {
          this.resetProcess(null);
       } else {
@@ -240,19 +247,27 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
       return (float)this.processTickLast / ModConfigs.VAULT_DIFFUSER.getProcessingTickTime();
    }
 
-   public VaultDiffuserTileEntity.DiffuserInventory getInventory() {
-      return this.inventory;
+   public VaultDiffuserTileEntity.DiffuserInput getInputInv() {
+      return this.inputInv;
+   }
+
+   public VaultDiffuserTileEntity.DiffuserOutput getOutputInv() {
+      return this.outputInv;
    }
 
    public void load(CompoundTag tag) {
       super.load(tag);
-      NBTHelper.deserializeSimpleContainer(this.inventory, tag.getList("inventory", 10));
+      this.outputInv.load(tag.getCompound("output"));
+      NBTHelper.deserializeSimpleContainer(this.inputInv, tag.getList("inventory", 10));
       this.processTick = tag.getInt("processTick");
    }
 
    protected void saveAdditional(CompoundTag tag) {
       super.saveAdditional(tag);
-      tag.put("inventory", NBTHelper.serializeSimpleContainer(this.inventory));
+      CompoundTag output = new CompoundTag();
+      this.outputInv.save(output);
+      tag.put("output", output);
+      tag.put("inventory", NBTHelper.serializeSimpleContainer(this.inputInv));
       tag.putInt("processTick", this.processTick);
    }
 
@@ -312,8 +327,8 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
 
    public void reviveCaps() {
       super.reviveCaps();
-      this.handlers = SidedInvWrapper.create(this.inventory, new Direction[]{Direction.UP, Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH});
-      this.outputHandlers = SidedInvWrapper.create(this.inventory, new Direction[]{Direction.DOWN});
+      this.handlers = SidedInvWrapper.create(this.inputInv, new Direction[]{Direction.UP, Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH});
+      this.outputHandlers = SidedInvWrapper.create(this.outputInv, new Direction[]{Direction.DOWN});
    }
 
    @OnlyIn(Dist.CLIENT)
@@ -373,8 +388,8 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
       }
    }
 
-   public class DiffuserInventory extends SimpleSidedContainer {
-      public DiffuserInventory() {
+   public class DiffuserInput extends SimpleSidedContainer {
+      public DiffuserInput() {
          super(6);
       }
 
@@ -436,6 +451,40 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
             p_19186_.shrink($$3);
             this.setChanged();
          }
+      }
+   }
+
+   public class DiffuserOutput extends OverSizedInventory implements WorldlyContainer {
+      private final Map<Direction, Set<Integer>> cachedSidedSlots = new HashMap<>();
+
+      public DiffuserOutput(int size, BlockEntity tile) {
+         super(size, tile);
+         this.cacheSlots();
+      }
+
+      private void cacheSlots() {
+         IntStream.range(0, this.getContainerSize())
+            .forEach(slot -> this.getAccessibleSlots(slot).forEach(dir -> this.cachedSidedSlots.computeIfAbsent(dir, side -> new HashSet<>()).add(slot)));
+      }
+
+      public List<Direction> getAccessibleSlots(int slot) {
+         return Lists.newArrayList(new Direction[]{Direction.UP, Direction.EAST, Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.DOWN});
+      }
+
+      public int[] getSlotsForFace(Direction side) {
+         return Optional.ofNullable(this.cachedSidedSlots.get(side)).map(Collection::stream).orElse(Stream.empty()).mapToInt(Integer::intValue).toArray();
+      }
+
+      public boolean canPlaceItem(int pIndex, ItemStack pStack) {
+         return false;
+      }
+
+      public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction side) {
+         return false;
+      }
+
+      public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+         return this.cachedSidedSlots.getOrDefault(side, Collections.emptySet()).contains(slot);
       }
    }
 }

@@ -3,6 +3,7 @@ package iskallia.vault.block.model;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import iskallia.vault.VaultMod;
+import javax.annotation.Nonnull;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -17,7 +18,8 @@ import net.minecraft.client.renderer.RenderType;
 public class VaultChestModel extends Model {
    public static final ModelLayerLocation TREASURE_LOCATION = new ModelLayerLocation(VaultMod.id("treasure_chest"), "main");
    public static final ModelLayerLocation MOSSY_LOCATION = new ModelLayerLocation(VaultMod.id("mossy_chest"), "main");
-   public static final ModelLayerLocation SCAVANGER_LOCATION = new ModelLayerLocation(VaultMod.id("scavanger_chest"), "main");
+   public static final ModelLayerLocation SCAVENGER_LOCATION = new ModelLayerLocation(VaultMod.id("scavanger_chest"), "main");
+   public static final ModelLayerLocation PRESENT_LOCATION = new ModelLayerLocation(VaultMod.id("present_chest"), "main");
    private final ModelPart chest;
    private final ModelPart base;
    private final ModelPart lid;
@@ -155,12 +157,89 @@ public class VaultChestModel extends Model {
       return LayerDefinition.create(meshdefinition, 128, 128);
    }
 
+   public static LayerDefinition createPresentLayer() {
+      MeshDefinition meshdefinition = new MeshDefinition();
+      PartDefinition partdefinition = meshdefinition.getRoot();
+      PartDefinition chest = partdefinition.addOrReplaceChild(
+         "chest", CubeListBuilder.create(), PartPose.offsetAndRotation(8.0F, 0.0F, 8.0F, 0.0F, 0.0F, 3.1416F)
+      );
+      PartDefinition lid = chest.addOrReplaceChild(
+         "lid",
+         CubeListBuilder.create()
+            .texOffs(0, 21)
+            .addBox(-6.5F, -0.8438F, -0.5F, 13.0F, 3.0F, 13.0F, new CubeDeformation(0.0F))
+            .texOffs(40, 23)
+            .addBox(6.0F, -0.5938F, 5.0F, 1.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 24)
+            .addBox(-7.0F, -0.5938F, 5.0F, 2.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(36, 0)
+            .addBox(-7.0F, -1.5938F, 5.0F, 14.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(44, 25)
+            .addBox(-1.0F, -0.5938F, 12.0F, 2.0F, 3.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 24)
+            .addBox(-1.0F, -0.5938F, -1.0F, 2.0F, 3.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 25)
+            .addBox(-1.0F, -1.5938F, 7.0F, 2.0F, 1.0F, 6.0F, new CubeDeformation(0.0F))
+            .texOffs(41, 24)
+            .addBox(-1.0F, -1.5938F, -1.0F, 2.0F, 1.0F, 6.0F, new CubeDeformation(0.0F)),
+         PartPose.offset(0.0F, -11.1563F, -6.0F)
+      );
+      PartDefinition bow = lid.addOrReplaceChild(
+         "bow",
+         CubeListBuilder.create()
+            .texOffs(2, 2)
+            .addBox(-2.0F, -13.75F, -1.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(2, 2)
+            .addBox(-5.0F, -13.75F, -1.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(2, 2)
+            .addBox(-4.0F, -14.75F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(3, 24)
+            .addBox(-1.0F, -13.75F, -2.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(3, 24)
+            .addBox(-1.0F, -13.75F, -5.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(3, 24)
+            .addBox(-1.0F, -14.75F, -4.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 30)
+            .addBox(-1.0F, -14.5F, -1.0F, 2.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(2, 4)
+            .addBox(1.0F, -13.75F, -1.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(2, 4)
+            .addBox(4.0F, -13.75F, -1.0F, 1.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(2, 4)
+            .addBox(2.0F, -14.75F, -1.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(1, 8)
+            .addBox(-1.0F, -13.75F, 1.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(1, 8)
+            .addBox(-1.0F, -13.75F, 4.0F, 2.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(1, 8)
+            .addBox(-1.0F, -14.75F, 2.0F, 2.0F, 1.0F, 2.0F, new CubeDeformation(0.0F)),
+         PartPose.offset(0.0F, 11.1563F, 6.0F)
+      );
+      PartDefinition base = chest.addOrReplaceChild(
+         "base",
+         CubeListBuilder.create()
+            .texOffs(0, 0)
+            .addBox(-6.0F, -9.0F, -6.0F, 12.0F, 9.0F, 12.0F, new CubeDeformation(0.0F))
+            .texOffs(40, 22)
+            .addBox(-1.0F, -9.0F, -6.5F, 2.0F, 9.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 22)
+            .addBox(5.5F, -9.0F, -1.0F, 1.0F, 9.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(4, 22)
+            .addBox(-1.0F, -9.0F, 5.5F, 2.0F, 9.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(40, 21)
+            .addBox(-6.5F, -9.0F, -1.0F, 1.0F, 9.0F, 2.0F, new CubeDeformation(0.0F)),
+         PartPose.offset(0.0F, 0.0F, 0.0F)
+      );
+      PartDefinition bone = base.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+      return LayerDefinition.create(meshdefinition, 128, 128);
+   }
+
    public void setLidAngle(float lidAngle) {
       this.lid.xRot = -(lidAngle * (float) (Math.PI / 2));
    }
 
    public void renderToBuffer(
-      PoseStack poseStack, VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha
+      @Nonnull PoseStack poseStack, @Nonnull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha
    ) {
       this.chest.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
    }

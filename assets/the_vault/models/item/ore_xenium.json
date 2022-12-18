@@ -1,3 +1,7 @@
 {
-    "parent": "the_vault:block/ore_xenium"
+    "parent": "the_vault:block/ore_xenium",
+    "overrides": [
+        { "predicate": { "the_vault:vault_ore_type": 0 }, "model": "the_vault:item/ore_xenium" },
+        { "predicate": { "the_vault:vault_ore_type": 1 }, "model": "the_vault:item/vaultstone_ore_xenium" }
+    ]
 }

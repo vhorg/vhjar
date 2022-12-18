@@ -140,6 +140,10 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
             AbilityNode<?, ?> abilityNode = this.abilityTree.getNodeOf(ability);
             if (abilityNode.isLearned()) {
                Minecraft.getInstance().player.playSound(ModSounds.SKILL_TREE_UPGRADE_SFX, 1.0F, 1.0F);
+               if (abilityNode.getLevel() == 1) {
+                  this.abilityTree.selectSpecialization(ability.getAbilityGroupName(), null);
+               }
+
                this.abilityTree.downgradeAbility(null, abilityNode);
                this.update();
                ModNetwork.CHANNEL.sendToServer(new AbilityLevelMessage(abilityNode.getGroup().getParentName(), false));

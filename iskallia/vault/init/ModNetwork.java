@@ -13,6 +13,7 @@ import iskallia.vault.network.message.CheerReceiveMessage;
 import iskallia.vault.network.message.ClientboundArchetypeMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
 import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
+import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
 import iskallia.vault.network.message.DiffuserParticleMessage;
 import iskallia.vault.network.message.EffectMessage;
@@ -445,6 +446,13 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(), AnimalPenParticleMessage.class, AnimalPenParticleMessage::encode, AnimalPenParticleMessage::decode, AnimalPenParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundUpdateAltarIndexMessage.class,
+         ClientboundUpdateAltarIndexMessage::encode,
+         ClientboundUpdateAltarIndexMessage::decode,
+         ClientboundUpdateAltarIndexMessage::handle
       );
    }
 

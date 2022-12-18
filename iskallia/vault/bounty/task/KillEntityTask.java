@@ -3,6 +3,7 @@ package iskallia.vault.bounty.task;
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.bounty.task.properties.KillEntityProperties;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.world.data.BountyData;
@@ -28,11 +29,17 @@ public class KillEntityTask extends Task<KillEntityProperties> {
 
    @Override
    protected <E> boolean doValidate(ServerPlayer player, E event) {
-      if (!(event instanceof LivingDeathEvent e)) {
-         return false;
-      } else {
+      if (event instanceof LivingDeathEvent e) {
          ResourceLocation entityId = ForgeRegistries.ENTITIES.getKey(e.getEntity().getType());
-         return entityId != null && entityId.equals(this.getProperties().getEntityId());
+         if (entityId == null) {
+            return false;
+         } else {
+            return entityId.equals(this.getProperties().getEntityId())
+               ? true
+               : ModConfigs.BOUNTY_ENTITIES.getValidEntities(this.getProperties().getEntityId()).contains(entityId);
+         }
+      } else {
+         return false;
       }
    }
 

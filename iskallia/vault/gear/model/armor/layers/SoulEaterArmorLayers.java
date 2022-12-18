@@ -66,7 +66,7 @@ public class SoulEaterArmorLayers extends ArmorLayers {
          PartDefinition partdefinition = meshdefinition.getRoot();
          PartDefinition head = partdefinition.addOrReplaceChild(
             "head",
-            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -9.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.51F)),
+            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -9.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(1.0F)),
             PartPose.offset(0.0F, 0.0F, 0.0F)
          );
          PartDefinition body = partdefinition.addOrReplaceChild(

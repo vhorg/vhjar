@@ -23,6 +23,7 @@ import iskallia.vault.util.AdvancementHelper;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.util.VaultRarity;
+import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.data.VaultCharmData;
@@ -53,11 +54,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.Clone;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
@@ -311,6 +314,20 @@ public class PlayerEvents {
    public static void onPlayerDrops(LivingDropsEvent event) {
       if (event.getEntity() instanceof Player player && ServerVaults.isInVault(player)) {
          event.setCanceled(true);
+      }
+   }
+
+   @SubscribeEvent
+   public static void on(LivingDeathEvent event) {
+      if (event.getEntity() instanceof ServerPlayer player) {
+         PlayerAbilitiesData.deactivateAllAbilities(player);
+      }
+   }
+
+   @SubscribeEvent
+   public static void on(Clone event) {
+      if (event.getPlayer() instanceof ServerPlayer player && !event.isWasDeath()) {
+         Mana.set(player, Mana.get(event.getOriginal()));
       }
    }
 }
