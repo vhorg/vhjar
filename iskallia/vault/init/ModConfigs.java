@@ -37,6 +37,7 @@ import iskallia.vault.config.LegendaryTreasureEpicConfig;
 import iskallia.vault.config.LegendaryTreasureNormalConfig;
 import iskallia.vault.config.LegendaryTreasureOmegaConfig;
 import iskallia.vault.config.LegendaryTreasureRareConfig;
+import iskallia.vault.config.LootInfoConfig;
 import iskallia.vault.config.MagnetConfigs;
 import iskallia.vault.config.ManaConfig;
 import iskallia.vault.config.MenuPlayerStatDescriptionConfig;
@@ -48,6 +49,7 @@ import iskallia.vault.config.OtherSideConfig;
 import iskallia.vault.config.OverLevelEnchantConfig;
 import iskallia.vault.config.PandorasBoxConfig;
 import iskallia.vault.config.PaxelConfigs;
+import iskallia.vault.config.PointsResetConfig;
 import iskallia.vault.config.RaidConfig;
 import iskallia.vault.config.RaidEventConfig;
 import iskallia.vault.config.RaidModifierConfig;
@@ -99,6 +101,8 @@ import iskallia.vault.config.VaultUtilitiesConfig;
 import iskallia.vault.config.WildSpawnerConfig;
 import iskallia.vault.config.altar.VaultAltarIngredientsConfig;
 import iskallia.vault.config.bounty.BountyConfig;
+import iskallia.vault.config.bounty.BountyEntitiesConfig;
+import iskallia.vault.config.bounty.BountyOresConfig;
 import iskallia.vault.config.bounty.RewardConfig;
 import iskallia.vault.config.bounty.task.TaskConfig;
 import iskallia.vault.config.core.LootPoolsConfig;
@@ -121,6 +125,7 @@ import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.world.loot.LootPool;
 import iskallia.vault.core.world.loot.LootTable;
+import iskallia.vault.core.world.loot.LootTableInfo;
 import iskallia.vault.core.world.loot.generator.TieredLootTableGenerator;
 import iskallia.vault.core.world.processor.Palette;
 import iskallia.vault.core.world.processor.tile.ReferenceTileProcessor;
@@ -234,16 +239,20 @@ public class ModConfigs {
    public static MenuPlayerStatDescriptionConfig MENU_PLAYER_STAT_DESCRIPTIONS;
    public static VaultModifierOverlayConfig VAULT_MODIFIER_OVERLAY;
    public static CrystalBuddingConfig CRYSTAL_BUDDING;
+   public static LootInfoConfig LOOT_INFO_CONFIG;
    public static Map<Item, VaultGearTierConfig> VAULT_GEAR_CONFIG;
    public static VaultGearTypePoolConfig VAULT_GEAR_TYPE_POOL_CONFIG;
    public static VaultGearTypeConfig VAULT_GEAR_TYPE_CONFIG;
    public static VaultGearTagConfig VAULT_GEAR_TAG_CONFIG;
    public static BountyConfig BOUNTY_CONFIG;
    public static RewardConfig REWARD_CONFIG;
+   public static BountyEntitiesConfig BOUNTY_ENTITIES;
+   public static BountyOresConfig BOUNTY_ORES;
    public static VaultGearCraftingConfig VAULT_GEAR_CRAFTING_CONFIG;
    public static VaultGearRecipesConfig VAULT_GEAR_RECIPES_CONFIG;
    public static VaultGearModificationConfig VAULT_GEAR_MODIFICATION_CONFIG;
    public static VaultAltarIngredientsConfig VAULT_ALTAR_INGREDIENTS;
+   public static PointsResetConfig PLAYER_RESETS;
 
    public static void registerCompressionConfigs() {
       COMPRESSION_BLOCKS = new CompressionBlocksConfig().readConfig();
@@ -350,6 +359,7 @@ public class ModConfigs {
       MENU_PLAYER_STAT_DESCRIPTIONS = new MenuPlayerStatDescriptionConfig().readConfig();
       VAULT_MODIFIER_OVERLAY = new VaultModifierOverlayConfig().readConfig();
       CRYSTAL_BUDDING = new CrystalBuddingConfig().readConfig();
+      LOOT_INFO_CONFIG = new LootInfoConfig().readConfig();
       VAULT_GEAR_CONFIG = VaultGearTierConfig.registerConfigs();
       VAULT_GEAR_TYPE_POOL_CONFIG = new VaultGearTypePoolConfig().readConfig();
       VAULT_GEAR_TYPE_CONFIG = new VaultGearTypeConfig().readConfig();
@@ -358,6 +368,7 @@ public class ModConfigs {
       VAULT_GEAR_RECIPES_CONFIG = new VaultGearRecipesConfig().readConfig();
       VAULT_GEAR_MODIFICATION_CONFIG = new VaultGearModificationConfig().readConfig();
       VAULT_ALTAR_INGREDIENTS = new VaultAltarIngredientsConfig().readConfig();
+      PLAYER_RESETS = new PointsResetConfig().readConfig();
       registerBountyConfigs();
       VaultMod.LOGGER.info("Vault Configs are loaded successfully!");
    }
@@ -408,6 +419,7 @@ public class ModConfigs {
       }
 
       TieredLootTableGenerator.clearCache();
+      LootTableInfo.clear();
 
       for (LootTableKey key : VaultRegistry.LOOT_TABLE.getKeys()) {
          for (LootTable table : key.getMap().values()) {
@@ -415,6 +427,8 @@ public class ModConfigs {
                TieredLootTableGenerator.addCache(table);
             }
          }
+
+         LootTableInfo.cache(key);
       }
 
       VaultMod.LOGGER.info("Vault Core Configs have finished loading!");
@@ -425,6 +439,8 @@ public class ModConfigs {
       TaskConfig.registerTaskConfigs();
       BOUNTY_CONFIG = new BountyConfig().readConfig();
       REWARD_CONFIG = new RewardConfig().readConfig();
+      BOUNTY_ENTITIES = new BountyEntitiesConfig().readConfig();
+      BOUNTY_ORES = new BountyOresConfig().readConfig();
    }
 
    public static boolean isInitialized() {

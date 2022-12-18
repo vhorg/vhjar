@@ -82,7 +82,7 @@ public class BardArmorLayers extends ArmorLayers {
                .addBox(-4.1622F, -9.1054F, 0.346F, 0.0F, 9.0F, 1.0F, new CubeDeformation(0.0F))
                .texOffs(46, 14)
                .addBox(-4.1622F, -8.1054F, -0.654F, 0.0F, 10.0F, 1.0F, new CubeDeformation(0.0F)),
-            PartPose.offsetAndRotation(-2.8378F, -11.4864F, 0.5385F, -0.5672F, 0.0F, 0.0F)
+            PartPose.offsetAndRotation(-2.8378F, -9.4864F, 0.5385F, -0.5672F, 0.0F, 0.0F)
          );
          PartDefinition cube_r2 = head.addOrReplaceChild(
             "cube_r2",
@@ -111,12 +111,12 @@ public class BardArmorLayers extends ArmorLayers {
                .addBox(-4.1622F, 2.2364F, -8.0385F, 14.0F, 1.0F, 1.0F, new CubeDeformation(0.0F))
                .texOffs(0, 0)
                .addBox(-4.1622F, 2.2364F, -7.0385F, 14.0F, 1.0F, 12.0F, new CubeDeformation(0.0F)),
-            PartPose.offsetAndRotation(-2.8378F, -11.4864F, 0.5385F, 0.1745F, 0.0F, 0.0F)
+            PartPose.offsetAndRotation(-2.8378F, -9.4864F, 0.5385F, 0.1745F, 0.0F, 0.0F)
          );
          PartDefinition cube_r3 = head.addOrReplaceChild(
             "cube_r3",
             CubeListBuilder.create().texOffs(28, 15).addBox(3.8444F, 8.6166F, -7.0385F, 3.0F, 1.0F, 12.0F, new CubeDeformation(0.0F)),
-            PartPose.offsetAndRotation(-2.8378F, -11.4864F, 0.5385F, 0.1129F, 0.1334F, -0.8651F)
+            PartPose.offsetAndRotation(-2.8378F, -9.4864F, 0.5385F, 0.1129F, 0.1334F, -0.8651F)
          );
          PartDefinition body = partdefinition.addOrReplaceChild(
             "body",

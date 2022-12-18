@@ -37,7 +37,7 @@ public class VaultAltarCommand extends Command {
          .filter(te -> te instanceof VaultAltarTileEntity)
          .map(te -> (VaultAltarTileEntity)te)
          .filter(altar -> altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING)
-         .forEach(VaultAltarTileEntity::onRemoveVaultRock);
+         .forEach(altar -> altar.onRemoveVaultRock(player.getUUID()));
       data.removeRecipe(player.getUUID());
       data.setDirty();
       return 0;

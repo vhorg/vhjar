@@ -36,7 +36,9 @@ public class PlayerTalentsData extends SavedData {
    }
 
    public PlayerTalentsData add(ServerPlayer player, TalentNode<?>... nodes) {
-      this.getTalents(player).add(player.getServer(), nodes);
+      TalentTree talents = this.getTalents(player);
+      talents.add(player.getServer(), nodes);
+      talents.sync(player.server);
       this.setDirty();
       return this;
    }

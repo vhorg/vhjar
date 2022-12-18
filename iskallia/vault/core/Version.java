@@ -10,7 +10,8 @@ public enum Version {
    v1_0("1.0"),
    v1_1("1.1"),
    v1_2("1.2"),
-   v1_3("1.3");
+   v1_3("1.3"),
+   v1_4("1.4");
 
    private static final Map<String, Version> NAME_TO_VERSION = Arrays.stream(values()).collect(Collectors.toMap(Version::getName, Function.identity()));
    private final String name;

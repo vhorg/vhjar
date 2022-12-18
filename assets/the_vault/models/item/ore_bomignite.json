@@ -1,3 +1,7 @@
 {
-    "parent": "the_vault:block/ore_bomignite"
-  }
+  "parent": "the_vault:block/ore_bomignite",
+  "overrides": [
+    { "predicate": { "the_vault:vault_ore_type": 0 }, "model": "the_vault:item/ore_bomignite" },
+    { "predicate": { "the_vault:vault_ore_type": 1 }, "model": "the_vault:item/vaultstone_ore_bomignite" }
+  ]
+}

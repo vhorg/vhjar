@@ -7,6 +7,7 @@ import java.util.Objects;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
@@ -53,7 +54,7 @@ public class CoinPileDecorBlock extends Block {
    };
 
    public CoinPileDecorBlock() {
-      super(Properties.of(Material.METAL).sound(ModSounds.COIN_PILE_SOUND_TYPE).noOcclusion().strength(0.2F, 3.0F));
+      super(Properties.of(Material.METAL).sound(ModSounds.COIN_PILE_DECO_SOUND_TYPE).noOcclusion().strength(0.2F, 3.0F));
    }
 
    public PushReaction getPistonPushReaction(BlockState pState) {
@@ -121,6 +122,13 @@ public class CoinPileDecorBlock extends Block {
          }
 
          super.onRemove(state, world, pos, newState, isMoving);
+      }
+   }
+
+   public void onPlace(BlockState pState, Level pLevel, BlockPos pPos, BlockState pOldState, boolean pIsMoving) {
+      super.onPlace(pState, pLevel, pPos, pOldState, pIsMoving);
+      if (!pOldState.hasProperty(COINS) && (Integer)pState.getValue(COINS) > 1) {
+         pLevel.playSound(null, pPos, ModSounds.COIN_PILE_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
       }
    }
 }

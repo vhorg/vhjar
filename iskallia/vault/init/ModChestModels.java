@@ -23,14 +23,16 @@ public class ModChestModels {
    public static void registerLayerDefinitions(RegisterLayerDefinitions event) {
       event.registerLayerDefinition(VaultChestModel.TREASURE_LOCATION, VaultChestModel::createTreasureLayer);
       event.registerLayerDefinition(VaultChestModel.MOSSY_LOCATION, VaultChestModel::createMossylayer);
-      event.registerLayerDefinition(VaultChestModel.SCAVANGER_LOCATION, VaultChestModel::createScavangerLayer);
+      event.registerLayerDefinition(VaultChestModel.SCAVENGER_LOCATION, VaultChestModel::createScavangerLayer);
+      event.registerLayerDefinition(VaultChestModel.PRESENT_LOCATION, VaultChestModel::createPresentLayer);
    }
 
    @SubscribeEvent
    @OnlyIn(Dist.CLIENT)
    public static void stitchTextures(Pre event) {
       if (event.getAtlas().location().equals(CHEST_SHEET)) {
-         VaultChestRenderer.MATERIAL_MAP.values().forEach(m -> event.addSprite(m.texture()));
+         VaultChestRenderer.NORMAL_MATERIAL_MAP.values().forEach(m -> event.addSprite(m.texture()));
+         VaultChestRenderer.PRESENT_MATERIAL_MAP.values().forEach(m -> event.addSprite(m.texture()));
       }
    }
 }

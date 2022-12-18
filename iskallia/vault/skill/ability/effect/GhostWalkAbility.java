@@ -89,8 +89,8 @@ public class GhostWalkAbility<C extends GhostWalkConfig> extends AbstractInstant
 
    @SubscribeEvent
    public void onTarget(LivingSetAttackTargetEvent event) {
-      if (event.getEntityLiving() instanceof Mob && this.isInvulnerable(event.getTarget(), null)) {
-         ((Mob)event.getEntityLiving()).setTarget(null);
+      if (event.getEntityLiving() instanceof Mob mob && this.isInvulnerable(event.getTarget(), null)) {
+         mob.setTarget(null);
       }
    }
 

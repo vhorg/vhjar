@@ -14,9 +14,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 public class AltarInfusionRecipe implements INBTSerializable<CompoundTag> {
    private UUID player;
-   @Nonnull
    private List<RequiredItems> requiredItems;
-   @Nonnull
    private List<RequiredItems> cachedItems;
    private boolean pogInfused;
 
@@ -76,7 +74,7 @@ public class AltarInfusionRecipe implements INBTSerializable<CompoundTag> {
          return false;
       } else {
          for (RequiredItems item : this.requiredItems) {
-            if (!item.reachedAmountRequired()) {
+            if (!item.isComplete()) {
                return false;
             }
          }

@@ -84,7 +84,13 @@ public class TieredLootTableGenerator extends LootTableGenerator {
       CommonEvents.LOOT_GENERATION.invoke(this, LootGenerationEvent.Phase.PRE);
       LootTable.Entry entry = this.table.get(this.version).getEntries().get(0);
       int roll = entry.getRoll().get(random);
-      roll = (int)(roll * (1.0F + this.itemQuantity));
+      if (this.version.isOlderThan(Version.v1_4)) {
+         roll = (int)(roll * (1.0F + this.itemQuantity));
+      } else {
+         float fRoll = roll * (1.0F + this.itemQuantity);
+         roll = (int)fRoll + (random.nextFloat() < fRoll - roll ? 1 : 0);
+      }
+
       LootPool pool = entry.getPool();
       this.key = new int[pool.getChildren().size() + 1];
       this.key[0] = roll;

@@ -8,6 +8,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.Lifecycle;
 import iskallia.vault.core.SkyVaultsChunkGenerator;
 import iskallia.vault.core.SkyVaultsPreset;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -15,25 +16,34 @@ import net.minecraft.client.Minecraft.ExperimentalDialogType;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.core.RegistryAccess.Writable;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.WorldStem;
 import net.minecraft.server.WorldStem.DataPackConfigSupplier;
 import net.minecraft.server.WorldStem.WorldDataSupplier;
+import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import net.minecraft.world.level.LevelSettings;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import net.minecraft.world.level.storage.LevelStorageSource.LevelStorageAccess;
 import org.slf4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin({Minecraft.class})
+@Mixin(
+   value = {Minecraft.class},
+   priority = 1001
+)
 public abstract class MixinMinecraft extends ReentrantBlockableEventLoop<Runnable> {
    @Shadow
    @Final
@@ -52,6 +62,14 @@ public abstract class MixinMinecraft extends ReentrantBlockableEventLoop<Runnabl
       ExperimentalDialogType var5,
       boolean var6
    );
+
+   @Shadow
+   public abstract WorldStem makeWorldStem(PackRepository var1, boolean var2, DataPackConfigSupplier var3, WorldDataSupplier var4) throws InterruptedException, ExecutionException;
+
+   @Shadow
+   protected static PackRepository createPackRepository(LevelStorageAccess p_205143_) {
+      return null;
+   }
 
    @Inject(
       method = {"createLevel"},
@@ -89,5 +107,66 @@ public abstract class MixinMinecraft extends ReentrantBlockableEventLoop<Runnabl
          );
          ci.cancel();
       }
+   }
+
+   @Overwrite
+   public void loadLevel(String pLevelName) {
+      this.doLoadLevel(
+         pLevelName,
+         DataPackConfigSupplier::loadFromWorld,
+         storageAccess -> (resourceManager, config) -> {
+            Writable newRegistry = RegistryAccess.builtinCopy();
+            DynamicOps<Tag> ops = RegistryOps.createAndLoad(NbtOps.INSTANCE, newRegistry, resourceManager);
+            WorldData data = storageAccess.getDataTag(ops, config, newRegistry.allElementsLifecycle());
+            if (data == null) {
+               throw new IllegalStateException("Failed to load world");
+            } else {
+               WorldGenSettings newWorldGenSettings = data.worldGenSettings();
+               if (((LevelStem)newWorldGenSettings.dimensions().get(LevelStem.NETHER)).generator() instanceof SkyVaultsChunkGenerator) {
+                  SkyVaultsPreset.build(
+                     (WritableRegistry<LevelStem>)newWorldGenSettings.dimensions(),
+                     newRegistry,
+                     newWorldGenSettings.seed(),
+                     newWorldGenSettings.generateFeatures()
+                  );
+               }
+
+               return Pair.of(data, newRegistry.freeze());
+            }
+         },
+         false,
+         ExperimentalDialogType.BACKUP,
+         false
+      );
+   }
+
+   @Overwrite
+   public WorldStem makeWorldStem(LevelStorageAccess storageAccess, boolean p_205154_) throws ExecutionException, InterruptedException {
+      PackRepository packRepository = createPackRepository(storageAccess);
+      return this.makeWorldStem(
+         packRepository,
+         p_205154_,
+         DataPackConfigSupplier.loadFromWorld(storageAccess),
+         (resourceManager, config) -> {
+            Writable newRegistry = RegistryAccess.builtinCopy();
+            DynamicOps<Tag> ops = RegistryOps.createAndLoad(NbtOps.INSTANCE, newRegistry, resourceManager);
+            WorldData data = storageAccess.getDataTag(ops, config, newRegistry.allElementsLifecycle());
+            if (data == null) {
+               throw new IllegalStateException("Failed to load world");
+            } else {
+               WorldGenSettings newWorldGenSettings = data.worldGenSettings();
+               if (((LevelStem)newWorldGenSettings.dimensions().get(LevelStem.NETHER)).generator() instanceof SkyVaultsChunkGenerator) {
+                  SkyVaultsPreset.build(
+                     (WritableRegistry<LevelStem>)newWorldGenSettings.dimensions(),
+                     newRegistry,
+                     newWorldGenSettings.seed(),
+                     newWorldGenSettings.generateFeatures()
+                  );
+               }
+
+               return Pair.of(data, newRegistry.freeze());
+            }
+         }
+      );
    }
 }

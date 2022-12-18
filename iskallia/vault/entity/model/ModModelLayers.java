@@ -12,6 +12,7 @@ public class ModModelLayers {
    public static final ModelLayerLocation TREASURE_GOBLIN = new ModelLayerLocation(VaultMod.id("treasure_goblin"), "main");
    public static final ModelLayerLocation FIGHTER_T3 = new ModelLayerLocation(VaultMod.id("fighter_t3"), "main");
    public static final ModelLayerLocation FIGHTER_T4 = new ModelLayerLocation(VaultMod.id("fighter_t4"), "main");
+   public static final ModelLayerLocation WINTER_WOLF = new ModelLayerLocation(VaultMod.id("winter_wolf"), "main");
    public static final ModelLayerLocation ELITE_ZOMBIE = new ModelLayerLocation(VaultMod.id("elite_zombie"), "main");
    public static final ModelLayerLocation ELITE_HUSK = new ModelLayerLocation(VaultMod.id("elite_husk"), "main");
    public static final ModelLayerLocation ELITE_DROWNED = new ModelLayerLocation(VaultMod.id("elite_drowned"), "main");

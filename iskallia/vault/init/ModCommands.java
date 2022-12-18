@@ -21,6 +21,7 @@ import iskallia.vault.command.MagnetCommand;
 import iskallia.vault.command.ModelDebugCommand;
 import iskallia.vault.command.PartyCommand;
 import iskallia.vault.command.PaxelCommand;
+import iskallia.vault.command.PointsResetCommand;
 import iskallia.vault.command.RaidCommand;
 import iskallia.vault.command.ReloadConfigsCommand;
 import iskallia.vault.command.ResearchTeamCommand;
@@ -65,6 +66,7 @@ public class ModCommands {
    public static BountyCommand BOUNTY;
    public static DifficultyCommand DIFFICULTY;
    public static VaultAltarCommand VAULT_ALTAR;
+   public static PointsResetCommand POINTS_RESET;
 
    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandSelection env) {
       RELOAD_CONFIGS = registerCommand(ReloadConfigsCommand::new, dispatcher, env);
@@ -94,6 +96,7 @@ public class ModCommands {
       DIFFICULTY = registerCommand(DifficultyCommand::new, dispatcher, env);
       BOUNTY = registerCommand(BountyCommand::new, dispatcher, env);
       VAULT_ALTAR = registerCommand(VaultAltarCommand::new, dispatcher, env);
+      POINTS_RESET = registerCommand(PointsResetCommand::new, dispatcher, env);
    }
 
    public static void registerArgumentTypes() {

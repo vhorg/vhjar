@@ -1,5 +1,7 @@
 package iskallia.vault.client.gui.screen.bounty;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.InputConstants.Key;
 import iskallia.vault.VaultMod;
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.client.atlas.TextureAtlasRegion;
@@ -12,6 +14,7 @@ import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.screen.bounty.element.BountyTableContainerElement;
 import iskallia.vault.container.BountyContainer;
 import java.util.Map;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -34,18 +37,18 @@ public class BountyScreen extends AbstractElementContainerScreen<BountyContainer
       VaultMod.id("unindentified"),
       ScreenTextures.BOUNTY_UNIDENTIFIED
    );
-   public static final Map<ResourceLocation, TextComponent> OBJECTIVE_NAME = Map.of(
-      VaultMod.id("obelisk"),
+   public static final Map<String, TextComponent> OBJECTIVE_NAME = Map.of(
+      "obelisk",
       new TextComponent("Obelisks"),
-      VaultMod.id("kill_boss"),
+      "boss",
       new TextComponent("Kill The Boss"),
-      VaultMod.id("cake"),
+      "cake",
       new TextComponent("Find The Cakes"),
-      VaultMod.id("scavenger"),
+      "scavenger",
       new TextComponent("Scavenger Hunt"),
-      VaultMod.id("vault"),
+      "vault",
       new TextComponent("Any Vault"),
-      VaultMod.id("monolith"),
+      "monolith",
       new TextComponent("Light the Monoliths")
    );
    private final BountyTableContainerElement bountyTableContainerElement;
@@ -68,5 +71,15 @@ public class BountyScreen extends AbstractElementContainerScreen<BountyContainer
 
    public BountyTableContainerElement getBountyTableElement() {
       return this.bountyTableContainerElement;
+   }
+
+   public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+      Key key = InputConstants.getKey(pKeyCode, pScanCode);
+      if (pKeyCode != 256 && !Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key)) {
+         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+      } else {
+         this.onClose();
+         return true;
+      }
    }
 }

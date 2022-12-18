@@ -66,10 +66,10 @@ public class MekaArmorLayers extends ArmorLayers {
             "head",
             CubeListBuilder.create()
                .texOffs(0, 24)
-               .addBox(-3.3729F, -2.4218F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(1.0F))
+               .addBox(-4.0F, -8.25F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(1.0F))
                .texOffs(32, 67)
-               .addBox(-1.3729F, -1.4218F, 5.0F, 4.0F, 11.0F, 4.0F, new CubeDeformation(0.0F)),
-            PartPose.offset(-0.6271F, -5.5782F, 0.0F)
+               .addBox(-2.0F, -7.25F, 5.0F, 4.0F, 11.0F, 4.0F, new CubeDeformation(0.0F)),
+            PartPose.offset(0.0F, 0.0F, 0.0F)
          );
          PartDefinition cube_r1 = head.addOrReplaceChild(
             "cube_r1",
@@ -100,17 +100,17 @@ public class MekaArmorLayers extends ArmorLayers {
                .addBox(-5.3311F, 1.6834F, 5.0F, 6.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
                .texOffs(0, 0)
                .addBox(-5.0811F, 5.6834F, -6.0F, 11.0F, 1.0F, 12.0F, new CubeDeformation(0.0F)),
-            PartPose.offsetAndRotation(0.4582F, -0.1052F, 0.5F, 0.0F, 1.5708F, 0.0F)
+            PartPose.offsetAndRotation(-0.1689F, -5.9334F, 0.5F, 0.0F, 1.5708F, 0.0F)
          );
          PartDefinition cube_r2 = head.addOrReplaceChild(
             "cube_r2",
             CubeListBuilder.create().texOffs(50, 22).addBox(5.152F, -2.1297F, -5.0F, 1.0F, 5.0F, 10.0F, new CubeDeformation(0.0F)),
-            PartPose.offsetAndRotation(0.4582F, -0.1052F, 0.5F, -1.5708F, 1.405F, -1.5708F)
+            PartPose.offsetAndRotation(-0.1689F, -5.9334F, 0.5F, -1.5708F, 1.405F, -1.5708F)
          );
          PartDefinition cube_r3 = head.addOrReplaceChild(
             "cube_r3",
             CubeListBuilder.create().texOffs(38, 53).addBox(5.7676F, 0.5341F, -5.0F, 1.0F, 4.0F, 10.0F, new CubeDeformation(0.0F)),
-            PartPose.offsetAndRotation(0.4582F, -0.1052F, 0.5F, 1.5708F, 1.3788F, 1.5708F)
+            PartPose.offsetAndRotation(-0.1689F, -5.9334F, 0.5F, 1.5708F, 1.3788F, 1.5708F)
          );
          PartDefinition body = partdefinition.addOrReplaceChild(
             "body",

@@ -9,25 +9,6 @@
           "children": [
             {
               "type": "minecraft:item",
-              "name": "the_vault:ore_sparkletine",
-              "conditions": [
-                {
-                  "condition": "minecraft:match_tool",
-                  "predicate": {
-                    "enchantments": [
-                      {
-                        "enchantment": "minecraft:silk_touch",
-                        "levels": {
-                          "min": 1
-                        }
-                      }
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "type": "minecraft:item",
               "name": "the_vault:gem_sparkletine",
               "functions": [
                 {

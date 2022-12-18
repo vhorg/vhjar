@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class PlayerVaultAltarData extends SavedData {
    protected static final String DATA_NAME = "the_vault_PlayerAltarRecipes";
@@ -37,7 +38,7 @@ public class PlayerVaultAltarData extends SavedData {
    }
 
    public boolean hasRecipe(UUID uuid) {
-      return this.playerMap.containsKey(uuid);
+      return this.playerMap.containsKey(uuid) && !this.playerMap.get(uuid).getRequiredItems().isEmpty();
    }
 
    public PlayerVaultAltarData addRecipe(UUID uuid, AltarInfusionRecipe recipe) {
@@ -128,6 +129,13 @@ public class PlayerVaultAltarData extends SavedData {
 
    public static PlayerVaultAltarData get(ServerLevel world) {
       return (PlayerVaultAltarData)world.getServer()
+         .overworld()
+         .getDataStorage()
+         .computeIfAbsent(PlayerVaultAltarData::create, PlayerVaultAltarData::new, "the_vault_PlayerAltarRecipes");
+   }
+
+   public static PlayerVaultAltarData get() {
+      return (PlayerVaultAltarData)ServerLifecycleHooks.getCurrentServer()
          .overworld()
          .getDataStorage()
          .computeIfAbsent(PlayerVaultAltarData::create, PlayerVaultAltarData::new, "the_vault_PlayerAltarRecipes");

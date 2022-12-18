@@ -1,7 +1,10 @@
 {
-    "variants": {
-      "": {
-        "model": "the_vault:block/ore_ashium"
-      }
+  "variants": {
+    "type=stone": {
+      "model": "the_vault:block/ore_ashium"
+    },
+    "type=vault_stone": {
+      "model": "the_vault:block/vaultstone_ore_ashium"
     }
   }
+}

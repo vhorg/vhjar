@@ -145,7 +145,7 @@ public class CakeObjective extends Objective {
             }
          }
       });
-      CommonEvents.TEMPLATE_GENERATION.at(TemplateGenerationEvent.Phase.PRE).register(this, data -> {
+      CommonEvents.TEMPLATE_GENERATION.at(TemplateGenerationEvent.Phase.PRE).in(world).register(this, data -> {
          if (data.getRegion().getX() != 0 || data.getRegion().getZ() != 0) {
             data.setTemplate(ConfiguredTemplate.EMPTY);
          }

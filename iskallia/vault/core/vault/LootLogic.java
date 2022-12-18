@@ -19,6 +19,7 @@ public abstract class LootLogic extends DataObject<LootLogic> implements ISuppli
    public void initServer(VirtualWorld world, Vault vault) {
       CommonEvents.CHEST_LOOT_GENERATION.pre().register(vault, data -> {
          if (data.getTileEntity().getLevel() == world) {
+            data.setVersion(vault.get(Vault.VERSION));
             JavaRandom random = JavaRandom.ofInternal(vault.get(Vault.SEED));
             long a = random.nextLong() | 1L;
             long b = random.nextLong() | 1L;

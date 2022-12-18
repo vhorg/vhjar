@@ -2,7 +2,6 @@ package iskallia.vault.event;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.TreasureDoorBlock;
-import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultLevel;
@@ -20,12 +19,10 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.ItemShardPouch;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.item.gear.VaultShieldItem;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
-import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.ServerVaults;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -33,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -44,8 +40,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Slime;
@@ -63,8 +57,6 @@ import net.minecraft.world.item.TippedArrowItem;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -76,7 +68,6 @@ import net.minecraftforge.event.entity.living.LivingSpawnEvent.CheckSpawn;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
 import net.minecraftforge.event.entity.living.ZombieEvent.SummonAidEvent;
 import net.minecraftforge.event.village.VillagerTradesEvent;
-import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -124,22 +115,6 @@ public class EntityEvents {
 
             return false;
          });
-      }
-   }
-
-   @SubscribeEvent
-   public static void preventLongDistanceChestBreak(BreakEvent event) {
-      Player player = event.getPlayer();
-      AttributeInstance reachAttr = player.getAttribute((Attribute)ForgeMod.REACH_DISTANCE.get());
-      if (reachAttr != null) {
-         BlockPos pos = event.getPos();
-         BlockState state = player.getCommandSenderWorld().getBlockState(pos);
-         if (state.getBlock() instanceof VaultChestBlock) {
-            double reach = reachAttr.getValue();
-            if (player.distanceToSqr(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5) >= reach * reach) {
-               event.setCanceled(true);
-            }
-         }
       }
    }
 
@@ -195,8 +170,7 @@ public class EntityEvents {
                      killerEntity = (Entity)((EternalEntity)killerEntity).getOwner().right().orElse(null);
                   }
 
-                  if (killerEntity instanceof ServerPlayer killer
-                     && MiscUtils.inventoryContains(killer.getInventory(), stack -> stack.getItem() instanceof ItemShardPouch)) {
+                  if (killerEntity instanceof ServerPlayer killer) {
                      addedDrops |= addShardDrops(world, entity, killer, event.getDrops());
                   }
 

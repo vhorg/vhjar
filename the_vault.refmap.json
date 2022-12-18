@@ -17,9 +17,6 @@
       "load": "Lnet/minecraft/world/level/block/entity/StructureBlockEntity;m_142466_(Lnet/minecraft/nbt/CompoundTag;)V",
       "Lnet/minecraft/util/Mth;clamp(III)I": "Lnet/minecraft/util/Mth;m_14045_(III)I"
     },
-    "iskallia/vault/mixin/MixinHumanoidModel": {
-      "setupAnim": "Lnet/minecraft/client/model/HumanoidModel;m_6973_(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V"
-    },
     "iskallia/vault/mixin/MixinLivingEntity": {
       "collectEquipmentChanges": "Lnet/minecraft/world/entity/LivingEntity;m_21319_()Ljava/util/Map;",
       "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;builder()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;": "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;m_22244_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
@@ -28,6 +25,9 @@
       "createLivingAttributes": "Lnet/minecraft/world/entity/LivingEntity;m_21183_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
       "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;)Z": "Lnet/minecraft/world/entity/LivingEntity;m_7292_(Lnet/minecraft/world/effect/MobEffectInstance;)Z",
       "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V"
+    },
+    "iskallia/vault/mixin/MixinHumanoidModel": {
+      "setupAnim": "Lnet/minecraft/client/model/HumanoidModel;m_6973_(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V"
     },
     "iskallia/vault/mixin/AccessorSlot": {
       "x": "f_40220_:I",
@@ -281,15 +281,16 @@
     "iskallia/vault/mixin/AccessorWorld": {
       "thread": "f_46423_:Ljava/lang/Thread;"
     },
-    "iskallia/vault/mixin/MixinItemStackClient": {
-      "hasCustomHoverName": "Lnet/minecraft/world/item/ItemStack;m_41788_()Z"
-    },
     "iskallia/vault/mixin/MixinModelPart": {
       "translateAndRotate": "Lnet/minecraft/client/model/geom/ModelPart;m_104299_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
     },
     "iskallia/vault/mixin/MixinCUpdateStructureBlockPacket": {
       "write": "Lnet/minecraft/network/protocol/game/ServerboundSetStructureBlockPacket;m_5779_(Lnet/minecraft/network/FriendlyByteBuf;)V",
       "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V": "Lnet/minecraft/network/protocol/game/ServerboundSetStructureBlockPacket;<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"
+    },
+    "iskallia/vault/mixin/MixinItemStackClient": {
+      "getTooltipLines": "Lnet/minecraft/world/item/ItemStack;m_41651_(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/TooltipFlag;)Ljava/util/List;",
+      "Lnet/minecraft/world/item/ItemStack;hasCustomHoverName()Z": "Lnet/minecraft/world/item/ItemStack;m_41788_()Z"
     },
     "iskallia/vault/mixin/MixinCCustomPayloadLoginPacket": {
       "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V": "Lnet/minecraft/network/protocol/login/ServerboundCustomQueryPacket;<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"
@@ -336,9 +337,6 @@
         "load": "Lnet/minecraft/world/level/block/entity/StructureBlockEntity;m_142466_(Lnet/minecraft/nbt/CompoundTag;)V",
         "Lnet/minecraft/util/Mth;clamp(III)I": "Lnet/minecraft/util/Mth;m_14045_(III)I"
       },
-      "iskallia/vault/mixin/MixinHumanoidModel": {
-        "setupAnim": "Lnet/minecraft/client/model/HumanoidModel;m_6973_(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V"
-      },
       "iskallia/vault/mixin/MixinLivingEntity": {
         "collectEquipmentChanges": "Lnet/minecraft/world/entity/LivingEntity;m_21319_()Ljava/util/Map;",
         "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;builder()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;": "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;m_22244_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
@@ -347,6 +345,9 @@
         "createLivingAttributes": "Lnet/minecraft/world/entity/LivingEntity;m_21183_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
         "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;)Z": "Lnet/minecraft/world/entity/LivingEntity;m_7292_(Lnet/minecraft/world/effect/MobEffectInstance;)Z",
         "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V"
+      },
+      "iskallia/vault/mixin/MixinHumanoidModel": {
+        "setupAnim": "Lnet/minecraft/client/model/HumanoidModel;m_6973_(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V"
       },
       "iskallia/vault/mixin/AccessorSlot": {
         "x": "f_40220_:I",
@@ -600,15 +601,16 @@
       "iskallia/vault/mixin/AccessorWorld": {
         "thread": "f_46423_:Ljava/lang/Thread;"
       },
-      "iskallia/vault/mixin/MixinItemStackClient": {
-        "hasCustomHoverName": "Lnet/minecraft/world/item/ItemStack;m_41788_()Z"
-      },
       "iskallia/vault/mixin/MixinModelPart": {
         "translateAndRotate": "Lnet/minecraft/client/model/geom/ModelPart;m_104299_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
       },
       "iskallia/vault/mixin/MixinCUpdateStructureBlockPacket": {
         "write": "Lnet/minecraft/network/protocol/game/ServerboundSetStructureBlockPacket;m_5779_(Lnet/minecraft/network/FriendlyByteBuf;)V",
         "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V": "Lnet/minecraft/network/protocol/game/ServerboundSetStructureBlockPacket;<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"
+      },
+      "iskallia/vault/mixin/MixinItemStackClient": {
+        "getTooltipLines": "Lnet/minecraft/world/item/ItemStack;m_41651_(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/TooltipFlag;)Ljava/util/List;",
+        "Lnet/minecraft/world/item/ItemStack;hasCustomHoverName()Z": "Lnet/minecraft/world/item/ItemStack;m_41788_()Z"
       },
       "iskallia/vault/mixin/MixinCCustomPayloadLoginPacket": {
         "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V": "Lnet/minecraft/network/protocol/login/ServerboundCustomQueryPacket;<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"

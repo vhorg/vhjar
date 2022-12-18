@@ -1,6 +1,5 @@
 package iskallia.vault.bounty.task;
 
-import iskallia.vault.VaultMod;
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.bounty.task.properties.CompletionProperties;
@@ -43,8 +42,8 @@ public class CompletionTask extends Task<CompletionProperties> {
    protected <E> boolean doValidate(ServerPlayer player, E event) {
       if (event instanceof VaultLeaveForgeEvent e) {
          Objectives objectives = e.getVault().get(Vault.OBJECTIVES);
-         if (!this.getProperties().getId().equals(VaultMod.id("vault"))
-            && objectives.get(Objectives.LIST).stream().noneMatch(objective -> isValidObjective(this.getProperties().getId(), objective))) {
+         String objectiveId = objectives.get(Objectives.KEY);
+         if (!this.getProperties().getId().equals("vault") && !this.getProperties().getId().equalsIgnoreCase(objectiveId)) {
             return false;
          } else if (e.getVault().has(Vault.STATS)) {
             StatsCollector statCollector = e.getVault().get(Vault.STATS);

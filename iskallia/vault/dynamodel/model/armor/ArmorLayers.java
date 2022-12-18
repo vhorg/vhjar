@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -12,8 +13,11 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -151,6 +155,27 @@ public abstract class ArmorLayers {
          }
 
          poseStack.popPose();
+      }
+
+      public void renderSleeve(
+         PoseStack matrixStack, ModelPart armPart, String baseTexture, String overlayTexture, MultiBufferSource bufferSource, int combinedLight
+      ) {
+         matrixStack.pushPose();
+         this.adjustForFirstPersonRender(matrixStack);
+         armPart.xRot = 0.0F;
+         armPart.yRot = 0.01F * (Minecraft.getInstance().options.mainHand == HumanoidArm.RIGHT ? -1 : 1);
+         armPart.zRot = 0.05F * (Minecraft.getInstance().options.mainHand == HumanoidArm.RIGHT ? 1 : -1);
+         if (baseTexture != null) {
+            VertexConsumer baseVertexConsumer = bufferSource.getBuffer(this.renderType(new ResourceLocation(baseTexture)));
+            armPart.render(matrixStack, baseVertexConsumer, combinedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+         }
+
+         if (overlayTexture != null) {
+            VertexConsumer overlayVertexConsumer = bufferSource.getBuffer(this.renderType(new ResourceLocation(overlayTexture)));
+            armPart.render(matrixStack, overlayVertexConsumer, combinedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+         }
+
+         matrixStack.popPose();
       }
 
       public void adjustForFirstPersonRender(@Nonnull PoseStack poseStack) {

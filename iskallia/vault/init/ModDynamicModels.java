@@ -1090,6 +1090,34 @@ public class ModDynamicModels {
       public static final ShieldModel TURTLE = REGISTRY.register(
          new ShieldModel(VaultMod.id("gear/shield/turtle"), "Turtle Shell").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
+      public static final ShieldModel PRESENT = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/present"), "Present Box Lid")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel SCULK = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/sculk"), "Sculk Shield").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel FLOWAH = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/flowah"), "Chamomile").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel EMBERWING = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/emberwing"), "Emberwing Dragonshield")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel SCRAP = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/scrap"), "Scrap Shield").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel DRUID = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/druid"), "Druid Shield").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel GOLD_PLATED = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/gold_plated"), "Gold Plated Shield")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel PEPPERMINT = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/peppermint"), "Peppermint Shield")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
    }
 
    public static class Swords {

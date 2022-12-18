@@ -300,7 +300,7 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
             return;
          }
 
-         for (int i = 0; i < e.itemsPerDrop; i++) {
+         for (int i = 0; i < e.itemsPerDrop && !e.items.isEmpty(); i++) {
             int itemIndex = level.random.nextInt(e.items.size());
             Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, (ItemStack)e.items.remove(itemIndex));
          }

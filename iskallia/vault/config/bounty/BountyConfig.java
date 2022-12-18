@@ -14,9 +14,9 @@ public class BountyConfig extends Config {
    @Expose
    private int maxActive;
    @Expose
-   private int abandonedPenaltyInHours;
+   private long abandonedPenaltySeconds;
    @Expose
-   private int waitingPeriodInHours;
+   private long waitingPeriodSeconds;
    @Expose
    private WeightedList<ResourceLocation> weightedTaskList = new WeightedList<>();
    @Expose
@@ -31,8 +31,8 @@ public class BountyConfig extends Config {
    protected void reset() {
       this.totalBountyCount = 3;
       this.maxActive = 1;
-      this.abandonedPenaltyInHours = 8;
-      this.waitingPeriodInHours = 2;
+      this.abandonedPenaltySeconds = 28800L;
+      this.waitingPeriodSeconds = 1800L;
       TaskConfig.getTaskConfigs().keySet().forEach(id -> this.weightedTaskList.add(id, 3));
 
       for (int i = 0; i < 30; i += 5) {
@@ -48,12 +48,12 @@ public class BountyConfig extends Config {
       return this.maxActive;
    }
 
-   public int getAbandonedPenaltyInHours() {
-      return this.abandonedPenaltyInHours;
+   public long getAbandonedPenaltySeconds() {
+      return this.abandonedPenaltySeconds;
    }
 
-   public int getWaitingPeriodInHours() {
-      return this.waitingPeriodInHours;
+   public long getWaitingPeriodSeconds() {
+      return this.waitingPeriodSeconds;
    }
 
    public ResourceLocation getRandomTask() {

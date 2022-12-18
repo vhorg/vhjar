@@ -1,7 +1,10 @@
 {
   "variants": {
-    "": {
+    "type=stone": {
       "model": "the_vault:block/ore_larimar"
+    },
+    "type=vault_stone": {
+      "model": "the_vault:block/vaultstone_ore_larimar"
     }
   }
 }

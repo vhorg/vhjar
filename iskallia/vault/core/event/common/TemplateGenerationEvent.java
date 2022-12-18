@@ -4,7 +4,9 @@ import iskallia.vault.core.event.Event;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.RegionPos;
 import iskallia.vault.core.world.template.configured.ConfiguredTemplate;
+import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelWriter;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 public class TemplateGenerationEvent extends Event<TemplateGenerationEvent, TemplateGenerationEvent.Data> {
@@ -27,6 +29,10 @@ public class TemplateGenerationEvent extends Event<TemplateGenerationEvent, Temp
 
    public TemplateGenerationEvent at(TemplateGenerationEvent.Phase phase) {
       return this.filter(data -> data.phase == phase);
+   }
+
+   public TemplateGenerationEvent in(LevelWriter world) {
+      return this.filter(data -> data.getWorld() == world || data.getWorld() instanceof WorldGenRegion genRegion && genRegion.getLevel() == world);
    }
 
    public static class Data {

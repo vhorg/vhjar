@@ -78,7 +78,6 @@
   "client": [
     "AccessorBakedOverride",
     "AccessorCommandSuggestions",
-    "AccessorItemOverrides$BakedOverride",
     "MixinAnvilScreen",
     "MixinBiome",
     "MixinBossOverlayGui",

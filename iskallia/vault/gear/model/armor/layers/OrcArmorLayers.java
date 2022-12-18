@@ -463,54 +463,54 @@ public class OrcArmorLayers extends ArmorLayers {
             CubeListBuilder.create()
                .texOffs(29, 116)
                .mirror()
-               .addBox(-3.0511F, -1.9487F, -1.6216F, 6.0F, 4.0F, 7.0F, new CubeDeformation(0.0F))
+               .addBox(-2.522F, 8.66F, -3.54F, 6.0F, 4.0F, 7.0F, new CubeDeformation(0.0F))
                .mirror(false)
                .texOffs(33, 94)
                .mirror()
-               .addBox(-2.4599F, -0.9087F, -2.6534F, 5.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+               .addBox(-1.9307F, 9.7F, -4.5718F, 5.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
                .mirror(false)
                .texOffs(34, 99)
                .mirror()
-               .addBox(-1.9599F, -0.0338F, -3.1534F, 4.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+               .addBox(-1.4307F, 10.575F, -5.0718F, 4.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                .mirror(false)
                .texOffs(29, 103)
                .mirror()
-               .addBox(-2.5291F, -5.1088F, -1.0716F, 5.0F, 7.0F, 6.0F, new CubeDeformation(0.0F))
+               .addBox(-2.0F, 5.5F, -2.99F, 5.0F, 7.0F, 6.0F, new CubeDeformation(0.0F))
                .mirror(false),
-            PartPose.offset(2.4291F, 22.6088F, -1.9184F)
+            PartPose.offset(1.9F, 12.0F, 0.0F)
          );
          PartDefinition left_leg_r1 = left_leg.addOrReplaceChild(
             "left_leg_r1",
             CubeListBuilder.create().texOffs(40, 109).addBox(-2.0F, -0.5F, -0.5F, 4.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
-            PartPose.offsetAndRotation(-1.1484F, -4.5338F, -1.1534F, -0.9553F, 0.5236F, -0.6155F)
+            PartPose.offsetAndRotation(-0.6193F, 6.075F, -3.0718F, -0.9553F, 0.5236F, -0.6155F)
          );
          PartDefinition left_leg_r2 = left_leg.addOrReplaceChild(
             "left_leg_r2",
             CubeListBuilder.create().texOffs(40, 109).mirror().addBox(-2.0F, -0.5F, -0.5F, 4.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false),
-            PartPose.offsetAndRotation(1.0402F, -4.5338F, -1.1534F, -0.9553F, -0.5236F, 0.6155F)
+            PartPose.offsetAndRotation(1.5693F, 6.075F, -3.0718F, -0.9553F, -0.5236F, 0.6155F)
          );
          PartDefinition right_leg = partdefinition.addOrReplaceChild(
             "right_leg",
             CubeListBuilder.create()
                .texOffs(29, 116)
-               .addBox(-2.9489F, -1.9487F, -1.6216F, 6.0F, 4.0F, 7.0F, new CubeDeformation(0.0F))
+               .addBox(-3.478F, 8.66F, -3.54F, 6.0F, 4.0F, 7.0F, new CubeDeformation(0.0F))
                .texOffs(33, 94)
-               .addBox(-2.5401F, -0.9087F, -2.6534F, 5.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
+               .addBox(-3.0693F, 9.7F, -4.5718F, 5.0F, 3.0F, 2.0F, new CubeDeformation(0.0F))
                .texOffs(34, 99)
-               .addBox(-2.0401F, -0.0338F, -3.1534F, 4.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
+               .addBox(-2.5693F, 10.575F, -5.0718F, 4.0F, 2.0F, 2.0F, new CubeDeformation(0.0F))
                .texOffs(29, 103)
-               .addBox(-2.4709F, -5.1088F, -1.0716F, 5.0F, 7.0F, 6.0F, new CubeDeformation(0.0F)),
-            PartPose.offset(-2.4291F, 22.6088F, -1.9184F)
+               .addBox(-3.0F, 5.5F, -2.99F, 5.0F, 7.0F, 6.0F, new CubeDeformation(0.0F)),
+            PartPose.offset(-1.9F, 12.0F, 0.0F)
          );
          PartDefinition right_leg_r1 = right_leg.addOrReplaceChild(
             "right_leg_r1",
             CubeListBuilder.create().texOffs(40, 109).mirror().addBox(-2.0F, -0.5F, -0.5F, 4.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)).mirror(false),
-            PartPose.offsetAndRotation(1.1484F, -4.5338F, -1.1534F, -0.9553F, -0.5236F, 0.6155F)
+            PartPose.offsetAndRotation(0.6193F, 6.075F, -3.0718F, -0.9553F, -0.5236F, 0.6155F)
          );
          PartDefinition right_leg_r2 = right_leg.addOrReplaceChild(
             "right_leg_r2",
             CubeListBuilder.create().texOffs(40, 109).addBox(-2.0F, -0.5F, -0.5F, 4.0F, 1.0F, 1.0F, new CubeDeformation(0.0F)),
-            PartPose.offsetAndRotation(-1.0402F, -4.5338F, -1.1534F, -0.9553F, 0.5236F, -0.6155F)
+            PartPose.offsetAndRotation(-1.5693F, 6.075F, -3.0718F, -0.9553F, 0.5236F, -0.6155F)
          );
          return LayerDefinition.create(meshdefinition, 128, 128);
       }

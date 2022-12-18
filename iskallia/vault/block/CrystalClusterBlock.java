@@ -7,6 +7,9 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.world.vault.modifier.VaultModifierStack;
+import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nonnull;
@@ -145,6 +148,13 @@ public class CrystalClusterBlock extends Block implements SimpleWaterloggedBlock
          crystal.setLevel(level);
          crystal.setModel(CrystalData.Model.RAW);
          crystal.setTheme(new ValueCrystalTheme(VaultMod.id("raw_vault_cave")));
+         VaultModifierRegistry.getOpt(VaultMod.id("xp_reduction")).ifPresent(modifier -> {
+            int size = 4 - level;
+            if (size > 0) {
+               crystal.addModifier(VaultModifierStack.of((VaultModifier<?>)modifier, size));
+            }
+         });
+         crystal.setModifiable(false);
          drops.add(stack);
       }
 

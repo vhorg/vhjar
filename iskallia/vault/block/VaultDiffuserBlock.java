@@ -56,7 +56,7 @@ public class VaultDiffuserBlock extends Block implements EntityBlock {
    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
       if (!pState.is(pNewState.getBlock())) {
          if (pLevel.getBlockEntity(pPos) instanceof VaultDiffuserTileEntity vaultDiffuserTileEntity) {
-            Containers.dropContents(pLevel, pPos, vaultDiffuserTileEntity.getInventory());
+            Containers.dropContents(pLevel, pPos, vaultDiffuserTileEntity.getInputInv());
             pLevel.updateNeighbourForOutputSignal(pPos, this);
          }
 

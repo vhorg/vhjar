@@ -114,7 +114,16 @@ public class AwardCrateObjective extends Objective {
                .ifPresent(
                   player -> CommonEvents.CRATE_AWARD_EVENT
                      .invoke(
-                        player, ItemStack.EMPTY, crateLootGenerator, vault, listener, crateType, List.of(), Version.latest(), random, CrateAwardEvent.Phase.PRE
+                        player,
+                        ItemStack.EMPTY,
+                        crateLootGenerator,
+                        vault,
+                        listener,
+                        crateType,
+                        List.of(),
+                        vault.get(Vault.VERSION),
+                        random,
+                        CrateAwardEvent.Phase.PRE
                      )
                );
             NonNullList<ItemStack> items = crateLootGenerator.generate(vault, listener, random);
@@ -122,7 +131,7 @@ public class AwardCrateObjective extends Objective {
             listener.getPlayer()
                .ifPresent(
                   player -> CommonEvents.CRATE_AWARD_EVENT
-                     .invoke(player, crate, crateLootGenerator, vault, listener, crateType, items, Version.latest(), random, CrateAwardEvent.Phase.POST)
+                     .invoke(player, crate, crateLootGenerator, vault, listener, crateType, items, vault.get(Vault.VERSION), random, CrateAwardEvent.Phase.POST)
                );
             stats.get(StatCollector.REWARD).add(crate);
          }

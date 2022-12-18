@@ -54,6 +54,9 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
 
          snapshotData.createSnapshot(player);
       });
+      vault.getOptional(Vault.STATS)
+         .map(stats -> stats.get(listener))
+         .ifPresent(stats -> stats.modify(StatCollector.EXP_MULTIPLIER, m -> m * this.properties().experienceMultiplierOnSuccess()));
    }
 
    @Override

@@ -18,6 +18,7 @@ import iskallia.vault.entity.renderer.VaultGuardianRenderer;
 import iskallia.vault.entity.renderer.VaultGummySoldierRenderer;
 import iskallia.vault.entity.renderer.VaultSpiderBabyRenderer;
 import iskallia.vault.entity.renderer.VaultSpiderRenderer;
+import iskallia.vault.entity.renderer.WinterWolfRenderer;
 import iskallia.vault.entity.renderer.elite.EliteDrownedRenderer;
 import iskallia.vault.entity.renderer.elite.EliteEndermanRenderer;
 import iskallia.vault.entity.renderer.elite.EliteHuskRenderer;
@@ -101,6 +102,7 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.VAULT_BLUE_GUMMY_SOLDIER, ctx -> new VaultGummySoldierRenderer(ctx, VaultGummySoldierRenderer.Color.BLUE));
       EntityRenderers.register(ModEntities.VAULT_YELLOW_GUMMY_SOLDIER, ctx -> new VaultGummySoldierRenderer(ctx, VaultGummySoldierRenderer.Color.YELLOW));
       EntityRenderers.register(ModEntities.VAULT_RED_GUMMY_SOLDIER, ctx -> new VaultGummySoldierRenderer(ctx, VaultGummySoldierRenderer.Color.RED));
+      EntityRenderers.register(ModEntities.WINTER_WOLF, WinterWolfRenderer::new);
       EntityRenderers.register(ModEntities.MONSTER_EYE, MonsterEyeRenderer::new);
       EntityRenderers.register(ModEntities.ROBOT, RobotRenderer::new);
       EntityRenderers.register(ModEntities.BLUE_BLAZE, BlueBlazeRenderer::new);

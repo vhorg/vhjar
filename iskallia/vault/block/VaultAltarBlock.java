@@ -8,6 +8,7 @@ import iskallia.vault.util.BlockHelper;
 import iskallia.vault.world.data.PlayerVaultAltarData;
 import java.util.Random;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -37,7 +38,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 public class VaultAltarBlock extends Block implements EntityBlock {
    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -48,12 +49,12 @@ public class VaultAltarBlock extends Block implements EntityBlock {
    }
 
    @Nullable
-   public <A extends BlockEntity> BlockEntityTicker<A> getTicker(Level p_153212_, BlockState state, BlockEntityType<A> tBlockEntityType) {
-      return BlockHelper.getTicker(tBlockEntityType, ModBlocks.VAULT_ALTAR_TILE_ENTITY, VaultAltarTileEntity::tick);
+   public <A extends BlockEntity> BlockEntityTicker<A> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<A> type) {
+      return BlockHelper.getTicker(type, ModBlocks.VAULT_ALTAR_TILE_ENTITY, VaultAltarTileEntity::tick);
    }
 
-   @javax.annotation.Nullable
-   public BlockState getStateForPlacement(BlockPlaceContext context) {
+   @Nullable
+   public BlockState getStateForPlacement(@NotNull BlockPlaceContext context) {
       return (BlockState)this.defaultBlockState().setValue(POWERED, Boolean.FALSE);
    }
 
@@ -88,53 +89,52 @@ public class VaultAltarBlock extends Block implements EntityBlock {
    }
 
    @Nullable
-   public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
-      return ModBlocks.VAULT_ALTAR_TILE_ENTITY.create(pPos, pState);
+   public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState state) {
+      return ModBlocks.VAULT_ALTAR_TILE_ENTITY.create(pos, state);
    }
 
-   public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
-      if (!world.isClientSide && handIn == InteractionHand.MAIN_HAND && player instanceof ServerPlayer) {
+   @NotNull
+   public InteractionResult use(
+      @NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit
+   ) {
+      if (!world.isClientSide && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer serverPlayer) {
+         ServerLevel serverLevel = serverPlayer.getLevel();
          ItemStack heldItem = player.getMainHandItem();
          VaultAltarTileEntity altar = this.getAltarTileEntity(world, pos);
          if (altar == null) {
             return InteractionResult.SUCCESS;
          } else if (altar.getAltarState() == VaultAltarTileEntity.AltarState.IDLE) {
-            return heldItem.getItem() == ModItems.VAULT_ROCK ? altar.onAddVaultRock((ServerPlayer)player, heldItem) : InteractionResult.SUCCESS;
+            return heldItem.getItem() == ModItems.VAULT_ROCK ? altar.onAddVaultRock(serverPlayer, heldItem) : InteractionResult.SUCCESS;
+         } else if (!player.isShiftKeyDown()
+            || altar.getAltarState() != VaultAltarTileEntity.AltarState.ACCEPTING && altar.getAltarState() != VaultAltarTileEntity.AltarState.COMPLETE) {
+            return InteractionResult.SUCCESS;
          } else {
-            if (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING) {
-            }
-
-            if (player.isShiftKeyDown()
-               && (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING || altar.getAltarState() == VaultAltarTileEntity.AltarState.COMPLETE)) {
-               InteractionResult result = altar.getRecipe() != null && altar.getRecipe().isPogInfused()
-                  ? altar.onRemovePogInfusion()
-                  : altar.onRemoveVaultRock();
-               PlayerVaultAltarData.get((ServerLevel)world).setDirty();
-               return result;
-            } else {
-               return InteractionResult.SUCCESS;
-            }
+            InteractionResult result = altar.onRemoveVaultRock(serverPlayer.getUUID());
+            PlayerVaultAltarData.get(serverLevel).setDirty();
+            return result;
          }
       } else {
          return InteractionResult.SUCCESS;
       }
    }
 
-   public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-      if (!worldIn.isClientSide) {
-         boolean powered = worldIn.hasNeighborSignal(pos);
+   public void neighborChanged(
+      @NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Block neighborBlock, @NotNull BlockPos neighborPos, boolean isMoving
+   ) {
+      if (!level.isClientSide) {
+         boolean powered = level.hasNeighborSignal(pos);
          if (powered != (Boolean)state.getValue(POWERED) && powered) {
-            VaultAltarTileEntity altar = this.getAltarTileEntity(worldIn, pos);
+            VaultAltarTileEntity altar = this.getAltarTileEntity(level, pos);
             if (altar != null) {
                altar.onAltarPowered();
             }
          }
 
-         worldIn.setBlock(pos, (BlockState)state.setValue(POWERED, powered), 3);
+         level.setBlock(pos, (BlockState)state.setValue(POWERED, powered), 3);
       }
    }
 
-   public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @javax.annotation.Nullable Direction side) {
+   public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side) {
       return true;
    }
 
@@ -143,32 +143,32 @@ public class VaultAltarBlock extends Block implements EntityBlock {
       return te instanceof VaultAltarTileEntity ? (VaultAltarTileEntity)te : null;
    }
 
-   public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
-      VaultAltarTileEntity altar = this.getAltarTileEntity(world, pos);
+   public void onRemove(@NotNull BlockState state, @NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState newState, boolean isMoving) {
+      VaultAltarTileEntity altar = this.getAltarTileEntity(level, pos);
       if (altar != null) {
          if (newState.getBlock() == Blocks.AIR) {
             if (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING || altar.getAltarState() == VaultAltarTileEntity.AltarState.COMPLETE) {
-               ItemEntity entity = new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, new ItemStack(ModItems.VAULT_ROCK));
-               world.addFreshEntity(entity);
+               ItemEntity entity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, new ItemStack(ModItems.VAULT_ROCK));
+               level.addFreshEntity(entity);
             }
 
-            ItemEntity entity = new ItemEntity(world, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, new ItemStack(ModBlocks.VAULT_ALTAR));
-            world.addFreshEntity(entity);
-            PlayerVaultAltarData.get((ServerLevel)world).removeAltar(altar.getOwner(), pos);
-            super.onRemove(state, world, pos, newState, isMoving);
+            ItemEntity entity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, new ItemStack(ModBlocks.VAULT_ALTAR));
+            level.addFreshEntity(entity);
+            PlayerVaultAltarData.get((ServerLevel)level).removeAltar(altar.getOwner(), pos);
+            super.onRemove(state, level, pos, newState, isMoving);
          }
       }
    }
 
-   public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, @javax.annotation.Nullable LivingEntity placer, ItemStack stack) {
-      if (!worldIn.isClientSide) {
-         VaultAltarTileEntity altar = (VaultAltarTileEntity)worldIn.getBlockEntity(pos);
+   public void setPlacedBy(Level level, @NotNull BlockPos pos, @NotNull BlockState state, @Nullable LivingEntity placer, @NotNull ItemStack stack) {
+      if (!level.isClientSide) {
+         VaultAltarTileEntity altar = (VaultAltarTileEntity)level.getBlockEntity(pos);
          if (altar != null && placer instanceof Player) {
             altar.setOwner(placer.getUUID());
             altar.setAltarState(VaultAltarTileEntity.AltarState.IDLE);
             altar.sendUpdates();
-            PlayerVaultAltarData.get((ServerLevel)worldIn).addAltar(placer.getUUID(), pos);
-            super.setPlacedBy(worldIn, pos, state, placer, stack);
+            PlayerVaultAltarData.get((ServerLevel)level).addAltar(placer.getUUID(), pos);
+            super.setPlacedBy(level, pos, state, placer, stack);
          }
       }
    }

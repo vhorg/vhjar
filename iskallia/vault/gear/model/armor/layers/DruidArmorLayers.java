@@ -1,8 +1,10 @@
 package iskallia.vault.gear.model.armor.layers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.dynamodel.model.armor.ArmorLayers;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -1299,6 +1301,10 @@ public class DruidArmorLayers extends ArmorLayers {
             PartPose.offsetAndRotation(-0.522F, 11.81F, -3.71F, -0.6981F, 0.0F, 0.0F)
          );
          return LayerDefinition.create(meshdefinition, 128, 128);
+      }
+
+      @Override
+      public void adjustForFirstPersonRender(@Nonnull PoseStack poseStack) {
       }
    }
 }

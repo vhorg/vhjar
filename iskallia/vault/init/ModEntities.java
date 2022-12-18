@@ -25,6 +25,7 @@ import iskallia.vault.entity.entity.VaultGummySoldier;
 import iskallia.vault.entity.entity.VaultSandEntity;
 import iskallia.vault.entity.entity.VaultSpiderBabyEntity;
 import iskallia.vault.entity.entity.VaultSpiderEntity;
+import iskallia.vault.entity.entity.WinterWolfEntity;
 import iskallia.vault.entity.entity.elite.EliteDrownedEntity;
 import iskallia.vault.entity.entity.elite.EliteHuskEntity;
 import iskallia.vault.entity.entity.elite.EliteSpiderEntity;
@@ -47,6 +48,7 @@ import iskallia.vault.entity.model.FighterModel;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.TreasureGoblinModel;
 import iskallia.vault.entity.model.VaultSpiderBabyModel;
+import iskallia.vault.entity.model.WinterWolfModel;
 import iskallia.vault.entity.model.elite.EliteDrownedModel;
 import iskallia.vault.entity.model.elite.EliteHuskModel;
 import iskallia.vault.entity.model.elite.EliteSkeletonModel;
@@ -71,6 +73,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.EntityType.Builder;
+import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.EnderMan;
@@ -106,6 +109,7 @@ public class ModEntities {
    public static EntityType<VaultGummySoldier> VAULT_BLUE_GUMMY_SOLDIER;
    public static EntityType<VaultGummySoldier> VAULT_YELLOW_GUMMY_SOLDIER;
    public static EntityType<VaultGummySoldier> VAULT_RED_GUMMY_SOLDIER;
+   public static EntityType<WinterWolfEntity> WINTER_WOLF;
    public static EntityType<MonsterEyeEntity> MONSTER_EYE;
    public static EntityType<RobotEntity> ROBOT;
    public static EntityType<BlueBlazeEntity> BLUE_BLAZE;
@@ -192,6 +196,9 @@ public class ModEntities {
          Builder.of(VaultGummySoldier::new, MobCategory.MONSTER).sized(0.72F, 1.95F).clientTrackingRange(8),
          VaultGummySoldier::createAttributes,
          event
+      );
+      WINTER_WOLF = registerLiving(
+         "winter_wolf", Builder.of(WinterWolfEntity::new, MobCategory.MONSTER).sized(0.72F, 1.15F).clientTrackingRange(8), Wolf::createAttributes, event
       );
       MONSTER_EYE = registerLiving("monster_eye", Builder.of(MonsterEyeEntity::new, MobCategory.MONSTER).sized(4.08F, 4.08F), Zombie::createAttributes, event);
       ROBOT = registerLiving("robot", Builder.of(RobotEntity::new, MobCategory.MONSTER).sized(2.8F, 5.4F), Zombie::createAttributes, event);
@@ -359,6 +366,7 @@ public class ModEntities {
          event.registerLayerDefinition(ModModelLayers.ELITE_WITHER_SKELETON, EliteWitherSkeletonModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.ELITE_ENDERMAN_ORNAMENT, EliteEnderOrnamentLayer.EnderOrnamentModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.VAULT_SPIDER_BABY, VaultSpiderBabyModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.WINTER_WOLF, WinterWolfModel::createBodyLayer);
       }
 
       @NotNull

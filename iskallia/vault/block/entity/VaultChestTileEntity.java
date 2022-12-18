@@ -155,7 +155,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
                this.generated = true;
                this.setChanged();
             } else {
-               this.generateLootTable(source, loot, data.getRandom());
+               this.generateLootTable(data.getVersion(), source, loot, data.getRandom());
                CommonEvents.CHEST_LOOT_GENERATION
                   .invoke(
                      player,
@@ -180,12 +180,12 @@ public class VaultChestTileEntity extends ChestBlockEntity {
       }
    }
 
-   private void generateLootTable(@Nullable Player player, List<ItemStack> loot, RandomSource random) {
+   private void generateLootTable(Version version, @Nullable Player player, List<ItemStack> loot, RandomSource random) {
       float quantity = ItemQuantityHelper.getItemQuantity(player);
       float rarity = ItemRarityHelper.getItemRarity(player);
       LootTableKey key = VaultRegistry.LOOT_TABLE.getKey(this.lootTable);
       if (key != null) {
-         TieredLootTableGenerator generator = new TieredLootTableGenerator(Version.latest(), key, rarity, quantity);
+         TieredLootTableGenerator generator = new TieredLootTableGenerator(version, key, rarity, quantity);
          generator.source = player;
          generator.generate(random);
          this.rarity = ModConfigs.VAULT_CHEST.getRarity(generator.getCDF());

@@ -47,7 +47,7 @@ public class VaultDiffuserScreen extends AbstractElementContainerScreen<VaultDif
       this.addElement((SlotsElement)new SlotsElement(this).layout((screen, gui, parent, world) -> world.positionXY(gui)));
       this.addElement(
          (ProgressElement)new ProgressElement(
-               Spatials.positionXY(42, 22), ScreenTextures.PROGRESS_ARROW, ((VaultDiffuserContainer)this.getMenu()).getTileEntity()::getProgressPercent
+               Spatials.positionXY(77, 22), ScreenTextures.PROGRESS_ARROW, ((VaultDiffuserContainer)this.getMenu()).getTileEntity()::getProgressPercent
             )
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );

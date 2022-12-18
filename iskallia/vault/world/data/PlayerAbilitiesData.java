@@ -43,7 +43,9 @@ public class PlayerAbilitiesData extends SavedData {
    }
 
    public PlayerAbilitiesData remove(ServerPlayer player, AbilityNode<?, ?>... nodes) {
-      this.getAbilities(player).remove(player.getServer(), nodes);
+      AbilityTree abilities = this.getAbilities(player);
+      abilities.remove(player.getServer(), nodes);
+      abilities.sync(player.server);
       this.setDirty();
       return this;
    }
@@ -99,6 +101,11 @@ public class PlayerAbilitiesData extends SavedData {
             abilities.putOnCooldown(player, node);
          }
       }
+   }
+
+   public static void deactivateAllAbilities(ServerPlayer player) {
+      AbilityTree abilities = get(player.getLevel()).getAbilities(player);
+      abilities.deactivateAllAbilities();
    }
 
    @SubscribeEvent

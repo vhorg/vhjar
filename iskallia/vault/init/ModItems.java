@@ -283,7 +283,7 @@ public class ModItems {
    public static ItemVaultFruit.BitterLemon BITTER_LEMON = new ItemVaultFruit.BitterLemon(VAULT_MOD_GROUP, VaultMod.id("bitter_lemon"), 600);
    public static ItemVaultFruit.SourOrange SOUR_ORANGE = new ItemVaultFruit.SourOrange(VAULT_MOD_GROUP, VaultMod.id("sour_orange"), 1200);
    public static ItemVaultFruit.MysticPear MYSTIC_PEAR = new ItemVaultFruit.MysticPear(VAULT_MOD_GROUP, VaultMod.id("mystic_pear"), 6000);
-   public static ItemVaultFruit.SweetKiwi SWEET_KIWI = new ItemVaultFruit.SweetKiwi(VAULT_MOD_GROUP, VaultMod.id("sweet_kiwi"), 100);
+   public static ItemVaultFruit.SweetKiwi SWEET_KIWI = new ItemVaultFruit.SweetKiwi(VAULT_MOD_GROUP, VaultMod.id("sweet_kiwi"), 200);
    public static BasicItem VAULT_APPLE = new BasicItem(VaultMod.id("vault_apple"));
    public static AbsorptionAppleItem HEARTY_APPLE = new AbsorptionAppleItem(VaultMod.id("hearty_apple"));
    public static VaultBasicFoodItem VAULT_MEAT = new VaultBasicFoodItem(
@@ -699,6 +699,9 @@ public class ModItems {
    public static final BasicMobEggItem VAULT_RED_GUMMY_SOLDIER_EGG = new BasicMobEggItem(
       VaultMod.id("vault_red_gummy_soldier_egg"), () -> ModEntities.VAULT_RED_GUMMY_SOLDIER, 13183310, 15022667, new Properties().tab(VAULT_MOD_GROUP)
    );
+   public static final BasicMobEggItem WINTER_WOLF_EGG = new BasicMobEggItem(
+      VaultMod.id("winter_wolf_egg"), () -> ModEntities.WINTER_WOLF, 10000793, 2845360, new Properties().tab(VAULT_MOD_GROUP)
+   );
    public static final BasicMobEggItem SPIRIT_EGG = new BasicMobEggItem(
       VaultMod.id("spirit_egg"), () -> ModEntities.SPIRIT, 12698049, 4802889, new Properties().tab(VAULT_MOD_GROUP)
    );
@@ -1086,6 +1089,7 @@ public class ModItems {
       registry.register(VAULT_BLUE_GUMMY_SOLDIER_EGG);
       registry.register(VAULT_YELLOW_GUMMY_SOLDIER_EGG);
       registry.register(VAULT_RED_GUMMY_SOLDIER_EGG);
+      registry.register(WINTER_WOLF_EGG);
       registry.register(SPIRIT_EGG);
       registry.register(EXTRAORDINARY_ALEXANDRITE);
       registry.register(EXTRAORDINARY_PAINITE);

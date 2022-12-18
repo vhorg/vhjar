@@ -66,6 +66,7 @@ public class ModSounds {
    public static SoundEvent WITCHSKALL_IDLE;
    public static SoundEvent FAVOUR_UP;
    public static SoundEvent COIN_PILE_PLACE;
+   public static SoundEvent COIN_SINGLE_PLACE;
    public static SoundEvent COIN_PILE_BREAK;
    public static SoundEvent CRATE_OPEN;
    public static SoundEvent MAGNET_TABLE;
@@ -82,6 +83,9 @@ public class ModSounds {
    );
    public static ForgeSoundType COIN_PILE_SOUND_TYPE = new ForgeSoundType(
       1.0F, 1.0F, () -> COIN_PILE_BREAK, SoundType.CHAIN::getStepSound, () -> COIN_PILE_PLACE, SoundType.CHAIN::getHitSound, SoundType.CHAIN::getFallSound
+   );
+   public static ForgeSoundType COIN_PILE_DECO_SOUND_TYPE = new ForgeSoundType(
+      1.0F, 1.0F, () -> COIN_PILE_BREAK, SoundType.CHAIN::getStepSound, () -> COIN_SINGLE_PLACE, SoundType.CHAIN::getHitSound, SoundType.CHAIN::getFallSound
    );
 
    public static void registerSounds(Register<SoundEvent> event) {
@@ -144,6 +148,7 @@ public class ModSounds {
       FAVOUR_UP = registerSound(event, "favour_up");
       COIN_PILE_BREAK = registerSound(event, "coin_pile_break");
       COIN_PILE_PLACE = registerSound(event, "coin_pile_place");
+      COIN_SINGLE_PLACE = registerSound(event, "coin_single_place");
       CRATE_OPEN = registerSound(event, "crate_open");
       MAGNET_TABLE = registerSound(event, "magnet_table");
       NOVA_SPEED = registerSound(event, "nova_speed");

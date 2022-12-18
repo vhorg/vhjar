@@ -4,6 +4,7 @@ import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.bounty.task.properties.MiningProperties;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.world.data.BountyData;
@@ -30,16 +31,20 @@ public class MiningTask extends Task<MiningProperties> {
 
    @Override
    protected <E> boolean doValidate(ServerPlayer player, E event) {
-      if (!(event instanceof BreakEvent e)) {
-         return false;
-      } else {
+      if (event instanceof BreakEvent e) {
          BlockState state = e.getState();
          if (state.getBlock() instanceof VaultOreBlock block && (Boolean)state.getValue(VaultOreBlock.GENERATED)) {
             ResourceLocation id = ForgeRegistries.BLOCKS.getKey(block);
-            return id != null && id.equals(this.getProperties().getBlockId());
+            if (id == null) {
+               return false;
+            } else {
+               return id.equals(this.getProperties().getBlockId()) ? true : ModConfigs.BOUNTY_ORES.getValidOres(this.getProperties().getBlockId()).contains(id);
+            }
          } else {
             return false;
          }
+      } else {
+         return false;
       }
    }
 

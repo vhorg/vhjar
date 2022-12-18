@@ -20,6 +20,7 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.network.NetworkDirection;
@@ -58,7 +59,7 @@ public class PlayerDamageHelper {
    public static PlayerDamageHelper.DamageMultiplier applyTimedMultiplier(
       UUID id, ServerPlayer player, float value, PlayerDamageHelper.Operation operation, boolean showOnClient, int tickDuration
    ) {
-      return applyTimedMultiplier(player, value, operation, showOnClient, tickDuration, sPlayer -> {});
+      return applyTimedMultiplier(id, player, value, operation, showOnClient, tickDuration, sPlayer -> {});
    }
 
    public static PlayerDamageHelper.DamageMultiplier applyTimedMultiplier(
@@ -167,6 +168,13 @@ public class PlayerDamageHelper {
    public static void on(PlayerLoggedInEvent event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
          sync(player);
+      }
+   }
+
+   @SubscribeEvent
+   public static void on(PlayerLoggedOutEvent event) {
+      if (event.getPlayer() instanceof ServerPlayer player) {
+         multipliers.remove(player.getUUID());
       }
    }
 

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "dsd",
+    "sls",
+    "dsd"
+  ],
+  "key": {
+    "d": {
+      "item": "minecraft:diamond"
+    },
+    "s": {
+      "item": "the_vault:knowledge_star_shard"
+    },
+    "l": {
+      "item": "the_vault:gem_larimar"
+    }
+  },
+  "result": {
+    "item": "the_vault:mod_box",
+    "count": 1
+  }
+}

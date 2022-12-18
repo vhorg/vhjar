@@ -6,6 +6,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.block.CryoChamberBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.block.TreasureDoorBlock;
+import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
 import iskallia.vault.etching.EtchingRegistry;
@@ -135,6 +136,15 @@ public class ModModels {
             return type == null ? -1.0F : type.ordinal();
          }
       };
+      public static ItemPropertyFunction VAULT_ORE_TYPE = (stack, world, entity, seed) -> {
+         CompoundTag nbt = stack.getTag();
+         if (nbt == null) {
+            return -1.0F;
+         } else {
+            VaultOreBlock.Type type = VaultOreBlock.Type.fromString(nbt.getString("type"));
+            return type == null ? -1.0F : type.ordinal();
+         }
+      };
       public static ItemPropertyFunction TREASURE_DOOR_TYPE = (stack, world, entity, seed) -> {
          CompoundTag nbt = stack.getTag();
          if (nbt == null) {
@@ -173,6 +183,10 @@ public class ModModels {
          registerItemProperty(ModBlocks.TREASURE_DOOR.asItem(), "treasure_door_type", TREASURE_DOOR_TYPE);
          registerItemProperty(ModItems.MAGNET_ITEM, "magnet_perk", (stack, world, entity, seed) -> MagnetItem.getPerk(stack).ordinal());
          ItemProperties.registerGeneric(VaultMod.id("count"), (s, w, e, l) -> s.getCount());
+
+         for (VaultOreBlock block : VaultOreBlock.ALL) {
+            registerItemProperty(block.asItem(), "vault_ore_type", VAULT_ORE_TYPE);
+         }
       }
 
       public static void registerOverrides() {

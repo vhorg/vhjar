@@ -148,7 +148,7 @@ public class BountyData extends SavedData {
       Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
       if (!activeBounty.isEmpty()) {
          Bounty active = activeBounty.get();
-         active.setExpiration(Instant.now().plus((long)ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltyInHours(), ChronoUnit.HOURS).toEpochMilli());
+         active.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltySeconds(), ChronoUnit.SECONDS).toEpochMilli());
          this.getAllActiveFor(playerId).removeById(bountyId);
          this.getAllCompletedFor(playerId).add(active);
          this.setDirty();
@@ -160,7 +160,7 @@ public class BountyData extends SavedData {
       Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
       if (!activeBounty.isEmpty()) {
          Bounty active = activeBounty.get();
-         active.setExpiration(Instant.now().plus((long)ModConfigs.BOUNTY_CONFIG.getWaitingPeriodInHours(), ChronoUnit.HOURS).toEpochMilli());
+         active.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getWaitingPeriodSeconds(), ChronoUnit.SECONDS).toEpochMilli());
          this.getAllActiveFor(playerId).removeById(bountyId);
          this.getAllCompletedFor(playerId).add(active);
          active.getTask().getTaskReward().apply(player);

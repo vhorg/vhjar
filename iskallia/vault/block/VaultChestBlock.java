@@ -5,10 +5,12 @@ import iskallia.vault.core.vault.stat.VaultChestType;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.BlockHelper;
 import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -26,10 +28,14 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
 
 public class VaultChestBlock extends ChestBlock {
+   public static final EnumProperty<VaultChestBlock.Variant> VARIANT = EnumProperty.create("variant", VaultChestBlock.Variant.class);
    private final VaultChestType type;
 
    protected VaultChestBlock(VaultChestType type, Properties builder, Supplier<BlockEntityType<? extends ChestBlockEntity>> tileSupplier) {
@@ -39,6 +45,11 @@ public class VaultChestBlock extends ChestBlock {
 
    public VaultChestBlock(VaultChestType type, Properties builder) {
       this(type, builder, () -> ModBlocks.VAULT_CHEST_TILE_ENTITY);
+   }
+
+   protected void createBlockStateDefinition(@Nonnull Builder<Block, BlockState> builder) {
+      super.createBlockStateDefinition(builder);
+      builder.add(new Property[]{VARIANT});
    }
 
    public VaultChestType getType() {
@@ -88,10 +99,10 @@ public class VaultChestBlock extends ChestBlock {
 
    public BlockState getStateForPlacement(BlockPlaceContext context) {
       BlockState state = super.getStateForPlacement(context);
-      return state == null ? null : (BlockState)state.setValue(TYPE, ChestType.SINGLE);
+      return state == null ? null : (BlockState)((BlockState)state.setValue(TYPE, ChestType.SINGLE)).setValue(VARIANT, VaultChestBlock.Variant.NORMAL);
    }
 
-   @org.jetbrains.annotations.Nullable
+   @Nullable
    public MenuProvider getMenuProvider(BlockState state, Level level, BlockPos pos) {
       if ((
             state.getBlock() == ModBlocks.ALTAR_CHEST_PLACEABLE
@@ -141,6 +152,22 @@ public class VaultChestBlock extends ChestBlock {
                }
             }
          } : super.getMenuProvider(state, level, pos);
+      }
+   }
+
+   public static enum Variant implements StringRepresentable {
+      NORMAL("normal"),
+      PRESENT("present");
+
+      private final String serializedName;
+
+      private Variant(String serializedName) {
+         this.serializedName = serializedName;
+      }
+
+      @Nonnull
+      public String getSerializedName() {
+         return this.serializedName;
       }
    }
 }
