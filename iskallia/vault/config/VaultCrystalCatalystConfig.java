@@ -156,9 +156,9 @@ public class VaultCrystalCatalystConfig extends Config {
       }
 
       @Nullable
-      public ResourceLocation getRandomModifier(Random random, Predicate<ResourceLocation> modifierFilter) {
+      public ResourceLocation getRandomModifier(Random random, Predicate<ResourceLocation> excludeFilter) {
          WeightedList<ResourceLocation> filteredModifiers = this.modifierIdWeightedList.copy();
-         filteredModifiers.removeIf(entry -> modifierFilter.test(entry.value));
+         filteredModifiers.removeIf(entry -> excludeFilter.test(entry.value));
          return filteredModifiers.getRandom(random);
       }
    }

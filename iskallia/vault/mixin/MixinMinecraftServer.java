@@ -1,12 +1,16 @@
 package iskallia.vault.mixin;
 
+import com.mojang.authlib.GameProfile;
 import iskallia.vault.core.SkyVaultsChunkGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.VirtualWorlds;
 import java.io.IOException;
+import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -83,5 +87,22 @@ public abstract class MixinMinecraftServer {
       if (world.getChunkSource().getGenerator() instanceof SkyVaultsChunkGenerator) {
          ci.cancel();
       }
+   }
+
+   @Redirect(
+      method = {"tickServer"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/server/level/ServerPlayer;getGameProfile()Lcom/mojang/authlib/GameProfile;"
+      )
+   )
+   public GameProfile setPlayerNameForStatus(ServerPlayer serverPlayer) {
+      String name = serverPlayer.getName().getString();
+      UUID id = serverPlayer.getUUID();
+      if (MiscUtils.getVault(serverPlayer).isPresent()) {
+         name = name + "(vault)";
+      }
+
+      return new GameProfile(id, name);
    }
 }
