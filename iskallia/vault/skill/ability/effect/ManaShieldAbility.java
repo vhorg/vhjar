@@ -15,7 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -57,7 +57,7 @@ public class ManaShieldAbility<C extends ManaShieldConfig> extends AbstractToggl
    @SubscribeEvent(
       priority = EventPriority.LOWEST
    )
-   public void on(LivingHurtEvent event) {
+   public void on(LivingDamageEvent event) {
       if (event.getEntity() instanceof ServerPlayer player && player.hasEffect(ModEffects.MANA_SHIELD)) {
          AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
          AbilityNode<?, ?> node = abilities.getNodeOf(this);

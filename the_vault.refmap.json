@@ -144,8 +144,10 @@
       "Lnet/minecraft/server/level/ServerLevel;tick(Ljava/util/function/BooleanSupplier;)V": "Lnet/minecraft/server/level/ServerLevel;m_8793_(Ljava/util/function/BooleanSupplier;)V",
       "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V": "Lnet/minecraft/util/profiling/ProfilerFiller;m_6182_(Ljava/lang/String;)V",
       "createLevels": "Lnet/minecraft/server/MinecraftServer;m_129815_(Lnet/minecraft/server/level/progress/ChunkProgressListener;)V",
+      "Lnet/minecraft/server/level/ServerPlayer;getGameProfile()Lcom/mojang/authlib/GameProfile;": "Lnet/minecraft/server/level/ServerPlayer;m_36316_()Lcom/mojang/authlib/GameProfile;",
       "tickChildren": "Lnet/minecraft/server/MinecraftServer;m_5703_(Ljava/util/function/BooleanSupplier;)V",
-      "Lnet/minecraft/world/level/border/WorldBorder;applySettings(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V": "Lnet/minecraft/world/level/border/WorldBorder;m_61931_(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V"
+      "Lnet/minecraft/world/level/border/WorldBorder;applySettings(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V": "Lnet/minecraft/world/level/border/WorldBorder;m_61931_(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V",
+      "tickServer": "Lnet/minecraft/server/MinecraftServer;m_5705_(Ljava/util/function/BooleanSupplier;)V"
     },
     "iskallia/vault/mixin/MixinSlotItemHandler": {
       "mayPlace": "Lnet/minecraftforge/items/SlotItemHandler;m_5857_(Lnet/minecraft/world/item/ItemStack;)Z"
@@ -464,8 +466,10 @@
         "Lnet/minecraft/server/level/ServerLevel;tick(Ljava/util/function/BooleanSupplier;)V": "Lnet/minecraft/server/level/ServerLevel;m_8793_(Ljava/util/function/BooleanSupplier;)V",
         "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V": "Lnet/minecraft/util/profiling/ProfilerFiller;m_6182_(Ljava/lang/String;)V",
         "createLevels": "Lnet/minecraft/server/MinecraftServer;m_129815_(Lnet/minecraft/server/level/progress/ChunkProgressListener;)V",
+        "Lnet/minecraft/server/level/ServerPlayer;getGameProfile()Lcom/mojang/authlib/GameProfile;": "Lnet/minecraft/server/level/ServerPlayer;m_36316_()Lcom/mojang/authlib/GameProfile;",
         "tickChildren": "Lnet/minecraft/server/MinecraftServer;m_5703_(Ljava/util/function/BooleanSupplier;)V",
-        "Lnet/minecraft/world/level/border/WorldBorder;applySettings(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V": "Lnet/minecraft/world/level/border/WorldBorder;m_61931_(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V"
+        "Lnet/minecraft/world/level/border/WorldBorder;applySettings(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V": "Lnet/minecraft/world/level/border/WorldBorder;m_61931_(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V",
+        "tickServer": "Lnet/minecraft/server/MinecraftServer;m_5705_(Ljava/util/function/BooleanSupplier;)V"
       },
       "iskallia/vault/mixin/MixinSlotItemHandler": {
         "mayPlace": "Lnet/minecraftforge/items/SlotItemHandler;m_5857_(Lnet/minecraft/world/item/ItemStack;)Z"

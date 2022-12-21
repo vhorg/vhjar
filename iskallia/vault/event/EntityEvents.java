@@ -231,17 +231,19 @@ public class EntityEvents {
 
    @SubscribeEvent
    public static void onWitchThrowPotion(EntityJoinWorldEvent event) {
-      if (!event.loadedFromDisk() && event.getEntity() instanceof ThrownPotion thrownPotion) {
-         Entity thrower = thrownPotion.getOwner();
-         if (thrower instanceof Witch) {
-            ServerVaults.get(thrower.getLevel()).ifPresent(vault -> {
-               int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
-               List<MobEffectInstance> configuredEffects = ModConfigs.VAULT_ENTITIES.getWitchAdditionalThrownEffects(level);
-               ItemStack thrown = thrownPotion.getItem();
-               List<MobEffectInstance> effects = new ArrayList<>(configuredEffects);
-               PotionUtils.setCustomEffects(thrown, effects);
-               thrownPotion.setItem(thrown);
-            });
+      if (event.getWorld() instanceof ServerLevel serverLevel) {
+         if (!event.loadedFromDisk() && event.getEntity() instanceof ThrownPotion thrownPotion) {
+            Entity thrower = thrownPotion.getOwner();
+            if (thrower instanceof Witch) {
+               ServerVaults.get(serverLevel).ifPresent(vault -> {
+                  int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
+                  List<MobEffectInstance> configuredEffects = ModConfigs.VAULT_ENTITIES.getWitchAdditionalThrownEffects(level);
+                  ItemStack thrown = thrownPotion.getItem();
+                  List<MobEffectInstance> effects = new ArrayList<>(configuredEffects);
+                  PotionUtils.setCustomEffects(thrown, effects);
+                  thrownPotion.setItem(thrown);
+               });
+            }
          }
       }
    }

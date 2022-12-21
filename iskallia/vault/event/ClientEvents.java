@@ -5,6 +5,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import iskallia.vault.client.ClientActiveEternalData;
 import iskallia.vault.client.ClientDamageData;
 import iskallia.vault.core.world.loot.LootTableInfo;
+import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import java.util.List;
 import java.util.Set;
@@ -79,28 +82,39 @@ public class ClientEvents {
             }
          }
 
-         if (LootTableInfo.containsItem(item.getRegistryName())) {
-            if (Screen.hasShiftDown()) {
-               event.getToolTip().add(new TextComponent("Found in:").withStyle(ChatFormatting.GRAY));
-               Set<ResourceLocation> lootTableKeys = LootTableInfo.getLootTableKeys(item.getRegistryName());
-               Set<String> names = new TreeSet<>();
+         addLootTableInfoToTooltip(current, event.getToolTip());
+      }
+   }
 
-               for (ResourceLocation lootTableKey : lootTableKeys) {
-                  names.addAll(ModConfigs.LOOT_INFO_CONFIG.getDisplayNames(lootTableKey));
-               }
+   private static void addLootTableInfoToTooltip(ItemStack itemStack, List<Component> toolTip) {
+      Item item = itemStack.getItem();
+      if (item instanceof VaultGearItem) {
+         VaultGearState state = VaultGearData.read(itemStack).getState();
+         if (state != VaultGearState.UNIDENTIFIED) {
+            return;
+         }
+      }
 
-               for (String name : names) {
-                  event.getToolTip().add(new TextComponent("  - " + name).withStyle(ChatFormatting.GRAY));
-               }
-            } else {
-               event.getToolTip()
-                  .add(
-                     new TextComponent("Hold ")
-                        .withStyle(ChatFormatting.DARK_GRAY)
-                        .append(new TextComponent("<SHIFT>").withStyle(ChatFormatting.GRAY))
-                        .append(new TextComponent(" for Vault Loot Info").withStyle(ChatFormatting.DARK_GRAY))
-                  );
+      if (LootTableInfo.containsItem(item.getRegistryName())) {
+         if (Screen.hasShiftDown()) {
+            toolTip.add(new TextComponent("Found in:").withStyle(ChatFormatting.GRAY));
+            Set<ResourceLocation> lootTableKeys = LootTableInfo.getLootTableKeys(item.getRegistryName());
+            Set<String> names = new TreeSet<>();
+
+            for (ResourceLocation lootTableKey : lootTableKeys) {
+               names.addAll(ModConfigs.LOOT_INFO_CONFIG.getDisplayNames(lootTableKey));
             }
+
+            for (String name : names) {
+               toolTip.add(new TextComponent("  - " + name).withStyle(ChatFormatting.GRAY));
+            }
+         } else {
+            toolTip.add(
+               new TextComponent("Hold ")
+                  .withStyle(ChatFormatting.DARK_GRAY)
+                  .append(new TextComponent("<SHIFT>").withStyle(ChatFormatting.GRAY))
+                  .append(new TextComponent(" for Vault Loot Info").withStyle(ChatFormatting.DARK_GRAY))
+            );
          }
       }
    }
