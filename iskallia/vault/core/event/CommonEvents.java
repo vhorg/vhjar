@@ -1,5 +1,6 @@
 package iskallia.vault.core.event;
 
+import iskallia.vault.core.event.common.AltarProgressEvent;
 import iskallia.vault.core.event.common.ArtifactChanceEvent;
 import iskallia.vault.core.event.common.BlockSetEvent;
 import iskallia.vault.core.event.common.BlockUseEvent;
@@ -67,6 +68,7 @@ public class CommonEvents {
    public static final BlockUseEvent BLOCK_USE = register(new BlockUseEvent());
    public static final BlockSetEvent BLOCK_SET = register(new BlockSetEvent());
    public static final VaultPortalCollideEvent VAULT_PORTAL_COLLIDE = register(new VaultPortalCollideEvent());
+   public static final AltarProgressEvent ALTAR_PROGRESS = register(new AltarProgressEvent());
    public static final EntityCreationEvent ENTITY_CREATION = register(new EntityCreationEvent());
    public static final EntitySpawnEvent ENTITY_SPAWN = register(new EntitySpawnEvent());
    public static final EntityTickEvent ENTITY_TICK = register(new EntityTickEvent());

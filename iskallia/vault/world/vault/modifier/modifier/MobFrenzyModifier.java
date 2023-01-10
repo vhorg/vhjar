@@ -6,6 +6,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.KillBossObjective;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.world.vault.modifier.spi.EntityAttributeModifier;
 import iskallia.vault.world.vault.modifier.spi.ModifierContext;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
@@ -22,12 +23,16 @@ public class MobFrenzyModifier extends VaultModifier<MobFrenzyModifier.Propertie
       super(id, properties, display);
       this.attackDamageAttributeModifier = new EntityAttributeModifier<>(
          VaultMod.id(id.getPath() + "/attack_damage"),
-         new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.ATTACK_DAMAGE_ADDITIVE_PERCENTILE, properties.getDamage()),
+         new EntityAttributeModifier.Properties(
+            EntityAttributeModifier.ModifierType.ATTACK_DAMAGE_ADDITIVE_PERCENTILE, properties.getDamage(), properties.reputation
+         ),
          display
       );
       this.movementSpeedAttributeModifier = new EntityAttributeModifier<>(
          VaultMod.id(id.getPath() + "/movement_speed"),
-         new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.SPEED_ADDITIVE_PERCENTILE, properties.getMovementSpeed()),
+         new EntityAttributeModifier.Properties(
+            EntityAttributeModifier.ModifierType.SPEED_ADDITIVE_PERCENTILE, properties.getMovementSpeed(), properties.reputation
+         ),
          display
       );
    }
@@ -39,8 +44,8 @@ public class MobFrenzyModifier extends VaultModifier<MobFrenzyModifier.Propertie
             if (entity.level == world && !(entity instanceof Player)) {
                long upperBits = context.getUUID().getMostSignificantBits();
                long lowerBits = context.getUUID().getLeastSignificantBits();
-               this.attackDamageAttributeModifier.applyToEntity(entity, new UUID(upperBits++, lowerBits));
-               this.movementSpeedAttributeModifier.applyToEntity(entity, new UUID(upperBits, lowerBits));
+               this.attackDamageAttributeModifier.applyToEntity(entity, new UUID(upperBits++, lowerBits), context);
+               this.movementSpeedAttributeModifier.applyToEntity(entity, new UUID(upperBits, lowerBits), context);
             }
          }
       });
@@ -65,11 +70,14 @@ public class MobFrenzyModifier extends VaultModifier<MobFrenzyModifier.Propertie
       private final float movementSpeed;
       @Expose
       private final float maxHealth;
+      @Expose
+      private final ScalarReputationProperty reputation;
 
-      public Properties(float damage, float movementSpeed, float maxHealth) {
+      public Properties(float damage, float movementSpeed, float maxHealth, ScalarReputationProperty reputation) {
          this.damage = damage;
          this.movementSpeed = movementSpeed;
          this.maxHealth = maxHealth;
+         this.reputation = reputation;
       }
 
       public float getDamage() {

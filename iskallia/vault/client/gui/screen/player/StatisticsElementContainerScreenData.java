@@ -9,6 +9,7 @@ import iskallia.vault.client.gui.screen.player.element.StatLabel;
 import iskallia.vault.client.gui.screen.player.element.StatLabelElementBuilder;
 import iskallia.vault.client.gui.screen.player.element.VaultGodFavorIconElement;
 import iskallia.vault.config.MenuPlayerStatDescriptionConfig;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.core.vault.stat.StatTotals;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
@@ -16,8 +17,8 @@ import iskallia.vault.mana.Mana;
 import iskallia.vault.util.StatUtils;
 import iskallia.vault.util.calc.AttributeLimitHelper;
 import iskallia.vault.util.function.Memo;
-import iskallia.vault.world.data.PlayerFavourData;
 import java.beans.Introspector;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
@@ -70,134 +71,142 @@ public class StatisticsElementContainerScreenData {
 
    @NotNull
    protected VaultGodFavorIconElement.ValueSupplier getValueProviderIdona() {
-      return VaultGodFavorIconElement.ValueSupplier.of(this::getFavorIdona, this::getTooltipTitleIdona, this::getTooltipExtendedIdona);
+      return VaultGodFavorIconElement.ValueSupplier.of(
+         this::getReputationIdona, this::getTooltipTitleIdona, this::getTooltipExtendedIdona, this.getColorIdona()
+      );
    }
 
-   private int getFavorIdona() {
-      return ClientStatisticsData.getFavour(PlayerFavourData.VaultGodType.MALEVOLENT);
+   private int getReputationIdona() {
+      return ClientStatisticsData.getReputation(VaultGod.IDONA);
+   }
+
+   private int getColorIdona() {
+      return ClientStatisticsData.getFavour().orElse(null) == VaultGod.IDONA ? 16755200 : 16777215;
    }
 
    @NotNull
    private TextComponent getTooltipTitleIdona() {
-      return this.getGodFavorTitle(PlayerFavourData.VaultGodType.MALEVOLENT);
+      return this.getGodFavorTitle(VaultGod.IDONA);
    }
 
    @NotNull
    private List<Component> getTooltipExtendedIdona() {
       return List.of(
-         this.getGodFavorTitle(PlayerFavourData.VaultGodType.MALEVOLENT),
-         this.getGodFavorDescription(PlayerFavourData.VaultGodType.MALEVOLENT).withStyle(EXTENDED_DESCRIPTION_STYLE),
+         this.getGodFavorTitle(VaultGod.IDONA),
+         this.getGodFavorDescription(VaultGod.IDONA).withStyle(EXTENDED_DESCRIPTION_STYLE),
          BLANK_LINE,
-         this.getPositiveInfluenceHeader().withStyle(EXTENDED_POSITIVE_INFLUENCES_STYLE),
          new TextComponent("  + Soul Shard Drop %").withStyle(EXTENDED_DESCRIPTION_STYLE),
          new TextComponent("  + Damage %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         BLANK_LINE,
-         this.getNegativeInfluencesHeader().withStyle(EXTENDED_NEGATIVE_INFLUENCES_STYLE),
-         new TextComponent("  - Player Damage %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Mob Health %").withStyle(EXTENDED_DESCRIPTION_STYLE)
+         new TextComponent("  + Life Leech %").withStyle(EXTENDED_DESCRIPTION_STYLE)
       );
    }
 
    @NotNull
    protected VaultGodFavorIconElement.ValueSupplier getValueProviderTenos() {
-      return VaultGodFavorIconElement.ValueSupplier.of(this::getFavorTenos, this::getTooltipTitleTenos, this::getTooltipExtendedTenos);
+      return VaultGodFavorIconElement.ValueSupplier.of(
+         this::getReputationTenos, this::getTooltipTitleTenos, this::getTooltipExtendedTenos, this.getColorTenos()
+      );
    }
 
-   private int getFavorTenos() {
-      return ClientStatisticsData.getFavour(PlayerFavourData.VaultGodType.OMNISCIENT);
+   private int getReputationTenos() {
+      return ClientStatisticsData.getReputation(VaultGod.TENOS);
    }
 
    @NotNull
    private TextComponent getTooltipTitleTenos() {
-      return this.getGodFavorTitle(PlayerFavourData.VaultGodType.OMNISCIENT);
+      return this.getGodFavorTitle(VaultGod.TENOS);
+   }
+
+   private int getColorTenos() {
+      return ClientStatisticsData.getFavour().orElse(null) == VaultGod.TENOS ? 16755200 : 16777215;
    }
 
    @NotNull
    private List<Component> getTooltipExtendedTenos() {
       return List.of(
-         this.getGodFavorTitle(PlayerFavourData.VaultGodType.OMNISCIENT),
-         this.getGodFavorDescription(PlayerFavourData.VaultGodType.OMNISCIENT).withStyle(EXTENDED_DESCRIPTION_STYLE),
+         this.getGodFavorTitle(VaultGod.TENOS),
+         this.getGodFavorDescription(VaultGod.TENOS).withStyle(EXTENDED_DESCRIPTION_STYLE),
          BLANK_LINE,
-         this.getPositiveInfluenceHeader().withStyle(EXTENDED_POSITIVE_INFLUENCES_STYLE),
-         new TextComponent("  + Luck").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Chest Rarity %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         BLANK_LINE,
-         this.getNegativeInfluencesHeader().withStyle(EXTENDED_NEGATIVE_INFLUENCES_STYLE),
-         new TextComponent("  + Unlucky").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  - Chest Rarity %").withStyle(EXTENDED_DESCRIPTION_STYLE)
+         new TextComponent("  + Item Rarity %").withStyle(EXTENDED_DESCRIPTION_STYLE),
+         new TextComponent("  + Item Quantity %").withStyle(EXTENDED_DESCRIPTION_STYLE),
+         new TextComponent("  - Chest Trap Chance %").withStyle(EXTENDED_DESCRIPTION_STYLE)
       );
    }
 
    @NotNull
    protected VaultGodFavorIconElement.ValueSupplier getValueProviderVelara() {
-      return VaultGodFavorIconElement.ValueSupplier.of(this::getFavorVelara, this::getTooltipTitleVelara, this::getTooltipExtendedVelara);
+      return VaultGodFavorIconElement.ValueSupplier.of(
+         this::getReputationVelara, this::getTooltipTitleVelara, this::getTooltipExtendedVelara, this.getColorVelara()
+      );
    }
 
-   private int getFavorVelara() {
-      return ClientStatisticsData.getFavour(PlayerFavourData.VaultGodType.BENEVOLENT);
+   private int getReputationVelara() {
+      return ClientStatisticsData.getReputation(VaultGod.VELARA);
+   }
+
+   private int getColorVelara() {
+      return ClientStatisticsData.getFavour().orElse(null) == VaultGod.VELARA ? 16755200 : 16777215;
    }
 
    @NotNull
    private TextComponent getTooltipTitleVelara() {
-      return this.getGodFavorTitle(PlayerFavourData.VaultGodType.BENEVOLENT);
+      return this.getGodFavorTitle(VaultGod.VELARA);
    }
 
    @NotNull
    private List<Component> getTooltipExtendedVelara() {
       return List.of(
-         this.getGodFavorTitle(PlayerFavourData.VaultGodType.BENEVOLENT),
-         this.getGodFavorDescription(PlayerFavourData.VaultGodType.BENEVOLENT).withStyle(EXTENDED_DESCRIPTION_STYLE),
+         this.getGodFavorTitle(VaultGod.VELARA),
+         this.getGodFavorDescription(VaultGod.VELARA).withStyle(EXTENDED_DESCRIPTION_STYLE),
          BLANK_LINE,
-         this.getPositiveInfluenceHeader().withStyle(EXTENDED_POSITIVE_INFLUENCES_STYLE),
          new TextComponent("  + Regeneration").withStyle(EXTENDED_DESCRIPTION_STYLE),
          new TextComponent("  + Healing Efficiency %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         BLANK_LINE,
-         this.getNegativeInfluencesHeader().withStyle(EXTENDED_NEGATIVE_INFLUENCES_STYLE),
-         new TextComponent("  + Amount of Mobs").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  - Healing Efficiency %").withStyle(EXTENDED_DESCRIPTION_STYLE)
+         new TextComponent("  + Max Health %").withStyle(EXTENDED_DESCRIPTION_STYLE)
       );
    }
 
    @NotNull
    protected VaultGodFavorIconElement.ValueSupplier getValueProviderWendarr() {
-      return VaultGodFavorIconElement.ValueSupplier.of(this::getFavorWendarr, this::getTooltipTitleWendarr, this::getTooltipExtendedWendarr);
+      return VaultGodFavorIconElement.ValueSupplier.of(
+         this::getReputationWendarr, this::getTooltipTitleWendarr, this::getTooltipExtendedWendarr, this.getColorWendarr()
+      );
    }
 
-   private int getFavorWendarr() {
-      return ClientStatisticsData.getFavour(PlayerFavourData.VaultGodType.TIMEKEEPER);
+   private int getReputationWendarr() {
+      return ClientStatisticsData.getReputation(VaultGod.WENDARR);
+   }
+
+   private int getColorWendarr() {
+      return ClientStatisticsData.getFavour().orElse(null) == VaultGod.WENDARR ? 16755200 : 16777215;
    }
 
    @NotNull
    private TextComponent getTooltipTitleWendarr() {
-      return this.getGodFavorTitle(PlayerFavourData.VaultGodType.TIMEKEEPER);
+      return this.getGodFavorTitle(VaultGod.WENDARR);
    }
 
    @NotNull
    private List<Component> getTooltipExtendedWendarr() {
       return List.of(
-         this.getGodFavorTitle(PlayerFavourData.VaultGodType.TIMEKEEPER),
-         this.getGodFavorDescription(PlayerFavourData.VaultGodType.TIMEKEEPER).withStyle(EXTENDED_DESCRIPTION_STYLE),
+         this.getGodFavorTitle(VaultGod.WENDARR),
+         this.getGodFavorDescription(VaultGod.WENDARR).withStyle(EXTENDED_DESCRIPTION_STYLE),
          BLANK_LINE,
-         this.getPositiveInfluenceHeader().withStyle(EXTENDED_POSITIVE_INFLUENCES_STYLE),
-         new TextComponent("  + Vault Time").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Cooldown %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         BLANK_LINE,
-         this.getNegativeInfluencesHeader().withStyle(EXTENDED_NEGATIVE_INFLUENCES_STYLE),
-         new TextComponent("  - Vault Time %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Mob Movement Speed %").withStyle(EXTENDED_DESCRIPTION_STYLE)
+         new TextComponent("  + Mana Regeneration %").withStyle(EXTENDED_DESCRIPTION_STYLE),
+         new TextComponent("  + Maximum Mana %").withStyle(EXTENDED_DESCRIPTION_STYLE),
+         new TextComponent("  + Cooldown Reduction %").withStyle(EXTENDED_DESCRIPTION_STYLE)
       );
    }
 
    @NotNull
-   private TextComponent getGodFavorTitle(PlayerFavourData.VaultGodType vaultGodType) {
+   private TextComponent getGodFavorTitle(VaultGod vaultGodType) {
       return new TextComponent(vaultGodType.getName() + " " + Introspector.decapitalize(vaultGodType.getTitle()));
    }
 
    @NotNull
-   private TextComponent getGodFavorDescription(PlayerFavourData.VaultGodType vaultGodType) {
+   private TextComponent getGodFavorDescription(VaultGod vaultGodType) {
       return new TextComponent(
-         "Complete a%s %s altar for a chance to gain favour with %s. Favour above +4 or below -4 has a chance to apply a buff or a curse."
-            .formatted(vaultGodType == PlayerFavourData.VaultGodType.MALEVOLENT ? "n" : "", vaultGodType.getName(), vaultGodType.getName())
+         "Complete a%s %s altar for a chance to gain favour with %s. A favour will grant a buff in the subsequent vault. Completing the objective in said vault will grant a reputation point which slowly increases the power of the buffs."
+            .formatted(vaultGodType == VaultGod.IDONA ? "n" : "", vaultGodType.getName(), vaultGodType.getName())
       );
    }
 
@@ -237,44 +246,57 @@ public class StatisticsElementContainerScreenData {
 
    @Nonnull
    protected List<StatLabelElementBuilder<?>> getStatListPlayer() {
-      return List.of(
-         GearAttributeStatLabel.of(this.player, ModGearAttributes.ARMOR, LivingEntity::getArmorValue),
-         GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_DAMAGE, player -> player.getAttributeValue(Attributes.ATTACK_DAMAGE)),
-         GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_SPEED, player -> player.getAttributeValue(Attributes.ATTACK_SPEED) - 4.0),
-         GearAttributeStatLabel.ofDouble(this.player, ModGearAttributes.ATTACK_SPEED_PERCENT),
-         GearAttributeStatLabel.of(this.player, ModGearAttributes.REACH, IForgePlayer::getReachDistance),
-         GearAttributeStatLabel.of(
-            this.player, ModGearAttributes.KNOCKBACK_RESISTANCE, player -> (float)player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)
-         ),
-         GearAttributeStatLabel.of(this.player, ModGearAttributes.HEALTH, LivingEntity::getMaxHealth),
-         GearAttributeStatLabel.of(this.player, ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE, Mana::getRegenPerSecond),
-         GearAttributeStatLabel.of(this.player, ModGearAttributes.MANA_ADDITIVE, player -> Mth.floor(Mana.getMax(player))),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.COOLDOWN_REDUCTION, AttributeLimitHelper::getCooldownReductionLimit),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.LEECH),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.RESISTANCE, AttributeLimitHelper::getResistanceLimit),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.BLOCK, AttributeLimitHelper::getBlockChanceLimit),
-         GearAttributeStatLabel.ofBoolean(this.player, ModGearAttributes.SOULBOUND),
-         GearAttributeStatLabel.ofBoolean(this.player, ModGearAttributes.IS_FIRE_IMMUNE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.CRITICAL_HIT_TAKEN_REDUCTION),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.VANILLA_CRITICAL_HIT_CHANCE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DURABILITY_WEAR_REDUCTION),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.FATAL_STRIKE_CHANCE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.FATAL_STRIKE_DAMAGE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_CHANCE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_DAMAGE),
-         GearAttributeStatLabel.ofInteger(this.player, ModGearAttributes.ON_HIT_CHAIN),
-         GearAttributeStatLabel.ofInteger(this.player, ModGearAttributes.ON_HIT_AOE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ON_HIT_STUN),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.SWEEPING_HIT_CHANCE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_QUANTITY),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_RARITY),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.TRAP_DISARMING),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.SOUL_CHANCE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_INCREASE),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_ILLAGERS),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_SPIDERS),
-         GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_UNDEAD)
+      List<StatLabelElementBuilder<?>> result = new ArrayList<>(
+         List.of(
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.ARMOR, LivingEntity::getArmorValue),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_DAMAGE, player -> player.getAttributeValue(Attributes.ATTACK_DAMAGE)),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_SPEED, player -> player.getAttributeValue(Attributes.ATTACK_SPEED) - 4.0),
+            GearAttributeStatLabel.ofDouble(this.player, ModGearAttributes.ATTACK_SPEED_PERCENT),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.REACH, IForgePlayer::getReachDistance),
+            GearAttributeStatLabel.of(
+               this.player, ModGearAttributes.KNOCKBACK_RESISTANCE, player -> (float)player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)
+            ),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.HEALTH, LivingEntity::getMaxHealth),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.HEALING_EFFECTIVENESS),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE, Mana::getRegenPerSecond),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.MANA_ADDITIVE, player -> Mth.floor(Mana.getMax(player))),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.COOLDOWN_REDUCTION, AttributeLimitHelper::getCooldownReductionLimit),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.LEECH),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.RESISTANCE, AttributeLimitHelper::getResistanceLimit),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.BLOCK, AttributeLimitHelper::getBlockChanceLimit),
+            GearAttributeStatLabel.ofBoolean(this.player, ModGearAttributes.SOULBOUND),
+            GearAttributeStatLabel.ofBoolean(this.player, ModGearAttributes.IS_FIRE_IMMUNE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.CRITICAL_HIT_TAKEN_REDUCTION),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.VANILLA_CRITICAL_HIT_CHANCE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DURABILITY_WEAR_REDUCTION),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.FATAL_STRIKE_CHANCE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.FATAL_STRIKE_DAMAGE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_CHANCE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_DAMAGE),
+            GearAttributeStatLabel.ofInteger(this.player, ModGearAttributes.ON_HIT_CHAIN),
+            GearAttributeStatLabel.ofInteger(this.player, ModGearAttributes.ON_HIT_AOE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ON_HIT_STUN),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.SWEEPING_HIT_CHANCE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_QUANTITY),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_RARITY),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.TRAP_DISARMING),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.SOUL_CHANCE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_INCREASE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_ILLAGERS),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_SPIDERS),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_UNDEAD)
+         )
       );
+      result.sort(StatLabelElementBuilder.COMPARATOR);
+      result.addAll(
+         List.of(
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.VELARA_AFFINITY),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.TENOS_AFFINITY),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.WENDARR_AFFINITY),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.IDONA_AFFINITY)
+         )
+      );
+      return result;
    }
 
    @Nonnull

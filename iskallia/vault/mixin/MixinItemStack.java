@@ -13,15 +13,19 @@ import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.Component.Serializer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,6 +39,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
    priority = 1001
 )
 public abstract class MixinItemStack {
+   @Shadow
+   @Final
+   @Deprecated
+   private Item item;
+
    @Shadow
    public abstract int getMaxDamage();
 
@@ -56,6 +65,8 @@ public abstract class MixinItemStack {
    @Overwrite
    public boolean hurt(int damage, Random rand, @Nullable ServerPlayer damager) {
       if (!this.isDamageableItem()) {
+         return false;
+      } else if (this.item == Items.ELYTRA && new Random().nextInt(5) == 0) {
          return false;
       } else {
          if (damage > 0) {
@@ -138,5 +149,31 @@ public abstract class MixinItemStack {
       }
 
       return stack.isDamaged();
+   }
+
+   @Inject(
+      method = {"getHoverName"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void getGearHoverName(CallbackInfoReturnable<Component> cir) {
+      ItemStack thisInstance = (ItemStack)this;
+      if (thisInstance.getItem() instanceof VaultGearItem) {
+         CompoundTag compoundtag = thisInstance.getTagElement("display");
+         if (compoundtag != null && compoundtag.contains("Name", 8)) {
+            try {
+               MutableComponent component = Serializer.fromJson(compoundtag.getString("Name"));
+               if (component != null) {
+                  VaultGearData gearData = VaultGearData.read(thisInstance);
+                  cir.setReturnValue(component.withStyle(Style.EMPTY.withColor(gearData.getRarity().getColor())));
+                  return;
+               }
+
+               compoundtag.remove("Name");
+            } catch (Exception var6) {
+               compoundtag.remove("Name");
+            }
+         }
+      }
    }
 }

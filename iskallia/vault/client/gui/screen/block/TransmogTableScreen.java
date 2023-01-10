@@ -127,7 +127,14 @@ public class TransmogTableScreen extends AbstractElementContainerScreen<Transmog
    public void render(@Nonnull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
       super.render(poseStack, mouseX, mouseY, partialTick);
       this.transmogButton
-         .setDisabled(((TransmogTableContainer)this.getMenu()).getPreviewItemStack().isEmpty() || !((TransmogTableContainer)this.getMenu()).priceFulfilled());
+         .setDisabled(
+            ((TransmogTableContainer)this.getMenu()).getPreviewItemStack().isEmpty()
+               || !((TransmogTableContainer)this.getMenu()).priceFulfilled()
+               || !((TransmogTableContainer)this.getMenu())
+                  .getInternalInventory()
+                  .getItem(((TransmogTableContainer)this.getMenu()).getInternalInventory().outputSlotIndex())
+                  .isEmpty()
+         );
    }
 
    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {

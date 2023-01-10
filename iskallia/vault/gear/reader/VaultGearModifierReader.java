@@ -28,7 +28,7 @@ public abstract class VaultGearModifierReader<T> {
       return this.rgbColor;
    }
 
-   protected Style getColoredTextStyle() {
+   public Style getColoredTextStyle() {
       return Style.EMPTY.withColor(this.getRgbColor());
    }
 

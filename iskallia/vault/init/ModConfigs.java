@@ -30,7 +30,6 @@ import iskallia.vault.config.FighterConfig;
 import iskallia.vault.config.FinalRaidModifierConfig;
 import iskallia.vault.config.GearModelRollRaritiesConfig;
 import iskallia.vault.config.GiftBombConfig;
-import iskallia.vault.config.KeyPressRecipesConfig;
 import iskallia.vault.config.LegacyLootTablesConfig;
 import iskallia.vault.config.LegacyScavengerHuntConfig;
 import iskallia.vault.config.LegendaryTreasureEpicConfig;
@@ -174,7 +173,6 @@ public class ModConfigs {
    public static GiftBombConfig GIFT_BOMB;
    public static StatueLootConfig STATUE_LOOT;
    public static CryoChamberConfig CRYO_CHAMBER;
-   public static KeyPressRecipesConfig KEY_PRESS;
    public static OverLevelEnchantConfig OVERLEVEL_ENCHANT;
    public static MysteryBoxConfig MYSTERY_BOX;
    public static VaultModifiersConfig VAULT_MODIFIERS;
@@ -295,7 +293,6 @@ public class ModConfigs {
       GIFT_BOMB = new GiftBombConfig().readConfig();
       STATUE_LOOT = new StatueLootConfig().readConfig();
       CRYO_CHAMBER = new CryoChamberConfig().readConfig();
-      KEY_PRESS = new KeyPressRecipesConfig().readConfig();
       OVERLEVEL_ENCHANT = new OverLevelEnchantConfig().readConfig();
       MYSTERY_BOX = new MysteryBoxConfig().readConfig();
       VAULT_MODIFIERS = new VaultModifiersConfig().readConfig();

@@ -15,11 +15,10 @@ import iskallia.vault.core.vault.Modifiers;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModTextureAtlases;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.awt.Color;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Map.Entry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
@@ -46,7 +45,7 @@ public class ModifiersRenderer {
    private static final BufferBuilder BOX_BUFFER = new BufferBuilder(256);
    public static final Vector3f SHADOW_OFFSET = new Vector3f(0.0F, 0.0F, -1.0F);
 
-   public static void render(Modifiers modifiers, PoseStack matrixStack) {
+   public static void render(Map<VaultModifier<?>, Integer> modifiers, PoseStack matrixStack) {
       RenderSystem.setShader(GameRenderer::getPositionTexShader);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
       RenderSystem.setShaderTexture(0, RESOURCE);
@@ -56,8 +55,7 @@ public class ModifiersRenderer {
       RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
    }
 
-   public static void renderVaultModifiers(Modifiers modifiers, PoseStack matrixStack) {
-      Object2IntMap<VaultModifier<?>> group = modifiers.getDisplayGroup();
+   public static void renderVaultModifiers(Map<VaultModifier<?>, Integer> group, PoseStack matrixStack) {
       Minecraft minecraft = Minecraft.getInstance();
       int right = minecraft.getWindow().getGuiScaledWidth();
       int bottom = minecraft.getWindow().getGuiScaledHeight();
@@ -75,12 +73,10 @@ public class ModifiersRenderer {
       }
 
       int index = 0;
-      ObjectIterator var12 = group.object2IntEntrySet().iterator();
 
-      while (var12.hasNext()) {
-         Entry<VaultModifier<?>> entry = (Entry<VaultModifier<?>>)var12.next();
-         VaultModifier<?> modifier = (VaultModifier<?>)entry.getKey();
-         int amount = entry.getIntValue();
+      for (Entry<VaultModifier<?>, Integer> entry : group.entrySet()) {
+         VaultModifier<?> modifier = entry.getKey();
+         int amount = entry.getValue();
          Optional<ResourceLocation> icon = modifier.getIcon();
          if (!icon.isEmpty()) {
             TextureAtlasSprite sprite = textureAtlas.getSprite(icon.get());

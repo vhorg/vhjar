@@ -1,5 +1,6 @@
 package iskallia.vault.core.vault;
 
+import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
@@ -27,7 +28,12 @@ public abstract class LootLogic extends DataObject<LootLogic> implements ISuppli
             int x = data.getPos().getX();
             int y = data.getPos().getY();
             int z = data.getPos().getZ();
-            random.setSeed(a * x + b * y + c + z ^ vault.get(Vault.SEED));
+            if (vault.get(Vault.VERSION).isOlderThan(Version.v1_5)) {
+               random.setSeed(a * x + b * y + c + z ^ vault.get(Vault.SEED));
+            } else {
+               random.setSeed(a * x + b * y + c * z ^ vault.get(Vault.SEED));
+            }
+
             data.setRandom(random);
             this.onPreGenerate(world, vault, data);
          }

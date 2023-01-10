@@ -2,11 +2,11 @@ package iskallia.vault.block;
 
 import iskallia.vault.block.base.FillableAltarBlock;
 import iskallia.vault.block.entity.SoulAltarTileEntity;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.util.BlockHelper;
-import iskallia.vault.world.data.PlayerFavourData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
@@ -37,8 +37,8 @@ public class SoulAltarBlock extends FillableAltarBlock<SoulAltarTileEntity> {
    }
 
    @Override
-   public PlayerFavourData.VaultGodType getAssociatedVaultGod() {
-      return PlayerFavourData.VaultGodType.MALEVOLENT;
+   public VaultGod getAssociatedVaultGod() {
+      return VaultGod.IDONA;
    }
 
    @Override
@@ -49,10 +49,8 @@ public class SoulAltarBlock extends FillableAltarBlock<SoulAltarTileEntity> {
    public InteractionResult rightClicked(
       BlockState state, ServerLevel world, BlockPos pos, SoulAltarTileEntity tileEntity, ServerPlayer player, ItemStack heldStack
    ) {
-      if (!tileEntity.initialized()) {
-         return InteractionResult.SUCCESS;
-      } else if (player.isCreative()) {
-         tileEntity.makeProgress(player, 1, sPlayer -> {});
+      if (player.isCreative()) {
+         tileEntity.makeProgress(player, 1);
          return InteractionResult.SUCCESS;
       } else {
          return InteractionResult.FAIL;

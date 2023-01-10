@@ -8,7 +8,9 @@ import net.minecraftforge.common.util.INBTSerializable;
 public interface LootRoll extends INBTSerializable<CompoundTag> {
    int get(RandomSource var1);
 
-   float getMean();
+   int getMin();
+
+   int getMax();
 
    JsonObject serializeJson();
 
@@ -72,7 +74,12 @@ public interface LootRoll extends INBTSerializable<CompoundTag> {
       }
 
       @Override
-      public float getMean() {
+      public int getMin() {
+         return this.count;
+      }
+
+      @Override
+      public int getMax() {
          return this.count;
       }
 
@@ -113,10 +120,12 @@ public interface LootRoll extends INBTSerializable<CompoundTag> {
          this.max = max;
       }
 
+      @Override
       public int getMin() {
          return this.min;
       }
 
+      @Override
       public int getMax() {
          return this.max;
       }
@@ -124,11 +133,6 @@ public interface LootRoll extends INBTSerializable<CompoundTag> {
       @Override
       public int get(RandomSource random) {
          return random.nextInt(this.max - this.min + 1) + this.min;
-      }
-
-      @Override
-      public float getMean() {
-         return (this.min + this.max) / 2.0F;
       }
 
       public CompoundTag serializeNBT() {

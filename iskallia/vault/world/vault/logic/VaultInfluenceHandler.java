@@ -1,7 +1,6 @@
 package iskallia.vault.world.vault.logic;
 
-import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.world.data.PlayerFavourData;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.influence.DamageInfluence;
 import iskallia.vault.world.vault.influence.EffectInfluence;
@@ -10,9 +9,6 @@ import iskallia.vault.world.vault.influence.MobsInfluence;
 import iskallia.vault.world.vault.influence.TimeInfluence;
 import iskallia.vault.world.vault.influence.VaultAttributeInfluence;
 import iskallia.vault.world.vault.influence.VaultInfluence;
-import iskallia.vault.world.vault.influence.VaultInfluences;
-import iskallia.vault.world.vault.logic.objective.VaultObjective;
-import iskallia.vault.world.vault.player.VaultPlayer;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,12 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.HoverEvent.Action;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
@@ -43,82 +33,17 @@ public class VaultInfluenceHandler {
    private static final UUID OMNISCIENT_ARMOR_INCREASE = UUID.fromString("15f0faaa-c014-4063-a3e5-ae801a95e721");
    private static final UUID MALEVOLENCE_DAMAGE_INCREASE = UUID.fromString("0011379d-97e7-44b1-860e-9d355746e886");
    private static final Random rand = new Random();
-   private static final Map<PlayerFavourData.VaultGodType, VaultInfluenceHandler.InfluenceMessages> messages = new HashMap<>();
+   private static final Map<VaultGod, VaultInfluenceHandler.InfluenceMessages> messages = new HashMap<>();
 
    public static void initializeInfluences(VaultRaid vault, ServerLevel world) {
-      int vaultLvl = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
-      if (vaultLvl >= 50) {
-         CrystalData data = vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).orElse(null);
-         if (data != null && data.canTriggerInfluences() && data.getType().canTriggerInfluences() && vault.getPlayers().size() <= 1) {
-            if (!vault.getAllObjectives().stream().anyMatch(VaultObjective::preventsInfluences)) {
-               VaultInfluences influences = vault.getInfluences();
-               PlayerFavourData favourData = PlayerFavourData.get(world);
-               Map<PlayerFavourData.VaultGodType, Integer> positives = new HashMap<>();
-               Map<PlayerFavourData.VaultGodType, Integer> negatives = new HashMap<>();
-
-               for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {
-                  for (VaultPlayer vPlayer : vault.getPlayers()) {
-                     int favour = favourData.getFavour(vPlayer.getPlayerId(), type);
-                     if (Math.abs(favour) >= 4 && !(rand.nextFloat() >= 0.66F)) {
-                        if (favour < 0) {
-                           negatives.put(type, favour);
-                        } else {
-                           positives.put(type, favour);
-                        }
-                        break;
-                     }
-                  }
-               }
-
-               positives.forEach(
-                  (typex, favourx) -> {
-                     Tuple<VaultInfluence, String> influenceResult = getPositiveInfluence(typex, Math.abs(favourx));
-                     influences.addInfluence((VaultInfluence)influenceResult.getA(), vault, world);
-                     String message = messages.get(typex).getPositiveMessage();
-                     MutableComponent vgName = new TextComponent(typex.getName()).withStyle(typex.getChatColor());
-                     vgName.withStyle(style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, typex.getHoverChatComponent())));
-                     MutableComponent txt = new TextComponent("");
-                     txt.append(new TextComponent("[VG] ").withStyle(ChatFormatting.DARK_PURPLE))
-                        .append(vgName)
-                        .append(new TextComponent(": ").withStyle(ChatFormatting.WHITE))
-                        .append(new TextComponent(message));
-                     MutableComponent info = new TextComponent((String)influenceResult.getB()).withStyle(ChatFormatting.DARK_GRAY);
-                     vault.getPlayers().forEach(vPlayerx -> vPlayerx.runIfPresent(world.getServer(), sPlayer -> {
-                        sPlayer.sendMessage(txt, Util.NIL_UUID);
-                        sPlayer.sendMessage(info, Util.NIL_UUID);
-                     }));
-                  }
-               );
-               negatives.forEach(
-                  (typex, favourx) -> {
-                     Tuple<VaultInfluence, String> influenceResult = getNegativeInfluence(typex, Math.abs(favourx));
-                     influences.addInfluence((VaultInfluence)influenceResult.getA(), vault, world);
-                     String message = messages.get(typex).getNegativeMessage();
-                     MutableComponent vgName = new TextComponent(typex.getName()).withStyle(typex.getChatColor());
-                     vgName.withStyle(style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, typex.getHoverChatComponent())));
-                     MutableComponent txt = new TextComponent("");
-                     txt.append(new TextComponent("[VG] ").withStyle(ChatFormatting.DARK_PURPLE))
-                        .append(vgName)
-                        .append(new TextComponent(": ").withStyle(ChatFormatting.WHITE))
-                        .append(new TextComponent(message));
-                     MutableComponent info = new TextComponent((String)influenceResult.getB()).withStyle(ChatFormatting.DARK_GRAY);
-                     vault.getPlayers().forEach(vPlayerx -> vPlayerx.runIfPresent(world.getServer(), sPlayer -> {
-                        sPlayer.sendMessage(txt, Util.NIL_UUID);
-                        sPlayer.sendMessage(info, Util.NIL_UUID);
-                     }));
-                  }
-               );
-            }
-         }
-      }
    }
 
-   private static Tuple<VaultInfluence, String> getPositiveInfluence(PlayerFavourData.VaultGodType type, int favour) {
+   private static Tuple<VaultInfluence, String> getPositiveInfluence(VaultGod type, int favour) {
       new DecimalFormat("0.##");
       VaultInfluence influence = null;
       String text = null;
       switch (type) {
-         case BENEVOLENT:
+         case VELARA:
             switch (rand.nextInt(2)) {
                case 0:
                   int heal = 50 + Mth.ceil((favour - 4) * 4.166666F);
@@ -133,7 +58,7 @@ public class VaultInfluenceHandler {
             }
 
             return new Tuple(influence, text);
-         case OMNISCIENT:
+         case TENOS:
             switch (rand.nextInt(2)) {
                case 0:
                   int increased = 25 + Math.min(Math.round((favour - 4) * 6.25F), 75);
@@ -147,7 +72,7 @@ public class VaultInfluenceHandler {
             }
 
             return new Tuple(influence, text);
-         case TIMEKEEPER:
+         case WENDARR:
             switch (rand.nextInt(2)) {
                case 0:
                   int cdReduction = 10 + Math.round((favour - 4) * 2.5F);
@@ -161,7 +86,7 @@ public class VaultInfluenceHandler {
             }
 
             return new Tuple(influence, text);
-         case MALEVOLENT:
+         case IDONA:
             switch (rand.nextInt(2)) {
                case 0:
                   int incDrops = 100 + (favour - 4) * 25;
@@ -181,11 +106,11 @@ public class VaultInfluenceHandler {
       }
    }
 
-   private static Tuple<VaultInfluence, String> getNegativeInfluence(PlayerFavourData.VaultGodType type, int favour) {
+   private static Tuple<VaultInfluence, String> getNegativeInfluence(VaultGod type, int favour) {
       VaultInfluence influence = null;
       String text = null;
       switch (type) {
-         case BENEVOLENT:
+         case VELARA:
             switch (rand.nextInt(2)) {
                case 0:
                   int reduced = 10 + Math.round((favour - 4) * 3.3333F);
@@ -199,7 +124,7 @@ public class VaultInfluenceHandler {
             }
 
             return new Tuple(influence, text);
-         case OMNISCIENT:
+         case TENOS:
             switch (rand.nextInt(2)) {
                case 0:
                   int ampl = Mth.clamp(favour / 5, 1, 3);
@@ -213,7 +138,7 @@ public class VaultInfluenceHandler {
             }
 
             return new Tuple(influence, text);
-         case TIMEKEEPER:
+         case WENDARR:
             switch (rand.nextInt(2)) {
                case 0:
                   int more = 10 + Math.round((favour - 4) * 3.333F);
@@ -230,7 +155,7 @@ public class VaultInfluenceHandler {
             }
 
             return new Tuple(influence, text);
-         case MALEVOLENT:
+         case IDONA:
             switch (rand.nextInt(2)) {
                case 0:
                   int less = 10 + Math.round((favour - 4) * 5.416666F);
@@ -261,7 +186,7 @@ public class VaultInfluenceHandler {
       benevolent.negativeMessages.add("Prosperity withers at your touch.");
       benevolent.negativeMessages.add("Defile, rot, decay and fester.");
       benevolent.negativeMessages.add("The flower of your aspirations will waste away.");
-      messages.put(PlayerFavourData.VaultGodType.BENEVOLENT, benevolent);
+      messages.put(VaultGod.VELARA, benevolent);
       VaultInfluenceHandler.InfluenceMessages omniscient = new VaultInfluenceHandler.InfluenceMessages();
       omniscient.positiveMessages.add("May foresight guide your step.");
       omniscient.positiveMessages.add("Careful planning and strategy may lead you.");
@@ -271,7 +196,7 @@ public class VaultInfluenceHandler {
       omniscient.negativeMessages.add("Riches, Wealth, Prosperity. An illusion.");
       omniscient.negativeMessages.add("Cascading eventuality. Solidified in ruin.");
       omniscient.negativeMessages.add("Diminishing reality.");
-      messages.put(PlayerFavourData.VaultGodType.OMNISCIENT, omniscient);
+      messages.put(VaultGod.TENOS, omniscient);
       VaultInfluenceHandler.InfluenceMessages timekeeper = new VaultInfluenceHandler.InfluenceMessages();
       timekeeper.positiveMessages.add("Seize the opportunity.");
       timekeeper.positiveMessages.add("A single instant, stretched to infinity.");
@@ -281,7 +206,7 @@ public class VaultInfluenceHandler {
       timekeeper.negativeMessages.add("Drown in the flow of time.");
       timekeeper.negativeMessages.add("Transience manifested.");
       timekeeper.negativeMessages.add("Immutable emptiness.");
-      messages.put(PlayerFavourData.VaultGodType.TIMEKEEPER, timekeeper);
+      messages.put(VaultGod.WENDARR, timekeeper);
       VaultInfluenceHandler.InfluenceMessages malevolence = new VaultInfluenceHandler.InfluenceMessages();
       malevolence.positiveMessages.add("Enforce your path through obstacles.");
       malevolence.positiveMessages.add("Our vigor may aid your conquest.");
@@ -291,7 +216,7 @@ public class VaultInfluenceHandler {
       malevolence.negativeMessages.add("Malice and spite given form.");
       malevolence.negativeMessages.add("Flee before the growing horde.");
       malevolence.negativeMessages.add("Perish from your own ambition.");
-      messages.put(PlayerFavourData.VaultGodType.MALEVOLENT, malevolence);
+      messages.put(VaultGod.IDONA, malevolence);
    }
 
    private static class InfluenceMessages {

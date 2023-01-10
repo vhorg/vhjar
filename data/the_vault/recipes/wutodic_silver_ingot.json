@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sss",
+    "sws",
+    "sss"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:silver_scrap"
+    },
+    "w": {
+      "item": "the_vault:perfect_wutodie"
+    }
+  },
+  "result": {
+    "item": "the_vault:wutodic_silver_ingot",
+    "count": 1
+  }
+}

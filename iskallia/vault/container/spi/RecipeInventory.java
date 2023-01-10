@@ -14,6 +14,10 @@ public abstract class RecipeInventory implements Container {
       this.slots = NonNullList.withSize(inputCount + 1, ItemStack.EMPTY);
    }
 
+   protected NonNullList<ItemStack> getSlots() {
+      return this.slots;
+   }
+
    public int getInputSlotCount() {
       return this.slots.size() - 1;
    }

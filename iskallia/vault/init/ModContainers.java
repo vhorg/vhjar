@@ -1,7 +1,6 @@
 package iskallia.vault.init;
 
 import iskallia.vault.container.BountyContainer;
-import iskallia.vault.container.KeyPressContainer;
 import iskallia.vault.container.LootStatueContainer;
 import iskallia.vault.container.NBTElementContainer;
 import iskallia.vault.container.RelicPedestalContainer;
@@ -50,7 +49,6 @@ public class ModContainers {
    public static MenuType<NBTElementContainer<ResearchTree>> RESEARCH_TAB_CONTAINER;
    public static MenuType<VaultCrateContainer> VAULT_CRATE_CONTAINER;
    public static MenuType<RenamingContainer> RENAMING_CONTAINER;
-   public static MenuType<KeyPressContainer> KEY_PRESS_CONTAINER;
    public static MenuType<LootStatueContainer> LOOT_STATUE_CONTAINER;
    public static MenuType<TransmogTableContainer> TRANSMOG_TABLE_CONTAINER;
    public static MenuType<ScavengerChestContainer> SCAVENGER_CHEST_CONTAINER;
@@ -108,18 +106,11 @@ public class ModContainers {
          CompoundTag nbt = buffer.readNbt();
          return new RenamingContainer(windowId, nbt == null ? new CompoundTag() : nbt);
       });
-      KEY_PRESS_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
-         Player player = inventory.player;
-         return new KeyPressContainer(windowId, player);
-      });
       LOOT_STATUE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          CompoundTag nbt = buffer.readNbt();
          return new LootStatueContainer(windowId, nbt == null ? new CompoundTag() : nbt);
       });
-      TRANSMOG_TABLE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
-         Player player = inventory.player;
-         return new TransmogTableContainer(windowId, player);
-      });
+      TRANSMOG_TABLE_CONTAINER = IForgeMenuType.create(TransmogTableContainer::new);
       SCAVENGER_CHEST_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          SimpleContainer inv = new SimpleContainer(45);
          return new ScavengerChestContainer(windowId, inventory, inv, inv);
@@ -193,7 +184,6 @@ public class ModContainers {
                (MenuType)RESEARCH_TAB_CONTAINER.setRegistryName("research_tab"),
                (MenuType)VAULT_CRATE_CONTAINER.setRegistryName("vault_crate"),
                (MenuType)RENAMING_CONTAINER.setRegistryName("renaming_container"),
-               (MenuType)KEY_PRESS_CONTAINER.setRegistryName("key_press_container"),
                (MenuType)LOOT_STATUE_CONTAINER.setRegistryName("omega_statue_container"),
                (MenuType)TRANSMOG_TABLE_CONTAINER.setRegistryName("transmog_table_container"),
                (MenuType)SCAVENGER_CHEST_CONTAINER.setRegistryName("scavenger_chest_container"),

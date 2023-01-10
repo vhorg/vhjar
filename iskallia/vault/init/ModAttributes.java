@@ -18,6 +18,7 @@ public class ModAttributes {
    public static Attribute BREAK_ARMOR_CHANCE;
    public static Attribute MANA_REGEN;
    public static Attribute MANA_MAX;
+   public static Attribute HEALING_MAX;
 
    public static void register(Register<Attribute> event) {
       Attributes.ATTACK_DAMAGE.setSyncable(true);
@@ -47,6 +48,8 @@ public class ModAttributes {
       MANA_MAX = register(event.getRegistry(), "generic.mana_max", new RangedAttribute("attribute.name.generic.mana_max", 100.0, 0.0, 4096.0))
          .setSyncable(true);
       MANA_REGEN = register(event.getRegistry(), "generic.mana_regen", new RangedAttribute("attribute.name.generic.mana_regen", 1.0, 0.0, 4096.0))
+         .setSyncable(true);
+      HEALING_MAX = register(event.getRegistry(), "generic.healing_max", new RangedAttribute("attribute.name.generic.healing_max", 0.0, 0.0, 512.0))
          .setSyncable(true);
    }
 

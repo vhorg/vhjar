@@ -14,6 +14,7 @@ public final class AbilityLabelBindingKeys {
    public static final String HEAL = "heal";
    public static final String RADIUS = "radius";
    public static final String ABSORB = "absorb";
+   public static final String MANA_PER_DAMAGE = "manaPerDamage";
    public static final String KNOCKBACK = "knockback";
    public static final String SLOWNESS = "slowness";
    public static final String CHAINS = "chains";

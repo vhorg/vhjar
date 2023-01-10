@@ -4,7 +4,8 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.VaultPortalSize;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
-import iskallia.vault.config.VaultCrystalCatalystConfig;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
@@ -13,7 +14,6 @@ import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.world.vault.modifier.VaultModifierStack;
-import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.HashMap;
 import java.util.List;
@@ -63,12 +63,13 @@ public class VaultCrystalItem extends Item {
    private static final Map<String, VaultCrystalItem.IScheduledTaskDeserializer> SCHEDULED_TASK_DESERIALIZER_MAP = new HashMap<String, VaultCrystalItem.IScheduledTaskDeserializer>() {
       {
          this.put("exhaust", VaultCrystalItem.ExhaustTask::deserializeNBT);
-         this.put("addRandomCurse", VaultCrystalItem.AddRandomCurseTask::deserializeNBT);
-         this.put("addRandomCurses", VaultCrystalItem.AddRandomCursesTask::deserializeNBT);
          this.put("removeRandomCurse", VaultCrystalItem.RemoveRandomCurseTask::deserializeNBT);
+         this.put("addCurses", VaultCrystalItem.AddCursesTask::deserializeNBT);
          this.put("addClarity", VaultCrystalItem.AddClarityTask::deserializeNBT);
          this.put("echo", VaultCrystalItem.EchoTask::deserializeNBT);
          this.put("clone", VaultCrystalItem.CloneTask::deserializeNBT);
+         this.put("addRandomCurse", VaultCrystalItem.NoOpTask::deserializeNBT);
+         this.put("addRandomCurses", VaultCrystalItem.NoOpTask::deserializeNBT);
       }
    };
 
@@ -237,10 +238,12 @@ public class VaultCrystalItem extends Item {
    }
 
    public static void scheduleTask(VaultCrystalItem.IScheduledTask task, ItemStack itemStack) {
-      CompoundTag nbt = itemStack.getOrCreateTag();
-      CompoundTag scheduledTasks = nbt.getCompound("scheduledTasks");
-      scheduledTasks.put(task.getId(), task.serializeNBT());
-      nbt.put("scheduledTasks", scheduledTasks);
+      if (!(task instanceof VaultCrystalItem.NoOpTask)) {
+         CompoundTag nbt = itemStack.getOrCreateTag();
+         CompoundTag scheduledTasks = nbt.getCompound("scheduledTasks");
+         scheduledTasks.put(task.getId(), task.serializeNBT());
+         nbt.put("scheduledTasks", scheduledTasks);
+      }
    }
 
    private boolean hasScheduledTasks(ItemStack itemStack) {
@@ -291,67 +294,35 @@ public class VaultCrystalItem extends Item {
       }
    }
 
-   public static class AddRandomCurseTask implements VaultCrystalItem.IScheduledTask {
-      public static final VaultCrystalItem.AddRandomCurseTask INSTANCE = new VaultCrystalItem.AddRandomCurseTask();
-      public static final String ID = "addRandomCurse";
-
-      private AddRandomCurseTask() {
-      }
+   public record AddCursesTask(ResourceLocation pool, boolean checkStability) implements VaultCrystalItem.IScheduledTask {
+      public static final String ID = "addCurses";
 
       @Override
       public String getId() {
-         return "addRandomCurse";
+         return "addCurses";
       }
 
       @Override
       public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
-         if (Math.random() < ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.calculateCurseChance(data.getInstability())) {
-            VaultCrystalCatalystConfig.ModifierPool pool = ModConfigs.VAULT_CRYSTAL_CATALYST.getModifierPoolById("CURSE");
-            if (pool != null) {
-               ResourceLocation curseModifier = pool.getRandomModifier(VaultCrystalItem.RANDOM);
-               VaultModifierRegistry.getOpt(curseModifier).ifPresent(modifier -> data.addModifier(VaultModifierStack.of((VaultModifier<?>)modifier)));
-            }
-         }
-      }
-
-      public static VaultCrystalItem.AddRandomCurseTask deserializeNBT(CompoundTag nbt) {
-         return INSTANCE;
-      }
-   }
-
-   public record AddRandomCursesTask(int min, int max) implements VaultCrystalItem.IScheduledTask {
-      public static final String ID = "addRandomCurses";
-      private static final String KEY_MIN = "min";
-      private static final String KEY_MAX = "max";
-
-      @Override
-      public String getId() {
-         return "addRandomCurses";
-      }
-
-      @Override
-      public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
-         int curses = VaultCrystalItem.RANDOM.nextInt(this.max - this.min + 1) + this.min;
-
-         for (int i = 0; i < curses; i++) {
-            VaultCrystalCatalystConfig.ModifierPool pool = ModConfigs.VAULT_CRYSTAL_CATALYST.getModifierPoolById("CURSE");
-            if (pool != null) {
-               ResourceLocation curseModifier = pool.getRandomModifier(VaultCrystalItem.RANDOM);
-               VaultModifierRegistry.getOpt(curseModifier).ifPresent(modifier -> data.addModifier(VaultModifierStack.of((VaultModifier<?>)modifier)));
-            }
+         RandomSource random = JavaRandom.ofNanoTime();
+         float curseChance = ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.calculateCurseChance(data.getInstability());
+         if (!this.checkStability || !(random.nextFloat() >= curseChance)) {
+            ModConfigs.VAULT_MODIFIER_POOLS
+               .getRandom(this.pool, data.getLevel(), JavaRandom.ofNanoTime())
+               .forEach(modifier -> data.addModifier(VaultModifierStack.of((VaultModifier<?>)modifier)));
          }
       }
 
       @Override
       public CompoundTag serializeNBT() {
          CompoundTag nbt = VaultCrystalItem.IScheduledTask.super.serializeNBT();
-         nbt.putInt("min", this.min);
-         nbt.putInt("max", this.max);
+         nbt.putString("pool", this.pool.toString());
+         nbt.putBoolean("checkStability", this.checkStability);
          return nbt;
       }
 
-      public static VaultCrystalItem.AddRandomCursesTask deserializeNBT(CompoundTag nbt) {
-         return new VaultCrystalItem.AddRandomCursesTask(nbt.getInt("min"), nbt.getInt("max"));
+      public static VaultCrystalItem.AddCursesTask deserializeNBT(CompoundTag nbt) {
+         return new VaultCrystalItem.AddCursesTask(new ResourceLocation(nbt.getString("pool")), nbt.getBoolean("checkStability"));
       }
    }
 
@@ -456,6 +427,28 @@ public class VaultCrystalItem extends Item {
    @FunctionalInterface
    public interface IScheduledTaskDeserializer {
       VaultCrystalItem.IScheduledTask deserialize(CompoundTag var1);
+   }
+
+   private static class NoOpTask implements VaultCrystalItem.IScheduledTask {
+      public static final VaultCrystalItem.NoOpTask INSTANCE = new VaultCrystalItem.NoOpTask();
+
+      @Override
+      public String getId() {
+         return "noop";
+      }
+
+      @Override
+      public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
+      }
+
+      @Override
+      public CompoundTag serializeNBT() {
+         return VaultCrystalItem.IScheduledTask.super.serializeNBT();
+      }
+
+      public static VaultCrystalItem.NoOpTask deserializeNBT(CompoundTag nbt) {
+         return INSTANCE;
+      }
    }
 
    public static class RemoveRandomCurseTask implements VaultCrystalItem.IScheduledTask {

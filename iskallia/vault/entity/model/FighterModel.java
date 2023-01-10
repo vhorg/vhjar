@@ -3,7 +3,6 @@ package iskallia.vault.entity.model;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.vertex.PoseStack;
-import iskallia.vault.entity.entity.FighterEntity;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.client.model.HumanoidModel;
@@ -302,7 +301,7 @@ public class FighterModel extends HumanoidModel<LivingEntity> {
       return Iterables.concat(super.bodyParts(), ImmutableList.of(this.leftPants, this.rightPants, this.leftSleeve, this.rightSleeve, this.jacket));
    }
 
-   public void setupAnim(FighterEntity pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
+   public void setupAnim(LivingEntity pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
       super.setupAnim(pEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
       this.leftPants.copyFrom(this.leftLeg);
       this.rightPants.copyFrom(this.rightLeg);

@@ -1,11 +1,11 @@
 package iskallia.vault.world.vault.logic;
 
 import iskallia.vault.config.VaultModifierPoolsConfig;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.world.data.InventorySnapshotData;
-import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.gen.piece.VaultPortal;
@@ -82,7 +82,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
             VaultPortal portal = portals.iterator().next();
             if (this.isInPortal(world, sPlayer)) {
                String[] split = portal.getTemplate().getPath().split(Pattern.quote("_"));
-               PlayerFavourData.VaultGodType type = this.fromColor(split[split.length - 1]);
+               VaultGod type = this.fromColor(split[split.length - 1]);
                if (type != null) {
                   VaultLobby.Branch branch = this.getOrCreate(portal.getUUID(), () -> new VaultLobby.Branch(portal.getUUID(), type));
                   if (branch.vaultId == null || VaultRaidData.get(world).get(branch.vaultId) == null) {
@@ -118,15 +118,15 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
       });
    }
 
-   private PlayerFavourData.VaultGodType fromColor(String color) {
+   private VaultGod fromColor(String color) {
       if ("green".equals(color)) {
-         return PlayerFavourData.VaultGodType.BENEVOLENT;
+         return VaultGod.VELARA;
       } else if ("blue".equals(color)) {
-         return PlayerFavourData.VaultGodType.OMNISCIENT;
+         return VaultGod.TENOS;
       } else if ("yellow".equals(color)) {
-         return PlayerFavourData.VaultGodType.TIMEKEEPER;
+         return VaultGod.WENDARR;
       } else {
-         return "red".equals(color) ? PlayerFavourData.VaultGodType.MALEVOLENT : null;
+         return "red".equals(color) ? VaultGod.IDONA : null;
       }
    }
 
@@ -134,13 +134,13 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
       CrystalData data = new CrystalData();
       data.setCanGenerateTreasureRooms(false);
       data.setCanTriggerInfluences(false);
-      if (branch.type == PlayerFavourData.VaultGodType.BENEVOLENT) {
+      if (branch.type == VaultGod.VELARA) {
          data.setType(CrystalData.Type.FINAL_VELARA);
-      } else if (branch.type == PlayerFavourData.VaultGodType.OMNISCIENT) {
+      } else if (branch.type == VaultGod.TENOS) {
          data.setType(CrystalData.Type.FINAL_TENOS);
-      } else if (branch.type == PlayerFavourData.VaultGodType.TIMEKEEPER) {
+      } else if (branch.type == VaultGod.WENDARR) {
          data.setType(CrystalData.Type.FINAL_WENDARR);
-      } else if (branch.type == PlayerFavourData.VaultGodType.MALEVOLENT) {
+      } else if (branch.type == VaultGod.IDONA) {
          data.setType(CrystalData.Type.FINAL_IDONA);
       } else {
          data = null;
@@ -150,7 +150,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
    }
 
    private void initialize(VaultLobby.Branch branch, VaultRaid vault) {
-      if (branch.type == PlayerFavourData.VaultGodType.BENEVOLENT) {
+      if (branch.type == VaultGod.VELARA) {
          vault.getActiveObjective(CakeHuntObjective.class).ifPresent(cakeHunt -> {
             cakeHunt.setModifierChance(1.0F);
             cakeHunt.setPoolType(VaultModifierPoolsConfig.ModifierPoolType.FINAL_VELARA_ADDS);
@@ -160,7 +160,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
 
    private void joinVault(VaultRaid vault, ServerPlayer player, ServerLevel world, VaultLobby.Branch branch) {
       VaultRunner runner = new VaultRunner(player.getUUID());
-      if (branch.type == PlayerFavourData.VaultGodType.BENEVOLENT) {
+      if (branch.type == VaultGod.VELARA) {
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.NO_OBJECTIVES_LEFT_GLOBALLY, VaultRaid.EXIT_SAFELY));
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.NO_TIME_LEFT, VaultRaid.EXIT_DEATH));
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.IS_RUNNER.and(VaultRaid.IS_DEAD), VaultRaid.EXIT_DEATH_ALL_NO_SAVE));
@@ -176,7 +176,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
             );
          runner.getProperties().create(VaultRaid.SPAWNER, new VaultSpawner());
          runner.getTimer().start(30000);
-      } else if (branch.type == PlayerFavourData.VaultGodType.OMNISCIENT) {
+      } else if (branch.type == VaultGod.TENOS) {
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.NO_OBJECTIVES_LEFT_GLOBALLY, VaultRaid.EXIT_SAFELY));
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.NO_TIME_LEFT, VaultRaid.EXIT_DEATH));
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.IS_RUNNER.and(VaultRaid.IS_DEAD), VaultRaid.EXIT_DEATH_ALL_NO_SAVE));
@@ -192,7 +192,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
             );
          runner.getProperties().create(VaultRaid.SPAWNER, new VaultSpawner());
          runner.getTimer().start(30000);
-      } else if (branch.type == PlayerFavourData.VaultGodType.TIMEKEEPER) {
+      } else if (branch.type == VaultGod.WENDARR) {
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.NO_OBJECTIVES_LEFT_GLOBALLY, VaultRaid.EXIT_SAFELY));
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.NO_TIME_LEFT, VaultRaid.EXIT_DEATH));
          runner.getBehaviours().add(new VaultBehaviour(VaultRaid.IS_RUNNER.and(VaultRaid.IS_DEAD), VaultRaid.EXIT_DEATH_ALL_NO_SAVE));
@@ -209,7 +209,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
          runner.getProperties().create(VaultRaid.SPAWNER, new VaultSpawner());
          runner.getTimer().start(ModConfigs.TREASURE_HUNT.startTicks);
       } else {
-         if (branch.type != PlayerFavourData.VaultGodType.MALEVOLENT) {
+         if (branch.type != VaultGod.IDONA) {
             return;
          }
 
@@ -286,12 +286,12 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
    public static class Branch implements INBTSerializable<CompoundTag> {
       protected UUID portalId;
       protected UUID vaultId;
-      protected PlayerFavourData.VaultGodType type;
+      protected VaultGod type;
 
       private Branch() {
       }
 
-      public Branch(UUID portalId, PlayerFavourData.VaultGodType type) {
+      public Branch(UUID portalId, VaultGod type) {
          this.portalId = portalId;
          this.type = type;
       }
@@ -304,7 +304,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
          return this.vaultId;
       }
 
-      public PlayerFavourData.VaultGodType getType() {
+      public VaultGod getType() {
          return this.type;
       }
 
@@ -322,7 +322,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
       public void deserializeNBT(CompoundTag nbt) {
          this.portalId = UUID.fromString(nbt.getString("Portal"));
          this.vaultId = !nbt.contains("Vault", 8) ? null : UUID.fromString(nbt.getString("Vault"));
-         this.type = PlayerFavourData.VaultGodType.fromName(nbt.getString("Type"));
+         this.type = VaultGod.fromName(nbt.getString("Type"));
       }
    }
 }

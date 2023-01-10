@@ -21,5 +21,7 @@ public abstract class GridLayout extends DataObject<GridLayout> implements ISupp
 
    public abstract void initServer(VirtualWorld var1, Vault var2, GridGenerator var3);
 
+   public abstract void releaseServer();
+
    public abstract Template getAt(Vault var1, RegionPos var2, RandomSource var3, PlacementSettings var4);
 }

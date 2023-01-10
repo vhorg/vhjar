@@ -8,14 +8,16 @@ import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.random.ChunkRandom;
+import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.vault.Modifiers;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.vault.player.Listener;
+import iskallia.vault.core.vault.player.Completion;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.world.data.PlayerFavourData;
+import iskallia.vault.world.data.PlayerInfluences;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -23,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.HoverEvent;
@@ -33,142 +34,124 @@ import net.minecraft.network.chat.HoverEvent.Action;
 import net.minecraft.resources.ResourceLocation;
 
 public class Influences extends DataObject<Influences> {
-   private static final Map<PlayerFavourData.VaultGodType, Influences.InfluenceMessages> MESSAGES = new HashMap<>();
+   private static final Map<VaultGod, List<String>> MESSAGES = new HashMap<>();
    public static final FieldRegistry FIELDS = new FieldRegistry();
-   public static final FieldKey<Void> INITIALIZED = FieldKey.of("initialized", Void.class).with(Version.v1_0, Adapter.ofVoid(), DISK.all()).register(FIELDS);
-   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_0, Adapter.ofUUID(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> INITIALIZED = FieldKey.of("initialized", Void.class).with(Version.v1_5, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<VaultGod> CURRENT = FieldKey.of("current", VaultGod.class)
+      .with(Version.v1_5, Adapter.ofEnum(VaultGod.class), DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
+   public static final FieldKey<Favours> FAVOURS = FieldKey.of("favours", Favours.class)
+      .with(Version.v1_5, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Favours::new)
+      .register(FIELDS);
 
    @Override
    public FieldRegistry getFields() {
       return FIELDS;
    }
 
-   public void initServer(VirtualWorld world, Vault vault) {
-      CommonEvents.LISTENER_JOIN.register(this, data -> {
-         if (!this.has(PLAYER)) {
-            if (data.getListener() instanceof Runner) {
-               this.set(PLAYER, data.getListener().get(Listener.ID));
-            }
+   public void initServer(VirtualWorld world, Vault vault, Runner runner) {
+      this.ifPresent(FAVOURS, favours -> favours.initServer(world, vault));
+      CommonEvents.ALTAR_PROGRESS.in(world).register(this, data -> {
+         if (data.isConsuming() && data.getPlayer().getUUID().equals(runner.getId())) {
+            ChunkRandom random = ChunkRandom.ofInternal(vault.get(Vault.SEED));
+            long a = random.nextLong() | 1L;
+            long b = random.nextLong() | 1L;
+            long c = random.nextLong() | 1L;
+            int x = data.getPos().getX();
+            int y = data.getPos().getY();
+            int z = data.getPos().getZ();
+            random.setSeed(a * x + b * y + c * z ^ vault.get(Vault.SEED));
+            VaultGod god = data.getBlockEntity().getVaultGod();
+            PlayerInfluences.attemptFavour(data.getPlayer(), data.getBlockEntity().getVaultGod(), random);
+            data.getBlockEntity().placeReward(data.getWorld(), data.getPos().above(), god.getColor(), random);
          }
       });
    }
 
-   public void tickServer(VirtualWorld world, Vault vault) {
+   public void tickServer(VirtualWorld world, Vault vault, Runner runner) {
+      this.ifPresent(FAVOURS, favours -> favours.tickServer(world, vault));
       if (!this.has(INITIALIZED) && vault.get(Vault.CLOCK).get(TickClock.GLOBAL_TIME) > 200) {
-         this.generateInfluences(world, vault, this.get(PLAYER));
+         this.initialize(world, vault, runner);
          this.set(INITIALIZED);
       }
    }
 
    public void releaseServer() {
-      CommonEvents.release(this);
+      this.ifPresent(FAVOURS, Modifiers::releaseServer);
    }
 
-   private void generateInfluences(VirtualWorld world, Vault vault, UUID uuid) {
-      int level = vault.get(Vault.LEVEL).get();
-      ChunkRandom random = ChunkRandom.any();
-      random.setSeed(vault.get(Vault.SEED));
-      PlayerFavourData favourData = PlayerFavourData.get(world);
-
-      for (PlayerFavourData.VaultGodType godType : PlayerFavourData.VaultGodType.values()) {
-         int favours = favourData.getFavour(uuid, godType);
-         Object2IntMap<VaultModifier<?>> modifiers = this.generateModifiers(level, godType, favours, random);
-         this.printGodMessage(vault, godType, favours, modifiers, random);
-         modifiers.forEach((modifier, count) -> vault.get(Vault.MODIFIERS).addPermanentModifier(modifier, count, true));
+   public void onLeave(VirtualWorld world, Vault vault, Runner runner) {
+      if (this.has(CURRENT)) {
+         vault.getOptional(Vault.STATS).map(stats -> stats.get(runner)).ifPresent(stats -> {
+            if (stats.getCompletion() == Completion.COMPLETED) {
+               PlayerInfluences.addReputation(runner.getId(), this.get(CURRENT), 1);
+            }
+         });
       }
    }
 
-   public Object2IntMap<VaultModifier<?>> generateModifiers(int level, PlayerFavourData.VaultGodType godType, int favours, RandomSource random) {
-      Object2IntMap<VaultModifier<?>> modifiers = new Object2IntOpenHashMap();
-      boolean positive = favours >= 0;
-      int rolls = Math.abs(favours) / 4;
-      ResourceLocation id = VaultMod.id("influences_" + godType.getSerializedName() + "_" + (positive ? "positive" : "negative"));
-
-      for (int i = 0; i < rolls; i++) {
-         for (VaultModifier<?> modifier : ModConfigs.VAULT_MODIFIER_POOLS.getRandom(id, level, random)) {
-            modifiers.put(modifier, modifiers.getOrDefault(modifier, 0) + 1);
-         }
+   public void initialize(VirtualWorld world, Vault vault, Runner runner) {
+      PlayerInfluences.consumeFavour(runner.getId()).ifPresent(god -> this.set(CURRENT, god));
+      if (this.has(CURRENT)) {
+         int reputation = PlayerInfluences.getReputation(runner.getId(), this.get(CURRENT));
+         this.set(FAVOURS, new Favours(runner.getId(), reputation));
+         this.get(FAVOURS).initServer(world, vault);
+         RandomSource random = JavaRandom.ofInternal(vault.get(Vault.SEED) ^ runner.getId().getLeastSignificantBits());
+         ResourceLocation id = VaultMod.id(this.get(CURRENT).getName().toLowerCase() + "_favours");
+         Object2IntMap<VaultModifier<?>> modifiers = new Object2IntOpenHashMap();
+         ModConfigs.VAULT_MODIFIER_POOLS
+            .getRandom(id, reputation, random)
+            .forEach(modifier -> modifiers.put(modifier, modifiers.getOrDefault(modifier, 0) + 1));
+         modifiers.forEach((modifier, count) -> this.get(FAVOURS).addPermanentModifier(modifier, count, true));
+         this.printGodMessage(runner, modifiers, random);
       }
-
-      return modifiers;
    }
 
-   private void printGodMessage(Vault vault, PlayerFavourData.VaultGodType godType, int favours, Object2IntMap<VaultModifier<?>> modifiers, RandomSource random) {
+   private void printGodMessage(Runner runner, Object2IntMap<VaultModifier<?>> modifiers, RandomSource random) {
       if (!modifiers.isEmpty()) {
-         String message = favours >= 0 ? MESSAGES.get(godType).getPositiveMessage(random) : MESSAGES.get(godType).getNegativeMessage(random);
-         MutableComponent vgName = new TextComponent(godType.getName()).withStyle(godType.getChatColor());
-         vgName.withStyle(style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, godType.getHoverChatComponent())));
+         VaultGod god = this.get(CURRENT);
+         String message = MESSAGES.get(god).get(random.nextInt(MESSAGES.get(god).size()));
+         MutableComponent vgName = new TextComponent(god.getName()).withStyle(god.getChatColor());
+         vgName.withStyle(style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, god.getHoverChatComponent())));
          MutableComponent txt = new TextComponent("");
          txt.append(new TextComponent("[VG] ").withStyle(ChatFormatting.DARK_PURPLE))
             .append(vgName)
             .append(new TextComponent(": ").withStyle(ChatFormatting.WHITE))
             .append(new TextComponent(message));
-
-         for (Listener listener : vault.get(Vault.LISTENERS).getAll()) {
-            listener.getPlayer().ifPresent(player -> {
-               player.sendMessage(txt, Util.NIL_UUID);
-               modifiers.forEach((modifier, count) -> {
-                  MutableComponent info = new TextComponent(modifier.getDisplayDescriptionFormatted(count)).withStyle(ChatFormatting.DARK_GRAY);
-                  player.sendMessage(info, Util.NIL_UUID);
-               });
+         runner.getPlayer().ifPresent(player -> {
+            player.sendMessage(txt, Util.NIL_UUID);
+            modifiers.forEach((modifier, count) -> {
+               MutableComponent info = new TextComponent(modifier.getDisplayDescriptionFormatted(count)).withStyle(ChatFormatting.DARK_GRAY);
+               player.sendMessage(info, Util.NIL_UUID);
             });
-         }
+         });
       }
    }
 
    static {
-      Influences.InfluenceMessages benevolent = new Influences.InfluenceMessages();
-      benevolent.positiveMessages.add("Our domain's ground will carve a path.");
-      benevolent.positiveMessages.add("Tread upon our domain with care and it will respond in kind.");
-      benevolent.positiveMessages.add("May your desire blossom into a wildfire.");
-      benevolent.positiveMessages.add("Creation bends to our will.");
-      benevolent.negativeMessages.add("Nature rises against you.");
-      benevolent.negativeMessages.add("Prosperity withers at your touch.");
-      benevolent.negativeMessages.add("Defile, rot, decay and fester.");
-      benevolent.negativeMessages.add("The flower of your aspirations will waste away.");
-      MESSAGES.put(PlayerFavourData.VaultGodType.BENEVOLENT, benevolent);
-      Influences.InfluenceMessages omniscient = new Influences.InfluenceMessages();
-      omniscient.positiveMessages.add("May foresight guide your step.");
-      omniscient.positiveMessages.add("Careful planning and strategy may lead you.");
-      omniscient.positiveMessages.add("A set choice; followed through and flawlessly executed.");
-      omniscient.positiveMessages.add("Chance's hand may favour your goals.");
-      omniscient.negativeMessages.add("A choice; leading one to disfavour.");
-      omniscient.negativeMessages.add("Riches, Wealth, Prosperity. An illusion.");
-      omniscient.negativeMessages.add("Cascading eventuality. Solidified in ruin.");
-      omniscient.negativeMessages.add("Diminishing reality.");
-      MESSAGES.put(PlayerFavourData.VaultGodType.OMNISCIENT, omniscient);
-      Influences.InfluenceMessages timekeeper = new Influences.InfluenceMessages();
-      timekeeper.positiveMessages.add("Seize the opportunity.");
-      timekeeper.positiveMessages.add("A single instant, stretched to infinity.");
-      timekeeper.positiveMessages.add("Your future glows golden with possibility.");
-      timekeeper.positiveMessages.add("Hasten and value every passing moment.");
-      timekeeper.negativeMessages.add("Eternity in the moment of standstill.");
-      timekeeper.negativeMessages.add("Drown in the flow of time.");
-      timekeeper.negativeMessages.add("Transience manifested.");
-      timekeeper.negativeMessages.add("Immutable emptiness.");
-      MESSAGES.put(PlayerFavourData.VaultGodType.TIMEKEEPER, timekeeper);
-      Influences.InfluenceMessages malevolence = new Influences.InfluenceMessages();
-      malevolence.positiveMessages.add("Enforce your path through obstacles.");
-      malevolence.positiveMessages.add("Our vigor may aid your conquest.");
-      malevolence.positiveMessages.add("Cherish this mote of my might.");
-      malevolence.positiveMessages.add("A tempest incarnate.");
-      malevolence.negativeMessages.add("Feel our domain's wrath.");
-      malevolence.negativeMessages.add("Malice and spite given form.");
-      malevolence.negativeMessages.add("Flee before the growing horde.");
-      malevolence.negativeMessages.add("Perish from your own ambition.");
-      MESSAGES.put(PlayerFavourData.VaultGodType.MALEVOLENT, malevolence);
-   }
-
-   private static class InfluenceMessages {
-      private final List<String> positiveMessages = new ArrayList<>();
-      private final List<String> negativeMessages = new ArrayList<>();
-
-      private String getNegativeMessage(RandomSource random) {
-         return this.negativeMessages.get(random.nextInt(this.negativeMessages.size()));
-      }
-
-      private String getPositiveMessage(RandomSource random) {
-         return this.positiveMessages.get(random.nextInt(this.positiveMessages.size()));
-      }
+      List<String> velara = new ArrayList<>();
+      velara.add("Our domain's ground will carve a path.");
+      velara.add("Tread upon our domain with care and it will respond in kind.");
+      velara.add("May your desire blossom into a wildfire.");
+      velara.add("Creation bends to our will.");
+      MESSAGES.put(VaultGod.VELARA, velara);
+      List<String> tenos = new ArrayList<>();
+      tenos.add("May foresight guide your step.");
+      tenos.add("Careful planning and strategy may lead you.");
+      tenos.add("A set choice; followed through and flawlessly executed.");
+      tenos.add("Chance's hand may favour your goals.");
+      MESSAGES.put(VaultGod.TENOS, tenos);
+      List<String> wendarr = new ArrayList<>();
+      wendarr.add("Seize the opportunity.");
+      wendarr.add("A single instant, stretched to infinity.");
+      wendarr.add("Your future glows golden with possibility.");
+      wendarr.add("Hasten and value every passing moment.");
+      MESSAGES.put(VaultGod.WENDARR, wendarr);
+      List<String> idona = new ArrayList<>();
+      idona.add("Enforce your path through obstacles.");
+      idona.add("Our vigor may aid your conquest.");
+      idona.add("Cherish this mote of my might.");
+      idona.add("A tempest incarnate.");
+      MESSAGES.put(VaultGod.IDONA, idona);
    }
 }

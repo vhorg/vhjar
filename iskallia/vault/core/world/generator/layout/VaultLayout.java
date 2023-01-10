@@ -42,7 +42,7 @@ public abstract class VaultLayout extends GridLayout {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault, GridGenerator generator) {
-      CommonEvents.NOISE_GENERATION.in(world).register(vault, data -> {
+      CommonEvents.NOISE_GENERATION.in(world).register(this, data -> {
          MutableBlockPos pos = new MutableBlockPos();
          BlockState state = ModBlocks.VAULT_BEDROCK.defaultBlockState();
 
@@ -54,6 +54,11 @@ public abstract class VaultLayout extends GridLayout {
             }
          }
       });
+   }
+
+   @Override
+   public void releaseServer() {
+      CommonEvents.NOISE_GENERATION.release(this);
    }
 
    @Override

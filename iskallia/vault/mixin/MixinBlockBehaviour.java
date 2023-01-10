@@ -36,11 +36,12 @@ public abstract class MixinBlockBehaviour {
    public void use(Level world, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
       BlockState state = this.asState();
       BlockPos pos = hit.getBlockPos();
-      BlockUseEvent.Data data = CommonEvents.BLOCK_USE.invoke(world, state, pos, player, hand, hit);
+      BlockUseEvent.Data data = CommonEvents.BLOCK_USE.invoke(world, state, pos, player, hand, hit, BlockUseEvent.Phase.HEAD);
       if (data.getResult() == null) {
          data.setResult(this.getBlock().use(state, world, pos, player, hand, hit));
       }
 
+      CommonEvents.BLOCK_USE.invoke(world, state, pos, player, hand, hit, BlockUseEvent.Phase.RETURN);
       cir.setReturnValue(data.getResult());
    }
 

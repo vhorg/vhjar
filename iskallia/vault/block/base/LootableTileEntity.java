@@ -42,7 +42,7 @@ public abstract class LootableTileEntity extends BlockEntity {
          );
       LootTableKey key = VaultRegistry.LOOT_TABLE.getKey(data.getLootTable());
       if (key != null) {
-         LootTableGenerator generator = new LootTableGenerator(Version.latest(), key);
+         LootTableGenerator generator = new LootTableGenerator(Version.latest(), key, 0.0F);
          generator.source = player;
          generator.generate(data.getRandom());
          generator.getItems().forEachRemaining(loot::add);

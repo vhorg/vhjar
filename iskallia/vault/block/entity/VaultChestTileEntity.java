@@ -299,6 +299,16 @@ public class VaultChestTileEntity extends ChestBlockEntity {
       return this.renderState != null ? this.renderState : super.getBlockState();
    }
 
+   protected boolean tryLoadLootTable(CompoundTag nbt) {
+      super.tryLoadLootTable(nbt);
+      return false;
+   }
+
+   protected boolean trySaveLootTable(CompoundTag nbt) {
+      super.trySaveLootTable(nbt);
+      return false;
+   }
+
    public void load(CompoundTag nbt) {
       super.load(nbt);
       if (nbt.contains("Rarity", 3)) {

@@ -3,6 +3,7 @@ package iskallia.vault.world.vault.modifier.spi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import iskallia.vault.VaultMod;
+import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
@@ -24,12 +25,12 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
       this.setDescriptionFormatter(properties.getType().getDescriptionFormatter());
    }
 
-   public void applyToEntity(LivingEntity entity, UUID context) {
+   public void applyToEntity(LivingEntity entity, UUID contextUUID, ModifierContext context) {
       EntityAttributeModifier.ModifierType modifierType = this.properties.getType();
 
       for (ResourceLocation id : modifierType.getAttributeResourceLocations()) {
          Attribute attribute = (Attribute)ForgeRegistries.ATTRIBUTES.getValue(id);
-         UUID uuid = this.getId(context);
+         UUID uuid = this.getId(contextUUID);
          if (attribute == null) {
             VaultMod.LOGGER.error("Invalid entity attribute '%s' configured for vault modifier '%s'".formatted(id, this.getId()));
             return;
@@ -41,7 +42,7 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
          }
 
          AttributeModifier modifier = attributeInstance.getModifier(uuid);
-         double amount = this.properties.getAmount();
+         double amount = this.properties.getAmount(context);
          if (modifier == null) {
             attributeInstance.addPermanentModifier(new AttributeModifier(uuid, this.getDisplayName(), amount, modifierType.getAttributeModifierOperation()));
          }
@@ -170,10 +171,13 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
       private final EntityAttributeModifier.ModifierType type;
       @Expose
       private final double amount;
+      @Expose
+      private final ScalarReputationProperty reputation;
 
-      public Properties(EntityAttributeModifier.ModifierType type, double amount) {
+      public Properties(EntityAttributeModifier.ModifierType type, double amount, ScalarReputationProperty reputation) {
          this.type = type;
          this.amount = amount;
+         this.reputation = reputation;
       }
 
       public EntityAttributeModifier.ModifierType getType() {
@@ -182,6 +186,10 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
 
       public double getAmount() {
          return this.amount;
+      }
+
+      public double getAmount(ModifierContext context) {
+         return this.reputation != null ? this.reputation.apply(this.amount, context) : this.amount;
       }
    }
 }

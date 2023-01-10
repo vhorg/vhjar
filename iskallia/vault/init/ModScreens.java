@@ -18,7 +18,6 @@ import iskallia.vault.client.gui.overlay.goal.ObeliskGoalOverlay;
 import iskallia.vault.client.gui.screen.CatalystInfusionTableScreen;
 import iskallia.vault.client.gui.screen.CryochamberScreen;
 import iskallia.vault.client.gui.screen.EtchingTradeScreen;
-import iskallia.vault.client.gui.screen.KeyPressScreen;
 import iskallia.vault.client.gui.screen.LootStatueScreen;
 import iskallia.vault.client.gui.screen.MagnetTableScreen;
 import iskallia.vault.client.gui.screen.RenameScreen;
@@ -59,7 +58,6 @@ public class ModScreens {
       MenuScreens.register(ModContainers.RESEARCH_TAB_CONTAINER, ResearchesElementContainerScreen::new);
       MenuScreens.register(ModContainers.VAULT_CRATE_CONTAINER, VaultCrateScreen::new);
       MenuScreens.register(ModContainers.RENAMING_CONTAINER, RenameScreen::new);
-      MenuScreens.register(ModContainers.KEY_PRESS_CONTAINER, KeyPressScreen::new);
       MenuScreens.register(ModContainers.LOOT_STATUE_CONTAINER, LootStatueScreen::new);
       MenuScreens.register(ModContainers.TRANSMOG_TABLE_CONTAINER, TransmogTableScreen::new);
       MenuScreens.register(ModContainers.SCAVENGER_CHEST_CONTAINER, ContainerScreen::new);

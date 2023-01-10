@@ -20,6 +20,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -55,7 +56,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -74,8 +74,8 @@ public class MagnetItem extends Item implements DyeableLeatherItem, IConditional
    }
 
    @Override
-   public boolean isImmuneToDamage(ItemStack stack, @Nullable Player player) {
-      return player != null && getPerk(stack) == MagnetItem.Perk.IMMORTAL && ServerVaults.isInVault(player);
+   public boolean isImmuneToDamage(ItemStack stack, Player player) {
+      return getPerk(stack) == MagnetItem.Perk.IMMORTAL && !ServerVaults.isInVault(player);
    }
 
    public static int getTextureColor(ItemStack stack) {
@@ -84,7 +84,7 @@ public class MagnetItem extends Item implements DyeableLeatherItem, IConditional
    }
 
    @OnlyIn(Dist.CLIENT)
-   public void appendHoverText(ItemStack stack, @javax.annotation.Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
+   public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
       if (worldIn != null) {
          int level = (100 - getSturdiness(stack)) / ModConfigs.MAGNET_CONFIG.getSturdinessDecrement();
          tooltip.add(new TextComponent("Level " + ChatFormatting.YELLOW + level));
@@ -182,7 +182,7 @@ public class MagnetItem extends Item implements DyeableLeatherItem, IConditional
 
                   if (itemEntity.isAlive()
                      && !stack.getOrCreateTag().getBoolean("PreventRemoteMovement")
-                     && !itemEntity.getTags().contains("PreventMagnetFMovement")) {
+                     && !itemEntity.getTags().contains("PreventMagnetMovement")) {
                      if (!PULLED_ITEMS_TO_PULLING_PLAYERS.containsKey(itemEntity.getUUID())) {
                         Player closest = this.getClosestPlayerWithMagnet(itemEntity, radius);
                         PULLED_ITEMS_TO_PULLING_PLAYERS.put(itemEntity.getUUID(), closest == null ? player.getUUID() : closest.getUUID());
@@ -276,7 +276,7 @@ public class MagnetItem extends Item implements DyeableLeatherItem, IConditional
       return false;
    }
 
-   @javax.annotation.Nullable
+   @Nullable
    private Player getClosestPlayerWithMagnet(ItemEntity item, double radius) {
       List<Player> players = item.getCommandSenderWorld().getEntitiesOfClass(Player.class, item.getBoundingBox().inflate(radius));
       if (players.isEmpty()) {
@@ -497,7 +497,7 @@ public class MagnetItem extends Item implements DyeableLeatherItem, IConditional
    public static final class MagnetTooltip implements TooltipComponent {
       public final int[] stats;
       public final int perkPower;
-      @javax.annotation.Nullable
+      @Nullable
       public final MagnetItem.Perk perk;
 
       public MagnetTooltip(int range, int speed, int manaCost, MagnetItem.Perk perk, int perkPower) {

@@ -19,6 +19,7 @@ import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.BlockSetEvent;
+import iskallia.vault.core.event.common.BlockUseEvent;
 import iskallia.vault.core.event.common.TemplateGenerationEvent;
 import iskallia.vault.core.random.ChunkRandom;
 import iskallia.vault.core.random.RandomSource;
@@ -27,7 +28,6 @@ import iskallia.vault.core.vault.ClassicPortalLogic;
 import iskallia.vault.core.vault.PortalLogic;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
-import iskallia.vault.core.vault.overlay.VaultOverlay;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.world.generator.GridGenerator;
@@ -41,6 +41,10 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +65,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -72,6 +78,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class CakeObjective extends Objective {
+   public static final ResourceLocation CAKE_HUD = VaultMod.id("textures/gui/cake_event_bar.png");
    protected static final ResourceLocation VIGNETTE = VaultMod.id("textures/gui/cake_vignette.png");
    public static final SupplierKey<Objective> KEY = SupplierKey.of("cake", Objective.class).with(Version.v1_0, CakeObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
@@ -128,26 +135,36 @@ public class CakeObjective extends Objective {
          .of(targetState)
          .in(world)
          .register(this, data -> data.getWorld().setBlock(data.getPos(), Blocks.AIR.defaultBlockState(), 3));
-      CommonEvents.BLOCK_USE.in(world).of(ModBlocks.CAKE).register(this, data -> {
-         if (this.get(COUNT) < this.get(TARGET)) {
-            BlockPos pos = data.getPos();
-            if (pos.equals(this.get(CAKE_POS))) {
-               if (vault.get(Vault.LISTENERS).getObjectivePriority(data.getPlayer().getUUID(), this) == 0) {
-                  world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
-                  this.doEatingEffects(world, pos);
-                  this.onCakeEaten(world, vault, vault.get(Vault.WORLD).get(WorldManager.GENERATOR), data.getPlayer());
-                  if (this.get(COUNT) >= this.get(TARGET)) {
-                     this.onCompleted(world, vault);
+      CommonEvents.BLOCK_USE.in(world).at(BlockUseEvent.Phase.HEAD).of(ModBlocks.CAKE).register(this, data -> {
+         MinecraftServer server = data.getWorld().getServer();
+         if (server != null) {
+            server.tell(new TickTask(server.getTickCount() + 1, () -> {
+               if (this.get(COUNT) < this.get(TARGET)) {
+                  BlockPos pos = data.getPos();
+                  if (pos.equals(this.get(CAKE_POS))) {
+                     if (vault.get(Vault.LISTENERS).getObjectivePriority(data.getPlayer().getUUID(), this) == 0) {
+                        world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
+                        this.doEatingEffects(world, pos);
+                        this.onCakeEaten(world, vault, vault.get(Vault.WORLD).get(WorldManager.GENERATOR), data.getPlayer());
+                        if (this.get(COUNT) >= this.get(TARGET)) {
+                           this.onCompleted(world, vault);
+                        }
+                     }
                   }
-
-                  data.setResult(InteractionResult.SUCCESS);
                }
-            }
+            }));
+            data.setResult(InteractionResult.SUCCESS);
          }
       });
       CommonEvents.TEMPLATE_GENERATION.at(TemplateGenerationEvent.Phase.PRE).in(world).register(this, data -> {
          if (data.getRegion().getX() != 0 || data.getRegion().getZ() != 0) {
             data.setTemplate(ConfiguredTemplate.EMPTY);
+         }
+      });
+      CommonEvents.BLOCK_USE.in(world).at(BlockUseEvent.Phase.HEAD).of(Blocks.CAKE).register(this, data -> {
+         Listener listener = vault.get(Vault.LISTENERS).get(data.getPlayer().getUUID());
+         if (listener != null) {
+            DiscoveredModelsData.get(world).discoverRandomArmorPieceAndBroadcast(data.getPlayer(), ModDynamicModels.Armor.JARDOON_CHEESE, new Random());
          }
       });
       super.initServer(world, vault);
@@ -174,6 +191,8 @@ public class CakeObjective extends Objective {
          ChunkRandom random = ChunkRandom.any();
          random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 912345678);
          this.generateCake(world, region, random);
+      } else {
+         world.getChunkSource().blockChanged(this.get(CAKE_POS));
       }
 
       if (this.get(COUNT) >= this.get(TARGET)) {
@@ -219,28 +238,45 @@ public class CakeObjective extends Objective {
    }
 
    public void addModifier(VirtualWorld world, Vault vault, Player player, RandomSource random) {
-      for (VaultModifier<?> modifier : new ArrayList<>(ModConfigs.VAULT_MODIFIER_POOLS.getRandom(this.get(MODIFIER_POOL), vault.get(Vault.LEVEL).get(), random))) {
-         if (modifier != null) {
-            for (Listener listener : vault.get(Vault.LISTENERS).getAll()) {
-               listener.getPlayer()
-                  .ifPresent(
-                     other -> {
-                        if (other.level == world) {
-                           Component c1 = player.getDisplayName();
-                           Component c2 = new TextComponent(" found a ").withStyle(ChatFormatting.GRAY);
-                           Component c3 = new TextComponent("cake").withStyle(ChatFormatting.GREEN);
-                           Component c4 = new TextComponent(" and added ").withStyle(ChatFormatting.GRAY);
-                           Component c5 = modifier.getNameComponent();
-                           other.displayClientMessage(
-                              new TextComponent("").append(c1).append(c2).append(c3).append(c4).append(c5).append(new TextComponent(".")), false
-                           );
-                        }
-                     }
-                  );
-            }
+      List<VaultModifier<?>> modifiers = new ArrayList<>(
+         ModConfigs.VAULT_MODIFIER_POOLS.getRandom(this.get(MODIFIER_POOL), vault.get(Vault.LEVEL).get(), random)
+      );
+      Object2IntMap<VaultModifier<?>> groups = new Object2IntOpenHashMap();
+      modifiers.forEach(modifier -> groups.put(modifier, groups.getOrDefault(modifier, 0) + 1));
+      ObjectIterator<Entry<VaultModifier<?>>> it = groups.object2IntEntrySet().iterator();
+      TextComponent suffix = new TextComponent("");
 
-            vault.get(Vault.MODIFIERS).addPermanentModifier(modifier, 1, true);
+      while (it.hasNext()) {
+         Entry<VaultModifier<?>> entry = (Entry<VaultModifier<?>>)it.next();
+         suffix.append(entry.getIntValue() + "x ");
+         suffix.append(((VaultModifier)entry.getKey()).getNameComponentFormatted(entry.getIntValue()));
+         if (it.hasNext()) {
+            suffix.append(new TextComponent(", "));
          }
+      }
+
+      TextComponent text = new TextComponent("");
+      if (modifiers.isEmpty()) {
+         text.append(player.getDisplayName())
+            .append(new TextComponent(" found a ").withStyle(ChatFormatting.GRAY))
+            .append(new TextComponent("cake").withStyle(ChatFormatting.GREEN))
+            .append(new TextComponent(".").withStyle(ChatFormatting.GRAY));
+      } else {
+         text.append(player.getDisplayName())
+            .append(new TextComponent(" found a ").withStyle(ChatFormatting.GRAY))
+            .append(new TextComponent("cake").withStyle(ChatFormatting.GREEN))
+            .append(new TextComponent(" and added ").withStyle(ChatFormatting.GRAY))
+            .append(suffix)
+            .append(new TextComponent(".").withStyle(ChatFormatting.GRAY));
+      }
+
+      groups.forEach((modifier, count) -> vault.get(Vault.MODIFIERS).addPermanentModifier(modifier, count, true));
+
+      for (Listener listener : vault.get(Vault.LISTENERS).getAll()) {
+         listener.getPlayer().ifPresent(other -> {
+            world.playSound(null, other.getX(), other.getY(), other.getZ(), SoundEvents.NOTE_BLOCK_BELL, SoundSource.PLAYERS, 0.9F, 1.2F);
+            other.displayClientMessage(text, false);
+         });
       }
    }
 
@@ -347,25 +383,31 @@ public class CakeObjective extends Objective {
       BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
       Font fr = mc.font;
       float part = (float)this.get(COUNT).intValue() / this.get(TARGET).intValue();
-      Component txt = new TextComponent("Find the cakes!").withStyle(ChatFormatting.AQUA).withStyle(ChatFormatting.BOLD);
+      int midX = width / 2;
+      Component txt = new TextComponent(this.get(COUNT) + " / ?").withStyle(ChatFormatting.LIGHT_PURPLE);
       fr.drawInBatch(
-         txt.getVisualOrderText(), 8.0F, height - 54, -1, true, matrixStack.last().pose(), buffer, false, 0, LightmapHelper.getPackedFullbrightCoords()
-      );
-      txt = new TextComponent(this.get(COUNT) + " / " + this.get(TARGET)).withStyle(ChatFormatting.AQUA).withStyle(ChatFormatting.BOLD);
-      fr.drawInBatch(
-         txt.getVisualOrderText(), 12.0F, height - 44, -1, true, matrixStack.last().pose(), buffer, false, 0, LightmapHelper.getPackedFullbrightCoords()
+         txt.getVisualOrderText(),
+         midX - mc.font.width(txt) / 2.0F,
+         31.0F,
+         -1,
+         true,
+         matrixStack.last().pose(),
+         buffer,
+         false,
+         0,
+         LightmapHelper.getPackedFullbrightCoords()
       );
       buffer.endBatch();
       RenderSystem.enableBlend();
       RenderSystem.defaultBlendFunc();
       RenderSystem.setShader(GameRenderer::getPositionTexShader);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-      RenderSystem.setShaderTexture(0, VaultOverlay.ARCHITECT_HUD);
+      RenderSystem.setShaderTexture(0, CAKE_HUD);
       ScreenDrawHelper.drawTexturedQuads(buf -> {
-         ScreenDrawHelper.rect(buf, matrixStack).at(15.0F, height - 31).dim(54.0F, 7.0F).texVanilla(0.0F, 105.0F, 54.0F, 7.0F).draw();
-         ScreenDrawHelper.rect(buf, matrixStack).at(16.0F, height - 30).dim(52.0F * part, 5.0F).texVanilla(0.0F, 113.0F, 52.0F * part, 5.0F).draw();
+         ScreenDrawHelper.rect(buf, matrixStack).at(midX - 14.400001F, 3.6F).dim(28.800001F, 25.6F).texVanilla(0.0F, 2.0F, 36.0F, 32.0F).draw();
+         ScreenDrawHelper.rect(buf, matrixStack).at(midX - 12.8F, 5.6F).dim(32.0F * part * 0.8F, 22.4F).texVanilla(2.0F, 40.0F, 32.0F * part, 28.0F).draw();
       });
-      if (this.get(CAKE_POS) != null) {
+      if (this.get(CAKE_POS) != null && mc.player != null) {
          double distance = Math.sqrt(this.get(CAKE_POS).distSqr(mc.player.blockPosition()));
          float alpha = (float)Mth.clamp(distance / 22.0, 0.0, 1.0);
          alpha = (float)Mth.clamp(Math.exp(alpha - 0.3) - 1.0, 0.0, 1.0);

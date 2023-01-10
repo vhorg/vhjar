@@ -6,9 +6,11 @@ import iskallia.vault.config.PaxelConfigs;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.event.InputEvents;
 import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
+import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.IConditionalDamageable;
+import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +31,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
@@ -46,10 +49,11 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -130,6 +134,12 @@ public class PaxelItem extends DiggerItem implements IConditionalDamageable {
 
                tooltip.add(component);
             }
+         }
+
+         List<PaxelItem.Perk> perks = getPerks(stack);
+         if (perks.contains(PaxelItem.Perk.HAMMERING) || perks.contains(PaxelItem.Perk.EXCAVATING) || perks.contains(PaxelItem.Perk.SHATTERING)) {
+            tooltip.add(new TextComponent(" "));
+            tooltip.add(new TextComponent("Use Shift+Arrow Keys to change Mining Area Offset.").withStyle(ChatFormatting.DARK_GRAY));
          }
 
          super.appendHoverText(stack, worldIn, tooltip, flagIn);
@@ -233,6 +243,40 @@ public class PaxelItem extends DiggerItem implements IConditionalDamageable {
       return 100 - getLevel(stack) * ModConfigs.PAXEL_CONFIGS.getTierValues(stack).getSturdinessDecrement();
    }
 
+   public static void addOffset(ItemStack stack, Vec2 offset) {
+      int range = 0;
+      List<PaxelItem.Perk> perks = getPerks(stack);
+      if (perks.contains(PaxelItem.Perk.SHATTERING)) {
+         range = PaxelItem.Perk.SHATTERING.digRadius;
+      } else if (perks.contains(PaxelItem.Perk.EXCAVATING)) {
+         range = PaxelItem.Perk.EXCAVATING.digRadius;
+      } else if (perks.contains(PaxelItem.Perk.HAMMERING)) {
+         range = PaxelItem.Perk.HAMMERING.digRadius;
+      }
+
+      if (range != 0) {
+         range = (range - 1) / 2;
+         Vec2 current = getOffset(stack);
+         float x = Math.max((float)(-range), Math.min(current.x + offset.x, (float)range));
+         float y = Math.max((float)(-range), Math.min(current.y + offset.y, (float)range));
+         setOffset(stack, new Vec2(x, y));
+      }
+   }
+
+   public static void setOffset(ItemStack stack, Vec2 offset) {
+      stack.getOrCreateTag().put("Offset", NBTHelper.serializeVec2(offset));
+   }
+
+   public static Vec2 getOffset(ItemStack stack) {
+      CompoundTag tag = stack.getOrCreateTag();
+      if (tag.contains("Offset")) {
+         CompoundTag offsetTag = tag.getCompound("Offset");
+         return NBTHelper.deserializeVec2(offsetTag);
+      } else {
+         return Vec2.ZERO;
+      }
+   }
+
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
       return (Multimap<Attribute, AttributeModifier>)(ModConfigs.isInitialized() && slot == EquipmentSlot.MAINHAND
          ? ImmutableMultimap.of(
@@ -308,38 +352,54 @@ public class PaxelItem extends DiggerItem implements IConditionalDamageable {
    private void areaDig(int range, Player player, ItemStack stack, BlockPos pos, BlockPos originPos, Direction side) {
       Level level = player.level;
       if (level.isAreaLoaded(pos, range)) {
-         Direction ort1;
-         Direction ort2;
-         switch (side.getAxis()) {
-            case Y:
-               ort1 = Direction.SOUTH;
-               ort2 = Direction.EAST;
-               break;
-            case Z:
-               ort1 = Direction.EAST;
-               ort2 = Direction.UP;
-               break;
-            default:
-               ort1 = Direction.UP;
-               ort2 = Direction.SOUTH;
-         }
-
+         Direction ort1 = side != Direction.UP && side != Direction.DOWN ? side.getCounterClockWise() : player.getDirection().getClockWise();
+         Direction ort2 = side != Direction.UP && side != Direction.DOWN
+            ? Direction.UP
+            : (side == Direction.UP ? player.getDirection() : player.getDirection().getOpposite());
+         Vec2 offset = getOffset(stack);
+         pos = pos.relative(ort1, (int)offset.x);
+         pos = pos.relative(ort2, (int)offset.y);
+         float destroySpeed = player.level.getBlockState(pos).getDestroySpeed(level, pos);
          Iterator<MutableBlockPos> it = BlockPos.spiralAround(pos, range, ort1, ort2).iterator();
 
          while (it.hasNext() && !stack.isEmpty()) {
-            this.destroyBlock((ServerLevel)level, (ServerPlayer)player, it.next().immutable());
+            BlockPos currentPos = it.next().immutable();
+            BlockState state = level.getBlockState(currentPos);
+            if (state.getBlock() == ModBlocks.VAULT_GLASS || state.getBlock() == ModBlocks.VAULT_BEDROCK) {
+               return;
+            }
+
+            this.destroyBlock((ServerLevel)level, (ServerPlayer)player, currentPos, destroySpeed);
          }
+
+         return;
       }
    }
 
-   public void destroyBlock(ServerLevel level, ServerPlayer player, BlockPos pos) {
+   public void destroyBlock(ServerLevel level, ServerPlayer player, BlockPos pos, float originDestroySpeed) {
       BlockState blockState = level.getBlockState(pos);
-      if (!blockState.isAir() && (player.isCreative() || blockState.getDestroyProgress(player, level, pos) != 0.0F)) {
-         ActiveFlags.IS_AOE_MINING.runIfNotSet(() -> {
-            if (player.gameMode.destroyBlock(pos)) {
-               level.levelEvent(2001, pos, Block.getId(blockState));
-            }
-         });
+      float currentDestroySpeed = blockState.getDestroySpeed(level, pos);
+      if (!blockState.isAir() && !(currentDestroySpeed < 0.0F)) {
+         ActiveFlags.IS_AOE_MINING
+            .runIfNotSet(
+               () -> {
+                  if (!player.isCreative()
+                     && currentDestroySpeed <= originDestroySpeed + ModConfigs.PAXEL_CONFIGS.getMaxHardnessAboveTarget()
+                     && player.gameMode.destroyBlock(pos)) {
+                     SoundType soundtype = blockState.getSoundType(level, pos, null);
+                     level.playSound(
+                        null,
+                        pos.getX(),
+                        pos.getY(),
+                        pos.getZ(),
+                        soundtype.getBreakSound(),
+                        SoundSource.BLOCKS,
+                        (soundtype.getVolume() + 1.0F) / 2.0F * 0.1F,
+                        soundtype.getPitch() * 0.8F
+                     );
+                  }
+               }
+            );
       }
    }
 

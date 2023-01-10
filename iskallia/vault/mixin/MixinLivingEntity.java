@@ -8,6 +8,7 @@ import iskallia.vault.init.ModAttributes;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.calc.ResistanceHelper;
+import iskallia.vault.world.data.ServerVaults;
 import javax.annotation.Nullable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -153,5 +154,16 @@ public abstract class MixinLivingEntity extends Entity {
       }
 
       return stack.getAttributeModifiers(slot);
+   }
+
+   @Inject(
+      method = {"checkTotemDeathProtection"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   private void checkTotemDeathProtection(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+      if (ServerVaults.get(this.level).isPresent()) {
+         cir.setReturnValue(false);
+      }
    }
 }

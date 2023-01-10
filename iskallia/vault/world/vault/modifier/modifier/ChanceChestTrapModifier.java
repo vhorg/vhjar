@@ -17,7 +17,9 @@ public class ChanceChestTrapModifier extends AbstractChanceModifier<AbstractChan
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
       CommonEvents.CHEST_TRAP_GENERATION.register(context.getUUID(), data -> {
          if (data.getPlayer().level == world) {
-            data.setProbability(data.getProbability() * this.properties.getChance());
+            if (!context.hasTarget() || context.getTarget().equals(data.getPlayer().getUUID())) {
+               data.setProbability(data.getProbability() + this.properties.getChance(context));
+            }
          }
       });
    }

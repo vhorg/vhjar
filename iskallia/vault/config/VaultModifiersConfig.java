@@ -149,7 +149,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new LootItemRarityModifier(
                      VaultMod.id("item_rarity"),
-                     new LootItemRarityModifier.Properties(0.1),
+                     new LootItemRarityModifier.Properties(0.1, null),
                      new VaultModifier.Display(
                         "Item Rarity", TextColor.parseColor("#7738c9"), "+10% Item Rarity", "+%d%% Item Rarity", VaultMod.id("gui/modifiers/item_rarity")
                      )
@@ -166,7 +166,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new LootItemQuantityModifier(
                      VaultMod.id("item_quantity"),
-                     new LootItemQuantityModifier.Properties(0.1),
+                     new LootItemQuantityModifier.Properties(0.1, null),
                      new VaultModifier.Display(
                         "Item Quantity",
                         TextColor.parseColor("#38c9c0"),
@@ -187,7 +187,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new MobFrenzyModifier(
                      VaultMod.id("frenzy"),
-                     new MobFrenzyModifier.Properties(3.0F, 0.1F, 1.0F),
+                     new MobFrenzyModifier.Properties(3.0F, 0.1F, 1.0F, null),
                      new VaultModifier.Display(
                         "Frenzy",
                         TextColor.parseColor("#FC7C5C"),
@@ -207,14 +207,14 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerAttributeModifier(
                      VaultMod.id("limited"),
-                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MAX_HEALTH_ADDITIVE, -2.0),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MAX_HEALTH_ADDITIVE, -2.0, null),
                      new VaultModifier.Display("Limited", TextColor.parseColor("#631f1f"), "-2 Max HP", "-%d Max HP", VaultMod.id("gui/modifiers/limited"))
                   )
                )
                .put(
                   new PlayerAttributeModifier(
                      VaultMod.id("draining"),
-                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MANA_REGEN_ADDITIVE_PERCENTILE, -0.2F),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MANA_REGEN_ADDITIVE_PERCENTILE, -0.2F, null),
                      new VaultModifier.Display(
                         "Draining", TextColor.parseColor("#7738c9"), "-20% Mana Regeneration", "-%d%% Mana Regeneration", VaultMod.id("gui/modifiers/draining")
                      )
@@ -231,7 +231,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new ChanceSoulShardModifier(
                      VaultMod.id("soul_hunter"),
-                     new AbstractChanceModifier.Properties(0.1F),
+                     new AbstractChanceModifier.Properties(0.1F, null),
                      new VaultModifier.Display(
                         "Soul Hunter", TextColor.parseColor("#6410a1"), "+10% Soul Shards", "+%d%% Soul Shards", VaultMod.id("gui/modifiers/soul_hunter")
                      )
@@ -248,7 +248,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new ChanceCatalystModifier(
                      VaultMod.id("prismatic"),
-                     new AbstractChanceModifier.Properties(0.1F),
+                     new AbstractChanceModifier.Properties(0.1F, null),
                      new VaultModifier.Display(
                         "Prismatic",
                         TextColor.parseColor("#FC00E3"),
@@ -269,7 +269,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new VaultLootableWeightModifier(
                      VaultMod.id("plentiful"),
-                     new VaultLootableWeightModifier.Properties(PlaceholderBlock.Type.ORE, 2.0),
+                     new VaultLootableWeightModifier.Properties(PlaceholderBlock.Type.ORE, 2.0, null),
                      new VaultModifier.Display(
                         "Plentiful",
                         TextColor.parseColor("#FF85FF"),
@@ -290,14 +290,14 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerStatModifier(
                      VaultMod.id("clumsy"),
-                     new PlayerStatModifier.Properties(PlayerStat.BLOCK_CHANCE, -0.1F),
+                     new PlayerStatModifier.Properties(PlayerStat.BLOCK_CHANCE, -0.1F, null),
                      new VaultModifier.Display("Clumsy", TextColor.parseColor("#CB866D"), "-10% Parry", "-%d%% Parry", VaultMod.id("gui/modifiers/clumsy"))
                   )
                )
                .put(
                   new PlayerStatModifier(
                      VaultMod.id("vulnerable"),
-                     new PlayerStatModifier.Properties(PlayerStat.RESISTANCE, -0.1F),
+                     new PlayerStatModifier.Properties(PlayerStat.RESISTANCE, -0.1F, null),
                      new VaultModifier.Display(
                         "Vulnerable", TextColor.parseColor("#CA9A5B"), "-10% Resistance", "-%d%% Resistance", VaultMod.id("gui/modifiers/vulnerable")
                      )
@@ -306,7 +306,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerStatModifier(
                      VaultMod.id("inert"),
-                     new PlayerStatModifier.Properties(PlayerStat.COOLDOWN_REDUCTION, -0.1F),
+                     new PlayerStatModifier.Properties(PlayerStat.COOLDOWN_REDUCTION, -0.1F, null),
                      new VaultModifier.Display(
                         "Inert", TextColor.parseColor("#6DACB5"), "-10% Cooldown Reduction", "-%d%% Cooldown Reduction", VaultMod.id("gui/modifiers/inert")
                      )
@@ -383,28 +383,28 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerEffectModifier(
                      VaultMod.id("lucky"),
-                     new PlayerEffectModifier.Properties(MobEffects.LUCK, 1),
+                     new PlayerEffectModifier.Properties(MobEffects.LUCK, 1, null),
                      new VaultModifier.Display("Lucky", TextColor.parseColor("#FFE900"), "+1 Luck", "+%d Luck", VaultMod.id("gui/modifiers/lucky"))
                   )
                )
                .put(
                   new PlayerEffectModifier(
                      VaultMod.id("unlucky"),
-                     new PlayerEffectModifier.Properties(MobEffects.UNLUCK, 1),
+                     new PlayerEffectModifier.Properties(MobEffects.UNLUCK, 1, null),
                      new VaultModifier.Display("Unlucky", TextColor.parseColor("#9F5300"), "-1 Luck", "-%d Luck", VaultMod.id("gui/modifiers/unlucky"))
                   )
                )
                .put(
                   new PlayerEffectModifier(
                      VaultMod.id("hunger"),
-                     new PlayerEffectModifier.Properties(MobEffects.HUNGER, 1),
+                     new PlayerEffectModifier.Properties(MobEffects.HUNGER, 1, null),
                      new VaultModifier.Display("Hunger", TextColor.parseColor("#E8DACD"), "+1 Hunger", "+%d Hunger", VaultMod.id("gui/modifiers/hunger"))
                   )
                )
                .put(
                   new PlayerEffectModifier(
                      VaultMod.id("tired"),
-                     new PlayerEffectModifier.Properties(MobEffects.DIG_SLOWDOWN, 1),
+                     new PlayerEffectModifier.Properties(MobEffects.DIG_SLOWDOWN, 1, null),
                      new VaultModifier.Display(
                         "Tired", TextColor.parseColor("#E8E9E1"), "+1 Mining Fatigue", "+%d Mining Fatigue", VaultMod.id("gui/modifiers/tired")
                      )
@@ -413,14 +413,14 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerEffectModifier(
                      VaultMod.id("slowed"),
-                     new PlayerEffectModifier.Properties(MobEffects.MOVEMENT_SLOWDOWN, 1),
+                     new PlayerEffectModifier.Properties(MobEffects.MOVEMENT_SLOWDOWN, 1, null),
                      new VaultModifier.Display("Slowed", TextColor.parseColor("#4C6786"), "+1 Slowness", "+%d Slowness", VaultMod.id("gui/modifiers/slowed"))
                   )
                )
                .put(
                   new PlayerEffectModifier(
                      VaultMod.id("weakened"),
-                     new PlayerEffectModifier.Properties(MobEffects.WEAKNESS, 1),
+                     new PlayerEffectModifier.Properties(MobEffects.WEAKNESS, 1, null),
                      new VaultModifier.Display(
                         "Weakened", TextColor.parseColor("#9F5300"), "+1 Weakness", "+%d Weakness", VaultMod.id("gui/modifiers/weakness")
                      )
@@ -429,14 +429,14 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerEffectModifier(
                      VaultMod.id("speedy"),
-                     new PlayerEffectModifier.Properties(MobEffects.MOVEMENT_SPEED, 1),
+                     new PlayerEffectModifier.Properties(MobEffects.MOVEMENT_SPEED, 1, null),
                      new VaultModifier.Display("Speedy", TextColor.parseColor("#00CDFF"), "+1 Speed", "+%d Speed", VaultMod.id("gui/modifiers/speed"))
                   )
                )
                .put(
                   new PlayerEffectModifier(
                      VaultMod.id("stronk"),
-                     new PlayerEffectModifier.Properties(MobEffects.DAMAGE_BOOST, 1),
+                     new PlayerEffectModifier.Properties(MobEffects.DAMAGE_BOOST, 1, null),
                      new VaultModifier.Display("Stronk", TextColor.parseColor("#5E12E5"), "+1 Strength", "+%d Strength", VaultMod.id("gui/modifiers/stronk"))
                   )
                )
@@ -451,7 +451,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new MobAttributeModifier(
                      VaultMod.id("chunky_mobs"),
-                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MAX_HEALTH_ADDITIVE_PERCENTILE, 0.2),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.MAX_HEALTH_ADDITIVE_PERCENTILE, 0.2, null),
                      new VaultModifier.Display(
                         "Chunky Mobs", TextColor.parseColor("#00FFFF"), "+20% Mob Health", "+%d%% Mob Health", VaultMod.id("gui/modifiers/chunky_mobs")
                      )
@@ -460,7 +460,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new MobAttributeModifier(
                      VaultMod.id("furious_mobs"),
-                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.ATTACK_DAMAGE_ADDITIVE_PERCENTILE, 0.2),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.ATTACK_DAMAGE_ADDITIVE_PERCENTILE, 0.2, null),
                      new VaultModifier.Display(
                         "Furious Mobs", TextColor.parseColor("#00FFFF"), "+20% Mob Damage", "+%d%% Mob Damage", VaultMod.id("gui/modifiers/furious_mobs")
                      )
@@ -469,7 +469,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new MobAttributeModifier(
                      VaultMod.id("speedy_mobs"),
-                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.SPEED_ADDITIVE_PERCENTILE, 0.05),
+                     new EntityAttributeModifier.Properties(EntityAttributeModifier.ModifierType.SPEED_ADDITIVE_PERCENTILE, 0.05, null),
                      new VaultModifier.Display(
                         "Speedy Mobs", TextColor.parseColor("#00FFFF"), "+5% Mob Speed", "+%d%% Mob Speed", VaultMod.id("gui/modifiers/speedy_mobs")
                      )
@@ -486,7 +486,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new ChanceChestTrapModifier(
                      VaultMod.id("trapped"),
-                     new AbstractChanceModifier.Properties(0.1F),
+                     new AbstractChanceModifier.Properties(0.1F, null),
                      new VaultModifier.Display(
                         "Trapped", TextColor.parseColor("#D35B00"), "+10% Trap Chance", "+%d%% Trap Chance", VaultMod.id("gui/modifiers/trapped")
                      )
@@ -495,7 +495,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new ChanceChestTrapModifier(
                      VaultMod.id("looters_dream"),
-                     new AbstractChanceModifier.Properties(0.0F),
+                     new AbstractChanceModifier.Properties(0.0F, null),
                      new VaultModifier.Display("Looter's Dream", TextColor.parseColor("#A3E2F5"), "No Trap Chance", VaultMod.id("gui/modifiers/safezone"))
                   )
                )
@@ -525,7 +525,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new VaultTimeModifier(
                      VaultMod.id("extended"),
-                     new VaultTimeModifier.Properties(1200),
+                     new VaultTimeModifier.Properties(1200, null),
                      new VaultModifier.Display(
                         "Extended", TextColor.parseColor("#2F86AE"), "+1 minute Vault Time", "+%d minute%s Vault Time", VaultMod.id("gui/modifiers/extended")
                      )
@@ -534,7 +534,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new VaultTimeModifier(
                      VaultMod.id("rushed"),
-                     new VaultTimeModifier.Properties(-1200),
+                     new VaultTimeModifier.Properties(-1200, null),
                      new VaultModifier.Display(
                         "Rushed", TextColor.parseColor("#FFCD6F"), "-1 minute Vault Time", "-%d minute%s Vault Time", VaultMod.id("gui/modifiers/rush")
                      )
@@ -573,7 +573,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new MobSpawnCountModifier(
                      VaultMod.id("crowded"),
-                     new MobSpawnCountModifier.Properties(1),
+                     new MobSpawnCountModifier.Properties(1, null),
                      new VaultModifier.Display(
                         "Crowded", TextColor.parseColor("#E83F24"), "+1 Mob Spawns", "+%d Mob Spawns", VaultMod.id("gui/modifiers/crowded")
                      )
@@ -582,7 +582,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new MobSpawnCountModifier(
                      VaultMod.id("personal_space"),
-                     new MobSpawnCountModifier.Properties(1),
+                     new MobSpawnCountModifier.Properties(1, null),
                      new VaultModifier.Display(
                         "Personal Space", TextColor.parseColor("#F9B1FF"), "-1 Mob Spawns", "-%d Mob Spawns", VaultMod.id("gui/modifiers/personalspace")
                      )
@@ -599,7 +599,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new VaultLevelModifier(
                      VaultMod.id("difficult"),
-                     new VaultLevelModifier.Properties(3),
+                     new VaultLevelModifier.Properties(3, null),
                      new VaultModifier.Display(
                         "Difficult", TextColor.parseColor("#E20000"), "+3 Vault Level", "+%d Vault Level", VaultMod.id("gui/modifiers/difficult")
                      )
@@ -608,7 +608,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new VaultLevelModifier(
                      VaultMod.id("easy"),
-                     new VaultLevelModifier.Properties(3),
+                     new VaultLevelModifier.Properties(3, null),
                      new VaultModifier.Display("Easy", TextColor.parseColor("#70FF2A"), "-3 Vault Level", "-%d Vault Level", VaultMod.id("gui/modifiers/easy"))
                   )
                )
@@ -667,7 +667,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerDurabilityDamageModifier(
                      VaultMod.id("frail"),
-                     new PlayerDurabilityDamageModifier.Properties(0.2F),
+                     new PlayerDurabilityDamageModifier.Properties(0.2F, null),
                      new VaultModifier.Display(
                         "Frail", TextColor.parseColor("#7B7E7F"), "+20% Durability Damage", "+%d%% Durability Damage", VaultMod.id("gui/modifiers/frail")
                      )
@@ -676,7 +676,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerDurabilityDamageModifier(
                      VaultMod.id("reinforced"),
-                     new PlayerDurabilityDamageModifier.Properties(-0.2F),
+                     new PlayerDurabilityDamageModifier.Properties(-0.2F, null),
                      new VaultModifier.Display(
                         "Reinforced",
                         TextColor.parseColor("#9550FF"),
@@ -697,7 +697,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new ChanceArtifactModifier(
                      VaultMod.id("treasure_hunting"),
-                     new AbstractChanceModifier.Properties(0.1F),
+                     new AbstractChanceModifier.Properties(0.1F, null),
                      new VaultModifier.Display(
                         "Treasure Hunting",
                         TextColor.parseColor("#EBFF8D"),
@@ -723,7 +723,8 @@ public class VaultModifiersConfig extends Config {
                            (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.GILDED_CHEST)
                         ),
                         1,
-                        true
+                        true,
+                        null
                      ),
                      new VaultModifier.Display("Gilded", TextColor.parseColor("#FFEC00"), "Adds Gilded Chests", VaultMod.id("gui/modifiers/gilded"))
                   )
@@ -736,7 +737,8 @@ public class VaultModifiersConfig extends Config {
                            (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.LIVING_CHEST)
                         ),
                         1,
-                        true
+                        true,
+                        null
                      ),
                      new VaultModifier.Display("Living", TextColor.parseColor("#5FC76A"), "Adds Living Chests", VaultMod.id("gui/modifiers/living"))
                   )
@@ -749,7 +751,8 @@ public class VaultModifiersConfig extends Config {
                            (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.ORNATE_CHEST)
                         ),
                         1,
-                        true
+                        true,
+                        null
                      ),
                      new VaultModifier.Display("Ornate", TextColor.parseColor("#8E5fC7"), "Adds Ornate Chests", VaultMod.id("gui/modifiers/ornate"))
                   )
@@ -760,7 +763,8 @@ public class VaultModifiersConfig extends Config {
                      new DecoratorAddModifier.Properties(
                         PartialTile.of((BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.COIN_STACKS)),
                         1,
-                        true
+                        true,
+                        null
                      ),
                      new VaultModifier.Display("Coins", TextColor.parseColor("#C7C05F"), "Adds Coin Piles to the vault", VaultMod.id("gui/modifiers/coins"))
                   )

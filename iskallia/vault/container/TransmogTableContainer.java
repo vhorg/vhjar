@@ -11,23 +11,37 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.util.EntityHelper;
+import java.util.Objects;
 import javax.annotation.Nonnull;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public class TransmogTableContainer extends AbstractElementContainer {
-   protected TransmogTableInventory internalInventory = new TransmogTableInventory();
+   protected TransmogTableInventory internalInventory;
    protected AbstractElementContainer.SlotIndexRange playerInventoryIndexRange;
    protected AbstractElementContainer.SlotIndexRange hotbarIndexRange;
    protected AbstractElementContainer.SlotIndexRange internalInventoryIndexRange;
    protected ResourceLocation selectedModelId;
 
-   public TransmogTableContainer(int id, Player player) {
+   public TransmogTableContainer(int id, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
+      this(id, playerInventory.player, null);
+   }
+
+   public TransmogTableContainer(int id, Player player, TransmogTableInventory inventory) {
       super(ModContainers.TRANSMOG_TABLE_CONTAINER, id, player);
+      this.internalInventory = Objects.requireNonNullElseGet(inventory, () -> new TransmogTableInventory() {
+         @Override
+         public void setChanged() {
+            super.setChanged();
+            TransmogTableContainer.this.slotsChanged(this);
+         }
+      });
+      this.internalInventory.stopOpen(player);
       int offsetX = 0;
       int offsetY = 0;
       int containerSlotIndex = 0;
@@ -52,7 +66,12 @@ public class TransmogTableContainer extends AbstractElementContainer {
       }
 
       this.hotbarIndexRange = new AbstractElementContainer.SlotIndexRange(this.playerInventoryIndexRange.end(), containerSlotIndex);
-      this.addSlot(new VaultGearSlot(this.internalInventory, 0, 63, 61));
+      this.addSlot(new VaultGearSlot(this.internalInventory, 0, 63, 61) {
+         public void setChanged() {
+            super.setChanged();
+            TransmogTableContainer.this.selectModelId(null);
+         }
+      });
       containerSlotIndex++;
       this.addSlot(new VaultCoinSlot(this.internalInventory, 1, 92, 61, ModBlocks.VAULT_BRONZE));
       containerSlotIndex++;
@@ -118,12 +137,7 @@ public class TransmogTableContainer extends AbstractElementContainer {
 
    public void removed(@Nonnull Player player) {
       super.removed(player);
-      this.internalInventory.forEachInput(relativeIndex -> {
-         ItemStack itemStack = this.internalInventory.getItem(relativeIndex);
-         if (!itemStack.isEmpty()) {
-            EntityHelper.giveItem(player, itemStack);
-         }
-      });
+      this.internalInventory.stopOpen(player);
    }
 
    @Nonnull

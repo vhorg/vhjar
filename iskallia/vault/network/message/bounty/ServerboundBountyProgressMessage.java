@@ -11,11 +11,13 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 public record ServerboundBountyProgressMessage() {
+   public static final ServerboundBountyProgressMessage INSTANCE = new ServerboundBountyProgressMessage();
+
    public static void encode(ServerboundBountyProgressMessage message, FriendlyByteBuf buffer) {
    }
 
    public static ServerboundBountyProgressMessage decode(FriendlyByteBuf buffer) {
-      return new ServerboundBountyProgressMessage();
+      return INSTANCE;
    }
 
    public static void handle(ServerboundBountyProgressMessage message, Supplier<Context> contextSupplier) {

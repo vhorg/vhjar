@@ -8,7 +8,7 @@ import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
 import iskallia.vault.core.event.ClientEvents;
 import iskallia.vault.core.event.CommonEvents;
-import iskallia.vault.core.vault.influence.Influences;
+import iskallia.vault.core.vault.influence.LegacyInfluences;
 import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.overlay.VaultOverlay;
 import iskallia.vault.core.vault.player.Listeners;
@@ -55,8 +55,8 @@ public class Vault extends DataObject<Vault> {
    public static final FieldKey<Modifiers> MODIFIERS = FieldKey.of("modifiers", Modifiers.class)
       .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Modifiers::new)
       .register(FIELDS);
-   public static final FieldKey<Influences> INFLUENCES = FieldKey.of("influences", Influences.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Influences::new)
+   public static final FieldKey<LegacyInfluences> INFLUENCES = FieldKey.of("influences", LegacyInfluences.class)
+      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), LegacyInfluences::new)
       .register(FIELDS);
    public static final FieldKey<StatsCollector> STATS = FieldKey.of("stats", StatsCollector.class)
       .with(Version.v1_0, Adapter.ofCompound(), DISK.all(), StatsCollector::new)
@@ -95,7 +95,7 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(OBJECTIVES, Objectives::releaseServer);
       this.ifPresent(MODIFIERS, Modifiers::releaseServer);
       this.ifPresent(LISTENERS, Listeners::releaseServer);
-      this.ifPresent(INFLUENCES, Influences::releaseServer);
+      this.ifPresent(INFLUENCES, LegacyInfluences::releaseServer);
       this.ifPresent(STATS, StatsCollector::releaseServer);
    }
 

@@ -3,6 +3,7 @@ package iskallia.vault.dump;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import iskallia.vault.config.EternalAuraConfig;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.entity.eternal.EternalData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
@@ -18,7 +19,7 @@ import iskallia.vault.util.calc.ResistanceHelper;
 import iskallia.vault.util.calc.ThornsHelper;
 import iskallia.vault.world.data.EternalsData;
 import iskallia.vault.world.data.PlayerAbilitiesData;
-import iskallia.vault.world.data.PlayerFavourData;
+import iskallia.vault.world.data.PlayerInfluences;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
@@ -98,12 +99,12 @@ public class PlayerSnapshotDump {
       snapshot.vaultDeaths = vaultRunsSnapshot.deaths;
       snapshot.artifactCount = vaultRunsSnapshot.artifacts;
       snapshot.powerLevel = stats.getTotalSpentSkillPoints() + stats.getUnspentSkillPoints();
-      PlayerFavourData favourData = PlayerFavourData.get(sWorld);
 
-      for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {
-         snapshot.favors.put(type.getName(), favourData.getFavour(sPlayer.getUUID(), type));
+      for (VaultGod type : VaultGod.values()) {
+         snapshot.reputation.put(type.getName(), PlayerInfluences.getReputation(sPlayer.getUUID(), type));
       }
 
+      PlayerInfluences.getFavour(sPlayer.getUUID()).ifPresent(god -> snapshot.favour = god.getName());
       EternalsData.EternalGroup group = EternalsData.get(sWorld).getEternals(sPlayer);
 
       for (EternalData eternal : group.getEternals()) {
@@ -157,7 +158,8 @@ public class PlayerSnapshotDump {
       protected int vaultLevel = 0;
       protected float levelPercent = 0.0F;
       protected Map<String, Double> attributes = new LinkedHashMap<>();
-      protected Map<String, Integer> favors = new LinkedHashMap<>();
+      protected Map<String, Integer> reputation = new LinkedHashMap<>();
+      protected String favour;
       protected float blockChance;
       protected float resistance;
       protected float cooldownReduction;

@@ -62,16 +62,17 @@ public class ManaShieldAbility<C extends ManaShieldConfig> extends AbstractToggl
          AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
          AbilityNode<?, ?> node = abilities.getNodeOf(this);
          if (node.getAbility() == this && node.isLearned() && node.getAbilityConfig() instanceof ManaShieldConfig config) {
-            float var11 = Mth.clamp(config.getPercentageDamageAbsorbed(), 0.0F, 1.0F);
-            float redirectedDamage = Math.min(event.getAmount() * var11, Mana.get(player));
-            if (!Mth.equal(redirectedDamage, 0.0F)) {
-               if (Mth.equal(redirectedDamage, event.getAmount())) {
+            float var12 = Mth.clamp(config.getPercentageDamageAbsorbed(), 0.0F, 1.0F);
+            float manaUsed = Math.min(event.getAmount() * var12 * config.getManaPerDamageScalar(), Mana.get(player));
+            float damageAbsorbed = manaUsed / config.getManaPerDamageScalar();
+            if (!Mth.equal(damageAbsorbed, 0.0F)) {
+               if (Mth.equal(damageAbsorbed, event.getAmount())) {
                   event.setCanceled(true);
                } else {
-                  event.setAmount(event.getAmount() - redirectedDamage);
+                  event.setAmount(event.getAmount() - damageAbsorbed);
                }
 
-               float mana = Mana.decrease(player, redirectedDamage);
+               float mana = Mana.decrease(player, manaUsed);
                float pitch = 1.25F + -0.5F * (mana / Mana.getMax(player));
                player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD_HIT, SoundSource.MASTER, 0.2F, pitch);
                player.playNotifySound(ModSounds.MANA_SHIELD_HIT, SoundSource.MASTER, 0.2F, pitch);

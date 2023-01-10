@@ -28,6 +28,7 @@ public class PlaceholderGenerationEvent extends Event<PlaceholderGenerationEvent
       private final Vault vault;
       private final VaultLootTileProcessor parent;
       private final PartialTile tile;
+      private final double baseProbability;
       private double probability;
       private final WeightedList<PartialTile> success;
       private final WeightedList<PartialTile> failure;
@@ -38,6 +39,7 @@ public class PlaceholderGenerationEvent extends Event<PlaceholderGenerationEvent
          this.vault = vault;
          this.parent = parent;
          this.tile = tile;
+         this.baseProbability = probability;
          this.probability = probability;
          this.success = success;
          this.failure = failure;
@@ -53,6 +55,10 @@ public class PlaceholderGenerationEvent extends Event<PlaceholderGenerationEvent
 
       public PartialTile getTile() {
          return this.tile;
+      }
+
+      public double getBaseProbability() {
+         return this.baseProbability;
       }
 
       public double getProbability() {

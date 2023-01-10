@@ -141,12 +141,9 @@ public class VirtualWorlds extends SavedData {
                   VirtualWorld world = (VirtualWorld)anyWorldx;
                   switch (world.getThreadingMode()) {
                      case CONCURRENT:
-                        CONCURRENT_POOL.execute(() -> {
-                           String oldName = Thread.currentThread().getName();
-                           Thread.currentThread().setName(world.dimension().location().toString());
-                           world.swapThreadsAndRun(Thread.currentThread(), () -> tickWorldSafe(server, world, hasTimeLeft, true, CRASH));
-                           Thread.currentThread().setName(oldName);
-                        });
+                        CONCURRENT_POOL.execute(
+                           () -> world.swapThreadsAndRun(Thread.currentThread(), () -> tickWorldSafe(server, world, hasTimeLeft, true, CRASH))
+                        );
                         break;
                      case PARALLEL:
                         throw new UnsupportedOperationException();

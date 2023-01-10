@@ -1,19 +1,24 @@
 package iskallia.vault.event;
 
-import iskallia.vault.event.event.VaultJoinForgeEvent;
-import iskallia.vault.event.event.VaultLeaveForgeEvent;
+import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.data.ServerVaults;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.event.TickEvent.Phase;
+import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.TabListNameFormat;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber
 public class PlayerTabNameEvent {
+   private static final Set<UUID> IN_VAULT = new HashSet<>();
+
    @SubscribeEvent
    public static void onTabListNameFormat(TabListNameFormat event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
@@ -21,10 +26,12 @@ public class PlayerTabNameEvent {
          MutableComponent display = new TextComponent("");
          MutableComponent level = new TextComponent(String.valueOf(vaultLevel)).withStyle(ChatFormatting.YELLOW);
          MutableComponent space = new TextComponent(" ");
-         MutableComponent playerName = player.getDisplayName().copy();
+         MutableComponent playerName = player.getName().copy();
          display.append(level).append(space).append(playerName);
-         if (ServerVaults.isInVault(player)) {
+         if (IN_VAULT.contains(player.getUUID())) {
             display.append(new TextComponent(" (Vault)").withStyle(ChatFormatting.DARK_GRAY));
+         } else {
+            display.append(new TextComponent(""));
          }
 
          event.setDisplayName(display);
@@ -32,12 +39,22 @@ public class PlayerTabNameEvent {
    }
 
    @SubscribeEvent
-   public static void onJoinVault(VaultJoinForgeEvent event) {
-      event.getPlayers().forEach(ServerPlayer::refreshTabListName);
-   }
+   public static void onTick(PlayerTickEvent event) {
+      if (event.player instanceof ServerPlayer serverPlayer) {
+         if (event.phase != Phase.END && serverPlayer.server.overworld().getGameTime() % 100L != 0L) {
+            return;
+         }
 
-   @SubscribeEvent
-   public static void onLeaveVault(VaultLeaveForgeEvent event) {
-      event.getPlayer().refreshTabListName();
+         boolean updated;
+         if (MiscUtils.getVault(serverPlayer).isPresent()) {
+            updated = IN_VAULT.add(serverPlayer.getUUID());
+         } else {
+            updated = IN_VAULT.remove(serverPlayer.getUUID());
+         }
+
+         if (updated) {
+            serverPlayer.refreshTabListName();
+         }
+      }
    }
 }

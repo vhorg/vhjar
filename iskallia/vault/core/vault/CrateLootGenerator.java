@@ -48,7 +48,7 @@ public class CrateLootGenerator {
    public NonNullList<ItemStack> createLootForCommand(RandomSource random, int vaultLevel) {
       NonNullList<ItemStack> loot = NonNullList.create();
       if (this.lootTable != null) {
-         LootTableGenerator generator = new LootTableGenerator(Version.v1_0, this.lootTable);
+         LootTableGenerator generator = new LootTableGenerator(Version.v1_0, this.lootTable, 0.0F);
          generator.generate(random);
          generator.getItems().forEachRemaining(loot::add);
       }
@@ -90,7 +90,7 @@ public class CrateLootGenerator {
    public NonNullList<ItemStack> createLoot(Vault vault, Listener listener, RandomSource random) {
       NonNullList<ItemStack> loot = NonNullList.create();
       if (this.lootTable != null) {
-         LootTableGenerator generator = new LootTableGenerator(vault.get(Vault.VERSION), this.lootTable);
+         LootTableGenerator generator = new LootTableGenerator(vault.get(Vault.VERSION), this.lootTable, 0.0F);
          generator.generate(random);
          generator.getItems().forEachRemaining(loot::add);
       }

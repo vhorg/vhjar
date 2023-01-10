@@ -152,6 +152,11 @@ public class AbilitiesGUIConfig extends Config {
                x, y, VaultMod.id("gui/abilities/hunter"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
                   {
                      this.put("Hunter_Blocks", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/hunter_blocks")));
+                     this.put("Hunter_Wooden", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/hunter_wooden")));
+                     this.put("Hunter_Gilded", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/hunter_gilded")));
+                     this.put("Hunter_Living", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/hunter_living")));
+                     this.put("Hunter_Ornate", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/hunter_ornate")));
+                     this.put("Hunter_Coins", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/hunter_coins")));
                   }
                }
             )
@@ -181,7 +186,18 @@ public class AbilitiesGUIConfig extends Config {
             })
          );
       x += 38;
-      this.styles.put("Stonefall", new AbilitiesGUIConfig.AbilityStyle(x, y, VaultMod.id("gui/abilities/stonefall")));
+      this.styles
+         .put(
+            "Stonefall",
+            new AbilitiesGUIConfig.AbilityStyle(
+               x, y, VaultMod.id("gui/abilities/stonefall"), new LinkedHashMap<String, AbilitiesGUIConfig.SpecializationStyle>() {
+                  {
+                     this.put("Stonefall_Snow", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/stonefall_snow")));
+                     this.put("Stonefall_Cold", new AbilitiesGUIConfig.SpecializationStyle(VaultMod.id("gui/abilities/stonefall_cold")));
+                  }
+               }
+            )
+         );
    }
 
    public static class AbilityStyle extends AbilitiesGUIConfig.IconStyle {

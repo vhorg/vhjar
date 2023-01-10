@@ -15,7 +15,11 @@ public class CompletionTaskConfig extends TaskConfig<TaskEntry<String>, Completi
    public CompletionProperties getGeneratedTaskProperties(int vaultLevel) {
       TaskEntry<String> taskEntry = this.getEntry(vaultLevel);
       GenericEntry<String> entry = taskEntry.getRandom();
-      return new CompletionProperties(entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getAmount().getRandom());
+      CompletionProperties completionProperties = new CompletionProperties(
+         entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getAmount().getRandom()
+      );
+      completionProperties.setRewardPool(entry.getRewardPool());
+      return completionProperties;
    }
 
    @Override

@@ -23,5 +23,8 @@ public class ModModelLayers {
    public static final ModelLayerLocation ELITE_STRAY = new ModelLayerLocation(VaultMod.id("elite_stray"), "main");
    public static final ModelLayerLocation ELITE_WITHER_SKELETON = new ModelLayerLocation(VaultMod.id("elite_wither_skeleton"), "main");
    public static final ModelLayerLocation ELITE_ENDERMAN_ORNAMENT = new ModelLayerLocation(VaultMod.id("elite_enderman_ornament"), "main");
+   public static final ModelLayerLocation T2_HUSK = new ModelLayerLocation(VaultMod.id("t2_husk"), "main");
+   public static final ModelLayerLocation T2_CREEPER = new ModelLayerLocation(VaultMod.id("t2_creeper"), "main");
+   public static final ModelLayerLocation T2_ENDERMAN = new ModelLayerLocation(VaultMod.id("t2_enderman"), "main");
    public static final ModelLayerLocation VAULT_SPIDER_BABY = new ModelLayerLocation(VaultMod.id("vault_spider_baby"), "main");
 }

@@ -20,7 +20,11 @@ public class KillEntityTaskConfig extends TaskConfig<TaskEntry<ResourceLocation>
    public KillEntityProperties getGeneratedTaskProperties(int vaultLevel) {
       TaskEntry<ResourceLocation> taskEntry = this.getEntry(vaultLevel);
       GenericEntry<ResourceLocation> entry = taskEntry.getRandom();
-      return new KillEntityProperties(entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount());
+      KillEntityProperties killEntityProperties = new KillEntityProperties(
+         entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount()
+      );
+      killEntityProperties.setRewardPool(entry.getRewardPool());
+      return killEntityProperties;
    }
 
    @Override

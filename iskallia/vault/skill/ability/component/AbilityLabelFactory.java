@@ -24,6 +24,7 @@ public final class AbilityLabelFactory {
    public static final String HEAL = "heal";
    public static final String RADIUS = "radius";
    public static final String ABSORB = "absorb";
+   public static final String MANA_PER_DAMAGE = "manaPerDamage";
    public static final String KNOCKBACK = "knockback";
    public static final String SLOWNESS = "slowness";
    public static final String CHAINS = "chains";
@@ -61,6 +62,10 @@ public final class AbilityLabelFactory {
          this.put("heal", context -> AbilityLabelFactory.label("\n Heal: ", AbilityLabelFactory.binding(context.config(), "heal"), "heal"));
          this.put("radius", context -> AbilityLabelFactory.label("\n Radius: ", AbilityLabelFactory.binding(context.config(), "radius"), "radius"));
          this.put("absorb", context -> AbilityLabelFactory.label("\n Absorb: ", AbilityLabelFactory.binding(context.config(), "absorb"), "absorb"));
+         this.put(
+            "manaPerDamage",
+            context -> AbilityLabelFactory.label("\n Mana / Damage: ", AbilityLabelFactory.binding(context.config(), "manaPerDamage"), "manaPerDamage")
+         );
          this.put("knockback", context -> AbilityLabelFactory.label("\n Knockback: ", AbilityLabelFactory.binding(context.config(), "knockback"), "knockback"));
          this.put("slowness", context -> AbilityLabelFactory.label("\n Slowness: ", AbilityLabelFactory.binding(context.config(), "slowness"), "slowness"));
          this.put("chains", context -> AbilityLabelFactory.label("\n Chains: ", AbilityLabelFactory.binding(context.config(), "chains"), "chains"));

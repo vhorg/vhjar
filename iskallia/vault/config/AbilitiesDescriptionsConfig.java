@@ -161,6 +161,51 @@ public class AbilitiesDescriptionsConfig extends Config {
          );
       this.data
          .put(
+            "Hunter_Wooden",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Hunter_Wooden"),
+               List.of("cooldown", "manaCost", "duration", "radius"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius")
+            )
+         );
+      this.data
+         .put(
+            "Hunter_Gilded",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Hunter_Gilded"),
+               List.of("cooldown", "manaCost", "duration", "radius"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius")
+            )
+         );
+      this.data
+         .put(
+            "Hunter_Living",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Hunter_Living"),
+               List.of("cooldown", "manaCost", "duration", "radius"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius")
+            )
+         );
+      this.data
+         .put(
+            "Hunter_Ornate",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Hunter_Ornate"),
+               List.of("cooldown", "manaCost", "duration", "radius"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius")
+            )
+         );
+      this.data
+         .put(
+            "Hunter_Coins",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Hunter_Coins"),
+               List.of("cooldown", "manaCost", "duration", "radius"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius")
+            )
+         );
+      this.data
+         .put(
             "Mana Shield",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Mana Shield"),
@@ -336,6 +381,20 @@ public class AbilitiesDescriptionsConfig extends Config {
       this.data
          .put(
             "Stonefall",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Stonefall"), List.of("cooldown", "manaCost", "duration"), List.of("level", "cooldown", "manaCost", "duration")
+            )
+         );
+      this.data
+         .put(
+            "Stonefall_Snow",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Stonefall_Snow"), List.of("cooldown", "manaCost", "radius"), List.of("level", "cooldown", "manaCost", "radius")
+            )
+         );
+      this.data
+         .put(
+            "Stonefall_Cold",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Stonefall"), List.of("cooldown", "manaCost", "duration"), List.of("level", "cooldown", "manaCost", "duration")
             )

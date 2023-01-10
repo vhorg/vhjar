@@ -34,5 +34,13 @@ public enum PlayerStat {
    @SerializedName("rage_damage")
    RAGE_DAMAGE,
    @SerializedName("healing_effectiveness")
-   HEALING_EFFECTIVENESS;
+   HEALING_EFFECTIVENESS,
+   @SerializedName("velara_affinity")
+   VELARA_AFFINITY,
+   @SerializedName("tenos_affinity")
+   TENOS_AFFINITY,
+   @SerializedName("wendarr_affinity")
+   WENDARR_AFFINITY,
+   @SerializedName("idona_affinity")
+   IDONA_AFFINITY;
 }

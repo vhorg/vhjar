@@ -145,7 +145,7 @@ public class EternalData implements INBTSerializable<CompoundTag>, EternalDataAc
    }
 
    public float getLevelPercent() {
-      int expNeeded = ModConfigs.ETERNAL.getExpForLevel(this.getLevel() + 1);
+      int expNeeded = ModConfigs.LEVELS_META.getLevelMeta(this.getLevel()).tnl;
       return (float)this.levelExp / expNeeded;
    }
 
@@ -188,7 +188,7 @@ public class EternalData implements INBTSerializable<CompoundTag>, EternalDataAc
          return false;
       } else {
          this.levelExp += xp;
-         int expNeeded = ModConfigs.ETERNAL.getExpForLevel(this.getLevel() + 1);
+         int expNeeded = ModConfigs.LEVELS_META.getLevelMeta(this.getLevel()).tnl;
          if (this.levelExp >= expNeeded) {
             this.level++;
             this.levelExp -= expNeeded;

@@ -28,12 +28,15 @@ import iskallia.vault.skill.ability.config.sub.FarmerMelonConfig;
 import iskallia.vault.skill.ability.config.sub.HealEffectConfig;
 import iskallia.vault.skill.ability.config.sub.HealGroupConfig;
 import iskallia.vault.skill.ability.config.sub.HunterObjectiveConfig;
+import iskallia.vault.skill.ability.config.sub.HunterTargetedConfig;
 import iskallia.vault.skill.ability.config.sub.MegaJumpBreakDownConfig;
 import iskallia.vault.skill.ability.config.sub.MegaJumpBreakUpConfig;
 import iskallia.vault.skill.ability.config.sub.NovaDotConfig;
 import iskallia.vault.skill.ability.config.sub.NovaSpeedConfig;
 import iskallia.vault.skill.ability.config.sub.RampageChainConfig;
 import iskallia.vault.skill.ability.config.sub.RampageLeechConfig;
+import iskallia.vault.skill.ability.config.sub.StonefallColdConfig;
+import iskallia.vault.skill.ability.config.sub.StonefallSnowConfig;
 import iskallia.vault.skill.ability.config.sub.TankProjectileConfig;
 import iskallia.vault.skill.ability.config.sub.TankReflectConfig;
 import iskallia.vault.skill.ability.config.sub.TauntRepelConfig;
@@ -142,7 +145,24 @@ public class ModAbilityLabelBindings {
             config -> AbilityLabelFormatters.ticks(config.getDurationTicks())
          )
       );
-      register(ManaShieldConfig.class, Map.of("absorb", config -> AbilityLabelFormatters.percentRounded(config.getPercentageDamageAbsorbed())));
+      register(
+         HunterTargetedConfig.class,
+         Map.of(
+            "radius",
+            config -> AbilityLabelFormatters.decimal(config.getSearchRadius()),
+            "duration",
+            config -> AbilityLabelFormatters.ticks(config.getDurationTicks())
+         )
+      );
+      register(
+         ManaShieldConfig.class,
+         Map.of(
+            "absorb",
+            config -> AbilityLabelFormatters.percentRounded(config.getPercentageDamageAbsorbed()),
+            "manaPerDamage",
+            config -> AbilityLabelFormatters.decimal(config.getManaPerDamageScalar())
+         )
+      );
       register(MegaJumpConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
       register(MegaJumpBreakUpConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
       register(MegaJumpBreakDownConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
@@ -182,6 +202,9 @@ public class ModAbilityLabelBindings {
       register(RampageConfig.class, Map.of("damage", config -> AbilityLabelFormatters.percentRounded(config.getDamageIncrease())));
       register(RampageChainConfig.class, Map.of("chains", config -> AbilityLabelFormatters.integer(config.getAdditionalChainCount())));
       register(RampageLeechConfig.class, Map.of("leech", config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getLeechPercent())));
+      register(StonefallConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
+      register(StonefallSnowConfig.class, Map.of("radius", config -> AbilityLabelFormatters.decimal(config.getRadius())));
+      register(StonefallColdConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
       register(
          SummonEternalConfig.class,
          Map.of(
@@ -260,7 +283,6 @@ public class ModAbilityLabelBindings {
          )
       );
       register(VeinMinerVoidConfig.class, Map.of("blocks", config -> AbilityLabelFormatters.decimal((float)config.getBlockLimit())));
-      register(StonefallConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
    }
 
    public static <C extends AbstractAbilityConfig> void register(Class<C> configClass) {

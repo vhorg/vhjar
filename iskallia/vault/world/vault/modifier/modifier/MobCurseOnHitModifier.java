@@ -25,12 +25,14 @@ public class MobCurseOnHitModifier extends VaultModifier<MobCurseOnHitModifier.P
          if (event.getEntityLiving() instanceof ServerPlayer player) {
             if (event.getSource().getEntity() instanceof LivingEntity) {
                if (vault.get(Vault.LISTENERS).contains(player.getUUID())) {
-                  if (!(world.random.nextFloat() >= this.properties.onHitApplyChance)) {
-                     MobEffect effect = this.properties.getEffect();
-                     if (!GrantedEffectHelper.hasImmunity(player, effect)) {
-                        int grantedAmplifier = GrantedEffectHelper.getEffectData(player, player.getLevel(), effect);
-                        int amplifier = grantedAmplifier + this.properties.effectAmplifier + 1;
-                        player.addEffect(new MobEffectInstance(effect, this.properties.effectDurationTicks, amplifier, true, false));
+                  if (!context.hasTarget() || context.getTarget().equals(player.getUUID())) {
+                     if (!(world.random.nextFloat() >= this.properties.onHitApplyChance)) {
+                        MobEffect effect = this.properties.getEffect();
+                        if (!GrantedEffectHelper.hasImmunity(player, effect)) {
+                           int grantedAmplifier = GrantedEffectHelper.getEffectData(player, player.getLevel(), effect);
+                           int amplifier = grantedAmplifier + this.properties.effectAmplifier + 1;
+                           player.addEffect(new MobEffectInstance(effect, this.properties.effectDurationTicks, amplifier, true, false));
+                        }
                      }
                   }
                }

@@ -18,7 +18,11 @@ public class ItemSubmissionTaskConfig extends TaskConfig<TaskEntry<ResourceLocat
    public ItemSubmissionProperties getGeneratedTaskProperties(int vaultLevel) {
       TaskEntry<ResourceLocation> taskEntry = this.getEntry(vaultLevel);
       GenericEntry<ResourceLocation> entry = taskEntry.getRandom();
-      return new ItemSubmissionProperties(entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount());
+      ItemSubmissionProperties itemSubmissionProperties = new ItemSubmissionProperties(
+         entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount()
+      );
+      itemSubmissionProperties.setRewardPool(entry.getRewardPool());
+      return itemSubmissionProperties;
    }
 
    @Override

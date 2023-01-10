@@ -20,6 +20,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.phys.Vec2;
 
 public class NBTHelper {
    public static IntArrayTag serializeBoundingBox(BoundingBox box) {
@@ -43,6 +44,19 @@ public class NBTHelper {
       int y = tag.getInt("posY");
       int z = tag.getInt("posZ");
       return new BlockPos(x, y, z);
+   }
+
+   public static CompoundTag serializeVec2(Vec2 vec) {
+      CompoundTag tag = new CompoundTag();
+      tag.putFloat("x", vec.x);
+      tag.putFloat("y", vec.y);
+      return tag;
+   }
+
+   public static Vec2 deserializeVec2(CompoundTag tag) {
+      float x = tag.getFloat("x");
+      float y = tag.getFloat("y");
+      return new Vec2(x, y);
    }
 
    public static <T, N extends Tag> Map<UUID, T> readMap(CompoundTag nbt, String name, Class<N> nbtType, Function<N, T> mapper) {

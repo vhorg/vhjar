@@ -17,13 +17,19 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.item.gear.VaultLootItem;
+import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
+import iskallia.vault.world.vault.chest.MobTrapEffect;
 import java.util.List;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.network.PacketDistributor;
 
 public class ClassicLootLogic extends LootLogic {
    public static final SupplierKey<LootLogic> KEY = SupplierKey.of("classic", LootLogic.class).with(Version.v1_0, ClassicLootLogic::new);
@@ -66,14 +72,23 @@ public class ClassicLootLogic extends LootLogic {
       } else {
          AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(data.getPlayer());
          float disarmChance = snapshot.getAttributeValue(ModGearAttributes.TRAP_DISARMING, VaultGearAttributeTypeMerger.floatSum());
-         if (data.getRandom().nextFloat() < disarmChance) {
+         float chance = data.getRandom().nextFloat();
+         if (chance < disarmChance) {
+            world.playSound(null, data.getPos(), ModSounds.DISARM_TRAP, SoundSource.BLOCKS, 1.0F, 1.0F);
             return false;
          } else {
             double probability = ModConfigs.VAULT_CHEST.getTrapProbability(vault.get(Vault.LEVEL).get());
             WeightedList<String> pool = ModConfigs.VAULT_CHEST.getEffectPool(vault.get(Vault.LEVEL).get());
             probability = CommonEvents.CHEST_TRAP_GENERATION.invoke(data.getPlayer(), probability, pool).getProbability();
             if (!(data.getRandom().nextFloat() >= probability) && pool != null) {
-               pool.getRandom(data.getRandom()).map(ModConfigs.VAULT_CHEST::getEffectByName).ifPresent(effect -> effect.apply(world, vault, data.getPlayer()));
+               pool.getRandom(data.getRandom()).map(ModConfigs.VAULT_CHEST::getEffectByName).ifPresent(effect -> {
+                  if (effect instanceof MobTrapEffect) {
+                     world.playSound(null, data.getPos(), ModSounds.MOB_TRAP, SoundSource.BLOCKS, 1.0F, 1.0F);
+                     ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new TrappedMobChestParticlesMessage(data.getPos()));
+                  }
+
+                  effect.apply(world, vault, data.getPlayer());
+               });
                vault.getOptional(Vault.STATS)
                   .map(c -> c.get(data.getPlayer().getUUID()))
                   .ifPresent(stats -> stats.get(StatCollector.CHESTS).add(ChestStat.ofTrapped(((VaultChestBlock)data.getState().getBlock()).getType())));

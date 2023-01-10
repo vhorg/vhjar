@@ -39,7 +39,7 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility<MegaJumpBreakDownC
       AbilityTree abilityTree = PlayerAbilitiesData.get(sWorld).getAbilities(player);
       AbilityNode<?, ?> focusedAbilityNode = abilityTree.getSelectedAbility();
       if (focusedAbilityNode != null && focusedAbilityNode.getAbility() == this) {
-         for (BlockPos offset : BlockHelper.getOvalPositions(player.blockPosition().below(3), 4.0F, config.getHeight())) {
+         BlockHelper.withEllipsoidPositions(player.blockPosition().below(3), 4.0F, config.getHeight(), 4.0F, offset -> {
             BlockState state = sWorld.getBlockState(offset);
             if (!state.isAir() && (!state.requiresCorrectToolForDrops() || TierSortingRegistry.isCorrectTierForDrops(Tiers.IRON, state))) {
                float hardness = state.getDestroySpeed(sWorld, offset);
@@ -47,7 +47,7 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility<MegaJumpBreakDownC
                   this.destroyBlock(sWorld, offset, player);
                }
             }
-         }
+         });
       }
    }
 

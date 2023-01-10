@@ -34,7 +34,7 @@ public class ItemLootEntry implements LootEntry {
    public ItemStack getStack(RandomSource random) {
       ItemStack stack = new ItemStack(this.item, this.count.get(random));
       if (this.nbt != null) {
-         stack.setTag(this.nbt);
+         stack.setTag(this.nbt.copy());
       }
 
       return stack;

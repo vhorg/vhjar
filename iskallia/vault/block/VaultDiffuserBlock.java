@@ -57,6 +57,12 @@ public class VaultDiffuserBlock extends Block implements EntityBlock {
       if (!pState.is(pNewState.getBlock())) {
          if (pLevel.getBlockEntity(pPos) instanceof VaultDiffuserTileEntity vaultDiffuserTileEntity) {
             Containers.dropContents(pLevel, pPos, vaultDiffuserTileEntity.getInputInv());
+            vaultDiffuserTileEntity.getOutputInv()
+               .getOverSizedContents()
+               .forEach(
+                  overSizedStack -> overSizedStack.splitByStackSize()
+                     .forEach(splitStack -> Containers.dropItemStack(pLevel, pPos.getX(), pPos.getY(), pPos.getZ(), splitStack))
+               );
             pLevel.updateNeighbourForOutputSignal(pPos, this);
          }
 

@@ -481,5 +481,17 @@
       "the_vault:smithing/smithing3",
       "the_vault:smithing/smithing4"
     ]
+  },
+  "mob_trap": {
+    "category": "block",
+    "sounds": [
+      "the_vault:mob_trap"
+    ]
+  },
+  "disarm_trap": {
+    "category": "block",
+    "sounds": [
+      "the_vault:disarm_trap"
+    ]
   }
 }

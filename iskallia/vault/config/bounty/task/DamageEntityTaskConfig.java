@@ -21,7 +21,11 @@ public class DamageEntityTaskConfig extends TaskConfig<TaskEntry<ResourceLocatio
    public DamageProperties getGeneratedTaskProperties(int vaultLevel) {
       TaskEntry<ResourceLocation> taskEntry = this.getEntry(vaultLevel);
       GenericEntry<ResourceLocation> entry = taskEntry.getRandom();
-      return new DamageProperties(entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount());
+      DamageProperties damageProperties = new DamageProperties(
+         entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount()
+      );
+      damageProperties.setRewardPool(entry.getRewardPool());
+      return damageProperties;
    }
 
    @Override

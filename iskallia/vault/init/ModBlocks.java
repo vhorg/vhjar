@@ -22,7 +22,6 @@ import iskallia.vault.block.EtchingVendorControllerBlock;
 import iskallia.vault.block.FinalVaultFrameBlock;
 import iskallia.vault.block.FloatingTextBlock;
 import iskallia.vault.block.HourglassBlock;
-import iskallia.vault.block.KeyPressBlock;
 import iskallia.vault.block.LootStatueBlock;
 import iskallia.vault.block.LootStatueUpperBlock;
 import iskallia.vault.block.MVPCrownBlock;
@@ -98,6 +97,7 @@ import iskallia.vault.block.entity.SpiritExtractorTileEntity;
 import iskallia.vault.block.entity.StabilizerTileEntity;
 import iskallia.vault.block.entity.TimeAltarTileEntity;
 import iskallia.vault.block.entity.ToolViseTile;
+import iskallia.vault.block.entity.TransmogTableTileEntity;
 import iskallia.vault.block.entity.TreasureDoorTileEntity;
 import iskallia.vault.block.entity.TreasureSandTileEntity;
 import iskallia.vault.block.entity.TrophyTileEntity;
@@ -242,7 +242,6 @@ public class ModBlocks {
    public static final LootStatueUpperBlock LOOT_STATUE_UPPER = new LootStatueUpperBlock();
    public static final ShopPedestalBlock SHOP_PEDESTAL = new ShopPedestalBlock();
    public static final CryoChamberBlock CRYO_CHAMBER = new CryoChamberBlock();
-   public static final KeyPressBlock KEY_PRESS = new KeyPressBlock();
    public static final Block VAULT_DIAMOND_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.DIAMOND_BLOCK));
    public static final MazeBlock MAZE_BLOCK = new MazeBlock();
    public static final TrophyBlock TROPHY_STATUE = new TrophyBlock();
@@ -355,6 +354,7 @@ public class ModBlocks {
    public static final CrystalClusterBlock MEDIUM_CRYSTAL_BUD = new CrystalClusterBlock(SoundType.LARGE_AMETHYST_BUD, 2, 4, 3.0);
    public static final CrystalClusterBlock SMALL_CRYSTAL_BUD = new CrystalClusterBlock(SoundType.SMALL_AMETHYST_BUD, 1, 3, 4.0);
    public static final VaultAnvilBlock VAULT_ANVIL = new VaultAnvilBlock();
+   public static final Block WUTODIC_SILVER_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK));
    public static final LiquidBlock VOID_LIQUID_BLOCK = new VoidFluidBlock(
       ModFluids.VOID_LIQUID,
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.WATER, MaterialColor.COLOR_BLACK)
@@ -531,6 +531,10 @@ public class ModBlocks {
       .build(null);
    public static final BlockEntityType<BlackMarketTileEntity> BLACK_MARKET_TILE_ENTITY = Builder.of(BlackMarketTileEntity::new, new Block[]{BLACK_MARKET})
       .build(null);
+   public static final BlockEntityType<TransmogTableTileEntity> TRANSMOG_TABLE_TILE_ENTITY = Builder.of(
+         TransmogTableTileEntity::new, new Block[]{TRANSMOG_TABLE}
+      )
+      .build(null);
 
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, ERROR_BLOCK, VaultMod.id("error_block"));
@@ -598,7 +602,6 @@ public class ModBlocks {
       registerBlock(event, LOOT_STATUE_UPPER, VaultMod.id("loot_statue_upper"));
       registerBlock(event, SHOP_PEDESTAL, VaultMod.id("shop_pedestal"));
       registerBlock(event, CRYO_CHAMBER, VaultMod.id("cryo_chamber"));
-      registerBlock(event, KEY_PRESS, VaultMod.id("key_press"));
       registerBlock(event, VAULT_DIAMOND_BLOCK, VaultMod.id("vault_diamond_block"));
       registerBlock(event, MAZE_BLOCK, VaultMod.id("maze_block"));
       registerBlock(event, TROPHY_STATUE, VaultMod.id("trophy_statue"));
@@ -672,6 +675,7 @@ public class ModBlocks {
       registerBlock(event, MEDIUM_CRYSTAL_BUD, VaultMod.id("crystal_bud_medium"));
       registerBlock(event, SMALL_CRYSTAL_BUD, VaultMod.id("crystal_bud_small"));
       registerBlock(event, VAULT_ANVIL, VaultMod.id("vault_anvil"));
+      registerBlock(event, WUTODIC_SILVER_BLOCK, VaultMod.id("wutodic_silver_block"));
    }
 
    public static void registerTileEntities(Register<BlockEntityType<?>> event) {
@@ -722,6 +726,7 @@ public class ModBlocks {
       registerTileEntity(event, SPIRIT_EXTRACTOR_TILE_ENTITY, VaultMod.id("spirit_extractor_tile_entity"));
       registerTileEntity(event, BOUNTY_TABLE_TILE_ENTITY, VaultMod.id("bounty_table_tile_entity"));
       registerTileEntity(event, BLACK_MARKET_TILE_ENTITY, VaultMod.id("black_market_tile_entity"));
+      registerTileEntity(event, TRANSMOG_TABLE_TILE_ENTITY, VaultMod.id("transmog_table_tile_entity"));
       registerTileEntity(event, CRYSTAL_BUDDING_TILE_ENTITY, VaultMod.id("crystal_budding_tile_entity"));
    }
 
@@ -820,7 +825,6 @@ public class ModBlocks {
       registerBlockItem(event, LOOT_STATUE, LOOT_STATUE_ITEM);
       registerBlockItem(event, SHOP_PEDESTAL);
       registerBlockItem(event, CRYO_CHAMBER);
-      registerBlockItem(event, KEY_PRESS);
       registerBlockItem(event, VAULT_DIAMOND_BLOCK);
       registerBlockItem(event, TROPHY_STATUE, TROPHY_STATUE_BLOCK_ITEM);
       registerBlockItem(event, TRANSMOG_TABLE);
@@ -890,6 +894,7 @@ public class ModBlocks {
       registerBlockItem(event, MEDIUM_CRYSTAL_BUD);
       registerBlockItem(event, LARGE_CRYSTAL_BUD);
       registerBlockItem(event, VAULT_ANVIL);
+      registerBlockItem(event, WUTODIC_SILVER_BLOCK);
    }
 
    private static void registerBlock(Register<Block> event, Block block, ResourceLocation id) {

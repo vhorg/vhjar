@@ -177,6 +177,11 @@ public class VaultGearHelper {
             addAttribute(builder, ModAttributes.MANA_MAX, manaPercent, identifier, Operation.MULTIPLY_BASE);
          }
 
+         if (data.has(ModGearAttributes.HEALING_EFFECTIVENESS)) {
+            float healingPercent = data.get(ModGearAttributes.HEALING_EFFECTIVENESS, VaultGearAttributeTypeMerger.floatSum());
+            addAttribute(builder, ModAttributes.HEALING_MAX, healingPercent, identifier, Operation.MULTIPLY_BASE);
+         }
+
          return builder.build();
       }
    }

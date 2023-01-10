@@ -89,7 +89,15 @@ public class SoulShardConfig extends Config {
       }
 
       public int getRandomAmount(float chanceMultiplier) {
-         return Config.rand.nextFloat() > this.chance * chanceMultiplier ? 0 : MathUtilities.getRandomInt(this.min, this.max + 1);
+         int amount = 0;
+
+         for (float chance = this.chance * chanceMultiplier; chance > 0.0F; chance--) {
+            if (Config.rand.nextFloat() < chance) {
+               amount += MathUtilities.getRandomInt(this.min, this.max + 1);
+            }
+         }
+
+         return amount;
       }
    }
 

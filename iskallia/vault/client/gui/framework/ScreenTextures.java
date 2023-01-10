@@ -109,6 +109,32 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_CLOSE_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_CLOSE, BUTTON_CLOSE_HOVER, BUTTON_CLOSE_PRESSED, BUTTON_CLOSE_DISABLED
    );
+   public static final TextureAtlasRegion BUTTON_SHARE = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_share"));
+   public static final TextureAtlasRegion BUTTON_SHARE_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_share_disabled")
+   );
+   public static final TextureAtlasRegion BUTTON_SHARE_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_share_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_SHARE_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_share_pressed")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_SHARE_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_SHARE, BUTTON_SHARE_HOVER, BUTTON_SHARE_PRESSED, BUTTON_SHARE_DISABLED
+   );
+   public static final TextureAtlasRegion BUTTON_HISTORY = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_history"));
+   public static final TextureAtlasRegion BUTTON_HISTORY_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_history_disabled")
+   );
+   public static final TextureAtlasRegion BUTTON_HISTORY_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_history_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_HISTORY_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_history_pressed")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_HISTORY_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_HISTORY, BUTTON_HISTORY_HOVER, BUTTON_HISTORY_PRESSED, BUTTON_HISTORY_DISABLED
+   );
    public static final TextureAtlasRegion BUTTON_TRADE_WIDE = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_trade_wide")
    );
@@ -165,6 +191,11 @@ public final class ScreenTextures {
    public static final TextureAtlasRegion TAB_ICON_LOOT = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_loot"));
    public static final TextureAtlasRegion TAB_ICON_MOBS_KILLED = TextureAtlasRegion.of(ModTextureAtlases.SCAVENGER, VaultMod.id("gui/scavenger/mob"));
    public static final TextureAtlasRegion TAB_ICON_COOP = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_coop"));
+   public static final TextureAtlasRegion TAB_ICON_HISTORY = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_history"));
+   public static final TextureAtlasRegion TAB_ICON_FAVORITES = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_favorites"));
+   public static final TextureAtlasRegion TAB_ICON_FAVORITES_GRAY = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_favorites_gray")
+   );
    public static final TextureAtlasRegion TAB_COUNTDOWN_BACKGROUND = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_countdown_background")
    );

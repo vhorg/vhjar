@@ -85,7 +85,13 @@ public abstract class MixinPlayerRenderer {
                String baseTexture = vaultArmorItem.getArmorTexture(chestplateStack, null, chestplateStack.getEquipmentSlot(), null);
                String overlayTexture = vaultArmorItem.getArmorTexture(chestplateStack, null, chestplateStack.getEquipmentSlot(), "overlay");
                ModelPart armPart = Minecraft.getInstance().options.mainHand == HumanoidArm.RIGHT ? mainLayer.getRightArm() : mainLayer.getLeftArm();
+               float prevXRot = armPart.xRot;
+               float prevYRot = armPart.yRot;
+               float prevZRot = armPart.zRot;
                mainLayer.renderSleeve(matrixStack, armPart, baseTexture, overlayTexture, bufferSource, combinedLight);
+               armPart.xRot = prevXRot;
+               armPart.yRot = prevYRot;
+               armPart.zRot = prevZRot;
             });
       }
    }

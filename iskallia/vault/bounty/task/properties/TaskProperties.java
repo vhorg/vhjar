@@ -12,12 +12,22 @@ public abstract class TaskProperties implements INBTSerializable<CompoundTag> {
    protected List<ResourceLocation> validDimensions;
    private boolean vaultOnly;
    private double amount;
+   private String rewardPool;
 
    protected TaskProperties(ResourceLocation taskType, List<ResourceLocation> validDimensions, boolean vaultOnly, double amount) {
       this.taskType = taskType;
       this.validDimensions = validDimensions;
       this.vaultOnly = vaultOnly;
       this.amount = amount;
+   }
+
+   public TaskProperties setRewardPool(String rewardPool) {
+      this.rewardPool = rewardPool;
+      return this;
+   }
+
+   public String getRewardPool() {
+      return this.rewardPool != null && !this.rewardPool.equals("") ? this.rewardPool : "common";
    }
 
    public TaskProperties(CompoundTag tag) {

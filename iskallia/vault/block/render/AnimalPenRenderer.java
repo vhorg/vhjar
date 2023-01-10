@@ -26,15 +26,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Bee;
 import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.TurtleEggBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -46,9 +49,6 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
       .appendLiteral(':')
       .appendValue(ChronoField.SECOND_OF_MINUTE, 2)
       .toFormatter();
-   public static final float CORNERS = 0.0625F;
-   public static final float MIN_Y = 0.25F;
-   public static final float MAX_Y = 0.9375F;
    private final Minecraft mc = Minecraft.getInstance();
    private final BlockRenderDispatcher blockRenderer = this.mc.getBlockRenderer();
 
@@ -79,7 +79,7 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
 
          Animal animal = animalPenTile.getAnimalToReference();
          Animal dyingAnimal = animalPenTile.getDyingAnimalToReference();
-         if (animal instanceof Bee bee) {
+         if (animal instanceof Bee) {
             int rotate = 0;
             if (dir == Direction.EAST) {
                rotate = 90;
@@ -101,7 +101,6 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
             }
 
             float offsetx = (float)Math.sin(Math.toRadians(rotate)) / 3.0F;
-            float offsety = 0.0F;
             float offsetz = (float)Math.cos(Math.toRadians(rotate)) / 3.0F;
             float scale = 0.5F;
             matrixStack.scale(scale, scale, scale);
@@ -119,6 +118,15 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
                animalPenTile.getBlockPos()
             );
             matrixStack.popPose();
+         }
+
+         ItemStack invItem = animalPenTile.getInventory().getItem(0);
+         if (invItem.hasTag()) {
+            CompoundTag tag = invItem.getOrCreateTag();
+            if (!tag.contains("turtleEggTimer") && animal instanceof Turtle) {
+               int count = Mth.clamp((tag.getInt("count") + 1) / 2, 1, 16);
+               renderTurtleEggs(dir, matrixStack, animalPenTile, buffer, this.blockRenderer, count);
+            }
          }
 
          this.mc.getEntityRenderDispatcher().setRenderShadow(false);
@@ -146,7 +154,6 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
             List<Component> components = new ArrayList<>();
             if (animal != null) {
                components.add(animal.getType().getDescription());
-               ItemStack invItem = animalPenTile.getInventory().getItem(0);
                if (invItem.hasTag()) {
                   CompoundTag tag = invItem.getOrCreateTag();
                   if (tag.contains("count")) {
@@ -167,6 +174,14 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
                      int time = tag.getInt("eggTimer");
                      components.add(new TextComponent("eggs in: " + LocalTime.of(0, 0, 0).plusSeconds(time / 20).format(FORMATTER)));
                   } else if (animal instanceof Chicken) {
+                     components.add(new TextComponent("Eggs ready!"));
+                     components.add(new TextComponent("(grab a bucket)"));
+                  }
+
+                  if (tag.contains("turtleEggTimer")) {
+                     int time = tag.getInt("turtleEggTimer");
+                     components.add(new TextComponent("eggs in: " + LocalTime.of(0, 0, 0).plusSeconds(time / 20).format(FORMATTER)));
+                  } else if (animal instanceof Turtle) {
                      components.add(new TextComponent("Eggs ready!"));
                      components.add(new TextComponent("(grab a bucket)"));
                   }
@@ -220,7 +235,6 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
 
          if (dyingAnimal != null) {
             if (dyingAnimal instanceof Sheep sheep) {
-               ItemStack invItem = animalPenTile.getInventory().getItem(0);
                sheep.setSheared(invItem.hasTag() && invItem.getTag().contains("shearTimer"));
             }
 
@@ -257,7 +271,7 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
                float offsetx = 0.0F;
                float offsety = 0.0F;
                float offsetz = 0.0F;
-               if (animal instanceof Bee bee) {
+               if (animal instanceof Bee) {
                   int rotatex = 0;
                   if (dir == Direction.EAST) {
                      rotatex = 90;
@@ -274,6 +288,26 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
                   offsetx = (float)Math.sin(Math.toRadians(rotatex)) / 2.5F;
                   offsetz = (float)Math.cos(Math.toRadians(rotatex)) / 2.5F;
                   offsety = 0.25F;
+               }
+
+               if (animal instanceof Turtle) {
+                  int rotatexx = 0;
+                  if (dir == Direction.EAST) {
+                     rotatexx = 90;
+                  }
+
+                  if (dir == Direction.NORTH) {
+                     rotatexx = 180;
+                  }
+
+                  if (dir == Direction.WEST) {
+                     rotatexx = 270;
+                  }
+
+                  offsetx = (float)(-Math.sin(Math.toRadians(rotatexx))) / 40.0F;
+                  offsetz = (float)(-Math.cos(Math.toRadians(rotatexx))) / 40.0F;
+                  offsety = 0.0F;
+                  scale *= 0.65F;
                }
 
                dyingAnimal.yBodyRot = rotx;
@@ -322,7 +356,6 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
 
          if (animal != null) {
             if (animal instanceof Sheep sheep) {
-               ItemStack invItem = animalPenTile.getInventory().getItem(0);
                sheep.setSheared(invItem.hasTag() && invItem.getTag().contains("shearTimer"));
             }
 
@@ -351,29 +384,49 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
                countx = animalPenTile.getInventory().getItem(0).getOrCreateTag().getInt("count");
             }
 
-            float scale = 0.55F / animal.getBbWidth();
-            scale = 0.55F + (scale - 0.55F) / 2.0F;
-            scale += scale * (countx / 1000.0F);
-            float offsetx = 0.0F;
-            float offsety = 0.0F;
-            float offsetz = 0.0F;
+            float scalex = 0.55F / animal.getBbWidth();
+            scalex = 0.55F + (scalex - 0.55F) / 2.0F;
+            scalex += scalex * (countx / 1000.0F);
+            float offsetxx = 0.0F;
+            float offsetyx = 0.0F;
+            float offsetzx = 0.0F;
             if (animal instanceof Bee bee) {
-               int rotatexx = 0;
+               int rotatexxx = 0;
                if (dir == Direction.EAST) {
-                  rotatexx = 90;
+                  rotatexxx = 90;
                }
 
                if (dir == Direction.NORTH) {
-                  rotatexx = 180;
+                  rotatexxx = 180;
                }
 
                if (dir == Direction.WEST) {
-                  rotatexx = 270;
+                  rotatexxx = 270;
                }
 
-               offsetx = (float)Math.sin(Math.toRadians(rotatexx)) / 2.5F;
-               offsetz = (float)Math.cos(Math.toRadians(rotatexx)) / 2.5F;
-               offsety = 0.25F;
+               offsetxx = (float)(-Math.sin(Math.toRadians(rotatexxx))) / 20.0F;
+               offsetzx = (float)(-Math.cos(Math.toRadians(rotatexxx))) / 20.0F;
+               offsetyx = 0.25F;
+            }
+
+            if (animal instanceof Turtle) {
+               int rotatexxxx = 0;
+               if (dir == Direction.EAST) {
+                  rotatexxxx = 90;
+               }
+
+               if (dir == Direction.NORTH) {
+                  rotatexxxx = 180;
+               }
+
+               if (dir == Direction.WEST) {
+                  rotatexxxx = 270;
+               }
+
+               offsetxx = (float)(-Math.sin(Math.toRadians(rotatexxxx))) / 40.0F;
+               offsetzx = (float)(-Math.cos(Math.toRadians(rotatexxxx))) / 40.0F;
+               offsetyx = 0.0F;
+               scalex *= 0.65F;
             }
 
             animal.yBodyRot = rotxx;
@@ -384,7 +437,7 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
             animal.yHeadRot = animal.getYRot();
             animal.yHeadRotO = animal.getYRot();
             matrixStack.pushPose();
-            matrixStack.scale(scale, scale, scale);
+            matrixStack.scale(scalex, scalex, scalex);
             animal.deathTime = 0;
             animal.animationSpeedOld = 0.0F;
             animal.animationSpeed = 0.0F;
@@ -394,9 +447,9 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
                .getEntityRenderDispatcher()
                .render(
                   animal,
-                  0.5F / scale + offsetx / scale,
-                  0.125F / scale + offsety / scale,
-                  0.5F / scale + offsetz / scale,
+                  0.5F / scalex + offsetxx / scalex,
+                  0.125F / scalex + offsetyx / scalex,
+                  0.5F / scalex + offsetzx / scalex,
                   0.0F,
                   this.mc.getFrameTime(),
                   matrixStack,
@@ -437,5 +490,106 @@ public class AnimalPenRenderer implements BlockEntityRenderer<AnimalPenTileEntit
             world, blockRenderer.getBlockModel(state), state, pos, matrixStack, buffer.getBuffer(type), false, world.random, 0L, OverlayTexture.NO_OVERLAY
          );
       ForgeHooksClient.setRenderType(null);
+   }
+
+   public static void renderTurtleEggs(
+      Direction dir, PoseStack matrixStack, AnimalPenTileEntity animalPenTile, MultiBufferSource buffer, BlockRenderDispatcher blockRenderer, int count
+   ) {
+      List<Integer> eggs = new ArrayList<>();
+
+      while (count > 0) {
+         if (count >= 4) {
+            eggs.add(4);
+            count -= 4;
+         } else {
+            eggs.add(count);
+            count = 0;
+         }
+      }
+
+      int rotate = 0;
+      if (dir == Direction.EAST) {
+         rotate = 90;
+      }
+
+      if (dir == Direction.NORTH) {
+         rotate = 180;
+      }
+
+      if (dir == Direction.WEST) {
+         rotate = 270;
+      }
+
+      if (eggs.size() > 0 && eggs.get(0) >= 0) {
+         matrixStack.pushPose();
+         float offsetx = (float)Math.sin(Math.toRadians(rotate - 30)) / 3.5F;
+         float offsetz = (float)Math.cos(Math.toRadians(rotate - 30)) / 3.5F;
+         float scale = 0.25F;
+         matrixStack.scale(scale, scale, scale);
+         matrixStack.translate(0.375F / scale + offsetx / scale, 0.4375, 0.375F / scale + offsetz / scale);
+         renderBlockState(
+            (BlockState)Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, eggs.get(0)),
+            matrixStack,
+            buffer,
+            blockRenderer,
+            animalPenTile.getLevel(),
+            animalPenTile.getBlockPos()
+         );
+         matrixStack.popPose();
+      }
+
+      if (eggs.size() > 1 && eggs.get(1) >= 0) {
+         float offsetx = (float)Math.sin(Math.toRadians(rotate + 30)) / 3.5F;
+         float offsetz = (float)Math.cos(Math.toRadians(rotate + 30)) / 3.5F;
+         float scale = 0.25F;
+         matrixStack.pushPose();
+         matrixStack.scale(scale, scale, scale);
+         matrixStack.translate(0.375F / scale + offsetx / scale, 0.4375, 0.375F / scale + offsetz / scale);
+         renderBlockState(
+            (BlockState)Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, eggs.get(1)),
+            matrixStack,
+            buffer,
+            blockRenderer,
+            animalPenTile.getLevel(),
+            animalPenTile.getBlockPos()
+         );
+         matrixStack.popPose();
+      }
+
+      if (eggs.size() > 2 && eggs.get(2) >= 0) {
+         float offsetx = (float)Math.sin(Math.toRadians(rotate - 60)) / 3.5F;
+         float offsetz = (float)Math.cos(Math.toRadians(rotate - 60)) / 3.5F;
+         float scale = 0.25F;
+         matrixStack.pushPose();
+         matrixStack.scale(scale, scale, scale);
+         matrixStack.translate(0.375F / scale + offsetx / scale, 0.4375, 0.375F / scale + offsetz / scale);
+         renderBlockState(
+            (BlockState)Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, eggs.get(2)),
+            matrixStack,
+            buffer,
+            blockRenderer,
+            animalPenTile.getLevel(),
+            animalPenTile.getBlockPos()
+         );
+         matrixStack.popPose();
+      }
+
+      if (eggs.size() > 3 && eggs.get(3) >= 0) {
+         float offsetx = (float)Math.sin(Math.toRadians(rotate + 60)) / 3.5F;
+         float offsetz = (float)Math.cos(Math.toRadians(rotate + 60)) / 3.5F;
+         float scale = 0.25F;
+         matrixStack.pushPose();
+         matrixStack.scale(scale, scale, scale);
+         matrixStack.translate(0.375F / scale + offsetx / scale, 0.4375, 0.375F / scale + offsetz / scale);
+         renderBlockState(
+            (BlockState)Blocks.TURTLE_EGG.defaultBlockState().setValue(TurtleEggBlock.EGGS, eggs.get(3)),
+            matrixStack,
+            buffer,
+            blockRenderer,
+            animalPenTile.getLevel(),
+            animalPenTile.getBlockPos()
+         );
+         matrixStack.popPose();
+      }
    }
 }

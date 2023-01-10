@@ -1,10 +1,11 @@
 package iskallia.vault.util.calc;
 
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.ItemUnidentifiedArtifact;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.network.message.PlayerStatisticsMessage;
-import iskallia.vault.world.data.PlayerFavourData;
+import iskallia.vault.world.data.PlayerInfluences;
 import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.logic.objective.VaultObjective;
@@ -12,9 +13,7 @@ import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import iskallia.vault.world.vault.player.VaultPlayer;
 import iskallia.vault.world.vault.player.VaultRunner;
 import iskallia.vault.world.vault.player.VaultSpectator;
-import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -29,16 +28,15 @@ public class PlayerStatisticsCollector {
    public static void onPlayerTick(PlayerTickEvent event) {
       if (event.phase == Phase.END && event.player instanceof ServerPlayer sPlayer) {
          if (sPlayer.tickCount % 20 == 0) {
-            PlayerFavourData favourData = PlayerFavourData.get(sPlayer.getLevel());
-            UUID playerUUID = sPlayer.getUUID();
-            CompoundTag favourStats = new CompoundTag();
+            CompoundTag reputationStats = new CompoundTag();
 
-            for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {
-               favourStats.put(type.name(), IntTag.valueOf(favourData.getFavour(playerUUID, type)));
+            for (VaultGod type : VaultGod.values()) {
+               reputationStats.putInt(type.getName(), PlayerInfluences.getReputation(sPlayer.getUUID(), type));
             }
 
             CompoundTag serialized = new CompoundTag();
-            serialized.put("favourStats", favourStats);
+            serialized.put("reputation", reputationStats);
+            PlayerInfluences.getFavour(sPlayer.getUUID()).ifPresent(god -> serialized.putString("favour", god.getName()));
             PlayerStatisticsMessage pkt = new PlayerStatisticsMessage(serialized);
             ModNetwork.CHANNEL.sendTo(pkt, sPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
          }

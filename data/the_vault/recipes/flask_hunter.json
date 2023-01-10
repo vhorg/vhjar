@@ -1,18 +1,33 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " a ",
-    "aba",
-    " c "
+    "eag",
+    "drv",
+    "sfs"
   ],
   "key": {
-    "a": {
+    "e": {
       "item": "the_vault:hunter_eye"
     },
-    "b": {
+    "a": {
+      "item": "the_vault:vault_alloy"
+    },
+    "g": {
+      "item": "the_vault:vault_gold"
+    },
+    "d": {
+      "item": "the_vault:dreamstone"
+    },
+    "v": {
+      "item": "the_vault:vault_diamond"
+    },
+    "s": {
+      "item": "the_vault:regret_chunk"
+    },
+    "f": {
       "item": "the_vault:empty_flask"
     },
-    "c": {
+    "r": {
       "item": "the_vault:red_vault_essence"
     }
   },

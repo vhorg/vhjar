@@ -2,9 +2,11 @@ package iskallia.vault.client.gui.screen.player;
 
 import iskallia.vault.client.gui.framework.ScreenRenderers;
 import iskallia.vault.client.gui.framework.ScreenTextures;
+import iskallia.vault.client.gui.framework.element.ButtonElement;
 import iskallia.vault.client.gui.framework.element.EntityModelElement;
 import iskallia.vault.client.gui.framework.element.NineSliceElement;
 import iskallia.vault.client.gui.framework.element.SlotsElement;
+import iskallia.vault.client.gui.framework.render.TooltipDirection;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.screen.player.element.CuriosElement;
@@ -14,10 +16,14 @@ import iskallia.vault.client.gui.screen.player.element.StatListVaultContainerEle
 import iskallia.vault.client.gui.screen.player.element.StatTabContainerElement;
 import iskallia.vault.client.gui.screen.player.element.VaultLevelBarElement;
 import iskallia.vault.container.StatisticsTabContainer;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.ServerboundOpenHistoricMessage;
+import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.ItemStack;
 
 public class StatisticsElementContainerScreen extends AbstractSkillTabElementContainerScreen<StatisticsTabContainer> {
    public static final int TAB_INDEX = 0;
@@ -95,6 +101,22 @@ public class StatisticsElementContainerScreen extends AbstractSkillTabElementCon
          statListVaultContainerElement.setEnabled(index == 1);
          statListVaultContainerElement.setVisible(index == 1);
       }).layout((screen, gui, parent, world) -> world.translateX(gui.right()).translateY(this.getTabContentSpatial().bottom())));
+      this.addElement(
+         (ButtonElement)((ButtonElement)new ButtonElement(
+                  Spatials.positionXY(-3, 3),
+                  ScreenTextures.BUTTON_HISTORY_TEXTURES,
+                  () -> ModNetwork.CHANNEL.sendToServer(ServerboundOpenHistoricMessage.INSTANCE)
+               )
+               .layout(
+                  (screen, gui, parent, world) -> world.width(21).height(21).translateX(gui.right() + 4).translateY(this.getTabContentSpatial().bottom() + 68)
+               ))
+            .tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+               tooltipRenderer.renderTooltip(
+                  poseStack, List.of(new TextComponent("Open Vault History")), mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT
+               );
+               return false;
+            })
+      );
       this.addElement(
          new CuriosElement(
             this::getTabContentSpatial,

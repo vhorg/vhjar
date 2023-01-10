@@ -3,6 +3,7 @@ package iskallia.vault.init;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 import iskallia.vault.VaultMod;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
 import iskallia.vault.gear.VaultGearState;
@@ -80,6 +81,12 @@ public class ModGearAttributes {
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
       ModGearAttributeReaders.percentageReader("Mana", 65535)
+   );
+   public static final VaultGearAttribute<Float> HEALING_EFFECTIVENESS = attr(
+      "healing_effectiveness",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Healing Efficiency", 9371426)
    );
    public static final VaultGearAttribute<Integer> DURABILITY = attr(
       "durability", VaultGearAttributeType.intType(), ModGearAttributeGenerators.intRange(), ModGearAttributeReaders.addedIntReader("Durability", 14668030)
@@ -237,6 +244,30 @@ public class ModGearAttributes {
    public static final VaultGearAttribute<Float> DAMAGE_UNDEAD = attr(
       "damage_undead", VaultGearAttributeType.floatType(), ModGearAttributeGenerators.floatRange(), ModGearAttributeReaders.percentageReader("Holy", 16382128)
    );
+   public static final VaultGearAttribute<Float> VELARA_AFFINITY = attr(
+      "velara_affinity",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Velara Affinity", VaultGod.VELARA.getColor())
+   );
+   public static final VaultGearAttribute<Float> TENOS_AFFINITY = attr(
+      "tenos_affinity",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Tenos Affinity", VaultGod.TENOS.getColor())
+   );
+   public static final VaultGearAttribute<Float> WENDARR_AFFINITY = attr(
+      "wendarr_affinity",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Wendarr Affinity", VaultGod.WENDARR.getColor())
+   );
+   public static final VaultGearAttribute<Float> IDONA_AFFINITY = attr(
+      "idona_affinity",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Idona Affinity", VaultGod.IDONA.getColor())
+   );
    public static final VaultGearAttribute<Float> RESISTANCE_CAP = attr(
       "resistance_cap",
       VaultGearAttributeType.floatType(),
@@ -313,6 +344,7 @@ public class ModGearAttributes {
       registry.register(MANA_REGEN_ADDITIVE_PERCENTILE);
       registry.register(MANA_ADDITIVE);
       registry.register(MANA_ADDITIVE_PERCENTILE);
+      registry.register(HEALING_EFFECTIVENESS);
       registry.register(DURABILITY);
       registry.register(COOLDOWN_REDUCTION);
       registry.register(LEECH);
@@ -344,6 +376,10 @@ public class ModGearAttributes {
       registry.register(DAMAGE_ILLAGERS);
       registry.register(DAMAGE_SPIDERS);
       registry.register(DAMAGE_UNDEAD);
+      registry.register(VELARA_AFFINITY);
+      registry.register(TENOS_AFFINITY);
+      registry.register(WENDARR_AFFINITY);
+      registry.register(IDONA_AFFINITY);
       registry.register(RESISTANCE_CAP);
       registry.register(COOLDOWN_REDUCTION_CAP);
       registry.register(BLOCK_CAP);

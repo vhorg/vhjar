@@ -1,11 +1,9 @@
 package iskallia.vault.block.entity;
 
 import iskallia.vault.block.base.FillableAltarTileEntity;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.world.data.PlayerFavourData;
-import iskallia.vault.world.vault.VaultRaid;
 import java.awt.Color;
-import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
@@ -22,8 +20,8 @@ public class BloodAltarTileEntity extends FillableAltarTileEntity {
    }
 
    @Override
-   public PlayerFavourData.VaultGodType getAssociatedVaultGod() {
-      return PlayerFavourData.VaultGodType.BENEVOLENT;
+   public VaultGod getVaultGod() {
+      return VaultGod.VELARA;
    }
 
    @Override
@@ -34,14 +32,5 @@ public class BloodAltarTileEntity extends FillableAltarTileEntity {
    @Override
    public Color getFillColor() {
       return new Color(-5570816);
-   }
-
-   @Override
-   protected Optional<Integer> calcMaxProgress(VaultRaid vault) {
-      return vault.getProperties().getBase(VaultRaid.LEVEL).map(vaultLevel -> {
-         float multiplier = vault.getProperties().getBase(VaultRaid.HOST).map(x$0 -> this.getMaxProgressMultiplier(x$0)).orElse(1.0F);
-         int progress = 3 + vaultLevel / 5;
-         return Math.round(progress * multiplier);
-      });
    }
 }

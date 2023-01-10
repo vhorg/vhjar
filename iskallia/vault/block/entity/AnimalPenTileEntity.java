@@ -39,6 +39,7 @@ import net.minecraft.world.entity.animal.Chicken;
 import net.minecraft.world.entity.animal.Cow;
 import net.minecraft.world.entity.animal.MushroomCow;
 import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.animal.Turtle;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -207,6 +208,7 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
          ItemStack invItem = tile.inventory.getItem(0);
          if (invItem.hasTag()) {
             CompoundTag tag = invItem.getOrCreateTag();
+            boolean changed = false;
             if (tag.contains("shearTimer")) {
                int timerx = tag.getInt("shearTimer");
                if (timerx > 1) {
@@ -216,36 +218,46 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
                   tile.playAmbient();
                }
 
-               tile.setChanged();
-               if (world instanceof ServerLevel serverWorld) {
-                  serverWorld.sendBlockUpdated(tile.getBlockPos(), state, state, 3);
-               }
+               changed = true;
             }
 
             if (tag.contains("breedTimer")) {
-               int timerxx = tag.getInt("breedTimer");
-               if (timerxx > 1) {
-                  tag.putInt("breedTimer", timerxx - 1);
+               int timerx = tag.getInt("breedTimer");
+               if (timerx > 1) {
+                  tag.putInt("breedTimer", timerx - 1);
                } else {
                   tag.remove("breedTimer");
                   tile.playAmbient();
                }
 
-               tile.setChanged();
-               if (world instanceof ServerLevel serverWorld) {
-                  serverWorld.sendBlockUpdated(tile.getBlockPos(), state, state, 3);
-               }
+               changed = true;
             }
 
             if (tag.contains("eggTimer")) {
-               int timerxxx = tag.getInt("eggTimer");
-               if (timerxxx > 1) {
-                  tag.putInt("eggTimer", timerxxx - 1);
+               int timerx = tag.getInt("eggTimer");
+               if (timerx > 1) {
+                  tag.putInt("eggTimer", timerx - 1);
                } else {
                   tag.remove("eggTimer");
                   tile.playAmbient();
                }
 
+               changed = true;
+            }
+
+            if (tag.contains("turtleEggTimer")) {
+               int timerx = tag.getInt("turtleEggTimer");
+               if (timerx > 1) {
+                  tag.putInt("turtleEggTimer", timerx - 1);
+               } else {
+                  tag.remove("turtleEggTimer");
+                  world.playSound(null, tile.getBlockPos(), SoundEvents.TURTLE_LAY_EGG, SoundSource.BLOCKS, 1.0F, 1.0F);
+               }
+
+               changed = true;
+            }
+
+            if (changed) {
                tile.setChanged();
                if (world instanceof ServerLevel serverWorld) {
                   serverWorld.sendBlockUpdated(tile.getBlockPos(), state, state, 3);
@@ -474,6 +486,26 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
                }
             }
 
+            if (!player.isCrouching() && !itemInPen.isEmpty() && this.animalToReference instanceof Turtle) {
+               CompoundTag tag = this.inventory.getItem(0).getOrCreateTag();
+               if (!tag.contains("turtleEggTimer") && itemInHand.is(Items.BUCKET)) {
+                  if (level instanceof ServerLevel serverWorld) {
+                     level.playSound(null, this.getBlockPos(), SoundEvents.CHICKEN_EGG, SoundSource.BLOCKS, 1.0F, 1.0F);
+                     int count = Mth.clamp((itemInPen.getOrCreateTag().getInt("count") + 1) / 2, 1, 16);
+
+                     for (int i = 0; i < count; i++) {
+                        Block.popResource(level, this.getBlockPos(), new ItemStack(Items.TURTLE_EGG));
+                     }
+
+                     this.inventory.getItem(0).getOrCreateTag().putInt("turtleEggTimer", 6000);
+                     this.setChanged();
+                     serverWorld.sendBlockUpdated(hit.getBlockPos(), state, state, 3);
+                  }
+
+                  return true;
+               }
+            }
+
             if (!player.isCrouching() && !itemInPen.isEmpty() && this.animalToReference instanceof MushroomCow && level instanceof ServerLevel) {
                this.animalToReference.mobInteract(player, hand);
             }
@@ -546,6 +578,10 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
 
                            for (int i = 0; i < count; i++) {
                               spawnCount += 1 + level.random.nextInt(3);
+                           }
+
+                           if (spawnCount > 256) {
+                              spawnCount = 256;
                            }
 
                            while (spawnCount > 0) {

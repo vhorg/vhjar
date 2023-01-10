@@ -101,7 +101,7 @@ public class BreadcrumbFeature extends Feature<NoneFeatureConfiguration> {
          for (int j = 0; j < stackSize; j++) {
             int attempts = 1;
 
-            for (int i = 0; i < decoratorAddModifier.properties().getAttemptsPerChunk(); i++) {
+            for (int i = 0; i < decoratorAddModifier.properties().getAttemptsPerChunk(null); i++) {
                doChestSpawnPass(rand, world, blockPlacer, featurePos, ModBlocks.GILDED_CHEST.defaultBlockState(), attempts);
             }
          }

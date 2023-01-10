@@ -10,14 +10,12 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -83,6 +81,22 @@ public class ClientEvents {
          }
 
          addLootTableInfoToTooltip(current, event.getToolTip());
+         if (event.getFlags().isAdvanced()) {
+            removeVanillaDurabilityLineFromVaultGearTooltip(current, event.getToolTip());
+         }
+      }
+   }
+
+   private static void removeVanillaDurabilityLineFromVaultGearTooltip(ItemStack itemStack, List<Component> tooltip) {
+      Item item = itemStack.getItem();
+      if (item instanceof VaultGearItem) {
+         for (int i = tooltip.size() - 1; i >= 0; i--) {
+            Component component = tooltip.get(i);
+            if (component instanceof TranslatableComponent translatableComponent && "item.durability".equals(translatableComponent.getKey())) {
+               tooltip.remove(i);
+               break;
+            }
+         }
       }
    }
 
@@ -95,19 +109,14 @@ public class ClientEvents {
          }
       }
 
-      if (LootTableInfo.containsItem(item.getRegistryName())) {
+      if (LootTableInfo.containsInfoForItem(item.getRegistryName())) {
          if (Screen.hasShiftDown()) {
             toolTip.add(new TextComponent("Found in:").withStyle(ChatFormatting.GRAY));
-            Set<ResourceLocation> lootTableKeys = LootTableInfo.getLootTableKeys(item.getRegistryName());
-            Set<String> names = new TreeSet<>();
-
-            for (ResourceLocation lootTableKey : lootTableKeys) {
-               names.addAll(ModConfigs.LOOT_INFO_CONFIG.getDisplayNames(lootTableKey));
-            }
-
-            for (String name : names) {
-               toolTip.add(new TextComponent("  - " + name).withStyle(ChatFormatting.GRAY));
-            }
+            LootTableInfo.getLootTableKeysForItem(item.getRegistryName())
+               .stream()
+               .flatMap(resourceLocation -> ModConfigs.LOOT_INFO_CONFIG.getTooltipLines(item).stream())
+               .distinct()
+               .forEach(name -> toolTip.add(new TextComponent("  - " + name).withStyle(ChatFormatting.GRAY)));
          } else {
             toolTip.add(
                new TextComponent("Hold ")

@@ -1,6 +1,7 @@
 package iskallia.vault.world.vault.modifier.spi;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import net.minecraft.resources.ResourceLocation;
 
 public abstract class AbstractChanceModifier<P extends AbstractChanceModifier.Properties> extends VaultModifier<P> {
@@ -12,13 +13,20 @@ public abstract class AbstractChanceModifier<P extends AbstractChanceModifier.Pr
    public static class Properties {
       @Expose
       private final float chance;
+      @Expose
+      private final ScalarReputationProperty reputation;
 
-      public Properties(float chance) {
+      public Properties(float chance, ScalarReputationProperty reputation) {
          this.chance = chance;
+         this.reputation = reputation;
       }
 
       public float getChance() {
          return this.chance;
+      }
+
+      public float getChance(ModifierContext context) {
+         return this.reputation != null ? this.reputation.apply(this.chance, context) : this.chance;
       }
    }
 }

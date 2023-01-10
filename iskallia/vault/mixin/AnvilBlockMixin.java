@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class AnvilBlockMixin {
    @Inject(
       method = {"damage"},
-      at = {@At("RETURN")},
+      at = {@At("HEAD")},
       cancellable = true
    )
    private static void damage(BlockState state, CallbackInfoReturnable<BlockState> cir) {

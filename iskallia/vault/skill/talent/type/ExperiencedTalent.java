@@ -2,7 +2,6 @@ package iskallia.vault.skill.talent.type;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -34,13 +33,6 @@ public class ExperiencedTalent extends PlayerTalent {
 
          for (ExperiencedTalent talent : talents.getTalents(ExperiencedTalent.class)) {
             increase += talent.getIncreasedExpPercentage();
-         }
-
-         int favour = PlayerFavourData.get(player.getLevel()).getFavour(player.getUUID(), PlayerFavourData.VaultGodType.OMNISCIENT);
-         if (favour >= 4) {
-            increase += favour * 0.2F;
-         } else if (favour <= -4) {
-            increase -= Math.min(Math.abs(favour), 8) * 0.0625F;
          }
 
          orb.value = (int)(orb.value * (1.0F + increase));

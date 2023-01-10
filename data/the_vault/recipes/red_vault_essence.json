@@ -1,10 +1,20 @@
 {
-    "type": "minecraft:crafting_shapeless",
-    "ingredients": [
-        {"item": "the_vault:vault_essence"},
-        {"item": "the_vault:gem_painite"}
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " e ",
+        "epe",
+        " e "
     ],
+    "key": {
+        "p": {
+            "item": "the_vault:gem_painite"
+        },
+        "e": {
+            "item": "the_vault:vault_essence"
+        }
+    },
     "result": {
-        "item": "the_vault:red_vault_essence"
+        "item": "the_vault:red_vault_essence",
+        "count": 1
     }
 }

@@ -60,6 +60,7 @@ public class VaultGearDataTooltip {
             int usedRepairs = data.getUsedRepairSlots();
             int totalRepairs = data.getRepairSlots();
             addRepairTooltip(tooltip, usedRepairs, totalRepairs);
+            addDurabilityTooltip(tooltip, stack);
             List<VaultGearModifier<?>> implicits = data.getModifiers(VaultGearModifier.AffixType.IMPLICIT);
             if (!implicits.isEmpty()) {
                addAffixTooltip(data, VaultGearModifier.AffixType.IMPLICIT, stack, tooltip, flag.displayModifierDetail());
@@ -174,5 +175,12 @@ public class VaultGearDataTooltip {
 
    public static Component tooltipDots(int amount, ChatFormatting formatting) {
       return new TextComponent("⬢ ".repeat(Math.max(0, amount))).withStyle(formatting);
+   }
+
+   private static void addDurabilityTooltip(List<Component> tooltip, ItemStack stack) {
+      tooltip.add(
+         new TextComponent("Durability: ")
+            .append(new TextComponent("%d/%d".formatted(stack.getMaxDamage() - stack.getDamageValue(), stack.getMaxDamage())).withStyle(ChatFormatting.GRAY))
+      );
    }
 }

@@ -3,7 +3,7 @@ package iskallia.vault.command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import iskallia.vault.world.data.PlayerFavourData;
+import iskallia.vault.core.vault.influence.VaultGod;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -31,7 +31,7 @@ public class VaultGodSayCommand extends Command {
    @Override
    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
       builder.then(
-         Commands.argument("sender", EnumArgument.enumArgument(PlayerFavourData.VaultGodType.class))
+         Commands.argument("sender", EnumArgument.enumArgument(VaultGod.class))
             .then(Commands.argument("message", MessageArgument.message()).executes(this::onSay))
       );
    }
@@ -39,7 +39,7 @@ public class VaultGodSayCommand extends Command {
    private int onSay(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       MinecraftServer srv = ((CommandSourceStack)ctx.getSource()).getServer();
       Component text = MessageArgument.getMessage(ctx, "message");
-      PlayerFavourData.VaultGodType sender = (PlayerFavourData.VaultGodType)ctx.getArgument("sender", PlayerFavourData.VaultGodType.class);
+      VaultGod sender = (VaultGod)ctx.getArgument("sender", VaultGod.class);
       TextComponent senderTxt = new TextComponent("[VG] ");
       senderTxt.withStyle(ChatFormatting.DARK_PURPLE)
          .append(new TextComponent(sender.getName()).withStyle(sender.getChatColor()))

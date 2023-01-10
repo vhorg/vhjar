@@ -44,6 +44,15 @@ import iskallia.vault.entity.entity.tier1.Tier1SkeletonEntity;
 import iskallia.vault.entity.entity.tier1.Tier1StrayEntity;
 import iskallia.vault.entity.entity.tier1.Tier1WitherSkeletonEntity;
 import iskallia.vault.entity.entity.tier1.Tier1ZombieEntity;
+import iskallia.vault.entity.entity.tier2.Tier2CreeperEntity;
+import iskallia.vault.entity.entity.tier2.Tier2DrownedEntity;
+import iskallia.vault.entity.entity.tier2.Tier2EndermanEntity;
+import iskallia.vault.entity.entity.tier2.Tier2HuskEntity;
+import iskallia.vault.entity.entity.tier2.Tier2PiglinEntity;
+import iskallia.vault.entity.entity.tier2.Tier2SkeletonEntity;
+import iskallia.vault.entity.entity.tier2.Tier2StrayEntity;
+import iskallia.vault.entity.entity.tier2.Tier2WitherSkeletonEntity;
+import iskallia.vault.entity.entity.tier2.Tier2ZombieEntity;
 import iskallia.vault.entity.model.FighterModel;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.TreasureGoblinModel;
@@ -58,6 +67,9 @@ import iskallia.vault.entity.model.elite.EliteWitherSkeletonModel;
 import iskallia.vault.entity.model.elite.EliteZombieModel;
 import iskallia.vault.entity.model.eyesore.EyesoreModel;
 import iskallia.vault.entity.model.eyesore.EyestalkModel;
+import iskallia.vault.entity.model.tier2.Tier2CreeperModel;
+import iskallia.vault.entity.model.tier2.Tier2EndermanModel;
+import iskallia.vault.entity.model.tier2.Tier2HuskModel;
 import iskallia.vault.entity.renderer.elite.EliteEnderOrnamentLayer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,6 +148,15 @@ public class ModEntities {
    public static EntityType<Tier1StrayEntity> T1_STRAY;
    public static EntityType<Tier1WitherSkeletonEntity> T1_WITHER_SKELETON;
    public static EntityType<Tier1ZombieEntity> T1_ZOMBIE;
+   public static EntityType<Tier2CreeperEntity> T2_CREEPER;
+   public static EntityType<Tier2DrownedEntity> T2_DROWNED;
+   public static EntityType<Tier2EndermanEntity> T2_ENDERMAN;
+   public static EntityType<Tier2HuskEntity> T2_HUSK;
+   public static EntityType<Tier2PiglinEntity> T2_PIGLIN;
+   public static EntityType<Tier2SkeletonEntity> T2_SKELETON;
+   public static EntityType<Tier2StrayEntity> T2_STRAY;
+   public static EntityType<Tier2WitherSkeletonEntity> T2_WITHER_SKELETON;
+   public static EntityType<Tier2ZombieEntity> T2_ZOMBIE;
    public static EntityType<DrillArrowEntity> DRILL_ARROW;
    public static EntityType<EffectCloudEntity> EFFECT_CLOUD;
    public static EntityType<VaultSandEntity> VAULT_SAND;
@@ -295,6 +316,42 @@ public class ModEntities {
       T1_ZOMBIE = registerLiving(
          "t1_zombie", Builder.of(Tier1ZombieEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
       );
+      T2_CREEPER = registerLiving(
+         "t2_creeper", Builder.of(Tier2CreeperEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Creeper::createAttributes, event
+      );
+      T2_DROWNED = registerLiving(
+         "t2_drowned", Builder.of(Tier2DrownedEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+      );
+      T2_ENDERMAN = registerLiving(
+         "t2_enderman", Builder.of(Tier2EndermanEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), EnderMan::createAttributes, event
+      );
+      T2_HUSK = registerLiving(
+         "t2_husk", Builder.of(Tier2HuskEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+      );
+      T2_PIGLIN = registerLiving(
+         "t2_piglin", Builder.of(Tier2PiglinEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Piglin::createAttributes, event
+      );
+      T2_SKELETON = registerLiving(
+         "t2_skeleton",
+         Builder.of(Tier2SkeletonEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T2_STRAY = registerLiving(
+         "t2_stray",
+         Builder.of(Tier2StrayEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T2_WITHER_SKELETON = registerLiving(
+         "t2_wither_skeleton",
+         Builder.of(Tier2WitherSkeletonEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T2_ZOMBIE = registerLiving(
+         "t2_zombie", Builder.of(Tier2ZombieEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+      );
       DRILL_ARROW = register("drill_arrow", Builder.of(DrillArrowEntity::new, MobCategory.MISC), event);
       EFFECT_CLOUD = register("effect_cloud", Builder.of(EffectCloudEntity::new, MobCategory.MISC), event);
       VAULT_SAND = register("vault_sand", Builder.of(VaultSandEntity::new, MobCategory.MISC), event);
@@ -365,6 +422,9 @@ public class ModEntities {
          event.registerLayerDefinition(ModModelLayers.ELITE_STRAY, EliteStrayModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.ELITE_WITHER_SKELETON, EliteWitherSkeletonModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.ELITE_ENDERMAN_ORNAMENT, EliteEnderOrnamentLayer.EnderOrnamentModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T2_HUSK, Tier2HuskModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T2_CREEPER, Tier2CreeperModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T2_ENDERMAN, Tier2EndermanModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.VAULT_SPIDER_BABY, VaultSpiderBabyModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.WINTER_WOLF, WinterWolfModel::createBodyLayer);
       }

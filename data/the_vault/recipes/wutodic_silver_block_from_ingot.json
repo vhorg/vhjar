@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "the_vault:wutodic_silver_ingot"},
+    {"item": "the_vault:wutodic_silver_ingot"},
+    {"item": "the_vault:wutodic_silver_ingot"},
+    {"item": "the_vault:wutodic_silver_ingot"},
+    {"item": "the_vault:wutodic_silver_ingot"},
+    {"item": "the_vault:wutodic_silver_ingot"},
+    {"item": "the_vault:wutodic_silver_ingot"},
+    {"item": "the_vault:wutodic_silver_ingot"},
+    {"item": "the_vault:wutodic_silver_ingot"}
+  ],
+  "result": {
+    "item": "the_vault:wutodic_silver_block",
+    "count": 1
+  }
+}
