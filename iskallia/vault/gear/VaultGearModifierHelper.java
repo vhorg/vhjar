@@ -12,6 +12,7 @@ import iskallia.vault.util.MiscUtils;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.util.Tuple;
@@ -46,6 +47,14 @@ public class VaultGearModifierHelper {
 
    public static boolean addNewModifierOfGroup(VaultGearTagConfig.ModGroupTag modGroupTag, ItemStack stack, Random random) {
       WeightedList<VaultGearModifierHelper.TierGroupOutcome> outcomes = getAvailableModGroupOutcomes(modGroupTag, stack);
+      Map<VaultGearTierConfig.ModifierTierGroup, Integer> highestTiers = new WeightedList<>();
+
+      for (VaultGearModifierHelper.TierGroupOutcome outcome : outcomes.keySet()) {
+         int current = highestTiers.getOrDefault(outcome.tierGroup, -1);
+         highestTiers.put(outcome.tierGroup, Math.max(outcome.tier.getModifierTier(), current));
+      }
+
+      outcomes.entrySet().removeIf(entry -> entry.getKey().tier.getModifierTier() != highestTiers.get(entry.getKey().tierGroup));
       VaultGearModifierHelper.TierGroupOutcome outcome = outcomes.getRandom(random).orElse(null);
       if (outcome == null) {
          return false;
@@ -337,6 +346,6 @@ public class VaultGearModifierHelper {
       return Math.round(modifierCount * 0.6F + modifierCount * 0.4F * random.nextFloat());
    }
 
-   private record TierGroupOutcome(VaultGearModifier.AffixType type, VaultGearTierConfig.ModifierTierGroup tierGroup, VaultGearTierConfig.ModifierTier<?> tier) {
+   public record TierGroupOutcome(VaultGearModifier.AffixType type, VaultGearTierConfig.ModifierTierGroup tierGroup, VaultGearTierConfig.ModifierTier<?> tier) {
    }
 }

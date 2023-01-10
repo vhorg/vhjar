@@ -9,6 +9,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import iskallia.vault.VaultMod;
 import iskallia.vault.core.util.WeightedTree;
 import iskallia.vault.core.world.loot.LootPool;
 import iskallia.vault.core.world.loot.LootRoll;
@@ -57,7 +58,12 @@ public class LootPoolAdapter extends WeightedTreeAdapter<LootEntry> {
          CompoundTag nbt = null;
          LootRoll count = LootRoll.ofConstant(1);
          if (object.has("id")) {
-            item = (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(object.get("id").getAsString()));
+            ResourceLocation key = new ResourceLocation(object.get("id").getAsString());
+            if (!ForgeRegistries.ITEMS.containsKey(key)) {
+               VaultMod.LOGGER.error("Unknown loot item entry [" + key + "], using air instead");
+            }
+
+            item = (Item)ForgeRegistries.ITEMS.getValue(key);
          }
 
          if (object.has("nbt")) {
@@ -70,6 +76,19 @@ public class LootPoolAdapter extends WeightedTreeAdapter<LootEntry> {
 
          if (object.has("count")) {
             count = LootRollAdapter.INSTANCE.deserialize(object.get("count"), typeOfT, context);
+            if (count.getMin() > item.getMaxStackSize() || count.getMax() > item.getMaxStackSize()) {
+               VaultMod.LOGGER
+                  .error(
+                     "Loot item entry ["
+                        + item.getRegistryName().toString()
+                        + "] stacks to ["
+                        + count.getMin()
+                        + ", "
+                        + count.getMax()
+                        + "] while its max stack size is "
+                        + item.getMaxStackSize()
+                  );
+            }
          }
 
          return new ItemLootEntry(item, nbt, count);

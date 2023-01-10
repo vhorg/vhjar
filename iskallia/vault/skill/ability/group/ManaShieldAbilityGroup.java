@@ -21,7 +21,7 @@ public class ManaShieldAbilityGroup extends AbilityGroup<ManaShieldConfig, ManaS
       ManaShieldAbilityGroup group = new ManaShieldAbilityGroup();
 
       for (int i = 0; i < 5; i++) {
-         group.addLevel(new ManaShieldConfig(1, 1, 10, 1, 1.25F + i * 0.25F, (i + 1) * 0.2F));
+         group.addLevel(new ManaShieldConfig(1, 1, 10, 1, 1.25F + i * 0.25F, (i + 1) * 0.2F, 1.0F));
       }
 
       return group;

@@ -14,6 +14,10 @@ public class ModifierContext extends DataObject<ModifierContext> {
    public static final FieldKey<Integer> TICKS_LEFT = FieldKey.of("ticks_left", Integer.class)
       .with(Version.v1_0, Adapter.ofSegmentedInt(7), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
+   public static final FieldKey<UUID> TARGET = FieldKey.of("target", UUID.class).with(Version.v1_5, Adapter.ofUUID(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Integer> REPUTATION = FieldKey.of("reputation", Integer.class)
+      .with(Version.v1_5, Adapter.ofSegmentedInt(7), DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
 
    @Override
    public FieldRegistry getFields() {
@@ -30,5 +34,25 @@ public class ModifierContext extends DataObject<ModifierContext> {
 
    public boolean hasExpired() {
       return this.has(TICKS_LEFT) && this.get(TICKS_LEFT) <= 0;
+   }
+
+   public boolean hasTarget() {
+      return this.has(TARGET);
+   }
+
+   public UUID getTarget() {
+      return this.get(TARGET);
+   }
+
+   public Optional<Integer> getReputation() {
+      return this.getOptional(REPUTATION);
+   }
+
+   public ModifierContext copy() {
+      return new ModifierContext()
+         .setIf(UUID, this.get(UUID), v -> this.has(UUID))
+         .setIf(TICKS_LEFT, this.get(TICKS_LEFT), v -> this.has(TICKS_LEFT))
+         .setIf(TARGET, this.get(TARGET), v -> this.has(TARGET))
+         .setIf(REPUTATION, this.get(REPUTATION), v -> this.has(REPUTATION));
    }
 }

@@ -7,6 +7,7 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
 import iskallia.vault.network.message.ServerboundAbilityKeyMessage;
 import iskallia.vault.network.message.ServerboundOpenStatisticsMessage;
+import iskallia.vault.network.message.ServerboundPickaxeOffsetKeyMessage;
 import iskallia.vault.network.message.bounty.ServerboundBountyProgressMessage;
 import iskallia.vault.skill.ability.KeyBehavior;
 import iskallia.vault.skill.ability.effect.spi.core.AbstractAbility;
@@ -62,48 +63,64 @@ public class InputEvents {
             AbilityGroup<?, ?> selectedAbility = ClientAbilityData.getSelectedAbility();
             if (selectedAbility != null) {
                AbstractAbility<?> ability = selectedAbility.getAbility(null);
-               if (ability != null
-                  && ability.getKeyBehavior() == KeyBehavior.ACTIVATE_ON_HOLD
-                  && ModKeybinds.abilityKey.getKey().getValue() == key
-                  && action == 0) {
+               if (ability != null && ability.getKeyBehavior() == KeyBehavior.ACTIVATE_ON_HOLD && isKey(ModKeybinds.abilityKey, key) && action == 0) {
                   ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
                }
             }
          } else {
-            for (Entry<String, KeyMapping> quickSelectKeybind : ModKeybinds.abilityQuickfireKey.entrySet()) {
-               if (quickSelectKeybind.getValue().getKey().getValue() == key) {
-                  if (action != 1) {
-                     return;
-                  }
-
-                  ModNetwork.CHANNEL.sendToServer(new AbilityQuickselectMessage(quickSelectKeybind.getKey()));
-               }
-            }
-
-            if (ModKeybinds.abilityWheelKey.getKey().getValue() == key) {
-               if (action != 1) {
-                  return;
-               }
-
-               minecraft.setScreen(new AbilitySelectionScreen());
-               ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.CancelKeyDown);
-            } else if (ModKeybinds.openAbilityTree.consumeClick()) {
-               ModNetwork.CHANNEL.sendToServer(ServerboundOpenStatisticsMessage.INSTANCE);
-            } else if (ModKeybinds.abilityKey.getKey().getValue() == key) {
+            if (isKey(ModKeybinds.abilityKey, key)) {
                if (action == 0) {
                   ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
                } else if (action == 1) {
                   ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyDown);
                }
-            } else if (ModKeybinds.bountyStatusKey.getKey().getValue() == key) {
-               if (action != 1) {
-                  return;
+            }
+
+            if (action == 1) {
+               if (isShiftDown) {
+                  if (key == 263) {
+                     ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.LEFT);
+                     return;
+                  }
+
+                  if (key == 262) {
+                     ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.RIGHT);
+                     return;
+                  }
+
+                  if (key == 265) {
+                     ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.UP);
+                     return;
+                  }
+
+                  if (key == 264) {
+                     ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.DOWN);
+                     return;
+                  }
                }
 
-               ModNetwork.CHANNEL.sendToServer(new ServerboundBountyProgressMessage());
+               for (Entry<String, KeyMapping> entry : ModKeybinds.abilityQuickfireKey.entrySet()) {
+                  if (isKey(entry.getValue(), key)) {
+                     ModNetwork.CHANNEL.sendToServer(new AbilityQuickselectMessage(entry.getKey()));
+                     return;
+                  }
+               }
+
+               if (isKey(ModKeybinds.abilityWheelKey, key)) {
+                  minecraft.setScreen(new AbilitySelectionScreen());
+                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.CancelKeyDown);
+               } else if (isKey(ModKeybinds.openAbilityTree, key)) {
+                  ModNetwork.CHANNEL.sendToServer(ServerboundOpenStatisticsMessage.INSTANCE);
+               } else if (isKey(ModKeybinds.bountyStatusKey, key)) {
+                  ModNetwork.CHANNEL.sendToServer(ServerboundBountyProgressMessage.INSTANCE);
+               }
             }
          }
       }
+   }
+
+   private static boolean isKey(KeyMapping keyMapping, int key) {
+      return keyMapping.getKey().getValue() == key && keyMapping.isConflictContextAndModifierActive();
    }
 
    @SubscribeEvent

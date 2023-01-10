@@ -1,5 +1,7 @@
 package iskallia.vault.core.world.storage;
 
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.event.common.BlockSetEvent;
 import iskallia.vault.core.world.DummyProgressListener;
 import iskallia.vault.core.world.generator.DummyChunkGenerator;
 import iskallia.vault.mixin.AccessorMinecraftServer;
@@ -10,6 +12,7 @@ import java.util.List;
 import java.util.OptionalLong;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -20,15 +23,19 @@ import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.DerivedLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.LevelStorageSource.LevelStorageAccess;
+import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class VirtualWorld extends ServerLevel {
+   public static final int UPDATE_IGNORE_PLACE = 256;
    protected ThreadingMode threadingMode;
    protected int tickCount;
    protected int randomTickSpeed;
@@ -95,6 +102,66 @@ public class VirtualWorld extends ServerLevel {
    public void tick(BooleanSupplier hasTimeLeft) {
       super.tick(hasTimeLeft);
       this.tickCount++;
+   }
+
+   public boolean setBlock(BlockPos pos, BlockState state, int flags, int recursionLeft) {
+      CommonEvents.BLOCK_SET.invoke(this, pos, state, flags, recursionLeft, BlockSetEvent.Type.HEAD);
+      if (!this.isOutsideBuildHeight(pos) && (this.isClientSide || !this.isDebug())) {
+         LevelChunk levelchunk = this.getChunkAt(pos);
+         Block block = state.getBlock();
+         pos = pos.immutable();
+         BlockSnapshot blockSnapshot = null;
+         if (this.captureBlockSnapshots && !this.isClientSide) {
+            blockSnapshot = BlockSnapshot.create(this.dimension(), this, pos, flags);
+            this.capturedBlockSnapshots.add(blockSnapshot);
+         }
+
+         BlockState old = this.getBlockState(pos);
+         int oldLight = old.getLightEmission(this, pos);
+         int oldOpacity = old.getLightBlock(this, pos);
+         BlockState blockstate;
+         if ((flags & 256) != 0) {
+            boolean oldFlag = this.captureBlockSnapshots;
+            this.captureBlockSnapshots = true;
+            blockstate = levelchunk.setBlockState(pos, state, (flags & 64) != 0);
+            this.captureBlockSnapshots = oldFlag;
+         } else {
+            blockstate = levelchunk.setBlockState(pos, state, (flags & 64) != 0);
+         }
+
+         if (blockstate == null) {
+            if (blockSnapshot != null) {
+               this.capturedBlockSnapshots.remove(blockSnapshot);
+            }
+
+            CommonEvents.BLOCK_SET.invoke(this, pos, state, flags, recursionLeft, BlockSetEvent.Type.RETURN);
+            return false;
+         } else {
+            BlockState blockstate1 = this.getBlockState(pos);
+            if ((flags & 128) == 0
+               && blockstate1 != blockstate
+               && (
+                  blockstate1.getLightBlock(this, pos) != oldOpacity
+                     || blockstate1.getLightEmission(this, pos) != oldLight
+                     || blockstate1.useShapeForLightOcclusion()
+                     || blockstate.useShapeForLightOcclusion()
+               )) {
+               this.getProfiler().push("queueCheckLight");
+               this.getChunkSource().getLightEngine().checkBlock(pos);
+               this.getProfiler().pop();
+            }
+
+            if (blockSnapshot == null) {
+               this.markAndNotifyBlock(pos, levelchunk, blockstate, state, flags, recursionLeft);
+            }
+
+            CommonEvents.BLOCK_SET.invoke(this, pos, state, flags, recursionLeft, BlockSetEvent.Type.RETURN);
+            return true;
+         }
+      } else {
+         CommonEvents.BLOCK_SET.invoke(this, pos, state, flags, recursionLeft, BlockSetEvent.Type.RETURN);
+         return false;
+      }
    }
 
    public static VirtualWorld create(ResourceLocation id, ThreadingMode mode) {

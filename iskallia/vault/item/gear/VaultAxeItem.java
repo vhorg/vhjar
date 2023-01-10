@@ -27,6 +27,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -75,6 +76,11 @@ public class VaultAxeItem extends AxeItem implements VaultGearItem {
    @Override
    public ProficiencyType getCraftingProficiencyType(ItemStack stack) {
       return ProficiencyType.AXE;
+   }
+
+   public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
+      stack.hurtAndBreak(1, attacker, p_43296_ -> p_43296_.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+      return true;
    }
 
    public float getDestroySpeed(ItemStack stack, BlockState state) {

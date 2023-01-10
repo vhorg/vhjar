@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 
-public abstract class TaskConfig<E extends TaskEntry, T extends TaskProperties> extends Config {
+public abstract class TaskConfig<E extends TaskEntry<?>, T extends TaskProperties> extends Config {
    @Expose
    protected LevelEntryMap<E> LEVELS = new LevelEntryMap();
    private static final Map<ResourceLocation, ? extends TaskConfig<?, ?>> TASK_CONFIGS = new HashMap<>();

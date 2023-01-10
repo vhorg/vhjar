@@ -5,6 +5,7 @@ import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.world.vault.modifier.spi.ModifierContext;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import net.minecraft.resources.ResourceLocation;
@@ -19,7 +20,7 @@ public class VaultLootableWeightModifier extends VaultModifier<VaultLootableWeig
       CommonEvents.PLACEHOLDER_GENERATION.register(context.getUUID(), data -> {
          if (data.getVault() == vault) {
             if (data.getParent().target == data.getTile().getState().get(PlaceholderBlock.TYPE)) {
-               data.setProbability(data.getProbability() + this.properties.chance);
+               data.setProbability(data.getProbability() + this.properties.getChance(context) * data.getBaseProbability());
             }
          }
       });
@@ -30,10 +31,13 @@ public class VaultLootableWeightModifier extends VaultModifier<VaultLootableWeig
       private final PlaceholderBlock.Type type;
       @Expose
       private final double chance;
+      @Expose
+      private final ScalarReputationProperty reputation;
 
-      public Properties(PlaceholderBlock.Type type, double chance) {
+      public Properties(PlaceholderBlock.Type type, double chance, ScalarReputationProperty reputation) {
          this.type = type;
          this.chance = chance;
+         this.reputation = reputation;
       }
 
       public PlaceholderBlock.Type getType() {
@@ -42,6 +46,10 @@ public class VaultLootableWeightModifier extends VaultModifier<VaultLootableWeig
 
       public double getChance() {
          return this.chance;
+      }
+
+      public double getChance(ModifierContext context) {
+         return this.reputation != null ? this.reputation.apply(this.chance, context) : this.chance;
       }
    }
 }

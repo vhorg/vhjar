@@ -20,8 +20,10 @@ public class MobAttributeModifier extends EntityAttributeModifier<EntityAttribut
       CommonEvents.ENTITY_SPAWN.register(context.getUUID(), event -> {
          if (event.getEntity() instanceof LivingEntity entity) {
             if (entity.level == world) {
-               this.applyToEntity(entity, context.getUUID());
-               entity.setHealth(entity.getMaxHealth());
+               if (!context.hasTarget() || context.getTarget().equals(entity.getUUID())) {
+                  this.applyToEntity(entity, context.getUUID(), context);
+                  entity.setHealth(entity.getMaxHealth());
+               }
             }
          }
       });

@@ -14,7 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 
 public class CompoundTagAdapter implements JsonSerializer<CompoundTag>, JsonDeserializer<CompoundTag> {
-   public static CompoundTagAdapter INSTANCE = new CompoundTagAdapter();
+   public static final CompoundTagAdapter INSTANCE = new CompoundTagAdapter();
 
    private CompoundTagAdapter() {
    }

@@ -15,7 +15,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
@@ -46,7 +46,7 @@ public class ExecuteAbility<C extends ExecuteConfig> extends AbstractInstantAbil
    @SubscribeEvent(
       priority = EventPriority.HIGH
    )
-   public void on(LivingDamageEvent event) {
+   public void on(LivingHurtEvent event) {
       if (!event.getEntity().getCommandSenderWorld().isClientSide()
          && event.getSource().getEntity() instanceof ServerPlayer serverPlayer
          && serverPlayer.getCommandSenderWorld() instanceof ServerLevel serverLevel) {

@@ -33,27 +33,30 @@ public class FillableAltarRenderer implements BlockEntityRenderer<FillableAltarT
    public void render(
       FillableAltarTileEntity tileEntity, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlayIn
    ) {
-      if (tileEntity.initialized()) {
-         VertexConsumer builder = buffer.getBuffer(RenderType.translucent());
-         float progressPercentage = tileEntity.progressPercentage();
-         if (progressPercentage > 0.0F) {
-            float fluidMaxHeight = FLUID_UPPER_POS.y() - FLUID_LOWER_POS.y();
-            Vector3f upperPos = new Vector3f(FLUID_UPPER_POS.x(), FLUID_LOWER_POS.y() + fluidMaxHeight * progressPercentage, FLUID_UPPER_POS.z());
-            this.renderCuboid(builder, matrixStack, FLUID_LOWER_POS, upperPos, tileEntity.getFillColor());
-            if (buffer instanceof BufferSource) {
-               ((BufferSource)buffer).endBatch(RenderType.translucent());
-            }
+      VertexConsumer builder = buffer.getBuffer(RenderType.translucent());
+      float progressPercentage = (float)tileEntity.getCurrentProgress() / tileEntity.getMaxProgress();
+      if (progressPercentage > 0.0F) {
+         float fluidMaxHeight = FLUID_UPPER_POS.y() - FLUID_LOWER_POS.y();
+         Vector3f upperPos = new Vector3f(FLUID_UPPER_POS.x(), FLUID_LOWER_POS.y() + fluidMaxHeight * progressPercentage, FLUID_UPPER_POS.z());
+         this.renderCuboid(builder, matrixStack, FLUID_LOWER_POS, upperPos, tileEntity.getFillColor());
+         if (buffer instanceof BufferSource) {
+            ((BufferSource)buffer).endBatch(RenderType.translucent());
          }
+      }
 
-         Minecraft minecraft = Minecraft.getInstance();
-         if (minecraft.hitResult != null && minecraft.hitResult.getType() == Type.BLOCK) {
-            BlockHitResult result = (BlockHitResult)minecraft.hitResult;
-            if (tileEntity.getBlockPos().equals(result.getBlockPos())) {
-               TextComponent progressText = (TextComponent)(
-                  tileEntity.isMaxedOut()
-                     ? new TextComponent("Right Click to Loot!").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(-1313364)))
-                     : new TextComponent(tileEntity.getCurrentProgress() + " / " + tileEntity.getMaxProgress() + " ").append(tileEntity.getRequirementUnit())
-               );
+      Minecraft minecraft = Minecraft.getInstance();
+      if (minecraft.hitResult != null && minecraft.hitResult.getType() == Type.BLOCK) {
+         BlockHitResult result = (BlockHitResult)minecraft.hitResult;
+         if (tileEntity.getBlockPos().equals(result.getBlockPos())) {
+            Component progressText = null;
+            if (tileEntity.isCompleted() && !tileEntity.isConsumed()) {
+               progressText = new TextComponent("Right Click to Loot!").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(-1313364)));
+            } else if (!tileEntity.isCompleted()) {
+               progressText = new TextComponent(tileEntity.getCurrentProgress() + " / " + tileEntity.getMaxProgress() + " ")
+                  .append(tileEntity.getRequirementUnit());
+            }
+
+            if (progressText != null) {
                this.renderLabel(matrixStack, 0.5F, 2.3F, 0.5F, buffer, combinedLight, tileEntity.getRequirementName());
                this.renderLabel(matrixStack, 0.5F, 2.1F, 0.5F, buffer, combinedLight, progressText);
             }

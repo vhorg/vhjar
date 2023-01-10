@@ -33,7 +33,7 @@ public class MixinDebugOverlayGui {
    )
    public void hideCoordinateInformation(CallbackInfoReturnable<List<String>> cir) {
       Player player = Minecraft.getInstance().player;
-      if (player != null && ServerVaults.isInVault(player)) {
+      if (ServerVaults.isInVault(player) && !player.isCreative() && !player.isSpectator()) {
          List<String> information = (List<String>)cir.getReturnValue();
          information.removeIf(str -> str.startsWith("XYZ: ") || str.startsWith("Block: ") || str.startsWith("Chunk: "));
       }
@@ -45,7 +45,7 @@ public class MixinDebugOverlayGui {
    )
    public void hideCoordinateBlockInformation(CallbackInfoReturnable<List<String>> cir) {
       Player player = Minecraft.getInstance().player;
-      if (player != null && ServerVaults.isInVault(player)) {
+      if (ServerVaults.isInVault(player) && !player.isCreative() && !player.isSpectator()) {
          List<String> information = (List<String>)cir.getReturnValue();
 
          for (int i = 0; i < information.size(); i++) {

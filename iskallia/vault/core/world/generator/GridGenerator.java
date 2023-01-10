@@ -21,11 +21,15 @@ import iskallia.vault.core.world.template.PlacementSettings;
 import iskallia.vault.core.world.template.configured.ChunkedTemplate;
 import iskallia.vault.core.world.template.configured.ConfiguredTemplate;
 import iskallia.vault.init.ModGameRules;
+import iskallia.vault.mixin.AccessorChunkMap;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 public class GridGenerator extends VaultGenerator {
    public static final SupplierKey<GridGenerator> KEY = SupplierKey.of("grid", GridGenerator.class).with(Version.v1_0, GridGenerator::new);
@@ -62,14 +66,16 @@ public class GridGenerator extends VaultGenerator {
    }
 
    @Override
-   public void tickServer(VirtualWorld world, Vault vault) {
+   public void releaseServer() {
+      this.cache = null;
+      this.get(LAYOUT).releaseServer();
+      super.releaseServer();
    }
 
    @Override
    public void generate(Vault vault, ServerLevelAccessor world, ChunkPos chunkPos) {
       BlockPos pos1 = new BlockPos(chunkPos.x * 16, Integer.MIN_VALUE, chunkPos.z * 16);
       BlockPos pos2 = new BlockPos(chunkPos.x * 16 + 15, Integer.MAX_VALUE, chunkPos.z * 16 + 15);
-      BoundingBox box = BoundingBox.fromCorners(pos1, pos2);
       int offsetX = Math.floorMod(pos1.getX(), this.get(CELL_X));
       int offsetZ = Math.floorMod(pos1.getZ(), this.get(CELL_Z));
 
@@ -103,7 +109,7 @@ public class GridGenerator extends VaultGenerator {
    public void generate(Vault vault, ServerLevelAccessor world, RegionPos region) {
       ChunkRandom random = ChunkRandom.any();
       random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890);
-      PlacementSettings settings = new PlacementSettings().setFlags(18);
+      PlacementSettings settings = new PlacementSettings().setFlags(272);
       settings.getProcessorContext().random = random;
       settings.getProcessorContext().vault = vault;
       ConfiguredTemplate template = this.get(LAYOUT).getAt(vault, region, random, settings).configure(ConfiguredTemplate::new, settings);
@@ -112,17 +118,31 @@ public class GridGenerator extends VaultGenerator {
       int minZ = region.getZ() * region.getSizeZ();
       int maxZ = minZ + region.getSizeZ();
 
-      for (int x = minX; x < maxX; x += 16) {
-         for (int z = minZ; z < maxZ; z += 16) {
-            CommonEvents.TEMPLATE_GENERATION.invoke(world, template, region, new ChunkPos(x >> 4, z >> 4), random, TemplateGenerationEvent.Phase.PRE);
+      for (int x = minX; x < maxX; x += x + 16 < maxX ? 16 : 16 - Math.floorMod(x, 16)) {
+         for (int z = minZ; z < maxZ; z += z + 16 < maxZ ? 16 : 16 - Math.floorMod(z, 16)) {
+            ChunkPos chunkPos = new ChunkPos(x >> 4, z >> 4);
+            CommonEvents.TEMPLATE_GENERATION.invoke(world, template, region, chunkPos, random, TemplateGenerationEvent.Phase.PRE);
          }
       }
 
       template.place(world, null);
 
-      for (int x = minX; x < maxX; x += 16) {
-         for (int z = minZ; z < maxZ; z += 16) {
-            CommonEvents.TEMPLATE_GENERATION.invoke(world, template, region, new ChunkPos(x >> 4, z >> 4), random, TemplateGenerationEvent.Phase.POST);
+      for (int x = minX; x < maxX; x += x + 16 < maxX ? 16 : 16 - Math.floorMod(x, 16)) {
+         for (int z = minZ; z < maxZ; z += z + 16 < maxZ ? 16 : 16 - Math.floorMod(z, 16)) {
+            ChunkPos chunkPos = new ChunkPos(x >> 4, z >> 4);
+            CommonEvents.TEMPLATE_GENERATION.invoke(world, template, region, chunkPos, random, TemplateGenerationEvent.Phase.POST);
+         }
+      }
+
+      if (world.getChunkSource() instanceof ServerChunkCache source && world.getServer() != null) {
+         for (int x = minX; x < maxX; x += x + 16 < maxX ? 16 : 16 - Math.floorMod(x, 16)) {
+            for (int z = minZ; z < maxZ; z += z + 16 < maxZ ? 16 : 16 - Math.floorMod(z, 16)) {
+               ChunkPos chunkPos = new ChunkPos(x >> 4, z >> 4);
+               world.getServer().tell(new TickTask(world.getServer().getTickCount() + 1, () -> source.chunkMap.getPlayers(chunkPos, false).forEach(player -> {
+                  world.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, true);
+                  ((AccessorChunkMap)source.chunkMap).callUpdateChunkTracking(player, chunkPos, new MutableObject(), false, true);
+               })));
+            }
          }
       }
    }

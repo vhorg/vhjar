@@ -24,7 +24,8 @@ public class EndScreenScheduler {
       if (getInstance().snapshot != null) {
          if (event.phase != Phase.START) {
             if (Minecraft.getInstance().player != null && !Minecraft.getInstance().player.isDeadOrDying() && Minecraft.getInstance().screen == null) {
-               Minecraft.getInstance().setScreen(new VaultEndScreen(getInstance().snapshot, new TextComponent("Vault Exit")));
+               Minecraft.getInstance()
+                  .setScreen(new VaultEndScreen(getInstance().snapshot, new TextComponent("Vault Exit"), Minecraft.getInstance().player.getUUID()));
                getInstance().snapshot = null;
             }
          }

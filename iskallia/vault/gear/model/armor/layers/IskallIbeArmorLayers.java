@@ -37,7 +37,7 @@ public class IskallIbeArmorLayers extends ArmorLayers {
          PartDefinition partdefinition = meshdefinition.getRoot();
          PartDefinition head = partdefinition.addOrReplaceChild(
             "head",
-            CubeListBuilder.create().texOffs(7, 5).addBox(1.0F, -5.0F, -4.0F, 3.0F, 3.0F, 6.0F, new CubeDeformation(1.0F)),
+            CubeListBuilder.create().texOffs(7, 5).addBox(1.0F, -5.0F, -4.0F, 3.0F, 3.0F, 6.0F, new CubeDeformation(0.25F)),
             PartPose.offset(0.0F, 0.0F, 0.0F)
          );
          return LayerDefinition.create(meshdefinition, 32, 32);

@@ -62,7 +62,7 @@ public class VaultBarOverlay implements IIngameOverlay {
       if (player != null) {
          profiler.push("VaultBarOverlay");
          int midX = width / 2;
-         int barWidth = 85;
+         int barWidth = 83;
          float expPercentage = (float)vaultExp / tnl;
          if (vaultLevel >= ModConfigs.LEVELS_META.getMaxLevel()) {
             expPercentage = 1.0F;
@@ -96,7 +96,7 @@ public class VaultBarOverlay implements IIngameOverlay {
          BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
          if (!player.isCreative() && !player.isSpectator()) {
             VAULT_LEVEL_SUPPLIER.ifChanged(VaultBarOverlay::onVaultLevelChanged);
-            int textX = midX + 50 - minecraft.font.width(vaultLevelComponent) / 2;
+            int textX = midX + 51 - minecraft.font.width(vaultLevelComponent) / 2;
             int textY = height - 54;
             FontHelper.drawStringWithBorder(textX, textY, -6601, 3945472, vaultLevelComponent.getVisualOrderText(), minecraft, matrixStack, buffer);
          }

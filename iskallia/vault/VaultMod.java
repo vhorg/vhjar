@@ -22,6 +22,7 @@ import iskallia.vault.world.data.EternalsData;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerArchetypeData;
 import iskallia.vault.world.data.PlayerBlackMarketData;
+import iskallia.vault.world.data.PlayerHistoricFavoritesData;
 import iskallia.vault.world.data.PlayerProficiencyData;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerTalentsData;
@@ -142,6 +143,7 @@ public class VaultMod {
       PlayerProficiencyData.get(serverWorld).sendProficiencyInformation(player);
       EternalsData.get(serverWorld).syncTo(player);
       PlayerBlackMarketData.get(serverWorld).getBlackMarket(player).syncToClient(server);
+      PlayerHistoricFavoritesData.get(serverWorld).getHistoricFavorites(player).syncToClient(server);
       DiscoveredModelsData.get(serverWorld).syncTo(player);
       DiscoveredTrinketsData.get(serverWorld).syncTo(player);
       ModConfigs.SOUL_SHARD.syncTo(ModConfigs.SOUL_SHARD, player);

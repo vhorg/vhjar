@@ -22,20 +22,22 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
 public class VaultExitContainerScreenData {
    protected final VaultSnapshot snapshot;
+   private final UUID asPlayer;
 
-   public VaultExitContainerScreenData(VaultSnapshot snapshot) {
+   public VaultExitContainerScreenData(VaultSnapshot snapshot, UUID asPlayer) {
       this.snapshot = snapshot;
+      this.asPlayer = asPlayer;
    }
 
    protected int getUnspentSkillPoints() {
@@ -78,7 +80,7 @@ public class VaultExitContainerScreenData {
 
    public StatCollector getStatsCollector() {
       Vault vault = this.snapshot.getEnd();
-      return vault.get(Vault.STATS).get(Minecraft.getInstance().player.getUUID());
+      return vault.get(Vault.STATS).get(this.asPlayer);
    }
 
    public Modifiers getModifiers() {
@@ -141,6 +143,26 @@ public class VaultExitContainerScreenData {
       return xp;
    }
 
+   public static float getMinedOresXp(StatCollector statCollector) {
+      float xp = 0.0F;
+      Map<ResourceLocation, Float> map = ModConfigs.VAULT_STATS.getBlocksMined();
+      Object2IntMap<ResourceLocation> group = statCollector.getMinedBlocks();
+      ObjectIterator var4 = group.object2IntEntrySet().iterator();
+
+      while (var4.hasNext()) {
+         Entry<ResourceLocation> entry = (Entry<ResourceLocation>)var4.next();
+         ResourceLocation loc = (ResourceLocation)entry.getKey();
+         int amount = entry.getIntValue();
+         String path = loc.getPath();
+         if (!path.equals("treasure_sand") && !path.equals("coin_pile")) {
+            float xpMul = map.get(loc);
+            xp += xpMul * amount;
+         }
+      }
+
+      return xp;
+   }
+
    public static float getCompletionXp(Vault vault, StatCollector statCollector) {
       return ModConfigs.VAULT_STATS.getCompletion(vault).get(statCollector.getCompletion());
    }
@@ -179,6 +201,24 @@ public class VaultExitContainerScreenData {
       }
 
       return treasureSand;
+   }
+
+   public static int getOresMined(StatCollector statCollector) {
+      int oresMined = 0;
+      Object2IntMap<ResourceLocation> group = statCollector.getMinedBlocks();
+      ObjectIterator var3 = group.object2IntEntrySet().iterator();
+
+      while (var3.hasNext()) {
+         Entry<ResourceLocation> entry = (Entry<ResourceLocation>)var3.next();
+         ResourceLocation loc = (ResourceLocation)entry.getKey();
+         int amount = entry.getIntValue();
+         String path = loc.getPath();
+         if (!path.equals("treasure_sand") && !path.equals("coin_pile")) {
+            oresMined += amount;
+         }
+      }
+
+      return oresMined;
    }
 
    public static int getMobsKilled(StatCollector statCollector) {
@@ -377,6 +417,27 @@ public class VaultExitContainerScreenData {
          StatLabelListElement.Stat.ofSeconds(() -> "Time Spent", () -> UIHelper.formatTimeString(endTime - startTime), () -> (endTime - startTime) / 20),
          StatLabelListElement.Stat.ofFloat(
             () -> "Experience Multiplier", () -> "Multiplier: " + String.format("%.1f", experienceMultiplier), () -> experienceMultiplier
+         )
+      );
+   }
+
+   @Nonnull
+   public List<StatLabelListElement.Stat<?>> getQuickOverview() {
+      Vault vault = this.snapshot.getEnd();
+      Vault startVault = this.snapshot.getStart();
+      StatCollector statCollector = this.getStatsCollector();
+      int endTime = vault.get(Vault.CLOCK).get(TickClock.LOGICAL_TIME);
+      int startTime = startVault.get(Vault.CLOCK).get(TickClock.LOGICAL_TIME);
+      return List.of(
+         StatLabelListElement.Stat.ofInteger(() -> "Mobs Unalived", () -> "Value: " + getMobsKilledXp(statCollector) + "xp", () -> getMobsKilled(statCollector)),
+         StatLabelListElement.Stat.ofInteger(
+            () -> "Chests Looted", () -> "Value: " + getTotalChestsXp(statCollector) + "xp", () -> getTotalChests(statCollector)
+         ),
+         StatLabelListElement.Stat.ofInteger(() -> "Ores Mined", () -> "Value: " + getMinedOresXp(statCollector) + "xp", () -> getOresMined(statCollector)),
+         StatLabelListElement.Stat.ofSeconds(
+            () -> "Time Left",
+            () -> "Time Spent: " + UIHelper.formatTimeString(endTime - startTime),
+            () -> vault.get(Vault.CLOCK).get(TickClock.DISPLAY_TIME) / 20
          )
       );
    }

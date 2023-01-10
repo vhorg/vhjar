@@ -17,6 +17,7 @@ import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -58,13 +59,15 @@ public class FloatingItemEntity extends ItemEntity {
       this.getEntityData().define(COLOR2, 16777215);
    }
 
-   public void setColor(int color) {
+   public FloatingItemEntity setColor(int color) {
       this.setColor(color, color);
+      return this;
    }
 
-   public void setColor(int color1, int color2) {
+   public FloatingItemEntity setColor(int color1, int color2) {
       this.entityData.set(COLOR1, color1);
       this.entityData.set(COLOR2, color2);
+      return this;
    }
 
    public void tick() {
@@ -73,6 +76,9 @@ public class FloatingItemEntity extends ItemEntity {
       if (this.isAlive() && this.getCommandSenderWorld().isClientSide()) {
          this.playEffects();
       }
+   }
+
+   public void move(MoverType type, Vec3 velocity) {
    }
 
    @OnlyIn(Dist.CLIENT)

@@ -6,6 +6,7 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.VirtualWorlds;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.UUID;
 import java.util.function.BooleanSupplier;
 import net.minecraft.server.MinecraftServer;
@@ -25,19 +26,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin({MinecraftServer.class})
 public abstract class MixinMinecraftServer {
    @Shadow
+   protected abstract ServerLevel[] getWorldArray();
+
+   @Shadow
    protected abstract boolean initServer() throws IOException;
 
    @Redirect(
       method = {"tickChildren"},
       at = @At(
          value = "INVOKE",
-         target = "Lnet/minecraft/server/level/ServerLevel;tick(Ljava/util/function/BooleanSupplier;)V"
+         target = "Lnet/minecraft/server/MinecraftServer;getWorldArray()[Lnet/minecraft/server/level/ServerLevel;"
       )
    )
-   public void tickChildren(ServerLevel instance, BooleanSupplier hasTimeLeft) {
-      if (!(instance instanceof VirtualWorld)) {
-         instance.tick(hasTimeLeft);
-      }
+   public ServerLevel[] tickChildren(MinecraftServer instance) {
+      return Arrays.stream(this.getWorldArray()).filter(world -> !(world instanceof VirtualWorld)).toArray(ServerLevel[]::new);
    }
 
    @Inject(
@@ -74,7 +76,7 @@ public abstract class MixinMinecraftServer {
          shift = Shift.BEFORE
       )}
    )
-   public void loadVWorlds(ChunkProgressListener holder, CallbackInfo ci) {
+   public void createLevels(ChunkProgressListener holder, CallbackInfo ci) {
       VirtualWorlds.load();
    }
 

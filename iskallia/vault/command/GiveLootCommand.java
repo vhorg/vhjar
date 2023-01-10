@@ -208,7 +208,7 @@ public class GiveLootCommand extends Command {
       int level = IntegerArgumentType.getInteger(ctx, "level");
       switch (type) {
          case BOUNTY:
-            crate = ModConfigs.REWARD_CONFIG.generateReward(level).createRewardCrate();
+            crate = ModConfigs.REWARD_CONFIG.generateReward(level, "common").createRewardCrate();
             break;
          case CAKE:
          case MONOLITH:

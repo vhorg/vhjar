@@ -39,7 +39,7 @@ public class StringStatDisplayElement<E extends StringStatDisplayElement<E>> ext
          (NineSliceElement)new NineSliceElement(Spatials.positionXYZ(4, 20, 1).size(width - 8, height - 20), ScreenTextures.VAULT_EXIT_ELEMENT_BG)
             .layout((screen, gui, parent, world) -> world.size(width - 8, height - 20))
       );
-      this.addElement(new TextureAtlasElement(Spatials.positionXYZ(9, 4, 5), icon));
+      this.addElement(new TextureAtlasElement(Spatials.positionXYZ(8, 4, 5), icon));
       this.addElement(
          new StringStatDisplayElement.StringElement(
             Spatials.positionXYZ(32, 8, 5), Spatials.size(16, 7), (Supplier<Component>)(() -> name), LabelTextStyle.shadow().left()

@@ -36,7 +36,7 @@ public class CrystalModifiers extends ArrayList<VaultModifierStack> implements I
    }
 
    public static class Adapter implements JsonSerializer<CrystalModifiers>, JsonDeserializer<CrystalModifiers> {
-      public static CrystalModifiers.Adapter INSTANCE = new CrystalModifiers.Adapter();
+      public static final CrystalModifiers.Adapter INSTANCE = new CrystalModifiers.Adapter();
 
       public CrystalModifiers deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
          CrystalModifiers modifiers = new CrystalModifiers();

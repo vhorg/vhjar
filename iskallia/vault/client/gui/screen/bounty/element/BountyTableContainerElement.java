@@ -74,6 +74,8 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
             .setDisabled(() -> {
                if (this.bountyElement.getSelectedBounty() == null) {
                   return true;
+               } else if (this.bountyElement.getStatus() != BountyElement.Status.AVAILABLE) {
+                  return true;
                } else {
                   Bounty bounty = this.bountyElement.getSelectedBounty();
                   ItemStack bronze = this.container.getBronzeSlot().getItem();
@@ -92,6 +94,8 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
             Bounty bounty = this.bountyElement.getSelectedBounty();
             if (bounty == null) {
                return List.of(new TextComponent("Select a bounty to see the cost of reroll"));
+            } else if (this.bountyElement.getStatus() != BountyElement.Status.AVAILABLE) {
+               return List.of(new TextComponent("Only \"Available\" bounties can be rerolled."));
             } else {
                List<Component> tooltips = new ArrayList<>();
                tooltips.add(new TextComponent("Reroll Selected Bounty"));

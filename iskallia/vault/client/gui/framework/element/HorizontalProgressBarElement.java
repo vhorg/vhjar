@@ -54,6 +54,7 @@ public class HorizontalProgressBarElement<E extends HorizontalProgressBarElement
       TextureAtlasSprite sprite = this.foreground.getSprite();
       float percentFull = Mth.clamp(this.percentageSupplier.get(), 0.0F, 1.0F);
       int width = Math.round(this.foreground.width() * percentFull);
+      percentFull = (float)width / this.foreground.width();
       if (this.direction == HorizontalProgressBarElement.Direction.LEFT_TO_RIGHT) {
          renderer.render(
             this.foreground,

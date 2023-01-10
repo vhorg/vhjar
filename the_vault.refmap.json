@@ -4,6 +4,10 @@
       "useOn": "Lnet/minecraft/world/item/SpawnEggItem;m_6225_(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;",
       "Lnet/minecraft/world/level/BaseSpawner;setEntityId(Lnet/minecraft/world/entity/EntityType;)V": "Lnet/minecraft/world/level/BaseSpawner;m_45462_(Lnet/minecraft/world/entity/EntityType;)V"
     },
+    "iskallia/vault/mixin/MixinLevelChunk": {
+      "setBlockState": "Lnet/minecraft/world/level/chunk/LevelChunk;m_6978_(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;",
+      "Lnet/minecraft/world/level/block/state/BlockState;onPlace(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V": "Lnet/minecraft/world/level/block/state/BlockState;m_60696_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V"
+    },
     "iskallia/vault/mixin/MixinFireBlock": {
       "tick": "Lnet/minecraft/world/level/block/FireBlock;m_7458_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"
     },
@@ -22,6 +26,7 @@
       "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;builder()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;": "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;m_22244_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
       "getDamageAfterMagicAbsorb": "Lnet/minecraft/world/entity/LivingEntity;m_6515_(Lnet/minecraft/world/damagesource/DamageSource;F)F",
       "Lnet/minecraft/world/item/ItemStack;getAttributeModifiers(Lnet/minecraft/world/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;": "Lnet/minecraft/world/item/ItemStack;m_41638_(Lnet/minecraft/world/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;",
+      "checkTotemDeathProtection": "Lnet/minecraft/world/entity/LivingEntity;m_21262_(Lnet/minecraft/world/damagesource/DamageSource;)Z",
       "createLivingAttributes": "Lnet/minecraft/world/entity/LivingEntity;m_21183_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
       "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;)Z": "Lnet/minecraft/world/entity/LivingEntity;m_7292_(Lnet/minecraft/world/effect/MobEffectInstance;)Z",
       "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V"
@@ -68,6 +73,10 @@
     "iskallia/vault/mixin/MixinBossOverlayGui": {
       "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
     },
+    "iskallia/vault/mixin/MixinPickarang": {
+      "Lnet/minecraft/world/level/block/state/BlockState;getDestroySpeed(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F": "Lnet/minecraft/world/level/block/state/BlockState;m_60800_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
+      "onHit": "Lvazkii/quark/content/tools/entity/Pickarang;m_6532_(Lnet/minecraft/world/phys/HitResult;)V"
+    },
     "iskallia/vault/mixin/BlockMixin": {
       "getDrops": "Lnet/minecraft/world/level/block/state/BlockBehaviour;m_7381_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/storage/loot/LootContext$Builder;)Ljava/util/List;"
     },
@@ -108,6 +117,9 @@
     "iskallia/vault/mixin/MixinProtectionEnchantment": {
       "getDamageProtection(ILnet/minecraft/world/damagesource/DamageSource;)I": "Lnet/minecraft/world/item/enchantment/ProtectionEnchantment;m_7205_(ILnet/minecraft/world/damagesource/DamageSource;)I"
     },
+    "iskallia/vault/mixin/AccessorChunkMap": {
+      "updateChunkTracking": "m_183754_(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/ChunkPos;Lorg/apache/commons/lang3/mutable/MutableObject;ZZ)V"
+    },
     "iskallia/vault/mixin/MixinWorld": {
       "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z": "Lnet/minecraft/world/level/Level;m_6933_(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z"
     },
@@ -141,7 +153,6 @@
     },
     "iskallia/vault/mixin/MixinMinecraftServer": {
       "setInitialSpawn": "Lnet/minecraft/server/MinecraftServer;m_177896_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/storage/ServerLevelData;ZZ)V",
-      "Lnet/minecraft/server/level/ServerLevel;tick(Ljava/util/function/BooleanSupplier;)V": "Lnet/minecraft/server/level/ServerLevel;m_8793_(Ljava/util/function/BooleanSupplier;)V",
       "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V": "Lnet/minecraft/util/profiling/ProfilerFiller;m_6182_(Ljava/lang/String;)V",
       "createLevels": "Lnet/minecraft/server/MinecraftServer;m_129815_(Lnet/minecraft/server/level/progress/ChunkProgressListener;)V",
       "Lnet/minecraft/server/level/ServerPlayer;getGameProfile()Lcom/mojang/authlib/GameProfile;": "Lnet/minecraft/server/level/ServerPlayer;m_36316_()Lcom/mojang/authlib/GameProfile;",
@@ -276,6 +287,7 @@
       "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V": "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"
     },
     "iskallia/vault/mixin/MixinItemStack": {
+      "getHoverName": "Lnet/minecraft/world/item/ItemStack;m_41786_()Lnet/minecraft/network/chat/Component;",
       "getDisplayName": "Lnet/minecraft/world/item/ItemStack;m_41611_()Lnet/minecraft/network/chat/Component;",
       "getTooltipLines": "Lnet/minecraft/world/item/ItemStack;m_41651_(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/TooltipFlag;)Ljava/util/List;",
       "Lnet/minecraft/world/item/ItemStack;isDamaged()Z": "Lnet/minecraft/world/item/ItemStack;m_41768_()Z"
@@ -326,6 +338,10 @@
         "useOn": "Lnet/minecraft/world/item/SpawnEggItem;m_6225_(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;",
         "Lnet/minecraft/world/level/BaseSpawner;setEntityId(Lnet/minecraft/world/entity/EntityType;)V": "Lnet/minecraft/world/level/BaseSpawner;m_45462_(Lnet/minecraft/world/entity/EntityType;)V"
       },
+      "iskallia/vault/mixin/MixinLevelChunk": {
+        "setBlockState": "Lnet/minecraft/world/level/chunk/LevelChunk;m_6978_(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)Lnet/minecraft/world/level/block/state/BlockState;",
+        "Lnet/minecraft/world/level/block/state/BlockState;onPlace(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V": "Lnet/minecraft/world/level/block/state/BlockState;m_60696_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Z)V"
+      },
       "iskallia/vault/mixin/MixinFireBlock": {
         "tick": "Lnet/minecraft/world/level/block/FireBlock;m_7458_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"
       },
@@ -344,6 +360,7 @@
         "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;builder()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;": "Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier;m_22244_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
         "getDamageAfterMagicAbsorb": "Lnet/minecraft/world/entity/LivingEntity;m_6515_(Lnet/minecraft/world/damagesource/DamageSource;F)F",
         "Lnet/minecraft/world/item/ItemStack;getAttributeModifiers(Lnet/minecraft/world/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;": "Lnet/minecraft/world/item/ItemStack;m_41638_(Lnet/minecraft/world/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;",
+        "checkTotemDeathProtection": "Lnet/minecraft/world/entity/LivingEntity;m_21262_(Lnet/minecraft/world/damagesource/DamageSource;)Z",
         "createLivingAttributes": "Lnet/minecraft/world/entity/LivingEntity;m_21183_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
         "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;)Z": "Lnet/minecraft/world/entity/LivingEntity;m_7292_(Lnet/minecraft/world/effect/MobEffectInstance;)Z",
         "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V"
@@ -390,6 +407,10 @@
       "iskallia/vault/mixin/MixinBossOverlayGui": {
         "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
       },
+      "iskallia/vault/mixin/MixinPickarang": {
+        "Lnet/minecraft/world/level/block/state/BlockState;getDestroySpeed(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F": "Lnet/minecraft/world/level/block/state/BlockState;m_60800_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
+        "onHit": "Lvazkii/quark/content/tools/entity/Pickarang;m_6532_(Lnet/minecraft/world/phys/HitResult;)V"
+      },
       "iskallia/vault/mixin/BlockMixin": {
         "getDrops": "Lnet/minecraft/world/level/block/state/BlockBehaviour;m_7381_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/storage/loot/LootContext$Builder;)Ljava/util/List;"
       },
@@ -430,6 +451,9 @@
       "iskallia/vault/mixin/MixinProtectionEnchantment": {
         "getDamageProtection(ILnet/minecraft/world/damagesource/DamageSource;)I": "Lnet/minecraft/world/item/enchantment/ProtectionEnchantment;m_7205_(ILnet/minecraft/world/damagesource/DamageSource;)I"
       },
+      "iskallia/vault/mixin/AccessorChunkMap": {
+        "updateChunkTracking": "m_183754_(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/ChunkPos;Lorg/apache/commons/lang3/mutable/MutableObject;ZZ)V"
+      },
       "iskallia/vault/mixin/MixinWorld": {
         "setBlock(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z": "Lnet/minecraft/world/level/Level;m_6933_(Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;II)Z"
       },
@@ -463,7 +487,6 @@
       },
       "iskallia/vault/mixin/MixinMinecraftServer": {
         "setInitialSpawn": "Lnet/minecraft/server/MinecraftServer;m_177896_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/storage/ServerLevelData;ZZ)V",
-        "Lnet/minecraft/server/level/ServerLevel;tick(Ljava/util/function/BooleanSupplier;)V": "Lnet/minecraft/server/level/ServerLevel;m_8793_(Ljava/util/function/BooleanSupplier;)V",
         "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V": "Lnet/minecraft/util/profiling/ProfilerFiller;m_6182_(Ljava/lang/String;)V",
         "createLevels": "Lnet/minecraft/server/MinecraftServer;m_129815_(Lnet/minecraft/server/level/progress/ChunkProgressListener;)V",
         "Lnet/minecraft/server/level/ServerPlayer;getGameProfile()Lcom/mojang/authlib/GameProfile;": "Lnet/minecraft/server/level/ServerPlayer;m_36316_()Lcom/mojang/authlib/GameProfile;",
@@ -598,6 +621,7 @@
         "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V": "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"
       },
       "iskallia/vault/mixin/MixinItemStack": {
+        "getHoverName": "Lnet/minecraft/world/item/ItemStack;m_41786_()Lnet/minecraft/network/chat/Component;",
         "getDisplayName": "Lnet/minecraft/world/item/ItemStack;m_41611_()Lnet/minecraft/network/chat/Component;",
         "getTooltipLines": "Lnet/minecraft/world/item/ItemStack;m_41651_(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/TooltipFlag;)Ljava/util/List;",
         "Lnet/minecraft/world/item/ItemStack;isDamaged()Z": "Lnet/minecraft/world/item/ItemStack;m_41768_()Z"

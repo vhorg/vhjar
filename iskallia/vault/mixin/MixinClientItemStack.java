@@ -25,13 +25,21 @@ public abstract class MixinClientItemStack {
       cancellable = true
    )
    public void getHoverName(CallbackInfoReturnable<Component> ci) {
-      if (this.getItem() == ModItems.SPICY_HEARTY_BURGER) {
-         LocalPlayer player = Minecraft.getInstance().player;
-         if (player == null || !player.getUUID().equals(UUID.fromString("5f820c39-5883-4392-b174-3125ac05e38c"))) {
-            return;
-         }
+      LocalPlayer player = Minecraft.getInstance().player;
+      if (player != null) {
+         if (this.getItem() == ModItems.SPICY_HEARTY_BURGER) {
+            if (!player.getUUID().equals(UUID.fromString("5f820c39-5883-4392-b174-3125ac05e38c"))) {
+               return;
+            }
 
-         ci.setReturnValue(new TextComponent("Spicy Farty Burger"));
+            ci.setReturnValue(new TextComponent("Spicy Farty Burger"));
+         } else if (this.getItem() == ModItems.BITTER_LEMON) {
+            if (!player.getUUID().equals(UUID.fromString("7ac3c39f-23d5-472a-a7c9-24798265fa15"))) {
+               return;
+            }
+
+            ci.setReturnValue(new TextComponent("Bitter Melon"));
+         }
       }
    }
 }

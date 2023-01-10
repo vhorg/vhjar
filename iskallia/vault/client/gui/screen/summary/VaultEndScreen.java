@@ -29,9 +29,11 @@ import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.stat.VaultSnapshot;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.ServerboundOpenHistoricMessage;
 import iskallia.vault.network.message.VaultPlayerStatsMessage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -51,12 +53,26 @@ public class VaultEndScreen extends AbstractElementScreen {
    private static final boolean DEBUG = false;
    public static final TextColor XP_COLOR = TextColor.parseColor("#FFE637");
    private final VaultSnapshot snapshot;
+   private final boolean isHistory;
+   private final boolean fromLink;
+   private final UUID asPlayer;
 
-   public VaultEndScreen(VaultSnapshot snapshot, Component title) {
+   public VaultEndScreen(VaultSnapshot snapshot, Component title, UUID asPlayer) {
+      this(snapshot, title, asPlayer, false);
+   }
+
+   public VaultEndScreen(VaultSnapshot snapshot, Component title, UUID asPlayer, boolean isHistory) {
+      this(snapshot, title, asPlayer, isHistory, false);
+   }
+
+   public VaultEndScreen(VaultSnapshot snapshot, Component title, UUID asPlayer, boolean isHistory, boolean fromLink) {
       super(title, ScreenRenderers.getBuffered(), ScreenTooltipRenderer::create);
+      this.isHistory = isHistory;
+      this.asPlayer = asPlayer;
       this.snapshot = snapshot;
+      this.fromLink = fromLink;
       this.setGuiSize(Spatials.size(350, 186));
-      VaultExitContainerScreenData screenData = new VaultExitContainerScreenData(snapshot);
+      VaultExitContainerScreenData screenData = new VaultExitContainerScreenData(snapshot, asPlayer);
       Vault vault = screenData.snapshot.getEnd();
       int numOfPlayers = vault.get(Vault.STATS).getMap().size();
       this.addElement(
@@ -185,13 +201,21 @@ public class VaultEndScreen extends AbstractElementScreen {
                )
             )
       );
+      Component buttonText = new TextComponent("Claim").withStyle(ChatFormatting.WHITE);
+      if (this.isHistory) {
+         buttonText = new TextComponent("Back").withStyle(ChatFormatting.WHITE);
+      }
+
+      if (this.fromLink) {
+         buttonText = new TextComponent("Close").withStyle(ChatFormatting.WHITE);
+      }
+
+      Component finalComponent = buttonText;
       this.addElement(
-         (LabelElement)new LabelElement(
-               Spatials.zero(), new TextComponent("Claim").withStyle(ChatFormatting.WHITE), LabelTextStyle.border4(ChatFormatting.BLACK).center()
-            )
+         (LabelElement)new LabelElement(Spatials.zero(), finalComponent, LabelTextStyle.border4(ChatFormatting.BLACK).center())
             .layout(
                (screen, gui, parent, world) -> world.translateZ(2)
-                  .translateX(gui.right() - gui.left() + gui.left() - 26 - 1 - TextBorder.DEFAULT_FONT.get().width("Claim") / 2)
+                  .translateX(gui.right() - gui.left() + gui.left() - 26 - 1 - TextBorder.DEFAULT_FONT.get().width(finalComponent) / 2)
                   .translateY(this.getTabContentSpatial().bottom() + gui.height() - 31)
             )
       );
@@ -266,8 +290,14 @@ public class VaultEndScreen extends AbstractElementScreen {
       );
       this.closeButton = this.addElement(
          new ButtonElement<ButtonElement<ButtonElement<?>>>(Spatials.zero(), ScreenTextures.BUTTON_CLOSE_TEXTURES, () -> {
-               this.onClose();
-               ModNetwork.CHANNEL.sendToServer(new VaultPlayerStatsMessage.C2S(this.snapshot.getEnd().get(Vault.ID)));
+               if (!this.isHistory) {
+                  this.onClose();
+                  ModNetwork.CHANNEL.sendToServer(new VaultPlayerStatsMessage.C2S(this.snapshot.getEnd().get(Vault.ID)));
+               } else if (!this.fromLink) {
+                  ModNetwork.CHANNEL.sendToServer(ServerboundOpenHistoricMessage.INSTANCE);
+               } else {
+                  this.onClose();
+               }
             })
             .layout(
                (screen, gui, parent, world) -> world.width(52)
@@ -292,7 +322,16 @@ public class VaultEndScreen extends AbstractElementScreen {
                      );
                   }
 
-                  tooltipRenderer.renderTooltip(poseStack, xpComponentList, mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT);
+                  if (!this.isHistory) {
+                     tooltipRenderer.renderTooltip(poseStack, xpComponentList, mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT);
+                  } else if (this.fromLink) {
+                     tooltipRenderer.renderTooltip(poseStack, List.of(new TextComponent("Close")), mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT);
+                  } else {
+                     tooltipRenderer.renderTooltip(
+                        poseStack, List.of(new TextComponent("Back to History")), mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT
+                     );
+                  }
+
                   return false;
                }
             )
@@ -305,7 +344,10 @@ public class VaultEndScreen extends AbstractElementScreen {
    }
 
    public void onClose() {
-      ModNetwork.CHANNEL.sendToServer(new VaultPlayerStatsMessage.C2S(this.snapshot.getEnd().get(Vault.ID)));
+      if (!this.isHistory) {
+         ModNetwork.CHANNEL.sendToServer(new VaultPlayerStatsMessage.C2S(this.snapshot.getEnd().get(Vault.ID)));
+      }
+
       super.onClose();
    }
 

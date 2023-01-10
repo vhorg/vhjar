@@ -3,11 +3,11 @@ package iskallia.vault.block;
 import iskallia.vault.block.base.FillableAltarBlock;
 import iskallia.vault.block.entity.TimeAltarTileEntity;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.core.vault.time.modifier.TimeAltarExtension;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModParticles;
-import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -31,8 +31,8 @@ public class TimeAltarBlock extends FillableAltarBlock<TimeAltarTileEntity> {
    }
 
    @Override
-   public PlayerFavourData.VaultGodType getAssociatedVaultGod() {
-      return PlayerFavourData.VaultGodType.TIMEKEEPER;
+   public VaultGod getAssociatedVaultGod() {
+      return VaultGod.WENDARR;
    }
 
    @Override
@@ -43,24 +43,11 @@ public class TimeAltarBlock extends FillableAltarBlock<TimeAltarTileEntity> {
    public InteractionResult rightClicked(
       BlockState state, ServerLevel world, BlockPos pos, TimeAltarTileEntity tileEntity, ServerPlayer player, ItemStack heldStack
    ) {
-      if (!tileEntity.initialized()) {
-         return InteractionResult.SUCCESS;
-      } else if (player.isCreative()) {
-         tileEntity.makeProgress(player, 1, sPlayer -> {});
-         return InteractionResult.SUCCESS;
-      } else {
-         tileEntity.makeProgress(player, 1, sPlayer -> {
-            PlayerFavourData data = PlayerFavourData.get(sPlayer.getLevel());
-            if (rand.nextFloat() < getFavourChance(sPlayer, PlayerFavourData.VaultGodType.TIMEKEEPER)) {
-               PlayerFavourData.VaultGodType vg = this.getAssociatedVaultGod();
-               if (data.addFavour(sPlayer, vg, 1)) {
-                  data.addFavour(sPlayer, vg.getOther(rand), -1);
-                  FillableAltarBlock.playFavourInfo(sPlayer);
-               }
-            }
-         });
+      if (!player.isCreative()) {
          ServerVaults.get(world).ifPresent(vault -> vault.ifPresent(Vault.CLOCK, clock -> clock.addModifier(new TimeAltarExtension(player, 1200))));
-         return InteractionResult.SUCCESS;
       }
+
+      tileEntity.makeProgress(player, 1);
+      return InteractionResult.SUCCESS;
    }
 }

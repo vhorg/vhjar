@@ -8,7 +8,6 @@ import iskallia.vault.client.gui.framework.spatial.Padding;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.IPosition;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
-import java.util.ArrayList;
 import java.util.List;
 
 public class StatListPlayerContainerElement extends VerticalScrollClipContainer<StatListPlayerContainerElement> {
@@ -30,10 +29,8 @@ public class StatListPlayerContainerElement extends VerticalScrollClipContainer<
                return true;
             })
       );
-      List<StatLabelElementBuilder<?>> mutableStatList = new ArrayList<>(statList);
-      mutableStatList.sort(StatLabelElementBuilder.COMPARATOR);
       this.addElement(
-         (StatLabelListElement)new StatLabelListElement(Spatials.positionY(25), mutableStatList)
+         (StatLabelListElement)new StatLabelListElement(Spatials.positionY(25), statList)
             .layout((screen, gui, parent, world) -> world.width(this.innerWidth()))
       );
    }

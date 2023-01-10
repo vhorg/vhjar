@@ -7,6 +7,7 @@
   "mixins": [
     "AccessorAbstractContainerMenu",
     "AccessorChestMenu",
+    "AccessorChunkMap",
     "AccessorMinecraftServer",
     "AccessorServerChunkCache",
     "AccessorSlot",
@@ -46,6 +47,7 @@
     "MixinMappedRegistry",
     "MixinMinecraftServer",
     "MixinNBTSizeTracker",
+    "MixinPickarang",
     "MixinPlayerEntity",
     "MixinPlayerInventory",
     "MixinProtectionEnchantment",

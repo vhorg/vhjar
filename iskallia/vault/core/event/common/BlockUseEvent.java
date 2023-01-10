@@ -22,8 +22,10 @@ public class BlockUseEvent extends Event<BlockUseEvent, BlockUseEvent.Data> {
       return new BlockUseEvent(this);
    }
 
-   public BlockUseEvent.Data invoke(Level world, BlockState state, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-      return this.invoke(new BlockUseEvent.Data(world, state, pos, player, hand, hit));
+   public BlockUseEvent.Data invoke(
+      Level world, BlockState state, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, BlockUseEvent.Phase phase
+   ) {
+      return this.invoke(new BlockUseEvent.Data(world, state, pos, player, hand, hit, phase));
    }
 
    public BlockUseEvent of(Block block) {
@@ -34,6 +36,10 @@ public class BlockUseEvent extends Event<BlockUseEvent, BlockUseEvent.Data> {
       return this.filter(data -> data.getWorld() == world);
    }
 
+   public BlockUseEvent at(BlockUseEvent.Phase phase) {
+      return this.filter(data -> data.getPhase() == phase);
+   }
+
    public static class Data {
       private final Level world;
       private final BlockState state;
@@ -42,14 +48,16 @@ public class BlockUseEvent extends Event<BlockUseEvent, BlockUseEvent.Data> {
       private final InteractionHand hand;
       private final BlockHitResult hit;
       private InteractionResult result;
+      private final BlockUseEvent.Phase phase;
 
-      public Data(Level world, BlockState state, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+      public Data(Level world, BlockState state, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, BlockUseEvent.Phase phase) {
          this.world = world;
          this.state = state;
          this.pos = pos;
          this.player = player;
          this.hand = hand;
          this.hit = hit;
+         this.phase = phase;
       }
 
       public Level getWorld() {
@@ -76,6 +84,10 @@ public class BlockUseEvent extends Event<BlockUseEvent, BlockUseEvent.Data> {
          return this.hit;
       }
 
+      public BlockUseEvent.Phase getPhase() {
+         return this.phase;
+      }
+
       public InteractionResult getResult() {
          return this.result;
       }
@@ -83,5 +95,10 @@ public class BlockUseEvent extends Event<BlockUseEvent, BlockUseEvent.Data> {
       public void setResult(InteractionResult result) {
          this.result = result;
       }
+   }
+
+   public static enum Phase {
+      HEAD,
+      RETURN;
    }
 }

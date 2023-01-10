@@ -89,6 +89,7 @@ public class MenuPlayerStatDescriptionConfig extends Config {
             this.put(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.MANA_ADDITIVE.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.MANA_ADDITIVE_PERCENTILE.getRegistryName(), "Configure me!");
+            this.put(ModGearAttributes.HEALING_EFFECTIVENESS.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.DURABILITY.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.COOLDOWN_REDUCTION.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.LEECH.getRegistryName(), "Configure me!");
@@ -115,6 +116,10 @@ public class MenuPlayerStatDescriptionConfig extends Config {
             this.put(ModGearAttributes.DAMAGE_ILLAGERS.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.DAMAGE_SPIDERS.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.DAMAGE_UNDEAD.getRegistryName(), "Configure me!");
+            this.put(ModGearAttributes.VELARA_AFFINITY.getRegistryName(), "Configure me!");
+            this.put(ModGearAttributes.TENOS_AFFINITY.getRegistryName(), "Configure me!");
+            this.put(ModGearAttributes.WENDARR_AFFINITY.getRegistryName(), "Configure me!");
+            this.put(ModGearAttributes.IDONA_AFFINITY.getRegistryName(), "Configure me!");
          }
       };
    }

@@ -65,6 +65,7 @@ public class WorldManager extends DataObject<WorldManager> {
 
    public void releaseServer() {
       this.ifPresent(MOB_LOGIC, MobLogic::releaseServer);
+      this.ifPresent(GENERATOR, VaultGenerator::releaseServer);
    }
 
    @OnlyIn(Dist.CLIENT)

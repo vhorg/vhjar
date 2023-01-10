@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultLevel;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.world.vault.modifier.spi.ModifierContext;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import net.minecraft.resources.ResourceLocation;
@@ -27,13 +28,20 @@ public class VaultLevelModifier extends VaultModifier<VaultLevelModifier.Propert
    public static class Properties {
       @Expose
       private final int levelAdded;
+      @Expose
+      private final ScalarReputationProperty reputation;
 
-      public Properties(int levelAdded) {
+      public Properties(int levelAdded, ScalarReputationProperty reputation) {
          this.levelAdded = levelAdded;
+         this.reputation = reputation;
       }
 
       public int getLevelAdded() {
          return this.levelAdded;
+      }
+
+      public int getLevelAdded(ModifierContext context) {
+         return this.reputation != null ? this.reputation.apply(this.levelAdded, context) : this.levelAdded;
       }
    }
 }

@@ -80,7 +80,7 @@ public class DrillArrowEntity extends Arrow {
          Level world = this.getCommandSenderWorld();
          float vel = (float)this.getDeltaMovement().length();
 
-         for (BlockPos offset : BlockHelper.getSphericalPositions(this.blockPosition(), Math.max(4.5F, 4.5F * vel))) {
+         for (BlockPos offset : BlockHelper.getSpherePositions(this.blockPosition(), Math.max(4.5F, 4.5F * vel))) {
             if (this.breakCount >= this.maxBreakCount) {
                break;
             }

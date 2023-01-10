@@ -8,11 +8,13 @@ import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.NaturalSpawner;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.influence.Influences;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.vault.time.modifier.ClockModifier;
 import iskallia.vault.core.vault.time.modifier.FruitExtension;
 import iskallia.vault.core.vault.time.modifier.VoidFluidExtension;
+import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.gear.trinket.TrinketHelper;
 import iskallia.vault.gear.trinket.effects.VaultExperienceTrinket;
@@ -30,9 +32,13 @@ public class Runner extends Listener {
    public static final FieldKey<NaturalSpawner> SPAWNER = FieldKey.of("spawner", NaturalSpawner.class)
       .with(Version.v1_0, Adapter.ofCompound(NaturalSpawner::new), DISK.all())
       .register(FIELDS);
+   public static final FieldKey<Influences> INFLUENCES = FieldKey.of("influences", Influences.class)
+      .with(Version.v1_5, Adapter.ofCompound(Influences::new), DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
 
    public Runner() {
       this.set(SPAWNER, new NaturalSpawner());
+      this.set(INFLUENCES, new Influences());
    }
 
    @Override
@@ -114,6 +120,43 @@ public class Runner extends Listener {
             }
          }
       });
+      CommonEvents.LOOT_GENERATION.pre().register(this, data -> {
+         if (data.getGenerator() instanceof LootTableGenerator generator) {
+            if (!(generator.source instanceof ServerPlayer player)) {
+               return;
+            }
+
+            if (player.level != world) {
+               return;
+            }
+
+            if (!player.getUUID().equals(this.get(ID))) {
+               return;
+            }
+
+            int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
+            int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
+            if (diff <= 0) {
+               return;
+            }
+
+            generator.itemQuantity -= diff * 0.05F;
+            generator.itemQuantity = Math.max(generator.itemQuantity, -0.8F);
+         }
+      }, -100);
+      CommonEvents.SOUL_SHARD_CHANCE.register(this, data -> {
+         if (data.getKiller().level == world) {
+            if (data.getKiller().getUUID().equals(this.get(ID))) {
+               int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
+               int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
+               if (diff > 0) {
+                  data.setChance(data.getChance() - diff * 0.05F);
+                  data.setChance(Math.max(data.getChance(), 0.2F));
+               }
+            }
+         }
+      }, -100);
+      this.ifPresent(INFLUENCES, influences -> influences.initServer(world, vault, this));
    }
 
    @Override
@@ -126,6 +169,13 @@ public class Runner extends Listener {
             spawner.setConfig(config).tickServer(world, vault, this);
          }
       });
+      this.ifPresent(INFLUENCES, influences -> influences.tickServer(world, vault, this));
+   }
+
+   @Override
+   public void releaseServer() {
+      super.releaseServer();
+      this.ifPresent(INFLUENCES, Influences::releaseServer);
    }
 
    @Override
@@ -156,5 +206,11 @@ public class Runner extends Listener {
                }
             }
          );
+   }
+
+   @Override
+   public void onLeave(VirtualWorld world, Vault vault) {
+      super.onLeave(world, vault);
+      this.ifPresent(INFLUENCES, influences -> influences.onLeave(world, vault, this));
    }
 }

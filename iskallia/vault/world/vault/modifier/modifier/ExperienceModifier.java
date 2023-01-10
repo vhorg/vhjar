@@ -17,9 +17,11 @@ public class ExperienceModifier extends VaultModifier<ExperienceModifier.Propert
 
    @Override
    public void onListenerAdd(VirtualWorld world, Vault vault, ModifierContext context, Listener listener) {
-      vault.getOptional(Vault.STATS)
-         .map(stats -> stats.get(listener))
-         .ifPresent(stats -> stats.modify(StatCollector.EXP_MULTIPLIER, exp -> exp + this.properties.getAddend()));
+      if (!context.hasTarget() || context.getTarget().equals(listener.getId())) {
+         vault.getOptional(Vault.STATS)
+            .map(stats -> stats.get(listener))
+            .ifPresent(stats -> stats.modify(StatCollector.EXP_MULTIPLIER, exp -> exp + this.properties.getAddend()));
+      }
    }
 
    public static class Properties {

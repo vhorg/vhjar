@@ -28,7 +28,7 @@ public class StatUtils {
 
       float chance = snapshot.getAttributeValue(ModGearAttributes.FATAL_STRIKE_CHANCE, VaultGearAttributeTypeMerger.floatSum());
       double damage = attackDamage * snapshot.getAttributeValue(ModGearAttributes.FATAL_STRIKE_DAMAGE, VaultGearAttributeTypeMerger.floatSum()).floatValue();
-      attackDamage += attackDamage * chance * damage;
+      attackDamage = attackDamage * (1.0F - chance) + damage * chance;
       float dmgIncrease = snapshot.getAttributeValue(ModGearAttributes.DAMAGE_INCREASE, VaultGearAttributeTypeMerger.floatSum());
       attackDamage *= 1.0F + dmgIncrease;
       float dynamicDmgMultiplier;

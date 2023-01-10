@@ -1,16 +1,13 @@
 package iskallia.vault.block.entity;
 
 import iskallia.vault.block.SoulAltarBlock;
-import iskallia.vault.block.base.FillableAltarBlock;
 import iskallia.vault.block.base.FillableAltarTileEntity;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.CodecUtils;
 import iskallia.vault.util.MiscUtils;
-import iskallia.vault.world.data.PlayerFavourData;
-import iskallia.vault.world.vault.VaultRaid;
 import java.awt.Color;
-import java.util.Optional;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
@@ -50,7 +47,6 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
    }
 
    public static void tick(Level level, BlockPos pos, BlockState state, SoulAltarTileEntity tile) {
-      FillableAltarTileEntity.tick(level, pos, state, tile);
       if (!level.isClientSide()) {
          tile.ticksExisted++;
          if (tile.ticksExisted % 10 != 0) {
@@ -111,17 +107,8 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
                   BlockPos altarRef = CodecUtils.readNBT(BlockPos.CODEC, tag.get("the_vault_SoulAltarPos"), null);
                   if (altarRef != null && world.hasChunkAt(altarRef)) {
                      BlockEntity te = world.getBlockEntity(altarRef);
-                     if (te instanceof SoulAltarTileEntity && ((SoulAltarTileEntity)te).initialized() && !((SoulAltarTileEntity)te).isMaxedOut()) {
-                        ((SoulAltarTileEntity)te).makeProgress(killer, 1, sPlayer -> {
-                           PlayerFavourData data = PlayerFavourData.get(sPlayer.getLevel());
-                           if (rand.nextFloat() < FillableAltarBlock.getFavourChance(sPlayer, PlayerFavourData.VaultGodType.MALEVOLENT)) {
-                              PlayerFavourData.VaultGodType vg = PlayerFavourData.VaultGodType.MALEVOLENT;
-                              if (data.addFavour(sPlayer, vg, 1)) {
-                                 data.addFavour(sPlayer, vg.getOther(rand), -1);
-                                 FillableAltarBlock.playFavourInfo(sPlayer);
-                              }
-                           }
-                        });
+                     if (te instanceof SoulAltarTileEntity && !((SoulAltarTileEntity)te).isCompleted()) {
+                        ((SoulAltarTileEntity)te).makeProgress(killer, 1);
                         te.setChanged();
                      }
                   }
@@ -137,8 +124,8 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
    }
 
    @Override
-   public PlayerFavourData.VaultGodType getAssociatedVaultGod() {
-      return PlayerFavourData.VaultGodType.MALEVOLENT;
+   public VaultGod getVaultGod() {
+      return VaultGod.IDONA;
    }
 
    @Override
@@ -149,14 +136,5 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
    @Override
    public Color getFillColor() {
       return new Color(-2158319);
-   }
-
-   @Override
-   protected Optional<Integer> calcMaxProgress(VaultRaid vault) {
-      return vault.getProperties().getBase(VaultRaid.LEVEL).map(vaultLevel -> {
-         float multiplier = vault.getProperties().getBase(VaultRaid.HOST).map(x$0 -> this.getMaxProgressMultiplier(x$0)).orElse(1.0F);
-         int progress = 4 + vaultLevel / 7;
-         return Math.round(progress * multiplier);
-      });
    }
 }

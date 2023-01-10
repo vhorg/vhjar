@@ -17,7 +17,9 @@ public class ChanceSoulShardModifier extends AbstractChanceModifier<AbstractChan
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
       CommonEvents.SOUL_SHARD_CHANCE.register(context.getUUID(), data -> {
          if (data.getKiller().level == world) {
-            data.setChance(this.properties.getChance());
+            if (!context.hasTarget() || context.getTarget().equals(data.getKiller().getUUID())) {
+               data.setChance(data.getChance() + this.properties.getChance(context));
+            }
          }
       });
    }

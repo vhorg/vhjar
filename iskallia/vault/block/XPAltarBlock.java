@@ -2,10 +2,10 @@ package iskallia.vault.block;
 
 import iskallia.vault.block.base.FillableAltarBlock;
 import iskallia.vault.block.entity.XpAltarTileEntity;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModParticles;
-import iskallia.vault.world.data.PlayerFavourData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
@@ -28,8 +28,8 @@ public class XPAltarBlock extends FillableAltarBlock<XpAltarTileEntity> {
    }
 
    @Override
-   public PlayerFavourData.VaultGodType getAssociatedVaultGod() {
-      return PlayerFavourData.VaultGodType.OMNISCIENT;
+   public VaultGod getAssociatedVaultGod() {
+      return VaultGod.TENOS;
    }
 
    @Override
@@ -40,26 +40,15 @@ public class XPAltarBlock extends FillableAltarBlock<XpAltarTileEntity> {
    public InteractionResult rightClicked(
       BlockState state, ServerLevel world, BlockPos pos, XpAltarTileEntity tileEntity, ServerPlayer player, ItemStack heldStack
    ) {
-      if (!tileEntity.initialized()) {
-         return InteractionResult.SUCCESS;
-      } else if (player.isCreative()) {
-         tileEntity.makeProgress(player, tileEntity.getMaxProgress() - tileEntity.getCurrentProgress(), sPlayer -> {});
+      if (player.isCreative()) {
+         tileEntity.makeProgress(player, tileEntity.getMaxProgress());
          return InteractionResult.SUCCESS;
       } else if (player.experienceLevel <= 0) {
          return InteractionResult.FAIL;
       } else {
          int levelDrain = Math.min(player.experienceLevel, tileEntity.getMaxProgress() - tileEntity.getCurrentProgress());
          player.setExperienceLevels(player.experienceLevel - levelDrain);
-         tileEntity.makeProgress(player, levelDrain, sPlayer -> {
-            PlayerFavourData data = PlayerFavourData.get(sPlayer.getLevel());
-            if (rand.nextFloat() < getFavourChance(sPlayer, PlayerFavourData.VaultGodType.OMNISCIENT)) {
-               PlayerFavourData.VaultGodType vg = this.getAssociatedVaultGod();
-               if (data.addFavour(sPlayer, vg, 1)) {
-                  data.addFavour(sPlayer, vg.getOther(rand), -1);
-                  FillableAltarBlock.playFavourInfo(sPlayer);
-               }
-            }
-         });
+         tileEntity.makeProgress(player, levelDrain);
          return InteractionResult.SUCCESS;
       }
    }

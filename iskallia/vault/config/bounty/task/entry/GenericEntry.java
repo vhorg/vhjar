@@ -17,12 +17,20 @@ public class GenericEntry<T> {
    protected Set<ResourceLocation> validDimensions;
    @Expose
    protected boolean vaultOnly;
+   @Expose
+   private String rewardPool;
 
    public GenericEntry(T value, RangeEntry amount) {
       this.value = value;
       this.amount = amount;
       this.validDimensions = new HashSet<>();
       this.vaultOnly = false;
+      this.rewardPool = "common";
+   }
+
+   public GenericEntry<T> rewardPool(String rewardPool) {
+      this.rewardPool = rewardPool;
+      return this;
    }
 
    public GenericEntry<T> vaultOnly() {
@@ -58,5 +66,9 @@ public class GenericEntry<T> {
 
    public Set<ResourceLocation> getValidDimensions() {
       return this.validDimensions;
+   }
+
+   public String getRewardPool() {
+      return this.rewardPool;
    }
 }

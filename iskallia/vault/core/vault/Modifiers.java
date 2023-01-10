@@ -19,7 +19,7 @@ import java.util.UUID;
 
 public class Modifiers extends DataObject<Modifiers> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
-   private static final FieldKey<Modifiers.Entry.List> ENTRIES = FieldKey.of("entries", Modifiers.Entry.List.class)
+   protected static final FieldKey<Modifiers.Entry.List> ENTRIES = FieldKey.of("entries", Modifiers.Entry.List.class)
       .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Modifiers.Entry.List::new)
       .register(FIELDS);
 
@@ -48,6 +48,10 @@ public class Modifiers extends DataObject<Modifiers> {
       return this;
    }
 
+   public ModifierContext getContext(Modifiers.Entry entry) {
+      return entry.get(Modifiers.Entry.CONTEXT).copy();
+   }
+
    public java.util.List<VaultModifier<?>> getModifiers() {
       java.util.List<VaultModifier<?>> modifiers = new ArrayList<>();
 
@@ -62,13 +66,13 @@ public class Modifiers extends DataObject<Modifiers> {
 
    public void onListenerAdd(VirtualWorld world, Vault vault, Listener listener) {
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
-         entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, entry.get(Modifiers.Entry.CONTEXT), listener);
+         entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, this.getContext(entry), listener);
       }
    }
 
    public void onListenerRemove(VirtualWorld world, Vault vault, Listener listener) {
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
-         entry.get(Modifiers.Entry.MODIFIER).onListenerRemove(world, vault, entry.get(Modifiers.Entry.CONTEXT), listener);
+         entry.get(Modifiers.Entry.MODIFIER).onListenerRemove(world, vault, this.getContext(entry), listener);
       }
    }
 
@@ -88,14 +92,14 @@ public class Modifiers extends DataObject<Modifiers> {
    public void initServer(VirtualWorld world, Vault vault) {
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
          if (entry.has(Modifiers.Entry.CONSUMED)) {
-            entry.get(Modifiers.Entry.MODIFIER).initServer(world, vault, entry.get(Modifiers.Entry.CONTEXT));
+            entry.get(Modifiers.Entry.MODIFIER).initServer(world, vault, this.getContext(entry));
             return;
          }
 
-         entry.get(Modifiers.Entry.MODIFIER).onVaultAdd(world, vault, entry.get(Modifiers.Entry.CONTEXT));
+         entry.get(Modifiers.Entry.MODIFIER).onVaultAdd(world, vault, this.getContext(entry));
          vault.ifPresent(Vault.LISTENERS, listeners -> {
             for (Listener listener : listeners.getAll()) {
-               entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, entry.get(Modifiers.Entry.CONTEXT), listener);
+               entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, this.getContext(entry), listener);
             }
          });
          entry.set(Modifiers.Entry.CONSUMED);
@@ -109,10 +113,10 @@ public class Modifiers extends DataObject<Modifiers> {
          } else if (!entry.has(Modifiers.Entry.CONSUMED)) {
             return true;
          } else {
-            entry.get(Modifiers.Entry.MODIFIER).onVaultRemove(world, vault, entry.get(Modifiers.Entry.CONTEXT));
+            entry.get(Modifiers.Entry.MODIFIER).onVaultRemove(world, vault, this.getContext(entry));
             vault.ifPresent(Vault.LISTENERS, listeners -> {
                for (Listener listener : listeners.getAll()) {
-                  entry.get(Modifiers.Entry.MODIFIER).onListenerRemove(world, vault, entry.get(Modifiers.Entry.CONTEXT), listener);
+                  entry.get(Modifiers.Entry.MODIFIER).onListenerRemove(world, vault, this.getContext(entry), listener);
                }
             });
             return true;
@@ -120,10 +124,10 @@ public class Modifiers extends DataObject<Modifiers> {
       });
       this.get(ENTRIES).forEach(entry -> {
          if (!entry.has(Modifiers.Entry.CONSUMED)) {
-            entry.get(Modifiers.Entry.MODIFIER).onVaultAdd(world, vault, entry.get(Modifiers.Entry.CONTEXT));
+            entry.get(Modifiers.Entry.MODIFIER).onVaultAdd(world, vault, this.getContext(entry));
             vault.ifPresent(Vault.LISTENERS, listeners -> {
                for (Listener listener : listeners.getAll()) {
-                  entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, entry.get(Modifiers.Entry.CONTEXT), listener);
+                  entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, this.getContext(entry), listener);
                }
             });
             entry.set(Modifiers.Entry.CONSUMED);
@@ -133,10 +137,10 @@ public class Modifiers extends DataObject<Modifiers> {
    }
 
    public void releaseServer() {
-      this.get(ENTRIES).forEach(entry -> entry.get(Modifiers.Entry.MODIFIER).releaseServer(entry.get(Modifiers.Entry.CONTEXT)));
+      this.get(ENTRIES).forEach(entry -> entry.get(Modifiers.Entry.MODIFIER).releaseServer(this.getContext(entry)));
    }
 
-   private static class Entry extends DataObject<Modifiers.Entry> {
+   protected static class Entry extends DataObject<Modifiers.Entry> {
       public static final FieldRegistry FIELDS = new FieldRegistry();
       public static final FieldKey<VaultModifier> MODIFIER = FieldKey.of("modifier", VaultModifier.class)
          .with(
@@ -188,7 +192,7 @@ public class Modifiers extends DataObject<Modifiers> {
          }
       }
 
-      private static class List extends DataList<Modifiers.Entry.List, Modifiers.Entry> {
+      public static class List extends DataList<Modifiers.Entry.List, Modifiers.Entry> {
          public List() {
             super(new ArrayList<>(), Adapter.ofCompound(Modifiers.Entry::new));
          }

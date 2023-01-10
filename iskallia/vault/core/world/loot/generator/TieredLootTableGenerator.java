@@ -27,17 +27,15 @@ import java.util.function.Consumer;
 
 public class TieredLootTableGenerator extends LootTableGenerator {
    public static final Map<TieredLootTableGenerator.CDFKey, TieredLootTableGenerator.CDF> CACHE = new HashMap<>();
-   public float itemRarity;
-   public float itemQuantity;
    private int[] key;
    protected final Map<LootPool, Integer> poolToIndex = new HashMap<>();
    protected int[] frequencies;
    protected double cdf;
+   public float itemRarity;
 
    public TieredLootTableGenerator(Version version, LootTableKey table, float itemRarity, float itemQuantity) {
-      super(version, table);
+      super(version, table, itemQuantity);
       this.itemRarity = itemRarity;
-      this.itemQuantity = itemQuantity;
    }
 
    public static void clearCache() {

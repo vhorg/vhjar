@@ -245,7 +245,7 @@ public class DebugCommand extends Command {
       BlockEntity blockEntity = ((CommandSourceStack)context.getSource()).getLevel().getBlockEntity(pos);
       if (blockEntity != null) {
          blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
-            LootTableGenerator generator = new LootTableGenerator(Version.latest(), VaultRegistry.LOOT_TABLE.getKey(id));
+            LootTableGenerator generator = new LootTableGenerator(Version.latest(), VaultRegistry.LOOT_TABLE.getKey(id), 0.0F);
             generator.generate(JavaRandom.ofNanoTime());
             generator.getItems().forEachRemaining(stack -> ItemHandlerHelper.insertItem(handler, stack, false));
          });

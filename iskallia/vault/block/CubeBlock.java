@@ -20,7 +20,7 @@ public class CubeBlock extends LootableBlock {
    public static final EnumProperty<CubeBlock.CubeColor> COLOR = EnumProperty.create("color", CubeBlock.CubeColor.class);
 
    public CubeBlock() {
-      super(Properties.copy(Blocks.BLACK_CONCRETE));
+      super(Properties.copy(Blocks.BLACK_CONCRETE).strength(1.8F, 3600000.0F));
       this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(COLOR, CubeBlock.CubeColor.BLUE));
    }
 

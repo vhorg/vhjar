@@ -21,7 +21,6 @@ import iskallia.vault.network.message.FighterSizeMessage;
 import iskallia.vault.network.message.InvalidConfigsMessage;
 import iskallia.vault.util.AdvancementHelper;
 import iskallia.vault.util.EntityHelper;
-import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.util.VaultRarity;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
@@ -292,9 +291,7 @@ public class PlayerEvents {
       if (event.side == LogicalSide.SERVER && event.phase == Phase.START) {
          event.player.getAttribute(ModAttributes.MANA_MAX).setBaseValue(ModConfigs.MANA.getManaMax());
          event.player.getAttribute(ModAttributes.MANA_REGEN).setBaseValue(ModConfigs.MANA.getManaRegenPerSecond());
-         if (!VHSmpUtil.isArenaWorld(event.player)) {
-            Mana.increase(event.player, Mana.getRegenPerSecond(event.player) * 0.05F);
-         }
+         Mana.increase(event.player, Mana.getRegenPerSecond(event.player) * 0.05F);
       }
    }
 

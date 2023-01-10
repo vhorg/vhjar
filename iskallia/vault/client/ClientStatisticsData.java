@@ -1,23 +1,31 @@
 package iskallia.vault.client;
 
-import iskallia.vault.world.data.PlayerFavourData;
-import java.util.HashMap;
+import iskallia.vault.core.vault.influence.VaultGod;
+import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 
 public class ClientStatisticsData {
-   private static final Map<PlayerFavourData.VaultGodType, Integer> favourStats = new HashMap<>();
+   private static final Map<VaultGod, Integer> REPUTATION = new EnumMap<>(VaultGod.class);
+   private static VaultGod FAVOUR = null;
 
-   public static void receiveUpdate(CompoundTag statisticsData) {
-      favourStats.clear();
-      CompoundTag favourData = statisticsData.getCompound("favourStats");
+   public static void receiveUpdate(CompoundTag data) {
+      REPUTATION.clear();
+      CompoundTag favourData = data.getCompound("reputation");
 
-      for (PlayerFavourData.VaultGodType type : PlayerFavourData.VaultGodType.values()) {
-         favourStats.put(type, favourData.getInt(type.name()));
+      for (VaultGod type : VaultGod.values()) {
+         REPUTATION.put(type, favourData.getInt(type.getName()));
       }
+
+      FAVOUR = data.contains("favour", 8) ? VaultGod.fromName(data.getString("favour")) : null;
    }
 
-   public static int getFavour(PlayerFavourData.VaultGodType type) {
-      return favourStats.getOrDefault(type, 0);
+   public static int getReputation(VaultGod type) {
+      return REPUTATION.getOrDefault(type, 0);
+   }
+
+   public static Optional<VaultGod> getFavour() {
+      return Optional.ofNullable(FAVOUR);
    }
 }

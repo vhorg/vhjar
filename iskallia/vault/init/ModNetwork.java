@@ -1,5 +1,6 @@
 package iskallia.vault.init;
 
+import iskallia.vault.VaultMod;
 import iskallia.vault.network.message.AbilityActivityMessage;
 import iskallia.vault.network.message.AbilityFocusMessage;
 import iskallia.vault.network.message.AbilityKnownOnesMessage;
@@ -21,10 +22,12 @@ import iskallia.vault.network.message.EternalInteractionMessage;
 import iskallia.vault.network.message.EternalSyncMessage;
 import iskallia.vault.network.message.FighterSizeMessage;
 import iskallia.vault.network.message.ForgeParticleMessage;
+import iskallia.vault.network.message.HistoricFavoritesMessage;
 import iskallia.vault.network.message.InvalidConfigsMessage;
 import iskallia.vault.network.message.KnownTalentsMessage;
 import iskallia.vault.network.message.MonolithIgniteMessage;
 import iskallia.vault.network.message.OmegaStatueUIMessage;
+import iskallia.vault.network.message.OpenVaultSnapshotMessage;
 import iskallia.vault.network.message.PartyMembersMessage;
 import iskallia.vault.network.message.PartyStatusMessage;
 import iskallia.vault.network.message.PlayerDamageMultiplierMessage;
@@ -43,16 +46,20 @@ import iskallia.vault.network.message.ScavengerAltarConsumeMessage;
 import iskallia.vault.network.message.ScoreboardDamageMessage;
 import iskallia.vault.network.message.ServerboundAbilityKeyMessage;
 import iskallia.vault.network.message.ServerboundAbilitySelectMessage;
+import iskallia.vault.network.message.ServerboundAddHistoricFavoriteMessage;
 import iskallia.vault.network.message.ServerboundChangeDifficultyMessage;
 import iskallia.vault.network.message.ServerboundCuriosScrollMessage;
 import iskallia.vault.network.message.ServerboundOpenAbilitiesMessage;
 import iskallia.vault.network.message.ServerboundOpenArchetypesMessage;
+import iskallia.vault.network.message.ServerboundOpenHistoricMessage;
 import iskallia.vault.network.message.ServerboundOpenResearchesMessage;
 import iskallia.vault.network.message.ServerboundOpenStatisticsMessage;
 import iskallia.vault.network.message.ServerboundOpenTalentsMessage;
 import iskallia.vault.network.message.ServerboundOpenVaultExitMessage;
+import iskallia.vault.network.message.ServerboundPickaxeOffsetKeyMessage;
 import iskallia.vault.network.message.ServerboundRenameEternalMessage;
 import iskallia.vault.network.message.ServerboundSelectArchetypeMessage;
+import iskallia.vault.network.message.ServerboundSendSnapshotLinkMessage;
 import iskallia.vault.network.message.ServerboundToggleEternalPlayerSkinMessage;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
 import iskallia.vault.network.message.ShardTradeMessage;
@@ -62,6 +69,7 @@ import iskallia.vault.network.message.StepHeightMessage;
 import iskallia.vault.network.message.SyncOverSizedContentMessage;
 import iskallia.vault.network.message.SyncOverSizedStackMessage;
 import iskallia.vault.network.message.TalentLevelMessage;
+import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.network.message.TrinketJumpMessage;
 import iskallia.vault.network.message.VaultArtisanRequestModificationMessage;
 import iskallia.vault.network.message.VaultCharmControllerScrollMessage;
@@ -72,6 +80,7 @@ import iskallia.vault.network.message.VaultLevelMessage;
 import iskallia.vault.network.message.VaultMessage;
 import iskallia.vault.network.message.VaultModifierMessage;
 import iskallia.vault.network.message.VaultOverlayMessage;
+import iskallia.vault.network.message.VaultPlayerHistoricDataMessage;
 import iskallia.vault.network.message.VaultPlayerStatsMessage;
 import iskallia.vault.network.message.WorldListUpdateMessage;
 import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
@@ -87,18 +96,29 @@ import iskallia.vault.network.message.relic.SelectRelicMessage;
 import iskallia.vault.network.message.transmog.DiscoveredEntriesMessage;
 import iskallia.vault.network.message.transmog.SelectDiscoveredModelMessage;
 import iskallia.vault.network.message.transmog.TransmogButtonMessage;
+import iskallia.vault.util.ModVersion;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 public class ModNetwork {
-   private static final String NETWORK_VERSION = "0.26.0";
+   private static final ModVersion VERSION = ModList.get()
+      .getModContainerById("the_vault")
+      .map(ModContainer::getModInfo)
+      .<ArtifactVersion>map(IModInfo::getVersion)
+      .map(artifactVersion -> new ModVersion(artifactVersion.getQualifier()))
+      .orElse(new ModVersion("1"));
    public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-      new ResourceLocation("the_vault", "network"), () -> "0.26.0", version -> version.equals("0.26.0"), version -> version.equals("0.26.0")
+      new ResourceLocation("the_vault", "network"), VERSION::toString, VERSION::accepted, VERSION::accepted
    );
    private static int ID = 0;
 
    public static void initialize() {
+      VaultMod.LOGGER.info("Initializing network. Version: {}", VERSION.toString());
       CHANNEL.registerMessage(
          nextId(),
          ServerboundOpenStatisticsMessage.class,
@@ -453,6 +473,58 @@ public class ModNetwork {
          ClientboundUpdateAltarIndexMessage::encode,
          ClientboundUpdateAltarIndexMessage::decode,
          ClientboundUpdateAltarIndexMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundOpenHistoricMessage.class,
+         ServerboundOpenHistoricMessage::encode,
+         ServerboundOpenHistoricMessage::decode,
+         ServerboundOpenHistoricMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         VaultPlayerHistoricDataMessage.S2C.class,
+         VaultPlayerHistoricDataMessage.S2C::encode,
+         VaultPlayerHistoricDataMessage.S2C::decode,
+         VaultPlayerHistoricDataMessage.S2C::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), HistoricFavoritesMessage.class, HistoricFavoritesMessage::encode, HistoricFavoritesMessage::decode, HistoricFavoritesMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundAddHistoricFavoriteMessage.class,
+         ServerboundAddHistoricFavoriteMessage::encode,
+         ServerboundAddHistoricFavoriteMessage::decode,
+         ServerboundAddHistoricFavoriteMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         OpenVaultSnapshotMessage.S2C.class,
+         OpenVaultSnapshotMessage.S2C::encode,
+         OpenVaultSnapshotMessage.S2C::decode,
+         OpenVaultSnapshotMessage.S2C::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundSendSnapshotLinkMessage.class,
+         ServerboundSendSnapshotLinkMessage::encode,
+         ServerboundSendSnapshotLinkMessage::decode,
+         ServerboundSendSnapshotLinkMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundPickaxeOffsetKeyMessage.class,
+         ServerboundPickaxeOffsetKeyMessage::encode,
+         ServerboundPickaxeOffsetKeyMessage::decode,
+         ServerboundPickaxeOffsetKeyMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         TrappedMobChestParticlesMessage.class,
+         TrappedMobChestParticlesMessage::encode,
+         TrappedMobChestParticlesMessage::decode,
+         TrappedMobChestParticlesMessage::handle
       );
    }
 

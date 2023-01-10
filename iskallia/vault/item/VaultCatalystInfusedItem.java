@@ -1,11 +1,14 @@
 package iskallia.vault.item;
 
 import iskallia.vault.config.VaultCrystalCatalystConfig;
+import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.CodecUtils;
 import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
 import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.world.vault.modifier.spi.VaultModifier;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -85,17 +88,15 @@ public class VaultCatalystInfusedItem extends Item {
          if (modifierPoolGroup != null) {
             List<ResourceLocation> modifierIdList = modifierPoolGroup.getModifierPoolIdList()
                .stream()
-               .map(modifierPoolId -> ModConfigs.VAULT_CRYSTAL_CATALYST.getModifierPoolById(modifierPoolId))
+               .map(modifierPoolId -> ModConfigs.VAULT_MODIFIER_POOLS.getRandom(modifierPoolId, 0, JavaRandom.ofNanoTime()))
                .filter(Objects::nonNull)
-               .map(modifierPool -> modifierPool.getRandomModifier(RANDOM, modifierId -> casualVaults && isInventoryRestoreModifier(modifierId)))
+               .flatMap(Collection::stream)
+               .filter(modifier -> !casualVaults || !(modifier instanceof PlayerInventoryRestoreModifier))
+               .map(VaultModifier::getId)
                .collect(Collectors.toList());
             setModifiers(itemStack, modifierIdList);
          }
       }
-   }
-
-   private static boolean isInventoryRestoreModifier(ResourceLocation modifierId) {
-      return VaultModifierRegistry.get(modifierId) instanceof PlayerInventoryRestoreModifier;
    }
 
    private static boolean hasModifiers(ItemStack itemStack) {

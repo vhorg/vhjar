@@ -3,6 +3,7 @@ package iskallia.vault.entity;
 import iskallia.vault.config.VaultMobGearConfig;
 import iskallia.vault.config.VaultMobsConfig;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.entity.entity.EternalEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -20,7 +21,7 @@ public class EntityScaler {
    }
 
    public static void scale(Vault vault, LivingEntity entity) {
-      if (!(entity instanceof Player)) {
+      if (!(entity instanceof Player) && !(entity instanceof EternalEntity)) {
          if (!isScaled(entity)) {
             vault.ifPresent(Vault.LEVEL, level -> {
                VaultMobsConfig.scale(entity, level.get());

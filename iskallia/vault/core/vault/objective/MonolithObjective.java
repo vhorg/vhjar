@@ -15,6 +15,7 @@ import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.BlockSetEvent;
+import iskallia.vault.core.event.common.BlockUseEvent;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.overlay.VaultOverlay;
 import iskallia.vault.core.vault.player.Listener;
@@ -85,6 +86,7 @@ public class MonolithObjective extends Objective {
          .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
       CommonEvents.BLOCK_USE
          .in(world)
+         .at(BlockUseEvent.Phase.HEAD)
          .of(ModBlocks.MONOLITH)
          .register(
             this,

@@ -30,8 +30,10 @@ public class PlayerAttributeModifier extends EntityAttributeModifier<EntityAttri
                if (vault.get(Vault.LISTENERS).contains(event.player.getUUID())
                   && event.player.getServer() != null
                   && event.player.getLevel().getGameTime() % 10L == 0L) {
-                  synchronized (event.player) {
-                     this.applyToEntity(event.player, context.getUUID());
+                  if (!context.hasTarget() || context.getTarget().equals(event.player.getUUID())) {
+                     synchronized (event.player) {
+                        this.applyToEntity(event.player, context.getUUID(), context);
+                     }
                   }
                }
             }

@@ -31,6 +31,22 @@ public class VaultSnapshots extends SavedData {
       return null;
    }
 
+   public static List<VaultSnapshot> getPrev50(UUID owner, List<VaultSnapshot> snapshots) {
+      List<VaultSnapshot> copy = new ArrayList<>(snapshots);
+      List<VaultSnapshot> snapshotToReturn = new ArrayList<>();
+
+      for (VaultSnapshot snapshot : copy) {
+         if (snapshot.getEnd().get(Vault.STATS).getMap().containsKey(owner)) {
+            snapshotToReturn.add(snapshot);
+            if (snapshotToReturn.size() >= 50) {
+               break;
+            }
+         }
+      }
+
+      return snapshotToReturn;
+   }
+
    public static List<VaultSnapshot> getAll() {
       return get(ServerLifecycleHooks.getCurrentServer()).snapshots;
    }

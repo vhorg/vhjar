@@ -193,6 +193,10 @@ public class BountyElement extends ContainerElement<BountyElement> {
       return this.bounty;
    }
 
+   public BountyElement.Status getStatus() {
+      return this.status;
+   }
+
    @Override
    public boolean equals(Object o) {
       if (this == o) {

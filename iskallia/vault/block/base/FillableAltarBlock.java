@@ -1,17 +1,12 @@
 package iskallia.vault.block.base;
 
-import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.gear.IdolItem;
-import iskallia.vault.world.data.PlayerFavourData;
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.vault.influence.VaultGod;
 import java.util.Random;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -32,7 +27,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> extends FacedBlock implements EntityBlock {
    protected static final Random rand = new Random();
-   public static final float FAVOUR_CHANCE = 0.05F;
    public static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 13.0, 16.0);
 
    public FillableAltarBlock() {
@@ -45,7 +39,7 @@ public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> exte
 
    public abstract ParticleOptions getFlameParticle();
 
-   public abstract PlayerFavourData.VaultGodType getAssociatedVaultGod();
+   public abstract VaultGod getAssociatedVaultGod();
 
    public abstract ItemStack getAssociatedVaultGodShard();
 
@@ -59,37 +53,33 @@ public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> exte
          ItemStack heldStack = player.getItemInHand(hand);
          if (tileEntity != null) {
             try {
-               if (((FillableAltarTileEntity)tileEntity).isMaxedOut()) {
+               if (((FillableAltarTileEntity)tileEntity).isCompleted() && !((FillableAltarTileEntity)tileEntity).isConsumed()) {
                   ((FillableAltarTileEntity)tileEntity).placeReplacement(world, pos);
+                  ((FillableAltarTileEntity)tileEntity).setConsumed();
+                  CommonEvents.ALTAR_PROGRESS
+                     .invoke(
+                        (ServerLevel)world,
+                        (ServerPlayer)player,
+                        state,
+                        pos,
+                        (FillableAltarTileEntity)tileEntity,
+                        ((FillableAltarTileEntity)tileEntity).currentProgress,
+                        ((FillableAltarTileEntity)tileEntity).maxProgress,
+                        true
+                     );
+                  ((FillableAltarTileEntity)tileEntity).sendUpdates();
                   return InteractionResult.SUCCESS;
                }
 
-               return this.rightClicked(state, (ServerLevel)world, pos, (T)tileEntity, (ServerPlayer)player, heldStack);
+               if (!((FillableAltarTileEntity)tileEntity).isCompleted()) {
+                  return this.rightClicked(state, (ServerLevel)world, pos, (T)tileEntity, (ServerPlayer)player, heldStack);
+               }
             } catch (ClassCastException var10) {
             }
          }
 
          return InteractionResult.FAIL;
       }
-   }
-
-   public static float getFavourChance(Player player, PlayerFavourData.VaultGodType favourType) {
-      ItemStack offHand = player.getItemInHand(InteractionHand.OFF_HAND);
-      if (offHand.isEmpty() || !(offHand.getItem() instanceof IdolItem)) {
-         return 0.05F;
-      } else if (favourType != ((IdolItem)offHand.getItem()).getType()) {
-         return 0.05F;
-      } else {
-         int multiplier = 2;
-         return 0.05F * multiplier;
-      }
-   }
-
-   public static void playFavourInfo(ServerPlayer sPlayer) {
-      BlockPos pos = sPlayer.blockPosition();
-      sPlayer.level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), ModSounds.FAVOUR_UP, SoundSource.PLAYERS, 0.4F, 0.7F);
-      Component msg = new TextComponent("You gained a favour!").withStyle(ChatFormatting.DARK_GREEN).withStyle(ChatFormatting.BOLD);
-      sPlayer.displayClientMessage(msg, true);
    }
 
    @OnlyIn(Dist.CLIENT)

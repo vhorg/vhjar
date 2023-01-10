@@ -29,9 +29,10 @@ public class EternalInteractionMessage {
       this.action = action;
    }
 
-   public static EternalInteractionMessage feedItem(ItemStack stack) {
+   public static EternalInteractionMessage feedItem(ItemStack stack, boolean shiftDown) {
       EternalInteractionMessage pkt = new EternalInteractionMessage(EternalInteractionMessage.Action.FEED_SELECTED);
       pkt.extraData.put("stack", stack.serializeNBT());
+      pkt.extraData.putBoolean("shiftDown", shiftDown);
       return pkt;
    }
 
@@ -73,40 +74,48 @@ public class EternalInteractionMessage {
                   if (eternal != null) {
                      switch (pkt.action) {
                         case FEED_SELECTED:
+                           boolean shiftDown = pkt.extraData.getBoolean("shiftDown");
                            ItemStack activeStack = player.containerMenu.getCarried();
                            if (activeStack.isEmpty() || !canBeFed(eternal, activeStack)) {
                               return;
                            }
 
                            if (eternal.getLevel() < eternal.getMaxLevel()) {
-                              ModConfigs.ETERNAL
-                                 .getFoodExp(activeStack.getItem())
-                                 .ifPresent(
-                                    foodExp -> {
-                                       if (eternal.addExp(foodExp) && !player.isCreative()) {
-                                          activeStack.shrink(1);
-                                          player.containerMenu.broadcastChanges();
-                                          player.level
-                                             .playSound(
-                                                null,
-                                                tile.getBlockPos(),
-                                                SoundEvents.GENERIC_EAT,
-                                                SoundSource.PLAYERS,
-                                                0.5F,
-                                                player.level.random.nextFloat() * 0.1F + 0.9F
-                                             );
-                                          player.level
-                                             .playSound(
-                                                null,
-                                                tile.getBlockPos(),
-                                                SoundEvents.PLAYER_BURP,
-                                                SoundSource.PLAYERS,
-                                                0.5F,
-                                                player.level.random.nextFloat() * 0.1F + 0.9F
-                                             );
-                                       }
-                                    }
-                                 );
+                              int num = 1;
+                              int foodExp = 0;
+                              if (shiftDown) {
+                                 num = activeStack.getCount();
+                              }
+
+                              for (int i = 0; i < num; i++) {
+                                 foodExp += ModConfigs.ETERNAL.getFoodExp(activeStack.getItem()).orElse(0);
+                              }
+
+                              if (foodExp > 0 && eternal.addExp(foodExp)) {
+                                 if (!player.isCreative()) {
+                                    activeStack.shrink(num);
+                                    player.containerMenu.broadcastChanges();
+                                 }
+
+                                 player.level
+                                    .playSound(
+                                       null,
+                                       tile.getBlockPos(),
+                                       SoundEvents.GENERIC_EAT,
+                                       SoundSource.PLAYERS,
+                                       0.5F,
+                                       player.level.random.nextFloat() * 0.1F + 0.9F
+                                    );
+                                 player.level
+                                    .playSound(
+                                       null,
+                                       tile.getBlockPos(),
+                                       SoundEvents.PLAYER_BURP,
+                                       SoundSource.PLAYERS,
+                                       0.5F,
+                                       player.level.random.nextFloat() * 0.1F + 0.9F
+                                    );
+                              }
                            }
 
                            if (!eternal.isAlive() && activeStack.getItem().equals(ModItems.LIFE_SCROLL)) {

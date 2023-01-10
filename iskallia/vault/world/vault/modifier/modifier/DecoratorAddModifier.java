@@ -11,6 +11,7 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.core.world.template.EmptyTemplate;
 import iskallia.vault.core.world.template.JigsawTemplate;
 import iskallia.vault.core.world.template.PlacementSettings;
+import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.world.vault.modifier.spi.ModifierContext;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import net.minecraft.core.BlockPos;
@@ -41,7 +42,7 @@ public class DecoratorAddModifier extends VaultModifier<DecoratorAddModifier.Pro
                   if (!(data.getTemplate().getParent() instanceof EmptyTemplate)) {
                      ProcessorContext processorContext = new ProcessorContext(vault, data.getRandom());
 
-                     for (int i = 0; i < this.properties.attemptsPerChunk; i++) {
+                     for (int i = 0; i < this.properties.getAttemptsPerChunk(context); i++) {
                         int x = data.getRandom().nextInt(16) + data.getChunkPos().x * 16;
                         int z = data.getRandom().nextInt(16) + data.getChunkPos().z * 16;
                         int y = data.getRandom().nextInt(64);
@@ -91,23 +92,26 @@ public class DecoratorAddModifier extends VaultModifier<DecoratorAddModifier.Pro
       private final int attemptsPerChunk;
       @Expose
       private final boolean requireConditions;
+      @Expose
+      private final ScalarReputationProperty reputation;
 
-      public Properties(PartialTile output) {
-         this(output, 48, true);
+      public Properties(PartialTile output, ScalarReputationProperty reputation) {
+         this(output, 48, true, reputation);
       }
 
-      public Properties(PartialTile output, int attemptsPerChunk, boolean requireConditions) {
+      public Properties(PartialTile output, int attemptsPerChunk, boolean requireConditions, ScalarReputationProperty reputation) {
          this.output = output;
          this.attemptsPerChunk = attemptsPerChunk;
          this.requireConditions = requireConditions;
+         this.reputation = reputation;
       }
 
       public PartialTile getOutput() {
          return this.output;
       }
 
-      public int getAttemptsPerChunk() {
-         return this.attemptsPerChunk;
+      public int getAttemptsPerChunk(ModifierContext context) {
+         return this.reputation != null ? this.reputation.apply(this.attemptsPerChunk, context) : this.attemptsPerChunk;
       }
 
       public boolean requireConditions() {

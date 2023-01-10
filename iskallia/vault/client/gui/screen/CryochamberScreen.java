@@ -1,5 +1,6 @@
 package iskallia.vault.client.gui.screen;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -420,7 +421,9 @@ public class CryochamberScreen extends AbstractContainerScreen<CryochamberContai
                if (!feedRct.contains(mouseX - this.leftPos, mouseY - this.topPos)) {
                   return false;
                } else {
-                  ModNetwork.CHANNEL.sendToServer(EternalInteractionMessage.feedItem(heldStack));
+                  long window = Minecraft.getInstance().getWindow().getWindow();
+                  boolean shiftDown = InputConstants.isKeyDown(window, 340) || InputConstants.isKeyDown(window, 344);
+                  ModNetwork.CHANNEL.sendToServer(EternalInteractionMessage.feedItem(heldStack, shiftDown));
                   if (!Minecraft.getInstance().player.isCreative()) {
                      heldStack.shrink(1);
                   }

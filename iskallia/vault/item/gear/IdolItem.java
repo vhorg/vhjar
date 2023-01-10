@@ -1,6 +1,7 @@
 package iskallia.vault.item.gear;
 
 import com.google.common.collect.Multimap;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
@@ -12,7 +13,6 @@ import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.BasicItem;
-import iskallia.vault.world.data.PlayerFavourData;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nonnull;
@@ -39,14 +39,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.NotNull;
 
 public class IdolItem extends BasicItem implements VaultGearItem {
-   private final PlayerFavourData.VaultGodType type;
+   private final VaultGod type;
 
-   public IdolItem(ResourceLocation id, PlayerFavourData.VaultGodType type, Properties properties) {
+   public IdolItem(ResourceLocation id, VaultGod type, Properties properties) {
       super(id, properties);
       this.type = type;
    }
 
-   public PlayerFavourData.VaultGodType getType() {
+   public VaultGod getType() {
       return this.type;
    }
 
@@ -54,11 +54,10 @@ public class IdolItem extends BasicItem implements VaultGearItem {
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       return switch (this.type) {
-         case BENEVOLENT -> ModDynamicModels.Idols.VELARA.getId();
-         case OMNISCIENT -> ModDynamicModels.Idols.TENOS.getId();
-         case TIMEKEEPER -> ModDynamicModels.Idols.WENDARR.getId();
-         case MALEVOLENT -> ModDynamicModels.Idols.IDONA.getId();
-         default -> null;
+         case VELARA -> ModDynamicModels.Idols.VELARA.getId();
+         case TENOS -> ModDynamicModels.Idols.TENOS.getId();
+         case WENDARR -> ModDynamicModels.Idols.WENDARR.getId();
+         case IDONA -> ModDynamicModels.Idols.IDONA.getId();
       };
    }
 

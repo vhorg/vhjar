@@ -12,6 +12,7 @@
     "the_vault:demagnetizer",
     "the_vault:magnet_modification_table",
     "the_vault:vault_diamond_block",
-    "the_vault:vault_recycler"
+    "the_vault:vault_recycler",
+    "the_vault:wutodic_silver_block"
   ]
 }

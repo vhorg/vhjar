@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.time.modifier.ModifierExtension;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.world.vault.modifier.spi.ModifierContext;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import net.minecraft.resources.ResourceLocation;
@@ -30,13 +31,20 @@ public class VaultTimeModifier extends VaultModifier<VaultTimeModifier.Propertie
    public static class Properties {
       @Expose
       private final int timeAddedTicks;
+      @Expose
+      private final ScalarReputationProperty reputation;
 
-      public Properties(int timeAddedTicks) {
+      public Properties(int timeAddedTicks, ScalarReputationProperty reputation) {
          this.timeAddedTicks = timeAddedTicks;
+         this.reputation = reputation;
       }
 
       public int getTimeAddedTicks() {
          return this.timeAddedTicks;
+      }
+
+      public int getTimeAddedTicks(ModifierContext context) {
+         return this.reputation != null ? this.reputation.apply(this.timeAddedTicks, context) : this.timeAddedTicks;
       }
    }
 }

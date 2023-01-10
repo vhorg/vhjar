@@ -18,7 +18,11 @@ public class ItemDiscoveryTaskConfig extends TaskConfig<TaskEntry<ResourceLocati
    public ItemDiscoveryProperties getGeneratedTaskProperties(int vaultLevel) {
       TaskEntry<ResourceLocation> taskEntry = this.getEntry(vaultLevel);
       GenericEntry<ResourceLocation> entry = taskEntry.getRandom();
-      return new ItemDiscoveryProperties(entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount());
+      ItemDiscoveryProperties itemDiscoveryProperties = new ItemDiscoveryProperties(
+         entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount()
+      );
+      itemDiscoveryProperties.setRewardPool(entry.getRewardPool());
+      return itemDiscoveryProperties;
    }
 
    @Override

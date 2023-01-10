@@ -19,6 +19,7 @@ import iskallia.vault.command.GlobalTimerCommand;
 import iskallia.vault.command.InternalCommand;
 import iskallia.vault.command.MagnetCommand;
 import iskallia.vault.command.ModelDebugCommand;
+import iskallia.vault.command.OpenVaultSnapshotCommand;
 import iskallia.vault.command.PartyCommand;
 import iskallia.vault.command.PaxelCommand;
 import iskallia.vault.command.PointsResetCommand;
@@ -67,6 +68,7 @@ public class ModCommands {
    public static DifficultyCommand DIFFICULTY;
    public static VaultAltarCommand VAULT_ALTAR;
    public static PointsResetCommand POINTS_RESET;
+   public static OpenVaultSnapshotCommand OPEN_VAULT_SNAPSHOT;
 
    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandSelection env) {
       RELOAD_CONFIGS = registerCommand(ReloadConfigsCommand::new, dispatcher, env);
@@ -97,6 +99,7 @@ public class ModCommands {
       BOUNTY = registerCommand(BountyCommand::new, dispatcher, env);
       VAULT_ALTAR = registerCommand(VaultAltarCommand::new, dispatcher, env);
       POINTS_RESET = registerCommand(PointsResetCommand::new, dispatcher, env);
+      OPEN_VAULT_SNAPSHOT = registerCommand(OpenVaultSnapshotCommand::new, dispatcher, env);
    }
 
    public static void registerArgumentTypes() {

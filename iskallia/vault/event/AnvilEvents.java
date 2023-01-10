@@ -3,6 +3,7 @@ package iskallia.vault.event;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.EnchantedBookEntry;
 import iskallia.vault.core.world.generator.layout.DIYRoomEntry;
+import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModBlocks;
@@ -162,7 +163,7 @@ public class AnvilEvents {
             .map(VaultModifierStack::of)
             .toList();
          if (data.addModifiersByCrafting(modifierStackList, CrystalData.Simulate.FALSE)) {
-            VaultCrystalItem.scheduleTask(VaultCrystalItem.AddRandomCurseTask.INSTANCE, output);
+            VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddCursesTask(VaultMod.id("catalyst_curse"), true), output);
             VaultCrystalItem.scheduleTask(VaultCrystalItem.ExhaustTask.INSTANCE, output);
             event.setOutput(output);
             event.setCost(modifierStackList.size() * 4);
@@ -175,7 +176,7 @@ public class AnvilEvents {
    public static void onApplyWitherSkull(AnvilUpdateEvent event) {
       if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == Items.WITHER_SKELETON_SKULL) {
          ItemStack output = event.getLeft().copy();
-         VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddRandomCursesTask(1, 1), output);
+         VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddCursesTask(VaultMod.id("wither_skull_curse"), false), output);
          event.setOutput(output);
          event.setCost(1);
          event.setMaterialCost(1);
@@ -238,29 +239,35 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
-   public static void onApplyDiamondToCrystal(AnvilUpdateEvent event) {
-      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == Items.DIAMOND) {
-         ItemStack output = event.getLeft().copy();
-         CrystalData data = VaultCrystalItem.getData(output);
-         int crystalLevel = data.getLevel();
-         if (data.isCursed()) {
-            return;
-         }
-
-         if (!data.canBeModified()) {
-            return;
-         }
-
-         if (data.getLevel() > 1) {
-            int count = event.getRight().getCount();
-            int diff = crystalLevel - count;
-            event.setMaterialCost(count);
-            data.setLevel(Math.max(0, diff));
-            if (diff < 0) {
-               event.setMaterialCost(count + diff);
+   public static void onApplyBanishedSoul(AnvilUpdateEvent event) {
+      if (event.getRight().getItem() == ModItems.BANISHED_SOUL) {
+         Item input = event.getLeft().getItem();
+         if (input == ModItems.VAULT_CRYSTAL) {
+            ItemStack output = event.getLeft().copy();
+            CrystalData data = new CrystalData(output);
+            if (data.isCursed() || !data.canBeModified() || data.getLevel() <= 0) {
+               return;
             }
 
-            event.setCost(1);
+            int newLevel = Math.max(0, data.getLevel() - event.getRight().getCount());
+            int price = data.getLevel() - newLevel;
+            data.setLevel(newLevel);
+            event.setMaterialCost(price);
+            event.setCost(price);
+            event.setOutput(output);
+         } else if (input instanceof VaultGearItem) {
+            ItemStack output = event.getLeft().copy();
+            VaultGearData data = VaultGearData.read(output);
+            if (data.getState() != VaultGearState.UNIDENTIFIED || data.getItemLevel() <= 0) {
+               return;
+            }
+
+            int newLevel = Math.max(0, data.getItemLevel() - event.getRight().getCount());
+            int price = data.getItemLevel() - newLevel;
+            data.setItemLevel(newLevel);
+            data.write(output);
+            event.setMaterialCost(price);
+            event.setCost(price);
             event.setOutput(output);
          }
       }
@@ -337,7 +344,7 @@ public class AnvilEvents {
             VaultModifierStack modifierStack = VaultModifierStack.of((VaultModifier<?>)vaultModifier);
             if (data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
                data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
-               VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddRandomCursesTask(0, 2), output);
+               VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddCursesTask(VaultMod.id("soul_flame_curse"), false), output);
                data.setModifiable(false);
                event.setOutput(output);
                event.setMaterialCost(1);

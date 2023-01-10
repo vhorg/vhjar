@@ -82,6 +82,8 @@ public class VaultForgeHelper {
    }
 
    private static boolean isEqualCrafting(ItemStack thisStack, ItemStack thatStack) {
-      return thisStack.getItem() == thatStack.getItem() && thisStack.getDamageValue() == thatStack.getDamageValue() && thisStack.areShareTagsEqual(thatStack);
+      return thisStack.getItem() == thatStack.getItem()
+         && thisStack.getDamageValue() == thatStack.getDamageValue()
+         && (thisStack.getTag() == null || thisStack.areShareTagsEqual(thatStack));
    }
 }

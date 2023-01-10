@@ -317,7 +317,7 @@ public class EffectCloudAttribute {
       private final boolean isWhenHit;
 
       protected Reader(boolean isWhenHit) {
-         super("modifierName", 15007916);
+         super(isWhenHit ? "Effect Cloud when Hit" : "Effect Cloud", 15007916);
          this.isWhenHit = isWhenHit;
       }
 

@@ -2,6 +2,7 @@ package iskallia.vault.init;
 
 import com.google.common.collect.Lists;
 import iskallia.vault.VaultMod;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.item.AnimalJarItem;
 import iskallia.vault.item.ArchetypeStarItem;
 import iskallia.vault.item.BasicItem;
@@ -9,6 +10,7 @@ import iskallia.vault.item.BasicMobEggItem;
 import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.item.BurntCrystalItem;
 import iskallia.vault.item.GatedLootableItem;
+import iskallia.vault.item.GodBlessingItem;
 import iskallia.vault.item.InfiniteWaterBucketItem;
 import iskallia.vault.item.ItemDrillArrow;
 import iskallia.vault.item.ItemGiftBomb;
@@ -52,7 +54,6 @@ import iskallia.vault.item.modification.ReforgeTagModificationFocus;
 import iskallia.vault.item.paxel.PaxelItem;
 import iskallia.vault.util.VaultRarity;
 import iskallia.vault.util.function.Memo;
-import iskallia.vault.world.data.PlayerFavourData;
 import java.util.Random;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
@@ -195,6 +196,8 @@ public class ModItems {
    public static BasicItem TREASURE_CHEST_SCROLL = new BasicItem(VaultMod.id("treasure_chest_scroll"));
    public static BasicItem WUTODIC_MASS = new BasicItem(VaultMod.id("wutodic_mass"));
    public static BasicItem HARDENED_WUTODIC_MASS = new BasicItem(VaultMod.id("hardened_wutodic_mass"));
+   public static BasicItem WUTODIC_SILVER_NUGGET = new BasicItem(VaultMod.id("wutodic_silver_nugget"));
+   public static BasicItem WUTODIC_SILVER_INGOT = new BasicItem(VaultMod.id("wutodic_silver_ingot"));
    public static BasicItem SUBLIME_VAULT_ELIXIR = new BasicItem(VaultMod.id("sublime_vault_elixir"));
    public static BasicItem SUBLIME_VAULT_SUBSTANCE = new BasicItem(VaultMod.id("sublime_vault_substance"));
    public static BasicItem SUBLIME_VAULT_VISION = new BasicItem(VaultMod.id("sublime_vault_vision"));
@@ -202,6 +205,7 @@ public class ModItems {
    public static BasicItem KEYSTONE_TENOS = new BasicItem(VaultMod.id("final_keystone_tenos"));
    public static BasicItem KEYSTONE_VELARA = new BasicItem(VaultMod.id("final_keystone_velara"));
    public static BasicItem KEYSTONE_WENDARR = new BasicItem(VaultMod.id("final_keystone_wendarr"));
+   public static GodBlessingItem GOD_BLESSING = new GodBlessingItem(VaultMod.id("god_blessing"));
    public static BasicItem POISONOUS_MUSHROOM = new BasicItem(VaultMod.id("poisonous_mushroom"));
    public static BasicItem HUNTER_EYE = new BasicItem(VaultMod.id("hunter_eye"));
    public static BasicItem ETERNAL_SOUL = new BasicItem(VaultMod.id("eternal_soul"));
@@ -368,18 +372,10 @@ public class ModItems {
    public static VaultShieldItem SHIELD = new VaultShieldItem(VaultMod.id("shield"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static EtchingItem ETCHING = new EtchingItem(VaultMod.id("etching"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static TrinketItem TRINKET = new TrinketItem(VaultMod.id("trinket"));
-   public static IdolItem IDOL_BENEVOLENT = new IdolItem(
-      VaultMod.id("idol_benevolent"), PlayerFavourData.VaultGodType.BENEVOLENT, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1)
-   );
-   public static IdolItem IDOL_OMNISCIENT = new IdolItem(
-      VaultMod.id("idol_omniscient"), PlayerFavourData.VaultGodType.OMNISCIENT, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1)
-   );
-   public static IdolItem IDOL_TIMEKEEPER = new IdolItem(
-      VaultMod.id("idol_timekeeper"), PlayerFavourData.VaultGodType.TIMEKEEPER, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1)
-   );
-   public static IdolItem IDOL_MALEVOLENCE = new IdolItem(
-      VaultMod.id("idol_malevolence"), PlayerFavourData.VaultGodType.MALEVOLENT, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1)
-   );
+   public static IdolItem IDOL_BENEVOLENT = new IdolItem(VaultMod.id("idol_benevolent"), VaultGod.VELARA, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
+   public static IdolItem IDOL_OMNISCIENT = new IdolItem(VaultMod.id("idol_omniscient"), VaultGod.TENOS, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
+   public static IdolItem IDOL_TIMEKEEPER = new IdolItem(VaultMod.id("idol_timekeeper"), VaultGod.WENDARR, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
+   public static IdolItem IDOL_MALEVOLENCE = new IdolItem(VaultMod.id("idol_malevolence"), VaultGod.IDONA, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BasicItem VAULT_PLATING = new BasicItem(VaultMod.id("vault_plating"));
    public static BasicItem REPAIR_CORE = new BasicItem(VaultMod.id("repair_core"));
    public static BasicItem VAULT_ALLOY = new BasicItem(VaultMod.id("vault_alloy"));
@@ -456,6 +452,7 @@ public class ModItems {
    public static BasicItem SOUL_DUST = new BasicItem(VaultMod.id("soul_dust"));
    public static ItemShardPouch SHARD_POUCH = new ItemShardPouch(VaultMod.id("shard_pouch"));
    public static BasicItem UNKNOWN_ITEM = new BasicItem(VaultMod.id("unknown_item"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
+   public static BasicItem BANISHED_SOUL = new BasicItem(VaultMod.id("banished_soul"));
    public static BasicScavengerItem SCAVENGER_CREEPER_EYE = new BasicScavengerItem("creeper_eye");
    public static BasicScavengerItem SCAVENGER_CREEPER_FOOT = new BasicScavengerItem("creeper_foot");
    public static BasicScavengerItem SCAVENGER_CREEPER_FUSE = new BasicScavengerItem("creeper_fuse");
@@ -686,6 +683,33 @@ public class ModItems {
    );
    public static final BasicMobEggItem T1_ZOMBIE_EGG = new BasicMobEggItem(
       VaultMod.id("t1_zombie_egg"), () -> ModEntities.T1_ZOMBIE, 44975, 7969893, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_CREEPER_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_creeper_egg"), () -> ModEntities.T2_CREEPER, 894731, 0, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_DROWNED_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_drowned_egg"), () -> ModEntities.T2_DROWNED, 9433559, 7969893, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_ENDERMAN_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_enderman_egg"), () -> ModEntities.T2_ENDERMAN, 1447446, 0, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_HUSK_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_husk_egg"), () -> ModEntities.T2_HUSK, 7958625, 15125652, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_PIGLIN_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_piglin_egg"), () -> ModEntities.T2_PIGLIN, 10051392, 16380836, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_SKELETON_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_skeleton_egg"), () -> ModEntities.T2_SKELETON, 12698049, 4802889, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_STRAY_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_stray_egg"), () -> ModEntities.T2_STRAY, 6387319, 14543594, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_WITHER_SKELETON_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_wither_skeleton_egg"), () -> ModEntities.T2_WITHER_SKELETON, 1315860, 4672845, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_zombie_egg"), () -> ModEntities.T2_ZOMBIE, 44975, 7969893, new Properties().tab(VAULT_MOD_GROUP)
    );
    public static final BasicMobEggItem VAULT_GREEN_GUMMY_SOLDIER_EGG = new BasicMobEggItem(
       VaultMod.id("vault_green_gummy_soldier_egg"), () -> ModEntities.VAULT_GREEN_GUMMY_SOLDIER, 2538582, 3593854, new Properties().tab(VAULT_MOD_GROUP)
@@ -938,6 +962,7 @@ public class ModItems {
       registry.register(UNKNOWN_ITEM);
       registry.register(SOUL_SHARD);
       registry.register(SOUL_DUST);
+      registry.register(BANISHED_SOUL);
       registry.register(SHARD_POUCH);
       registry.register(TRINKET);
       registry.register(VAULTERITE_PICKAXE);
@@ -1020,6 +1045,7 @@ public class ModItems {
       registry.register(KEYSTONE_VELARA);
       registry.register(KEYSTONE_TENOS);
       registry.register(KEYSTONE_WENDARR);
+      registry.register(GOD_BLESSING);
       registry.register(RAW_CHROMATIC_IRON);
       registry.register(CHROMATIC_IRON_TINY_DUST);
       registry.register(CHROMATIC_IRON_SMALL_DUST);
@@ -1048,6 +1074,8 @@ public class ModItems {
       registry.register(TREASURE_CHEST_SCROLL);
       registry.register(WUTODIC_MASS);
       registry.register(HARDENED_WUTODIC_MASS);
+      registry.register(WUTODIC_SILVER_NUGGET);
+      registry.register(WUTODIC_SILVER_INGOT);
       registry.register(SUBLIME_VAULT_ELIXIR);
       registry.register(VAULT_MEAT);
       registry.register(RAW_VAULT_STEAK);
@@ -1085,6 +1113,15 @@ public class ModItems {
       registry.register(T1_STRAY_EGG);
       registry.register(T1_WITHER_SKELETON_EGG);
       registry.register(T1_ZOMBIE_EGG);
+      registry.register(T2_CREEPER_EGG);
+      registry.register(T2_DROWNED_EGG);
+      registry.register(T2_ENDERMAN_EGG);
+      registry.register(T2_HUSK_EGG);
+      registry.register(T2_PIGLIN_EGG);
+      registry.register(T2_SKELETON_EGG);
+      registry.register(T2_STRAY_EGG);
+      registry.register(T2_WITHER_SKELETON_EGG);
+      registry.register(T2_ZOMBIE_EGG);
       registry.register(VAULT_GREEN_GUMMY_SOLDIER_EGG);
       registry.register(VAULT_BLUE_GUMMY_SOLDIER_EGG);
       registry.register(VAULT_YELLOW_GUMMY_SOLDIER_EGG);

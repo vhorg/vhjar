@@ -1,13 +1,13 @@
 package iskallia.vault.item.crystal;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.layout.CrystalLayout;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.util.MathUtilities;
-import iskallia.vault.world.data.PlayerFavourData;
 import iskallia.vault.world.vault.VaultRaid;
 import iskallia.vault.world.vault.builder.ClassicVaultBuilder;
 import iskallia.vault.world.vault.builder.CoopVaultBuilder;
@@ -778,11 +778,11 @@ public class CrystalData implements INBTSerializable<CompoundTag> {
       RAFFLE(VaultLogic.RAFFLE, RaffleVaultBuilder.getInstance(), "Raffle"),
       COOP(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Cooperative"),
       TROVE(VaultLogic.CLASSIC, TroveVaultBuilder.getInstance(), "Vault Trove", ChatFormatting.GOLD),
-      BOSS_BENEVOLENT_PREP("Velara's Sacrifice", PlayerFavourData.VaultGodType.BENEVOLENT.getChatColor()),
-      BOSS_BENEVOLENT("Velara's Demand", PlayerFavourData.VaultGodType.BENEVOLENT.getChatColor()),
-      BOSS_OMNISCIENT("Tenos' Oblivion", PlayerFavourData.VaultGodType.OMNISCIENT.getChatColor()),
-      BOSS_TIMEKEEPER("Wendarr's Transience", PlayerFavourData.VaultGodType.TIMEKEEPER.getChatColor()),
-      BOSS_MALEVOLENCE("Idona's Wrath", PlayerFavourData.VaultGodType.MALEVOLENT.getChatColor()),
+      BOSS_BENEVOLENT_PREP("Velara's Sacrifice", VaultGod.VELARA.getChatColor()),
+      BOSS_BENEVOLENT("Velara's Demand", VaultGod.VELARA.getChatColor()),
+      BOSS_OMNISCIENT("Tenos' Oblivion", VaultGod.TENOS.getChatColor()),
+      BOSS_TIMEKEEPER("Wendarr's Transience", VaultGod.WENDARR.getChatColor()),
+      BOSS_MALEVOLENCE("Idona's Wrath", VaultGod.IDONA.getChatColor()),
       FINAL_LOBBY(VaultLogic.FINAL_LOBBY, FinalLobbyBuilder.getInstance(), "Final Vault", ChatFormatting.DARK_PURPLE),
       FINAL_VELARA(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Velara Challenge", ChatFormatting.GREEN),
       FINAL_TENOS(VaultLogic.COOP, CoopVaultBuilder.getInstance(), "Final Tenos Challenge", ChatFormatting.AQUA),

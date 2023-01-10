@@ -77,7 +77,7 @@ public class StatisticsTabContainer extends NBTElementContainer<StatTotals> {
       );
       this.curioContainerHandler.scrollToIndex(0);
       this.curioSlotIndexRange = new AbstractElementContainer.SlotIndexRange(
-         this.offhandSlotIndexRange.end(), this.offhandSlotIndexRange.end() + this.curioContainerHandler.maxSlotsDisplayed
+         this.offhandSlotIndexRange.end(), this.offhandSlotIndexRange.end() + this.curioContainerHandler.getVisibleSlotCount()
       );
    }
 
@@ -100,18 +100,14 @@ public class StatisticsTabContainer extends NBTElementContainer<StatTotals> {
             }
          } else if (equipmentSlot.getType() == Type.ARMOR && !((Slot)this.slots.get(this.armorSlotIndexRange.end() - equipmentSlot.getIndex() - 1)).hasItem()) {
             int i = this.armorSlotIndexRange.end() - equipmentSlot.getIndex() - 1;
-            if (!this.moveItemStackTo(slotItemStack, i, i + 1, false)) {
-               return ItemStack.EMPTY;
-            }
+            this.moveItemStackTo(slotItemStack, i, i + 1, false);
          } else if (index < this.curioSlotIndexRange.start() && !CuriosApi.getCuriosHelper().getCurioTags(slotItemStack.getItem()).isEmpty()) {
-            if (!this.moveItemStackTo(slotItemStack, this.curioSlotIndexRange, false)) {
-               return ItemStack.EMPTY;
-            }
+            this.moveItemStackTo(slotItemStack, this.curioSlotIndexRange, false);
          } else if (equipmentSlot == EquipmentSlot.OFFHAND && !((Slot)this.slots.get(this.offhandSlotIndexRange.start())).hasItem()) {
-            if (!this.moveItemStackTo(slotItemStack, this.offhandSlotIndexRange, false)) {
-               return ItemStack.EMPTY;
-            }
-         } else if (this.inventorySlotIndexRange.contains(index)) {
+            this.moveItemStackTo(slotItemStack, this.offhandSlotIndexRange, false);
+         }
+
+         if (this.inventorySlotIndexRange.contains(index)) {
             if (!this.moveItemStackTo(slotItemStack, this.hotbarSlotIndexRange, false)) {
                return ItemStack.EMPTY;
             }

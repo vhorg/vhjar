@@ -23,12 +23,15 @@ import iskallia.vault.skill.ability.effect.sub.FarmerMelonAbility;
 import iskallia.vault.skill.ability.effect.sub.HealEffectAbility;
 import iskallia.vault.skill.ability.effect.sub.HealGroupAbility;
 import iskallia.vault.skill.ability.effect.sub.HunterObjectiveAbility;
+import iskallia.vault.skill.ability.effect.sub.HunterTargetedAbility;
 import iskallia.vault.skill.ability.effect.sub.MegaJumpBreakDownAbility;
 import iskallia.vault.skill.ability.effect.sub.MegaJumpBreakUpAbility;
 import iskallia.vault.skill.ability.effect.sub.NovaDotAbility;
 import iskallia.vault.skill.ability.effect.sub.NovaSpeedAbility;
 import iskallia.vault.skill.ability.effect.sub.RampageChainAbility;
 import iskallia.vault.skill.ability.effect.sub.RampageLeechAbility;
+import iskallia.vault.skill.ability.effect.sub.StonefallColdAbility;
+import iskallia.vault.skill.ability.effect.sub.StonefallSnowAbility;
 import iskallia.vault.skill.ability.effect.sub.TankProjectileAbility;
 import iskallia.vault.skill.ability.effect.sub.TankReflectAbility;
 import iskallia.vault.skill.ability.effect.sub.TauntRepelAbility;
@@ -63,6 +66,11 @@ public class ModAbilities {
    public static final String VEIN_MINER_VOID = "Vein Miner_Void";
    public static final String HUNTER = "Hunter";
    public static final String HUNTER_BLOCKS = "Hunter_Blocks";
+   public static final String HUNTER_WOODEN = "Hunter_Wooden";
+   public static final String HUNTER_GILDED = "Hunter_Gilded";
+   public static final String HUNTER_LIVING = "Hunter_Living";
+   public static final String HUNTER_ORNATE = "Hunter_Ornate";
+   public static final String HUNTER_COINS = "Hunter_Coins";
    public static final String FARMER = "Farmer";
    public static final String FARMER_MELON = "Farmer_Melon";
    public static final String FARMER_CACTUS = "Farmer_Cactus";
@@ -71,6 +79,8 @@ public class ModAbilities {
    public static final String TAUNT = "Taunt";
    public static final String TAUNT_REPEL = "Taunt_Repel";
    public static final String STONEFALL = "Stonefall";
+   public static final String STONEFALL_SNOW = "Stonefall_Snow";
+   public static final String STONEFALL_COLD = "Stonefall_Cold";
 
    public static void init() {
       AbilityRegistry.register("Heal", new HealAbility());
@@ -87,6 +97,11 @@ public class ModAbilities {
       AbilityRegistry.register("Mega Jump_Break_Down", new MegaJumpBreakDownAbility());
       AbilityRegistry.register("Hunter", new HunterAbility());
       AbilityRegistry.register("Hunter_Blocks", new HunterObjectiveAbility());
+      AbilityRegistry.register("Hunter_Wooden", new HunterTargetedAbility());
+      AbilityRegistry.register("Hunter_Gilded", new HunterTargetedAbility());
+      AbilityRegistry.register("Hunter_Living", new HunterTargetedAbility());
+      AbilityRegistry.register("Hunter_Ornate", new HunterTargetedAbility());
+      AbilityRegistry.register("Hunter_Coins", new HunterTargetedAbility());
       AbilityRegistry.register("Execute", new ExecuteAbility());
       AbilityRegistry.register("Summon Eternal", new SummonEternalAbility());
       AbilityRegistry.register("Farmer", new FarmerAbility());
@@ -107,5 +122,7 @@ public class ModAbilities {
       AbilityRegistry.register("Vein Miner_Durability", new VeinMinerDurabilityAbility());
       AbilityRegistry.register("Vein Miner_Void", new VeinMinerVoidAbility());
       AbilityRegistry.register("Stonefall", new StonefallAbility());
+      AbilityRegistry.register("Stonefall_Snow", new StonefallSnowAbility());
+      AbilityRegistry.register("Stonefall_Cold", new StonefallColdAbility());
    }
 }

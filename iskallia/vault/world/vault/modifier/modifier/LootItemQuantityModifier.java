@@ -6,9 +6,11 @@ import iskallia.vault.core.event.common.LootGenerationEvent;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.world.loot.generator.TieredLootTableGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.world.vault.modifier.spi.ModifierContext;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.Optional;
+import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 
 public class LootItemQuantityModifier extends VaultModifier<LootItemQuantityModifier.Properties> {
@@ -23,24 +25,29 @@ public class LootItemQuantityModifier extends VaultModifier<LootItemQuantityModi
          .pre()
          .register(
             context.getUUID(),
-            data -> this.getGenerator(vault, data)
-               .ifPresent(generator -> generator.itemQuantity = (float)(generator.itemQuantity + this.properties.percentage))
+            data -> this.getGenerator(vault, data, context)
+               .ifPresent(generator -> generator.itemQuantity = (float)(generator.itemQuantity + this.properties.getPercentage(context)))
          );
       CommonEvents.LOOT_GENERATION
          .post()
          .register(
             context.getUUID(),
-            data -> this.getGenerator(vault, data)
-               .ifPresent(generator -> generator.itemQuantity = (float)(generator.itemQuantity - this.properties.percentage))
+            data -> this.getGenerator(vault, data, context)
+               .ifPresent(generator -> generator.itemQuantity = (float)(generator.itemQuantity - this.properties.getPercentage(context)))
          );
    }
 
-   public Optional<TieredLootTableGenerator> getGenerator(Vault vault, LootGenerationEvent.Data data) {
+   public Optional<TieredLootTableGenerator> getGenerator(Vault vault, LootGenerationEvent.Data data, ModifierContext context) {
       if (data.getGenerator() instanceof TieredLootTableGenerator generator) {
          if (generator.source == null) {
             return Optional.empty();
          } else {
-            return !vault.get(Vault.LISTENERS).contains(generator.source.getUUID()) ? Optional.empty() : Optional.of(generator);
+            UUID uuid = generator.source.getUUID();
+            if (!vault.get(Vault.LISTENERS).contains(uuid)) {
+               return Optional.empty();
+            } else {
+               return context.hasTarget() && !context.getTarget().equals(uuid) ? Optional.empty() : Optional.of(generator);
+            }
          }
       } else {
          return Optional.empty();
@@ -50,13 +57,20 @@ public class LootItemQuantityModifier extends VaultModifier<LootItemQuantityModi
    public static class Properties {
       @Expose
       private final double percentage;
+      @Expose
+      private final ScalarReputationProperty reputation;
 
-      public Properties(double percentage) {
+      public Properties(double percentage, ScalarReputationProperty reputation) {
          this.percentage = percentage;
+         this.reputation = reputation;
       }
 
       public double getPercentage() {
          return this.percentage;
+      }
+
+      public double getPercentage(ModifierContext context) {
+         return this.reputation != null ? this.reputation.apply(this.percentage, context) : this.percentage;
       }
    }
 }

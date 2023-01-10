@@ -30,6 +30,8 @@ public class AbilitiesVignetteConfig extends Config {
    @Expose
    public AbilitiesVignetteConfig.VignetteData STONEFALL;
    @Expose
+   public AbilitiesVignetteConfig.VignetteData STONEFALL_COLD;
+   @Expose
    public AbilitiesVignetteConfig.VignetteData RAGE;
 
    @Override
@@ -50,6 +52,7 @@ public class AbilitiesVignetteConfig extends Config {
       this.RAMPAGE_LEECH = new AbilitiesVignetteConfig.VignetteData(TextColor.parseColor("#FF0000"), 0.125F, AbilitiesVignetteConfig.VignetteStyle.VIGNETTE);
       this.RAMPAGE_CHAIN = new AbilitiesVignetteConfig.VignetteData(TextColor.parseColor("#FF0000"), 0.125F, AbilitiesVignetteConfig.VignetteStyle.VIGNETTE);
       this.STONEFALL = new AbilitiesVignetteConfig.VignetteData(TextColor.parseColor("#999999"), 0.75F, AbilitiesVignetteConfig.VignetteStyle.VIGNETTE);
+      this.STONEFALL_COLD = new AbilitiesVignetteConfig.VignetteData(TextColor.parseColor("#FFFFFF"), 0.75F, AbilitiesVignetteConfig.VignetteStyle.VIGNETTE);
       this.RAGE = new AbilitiesVignetteConfig.VignetteData(TextColor.parseColor("#FF0000"), 0.5F, AbilitiesVignetteConfig.VignetteStyle.VIGNETTE);
    }
 
@@ -70,6 +73,7 @@ public class AbilitiesVignetteConfig extends Config {
          this.RAMPAGE_LEECH,
          this.RAMPAGE_CHAIN,
          this.STONEFALL,
+         this.STONEFALL_COLD,
          this.RAGE
       );
    }

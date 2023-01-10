@@ -17,7 +17,9 @@ public class ChanceArtifactModifier extends AbstractChanceModifier<AbstractChanc
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
       CommonEvents.ARTIFACT_CHANCE.register(context.getUUID(), data -> data.getListener().getPlayer().ifPresent(player -> {
          if (player.level == world) {
-            data.setProbability(data.getProbability() + this.properties.getChance());
+            if (!context.hasTarget() || context.getTarget().equals(data.getListener().getId())) {
+               data.setProbability(data.getProbability() + this.properties.getChance(context));
+            }
          }
       }));
    }

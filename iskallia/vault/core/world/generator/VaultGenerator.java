@@ -10,10 +10,14 @@ import net.minecraft.world.level.ServerLevelAccessor;
 
 public abstract class VaultGenerator extends DataObject<VaultGenerator> implements ISupplierKey<GridGenerator> {
    public void initServer(VirtualWorld world, Vault vault) {
-      CommonEvents.SURFACE_GENERATION.in(world).register(vault, data -> this.generate(vault, data.getGenRegion(), data.getChunk().getPos()));
+      CommonEvents.SURFACE_GENERATION.in(world).register(this, data -> this.generate(vault, data.getGenRegion(), data.getChunk().getPos()));
    }
 
    public void tickServer(VirtualWorld world, Vault vault) {
+   }
+
+   public void releaseServer() {
+      CommonEvents.SURFACE_GENERATION.release(this);
    }
 
    public abstract void generate(Vault var1, ServerLevelAccessor var2, ChunkPos var3);

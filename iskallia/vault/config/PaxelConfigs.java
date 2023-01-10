@@ -43,6 +43,8 @@ public class PaxelConfigs extends Config {
    private Map<PaxelItem.Perk, PaxelConfigs.PerkUpgrade> PERKS;
    @Expose
    private Item[] MATERIAL_ITEMS = new Item[6];
+   @Expose
+   private int MAX_HARDNESS_ABOVE_TARGET;
 
    public Item getMaterialItem(int i) {
       return this.MATERIAL_ITEMS[i];
@@ -71,6 +73,10 @@ public class PaxelConfigs extends Config {
 
    public PaxelConfigs.PaxelTierValues getTierValues(ItemStack paxel) {
       return this.TIER_VALUES.get(paxel.getItem());
+   }
+
+   public int getMaxHardnessAboveTarget() {
+      return this.MAX_HARDNESS_ABOVE_TARGET;
    }
 
    @Override
@@ -108,6 +114,7 @@ public class PaxelConfigs extends Config {
       this.PERKS = Arrays.stream(PaxelItem.Perk.values())
          .collect(Collectors.toMap(Function.identity(), p -> new PaxelConfigs.PerkUpgrade(1, 5, TextColor.fromRgb(-1), "configure me")));
       this.PULVERIZING_MAP = Map.of(Blocks.DIORITE.getRegistryName(), new PaxelConfigs.Entry(new ItemStack(Items.DIAMOND, 3), 0.5F));
+      this.MAX_HARDNESS_ABOVE_TARGET = 5;
    }
 
    private static class Entry {

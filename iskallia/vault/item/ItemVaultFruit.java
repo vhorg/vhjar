@@ -119,7 +119,7 @@ public class ItemVaultFruit extends Item {
             attributeInstance.removeModifier(MAX_HEALTH_REDUCTION_ATTRIBUTE_MODIFIER_UUID);
          }
 
-         reductionAmount -= Math.max((double)minimumReduction, attributeInstance.getBaseValue() * percentageReduction);
+         reductionAmount -= Math.max((double)minimumReduction, attributeInstance.getValue() * percentageReduction);
          attributeInstance.addPermanentModifier(
             new AttributeModifier(MAX_HEALTH_REDUCTION_ATTRIBUTE_MODIFIER_UUID, "VaultFruitMaxHealthReduction", reductionAmount, Operation.ADDITION)
          );

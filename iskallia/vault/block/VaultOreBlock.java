@@ -17,8 +17,10 @@ import net.minecraft.advancements.critereon.MinMaxBounds.Ints;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -95,7 +97,10 @@ public class VaultOreBlock extends OreBlock {
             if (!tool.isEmpty() && tool.getItem() instanceof PaxelItem) {
                float copiouslyChance = PaxelItem.getUsableStat(tool, PaxelItem.Stat.COPIOUSLY);
                if (copiouslyChance > 0.0F && this.RANDOM.nextFloat() < copiouslyChance / 100.0F) {
-                  drops.addAll(super.getDrops(state, builder));
+                  Entity player = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
+                  BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
+                  player.level.playSound(null, pos, ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.1F, 0.85F);
+                  drops.addAll(drops);
                }
             }
          }

@@ -18,7 +18,11 @@ public class MiningTaskConfig extends TaskConfig<TaskEntry<ResourceLocation>, Mi
    public MiningProperties getGeneratedTaskProperties(int vaultLevel) {
       TaskEntry<ResourceLocation> taskEntry = this.getEntry(vaultLevel);
       GenericEntry<ResourceLocation> entry = taskEntry.getRandom();
-      return new MiningProperties(entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount());
+      MiningProperties miningProperties = new MiningProperties(
+         entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount()
+      );
+      miningProperties.setRewardPool(entry.getRewardPool());
+      return miningProperties;
    }
 
    @Override

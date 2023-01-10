@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " sd",
+    "ses",
+    "ds "
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "s": {
+      "item": "the_vault:soul_shard"
+    },
+    "d": {
+      "item": "minecraft:diamond"
+    }
+  },
+  "result": {
+    "item": "the_vault:banished_soul",
+    "count": 1
+  }
+}

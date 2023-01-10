@@ -1,6 +1,7 @@
 package iskallia.vault.entity.entity;
 
 import com.mojang.authlib.GameProfile;
+import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.sync.context.DiskSyncContext;
 import iskallia.vault.core.net.ArrayBitBuffer;
@@ -15,13 +16,18 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.world.data.ServerVaults;
+import iskallia.vault.world.data.SpiritDropData;
 import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.BlockPos.MutableBlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
@@ -44,10 +50,12 @@ import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -55,6 +63,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber
 public class SpiritEntity extends Mob implements IPlayerSkinHolder {
+   private static final String SPAWN_SPIRIT_TAG = VaultMod.sId("spawnSpirit");
    private static final String OWNER_PROFILE_TAG = "ownerProfile";
    private static final String JOIN_STATE_TAG = "joinState";
    private GameProfile gameProfile = null;
@@ -79,7 +88,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    }
 
    private void addDrops(Collection<ItemEntity> drops) {
-      drops.stream().<ItemStack>map(ItemEntity::getItem).filter(this::shouldAddItem).forEach(this.items::add);
+      drops.stream().<ItemStack>map(ItemEntity::getItem).filter(SpiritEntity::shouldAddItem).forEach(stack -> this.items.add(stack.copy()));
    }
 
    public void setJoinState(EntityState joinState) {
@@ -96,37 +105,73 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
             .ifPresent(
                vault -> {
                   if (level instanceof ServerLevel serverLevel
-                     && level.players().size() > 1
-                     && vault.get(Vault.MODIFIERS).getModifiers().stream().noneMatch(m -> m instanceof PlayerInventoryRestoreModifier)
-                     && ModEntities.SPIRIT.spawn(serverLevel, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
-                     )
-                   {
-                     EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
-                     spirit.transferPlayerData(player, event.getDrops(), joinState);
+                     && vault.get(Vault.MODIFIERS).getModifiers().stream().noneMatch(m -> m instanceof PlayerInventoryRestoreModifier)) {
+                     if (level.players().size() > 1) {
+                        if (ModEntities.SPIRIT.spawn(serverLevel, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
+                           )
+                         {
+                           EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
+                           spirit.transferPlayerData(player, event.getDrops(), joinState);
+                        }
+                     } else {
+                        SpiritDropData data = SpiritDropData.get(serverLevel);
+                        UUID playerId = player.getUUID();
+                        event.getDrops()
+                           .stream()
+                           .<ItemStack>map(ItemEntity::getItem)
+                           .filter(SpiritEntity::shouldAddItem)
+                           .forEach(stack -> data.addDrop(playerId, stack.copy()));
+                        player.getTags().add(SPAWN_SPIRIT_TAG);
+                     }
                   }
                }
             );
       }
    }
 
+   @SubscribeEvent
+   public static void onPlayerRespawn(PlayerRespawnEvent event) {
+      Player player = event.getPlayer();
+      if (player.getTags().contains(SPAWN_SPIRIT_TAG) && player.getLevel() instanceof ServerLevel serverLevel) {
+         player.getTags().remove(SPAWN_SPIRIT_TAG);
+
+         for (MutableBlockPos p : BlockPos.spiralAround(new BlockPos(player.position()), 1, Direction.EAST, Direction.SOUTH)) {
+            Vec3 respawnPos = DismountHelper.findSafeDismountLocation(ModEntities.SPIRIT, player.getLevel(), p.immutable(), false);
+            if (respawnPos != null) {
+               if (ModEntities.SPIRIT.spawn(serverLevel, null, null, new BlockPos(respawnPos), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
+                  )
+                {
+                  SpiritDropData data = SpiritDropData.get(serverLevel);
+                  UUID playerId = player.getUUID();
+                  spirit.setItems(data.getDrops(playerId));
+                  spirit.setGameProfile(player.getGameProfile());
+                  spirit.setVaultLevel(SidedHelper.getVaultLevel(player));
+                  data.removeDrops(playerId);
+               }
+               break;
+            }
+         }
+      }
+   }
+
    public void addPlayersItems(Player player) {
       for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
          ItemStack stackInSlot = player.getInventory().getItem(slot);
-         if (this.shouldAddItem(stackInSlot)) {
+         if (shouldAddItem(stackInSlot)) {
             this.items.add(stackInSlot.copy());
          }
       }
 
       if (ModList.get().isLoaded("curios")) {
          IntegrationCurios.getCuriosItemStacks(player).forEach((slotType, stacks) -> stacks.forEach(stack -> {
-            if (this.shouldAddItem(stack)) {
+            if (shouldAddItem(stack)) {
                this.items.add(stack.copy());
             }
          }));
       }
    }
 
-   private boolean shouldAddItem(ItemStack stack) {
+   private static boolean shouldAddItem(ItemStack stack) {
       return !stack.isEmpty()
          && (
             !AttributeGearData.hasData(stack)

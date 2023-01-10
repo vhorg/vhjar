@@ -9,6 +9,7 @@ import iskallia.vault.block.TreasureDoorBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
 import iskallia.vault.gear.VaultGearHelper;
@@ -53,7 +54,6 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_ALTAR, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_ARTIFACT, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.MVP_CROWN, RenderType.cutout());
-      ItemBlockRenderTypes.setRenderLayer(ModBlocks.KEY_PRESS, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.XP_ALTAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLOOD_ALTAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.TIME_ALTAR, RenderType.translucent());
@@ -154,6 +154,15 @@ public class ModModels {
             return type == null ? -1.0F : type.ordinal();
          }
       };
+      public static ItemPropertyFunction GOD_BLESSING_TYPE = (stack, world, entity, seed) -> {
+         CompoundTag nbt = stack.getTag();
+         if (nbt == null) {
+            return -1.0F;
+         } else {
+            VaultGod type = VaultGod.fromName(nbt.getString("type"));
+            return type == null ? -1.0F : type.ordinal();
+         }
+      };
 
       public static void register() {
          registerItemProperty(ModItems.ETCHING, "etching", ETCHING);
@@ -187,6 +196,8 @@ public class ModModels {
          for (VaultOreBlock block : VaultOreBlock.ALL) {
             registerItemProperty(block.asItem(), "vault_ore_type", VAULT_ORE_TYPE);
          }
+
+         registerItemProperty(ModItems.GOD_BLESSING, "god_blessing_type", GOD_BLESSING_TYPE);
       }
 
       public static void registerOverrides() {

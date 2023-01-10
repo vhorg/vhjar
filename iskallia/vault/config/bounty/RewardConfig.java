@@ -9,6 +9,7 @@ import iskallia.vault.config.entry.RangeEntry;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
@@ -18,7 +19,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 public class RewardConfig extends Config {
    @Expose
-   protected LevelEntryMap<RewardConfig.RewardEntry> LEVELS = new LevelEntryMap<>();
+   protected HashMap<String, LevelEntryMap<RewardConfig.RewardEntry>> POOLS = new HashMap<>();
 
    @Override
    public String getName() {
@@ -27,6 +28,15 @@ public class RewardConfig extends Config {
 
    @Override
    protected void reset() {
+      this.resetLevels("common");
+      this.resetLevels("rare");
+      this.resetLevels("epic");
+      this.resetLevels("omega");
+   }
+
+   private void resetLevels(String poolId) {
+      LevelEntryMap<RewardConfig.RewardEntry> entryMap = new LevelEntryMap<>();
+
       for (int i = 0; i < 30; i += 10) {
          ItemStackPool pool = new ItemStackPool(1, 10);
          pool.addItemStack(new ItemStack(Items.STICK), 1, 32);
@@ -34,12 +44,15 @@ public class RewardConfig extends Config {
          ItemStack sword = new ItemStack(Items.STONE_SWORD);
          EnchantmentHelper.enchantItem(rand, sword, i + 10, true);
          pool.addItemStack(sword, 1);
-         this.LEVELS.put(Integer.valueOf(i), new RewardConfig.RewardEntry(new RangeEntry(1, 2), pool, new ArrayList<>()));
+         entryMap.put(Integer.valueOf(i), new RewardConfig.RewardEntry(new RangeEntry(1, 2), pool, new ArrayList<>()));
       }
+
+      this.POOLS.put(poolId, entryMap);
    }
 
-   public TaskReward generateReward(int vaultLevel) {
-      Optional<RewardConfig.RewardEntry> entry = this.LEVELS.getForLevel(vaultLevel);
+   public TaskReward generateReward(int vaultLevel, String poolId) {
+      LevelEntryMap<RewardConfig.RewardEntry> entryMap = this.POOLS.get(poolId);
+      Optional<RewardConfig.RewardEntry> entry = entryMap.getForLevel(vaultLevel);
       if (entry.isEmpty()) {
          throw new IllegalArgumentException("No Reward Entry found for level: " + vaultLevel);
       } else {

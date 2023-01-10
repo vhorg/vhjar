@@ -15,12 +15,14 @@ import net.minecraft.world.item.ItemStack;
 public class LootTableGenerator implements LootGenerator {
    protected final Version version;
    protected final LootTableKey table;
+   public float itemQuantity;
    public Entity source;
    protected final List<ItemStack> items = new ArrayList<>();
 
-   public LootTableGenerator(Version version, LootTableKey table) {
+   public LootTableGenerator(Version version, LootTableKey table, float itemQuantity) {
       this.version = version;
       this.table = table;
+      this.itemQuantity = itemQuantity;
    }
 
    public LootTableKey getTable() {
@@ -30,16 +32,6 @@ public class LootTableGenerator implements LootGenerator {
    @Override
    public Iterator<ItemStack> getItems() {
       return this.items.iterator();
-   }
-
-   public float getMeanRolls() {
-      float mean = 0.0F;
-
-      for (LootTable.Entry entry : this.table.get(this.version).getEntries()) {
-         mean += entry.getRoll().getMean();
-      }
-
-      return mean;
    }
 
    @Override
@@ -56,9 +48,11 @@ public class LootTableGenerator implements LootGenerator {
    }
 
    protected void generateEntry(LootTable.Entry entry, RandomSource random) {
-      int count = entry.getRoll().get(random);
+      int roll = entry.getRoll().get(random);
+      float fRoll = roll * (1.0F + this.itemQuantity);
+      roll = (int)fRoll + (random.nextFloat() < fRoll - roll ? 1 : 0);
 
-      for (int i = 0; i < count; i++) {
+      for (int i = 0; i < roll; i++) {
          entry.getPool().getRandomFlat(this.version, random).map(e -> e.getStack(random)).ifPresent(this.items::add);
       }
    }

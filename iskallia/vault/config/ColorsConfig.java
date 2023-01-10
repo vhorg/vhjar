@@ -35,6 +35,7 @@ public class ColorsConfig extends Config {
    public static final String HEAL = "heal";
    public static final String RADIUS = "radius";
    public static final String ABSORB = "absorb";
+   public static final String MANA_PER_DAMAGE = "manaPerDamage";
    public static final String KNOCKBACK = "knockback";
    public static final String SLOWNESS = "slowness";
    public static final String CHAINS = "chains";
@@ -72,6 +73,7 @@ public class ColorsConfig extends Config {
       this.colors.builtin.put("heal", TextColor.fromRgb(8254855));
       this.colors.builtin.put("radius", TextColor.fromRgb(883257));
       this.colors.builtin.put("absorb", TextColor.fromRgb(9367001));
+      this.colors.builtin.put("manaPerDamage", TextColor.fromRgb(65535));
       this.colors.builtin.put("knockback", TextColor.fromRgb(10033226));
       this.colors.builtin.put("slowness", TextColor.fromRgb(2837801));
       this.colors.builtin.put("chains", TextColor.fromRgb(2837801));

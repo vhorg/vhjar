@@ -83,7 +83,6 @@ public class PointsResetConfig extends Config {
       abilityNodes.forEach(node -> playerAbilitiesData.remove(player, node));
       PlayerVaultStatsData data = PlayerVaultStatsData.get(server);
       data.resetAndReturnSkillPoints(player);
-      data.resetAndReturnRegretPoints(player);
       this.skillPointsCurrentlyReset.add(player.getUUID());
       this.save();
       player.sendMessage(

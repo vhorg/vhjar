@@ -153,7 +153,7 @@ public class AbilityWidgetSelectable extends AbilityWidget implements ComponentW
             builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
             matrixStack.translate(0.0, 0.0, -1.0);
             int secondaryNodeHeight = AbilityNodeTextures.SECONDARY_NODE.get(NodeState.DEFAULT).height();
-            float lineY1 = this.y + this.height / 2.0F + 3.0F + secondaryNodeHeight / 2.0F + (3 + secondaryNodeHeight) * (specializationCount - 1);
+            float lineY1 = this.y + this.height / 2.0F + 3.0F + secondaryNodeHeight / 2.0F + secondaryNodeHeight * (specializationCount - 1);
             LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 5.0, -16777216);
             if (hasSpecialization) {
                LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -3755746);

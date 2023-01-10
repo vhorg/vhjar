@@ -3,7 +3,6 @@ package iskallia.vault.core.vault;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.random.JavaRandom;
-import iskallia.vault.core.vault.influence.Influences;
 import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.objective.VictoryObjective;
 import iskallia.vault.core.vault.overlay.VaultOverlay;
@@ -50,7 +49,6 @@ public class VaultFactory {
          .set(Vault.OBJECTIVES, new Objectives())
          .set(Vault.MODIFIERS, new Modifiers())
          .set(Vault.LISTENERS, new Listeners().set(Listeners.LOGIC, new ClassicListenersLogic()))
-         .set(Vault.INFLUENCES, new Influences())
          .set(Vault.STATS, new StatsCollector())
          .set(Vault.CRYSTAL, crystal.serializeNBT());
       CrystalLayout layout = crystal.getLayout() == null ? ModConfigs.VAULT_CRYSTAL.getRandomLayout(level, random).orElse(null) : crystal.getLayout();

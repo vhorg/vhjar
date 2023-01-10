@@ -1,6 +1,7 @@
 package iskallia.vault.container.inventory;
 
 import iskallia.vault.container.spi.RecipeInventory;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 
 public class TransmogTableInventory extends RecipeInventory {
@@ -27,5 +28,10 @@ public class TransmogTableInventory extends RecipeInventory {
 
    @Override
    public void updateResult() {
+   }
+
+   @Override
+   public NonNullList<ItemStack> getSlots() {
+      return super.getSlots();
    }
 }
