@@ -1,18 +1,18 @@
 {
   "variants": {
     "facing=east": {
-      "model": "the_vault:block/time_altar",
+      "model": "the_vault:block/fillable_altar/wendarr_altar",
       "y": 270
     },
     "facing=north": {
-      "model": "the_vault:block/time_altar",
+      "model": "the_vault:block/fillable_altar/wendarr_altar",
       "y": 180
     },
     "facing=south": {
-      "model": "the_vault:block/time_altar"
+      "model": "the_vault:block/fillable_altar/wendarr_altar"
     },
     "facing=west": {
-      "model": "the_vault:block/time_altar",
+      "model": "the_vault:block/fillable_altar/wendarr_altar",
       "y": 90
     }
   }

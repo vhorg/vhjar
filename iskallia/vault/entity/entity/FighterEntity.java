@@ -1,5 +1,6 @@
 package iskallia.vault.entity.entity;
 
+import iskallia.vault.core.vault.Vault;
 import iskallia.vault.entity.ai.ThrowProjectilesGoal;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
@@ -8,6 +9,7 @@ import iskallia.vault.network.message.FighterSizeMessage;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.SkinProfile;
 import iskallia.vault.world.VaultDifficulty;
+import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.data.WorldSettings;
 import java.util.regex.Pattern;
 import javax.annotation.Nullable;
@@ -83,7 +85,12 @@ public class FighterEntity extends Zombie {
 
    protected void registerGoals() {
       this.goalSelector.addGoal(1, new FloatGoal(this));
-      VaultDifficulty vaultDifficulty = WorldSettings.get(this.level).getVaultDifficulty();
+      ServerVaults.get(this.level).ifPresent(this::registerProjectileGoal);
+      super.registerGoals();
+   }
+
+   private void registerProjectileGoal(Vault vault) {
+      VaultDifficulty vaultDifficulty = WorldSettings.get(this.level).getPlayerDifficulty(vault.get(Vault.OWNER));
       if (vaultDifficulty == VaultDifficulty.HARD || vaultDifficulty == VaultDifficulty.IMPOSSIBLE) {
          this.goalSelector.addGoal(3, new ThrowProjectilesGoal<FighterEntity>(this, ModConfigs.FIGHTER.chancerPerTick, 1, FighterEntity.ThrowableBrick::new) {
             @Override
@@ -119,8 +126,6 @@ public class FighterEntity extends Zombie {
             }
          });
       }
-
-      super.registerGoals();
    }
 
    @OnlyIn(Dist.CLIENT)

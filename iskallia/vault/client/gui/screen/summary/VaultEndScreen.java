@@ -29,6 +29,7 @@ import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.stat.VaultSnapshot;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
+import iskallia.vault.init.ModSounds;
 import iskallia.vault.network.message.ServerboundOpenHistoricMessage;
 import iskallia.vault.network.message.VaultPlayerStatsMessage;
 import java.util.ArrayList;
@@ -37,12 +38,14 @@ import java.util.UUID;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 
 public class VaultEndScreen extends AbstractElementScreen {
@@ -293,8 +296,11 @@ public class VaultEndScreen extends AbstractElementScreen {
                if (!this.isHistory) {
                   this.onClose();
                   ModNetwork.CHANNEL.sendToServer(new VaultPlayerStatsMessage.C2S(this.snapshot.getEnd().get(Vault.ID)));
+                  Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(ModSounds.VAULT_CHEST_RARE_OPEN, 1.25F));
+                  Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                } else if (!this.fromLink) {
                   ModNetwork.CHANNEL.sendToServer(ServerboundOpenHistoricMessage.INSTANCE);
+                  Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
                } else {
                   this.onClose();
                }

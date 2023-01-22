@@ -1,13 +1,21 @@
 package iskallia.vault.block.entity;
 
 import com.mojang.authlib.GameProfile;
+import iskallia.vault.VaultMod;
 import iskallia.vault.config.SpiritConfig;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.entity.IPlayerSkinHolder;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
+import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.world.data.PlayerSpiritRecoveryData;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -24,6 +32,9 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -36,22 +47,22 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
    private static final String OWNER_PROFILE_TAG = "ownerProfile";
    private static final String ITEMS_TAG = "items";
    private static final String PAYMENT_STACK_TAG = "paymentStack";
-   private static final String TOTAL_COST_TAG = "totalCost";
-   private static final String SPIRIT_RECOVERY_COUNT_TAG = "spiritRecoveryCount";
+   private static final String RECOVERY_COST_TAG = "recoveryCost";
+   private static final String RECYCLABLE_TAG = "recyclable";
    @Nullable
    private GameProfile gameProfile;
    private final NonNullList<ItemStack> items = NonNullList.create();
    private int vaultLevel;
-   private ItemStack totalCost = ItemStack.EMPTY;
-   private int spiritRecoveryCount = 0;
+   private int playerLevel;
+   private SpiritExtractorTileEntity.RecoveryCost recoveryCost = new SpiritExtractorTileEntity.RecoveryCost();
    private final OverSizedInventory paymentInventory = new OverSizedInventory(1, this::setChanged, player -> true) {
       public boolean canPlaceItem(int pIndex, ItemStack pStack) {
-         return SpiritExtractorTileEntity.this.getTotalCost().getItem() == pStack.getItem();
+         return SpiritExtractorTileEntity.this.getRecoveryCost().getTotalCost().getItem() == pStack.getItem();
       }
 
       @Override
       public int getMaxStackSize() {
-         return SpiritExtractorTileEntity.this.getTotalCost().getCount();
+         return SpiritExtractorTileEntity.this.getRecoveryCost().getTotalCost().getCount();
       }
    };
    private boolean spewingItems;
@@ -60,50 +71,35 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
    private ResourceLocation skinLocation = null;
    private boolean updatingSkin = false;
    private boolean slimSkin = false;
+   private boolean recyclable = false;
+   private float rescuedBonus = 0.0F;
 
    public SpiritExtractorTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.SPIRIT_EXTRACTOR_TILE_ENTITY, pos, state);
    }
 
-   public ItemStack getTotalCost() {
-      if (!this.spewingItems && this.totalCost.isEmpty()) {
+   public SpiritExtractorTileEntity.RecoveryCost getRecoveryCost() {
+      if (!this.spewingItems && this.recoveryCost.isEmpty()) {
          this.recalculateCost();
       }
 
-      return this.totalCost;
-   }
-
-   public int getSpiritRecoveryCount() {
-      return this.spiritRecoveryCount;
+      return this.recoveryCost;
    }
 
    public void recalculateCost() {
-      if (this.level instanceof ServerLevel serverLevel && this.gameProfile != null) {
-         this.spiritRecoveryCount = this.getSpiritRecoveryCountFromData(serverLevel);
-         this.totalCost = this.spewingItems
-            ? ItemStack.EMPTY
-            : this.getLevelCost(this.vaultLevel).map(levelCost -> new ItemStack(levelCost.item, this.calculateCount(levelCost.count))).orElse(ItemStack.EMPTY);
-      }
-   }
-
-   public int getSpiritRecoveryCountFromData(ServerLevel serverLevel) {
-      return this.getGameProfile().map(gp -> PlayerSpiritRecoveryData.get(serverLevel).getSpiritRecoveryCount(gp.getId())).orElse(0);
-   }
-
-   private int calculateCount(int levelCostCount) {
-      return (int)Math.round(levelCostCount * Math.pow(ModConfigs.SPIRIT.recoveryCostMultiplier, this.spiritRecoveryCount));
-   }
-
-   private Optional<SpiritConfig.LevelCost> getLevelCost(int vaultLevel) {
-      SpiritConfig.LevelCost ret = null;
-
-      for (SpiritConfig.LevelCost levelCost : ModConfigs.SPIRIT.levelCosts) {
-         if (levelCost.minLevel <= vaultLevel && (ret == null || ret.minLevel < levelCost.minLevel)) {
-            ret = levelCost;
+      if (this.level instanceof ServerLevel serverLevel) {
+         if (this.gameProfile != null) {
+            PlayerSpiritRecoveryData data = PlayerSpiritRecoveryData.get(serverLevel);
+            this.recoveryCost
+               .calculate(
+                  data.getSpiritRecoveryMultiplier(this.gameProfile.getId()),
+                  this.playerLevel,
+                  this.items,
+                  data.getHeroDiscount(this.gameProfile.getId()),
+                  this.rescuedBonus
+               );
          }
       }
-
-      return Optional.ofNullable(ret);
    }
 
    public OverSizedInventory getPaymentInventory() {
@@ -115,9 +111,32 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       this.setChanged();
    }
 
+   public void setPlayerLevel(int playerLevel) {
+      this.playerLevel = playerLevel;
+      this.setChanged();
+   }
+
+   public void setRescuedBonus(float rescuedBonus) {
+      this.rescuedBonus = rescuedBonus;
+      this.setChanged();
+   }
+
+   public float getRescuedBonus() {
+      return this.rescuedBonus;
+   }
+
    @Override
    public void setGameProfile(GameProfile gameProfile) {
-      this.gameProfile = gameProfile;
+      if (gameProfile == null || !gameProfile.equals(this.gameProfile)) {
+         this.gameProfile = gameProfile;
+         this.skinLocation = null;
+      }
+
+      this.setChanged();
+   }
+
+   public void setRecyclable(boolean recyclable) {
+      this.recyclable = recyclable;
       this.setChanged();
    }
 
@@ -174,14 +193,13 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       return ClientboundBlockEntityDataPacket.create(this, blockEntity -> this.addSpiritRecoveryData(blockEntity.getUpdateTag()));
    }
 
-   public CompoundTag getUpdateTag() {
-      return this.saveWithoutMetadata();
+   private CompoundTag addSpiritRecoveryData(CompoundTag tag) {
+      tag.put("recoveryCost", this.recoveryCost.serialize());
+      return tag;
    }
 
-   private CompoundTag addSpiritRecoveryData(CompoundTag tag) {
-      tag.put("totalCost", this.totalCost.save(new CompoundTag()));
-      tag.putInt("spiritRecoveryCount", this.spiritRecoveryCount);
-      return tag;
+   public CompoundTag getUpdateTag() {
+      return this.saveWithoutMetadata();
    }
 
    protected void saveAdditional(CompoundTag tag) {
@@ -191,6 +209,7 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       }
 
       tag.putInt("vaultLevel", this.vaultLevel);
+      tag.putInt("playerLevel", this.playerLevel);
       ListTag itemList = new ListTag();
 
       for (ItemStack item : this.items) {
@@ -204,6 +223,8 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       }
 
       tag.putBoolean("spewingItems", this.spewingItems);
+      tag.putBoolean("recyclable", this.recyclable);
+      tag.putFloat("rescuedBonus", this.rescuedBonus);
    }
 
    public void load(CompoundTag tag) {
@@ -220,18 +241,18 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       }
 
       this.vaultLevel = tag.getInt("vaultLevel");
+      this.playerLevel = tag.contains("playerLevel") ? tag.getInt("playerLevel") : this.vaultLevel;
       if (tag.contains("paymentStack")) {
          this.paymentInventory.setOverSizedStack(0, OverSizedItemStack.deserialize(tag.getCompound("paymentStack")));
       }
 
       this.spewingItems = tag.getBoolean("spewingItems");
-      if (tag.contains("totalCost", 10)) {
-         this.totalCost = ItemStack.of(tag.getCompound("totalCost"));
+      if (tag.contains("recoveryCost", 10)) {
+         this.recoveryCost.deserialize(tag.getCompound("recoveryCost"));
       }
 
-      if (tag.contains("spiritRecoveryCount")) {
-         this.spiritRecoveryCount = tag.getInt("spiritRecoveryCount");
-      }
+      this.recyclable = !tag.contains("recyclable") || tag.getBoolean("recyclable");
+      this.rescuedBonus = tag.getFloat("rescuedBonus");
    }
 
    private int calculateItemsPerDrop() {
@@ -252,19 +273,23 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
             this.spawnParticles();
          } else {
             if (this.level instanceof ServerLevel serverLevel && this.gameProfile != null) {
-               PlayerSpiritRecoveryData.get(serverLevel).incrementSpiritRecovery(this.gameProfile.getId());
+               PlayerSpiritRecoveryData data = PlayerSpiritRecoveryData.get(serverLevel);
+               data.increaseMultiplierOnRecovery(this.gameProfile.getId());
+               data.removeHeroDiscount(this.gameProfile.getId());
             }
 
             this.paymentInventory.setItem(0, ItemStack.EMPTY);
+            this.recoveryCost = new SpiritExtractorTileEntity.RecoveryCost();
             this.spewingItems = true;
             this.spewingCooldownTime = this.level.getGameTime() + 20L;
+            this.level.playSound(null, this.getBlockPos(), SoundEvents.PLAYER_LEVELUP, SoundSource.BLOCKS, 1.0F, 0.5F);
          }
       }
    }
 
    public boolean coinsCoverTotalCost() {
-      int totalCost = this.getTotalCost().getCount();
-      return totalCost >= 0 && this.paymentInventory.getItem(0).getCount() >= totalCost;
+      int totalCost = this.getRecoveryCost().getTotalCost().getCount();
+      return totalCost > 0 && this.paymentInventory.getItem(0).getCount() >= totalCost;
    }
 
    private void spawnParticles() {
@@ -314,12 +339,129 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       return this.vaultLevel;
    }
 
+   public int getPlayerLevel() {
+      return this.playerLevel;
+   }
+
    public void removeSpirit() {
       this.gameProfile = null;
       this.itemsPerDrop = 0;
       this.vaultLevel = 0;
+      this.playerLevel = 0;
       this.paymentInventory.setItem(0, ItemStack.EMPTY);
       this.setChanged();
       this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+   }
+
+   public void recycle() {
+      if (this.gameProfile != null && !this.isSpewingItems()) {
+         if (this.recyclable) {
+            ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
+            CrystalData crystal = new CrystalData(stack);
+            crystal.setTheme(new PoolCrystalTheme(VaultMod.id("default")));
+            crystal.setLevel(this.vaultLevel);
+            BlockPos pos = this.getBlockPos();
+            Containers.dropItemStack(this.level, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, stack);
+         }
+
+         this.items.clear();
+         this.removeSpirit();
+         this.setChanged();
+         this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+         this.level.playSound(null, this.getBlockPos(), SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 1.0F, 1.0F);
+      }
+   }
+
+   public boolean isRecyclable() {
+      return this.recyclable;
+   }
+
+   public static class RecoveryCost {
+      private OverSizedItemStack totalCost = OverSizedItemStack.EMPTY;
+      private OverSizedItemStack baseCost = OverSizedItemStack.EMPTY;
+      private List<Tuple<ItemStack, Integer>> stackCost = new ArrayList<>();
+
+      public CompoundTag serialize() {
+         CompoundTag tag = new CompoundTag();
+         tag.put("totalCost", this.totalCost.serialize());
+         tag.put("baseCost", this.baseCost.serialize());
+         if (!this.stackCost.isEmpty()) {
+            ListTag stackCostTag = new ListTag();
+            this.stackCost.forEach(t -> {
+               CompoundTag singleStackTag = new CompoundTag();
+               singleStackTag.put("stack", ((ItemStack)t.getA()).save(new CompoundTag()));
+               singleStackTag.putInt("cost", (Integer)t.getB());
+               stackCostTag.add(singleStackTag);
+            });
+            tag.put("stackCost", stackCostTag);
+         }
+
+         return tag;
+      }
+
+      public void deserialize(CompoundTag tag) {
+         this.totalCost = tag.contains("totalCost", 10) ? OverSizedItemStack.deserialize(tag.getCompound("totalCost")) : OverSizedItemStack.EMPTY;
+         this.baseCost = tag.contains("baseCost", 10) ? OverSizedItemStack.deserialize(tag.getCompound("baseCost")) : OverSizedItemStack.EMPTY;
+         this.stackCost.clear();
+         if (tag.contains("stackCost", 9)) {
+            tag.getList("stackCost", 10).forEach(t -> {
+               CompoundTag singleStackCostTag = (CompoundTag)t;
+               this.stackCost.add(new Tuple(ItemStack.of(singleStackCostTag.getCompound("stack")), singleStackCostTag.getInt("cost")));
+            });
+         }
+      }
+
+      public boolean isEmpty() {
+         return this.totalCost.overSizedStack().isEmpty();
+      }
+
+      public void calculate(float multiplier, int vaultLevel, List<ItemStack> items, float heroDiscount, float rescuedBonus) {
+         this.getLevelCost(vaultLevel).ifPresent(cost -> {
+            this.baseCost = new OverSizedItemStack(new ItemStack(cost.item, cost.count), cost.count);
+            int totalCost = cost.count * Math.max(1, vaultLevel);
+            this.stackCost.clear();
+
+            for (ItemStack item : items) {
+               if (item.getItem() instanceof TrinketItem) {
+                  this.stackCost.add(new Tuple(item.copy(), cost.trinketCost));
+                  totalCost += cost.trinketCost;
+               } else if (item.getItem() instanceof VaultGearItem) {
+                  VaultGearData data = VaultGearData.read(item);
+                  if (cost.gearRarityCost.containsKey(data.getRarity())) {
+                     int gearCost = cost.gearRarityCost.get(data.getRarity());
+                     this.stackCost.add(new Tuple(item.copy(), gearCost));
+                     totalCost += gearCost;
+                  }
+               }
+            }
+
+            totalCost = (int)(totalCost * multiplier * (1.0F - heroDiscount) * (1.0F - rescuedBonus));
+            this.totalCost = new OverSizedItemStack(new ItemStack(cost.item, totalCost), totalCost);
+         });
+      }
+
+      private Optional<SpiritConfig.LevelCost> getLevelCost(int vaultLevel) {
+         SpiritConfig.LevelCost ret = null;
+
+         for (SpiritConfig.LevelCost levelCost : ModConfigs.SPIRIT.levelCosts) {
+            if (levelCost.minLevel <= vaultLevel && (ret == null || ret.minLevel < levelCost.minLevel)) {
+               ret = levelCost;
+            }
+         }
+
+         return Optional.ofNullable(ret);
+      }
+
+      public ItemStack getTotalCost() {
+         return this.totalCost.overSizedStack();
+      }
+
+      public ItemStack getBaseCost() {
+         return this.baseCost.overSizedStack();
+      }
+
+      public List<Tuple<ItemStack, Integer>> getStackCost() {
+         return this.stackCost;
+      }
    }
 }

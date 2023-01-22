@@ -34,12 +34,12 @@ public class ServerboundChangeDifficultyMessage {
             ServerPlayer sender = context.getSender();
             if (sender != null) {
                WorldSettings worldSettings = WorldSettings.get(sender.getLevel());
-               worldSettings.setVaultDifficulty(message.vaultDifficulty);
+               worldSettings.setGlobalVaultDifficulty(message.vaultDifficulty);
                worldSettings.setVaultDifficultyLocked(message.vaultDifficultyLocked);
                ModNetwork.CHANNEL
                   .send(
                      PacketDistributor.ALL.noArg(),
-                     new ClientboundUpdateDifficultyMessage(worldSettings.getVaultDifficulty(), worldSettings.isVaultDifficultyLocked())
+                     new ClientboundUpdateDifficultyMessage(worldSettings.getGlobalVaultDifficulty(), worldSettings.isVaultDifficultyLocked())
                   );
             }
          }

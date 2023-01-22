@@ -123,4 +123,11 @@ public class VaultCatalystInfusedItem extends Item {
          CodecUtils.writeNBT(ResourceLocation.CODEC.listOf(), result, nbt -> tag.put("modifiers", nbt));
       }
    }
+
+   public static void setJeiModifiers(ItemStack itemStack, List<ResourceLocation> result) {
+      if (itemStack.getItem() == ModItems.VAULT_CATALYST_INFUSED) {
+         CompoundTag tag = itemStack.getOrCreateTag();
+         CodecUtils.writeNBT(ResourceLocation.CODEC.listOf(), result, nbt -> tag.put("modifiers", nbt));
+      }
+   }
 }

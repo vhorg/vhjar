@@ -53,12 +53,14 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -175,7 +177,10 @@ public class VaultHistoricDataScreen extends AbstractElementScreen {
             )
       );
       this.closeButton = this.addElement(
-         new ButtonElement<ButtonElement<ButtonElement<?>>>(Spatials.zero(), ScreenTextures.BUTTON_CLOSE_TEXTURES, this::onClose)
+         new ButtonElement<ButtonElement<ButtonElement<?>>>(Spatials.zero(), ScreenTextures.BUTTON_CLOSE_TEXTURES, () -> {
+               this.onClose();
+               Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            })
             .layout(
                (screen, gui, parent, world) -> world.width(52)
                   .height(19)
@@ -479,10 +484,13 @@ public class VaultHistoricDataScreen extends AbstractElementScreen {
                new ButtonElement<ButtonElement<ButtonElement<?>>>(
                      Spatials.positionXYZ(5, 36 + 74 * i, 5),
                      ScreenTextures.BUTTON_CLOSE_TEXTURES,
-                     () -> Minecraft.getInstance()
-                        .setScreen(
-                           new VaultEndScreen(screenData.getSnapshot(), new TextComponent("Vault Exit"), Minecraft.getInstance().player.getUUID(), true)
-                        )
+                     () -> {
+                        Minecraft.getInstance()
+                           .setScreen(
+                              new VaultEndScreen(screenData.getSnapshot(), new TextComponent("Vault Exit"), Minecraft.getInstance().player.getUUID(), true)
+                           );
+                        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                     }
                   )
                   .layout((screen, gui, parent, world) -> world.width(52).height(19))
                   .tooltip(
@@ -496,18 +504,13 @@ public class VaultHistoricDataScreen extends AbstractElementScreen {
             );
             this.buttonElements.add(buttonElement);
             ButtonElement<?> buttonElement2 = this.addElement(
-               new ButtonElement<ButtonElement<ButtonElement<?>>>(
-                     Spatials.positionXYZ(21, 13 + 74 * i, 5),
-                     ScreenTextures.BUTTON_SHARE_TEXTURES,
-                     () -> ModNetwork.CHANNEL.sendToServer(new ServerboundSendSnapshotLinkMessage(screenData.getSnapshot().getEnd().get(Vault.ID)))
-                  )
-                  .layout((screen, gui, parent, world) -> world.width(19).height(19))
-                  .tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
-                     tooltipRenderer.renderTooltip(
-                        poseStack, List.of(new TextComponent("Share Vault")), mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT
-                     );
-                     return false;
-                  })
+               new ButtonElement<ButtonElement<ButtonElement<?>>>(Spatials.positionXYZ(21, 13 + 74 * i, 5), ScreenTextures.BUTTON_SHARE_TEXTURES, () -> {
+                  ModNetwork.CHANNEL.sendToServer(new ServerboundSendSnapshotLinkMessage(screenData.getSnapshot().getEnd().get(Vault.ID)));
+                  Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+               }).layout((screen, gui, parent, world) -> world.width(19).height(19)).tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+                  tooltipRenderer.renderTooltip(poseStack, List.of(new TextComponent("Share Vault")), mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT);
+                  return false;
+               })
             );
             this.buttonElements.add(buttonElement2);
             i++;

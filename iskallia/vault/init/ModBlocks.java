@@ -19,6 +19,7 @@ import iskallia.vault.block.DemagnetizerBlock;
 import iskallia.vault.block.EliteSpawnerBlock;
 import iskallia.vault.block.ErrorBlock;
 import iskallia.vault.block.EtchingVendorControllerBlock;
+import iskallia.vault.block.EternalPedestalBlock;
 import iskallia.vault.block.FinalVaultFrameBlock;
 import iskallia.vault.block.FloatingTextBlock;
 import iskallia.vault.block.HourglassBlock;
@@ -32,6 +33,7 @@ import iskallia.vault.block.MonolithBlock;
 import iskallia.vault.block.ObeliskBlock;
 import iskallia.vault.block.OtherSidePortalBlock;
 import iskallia.vault.block.PlaceholderBlock;
+import iskallia.vault.block.PylonBlock;
 import iskallia.vault.block.RelicPedestalBlock;
 import iskallia.vault.block.ScavengerAltarBlock;
 import iskallia.vault.block.ScavengerChestBlock;
@@ -79,6 +81,7 @@ import iskallia.vault.block.entity.CustomEntitySpawnerTileEntity;
 import iskallia.vault.block.entity.DemagnetizerTileEntity;
 import iskallia.vault.block.entity.EliteSpawnerTileEntity;
 import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
+import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.block.entity.FinalVaultFrameTileEntity;
 import iskallia.vault.block.entity.FloatingTextTileEntity;
 import iskallia.vault.block.entity.HourglassTileEntity;
@@ -87,6 +90,7 @@ import iskallia.vault.block.entity.MagnetTableTile;
 import iskallia.vault.block.entity.MonolithTileEntity;
 import iskallia.vault.block.entity.ObeliskTileEntity;
 import iskallia.vault.block.entity.OtherSidePortalTileEntity;
+import iskallia.vault.block.entity.PylonTileEntity;
 import iskallia.vault.block.entity.RelicPedestalTileEntity;
 import iskallia.vault.block.entity.ScavengerAltarTileEntity;
 import iskallia.vault.block.entity.ScavengerChestTileEntity;
@@ -125,12 +129,14 @@ import iskallia.vault.block.item.VaultOreBlockItem;
 import iskallia.vault.block.render.AnimalPenRenderer;
 import iskallia.vault.block.render.BlackMarketRenderer;
 import iskallia.vault.block.render.CryoChamberRenderer;
+import iskallia.vault.block.render.EternalPedestalRenderer;
 import iskallia.vault.block.render.FillableAltarRenderer;
 import iskallia.vault.block.render.FinalVaultFrameRenderer;
 import iskallia.vault.block.render.FloatingTextRenderer;
 import iskallia.vault.block.render.HourglassRenderer;
 import iskallia.vault.block.render.LootStatueRenderer;
 import iskallia.vault.block.render.MagnetTableRenderer;
+import iskallia.vault.block.render.PylonRenderer;
 import iskallia.vault.block.render.RelicPedestalRenderer;
 import iskallia.vault.block.render.ScavengerAltarRenderer;
 import iskallia.vault.block.render.ShopPedestalBlockTileRenderer;
@@ -223,6 +229,7 @@ public class ModBlocks {
    public static final VaultCrateBlock VAULT_CRATE_MONOLITH = new VaultCrateBlock();
    public static final ObeliskBlock OBELISK = new ObeliskBlock();
    public static final MonolithBlock MONOLITH = new MonolithBlock();
+   public static final PylonBlock PYLON = new PylonBlock();
    public static final MVPCrownBlock MVP_CROWN = new MVPCrownBlock();
    public static final VaultBedrockBlock VAULT_BEDROCK = new VaultBedrockBlock();
    public static final Block VAULT_STONE = new Block(
@@ -355,6 +362,7 @@ public class ModBlocks {
    public static final CrystalClusterBlock SMALL_CRYSTAL_BUD = new CrystalClusterBlock(SoundType.SMALL_AMETHYST_BUD, 1, 3, 4.0);
    public static final VaultAnvilBlock VAULT_ANVIL = new VaultAnvilBlock();
    public static final Block WUTODIC_SILVER_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK));
+   public static final EternalPedestalBlock ETERNAL_PEDESTAL = new EternalPedestalBlock();
    public static final LiquidBlock VOID_LIQUID_BLOCK = new VoidFluidBlock(
       ModFluids.VOID_LIQUID,
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.WATER, MaterialColor.COLOR_BLACK)
@@ -459,6 +467,7 @@ public class ModBlocks {
    public static final BlockEntityType<SoulAltarTileEntity> SOUL_ALTAR_TILE_ENTITY = Builder.of(SoulAltarTileEntity::new, new Block[]{SOUL_ALTAR}).build(null);
    public static final BlockEntityType<ObeliskTileEntity> OBELISK_TILE_ENTITY = Builder.of(ObeliskTileEntity::new, new Block[]{OBELISK}).build(null);
    public static final BlockEntityType<MonolithTileEntity> MONOLITH_TILE_ENTITY = Builder.of(MonolithTileEntity::new, new Block[]{MONOLITH}).build(null);
+   public static final BlockEntityType<PylonTileEntity> PYLON_TILE_ENTITY = Builder.of(PylonTileEntity::new, new Block[]{PYLON}).build(null);
    public static final BlockEntityType<HourglassTileEntity> HOURGLASS_TILE_ENTITY = Builder.of(HourglassTileEntity::new, new Block[]{HOURGLASS}).build(null);
    public static final BlockEntityType<ScavengerChestTileEntity> SCAVENGER_CHEST_TILE_ENTITY = Builder.of(
          ScavengerChestTileEntity::new, new Block[]{SCAVENGER_CHEST}
@@ -535,6 +544,10 @@ public class ModBlocks {
          TransmogTableTileEntity::new, new Block[]{TRANSMOG_TABLE}
       )
       .build(null);
+   public static final BlockEntityType<EternalPedestalTileEntity> ETERNAL_PEDESTAL_TILE_ENTITY = Builder.of(
+         EternalPedestalTileEntity::new, new Block[]{ETERNAL_PEDESTAL}
+      )
+      .build(null);
 
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, ERROR_BLOCK, VaultMod.id("error_block"));
@@ -589,6 +602,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_CRATE_MONOLITH, VaultMod.id("vault_crate_monolith"));
       registerBlock(event, OBELISK, VaultMod.id("obelisk"));
       registerBlock(event, MONOLITH, VaultMod.id("monolith"));
+      registerBlock(event, PYLON, VaultMod.id("pylon"));
       registerBlock(event, MVP_CROWN, VaultMod.id("mvp_crown"));
       registerBlock(event, VAULT_BEDROCK, VaultMod.id("vault_bedrock"));
       registerBlock(event, VAULT_STONE, VaultMod.id("vault_stone"));
@@ -676,6 +690,7 @@ public class ModBlocks {
       registerBlock(event, SMALL_CRYSTAL_BUD, VaultMod.id("crystal_bud_small"));
       registerBlock(event, VAULT_ANVIL, VaultMod.id("vault_anvil"));
       registerBlock(event, WUTODIC_SILVER_BLOCK, VaultMod.id("wutodic_silver_block"));
+      registerBlock(event, ETERNAL_PEDESTAL, VaultMod.id("eternal_pedestal"));
    }
 
    public static void registerTileEntities(Register<BlockEntityType<?>> event) {
@@ -700,6 +715,7 @@ public class ModBlocks {
       registerTileEntity(event, SOUL_ALTAR_TILE_ENTITY, VaultMod.id("soul_altar_tile_entity"));
       registerTileEntity(event, OBELISK_TILE_ENTITY, VaultMod.id("obelisk_tile_entity"));
       registerTileEntity(event, MONOLITH_TILE_ENTITY, VaultMod.id("monolith_tile_entity"));
+      registerTileEntity(event, PYLON_TILE_ENTITY, VaultMod.id("pylon_tile_entity"));
       registerTileEntity(event, HOURGLASS_TILE_ENTITY, VaultMod.id("hourglass_tile_entity"));
       registerTileEntity(event, SCAVENGER_CHEST_TILE_ENTITY, VaultMod.id("scavenger_chest_tile_entity"));
       registerTileEntity(event, SCAVENGER_ALTAR_TILE_ENTITY, VaultMod.id("scavenger_altar_tile_entity"));
@@ -728,6 +744,7 @@ public class ModBlocks {
       registerTileEntity(event, BLACK_MARKET_TILE_ENTITY, VaultMod.id("black_market_tile_entity"));
       registerTileEntity(event, TRANSMOG_TABLE_TILE_ENTITY, VaultMod.id("transmog_table_tile_entity"));
       registerTileEntity(event, CRYSTAL_BUDDING_TILE_ENTITY, VaultMod.id("crystal_budding_tile_entity"));
+      registerTileEntity(event, ETERNAL_PEDESTAL_TILE_ENTITY, VaultMod.id("eternal_pedestal_tile_entity"));
    }
 
    public static void registerTileEntityRenderers(RegisterRenderers event) {
@@ -760,6 +777,8 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(VAULT_DIFFUSER_ENTITY, VaultDiffuserRenderer::new);
       event.registerBlockEntityRenderer(BLACK_MARKET_TILE_ENTITY, BlackMarketRenderer::new);
       event.registerBlockEntityRenderer(ANIMAL_PEN_ENTITY, AnimalPenRenderer::new);
+      event.registerBlockEntityRenderer(ETERNAL_PEDESTAL_TILE_ENTITY, EternalPedestalRenderer::new);
+      event.registerBlockEntityRenderer(PYLON_TILE_ENTITY, PylonRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
@@ -813,6 +832,7 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_CRATE_MONOLITH, 1, Properties::fireResistant);
       registerBlockItem(event, OBELISK, 1);
       registerBlockItem(event, MONOLITH, 1);
+      registerBlockItem(event, PYLON, 1);
       registerBlockItem(event, MVP_CROWN, 1);
       registerBlockItem(event, VAULT_BEDROCK);
       registerBlockItem(event, VAULT_STONE);
@@ -895,6 +915,7 @@ public class ModBlocks {
       registerBlockItem(event, LARGE_CRYSTAL_BUD);
       registerBlockItem(event, VAULT_ANVIL);
       registerBlockItem(event, WUTODIC_SILVER_BLOCK);
+      registerBlockItem(event, ETERNAL_PEDESTAL);
    }
 
    private static void registerBlock(Register<Block> event, Block block, ResourceLocation id) {

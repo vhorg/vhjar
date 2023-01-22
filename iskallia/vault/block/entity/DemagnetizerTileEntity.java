@@ -1,6 +1,7 @@
 package iskallia.vault.block.entity;
 
 import com.google.common.collect.MapMaker;
+import iskallia.vault.block.DemagnetizerBlock;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import java.util.Collections;
@@ -34,6 +35,10 @@ public class DemagnetizerTileEntity extends BlockEntity {
       int r = radius * radius;
       return LOADED_DEMAGNETIZERS.stream()
          .filter(f -> f.getLevel() == e.level)
-         .anyMatch(f -> f.getBlockPos().distToCenterSqr(e.getX(), e.getY(), e.getZ()) <= r);
+         .anyMatch(
+            f -> f.getBlockState().hasProperty(DemagnetizerBlock.DEACTIVATED) && f.getBlockState().getValue(DemagnetizerBlock.DEACTIVATED)
+               ? false
+               : f.getBlockPos().distToCenterSqr(e.getX(), e.getY(), e.getZ()) <= r
+         );
    }
 }

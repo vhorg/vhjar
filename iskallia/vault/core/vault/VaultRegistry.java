@@ -29,6 +29,7 @@ import iskallia.vault.core.vault.time.TickTimer;
 import iskallia.vault.core.vault.time.modifier.ClockModifier;
 import iskallia.vault.core.vault.time.modifier.FruitExtension;
 import iskallia.vault.core.vault.time.modifier.ModifierExtension;
+import iskallia.vault.core.vault.time.modifier.PylonExtension;
 import iskallia.vault.core.vault.time.modifier.RelicExtension;
 import iskallia.vault.core.vault.time.modifier.TimeAltarExtension;
 import iskallia.vault.core.vault.time.modifier.TrinketExtension;
@@ -62,7 +63,8 @@ public class VaultRegistry {
       .add(TrinketExtension.KEY)
       .add(RelicExtension.KEY)
       .add(VoidFluidExtension.KEY)
-      .add(TimeAltarExtension.KEY);
+      .add(TimeAltarExtension.KEY)
+      .add(PylonExtension.KEY);
    public static final SupplierRegistry<GridLayout> GRID_LAYOUT = new SupplierRegistry<GridLayout>()
       .add(ClassicInfiniteLayout.KEY)
       .add(ClassicSpiralLayout.KEY)

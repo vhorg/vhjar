@@ -13,6 +13,7 @@ import iskallia.vault.entity.entity.DrillArrowEntity;
 import iskallia.vault.entity.entity.EffectCloudEntity;
 import iskallia.vault.entity.entity.EtchingVendorEntity;
 import iskallia.vault.entity.entity.EternalEntity;
+import iskallia.vault.entity.entity.EternalSpiritEntity;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.FloatingItemEntity;
 import iskallia.vault.entity.entity.MonsterEyeEntity;
@@ -35,6 +36,8 @@ import iskallia.vault.entity.entity.elite.EliteZombieEntity;
 import iskallia.vault.entity.entity.eyesore.EyesoreEntity;
 import iskallia.vault.entity.entity.eyesore.EyesoreFireballEntity;
 import iskallia.vault.entity.entity.eyesore.EyestalkEntity;
+import iskallia.vault.entity.entity.guardian.FixedArrowEntity;
+import iskallia.vault.entity.entity.guardian.GuardianType;
 import iskallia.vault.entity.entity.tier1.Tier1CreeperEntity;
 import iskallia.vault.entity.entity.tier1.Tier1DrownedEntity;
 import iskallia.vault.entity.entity.tier1.Tier1EndermanEntity;
@@ -110,7 +113,8 @@ public class ModEntities {
    public static EntityType<FighterEntity> FIGHTER;
    public static EntityType<ArenaBossEntity> ARENA_BOSS;
    public static EntityType<ArenaTrackerEntity> ARENA_TRACKER;
-   public static EntityType<VaultGuardianEntity> VAULT_GUARDIAN;
+   public static EntityType<VaultGuardianEntity> BRUISER_GUARDIAN;
+   public static EntityType<VaultGuardianEntity> ARBALIST_GUARDIAN;
    public static EntityType<EternalEntity> ETERNAL;
    public static EntityType<TreasureGoblinEntity> TREASURE_GOBLIN;
    public static EntityType<AggressiveCowEntity> AGGRESSIVE_COW;
@@ -162,7 +166,9 @@ public class ModEntities {
    public static EntityType<VaultSandEntity> VAULT_SAND;
    public static EntityType<FloatingItemEntity> FLOATING_ITEM;
    public static EntityType<EyesoreFireballEntity> EYESORE_FIREBALL;
+   public static EntityType<FixedArrowEntity> FIXED_ARROW;
    public static EntityType<SpiritEntity> SPIRIT;
+   public static EntityType<EternalSpiritEntity> ETERNAL_SPIRIT;
    public static EntityType<FighterEntity.ThrowableBrick> BRICK;
    private static final Map<EntityType<? extends LivingEntity>, Supplier<net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder>> ATTRIBUTE_BUILDERS = new HashMap<>();
 
@@ -176,8 +182,17 @@ public class ModEntities {
          "arena_boss", Builder.of(ArenaBossEntity::new, MobCategory.MONSTER).sized(0.6F, 1.95F), ArenaBossEntity::createAttributes, event
       );
       ARENA_TRACKER = registerLiving("arena_tracker", Builder.of(ArenaTrackerEntity::new, MobCategory.MISC).sized(0.0F, 0.0F), Zombie::createAttributes, event);
-      VAULT_GUARDIAN = registerLiving(
-         "vault_guardian", Builder.of(VaultGuardianEntity::new, MobCategory.MONSTER).sized(1.3F, 2.95F), Zombie::createAttributes, event
+      BRUISER_GUARDIAN = registerLiving(
+         "bruiser_guardian",
+         Builder.of((type, world) -> new VaultGuardianEntity(type, GuardianType.BRUISER, world), MobCategory.MONSTER).sized(0.88F, 2.36F),
+         Zombie::createAttributes,
+         event
+      );
+      ARBALIST_GUARDIAN = registerLiving(
+         "arbalist_guardian",
+         Builder.of((type, world) -> new VaultGuardianEntity(type, GuardianType.ARBALIST, world), MobCategory.MONSTER).sized(0.88F, 2.36F),
+         Zombie::createAttributes,
+         event
       );
       ETERNAL = registerLiving("eternal", Builder.of(EternalEntity::new, MobCategory.CREATURE).sized(0.6F, 1.95F), Zombie::createAttributes, event);
       TREASURE_GOBLIN = registerLiving(
@@ -357,8 +372,14 @@ public class ModEntities {
       VAULT_SAND = register("vault_sand", Builder.of(VaultSandEntity::new, MobCategory.MISC), event);
       FLOATING_ITEM = register("floating_item", Builder.of(FloatingItemEntity::new, MobCategory.MISC), event);
       EYESORE_FIREBALL = register("eyesore_fireball", Builder.of(EyesoreFireballEntity::new, MobCategory.MISC), event);
+      FIXED_ARROW = register(
+         "fixed_arrow", Builder.of(FixedArrowEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20), event
+      );
       SPIRIT = registerLiving(
          "spirit", Builder.of(SpiritEntity::new, MobCategory.MONSTER).sized(0.6F, 1.8F).clientTrackingRange(8), Witch::createAttributes, event
+      );
+      ETERNAL_SPIRIT = registerLiving(
+         "eternal_spirit", Builder.of(EternalSpiritEntity::new, MobCategory.MISC).sized(0.6F, 1.8F).clientTrackingRange(8), Witch::createAttributes, event
       );
       BRICK = register(
          "brick", Builder.of(FighterEntity.ThrowableBrick::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10), event

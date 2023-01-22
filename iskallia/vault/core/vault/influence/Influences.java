@@ -18,6 +18,7 @@ import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.data.PlayerInfluences;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
@@ -62,7 +63,12 @@ public class Influences extends DataObject<Influences> {
             int z = data.getPos().getZ();
             random.setSeed(a * x + b * y + c * z ^ vault.get(Vault.SEED));
             VaultGod god = data.getBlockEntity().getVaultGod();
-            PlayerInfluences.attemptFavour(data.getPlayer(), data.getBlockEntity().getVaultGod(), random);
+            int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(data.getPlayer().getUUID()).getVaultLevel();
+            int diff = playerLevel - vault.get(Vault.LEVEL).get();
+            if (diff <= 5) {
+               PlayerInfluences.attemptFavour(data.getPlayer(), data.getBlockEntity().getVaultGod(), random);
+            }
+
             data.getBlockEntity().placeReward(data.getWorld(), data.getPos().above(), god.getColor(), random);
          }
       });

@@ -6,9 +6,12 @@ import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.research.type.Research;
 import iskallia.vault.skill.PlayerVaultStats;
+import iskallia.vault.util.PlayerReference;
 import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
@@ -42,30 +45,35 @@ public class ResearchMessage {
       Context context = contextSupplier.get();
       context.enqueueWork(
          () -> {
-            ServerPlayer sender = context.getSender();
-            if (sender != null) {
+            ServerPlayer unlockingPlayer = context.getSender();
+            if (unlockingPlayer != null) {
                Research research = ModConfigs.RESEARCHES.getByName(message.researchName);
                if (research != null) {
-                  PlayerVaultStatsData statsData = PlayerVaultStatsData.get((ServerLevel)sender.level);
-                  PlayerResearchesData researchesData = PlayerResearchesData.get((ServerLevel)sender.level);
-                  ResearchTree researchTree = researchesData.getResearches(sender);
+                  PlayerVaultStatsData statsData = PlayerVaultStatsData.get((ServerLevel)unlockingPlayer.level);
+                  PlayerResearchesData researchesData = PlayerResearchesData.get((ServerLevel)unlockingPlayer.level);
+                  ResearchTree researchTree = researchesData.getResearches(unlockingPlayer);
                   if (!researchTree.isResearched(research)) {
                      int researchCost = researchTree.getResearchCost(research);
                      if (!ModConfigs.SKILL_GATES.getGates().isLocked(research.getName(), researchTree)) {
-                        PlayerVaultStats stats = statsData.getVaultStats(sender);
+                        PlayerVaultStats stats = statsData.getVaultStats(unlockingPlayer);
                         int currentPoints = stats.getUnspentKnowledgePoints();
                         if (currentPoints >= researchCost) {
-                           researchesData.research(sender, research);
+                           researchesData.research(unlockingPlayer, research);
                            List<String> discoversModels = research.getDiscoversModels();
-                           statsData.spendKnowledgePoints(sender, researchCost);
+                           statsData.spendKnowledgePoints(unlockingPlayer, researchCost);
                            if (discoversModels != null && !discoversModels.isEmpty()) {
-                              DiscoveredModelsData discoveredModelsData = DiscoveredModelsData.get(sender.server);
+                              Collection<PlayerReference> discoveringPlayers = (Collection<PlayerReference>)(researchesData.isInTeam(unlockingPlayer.getUUID())
+                                 ? researchesData.getTeamMembers(unlockingPlayer.getUUID())
+                                 : Collections.singleton(new PlayerReference(unlockingPlayer)));
+                              DiscoveredModelsData discoveredModelsData = DiscoveredModelsData.get(unlockingPlayer.server);
                               discoversModels.stream()
                                  .<ResourceLocation>map(ResourceLocation::new)
                                  .forEach(modelId -> ModDynamicModels.REGISTRIES.getModelAndAssociatedItem(modelId).ifPresent(pair -> {
-                                    DynamicModel gearModel = (DynamicModel)pair.getFirst();
-                                    Item associatedItem = (Item)pair.getSecond();
-                                    discoveredModelsData.discoverModelAndBroadcast(associatedItem, gearModel.getId(), sender);
+                                    for (PlayerReference discoveringPlayer : discoveringPlayers) {
+                                       DynamicModel<?> gearModel = (DynamicModel<?>)pair.getFirst();
+                                       Item associatedItem = (Item)pair.getSecond();
+                                       discoveredModelsData.discoverModelAndBroadcast(associatedItem, gearModel.getId(), discoveringPlayer);
+                                    }
                                  }));
                            }
                         }

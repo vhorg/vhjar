@@ -73,10 +73,10 @@ public class VaultDollItem extends BasicItem {
 
    public VaultDollItem(ResourceLocation id, Properties properties) {
       super(id, properties);
-      CommonEvents.CHEST_LOOT_GENERATION.register(this, this::handleChestLoot);
-      CommonEvents.COIN_STACK_LOOT_GENERATION.register(this, this::handleCoinStackLoot);
-      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.register(this, this::handleLootableBlockLoot);
-      CommonEvents.CRATE_AWARD_EVENT.register(this, this::handleCrateLoot);
+      CommonEvents.CHEST_LOOT_GENERATION.register(this, this::handleChestLoot, -1);
+      CommonEvents.COIN_STACK_LOOT_GENERATION.register(this, this::handleCoinStackLoot, -1);
+      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.register(this, this::handleLootableBlockLoot, -1);
+      CommonEvents.CRATE_AWARD_EVENT.register(this, this::handleCrateLoot, -1);
    }
 
    private void handleCrateLoot(CrateAwardEvent.Data data) {

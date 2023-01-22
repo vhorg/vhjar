@@ -1,11 +1,12 @@
 package iskallia.vault.container.inventory;
 
+import iskallia.vault.block.entity.RelicPedestalTileEntity;
 import iskallia.vault.container.spi.RecipeInventory;
 import net.minecraft.world.item.ItemStack;
 
 public class RelicPedestalInventory extends RecipeInventory {
-   public RelicPedestalInventory() {
-      super(5);
+   public RelicPedestalInventory(RelicPedestalTileEntity tileEntity) {
+      super(5, tileEntity);
    }
 
    @Override

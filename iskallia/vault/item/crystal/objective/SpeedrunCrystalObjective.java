@@ -7,7 +7,7 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.DeathObjective;
 import iskallia.vault.core.vault.objective.FindExitObjective;
 import iskallia.vault.core.vault.objective.KillBossObjective;
-import iskallia.vault.core.vault.objective.ObeliskObjective;
+import iskallia.vault.core.vault.objective.LegacyObeliskObjective;
 import iskallia.vault.core.vault.objective.TrackSpeedrunObjective;
 import iskallia.vault.core.world.loot.LootRoll;
 import net.minecraft.ChatFormatting;
@@ -34,7 +34,7 @@ public class SpeedrunCrystalObjective extends CrystalObjective {
          Vault.OBJECTIVES,
          objectives -> {
             objectives.add(
-               ObeliskObjective.of(this.target.get(random), this.objectiveProbability)
+               LegacyObeliskObjective.of(this.target.get(random), this.objectiveProbability)
                   .add(KillBossObjective.ofStandardConfig(level, random).add(FindExitObjective.create(ClassicPortalLogic.EXIT)))
             );
             objectives.add(DeathObjective.create(false));

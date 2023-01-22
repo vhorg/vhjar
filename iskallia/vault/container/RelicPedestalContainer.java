@@ -1,5 +1,6 @@
 package iskallia.vault.container;
 
+import iskallia.vault.block.entity.RelicPedestalTileEntity;
 import iskallia.vault.container.inventory.RelicPedestalInventory;
 import iskallia.vault.container.slot.RelicRecipeFragmentSlot;
 import iskallia.vault.container.slot.TabSlot;
@@ -24,11 +25,18 @@ public class RelicPedestalContainer extends AbstractElementContainer {
    protected BlockPos pedestalPos;
    @NotNull
    protected ResourceLocation selectedRelicId = ModRelics.EMPTY.getResultingRelic();
+   private final RelicPedestalTileEntity tileEntity;
 
    public RelicPedestalContainer(int id, Player player, BlockPos pedestalPos) {
       super(ModContainers.RELIC_PEDESTAL_CONTAINER, id, player);
       this.pedestalPos = pedestalPos;
-      this.internalInventory = new RelicPedestalInventory();
+      if (player.getLevel().getBlockEntity(this.pedestalPos) instanceof RelicPedestalTileEntity relicPedestalTileEntity) {
+         this.tileEntity = relicPedestalTileEntity;
+      } else {
+         this.tileEntity = null;
+      }
+
+      this.internalInventory = new RelicPedestalInventory(this.tileEntity);
       int offsetX = 0;
       int offsetY = 0;
       int containerSlotIndex = 0;

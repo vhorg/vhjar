@@ -26,6 +26,7 @@ public class ModGameRules {
    public static Key<IntegerValue> VAULT_TEMPLATE_CACHE_SIZE;
    public static Key<BooleanValue> CASUAL_VAULTS;
    public static Key<BooleanValue> VAULT_ALLOW_WAYPOINTS;
+   public static Key<BooleanValue> VAULT_NO_OP_DIFFICULTY;
 
    public static void initialize() {
       FINAL_VAULT_ALLOW_PARTY = register("finalVaultAllowParty", Category.MISC, booleanRule(true));
@@ -39,6 +40,7 @@ public class ModGameRules {
             false, (server, value) -> ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ClientboundSyncVaultAllowWaypointsMessage(value.get()))
          )
       );
+      VAULT_NO_OP_DIFFICULTY = register("vaultNoOpDifficulty", Category.MISC, booleanRule(true));
    }
 
    public static <T extends Value<T>> Key<T> register(String name, Category category, Type<T> type) {

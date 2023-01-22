@@ -15,21 +15,19 @@ import net.minecraft.world.item.Item;
 public class ChestScavengeTask extends ScavengeTask {
    public final String target;
    public final double probability;
-   public final double multiplier;
    public final ResourceLocation icon;
    public final WeightedList<ChestScavengeTask.Entry> entries;
 
-   public ChestScavengeTask(String target, double probability, double multiplier, ResourceLocation icon, WeightedList<ChestScavengeTask.Entry> entries) {
+   public ChestScavengeTask(String target, double probability, ResourceLocation icon, WeightedList<ChestScavengeTask.Entry> entries) {
       this.target = target;
       this.probability = probability;
-      this.multiplier = multiplier;
       this.icon = icon;
       this.entries = entries;
    }
 
    @Override
    public Optional<ScavengerGoal> generateGoal(int count, RandomSource random) {
-      return this.entries.getRandom(random).map(entry -> new ScavengerGoal(entry.item, (int)Math.ceil(count * this.multiplier), this.icon, entry.color));
+      return this.entries.getRandom(random).map(entry -> new ScavengerGoal(entry.item, (int)Math.ceil(count * entry.multiplier), this.icon, entry.color));
    }
 
    @Override
@@ -49,10 +47,12 @@ public class ChestScavengeTask extends ScavengeTask {
 
    public static class Entry {
       public final Item item;
+      public final double multiplier;
       public final int color;
 
-      public Entry(Item item, int color) {
+      public Entry(Item item, double multiplier, int color) {
          this.item = item;
+         this.multiplier = multiplier;
          this.color = color;
       }
    }

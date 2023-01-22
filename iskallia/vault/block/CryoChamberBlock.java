@@ -5,6 +5,8 @@ import iskallia.vault.block.entity.CryoChamberTileEntity;
 import iskallia.vault.container.RenamingContainer;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.ClientboundResetCryoChamberMessage;
 import iskallia.vault.util.BlockHelper;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.RenameType;
@@ -51,6 +53,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.network.NetworkHooks;
+import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 public class CryoChamberBlock extends Block implements EntityBlock {
@@ -192,7 +195,10 @@ public class CryoChamberBlock extends Block implements EntityBlock {
             ItemStack heldStack = player.getItemInHand(hand);
             if (chamber.getEternal() != null) {
                if (!player.isShiftKeyDown()) {
-                  NetworkHooks.openGui((ServerPlayer)player, chamber, buffer -> buffer.writeBlockPos(pos));
+                  chamber.pickupSpirit(player, chamber);
+                  chamber.resetAll();
+                  ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ClientboundResetCryoChamberMessage(chamber.getBlockPos()));
+                  chamber.sendUpdates();
                   return InteractionResult.SUCCESS;
                }
 

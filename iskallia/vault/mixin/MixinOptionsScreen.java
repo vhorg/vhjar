@@ -47,7 +47,8 @@ public class MixinOptionsScreen extends Screen {
                            this::lockVaultDifficulty,
                            new TranslatableComponent("the_vault.difficulty.lock.title"),
                            new TranslatableComponent(
-                              "the_vault.difficulty.lock.question", new Object[]{WorldSettings.get(this.minecraft.level).getVaultDifficulty().getDisplayName()}
+                              "the_vault.difficulty.lock.question",
+                              new Object[]{WorldSettings.get(this.minecraft.level).getGlobalVaultDifficulty().getDisplayName()}
                            )
                         )
                      )
@@ -66,7 +67,7 @@ public class MixinOptionsScreen extends Screen {
       this.minecraft.setScreen(this);
       if (vaultDifficultyLocked && this.minecraft.level != null) {
          ModNetwork.CHANNEL
-            .sendToServer(new ServerboundChangeDifficultyMessage(WorldSettings.get(this.minecraft.level).getVaultDifficulty(), vaultDifficultyLocked));
+            .sendToServer(new ServerboundChangeDifficultyMessage(WorldSettings.get(this.minecraft.level).getGlobalVaultDifficulty(), vaultDifficultyLocked));
          this.vaultLockButton.setLocked(true);
          this.vaultLockButton.active = false;
          this.vaultDifficultyButton.active = false;
@@ -76,7 +77,7 @@ public class MixinOptionsScreen extends Screen {
    private CycleButton<VaultDifficulty> createDifficultyButton(int screenWidth, int screenHeight, Minecraft mc) {
       return CycleButton.builder(VaultDifficulty::getDisplayName)
          .withValues(VaultDifficulty.values())
-         .withInitialValue(WorldSettings.get(mc.level).getVaultDifficulty())
+         .withInitialValue(WorldSettings.get(mc.level).getGlobalVaultDifficulty())
          .create(
             screenWidth / 2 - 155 + 160,
             screenHeight / 6 - 12 + 20,

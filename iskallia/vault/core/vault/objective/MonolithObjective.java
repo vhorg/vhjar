@@ -7,7 +7,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import iskallia.vault.block.MonolithBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.client.gui.helper.LightmapHelper;
-import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapter;
 import iskallia.vault.core.data.key.FieldKey;
@@ -26,15 +25,16 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.MonolithIgniteMessage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -170,52 +170,50 @@ public class MonolithObjective extends Objective {
          }
       }
 
-      matrixStack.pushPose();
-      matrixStack.translate(15.0, window.getGuiScaledHeight() - 34, 0.0);
-      if (AbilitiesOverlay.ABILITY_DATA.shouldRender) {
-         matrixStack.translate(0.0, -12.0, 0.0);
-      }
-
+      int midX = window.getGuiScaledWidth() / 2;
+      Font font = Minecraft.getInstance().font;
       BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-      FormattedCharSequence text = new TextComponent("Monoliths").withStyle(ChatFormatting.BOLD).getVisualOrderText();
-      Minecraft.getInstance()
-         .font
-         .drawInBatch(text, 0.0F, 0.0F, -1, true, matrixStack.last().pose(), buffer, false, 0, LightmapHelper.getPackedFullbrightCoords());
+      Component txt = new TextComponent("Find the Monoliths!").withStyle(ChatFormatting.WHITE);
+      font.drawInBatch(
+         txt.getVisualOrderText(),
+         midX - font.width(txt) / 2.0F,
+         6.0F,
+         -1,
+         true,
+         matrixStack.last().pose(),
+         buffer,
+         false,
+         0,
+         LightmapHelper.getPackedFullbrightCoords()
+      );
       buffer.endBatch();
-      if (this.get(TARGET) <= 0) {
-         return false;
-      } else {
-         float scale = 0.6F;
-         float gap = 2.0F;
-         float margin = 2.0F;
-         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-         int previousTexture = RenderSystem.getShaderTexture(0);
-         RenderSystem.setShaderTexture(0, VaultOverlay.VAULT_HUD);
-         int iconWidth = 12;
-         int iconHeight = 22;
+      int gapWidth = 4;
+      int itemBoxWidth = 16;
+      int iconWidth = 12;
+      int iconHeight = 22;
+      int totalWidth = this.get(TARGET) * itemBoxWidth + (this.get(TARGET) - 1) * gapWidth;
+      int shiftX = -totalWidth / 2 + 2;
+      matrixStack.pushPose();
+      matrixStack.translate(midX + shiftX, 25.0, 0.0);
+
+      for (int i = 0; i < this.get(TARGET); i++) {
          matrixStack.pushPose();
-         matrixStack.translate(0.0, -margin, 0.0);
-         matrixStack.translate(0.0, -scale * iconHeight, 0.0);
-         matrixStack.scale(scale, scale, scale);
-
-         for (int i = 0; i < this.get(COUNT); i++) {
-            GuiComponent.blit(matrixStack, 0, 0, 103.0F, 84.0F, iconWidth, iconHeight, 256, 256);
-            matrixStack.translate(scale * gap + iconWidth, 0.0, 0.0);
-         }
-
-         for (int i = 0; i < this.get(TARGET) - this.get(COUNT); i++) {
-            GuiComponent.blit(matrixStack, 0, 0, 90.0F, 84.0F, iconWidth, iconHeight, 256, 256);
-            matrixStack.translate(scale * gap + iconWidth, 0.0, 0.0);
-         }
-
-         matrixStack.popPose();
-         matrixStack.popPose();
+         matrixStack.translate(0.0, -itemBoxWidth / 2.0F, 0.0);
          RenderSystem.setShader(GameRenderer::getPositionTexShader);
          RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-         RenderSystem.setShaderTexture(0, previousTexture);
-         return true;
+         RenderSystem.setShaderTexture(0, VaultOverlay.VAULT_HUD);
+         if (i < this.get(COUNT)) {
+            GuiComponent.blit(matrixStack, 0, 0, 103.0F, 84.0F, iconWidth, iconHeight, 256, 256);
+         } else {
+            GuiComponent.blit(matrixStack, 0, 0, 90.0F, 84.0F, iconWidth, iconHeight, 256, 256);
+         }
+
+         matrixStack.popPose();
+         matrixStack.translate(itemBoxWidth + gapWidth, 0.0, 0.0);
       }
+
+      matrixStack.popPose();
+      return true;
    }
 
    @Override

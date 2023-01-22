@@ -6,6 +6,7 @@ import iskallia.vault.core.data.key.registry.KeyRegistry;
 import iskallia.vault.core.data.sync.context.SyncContext;
 import iskallia.vault.core.net.BitBuffer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.Registry;
@@ -111,6 +112,10 @@ public abstract class Adapter<T> {
 
    public static ItemStackAdapter ofItemStack() {
       return new ItemStackAdapter();
+   }
+
+   public static <T> ArrayAdapter<T> ofArray(IntFunction<T[]> constructor, Adapter<T> elementAdapter) {
+      return new ArrayAdapter<>(constructor, elementAdapter, false);
    }
 
    @FunctionalInterface

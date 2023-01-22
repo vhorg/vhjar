@@ -1,6 +1,6 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.block.entity.CryoChamberTileEntity;
+import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.entity.eternal.EternalData;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.world.data.EternalsData;
@@ -36,26 +36,24 @@ public class ServerboundToggleEternalPlayerSkinMessage {
       context.enqueueWork(() -> {
          ServerPlayer serverPlayer = context.getSender();
          if (serverPlayer != null) {
-            if (serverPlayer.getLevel().getBlockEntity(message.pos) instanceof CryoChamberTileEntity cryoChamberTileEntity) {
-               cryoChamberTileEntity.usingPlayerSkin = !cryoChamberTileEntity.usingPlayerSkin;
-               EternalData eternalData = cryoChamberTileEntity.getEternal();
+            if (serverPlayer.getLevel().getBlockEntity(message.pos) instanceof EternalPedestalTileEntity eternalPedestal) {
+               EternalData eternalData = eternalPedestal.getEternal();
                if (eternalData != null) {
-                  eternalData.setUsingPlayerSkin(cryoChamberTileEntity.usingPlayerSkin);
+                  eternalData.setUsingPlayerSkin(!eternalData.isUsingPlayerSkin());
                   EternalsData.get(serverPlayer.getLevel()).setDirty();
                }
 
-               cryoChamberTileEntity.sendUpdates();
-               NetworkHooks.openGui(serverPlayer, cryoChamberTileEntity, buffer -> buffer.writeBlockPos(cryoChamberTileEntity.getBlockPos()));
-            } else if (serverPlayer.getLevel().getBlockEntity(message.pos.below()) instanceof CryoChamberTileEntity cryoChamberTileEntity) {
-               cryoChamberTileEntity.usingPlayerSkin = !cryoChamberTileEntity.usingPlayerSkin;
-               EternalData eternalData = cryoChamberTileEntity.getEternal();
+               eternalPedestal.sendUpdates();
+               NetworkHooks.openGui(serverPlayer, eternalPedestal, buffer -> buffer.writeBlockPos(eternalPedestal.getBlockPos()));
+            } else if (serverPlayer.getLevel().getBlockEntity(message.pos.below()) instanceof EternalPedestalTileEntity eternalPedestal) {
+               EternalData eternalData = eternalPedestal.getEternal();
                if (eternalData != null) {
-                  eternalData.setUsingPlayerSkin(cryoChamberTileEntity.usingPlayerSkin);
+                  eternalData.setUsingPlayerSkin(eternalData.isUsingPlayerSkin());
                   EternalsData.get(serverPlayer.getLevel()).setDirty();
                }
 
-               cryoChamberTileEntity.sendUpdates();
-               NetworkHooks.openGui(serverPlayer, cryoChamberTileEntity, buffer -> buffer.writeBlockPos(cryoChamberTileEntity.getBlockPos()));
+               eternalPedestal.sendUpdates();
+               NetworkHooks.openGui(serverPlayer, eternalPedestal, buffer -> buffer.writeBlockPos(eternalPedestal.getBlockPos()));
             }
          }
       });

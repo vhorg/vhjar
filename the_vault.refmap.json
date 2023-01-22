@@ -29,6 +29,7 @@
       "checkTotemDeathProtection": "Lnet/minecraft/world/entity/LivingEntity;m_21262_(Lnet/minecraft/world/damagesource/DamageSource;)Z",
       "createLivingAttributes": "Lnet/minecraft/world/entity/LivingEntity;m_21183_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
       "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;)Z": "Lnet/minecraft/world/entity/LivingEntity;m_7292_(Lnet/minecraft/world/effect/MobEffectInstance;)Z",
+      "getTicksUsingItem": "Lnet/minecraft/world/entity/LivingEntity;m_21252_()I",
       "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V"
     },
     "iskallia/vault/mixin/MixinHumanoidModel": {
@@ -70,12 +71,12 @@
     "iskallia/vault/mixin/AnvilBlockMixin": {
       "damage": "Lnet/minecraft/world/level/block/AnvilBlock;m_48824_(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/state/BlockState;"
     },
-    "iskallia/vault/mixin/MixinBossOverlayGui": {
-      "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
-    },
     "iskallia/vault/mixin/MixinPickarang": {
       "Lnet/minecraft/world/level/block/state/BlockState;getDestroySpeed(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F": "Lnet/minecraft/world/level/block/state/BlockState;m_60800_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
       "onHit": "Lvazkii/quark/content/tools/entity/Pickarang;m_6532_(Lnet/minecraft/world/phys/HitResult;)V"
+    },
+    "iskallia/vault/mixin/MixinBossOverlayGui": {
+      "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
     },
     "iskallia/vault/mixin/BlockMixin": {
       "getDrops": "Lnet/minecraft/world/level/block/state/BlockBehaviour;m_7381_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/storage/loot/LootContext$Builder;)Ljava/util/List;"
@@ -87,6 +88,9 @@
     },
     "iskallia/vault/mixin/MixinRepairContainer": {
       "createResult": "Lnet/minecraft/world/inventory/AnvilMenu;m_6640_()V"
+    },
+    "iskallia/vault/mixin/MixinPiglinAi": {
+      "findNearestValidAttackTarget": "Lnet/minecraft/world/entity/monster/piglin/PiglinAi;m_35000_(Lnet/minecraft/world/entity/monster/piglin/Piglin;)Ljava/util/Optional;"
     },
     "iskallia/vault/mixin/MixinSmallFireball": {
       "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z": "Lnet/minecraft/world/entity/Entity;m_6469_(Lnet/minecraft/world/damagesource/DamageSource;F)Z",
@@ -106,6 +110,10 @@
     },
     "iskallia/vault/mixin/MixinCombatRules": {
       "getDamageAfterAbsorb": "Lnet/minecraft/world/damagesource/CombatRules;m_19272_(FFF)F"
+    },
+    "iskallia/vault/mixin/MixinCrossbowAttack": {
+      "tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;J)V": "Lnet/minecraft/world/entity/ai/behavior/CrossbowAttack;m_6725_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;J)V",
+      "checkExtraStartConditions(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;)Z": "Lnet/minecraft/world/entity/ai/behavior/CrossbowAttack;m_6114_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;)Z"
     },
     "iskallia/vault/mixin/MixinClientItemStack": {
       "getHoverName": "Lnet/minecraft/world/item/ItemStack;m_41786_()Lnet/minecraft/network/chat/Component;"
@@ -194,13 +202,13 @@
       "getAmbientSound": "Lnet/minecraft/world/entity/monster/Witch;m_7515_()Lnet/minecraft/sounds/SoundEvent;",
       "defineSynchedData": "Lnet/minecraft/world/entity/monster/Witch;m_8097_()V"
     },
-    "iskallia/vault/mixin/MixinEnchantment": {
-      "canEnchant": "Lnet/minecraft/world/item/enchantment/Enchantment;m_6081_(Lnet/minecraft/world/item/ItemStack;)Z",
-      "isTradeable": "Lnet/minecraft/world/item/enchantment/Enchantment;m_6594_()Z"
-    },
     "iskallia/vault/mixin/MixinBlockBehaviour": {
       "use": "Lnet/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase;m_60664_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;",
       "isPathfindable": "Lnet/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase;m_60647_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/pathfinder/PathComputationType;)Z"
+    },
+    "iskallia/vault/mixin/MixinEnchantment": {
+      "canEnchant": "Lnet/minecraft/world/item/enchantment/Enchantment;m_6081_(Lnet/minecraft/world/item/ItemStack;)Z",
+      "isTradeable": "Lnet/minecraft/world/item/enchantment/Enchantment;m_6594_()Z"
     },
     "iskallia/vault/mixin/MixinKeyboardInput": {
       "calculateImpulse": "m_205577_(ZZ)F",
@@ -295,6 +303,9 @@
     "iskallia/vault/mixin/AccessorWorld": {
       "thread": "f_46423_:Ljava/lang/Thread;"
     },
+    "iskallia/vault/mixin/MixinMob": {
+      "getMeleeAttackRangeSqr": "Lnet/minecraft/world/entity/Mob;m_142593_(Lnet/minecraft/world/entity/LivingEntity;)D"
+    },
     "iskallia/vault/mixin/MixinModelPart": {
       "translateAndRotate": "Lnet/minecraft/client/model/geom/ModelPart;m_104299_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
     },
@@ -363,6 +374,7 @@
         "checkTotemDeathProtection": "Lnet/minecraft/world/entity/LivingEntity;m_21262_(Lnet/minecraft/world/damagesource/DamageSource;)Z",
         "createLivingAttributes": "Lnet/minecraft/world/entity/LivingEntity;m_21183_()Lnet/minecraft/world/entity/ai/attributes/AttributeSupplier$Builder;",
         "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;)Z": "Lnet/minecraft/world/entity/LivingEntity;m_7292_(Lnet/minecraft/world/effect/MobEffectInstance;)Z",
+        "getTicksUsingItem": "Lnet/minecraft/world/entity/LivingEntity;m_21252_()I",
         "tick": "Lnet/minecraft/world/entity/LivingEntity;m_8119_()V"
       },
       "iskallia/vault/mixin/MixinHumanoidModel": {
@@ -404,12 +416,12 @@
       "iskallia/vault/mixin/AnvilBlockMixin": {
         "damage": "Lnet/minecraft/world/level/block/AnvilBlock;m_48824_(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/state/BlockState;"
       },
-      "iskallia/vault/mixin/MixinBossOverlayGui": {
-        "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
-      },
       "iskallia/vault/mixin/MixinPickarang": {
         "Lnet/minecraft/world/level/block/state/BlockState;getDestroySpeed(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F": "Lnet/minecraft/world/level/block/state/BlockState;m_60800_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
         "onHit": "Lvazkii/quark/content/tools/entity/Pickarang;m_6532_(Lnet/minecraft/world/phys/HitResult;)V"
+      },
+      "iskallia/vault/mixin/MixinBossOverlayGui": {
+        "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
       },
       "iskallia/vault/mixin/BlockMixin": {
         "getDrops": "Lnet/minecraft/world/level/block/state/BlockBehaviour;m_7381_(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/storage/loot/LootContext$Builder;)Ljava/util/List;"
@@ -421,6 +433,9 @@
       },
       "iskallia/vault/mixin/MixinRepairContainer": {
         "createResult": "Lnet/minecraft/world/inventory/AnvilMenu;m_6640_()V"
+      },
+      "iskallia/vault/mixin/MixinPiglinAi": {
+        "findNearestValidAttackTarget": "Lnet/minecraft/world/entity/monster/piglin/PiglinAi;m_35000_(Lnet/minecraft/world/entity/monster/piglin/Piglin;)Ljava/util/Optional;"
       },
       "iskallia/vault/mixin/MixinSmallFireball": {
         "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z": "Lnet/minecraft/world/entity/Entity;m_6469_(Lnet/minecraft/world/damagesource/DamageSource;F)Z",
@@ -440,6 +455,10 @@
       },
       "iskallia/vault/mixin/MixinCombatRules": {
         "getDamageAfterAbsorb": "Lnet/minecraft/world/damagesource/CombatRules;m_19272_(FFF)F"
+      },
+      "iskallia/vault/mixin/MixinCrossbowAttack": {
+        "tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;J)V": "Lnet/minecraft/world/entity/ai/behavior/CrossbowAttack;m_6725_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;J)V",
+        "checkExtraStartConditions(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;)Z": "Lnet/minecraft/world/entity/ai/behavior/CrossbowAttack;m_6114_(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Mob;)Z"
       },
       "iskallia/vault/mixin/MixinClientItemStack": {
         "getHoverName": "Lnet/minecraft/world/item/ItemStack;m_41786_()Lnet/minecraft/network/chat/Component;"
@@ -528,13 +547,13 @@
         "getAmbientSound": "Lnet/minecraft/world/entity/monster/Witch;m_7515_()Lnet/minecraft/sounds/SoundEvent;",
         "defineSynchedData": "Lnet/minecraft/world/entity/monster/Witch;m_8097_()V"
       },
-      "iskallia/vault/mixin/MixinEnchantment": {
-        "canEnchant": "Lnet/minecraft/world/item/enchantment/Enchantment;m_6081_(Lnet/minecraft/world/item/ItemStack;)Z",
-        "isTradeable": "Lnet/minecraft/world/item/enchantment/Enchantment;m_6594_()Z"
-      },
       "iskallia/vault/mixin/MixinBlockBehaviour": {
         "use": "Lnet/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase;m_60664_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/world/InteractionResult;",
         "isPathfindable": "Lnet/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase;m_60647_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/pathfinder/PathComputationType;)Z"
+      },
+      "iskallia/vault/mixin/MixinEnchantment": {
+        "canEnchant": "Lnet/minecraft/world/item/enchantment/Enchantment;m_6081_(Lnet/minecraft/world/item/ItemStack;)Z",
+        "isTradeable": "Lnet/minecraft/world/item/enchantment/Enchantment;m_6594_()Z"
       },
       "iskallia/vault/mixin/MixinKeyboardInput": {
         "calculateImpulse": "m_205577_(ZZ)F",
@@ -628,6 +647,9 @@
       },
       "iskallia/vault/mixin/AccessorWorld": {
         "thread": "f_46423_:Ljava/lang/Thread;"
+      },
+      "iskallia/vault/mixin/MixinMob": {
+        "getMeleeAttackRangeSqr": "Lnet/minecraft/world/entity/Mob;m_142593_(Lnet/minecraft/world/entity/LivingEntity;)D"
       },
       "iskallia/vault/mixin/MixinModelPart": {
         "translateAndRotate": "Lnet/minecraft/client/model/geom/ModelPart;m_104299_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"

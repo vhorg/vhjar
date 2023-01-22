@@ -1,5 +1,6 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.dynamodel.model.armor.ArmorModel;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import iskallia.vault.gear.VaultGearRarity;
@@ -11,12 +12,15 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.network.message.transmog.DiscoveredEntriesMessage;
+import iskallia.vault.research.ResearchTree;
 import iskallia.vault.util.MiscUtils;
+import iskallia.vault.util.PlayerReference;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -56,6 +60,15 @@ public class DiscoveredModelsData extends SavedData {
       if (!vaultGear.isEmpty() && vaultGear.getItem() instanceof VaultGearItem) {
          VaultGearData data = VaultGearData.read(vaultGear);
          data.getFirstValue(ModGearAttributes.GEAR_MODEL).ifPresent(modelId -> this.discoverModelAndBroadcast(vaultGear.getItem(), modelId, player));
+      }
+   }
+
+   public void discoverModelAndBroadcast(Item gearItem, ResourceLocation modelId, PlayerReference playerReference) {
+      if (gearItem instanceof VaultGearItem vaultGearItem) {
+         boolean collected = this.discoverModel(playerReference.getId(), modelId);
+         if (collected) {
+            this.broadcastModelDiscovery(modelId, playerReference.getName(), vaultGearItem);
+         }
       }
    }
 
@@ -106,10 +119,17 @@ public class DiscoveredModelsData extends SavedData {
       }
    }
 
+   private void broadcastModelDiscovery(ResourceLocation modelId, String playerNickname, VaultGearItem vaultGearItem) {
+      this.broadcastModelDiscovery(modelId, new TextComponent(playerNickname), vaultGearItem);
+   }
+
    private void broadcastModelDiscovery(ResourceLocation modelId, Player player, VaultGearItem vaultGearItem) {
+      this.broadcastModelDiscovery(modelId, player.getName().copy(), vaultGearItem);
+   }
+
+   private void broadcastModelDiscovery(ResourceLocation modelId, MutableComponent playerName, VaultGearItem vaultGearItem) {
       ModDynamicModels.REGISTRIES.getAssociatedRegistry(vaultGearItem.getItem()).flatMap(registry -> registry.get(modelId)).ifPresent(model -> {
          MutableComponent msgContainer = new TextComponent("").withStyle(ChatFormatting.WHITE);
-         MutableComponent playerName = player.getDisplayName().copy();
          playerName.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(9974168)));
          MutableComponent pieceName = new TextComponent(model.getDisplayName());
          VaultGearRarity rollRarity = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, modelId);
@@ -120,6 +140,27 @@ public class DiscoveredModelsData extends SavedData {
 
    public Set<ResourceLocation> getDiscoveredModels(UUID playerUUID) {
       return this.discoveredModels.getOrDefault(playerUUID, Collections.emptySet());
+   }
+
+   public void ensureResearchDiscoverables(ServerPlayer player) {
+      DiscoveredModelsData discoveredModelsData = get(player.getLevel());
+      PlayerResearchesData researchesData = PlayerResearchesData.get(player.getLevel());
+      ResearchTree researches = researchesData.getResearches(player);
+
+      for (ResourceLocation modelId : researches.getResearchesDone()
+         .stream()
+         .map(ModConfigs.RESEARCHES::getByName)
+         .filter(research -> research.getDiscoversModels() != null)
+         .flatMap(research -> research.getDiscoversModels().stream())
+         .<ResourceLocation>map(ResourceLocation::tryParse)
+         .filter(Objects::nonNull)
+         .toList()) {
+         ModDynamicModels.REGISTRIES.getModelAndAssociatedItem(modelId).ifPresent(pair -> {
+            DynamicModel<?> gearModel = (DynamicModel<?>)pair.getFirst();
+            Item associatedItem = (Item)pair.getSecond();
+            discoveredModelsData.discoverModelAndBroadcast(associatedItem, gearModel.getId(), player);
+         });
+      }
    }
 
    public void setDirty(boolean dirty) {

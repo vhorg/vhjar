@@ -28,6 +28,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,6 +42,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin({LivingEntity.class})
 public abstract class MixinLivingEntity extends Entity {
    private float prevSize = -1.0F;
+   @Shadow
+   protected ItemStack useItem;
 
    public MixinLivingEntity(EntityType<?> entityType, Level world) {
       super(entityType, world);
@@ -62,6 +65,12 @@ public abstract class MixinLivingEntity extends Entity {
 
    @Shadow
    public abstract ItemStack getItemInHand(InteractionHand var1);
+
+   @Shadow
+   public abstract boolean isUsingItem();
+
+   @Shadow
+   public abstract int getUseItemRemainingTicks();
 
    @Redirect(
       method = {"createLivingAttributes"},
@@ -89,7 +98,26 @@ public abstract class MixinLivingEntity extends Entity {
          .add(ModAttributes.SIZE_SCALE)
          .add(ModAttributes.BREAK_ARMOR_CHANCE)
          .add(ModAttributes.MANA_MAX)
-         .add(ModAttributes.MANA_REGEN);
+         .add(ModAttributes.MANA_REGEN)
+         .add(ModAttributes.REACH)
+         .add(ModAttributes.CROSSBOW_CHARGE_TIME)
+         .add(ModAttributes.THORNS_CHANCE)
+         .add(ModAttributes.THORNS_DAMAGE);
+   }
+
+   @Inject(
+      method = {"getTicksUsingItem"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void getTicksUsingItem(CallbackInfoReturnable<Integer> ci) {
+      if (this.useItem.getItem() == Items.CROSSBOW && this.isUsingItem()) {
+         AttributeInstance attribute = this.getAttribute(ModAttributes.CROSSBOW_CHARGE_TIME);
+         if (attribute != null) {
+            int value = this.useItem.getUseDuration() - this.getUseItemRemainingTicks();
+            ci.setReturnValue((int)(this.useItem.getUseDuration() / attribute.getValue() * value));
+         }
+      }
    }
 
    @Inject(

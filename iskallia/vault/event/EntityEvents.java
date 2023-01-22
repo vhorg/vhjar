@@ -10,7 +10,6 @@ import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.MonsterEyeEntity;
 import iskallia.vault.entity.entity.TreasureGoblinEntity;
-import iskallia.vault.entity.entity.VaultGuardianEntity;
 import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -24,6 +23,7 @@ import iskallia.vault.item.gear.VaultShieldItem;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.PlayerStat;
+import iskallia.vault.util.damage.ThornsReflectDamageSource;
 import iskallia.vault.world.data.ServerVaults;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.ArrayList;
@@ -33,6 +33,7 @@ import java.util.Random;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -41,6 +42,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.monster.Spider;
@@ -58,6 +60,7 @@ import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
@@ -183,7 +186,7 @@ public class EntityEvents {
    }
 
    private static boolean shouldDropDefaultInVault(Entity entity) {
-      return entity instanceof VaultGuardianEntity || entity instanceof TreasureGoblinEntity || entity instanceof Player;
+      return entity instanceof TreasureGoblinEntity || entity instanceof Player;
    }
 
    private static boolean addShardDrops(Level world, Entity killed, ServerPlayer killer, Collection<ItemEntity> drops) {
@@ -260,16 +263,6 @@ public class EntityEvents {
                chance--;
                player.getInventory().hurtArmor(event.getSource(), 4.0F, Inventory.ALL_ARMOR_SLOTS);
             }
-         }
-      }
-   }
-
-   @SubscribeEvent
-   public static void vaultGuardianReflectDamage(LivingDamageEvent event) {
-      LivingEntity entityLiving = event.getEntityLiving();
-      if (!entityLiving.level.isClientSide) {
-         if (entityLiving instanceof VaultGuardianEntity && event.getSource().getEntity() instanceof LivingEntity attacker) {
-            attacker.hurt(DamageSource.thorns(entityLiving), event.getAmount() * 0.2F);
          }
       }
    }
@@ -395,6 +388,38 @@ public class EntityEvents {
       Entity entity = event.getEntity();
       if (ServerVaults.isInVault(entity)) {
          event.setResult(Result.DENY);
+      }
+   }
+
+   @SubscribeEvent(
+      priority = EventPriority.HIGH
+   )
+   public static void thornsReflectDamage(LivingAttackEvent event) {
+      if (!(event.getSource() instanceof ThornsReflectDamageSource)) {
+         if (event.getSource().getEntity() instanceof LivingEntity attacker) {
+            LivingEntity attacked = event.getEntityLiving();
+            if (attacked.getAttribute(ModAttributes.THORNS_CHANCE) != null && attacked.getAttribute(ModAttributes.THORNS_DAMAGE) != null) {
+               double thornsChance = attacked.getAttribute(ModAttributes.THORNS_CHANCE).getValue();
+               if (!(rand.nextFloat() >= thornsChance)) {
+                  double thornsMultiplier = attacked.getAttribute(ModAttributes.THORNS_DAMAGE).getValue();
+                  if (!(thornsMultiplier <= 0.0)) {
+                     float dmg = (float)attacked.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
+                     DamageSource src = ThornsReflectDamageSource.of(event.getEntityLiving());
+                     attacker.hurt(src, (float)(dmg * thornsMultiplier));
+                     event.getEntityLiving()
+                        .level
+                        .playSound(
+                           null,
+                           event.getEntityLiving().getOnPos(),
+                           SoundEvents.THORNS_HIT,
+                           SoundSource.BLOCKS,
+                           1.0F,
+                           (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F
+                        );
+                  }
+               }
+            }
+         }
       }
    }
 }

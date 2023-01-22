@@ -148,6 +148,7 @@ public class VaultMod {
       DiscoveredTrinketsData.get(serverWorld).syncTo(player);
       ModConfigs.SOUL_SHARD.syncTo(ModConfigs.SOUL_SHARD, player);
       ModConfigs.VAULT_GEAR_RECIPES_CONFIG.syncTo(ModConfigs.VAULT_GEAR_RECIPES_CONFIG, player);
+      DiscoveredModelsData.get(serverWorld).ensureResearchDiscoverables(player);
    }
 
    public static String sId(String name) {

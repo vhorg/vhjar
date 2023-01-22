@@ -100,6 +100,8 @@ public class VaultAltarIngredientsConfig extends Config {
          if (ingredientEntry.getScale() != 0.0) {
             double scale = this.getScale(poolId, crystalsCrafted);
             amount = Math.max((int)(Math.round(amount * scale * amtMultiplier) * ingredientEntry.getScale()), 1);
+         } else {
+            amount = Math.max(Math.round(amount * amtMultiplier), 1);
          }
 
          requiredItems.add(new RequiredItems(poolId, items, amount));

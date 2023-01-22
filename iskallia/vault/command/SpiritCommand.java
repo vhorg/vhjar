@@ -76,6 +76,7 @@ public class SpiritCommand extends Command {
             if (spirit != null) {
                spirit.setGameProfile(gp);
                spirit.setVaultLevel(vaultLevel);
+               spirit.setPlayerLevel(vaultLevel);
                ServerVaults.get(serverLevel).ifPresent(vault -> {
                   Listener listener = vault.get(Vault.LISTENERS).get(serverPlayer.getUUID());
                   if (listener != null) {

@@ -24,7 +24,7 @@ public class EntityScaler {
       if (!(entity instanceof Player) && !(entity instanceof EternalEntity)) {
          if (!isScaled(entity)) {
             vault.ifPresent(Vault.LEVEL, level -> {
-               VaultMobsConfig.scale(entity, level.get());
+               VaultMobsConfig.scale(vault.get(Vault.OWNER), entity, level.get());
                VaultMobGearConfig.applyEquipment(entity, level.get());
             });
             setScaled(entity);

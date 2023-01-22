@@ -1,22 +1,16 @@
 package iskallia.vault.block;
 
 import iskallia.vault.block.entity.TransmogTableTileEntity;
-import iskallia.vault.container.TransmogTableContainer;
 import iskallia.vault.init.ModBlocks;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -60,23 +54,16 @@ public class TransmogTableBlock extends Block implements EntityBlock {
    }
 
    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
-      if (world.isClientSide) {
+      if (world.isClientSide()) {
          return InteractionResult.SUCCESS;
-      } else {
-         if (world.getBlockEntity(pos) instanceof TransmogTableTileEntity tileEntity) {
-            NetworkHooks.openGui((ServerPlayer)player, new MenuProvider() {
-               @Nonnull
-               public Component getDisplayName() {
-                  return new TranslatableComponent("container.the_vault.transmog_table");
-               }
-
-               @Nonnull
-               public AbstractContainerMenu createMenu(int windowId, @Nonnull Inventory inventory, @Nonnull Player playerx) {
-                  return new TransmogTableContainer(windowId, playerx, tileEntity.getInternalInventory());
-               }
-            });
+      } else if (player instanceof ServerPlayer sPlayer) {
+         if (world.getBlockEntity(pos) instanceof TransmogTableTileEntity transmogTableTileEntity) {
+            NetworkHooks.openGui(sPlayer, transmogTableTileEntity, buffer -> buffer.writeBlockPos(pos));
+            return InteractionResult.SUCCESS;
+         } else {
+            return InteractionResult.SUCCESS;
          }
-
+      } else {
          return InteractionResult.SUCCESS;
       }
    }

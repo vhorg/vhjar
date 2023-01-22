@@ -2,6 +2,8 @@ package iskallia.vault.world.data;
 
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.influence.VaultGod;
+import iskallia.vault.init.ModDynamicModels;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.util.calc.GodAffinityHelper;
@@ -11,11 +13,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import javax.annotation.Nonnull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -59,8 +64,34 @@ public class PlayerInfluences extends SavedData {
       return !get().entries.containsKey(player) ? 0 : get().entries.get(player).reputation.getOrDefault(god, 0);
    }
 
-   public static void addReputation(UUID player, VaultGod god, int reputation) {
-      get().entries.computeIfAbsent(player, uuid -> new PlayerInfluences.Entry()).addReputation(god, reputation);
+   public static void addReputation(UUID playerUUID, VaultGod god, int reputation) {
+      PlayerInfluences.Entry entry = get().entries.computeIfAbsent(playerUUID, uuid -> new PlayerInfluences.Entry());
+      entry.addReputation(god, reputation);
+      MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+      ServerPlayer player = server.getPlayerList().getPlayer(playerUUID);
+      if (player != null) {
+         entry.reputation.forEach((vaultGod, updatedReputation) -> {
+            if (updatedReputation >= 100) {
+               DiscoveredModelsData discoveredModelsData = DiscoveredModelsData.get(server);
+               if (vaultGod == VaultGod.IDONA) {
+                  discoveredModelsData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.IDONAS_ARMOUR);
+                  discoveredModelsData.discoverModelAndBroadcast(ModItems.SWORD, ModDynamicModels.Swords.IDONAS_SWORD.getId(), player);
+                  discoveredModelsData.discoverModelAndBroadcast(ModItems.AXE, ModDynamicModels.Axes.IDONAS_SCYTHE.getId(), player);
+               } else if (vaultGod == VaultGod.TENOS) {
+                  discoveredModelsData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.TENOS_ARMOUR);
+                  discoveredModelsData.discoverModelAndBroadcast(ModItems.AXE, ModDynamicModels.Axes.TENOS_STAFF.getId(), player);
+               } else if (vaultGod == VaultGod.VELARA) {
+                  discoveredModelsData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.VELARAS_ARMOUR);
+                  discoveredModelsData.discoverModelAndBroadcast(ModItems.SWORD, ModDynamicModels.Swords.VELARAS_GREATSWORD.getId(), player);
+                  discoveredModelsData.discoverModelAndBroadcast(ModItems.AXE, ModDynamicModels.Axes.VELARAS_HAMMER.getId(), player);
+               } else if (vaultGod == VaultGod.WENDARR) {
+                  discoveredModelsData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.WENDARRS_ARMOUR);
+                  discoveredModelsData.discoverModelAndBroadcast(ModItems.SWORD, ModDynamicModels.Swords.WENDARRS_GREATSWORD.getId(), player);
+                  discoveredModelsData.discoverModelAndBroadcast(ModItems.AXE, ModDynamicModels.Axes.WENDARRS_CLOCKAXE.getId(), player);
+               }
+            }
+         });
+      }
    }
 
    private static PlayerInfluences load(CompoundTag nbt) {
@@ -73,6 +104,7 @@ public class PlayerInfluences extends SavedData {
       return true;
    }
 
+   @Nonnull
    public CompoundTag save(CompoundTag nbt) {
       nbt.put("entries", this.entries.serializeNBT());
       return nbt;
@@ -86,7 +118,7 @@ public class PlayerInfluences extends SavedData {
    }
 
    private static class Entry implements INBTSerializable<CompoundTag> {
-      private Map<VaultGod, Integer> reputation = new HashMap<>();
+      private final Map<VaultGod, Integer> reputation = new HashMap<>();
       private VaultGod favour;
 
       public void addReputation(VaultGod god, int reputation) {
@@ -96,7 +128,7 @@ public class PlayerInfluences extends SavedData {
          Random random = new Random();
 
          for (int i = 0; i < remove; i++) {
-            List<VaultGod> available = this.reputation.entrySet().stream().filter(e -> e.getValue() > 0).map(Map.Entry::getKey).toList();
+            List<VaultGod> available = this.reputation.entrySet().stream().filter(e -> e.getValue() > 0 && e.getKey() != god).map(Map.Entry::getKey).toList();
             VaultGod target = available.get(random.nextInt(available.size()));
             this.reputation.put(target, this.reputation.get(target) - 1);
          }

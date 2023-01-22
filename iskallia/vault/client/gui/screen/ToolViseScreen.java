@@ -46,7 +46,7 @@ public class ToolViseScreen extends AbstractContainerScreen<ToolViseContainerMen
       this.imageWidth = 176;
       this.imageHeight = 218;
       this.inventoryLabelY += 54;
-      ((ToolViseContainerMenu)this.menu).addSlotListener(this);
+      ((ToolViseContainerMenu)this.getMenu()).addSlotListener(this);
    }
 
    public void init() {
@@ -65,7 +65,7 @@ public class ToolViseScreen extends AbstractContainerScreen<ToolViseContainerMen
          u++;
       }
 
-      this.slotChanged(this.menu, 0, ((ToolViseContainerMenu)this.menu).getSlot(0).getItem());
+      this.slotChanged(this.menu, 36, ((ToolViseContainerMenu)this.menu).getSlot(36).getItem());
    }
 
    protected void containerTick() {
@@ -166,7 +166,7 @@ public class ToolViseScreen extends AbstractContainerScreen<ToolViseContainerMen
       for (int i = 0; i < this.ingredientCounts.length; i++) {
          int cost = upgrade.getMaterialCost(i);
          if (cost != 0) {
-            Slot slot = ((ToolViseContainerMenu)this.menu).getSlot(i + 1);
+            Slot slot = ((ToolViseContainerMenu)this.menu).getSlot(i + 1 + 36);
             this.font
                .drawShadow(poseStack, (cost > this.ingredientCounts[i] ? ChatFormatting.RED : ChatFormatting.GREEN) + "-" + cost, k + slot.x, l + slot.y, -1);
          }
@@ -180,7 +180,7 @@ public class ToolViseScreen extends AbstractContainerScreen<ToolViseContainerMen
    }
 
    private ItemStack getPaxel() {
-      return ((ToolViseContainerMenu)this.menu).getSlot(0).getItem();
+      return ((ToolViseContainerMenu)this.menu).getSlot(36).getItem();
    }
 
    public boolean keyPressed(int key, int b, int c) {
@@ -207,7 +207,7 @@ public class ToolViseScreen extends AbstractContainerScreen<ToolViseContainerMen
          this.levelPerSocket = 0;
       } else {
          for (int i = 0; i < this.ingredientCounts.length; i++) {
-            ItemStack item = ((ToolViseContainerMenu)this.menu).getSlot(i + 1).getItem();
+            ItemStack item = ((ToolViseContainerMenu)this.menu).getSlot(i + 1 + 36).getItem();
             this.ingredientCounts[i] = item.isEmpty() ? 0 : item.getCount();
          }
 

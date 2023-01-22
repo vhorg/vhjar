@@ -1,6 +1,6 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.block.entity.CryoChamberTileEntity;
+import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.block.entity.LootStatueTileEntity;
 import iskallia.vault.util.RenameType;
 import java.util.function.Supplier;
@@ -47,9 +47,9 @@ public class RenameUIMessage {
             case CRYO_CHAMBER:
                BlockPos pos = NbtUtils.readBlockPos(data.getCompound("BlockPos"));
                String name = data.getString("EternalName");
-               if (sender.getCommandSenderWorld().getBlockEntity(pos) instanceof CryoChamberTileEntity chamber) {
+               if (sender.getCommandSenderWorld().getBlockEntity(pos) instanceof EternalPedestalTileEntity chamber) {
                   chamber.renameEternal(name);
-                  chamber.getSkin().updateSkin(name);
+                  chamber.getSkinProfile().updateSkin(name);
                   chamber.sendUpdates();
                }
          }

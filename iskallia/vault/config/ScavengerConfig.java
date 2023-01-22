@@ -62,36 +62,33 @@ public class ScavengerConfig extends Config {
             new ChestScavengeTask(
                "the_vault:wooden_chest",
                0.5,
-               1.0,
                VaultMod.id("gui/scav/wooden_chest"),
                new WeightedList<ChestScavengeTask.Entry>()
-                  .add(new ChestScavengeTask.Entry(Items.LIGHT_BLUE_WOOL, 16777215), 8)
-                  .add(new ChestScavengeTask.Entry(Items.YELLOW_WOOL, 16777215), 4)
-                  .add(new ChestScavengeTask.Entry(Items.PURPLE_WOOL, 16777215), 2)
-                  .add(new ChestScavengeTask.Entry(Items.LIME_WOOL, 16777215), 1)
+                  .add(new ChestScavengeTask.Entry(Items.LIGHT_BLUE_WOOL, 1.0, 16777215), 8)
+                  .add(new ChestScavengeTask.Entry(Items.YELLOW_WOOL, 1.0, 16777215), 4)
+                  .add(new ChestScavengeTask.Entry(Items.PURPLE_WOOL, 1.0, 16777215), 2)
+                  .add(new ChestScavengeTask.Entry(Items.LIME_WOOL, 1.0, 16777215), 1)
             )
          );
       this.tasks
          .add(
             new CoinStacksScavengeTask(
                0.5,
-               1.0,
                VaultMod.id("gui/scav/wooden_chest"),
                new WeightedList<CoinStacksScavengeTask.Entry>()
-                  .add(new CoinStacksScavengeTask.Entry(Items.LIGHT_BLUE_WOOL, 16777215), 8)
-                  .add(new CoinStacksScavengeTask.Entry(Items.YELLOW_WOOL, 16777215), 4)
-                  .add(new CoinStacksScavengeTask.Entry(Items.PURPLE_WOOL, 16777215), 2)
-                  .add(new CoinStacksScavengeTask.Entry(Items.LIME_WOOL, 16777215), 1)
+                  .add(new CoinStacksScavengeTask.Entry(Items.LIGHT_BLUE_WOOL, 1.0, 16777215), 8)
+                  .add(new CoinStacksScavengeTask.Entry(Items.YELLOW_WOOL, 1.0, 16777215), 4)
+                  .add(new CoinStacksScavengeTask.Entry(Items.PURPLE_WOOL, 1.0, 16777215), 2)
+                  .add(new CoinStacksScavengeTask.Entry(Items.LIME_WOOL, 1.0, 16777215), 1)
             )
          );
       this.tasks
          .add(
             new MobScavengeTask(
                0.5,
-               1.0,
                VaultMod.id("gui/scav/wooden_chest"),
                16777215,
-               new MobScavengeTask.Entry(Items.GOLDEN_APPLE, EntityType.ZOMBIE, EntityType.CREEPER, EntityType.SPIDER)
+               new MobScavengeTask.Entry(Items.GOLDEN_APPLE, 1.0, EntityType.ZOMBIE, EntityType.CREEPER, EntityType.SPIDER)
             )
          );
       this.levels.add(new ScavengerConfig.Entry(0, LootRoll.ofUniform(2, 6), LootRoll.ofUniform(4, 10)));

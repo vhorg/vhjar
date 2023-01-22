@@ -12,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.Consumer;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -38,12 +39,12 @@ public class VaultMobsConfig extends Config {
       return "vault_mobs";
    }
 
-   public static LivingEntity scale(LivingEntity entity, int vaultLevel) {
+   public static LivingEntity scale(UUID ownerId, LivingEntity entity, int vaultLevel) {
       List<VaultMobsConfig.Mob.AttributeOverride> attributes = ModConfigs.VAULT_MOBS.ATTRIBUTE_OVERRIDES.get(entity.getType().getRegistryName().toString());
       if (attributes == null) {
          return entity;
       } else {
-         double difficultyMultiplier = WorldSettings.get(entity.level).getVaultDifficulty().getMobDifficultyMultiplier();
+         double difficultyMultiplier = WorldSettings.get(entity.level).getPlayerDifficulty(ownerId).getMobDifficultyMultiplier();
 
          for (VaultMobsConfig.Mob.AttributeOverride override : attributes) {
             if (!(entity.level.random.nextDouble() >= override.ROLL_CHANCE)) {

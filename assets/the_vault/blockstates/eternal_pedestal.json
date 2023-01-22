@@ -1,0 +1,14 @@
+{
+  "variants": {
+
+    "half=lower": {
+      "model": "the_vault:block/eternal_pedestal"
+    },
+    "half=middle": {
+      "model": "the_vault:block/eternal_pedestal_nothing"
+    },
+    "half=upper": {
+      "model": "the_vault:block/eternal_pedestal_nothing"
+    }
+  }
+}

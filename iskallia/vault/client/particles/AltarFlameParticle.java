@@ -28,7 +28,7 @@ public class AltarFlameParticle extends RisingParticle {
 
    public float getQuadSize(float scaleFactor) {
       float f = (this.age + scaleFactor) / this.lifetime;
-      return this.quadSize * (1.0F - f * f * 0.5F);
+      return 0.4F * this.quadSize * (1.0F - f * f * 0.5F);
    }
 
    public int getLightColor(float partialTick) {

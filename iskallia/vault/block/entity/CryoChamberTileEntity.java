@@ -4,10 +4,12 @@ import com.mojang.authlib.GameProfile;
 import iskallia.vault.client.ClientEternalData;
 import iskallia.vault.container.RenamingContainer;
 import iskallia.vault.container.inventory.CryochamberContainer;
+import iskallia.vault.entity.entity.EternalSpiritEntity;
 import iskallia.vault.entity.eternal.EternalData;
 import iskallia.vault.entity.eternal.EternalDataSnapshot;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.RenameType;
 import iskallia.vault.util.SkinProfile;
@@ -31,6 +33,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -58,6 +61,7 @@ public class CryoChamberTileEntity extends BlockEntity implements MenuProvider {
    private boolean growingEternal = false;
    private int growEternalTimeRemaining = 0;
    protected UUID eternalId;
+   protected UUID eternalIdPrev;
    public float lastCoreCount;
    public int eternalSoulsConsumed;
    public EternalsData.EternalVariant variant;
@@ -82,6 +86,20 @@ public class CryoChamberTileEntity extends BlockEntity implements MenuProvider {
       super(tileEntityType, pos, state);
       this.skin = new SkinProfile();
       this.eternalSoulsConsumed = 0;
+   }
+
+   public void resetAll() {
+      this.skin = new SkinProfile();
+      this.eternalSoulsConsumed = 0;
+      this.coreNames = new ArrayList<>();
+      this.maxCores = 0;
+      this.infusing = false;
+      this.infusionTimeRemaining = 0;
+      this.growingEternal = false;
+      this.growEternalTimeRemaining = 0;
+      this.eternalId = null;
+      this.lastCoreCount = 0.0F;
+      this.usingPlayerSkin = false;
    }
 
    public CryoChamberTileEntity(BlockPos pos, BlockState state) {
@@ -220,6 +238,22 @@ public class CryoChamberTileEntity extends BlockEntity implements MenuProvider {
 
             tile.sendUpdates();
          }
+      }
+   }
+
+   public void pickupSpirit(Player player, CryoChamberTileEntity cryoChamberTileEntity) {
+      if (ModEntities.ETERNAL_SPIRIT.spawn((ServerLevel)player.level, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof EternalSpiritEntity spirit
+         )
+       {
+         EternalsData.get((ServerLevel)player.level).getEternal(cryoChamberTileEntity.eternalId);
+         GameProfile profile = cryoChamberTileEntity.getSkin().gameProfile.get();
+         if (profile != null) {
+            spirit.setGameProfile(profile);
+         }
+
+         spirit.setEternalUUID(cryoChamberTileEntity.eternalId);
+         spirit.setOwnerUUID(player.getUUID());
+         spirit.putInPlayersHand(player);
       }
    }
 
