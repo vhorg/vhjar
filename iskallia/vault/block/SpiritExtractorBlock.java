@@ -82,30 +82,31 @@ public class SpiritExtractorBlock extends Block implements EntityBlock {
    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
       if (!(level.getBlockEntity(pos) instanceof SpiritExtractorTileEntity spiritExtractorTile)) {
          return super.use(state, level, pos, player, hand, hit);
-      } else if (this.hasSpiritAlready(spiritExtractorTile)) {
+      } else if (!player.getPassengers().isEmpty() && player.getPassengers().get(0) instanceof SpiritEntity spirit) {
          if (level.isClientSide()) {
             return InteractionResult.SUCCESS;
+         } else if (this.hasSpiritAlready(spiritExtractorTile)) {
+            return InteractionResult.FAIL;
          } else {
-            if (player.isShiftKeyDown() && player.getOffhandItem().isEmpty() && player.getPassengers().isEmpty()) {
-               this.pickupSpirit(player, spiritExtractorTile);
-            } else {
-               this.openGui(pos, (ServerPlayer)player);
-            }
-
+            spirit.getGameProfile().ifPresent(spiritExtractorTile::setGameProfile);
+            spiritExtractorTile.setItems(spirit.getItems());
+            spiritExtractorTile.setVaultLevel(spirit.getVaultLevel());
+            spiritExtractorTile.setPlayerLevel(spirit.getPlayerLevel());
+            spiritExtractorTile.setRecyclable(spirit.isRecyclable());
+            spiritExtractorTile.setRescuedBonus(spirit.getRescuedBonus());
+            level.sendBlockUpdated(pos, state, state, 3);
+            spirit.remove(RemovalReason.DISCARDED);
             return InteractionResult.SUCCESS;
          }
-      } else if (!(!player.getPassengers().isEmpty() && player.getPassengers().get(0) instanceof SpiritEntity spirit)) {
-         return super.use(state, level, pos, player, hand, hit);
       } else if (level.isClientSide()) {
          return InteractionResult.SUCCESS;
-      } else if (this.hasSpiritAlready(spiritExtractorTile)) {
-         return InteractionResult.FAIL;
       } else {
-         spirit.getGameProfile().ifPresent(spiritExtractorTile::setGameProfile);
-         spiritExtractorTile.setItems(spirit.getItems());
-         spiritExtractorTile.setVaultLevel(spirit.getVaultLevel());
-         level.sendBlockUpdated(pos, state, state, 3);
-         spirit.remove(RemovalReason.DISCARDED);
+         if (player.isShiftKeyDown() && player.getOffhandItem().isEmpty() && player.getPassengers().isEmpty()) {
+            this.pickupSpirit(player, spiritExtractorTile);
+         } else {
+            this.openGui(pos, (ServerPlayer)player);
+         }
+
          return InteractionResult.SUCCESS;
       }
    }
@@ -116,7 +117,9 @@ public class SpiritExtractorBlock extends Block implements EntityBlock {
        {
          spiritExtractorTile.getGameProfile().ifPresent(spirit::setGameProfile);
          spirit.setVaultLevel(spiritExtractorTile.getVaultLevel());
+         spirit.setPlayerLevel(spiritExtractorTile.getPlayerLevel());
          spirit.setItems(spiritExtractorTile.getItems());
+         spirit.setRescuedBonus(spiritExtractorTile.getRescuedBonus());
          spirit.putInPlayersHand(player);
          spiritExtractorTile.removeSpirit();
       }

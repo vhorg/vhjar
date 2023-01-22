@@ -22,7 +22,7 @@ public class ToolViseRenderer implements BlockEntityRenderer<ToolViseTile> {
    }
 
    public void render(ToolViseTile tile, float partialTicks, PoseStack poseStack, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlayIn) {
-      ItemStack magnet = tile.getPaxel();
+      ItemStack magnet = tile.getPickaxe();
       if (!magnet.isEmpty()) {
          poseStack.pushPose();
          poseStack.translate(0.5, 0.5, 0.5);

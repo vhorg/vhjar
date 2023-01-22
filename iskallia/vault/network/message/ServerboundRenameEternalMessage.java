@@ -1,6 +1,6 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.block.entity.CryoChamberTileEntity;
+import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.init.ModNetwork;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
@@ -33,10 +33,10 @@ public class ServerboundRenameEternalMessage {
       context.enqueueWork(() -> {
          ServerPlayer serverPlayer = context.getSender();
          if (serverPlayer != null) {
-            if (serverPlayer.getLevel().getBlockEntity(message.pos) instanceof CryoChamberTileEntity cryoChamberTileEntity) {
-               cryoChamberTileEntity.renameEternal(serverPlayer);
-            } else if (serverPlayer.getLevel().getBlockEntity(message.pos.below()) instanceof CryoChamberTileEntity cryoChamberTileEntity) {
-               cryoChamberTileEntity.renameEternal(serverPlayer);
+            if (serverPlayer.getLevel().getBlockEntity(message.pos) instanceof EternalPedestalTileEntity eternalPedestal) {
+               eternalPedestal.renameEternal(serverPlayer);
+            } else if (serverPlayer.getLevel().getBlockEntity(message.pos.below()) instanceof EternalPedestalTileEntity eternalPedestal) {
+               eternalPedestal.renameEternal(serverPlayer);
             }
          }
       });

@@ -49,17 +49,15 @@ public abstract class ScavengeTask {
                for (String key : obj.keySet()) {
                   JsonObject value = obj.get(key).getAsJsonObject();
                   entries.put(
-                     new ChestScavengeTask.Entry((Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("color").getAsInt()),
+                     new ChestScavengeTask.Entry(
+                        (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
+                     ),
                      value.get("weight").getAsInt()
                   );
                }
 
                return new ChestScavengeTask(
-                  object.get("target").getAsString(),
-                  object.get("probability").getAsDouble(),
-                  object.get("multiplier").getAsDouble(),
-                  new ResourceLocation(object.get("icon").getAsString()),
-                  entries
+                  object.get("target").getAsString(), object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries
                );
             case "coin_stacks":
                WeightedList<CoinStacksScavengeTask.Entry> entries = new WeightedList<>();
@@ -68,35 +66,34 @@ public abstract class ScavengeTask {
                for (String key : obj.keySet()) {
                   JsonObject value = obj.get(key).getAsJsonObject();
                   entries.put(
-                     new CoinStacksScavengeTask.Entry((Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("color").getAsInt()),
+                     new CoinStacksScavengeTask.Entry(
+                        (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
+                     ),
                      value.get("weight").getAsInt()
                   );
                }
 
-               return new CoinStacksScavengeTask(
-                  object.get("probability").getAsDouble(),
-                  object.get("multiplier").getAsDouble(),
-                  new ResourceLocation(object.get("icon").getAsString()),
-                  entries
-               );
+               return new CoinStacksScavengeTask(object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries);
             case "mob":
                List<MobScavengeTask.Entry> entries = new ArrayList<>();
                JsonObject obj = object.get("entries").getAsJsonObject();
 
                for (String key : obj.keySet()) {
-                  JsonArray list = obj.get(key).getAsJsonArray();
+                  JsonObject entry = obj.get(key).getAsJsonObject();
+                  JsonArray list = entry.get("mobs").getAsJsonArray();
                   Set<ResourceLocation> group = new HashSet<>();
 
                   for (JsonElement element : list) {
                      group.add(new ResourceLocation(element.getAsString()));
                   }
 
-                  entries.add(new MobScavengeTask.Entry((Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), group));
+                  entries.add(
+                     new MobScavengeTask.Entry((Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), entry.get("multiplier").getAsDouble(), group)
+                  );
                }
 
                return new MobScavengeTask(
                   object.get("probability").getAsDouble(),
-                  object.get("multiplier").getAsDouble(),
                   new ResourceLocation(object.get("icon").getAsString()),
                   object.get("color").getAsInt(),
                   entries.toArray(MobScavengeTask.Entry[]::new)

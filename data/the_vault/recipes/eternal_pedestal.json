@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "###",
+    "PBP",
+    "CCC"
+  ],
+  "key": {
+    "#": {
+      "item": "the_vault:polished_vault_stone"
+    },
+    "C": {
+      "item": "the_vault:chromatic_iron_block"
+    },
+    "P": {
+      "item": "the_vault:gem_pog"
+    },
+    "B": {
+      "item": "the_vault:black_chromatic_steel_ingot"
+    }
+  },
+  "result": {
+    "item": "the_vault:eternal_pedestal",
+    "count": 1
+  }
+}

@@ -3,6 +3,7 @@ package iskallia.vault.init;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.AbilitiesConfig;
 import iskallia.vault.config.AbilitiesDescriptionsConfig;
+import iskallia.vault.config.AbilitiesDrillDigDenyConfig;
 import iskallia.vault.config.AbilitiesGUIConfig;
 import iskallia.vault.config.AbilitiesVeinMinerDenyConfig;
 import iskallia.vault.config.AbilitiesVignetteConfig;
@@ -83,6 +84,7 @@ import iskallia.vault.config.VaultCrystalConfig;
 import iskallia.vault.config.VaultDiffuserConfig;
 import iskallia.vault.config.VaultEntitiesConfig;
 import iskallia.vault.config.VaultGeneralConfig;
+import iskallia.vault.config.VaultGuardianConfig;
 import iskallia.vault.config.VaultItemsConfig;
 import iskallia.vault.config.VaultLevelsConfig;
 import iskallia.vault.config.VaultMetaChestConfig;
@@ -145,6 +147,7 @@ public class ModConfigs {
    public static AbilitiesDescriptionsConfig ABILITIES_DESCRIPTIONS;
    public static AbilitiesVignetteConfig ABILITIES_VIGNETTE;
    public static AbilitiesVeinMinerDenyConfig ABILITIES_VEIN_MINER_DENY_CONFIG;
+   public static AbilitiesDrillDigDenyConfig ABILITIES_DRILL_DIG_DENY_CONFIG;
    public static ArchetypesConfig ARCHETYPES;
    public static ArchetypeGUIConfig ARCHETYPES_GUI;
    public static ArchetypeDescriptionsConfig ARCHETYPE_DESCRIPTIONS;
@@ -251,6 +254,7 @@ public class ModConfigs {
    public static VaultGearModificationConfig VAULT_GEAR_MODIFICATION_CONFIG;
    public static VaultAltarIngredientsConfig VAULT_ALTAR_INGREDIENTS;
    public static PointsResetConfig PLAYER_RESETS;
+   public static VaultGuardianConfig VAULT_GUARDIAN;
 
    public static void registerCompressionConfigs() {
       COMPRESSION_BLOCKS = new CompressionBlocksConfig().readConfig();
@@ -265,6 +269,7 @@ public class ModConfigs {
       ABILITIES_DESCRIPTIONS = new AbilitiesDescriptionsConfig().readConfig();
       ABILITIES_VIGNETTE = new AbilitiesVignetteConfig().readConfig();
       ABILITIES_VEIN_MINER_DENY_CONFIG = new AbilitiesVeinMinerDenyConfig().readConfig();
+      ABILITIES_DRILL_DIG_DENY_CONFIG = new AbilitiesDrillDigDenyConfig().readConfig();
       ARCHETYPES = new ArchetypesConfig().readConfig();
       ARCHETYPES_GUI = new ArchetypeGUIConfig().readConfig();
       ARCHETYPE_DESCRIPTIONS = new ArchetypeDescriptionsConfig().readConfig();
@@ -357,6 +362,7 @@ public class ModConfigs {
       VAULT_MODIFIER_OVERLAY = new VaultModifierOverlayConfig().readConfig();
       CRYSTAL_BUDDING = new CrystalBuddingConfig().readConfig();
       LOOT_INFO_CONFIG = new LootInfoConfig().readConfig();
+      VAULT_GUARDIAN = new VaultGuardianConfig().readConfig();
       VAULT_GEAR_CONFIG = VaultGearTierConfig.registerConfigs();
       VAULT_GEAR_TYPE_POOL_CONFIG = new VaultGearTypePoolConfig().readConfig();
       VAULT_GEAR_TYPE_CONFIG = new VaultGearTypeConfig().readConfig();

@@ -80,6 +80,18 @@ public class VaultRecyclerConfig extends Config {
          return DataTransferItem.doConvertStack(this.mainOutput.createItemStack(Config.rand));
       }
 
+      public ChanceItemStackEntry getMainOutput() {
+         return this.mainOutput;
+      }
+
+      public ChanceItemStackEntry getExtraOutput1() {
+         return this.extraOutput1;
+      }
+
+      public ChanceItemStackEntry getExtraOutput2() {
+         return this.extraOutput2;
+      }
+
       public ItemStack getMainOutputMatching() {
          return this.mainOutput.getMatchingStack();
       }

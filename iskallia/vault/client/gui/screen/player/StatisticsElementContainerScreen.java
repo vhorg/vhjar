@@ -19,9 +19,12 @@ import iskallia.vault.container.StatisticsTabContainer;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ServerboundOpenHistoricMessage;
 import java.util.List;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -102,14 +105,12 @@ public class StatisticsElementContainerScreen extends AbstractSkillTabElementCon
          statListVaultContainerElement.setVisible(index == 1);
       }).layout((screen, gui, parent, world) -> world.translateX(gui.right()).translateY(this.getTabContentSpatial().bottom())));
       this.addElement(
-         (ButtonElement)((ButtonElement)new ButtonElement(
-                  Spatials.positionXY(-3, 3),
-                  ScreenTextures.BUTTON_HISTORY_TEXTURES,
-                  () -> ModNetwork.CHANNEL.sendToServer(ServerboundOpenHistoricMessage.INSTANCE)
-               )
-               .layout(
-                  (screen, gui, parent, world) -> world.width(21).height(21).translateX(gui.right() + 4).translateY(this.getTabContentSpatial().bottom() + 68)
-               ))
+         (ButtonElement)((ButtonElement)new ButtonElement(Spatials.positionXY(-3, 3), ScreenTextures.BUTTON_HISTORY_TEXTURES, () -> {
+               ModNetwork.CHANNEL.sendToServer(ServerboundOpenHistoricMessage.INSTANCE);
+               Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+            }).layout(
+               (screen, gui, parent, world) -> world.width(21).height(21).translateX(gui.right() + 4).translateY(this.getTabContentSpatial().bottom() + 68)
+            ))
             .tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
                tooltipRenderer.renderTooltip(
                   poseStack, List.of(new TextComponent("Open Vault History")), mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT

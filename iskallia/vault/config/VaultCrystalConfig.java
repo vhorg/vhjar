@@ -127,7 +127,7 @@ public class VaultCrystalConfig extends Config {
             new VaultCrystalConfig.ObjectiveEntry(
                0,
                new WeightedList<CrystalObjective>()
-                  .add(new BossCrystalObjective(LootRoll.ofUniform(3, 6), 0.1F), 1)
+                  .add(new BossCrystalObjective(LootRoll.ofUniform(3, 6), LootRoll.ofUniform(3, 6), 0.1F), 1)
                   .add(new ScavengerCrystalObjective(0.1F), 1)
             )
          );
@@ -138,7 +138,7 @@ public class VaultCrystalConfig extends Config {
          new VaultCrystalConfig.SealEntry(
             0,
             Arrays.asList(ModItems.VAULT_CRYSTAL.getRegistryName()),
-            new BossCrystalObjective(LootRoll.ofUniform(3, 6), 0.1F),
+            new BossCrystalObjective(LootRoll.ofUniform(3, 6), LootRoll.ofUniform(3, 6), 0.1F),
             new ClassicInfiniteCrystalLayout(1),
             null,
             null,

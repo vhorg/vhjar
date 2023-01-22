@@ -19,6 +19,14 @@ public class ItemStackEntry {
       this.maxCount = maxCount;
    }
 
+   public int getMinCount() {
+      return this.minCount;
+   }
+
+   public int getMaxCount() {
+      return this.maxCount;
+   }
+
    public ItemStack getMatchingStack() {
       ItemStack created = this.stack.copy();
       created.setCount(this.maxCount);

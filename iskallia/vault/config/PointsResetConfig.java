@@ -11,6 +11,7 @@ import iskallia.vault.world.data.PlayerArchetypeData;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.world.data.PointsResetData;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +56,7 @@ public class PointsResetConfig extends Config {
    public void enableResetSkillPoints() {
       this.resetSkillPoints = true;
       this.skillPointsCurrentlyReset.clear();
+      PointsResetData.get().onResetSkillPoints();
       this.save();
       ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers().forEach(this::resetSkillPoints);
    }
@@ -62,6 +64,7 @@ public class PointsResetConfig extends Config {
    public void enableResetKnowledgePoints() {
       this.resetKnowledgePoints = true;
       this.knowledgePointsCurrentlyReset.clear();
+      PointsResetData.get().onResetKnowledgePoints();
       this.save();
       ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers().forEach(this::resetKnowledgePoints);
    }
@@ -69,6 +72,7 @@ public class PointsResetConfig extends Config {
    public void enableResetArchetypePoints() {
       this.resetArchetypePoints = true;
       this.archetypePointsCurrentlyReset.clear();
+      PointsResetData.get().onResetArchetypePoints();
       this.save();
       ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers().forEach(this::resetArchetypePoints);
    }
@@ -83,8 +87,7 @@ public class PointsResetConfig extends Config {
       abilityNodes.forEach(node -> playerAbilitiesData.remove(player, node));
       PlayerVaultStatsData data = PlayerVaultStatsData.get(server);
       data.resetAndReturnSkillPoints(player);
-      this.skillPointsCurrentlyReset.add(player.getUUID());
-      this.save();
+      PointsResetData.get().addToSkillPoinsList(player.getUUID());
       player.sendMessage(
          new TextComponent(
                "Your Abilities and Talents were reset and all skill points were refunded. This is because of a patch that required it, or your Server Admin has decided it was necessary."
@@ -101,8 +104,7 @@ public class PointsResetConfig extends Config {
       researchesDone.forEach(name -> researchesData.removeResearch(player, ModConfigs.RESEARCHES.getByName(name)));
       PlayerVaultStatsData statsData = PlayerVaultStatsData.get(server);
       statsData.resetAndReturnKnowledgePoints(player);
-      this.knowledgePointsCurrentlyReset.add(player.getUUID());
-      this.save();
+      PointsResetData.get().addToKnowledgePoinsList(player.getUUID());
       player.sendMessage(
          new TextComponent(
                "Your Researches were reset and all knowledge points were refunded. This is because of a patch that required it, or your Server Admin has decided it was necessary."
@@ -118,8 +120,7 @@ public class PointsResetConfig extends Config {
       archetypeData.set(player, ModArchetypes.DEFAULT.getRegistryName());
       PlayerVaultStatsData statsData = PlayerVaultStatsData.get(server);
       statsData.resetAndReturnArchetypePoints(player);
-      this.archetypePointsCurrentlyReset.add(player.getUUID());
-      this.save();
+      PointsResetData.get().addToArchetypePoinsList(player.getUUID());
       player.sendMessage(
          new TextComponent(
                "Your Archetype was reset and all archetype points were refunded. This is because of a patch that required it, or your Server Admin has decided it was necessary."
@@ -143,17 +144,51 @@ public class PointsResetConfig extends Config {
    public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
          PointsResetConfig config = ModConfigs.PLAYER_RESETS;
-         if (config.resetSkillPoints && !config.skillPointsCurrentlyReset.contains(player.getUUID())) {
+         if (config.skillPointsCurrentlyReset.contains(player.getUUID())) {
+            migrateSkillPointsData(player.getUUID());
+            config.skillPointsCurrentlyReset.remove(player.getUUID());
+         }
+
+         if (config.knowledgePointsCurrentlyReset.contains(player.getUUID())) {
+            migrateKnowledgePointsData(player.getUUID());
+            config.knowledgePointsCurrentlyReset.remove(player.getUUID());
+         }
+
+         if (config.archetypePointsCurrentlyReset.contains(player.getUUID())) {
+            migrateArchetypePointsData(player.getUUID());
+            config.archetypePointsCurrentlyReset.remove(player.getUUID());
+         }
+
+         config.save();
+         if (config.resetSkillPoints
+            && !config.skillPointsCurrentlyReset.contains(player.getUUID())
+            && !PointsResetData.get().hasSkillPointsReset(player.getUUID())) {
             config.resetSkillPoints(player);
          }
 
-         if (config.resetKnowledgePoints && !config.knowledgePointsCurrentlyReset.contains(player.getUUID())) {
+         if (config.resetKnowledgePoints
+            && !config.knowledgePointsCurrentlyReset.contains(player.getUUID())
+            && !PointsResetData.get().hasKnowledgePointsReset(player.getUUID())) {
             config.resetKnowledgePoints(player);
          }
 
-         if (config.resetArchetypePoints && !config.archetypePointsCurrentlyReset.contains(player.getUUID())) {
+         if (config.resetArchetypePoints
+            && !config.archetypePointsCurrentlyReset.contains(player.getUUID())
+            && !PointsResetData.get().hasArchetypePointsReset(player.getUUID())) {
             config.resetArchetypePoints(player);
          }
       }
+   }
+
+   private static void migrateSkillPointsData(UUID uuid) {
+      PointsResetData.get().addToSkillPoinsList(uuid);
+   }
+
+   private static void migrateKnowledgePointsData(UUID uuid) {
+      PointsResetData.get().addToKnowledgePoinsList(uuid);
+   }
+
+   private static void migrateArchetypePointsData(UUID uuid) {
+      PointsResetData.get().addToArchetypePoinsList(uuid);
    }
 }

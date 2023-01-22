@@ -6,6 +6,7 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.renderer.VaultArmorRenderProperties;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.util.ModelPartHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel.ArmPose;
@@ -81,18 +82,16 @@ public abstract class MixinPlayerRenderer {
             .map(VaultArmorRenderProperties.BAKED_LAYERS::get)
             .filter(layer -> layer instanceof ArmorLayers.MainLayer)
             .map(layer -> (ArmorLayers.MainLayer)layer)
-            .ifPresent(mainLayer -> {
-               String baseTexture = vaultArmorItem.getArmorTexture(chestplateStack, null, chestplateStack.getEquipmentSlot(), null);
-               String overlayTexture = vaultArmorItem.getArmorTexture(chestplateStack, null, chestplateStack.getEquipmentSlot(), "overlay");
-               ModelPart armPart = Minecraft.getInstance().options.mainHand == HumanoidArm.RIGHT ? mainLayer.getRightArm() : mainLayer.getLeftArm();
-               float prevXRot = armPart.xRot;
-               float prevYRot = armPart.yRot;
-               float prevZRot = armPart.zRot;
-               mainLayer.renderSleeve(matrixStack, armPart, baseTexture, overlayTexture, bufferSource, combinedLight);
-               armPart.xRot = prevXRot;
-               armPart.yRot = prevYRot;
-               armPart.zRot = prevZRot;
-            });
+            .ifPresent(
+               mainLayer -> {
+                  String baseTexture = vaultArmorItem.getArmorTexture(chestplateStack, null, chestplateStack.getEquipmentSlot(), null);
+                  String overlayTexture = vaultArmorItem.getArmorTexture(chestplateStack, null, chestplateStack.getEquipmentSlot(), "overlay");
+                  ModelPart armPart = Minecraft.getInstance().options.mainHand == HumanoidArm.RIGHT ? mainLayer.getRightArm() : mainLayer.getLeftArm();
+                  ModelPartHelper.runPreservingTransforms(
+                     () -> mainLayer.renderSleeve(matrixStack, armPart, baseTexture, overlayTexture, bufferSource, combinedLight), armPart
+                  );
+               }
+            );
       }
    }
 }

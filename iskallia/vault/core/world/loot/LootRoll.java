@@ -40,13 +40,24 @@ public interface LootRoll extends INBTSerializable<CompoundTag> {
    }
 
    static LootRoll fromJson(JsonObject object) {
-      String var2 = object.get("type").getAsString();
+      Object var10000;
+      if (!object.has("type")) {
+         var10000 = null;
+      } else {
+         String var2 = object.get("type").getAsString();
+         switch (var2) {
+            case "constant":
+               var10000 = new LootRoll.Constant();
+               break;
+            case "uniform":
+               var10000 = new LootRoll.Uniform();
+               break;
+            default:
+               var10000 = null;
+         }
+      }
 
-      LootRoll roll = (LootRoll)(switch (var2) {
-         case "constant" -> new LootRoll.Constant();
-         case "uniform" -> new LootRoll.Uniform();
-         default -> null;
-      });
+      LootRoll roll = (LootRoll)var10000;
       if (roll != null) {
          roll.deserializeJson(object);
       }

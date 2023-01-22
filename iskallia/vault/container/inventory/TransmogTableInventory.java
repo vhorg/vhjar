@@ -1,15 +1,16 @@
 package iskallia.vault.container.inventory;
 
+import iskallia.vault.block.entity.TransmogTableTileEntity;
 import iskallia.vault.container.spi.RecipeInventory;
-import net.minecraft.core.NonNullList;
+import java.util.List;
 import net.minecraft.world.item.ItemStack;
 
 public class TransmogTableInventory extends RecipeInventory {
    public static final int GEAR_SLOT = 0;
    public static final int BRONZE_SLOT = 1;
 
-   public TransmogTableInventory() {
-      super(2);
+   public TransmogTableInventory(TransmogTableTileEntity tileEntity) {
+      super(2, tileEntity);
    }
 
    @Override
@@ -30,8 +31,7 @@ public class TransmogTableInventory extends RecipeInventory {
    public void updateResult() {
    }
 
-   @Override
-   public NonNullList<ItemStack> getSlots() {
-      return super.getSlots();
+   public List<ItemStack> getSlots() {
+      return super.getContents();
    }
 }

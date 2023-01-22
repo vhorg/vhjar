@@ -5,7 +5,7 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.VaultMod;
-import iskallia.vault.block.entity.CryoChamberTileEntity;
+import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.client.ClientEternalData;
 import iskallia.vault.client.gui.helper.FontHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
@@ -447,7 +447,7 @@ public class CryochamberScreen extends AbstractContainerScreen<CryochamberContai
       if (world == null) {
          return null;
       } else {
-         CryoChamberTileEntity tile = ((CryochamberContainer)this.menu).getCryoChamber(world);
+         EternalPedestalTileEntity tile = ((CryochamberContainer)this.menu).getPedestal(world);
          return tile == null ? null : ClientEternalData.getSnapshot(tile.getEternalId());
       }
    }

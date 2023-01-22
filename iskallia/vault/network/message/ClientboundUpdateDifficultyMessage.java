@@ -36,7 +36,7 @@ public class ClientboundUpdateDifficultyMessage {
    @OnlyIn(Dist.CLIENT)
    private static void updateDifficulty(ClientboundUpdateDifficultyMessage message) {
       WorldSettings worldSettings = WorldSettings.get(Minecraft.getInstance().level);
-      worldSettings.setVaultDifficulty(message.vaultDifficulty);
+      worldSettings.setGlobalVaultDifficulty(message.vaultDifficulty);
       worldSettings.setVaultDifficultyLocked(message.vaultDifficultyLocked);
    }
 }

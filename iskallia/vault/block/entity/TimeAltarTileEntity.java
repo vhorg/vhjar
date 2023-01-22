@@ -16,7 +16,7 @@ public class TimeAltarTileEntity extends FillableAltarTileEntity {
 
    @Override
    public Component getRequirementName() {
-      return new TextComponent("Vault Time");
+      return new TextComponent("Mana");
    }
 
    @Override
@@ -26,7 +26,7 @@ public class TimeAltarTileEntity extends FillableAltarTileEntity {
 
    @Override
    public Component getRequirementUnit() {
-      return new TextComponent("minutes");
+      return new TextComponent("mana");
    }
 
    @Override

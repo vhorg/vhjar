@@ -3,6 +3,7 @@ package iskallia.vault.config.entry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 
 public class LevelEntryList<T extends LevelEntryList.ILevelEntry> extends ArrayList<T> {
@@ -30,19 +31,20 @@ public class LevelEntryList<T extends LevelEntryList.ILevelEntry> extends ArrayL
       if (this.isEmpty()) {
          return Optional.empty();
       } else {
-         this.sort(Comparator.comparing(LevelEntryList.ILevelEntry::getLevel));
+         List<T> copy = new ArrayList<>(this);
+         copy.sort(Comparator.comparing(LevelEntryList.ILevelEntry::getLevel));
 
-         for (int i = 0; i < this.size(); i++) {
-            if (level < this.get(i).getLevel()) {
+         for (int i = 0; i < copy.size(); i++) {
+            if (level < copy.get(i).getLevel()) {
                if (i == 0) {
                   return Optional.empty();
                }
 
-               return Optional.of(this.get(i - 1));
+               return Optional.of(copy.get(i - 1));
             }
          }
 
-         return Optional.of(this.get(this.size() - 1));
+         return Optional.of(copy.get(copy.size() - 1));
       }
    }
 

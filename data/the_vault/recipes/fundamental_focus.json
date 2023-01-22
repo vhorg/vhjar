@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "fff",
+    "fpf",
+    "fff"
+  ],
+  "key": {
+    "f": {
+      "item": "the_vault:nullifying_focus"
+    },
+    "p": {
+      "item": "the_vault:gem_pog"
+    }
+  },
+  "result": {
+    "item": "the_vault:fundamental_focus",
+    "count": 1
+  }
+}

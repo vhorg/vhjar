@@ -102,7 +102,7 @@ public class VictoryObjective extends Objective {
                            );
                            world.addFreshEntity(fireworks);
                            world.playSound(
-                              null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 1.0F, 1.0F
+                              null, player.getX(), player.getY(), player.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.MASTER, 0.6F, 1.0F
                            );
                            TextComponent title = new TextComponent("Vault Completed!");
                            title.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(14536734)));

@@ -68,14 +68,16 @@ public class VaultGearHelper {
          return defaultUse;
       } else if (!ServerVaults.isVaultWorld(world) && !VHSmpUtil.isArenaWorld(world)) {
          ItemStack stack = player.getItemInHand(hand);
-         VaultGearData data = VaultGearData.read(stack);
-         if (data.getState() == VaultGearState.UNIDENTIFIED) {
-            data.setState(VaultGearState.ROLLING);
-            data.write(stack);
-            return InteractionResultHolder.fail(stack);
-         } else {
-            return defaultUse;
+         if (!stack.isEmpty()) {
+            VaultGearData data = VaultGearData.read(stack);
+            if (data.getState() == VaultGearState.UNIDENTIFIED) {
+               data.setState(VaultGearState.ROLLING);
+               data.write(stack);
+               return InteractionResultHolder.fail(stack);
+            }
          }
+
+         return defaultUse;
       } else {
          return defaultUse;
       }

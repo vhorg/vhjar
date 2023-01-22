@@ -13,6 +13,9 @@ import iskallia.vault.network.message.BossMusicMessage;
 import iskallia.vault.network.message.CheerReceiveMessage;
 import iskallia.vault.network.message.ClientboundArchetypeMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
+import iskallia.vault.network.message.ClientboundRefreshSpiritExtractorMessage;
+import iskallia.vault.network.message.ClientboundRefreshToolViseMessage;
+import iskallia.vault.network.message.ClientboundResetCryoChamberMessage;
 import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
 import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
@@ -64,7 +67,7 @@ import iskallia.vault.network.message.ServerboundToggleEternalPlayerSkinMessage;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.network.message.ShardTradeTradeMessage;
-import iskallia.vault.network.message.SpiritExtractorBuyItemsMessage;
+import iskallia.vault.network.message.SpiritExtractorMessage;
 import iskallia.vault.network.message.StepHeightMessage;
 import iskallia.vault.network.message.SyncOverSizedContentMessage;
 import iskallia.vault.network.message.SyncOverSizedStackMessage;
@@ -368,11 +371,7 @@ public class ModNetwork {
          ServerboundOpenVaultExitMessage::handle
       );
       CHANNEL.registerMessage(
-         nextId(),
-         SpiritExtractorBuyItemsMessage.class,
-         SpiritExtractorBuyItemsMessage::encode,
-         SpiritExtractorBuyItemsMessage::decode,
-         SpiritExtractorBuyItemsMessage::handle
+         nextId(), SpiritExtractorMessage.class, SpiritExtractorMessage::encode, SpiritExtractorMessage::decode, SpiritExtractorMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),
@@ -525,6 +524,27 @@ public class ModNetwork {
          TrappedMobChestParticlesMessage::encode,
          TrappedMobChestParticlesMessage::decode,
          TrappedMobChestParticlesMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundResetCryoChamberMessage.class,
+         ClientboundResetCryoChamberMessage::encode,
+         ClientboundResetCryoChamberMessage::decode,
+         ClientboundResetCryoChamberMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundRefreshToolViseMessage.class,
+         ClientboundRefreshToolViseMessage::encode,
+         ClientboundRefreshToolViseMessage::decode,
+         ClientboundRefreshToolViseMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundRefreshSpiritExtractorMessage.class,
+         ClientboundRefreshSpiritExtractorMessage::encode,
+         ClientboundRefreshSpiritExtractorMessage::decode,
+         ClientboundRefreshSpiritExtractorMessage::handle
       );
    }
 

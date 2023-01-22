@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "eee",
+    "iai",
+    "eee"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "i": {
+      "item": "the_vault:vault_catalyst_infused"
+    },
+    "a": {
+      "item": "the_vault:extraordinary_alexandrite"
+    }
+  },
+  "result": {
+    "item": "the_vault:vault_catalyst",
+    "count": 1
+  }
+}

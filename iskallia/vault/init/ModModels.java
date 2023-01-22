@@ -7,6 +7,7 @@ import iskallia.vault.block.CryoChamberBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.block.TreasureDoorBlock;
 import iskallia.vault.block.VaultOreBlock;
+import iskallia.vault.block.model.PylonCrystalModel;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
 import iskallia.vault.core.vault.influence.VaultGod;
@@ -33,6 +34,7 @@ import net.minecraft.client.renderer.item.ClampedItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
 import net.minecraft.client.renderer.item.ItemProperties.CompassWobble;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +48,18 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions;
+import net.minecraftforge.client.event.TextureStitchEvent.Pre;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 
+@EventBusSubscriber(
+   value = {Dist.CLIENT},
+   bus = Bus.MOD
+)
 public class ModModels {
    public static void setupRenderLayers() {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_PORTAL, RenderType.translucent());
@@ -69,6 +82,7 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.MONOLITH, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLACK_MARKET, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANIMAL_JAR, RenderType.translucent());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.ETERNAL_PEDESTAL, RenderType.cutout());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.HOURGLASS, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.solid(), RenderType.translucent());
@@ -114,6 +128,20 @@ public class ModModels {
          }
       );
       colors.register((stack, tintIndex) -> tintIndex == 1 ? MagnetItem.getTextureColor(stack) : -1, new ItemLike[]{ModItems.MAGNET_ITEM});
+   }
+
+   @SubscribeEvent
+   @OnlyIn(Dist.CLIENT)
+   public static void registerLayerDefinitions(RegisterLayerDefinitions event) {
+      event.registerLayerDefinition(PylonCrystalModel.MODEL_LOCATION, PylonCrystalModel::createBodyLayer);
+   }
+
+   @SubscribeEvent
+   @OnlyIn(Dist.CLIENT)
+   public static void stitchTextures(Pre event) {
+      if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
+         event.addSprite(PylonCrystalModel.TEXTURE_LOCATION);
+      }
    }
 
    public static class ItemProperty {

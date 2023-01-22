@@ -1,9 +1,11 @@
 package iskallia.vault.container;
 
+import iskallia.vault.block.entity.TransmogTableTileEntity;
 import iskallia.vault.container.inventory.TransmogTableInventory;
+import iskallia.vault.container.oversized.OverSizedSlotContainer;
+import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.RecipeOutputSlot;
 import iskallia.vault.container.slot.TabSlot;
-import iskallia.vault.container.slot.VaultCoinSlot;
 import iskallia.vault.container.slot.VaultGearSlot;
 import iskallia.vault.container.spi.AbstractElementContainer;
 import iskallia.vault.gear.VaultGearState;
@@ -11,37 +13,42 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModGearAttributes;
-import java.util.Objects;
+import iskallia.vault.init.ModSlotIcons;
 import javax.annotation.Nonnull;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
-public class TransmogTableContainer extends AbstractElementContainer {
+public class TransmogTableContainer extends OverSizedSlotContainer {
    protected TransmogTableInventory internalInventory;
    protected AbstractElementContainer.SlotIndexRange playerInventoryIndexRange;
    protected AbstractElementContainer.SlotIndexRange hotbarIndexRange;
    protected AbstractElementContainer.SlotIndexRange internalInventoryIndexRange;
    protected ResourceLocation selectedModelId;
+   private final TransmogTableTileEntity tileEntity;
+   private final BlockPos tilePos;
 
-   public TransmogTableContainer(int id, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
-      this(id, playerInventory.player, null);
+   public TransmogTableContainer(int id, Level level, BlockPos pos, Inventory playerInventory) {
+      super(ModContainers.TRANSMOG_TABLE_CONTAINER, id, playerInventory.player);
+      this.tilePos = pos;
+      if (level.getBlockEntity(this.tilePos) instanceof TransmogTableTileEntity transmogTableTileEntity) {
+         this.tileEntity = transmogTableTileEntity;
+         this.initInventory();
+      } else {
+         this.tileEntity = null;
+      }
    }
 
-   public TransmogTableContainer(int id, Player player, TransmogTableInventory inventory) {
-      super(ModContainers.TRANSMOG_TABLE_CONTAINER, id, player);
-      this.internalInventory = Objects.requireNonNullElseGet(inventory, () -> new TransmogTableInventory() {
-         @Override
-         public void setChanged() {
-            super.setChanged();
-            TransmogTableContainer.this.slotsChanged(this);
-         }
-      });
-      this.internalInventory.stopOpen(player);
+   private void initInventory() {
+      this.internalInventory = this.tileEntity.getInternalInventory();
+      this.internalInventory.stopOpen(this.player);
       int offsetX = 0;
       int offsetY = 0;
       int containerSlotIndex = 0;
@@ -51,7 +58,7 @@ public class TransmogTableContainer extends AbstractElementContainer {
             int index = column + (row + 1) * 9;
             int x = 8 + column * 18 + offsetX;
             int y = 84 + row * 18 + offsetY;
-            this.addSlot(new TabSlot(player.getInventory(), index, x, y));
+            this.addSlot(new TabSlot(this.player.getInventory(), index, x, y));
             containerSlotIndex++;
          }
       }
@@ -61,7 +68,7 @@ public class TransmogTableContainer extends AbstractElementContainer {
       for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
          int x = 8 + hotbarSlot * 18 + offsetX;
          int y = 142 + offsetY;
-         this.addSlot(new TabSlot(player.getInventory(), hotbarSlot, x, y));
+         this.addSlot(new TabSlot(this.player.getInventory(), hotbarSlot, x, y));
          containerSlotIndex++;
       }
 
@@ -73,9 +80,19 @@ public class TransmogTableContainer extends AbstractElementContainer {
          }
       });
       containerSlotIndex++;
-      this.addSlot(new VaultCoinSlot(this.internalInventory, 1, 92, 61, ModBlocks.VAULT_BRONZE));
+      this.addSlot((new OverSizedTabSlot(this.internalInventory, 1, 92, 61) {
+         public void setChanged() {
+            super.setChanged();
+            TransmogTableContainer.this.slotsChanged(this.container);
+         }
+      }).setFilter(itemStack -> itemStack.getItem() == ModBlocks.VAULT_BRONZE).setBackground(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.COINS_NO_ITEM));
       containerSlotIndex++;
-      this.addSlot(new RecipeOutputSlot(this.internalInventory, this.internalInventory.outputSlotIndex(), 152, 61));
+      this.addSlot(new RecipeOutputSlot(this.internalInventory, this.internalInventory.outputSlotIndex(), 152, 61) {
+         public void setChanged() {
+            super.setChanged();
+            TransmogTableContainer.this.slotsChanged(this.container);
+         }
+      });
       this.internalInventoryIndexRange = new AbstractElementContainer.SlotIndexRange(this.hotbarIndexRange.end(), ++containerSlotIndex);
    }
 
@@ -131,6 +148,11 @@ public class TransmogTableContainer extends AbstractElementContainer {
       }
    }
 
+   public void slotsChanged(Container pInventory) {
+      this.tileEntity.setChanged();
+      super.slotsChanged(pInventory);
+   }
+
    public boolean stillValid(@Nonnull Player player) {
       return this.internalInventory.stillValid(player);
    }
@@ -142,23 +164,40 @@ public class TransmogTableContainer extends AbstractElementContainer {
 
    @Nonnull
    public ItemStack quickMoveStack(@Nonnull Player player, int index) {
+      ItemStack itemstack = ItemStack.EMPTY;
       Slot slot = (Slot)this.slots.get(index);
-      if (!slot.hasItem()) {
-         return ItemStack.EMPTY;
-      } else {
-         ItemStack slotItem = slot.getItem();
-         ItemStack copiedStack = slotItem.copy();
-         if (!this.playerInventoryIndexRange.contains(index) && !this.hotbarIndexRange.contains(index)) {
-            if (this.internalInventoryIndexRange.contains(index)) {
-               return this.moveItemStackTo(slotItem, this.playerInventoryIndexRange.start(), this.hotbarIndexRange.end(), false)
-                  ? copiedStack
-                  : ItemStack.EMPTY;
-            } else {
-               return copiedStack;
-            }
-         } else {
-            return this.moveItemStackTo(slotItem, this.internalInventoryIndexRange, false) ? copiedStack : ItemStack.EMPTY;
+      if (slot.hasItem()) {
+         ItemStack slotStack = slot.getItem();
+         itemstack = slotStack.copy();
+         if (index >= 0 && index < 36 && this.moveOverSizedItemStackTo(slotStack, slot, 36, this.slots.size(), false)) {
+            return itemstack;
          }
+
+         if (index >= 0 && index < 27) {
+            if (!this.moveOverSizedItemStackTo(slotStack, slot, 27, 36, false)) {
+               return ItemStack.EMPTY;
+            }
+         } else if (index >= 27 && index < 36) {
+            if (!this.moveOverSizedItemStackTo(slotStack, slot, 0, 27, false)) {
+               return ItemStack.EMPTY;
+            }
+         } else if (!this.moveOverSizedItemStackTo(slotStack, slot, 0, 36, false)) {
+            return ItemStack.EMPTY;
+         }
+
+         if (slotStack.getCount() == 0) {
+            slot.set(ItemStack.EMPTY);
+         } else {
+            slot.setChanged();
+         }
+
+         if (slotStack.getCount() == itemstack.getCount()) {
+            return ItemStack.EMPTY;
+         }
+
+         slot.onTake(player, slotStack);
       }
+
+      return itemstack;
    }
 }

@@ -19,6 +19,7 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import java.util.Arrays;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.network.chat.Component;
@@ -87,15 +88,22 @@ public class FindExitObjective extends Objective {
    @OnlyIn(Dist.CLIENT)
    @Override
    public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
-      int width = window.getGuiScaledWidth();
-      int height = window.getGuiScaledHeight();
+      int midX = window.getGuiScaledWidth() / 2;
+      Font font = Minecraft.getInstance().font;
       BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
       Component txt = new TextComponent("Find the Exit!").withStyle(ChatFormatting.AQUA).withStyle(ChatFormatting.BOLD);
-      Minecraft.getInstance()
-         .font
-         .drawInBatch(
-            txt.getVisualOrderText(), 8.0F, height - 54, -1, true, matrixStack.last().pose(), buffer, false, 0, LightmapHelper.getPackedFullbrightCoords()
-         );
+      font.drawInBatch(
+         txt.getVisualOrderText(),
+         midX - font.width(txt) / 2.0F,
+         9.0F,
+         -1,
+         true,
+         matrixStack.last().pose(),
+         buffer,
+         false,
+         0,
+         LightmapHelper.getPackedFullbrightCoords()
+      );
       buffer.endBatch();
       return true;
    }

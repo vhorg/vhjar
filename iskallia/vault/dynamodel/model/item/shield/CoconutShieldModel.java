@@ -1,4 +1,4 @@
-package iskallia.vault.dynamodel.model.item;
+package iskallia.vault.dynamodel.model.item.shield;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.util.calc.BlockChanceHelper;

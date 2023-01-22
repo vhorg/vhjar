@@ -20,14 +20,12 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public class MobScavengeTask extends ScavengeTask {
    public final double probability;
-   public final double multiplier;
    public final ResourceLocation icon;
    public final int color;
    public final List<MobScavengeTask.Entry> entries;
 
-   public MobScavengeTask(double probability, double multiplier, ResourceLocation icon, int color, MobScavengeTask.Entry... entries) {
+   public MobScavengeTask(double probability, ResourceLocation icon, int color, MobScavengeTask.Entry... entries) {
       this.probability = probability;
-      this.multiplier = multiplier;
       this.icon = icon;
       this.color = color;
       this.entries = Arrays.asList(entries);
@@ -36,7 +34,7 @@ public class MobScavengeTask extends ScavengeTask {
    @Override
    public Optional<ScavengerGoal> generateGoal(int count, RandomSource random) {
       MobScavengeTask.Entry entry = this.entries.get(random.nextInt(this.entries.size()));
-      return Optional.of(new ScavengerGoal(entry.item, (int)Math.ceil(count * this.multiplier), this.icon, this.color));
+      return Optional.of(new ScavengerGoal(entry.item, (int)Math.ceil(count * entry.multiplier), this.icon, this.color));
    }
 
    @Override
@@ -66,15 +64,18 @@ public class MobScavengeTask extends ScavengeTask {
 
    public static class Entry {
       public final Item item;
+      public final double multiplier;
       public final Set<ResourceLocation> group;
 
-      public Entry(Item item, EntityType<?>... group) {
+      public Entry(Item item, double multiplier, EntityType<?>... group) {
          this.item = item;
+         this.multiplier = multiplier;
          this.group = new LinkedHashSet<>(Arrays.stream(group).map(ForgeRegistryEntry::getRegistryName).toList());
       }
 
-      public Entry(Item item, Set<ResourceLocation> group) {
+      public Entry(Item item, double multiplier, Set<ResourceLocation> group) {
          this.item = item;
+         this.multiplier = multiplier;
          this.group = group;
       }
    }

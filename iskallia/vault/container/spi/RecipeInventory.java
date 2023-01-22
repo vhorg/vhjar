@@ -1,81 +1,35 @@
 package iskallia.vault.container.spi;
 
+import iskallia.vault.container.oversized.OverSizedInventory;
 import java.util.function.Consumer;
-import net.minecraft.core.NonNullList;
-import net.minecraft.world.Container;
-import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-public abstract class RecipeInventory implements Container {
-   protected final NonNullList<ItemStack> slots;
-
-   public RecipeInventory(int inputCount) {
-      this.slots = NonNullList.withSize(inputCount + 1, ItemStack.EMPTY);
-   }
-
-   protected NonNullList<ItemStack> getSlots() {
-      return this.slots;
+public abstract class RecipeInventory extends OverSizedInventory {
+   public RecipeInventory(int inputCount, BlockEntity tileEntity) {
+      super(inputCount + 1, tileEntity);
    }
 
    public int getInputSlotCount() {
-      return this.slots.size() - 1;
+      return this.getContents().size() - 1;
    }
 
+   @Override
    public int getContainerSize() {
-      return this.slots.size();
+      return this.getContents().size();
    }
 
-   public boolean isEmpty() {
-      return this.slots.isEmpty();
-   }
-
-   public ItemStack getItem(int index) {
-      return (ItemStack)this.slots.get(index);
-   }
-
-   public ItemStack removeItem(int index, int count) {
-      ItemStack itemStack = (ItemStack)this.slots.get(index);
-      if (index == this.outputSlotIndex() && !itemStack.isEmpty()) {
-         ItemStack andSplit = ContainerHelper.removeItem(this.slots, index, itemStack.getCount());
-         this.consumeIngredients();
-         this.updateResult();
-         return andSplit;
-      } else {
-         ItemStack splitStack = ContainerHelper.removeItem(this.slots, index, count);
-         this.updateResult();
-         return splitStack;
-      }
-   }
-
-   public ItemStack removeItemNoUpdate(int index) {
-      ItemStack andRemove = ContainerHelper.takeItem(this.slots, index);
-      this.updateResult();
-      return andRemove;
-   }
-
-   public void setItem(int index, ItemStack stack) {
-      this.slots.set(index, stack);
-      this.updateResult();
-   }
-
+   @Override
    public void setChanged() {
-   }
-
-   public boolean stillValid(Player playerEntity) {
-      return true;
-   }
-
-   public void clearContent() {
-      this.slots.clear();
+      super.setChanged();
    }
 
    public void updateResult() {
       ItemStack outputItemStack = this.getItem(this.outputSlotIndex());
       if (this.recipeFulfilled()) {
-         this.slots.set(this.outputSlotIndex(), this.resultingItemStack());
+         this.getContents().set(this.outputSlotIndex(), this.resultingItemStack());
       } else if (!outputItemStack.isEmpty()) {
-         this.slots.set(this.outputSlotIndex(), ItemStack.EMPTY);
+         this.getContents().set(this.outputSlotIndex(), ItemStack.EMPTY);
       }
    }
 
@@ -88,7 +42,7 @@ public abstract class RecipeInventory implements Container {
    public abstract ItemStack resultingItemStack();
 
    public boolean isIngredientSlotsFilled() {
-      for (int i = 0; i < this.slots.size() - 1; i++) {
+      for (int i = 0; i < this.getContents().size() - 1; i++) {
          ItemStack ingredientStack = this.getItem(i);
          if (ingredientStack.isEmpty()) {
             return false;
@@ -99,13 +53,13 @@ public abstract class RecipeInventory implements Container {
    }
 
    public void forEachInput(Consumer<Integer> inputConsumer) {
-      for (int i = 0; i < this.slots.size() - 1; i++) {
+      for (int i = 0; i < this.getContents().size() - 1; i++) {
          inputConsumer.accept(i);
       }
    }
 
    public int outputSlotIndex() {
-      return this.slots.size() - 1;
+      return this.getContents().size() - 1;
    }
 
    public boolean isIngredientIndex(int index) {

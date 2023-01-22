@@ -1,6 +1,6 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.block.entity.CryoChamberTileEntity;
+import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.config.EternalAuraConfig;
 import iskallia.vault.container.inventory.CryochamberContainer;
 import iskallia.vault.entity.eternal.EternalData;
@@ -65,7 +65,7 @@ public class EternalInteractionMessage {
          () -> {
             ServerPlayer player = contextSupplier.get().getSender();
             if (player.containerMenu instanceof CryochamberContainer) {
-               CryoChamberTileEntity tile = ((CryochamberContainer)player.containerMenu).getCryoChamber(player.getLevel());
+               EternalPedestalTileEntity tile = ((CryochamberContainer)player.containerMenu).getPedestal(player.getLevel());
                if (tile != null) {
                   UUID eternalId = tile.getEternalId();
                   EternalsData data = EternalsData.get(player.getLevel());

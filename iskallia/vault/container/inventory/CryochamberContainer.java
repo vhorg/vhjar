@@ -1,7 +1,6 @@
 package iskallia.vault.container.inventory;
 
-import iskallia.vault.block.CryoChamberBlock;
-import iskallia.vault.block.entity.CryoChamberTileEntity;
+import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.container.slot.ArmorSlot;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModContainers;
@@ -19,6 +18,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
@@ -28,10 +28,10 @@ public class CryochamberContainer extends AbstractContainerMenu {
    public CryochamberContainer(int windowId, Level world, BlockPos pos, Inventory playerInventory) {
       super(ModContainers.CRYOCHAMBER_CONTAINER, windowId);
       this.tilePos = pos;
-      CryoChamberTileEntity cryoChamber = this.getCryoChamber(world);
       Container equipmentInventory;
-      if (world instanceof ServerLevel && cryoChamber != null) {
-         equipmentInventory = EternalsData.get((ServerLevel)world).getEternalEquipmentInventory(cryoChamber.getEternalId(), cryoChamber::sendUpdates);
+      if (world instanceof ServerLevel && world.getBlockEntity(pos) instanceof EternalPedestalTileEntity eternalPedestalTile) {
+         equipmentInventory = EternalsData.get((ServerLevel)world)
+            .getEternalEquipmentInventory(eternalPedestalTile.getEternalId(), eternalPedestalTile::sendUpdates);
          if (equipmentInventory == null) {
             return;
          }
@@ -67,13 +67,18 @@ public class CryochamberContainer extends AbstractContainerMenu {
    }
 
    public boolean stillValid(Player player) {
-      return this.getCryoChamber(player.getCommandSenderWorld()) == null ? false : player.distanceToSqr(Vec3.atCenterOf(this.tilePos)) <= 64.0;
+      return this.getPedestal(player.getCommandSenderWorld()) == null ? false : player.distanceToSqr(Vec3.atCenterOf(this.tilePos)) <= 64.0;
    }
 
    @Nullable
-   public CryoChamberTileEntity getCryoChamber(Level world) {
+   public EternalPedestalTileEntity getPedestal(Level world) {
       BlockState state = world.getBlockState(this.tilePos);
-      return !state.is(ModBlocks.CRYO_CHAMBER) ? null : CryoChamberBlock.getCryoChamberTileEntity(world, this.tilePos, state);
+      return !state.is(ModBlocks.ETERNAL_PEDESTAL) ? null : getEternalPedestalTileEntity(world, this.tilePos, state);
+   }
+
+   public static EternalPedestalTileEntity getEternalPedestalTileEntity(Level world, BlockPos pos, BlockState state) {
+      BlockEntity tileEntity = world.getBlockEntity(pos);
+      return !(tileEntity instanceof EternalPedestalTileEntity) ? null : (EternalPedestalTileEntity)tileEntity;
    }
 
    public ItemStack quickMoveStack(Player playerIn, int index) {

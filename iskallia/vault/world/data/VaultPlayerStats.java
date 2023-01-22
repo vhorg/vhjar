@@ -1,6 +1,7 @@
 package iskallia.vault.world.data;
 
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.player.Completion;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.stat.VaultSnapshot;
 import iskallia.vault.init.ModNetwork;
@@ -81,6 +82,9 @@ public class VaultPlayerStats extends SavedData {
             int experience = stats.getExperience(snapshot.getEnd());
             statsData.addVaultExp(player, experience);
             VaultDollItem.giveDollExperience(player, vaultId, experience);
+            if (stats.getCompletion() == Completion.COMPLETED) {
+               PlayerSpiritRecoveryData.get(player.getLevel()).decreaseMultiplierOnCompletion(player.getUUID());
+            }
 
             for (ItemStack stack : stats.get(StatCollector.REWARD)) {
                player.getInventory().placeItemBackInInventory(stack.copy());

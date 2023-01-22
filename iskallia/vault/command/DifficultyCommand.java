@@ -38,7 +38,7 @@ public class DifficultyCommand extends Command {
       builder.executes(
          ctx -> {
             ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
-            VaultDifficulty vaultDifficultyx = WorldSettings.get(player.getLevel()).getVaultDifficulty();
+            VaultDifficulty vaultDifficultyx = WorldSettings.get(player.getLevel()).getGlobalVaultDifficulty();
             ((CommandSourceStack)ctx.getSource())
                .sendSuccess(new TranslatableComponent("commands.the_vault.difficulty.query", new Object[]{vaultDifficultyx.getDisplayName()}), false);
             return vaultDifficultyx.getId();
@@ -53,10 +53,10 @@ public class DifficultyCommand extends Command {
 
    public static int setDifficulty(CommandSourceStack source, VaultDifficulty vaultDifficulty) throws CommandSyntaxException {
       WorldSettings worldSettings = WorldSettings.get(source.getLevel());
-      if (worldSettings.getVaultDifficulty() == vaultDifficulty) {
+      if (worldSettings.getGlobalVaultDifficulty() == vaultDifficulty) {
          throw ERROR_ALREADY_DIFFICULT.create(vaultDifficulty.getKey());
       } else {
-         worldSettings.setVaultDifficulty(vaultDifficulty);
+         worldSettings.setGlobalVaultDifficulty(vaultDifficulty);
          source.sendSuccess(new TranslatableComponent("commands.the_vault.difficulty.success", new Object[]{vaultDifficulty.getDisplayName()}), true);
          return 0;
       }

@@ -1,0 +1,36 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "the_vault:amplifying_focus"
+    },
+    {
+      "item": "the_vault:amplifying_focus"
+    },
+    {
+      "item": "the_vault:amplifying_focus"
+    },
+    {
+      "item": "the_vault:amplifying_focus"
+    },
+    {
+      "item": "the_vault:amplifying_focus"
+    },
+    {
+      "item": "the_vault:amplifying_focus"
+    },
+    {
+      "item": "the_vault:amplifying_focus"
+    },
+    {
+      "item": "the_vault:amplifying_focus"
+    },
+    {
+      "item": "the_vault:amplifying_focus"
+    }
+  ],
+  "result": {
+    "item": "the_vault:nullifying_focus",
+    "count": 3
+  }
+}

@@ -3,7 +3,9 @@ package iskallia.vault.block.base;
 import com.mojang.brigadier.StringReader;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.event.common.AltarProgressEvent;
 import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.core.world.data.PartialTile;
@@ -11,6 +13,9 @@ import iskallia.vault.core.world.data.TileParser;
 import iskallia.vault.core.world.loot.LootPool;
 import iskallia.vault.entity.entity.FloatingItemEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.item.gear.DataTransferItem;
+import iskallia.vault.item.gear.VaultLootItem;
+import iskallia.vault.world.data.ServerVaults;
 import java.awt.Color;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
@@ -22,6 +27,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -63,8 +69,11 @@ public abstract class FillableAltarTileEntity extends BlockEntity {
       this.currentProgress += progress;
       this.currentProgress = Math.min(this.currentProgress, this.maxProgress);
       this.sendUpdates();
-      CommonEvents.ALTAR_PROGRESS
+      AltarProgressEvent.Data result = CommonEvents.ALTAR_PROGRESS
          .invoke((ServerLevel)this.level, player, this.getBlockState(), this.getBlockPos(), this, this.currentProgress, this.maxProgress, false);
+      if (result.getProgress() >= result.getTotal()) {
+         player.getLevel().playSound(null, player.getOnPos(), SoundEvents.BEACON_ACTIVATE, SoundSource.BLOCKS, 2.0F, 1.0F);
+      }
    }
 
    public abstract Component getRequirementName();
@@ -136,7 +145,17 @@ public abstract class FillableAltarTileEntity extends BlockEntity {
    public void placeReward(Level world, BlockPos pos, int color, RandomSource random) {
       LootPool pool = VaultRegistry.LOOT_POOL.getKey(this.reward).get(Version.latest());
       pool.getRandomFlat(Version.latest(), random).ifPresent(entry -> {
-         world.addFreshEntity(FloatingItemEntity.create(world, pos, entry.getStack(random)).setColor(color));
+         ItemStack stack = entry.getStack(random);
+         Vault vault = ServerVaults.get(world).orElse(null);
+         if (vault != null && stack.getItem() instanceof VaultLootItem lootItem) {
+            lootItem.initializeLoot(vault, stack);
+         }
+
+         if (stack.getItem() instanceof DataTransferItem lootItem) {
+            stack = lootItem.convertStack(stack, random);
+         }
+
+         world.addFreshEntity(FloatingItemEntity.create(world, pos, stack).setColor(color));
          world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8F, 0.2F);
       });
    }

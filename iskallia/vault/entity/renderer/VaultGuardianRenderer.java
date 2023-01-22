@@ -19,7 +19,7 @@ public class VaultGuardianRenderer extends HumanoidMobRenderer<VaultGuardianEnti
 
    protected void scale(@Nonnull VaultGuardianEntity entity, @Nonnull PoseStack matrixStack, float partialTickTime) {
       super.scale(entity, matrixStack, partialTickTime);
-      matrixStack.scale(1.5F, 1.5F, 1.5F);
+      matrixStack.scale(1.1F, 1.2F, 1.1F);
    }
 
    @Nonnull

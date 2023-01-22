@@ -1,5 +1,8 @@
 package iskallia.vault.event;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.platform.InputConstants.Key;
+import com.mojang.blaze3d.platform.InputConstants.Type;
 import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.gui.screen.AbilitySelectionScreen;
 import iskallia.vault.init.ModKeybinds;
@@ -12,6 +15,8 @@ import iskallia.vault.network.message.bounty.ServerboundBountyProgressMessage;
 import iskallia.vault.skill.ability.KeyBehavior;
 import iskallia.vault.skill.ability.effect.spi.core.AbstractAbility;
 import iskallia.vault.skill.ability.group.AbilityGroup;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Map.Entry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -25,6 +30,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 @OnlyIn(Dist.CLIENT)
 public class InputEvents {
    private static boolean isShiftDown;
+   private static final Set<Key> KEY_DOWN_SET = new HashSet<>();
 
    public static boolean isShiftDown() {
       return isShiftDown;
@@ -45,7 +51,7 @@ public class InputEvents {
    public static void onKey(KeyInputEvent event) {
       Minecraft minecraft = Minecraft.getInstance();
       if (minecraft.level != null) {
-         onInput(minecraft, event.getKey(), event.getAction());
+         onInput(minecraft, InputConstants.getKey(event.getKey(), event.getScanCode()), event.getAction());
       }
    }
 
@@ -53,74 +59,98 @@ public class InputEvents {
    public static void onMouse(MouseInputEvent event) {
       Minecraft minecraft = Minecraft.getInstance();
       if (minecraft.level != null) {
-         onInput(minecraft, event.getButton(), event.getAction());
+         onInput(minecraft, Type.MOUSE.getOrCreate(event.getButton()), event.getAction());
       }
    }
 
-   private static void onInput(Minecraft minecraft, int key, int action) {
-      if (key != -1) {
-         if (minecraft.screen != null) {
-            AbilityGroup<?, ?> selectedAbility = ClientAbilityData.getSelectedAbility();
-            if (selectedAbility != null) {
-               AbstractAbility<?> ability = selectedAbility.getAbility(null);
-               if (ability != null && ability.getKeyBehavior() == KeyBehavior.ACTIVATE_ON_HOLD && isKey(ModKeybinds.abilityKey, key) && action == 0) {
-                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
-               }
-            }
-         } else {
-            if (isKey(ModKeybinds.abilityKey, key)) {
-               if (action == 0) {
-                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
-               } else if (action == 1) {
-                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyDown);
-               }
-            }
+   private static void onInput(Minecraft minecraft, Key key, int action) {
+      if (key != InputConstants.UNKNOWN) {
+         if (action == 1) {
+            KEY_DOWN_SET.add(key);
+         } else if (action == 0) {
+            KEY_DOWN_SET.remove(key);
+         }
 
+         if (minecraft.screen != null) {
+            if (action == 0) {
+               checkAndReleaseHoldAbility(key);
+            }
+         } else if (action != 0) {
             if (action == 1) {
+               for (Entry<String, KeyMapping> entry : ModKeybinds.abilityQuickfireKey.entrySet()) {
+                  if (entry.getValue().isActiveAndMatches(key)) {
+                     ModNetwork.CHANNEL.sendToServer(new AbilityQuickselectMessage(entry.getKey(), 1));
+                     return;
+                  }
+               }
+
                if (isShiftDown) {
-                  if (key == 263) {
+                  if (key.getValue() == 263) {
                      ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.LEFT);
                      return;
                   }
 
-                  if (key == 262) {
+                  if (key.getValue() == 262) {
                      ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.RIGHT);
                      return;
                   }
 
-                  if (key == 265) {
+                  if (key.getValue() == 265) {
                      ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.UP);
                      return;
                   }
 
-                  if (key == 264) {
+                  if (key.getValue() == 264) {
                      ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.DOWN);
                      return;
                   }
                }
 
-               for (Entry<String, KeyMapping> entry : ModKeybinds.abilityQuickfireKey.entrySet()) {
-                  if (isKey(entry.getValue(), key)) {
-                     ModNetwork.CHANNEL.sendToServer(new AbilityQuickselectMessage(entry.getKey()));
-                     return;
-                  }
-               }
-
-               if (isKey(ModKeybinds.abilityWheelKey, key)) {
+               if (ModKeybinds.abilityKey.isActiveAndMatches(key)) {
+                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyDown);
+               } else if (ModKeybinds.abilityWheelKey.isActiveAndMatches(key)) {
                   minecraft.setScreen(new AbilitySelectionScreen());
                   ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.CancelKeyDown);
-               } else if (isKey(ModKeybinds.openAbilityTree, key)) {
+               } else if (ModKeybinds.openAbilityTree.isActiveAndMatches(key)) {
                   ModNetwork.CHANNEL.sendToServer(ServerboundOpenStatisticsMessage.INSTANCE);
-               } else if (isKey(ModKeybinds.bountyStatusKey, key)) {
+               } else if (ModKeybinds.bountyStatusKey.isActiveAndMatches(key)) {
                   ModNetwork.CHANNEL.sendToServer(ServerboundBountyProgressMessage.INSTANCE);
                }
+            }
+         } else if ((!isKeyDown(ModKeybinds.abilityKey.getKey()) || !ModKeybinds.abilityKey.getKeyModifier().matches(key))
+            && !ModKeybinds.abilityKey.getKey().equals(key)) {
+            for (Entry<String, KeyMapping> entryx : ModKeybinds.abilityQuickfireKey.entrySet()) {
+               KeyMapping keyMapping = entryx.getValue();
+               if (isKeyDown(keyMapping.getKey()) && keyMapping.getKeyModifier().matches(key) || keyMapping.getKey().equals(key)) {
+                  ModNetwork.CHANNEL.sendToServer(new AbilityQuickselectMessage(entryx.getKey(), 0));
+                  return;
+               }
+            }
+         } else {
+            ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
+         }
+      }
+   }
+
+   private static void checkAndReleaseHoldAbility(Key key) {
+      AbilityGroup<?, ?> selectedAbility = ClientAbilityData.getSelectedAbility();
+      if (selectedAbility != null) {
+         AbstractAbility<?> ability = selectedAbility.getAbility(null);
+         if (ability != null && ability.getKeyBehavior() == KeyBehavior.ACTIVATE_ON_HOLD && ClientAbilityData.isActive(selectedAbility.getParentName())) {
+            if (!ModKeybinds.abilityKey.getKeyModifier().matches(key) && !ModKeybinds.abilityKey.getKey().equals(key)) {
+               KeyMapping keyMapping = ModKeybinds.abilityQuickfireKey.get(selectedAbility.getParentName());
+               if (keyMapping != null && (keyMapping.getKeyModifier().matches(key) || keyMapping.getKey().equals(key))) {
+                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
+               }
+            } else {
+               ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
             }
          }
       }
    }
 
-   private static boolean isKey(KeyMapping keyMapping, int key) {
-      return keyMapping.getKey().getValue() == key && keyMapping.isConflictContextAndModifierActive();
+   private static boolean isKeyDown(Key key) {
+      return KEY_DOWN_SET.contains(key);
    }
 
    @SubscribeEvent

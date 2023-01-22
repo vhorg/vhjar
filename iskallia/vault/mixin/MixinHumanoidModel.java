@@ -1,5 +1,6 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.entity.renderer.EternalSpiritRenderer;
 import iskallia.vault.entity.renderer.SpiritRenderer;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
@@ -27,6 +28,7 @@ public abstract class MixinHumanoidModel {
    ) {
       if (entity instanceof Player player) {
          SpiritRenderer.handleStaticHandHoldingSpirit(player, this.leftArm);
+         EternalSpiritRenderer.handleStaticHandHoldingSpirit(player, this.leftArm);
       }
    }
 }

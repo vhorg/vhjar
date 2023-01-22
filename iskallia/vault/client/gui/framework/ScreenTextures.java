@@ -158,6 +158,22 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_PAY_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_PAY, BUTTON_PAY_HOVER, BUTTON_PAY_PRESSED, BUTTON_PAY_DISABLED
    );
+   public static final TextureAtlasRegion BUTTON_TOGGLE_ON = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_toggle_on"));
+   public static final TextureAtlasRegion BUTTON_TOGGLE_ON_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_toggle_on_hover")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_TOGGLE_ON_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_TOGGLE_ON, BUTTON_TOGGLE_ON_HOVER, BUTTON_TOGGLE_ON, BUTTON_TOGGLE_ON
+   );
+   public static final TextureAtlasRegion BUTTON_TOGGLE_OFF = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_toggle_off")
+   );
+   public static final TextureAtlasRegion BUTTON_TOGGLE_OFF_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_toggle_off_hover")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_TOGGLE_OFF_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_TOGGLE_OFF, BUTTON_TOGGLE_OFF_HOVER, BUTTON_TOGGLE_OFF, BUTTON_TOGGLE_OFF
+   );
    public static final TextureAtlasRegion PROGRESS_ARROW_BACKGROUND = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/progress/arrow_right_background")
    );

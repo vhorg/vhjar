@@ -32,6 +32,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -55,6 +56,28 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
       ItemStack stack = createBaseTrinket(trinket);
       setUses(stack, trinket.getTrinketConfig().getRandomUses());
       return stack;
+   }
+
+   public static float getUsePercentage(ItemStack input) {
+      if (input.isEmpty()) {
+         return 0.0F;
+      } else if (input.getItem() instanceof TrinketItem) {
+         return !isIdentified(input) ? 1.0F : 1.0F - (float)getUsedVaults(input).size() / getUses(input);
+      } else {
+         return 0.0F;
+      }
+   }
+
+   public int getBarWidth(ItemStack pStack) {
+      return Math.round(13.0F - (1.0F - getUsePercentage(pStack)) * 13.0F);
+   }
+
+   public int getBarColor(ItemStack pStack) {
+      return Mth.hsvToRgb(getUsePercentage(pStack) / 3.0F, 1.0F, 1.0F);
+   }
+
+   public boolean isBarVisible(ItemStack pStack) {
+      return isIdentified(pStack) && getUsePercentage(pStack) != 1.0F;
    }
 
    public static ItemStack createBaseTrinket(TrinketEffect<?> trinket) {

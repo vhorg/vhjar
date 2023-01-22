@@ -50,7 +50,9 @@ public record TransmogButtonMessage() {
                gearData.updateAttribute(ModGearAttributes.GEAR_MODEL, container.getSelectedModelId());
                gearData.write(resultingStack);
                gearSlot.set(ItemStack.EMPTY);
-               bronzeSlot.getItem().shrink(copperCost);
+               ItemStack bronze = bronzeSlot.getItem().copy();
+               bronze.shrink(copperCost);
+               container.getInternalInventory().setItem(1, bronze);
                outputSlot.set(resultingStack);
                container.broadcastChanges();
             }

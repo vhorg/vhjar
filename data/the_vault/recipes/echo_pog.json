@@ -1,16 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " g ",
-    "geg",
-    " g "
+    "ppp",
+    "pep",
+    "ppp"
   ],
   "key": {
-    "e": {
-      "item": "the_vault:extraordinary_echo_gem"
-    },
-    "g": {
+    "p": {
       "item": "the_vault:gem_pog"
+    },
+    "e": {
+      "item": "the_vault:perfect_echo_gem"
     }
   },
   "result": {

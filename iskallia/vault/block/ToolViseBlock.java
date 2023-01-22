@@ -4,7 +4,7 @@ import iskallia.vault.block.entity.ToolViseTile;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction.Axis;
-import net.minecraft.world.Container;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -27,6 +27,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkHooks;
 
 public class ToolViseBlock extends Block implements EntityBlock {
    public static final VoxelShape SHAPE_X = Shapes.or(
@@ -55,27 +56,36 @@ public class ToolViseBlock extends Block implements EntityBlock {
       return new ToolViseTile(pPos, pState);
    }
 
-   public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
-      if (pLevel.isClientSide) {
+   public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+      if (level.isClientSide()) {
          return InteractionResult.SUCCESS;
-      } else {
-         if (pLevel.getBlockEntity(pPos) instanceof ToolViseTile tile) {
-            pPlayer.openMenu(tile);
+      } else if (player instanceof ServerPlayer sPlayer) {
+         if (level.getBlockEntity(pos) instanceof ToolViseTile toolViseTile) {
+            NetworkHooks.openGui(sPlayer, toolViseTile, buffer -> buffer.writeBlockPos(pos));
+            return InteractionResult.SUCCESS;
+         } else {
+            return InteractionResult.SUCCESS;
          }
-
-         return InteractionResult.CONSUME;
+      } else {
+         return InteractionResult.SUCCESS;
       }
    }
 
-   public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-      if (!pState.is(pNewState.getBlock())) {
-         if (pLevel.getBlockEntity(pPos) instanceof Container container) {
-            Containers.dropContents(pLevel, pPos, container);
-            pLevel.updateNeighbourForOutputSignal(pPos, this);
-         }
-
-         super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+   public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+      if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ToolViseTile toolViseTile) {
+         toolViseTile.getInventory()
+            .getOverSizedContents()
+            .forEach(
+               overSizedStack -> overSizedStack.splitByStackSize()
+                  .forEach(splitStack -> Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), splitStack))
+            );
+         Containers.dropContents(level, pos, toolViseTile.getPickaxeInput());
+         toolViseTile.getInventory().clearContent();
+         toolViseTile.getPickaxeInput().clearContent();
+         level.updateNeighbourForOutputSignal(pos, this);
       }
+
+      super.onRemove(state, level, pos, newState, isMoving);
    }
 
    public BlockState rotate(BlockState pState, Rotation pRot) {

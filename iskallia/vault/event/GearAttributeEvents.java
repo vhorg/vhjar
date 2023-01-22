@@ -20,8 +20,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.function.BiConsumer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -142,7 +140,8 @@ public class GearAttributeEvents {
    @SubscribeEvent
    public static void blockAttack(LivingAttackEvent event) {
       LivingEntity attacked = event.getEntityLiving();
-      if (!attacked.getLevel().isClientSide() && !event.getSource().isBypassInvul()) {
+      DamageSource damageSource = event.getSource();
+      if (!attacked.getLevel().isClientSide() && !damageSource.isBypassInvul()) {
          ItemStack mainHandStack = attacked.getItemInHand(InteractionHand.MAIN_HAND);
          ItemStack offHandStack = attacked.getItemInHand(InteractionHand.OFF_HAND);
          ItemStack shieldStack = mainHandStack.getItem() instanceof ShieldItem
@@ -155,12 +154,9 @@ public class GearAttributeEvents {
                   event.setCanceled(true);
                   if (shieldStack.getItem() instanceof VaultGearItem) {
                      VaultGearData gearData = VaultGearData.read(shieldStack);
-                     Boolean isBellModel = gearData.getFirstValue(ModGearAttributes.GEAR_MODEL)
-                        .map(modelId -> modelId.equals(ModDynamicModels.Shields.BELL.getId()))
-                        .orElse(false);
-                     if (isBellModel) {
-                        attacked.getLevel().playSound(null, attacked.getOnPos(), SoundEvents.BELL_BLOCK, SoundSource.BLOCKS, 2.0F, 1.0F);
-                     }
+                     gearData.getFirstValue(ModGearAttributes.GEAR_MODEL)
+                        .flatMap(ModDynamicModels.Shields.REGISTRY::get)
+                        .ifPresent(shieldModel -> shieldModel.onBlocked(attacked, damageSource));
                   }
 
                   attacked.getLevel().broadcastEntityEvent(attacked, (byte)29);

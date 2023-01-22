@@ -110,7 +110,11 @@ public class ModContainers {
          CompoundTag nbt = buffer.readNbt();
          return new LootStatueContainer(windowId, nbt == null ? new CompoundTag() : nbt);
       });
-      TRANSMOG_TABLE_CONTAINER = IForgeMenuType.create(TransmogTableContainer::new);
+      TRANSMOG_TABLE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new TransmogTableContainer(windowId, world, pos, inventory);
+      });
       SCAVENGER_CHEST_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          SimpleContainer inv = new SimpleContainer(45);
          return new ScavengerChestContainer(windowId, inventory, inv, inv);
@@ -134,7 +138,11 @@ public class ModContainers {
       VAULT_CHARM_CONTROLLER_CONTAINER = IForgeMenuType.create(
          (windowId, inventory, data) -> new VaultCharmControllerContainer(windowId, inventory, data.readNbt())
       );
-      TOOL_VISE_CONTAINER = IForgeMenuType.create(ToolViseContainerMenu::new);
+      TOOL_VISE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new ToolViseContainerMenu(windowId, world, pos, inventory);
+      });
       MAGNET_TABLE_CONTAINER = IForgeMenuType.create(MagnetTableContainerMenu::new);
       VAULT_FORGE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          Level world = inventory.player.getCommandSenderWorld();

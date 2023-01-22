@@ -10,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -34,14 +33,7 @@ public class FillableAltarRenderer implements BlockEntityRenderer<FillableAltarT
       FillableAltarTileEntity tileEntity, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLight, int combinedOverlayIn
    ) {
       VertexConsumer builder = buffer.getBuffer(RenderType.translucent());
-      float progressPercentage = (float)tileEntity.getCurrentProgress() / tileEntity.getMaxProgress();
-      if (progressPercentage > 0.0F) {
-         float fluidMaxHeight = FLUID_UPPER_POS.y() - FLUID_LOWER_POS.y();
-         Vector3f upperPos = new Vector3f(FLUID_UPPER_POS.x(), FLUID_LOWER_POS.y() + fluidMaxHeight * progressPercentage, FLUID_UPPER_POS.z());
-         this.renderCuboid(builder, matrixStack, FLUID_LOWER_POS, upperPos, tileEntity.getFillColor());
-         if (buffer instanceof BufferSource) {
-            ((BufferSource)buffer).endBatch(RenderType.translucent());
-         }
+      if (tileEntity.isCompleted()) {
       }
 
       Minecraft minecraft = Minecraft.getInstance();

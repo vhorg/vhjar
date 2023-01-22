@@ -8,23 +8,26 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Container;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class TransmogTableTileEntity extends BaseContainerBlockEntity implements WorldlyContainer {
-   protected TransmogTableInventory internalInventory = new TransmogTableInventory() {
+public class TransmogTableTileEntity extends BlockEntity implements WorldlyContainer, MenuProvider {
+   protected TransmogTableInventory internalInventory = new TransmogTableInventory(this) {
       @Override
       public void setChanged() {
          super.setChanged();
@@ -40,14 +43,8 @@ public class TransmogTableTileEntity extends BaseContainerBlockEntity implements
       return this.internalInventory;
    }
 
-   @Nonnull
-   protected Component getDefaultName() {
-      return new TranslatableComponent("container.the_vault.transmog_table");
-   }
-
-   @Nonnull
-   protected AbstractContainerMenu createMenu(int containerId, Inventory pInventory) {
-      return new TransmogTableContainer(containerId, pInventory.player, this.internalInventory);
+   public AbstractContainerMenu createMenu(int containerId, @NotNull Inventory inv, @NotNull Player player) {
+      return this.getLevel() == null ? null : new TransmogTableContainer(containerId, this.getLevel(), this.getBlockPos(), inv);
    }
 
    public int getContainerSize() {
@@ -92,14 +89,31 @@ public class TransmogTableTileEntity extends BaseContainerBlockEntity implements
       }
    }
 
-   public void load(@Nonnull CompoundTag tag) {
-      super.load(tag);
-      ContainerHelper.loadAllItems(tag, this.internalInventory.getSlots());
+   public void load(@Nonnull CompoundTag compound) {
+      super.load(compound);
+      super.load(compound);
+      if (compound.contains("Items")) {
+         loadAllItems(compound, this.internalInventory);
+      } else {
+         this.internalInventory.load(compound);
+      }
    }
 
    protected void saveAdditional(@Nonnull CompoundTag tag) {
       super.saveAdditional(tag);
-      ContainerHelper.saveAllItems(tag, this.internalInventory.getSlots());
+      this.internalInventory.save(tag);
+   }
+
+   private static void loadAllItems(CompoundTag pTag, Container inventory) {
+      ListTag listtag = pTag.getList("Items", 10);
+
+      for (int i = 0; i < listtag.size(); i++) {
+         CompoundTag compoundtag = listtag.getCompound(i);
+         int j = compoundtag.getByte("Slot") & 255;
+         if (j >= 0 && j < inventory.getContainerSize()) {
+            inventory.setItem(j, ItemStack.of(compoundtag));
+         }
+      }
    }
 
    public ClientboundBlockEntityDataPacket getUpdatePacket() {
@@ -127,5 +141,10 @@ public class TransmogTableTileEntity extends BaseContainerBlockEntity implements
    @Nonnull
    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
       return super.getCapability(cap, side);
+   }
+
+   @NotNull
+   public Component getDisplayName() {
+      return new TranslatableComponent("container.the_vault.transmog_table");
    }
 }

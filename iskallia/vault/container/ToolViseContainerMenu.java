@@ -3,29 +3,33 @@ package iskallia.vault.container;
 import com.mojang.datafixers.util.Pair;
 import iskallia.vault.block.entity.ToolViseTile;
 import iskallia.vault.config.PaxelConfigs;
+import iskallia.vault.container.oversized.OverSizedSlotContainer;
+import iskallia.vault.container.oversized.OverSizedTabSlot;
+import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModContainers;
+import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSlotIcons;
 import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.network.message.ClientboundRefreshToolViseMessage;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Predicate;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.network.NetworkDirection;
 
-public class ToolViseContainerMenu extends AbstractContainerMenu {
+public class ToolViseContainerMenu extends OverSizedSlotContainer {
    private static final Pair<ResourceLocation, ResourceLocation>[] EMPTY_SLOT_TEXTURES = new Pair[]{
       Pair.of(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.TOOL_VISE_SLOT_0_NO_ITEM),
       Pair.of(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.TOOL_VISE_SLOT_1_NO_ITEM),
@@ -34,106 +38,156 @@ public class ToolViseContainerMenu extends AbstractContainerMenu {
       Pair.of(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.TOOL_VISE_SLOT_4_NO_ITEM),
       Pair.of(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.TOOL_VISE_SLOT_5_NO_ITEM)
    };
-   private static final int SIZE = 7;
+   private final BlockPos tilePos;
+   private final ToolViseTile tileEntity;
    public final Map<PaxelItem.Stat, PaxelConfigs.Upgrade> upgrades = ModConfigs.PAXEL_CONFIGS.getAllUpgrades();
-   public final Container container;
 
-   public ToolViseContainerMenu(int id, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
-      this(id, playerInventory, (Container)null);
+   public ToolViseContainerMenu(int id, Level level, BlockPos pos, Inventory playerInventory) {
+      super(ModContainers.TOOL_VISE_CONTAINER, id, playerInventory.player);
+      this.tilePos = pos;
+      if (level.getBlockEntity(pos) instanceof ToolViseTile toolViseTile) {
+         this.tileEntity = toolViseTile;
+         this.initSlots(playerInventory);
+      } else {
+         this.tileEntity = null;
+      }
    }
 
-   public ToolViseContainerMenu(int id, Inventory playerInventory, @Nullable Container container) {
-      super(ModContainers.TOOL_VISE_CONTAINER, id);
-      this.container = Objects.requireNonNullElseGet(container, () -> new SimpleContainer(7) {
-         public void setChanged() {
-            super.setChanged();
-            ToolViseContainerMenu.this.slotsChanged(this);
+   private void initSlots(Inventory playerInventory) {
+      for (int row = 0; row < 3; row++) {
+         for (int column = 0; column < 9; column++) {
+            this.addSlot(new TabSlot(playerInventory, column + row * 9 + 9, 8 + column * 18, 136 + row * 18));
          }
-      });
-      checkContainerSize(this.container, 7);
-      this.container.startOpen(playerInventory.player);
-      this.addSlot(new Slot(this.container, 0, 55, 24) {
+      }
+
+      for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
+         this.addSlot(new TabSlot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 194));
+      }
+
+      Container pickaxeContainer = this.tileEntity.getPickaxeInput();
+      this.addSlot(new TabSlot(pickaxeContainer, 0, 55, 24) {
          public boolean mayPlace(ItemStack stack) {
             return stack.getItem() instanceof PaxelItem;
          }
-      });
-      this.addSlot(
-         new ToolViseContainerMenu.MaterialSlot(
-            this.container, 1, 43, 64, itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(0)), EMPTY_SLOT_TEXTURES[0]
-         )
-      );
-      this.addSlot(
-         new ToolViseContainerMenu.MaterialSlot(
-            this.container, 2, 66, 64, itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(1)), EMPTY_SLOT_TEXTURES[1]
-         )
-      );
-      this.addSlot(
-         new ToolViseContainerMenu.MaterialSlot(
-            this.container, 3, 43, 86, itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(2)), EMPTY_SLOT_TEXTURES[2]
-         )
-      );
-      this.addSlot(
-         new ToolViseContainerMenu.MaterialSlot(
-            this.container, 4, 66, 86, itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(3)), EMPTY_SLOT_TEXTURES[3]
-         )
-      );
-      this.addSlot(
-         new ToolViseContainerMenu.MaterialSlot(
-            this.container, 5, 43, 108, itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(4)), EMPTY_SLOT_TEXTURES[4]
-         )
-      );
-      this.addSlot(
-         new ToolViseContainerMenu.MaterialSlot(
-            this.container, 6, 66, 108, itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(5)), EMPTY_SLOT_TEXTURES[5]
-         )
-      );
 
-      for (int si = 0; si < 3; si++) {
-         for (int sj = 0; sj < 9; sj++) {
-            this.addSlot(new Slot(playerInventory, sj + (si + 1) * 9, 8 + sj * 18, 136 + si * 18));
+         public void setChanged() {
+            ToolViseContainerMenu.this.slotsChanged(this.container);
+            super.setChanged();
          }
-      }
-
-      for (int si = 0; si < 9; si++) {
-         this.addSlot(new Slot(playerInventory, si, 8 + si * 18, 194));
-      }
+      });
+      Container inventoryContainer = this.tileEntity.getInventory();
+      this.addSlot(
+         (new OverSizedTabSlot(inventoryContainer, 0, 43, 64) {
+               public void setChanged() {
+                  ToolViseContainerMenu.this.slotsChanged(this.container);
+                  super.setChanged();
+               }
+            })
+            .setFilter(itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(0)))
+            .setBackground((ResourceLocation)EMPTY_SLOT_TEXTURES[0].getFirst(), (ResourceLocation)EMPTY_SLOT_TEXTURES[0].getSecond())
+      );
+      this.addSlot(
+         (new OverSizedTabSlot(inventoryContainer, 1, 66, 64) {
+               public void setChanged() {
+                  ToolViseContainerMenu.this.slotsChanged(this.container);
+                  super.setChanged();
+               }
+            })
+            .setFilter(itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(1)))
+            .setBackground((ResourceLocation)EMPTY_SLOT_TEXTURES[1].getFirst(), (ResourceLocation)EMPTY_SLOT_TEXTURES[1].getSecond())
+      );
+      this.addSlot(
+         (new OverSizedTabSlot(inventoryContainer, 2, 43, 86) {
+               public void setChanged() {
+                  ToolViseContainerMenu.this.tileEntity.setChanged();
+                  ToolViseContainerMenu.this.slotsChanged(this.container);
+                  super.setChanged();
+               }
+            })
+            .setFilter(itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(2)))
+            .setBackground((ResourceLocation)EMPTY_SLOT_TEXTURES[2].getFirst(), (ResourceLocation)EMPTY_SLOT_TEXTURES[2].getSecond())
+      );
+      this.addSlot(
+         (new OverSizedTabSlot(inventoryContainer, 3, 66, 86) {
+               public void setChanged() {
+                  ToolViseContainerMenu.this.slotsChanged(this.container);
+                  super.setChanged();
+               }
+            })
+            .setFilter(itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(3)))
+            .setBackground((ResourceLocation)EMPTY_SLOT_TEXTURES[3].getFirst(), (ResourceLocation)EMPTY_SLOT_TEXTURES[3].getSecond())
+      );
+      this.addSlot(
+         (new OverSizedTabSlot(inventoryContainer, 4, 43, 108) {
+               public void setChanged() {
+                  ToolViseContainerMenu.this.slotsChanged(this.container);
+                  super.setChanged();
+               }
+            })
+            .setFilter(itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(4)))
+            .setBackground((ResourceLocation)EMPTY_SLOT_TEXTURES[4].getFirst(), (ResourceLocation)EMPTY_SLOT_TEXTURES[4].getSecond())
+      );
+      this.addSlot(
+         (new OverSizedTabSlot(inventoryContainer, 5, 66, 108) {
+               public void setChanged() {
+                  ToolViseContainerMenu.this.slotsChanged(this.container);
+                  super.setChanged();
+               }
+            })
+            .setFilter(itemStack -> itemStack.is(ModConfigs.PAXEL_CONFIGS.getMaterialItem(5)))
+            .setBackground((ResourceLocation)EMPTY_SLOT_TEXTURES[5].getFirst(), (ResourceLocation)EMPTY_SLOT_TEXTURES[5].getSecond())
+      );
    }
 
    public void slotsChanged(Container pInventory) {
+      if (this.player instanceof ServerPlayer serverPlayer) {
+         ModNetwork.CHANNEL.sendTo(new ClientboundRefreshToolViseMessage(this.tilePos), serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+      }
+
+      this.tileEntity.setChanged();
       super.slotsChanged(pInventory);
    }
 
    public boolean stillValid(Player playerIn) {
-      return this.container.stillValid(playerIn);
+      return this.tileEntity.getInventory().stillValid(playerIn);
    }
 
    public ItemStack quickMoveStack(Player playerIn, int index) {
       ItemStack itemstack = ItemStack.EMPTY;
       Slot slot = (Slot)this.slots.get(index);
       if (slot.hasItem()) {
-         ItemStack otherStack = slot.getItem();
-         itemstack = otherStack.copy();
-         if (index < this.container.getContainerSize()) {
-            if (!this.moveItemStackTo(otherStack, this.container.getContainerSize(), this.slots.size(), true)) {
+         ItemStack slotStack = slot.getItem();
+         itemstack = slotStack.copy();
+         if (index >= 0 && index < 36 && this.moveOverSizedItemStackTo(slotStack, slot, 36, this.slots.size(), false)) {
+            return itemstack;
+         }
+
+         if (index >= 0 && index < 27) {
+            if (!this.moveOverSizedItemStackTo(slotStack, slot, 27, 36, false)) {
                return ItemStack.EMPTY;
             }
-         } else if (!this.moveItemStackTo(otherStack, 0, this.container.getContainerSize(), false)) {
+         } else if (index >= 27 && index < 36) {
+            if (!this.moveOverSizedItemStackTo(slotStack, slot, 0, 27, false)) {
+               return ItemStack.EMPTY;
+            }
+         } else if (!this.moveOverSizedItemStackTo(slotStack, slot, 0, 36, false)) {
             return ItemStack.EMPTY;
          }
 
-         if (otherStack.isEmpty()) {
+         if (slotStack.getCount() == 0) {
             slot.set(ItemStack.EMPTY);
          } else {
             slot.setChanged();
          }
+
+         if (slotStack.getCount() == itemstack.getCount()) {
+            return ItemStack.EMPTY;
+         }
+
+         slot.onTake(this.player, slotStack);
       }
 
       return itemstack;
-   }
-
-   public void removed(Player playerIn) {
-      super.removed(playerIn);
-      this.container.stopOpen(playerIn);
    }
 
    public boolean clickMenuButton(Player pPlayer, int pId) {
@@ -144,31 +198,33 @@ public class ToolViseContainerMenu extends AbstractContainerMenu {
          PaxelConfigs.Upgrade upgrade = this.upgrades.get(stat);
          if (!pPlayer.isCreative()) {
             for (int i = 1; i <= 6; i++) {
-               ((Slot)this.slots.get(i)).getItem().shrink(upgrade.getMaterialCost(i - 1));
+               ItemStack stack = ((Slot)this.slots.get(i + 36)).getItem().copy();
+               int materialCost = upgrade.getMaterialCost(i - 1);
+               stack.shrink(materialCost);
+               ((Slot)this.slots.get(i + 36)).set(stack);
             }
          }
 
-         ItemStack paxel = ((Slot)this.slots.get(0)).getItem();
+         ItemStack paxel = ((Slot)this.slots.get(36)).getItem();
          PaxelItem.increaseStatUpgrade(paxel, stat, upgrade.getYield(pPlayer.getRandom()));
          int sturdiness = PaxelItem.getSturdiness(paxel);
-         if (this.container instanceof ToolViseTile tile) {
-            boolean playSound = true;
-            int level = PaxelItem.getLevel(paxel);
-            int delta = ModConfigs.PAXEL_CONFIGS.getTierValues(paxel).getLevelsPerSocket();
-            PaxelItem.setLevel(paxel, level + 1);
-            if (sturdiness < tile.getLevel().random.nextFloat() * 100.0F && !pPlayer.isCreative()) {
-               tile.getLevel().playSound(null, tile.getBlockPos(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.0F, 1.1F);
-               ((Slot)this.slots.get(0)).set(ItemStack.EMPTY);
-               playSound = false;
-            } else if (level / delta != (level + 1) / delta) {
-               PaxelItem.setSockets(paxel, PaxelItem.getSockets(paxel) + 1);
-            }
-
-            if (playSound) {
-               tile.getLevel().playSound(null, tile.getBlockPos(), SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 1.1F);
-            }
+         boolean playSound = true;
+         int level = PaxelItem.getLevel(paxel);
+         int delta = ModConfigs.PAXEL_CONFIGS.getTierValues(paxel).getLevelsPerSocket();
+         PaxelItem.setLevel(paxel, level + 1);
+         if (sturdiness < this.tileEntity.getLevel().random.nextFloat() * 100.0F && !pPlayer.isCreative()) {
+            this.tileEntity.getLevel().playSound(null, this.tilePos, SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.0F, 1.1F);
+            ((Slot)this.slots.get(36)).set(ItemStack.EMPTY);
+            playSound = false;
+         } else if (level / delta != (level + 1) / delta) {
+            PaxelItem.setSockets(paxel, PaxelItem.getSockets(paxel) + 1);
          }
 
+         if (playSound) {
+            this.tileEntity.getLevel().playSound(null, this.tilePos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 1.1F);
+         }
+
+         this.tileEntity.setChanged();
          this.broadcastChanges();
          return true;
       }

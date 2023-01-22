@@ -89,7 +89,7 @@ public class ButtonElement<E extends ButtonElement<E>> extends AbstractSpatialEl
    }
 
    public record ButtonTextures(TextureAtlasRegion button, TextureAtlasRegion buttonHover, TextureAtlasRegion buttonHeld, TextureAtlasRegion buttonDisabled) {
-      private TextureAtlasRegion selectTexture(boolean disabled, boolean hover, boolean clicked) {
+      public TextureAtlasRegion selectTexture(boolean disabled, boolean hover, boolean clicked) {
          if (disabled) {
             return this.buttonDisabled();
          } else if (clicked) {

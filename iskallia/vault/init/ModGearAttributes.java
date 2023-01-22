@@ -170,13 +170,13 @@ public class ModGearAttributes {
       "thorns_chance",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
-      ModGearAttributeReaders.percentageReader("Thorns Chance", 7195648)
+      ModGearAttributeReaders.percentageReader("Thorns Chance", 16761035)
    );
    public static final VaultGearAttribute<Float> THORNS_DAMAGE = attr(
       "thorns_damage",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
-      ModGearAttributeReaders.percentageReader("Thorns Damage", 3646976)
+      ModGearAttributeReaders.percentageReader("Thorns Damage", 15507136)
    );
    public static final VaultGearAttribute<Integer> ON_HIT_CHAIN = attr(
       "on_hit_chain",
@@ -215,7 +215,7 @@ public class ModGearAttributes {
       "trap_disarming",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
-      ModGearAttributeReaders.percentageReader("Trap Disarm Chance", 7071001)
+      ModGearAttributeReaders.percentageReader("Trap Disarm Chance", 8471551)
    );
    public static final VaultGearAttribute<Float> SOUL_CHANCE = attr(
       "soul_chance",

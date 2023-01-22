@@ -28,7 +28,7 @@ public abstract class AbstractArchetype<C extends AbstractArchetypeConfig> exten
       return this.name;
    }
 
-   protected boolean hasThisArchetype(LivingEntity entity) {
+   public boolean hasThisArchetype(LivingEntity entity) {
       if (entity instanceof Player && entity.getServer() == null) {
          return ClientArchetypeData.getCurrentArchetype() == this;
       } else {

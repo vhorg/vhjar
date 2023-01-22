@@ -14,10 +14,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.TierSortingRegistry;
 
 public class MegaJumpBreakDownAbility extends MegaJumpAbility<MegaJumpBreakDownConfig> {
    protected boolean canDoAction(MegaJumpBreakDownConfig config, ServerPlayer player, boolean active) {
@@ -41,7 +39,7 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility<MegaJumpBreakDownC
       if (focusedAbilityNode != null && focusedAbilityNode.getAbility() == this) {
          BlockHelper.withEllipsoidPositions(player.blockPosition().below(3), 4.0F, config.getHeight(), 4.0F, offset -> {
             BlockState state = sWorld.getBlockState(offset);
-            if (!state.isAir() && (!state.requiresCorrectToolForDrops() || TierSortingRegistry.isCorrectTierForDrops(Tiers.IRON, state))) {
+            if (this.canBreakBlock(state)) {
                float hardness = state.getDestroySpeed(sWorld, offset);
                if (hardness >= 0.0F && hardness <= 25.0F) {
                   this.destroyBlock(sWorld, offset, player);

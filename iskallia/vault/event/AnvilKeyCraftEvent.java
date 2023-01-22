@@ -37,9 +37,11 @@ public class AnvilKeyCraftEvent {
          }
 
          if (!output.isEmpty()) {
+            int cost = Math.min(event.getLeft().getCount(), event.getRight().getCount());
+            output.setCount(cost);
             event.setOutput(output);
-            event.setCost(1);
-            event.setMaterialCost(1);
+            event.setCost(cost);
+            event.setMaterialCost(cost);
          }
       }
    }

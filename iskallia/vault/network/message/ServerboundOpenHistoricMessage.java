@@ -31,13 +31,12 @@ public class ServerboundOpenHistoricMessage {
          () -> {
             ServerPlayer sender = context.getSender();
             if (sender != null) {
-               List<VaultSnapshot> snapshots = VaultSnapshots.getAll();
-               List<UUID> list = PlayerHistoricFavoritesData.get(sender.server).getHistoricFavorites(sender).getFavorites();
-               List<VaultSnapshot> copy = new ArrayList<>(snapshots);
-               Collections.reverse(copy);
+               List<VaultSnapshot> snapshots = new ArrayList<>(VaultSnapshots.getAll());
+               List<UUID> favourites = PlayerHistoricFavoritesData.get(sender.server).getHistoricFavorites(sender).getFavorites();
+               Collections.reverse(snapshots);
                List<VaultSnapshot> prev50 = new ArrayList<>();
 
-               for (VaultSnapshot snapshot : copy) {
+               for (VaultSnapshot snapshot : snapshots) {
                   if (snapshot.getEnd() != null && snapshot.getEnd().get(Vault.STATS).getMap().containsKey(sender.getUUID())) {
                      prev50.add(snapshot);
                      if (prev50.size() >= 50) {
@@ -46,15 +45,19 @@ public class ServerboundOpenHistoricMessage {
                   }
                }
 
-               List<VaultSnapshot> favorites = new ArrayList<>(
-                  copy.stream()
-                     .filter(
-                        snapshotx -> list.stream().anyMatch(uuid -> uuid.equals(snapshotx.getEnd().get(Vault.ID)))
-                           && prev50.stream().noneMatch(vaultSnapshot -> vaultSnapshot.getEnd().get(Vault.ID).equals(snapshotx.getEnd().get(Vault.ID)))
-                     )
-                     .toList()
-               );
-               prev50.addAll(favorites);
+               List<VaultSnapshot> result = new ArrayList<>();
+
+               for (VaultSnapshot snapshotx : snapshots) {
+                  if (favourites.stream().anyMatch(uuid -> snapshot.getEnd() != null && uuid.equals(snapshot.getEnd().get(Vault.ID)))
+                     && prev50.stream()
+                        .noneMatch(
+                           vaultSnapshot -> vaultSnapshot.getEnd() != null && vaultSnapshot.getEnd().get(Vault.ID).equals(snapshot.getEnd().get(Vault.ID))
+                        )) {
+                     result.add(snapshotx);
+                  }
+               }
+
+               prev50.addAll(result);
                ModNetwork.CHANNEL.sendTo(new VaultPlayerHistoricDataMessage.S2C(prev50), sender.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
             }
          }

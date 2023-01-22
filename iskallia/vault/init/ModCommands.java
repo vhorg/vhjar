@@ -22,6 +22,7 @@ import iskallia.vault.command.ModelDebugCommand;
 import iskallia.vault.command.OpenVaultSnapshotCommand;
 import iskallia.vault.command.PartyCommand;
 import iskallia.vault.command.PaxelCommand;
+import iskallia.vault.command.PlayerDifficultyCommand;
 import iskallia.vault.command.PointsResetCommand;
 import iskallia.vault.command.RaidCommand;
 import iskallia.vault.command.ReloadConfigsCommand;
@@ -66,6 +67,7 @@ public class ModCommands {
    public static SnapshotCommand SNAPSHOT;
    public static BountyCommand BOUNTY;
    public static DifficultyCommand DIFFICULTY;
+   public static PlayerDifficultyCommand PLAYER_DIFFICULTY;
    public static VaultAltarCommand VAULT_ALTAR;
    public static PointsResetCommand POINTS_RESET;
    public static OpenVaultSnapshotCommand OPEN_VAULT_SNAPSHOT;
@@ -96,6 +98,7 @@ public class ModCommands {
       SPIRIT = registerCommand(SpiritCommand::new, dispatcher, env);
       SNAPSHOT = registerCommand(SnapshotCommand::new, dispatcher, env);
       DIFFICULTY = registerCommand(DifficultyCommand::new, dispatcher, env);
+      PLAYER_DIFFICULTY = registerCommand(PlayerDifficultyCommand::new, dispatcher, env);
       BOUNTY = registerCommand(BountyCommand::new, dispatcher, env);
       VAULT_ALTAR = registerCommand(VaultAltarCommand::new, dispatcher, env);
       POINTS_RESET = registerCommand(PointsResetCommand::new, dispatcher, env);

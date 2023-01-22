@@ -11,12 +11,13 @@ import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.entity.IPlayerSkinHolder;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.util.SidedHelper;
+import iskallia.vault.world.data.PlayerSpiritRecoveryData;
 import iskallia.vault.world.data.ServerVaults;
-import iskallia.vault.world.data.SpiritDropData;
 import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,23 +67,30 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    private static final String SPAWN_SPIRIT_TAG = VaultMod.sId("spawnSpirit");
    private static final String OWNER_PROFILE_TAG = "ownerProfile";
    private static final String JOIN_STATE_TAG = "joinState";
+   private static final String RECYCLABLE_TAG = "recyclable";
    private GameProfile gameProfile = null;
    private final NonNullList<ItemStack> items = NonNullList.create();
    private int vaultLevel;
+   private int playerLevel;
+   private boolean recyclable = false;
    private long yeetCooldown;
    private ResourceLocation skinLocation = null;
    private boolean updatingSkin = false;
    private boolean slimSkin = false;
    @Nullable
    private EntityState joinState = null;
+   @Nullable
+   private UUID heroId = null;
+   private float rescuedBonus = 0.0F;
 
    public SpiritEntity(EntityType<SpiritEntity> entityType, Level level) {
       super(entityType, level);
    }
 
-   public void transferPlayerData(Player player, Collection<ItemEntity> drops, EntityState joinState) {
+   public void transferSpiritData(Player player, Collection<ItemEntity> drops, EntityState joinState, int vaultLevel) {
       this.setGameProfile(player.getGameProfile());
-      this.setVaultLevel(SidedHelper.getVaultLevel(player));
+      this.setVaultLevel(vaultLevel);
+      this.setPlayerLevel(SidedHelper.getVaultLevel(player));
       this.addDrops(drops);
       this.setJoinState(joinState);
    }
@@ -98,7 +106,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    @SubscribeEvent(
       priority = EventPriority.LOW
    )
-   public static void onPlayerInVaultDrops(LivingDropsEvent event) {
+   public static void onPlayerDrops(LivingDropsEvent event) {
       if (event.getEntity() instanceof Player player && !player.level.isClientSide()) {
          Level level = player.level;
          ServerVaults.get(level)
@@ -106,21 +114,23 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                vault -> {
                   if (level instanceof ServerLevel serverLevel
                      && vault.get(Vault.MODIFIERS).getModifiers().stream().noneMatch(m -> m instanceof PlayerInventoryRestoreModifier)) {
+                     int vaultLevel = vault.get(Vault.LEVEL).get();
                      if (level.players().size() > 1) {
                         if (ModEntities.SPIRIT.spawn(serverLevel, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
                            )
                          {
                            EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
-                           spirit.transferPlayerData(player, event.getDrops(), joinState);
+                           spirit.transferSpiritData(player, event.getDrops(), joinState, vaultLevel);
                         }
                      } else {
-                        SpiritDropData data = SpiritDropData.get(serverLevel);
+                        PlayerSpiritRecoveryData data = PlayerSpiritRecoveryData.get(serverLevel);
                         UUID playerId = player.getUUID();
                         event.getDrops()
                            .stream()
                            .<ItemStack>map(ItemEntity::getItem)
                            .filter(SpiritEntity::shouldAddItem)
                            .forEach(stack -> data.addDrop(playerId, stack.copy()));
+                        data.setLastVaultLevel(playerId, vaultLevel);
                         player.getTags().add(SPAWN_SPIRIT_TAG);
                      }
                   }
@@ -136,21 +146,30 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
          player.getTags().remove(SPAWN_SPIRIT_TAG);
 
          for (MutableBlockPos p : BlockPos.spiralAround(new BlockPos(player.position()), 1, Direction.EAST, Direction.SOUTH)) {
-            Vec3 respawnPos = DismountHelper.findSafeDismountLocation(ModEntities.SPIRIT, player.getLevel(), p.immutable(), false);
-            if (respawnPos != null) {
-               if (ModEntities.SPIRIT.spawn(serverLevel, null, null, new BlockPos(respawnPos), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
-                  )
-                {
-                  SpiritDropData data = SpiritDropData.get(serverLevel);
-                  UUID playerId = player.getUUID();
-                  spirit.setItems(data.getDrops(playerId));
-                  spirit.setGameProfile(player.getGameProfile());
-                  spirit.setVaultLevel(SidedHelper.getVaultLevel(player));
-                  data.removeDrops(playerId);
+            if (!p.equals(player.blockPosition())) {
+               Vec3 respawnPos = DismountHelper.findSafeDismountLocation(ModEntities.SPIRIT, player.getLevel(), p.immutable(), false);
+               if (respawnPos != null) {
+                  spawnSpirit(player, serverLevel, respawnPos);
+                  return;
                }
-               break;
             }
          }
+
+         spawnSpirit(player, serverLevel, player.position());
+      }
+   }
+
+   private static void spawnSpirit(Player player, ServerLevel serverLevel, Vec3 respawnPos) {
+      if (ModEntities.SPIRIT.spawn(serverLevel, null, null, new BlockPos(respawnPos), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit) {
+         PlayerSpiritRecoveryData data = PlayerSpiritRecoveryData.get(serverLevel);
+         UUID playerId = player.getUUID();
+         spirit.setItems(data.getDrops(playerId));
+         spirit.setGameProfile(player.getGameProfile());
+         spirit.setVaultLevel(data.getLastVaultLevel(playerId).orElse(0));
+         spirit.setPlayerLevel(SidedHelper.getVaultLevel(player));
+         spirit.setRecyclable(true);
+         data.removeDrops(playerId);
+         data.removeLastVaultLevel(playerId);
       }
    }
 
@@ -189,6 +208,14 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
 
    public int getVaultLevel() {
       return this.vaultLevel;
+   }
+
+   public void setPlayerLevel(int playerLevel) {
+      this.playerLevel = playerLevel;
+   }
+
+   public int getPlayerLevel() {
+      return this.playerLevel;
    }
 
    protected void defineSynchedData() {
@@ -244,6 +271,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
 
             if (vehicle instanceof Player player && !player.getOffhandItem().isEmpty()) {
                this.stopRiding();
+               this.markWithHero(vehicle);
                if (player instanceof ServerPlayer serverPlayer) {
                   serverPlayer.connection.send(new ClientboundSetPassengersPacket(vehicle));
                }
@@ -255,6 +283,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                player.displayClientMessage(new TextComponent("You can't hold me with that in offhand"), true);
             } else if (vehicle.isCrouching()) {
                this.stopRiding();
+               this.markWithHero(vehicle);
                if (vehicle instanceof ServerPlayer serverPlayer) {
                   serverPlayer.connection.send(new ClientboundSetPassengersPacket(vehicle));
                }
@@ -272,6 +301,12 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                this.setPose(Pose.STANDING);
             }
          }
+      }
+   }
+
+   private void markWithHero(Entity vehicle) {
+      if (vehicle instanceof ServerPlayer player && ServerVaults.isInVault(vehicle) && this.items.size() > 5 && this.gameProfile.getId() != player.getUUID()) {
+         this.heroId = player.getUUID();
       }
    }
 
@@ -311,6 +346,10 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    public void setGameProfile(GameProfile gameProfile) {
       this.entityData.set(OPTIONAL_GAME_PROFILE, Optional.ofNullable(gameProfile));
       this.gameProfile = gameProfile;
+   }
+
+   public void setRecyclable(boolean recyclable) {
+      this.recyclable = recyclable;
    }
 
    @Override
@@ -362,6 +401,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
 
       compound.put("items", itemList);
       compound.putInt("vaultLevel", this.vaultLevel);
+      compound.putInt("playerLevel", this.playerLevel);
       if (this.joinState != null) {
          ArrayBitBuffer buffer = ArrayBitBuffer.empty();
          this.joinState.write(buffer, new DiskSyncContext(Version.v1_0));
@@ -371,6 +411,13 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       if (this.isPassenger()) {
          compound.putBoolean("isBeingCarried", true);
       }
+
+      compound.putBoolean("recyclable", this.recyclable);
+      if (this.heroId != null) {
+         compound.putUUID("heroId", this.heroId);
+      }
+
+      compound.putFloat("rescuedBonus", this.rescuedBonus);
    }
 
    public void readAdditionalSaveData(CompoundTag compound) {
@@ -383,6 +430,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       }
 
       this.vaultLevel = compound.getInt("vaultLevel");
+      this.playerLevel = compound.contains("playerLevel") ? compound.getInt("playerLevel") : this.vaultLevel;
       if (compound.contains("joinState", 12)) {
          this.joinState = new EntityState().read(ArrayBitBuffer.backing(compound.getLongArray("joinState"), 0), new DiskSyncContext(Version.v1_0));
       } else {
@@ -392,6 +440,13 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       if (compound.getBoolean("isBeingCarried")) {
          this.setPose(Pose.SLEEPING);
       }
+
+      this.recyclable = !compound.contains("recyclable") || compound.getBoolean("recyclable");
+      if (compound.contains("heroId", 11)) {
+         this.heroId = compound.getUUID("heroId");
+      }
+
+      this.rescuedBonus = compound.getFloat("rescuedBonus");
    }
 
    public void setItems(List<ItemStack> items) {
@@ -407,6 +462,23 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
 
          this.joinState.teleport(this);
          this.joinState = null;
+         if (this.heroId != null && this.level instanceof ServerLevel serverLevel) {
+            PlayerSpiritRecoveryData.get(serverLevel).setHeroDiscount(this.heroId, serverLevel.random);
+         }
+
+         this.rescuedBonus = ModConfigs.SPIRIT.getRescuedBonus(this.level.random);
       }
+   }
+
+   public boolean isRecyclable() {
+      return this.recyclable;
+   }
+
+   public float getRescuedBonus() {
+      return this.rescuedBonus;
+   }
+
+   public void setRescuedBonus(float rescuedBonus) {
+      this.rescuedBonus = rescuedBonus;
    }
 }

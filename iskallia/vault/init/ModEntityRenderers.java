@@ -9,6 +9,7 @@ import iskallia.vault.entity.renderer.DollMiniMeRenderer;
 import iskallia.vault.entity.renderer.EffectCloudRenderer;
 import iskallia.vault.entity.renderer.EtchingVendorRenderer;
 import iskallia.vault.entity.renderer.EternalRenderer;
+import iskallia.vault.entity.renderer.EternalSpiritRenderer;
 import iskallia.vault.entity.renderer.FighterRenderer;
 import iskallia.vault.entity.renderer.MonsterEyeRenderer;
 import iskallia.vault.entity.renderer.RobotRenderer;
@@ -100,7 +101,8 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.FIGHTER, ctx -> new FighterRenderer(ctx, ModModelLayers.FIGHTER));
       EntityRenderers.register(ModEntities.ARENA_BOSS, ctx -> new FighterRenderer(ctx, ModModelLayers.FIGHTER));
       EntityRenderers.register(ModEntities.ARENA_TRACKER, ArenaTrackerRenderer::new);
-      EntityRenderers.register(ModEntities.VAULT_GUARDIAN, VaultGuardianRenderer::new);
+      EntityRenderers.register(ModEntities.BRUISER_GUARDIAN, VaultGuardianRenderer::new);
+      EntityRenderers.register(ModEntities.ARBALIST_GUARDIAN, VaultGuardianRenderer::new);
       EntityRenderers.register(ModEntities.ETERNAL, EternalRenderer::new);
       EntityRenderers.register(ModEntities.TREASURE_GOBLIN, TreasureGoblinRenderer::new);
       EntityRenderers.register(ModEntities.AGGRESSIVE_COW, CowRenderer::new);
@@ -153,6 +155,7 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.T2_WITHER_SKELETON, Tier2WitherSkeletonRenderer::new);
       EntityRenderers.register(ModEntities.T2_ZOMBIE, Tier2ZombieRenderer::new);
       EntityRenderers.register(ModEntities.SPIRIT, SpiritRenderer::new);
+      EntityRenderers.register(ModEntities.ETERNAL_SPIRIT, EternalSpiritRenderer::new);
       EntityRenderers.register(ModEntities.BRICK, ThrownItemRenderer::new);
    }
 }
