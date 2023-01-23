@@ -4,6 +4,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.Dynamic2CommandExceptionType;
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.world.VaultDifficulty;
 import iskallia.vault.world.data.WorldSettings;
@@ -19,6 +20,9 @@ public class PlayerDifficultyCommand extends Command {
    private static final String COMMANDS_PREFIX = "commands.";
    private static final Dynamic2CommandExceptionType ERROR_ALREADY_DIFFICULT = new Dynamic2CommandExceptionType(
       (playerName, vaultDifficulty) -> new TranslatableComponent("commands.the_vault.player_difficulty.failure", new Object[]{playerName, vaultDifficulty})
+   );
+   private static final DynamicCommandExceptionType ERROR_DIFFERENT_PLAYER = new DynamicCommandExceptionType(
+      playerName -> new TranslatableComponent("commands.the_vault.player_difficulty.failure.different_player", new Object[]{playerName})
    );
 
    @Override
@@ -64,8 +68,11 @@ public class PlayerDifficultyCommand extends Command {
    }
 
    public static int setDifficulty(CommandSourceStack source, Player player, VaultDifficulty vaultDifficulty) throws CommandSyntaxException {
+      ServerPlayer sender = source.getPlayerOrException();
       WorldSettings worldSettings = WorldSettings.get(source.getLevel());
-      if (worldSettings.getPlayerDifficulty(player.getUUID()) == vaultDifficulty) {
+      if (!sender.hasPermissions(4) && !sender.getUUID().equals(player.getUUID())) {
+         throw ERROR_DIFFERENT_PLAYER.create(player.getName());
+      } else if (worldSettings.getPlayerDifficulty(player.getUUID()) == vaultDifficulty) {
          throw ERROR_ALREADY_DIFFICULT.create(player.getName(), vaultDifficulty);
       } else {
          worldSettings.setPlayerDifficulty(player.getUUID(), vaultDifficulty);

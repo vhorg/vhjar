@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -128,7 +129,16 @@ public class PlayerInfluences extends SavedData {
          Random random = new Random();
 
          for (int i = 0; i < remove; i++) {
-            List<VaultGod> available = this.reputation.entrySet().stream().filter(e -> e.getValue() > 0 && e.getKey() != god).map(Map.Entry::getKey).toList();
+            List<VaultGod> available = this.reputation
+               .entrySet()
+               .stream()
+               .filter(e -> e.getValue() > 0 && e.getKey() != god)
+               .map(Map.Entry::getKey)
+               .collect(Collectors.toList());
+            if (available.isEmpty()) {
+               available.add(god);
+            }
+
             VaultGod target = available.get(random.nextInt(available.size()));
             this.reputation.put(target, this.reputation.get(target) - 1);
          }
