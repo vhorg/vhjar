@@ -167,7 +167,9 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GlassBlock;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.OreBlock;
+import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType.Builder;
@@ -363,6 +365,10 @@ public class ModBlocks {
    public static final VaultAnvilBlock VAULT_ANVIL = new VaultAnvilBlock();
    public static final Block WUTODIC_SILVER_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK));
    public static final EternalPedestalBlock ETERNAL_PEDESTAL = new EternalPedestalBlock();
+   public static final SlabBlock VAULT_STONE_SLAB = new SlabBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_SLAB));
+   public static final StairBlock VAULT_STONE_STAIRS = new StairBlock(
+      VAULT_STONE::defaultBlockState, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_STAIRS)
+   );
    public static final LiquidBlock VOID_LIQUID_BLOCK = new VoidFluidBlock(
       ModFluids.VOID_LIQUID,
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.WATER, MaterialColor.COLOR_BLACK)
@@ -691,6 +697,8 @@ public class ModBlocks {
       registerBlock(event, VAULT_ANVIL, VaultMod.id("vault_anvil"));
       registerBlock(event, WUTODIC_SILVER_BLOCK, VaultMod.id("wutodic_silver_block"));
       registerBlock(event, ETERNAL_PEDESTAL, VaultMod.id("eternal_pedestal"));
+      registerBlock(event, VAULT_STONE_SLAB, VaultMod.id("vault_stone_slab"));
+      registerBlock(event, VAULT_STONE_STAIRS, VaultMod.id("vault_stone_stairs"));
    }
 
    public static void registerTileEntities(Register<BlockEntityType<?>> event) {
@@ -916,6 +924,8 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_ANVIL);
       registerBlockItem(event, WUTODIC_SILVER_BLOCK);
       registerBlockItem(event, ETERNAL_PEDESTAL);
+      registerBlockItem(event, VAULT_STONE_SLAB);
+      registerBlockItem(event, VAULT_STONE_STAIRS);
    }
 
    private static void registerBlock(Register<Block> event, Block block, ResourceLocation id) {

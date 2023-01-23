@@ -212,19 +212,19 @@ public class SpiritExtractorContainer extends OverSizedSlotContainer {
       if (slot != null && slot.hasItem()) {
          ItemStack slotStack = slot.getItem();
          itemstack = slotStack.copy();
-         if (index >= 0 && index < 36 && this.moveItemStackTo(slotStack, 36, 37, false)) {
+         if (index >= 0 && index < 36 && this.moveOverSizedItemStackTo(slotStack, slot, 36, 37, false)) {
             return ItemStack.EMPTY;
          }
 
          if (index >= 0 && index < 27) {
-            if (!this.moveItemStackTo(slotStack, 27, 36, false)) {
+            if (!this.moveOverSizedItemStackTo(slotStack, slot, 27, 36, false)) {
                return ItemStack.EMPTY;
             }
          } else if (index >= 27 && index < 36) {
-            if (!this.moveItemStackTo(slotStack, 0, 27, false)) {
+            if (!this.moveOverSizedItemStackTo(slotStack, slot, 0, 27, false)) {
                return ItemStack.EMPTY;
             }
-         } else if (!this.moveItemStackTo(slotStack, 0, 36, false)) {
+         } else if (!this.moveOverSizedItemStackTo(slotStack, slot, 0, 36, false)) {
             return ItemStack.EMPTY;
          }
 

@@ -56,7 +56,7 @@ public class SpiritConfig extends Config {
    }
 
    public float getHeroDiscount(Random random) {
-      return random.nextFloat(this.heroDiscountMin, this.heroDiscountMax);
+      return this.heroDiscountMax > 0.0F ? random.nextFloat(this.heroDiscountMin, this.heroDiscountMax) : 0.0F;
    }
 
    public float getRescuedBonus(Random random) {
