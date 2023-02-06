@@ -83,7 +83,12 @@ public class GridGenerator extends VaultGenerator {
          for (int z = pos1.getZ(); z <= pos2.getZ(); z += this.get(CELL_Z) - offsetZ) {
             RegionPos region = RegionPos.ofBlockPos(new BlockPos(x, 0, z), this.get(CELL_X), this.get(CELL_Z));
             ChunkRandom random = ChunkRandom.any();
-            random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890);
+            if (vault.get(Vault.VERSION).isOlderThan(Version.v1_7)) {
+               random.setCarverSeed(vault.get(Vault.SEED), region.getX(), region.getZ());
+            } else {
+               random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890);
+            }
+
             ConfiguredTemplate template;
             if (this.cache.has(region)) {
                template = this.cache.get(region);

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "the_vault:perfect_benitoite"
+    }
+  ],
+  "result": {
+    "item": "the_vault:gem_benitoite",
+    "count": 4
+  }
+}

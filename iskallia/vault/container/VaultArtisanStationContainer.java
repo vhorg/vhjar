@@ -90,7 +90,7 @@ public class VaultArtisanStationContainer extends OverSizedSlotContainer {
       Container inputContainer = this.tileEntity.getGearInput();
       this.addSlot(new TabSlot(inputContainer, 0, 79, 60) {
          public boolean mayPlace(ItemStack stack) {
-            return stack.getItem() instanceof VaultGearItem;
+            return stack.getItem() instanceof VaultGearItem && stack.getItem() != ModItems.JEWEL;
          }
       });
    }
@@ -169,6 +169,6 @@ public class VaultArtisanStationContainer extends OverSizedSlotContainer {
    }
 
    public boolean stillValid(Player player) {
-      return this.tileEntity == null ? false : this.tileEntity.getInventory().stillValid(this.player);
+      return this.tileEntity == null ? false : this.tileEntity.stillValid(this.player);
    }
 }

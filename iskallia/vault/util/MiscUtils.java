@@ -40,6 +40,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -130,6 +131,18 @@ public class MiscUtils {
       return list;
    }
 
+   public static List<Integer> getEmptySlots(IItemHandler inventory) {
+      List<Integer> list = Lists.newArrayList();
+
+      for (int i = 0; i < inventory.getSlots(); i++) {
+         if (inventory.getStackInSlot(i).isEmpty()) {
+            list.add(i);
+         }
+      }
+
+      return list;
+   }
+
    public static boolean inventoryContains(Container inventory, Predicate<ItemStack> filter) {
       for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
          if (filter.test(inventory.getItem(slot))) {
@@ -207,62 +220,28 @@ public class MiscUtils {
       }
    }
 
-   public static boolean mergeIntoInventory(Container inventory, ItemStack toAdd) {
+   public static ItemStack mergeIntoInventory(IItemHandler inventory, ItemStack toAdd, boolean simulate) {
       if (toAdd.isEmpty()) {
-         return true;
+         return ItemStack.EMPTY;
       } else {
-         for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-            ItemStack stack = inventory.getItem(slot);
-            if (!stack.isEmpty()) {
-               if (canMerge(stack, toAdd)) {
-                  int maxToAdd = Math.min(Math.min(stack.getMaxStackSize(), inventory.getMaxStackSize()) - stack.getCount(), toAdd.getCount());
-                  if (maxToAdd > 0) {
-                     toAdd.shrink(maxToAdd);
-                     stack.grow(maxToAdd);
-                  }
-               }
-
+         for (int slot = 0; slot < inventory.getSlots(); slot++) {
+            ItemStack inSlot = inventory.getStackInSlot(slot);
+            if (!inSlot.isEmpty()) {
+               toAdd = inventory.insertItem(slot, toAdd, simulate);
                if (toAdd.isEmpty()) {
-                  return true;
+                  return ItemStack.EMPTY;
                }
             }
          }
-
-         int maxStackSize = Math.min(toAdd.getMaxStackSize(), inventory.getMaxStackSize());
 
          for (int emptySlotId : getEmptySlots(inventory)) {
-            inventory.setItem(emptySlotId, toAdd.split(maxStackSize));
+            toAdd = inventory.insertItem(emptySlotId, toAdd, simulate);
             if (toAdd.isEmpty()) {
-               return true;
+               return ItemStack.EMPTY;
             }
          }
 
-         return false;
-      }
-   }
-
-   public static boolean canMergeIntoInventory(Container inventory, ItemStack toAdd) {
-      if (toAdd.isEmpty()) {
-         return true;
-      } else {
-         int toMerge = toAdd.getCount();
-
-         for (int i = 0; i < inventory.getContainerSize(); i++) {
-            ItemStack stack = inventory.getItem(i);
-            if (!stack.isEmpty() && canMerge(stack, toAdd)) {
-               int maxToAdd = Math.min(stack.getMaxStackSize() - stack.getCount(), toMerge);
-               if (maxToAdd > 0) {
-                  toMerge -= maxToAdd;
-               }
-            }
-         }
-
-         if (toMerge <= 0) {
-            return true;
-         } else {
-            int maxStackSize = Math.min(toAdd.getMaxStackSize(), inventory.getMaxStackSize());
-            return getEmptySlots(inventory).size() * maxStackSize >= toMerge;
-         }
+         return toAdd;
       }
    }
 
@@ -387,11 +366,11 @@ public class MiscUtils {
       return null;
    }
 
-   public static Optional<Vault> getVault(Player player) {
-      if (!ServerVaults.isInVault(player)) {
+   public static Optional<Vault> getVault(Entity entity) {
+      if (!ServerVaults.isInVault(entity)) {
          return Optional.empty();
       } else {
-         return player.getLevel().isClientSide() ? Optional.ofNullable(ClientVaults.ACTIVE) : ServerVaults.get(player.getLevel());
+         return entity.getLevel().isClientSide() ? Optional.ofNullable(ClientVaults.ACTIVE) : ServerVaults.get(entity.getLevel());
       }
    }
 

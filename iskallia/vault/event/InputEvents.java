@@ -11,6 +11,7 @@ import iskallia.vault.network.message.AbilityQuickselectMessage;
 import iskallia.vault.network.message.ServerboundAbilityKeyMessage;
 import iskallia.vault.network.message.ServerboundOpenStatisticsMessage;
 import iskallia.vault.network.message.ServerboundPickaxeOffsetKeyMessage;
+import iskallia.vault.network.message.ToolMessage;
 import iskallia.vault.network.message.bounty.ServerboundBountyProgressMessage;
 import iskallia.vault.skill.ability.KeyBehavior;
 import iskallia.vault.skill.ability.effect.spi.core.AbstractAbility;
@@ -38,7 +39,8 @@ public class InputEvents {
 
    @SubscribeEvent
    public static void onShiftKey(KeyInputEvent event) {
-      if (event.getKey() == 340) {
+      Key shiftKey = Minecraft.getInstance().options.keyShift.getKey();
+      if (event.getKey() == shiftKey.getValue()) {
          if (event.getAction() == 1) {
             isShiftDown = true;
          } else if (event.getAction() == 0) {
@@ -84,37 +86,41 @@ public class InputEvents {
                   }
                }
 
-               if (isShiftDown) {
-                  if (key.getValue() == 263) {
-                     ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.LEFT);
-                     return;
+               if (isShiftDown && ToolMessage.Offset.isKey(key.getValue())) {
+                  ToolMessage.sendOffset(key.getValue());
+               } else {
+                  if (isShiftDown) {
+                     if (key.getValue() == 263) {
+                        ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.LEFT);
+                        return;
+                     }
+
+                     if (key.getValue() == 262) {
+                        ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.RIGHT);
+                        return;
+                     }
+
+                     if (key.getValue() == 265) {
+                        ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.UP);
+                        return;
+                     }
+
+                     if (key.getValue() == 264) {
+                        ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.DOWN);
+                        return;
+                     }
                   }
 
-                  if (key.getValue() == 262) {
-                     ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.RIGHT);
-                     return;
+                  if (ModKeybinds.abilityKey.isActiveAndMatches(key)) {
+                     ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyDown);
+                  } else if (ModKeybinds.abilityWheelKey.isActiveAndMatches(key)) {
+                     minecraft.setScreen(new AbilitySelectionScreen());
+                     ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.CancelKeyDown);
+                  } else if (ModKeybinds.openAbilityTree.isActiveAndMatches(key)) {
+                     ModNetwork.CHANNEL.sendToServer(ServerboundOpenStatisticsMessage.INSTANCE);
+                  } else if (ModKeybinds.bountyStatusKey.isActiveAndMatches(key)) {
+                     ModNetwork.CHANNEL.sendToServer(ServerboundBountyProgressMessage.INSTANCE);
                   }
-
-                  if (key.getValue() == 265) {
-                     ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.UP);
-                     return;
-                  }
-
-                  if (key.getValue() == 264) {
-                     ServerboundPickaxeOffsetKeyMessage.send(ServerboundPickaxeOffsetKeyMessage.Opcode.DOWN);
-                     return;
-                  }
-               }
-
-               if (ModKeybinds.abilityKey.isActiveAndMatches(key)) {
-                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyDown);
-               } else if (ModKeybinds.abilityWheelKey.isActiveAndMatches(key)) {
-                  minecraft.setScreen(new AbilitySelectionScreen());
-                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.CancelKeyDown);
-               } else if (ModKeybinds.openAbilityTree.isActiveAndMatches(key)) {
-                  ModNetwork.CHANNEL.sendToServer(ServerboundOpenStatisticsMessage.INSTANCE);
-               } else if (ModKeybinds.bountyStatusKey.isActiveAndMatches(key)) {
-                  ModNetwork.CHANNEL.sendToServer(ServerboundBountyProgressMessage.INSTANCE);
                }
             }
          } else if ((!isKeyDown(ModKeybinds.abilityKey.getKey()) || !ModKeybinds.abilityKey.getKeyModifier().matches(key))

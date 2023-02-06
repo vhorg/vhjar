@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.item.MagnetItem;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +33,10 @@ public class VaultDiffuserConfig extends Config {
 
    public Map<ResourceLocation, Integer> getDiffuserOutputMap() {
       return this.diffuserOutputMap;
+   }
+
+   public boolean contains(ItemStack stack) {
+      return stack.getItem() == ModItems.MAGNET && !MagnetItem.isLegacy(stack) ? false : this.diffuserOutputMap.containsKey(stack.getItem().getRegistryName());
    }
 
    @Override

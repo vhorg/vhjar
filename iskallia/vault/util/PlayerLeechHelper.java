@@ -1,5 +1,7 @@
 package iskallia.vault.util;
 
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.event.common.EntityLeechEvent;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.util.calc.LeechHelper;
@@ -17,10 +19,13 @@ public class PlayerLeechHelper {
          if (!attacker.getCommandSenderWorld().isClientSide()) {
             float leechMultiplier = 1.0F;
             if (!ActiveFlags.IS_AOE_ATTACKING.isSet() && !ActiveFlags.IS_DOT_ATTACKING.isSet() && !ActiveFlags.IS_REFLECT_ATTACKING.isSet()) {
+               LivingEntity hurtEntity = event.getEntityLiving();
                float leech = LeechHelper.getLeechPercent(attacker);
                leech *= leechMultiplier;
                if (leech > 1.0E-4) {
-                  leechHealth(attacker, event.getAmount() * leech);
+                  float amountLeeched = event.getAmount() * leech;
+                  leechHealth(attacker, amountLeeched);
+                  CommonEvents.ENTITY_LEECH.invoke(new EntityLeechEvent.Data(attacker, hurtEntity, amountLeeched));
                }
             }
          }

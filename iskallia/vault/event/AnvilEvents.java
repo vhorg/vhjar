@@ -10,7 +10,7 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.ItemVaultCrystalSeal;
-import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.PaxelJewelItem;
 import iskallia.vault.item.VaultCatalystInfusedItem;
 import iskallia.vault.item.VaultRuneItem;
@@ -19,7 +19,8 @@ import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.crystal.layout.CrystalLayout;
 import iskallia.vault.item.crystal.layout.DIYCrystalLayout;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
+import iskallia.vault.item.tool.ToolItem;
 import iskallia.vault.util.EnchantmentUtil;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.OverlevelEnchantHelper;
@@ -70,7 +71,7 @@ public class AnvilEvents {
    public static void repairVaultGear(AnvilUpdateEvent event) {
       ItemStack equipment = event.getLeft();
       ItemStack core = event.getRight();
-      if (!equipment.isEmpty() && equipment.getItem() instanceof VaultGearItem) {
+      if (!equipment.isEmpty() && (equipment.getItem() instanceof VaultGearItem || equipment.getItem() == ModItems.TOOL)) {
          if (core.is(ModItems.REPAIR_CORE)) {
             VaultGearData data = VaultGearData.read(equipment);
             if (data.getUsedRepairSlots() < data.getRepairSlots()) {
@@ -138,14 +139,16 @@ public class AnvilEvents {
       ItemStack input = event.getLeft();
       ItemStack seal = event.getRight();
       if (seal.getItem() instanceof ItemVaultCrystalSeal) {
-         ItemStack copy = input.getItem() == ModItems.VAULT_CRYSTAL ? input.copy() : new ItemStack(ModItems.VAULT_CRYSTAL);
-         CrystalData crystal = new CrystalData(copy);
-         if (crystal.getModifiers().isEmpty()) {
-            if (ModConfigs.VAULT_CRYSTAL.applySeal(seal.getItem(), input.getItem(), crystal)) {
-               VaultCrystalItem.setRandomSeed(copy);
-               event.setOutput(copy);
-               event.setMaterialCost(1);
-               event.setCost(8);
+         if (seal.getItem() != ModItems.CRYSTAL_SEAL_SPEEDRUN) {
+            ItemStack copy = input.getItem() == ModItems.VAULT_CRYSTAL ? input.copy() : new ItemStack(ModItems.VAULT_CRYSTAL);
+            CrystalData crystal = new CrystalData(copy);
+            if (crystal.getModifiers().isEmpty()) {
+               if (ModConfigs.VAULT_CRYSTAL.applySeal(seal.getItem(), input.getItem(), crystal)) {
+                  VaultCrystalItem.setRandomSeed(copy);
+                  event.setOutput(copy);
+                  event.setMaterialCost(1);
+                  event.setCost(8);
+               }
             }
          }
       }
@@ -320,13 +323,13 @@ public class AnvilEvents {
 
    @SubscribeEvent
    public static void onRepairDeny(AnvilUpdateEvent event) {
-      if (event.getLeft().getItem() instanceof MagnetItem && event.getRight().getItem() instanceof MagnetItem) {
+      if (event.getLeft().getItem() instanceof LegacyMagnetItem && event.getRight().getItem() instanceof LegacyMagnetItem) {
          event.setCanceled(true);
       } else if (event.getLeft().getItem() instanceof PaxelItem && event.getRight().getItem() instanceof PaxelItem) {
          event.setCanceled(true);
       }
 
-      if (event.getLeft().getItem() instanceof VaultGearItem && event.getRight().getItem() instanceof VaultGearItem) {
+      if (event.getLeft().getItem() instanceof VaultGearItem && event.getRight().getItem() instanceof VaultGearItem && !event.getRight().is(ModItems.JEWEL)) {
          event.setCanceled(true);
       }
    }
@@ -391,6 +394,25 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
+   public static void onApplyAbyssalIchor(AnvilUpdateEvent event) {
+      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == ModItems.ABYSSAL_ICHOR) {
+         ItemStack output = event.getLeft().copy();
+         int amt = event.getRight().getCount();
+         CrystalData data = VaultCrystalItem.getData(output);
+         VaultModifierRegistry.getOpt(VaultMod.id("abyss_effect")).ifPresent(modifier -> {
+            VaultModifierStack modifierStack = VaultModifierStack.of((VaultModifier<?>)modifier);
+            modifierStack.setSize(amt);
+            if (data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
+               data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
+               event.setOutput(output);
+               event.setMaterialCost(amt);
+               event.setCost(1);
+            }
+         });
+      }
+   }
+
+   @SubscribeEvent
    public static void onApplyPog(AnvilUpdateEvent event) {
       if (event.getRight().getItem() == ModItems.OMEGA_POG) {
          ResourceLocation name = event.getLeft().getItem().getRegistryName();
@@ -417,26 +439,6 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
-   public static void onAddPerkToPaxel(AnvilUpdateEvent event) {
-      ItemStack paxel = event.getLeft();
-      ItemStack jewel = event.getRight();
-      if (paxel.getItem() instanceof PaxelItem && jewel.getItem() instanceof PaxelJewelItem ji) {
-         int sockets = PaxelItem.getSockets(paxel);
-         if (sockets != 0) {
-            PaxelItem.Perk perk = ji.getPerk();
-            if (!PaxelItem.getPerks(paxel).contains(perk)) {
-               event.setMaterialCost(1);
-               event.setCost(1);
-               ItemStack output = paxel.copy();
-               PaxelItem.setSockets(output, sockets - 1);
-               PaxelItem.addPerk(output, perk);
-               event.setOutput(output);
-            }
-         }
-      }
-   }
-
-   @SubscribeEvent
    public static void onRepairMagnetOrPaxel(AnvilUpdateEvent event) {
       ItemStack magnet = event.getLeft();
       ItemStack magnetite = event.getRight();
@@ -444,9 +446,9 @@ public class AnvilEvents {
          ItemStack output = magnet.copy();
          int used;
          int max;
-         if (magnet.getItem() instanceof MagnetItem) {
-            used = MagnetItem.getUsedRepairSlots(magnet);
-            max = MagnetItem.getMaxRepairSlots(magnet);
+         if (magnet.getItem() instanceof LegacyMagnetItem) {
+            used = LegacyMagnetItem.getUsedRepairSlots(magnet);
+            max = LegacyMagnetItem.getMaxRepairSlots(magnet);
          } else {
             if (!(magnet.getItem() instanceof PaxelItem)) {
                return;
@@ -460,11 +462,25 @@ public class AnvilEvents {
          if (event.getLeft().getDamageValue() != 0 && left != 0) {
             event.setMaterialCost(1);
             event.setCost(1);
-            MagnetItem.useRepairSlot(output);
+            LegacyMagnetItem.useRepairSlot(output);
             output.setDamageValue(0);
             event.setOutput(output);
          } else {
             event.setCanceled(true);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyJewel(AnvilUpdateEvent event) {
+      if (event.getLeft().getItem() == ModItems.TOOL) {
+         if (event.getRight().getItem() == ModItems.JEWEL) {
+            ItemStack result = event.getLeft().copy();
+            if (ToolItem.applyJewel(result, event.getRight())) {
+               event.setMaterialCost(1);
+               event.setCost(1);
+               event.setOutput(result);
+            }
          }
       }
    }

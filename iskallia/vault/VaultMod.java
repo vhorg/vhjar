@@ -1,6 +1,9 @@
 package iskallia.vault;
 
+import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.core.SkyVaultsPreset;
+import iskallia.vault.core.vault.abyss.AbyssVaultLightHelper;
+import iskallia.vault.core.vault.abyss.AbyssVaultLootHelper;
 import iskallia.vault.dump.VaultDataDump;
 import iskallia.vault.init.ModClientCommands;
 import iskallia.vault.init.ModCommands;
@@ -69,6 +72,7 @@ public class VaultMod {
       MinecraftForge.EVENT_BUS.addListener(DailyScheduler::start);
       MinecraftForge.EVENT_BUS.addListener(DailyScheduler::stop);
       MinecraftForge.EVENT_BUS.addListener(VaultDataDump::onStart);
+      AbyssVaultLootHelper.init();
       this.registerDeferredRegistries();
       ModCommands.registerArgumentTypes();
       if (ModList.get().isLoaded("dankstorage")) {
@@ -88,8 +92,10 @@ public class VaultMod {
       }
 
       if (FMLEnvironment.dist == Dist.CLIENT) {
+         MinecraftForge.EVENT_BUS.addListener(ClientScheduler.INSTANCE::onClientTick);
          MinecraftForge.EVENT_BUS.addListener(this::onClientCommandRegister);
          SkyVaultsPreset.register();
+         AbyssVaultLightHelper.init();
       }
    }
 
@@ -148,6 +154,7 @@ public class VaultMod {
       DiscoveredTrinketsData.get(serverWorld).syncTo(player);
       ModConfigs.SOUL_SHARD.syncTo(ModConfigs.SOUL_SHARD, player);
       ModConfigs.VAULT_GEAR_RECIPES_CONFIG.syncTo(ModConfigs.VAULT_GEAR_RECIPES_CONFIG, player);
+      ModConfigs.TOOL_RECIPES.syncTo(ModConfigs.TOOL_RECIPES, player);
       DiscoveredModelsData.get(serverWorld).ensureResearchDiscoverables(player);
    }
 

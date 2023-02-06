@@ -13,6 +13,7 @@ import iskallia.vault.network.message.BossMusicMessage;
 import iskallia.vault.network.message.CheerReceiveMessage;
 import iskallia.vault.network.message.ClientboundArchetypeMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
+import iskallia.vault.network.message.ClientboundPlayerLastDamageSourceMessage;
 import iskallia.vault.network.message.ClientboundRefreshSpiritExtractorMessage;
 import iskallia.vault.network.message.ClientboundRefreshToolViseMessage;
 import iskallia.vault.network.message.ClientboundResetCryoChamberMessage;
@@ -72,6 +73,9 @@ import iskallia.vault.network.message.StepHeightMessage;
 import iskallia.vault.network.message.SyncOverSizedContentMessage;
 import iskallia.vault.network.message.SyncOverSizedStackMessage;
 import iskallia.vault.network.message.TalentLevelMessage;
+import iskallia.vault.network.message.ToolMessage;
+import iskallia.vault.network.message.ToolStationRecipeMessage;
+import iskallia.vault.network.message.ToolStationRequestCraftMessage;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.network.message.TrinketJumpMessage;
 import iskallia.vault.network.message.VaultArtisanRequestModificationMessage;
@@ -545,6 +549,24 @@ public class ModNetwork {
          ClientboundRefreshSpiritExtractorMessage::encode,
          ClientboundRefreshSpiritExtractorMessage::decode,
          ClientboundRefreshSpiritExtractorMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundPlayerLastDamageSourceMessage.class,
+         ClientboundPlayerLastDamageSourceMessage::encode,
+         ClientboundPlayerLastDamageSourceMessage::decode,
+         ClientboundPlayerLastDamageSourceMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), ToolMessage.Offset.class, ToolMessage.Offset::encode, ToolMessage.Offset::decode, ToolMessage.Offset::handle);
+      CHANNEL.registerMessage(
+         nextId(), ToolStationRecipeMessage.class, ToolStationRecipeMessage::encode, ToolStationRecipeMessage::decode, ToolStationRecipeMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ToolStationRequestCraftMessage.class,
+         ToolStationRequestCraftMessage::encode,
+         ToolStationRequestCraftMessage::decode,
+         ToolStationRequestCraftMessage::handle
       );
    }
 

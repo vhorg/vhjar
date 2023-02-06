@@ -21,6 +21,13 @@ public class LootTable {
    protected List<LootTable.Entry> entries = new ArrayList<>();
    protected String path;
 
+   public LootTable() {
+   }
+
+   public LootTable(List<LootTable.Entry> entries) {
+      this.entries = entries;
+   }
+
    public static LootTable fromPath(String path) {
       LootTable lootTable;
       try {

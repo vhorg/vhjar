@@ -75,51 +75,93 @@ public class ItemSubmissionTask extends Task<ItemSubmissionProperties> {
    public static void onInteractWithBountyTable(RightClickBlock event) {
       if (event.getEntity() instanceof ServerPlayer player) {
          BountyData data = BountyData.get();
-         data.getAllActiveTasksById(player, TaskRegistry.ITEM_SUBMISSION)
-            .stream()
-            .filter(task -> !task.isComplete())
-            .filter(task -> task.validate(player, event))
-            .peek(
-               task -> {
-                  event.setCanceled(true);
-                  ItemStack stack = event.getItemStack();
-                  ItemStack match = event.getItemStack().copy();
-                  int amount = stack.getCount();
-                  double remainder = Math.max(task.getAmountObtained() + amount - task.getProperties().getAmount(), 0.0);
-                  task.increment(amount - remainder);
-                  stack.setCount((int)remainder);
-                  event.getPlayer()
-                     .getLevel()
-                     .playSound(
-                        null,
-                        event.getPos(),
-                        SoundEvents.ITEM_PICKUP,
-                        SoundSource.PLAYERS,
-                        0.7F,
-                        ((event.getPlayer().getRandom().nextFloat() - event.getPlayer().getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F
-                     );
-                  if (remainder == 0.0) {
-                     Inventory inventory = event.getPlayer().getInventory();
-                     int slot = inventory.findSlotMatchingItem(match);
-                     if (slot < 0) {
-                        return;
-                     }
 
-                     ItemStack newStack = inventory.getItem(slot).copy();
-                     if (newStack.isEmpty()) {
-                        return;
-                     }
-
-                     inventory.setItem(slot, ItemStack.EMPTY);
-                     inventory.setItem(event.getPlayer().getInventory().selected, newStack);
+         for (Task<?> task : data.getAllLegendaryById(player, TaskRegistry.ITEM_SUBMISSION).stream().filter(taskx -> !taskx.isComplete()).toList()) {
+            if (task.validate(player, event)) {
+               event.setCanceled(true);
+               ItemStack stack = event.getItemStack();
+               ItemStack match = event.getItemStack().copy();
+               int amount = stack.getCount();
+               double remainder = Math.max(task.getAmountObtained() + amount - task.getProperties().getAmount(), 0.0);
+               task.increment(amount - remainder);
+               stack.setCount((int)remainder);
+               event.getPlayer()
+                  .getLevel()
+                  .playSound(
+                     null,
+                     event.getPos(),
+                     SoundEvents.ITEM_PICKUP,
+                     SoundSource.PLAYERS,
+                     0.7F,
+                     ((event.getPlayer().getRandom().nextFloat() - event.getPlayer().getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F
+                  );
+               if (remainder == 0.0) {
+                  Inventory inventory = event.getPlayer().getInventory();
+                  int slot = inventory.findSlotMatchingItem(match);
+                  if (slot < 0) {
+                     return;
                   }
+
+                  ItemStack newStack = inventory.getItem(slot).copy();
+                  if (newStack.isEmpty()) {
+                     return;
+                  }
+
+                  inventory.setItem(slot, ItemStack.EMPTY);
+                  inventory.setItem(event.getPlayer().getInventory().selected, newStack);
                }
-            )
-            .filter(Task::isComplete)
-            .forEach(
-               task -> ModNetwork.CHANNEL
-                  .sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT)
-            );
+
+               if (task.isComplete()) {
+                  ModNetwork.CHANNEL.sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+               }
+
+               return;
+            }
+         }
+
+         for (Task<?> taskx : data.getAllActiveById(player, TaskRegistry.ITEM_SUBMISSION).stream().filter(taskxx -> !taskxx.isComplete()).toList()) {
+            if (taskx.validate(player, event)) {
+               event.setCanceled(true);
+               ItemStack stackx = event.getItemStack();
+               ItemStack matchx = event.getItemStack().copy();
+               int amountx = stackx.getCount();
+               double remainderx = Math.max(taskx.getAmountObtained() + amountx - taskx.getProperties().getAmount(), 0.0);
+               taskx.increment(amountx - remainderx);
+               stackx.setCount((int)remainderx);
+               event.getPlayer()
+                  .getLevel()
+                  .playSound(
+                     null,
+                     event.getPos(),
+                     SoundEvents.ITEM_PICKUP,
+                     SoundSource.PLAYERS,
+                     0.7F,
+                     ((event.getPlayer().getRandom().nextFloat() - event.getPlayer().getRandom().nextFloat()) * 0.7F + 1.0F) * 2.0F
+                  );
+               if (remainderx == 0.0) {
+                  Inventory inventoryx = event.getPlayer().getInventory();
+                  int slotx = inventoryx.findSlotMatchingItem(matchx);
+                  if (slotx < 0) {
+                     return;
+                  }
+
+                  ItemStack newStack = inventoryx.getItem(slotx).copy();
+                  if (newStack.isEmpty()) {
+                     return;
+                  }
+
+                  inventoryx.setItem(slotx, ItemStack.EMPTY);
+                  inventoryx.setItem(event.getPlayer().getInventory().selected, newStack);
+               }
+
+               if (taskx.isComplete()) {
+                  ModNetwork.CHANNEL
+                     .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+               }
+
+               return;
+            }
+         }
       }
    }
 }

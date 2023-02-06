@@ -38,8 +38,10 @@ public abstract class ListenersLogic extends DataObject<ListenersLogic> implemen
             vault.ifPresent(Vault.WORLD, manager -> {
                if (manager.get(WorldManager.PORTAL_LOGIC) instanceof ClassicPortalLogic logic) {
                   logic.getPlayerStart(world, vault).ifPresent(state -> {
-                     state.teleport(player);
-                     this.onTeleport(world, vault, player);
+                     if (state.isLoaded()) {
+                        state.teleport(player);
+                        this.onTeleport(world, vault, player);
+                     }
                   });
                }
             });

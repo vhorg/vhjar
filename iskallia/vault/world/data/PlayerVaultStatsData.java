@@ -74,6 +74,30 @@ public class PlayerVaultStatsData extends SavedData {
       return this;
    }
 
+   public PlayerVaultStatsData refundSkillPoints(ServerPlayer player, int amount) {
+      this.getVaultStats(player).refundSkillPoints(amount).sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
+   public PlayerVaultStatsData refundKnowledgePoints(ServerPlayer player, int amount) {
+      this.getVaultStats(player).refundKnowledgePoints(amount).sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
+   public PlayerVaultStatsData refundArchetypePoints(ServerPlayer player, int amount) {
+      this.getVaultStats(player).refundArchetypePoints(amount).sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
+   public PlayerVaultStatsData refundRegretPoints(ServerPlayer player, int amount) {
+      this.getVaultStats(player).refundRegretPoints(amount).sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
    public PlayerVaultStatsData addKnowledgePoints(ServerPlayer player, int amount) {
       this.getVaultStats(player).addKnowledgePoints(amount).sync(player.getLevel().getServer());
       this.setDirty();

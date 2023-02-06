@@ -6,14 +6,17 @@ import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.data.GearDataVersion;
 import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.tooltip.ModifierCategoryTooltip;
+import iskallia.vault.util.MiscUtils;
 import java.util.Optional;
 import java.util.function.Function;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -23,10 +26,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    private int rolledTier = -1;
-   private boolean legendary = false;
    private String modifierGroup = "";
    private ResourceLocation modifierIdentifier = null;
    private long gameTimeAdded = Long.MIN_VALUE;
+   private VaultGearModifier.AffixCategory category = VaultGearModifier.AffixCategory.NONE;
 
    VaultGearModifier(VaultGearAttribute<T> attribute) {
       super(attribute);
@@ -44,12 +47,13 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
       return this.rolledTier;
    }
 
-   public void setLegendary(boolean legendary) {
-      this.legendary = legendary;
+   public void setCategory(@Nonnull VaultGearModifier.AffixCategory category) {
+      this.category = category;
    }
 
-   public boolean isLegendary() {
-      return this.legendary;
+   @Nonnull
+   public VaultGearModifier.AffixCategory getCategory() {
+      return this.category;
    }
 
    public void setModifierGroup(String modifierGroup) {
@@ -87,82 +91,55 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    @OnlyIn(Dist.CLIENT)
    @Override
    public Optional<MutableComponent> getDisplay(VaultGearData data, VaultGearModifier.AffixType type, ItemStack stack, boolean displayDetail) {
-      return super.getDisplay(data, type, stack, displayDetail)
-         .map(
-            displayText -> {
-               if (!this.isLegendary()) {
-                  return (MutableComponent)displayText;
-               } else {
-                  Style style = displayText.getStyle();
-                  String rawString = displayText.getString();
-                  MutableComponent legendaryCt = new TextComponent("✦ ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(15853364)));
-                  int time = rawString.length();
-                  time = (int)(time * 1.4);
-                  int step = (int)(System.currentTimeMillis() / 90L % time);
-                  if (step >= rawString.length()) {
-                     return legendaryCt.append(new TextComponent(rawString).setStyle(style));
-                  } else {
-                     int stepCap = Math.min(step + 1, rawString.length());
-                     String start = rawString.substring(0, step);
-                     String highlight = rawString.substring(step, stepCap);
-                     String end = rawString.substring(stepCap);
-                     return legendaryCt.append(new TextComponent(start).setStyle(style))
-                        .append(new TextComponent(highlight).setStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)))
-                        .append(new TextComponent(end).setStyle(style));
-                  }
-               }
-            }
-         )
-         .map(displayText -> {
-            if (!this.hasGameTimeAdded()) {
+      return super.getDisplay(data, type, stack, displayDetail).map(this.category.getModifierFormatter()).map(displayText -> {
+         if (!this.hasGameTimeAdded()) {
+            return (MutableComponent)displayText;
+         } else {
+            int showDuration = 600;
+            long added = this.getGameTimeAdded();
+            Level currentWorld = Minecraft.getInstance().level;
+            if (currentWorld != null && currentWorld.getGameTime() - added <= showDuration) {
+               displayText.append(new TextComponent(" [new]").withStyle(ChatFormatting.GOLD));
                return (MutableComponent)displayText;
             } else {
-               int showDuration = 600;
-               long added = this.getGameTimeAdded();
-               Level currentWorld = Minecraft.getInstance().level;
-               if (currentWorld != null && currentWorld.getGameTime() - added <= showDuration) {
-                  displayText.append(new TextComponent(" [new]").withStyle(ChatFormatting.GOLD));
-                  return (MutableComponent)displayText;
+               return (MutableComponent)displayText;
+            }
+         }
+      }).map(displayText -> {
+         if (!displayDetail) {
+            return (MutableComponent)displayText;
+         } else {
+            MutableComponent tierDisplay = VaultGearTierConfig.getConfig(stack.getItem()).map(tierConfig -> {
+               Object config = tierConfig.getTierConfig(this);
+               if (config != null) {
+                  ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
+                  return configGen.getConfigDisplay(this.getAttribute().getReader(), config);
                } else {
-                  return (MutableComponent)displayText;
+                  return null;
+               }
+            }).orElse(null);
+            if (tierDisplay != null) {
+               Style txtStyle = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false).withUnderlined(false).withBold(false);
+               String categoryInfo = this.getCategory().getTooltipDescriptor();
+               if (tierDisplay.getString().isEmpty()) {
+                  displayText.append(new TextComponent(" (%sT%s)".formatted(categoryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
+               } else {
+                  displayText.append(new TextComponent(" (%sT%s: ".formatted(categoryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
+                  displayText.append(tierDisplay.setStyle(txtStyle));
+                  displayText.append(new TextComponent(")").setStyle(txtStyle));
                }
             }
-         })
-         .map(displayText -> {
-            if (!displayDetail) {
-               return (MutableComponent)displayText;
-            } else {
-               MutableComponent tierDisplay = VaultGearTierConfig.getConfig(stack.getItem()).map(tierConfig -> {
-                  Object config = tierConfig.getTierConfig(this);
-                  if (config != null) {
-                     ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
-                     return configGen.getConfigDisplay(this.getAttribute().getReader(), config);
-                  } else {
-                     return null;
-                  }
-               }).orElse(null);
-               if (tierDisplay != null) {
-                  Style txtStyle = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false).withUnderlined(false).withBold(false);
-                  String legendaryInfo = this.isLegendary() ? "Legendary " : "";
-                  if (tierDisplay.getString().isEmpty()) {
-                     displayText.append(new TextComponent(" (%sT%s)".formatted(legendaryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
-                  } else {
-                     displayText.append(new TextComponent(" (%sT%s: ".formatted(legendaryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
-                     displayText.append(tierDisplay.setStyle(txtStyle));
-                     displayText.append(new TextComponent(")").setStyle(txtStyle));
-                  }
-               }
 
-               return (MutableComponent)displayText;
-            }
-         });
+            return (MutableComponent)displayText;
+         }
+      });
    }
 
    @Override
    public void write(BitBuffer buf) {
       super.write(buf);
       buf.writeInt(this.rolledTier);
-      buf.writeBoolean(this.legendary);
+      this.category.write(buf);
       buf.writeString(this.modifierGroup);
       buf.writeNullable(this.modifierIdentifier, BitBuffer::writeIdentifier);
       buf.writeLong(this.gameTimeAdded);
@@ -172,7 +149,7 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    public void read(BitBuffer buf, GearDataVersion version) {
       super.read(buf, version);
       this.rolledTier = buf.readInt();
-      this.legendary = buf.readBoolean();
+      this.category = VaultGearModifier.AffixCategory.read(buf, version);
       this.modifierGroup = buf.readString();
       this.modifierIdentifier = buf.readNullable(BitBuffer::readIdentifier);
       this.gameTimeAdded = buf.readLong();
@@ -182,7 +159,7 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    public void toNbt(CompoundTag tag) {
       super.toNbt(tag);
       tag.putInt("rolledTier", this.rolledTier);
-      tag.putBoolean("legendary", this.legendary);
+      this.category.writeNbt(tag);
       tag.putString("modifierGroup", this.modifierGroup);
       if (this.modifierIdentifier != null) {
          tag.putString("modifierIdentifier", this.modifierIdentifier.toString());
@@ -195,7 +172,7 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    protected void fromNbt(CompoundTag tag, GearDataVersion version) {
       super.fromNbt(tag, version);
       this.rolledTier = tag.getInt("rolledTier");
-      this.legendary = tag.getBoolean("legendary");
+      this.category = VaultGearModifier.AffixCategory.readNbt(tag, version);
       this.modifierGroup = tag.getString("modifierGroup");
       if (tag.contains("modifierIdentifier", 8)) {
          this.modifierIdentifier = new ResourceLocation(tag.getString("modifierIdentifier"));
@@ -207,8 +184,60 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    @Override
    public JsonObject serialize(VaultGearModifier.AffixType type) {
       JsonObject obj = super.serialize(type);
-      obj.addProperty("legendary", this.legendary);
+      obj.addProperty("legendary", this.category == VaultGearModifier.AffixCategory.LEGENDARY);
+      obj.addProperty("category", this.category.name());
       return obj;
+   }
+
+   public static enum AffixCategory {
+      NONE,
+      LEGENDARY("Legendary", ModifierCategoryTooltip::modifyLegendaryTooltip),
+      ABYSSAL("Abyssal", ModifierCategoryTooltip::modifyAbyssalTooltip);
+
+      private final String descriptor;
+      private final Function<MutableComponent, MutableComponent> modifierFormatter;
+
+      private AffixCategory() {
+         this(null, null);
+      }
+
+      private AffixCategory(@Nullable String descriptor, @Nullable Function<MutableComponent, MutableComponent> modifierFormatter) {
+         this.descriptor = descriptor == null ? "" : descriptor + " ";
+         this.modifierFormatter = modifierFormatter == null ? Function.identity() : modifierFormatter;
+      }
+
+      @Nonnull
+      public String getTooltipDescriptor() {
+         return this.descriptor;
+      }
+
+      public Function<MutableComponent, MutableComponent> getModifierFormatter() {
+         return this.modifierFormatter;
+      }
+
+      public void write(BitBuffer buf) {
+         buf.writeInt(this.ordinal());
+      }
+
+      public static VaultGearModifier.AffixCategory read(BitBuffer buf, GearDataVersion version) {
+         if (GearDataVersion.V0_3.isLaterThan(version)) {
+            return buf.readBoolean() ? LEGENDARY : NONE;
+         } else {
+            return MiscUtils.getEnumEntry(VaultGearModifier.AffixCategory.class, buf.readInt());
+         }
+      }
+
+      public void writeNbt(CompoundTag tag) {
+         tag.putInt("category", this.ordinal());
+      }
+
+      public static VaultGearModifier.AffixCategory readNbt(CompoundTag tag, GearDataVersion version) {
+         if (tag.contains("legendary", 1)) {
+            return tag.getBoolean("legendary") ? LEGENDARY : NONE;
+         } else {
+            return MiscUtils.getEnumEntry(VaultGearModifier.AffixCategory.class, tag.getInt("category"));
+         }
+      }
    }
 
    public static enum AffixType {
@@ -216,6 +245,7 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
       PREFIX("Prefixes", isPositive -> isPositive ? "+" : "-"),
       SUFFIX("Suffixes", isPositive -> isPositive ? "+" : "-");
 
+      private static final VaultGearModifier.AffixType[] EXPLICITS = new VaultGearModifier.AffixType[]{PREFIX, SUFFIX};
       private final String displayName;
       private final Function<Boolean, String> affixPrefix;
 
@@ -230,6 +260,10 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
 
       public String getAffixPrefix(boolean isPositive) {
          return this.affixPrefix.apply(isPositive);
+      }
+
+      public static VaultGearModifier.AffixType[] explicits() {
+         return EXPLICITS;
       }
    }
 }

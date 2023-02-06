@@ -73,37 +73,33 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
 
       @Override
       public void adjustSlot(FakeItemSlotElement<?> slot) {
-         slot.tooltip(
-            (tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
-               poseStack.pushPose();
-               poseStack.translate(0.0, 0.0, 500.0);
-               if (this.isDisabled()) {
-                  tooltipRenderer.renderTooltip(
-                     poseStack, new TextComponent("Undiscovered").withStyle(ChatFormatting.ITALIC), mouseX, mouseY, TooltipDirection.RIGHT
-                  );
-                  poseStack.popPose();
-                  return true;
-               } else {
-                  List<ItemStack> inputs = this.recipe.getInputs();
-                  List<ItemStack> missingInputs = this.inputItemCheck.apply(inputs);
-                  List<Component> text = new ArrayList<>();
-                  text.add(new TextComponent("Craft: ").append(this.recipe.getDisplayOutput().getHoverName()));
+         slot.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+            poseStack.pushPose();
+            poseStack.translate(0.0, 0.0, 500.0);
+            if (this.isDisabled()) {
+               tooltipRenderer.renderTooltip(poseStack, this.recipe.getDisabledText(), mouseX, mouseY, TooltipDirection.RIGHT);
+               poseStack.popPose();
+               return true;
+            } else {
+               List<ItemStack> inputs = this.recipe.getInputs();
+               List<ItemStack> missingInputs = this.inputItemCheck.apply(inputs);
+               List<Component> text = new ArrayList<>();
+               text.add(new TextComponent("Craft: ").append(this.recipe.getDisplayOutput().getHoverName()));
 
-                  for (ItemStack in : this.recipe.getInputs()) {
-                     ChatFormatting color = ChatFormatting.GREEN;
-                     if (missingInputs.contains(in)) {
-                        color = ChatFormatting.RED;
-                     }
-
-                     text.add(new TextComponent("- ").append(in.getHoverName()).append(" x" + in.getCount()).withStyle(color));
+               for (ItemStack in : this.recipe.getInputs()) {
+                  ChatFormatting color = ChatFormatting.GREEN;
+                  if (missingInputs.contains(in)) {
+                     color = ChatFormatting.RED;
                   }
 
-                  tooltipRenderer.renderComponentTooltip(poseStack, text, mouseX, mouseY, TooltipDirection.RIGHT);
-                  poseStack.popPose();
-                  return true;
+                  text.add(new TextComponent("- ").append(in.getHoverName()).append(" x" + in.getCount()).withStyle(color));
                }
+
+               tooltipRenderer.renderComponentTooltip(poseStack, text, mouseX, mouseY, TooltipDirection.RIGHT);
+               poseStack.popPose();
+               return true;
             }
-         );
+         });
       }
    }
 

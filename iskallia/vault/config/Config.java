@@ -6,6 +6,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.config.adapter.CompoundTagAdapter;
 import iskallia.vault.config.adapter.IdentifierAdapter;
 import iskallia.vault.config.adapter.ItemStackAdapter;
+import iskallia.vault.config.adapter.LootPoolAdapter;
 import iskallia.vault.config.adapter.LootRollAdapter;
 import iskallia.vault.config.adapter.PartialTileAdapter;
 import iskallia.vault.config.adapter.RegistryCodecAdapter;
@@ -15,6 +16,7 @@ import iskallia.vault.config.adapter.WeightedListAdapter;
 import iskallia.vault.config.gear.VaultGearTierConfig;
 import iskallia.vault.core.data.key.VersionedKey;
 import iskallia.vault.core.vault.objective.scavenger.ScavengeTask;
+import iskallia.vault.core.world.loot.LootPool;
 import iskallia.vault.core.world.loot.LootRoll;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.CrystalModifiers;
@@ -55,6 +57,7 @@ public abstract class Config {
       .registerTypeHierarchyAdapter(CrystalTheme.class, CrystalTheme.Adapter.INSTANCE)
       .registerTypeHierarchyAdapter(CrystalModifiers.class, CrystalModifiers.Adapter.INSTANCE)
       .registerTypeHierarchyAdapter(ScavengeTask.class, ScavengeTask.Adapter.INSTANCE)
+      .registerTypeHierarchyAdapter(LootPool.class, LootPoolAdapter.INSTANCE)
       .registerTypeHierarchyAdapter(LootRoll.class, LootRollAdapter.INSTANCE)
       .excludeFieldsWithoutExposeAnnotation()
       .enableComplexMapKeySerialization()

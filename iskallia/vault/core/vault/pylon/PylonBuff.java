@@ -7,6 +7,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import iskallia.vault.core.vault.Vault;
+import iskallia.vault.world.data.ServerVaults;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +24,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 public abstract class PylonBuff<C extends PylonBuff.Config<?>> implements INBTSerializable<CompoundTag> {
    protected UUID uuid = UUID.randomUUID();
    protected UUID playerUuid;
+   protected UUID vaultUuid;
    protected C config;
 
    public PylonBuff(C config) {
@@ -32,7 +35,15 @@ public abstract class PylonBuff<C extends PylonBuff.Config<?>> implements INBTSe
       this.playerUuid = player.getUUID();
    }
 
-   public abstract boolean isDone();
+   public void setVault(Vault vault) {
+      this.vaultUuid = vault.get(Vault.ID);
+   }
+
+   public boolean isDone() {
+      return this.vaultUuid != null
+         ? ServerVaults.get(this.vaultUuid).map(vault -> !vault.get(Vault.LISTENERS).contains(this.playerUuid)).orElse(false)
+         : false;
+   }
 
    public void initServer(MinecraftServer server) {
    }
@@ -56,12 +67,19 @@ public abstract class PylonBuff<C extends PylonBuff.Config<?>> implements INBTSe
    public void write(CompoundTag object) {
       object.putString("uuid", this.uuid.toString());
       object.putString("playerUuid", this.playerUuid.toString());
+      if (this.vaultUuid != null) {
+         object.putString("vaultUuid", this.vaultUuid.toString());
+      }
+
       object.put("config", this.config.serializeNBT());
    }
 
    public void read(CompoundTag object) {
       this.uuid = UUID.fromString(object.getString("uuid"));
       this.playerUuid = UUID.fromString(object.getString("playerUuid"));
+      if (object.contains("vaultUuid")) {
+         this.vaultUuid = UUID.fromString(object.getString("vaultUuid"));
+      }
    }
 
    public final CompoundTag serializeNBT() {

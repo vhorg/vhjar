@@ -6,8 +6,6 @@
     "the_vault:polished_vault_stone",
     "the_vault:bumbo_polished_vault_stone",
     "the_vault:chiseled_vault_stone",
-    "the_vault:gilded_chest",
-    "the_vault:ornate_chest",
     "the_vault:chromatic_iron_ore",
     "the_vault:raw_chromatic_iron_block",
     "the_vault:chromatic_iron_block",
@@ -55,13 +53,10 @@
     "the_vault:transmog_table",
     "the_vault:tool_vise",
     "the_vault:demagnetizer",
-    "the_vault:coin_pile",
     "the_vault:magnet_modification_table",
     "the_vault:vault_altar",
     "the_vault:vault_recycler",
     "the_vault:crystal_budding",
-    "the_vault:gilded_chest_placeable",
-    "the_vault:ornate_chest_placeable",
     "the_vault:treasure_chest_placeable",
     "the_vault:altar_chest_placeable",
     "the_vault:vault_anvil",
@@ -69,6 +64,8 @@
     "the_vault:crystal_cluster",
     "the_vault:animal_pen",
     "the_vault:wutodic_silver_block",
-    "the_vault:eternal_pedestal"
+    "the_vault:eternal_pedestal",
+    "the_vault:tool_station",
+    "the_vault:golden_tooth"
   ]
 }

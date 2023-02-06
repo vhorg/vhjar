@@ -1,6 +1,5 @@
 package iskallia.vault.core.world.loot.generator;
 
-import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.event.CommonEvents;
@@ -80,7 +79,7 @@ public class TieredLootTableGenerator extends LootTableGenerator {
    @Override
    public void generate(RandomSource random) {
       CommonEvents.LOOT_GENERATION.invoke(this, LootGenerationEvent.Phase.PRE);
-      LootTable.Entry entry = this.table.get(this.version).getEntries().get(0);
+      LootTable.Entry entry = this.table.getEntries().get(0);
       int roll = entry.getRoll().get(random);
       if (this.version.isOlderThan(Version.v1_4)) {
          roll = (int)(roll * (1.0F + this.itemQuantity));
@@ -122,8 +121,6 @@ public class TieredLootTableGenerator extends LootTableGenerator {
          adjustedPool.getRandomFlat(this.version, random, (children, next) -> {
             if (this.poolToIndex.containsKey(next)) {
                this.frequencies[this.poolToIndex.get(next)]++;
-            } else {
-               VaultMod.LOGGER.error("Nonexistent pool index for %s, %f, %f".formatted(this.table.getId().toString(), this.itemRarity, this.itemQuantity));
             }
          }).map(e -> e.getStack(random)).ifPresent(this.items::add);
       }

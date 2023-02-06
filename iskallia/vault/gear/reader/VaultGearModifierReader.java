@@ -24,7 +24,7 @@ public abstract class VaultGearModifierReader<T> {
       return this.modifierName;
    }
 
-   protected int getRgbColor() {
+   public int getRgbColor() {
       return this.rgbColor;
    }
 

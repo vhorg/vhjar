@@ -101,6 +101,6 @@ public class VaultDiffuserContainer extends OverSizedSlotContainer {
    }
 
    public boolean stillValid(Player player) {
-      return this.tileEntity == null ? false : this.tileEntity.getInputInv().stillValid(this.player);
+      return this.tileEntity == null ? false : this.tileEntity.stillValid(this.player);
    }
 }

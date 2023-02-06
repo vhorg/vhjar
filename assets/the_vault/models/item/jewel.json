@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "the_vault:item/jewel/jewel",
+    "layer1": "the_vault:item/jewel/frame"
+  }
+}

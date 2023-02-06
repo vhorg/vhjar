@@ -5,11 +5,12 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.world.generator.layout.DIYRoomEntry;
 import iskallia.vault.core.world.loot.LootRoll;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.gear.VaultLootItem;
+import iskallia.vault.item.gear.VaultLevelItem;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,7 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class VaultRuneItem extends Item implements VaultLootItem {
+public class VaultRuneItem extends Item implements VaultLevelItem {
    public VaultRuneItem(CreativeModeTab group, ResourceLocation id) {
       super(new Properties().tab(group).stacksTo(8));
       this.setRegistryName(id);
@@ -80,7 +81,7 @@ public class VaultRuneItem extends Item implements VaultLootItem {
    }
 
    @Override
-   public void initializeLoot(Vault vault, ItemStack stack) {
+   public void initializeVaultLoot(Vault vault, ItemStack stack, @Nullable BlockPos pos) {
       if (stack.getTag() != null) {
          ListTag list = stack.getTag().getList("entries", 10);
 

@@ -4,6 +4,7 @@ import iskallia.vault.bounty.task.Task;
 import iskallia.vault.client.gui.framework.element.VerticalScrollClipContainer;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
+import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 
 public class TaskScrollContainerElement extends VerticalScrollClipContainer<TaskScrollContainerElement> {
    private AbstractTaskElement<?> taskElement;
@@ -12,11 +13,11 @@ public class TaskScrollContainerElement extends VerticalScrollClipContainer<Task
       super(spatial);
    }
 
-   public void setTaskElement(Task<?> task) {
+   public void setTaskElement(Task<?> task, BountyElement.Status status) {
       if (this.taskElement != null) {
          this.removeElement(this.taskElement);
       }
 
-      this.taskElement = this.addElement(AbstractTaskElement.create(task.getTaskType(), Spatials.positionXY(0, 0).width(this.innerWidth()), task));
+      this.taskElement = this.addElement(AbstractTaskElement.create(task.getTaskType(), Spatials.positionXY(0, 0).width(this.innerWidth()), task, status));
    }
 }

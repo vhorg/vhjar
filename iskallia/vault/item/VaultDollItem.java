@@ -175,18 +175,37 @@ public class VaultDollItem extends BasicItem {
                   );
                   Player player = event.getPlayer();
                   if (player != null) {
-                     getVaultUUID(stack).ifPresentOrElse(vaultId -> {
-                        boolean isInThisVault = MiscUtils.getVaultData(player, Vault.ID).map(vaultId::equals).orElse(false);
-                        if (isInThisVault) {
-                           tooltip.add(4, new TranslatableComponent("tooltip.the_vault.doll_status.active").withStyle(ChatFormatting.YELLOW));
-                        } else {
-                           tooltip.add(4, new TranslatableComponent("tooltip.the_vault.doll_status.completed").withStyle(ChatFormatting.GREEN));
-                        }
-                     }, () -> tooltip.add(4, new TranslatableComponent("tooltip.the_vault.doll_status.ready").withStyle(ChatFormatting.WHITE)));
+                     getVaultUUID(stack)
+                        .ifPresentOrElse(
+                           vaultId -> {
+                              boolean isInThisVault = MiscUtils.getVaultData(player, Vault.ID).map(vaultId::equals).orElse(false);
+                              if (isInThisVault) {
+                                 tooltip.add(4, new TranslatableComponent("tooltip.the_vault.doll_status.active").withStyle(ChatFormatting.YELLOW));
+                              } else {
+                                 tooltip.add(
+                                    4,
+                                    new TranslatableComponent(
+                                          "tooltip.the_vault.doll_status.completed_by", new Object[]{getCompletedBy(stack), getVaultLevel(stack)}
+                                       )
+                                       .withStyle(ChatFormatting.GRAY)
+                                 );
+                                 tooltip.add(5, new TranslatableComponent("tooltip.the_vault.doll_status.completed").withStyle(ChatFormatting.GREEN));
+                              }
+                           },
+                           () -> tooltip.add(4, new TranslatableComponent("tooltip.the_vault.doll_status.ready").withStyle(ChatFormatting.WHITE))
+                        );
                   }
                }
             );
       }
+   }
+
+   private static String getCompletedBy(ItemStack doll) {
+      return doll.getOrCreateTag().getString("completedBy");
+   }
+
+   private static int getVaultLevel(ItemStack doll) {
+      return doll.getOrCreateTag().getInt("vaultLevel");
    }
 
    @SubscribeEvent
@@ -248,11 +267,12 @@ public class VaultDollItem extends BasicItem {
       }
    }
 
-   public static void giveDollExperience(Player player, UUID vaultId, int experiencePoints) {
+   public static void onVaultCompletion(Player player, UUID vaultId, int vaultLevel, int experiencePoints) {
       ItemStack doll = getFirstDollMatching(player, stack -> isDollSetToVault(stack, vaultId));
       if (!doll.isEmpty()) {
          float xpPercentage = getXpPercent(doll);
          setExperience(doll, (int)(xpPercentage * experiencePoints));
+         setCompletedBy(doll, player.getDisplayName().getString(), vaultLevel);
       }
    }
 
@@ -345,6 +365,12 @@ public class VaultDollItem extends BasicItem {
 
    public static void setGameProfile(CompoundTag tag, GameProfile gameProfile) {
       tag.put("playerProfile", NbtUtils.writeGameProfile(new CompoundTag(), gameProfile));
+   }
+
+   private static void setCompletedBy(ItemStack doll, String completedBy, int vaultLevel) {
+      CompoundTag tag = doll.getOrCreateTag();
+      tag.putString("completedBy", completedBy);
+      tag.putInt("vaultLevel", vaultLevel);
    }
 
    public static Optional<GameProfile> getPlayerGameProfile(ItemStack doll) {

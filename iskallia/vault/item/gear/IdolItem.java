@@ -9,7 +9,6 @@ import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
-import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.BasicItem;
@@ -124,6 +123,6 @@ public class IdolItem extends BasicItem implements VaultGearItem {
    @Override
    public void appendHoverText(ItemStack stack, Level world, List<Component> tooltip, TooltipFlag flag) {
       super.appendHoverText(stack, world, tooltip, flag);
-      tooltip.addAll(VaultGearDataTooltip.createTooltip(stack, GearTooltip.itemTooltip()));
+      tooltip.addAll(this.createTooltip(stack, GearTooltip.itemTooltip()));
    }
 }

@@ -94,9 +94,9 @@ public class PlayerSnapshotDump {
       ResearchTree researches = PlayerResearchesData.get(sWorld).getResearches(sPlayer);
       snapshot.researches.addAll(researches.getResearchesDone());
       PlayerStatisticsCollector.VaultRunsSnapshot vaultRunsSnapshot = PlayerStatisticsCollector.VaultRunsSnapshot.ofPlayer(sPlayer);
-      snapshot.vaultRuns = vaultRunsSnapshot.vaultRuns;
-      snapshot.vaultWins = vaultRunsSnapshot.bossKills;
-      snapshot.vaultDeaths = vaultRunsSnapshot.deaths;
+      snapshot.completed = vaultRunsSnapshot.completed;
+      snapshot.survived = vaultRunsSnapshot.survived;
+      snapshot.failed = vaultRunsSnapshot.failed;
       snapshot.artifactCount = vaultRunsSnapshot.artifacts;
       snapshot.powerLevel = stats.getTotalSpentSkillPoints() + stats.getUnspentSkillPoints();
 
@@ -149,9 +149,9 @@ public class PlayerSnapshotDump {
       protected final UUID playerUUID;
       protected final String playerNickname;
       protected final long timestamp;
-      protected int vaultRuns;
-      protected int vaultWins;
-      protected int vaultDeaths;
+      protected int completed;
+      protected int survived;
+      protected int failed;
       protected int artifactCount;
       protected boolean inVault = false;
       protected int powerLevel = 0;

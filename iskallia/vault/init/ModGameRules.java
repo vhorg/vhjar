@@ -31,7 +31,7 @@ public class ModGameRules {
    public static void initialize() {
       FINAL_VAULT_ALLOW_PARTY = register("finalVaultAllowParty", Category.MISC, booleanRule(true));
       VAULT_JOIN_REQUIRE_PARTY = register("vaultJoinRequireParty", Category.MISC, booleanRule(true));
-      VAULT_TEMPLATE_CACHE_SIZE = register("vaultTemplateCacheSize", Category.MISC, integerRule(16));
+      VAULT_TEMPLATE_CACHE_SIZE = register("vaultTemplateCacheSize", Category.MISC, integerRule(32));
       CASUAL_VAULTS = register("vaultCasualMode", Category.MISC, booleanRule(false));
       VAULT_ALLOW_WAYPOINTS = register(
          "vaultAllowWaypoints",

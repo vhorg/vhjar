@@ -17,7 +17,7 @@ public class AttributePylonBuff extends TickingPylonBuff<AttributePylonBuff.Conf
 
    @Override
    public boolean isDone() {
-      return this.tick >= this.config.duration;
+      return super.isDone() || this.tick >= this.config.duration;
    }
 
    @Override

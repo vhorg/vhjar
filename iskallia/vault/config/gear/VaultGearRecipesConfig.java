@@ -1,6 +1,7 @@
 package iskallia.vault.config.gear;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.VaultMod;
 import iskallia.vault.config.Config;
 import iskallia.vault.config.entry.ItemEntry;
 import iskallia.vault.gear.crafting.ProficiencyType;
@@ -28,6 +29,8 @@ public class VaultGearRecipesConfig extends Config {
    @Expose
    private final List<VaultGearRecipesConfig.GearRecipe> gearRecipes = new ArrayList<>();
    @Expose
+   private final List<VaultGearRecipesConfig.JewelRecipe> jewelRecipes = new ArrayList<>();
+   @Expose
    private final List<VaultGearRecipesConfig.TrinketRecipe> trinketRecipes = new ArrayList<>();
 
    @Override
@@ -38,6 +41,7 @@ public class VaultGearRecipesConfig extends Config {
    public List<VaultForgeRecipe> getAllRecipes() {
       List<VaultForgeRecipe> recipes = new ArrayList<>();
       this.gearRecipes.forEach(recipe -> recipes.add(recipe.makeRecipe()));
+      this.jewelRecipes.forEach(recipe -> recipes.add(recipe.makeRecipe()));
       this.trinketRecipes.forEach(recipe -> recipes.add(recipe.makeRecipe()));
       return recipes;
    }
@@ -50,9 +54,15 @@ public class VaultGearRecipesConfig extends Config {
          }
       }
 
-      for (VaultGearRecipesConfig.TrinketRecipe recipex : this.trinketRecipes) {
+      for (VaultGearRecipesConfig.JewelRecipe recipex : this.jewelRecipes) {
          if (id.equals(recipex.id)) {
             return recipex.makeRecipe();
+         }
+      }
+
+      for (VaultGearRecipesConfig.TrinketRecipe recipexx : this.trinketRecipes) {
+         if (id.equals(recipexx.id)) {
+            return recipexx.makeRecipe();
          }
       }
 
@@ -62,12 +72,15 @@ public class VaultGearRecipesConfig extends Config {
    @Override
    protected void reset() {
       this.gearRecipes.clear();
+      this.jewelRecipes.clear();
       this.trinketRecipes.clear();
 
       for (ProficiencyType type : ProficiencyType.getCraftableTypes()) {
          ItemStack out = new ItemStack(type.getDisplayStack().get().getItem());
          this.gearRecipes.add(new VaultGearRecipesConfig.GearRecipe(out, type).addInput(new ItemStack(Items.DIAMOND, 2)));
       }
+
+      this.jewelRecipes.add(new VaultGearRecipesConfig.JewelRecipe());
 
       for (TrinketEffect<?> trinket : TrinketEffectRegistry.getOrderedEntries()) {
          this.trinketRecipes.add(new VaultGearRecipesConfig.TrinketRecipe(trinket).addInput(new ItemStack(Items.DIAMOND, 2)));
@@ -132,6 +145,19 @@ public class VaultGearRecipesConfig extends Config {
          ItemStack out = this.output.createItemStack();
          List<ItemStack> in = this.inputs.stream().map(ItemEntry::createItemStack).toList();
          return new VaultGearForgeRecipe(this.id, out, in, this.proficiencyType);
+      }
+   }
+
+   public static class JewelRecipe extends VaultGearRecipesConfig.ForgeRecipe {
+      public JewelRecipe() {
+         super(VaultMod.id("jewel"), new ItemStack(ModItems.JEWEL));
+      }
+
+      @Override
+      public VaultForgeRecipe makeRecipe() {
+         ItemStack out = this.output.createItemStack();
+         List<ItemStack> in = this.inputs.stream().map(ItemEntry::createItemStack).toList();
+         return new iskallia.vault.gear.crafting.recipe.JewelRecipe(this.id, out, in);
       }
    }
 

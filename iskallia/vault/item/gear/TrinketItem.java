@@ -49,7 +49,7 @@ import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 public class TrinketItem extends BasicItem implements ICurioItem, DataTransferItem {
    public TrinketItem(ResourceLocation id) {
-      super(id, new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(1));
+      super(id, new Properties().tab(ModItems.GEAR_GROUP).stacksTo(1));
    }
 
    public static ItemStack createRandomTrinket(TrinketEffect<?> trinket) {

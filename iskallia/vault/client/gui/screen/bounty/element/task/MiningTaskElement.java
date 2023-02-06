@@ -2,6 +2,7 @@ package iskallia.vault.client.gui.screen.bounty.element.task;
 
 import iskallia.vault.bounty.task.MiningTask;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
+import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import iskallia.vault.util.TextUtil;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -17,8 +18,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class MiningTaskElement extends AbstractTaskElement<MiningTask> {
-   protected MiningTaskElement(ISpatial spatial, MiningTask task) {
-      super(spatial, task);
+   protected MiningTaskElement(ISpatial spatial, MiningTask task, BountyElement.Status status) {
+      super(spatial, task, status);
    }
 
    @Override

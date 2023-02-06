@@ -10,7 +10,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSlotIcons;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
 import iskallia.vault.network.message.ClientboundRefreshToolViseMessage;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -18,8 +18,6 @@ import javax.annotation.Nonnull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -149,7 +147,7 @@ public class ToolViseContainerMenu extends OverSizedSlotContainer {
    }
 
    public boolean stillValid(Player playerIn) {
-      return this.tileEntity.getInventory().stillValid(playerIn);
+      return this.tileEntity == null ? false : this.tileEntity.stillValid(playerIn);
    }
 
    public ItemStack quickMoveStack(Player playerIn, int index) {
@@ -191,43 +189,7 @@ public class ToolViseContainerMenu extends OverSizedSlotContainer {
    }
 
    public boolean clickMenuButton(Player pPlayer, int pId) {
-      if (pId >= PaxelItem.Stat.values().length) {
-         return super.clickMenuButton(pPlayer, pId);
-      } else {
-         PaxelItem.Stat stat = PaxelItem.Stat.values()[pId];
-         PaxelConfigs.Upgrade upgrade = this.upgrades.get(stat);
-         if (!pPlayer.isCreative()) {
-            for (int i = 1; i <= 6; i++) {
-               ItemStack stack = ((Slot)this.slots.get(i + 36)).getItem().copy();
-               int materialCost = upgrade.getMaterialCost(i - 1);
-               stack.shrink(materialCost);
-               ((Slot)this.slots.get(i + 36)).set(stack);
-            }
-         }
-
-         ItemStack paxel = ((Slot)this.slots.get(36)).getItem();
-         PaxelItem.increaseStatUpgrade(paxel, stat, upgrade.getYield(pPlayer.getRandom()));
-         int sturdiness = PaxelItem.getSturdiness(paxel);
-         boolean playSound = true;
-         int level = PaxelItem.getLevel(paxel);
-         int delta = ModConfigs.PAXEL_CONFIGS.getTierValues(paxel).getLevelsPerSocket();
-         PaxelItem.setLevel(paxel, level + 1);
-         if (sturdiness < this.tileEntity.getLevel().random.nextFloat() * 100.0F && !pPlayer.isCreative()) {
-            this.tileEntity.getLevel().playSound(null, this.tilePos, SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.0F, 1.1F);
-            ((Slot)this.slots.get(36)).set(ItemStack.EMPTY);
-            playSound = false;
-         } else if (level / delta != (level + 1) / delta) {
-            PaxelItem.setSockets(paxel, PaxelItem.getSockets(paxel) + 1);
-         }
-
-         if (playSound) {
-            this.tileEntity.getLevel().playSound(null, this.tilePos, SoundEvents.ANVIL_USE, SoundSource.BLOCKS, 1.0F, 1.1F);
-         }
-
-         this.tileEntity.setChanged();
-         this.broadcastChanges();
-         return true;
-      }
+      return super.clickMenuButton(pPlayer, pId);
    }
 
    private static class MaterialSlot extends Slot {

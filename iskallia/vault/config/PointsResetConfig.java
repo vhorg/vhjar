@@ -5,7 +5,9 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.init.ModArchetypes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.ability.AbilityNode;
+import iskallia.vault.skill.talent.TalentGroup;
 import iskallia.vault.skill.talent.TalentNode;
+import iskallia.vault.skill.talent.TalentTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerArchetypeData;
 import iskallia.vault.world.data.PlayerResearchesData;
@@ -15,10 +17,12 @@ import iskallia.vault.world.data.PointsResetData;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
@@ -143,6 +147,7 @@ public class PointsResetConfig extends Config {
    @SubscribeEvent
    public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
+         removeAndRefundTalent(player, ModConfigs.TALENTS.REACH);
          PointsResetConfig config = ModConfigs.PLAYER_RESETS;
          if (config.skillPointsCurrentlyReset.contains(player.getUUID())) {
             migrateSkillPointsData(player.getUUID());
@@ -176,6 +181,34 @@ public class PointsResetConfig extends Config {
             && !config.archetypePointsCurrentlyReset.contains(player.getUUID())
             && !PointsResetData.get().hasArchetypePointsReset(player.getUUID())) {
             config.resetArchetypePoints(player);
+         }
+      }
+   }
+
+   public static void removeAndRefundTalent(ServerPlayer player, TalentGroup<?> talentGroup) {
+      PlayerTalentsData data = PlayerTalentsData.get(player.getLevel());
+      TalentTree talents = data.getTalents(player);
+      if (talents.hasLearnedNode(talentGroup)) {
+         Optional<TalentNode<?>> talentNode = talents.getLearnedNodes()
+            .stream()
+            .filter(node -> node.getGroup().getParentName().equals(talentGroup.getParentName()))
+            .findFirst();
+         if (!talentNode.isEmpty()) {
+            TalentNode<?> talent = talentNode.get();
+            int level = talent.getLevel();
+            int cost = 0;
+
+            for (int i = 1; i <= level; i++) {
+               cost += talent.getGroup().cost(i);
+            }
+
+            PlayerVaultStatsData statsData = PlayerVaultStatsData.get(player.getLevel());
+            statsData.refundSkillPoints(player, cost);
+            data.remove(player, talent);
+            player.sendMessage(
+               new TranslatableComponent("commands.the_vault.talent.removed", new Object[]{talent.getName(), cost}).withStyle(ChatFormatting.YELLOW),
+               player.getUUID()
+            );
          }
       }
    }

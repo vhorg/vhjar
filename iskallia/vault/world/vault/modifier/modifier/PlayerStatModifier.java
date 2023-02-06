@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 public class PlayerStatModifier extends VaultModifier<PlayerStatModifier.Properties> {
    public PlayerStatModifier(ResourceLocation id, PlayerStatModifier.Properties properties, VaultModifier.Display display) {
       super(id, properties, display);
+      this.setDescriptionFormatter((t, p, s) -> t.formatted((int)Math.abs(p.addend * s * 100.0F)));
    }
 
    @Override

@@ -10,7 +10,7 @@ import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.gear.modification.GearModificationAction;
 import iskallia.vault.gear.modification.GearModificationCost;
 import iskallia.vault.gear.tooltip.GearTooltip;
-import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
+import iskallia.vault.gear.tooltip.VaultGearTooltipItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
@@ -94,7 +94,9 @@ public class ModificationButtonElement<E extends ModificationButtonElement<E>> e
 
                      tooltip.add(TextComponent.EMPTY);
                      tooltip.add(gearStack.getHoverName());
-                     tooltip.addAll(VaultGearDataTooltip.createTooltip(gearStack, GearTooltip.craftingView()));
+                     if (gearStack.getItem() instanceof VaultGearTooltipItem gearTooltipItem) {
+                        tooltip.addAll(gearTooltipItem.createTooltip(gearStack, GearTooltip.craftingView()));
+                     }
                   }
 
                   return tooltip;

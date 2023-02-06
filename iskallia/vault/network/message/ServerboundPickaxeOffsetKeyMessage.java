@@ -1,7 +1,7 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ChatType;

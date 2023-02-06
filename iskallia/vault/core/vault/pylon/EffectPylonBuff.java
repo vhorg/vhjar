@@ -15,7 +15,7 @@ public class EffectPylonBuff extends TickingPylonBuff<EffectPylonBuff.Config> {
 
    @Override
    public boolean isDone() {
-      return this.tick >= this.config.duration;
+      return super.isDone() || this.tick >= this.config.duration;
    }
 
    @Override

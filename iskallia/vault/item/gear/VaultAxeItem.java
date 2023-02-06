@@ -10,7 +10,6 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.item.VaultGearToolTier;
 import iskallia.vault.gear.tooltip.GearTooltip;
-import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.util.MiscUtils;
@@ -34,9 +33,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.ItemStack.TooltipPart;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.MendingEnchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
@@ -135,10 +137,14 @@ public class VaultAxeItem extends AxeItem implements VaultGearItem {
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(ItemStack stack, Level world, List<Component> tooltip, TooltipFlag flag) {
       super.appendHoverText(stack, world, tooltip, flag);
-      tooltip.addAll(VaultGearDataTooltip.createTooltip(stack, GearTooltip.itemTooltip()));
+      tooltip.addAll(this.createTooltip(stack, GearTooltip.itemTooltip()));
    }
 
    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {
       return false;
+   }
+
+   public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
+      return enchantment instanceof MendingEnchantment ? false : enchantment.category.canEnchant(Items.NETHERITE_SWORD);
    }
 }

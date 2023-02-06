@@ -20,8 +20,11 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.item.ItemDrillArrow;
-import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.crystal.VaultCrystalItem;
+import iskallia.vault.item.tool.JewelItem;
+import iskallia.vault.research.StageManager;
+import iskallia.vault.research.type.Research;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.Arrays;
@@ -124,10 +127,11 @@ public class ModModels {
             ModItems.IDOL_BENEVOLENT,
             ModItems.IDOL_OMNISCIENT,
             ModItems.IDOL_TIMEKEEPER,
-            ModItems.IDOL_MALEVOLENCE
+            ModItems.IDOL_MALEVOLENCE,
+            ModItems.MAGNET
          }
       );
-      colors.register((stack, tintIndex) -> tintIndex == 1 ? MagnetItem.getTextureColor(stack) : -1, new ItemLike[]{ModItems.MAGNET_ITEM});
+      colors.register((stack, tintIndex) -> tintIndex == 0 ? JewelItem.getColor(stack) : -1, new ItemLike[]{ModItems.JEWEL});
    }
 
    @SubscribeEvent
@@ -218,7 +222,7 @@ public class ModModels {
          ItemProperties.register(ModItems.VAULT_COMPASS, new ResourceLocation("angle"), new ModModels.ItemProperty.CompassPropertyFunction());
          registerItemProperty(ModBlocks.PLACEHOLDER.asItem(), "placeholder_type", PLACEHOLDER_TYPE);
          registerItemProperty(ModBlocks.TREASURE_DOOR.asItem(), "treasure_door_type", TREASURE_DOOR_TYPE);
-         registerItemProperty(ModItems.MAGNET_ITEM, "magnet_perk", (stack, world, entity, seed) -> MagnetItem.getPerk(stack).ordinal());
+         registerItemProperty(ModItems.MAGNET, "magnet_perk", (stack, world, entity, seed) -> LegacyMagnetItem.getPerk(stack).ordinal());
          ItemProperties.registerGeneric(VaultMod.id("count"), (s, w, e, l) -> s.getCount());
 
          for (VaultOreBlock block : VaultOreBlock.ALL) {
@@ -261,8 +265,11 @@ public class ModModels {
 
                BlockPos portalPos = new BlockPos(24, 24, 24);
                long gameTime = level.getGameTime();
+               Research vaultCompass = ModConfigs.RESEARCHES.getByName("Vault Compass");
+               boolean researched = vaultCompass != null && StageManager.getResearchTree(player).isResearched(vaultCompass);
                if (ServerVaults.isInVault(player)
-                  && player.position().distanceToSqr(portalPos.getX() + 0.5, player.position().y(), portalPos.getZ() + 0.5) > 1.0E-5) {
+                  && player.position().distanceToSqr(portalPos.getX() + 0.5, player.position().y(), portalPos.getZ() + 0.5) > 1.0E-5
+                  && researched) {
                   double yRotation = player.getYRot();
                   yRotation = Mth.positiveModulo(yRotation / 360.0, 1.0);
                   double index = this.getAngleTo(Vec3.atCenterOf(portalPos), player) / (float) (Math.PI * 2);

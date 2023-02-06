@@ -154,7 +154,7 @@ public class TransmogTableContainer extends OverSizedSlotContainer {
    }
 
    public boolean stillValid(@Nonnull Player player) {
-      return this.internalInventory.stillValid(player);
+      return this.tileEntity == null ? false : this.tileEntity.stillValid(player);
    }
 
    public void removed(@Nonnull Player player) {

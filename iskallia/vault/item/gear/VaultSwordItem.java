@@ -10,7 +10,6 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.item.VaultGearToolTier;
 import iskallia.vault.gear.tooltip.GearTooltip;
-import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.util.MiscUtils;
@@ -131,7 +130,7 @@ public class VaultSwordItem extends SwordItem implements VaultGearItem, DyeableL
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(ItemStack stack, Level world, List<Component> tooltip, TooltipFlag flag) {
       super.appendHoverText(stack, world, tooltip, flag);
-      tooltip.addAll(VaultGearDataTooltip.createTooltip(stack, GearTooltip.itemTooltip()));
+      tooltip.addAll(this.createTooltip(stack, GearTooltip.itemTooltip()));
    }
 
    public boolean canPerformAction(ItemStack stack, ToolAction toolAction) {

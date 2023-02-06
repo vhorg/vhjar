@@ -2,7 +2,7 @@ package iskallia.vault.item;
 
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;

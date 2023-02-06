@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.Map.Entry;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
@@ -51,7 +52,7 @@ import org.apache.commons.lang3.ObjectUtils;
 public class VaultGearTierConfig extends Config {
    private Item gearItem;
    @Expose
-   private final Map<VaultGearModifier.AffixType, VaultGearTierConfig.AttributeGroup> modifierGroup = new LinkedHashMap<>();
+   private final Map<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.AttributeGroup> modifierGroup = new LinkedHashMap<>();
 
    public static Map<Item, VaultGearTierConfig> registerConfigs() {
       Map<Item, VaultGearTierConfig> gearConfig = new HashMap<>();
@@ -67,7 +68,9 @@ public class VaultGearTierConfig extends Config {
          ModItems.IDOL_BENEVOLENT,
          ModItems.IDOL_MALEVOLENCE,
          ModItems.IDOL_OMNISCIENT,
-         ModItems.IDOL_TIMEKEEPER
+         ModItems.IDOL_TIMEKEEPER,
+         ModItems.JEWEL,
+         ModItems.MAGNET
       )) {
          gearConfig.put(item, new VaultGearTierConfig(item).readConfig());
       }
@@ -147,7 +150,7 @@ public class VaultGearTierConfig extends Config {
 
    @Nullable
    public VaultGearModifier<?> maxAndIncreaseTier(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier, int level, int tierIncrease, Random random) {
-      VaultGearTierConfig.AttributeGroup attributeGroup = this.modifierGroup.get(type);
+      VaultGearTierConfig.AttributeGroup attributeGroup = this.modifierGroup.get(VaultGearTierConfig.ModifierAffixTagGroup.ofAffixType(type));
       if (attributeGroup != null && !attributeGroup.isEmpty()) {
          VaultGearTierConfig.ModifierTierGroup tierGroup = null;
 
@@ -175,7 +178,7 @@ public class VaultGearTierConfig extends Config {
    }
 
    public List<VaultGearModifier<?>> generateImplicits(int level, Random random) {
-      VaultGearTierConfig.AttributeGroup attributePool = this.modifierGroup.get(VaultGearModifier.AffixType.IMPLICIT);
+      VaultGearTierConfig.AttributeGroup attributePool = this.modifierGroup.get(VaultGearTierConfig.ModifierAffixTagGroup.IMPLICIT);
       if (attributePool != null && !attributePool.isEmpty()) {
          List<VaultGearModifier<?>> modifiers = new ArrayList<>();
          attributePool.forEach(
@@ -193,12 +196,18 @@ public class VaultGearTierConfig extends Config {
    }
 
    public Optional<VaultGearModifier<?>> getRandomModifier(VaultGearModifier.AffixType type, int level, Random random, Set<String> excludedModGroups) {
-      VaultGearTierConfig.AttributeGroup attributePool = this.modifierGroup.get(type);
+      return this.getRandomModifier(VaultGearTierConfig.ModifierAffixTagGroup.ofAffixType(type), level, random, excludedModGroups);
+   }
+
+   public Optional<VaultGearModifier<?>> getRandomModifier(
+      VaultGearTierConfig.ModifierAffixTagGroup affixTagGroup, int level, Random random, Set<String> excludedModGroups
+   ) {
+      VaultGearTierConfig.AttributeGroup attributePool = this.modifierGroup.get(affixTagGroup);
       if (attributePool != null && !attributePool.isEmpty()) {
          WeightedList<VaultGearTierConfig.ModifierOutcome<?>> outcomes = new WeightedList<>();
          attributePool.forEach(
             group -> {
-               if (!excludedModGroups.contains(group.modifierGroup)) {
+               if (group.modifierGroup.isEmpty() || !excludedModGroups.contains(group.modifierGroup)) {
                   group.getModifiersForLevel(level)
                      .forEach(
                         tier -> outcomes.add(new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight())
@@ -212,13 +221,15 @@ public class VaultGearTierConfig extends Config {
       }
    }
 
-   public List<Tuple<VaultGearModifier.AffixType, VaultGearTierConfig.ModifierTierGroup>> getModifierGroupConfigurations(String modGroup) {
-      List<Tuple<VaultGearModifier.AffixType, VaultGearTierConfig.ModifierTierGroup>> configs = new ArrayList<>();
+   public List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> getModifierGroupConfigurations(String modGroup) {
+      List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> configs = new ArrayList<>();
 
-      for (Entry<VaultGearModifier.AffixType, VaultGearTierConfig.AttributeGroup> entry : this.modifierGroup.entrySet()) {
-         for (VaultGearTierConfig.ModifierTierGroup group : entry.getValue()) {
-            if (group.modifierGroup.equals(modGroup)) {
-               configs.add(new Tuple(entry.getKey(), group));
+      for (Entry<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.AttributeGroup> entry : this.modifierGroup.entrySet()) {
+         if (entry.getKey().isGenericGroup()) {
+            for (VaultGearTierConfig.ModifierTierGroup group : entry.getValue()) {
+               if (modGroup.isEmpty() || group.modifierGroup.equals(modGroup)) {
+                  configs.add(new Tuple(entry.getKey(), group));
+               }
             }
          }
       }
@@ -230,7 +241,7 @@ public class VaultGearTierConfig extends Config {
    protected void reset() {
       this.modifierGroup.clear();
       VaultGearTierConfig.AttributeGroup implicits = new VaultGearTierConfig.AttributeGroup();
-      this.modifierGroup.put(VaultGearModifier.AffixType.IMPLICIT, implicits);
+      this.modifierGroup.put(VaultGearTierConfig.ModifierAffixTagGroup.IMPLICIT, implicits);
       VaultGearTierConfig.ModifierTierGroup armorTierGroup = new VaultGearTierConfig.ModifierTierGroup(ModGearAttributes.ARMOR, "ModArmor", "armor");
       armorTierGroup.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new IntegerAttributeGenerator.Range(1, 2, 1)));
       armorTierGroup.add(new VaultGearTierConfig.ModifierTier<>(15, 10, new IntegerAttributeGenerator.Range(1, 2, 1)));
@@ -250,7 +261,7 @@ public class VaultGearTierConfig extends Config {
       prefixes.add(armorTierGroup);
       prefixes.add(attackDamageTierGroup);
       prefixes.add(effectAvoidTierGroup);
-      this.modifierGroup.put(VaultGearModifier.AffixType.PREFIX, prefixes);
+      this.modifierGroup.put(VaultGearTierConfig.ModifierAffixTagGroup.PREFIX, prefixes);
       EffectCloudAttribute.CloudConfig config = new EffectCloudAttribute.CloudConfig(
          "Healing", Potions.HEALING.getRegistryName(), 40, 4.0F, Color.RED.getRGB(), true, 0.05F
       );
@@ -272,7 +283,7 @@ public class VaultGearTierConfig extends Config {
       suffixes.add(effectGroup);
       suffixes.add(fireImmunityGroup);
       suffixes.add(soulboundGroup);
-      this.modifierGroup.put(VaultGearModifier.AffixType.SUFFIX, suffixes);
+      this.modifierGroup.put(VaultGearTierConfig.ModifierAffixTagGroup.SUFFIX, suffixes);
    }
 
    @Override
@@ -368,6 +379,41 @@ public class VaultGearTierConfig extends Config {
                }
             });
             return array;
+         }
+      }
+   }
+
+   public static enum ModifierAffixTagGroup {
+      IMPLICIT(VaultGearModifier.AffixType.IMPLICIT),
+      PREFIX(VaultGearModifier.AffixType.PREFIX),
+      SUFFIX(VaultGearModifier.AffixType.SUFFIX),
+      ABYSSAL_IMPLICIT(VaultGearModifier.AffixType.IMPLICIT);
+
+      private final VaultGearModifier.AffixType targetAffixType;
+
+      private ModifierAffixTagGroup(VaultGearModifier.AffixType targetAffixType) {
+         this.targetAffixType = targetAffixType;
+      }
+
+      public VaultGearModifier.AffixType getTargetAffixType() {
+         return this.targetAffixType;
+      }
+
+      public boolean isGenericGroup() {
+         return this == IMPLICIT || this == PREFIX || this == SUFFIX;
+      }
+
+      @Nonnull
+      public static VaultGearTierConfig.ModifierAffixTagGroup ofAffixType(VaultGearModifier.AffixType type) {
+         switch (type) {
+            case IMPLICIT:
+               return IMPLICIT;
+            case PREFIX:
+               return PREFIX;
+            case SUFFIX:
+               return SUFFIX;
+            default:
+               throw new IllegalArgumentException("Unknown AffixType: " + type.name());
          }
       }
    }

@@ -12,7 +12,6 @@ import iskallia.vault.gear.item.VaultGearArmorMaterial;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.renderer.VaultArmorRenderProperties;
 import iskallia.vault.gear.tooltip.GearTooltip;
-import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
@@ -154,9 +153,9 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGearItem {
    }
 
    @OnlyIn(Dist.CLIENT)
-   public void appendHoverText(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag flag) {
-      super.appendHoverText(itemStack, world, tooltip, flag);
-      tooltip.addAll(VaultGearDataTooltip.createTooltip(itemStack, GearTooltip.itemTooltip()));
+   public void appendHoverText(ItemStack stack, Level world, List<Component> tooltip, TooltipFlag flag) {
+      super.appendHoverText(stack, world, tooltip, flag);
+      tooltip.addAll(this.createTooltip(stack, GearTooltip.itemTooltip()));
    }
 
    public boolean canElytraFly(ItemStack stack, LivingEntity entity) {

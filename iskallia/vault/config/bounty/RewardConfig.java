@@ -7,6 +7,7 @@ import iskallia.vault.config.entry.ItemStackPool;
 import iskallia.vault.config.entry.LevelEntryMap;
 import iskallia.vault.config.entry.RangeEntry;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,10 +64,11 @@ public class RewardConfig extends Config {
 
          for (ItemStack reward : rewardEntry.itemPool.getRandomStacks()) {
             if (reward.getItem() instanceof VaultGearItem gearItem) {
-               gearItem.setLevel(reward, vaultLevel);
+               gearItem.setItemLevel(reward, vaultLevel);
             }
 
             reward = DataTransferItem.doConvertStack(reward);
+            DataInitializationItem.doInitialize(reward);
             items.add(reward);
          }
 

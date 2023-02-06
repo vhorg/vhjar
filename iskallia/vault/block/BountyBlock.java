@@ -1,18 +1,26 @@
 package iskallia.vault.block;
 
 import iskallia.vault.block.entity.BountyTableTileEntity;
+import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.util.EntityHelper;
 import iskallia.vault.world.data.BountyData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -104,11 +112,40 @@ public class BountyBlock extends HorizontalDirectionalBlock implements EntityBlo
          if (level.getBlockEntity(pos) instanceof BountyTableTileEntity bountyTableTileEntity) {
             BountyData data = BountyData.get();
             int vaultLevel = PlayerVaultStatsData.get(sPlayer.getLevel()).getVaultStats(sPlayer).getVaultLevel();
-            CompoundTag tag = data.getAllBountiesAsTagFor(sPlayer.getUUID());
-            tag.put("pos", NbtUtils.writeBlockPos(pos));
-            tag.putInt("vaultLevel", vaultLevel);
-            NetworkHooks.openGui(sPlayer, bountyTableTileEntity, buffer -> buffer.writeNbt(tag));
-            return InteractionResult.SUCCESS;
+            ItemStack itemInHand = sPlayer.getItemInHand(hand);
+            if (itemInHand.getItem() == ModItems.LOST_BOUNTY && data.getAllLegendaryFor(sPlayer.getUUID()).isEmpty()) {
+               data.setupLegendary(sPlayer.getUUID());
+               level.playSound(null, pos, SoundEvents.PLAYER_LEVELUP, SoundSource.BLOCKS, 0.75F, 0.7F);
+               if (!sPlayer.isCreative()) {
+                  itemInHand.shrink(1);
+               }
+
+               return InteractionResult.SUCCESS;
+            } else {
+               if (!bountyTableTileEntity.getInventory().isEmpty()) {
+                  OverSizedInventory inventory = bountyTableTileEntity.getInventory();
+                  if (inventory.getItem(0).is(ModBlocks.BRONZE_COIN_PILE.asItem())) {
+                     inventory.getOverSizedContents()
+                        .forEach(overSizedStack -> overSizedStack.splitByStackSize().forEach(splitStack -> EntityHelper.giveItem(player, splitStack)));
+                     inventory.getOverSizedContents().clear();
+                     player.sendMessage(
+                        new TextComponent(
+                              "Bronze is no longer used to reroll bounties. Removed all existing bronze from your bounty table and placed in your inventory or dropped if your inventory is full."
+                           )
+                           .withStyle(ChatFormatting.YELLOW),
+                        player.getUUID()
+                     );
+                     player.playSound(SoundEvents.ITEM_PICKUP, 0.75F, 1.0F);
+                     return InteractionResult.SUCCESS;
+                  }
+               }
+
+               CompoundTag tag = data.getAllBountiesAsTagFor(sPlayer.getUUID());
+               tag.put("pos", NbtUtils.writeBlockPos(pos));
+               tag.putInt("vaultLevel", vaultLevel);
+               NetworkHooks.openGui(sPlayer, bountyTableTileEntity, buffer -> buffer.writeNbt(tag));
+               return InteractionResult.SUCCESS;
+            }
          } else {
             return InteractionResult.SUCCESS;
          }

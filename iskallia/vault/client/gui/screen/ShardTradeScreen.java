@@ -23,6 +23,7 @@ import iskallia.vault.client.gui.framework.spatial.spi.ISize;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.client.gui.framework.text.TextBorder;
 import iskallia.vault.container.inventory.ShardTradeContainer;
+import iskallia.vault.event.InputEvents;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.ItemShardPouch;
@@ -197,7 +198,11 @@ public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeC
    private void buyRandomTrade() {
       if (this.canBuyRandomTrade()) {
          ModNetwork.CHANNEL
-            .sendToServer(new ShardTradeTradeMessage(-1, false, Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUUID() : null));
+            .sendToServer(
+               new ShardTradeTradeMessage(
+                  -1, InputEvents.isShiftDown(), Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUUID() : null
+               )
+            );
       }
    }
 
@@ -205,7 +210,9 @@ public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeC
       if (this.canBuyTrade(tradeIndex)) {
          ModNetwork.CHANNEL
             .sendToServer(
-               new ShardTradeTradeMessage(tradeIndex, false, Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUUID() : null)
+               new ShardTradeTradeMessage(
+                  tradeIndex, InputEvents.isShiftDown(), Minecraft.getInstance().player != null ? Minecraft.getInstance().player.getUUID() : null
+               )
             );
       }
    }

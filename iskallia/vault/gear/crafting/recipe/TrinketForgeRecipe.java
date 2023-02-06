@@ -1,6 +1,7 @@
 package iskallia.vault.gear.crafting.recipe;
 
 import iskallia.vault.client.ClientDiscoveredEntriesData;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.init.ModGearAttributes;
@@ -48,7 +49,7 @@ public class TrinketForgeRecipe extends VaultForgeRecipe {
    }
 
    @Override
-   public ItemStack createOutput(ServerPlayer crafter) {
+   public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter) {
       ItemStack trinket = TrinketItem.createRandomTrinket(this.effect);
       AttributeGearData data = AttributeGearData.read(trinket);
       data.updateAttribute(ModGearAttributes.CRAFTED_BY, crafter.getName().getContents());

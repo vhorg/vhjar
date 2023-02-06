@@ -207,8 +207,7 @@ public class ClassicListenersLogic extends ListenersLogic {
 
       while (it.hasNext()) {
          Entry<VaultModifier<?>> entry = (Entry<VaultModifier<?>>)it.next();
-         text.append(entry.getIntValue() + "x ");
-         text.append(((VaultModifier)entry.getKey()).getNameComponentFormatted(entry.getIntValue()));
+         text.append(((VaultModifier)entry.getKey()).getChatDisplayNameComponent(entry.getIntValue()));
          if (it.hasNext()) {
             text.append(new TextComponent(", "));
          } else {

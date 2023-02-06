@@ -1,7 +1,5 @@
 {
-    "replace": "false",
+    "replace": false,
     "values": [
-        "the_vault:living_chest",
-        "the_vault:living_chest_placeable"
     ]
 }

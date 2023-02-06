@@ -7,7 +7,7 @@ import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.PaxelConfigs;
 import iskallia.vault.container.ToolViseContainerMenu;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;

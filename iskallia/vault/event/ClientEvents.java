@@ -57,7 +57,7 @@ public class ClientEvents {
       ItemStack current = event.getItemStack();
       if (!current.isEmpty()) {
          Item item = current.getItem();
-         if (ModConfigs.VAULT_DIFFUSER.getDiffuserOutputMap().containsKey(item.getRegistryName())) {
+         if (ModConfigs.VAULT_DIFFUSER.contains(current)) {
             int value = ModConfigs.VAULT_DIFFUSER.getDiffuserOutputMap().get(item.getRegistryName());
             if (value > 0) {
                if (Screen.hasShiftDown()) {

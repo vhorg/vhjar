@@ -13,7 +13,7 @@ public class StatPylonBuff extends TickingPylonBuff<StatPylonBuff.Config> {
 
    @Override
    public boolean isDone() {
-      return this.tick >= this.config.duration;
+      return super.isDone() || this.tick >= this.config.duration;
    }
 
    @Override

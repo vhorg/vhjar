@@ -4,10 +4,10 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.client.util.TooltipUtil;
 import iskallia.vault.client.util.color.ColorUtil;
-import iskallia.vault.config.MagnetConfigs;
+import iskallia.vault.config.LegacyMagnetConfigs;
 import iskallia.vault.container.inventory.MagnetTableContainerMenu;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.LegacyMagnetItem;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -34,7 +34,7 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
    private float sturdinessBar = 0.0F;
    private final int[] ingredientCounts = new int[]{0, 0, 0, 0};
    private int upgradeVisual = 0;
-   private MagnetItem.Stat upgradedStat = null;
+   private LegacyMagnetItem.Stat upgradedStat = null;
    private boolean upgradedPerk = false;
    private final List<MagnetTableScreen.UpgradeButton> upgradeButtons = new ArrayList<>();
 
@@ -54,14 +54,6 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
       int i = (this.width - this.imageWidth) / 2;
       int j = (this.height - this.imageHeight) / 2;
       int u = 0;
-
-      for (MagnetItem.Stat stat : MagnetItem.Stat.values()) {
-         MagnetConfigs.Upgrade upgrade = ((MagnetTableContainerMenu)this.menu).upgrades.get(stat);
-         this.upgradeButtons
-            .add((MagnetTableScreen.UpgradeButton)this.addRenderableWidget(new MagnetTableScreen.UpgradeButton(i + 10, j + 19 + 22 * u, u, upgrade, stat)));
-         u++;
-      }
-
       this.slotChanged(this.menu, 0, ((MagnetTableContainerMenu)this.menu).getSlot(0).getItem());
    }
 
@@ -82,16 +74,16 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
       int barSize = 34;
       int s = Math.round(this.sturdinessBar * barSize);
       ItemStack magnet = this.getMagnet();
-      MagnetItem.Perk perk = MagnetItem.getPerk(magnet);
+      LegacyMagnetItem.Perk perk = LegacyMagnetItem.getPerk(magnet);
       int x0 = k + 46;
       int y0 = l + 48;
       if (s != 0) {
-         int cl = MagnetItem.getSturdinessColor((int)(this.sturdinessBar * 100.0F)).getColor();
+         int cl = LegacyMagnetItem.getSturdinessColor((int)(this.sturdinessBar * 100.0F)).getColor();
          GuiComponent.fill(poseStack, x0, y0, x0 + s, y0 + 3, 0xFF000000 | cl);
          TextComponent percentage = new TextComponent((int)(this.sturdinessBar * 100.0F) + "%");
          int centerX = x0 + barSize / 2;
          this.font.drawShadow(poseStack, percentage, centerX - this.font.width(percentage) / 2.0F, y0 + 5, cl);
-         if (perk == MagnetItem.Perk.NONE) {
+         if (perk == LegacyMagnetItem.Perk.NONE) {
             RenderSystem.setShaderTexture(0, TEXTURE);
             GuiComponent.blit(
                poseStack, centerX - 3 + (int)((ModConfigs.MAGNET_CONFIG.getSturdinessCutoff() - 50) * 0.13F), y0 - 2, 6, 6, 0.0F, 204.0F, 7, 7, 256, 256
@@ -107,8 +99,8 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
          int V = 94;
          int W = 10;
 
-         for (MagnetItem.Stat stat : MagnetItem.Stat.values()) {
-            int value = MagnetItem.getStatUpgrade(magnet, stat);
+         for (LegacyMagnetItem.Stat stat : LegacyMagnetItem.Stat.values()) {
+            int value = LegacyMagnetItem.getStatUpgrade(magnet, stat);
             if (value != 0) {
                l += 14;
                int iconSize = 9 - 1;
@@ -125,7 +117,7 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
             V += 18;
          }
 
-         if (perk != MagnetItem.Perk.NONE) {
+         if (perk != LegacyMagnetItem.Perk.NONE) {
             l += 14;
             int iconSize = 9 - 1;
             RenderSystem.setShaderTexture(0, TEXTURE);
@@ -153,7 +145,7 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
       this.renderTooltip(poseStack, mouseX, mouseY);
    }
 
-   private void renderUpgradeCost(PoseStack poseStack, MagnetConfigs.Upgrade upgrade) {
+   private void renderUpgradeCost(PoseStack poseStack, LegacyMagnetConfigs.Upgrade upgrade) {
       poseStack.pushPose();
       poseStack.translate(0.0, 0.0, this.getBlitOffset() + 300);
       int k = (this.width - this.imageWidth) / 2 + 4;
@@ -210,7 +202,7 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
             b.active = b.upgrade.canCraftAndApply(this.ingredientCounts, pStack, b.stat);
          }
 
-         this.sturdinessBar = MagnetItem.getSturdiness(magnet) / 100.0F;
+         this.sturdinessBar = LegacyMagnetItem.getSturdiness(magnet) / 100.0F;
       }
    }
 
@@ -220,10 +212,10 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
 
    protected class UpgradeButton extends AbstractButton {
       private final int textureIndex;
-      private final MagnetConfigs.Upgrade upgrade;
-      private final MagnetItem.Stat stat;
+      private final LegacyMagnetConfigs.Upgrade upgrade;
+      private final LegacyMagnetItem.Stat stat;
 
-      protected UpgradeButton(int x, int y, int index, MagnetConfigs.Upgrade upgrade, MagnetItem.Stat stat) {
+      protected UpgradeButton(int x, int y, int index, LegacyMagnetConfigs.Upgrade upgrade, LegacyMagnetItem.Stat stat) {
          super(x, y, 18, 18, TextComponent.EMPTY);
          this.textureIndex = index;
          this.upgrade = upgrade;
@@ -262,8 +254,8 @@ public class MagnetTableScreen extends AbstractContainerScreen<MagnetTableContai
          MagnetTableScreen.this.upgradeVisual = 30;
          MagnetTableScreen.this.upgradedStat = this.stat;
          MagnetTableScreen.this.upgradedPerk = false;
-         if (MagnetItem.getPerk(MagnetTableScreen.this.getMagnet()) == MagnetItem.Perk.NONE
-            && MagnetItem.getSturdiness(MagnetTableScreen.this.getMagnet()) - ModConfigs.MAGNET_CONFIG.getSturdinessDecrement()
+         if (LegacyMagnetItem.getPerk(MagnetTableScreen.this.getMagnet()) == LegacyMagnetItem.Perk.NONE
+            && LegacyMagnetItem.getSturdiness(MagnetTableScreen.this.getMagnet()) - ModConfigs.MAGNET_CONFIG.getSturdinessDecrement()
                <= ModConfigs.MAGNET_CONFIG.getSturdinessCutoff()) {
             MagnetTableScreen.this.upgradedPerk = true;
          }

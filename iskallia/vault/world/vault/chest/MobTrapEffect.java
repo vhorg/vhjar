@@ -1,12 +1,12 @@
 package iskallia.vault.world.vault.chest;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.core.vault.NaturalSpawner;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.world.vault.logic.VaultSpawner;
+import java.util.Random;
 import net.minecraft.server.level.ServerPlayer;
 
 public class MobTrapEffect extends VaultChestEffect {
@@ -35,13 +35,13 @@ public class MobTrapEffect extends VaultChestEffect {
          Listener listener = listeners.get(player.getUUID());
          if (listener != null) {
             listener.ifPresent(Runner.SPAWNER, spawner -> {
-               spawner.modify(NaturalSpawner.EXTRA_MAX_MOBS, ix -> ix + this.attempts);
+               int spawned = 0;
 
-               for (int i = 0; i < this.attempts; i++) {
-                  spawner.tickServer(world, vault, listener);
+               for (int i = 0; i < this.attempts * 200 && spawned < this.attempts; i++) {
+                  if (spawner.attemptSpawn(world, vault, player, new Random()) != null) {
+                     spawned++;
+                  }
                }
-
-               spawner.modify(NaturalSpawner.EXTRA_MAX_MOBS, ix -> ix - this.attempts);
             });
          }
       });

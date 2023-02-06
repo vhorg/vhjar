@@ -3,7 +3,7 @@ package iskallia.vault.block.entity;
 import iskallia.vault.container.inventory.MagnetTableContainerMenu;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.LegacyMagnetItem;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -97,7 +97,7 @@ public class MagnetTableTile extends RandomizableContainerBlockEntity implements
 
    public boolean canPlaceItemThroughFace(int index, ItemStack stack, @Nullable Direction direction) {
       if (direction.getAxis() == Axis.Y) {
-         return stack.getItem() instanceof MagnetItem;
+         return stack.getItem() instanceof LegacyMagnetItem;
       } else {
          Item i = stack.getItem();
          return ModConfigs.MAGNET_CONFIG.getMaterialItem(index - 1) == i;

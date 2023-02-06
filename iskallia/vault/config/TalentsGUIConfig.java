@@ -32,6 +32,12 @@ public class TalentsGUIConfig extends Config {
       style = new SkillStyle(140, 0, VaultMod.id("gui/talents/berserking"));
       style.frameType = SkillFrame.RECTANGULAR;
       this.styles.put(ModConfigs.TALENTS.BERSERKING.getParentName(), style);
+      style = new SkillStyle(70, 210, VaultMod.id("gui/talents/methodical"));
+      style.frameType = SkillFrame.RECTANGULAR;
+      this.styles.put(ModConfigs.TALENTS.METHODICAL.getParentName(), style);
+      style = new SkillStyle(140, 210, VaultMod.id("gui/talents/depleted"));
+      style.frameType = SkillFrame.RECTANGULAR;
+      this.styles.put(ModConfigs.TALENTS.DEPLETED.getParentName(), style);
       style = new SkillStyle(280, 0, VaultMod.id("gui/talents/strength"));
       style.frameType = SkillFrame.RECTANGULAR;
       this.styles.put(ModConfigs.TALENTS.STRENGTH.getParentName(), style);

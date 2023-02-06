@@ -50,7 +50,7 @@ public class CoinPileBlock extends Block implements EntityBlock {
    };
 
    public CoinPileBlock() {
-      super(Properties.of(Material.METAL).sound(ModSounds.COIN_PILE_SOUND_TYPE).noOcclusion().strength(4.6F, 3.0F));
+      super(Properties.of(Material.METAL).sound(ModSounds.COIN_PILE_SOUND_TYPE).noOcclusion().strength(0.6F, 3.0F));
    }
 
    public PushReaction getPistonPushReaction(BlockState pState) {

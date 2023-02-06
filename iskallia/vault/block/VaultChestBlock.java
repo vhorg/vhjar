@@ -56,6 +56,10 @@ public class VaultChestBlock extends ChestBlock {
       return this.type;
    }
 
+   public boolean hasStepBreaking() {
+      return this == ModBlocks.GILDED_CHEST || this == ModBlocks.LIVING_CHEST || this == ModBlocks.ORNATE_CHEST;
+   }
+
    @Nullable
    public <A extends BlockEntity> BlockEntityTicker<A> getTicker(Level pLevel, BlockState state, BlockEntityType<A> tBlockEntityType) {
       return BlockHelper.getTicker(tBlockEntityType, ModBlocks.VAULT_CHEST_TILE_ENTITY, pLevel.isClientSide ? VaultChestTileEntity::tick : null);
@@ -64,7 +68,7 @@ public class VaultChestBlock extends ChestBlock {
    public boolean onDestroyedByPlayer(BlockState state, Level world, BlockPos pos, Player player, boolean willHarvest, FluidState fluid) {
       if (!(world.getBlockEntity(pos) instanceof VaultChestTileEntity chest && !player.isCreative())) {
          return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
-      } else if (this != ModBlocks.GILDED_CHEST && this != ModBlocks.LIVING_CHEST && this != ModBlocks.ORNATE_CHEST) {
+      } else if (!this.hasStepBreaking()) {
          return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
       } else if (chest.isEmpty()) {
          return super.onDestroyedByPlayer(state, world, pos, player, willHarvest, fluid);
@@ -75,7 +79,7 @@ public class VaultChestBlock extends ChestBlock {
    }
 
    public void playerDestroy(Level world, Player player, BlockPos pos, BlockState state, @Nullable BlockEntity te, ItemStack stack) {
-      if (this != ModBlocks.GILDED_CHEST && this != ModBlocks.LIVING_CHEST && this != ModBlocks.ORNATE_CHEST) {
+      if (!this.hasStepBreaking()) {
          super.playerDestroy(world, player, pos, state, te, stack);
       } else {
          player.awardStat(Stats.BLOCK_MINED.get(this));

@@ -3,6 +3,7 @@ package iskallia.vault.client.gui.screen.bounty.element.task;
 import iskallia.vault.bounty.task.CompletionTask;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.screen.bounty.BountyScreen;
+import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -14,8 +15,8 @@ import net.minecraft.network.chat.TextComponent;
 public class CompletionTaskElement extends AbstractTaskElement<CompletionTask> {
    public static final TextComponent EMPTY_LINE = new TextComponent("");
 
-   protected CompletionTaskElement(ISpatial spatial, CompletionTask task) {
-      super(spatial, task);
+   protected CompletionTaskElement(ISpatial spatial, CompletionTask task, BountyElement.Status status) {
+      super(spatial, task, status);
    }
 
    @Override

@@ -4,6 +4,7 @@ import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
 import iskallia.vault.client.gui.overlay.ArenaScoreboardOverlay;
 import iskallia.vault.client.gui.overlay.CheerOverlay;
 import iskallia.vault.client.gui.overlay.GiftBombOverlay;
+import iskallia.vault.client.gui.overlay.HarmfulPotionOverlay;
 import iskallia.vault.client.gui.overlay.PlayerArmorOverlay;
 import iskallia.vault.client.gui.overlay.PlayerDamageOverlay;
 import iskallia.vault.client.gui.overlay.PlayerRageOverlay;
@@ -28,6 +29,7 @@ import iskallia.vault.client.gui.screen.VaultCharmControllerScreen;
 import iskallia.vault.client.gui.screen.VaultCrateScreen;
 import iskallia.vault.client.gui.screen.block.RelicPedestalScreen;
 import iskallia.vault.client.gui.screen.block.SpiritExtractorScreen;
+import iskallia.vault.client.gui.screen.block.ToolStationScreen;
 import iskallia.vault.client.gui.screen.block.TransmogTableScreen;
 import iskallia.vault.client.gui.screen.block.VaultArtisanStationScreen;
 import iskallia.vault.client.gui.screen.block.VaultDiffuserScreen;
@@ -70,6 +72,7 @@ public class ModScreens {
       MenuScreens.register(ModContainers.TOOL_VISE_CONTAINER, ToolViseScreen::new);
       MenuScreens.register(ModContainers.MAGNET_TABLE_CONTAINER, MagnetTableScreen::new);
       MenuScreens.register(ModContainers.VAULT_FORGE_CONTAINER, VaultForgeScreen::new);
+      MenuScreens.register(ModContainers.TOOL_STATION_CONTAINER, ToolStationScreen::new);
       MenuScreens.register(ModContainers.VAULT_ARTISAN_STATION_CONTAINER, VaultArtisanStationScreen::new);
       MenuScreens.register(ModContainers.VAULT_RECYCLER_CONTAINER, VaultRecyclerScreen::new);
       MenuScreens.register(ModContainers.VAULT_DIFFUSER_CONTAINER, VaultDiffuserScreen::new);
@@ -89,6 +92,7 @@ public class ModScreens {
 
    public static void registerOverlays() {
       registerTop(new VignetteOverlay());
+      registerTop(new HarmfulPotionOverlay());
       registerAbove(new PlayerDamageOverlay(), ForgeIngameGui.PLAYER_HEALTH_ELEMENT);
       registerAbove(new PlayerRageOverlay(), ForgeIngameGui.EXPERIENCE_BAR_ELEMENT);
       registerAbove(new PlayerArmorOverlay(), ForgeIngameGui.ARMOR_LEVEL_ELEMENT);

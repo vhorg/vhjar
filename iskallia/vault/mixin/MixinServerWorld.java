@@ -1,6 +1,7 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.world.data.ServerVaults;
+import java.util.List;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import net.minecraft.core.Holder;
@@ -8,11 +9,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.WritableLevelData;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,11 +25,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin({ServerLevel.class})
 public abstract class MixinServerWorld extends Level {
    @Shadow
+   @Final
+   private MinecraftServer server;
+
+   @Shadow
    public abstract ServerChunkCache getChunkSource();
 
    @Shadow
    @Nonnull
    public abstract MinecraftServer getServer();
+
+   @Shadow
+   public abstract List<ServerPlayer> players();
 
    protected MixinServerWorld(
       WritableLevelData p_204149_,

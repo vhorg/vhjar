@@ -12,6 +12,8 @@ import iskallia.vault.skill.talent.type.EffectTalent;
 import iskallia.vault.skill.talent.type.ExperiencedTalent;
 import iskallia.vault.skill.talent.type.LowHealthDamageTalent;
 import iskallia.vault.skill.talent.type.LowHealthResistanceTalent;
+import iskallia.vault.skill.talent.type.LowManaDamageTalent;
+import iskallia.vault.skill.talent.type.LowManaHealingEfficiencyTalent;
 import iskallia.vault.skill.talent.type.LuckyAltarTalent;
 import iskallia.vault.skill.talent.type.VanillaAttributeTalent;
 import java.util.Arrays;
@@ -72,6 +74,10 @@ public class TalentsConfig extends Config {
    public TalentGroup<LowHealthResistanceTalent> LAST_STAND;
    @Expose
    public TalentGroup<LowHealthDamageTalent> BERSERKING;
+   @Expose
+   public TalentGroup<LowManaHealingEfficiencyTalent> METHODICAL;
+   @Expose
+   public TalentGroup<LowManaDamageTalent> DEPLETED;
 
    @Override
    public String getName() {
@@ -103,7 +109,9 @@ public class TalentsConfig extends Config {
          this.BARTERING,
          this.BLACKSMITH,
          this.LAST_STAND,
-         this.BERSERKING
+         this.BERSERKING,
+         this.METHODICAL,
+         this.DEPLETED
       );
    }
 
@@ -185,6 +193,15 @@ public class TalentsConfig extends Config {
       );
       this.BERSERKING = new TalentGroup<>(
          "Berserking", new LowHealthDamageTalent(1, 0.2F, 0.15F), new LowHealthDamageTalent(2, 0.2F, 0.25F), new LowHealthDamageTalent(3, 0.2F, 0.5F)
+      );
+      this.METHODICAL = new TalentGroup<>(
+         "Methodical",
+         new LowManaHealingEfficiencyTalent(1, 0.2F, 0.05F),
+         new LowManaHealingEfficiencyTalent(2, 0.2F, 0.1F),
+         new LowManaHealingEfficiencyTalent(3, 0.2F, 0.15F)
+      );
+      this.DEPLETED = new TalentGroup<>(
+         "Depleted", new LowManaDamageTalent(1, 0.2F, 0.15F), new LowManaDamageTalent(2, 0.2F, 0.25F), new LowManaDamageTalent(3, 0.2F, 0.5F)
       );
    }
 }

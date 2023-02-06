@@ -6,6 +6,7 @@ import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModDynamicModels;
+import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.DiscoveredModelsData;
@@ -89,10 +90,11 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
    public void setGearToPlayerLevel(ServerPlayer player) {
       for (ItemStack stack : this.rewardItems) {
          if (player != null && stack.getItem() instanceof VaultGearItem gearItem) {
-            gearItem.setPlayerLevel(stack, player);
+            gearItem.setItemLevel(stack, player);
          }
 
          DataTransferItem.doConvertStack(stack);
+         DataInitializationItem.doInitialize(stack);
       }
    }
 

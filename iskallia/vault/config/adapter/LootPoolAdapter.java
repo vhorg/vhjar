@@ -101,7 +101,10 @@ public class LootPoolAdapter extends WeightedTreeAdapter<LootEntry> {
             object.addProperty("nbt", value.getNbt().toString());
          }
 
-         object.add("count", LootRollAdapter.INSTANCE.serialize(value.getCount(), typeOfSrc, context));
+         if (!(value.getCount() instanceof LootRoll.Constant constant && constant.getCount() == 1)) {
+            object.add("count", LootRollAdapter.INSTANCE.serialize(value.getCount(), typeOfSrc, context));
+         }
+
          return object;
       }
    }

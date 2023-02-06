@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "the_vault:extraordinary_wutodie"
+    }
+  ],
+  "result": {
+    "item": "the_vault:perfect_wutodie",
+    "count": 4
+  }
+}

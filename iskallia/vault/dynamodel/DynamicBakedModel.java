@@ -2,6 +2,8 @@ package iskallia.vault.dynamodel;
 
 import iskallia.vault.dynamodel.registry.DynamicModelRegistry;
 import iskallia.vault.init.ModDynamicModels;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.MagnetItem;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -35,6 +37,10 @@ public class DynamicBakedModel implements BakedModel {
       this.overrides = new ItemOverrides(loader, missing, id2 -> missing, Collections.emptyList()) {
          public BakedModel resolve(@NotNull BakedModel original, @NotNull ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed) {
             if (stack.getItem() instanceof DynamicModelItem dynamicModelItem) {
+               if (stack.is(ModItems.MAGNET) && MagnetItem.hasLegacyData(stack)) {
+                  MagnetItem.removeLegacyData(stack);
+               }
+
                ResourceLocation modelId = dynamicModelItem.getDynamicModelId(stack).orElse(null);
                if (modelId == null) {
                   return original;

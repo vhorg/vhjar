@@ -106,7 +106,7 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
 
       BountyData data = BountyData.get();
 
-      for (ItemDiscoveryTask task : data.getAllActiveTasksById(player, TaskRegistry.ITEM_DISCOVERY)) {
+      for (ItemDiscoveryTask task : data.getAllLegendaryById(player, TaskRegistry.ITEM_DISCOVERY)) {
          if (!task.isComplete()) {
             task.setCachedItems(items);
             if (task.validate(player, event)) {
@@ -119,8 +119,31 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
                      if (task.isComplete()) {
                         ModNetwork.CHANNEL
                            .sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
-                        break;
                      }
+
+                     return;
+                  }
+               }
+            }
+         }
+      }
+
+      for (ItemDiscoveryTask taskx : data.getAllActiveById(player, TaskRegistry.ITEM_DISCOVERY)) {
+         if (!taskx.isComplete()) {
+            taskx.setCachedItems(items);
+            if (taskx.validate(player, event)) {
+               for (ItemStack stackx : items) {
+                  Item item = stackx.getItem();
+                  ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
+                  ResourceLocation requiredItem = taskx.getProperties().getItemId();
+                  if (itemId != null && itemId.equals(requiredItem)) {
+                     taskx.increment(stackx.getCount());
+                     if (taskx.isComplete()) {
+                        ModNetwork.CHANNEL
+                           .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                     }
+
+                     return;
                   }
                }
             }

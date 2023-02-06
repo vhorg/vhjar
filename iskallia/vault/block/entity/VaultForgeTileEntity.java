@@ -38,6 +38,10 @@ public class VaultForgeTileEntity extends BlockEntity implements MenuProvider {
       super(ModBlocks.VAULT_FORGE_TILE_ENTITY, pWorldPosition, pBlockState);
    }
 
+   public boolean stillValid(Player player) {
+      return this.level != null && this.level.getBlockEntity(this.worldPosition) == this ? this.inventory.stillValid(player) : false;
+   }
+
    public OverSizedInventory getInventory() {
       return this.inventory;
    }

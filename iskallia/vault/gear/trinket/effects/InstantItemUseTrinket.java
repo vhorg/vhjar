@@ -21,7 +21,7 @@ public class InstantItemUseTrinket extends TrinketEffect.Simple {
       if (event.getEntityLiving() instanceof Player player) {
          if (!TrinketHelper.getTrinkets(player, InstantItemUseTrinket.class).isEmpty()) {
             ItemStack inUse = event.getItem();
-            if (inUse.isEdible() || inUse.getUseAnimation() == UseAnim.DRINK || inUse.getUseAnimation() == UseAnim.EAT) {
+            if (inUse.isEdible() || inUse.getUseAnimation() == UseAnim.EAT) {
                event.setDuration(1);
             }
          }

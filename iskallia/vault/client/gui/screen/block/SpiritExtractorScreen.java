@@ -192,10 +192,13 @@ public class SpiritExtractorScreen extends AbstractElementContainerScreen<Spirit
          }
 
          purchaseButtonTooltips.add(TextComponent.EMPTY);
-         int baseCostCount = recoveryCost.getBaseCost().getCount();
+         float baseCostCount = recoveryCost.getBaseCount();
          int levels = Math.max(1, ((SpiritExtractorContainer)this.getMenu()).getPlayerLevel());
          purchaseButtonTooltips.add(
-            new TranslatableComponent("screen.the_vault.spirit_extractor.tooltip.base_cost", new Object[]{baseCostCount * levels, baseCostCount, levels})
+            new TranslatableComponent(
+                  "screen.the_vault.spirit_extractor.tooltip.base_cost",
+                  new Object[]{String.format("%.0f", baseCostCount * levels), String.format("%.2f", baseCostCount), levels}
+               )
                .withStyle(ChatFormatting.GRAY)
          );
          recoveryCost.getStackCost()
@@ -214,7 +217,7 @@ public class SpiritExtractorScreen extends AbstractElementContainerScreen<Spirit
          }
 
          float heroDiscount = ((SpiritExtractorContainer)this.getMenu()).getHeroDiscount();
-         if (heroDiscount > 0.0F) {
+         if (heroDiscount >= 0.01) {
             purchaseButtonTooltips.add(
                new TranslatableComponent(
                      "screen.the_vault.spirit_extractor.tooltip.hero_discount", new Object[]{String.format("%.0f%%", heroDiscount * 100.0F)}

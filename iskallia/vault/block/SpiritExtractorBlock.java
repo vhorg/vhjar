@@ -101,7 +101,10 @@ public class SpiritExtractorBlock extends Block implements EntityBlock {
       } else if (level.isClientSide()) {
          return InteractionResult.SUCCESS;
       } else {
-         if (player.isShiftKeyDown() && player.getOffhandItem().isEmpty() && player.getPassengers().isEmpty()) {
+         if (player.isShiftKeyDown()
+            && player.getOffhandItem().isEmpty()
+            && player.getPassengers().isEmpty()
+            && spiritExtractorTile.getGameProfile().isPresent()) {
             this.pickupSpirit(player, spiritExtractorTile);
          } else {
             this.openGui(pos, (ServerPlayer)player);

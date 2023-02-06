@@ -113,7 +113,7 @@ public class RelicPedestalContainer extends AbstractElementContainer {
    }
 
    public boolean stillValid(@Nonnull Player player) {
-      return true;
+      return this.tileEntity == null ? false : this.tileEntity.stillValid(player);
    }
 
    public void removed(@Nonnull Player player) {
@@ -128,23 +128,40 @@ public class RelicPedestalContainer extends AbstractElementContainer {
 
    @Nonnull
    public ItemStack quickMoveStack(@Nonnull Player player, int index) {
+      ItemStack itemstack = ItemStack.EMPTY;
       Slot slot = (Slot)this.slots.get(index);
-      if (!slot.hasItem()) {
-         return ItemStack.EMPTY;
-      } else {
-         ItemStack slotItem = slot.getItem();
-         ItemStack copiedStack = slotItem.copy();
-         if (!this.playerInventoryIndexRange.contains(index) && !this.hotbarIndexRange.contains(index)) {
-            if (this.internalInventoryIndexRange.contains(index)) {
-               return this.moveItemStackTo(slotItem, this.playerInventoryIndexRange.start(), this.hotbarIndexRange.end(), false)
-                  ? copiedStack
-                  : ItemStack.EMPTY;
-            } else {
-               return copiedStack;
-            }
-         } else {
-            return this.moveItemStackTo(slotItem, this.internalInventoryIndexRange, false) ? copiedStack : ItemStack.EMPTY;
+      if (slot.hasItem()) {
+         ItemStack slotStack = slot.getItem();
+         itemstack = slotStack.copy();
+         if (index >= 0 && index < 36 && this.moveItemStackTo(slotStack, 36, this.slots.size(), false)) {
+            return itemstack;
          }
+
+         if (index >= 0 && index < 27) {
+            if (!this.moveItemStackTo(slotStack, 27, 36, false)) {
+               return ItemStack.EMPTY;
+            }
+         } else if (index >= 27 && index < 36) {
+            if (!this.moveItemStackTo(slotStack, 0, 27, false)) {
+               return ItemStack.EMPTY;
+            }
+         } else if (!this.moveItemStackTo(slotStack, 0, 36, false)) {
+            return ItemStack.EMPTY;
+         }
+
+         if (slotStack.getCount() == 0) {
+            slot.set(ItemStack.EMPTY);
+         } else {
+            slot.setChanged();
+         }
+
+         if (slotStack.getCount() == itemstack.getCount()) {
+            return ItemStack.EMPTY;
+         }
+
+         slot.onTake(player, slotStack);
       }
+
+      return itemstack;
    }
 }

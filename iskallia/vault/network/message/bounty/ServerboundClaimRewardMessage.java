@@ -28,15 +28,20 @@ public record ServerboundClaimRewardMessage(UUID bountyId) {
             ServerPlayer serverPlayer = context.getSender();
             if (serverPlayer != null) {
                UUID playerId = serverPlayer.getUUID();
+               boolean legendary = BountyData.get().getAllLegendaryFor(playerId).findById(message.bountyId).isPresent();
                BountyData.get().complete(serverPlayer, message.bountyId);
                if (serverPlayer.containerMenu instanceof BountyContainer container) {
-                  container.replaceActive(new BountyList());
+                  if (!legendary) {
+                     container.replaceActive(new BountyList());
+                  }
+
                   ModNetwork.CHANNEL
                      .sendTo(
                         new ClientboundRefreshBountiesMessage(
                            BountyData.get().getAllActiveFor(playerId),
                            BountyData.get().getAllAvailableFor(playerId),
-                           BountyData.get().getAllCompletedFor(playerId)
+                           BountyData.get().getAllCompletedFor(playerId),
+                           BountyData.get().getAllLegendaryFor(playerId)
                         ),
                         serverPlayer.connection.connection,
                         NetworkDirection.PLAY_TO_CLIENT

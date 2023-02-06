@@ -19,6 +19,7 @@ import iskallia.vault.client.gui.framework.render.Tooltips;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
+import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.util.TextUtil;
 import java.text.DecimalFormat;
@@ -41,12 +42,15 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
    final DynamicProgressElement<?> progressBar;
    private final LabelElement<?> description;
 
-   protected AbstractTaskElement(ISpatial spatial, T task) {
+   protected AbstractTaskElement(ISpatial spatial, T task, BountyElement.Status status) {
       super(spatial);
       this.task = task;
       this.taskReward = task.getTaskReward();
+      LabelElement<?> statusLabel = new LabelElement(
+         Spatials.positionXY(2, 5), new TextComponent("Status: ").withStyle(ChatFormatting.BLACK).append(status.getDisplay()), LabelTextStyle.defaultStyle()
+      );
       LabelElement<?> descriptionLabel = new LabelElement(
-         Spatials.positionXY(2, 5), new TextComponent("Description:").withStyle(ChatFormatting.BLACK), LabelTextStyle.defaultStyle()
+         Spatials.positionXY(2, 20), new TextComponent("Description:").withStyle(ChatFormatting.BLACK), LabelTextStyle.defaultStyle()
       );
       this.description = this.addElement(
             new LabelElement<LabelElement<LabelElement<?>>>(
@@ -59,7 +63,7 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
          .layout((screen, gui, parent, world) -> world.width(this.width() - 4));
       int descriptionHeight = this.getLabelHeight(this.description);
       LabelElement<?> progressLabel = new LabelElement(
-         Spatials.positionXY(2, descriptionHeight + 18), new TextComponent("Progress:").withStyle(ChatFormatting.BLACK), LabelTextStyle.defaultStyle()
+         Spatials.positionXY(2, descriptionHeight + 18 + 15), new TextComponent("Progress:").withStyle(ChatFormatting.BLACK), LabelTextStyle.defaultStyle()
       );
       int barWidth = this.getWorldSpatial().width() - 4;
       this.progressBar = new DynamicProgressElement(
@@ -135,7 +139,9 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
          new TextComponent("+" + this.taskReward.getVaultExp() + " Vault XP").withStyle(ChatFormatting.YELLOW),
          LabelTextStyle.shadow()
       );
-      this.addElements(descriptionLabel, new IElement[]{this.description, progressLabel, this.progressBar, progressText, rewardText, vaultExpLabel});
+      this.addElements(
+         statusLabel, new IElement[]{descriptionLabel, this.description, progressLabel, this.progressBar, progressText, rewardText, vaultExpLabel}
+      );
    }
 
    private int getLabelHeight(LabelElement<?> label) {
@@ -188,19 +194,19 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
       }
    }
 
-   public static <E extends AbstractTaskElement<T>, T extends Task<?>> E create(ResourceLocation taskId, ISpatial spatial, T task) {
+   public static <E extends AbstractTaskElement<T>, T extends Task<?>> E create(ResourceLocation taskId, ISpatial spatial, T task, BountyElement.Status status) {
       if (taskId.equals(TaskRegistry.KILL_ENTITY)) {
-         return (E)(new KillEntityTaskElement(spatial, (KillEntityTask)task));
+         return (E)(new KillEntityTaskElement(spatial, (KillEntityTask)task, status));
       } else if (taskId.equals(TaskRegistry.DAMAGE_ENTITY)) {
-         return (E)(new DamageEntityTaskElement(spatial, (DamageTask)task));
+         return (E)(new DamageEntityTaskElement(spatial, (DamageTask)task, status));
       } else if (taskId.equals(TaskRegistry.COMPLETION)) {
-         return (E)(new CompletionTaskElement(spatial, (CompletionTask)task));
+         return (E)(new CompletionTaskElement(spatial, (CompletionTask)task, status));
       } else if (taskId.equals(TaskRegistry.ITEM_SUBMISSION)) {
-         return (E)(new ItemSubmissionTaskElement(spatial, (ItemSubmissionTask)task));
+         return (E)(new ItemSubmissionTaskElement(spatial, (ItemSubmissionTask)task, status));
       } else if (taskId.equals(TaskRegistry.ITEM_DISCOVERY)) {
-         return (E)(new ItemDiscoveryTaskElement(spatial, (ItemDiscoveryTask)task));
+         return (E)(new ItemDiscoveryTaskElement(spatial, (ItemDiscoveryTask)task, status));
       } else if (taskId.equals(TaskRegistry.MINING)) {
-         return (E)(new MiningTaskElement(spatial, (MiningTask)task));
+         return (E)(new MiningTaskElement(spatial, (MiningTask)task, status));
       } else {
          throw new IllegalArgumentException("No Task Element defined for " + taskId);
       }

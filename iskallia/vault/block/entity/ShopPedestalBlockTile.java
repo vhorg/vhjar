@@ -1,11 +1,11 @@
 package iskallia.vault.block.entity;
 
 import iskallia.vault.config.ShopPedestalConfig;
-import iskallia.vault.core.vault.Vault;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLootItem;
+import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -39,14 +39,9 @@ public class ShopPedestalBlockTile extends BlockEntity {
             ShopPedestalConfig.ShopOffer shopOffer = ModConfigs.SHOP_PEDESTAL.getForLevel(level, serverLevel.getRandom());
             if (shopOffer != null && !shopOffer.isEmpty()) {
                ItemStack offerStack = shopOffer.offer().copy();
-               if (offerStack.getItem() instanceof VaultLootItem lootItem) {
-                  Vault vault = ServerVaults.get(serverLevel).orElse(null);
-                  if (vault != null) {
-                     lootItem.initializeLoot(vault, offerStack);
-                  }
-               }
-
+               VaultLevelItem.doInitializeVaultLoot(offerStack, serverLevel, pos);
                offerStack = DataTransferItem.doConvertStack(offerStack);
+               DataInitializationItem.doInitialize(offerStack);
                tile.offer = offerStack.copy();
                tile.currency = shopOffer.currency().copy();
             }

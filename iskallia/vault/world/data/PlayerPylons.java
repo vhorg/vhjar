@@ -1,5 +1,6 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.pylon.PylonBuff;
 import iskallia.vault.nbt.VListNBT;
 import javax.annotation.Nonnull;
@@ -24,10 +25,14 @@ public class PlayerPylons extends SavedData {
    protected VListNBT<PylonBuff<?>, CompoundTag> buffs = (VListNBT<PylonBuff<?>, CompoundTag>)VListNBT.of(PylonBuff::fromNBT);
    protected boolean initialized;
 
-   public static void add(Player player, PylonBuff.Config<?> config) {
+   public static void add(Vault vault, Player player, PylonBuff.Config<?> config) {
       MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
       PylonBuff<?> buff = config.build();
       buff.setPlayer(player);
+      if (vault != null) {
+         buff.setVault(vault);
+      }
+
       buff.initServer(server);
       buff.onAdd(server);
       get().buffs.add(buff);

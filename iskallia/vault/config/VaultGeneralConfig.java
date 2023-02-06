@@ -13,8 +13,10 @@ import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -92,7 +94,11 @@ public class VaultGeneralConfig extends Config {
    }
 
    public boolean isBlacklisted(ItemStack stack) {
-      ResourceLocation registryName = stack.getItem().getRegistryName();
+      return this.isBlacklisted(stack.getItem());
+   }
+
+   public boolean isBlacklisted(Item item) {
+      ResourceLocation registryName = item.getRegistryName();
       if (registryName == null) {
          return false;
       } else {
@@ -109,7 +115,11 @@ public class VaultGeneralConfig extends Config {
    }
 
    public boolean isBlacklisted(BlockState state) {
-      ResourceLocation registryName = state.getBlock().getRegistryName();
+      return this.isBlacklisted(state.getBlock());
+   }
+
+   public boolean isBlacklisted(Block block) {
+      ResourceLocation registryName = block.getRegistryName();
       if (registryName == null) {
          return false;
       } else {

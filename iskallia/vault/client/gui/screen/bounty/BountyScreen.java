@@ -37,11 +37,27 @@ public class BountyScreen extends AbstractElementContainerScreen<BountyContainer
       VaultMod.id("unindentified"),
       ScreenTextures.BOUNTY_UNIDENTIFIED
    );
+   public static final Map<ResourceLocation, TextureAtlasRegion> TASK_ICON_MAP_LEGENDARY = Map.of(
+      TaskRegistry.KILL_ENTITY,
+      ScreenTextures.BOUNTY_KILL_ICON_32,
+      TaskRegistry.DAMAGE_ENTITY,
+      ScreenTextures.BOUNTY_DAMAGE_ENTITY_32,
+      TaskRegistry.COMPLETION,
+      ScreenTextures.BOUNTY_COMPLETION_32,
+      TaskRegistry.ITEM_DISCOVERY,
+      ScreenTextures.BOUNTY_ITEM_DISCOVERY_32,
+      TaskRegistry.ITEM_SUBMISSION,
+      ScreenTextures.BOUNTY_ITEM_SUBMISSION_32,
+      TaskRegistry.MINING,
+      ScreenTextures.BOUNTY_MINING_32,
+      VaultMod.id("unindentified"),
+      ScreenTextures.BOUNTY_UNIDENTIFIED
+   );
    public static final Map<String, TextComponent> OBJECTIVE_NAME = Map.of(
       "obelisk",
       new TextComponent("Obelisks"),
       "boss",
-      new TextComponent("Kill The Boss"),
+      new TextComponent("Hunt The Guardians"),
       "cake",
       new TextComponent("Find The Cakes"),
       "scavenger",

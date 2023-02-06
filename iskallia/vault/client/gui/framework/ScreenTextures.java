@@ -286,6 +286,21 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_EMPTY_32_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_EMPTY_32, BUTTON_EMPTY_32_HOVER, BUTTON_EMPTY_32_PRESSED, BUTTON_EMPTY_32_DISABLED
    );
+   public static final TextureAtlasRegion BUTTON_EMPTY_LEGENDARY = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/button_empty_legendary")
+   );
+   public static final TextureAtlasRegion BUTTON_EMPTY_LEGENDARY_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/button_empty_legendary_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_EMPTY_LEGENDARY_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/button_empty_legendary_pressed")
+   );
+   public static final TextureAtlasRegion BUTTON_EMPTY_LEGENDARY_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/button_empty_legendary_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_EMPTY_LEGENDARY_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_EMPTY_LEGENDARY, BUTTON_EMPTY_LEGENDARY_HOVER, BUTTON_EMPTY_LEGENDARY_PRESSED, BUTTON_EMPTY_LEGENDARY_DISABLED
+   );
    public static final DynamicProgressElement.ProgressTextures BOUNTY_PROGRESS_BAR = new DynamicProgressElement.ProgressTextures(
       INSET_GREY_BACKGROUND, SLOT_FOREGROUND
    );
@@ -305,6 +320,22 @@ public final class ScreenTextures {
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/item_submission_bounty")
    );
    public static final TextureAtlasRegion BOUNTY_MINING = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/mining_bounty"));
+   public static final TextureAtlasRegion BOUNTY_KILL_ICON_32 = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/kill_entity_bounty_32")
+   );
+   public static final TextureAtlasRegion BOUNTY_COMPLETION_32 = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/completion_bounty_32")
+   );
+   public static final TextureAtlasRegion BOUNTY_DAMAGE_ENTITY_32 = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/damage_entity_bounty_32")
+   );
+   public static final TextureAtlasRegion BOUNTY_ITEM_DISCOVERY_32 = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/item_discovery_bounty_32")
+   );
+   public static final TextureAtlasRegion BOUNTY_ITEM_SUBMISSION_32 = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/item_submission_bounty_32")
+   );
+   public static final TextureAtlasRegion BOUNTY_MINING_32 = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/mining_bounty_32"));
    public static final TextureAtlasRegion BOUNTY_UNIDENTIFIED = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/bounty/unidentified_bounty")
    );

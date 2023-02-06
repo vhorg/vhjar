@@ -8,6 +8,7 @@ import iskallia.vault.container.RenamingContainer;
 import iskallia.vault.container.ScavengerChestContainer;
 import iskallia.vault.container.SpiritExtractorContainer;
 import iskallia.vault.container.StatisticsTabContainer;
+import iskallia.vault.container.ToolStationContainer;
 import iskallia.vault.container.ToolViseContainerMenu;
 import iskallia.vault.container.TransmogTableContainer;
 import iskallia.vault.container.VaultArtisanStationContainer;
@@ -61,6 +62,7 @@ public class ModContainers {
    public static MenuType<ToolViseContainerMenu> TOOL_VISE_CONTAINER;
    public static MenuType<MagnetTableContainerMenu> MAGNET_TABLE_CONTAINER;
    public static MenuType<VaultForgeContainer> VAULT_FORGE_CONTAINER;
+   public static MenuType<ToolStationContainer> TOOL_STATION_CONTAINER;
    public static MenuType<VaultArtisanStationContainer> VAULT_ARTISAN_STATION_CONTAINER;
    public static MenuType<VaultRecyclerContainer> VAULT_RECYCLER_CONTAINER;
    public static MenuType<VaultDiffuserContainer> VAULT_DIFFUSER_CONTAINER;
@@ -149,6 +151,11 @@ public class ModContainers {
          BlockPos pos = buffer.readBlockPos();
          return new VaultForgeContainer(windowId, world, pos, inventory);
       });
+      TOOL_STATION_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new ToolStationContainer(windowId, world, pos, inventory);
+      });
       VAULT_ARTISAN_STATION_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          Level world = inventory.player.getCommandSenderWorld();
          BlockPos pos = buffer.readBlockPos();
@@ -204,6 +211,7 @@ public class ModContainers {
                (MenuType)TOOL_VISE_CONTAINER.setRegistryName("tool_vise_container"),
                (MenuType)MAGNET_TABLE_CONTAINER.setRegistryName("magnet_table_container"),
                (MenuType)VAULT_FORGE_CONTAINER.setRegistryName("vault_forge_container"),
+               (MenuType)TOOL_STATION_CONTAINER.setRegistryName("tool_station_container"),
                (MenuType)VAULT_ARTISAN_STATION_CONTAINER.setRegistryName("vault_artisan_station_container"),
                (MenuType)VAULT_RECYCLER_CONTAINER.setRegistryName("vault_recycler_container"),
                (MenuType)VAULT_DIFFUSER_CONTAINER.setRegistryName("vault_diffuser_container"),

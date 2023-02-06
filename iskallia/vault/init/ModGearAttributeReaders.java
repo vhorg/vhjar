@@ -28,6 +28,10 @@ public class ModGearAttributeReaders {
       return new DecimalModifierReader.Round<>(modifierName, rgbColor);
    }
 
+   public static <T extends Float> DecimalModifierReader<T> addedRoundedDecimalReader(String modifierName, int rgbColor, float multiplier) {
+      return new DecimalModifierReader.Round<>(modifierName, rgbColor, multiplier);
+   }
+
    public static StringConstantModifierReader stringReader(String modifierName, int rgbColor, String format) {
       return new StringConstantModifierReader(modifierName, rgbColor, format);
    }

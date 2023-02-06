@@ -3,6 +3,7 @@ package iskallia.vault.mixin;
 import iskallia.vault.entity.entity.SpiritEntity;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
@@ -13,9 +14,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity.RemovalReason;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,6 +34,9 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
 
    @Shadow
    public abstract void die(DamageSource var1);
+
+   @Shadow
+   public abstract void remove(RemovalReason var1);
 
    protected MixinPlayerEntity(EntityType<? extends LivingEntity> type, Level worldIn) {
       super(type, worldIn);
@@ -95,5 +102,23 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
 
    public boolean canBeRiddenInWater(Entity rider) {
       return rider instanceof SpiritEntity ? true : super.canBeRiddenInWater(rider);
+   }
+
+   @Redirect(
+      method = {"getDigSpeed"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/entity/player/Inventory;getDestroySpeed(Lnet/minecraft/world/level/block/state/BlockState;)F"
+      )
+   )
+   public float getDigSpeed(Inventory inventory, BlockState state) {
+      float base = inventory.getDestroySpeed(state);
+      AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(this);
+      float bonus = snapshot.getAttributeValue(ModGearAttributes.MINING_SPEED, VaultGearAttributeTypeMerger.floatSum());
+      if (inventory.getSelected().getItem() == ModItems.TOOL) {
+         return base > 1.0F ? bonus : base;
+      } else {
+         return base > 1.0F ? base + bonus : base;
+      }
    }
 }

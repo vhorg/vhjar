@@ -1,5 +1,9 @@
 package iskallia.vault.event;
 
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.event.common.EntityChainAttackedEvent;
+import iskallia.vault.core.event.common.EntityDamageBlockEvent;
+import iskallia.vault.core.event.common.EntityStunnedEvent;
 import iskallia.vault.entity.entity.EffectCloudEntity;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
@@ -108,6 +112,8 @@ public class GearAttributeEvents {
                            mob.hurt(event.getSource(), event.getAmount() * multiplier);
                            multiplier *= 0.5F;
                         }
+
+                        CommonEvents.ENTITY_CHAIN_ATTACKED.invoke(new EntityChainAttackedEvent.Data(attacker, nearby));
                      }
 
                      if (attacker instanceof Player playerx) {
@@ -131,6 +137,7 @@ public class GearAttributeEvents {
                   LivingEntity attacked = event.getEntityLiving();
                   attacked.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 9));
                   attacked.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 30, 9));
+                  CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(attacker, attacked));
                }
             }
          }
@@ -150,8 +157,11 @@ public class GearAttributeEvents {
          if (shieldStack != null) {
             if (AttributeSnapshotHelper.canHaveSnapshot(attacked)) {
                float blockChance = BlockChanceHelper.getBlockChance(attacked);
-               if (!(rand.nextFloat() >= blockChance)) {
+               if (rand.nextFloat() >= blockChance) {
+                  CommonEvents.ENTITY_DAMAGE_BLOCK.invoke(new EntityDamageBlockEvent.Data(true, damageSource, attacked));
+               } else {
                   event.setCanceled(true);
+                  CommonEvents.ENTITY_DAMAGE_BLOCK.invoke(new EntityDamageBlockEvent.Data(false, damageSource, attacked));
                   if (shieldStack.getItem() instanceof VaultGearItem) {
                      VaultGearData gearData = VaultGearData.read(shieldStack);
                      gearData.getFirstValue(ModGearAttributes.GEAR_MODEL)
@@ -298,7 +308,8 @@ public class GearAttributeEvents {
                   if (!(thornsMultiplier <= 0.0F)) {
                      float dmg = (float)attacked.getAttributeValue(Attributes.ATTACK_DAMAGE);
                      DamageSource src = ThornsReflectDamageSource.of(attacked);
-                     attacker.hurt(src, dmg * thornsMultiplier);
+                     float reflectedDamage = dmg * thornsMultiplier;
+                     attacker.hurt(src, reflectedDamage);
                   }
                }
             });

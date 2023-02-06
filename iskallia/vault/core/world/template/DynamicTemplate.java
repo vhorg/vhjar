@@ -1,11 +1,11 @@
 package iskallia.vault.core.world.template;
 
-import iskallia.vault.core.util.iterator.EmptyIterator;
 import iskallia.vault.core.util.iterator.MappingIterator;
 import iskallia.vault.core.world.data.PartialEntity;
 import iskallia.vault.core.world.data.PartialTile;
 import iskallia.vault.core.world.processor.Processor;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -21,7 +21,7 @@ public class DynamicTemplate extends Template {
 
    @Override
    public Iterator<ResourceLocation> getTags() {
-      return new EmptyIterator<>();
+      return Collections.emptyIterator();
    }
 
    @Override

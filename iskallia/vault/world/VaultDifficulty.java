@@ -7,22 +7,25 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public enum VaultDifficulty {
-   EASY(0, "easy", 0.5),
-   NORMAL(1, "normal", 0.75),
-   HARD(2, "hard", 1.0),
-   IMPOSSIBLE(3, "impossible", 2.0);
+   EASY(0, "easy", 0.5, 0.5),
+   NORMAL(1, "normal", 0.75, 0.75),
+   HARD(2, "hard", 1.0, 1.0),
+   IMPOSSIBLE(3, "impossible", 2.0, 2.0),
+   FRAGGED(3, "fragged", 4.0, 2.0);
 
    private static final VaultDifficulty[] BY_ID = Arrays.stream(values())
       .sorted(Comparator.comparingInt(VaultDifficulty::getId))
       .toArray(VaultDifficulty[]::new);
    private final int id;
    private final String key;
-   private final double mobDifficultyMultiplier;
+   private final double damageMultiplier;
+   private final double heathMultiplier;
 
-   private VaultDifficulty(int id, String key, double mobDifficultyMultiplier) {
+   private VaultDifficulty(int id, String key, double damageMultiplier, double heathMultiplier) {
       this.id = id;
       this.key = key;
-      this.mobDifficultyMultiplier = mobDifficultyMultiplier;
+      this.damageMultiplier = damageMultiplier;
+      this.heathMultiplier = heathMultiplier;
    }
 
    public int getId() {
@@ -52,7 +55,11 @@ public enum VaultDifficulty {
       return this.key;
    }
 
-   public double getMobDifficultyMultiplier() {
-      return this.mobDifficultyMultiplier;
+   public double getDamageMultiplier() {
+      return this.damageMultiplier;
+   }
+
+   public double getHeathMultiplier() {
+      return this.heathMultiplier;
    }
 }
