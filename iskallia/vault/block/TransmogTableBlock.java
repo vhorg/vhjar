@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -93,9 +92,8 @@ public class TransmogTableBlock extends Block implements EntityBlock {
 
    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
       if (!pState.is(pNewState.getBlock())) {
-         BlockEntity blockentity = pLevel.getBlockEntity(pPos);
-         if (blockentity instanceof Container) {
-            Containers.dropContents(pLevel, pPos, (Container)blockentity);
+         if (pLevel.getBlockEntity(pPos) instanceof TransmogTableTileEntity transmogTableTileEntity) {
+            Containers.dropContents(pLevel, pPos, transmogTableTileEntity.getInternalInventory());
             pLevel.updateNeighbourForOutputSignal(pPos, this);
          }
 

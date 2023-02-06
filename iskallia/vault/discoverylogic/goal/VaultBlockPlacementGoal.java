@@ -5,21 +5,24 @@ import iskallia.vault.core.vault.DiscoveryGoalsManager;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.discoverylogic.goal.base.InVaultDiscoveryGoal;
-import iskallia.vault.util.damage.ThornsReflectDamageSource;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.Block;
 
-public class VaultThornsDamageGoal extends InVaultDiscoveryGoal<VaultThornsDamageGoal> {
-   public VaultThornsDamageGoal(float targetProgress) {
+public class VaultBlockPlacementGoal extends InVaultDiscoveryGoal<VaultBlockPlacementGoal> {
+   protected Block block;
+
+   public VaultBlockPlacementGoal(Block block, float targetProgress) {
       super(targetProgress);
+      this.block = block;
    }
 
    @Override
    public void initServer(DiscoveryGoalsManager manager, VirtualWorld world, Vault vault) {
-      CommonEvents.ENTITY_DAMAGE.register(manager, event -> {
-         if (event.getSource() instanceof ThornsReflectDamageSource damageSource) {
-            if (damageSource.getEntity() instanceof ServerPlayer player) {
-               if (player.getLevel() == world) {
-                  this.progress(player, event.getAmount());
+      CommonEvents.ENTITY_PLACE.register(manager, event -> {
+         if (event.getEntity() instanceof ServerPlayer player) {
+            if (player.getLevel() == world) {
+               if (event.getPlacedBlock().getBlock() == this.block) {
+                  this.progress(player, 1.0F);
                }
             }
          }

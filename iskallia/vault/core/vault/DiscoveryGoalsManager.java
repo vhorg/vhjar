@@ -23,12 +23,12 @@ public class DiscoveryGoalsManager extends DataObject<DiscoveryGoalsManager> {
          DiscoveryGoalStatesData worldData = DiscoveryGoalStatesData.get(serverPlayer.getLevel());
          DiscoveryGoalsState state = worldData.getState(serverPlayer);
          state.resetGoalIf(goalId -> {
-            DiscoveryGoal goal = ModModelDiscoveryGoals.REGISTRY.get(goalId);
+            DiscoveryGoal<?> goal = ModModelDiscoveryGoals.REGISTRY.get(goalId);
             return goal instanceof InVaultDiscoveryGoal;
          });
       }));
       ModModelDiscoveryGoals.REGISTRY.forEach((id, discoveryGoal) -> {
-         if (discoveryGoal instanceof InVaultDiscoveryGoal goal) {
+         if (discoveryGoal instanceof InVaultDiscoveryGoal<?> goal) {
             goal.initServer(this, world, vault);
          }
       });

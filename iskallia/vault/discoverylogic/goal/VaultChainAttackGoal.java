@@ -5,15 +5,11 @@ import iskallia.vault.core.vault.DiscoveryGoalsManager;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.discoverylogic.goal.base.InVaultDiscoveryGoal;
-import iskallia.vault.init.ModDynamicModels;
-import iskallia.vault.init.ModItems;
-import iskallia.vault.world.data.DiscoveredModelsData;
 import java.util.List;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Mob;
 
-public class VaultChainAttackGoal extends InVaultDiscoveryGoal {
+public class VaultChainAttackGoal extends InVaultDiscoveryGoal<VaultChainAttackGoal> {
    protected int targetCount;
 
    public VaultChainAttackGoal(int targetProgress, int targetCount) {
@@ -21,13 +17,8 @@ public class VaultChainAttackGoal extends InVaultDiscoveryGoal {
       this.targetCount = targetCount;
    }
 
-   @Override
-   public void onGoalAchieved(ServerPlayer player) {
-      DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());
-      ResourceLocation modelId = ModDynamicModels.Swords.CHAINSWORD.getId();
-      if (!discoversData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
-         discoversData.discoverModelAndBroadcast(ModItems.SWORD, modelId, player);
-      }
+   public int getTargetCount() {
+      return this.targetCount;
    }
 
    @Override

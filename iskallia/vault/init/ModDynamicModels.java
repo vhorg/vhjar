@@ -1378,5 +1378,8 @@ public class ModDynamicModels {
          new HandHeldModel(VaultMod.id("gear/sword/glorem_glipsum"), "Glorem Glipsum")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
+      public static final HandHeldModel BAMBOO = REGISTRY.register(
+         new HandHeldModel(VaultMod.id("gear/sword/bamboo"), "Bamboo").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
    }
 }
