@@ -10,6 +10,8 @@ import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.MagnetItem;
 import iskallia.vault.util.data.BitSerializers;
 import iskallia.vault.util.data.LazyHolder;
 import java.util.ArrayList;
@@ -56,9 +58,13 @@ public class AttributeGearData {
 
    @Nonnull
    public static <T extends AttributeGearData> T read(ItemStack stack) {
-      return stack.getItem() instanceof VaultGearItem
-         ? read(stack, (Function<BitBuffer, T>)(VaultGearData::new), (Supplier<T>)(VaultGearData::new))
-         : read(stack, (Function<BitBuffer, T>)(AttributeGearData::new), (Supplier<T>)(AttributeGearData::new));
+      if (stack.getItem() == ModItems.MAGNET && MagnetItem.isLegacy(stack)) {
+         return (T)(new VaultGearData());
+      } else {
+         return stack.getItem() instanceof VaultGearItem
+            ? read(stack, (Function<BitBuffer, T>)(VaultGearData::new), (Supplier<T>)(VaultGearData::new))
+            : read(stack, (Function<BitBuffer, T>)(AttributeGearData::new), (Supplier<T>)(AttributeGearData::new));
+      }
    }
 
    public static Optional<UUID> readUUID(ItemStack stack) {
