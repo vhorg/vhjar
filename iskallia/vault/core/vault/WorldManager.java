@@ -32,7 +32,7 @@ public class WorldManager extends DataObject<WorldManager> {
       .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.CHEST_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all())
       .register(FIELDS);
    public static final FieldKey<PortalLogic> PORTAL_LOGIC = FieldKey.of("portal_logic", PortalLogic.class)
-      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.PORTAL_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all())
+      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.PORTAL_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<MobLogic> MOB_LOGIC = FieldKey.of("mob_logic", MobLogic.class)
       .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.MOB_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all())
@@ -60,7 +60,7 @@ public class WorldManager extends DataObject<WorldManager> {
    public void tickServer(VirtualWorld world, Vault vault) {
       this.ifPresent(RANDOM_TICK_SPEED, world::setRandomTickSpeed);
       this.ifPresent(GENERATOR, generator -> generator.tickServer(world, vault));
-      world.getChunkSource().addRegionTicket(TicketType.PORTAL, ChunkPos.ZERO, 1, new BlockPos(24, 0, 24));
+      world.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(1, 1), 1, new BlockPos(24, 0, 24));
    }
 
    public void releaseServer() {

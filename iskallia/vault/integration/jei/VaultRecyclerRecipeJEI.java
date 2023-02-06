@@ -3,10 +3,9 @@ package iskallia.vault.integration.jei;
 import com.google.common.collect.Lists;
 import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.config.entry.ChanceItemStackEntry;
-import iskallia.vault.gear.VaultGearModifierHelper;
+import iskallia.vault.gear.GearRollHelper;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
-import iskallia.vault.gear.crafting.VaultGearCraftingHelper;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
@@ -230,13 +229,7 @@ public class VaultRecyclerRecipeJEI {
       }
 
       data.write(itemStack);
-      data.setState(VaultGearState.IDENTIFIED);
-      data.write(itemStack);
-      VaultGearModifierHelper.reRollRepairSlots(itemStack, random);
-      VaultGearCraftingHelper.reRollCraftingPotential(itemStack);
-      VaultGearModifierHelper.generateAffixSlots(itemStack, random);
-      VaultGearModifierHelper.generateImplicits(itemStack, random);
-      VaultGearModifierHelper.generateModifiers(itemStack, random);
+      GearRollHelper.initializeGear(itemStack);
       return itemStack;
    }
 }

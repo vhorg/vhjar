@@ -17,9 +17,11 @@ import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.item.gear.VaultShieldItem;
+import iskallia.vault.network.message.ClientboundPlayerLastDamageSourceMessage;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.PlayerStat;
@@ -76,6 +78,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.network.NetworkDirection;
 
 @EventBusSubscriber(
    bus = Bus.FORGE
@@ -396,6 +399,11 @@ public class EntityEvents {
    )
    public static void thornsReflectDamage(LivingAttackEvent event) {
       if (!(event.getSource() instanceof ThornsReflectDamageSource)) {
+         if (event.getEntityLiving() instanceof ServerPlayer player && (event.getSource() == DamageSource.MAGIC || event.getSource() == DamageSource.WITHER)) {
+            ModNetwork.CHANNEL
+               .sendTo(new ClientboundPlayerLastDamageSourceMessage(event.getSource()), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+         }
+
          if (event.getSource().getEntity() instanceof LivingEntity attacker) {
             LivingEntity attacked = event.getEntityLiving();
             if (attacked.getAttribute(ModAttributes.THORNS_CHANCE) != null && attacked.getAttribute(ModAttributes.THORNS_DAMAGE) != null) {

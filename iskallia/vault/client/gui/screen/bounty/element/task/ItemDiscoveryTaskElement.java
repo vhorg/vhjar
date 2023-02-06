@@ -2,6 +2,7 @@ package iskallia.vault.client.gui.screen.bounty.element.task;
 
 import iskallia.vault.bounty.task.ItemDiscoveryTask;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
+import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import iskallia.vault.util.TextUtil;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -17,8 +18,8 @@ import net.minecraft.world.item.TooltipFlag.Default;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemDiscoveryTaskElement extends AbstractTaskElement<ItemDiscoveryTask> {
-   protected ItemDiscoveryTaskElement(ISpatial spatial, ItemDiscoveryTask task) {
-      super(spatial, task);
+   protected ItemDiscoveryTaskElement(ISpatial spatial, ItemDiscoveryTask task, BountyElement.Status status) {
+      super(spatial, task, status);
    }
 
    @Override

@@ -5,7 +5,6 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.backup.BackupListArgument;
 import iskallia.vault.command.AbilityCommand;
 import iskallia.vault.command.AliasCommand;
-import iskallia.vault.command.ArchitectCommand;
 import iskallia.vault.command.BountyCommand;
 import iskallia.vault.command.Command;
 import iskallia.vault.command.CrystalCommand;
@@ -15,13 +14,11 @@ import iskallia.vault.command.EternalCommand;
 import iskallia.vault.command.EventCommand;
 import iskallia.vault.command.GearDebugCommand;
 import iskallia.vault.command.GiveLootCommand;
-import iskallia.vault.command.GlobalTimerCommand;
 import iskallia.vault.command.InternalCommand;
 import iskallia.vault.command.MagnetCommand;
 import iskallia.vault.command.ModelDebugCommand;
 import iskallia.vault.command.OpenVaultSnapshotCommand;
 import iskallia.vault.command.PartyCommand;
-import iskallia.vault.command.PaxelCommand;
 import iskallia.vault.command.PlayerDifficultyCommand;
 import iskallia.vault.command.PointsResetCommand;
 import iskallia.vault.command.RaidCommand;
@@ -42,7 +39,6 @@ import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 
 public class ModCommands {
    public static ReloadConfigsCommand RELOAD_CONFIGS;
-   public static GlobalTimerCommand GLOBAL_TIMER;
    public static RaidCommand RAID;
    public static VaultLevelCommand VAULT_LEVEL;
    public static InternalCommand INTERNAL;
@@ -53,14 +49,12 @@ public class ModCommands {
    public static VaultGodSayCommand VAULTGOD_SAY;
    public static SandEventCommand SAND_EVENT;
    public static AliasCommand ALIAS;
-   public static ArchitectCommand ARCHITECT;
    public static TeamScoreCommand SCORES;
    public static CrystalCommand CRYSTAL;
    public static EternalCommand ETERNAL;
    public static EventCommand EVENT;
    public static GearDebugCommand GEAR_DEBUG;
    public static MagnetCommand MAGNET;
-   public static PaxelCommand PAXEL;
    public static ResearchTeamCommand RESEARCH_TEAM;
    public static PartyCommand PARTY;
    public static SpiritCommand SPIRIT;
@@ -74,7 +68,6 @@ public class ModCommands {
 
    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandSelection env) {
       RELOAD_CONFIGS = registerCommand(ReloadConfigsCommand::new, dispatcher, env);
-      GLOBAL_TIMER = registerCommand(GlobalTimerCommand::new, dispatcher, env);
       RAID = registerCommand(RaidCommand::new, dispatcher, env);
       VAULT_LEVEL = registerCommand(VaultLevelCommand::new, dispatcher, env);
       INTERNAL = registerCommand(InternalCommand::new, dispatcher, env);
@@ -85,14 +78,12 @@ public class ModCommands {
       VAULTGOD_SAY = registerCommand(VaultGodSayCommand::new, dispatcher, env);
       SAND_EVENT = registerCommand(SandEventCommand::new, dispatcher, env);
       ALIAS = registerCommand(AliasCommand::new, dispatcher, env);
-      ARCHITECT = registerCommand(ArchitectCommand::new, dispatcher, env);
       SCORES = registerCommand(TeamScoreCommand::new, dispatcher, env);
       CRYSTAL = registerCommand(CrystalCommand::new, dispatcher, env);
       ETERNAL = registerCommand(EternalCommand::new, dispatcher, env);
       EVENT = registerCommand(EventCommand::new, dispatcher, env);
       GEAR_DEBUG = registerCommand(GearDebugCommand::new, dispatcher, env);
       MAGNET = registerCommand(MagnetCommand::new, dispatcher, env);
-      PAXEL = registerCommand(PaxelCommand::new, dispatcher, env);
       RESEARCH_TEAM = registerCommand(ResearchTeamCommand::new, dispatcher, env);
       PARTY = registerCommand(PartyCommand::new, dispatcher, env);
       SPIRIT = registerCommand(SpiritCommand::new, dispatcher, env);

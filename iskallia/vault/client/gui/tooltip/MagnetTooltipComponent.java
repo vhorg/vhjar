@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.client.gui.screen.MagnetTableScreen;
 import iskallia.vault.event.InputEvents;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.LegacyMagnetItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -19,10 +19,10 @@ import net.minecraft.resources.ResourceLocation;
 
 public class MagnetTooltipComponent implements ClientTooltipComponent {
    private static final ResourceLocation TEXTURE = MagnetTableScreen.TEXTURE;
-   private final MagnetItem.MagnetTooltip tooltip;
+   private final LegacyMagnetItem.MagnetTooltip tooltip;
    private final TextComponent advanced;
 
-   public MagnetTooltipComponent(MagnetItem.MagnetTooltip tooltip) {
+   public MagnetTooltipComponent(LegacyMagnetItem.MagnetTooltip tooltip) {
       this.tooltip = tooltip;
       this.advanced = new TextComponent(
          " " + ChatFormatting.DARK_GRAY + ModConfigs.MAGNET_CONFIG.getPerkUpgrade(tooltip.perk).getAdvancedTooltip(tooltip.perkPower)
@@ -30,7 +30,7 @@ public class MagnetTooltipComponent implements ClientTooltipComponent {
    }
 
    public int getHeight() {
-      return 16 * (this.tooltip.perk != MagnetItem.Perk.NONE ? 2 : 1);
+      return 16 * (this.tooltip.perk != LegacyMagnetItem.Perk.NONE ? 2 : 1);
    }
 
    public int getWidth(Font font) {
@@ -38,7 +38,7 @@ public class MagnetTooltipComponent implements ClientTooltipComponent {
          + font.width(this.tooltip.stats[0] + "")
          + font.width(this.tooltip.stats[1] + "")
          + font.width(this.tooltip.stats[2] + "")
-         + (this.tooltip.perk != MagnetItem.Perk.NONE ? (InputEvents.isShiftDown() ? font.width(this.advanced) : 0) : 0);
+         + (this.tooltip.perk != LegacyMagnetItem.Perk.NONE ? (InputEvents.isShiftDown() ? font.width(this.advanced) : 0) : 0);
    }
 
    public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer pItemRenderer, int pBlitOffset) {
@@ -62,7 +62,7 @@ public class MagnetTooltipComponent implements ClientTooltipComponent {
          x += font.width(text) + 2;
       }
 
-      if (this.tooltip.perk != MagnetItem.Perk.NONE) {
+      if (this.tooltip.perk != LegacyMagnetItem.Perk.NONE) {
          y += 12;
          RenderSystem.setShaderTexture(0, TEXTURE);
          GuiComponent.blit(poseStack, xo, y, s, s, 198.0F, 77 + 18 * this.tooltip.perk.ordinal(), W, W, 256, 256);

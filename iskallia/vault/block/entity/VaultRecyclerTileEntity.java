@@ -62,6 +62,10 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
       super(ModBlocks.VAULT_RECYCLER_ENTITY, pWorldPosition, pBlockState);
    }
 
+   public boolean stillValid(Player player) {
+      return this.level != null && this.level.getBlockEntity(this.worldPosition) == this ? this.inventory.stillValid(player) : false;
+   }
+
    public static void tick(Level world, BlockPos pos, BlockState state, VaultRecyclerTileEntity tile) {
       if (!world.isClientSide() && tile.gearIdProcessing != null) {
          if (!tile.canCraft()) {
@@ -137,7 +141,9 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
          return null;
       } else {
          VaultRecyclerConfig.RecyclerOutput output;
-         if (input.is(ModItems.TRINKET)) {
+         if (input.is(ModItems.JEWEL)) {
+            output = ModConfigs.VAULT_RECYCLER.getJewelRecyclingOutput();
+         } else if (input.is(ModItems.TRINKET)) {
             output = ModConfigs.VAULT_RECYCLER.getTrinketRecyclingOutput();
          } else {
             output = ModConfigs.VAULT_RECYCLER.getGearRecyclingOutput();
@@ -165,7 +171,9 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
          return false;
       } else {
          Item inputItem = input.getItem();
-         return !(inputItem instanceof VaultGearItem) && !(inputItem instanceof TrinketItem) ? false : AttributeGearData.hasData(input);
+         return !(inputItem instanceof VaultGearItem) && !(inputItem instanceof TrinketItem) && inputItem != ModItems.JEWEL
+            ? false
+            : AttributeGearData.hasData(input);
       }
    }
 
@@ -173,7 +181,11 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
       if (input.isEmpty()) {
          return 0.0F;
       } else if (input.getItem() instanceof VaultGearItem) {
-         return VaultGearData.read(input).getState() != VaultGearState.IDENTIFIED ? 1.0F : 1.0F - (float)input.getDamageValue() / input.getMaxDamage();
+         if (VaultGearData.read(input).getState() != VaultGearState.IDENTIFIED) {
+            return 1.0F;
+         } else {
+            return !input.isDamageableItem() ? 1.0F : 1.0F - (float)input.getDamageValue() / input.getMaxDamage();
+         }
       } else if (input.getItem() instanceof TrinketItem) {
          return !TrinketItem.isIdentified(input) ? 1.0F : 1.0F - (float)TrinketItem.getUsedVaults(input).size() / TrinketItem.getUses(input);
       } else {

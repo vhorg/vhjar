@@ -13,6 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 public class VaultLootableWeightModifier extends VaultModifier<VaultLootableWeightModifier.Properties> {
    public VaultLootableWeightModifier(ResourceLocation id, VaultLootableWeightModifier.Properties properties, VaultModifier.Display display) {
       super(id, properties, display);
+      this.setDescriptionFormatter((t, p, s) -> t.formatted((int)Math.abs(p.getChance() * s * 100.0)));
    }
 
    @Override

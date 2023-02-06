@@ -40,6 +40,7 @@ public class BountyData extends SavedData {
    private final HashMap<UUID, BountyList> active = new HashMap<>();
    private final HashMap<UUID, BountyList> available = new HashMap<>();
    private final HashMap<UUID, BountyList> complete = new HashMap<>();
+   private final HashMap<UUID, BountyList> legendary = new HashMap<>();
 
    private Optional<Bounty> getActiveFor(UUID playerId, UUID bountyId) {
       return !this.active.containsKey(playerId) ? Optional.empty() : this.active.get(playerId).findById(bountyId);
@@ -75,11 +76,26 @@ public class BountyData extends SavedData {
       }
    }
 
+   private Optional<Bounty> getLegendaryFor(UUID playerId, UUID bountyId) {
+      return !this.legendary.containsKey(playerId) ? Optional.empty() : this.legendary.get(playerId).findById(bountyId);
+   }
+
+   public BountyList getAllLegendaryFor(UUID playerId) {
+      if (this.legendary.containsKey(playerId)) {
+         return this.legendary.get(playerId);
+      } else {
+         BountyList list = this.legendary.computeIfAbsent(playerId, id -> new BountyList());
+         this.setDirty();
+         return list;
+      }
+   }
+
    public BountyList getAllBountiesFor(UUID playerId) {
       BountyList list = new BountyList();
       list.addAll((Collection<? extends Bounty>)this.active.computeIfAbsent(playerId, id -> new BountyList()));
       list.addAll((Collection<? extends Bounty>)this.available.computeIfAbsent(playerId, id -> new BountyList()));
       list.addAll((Collection<? extends Bounty>)this.complete.computeIfAbsent(playerId, id -> new BountyList()));
+      list.addAll((Collection<? extends Bounty>)this.legendary.computeIfAbsent(playerId, id -> new BountyList()));
       return list;
    }
 
@@ -88,11 +104,23 @@ public class BountyData extends SavedData {
       bounties.put("active", this.getAllActiveFor(playerId).serializeNBT());
       bounties.put("available", this.getAllAvailableFor(playerId).serializeNBT());
       bounties.put("abandoned", this.getAllCompletedFor(playerId).serializeNBT());
+      bounties.put("legendary", this.getAllLegendaryFor(playerId).serializeNBT());
       return bounties;
    }
 
-   public <T extends Task<?>> List<T> getAllActiveTasksById(ServerPlayer player, ResourceLocation taskId) {
+   public <T extends Task<?>> List<T> getAllActiveById(ServerPlayer player, ResourceLocation taskId) {
       return this.active
+         .values()
+         .stream()
+         .flatMap(Collection::stream)
+         .filter(bounty -> bounty.getPlayerId().equals(player.getUUID()))
+         .map(Bounty::getTask)
+         .filter(task -> task.getTaskType().equals(taskId))
+         .toList();
+   }
+
+   public <T extends Task<?>> List<T> getAllLegendaryById(ServerPlayer player, ResourceLocation taskId) {
+      return this.legendary
          .values()
          .stream()
          .flatMap(Collection::stream)
@@ -115,6 +143,17 @@ public class BountyData extends SavedData {
       ResourceLocation taskId = ModConfigs.BOUNTY_CONFIG.getRandomTask();
       TaskConfig<?, ?> config = TaskConfig.getConfig(taskId);
       TaskProperties properties = config.getGeneratedTaskProperties(vaultLevel);
+      TaskReward reward = ModConfigs.REWARD_CONFIG.generateReward(vaultLevel, properties.getRewardPool());
+      UUID bountyId = UUID.randomUUID();
+      return new Bounty(bountyId, playerId, TaskRegistry.createTask(taskId, bountyId, properties, reward));
+   }
+
+   private Bounty generateLegendaryBounty(UUID playerId) {
+      int vaultLevel = PlayerVaultStatsData.get(ServerLifecycleHooks.getCurrentServer()).getVaultStats(playerId).getVaultLevel();
+      ResourceLocation taskId = ModConfigs.BOUNTY_CONFIG.getRandomTask();
+      TaskConfig<?, ?> config = TaskConfig.getConfig(taskId);
+      TaskProperties properties = config.getGeneratedTaskProperties(vaultLevel);
+      properties.setRewardPool("legendary");
       TaskReward reward = ModConfigs.REWARD_CONFIG.generateReward(vaultLevel, properties.getRewardPool());
       UUID bountyId = UUID.randomUUID();
       return new Bounty(bountyId, playerId, TaskRegistry.createTask(taskId, bountyId, properties, reward));
@@ -145,26 +184,39 @@ public class BountyData extends SavedData {
    }
 
    public void abandon(UUID playerId, UUID bountyId) {
-      Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
-      if (!activeBounty.isEmpty()) {
-         Bounty active = activeBounty.get();
-         active.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltySeconds(), ChronoUnit.SECONDS).toEpochMilli());
-         this.getAllActiveFor(playerId).removeById(bountyId);
-         this.getAllCompletedFor(playerId).add(active);
+      Optional<Bounty> legendaryBounty = this.getLegendaryFor(playerId, bountyId);
+      if (legendaryBounty.isPresent()) {
+         this.getAllLegendaryFor(playerId).removeById(bountyId);
          this.setDirty();
+      } else {
+         Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
+         if (!activeBounty.isEmpty()) {
+            Bounty active = activeBounty.get();
+            active.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltySeconds(), ChronoUnit.SECONDS).toEpochMilli());
+            this.getAllActiveFor(playerId).removeById(bountyId);
+            this.getAllCompletedFor(playerId).add(active);
+            this.setDirty();
+         }
       }
    }
 
    public void complete(ServerPlayer player, UUID bountyId) {
       UUID playerId = player.getUUID();
-      Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
-      if (!activeBounty.isEmpty()) {
-         Bounty active = activeBounty.get();
-         active.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getWaitingPeriodSeconds(), ChronoUnit.SECONDS).toEpochMilli());
-         this.getAllActiveFor(playerId).removeById(bountyId);
-         this.getAllCompletedFor(playerId).add(active);
-         active.getTask().getTaskReward().apply(player);
+      Optional<Bounty> legendaryBounty = this.getLegendaryFor(playerId, bountyId);
+      if (legendaryBounty.isPresent()) {
+         this.getAllLegendaryFor(playerId).removeById(bountyId);
+         legendaryBounty.get().getTask().getTaskReward().apply(player);
          this.setDirty();
+      } else {
+         Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
+         if (!activeBounty.isEmpty()) {
+            Bounty active = activeBounty.get();
+            active.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getWaitingPeriodSeconds(), ChronoUnit.SECONDS).toEpochMilli());
+            this.getAllActiveFor(playerId).removeById(bountyId);
+            this.getAllCompletedFor(playerId).add(active);
+            active.getTask().getTaskReward().apply(player);
+            this.setDirty();
+         }
       }
    }
 
@@ -177,6 +229,14 @@ public class BountyData extends SavedData {
       this.setDirty();
    }
 
+   public void setupLegendary(UUID playerId) {
+      if (!this.legendary.containsKey(playerId) || this.legendary.get(playerId).isEmpty()) {
+         BountyList list = new BountyList(List.of(this.generateLegendaryBounty(playerId)));
+         this.legendary.put(playerId, list);
+         this.setDirty();
+      }
+   }
+
    private boolean playerExists(UUID uuid) {
       return this.active.containsKey(uuid) || this.available.containsKey(uuid) || this.complete.containsKey(uuid);
    }
@@ -185,6 +245,7 @@ public class BountyData extends SavedData {
       this.available.clear();
       this.active.clear();
       this.complete.clear();
+      this.legendary.clear();
    }
 
    public static BountyData create(CompoundTag nbt) {
@@ -217,6 +278,12 @@ public class BountyData extends SavedData {
          List<Bounty> list = NBTHelper.readList(completeTag, idString, CompoundTag.class, Bounty::new);
          this.complete.put(playerId, new BountyList(list));
       });
+      CompoundTag legendaryTag = tag.getCompound("legendary");
+      legendaryTag.getAllKeys().forEach(idString -> {
+         UUID playerId = UUID.fromString(idString);
+         List<Bounty> list = NBTHelper.readList(legendaryTag, idString, CompoundTag.class, Bounty::new);
+         this.legendary.put(playerId, new BountyList(list));
+      });
    }
 
    @NotNull
@@ -224,15 +291,19 @@ public class BountyData extends SavedData {
       CompoundTag availableTag = new CompoundTag();
       CompoundTag activeTag = new CompoundTag();
       CompoundTag completeTag = new CompoundTag();
+      CompoundTag legendaryTag = new CompoundTag();
       this.available
          .forEach((playerId, bountyList) -> NBTHelper.writeCollection(availableTag, playerId.toString(), bountyList, CompoundTag.class, Bounty::serializeNBT));
       this.active
          .forEach((playerId, bountyList) -> NBTHelper.writeCollection(activeTag, playerId.toString(), bountyList, CompoundTag.class, Bounty::serializeNBT));
       this.complete
          .forEach((playerId, bountyList) -> NBTHelper.writeCollection(completeTag, playerId.toString(), bountyList, CompoundTag.class, Bounty::serializeNBT));
+      this.legendary
+         .forEach((playerId, bountyList) -> NBTHelper.writeCollection(legendaryTag, playerId.toString(), bountyList, CompoundTag.class, Bounty::serializeNBT));
       nbt.put("available", availableTag);
       nbt.put("active", activeTag);
       nbt.put("complete", completeTag);
+      nbt.put("legendary", legendaryTag);
       return nbt;
    }
 

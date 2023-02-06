@@ -1,16 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " m ",
+    "mmm",
     "mcm",
-    " m "
+    "mmm"
   ],
   "key": {
     "m": {
       "item": "the_vault:magnetite"
     },
     "c": {
-      "item": "the_vault:chromatic_iron_ingot"
+      "item": "the_vault:chromatic_steel_ingot"
     }
   },
   "result": {

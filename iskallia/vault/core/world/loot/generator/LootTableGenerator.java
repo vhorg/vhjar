@@ -14,18 +14,22 @@ import net.minecraft.world.item.ItemStack;
 
 public class LootTableGenerator implements LootGenerator {
    protected final Version version;
-   protected final LootTableKey table;
+   protected final LootTable table;
    public float itemQuantity;
    public Entity source;
    protected final List<ItemStack> items = new ArrayList<>();
 
    public LootTableGenerator(Version version, LootTableKey table, float itemQuantity) {
+      this(version, table.get(version), itemQuantity);
+   }
+
+   public LootTableGenerator(Version version, LootTable table, float itemQuantity) {
       this.version = version;
       this.table = table;
       this.itemQuantity = itemQuantity;
    }
 
-   public LootTableKey getTable() {
+   public LootTable getTable() {
       return this.table;
    }
 
@@ -38,8 +42,8 @@ public class LootTableGenerator implements LootGenerator {
    public void generate(RandomSource random) {
       CommonEvents.LOOT_GENERATION.invoke(this, LootGenerationEvent.Phase.PRE);
       this.items.clear();
-      if (this.table.get(this.version) != null) {
-         for (LootTable.Entry entry : this.table.get(this.version).getEntries()) {
+      if (this.table != null) {
+         for (LootTable.Entry entry : this.table.getEntries()) {
             this.generateEntry(entry, random);
          }
       }

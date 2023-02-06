@@ -39,9 +39,11 @@ public class VaultGearModificationConfig extends Config {
       this.set(ModGearModifications.REMOVE_MODIFIER, 4, 7, 1.3F, 1.2F);
       this.set(ModGearModifications.RESET_POTENTIAL, 0, 0, 2.0F, 4.0F);
       this.set(ModGearModifications.REFORGE_REPAIR_SLOTS, 10, 20, 1.3F, 1.6F);
-      this.set(ModGearModifications.REFORGE_ALL_IMPLICITS, 3, 7, 1.0F, 1.0F);
+      this.set(ModGearModifications.REFORGE_ALL_IMPLICITS, 7, 16, 1.0F, 1.0F);
       this.set(ModGearModifications.REFORGE_ALL_ADD_TAG, 5, 8, 1.2F, 1.2F);
       this.set(ModGearModifications.REFORGE_RANDOM_TIER, 3, 9, 1.1F, 1.1F);
+      this.set(ModGearModifications.REFORGE_PREFIXES, 12, 18, 1.0F, 1.0F);
+      this.set(ModGearModifications.REFORGE_SUFFIXES, 12, 18, 1.0F, 1.0F);
    }
 
    private void set(GearModification modification, int pMin, int pMax, float base, float negative) {

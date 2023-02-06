@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMultimap.Builder;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModAttributes;
@@ -105,9 +106,8 @@ public class VaultGearHelper {
    }
 
    public static int getGearColor(ItemStack stack) {
-      VaultGearData data = VaultGearData.read(stack);
-      VaultGearState state = data.getState();
-      if (state == VaultGearState.UNIDENTIFIED) {
+      AttributeGearData data = AttributeGearData.read(stack);
+      if (data instanceof VaultGearData gearData && gearData.getState() == VaultGearState.UNIDENTIFIED) {
          return -1;
       } else {
          CompoundTag displayTag = stack.getTagElement("display");
@@ -118,74 +118,75 @@ public class VaultGearHelper {
    }
 
    public static Multimap<Attribute, AttributeModifier> getModifiers(ItemStack stack, EquipmentSlot slot) {
-      if (!VaultGearItem.<VaultGearItem>of(stack).isIntendedForSlot(stack, slot)) {
-         return ImmutableMultimap.of();
-      } else {
-         Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
-         VaultGearData data = VaultGearData.read(stack);
-         UUID identifier = data.getIdentifier();
-         if (data.has(ModGearAttributes.ATTACK_DAMAGE)) {
-            double attackDamage = data.get(ModGearAttributes.ATTACK_DAMAGE, VaultGearAttributeTypeMerger.doubleSum());
-            addAttribute(builder, Attributes.ATTACK_DAMAGE, attackDamage, identifier);
-         }
+      return (Multimap<Attribute, AttributeModifier>)(!VaultGearItem.<VaultGearItem>of(stack).isIntendedForSlot(stack, slot)
+         ? ImmutableMultimap.of()
+         : getModifiers(VaultGearData.read(stack)));
+   }
 
-         if (data.has(ModGearAttributes.ATTACK_SPEED)) {
-            double attackSpeed = data.get(ModGearAttributes.ATTACK_SPEED, VaultGearAttributeTypeMerger.doubleSum());
-            addAttribute(builder, Attributes.ATTACK_SPEED, attackSpeed, identifier);
-         }
-
-         if (data.has(ModGearAttributes.ATTACK_SPEED_PERCENT)) {
-            double attackSpeed = data.get(ModGearAttributes.ATTACK_SPEED_PERCENT, VaultGearAttributeTypeMerger.doubleSum());
-            addAttribute(builder, Attributes.ATTACK_SPEED, attackSpeed, identifier, Operation.MULTIPLY_BASE);
-         }
-
-         if (data.has(ModGearAttributes.ARMOR)) {
-            double armor = data.get(ModGearAttributes.ARMOR, VaultGearAttributeTypeMerger.intSum()).intValue();
-            addAttribute(builder, Attributes.ARMOR, armor, identifier);
-         }
-
-         if (data.has(ModGearAttributes.ARMOR_TOUGHNESS)) {
-            double armorToughness = data.get(ModGearAttributes.ARMOR_TOUGHNESS, VaultGearAttributeTypeMerger.intSum()).intValue();
-            addAttribute(builder, Attributes.ARMOR_TOUGHNESS, armorToughness, identifier);
-         }
-
-         if (data.has(ModGearAttributes.KNOCKBACK_RESISTANCE)) {
-            float knockbackResistance = data.get(ModGearAttributes.KNOCKBACK_RESISTANCE, VaultGearAttributeTypeMerger.floatSum());
-            addAttribute(builder, Attributes.KNOCKBACK_RESISTANCE, knockbackResistance, identifier);
-         }
-
-         if (data.has(ModGearAttributes.HEALTH)) {
-            float health = data.get(ModGearAttributes.HEALTH, VaultGearAttributeTypeMerger.floatSum());
-            addAttribute(builder, Attributes.MAX_HEALTH, health, identifier);
-         }
-
-         if (data.has(ModGearAttributes.REACH)) {
-            double reach = data.get(ModGearAttributes.REACH, VaultGearAttributeTypeMerger.doubleSum());
-            addAttribute(builder, (Attribute)ForgeMod.REACH_DISTANCE.get(), reach, identifier);
-         }
-
-         if (data.has(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE)) {
-            float manaRegen = data.get(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum());
-            addAttribute(builder, ModAttributes.MANA_REGEN, manaRegen, identifier, Operation.MULTIPLY_BASE);
-         }
-
-         if (data.has(ModGearAttributes.MANA_ADDITIVE)) {
-            int manaFlat = data.get(ModGearAttributes.MANA_ADDITIVE, VaultGearAttributeTypeMerger.intSum());
-            addAttribute(builder, ModAttributes.MANA_MAX, manaFlat, identifier);
-         }
-
-         if (data.has(ModGearAttributes.MANA_ADDITIVE_PERCENTILE)) {
-            float manaPercent = data.get(ModGearAttributes.MANA_ADDITIVE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum());
-            addAttribute(builder, ModAttributes.MANA_MAX, manaPercent, identifier, Operation.MULTIPLY_BASE);
-         }
-
-         if (data.has(ModGearAttributes.HEALING_EFFECTIVENESS)) {
-            float healingPercent = data.get(ModGearAttributes.HEALING_EFFECTIVENESS, VaultGearAttributeTypeMerger.floatSum());
-            addAttribute(builder, ModAttributes.HEALING_MAX, healingPercent, identifier, Operation.MULTIPLY_BASE);
-         }
-
-         return builder.build();
+   public static Multimap<Attribute, AttributeModifier> getModifiers(AttributeGearData data) {
+      Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
+      UUID identifier = data.getIdentifier();
+      if (data.has(ModGearAttributes.ATTACK_DAMAGE)) {
+         double attackDamage = data.get(ModGearAttributes.ATTACK_DAMAGE, VaultGearAttributeTypeMerger.doubleSum());
+         addAttribute(builder, Attributes.ATTACK_DAMAGE, attackDamage, identifier);
       }
+
+      if (data.has(ModGearAttributes.ATTACK_SPEED)) {
+         double attackSpeed = data.get(ModGearAttributes.ATTACK_SPEED, VaultGearAttributeTypeMerger.doubleSum());
+         addAttribute(builder, Attributes.ATTACK_SPEED, attackSpeed, identifier);
+      }
+
+      if (data.has(ModGearAttributes.ATTACK_SPEED_PERCENT)) {
+         double attackSpeed = data.get(ModGearAttributes.ATTACK_SPEED_PERCENT, VaultGearAttributeTypeMerger.doubleSum());
+         addAttribute(builder, Attributes.ATTACK_SPEED, attackSpeed, identifier, Operation.MULTIPLY_BASE);
+      }
+
+      if (data.has(ModGearAttributes.ARMOR)) {
+         double armor = data.get(ModGearAttributes.ARMOR, VaultGearAttributeTypeMerger.intSum()).intValue();
+         addAttribute(builder, Attributes.ARMOR, armor, identifier);
+      }
+
+      if (data.has(ModGearAttributes.ARMOR_TOUGHNESS)) {
+         double armorToughness = data.get(ModGearAttributes.ARMOR_TOUGHNESS, VaultGearAttributeTypeMerger.intSum()).intValue();
+         addAttribute(builder, Attributes.ARMOR_TOUGHNESS, armorToughness, identifier);
+      }
+
+      if (data.has(ModGearAttributes.KNOCKBACK_RESISTANCE)) {
+         float knockbackResistance = data.get(ModGearAttributes.KNOCKBACK_RESISTANCE, VaultGearAttributeTypeMerger.floatSum());
+         addAttribute(builder, Attributes.KNOCKBACK_RESISTANCE, knockbackResistance, identifier);
+      }
+
+      if (data.has(ModGearAttributes.HEALTH)) {
+         float health = data.get(ModGearAttributes.HEALTH, VaultGearAttributeTypeMerger.floatSum());
+         addAttribute(builder, Attributes.MAX_HEALTH, health, identifier);
+      }
+
+      if (data.has(ModGearAttributes.REACH)) {
+         double reach = data.get(ModGearAttributes.REACH, VaultGearAttributeTypeMerger.doubleSum());
+         addAttribute(builder, (Attribute)ForgeMod.REACH_DISTANCE.get(), reach, identifier);
+      }
+
+      if (data.has(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE)) {
+         float manaRegen = data.get(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum());
+         addAttribute(builder, ModAttributes.MANA_REGEN, manaRegen, identifier, Operation.MULTIPLY_BASE);
+      }
+
+      if (data.has(ModGearAttributes.MANA_ADDITIVE)) {
+         int manaFlat = data.get(ModGearAttributes.MANA_ADDITIVE, VaultGearAttributeTypeMerger.intSum());
+         addAttribute(builder, ModAttributes.MANA_MAX, manaFlat, identifier);
+      }
+
+      if (data.has(ModGearAttributes.MANA_ADDITIVE_PERCENTILE)) {
+         float manaPercent = data.get(ModGearAttributes.MANA_ADDITIVE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum());
+         addAttribute(builder, ModAttributes.MANA_MAX, manaPercent, identifier, Operation.MULTIPLY_BASE);
+      }
+
+      if (data.has(ModGearAttributes.HEALING_EFFECTIVENESS)) {
+         float healingPercent = data.get(ModGearAttributes.HEALING_EFFECTIVENESS, VaultGearAttributeTypeMerger.floatSum());
+         addAttribute(builder, ModAttributes.HEALING_MAX, healingPercent, identifier, Operation.MULTIPLY_BASE);
+      }
+
+      return builder.build();
    }
 
    private static void addAttribute(Builder<Attribute, AttributeModifier> builder, Attribute attribute, double value, UUID seed) {

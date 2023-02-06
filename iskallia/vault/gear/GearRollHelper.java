@@ -45,23 +45,29 @@ public class GearRollHelper {
                data.write(inStack);
             },
             inStack -> {
-               VaultGearData data = VaultGearData.read(inStack);
-               data.setState(VaultGearState.IDENTIFIED);
-               data.write(inStack);
-               VaultGearModifierHelper.reRollRepairSlots(inStack, rand);
-               VaultGearCraftingHelper.reRollCraftingPotential(inStack);
-               VaultGearModifierHelper.generateAffixSlots(inStack, rand);
-               VaultGearModifierHelper.generateImplicits(inStack, rand);
-               VaultGearModifierHelper.generateModifiers(inStack, rand);
-               if (data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false)
-                  && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance()) {
-                  VaultGearModifierHelper.generateLegendaryModifier(inStack, rand);
-               }
-
+               initializeGear(inStack);
                DiscoveredModelsData worldData = DiscoveredModelsData.get(player.getLevel().getServer());
-               worldData.discoverModelAndBroadcast(inStack, player);
+               worldData.discoverModelAndBroadcast(stack, player);
             }
          );
+      }
+   }
+
+   public static void initializeGear(ItemStack stack) {
+      VaultGearData data = VaultGearData.read(stack);
+      data.setState(VaultGearState.IDENTIFIED);
+      data.write(stack);
+      VaultGearModifierHelper.reRollRepairSlots(stack, rand);
+      VaultGearCraftingHelper.reRollCraftingPotential(stack);
+      VaultGearModifierHelper.generateAffixSlots(stack, rand);
+      VaultGearModifierHelper.generateImplicits(stack, rand);
+      VaultGearModifierHelper.generateModifiers(stack, rand);
+      if (data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false) && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance()) {
+         VaultGearModifierHelper.generateLegendaryModifier(stack, rand);
+      }
+
+      if (data.getFirstValue(ModGearAttributes.IS_ABYSSAL).orElse(false)) {
+         VaultGearModifierHelper.generateAbyssalModifiers(stack, rand);
       }
    }
 

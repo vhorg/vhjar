@@ -1,10 +1,12 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.block.entity.SpiritExtractorTileEntity;
+import iskallia.vault.init.ModModelDiscoveryGoals;
 import java.util.function.Supplier;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 public class SpiritExtractorMessage {
@@ -28,10 +30,13 @@ public class SpiritExtractorMessage {
    public static void handle(SpiritExtractorMessage message, Supplier<Context> contextSupplier) {
       Context context = contextSupplier.get();
       context.enqueueWork(() -> {
-         ServerLevel serverWorld = context.getSender().getLevel();
+         ServerPlayer serverPlayer = context.getSender();
+         ServerLevel serverWorld = serverPlayer.getLevel();
          if (serverWorld.getBlockEntity(message.extractorPos) instanceof SpiritExtractorTileEntity spiritExtractor) {
             if (message.action == SpiritExtractorMessage.Action.REVIVE) {
                spiritExtractor.spewItems();
+               int totalCost = spiritExtractor.getRecoveryCost().getTotalCost().getCount();
+               ModModelDiscoveryGoals.SPIRIT_EXTRACTION.onSpiritExtracted(serverPlayer, totalCost);
             } else if (message.action == SpiritExtractorMessage.Action.RECYCLE) {
                spiritExtractor.recycle();
             }

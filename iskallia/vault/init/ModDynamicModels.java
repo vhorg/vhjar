@@ -137,11 +137,12 @@ public class ModDynamicModels {
          .associate(ModItems.IDOL_OMNISCIENT, ModDynamicModels.Idols.REGISTRY_TENOS)
          .associate(ModItems.SHIELD, ModDynamicModels.Shields.REGISTRY)
          .associate(ModItems.RELIC, ModDynamicModels.Relics.RELIC_REGISTRY)
-         .associate(ModItems.RELIC_FRAGMENT, ModDynamicModels.Relics.FRAGMENT_REGISTRY);
+         .associate(ModItems.RELIC_FRAGMENT, ModDynamicModels.Relics.FRAGMENT_REGISTRY)
+         .associate(ModItems.MAGNET, ModDynamicModels.Magnets.REGISTRY_MAGNETS);
    }
 
    public static void initCauldronWashables() {
-      CauldronInteraction.WATER.put(ModItems.MAGNET_ITEM, CauldronInteraction.DYED_ITEM);
+      CauldronInteraction.WATER.put(ModItems.MAGNET, CauldronInteraction.DYED_ITEM);
       CauldronInteraction.WATER.put(ModItems.HELMET, CauldronInteraction.DYED_ITEM);
       CauldronInteraction.WATER.put(ModItems.CHESTPLATE, CauldronInteraction.DYED_ITEM);
       CauldronInteraction.WATER.put(ModItems.LEGGINGS, CauldronInteraction.DYED_ITEM);
@@ -1113,6 +1114,11 @@ public class ModDynamicModels {
       );
    }
 
+   public static class Magnets {
+      public static final DynamicModelRegistry<PlainItemModel> REGISTRY_MAGNETS = new DynamicModelRegistry<>();
+      public static final PlainItemModel DEFAULT = REGISTRY_MAGNETS.register(new PlainItemModel(VaultMod.id("magnets/magnet_1"), "Magnet"));
+   }
+
    public static class Relics {
       public static final DynamicModelRegistry<PlainItemModel> RELIC_REGISTRY = new DynamicModelRegistry<>();
       public static final DynamicModelRegistry<PlainItemModel> FRAGMENT_REGISTRY = new DynamicModelRegistry<>();
@@ -1366,6 +1372,10 @@ public class ModDynamicModels {
       );
       public static final HandHeldModel TRIBAL_BLADE = REGISTRY.register(
          new HandHeldModel(VaultMod.id("gear/sword/tribal_blade"), "Tribal Blade")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final HandHeldModel GLOREM_GLIPSUM = REGISTRY.register(
+         new HandHeldModel(VaultMod.id("gear/sword/glorem_glipsum"), "Glorem Glipsum")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }

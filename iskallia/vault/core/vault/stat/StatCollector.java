@@ -82,7 +82,7 @@ public class StatCollector extends DataObject<StatCollector> {
       });
       CommonEvents.ENTITY_DEATH.register(this, event -> {
          Entity source = event.getSource().getEntity();
-         if (source != null && source.getUUID().equals(uuid)) {
+         if (source != null && source.getUUID().equals(uuid) && event.getEntity().level == world) {
             this.get(MOBS).onKilled(event.getEntity());
          }
       });

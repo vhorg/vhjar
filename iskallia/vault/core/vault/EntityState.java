@@ -7,6 +7,7 @@ import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.entity.entity.SpiritEntity;
 import iskallia.vault.world.vault.VaultUtils;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
@@ -85,6 +86,12 @@ public class EntityState extends DataObject<EntityState> implements INBTSerializ
       this.set(PITCH, Float.valueOf(nbt.getFloat("Pitch")));
       this.set(GAME_MODE, GameType.values()[nbt.getInt("GameMode")]);
       this.set(WORLD, ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("World"))));
+   }
+
+   public boolean isLoaded() {
+      ServerLevel target = ServerLifecycleHooks.getCurrentServer().getLevel(this.get(WORLD));
+      BlockPos pos = new BlockPos(this.get(POS_X), this.get(POS_Y), this.get(POS_Z));
+      return target != null && target.isLoaded(pos);
    }
 
    public void teleport(Entity entity) {

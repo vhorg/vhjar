@@ -46,8 +46,9 @@ public abstract class VaultModifier<P> implements IVaultModifierBehaviorApply {
       return this.display.getName();
    }
 
-   protected void setNameFormatter(@Nonnull IVaultModifierTextFormatter<P> nameFormatter) {
+   protected <T extends VaultModifier<P>> T setNameFormatter(@Nonnull IVaultModifierTextFormatter<P> nameFormatter) {
       this.nameFormatter = nameFormatter;
+      return (T)this;
    }
 
    public String getDisplayNameFormatted(int modifierStackSize) {
@@ -64,8 +65,9 @@ public abstract class VaultModifier<P> implements IVaultModifierBehaviorApply {
       return this.display.getDescription();
    }
 
-   protected void setDescriptionFormatter(IVaultModifierTextFormatter<P> descriptionFormatter) {
+   protected <T extends VaultModifier<P>> T setDescriptionFormatter(IVaultModifierTextFormatter<P> descriptionFormatter) {
       this.descriptionFormatter = descriptionFormatter;
+      return (T)this;
    }
 
    public String getDisplayDescriptionFormatted(int modifierStackSize) {
@@ -92,6 +94,10 @@ public abstract class VaultModifier<P> implements IVaultModifierBehaviorApply {
       HoverEvent hover = new HoverEvent(Action.SHOW_TEXT, new TextComponent(this.getDisplayDescriptionFormatted(modifierStackSize)));
       return new TextComponent(this.getDisplayNameFormatted(modifierStackSize))
          .setStyle(Style.EMPTY.withColor(this.getDisplayTextColor()).withHoverEvent(hover));
+   }
+
+   public Component getChatDisplayNameComponent(int modifierStackSize) {
+      return new TextComponent(modifierStackSize + "x ").append(this.getNameComponentFormatted(modifierStackSize));
    }
 
    public static class Display {

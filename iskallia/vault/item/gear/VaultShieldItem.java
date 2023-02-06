@@ -10,7 +10,6 @@ import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
-import iskallia.vault.gear.tooltip.VaultGearDataTooltip;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.util.MiscUtils;
@@ -119,9 +118,9 @@ public class VaultShieldItem extends ShieldItem implements VaultGearItem {
    }
 
    @OnlyIn(Dist.CLIENT)
-   public void appendHoverText(ItemStack itemStack, Level world, List<Component> tooltip, TooltipFlag flag) {
-      super.appendHoverText(itemStack, world, tooltip, flag);
-      tooltip.addAll(VaultGearDataTooltip.createTooltip(itemStack, GearTooltip.itemTooltip()));
+   public void appendHoverText(ItemStack stack, Level world, List<Component> tooltip, TooltipFlag flag) {
+      super.appendHoverText(stack, world, tooltip, flag);
+      tooltip.addAll(this.createTooltip(stack, GearTooltip.itemTooltip()));
    }
 
    public boolean canElytraFly(ItemStack stack, LivingEntity entity) {
@@ -129,6 +128,10 @@ public class VaultShieldItem extends ShieldItem implements VaultGearItem {
    }
 
    public boolean elytraFlightTick(ItemStack stack, LivingEntity entity, int flightTicks) {
+      return false;
+   }
+
+   public boolean isValidRepairItem(@NotNull ItemStack stack, @NotNull ItemStack material) {
       return false;
    }
 

@@ -2,6 +2,7 @@ package iskallia.vault.client.gui.screen.bounty.element.task;
 
 import iskallia.vault.bounty.task.KillEntityTask;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
+import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import iskallia.vault.util.TextUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +15,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class KillEntityTaskElement extends AbstractTaskElement<KillEntityTask> {
-   protected KillEntityTaskElement(ISpatial spatial, KillEntityTask task) {
-      super(spatial, task);
+   protected KillEntityTaskElement(ISpatial spatial, KillEntityTask task, BountyElement.Status status) {
+      super(spatial, task, status);
    }
 
    @Override

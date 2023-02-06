@@ -23,6 +23,9 @@ import java.awt.Color;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.RegistryEvent.Register;
 
 public class ModEffects {
@@ -46,6 +49,8 @@ public class ModEffects {
    public static final ToggleAbilityEffect MANA_SHIELD = new ManaShieldAbility.ManaShieldEffect(Color.CYAN.getRGB(), VaultMod.id("mana_shield"));
    public static final PlayerRageHelper.RageEffect RAGE = new PlayerRageHelper.RageEffect(Color.RED.getRGB(), VaultMod.id("rage"));
    public static final MobEffect RESISTANCE = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.YELLOW.getRGB(), VaultMod.id("resistance"));
+   public static final MobEffect REACH = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.BLUE.getRGB(), VaultMod.id("reach"))
+      .addAttributeModifier((Attribute)ForgeMod.REACH_DISTANCE.get(), "c55181ae-a259-11ed-a8fc-0242ac120002", 2.0, Operation.ADDITION);
    public static final MobEffect TIMER_ACCELERATION = new TimerAccelerationEffect(MobEffectCategory.HARMFUL, -16448251, VaultMod.id("time_acceleration"));
    public static final MobEffect POISON_OVERRIDE = new PoisonOverrideEffect();
 
@@ -67,6 +72,7 @@ public class ModEffects {
                TIMER_ACCELERATION,
                POISON_OVERRIDE,
                RESISTANCE,
+               REACH,
                TAUNT,
                TAUNT_REPEL_MOB,
                TAUNT_REPEL_PLAYER,

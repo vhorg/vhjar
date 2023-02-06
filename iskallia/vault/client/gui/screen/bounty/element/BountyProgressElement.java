@@ -14,7 +14,9 @@ import net.minecraft.network.chat.TextComponent;
 public class BountyProgressElement extends ContainerElement<BountyProgressElement> {
    public BountyProgressElement(ISpatial spatial, Bounty active) {
       super(spatial);
-      BountyElement.Status status = BountyElement.Status.ACTIVE;
+      BountyElement.Status status = active.getTask().getProperties().getRewardPool().equalsIgnoreCase("legendary")
+         ? BountyElement.Status.LEGENDARY
+         : BountyElement.Status.ACTIVE;
       MutableComponent bountyTitle = TextUtil.formatLocationPathAsProperNoun(active.getTask().getTaskType()).withStyle(status.getDisplay().getStyle());
       HeaderElement headerElement = this.addElement(
          new HeaderElement(
@@ -28,6 +30,6 @@ public class BountyProgressElement extends ContainerElement<BountyProgressElemen
       TaskScrollContainerElement taskScrollContainerElement = this.addElement(
          new TaskScrollContainerElement(Spatials.positionXY(4, 20).width(this.width() - 11).height(this.height() - 53))
       );
-      taskScrollContainerElement.setTaskElement(active.getTask());
+      taskScrollContainerElement.setTaskElement(active.getTask(), status);
    }
 }

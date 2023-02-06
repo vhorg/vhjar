@@ -13,8 +13,9 @@ import iskallia.vault.core.world.data.TileParser;
 import iskallia.vault.core.world.loot.LootPool;
 import iskallia.vault.entity.entity.FloatingItemEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLootItem;
+import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.world.data.ServerVaults;
 import java.awt.Color;
 import java.util.Random;
@@ -147,14 +148,9 @@ public abstract class FillableAltarTileEntity extends BlockEntity {
       pool.getRandomFlat(Version.latest(), random).ifPresent(entry -> {
          ItemStack stack = entry.getStack(random);
          Vault vault = ServerVaults.get(world).orElse(null);
-         if (vault != null && stack.getItem() instanceof VaultLootItem lootItem) {
-            lootItem.initializeLoot(vault, stack);
-         }
-
-         if (stack.getItem() instanceof DataTransferItem lootItem) {
-            stack = lootItem.convertStack(stack, random);
-         }
-
+         VaultLevelItem.doInitializeVaultLoot(stack, vault, null);
+         stack = DataTransferItem.doConvertStack(stack);
+         DataInitializationItem.doInitialize(stack);
          world.addFreshEntity(FloatingItemEntity.create(world, pos, stack).setColor(color));
          world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8F, 0.2F);
       });

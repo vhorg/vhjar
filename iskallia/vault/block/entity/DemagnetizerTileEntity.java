@@ -1,44 +1,59 @@
 package iskallia.vault.block.entity;
 
-import com.google.common.collect.MapMaker;
 import iskallia.vault.block.DemagnetizerBlock;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import java.util.Collections;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public class DemagnetizerTileEntity extends BlockEntity {
-   private static final Set<DemagnetizerTileEntity> LOADED_DEMAGNETIZERS = Collections.newSetFromMap(new MapMaker().concurrencyLevel(2).weakKeys().makeMap());
-
    public DemagnetizerTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.DEMAGNETIZER_TILE_ENTITY, pos, state);
    }
 
-   public void onLoad() {
-      super.onLoad();
-      if (!LOADED_DEMAGNETIZERS.contains(this)) {
-         LOADED_DEMAGNETIZERS.add(this);
-      }
-   }
-
-   public void setRemoved() {
-      super.setRemoved();
-      LOADED_DEMAGNETIZERS.remove(this);
-   }
-
-   public static boolean hasDemagnetizerAround(Entity e) {
+   public static boolean hasDemagnetizerAround(Entity entity) {
       int radius = ModConfigs.MAGNET_CONFIG.getDemagnetizerRadius();
-      int r = radius * radius;
-      return LOADED_DEMAGNETIZERS.stream()
-         .filter(f -> f.getLevel() == e.level)
-         .anyMatch(
-            f -> f.getBlockState().hasProperty(DemagnetizerBlock.DEACTIVATED) && f.getBlockState().getValue(DemagnetizerBlock.DEACTIVATED)
-               ? false
-               : f.getBlockPos().distToCenterSqr(e.getX(), e.getY(), e.getZ()) <= r
-         );
+      return getDemagnetizers(entity, radius)
+         .stream()
+         .filter(demagnetizer -> demagnetizer.getLevel() == entity.level)
+         .filter(demagnetizer -> demagnetizer.getBlockState().getOptionalValue(DemagnetizerBlock.DEACTIVATED).isPresent())
+         .anyMatch(demagnetizer -> !(Boolean)demagnetizer.getBlockState().getValue(DemagnetizerBlock.DEACTIVATED));
+   }
+
+   private static List<DemagnetizerTileEntity> getDemagnetizers(Entity entity, double radius) {
+      List<DemagnetizerTileEntity> demagnetizers = new ArrayList<>();
+      BlockPos entityPosition = entity.blockPosition();
+      double radiusSq = radius * radius;
+      int iRadius = Mth.ceil(radius);
+      Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);
+      ChunkPos posMin = new ChunkPos(entityPosition.subtract(radVec));
+      ChunkPos posMax = new ChunkPos(entityPosition.offset(radVec));
+
+      for (int xx = posMin.x; xx <= posMax.x; xx++) {
+         for (int zz = posMin.z; zz <= posMax.z; zz++) {
+            LevelChunk ch = entity.getLevel().getChunkSource().getChunkNow(xx, zz);
+            if (ch != null) {
+               Map<BlockPos, BlockEntity> blockEntities = ch.getBlockEntities();
+               blockEntities.forEach((pos, tile) -> {
+                  if (tile instanceof DemagnetizerTileEntity demagnetizer) {
+                     if (pos.distSqr(entityPosition) <= radiusSq) {
+                        demagnetizers.add(demagnetizer);
+                     }
+                  }
+               });
+            }
+         }
+      }
+
+      return demagnetizers;
    }
 }

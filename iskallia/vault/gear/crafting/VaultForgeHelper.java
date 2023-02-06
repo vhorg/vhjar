@@ -36,6 +36,12 @@ public class VaultForgeHelper {
    }
 
    public static boolean consumeInputs(List<ItemStack> recipeInputs, Inventory playerInventory, VaultForgeTileEntity tile, boolean simulate) {
+      return consumeInputs(recipeInputs, playerInventory, tile, simulate, new ArrayList<>());
+   }
+
+   public static boolean consumeInputs(
+      List<ItemStack> recipeInputs, Inventory playerInventory, VaultForgeTileEntity tile, boolean simulate, List<OverSizedItemStack> consumed
+   ) {
       boolean missingInput = true;
 
       for (ItemStack input : recipeInputs) {
@@ -52,6 +58,7 @@ public class VaultForgeHelper {
                int deductedAmount = Math.min(neededCount, overSized.amount());
                if (!simulate) {
                   tile.getInventory().setOverSizedStack(slot, overSized.addCopy(-deductedAmount));
+                  consumed.add(overSized.copyAmount(deductedAmount));
                }
 
                neededCount -= overSized.amount();
@@ -67,6 +74,9 @@ public class VaultForgeHelper {
                int deductedAmount = Math.min(neededCount, plStack.getCount());
                if (!simulate) {
                   plStack.shrink(deductedAmount);
+                  ItemStack deducted = plStack.copy();
+                  deducted.setCount(deductedAmount);
+                  consumed.add(OverSizedItemStack.of(deducted));
                }
 
                neededCount -= deductedAmount;

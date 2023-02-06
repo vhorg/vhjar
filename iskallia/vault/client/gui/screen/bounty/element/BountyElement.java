@@ -28,6 +28,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
@@ -64,13 +65,17 @@ public class BountyElement extends ContainerElement<BountyElement> {
                ScreenTextures.BUTTON_EMPTY_TEXTURES,
                this::onActionClicked
             )
-            .setRenderButtonHeld(() -> this.status == BountyElement.Status.ACTIVE && !this.bounty.getTask().isComplete())
+            .setRenderButtonHeld(
+               () -> (this.status == BountyElement.Status.ACTIVE || this.status == BountyElement.Status.LEGENDARY) && !this.bounty.getTask().isComplete()
+            )
             .label(this.getButtonLabel(), LabelTextStyle.center().shadow())
       );
       this.headerElement.enableSpatialDebugRender(false, true);
       this.taskScrollContainerElement.enableSpatialDebugRender(false, true);
       this.actionButton.enableSpatialDebugRender(false, true);
-      if (!this.container.getActive().isEmpty()) {
+      if (!this.container.getLegendary().isEmpty()) {
+         this.setBounty(this.container.getLegendary().get(0).getId(), BountyElement.Status.LEGENDARY);
+      } else if (!this.container.getActive().isEmpty()) {
          this.setBounty(this.container.getActive().get(0).getId(), BountyElement.Status.ACTIVE);
       } else {
          this.actionButton.setDisabled(true);
@@ -81,6 +86,7 @@ public class BountyElement extends ContainerElement<BountyElement> {
    private TextComponent getButtonLabel() {
       switch (this.status) {
          case ACTIVE:
+         case LEGENDARY:
             if (this.bounty.getTask().isComplete()) {
                return new TextComponent("Claim Reward");
             }
@@ -96,18 +102,36 @@ public class BountyElement extends ContainerElement<BountyElement> {
    private void onActionClicked() {
       switch (this.status) {
          case ACTIVE:
+         case LEGENDARY:
+            LocalPlayer player = Minecraft.getInstance().player;
             if (this.bounty.getTask().isComplete()) {
                ModNetwork.CHANNEL.sendToServer(new ServerboundClaimRewardMessage(this.bounty.getId()));
-               this.container.getActive().removeById(this.bounty.getId());
-               this.container.getComplete().add(this.bounty);
-               this.bounty.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getWaitingPeriodSeconds(), ChronoUnit.SECONDS).toEpochMilli());
-               Minecraft.getInstance().player.playSound(SoundEvents.PLAYER_LEVELUP, 0.7F, 1.0F);
+               if (this.status == BountyElement.Status.LEGENDARY) {
+                  this.container.getLegendary().removeById(this.bounty.getId());
+               } else {
+                  this.container.getActive().removeById(this.bounty.getId());
+                  this.container.getComplete().add(this.bounty);
+                  this.bounty.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getWaitingPeriodSeconds(), ChronoUnit.SECONDS).toEpochMilli());
+               }
+
+               if (player != null) {
+                  player.playSound(SoundEvents.PLAYER_LEVELUP, 0.7F, 1.0F);
+               }
             } else if (this.actionButton.getTimeHeld() > 60.0) {
-               this.status = BountyElement.Status.COMPLETE;
-               ModNetwork.CHANNEL.sendToServer(new ServerboundAbandonBountyMessage(this.bounty.getId()));
-               this.container.getActive().removeById(this.bounty.getId());
-               this.container.getComplete().add(this.bounty);
-               this.bounty.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltySeconds(), ChronoUnit.SECONDS).toEpochMilli());
+               if (this.status == BountyElement.Status.LEGENDARY) {
+                  ModNetwork.CHANNEL.sendToServer(new ServerboundAbandonBountyMessage(this.bounty.getId()));
+                  this.container.getLegendary().removeById(this.bounty.getId());
+               } else {
+                  this.status = BountyElement.Status.COMPLETE;
+                  ModNetwork.CHANNEL.sendToServer(new ServerboundAbandonBountyMessage(this.bounty.getId()));
+                  this.container.getActive().removeById(this.bounty.getId());
+                  this.container.getComplete().add(this.bounty);
+                  this.bounty.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltySeconds(), ChronoUnit.SECONDS).toEpochMilli());
+               }
+
+               if (player != null) {
+                  player.playSound(SoundEvents.CANDLE_EXTINGUISH, 1.0F, 1.0F);
+               }
             }
 
             if (this.bounty != null) {
@@ -142,7 +166,7 @@ public class BountyElement extends ContainerElement<BountyElement> {
       this.headerElement.setTitle(bountyTitle);
       this.headerElement.setIcon(bounty.getTask().getTaskType());
       this.headerElement.tooltip(Tooltips.single(() -> this.status.getDisplay()));
-      this.taskScrollContainerElement.setTaskElement(bounty.getTask());
+      this.taskScrollContainerElement.setTaskElement(bounty.getTask(), this.status);
       this.actionButton.label(this.getButtonLabel(), LabelTextStyle.center().shadow());
       this.actionButton.setDisabled(this.status == BountyElement.Status.COMPLETE || this.bounty == null);
       if (this.status == BountyElement.Status.COMPLETE) {
@@ -230,6 +254,7 @@ public class BountyElement extends ContainerElement<BountyElement> {
       ACTIVE(new TextComponent("Active").withStyle(ChatFormatting.GREEN)),
       AVAILABLE(new TextComponent("Available").withStyle(ChatFormatting.WHITE)),
       COMPLETE(new TextComponent("Complete").withStyle(ChatFormatting.AQUA)),
+      LEGENDARY(new TextComponent("Legendary").withStyle(ChatFormatting.YELLOW)),
       NONE(new TextComponent(""));
 
       private final MutableComponent display;

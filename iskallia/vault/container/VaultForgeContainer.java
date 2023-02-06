@@ -105,6 +105,6 @@ public class VaultForgeContainer extends OverSizedSlotContainer {
    }
 
    public boolean stillValid(Player player) {
-      return this.tileEntity == null ? false : this.tileEntity.getInventory().stillValid(this.player);
+      return this.tileEntity == null ? false : this.tileEntity.stillValid(this.player);
    }
 }

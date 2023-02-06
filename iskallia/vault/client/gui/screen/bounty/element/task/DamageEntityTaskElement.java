@@ -2,6 +2,7 @@ package iskallia.vault.client.gui.screen.bounty.element.task;
 
 import iskallia.vault.bounty.task.DamageTask;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
+import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import iskallia.vault.util.TextUtil;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +13,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class DamageEntityTaskElement extends AbstractTaskElement<DamageTask> {
-   protected DamageEntityTaskElement(ISpatial spatial, DamageTask task) {
-      super(spatial, task);
+   protected DamageEntityTaskElement(ISpatial spatial, DamageTask task, BountyElement.Status status) {
+      super(spatial, task, status);
    }
 
    @Override

@@ -1,17 +1,7 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "the_vault:item/magnets/magnet_base",
-    "layer1": "the_vault:item/magnets/magnet_overlay"
-  },
-  "overrides": [
-    { "predicate": { "the_vault:magnet_perk": 1 }, "model": "the_vault:item/magnet_chunky" },
-    { "predicate": { "the_vault:magnet_perk": 2 }, "model": "the_vault:item/magnet_hoard" },
-    { "predicate": { "the_vault:magnet_perk": 3 }, "model": "the_vault:item/magnet_immortal" },
-    { "predicate": { "the_vault:magnet_perk": 4 }, "model": "the_vault:item/magnet_reinforced" },
-    { "predicate": { "the_vault:magnet_perk": 5 }, "model": "the_vault:item/magnet_sharp" },
-    { "predicate": { "the_vault:magnet_perk": 6 }, "model": "the_vault:item/magnet_soul_hunting" },
-    { "predicate": { "the_vault:magnet_perk": 7 }, "model": "the_vault:item/magnet_teleporting" },
-    { "predicate": { "the_vault:magnet_perk": 8 }, "model": "the_vault:item/magnet_treasure" }
-  ]
+    "layer0": "the_vault:item/magnets/unidentified",
+    "layer1": "the_vault:item/magnets/unidentified_overlay"
+  }
 }

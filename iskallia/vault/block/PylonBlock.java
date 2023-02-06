@@ -4,6 +4,7 @@ import iskallia.vault.block.entity.PylonTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.BlockHelper;
 import iskallia.vault.world.data.PlayerPylons;
+import iskallia.vault.world.data.ServerVaults;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -66,7 +67,7 @@ public class PylonBlock extends Block implements EntityBlock {
    ) {
       if (world.getBlockEntity(pos) instanceof PylonTileEntity pylon && !pylon.isConsumed()) {
          if (!world.isClientSide) {
-            PlayerPylons.add(player, pylon.config);
+            PlayerPylons.add(ServerVaults.get(player.level).orElse(null), player, pylon.config);
             pylon.setConsumed(true);
             world.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 2.0F);
          }

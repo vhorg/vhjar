@@ -6,6 +6,7 @@ import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.NaturalSpawner;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.world.VaultDifficulty;
 import iskallia.vault.world.data.WorldSettings;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -44,7 +45,7 @@ public class VaultMobsConfig extends Config {
       if (attributes == null) {
          return entity;
       } else {
-         double difficultyMultiplier = WorldSettings.get(entity.level).getPlayerDifficulty(ownerId).getMobDifficultyMultiplier();
+         VaultDifficulty difficulty = WorldSettings.get(entity.level).getPlayerDifficulty(ownerId);
 
          for (VaultMobsConfig.Mob.AttributeOverride override : attributes) {
             if (!(entity.level.random.nextDouble() >= override.ROLL_CHANCE)) {
@@ -52,8 +53,10 @@ public class VaultMobsConfig extends Config {
                   AttributeInstance instance = entity.getAttribute(attribute);
                   if (instance != null) {
                      double baseValue = override.getValue(instance.getBaseValue(), vaultLevel, entity.level.getRandom());
-                     if (instance.getAttribute() == Attributes.MAX_HEALTH || instance.getAttribute() == Attributes.ATTACK_DAMAGE) {
-                        baseValue *= difficultyMultiplier;
+                     if (instance.getAttribute() == Attributes.MAX_HEALTH) {
+                        baseValue *= difficulty.getHeathMultiplier();
+                     } else if (instance.getAttribute() == Attributes.ATTACK_DAMAGE) {
+                        baseValue *= difficulty.getDamageMultiplier();
                      }
 
                      instance.setBaseValue(baseValue);

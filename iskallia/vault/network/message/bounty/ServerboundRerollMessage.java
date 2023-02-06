@@ -5,7 +5,6 @@ import iskallia.vault.container.BountyContainer;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.world.data.BountyData;
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -35,17 +34,18 @@ public record ServerboundRerollMessage(UUID bountyId) {
                if (serverPlayer.containerMenu instanceof BountyContainer container) {
                   Optional<Bounty> bounty = BountyData.get().getAllBountiesFor(serverPlayer.getUUID()).findById(message.bountyId);
                   if (bounty.isPresent()) {
-                     ItemStack bronze = container.getBronzeSlot().getItem();
-                     int cost = ModConfigs.BOUNTY_CONFIG.getCost(container.getVaultLevel(), bounty.get().getExpiration() - Instant.now().toEpochMilli());
-                     bronze.shrink(cost);
-                     container.getBronzeSlot().set(bronze);
+                     ItemStack pearl = container.getBountyPearlSlot().getItem();
+                     int cost = ModConfigs.BOUNTY_CONFIG.getCost(container.getVaultLevel());
+                     pearl.shrink(cost);
+                     container.getBountyPearlSlot().set(pearl);
                      BountyData.get().reroll(serverPlayer, message.bountyId);
                      ModNetwork.CHANNEL
                         .sendTo(
                            new ClientboundRefreshBountiesMessage(
                               BountyData.get().getAllActiveFor(playerId),
                               BountyData.get().getAllAvailableFor(playerId),
-                              BountyData.get().getAllCompletedFor(playerId)
+                              BountyData.get().getAllCompletedFor(playerId),
+                              BountyData.get().getAllLegendaryFor(playerId)
                            ),
                            serverPlayer.connection.connection,
                            NetworkDirection.PLAY_TO_CLIENT

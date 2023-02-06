@@ -25,6 +25,10 @@ public class VaultArtisanStationTileEntity extends BlockEntity implements MenuPr
       }
    };
 
+   public boolean stillValid(Player player) {
+      return this.level != null && this.level.getBlockEntity(this.worldPosition) == this ? this.inventory.stillValid(player) : false;
+   }
+
    public VaultArtisanStationTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.VAULT_ARTISAN_STATION_ENTITY, pos, state);
    }

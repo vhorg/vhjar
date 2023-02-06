@@ -17,7 +17,11 @@ import net.minecraft.world.item.ItemStack;
 
 public interface DataTransferItem {
    static ItemStack doConvertStack(ItemStack stack) {
-      return stack.getItem() instanceof DataTransferItem transferItem ? transferItem.convertStack(stack, JavaRandom.ofNanoTime()) : stack;
+      return doConvertStack(stack, JavaRandom.ofNanoTime());
+   }
+
+   static ItemStack doConvertStack(ItemStack stack, RandomSource random) {
+      return stack.getItem() instanceof DataTransferItem transferItem ? transferItem.convertStack(stack, random) : stack;
    }
 
    default ItemStack convertStack(ItemStack stack, RandomSource random) {

@@ -2,7 +2,6 @@ package iskallia.vault.event;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.entity.VaultChestTileEntity;
-import iskallia.vault.core.vault.Vault;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.gear.data.VaultGearData;
@@ -55,7 +54,6 @@ import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.EntityItemPickupEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
@@ -122,17 +120,6 @@ public class PlayerEvents {
          if (trinketItem.canEquip(event.getSlotContext(), stack)) {
             event.setResult(Result.ALLOW);
          }
-      }
-   }
-
-   @SubscribeEvent
-   public static void playerImmuneInFinishedVault(LivingHurtEvent event) {
-      if (event.getEntity() instanceof ServerPlayer player) {
-         ServerVaults.get(player.getLevel()).ifPresent(vault -> {
-            if (vault.has(Vault.FINISHED)) {
-               event.setCanceled(true);
-            }
-         });
       }
    }
 

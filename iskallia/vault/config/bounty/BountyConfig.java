@@ -60,14 +60,8 @@ public class BountyConfig extends Config {
       return this.weightedTaskList.getRandom(rand);
    }
 
-   public int getBaseCost(int vaultLevel) {
+   public int getCost(int vaultLevel) {
       Optional<Integer> entry = this.rerollBronzeCost.getForLevel(vaultLevel);
-      return entry.isEmpty() ? vaultLevel : entry.get();
-   }
-
-   public int getCost(int vaultLevel, long timeRemaining) {
-      int baseCost = this.getBaseCost(vaultLevel);
-      int extra = (int)Math.max(Math.round(timeRemaining / 3600000.0), 1L);
-      return baseCost + extra;
+      return entry.isEmpty() ? 1 : entry.get();
    }
 }

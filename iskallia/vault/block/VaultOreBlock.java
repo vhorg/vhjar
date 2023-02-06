@@ -2,8 +2,12 @@ package iskallia.vault.block;
 
 import com.google.common.base.Functions;
 import iskallia.vault.block.item.VaultOreBlockItem;
+import iskallia.vault.core.vault.abyss.AbyssVaultLootHelper;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -39,8 +43,6 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.HitResult;
 
@@ -91,22 +93,36 @@ public class VaultOreBlock extends OreBlock {
       }
 
       if ((Boolean)state.getValue(GENERATED)) {
-         LootContext ctx = builder.create(LootContextParamSets.EMPTY);
-         if (ctx.hasParam(LootContextParams.TOOL)) {
-            tool = (ItemStack)ctx.getParam(LootContextParams.TOOL);
-            if (!tool.isEmpty() && tool.getItem() instanceof PaxelItem) {
-               float copiouslyChance = PaxelItem.getUsableStat(tool, PaxelItem.Stat.COPIOUSLY);
-               if (copiouslyChance > 0.0F && this.RANDOM.nextFloat() < copiouslyChance / 100.0F) {
-                  Entity player = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
-                  BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
-                  player.level.playSound(null, pos, ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.1F, 0.85F);
-                  drops.addAll(drops);
-               }
-            }
+         float chance = getCopiouslyChance(builder);
+         if (this.RANDOM.nextFloat() < chance) {
+            Entity player = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
+            BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
+            player.level.playSound(null, pos, ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.1F, 0.85F);
+            drops.addAll(drops);
          }
       }
 
       return drops;
+   }
+
+   private static float getCopiouslyChance(net.minecraft.world.level.storage.loot.LootContext.Builder ctx) {
+      float chance = 0.0F;
+      ItemStack tool = (ItemStack)ctx.getOptionalParameter(LootContextParams.TOOL);
+      if (tool != null && !tool.isEmpty()) {
+         if (tool.getItem() instanceof PaxelItem) {
+            chance += PaxelItem.getUsableStat(tool, PaxelItem.Stat.COPIOUSLY) / 100.0F;
+         }
+
+         AttributeGearData data = AttributeGearData.read(tool);
+         chance += data.get(ModGearAttributes.COPIOUSLY, VaultGearAttributeTypeMerger.floatSum());
+      }
+
+      Entity harvestingEntity = (Entity)ctx.getOptionalParameter(LootContextParams.THIS_ENTITY);
+      if (harvestingEntity != null) {
+         chance += AbyssVaultLootHelper.getCopiouslyChance(harvestingEntity);
+      }
+
+      return chance;
    }
 
    public BlockState getStateForPlacement(BlockPlaceContext context) {

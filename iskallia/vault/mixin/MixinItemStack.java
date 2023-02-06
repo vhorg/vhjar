@@ -66,7 +66,7 @@ public abstract class MixinItemStack {
    public boolean hurt(int damage, Random rand, @Nullable ServerPlayer damager) {
       if (!this.isDamageableItem()) {
          return false;
-      } else if (this.item == Items.ELYTRA && new Random().nextInt(5) == 0) {
+      } else if (this.item == Items.ELYTRA && new Random().nextInt(5) != 0) {
          return false;
       } else {
          if (damage > 0) {

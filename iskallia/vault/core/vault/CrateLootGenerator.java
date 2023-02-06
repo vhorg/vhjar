@@ -8,8 +8,9 @@ import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLootItem;
+import iskallia.vault.item.gear.VaultLevelItem;
 import java.util.Collections;
 import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
@@ -28,21 +29,17 @@ public class CrateLootGenerator {
    }
 
    public NonNullList<ItemStack> generate(Vault vault, Listener listener, RandomSource random) {
-      NonNullList<ItemStack> items = this.createLoot(vault, listener, random);
-      items.forEach(stackx -> {
-         if (stackx.getItem() instanceof VaultLootItem lootItemx) {
-            lootItemx.initializeLoot(vault, stackx);
-         }
-      });
+      NonNullList<ItemStack> loot = this.createLoot(vault, listener, random);
 
-      for (int i = 0; i < items.size(); i++) {
-         ItemStack stack = (ItemStack)items.get(i);
-         if (stack.getItem() instanceof DataTransferItem lootItem) {
-            items.set(i, lootItem.convertStack(stack, random));
-         }
+      for (int i = 0; i < loot.size(); i++) {
+         ItemStack stack = (ItemStack)loot.get(i);
+         VaultLevelItem.doInitializeVaultLoot(stack, vault, null);
+         stack = DataTransferItem.doConvertStack(stack);
+         DataInitializationItem.doInitialize(stack);
+         loot.set(i, stack);
       }
 
-      return items;
+      return loot;
    }
 
    public NonNullList<ItemStack> createLootForCommand(RandomSource random, int vaultLevel) {
@@ -64,7 +61,7 @@ public class CrateLootGenerator {
       Collections.shuffle(loot);
       loot.forEach(stackx -> {
          if (stackx.getItem() instanceof VaultGearItem lootItemx) {
-            lootItemx.setLevel(stackx, vaultLevel);
+            lootItemx.setItemLevel(stackx, vaultLevel);
          }
       });
 

@@ -2,13 +2,13 @@ package iskallia.vault.container.inventory;
 
 import com.mojang.datafixers.util.Pair;
 import iskallia.vault.block.entity.MagnetTableTile;
-import iskallia.vault.config.MagnetConfigs;
+import iskallia.vault.config.LegacyMagnetConfigs;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSlotIcons;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.LegacyMagnetItem;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -34,7 +34,7 @@ public class MagnetTableContainerMenu extends AbstractContainerMenu {
       Pair.of(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.MAGNET_TABLE_SLOT_2_NO_ITEM),
       Pair.of(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.MAGNET_TABLE_SLOT_3_NO_ITEM)
    };
-   public final Map<MagnetItem.Stat, MagnetConfigs.Upgrade> upgrades = ModConfigs.MAGNET_CONFIG.getAllUpgrades();
+   public final Map<LegacyMagnetItem.Stat, LegacyMagnetConfigs.Upgrade> upgrades = ModConfigs.MAGNET_CONFIG.getAllUpgrades();
    public final Container container;
 
    public MagnetTableContainerMenu(int id, Inventory playerInventory, FriendlyByteBuf packetBuffer) {
@@ -53,7 +53,7 @@ public class MagnetTableContainerMenu extends AbstractContainerMenu {
       this.container.startOpen(playerInventory.player);
       this.addSlot(new Slot(this.container, 0, 55, 24) {
          public boolean mayPlace(ItemStack stack) {
-            return stack.is(ModItems.MAGNET_ITEM);
+            return stack.is(ModItems.MAGNET);
          }
       });
       this.addSlot(
@@ -126,21 +126,21 @@ public class MagnetTableContainerMenu extends AbstractContainerMenu {
    }
 
    public boolean clickMenuButton(Player pPlayer, int pId) {
-      if (pId >= MagnetItem.Stat.values().length) {
+      if (pId >= LegacyMagnetItem.Stat.values().length) {
          return super.clickMenuButton(pPlayer, pId);
       } else {
-         MagnetItem.Stat stat = MagnetItem.Stat.values()[pId];
-         MagnetConfigs.Upgrade upgrade = this.upgrades.get(stat);
+         LegacyMagnetItem.Stat stat = LegacyMagnetItem.Stat.values()[pId];
+         LegacyMagnetConfigs.Upgrade upgrade = this.upgrades.get(stat);
 
          for (int i = 1; i < 5; i++) {
             ((Slot)this.slots.get(i)).getItem().shrink(upgrade.getMaterialCost(i - 1));
          }
 
          ItemStack magnet = ((Slot)this.slots.get(0)).getItem();
-         MagnetItem.increaseStatUpgrade(magnet, stat, upgrade.getYield(pPlayer.getRandom()));
+         LegacyMagnetItem.increaseStatUpgrade(magnet, stat, upgrade.getYield(pPlayer.getRandom()));
          int decrement = ModConfigs.MAGNET_CONFIG.getSturdinessDecrement();
-         int s = MagnetItem.getSturdiness(magnet);
-         MagnetItem.decreaseSturdiness(magnet, decrement);
+         int s = LegacyMagnetItem.getSturdiness(magnet);
+         LegacyMagnetItem.decreaseSturdiness(magnet, decrement);
          if (this.container instanceof MagnetTableTile tile) {
             boolean playSound = true;
             float cutoff = ModConfigs.MAGNET_CONFIG.getSturdinessCutoff();
@@ -148,8 +148,8 @@ public class MagnetTableContainerMenu extends AbstractContainerMenu {
                tile.getLevel().playSound(null, tile.getBlockPos(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.0F, 1.1F);
                ((Slot)this.slots.get(0)).set(ItemStack.EMPTY);
                playSound = false;
-            } else if (MagnetItem.getSturdiness(magnet) <= cutoff && MagnetItem.getPerk(magnet) == MagnetItem.Perk.NONE) {
-               MagnetItem.addRandomPerk(magnet, tile.getLevel().random);
+            } else if (LegacyMagnetItem.getSturdiness(magnet) <= cutoff && LegacyMagnetItem.getPerk(magnet) == LegacyMagnetItem.Perk.NONE) {
+               LegacyMagnetItem.addRandomPerk(magnet, tile.getLevel().random);
             }
 
             if (playSound) {

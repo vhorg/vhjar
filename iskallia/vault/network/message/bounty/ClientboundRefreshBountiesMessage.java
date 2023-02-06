@@ -10,18 +10,20 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent.Context;
 
-public record ClientboundRefreshBountiesMessage(BountyList active, BountyList available, BountyList complete) {
+public record ClientboundRefreshBountiesMessage(BountyList active, BountyList available, BountyList complete, BountyList legendary) {
    public static void encode(ClientboundRefreshBountiesMessage message, FriendlyByteBuf buffer) {
       buffer.writeNbt(message.active.serializeNBT());
       buffer.writeNbt(message.available.serializeNBT());
       buffer.writeNbt(message.complete.serializeNBT());
+      buffer.writeNbt(message.legendary.serializeNBT());
    }
 
    public static ClientboundRefreshBountiesMessage decode(FriendlyByteBuf buffer) {
       BountyList active = new BountyList(buffer.readNbt());
       BountyList available = new BountyList(buffer.readNbt());
       BountyList complete = new BountyList(buffer.readNbt());
-      return new ClientboundRefreshBountiesMessage(active, available, complete);
+      BountyList legendary = new BountyList(buffer.readNbt());
+      return new ClientboundRefreshBountiesMessage(active, available, complete, legendary);
    }
 
    public static void handle(ClientboundRefreshBountiesMessage message, Supplier<Context> contextSupplier) {
@@ -32,6 +34,7 @@ public record ClientboundRefreshBountiesMessage(BountyList active, BountyList av
          container.replaceActive(message.active);
          container.replaceAvailable(message.available);
          container.replaceComplete(message.complete);
+         container.replaceLegendary(message.legendary);
          container.broadcastChanges();
          if (screen instanceof BountyScreen bountyScreen) {
             bountyScreen.getBountyTableElement().refreshBountySelection();

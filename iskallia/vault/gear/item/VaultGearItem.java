@@ -1,8 +1,10 @@
 package iskallia.vault.gear.item;
 
 import com.google.gson.JsonObject;
+import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.abyss.AbyssHelper;
 import iskallia.vault.dynamodel.DynamicModelItem;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import iskallia.vault.gear.GearRollHelper;
@@ -13,12 +15,13 @@ import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.tooltip.VaultGearTooltipItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.IConditionalDamageable;
 import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLootItem;
+import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.world.data.ServerVaults;
@@ -30,6 +33,7 @@ import java.util.Random;
 import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,13 +44,19 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.extensions.IForgeItem;
 
-public interface VaultGearItem extends IForgeItem, DataTransferItem, VaultLootItem, DynamicModelItem, IConditionalDamageable {
+public interface VaultGearItem extends IForgeItem, VaultGearTooltipItem, DataTransferItem, VaultLevelItem, DynamicModelItem, IConditionalDamageable {
+   JavaRandom random = JavaRandom.ofNanoTime();
+
    default Item getItem() {
       return (Item)this;
    }
 
+   static boolean matches(ItemStack stack) {
+      return stack.getItem() instanceof VaultGearItem;
+   }
+
    static <T extends VaultGearItem> T of(ItemStack stack) {
-      if (!(stack.getItem() instanceof VaultGearItem)) {
+      if (!matches(stack)) {
          throw new IllegalArgumentException("Item is not VaultGear: %s".formatted(stack));
       } else {
          return (T)stack.getItem();
@@ -76,10 +86,18 @@ public interface VaultGearItem extends IForgeItem, DataTransferItem, VaultLootIt
    }
 
    @Override
-   default void initializeLoot(Vault vault, ItemStack stack) {
+   default void initializeVaultLoot(Vault vault, ItemStack stack, @Nullable BlockPos pos) {
       VaultGearData data = VaultGearData.read(stack);
       data.setItemLevel(vault.get(Vault.LEVEL).get());
       data.updateAttribute(ModGearAttributes.IS_LOOT, Boolean.valueOf(true));
+      if (pos != null && AbyssHelper.hasAbyssEffect(vault)) {
+         float chance = AbyssHelper.getAbyssEffect(vault) * AbyssHelper.getAbyssDistanceModifier(pos, vault);
+         chance *= ModConfigs.ABYSS.getAbyssalModifierChance();
+         if (random.nextFloat() < chance) {
+            data.updateAttribute(ModGearAttributes.IS_ABYSSAL, Boolean.valueOf(true));
+         }
+      }
+
       data.write(stack);
    }
 
@@ -124,13 +142,11 @@ public interface VaultGearItem extends IForgeItem, DataTransferItem, VaultLootIt
       return result;
    }
 
-   default void setPlayerLevel(ItemStack stack, Player player) {
-      VaultGearData data = VaultGearData.read(stack);
-      data.setItemLevel(SidedHelper.getVaultLevel(player));
-      data.write(stack);
+   default void setItemLevel(ItemStack stack, Player player) {
+      this.setItemLevel(stack, SidedHelper.getVaultLevel(player));
    }
 
-   default void setLevel(ItemStack stack, int level) {
+   default void setItemLevel(ItemStack stack, int level) {
       VaultGearData data = VaultGearData.read(stack);
       data.setItemLevel(level);
       data.write(stack);

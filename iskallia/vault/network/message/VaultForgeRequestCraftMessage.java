@@ -2,10 +2,13 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.block.entity.VaultForgeTileEntity;
 import iskallia.vault.container.VaultForgeContainer;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.gear.crafting.VaultForgeHelper;
 import iskallia.vault.gear.crafting.recipe.VaultForgeRecipe;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -40,9 +43,10 @@ public class VaultForgeRequestCraftMessage {
                   if (recipe != null && recipe.canCraft(requester)) {
                      Inventory playerInventory = requester.getInventory();
                      VaultForgeTileEntity tile = container.getTileEntity();
+                     List<OverSizedItemStack> consumed = new ArrayList<>();
                      if (VaultForgeHelper.consumeInputs(recipe.getInputs(), playerInventory, tile, true)
-                        && VaultForgeHelper.consumeInputs(recipe.getInputs(), playerInventory, tile, false)) {
-                        container.getResultSlot().set(recipe.createOutput(requester));
+                        && VaultForgeHelper.consumeInputs(recipe.getInputs(), playerInventory, tile, false, consumed)) {
+                        container.getResultSlot().set(recipe.createOutput(consumed, requester));
                         requester.level.levelEvent(1030, tile.getBlockPos(), 0);
                         container.broadcastChanges();
                         ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ForgeParticleMessage(tile.getBlockPos()));

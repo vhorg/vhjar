@@ -93,6 +93,14 @@ public class AttributeSnapshotCalculator {
                }
             }
 
+            var10 = stack.getItem();
+            if (var10 instanceof CuriosGearItem) {
+               CuriosGearItem gearItem = (CuriosGearItem)var10;
+               if (!gearItem.isIntendedSlot(stack, slot)) {
+                  continue;
+               }
+            }
+
             gear.add(stack);
          }
       }

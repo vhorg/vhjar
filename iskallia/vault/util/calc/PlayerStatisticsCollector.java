@@ -1,25 +1,29 @@
 package iskallia.vault.util.calc;
 
+import iskallia.vault.block.VaultCrateBlock;
+import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.influence.VaultGod;
+import iskallia.vault.core.vault.player.Completion;
+import iskallia.vault.core.vault.stat.StatCollector;
+import iskallia.vault.core.vault.stat.VaultSnapshot;
+import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.ItemUnidentifiedArtifact;
-import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.network.message.PlayerStatisticsMessage;
 import iskallia.vault.world.data.PlayerInfluences;
-import iskallia.vault.world.data.PlayerStatsData;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.logic.objective.VaultObjective;
-import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
-import iskallia.vault.world.vault.player.VaultPlayer;
-import iskallia.vault.world.vault.player.VaultRunner;
-import iskallia.vault.world.vault.player.VaultSpectator;
+import iskallia.vault.world.data.VaultSnapshots;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.network.NetworkDirection;
 
 @EventBusSubscriber
@@ -113,99 +117,58 @@ public class PlayerStatisticsCollector {
    }
 
    public static class VaultRunsSnapshot {
-      public int vaultRuns;
-      public int deaths;
-      public int bails;
-      public int bossKills;
+      public int completed;
+      public int survived;
+      public int failed;
       public int artifacts;
-      public int raidsCompleted;
 
       public static PlayerStatisticsCollector.VaultRunsSnapshot ofPlayer(ServerPlayer sPlayer) {
-         PlayerStatsData.Stats vaultPlayerStats = PlayerStatsData.get().get(sPlayer);
-         PlayerStatisticsCollector.VaultRunsSnapshot snapshot = new PlayerStatisticsCollector.VaultRunsSnapshot();
-         snapshot.vaultRuns = vaultPlayerStats.getVaults().size();
+         PlayerStatisticsCollector.VaultRunsSnapshot data = new PlayerStatisticsCollector.VaultRunsSnapshot();
 
-         for (VaultRaid recordedRaid : vaultPlayerStats.getVaults()) {
-            boolean completedAll = true;
-
-            for (VaultObjective objective : recordedRaid.getAllObjectives()) {
-               for (VaultObjective.Crate crate : objective.getCrates()) {
-                  for (ItemStack stack : crate.getContents()) {
-                     if (stack.getItem() instanceof ItemUnidentifiedArtifact) {
-                        snapshot.artifacts++;
+         for (VaultSnapshot snapshot : VaultSnapshots.getAll()) {
+            Vault vault = snapshot.getEnd();
+            if (vault != null) {
+               vault.ifPresent(Vault.STATS, collector -> {
+                  StatCollector stats = collector.get(sPlayer.getUUID());
+                  if (stats != null) {
+                     switch ((Completion)stats.get(StatCollector.COMPLETION)) {
+                        case COMPLETED:
+                           data.completed++;
+                           break;
+                        case BAILED:
+                           data.survived++;
+                           break;
+                        case FAILED:
+                           data.failed++;
                      }
-                  }
-               }
 
-               if (objective instanceof RaidChallengeObjective) {
-                  snapshot.raidsCompleted = snapshot.raidsCompleted + ((RaidChallengeObjective)objective).getCompletedRaids();
-               }
-
-               if (!objective.isCompleted()) {
-                  completedAll = false;
-                  break;
-               }
-            }
-
-            if (completedAll) {
-               snapshot.bossKills++;
-            } else {
-               CrystalData data = recordedRaid.getProperties().getBaseOrDefault(VaultRaid.CRYSTAL_DATA, CrystalData.EMPTY);
-               CrystalData.Type vaultType = data.getType();
-               if (vaultType != CrystalData.Type.COOP) {
-                  for (VaultPlayer vPlayer : recordedRaid.getPlayers()) {
-                     if (vPlayer.hasExited()) {
-                        if (vPlayer instanceof VaultSpectator) {
-                           snapshot.deaths++;
-                        } else {
-                           snapshot.bails++;
+                     for (ItemStack reward : stats.get(StatCollector.REWARD)) {
+                        Block patt3210$temp = ((BlockItem)reward.getItem()).getBlock();
+                        if (patt3210$temp instanceof VaultCrateBlock) {
+                           VaultCrateBlock block = (VaultCrateBlock)patt3210$temp;
+                           if (reward.getTag() != null) {
+                              CompoundTag tag = reward.getOrCreateTag().getCompound("BlockEntityTag").copy();
+                              tag.putString("id", ModBlocks.VAULT_CRATE_TILE_ENTITY.getRegistryName().toString());
+                              BlockEntity te = BlockEntity.loadStatic(BlockPos.ZERO, block.defaultBlockState(), tag);
+                              if (te != null) {
+                                 te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
+                                    for (int i = 0; i < handler.getSlots(); i++) {
+                                       ItemStack stack = handler.getStackInSlot(i);
+                                       if (stack.getItem() == ModItems.UNIDENTIFIED_ARTIFACT) {
+                                          data.artifacts++;
+                                       }
+                                    }
+                                 });
+                              }
+                           }
                         }
-                        break;
                      }
                   }
-               } else {
-                  boolean done = true;
-                  boolean areAllSpectators = true;
-
-                  for (VaultPlayer vPlayerx : recordedRaid.getPlayers()) {
-                     if (!vPlayerx.hasExited()) {
-                        done = false;
-                     }
-
-                     if (vPlayerx instanceof VaultRunner) {
-                        areAllSpectators = false;
-                     }
-                  }
-
-                  if (done) {
-                     if (areAllSpectators) {
-                        snapshot.bails++;
-                     } else {
-                        snapshot.deaths++;
-                     }
-                  }
-               }
+               });
             }
          }
 
-         String uuidStr = sPlayer.getUUID().toString();
-         if (uuidStr.equalsIgnoreCase("d974cbae-e62b-4e34-a1b8-0175a2d41d9a")) {
-            snapshot.artifacts += 2;
-         }
-
-         if (uuidStr.equalsIgnoreCase("0f5e0db0-13a0-4125-a97a-e9f8e872d521")) {
-            snapshot.artifacts += 2;
-         }
-
-         if (uuidStr.equalsIgnoreCase("5f820c39-5883-4392-b174-3125ac05e38c")) {
-            snapshot.artifacts++;
-         }
-
-         if (uuidStr.equalsIgnoreCase("7ed3587b-e656-4689-90d6-08e11daaf907")) {
-            snapshot.artifacts += 2;
-         }
-
-         return snapshot;
+         return data;
       }
    }
 }

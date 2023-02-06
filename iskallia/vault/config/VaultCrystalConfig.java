@@ -64,29 +64,37 @@ public class VaultCrystalConfig extends Config {
       return !this.SEALS.containsKey(seal.getRegistryName()) ? false : this.SEALS.get(seal.getRegistryName()).getForLevel(crystal.getLevel()).map(entry -> {
          if (!entry.input.contains(input.getRegistryName())) {
             return false;
+         } else if (!crystal.canBeModified()) {
+            return false;
          } else {
-            crystal.setObjective(entry.objective);
-            if (entry.layout != null) {
-               crystal.setLayout(entry.layout);
-            }
+            String existing = CrystalObjective.getId(crystal.getObjective());
+            String attempted = CrystalObjective.getId(entry.objective);
+            if (existing.equals(attempted)) {
+               return false;
+            } else {
+               crystal.setObjective(entry.objective);
+               if (entry.layout != null) {
+                  crystal.setLayout(entry.layout);
+               }
 
-            if (entry.theme != null) {
-               crystal.setTheme(entry.theme);
-            }
+               if (entry.theme != null) {
+                  crystal.setTheme(entry.theme);
+               }
 
-            if (entry.modifiers != null) {
-               crystal.setModifiers(entry.modifiers);
-            }
+               if (entry.modifiers != null) {
+                  crystal.setModifiers(entry.modifiers);
+               }
 
-            if (entry.preventsRandomModifiers != null) {
-               crystal.setPreventsRandomModifiers(entry.preventsRandomModifiers);
-            }
+               if (entry.preventsRandomModifiers != null) {
+                  crystal.setPreventsRandomModifiers(entry.preventsRandomModifiers);
+               }
 
-            if (entry.canBeModified != null) {
-               crystal.setModifiable(entry.canBeModified);
-            }
+               if (entry.canBeModified != null) {
+                  crystal.setModifiable(entry.canBeModified);
+               }
 
-            return true;
+               return true;
+            }
          }
       }).orElse(false);
    }

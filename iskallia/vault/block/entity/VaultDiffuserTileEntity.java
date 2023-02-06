@@ -77,6 +77,10 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
       super(ModBlocks.VAULT_DIFFUSER_ENTITY, pWorldPosition, pBlockState);
    }
 
+   public boolean stillValid(Player player) {
+      return this.level != null && this.level.getBlockEntity(this.worldPosition) == this ? this.inputInv.stillValid(player) : false;
+   }
+
    public static void tick(Level world, BlockPos pos, BlockState state, VaultDiffuserTileEntity tile) {
       tile.processTickLast = tile.processTick;
       if (!tile.prevInput.sameItem(tile.inputInv.getItem(0))) {
@@ -401,7 +405,7 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
       }
 
       public boolean canPlaceItem(int slot, ItemStack stack) {
-         return ModConfigs.VAULT_DIFFUSER.getDiffuserOutputMap().containsKey(stack.getItem().getRegistryName());
+         return ModConfigs.VAULT_DIFFUSER.contains(stack);
       }
 
       public void setChanged() {

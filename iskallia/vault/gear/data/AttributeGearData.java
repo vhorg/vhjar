@@ -10,6 +10,8 @@ import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.util.data.BitSerializers;
+import iskallia.vault.util.data.LazyHolder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -24,9 +26,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
 
 public class AttributeGearData {
-   private static final String TAG_KEY = "vaultGearData";
+   public static final String TAG_KEY = "vaultGearData";
    private GearDataVersion version = GearDataVersion.current();
-   private UUID identifier = UUID.randomUUID();
+   private final LazyHolder<UUID> identifier = new LazyHolder<>(UUID::randomUUID, BitSerializers.UUID);
    List<VaultGearAttributeInstance<?>> attributes = new ArrayList<>();
 
    protected AttributeGearData() {
@@ -82,11 +84,12 @@ public class AttributeGearData {
    }
 
    protected void markChanged() {
-      this.identifier = UUID.randomUUID();
+      this.identifier.refresh();
    }
 
+   @Nonnull
    public UUID getIdentifier() {
-      return this.identifier;
+      return this.identifier.get();
    }
 
    public <T> Optional<T> getFirstValue(VaultGearAttribute<T> attribute) {
@@ -133,13 +136,13 @@ public class AttributeGearData {
 
    protected void write(BitBuffer buf) {
       buf.writeEnum(GearDataVersion.current());
-      buf.writeUUID(this.identifier);
+      this.identifier.write(buf);
       buf.writeCollection(this.attributes, VaultGearAttributeRegistry::writeAttributeInstance);
    }
 
    protected void read(BitBuffer buf) {
       this.version = buf.readEnum(GearDataVersion.class);
-      this.identifier = buf.readUUID();
+      this.identifier.read(buf);
       this.attributes = buf.readCollection(ArrayList::new, this.versioned(VaultGearAttributeRegistry::readAttributeInstance));
    }
 

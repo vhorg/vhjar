@@ -6,8 +6,8 @@ import iskallia.vault.bounty.BountyList;
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
-import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModContainers;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSlotIcons;
 import java.util.Optional;
 import java.util.UUID;
@@ -28,6 +28,7 @@ public class BountyContainer extends OverSizedSlotContainer {
    private final BountyList active;
    private final BountyList available;
    private final BountyList complete;
+   private final BountyList legendary;
    private final int vaultLevel;
    private final BountyTableTileEntity tileEntity;
 
@@ -37,10 +38,12 @@ public class BountyContainer extends OverSizedSlotContainer {
          this.active = new BountyList(data.getCompound("active"));
          this.available = new BountyList(data.getCompound("available"));
          this.complete = new BountyList(data.getCompound("abandoned"));
+         this.legendary = new BountyList(data.getCompound("legendary"));
       } else {
          this.active = new BountyList();
          this.available = new BountyList();
          this.complete = new BountyList();
+         this.legendary = new BountyList();
       }
 
       this.vaultLevel = data.getInt("vaultLevel");
@@ -53,7 +56,7 @@ public class BountyContainer extends OverSizedSlotContainer {
       }
    }
 
-   public Slot getBronzeSlot() {
+   public Slot getBountyPearlSlot() {
       return (Slot)this.slots.get(36);
    }
 
@@ -71,8 +74,8 @@ public class BountyContainer extends OverSizedSlotContainer {
       Container invContainer = this.tileEntity.getInventory();
       this.addSlot(
          new OverSizedTabSlot(invContainer, 0, 72, 118)
-            .setFilter(stack -> stack.is(ModBlocks.VAULT_BRONZE))
-            .setBackground(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.COINS_NO_ITEM)
+            .setFilter(stack -> stack.is(ModItems.BOUNTY_PEARL))
+            .setBackground(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.BOUNTY_TABLE_SLOT_PEARL)
       );
    }
 
@@ -88,6 +91,10 @@ public class BountyContainer extends OverSizedSlotContainer {
       return this.complete;
    }
 
+   public BountyList getLegendary() {
+      return this.legendary;
+   }
+
    public int getVaultLevel() {
       return this.vaultLevel;
    }
@@ -97,8 +104,10 @@ public class BountyContainer extends OverSizedSlotContainer {
          return this.active.findById(id);
       } else if (this.available.contains(id)) {
          return this.available.findById(id);
+      } else if (this.complete.contains(id)) {
+         return this.complete.findById(id);
       } else {
-         return this.complete.contains(id) ? this.complete.findById(id) : Optional.empty();
+         return this.legendary.contains(id) ? this.legendary.findById(id) : Optional.empty();
       }
    }
 
@@ -142,7 +151,7 @@ public class BountyContainer extends OverSizedSlotContainer {
    }
 
    public boolean stillValid(@Nonnull Player player) {
-      return true;
+      return this.tileEntity == null ? false : this.tileEntity.stillValid(player);
    }
 
    public void replaceActive(BountyList list) {
@@ -158,6 +167,11 @@ public class BountyContainer extends OverSizedSlotContainer {
    public void replaceComplete(BountyList list) {
       this.complete.clear();
       this.complete.addAll(list);
+   }
+
+   public void replaceLegendary(BountyList list) {
+      this.legendary.clear();
+      this.legendary.addAll(list);
    }
 
    public BountyTableTileEntity getTileEntity() {

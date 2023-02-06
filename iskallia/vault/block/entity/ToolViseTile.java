@@ -30,6 +30,10 @@ public class ToolViseTile extends BlockEntity implements MenuProvider {
       }
    };
 
+   public boolean stillValid(Player player) {
+      return this.level != null && this.level.getBlockEntity(this.worldPosition) == this ? this.inventory.stillValid(player) : false;
+   }
+
    public ToolViseTile(BlockPos pos, BlockState state) {
       super(ModBlocks.TOOL_VISE_TILE_ENTITY, pos, state);
    }

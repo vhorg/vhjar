@@ -13,7 +13,7 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.VaultCatalystInfusedItem;
 import iskallia.vault.item.VaultRuneItem;
 import iskallia.vault.item.crystal.CrystalData;
@@ -282,17 +282,17 @@ public class AnvilRecipesJEI {
       addModifier(dataLeftx, VaultMod.id("lucky"));
       ItemStack outputx = left.copy();
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(outputx)));
-      left = new ItemStack(ModItems.MAGNET_ITEM);
+      left = new ItemStack(ModItems.MAGNET);
       right = new ItemStack(ModItems.REPAIR_CORE);
-      output = new ItemStack(ModItems.MAGNET_ITEM);
-      MagnetItem.useRepairSlot(output);
+      output = new ItemStack(ModItems.MAGNET);
+      LegacyMagnetItem.useRepairSlot(output);
       left.setDamageValue(left.getMaxDamage() - 5);
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
 
       for (ItemStack leftx : vaultPicks) {
          output = new ItemStack(ModItems.REPAIR_CORE);
          ItemStack outputxx = leftx.copy();
-         MagnetItem.useRepairSlot(outputxx);
+         LegacyMagnetItem.useRepairSlot(outputxx);
          leftx.setDamageValue(leftx.getMaxDamage() - 5);
          recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(leftx), List.of(output), List.of(outputxx)));
       }

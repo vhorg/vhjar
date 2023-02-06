@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModAttributes;
@@ -10,6 +11,7 @@ import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.calc.ResistanceHelper;
 import iskallia.vault.world.data.ServerVaults;
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -44,6 +46,10 @@ public abstract class MixinLivingEntity extends Entity {
    private float prevSize = -1.0F;
    @Shadow
    protected ItemStack useItem;
+   @Shadow
+   public long lastDamageStamp;
+   private float rawHealth;
+   private boolean useRawHealth;
 
    public MixinLivingEntity(EntityType<?> entityType, Level world) {
       super(entityType, world);
@@ -71,6 +77,15 @@ public abstract class MixinLivingEntity extends Entity {
 
    @Shadow
    public abstract int getUseItemRemainingTicks();
+
+   @Shadow
+   public abstract float getMaxHealth();
+
+   @Shadow
+   public abstract float getHealth();
+
+   @Shadow
+   public abstract void setHealth(float var1);
 
    @Redirect(
       method = {"createLivingAttributes"},
@@ -105,6 +120,17 @@ public abstract class MixinLivingEntity extends Entity {
          .add(ModAttributes.THORNS_DAMAGE);
    }
 
+   @Redirect(
+      method = {"die"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/entity/LivingEntity;hasCustomName()Z"
+      )
+   )
+   public boolean removeFighterKilledLogMessage(LivingEntity entity) {
+      return entity instanceof FighterEntity ? false : entity.hasCustomName();
+   }
+
    @Inject(
       method = {"getTicksUsingItem"},
       at = {@At("HEAD")},
@@ -113,10 +139,21 @@ public abstract class MixinLivingEntity extends Entity {
    public void getTicksUsingItem(CallbackInfoReturnable<Integer> ci) {
       if (this.useItem.getItem() == Items.CROSSBOW && this.isUsingItem()) {
          AttributeInstance attribute = this.getAttribute(ModAttributes.CROSSBOW_CHARGE_TIME);
-         if (attribute != null) {
+         if (attribute != null && attribute.getValue() > 0.0) {
             int value = this.useItem.getUseDuration() - this.getUseItemRemainingTicks();
             ci.setReturnValue((int)(this.useItem.getUseDuration() / attribute.getValue() * value));
          }
+      }
+   }
+
+   @Inject(
+      method = {"handleEntityEvent"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void exitIfDamageAlreadyHandled(byte pId, CallbackInfo ci) {
+      if (pId == 2 && this.lastDamageStamp == this.level.getGameTime()) {
+         ci.cancel();
       }
    }
 
@@ -141,6 +178,11 @@ public abstract class MixinLivingEntity extends Entity {
       at = {@At("RETURN")}
    )
    public void tick(CallbackInfo ci) {
+      if (this.useRawHealth && this.rawHealth > this.getHealth()) {
+         this.setHealth(this.rawHealth);
+         this.useRawHealth = false;
+      }
+
       AttributeInstance scale = this.getAttribute(ModAttributes.SIZE_SCALE);
       if (scale != null) {
          if (this.prevSize != scale.getValue()) {
@@ -192,6 +234,20 @@ public abstract class MixinLivingEntity extends Entity {
    private void checkTotemDeathProtection(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
       if (ServerVaults.get(this.level).isPresent()) {
          cir.setReturnValue(false);
+      }
+   }
+
+   @Inject(
+      method = {"readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V"},
+      at = {@At("HEAD")}
+   )
+   private void readAdditionalSaveData(CompoundTag nbt, CallbackInfo ci) {
+      if (nbt.contains("Health", 99)) {
+         float health = nbt.getFloat("Health");
+         if (health > this.getMaxHealth()) {
+            this.rawHealth = health;
+            this.useRawHealth = true;
+         }
       }
    }
 }

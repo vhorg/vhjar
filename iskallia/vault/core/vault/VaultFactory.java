@@ -50,6 +50,7 @@ public class VaultFactory {
          .set(Vault.MODIFIERS, new Modifiers())
          .set(Vault.LISTENERS, new Listeners().set(Listeners.LOGIC, new ClassicListenersLogic()))
          .set(Vault.STATS, new StatsCollector())
+         .set(Vault.DISCOVERY, new DiscoveryGoalsManager())
          .set(Vault.CRYSTAL, crystal.serializeNBT());
       CrystalLayout layout = crystal.getLayout() == null ? ModConfigs.VAULT_CRYSTAL.getRandomLayout(level, random).orElse(null) : crystal.getLayout();
       if (layout != null) {

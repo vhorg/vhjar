@@ -26,6 +26,7 @@ import iskallia.vault.item.ItemVaultFruit;
 import iskallia.vault.item.ItemVaultKey;
 import iskallia.vault.item.LootableItem;
 import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.OldNotesItem;
 import iskallia.vault.item.PaxelJewelItem;
 import iskallia.vault.item.RegretOrbItem;
 import iskallia.vault.item.RelicFragmentItem;
@@ -51,7 +52,10 @@ import iskallia.vault.item.gear.VaultShieldItem;
 import iskallia.vault.item.gear.VaultSwordItem;
 import iskallia.vault.item.modification.GearModificationItem;
 import iskallia.vault.item.modification.ReforgeTagModificationFocus;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.GemstoneItem;
+import iskallia.vault.item.tool.JewelItem;
+import iskallia.vault.item.tool.PaxelItem;
+import iskallia.vault.item.tool.ToolItem;
 import iskallia.vault.util.VaultRarity;
 import iskallia.vault.util.function.Memo;
 import java.util.Random;
@@ -61,6 +65,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties.Builder;
 import net.minecraft.world.item.BucketItem;
@@ -69,6 +74,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraftforge.event.RegistryEvent.Register;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -77,6 +83,7 @@ public class ModItems {
    public static CreativeModeTab VAULT_MOD_GROUP = createCreativeTab("the_vault", Memo.of(() -> new ItemStack(ModItems.SPICY_HEARTY_BURGER)));
    public static CreativeModeTab SCAVENGER_GROUP = createCreativeTab("the_vault.scavenger", Memo.of(() -> new ItemStack(ModBlocks.SCAVENGER_ALTAR)));
    public static CreativeModeTab RELIC_GROUP = createCreativeTab("the_vault.relic", Memo.of(() -> new ItemStack(ModBlocks.RELIC_PEDESTAL)));
+   public static CreativeModeTab GEAR_GROUP = createCreativeTab("the_vault.gear", Memo.of(() -> new ItemStack(ModItems.SWORD)));
    public static BasicItem VAULT_ROCK = new BasicItem(VaultMod.id("vault_rock"));
    public static BasicItem ALEXANDRITE_GEM = new BasicItem(VaultMod.id("gem_alexandrite"));
    public static BasicItem BENITOITE_GEM = new BasicItem(VaultMod.id("gem_benitoite"));
@@ -361,21 +368,22 @@ public class ModItems {
    public static BasicItem ARCHETYPE_STAR_SHARD = new BasicItem(VaultMod.id("archetype_star_shard"));
    public static BasicItem ARCHETYPE_STAR_CORE = new BasicItem(VaultMod.id("archetype_star_core"));
    public static BasicItem ARCHETYPE_STAR_ESSENCE = new BasicItem(VaultMod.id("archetype_star_essence"));
-   public static VaultSwordItem SWORD = new VaultSwordItem(VaultMod.id("sword"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static VaultAxeItem AXE = new VaultAxeItem(VaultMod.id("axe"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static VaultArmorItem HELMET = new VaultArmorItem(VaultMod.id("helmet"), EquipmentSlot.HEAD, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static VaultArmorItem CHESTPLATE = new VaultArmorItem(
-      VaultMod.id("chestplate"), EquipmentSlot.CHEST, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1)
-   );
-   public static VaultArmorItem LEGGINGS = new VaultArmorItem(VaultMod.id("leggings"), EquipmentSlot.LEGS, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static VaultArmorItem BOOTS = new VaultArmorItem(VaultMod.id("boots"), EquipmentSlot.FEET, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static VaultShieldItem SHIELD = new VaultShieldItem(VaultMod.id("shield"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static EtchingItem ETCHING = new EtchingItem(VaultMod.id("etching"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
+   public static VaultSwordItem SWORD = new VaultSwordItem(VaultMod.id("sword"), new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static VaultAxeItem AXE = new VaultAxeItem(VaultMod.id("axe"), new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static VaultArmorItem HELMET = new VaultArmorItem(VaultMod.id("helmet"), EquipmentSlot.HEAD, new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static VaultArmorItem CHESTPLATE = new VaultArmorItem(VaultMod.id("chestplate"), EquipmentSlot.CHEST, new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static VaultArmorItem LEGGINGS = new VaultArmorItem(VaultMod.id("leggings"), EquipmentSlot.LEGS, new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static VaultArmorItem BOOTS = new VaultArmorItem(VaultMod.id("boots"), EquipmentSlot.FEET, new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static VaultShieldItem SHIELD = new VaultShieldItem(VaultMod.id("shield"), new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static EtchingItem ETCHING = new EtchingItem(VaultMod.id("etching"), new Properties().tab(GEAR_GROUP).stacksTo(1));
    public static TrinketItem TRINKET = new TrinketItem(VaultMod.id("trinket"));
-   public static IdolItem IDOL_BENEVOLENT = new IdolItem(VaultMod.id("idol_benevolent"), VaultGod.VELARA, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static IdolItem IDOL_OMNISCIENT = new IdolItem(VaultMod.id("idol_omniscient"), VaultGod.TENOS, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static IdolItem IDOL_TIMEKEEPER = new IdolItem(VaultMod.id("idol_timekeeper"), VaultGod.WENDARR, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static IdolItem IDOL_MALEVOLENCE = new IdolItem(VaultMod.id("idol_malevolence"), VaultGod.IDONA, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
+   public static IdolItem IDOL_BENEVOLENT = new IdolItem(VaultMod.id("idol_benevolent"), VaultGod.VELARA, new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static IdolItem IDOL_OMNISCIENT = new IdolItem(VaultMod.id("idol_omniscient"), VaultGod.TENOS, new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static IdolItem IDOL_TIMEKEEPER = new IdolItem(VaultMod.id("idol_timekeeper"), VaultGod.WENDARR, new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static IdolItem IDOL_MALEVOLENCE = new IdolItem(VaultMod.id("idol_malevolence"), VaultGod.IDONA, new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static ToolItem TOOL = new ToolItem(VaultMod.id("tool"), new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static JewelItem JEWEL = new JewelItem(VaultMod.id("jewel"), new Properties().tab(GEAR_GROUP).stacksTo(1));
+   public static GemstoneItem GEMSTONE = new GemstoneItem(VaultMod.id("gemstone"), new Properties().tab(GEAR_GROUP));
    public static BasicItem VAULT_PLATING = new BasicItem(VaultMod.id("vault_plating"));
    public static BasicItem REPAIR_CORE = new BasicItem(VaultMod.id("repair_core"));
    public static BasicItem VAULT_ALLOY = new BasicItem(VaultMod.id("vault_alloy"));
@@ -388,6 +396,8 @@ public class ModItems {
    public static BasicItem FUNDAMENTAL_FOCUS = new GearModificationItem(VaultMod.id("fundamental_focus"), ModGearModifications.REFORGE_ALL_IMPLICITS);
    public static BasicItem FACETED_FOCUS = new ReforgeTagModificationFocus(VaultMod.id("faceted_focus"), ModGearModifications.REFORGE_ALL_ADD_TAG);
    public static BasicItem CHAOTIC_FOCUS = new GearModificationItem(VaultMod.id("chaotic_focus"), ModGearModifications.REFORGE_RANDOM_TIER);
+   public static BasicItem WAXING_FOCUS = new GearModificationItem(VaultMod.id("waxing_focus"), ModGearModifications.REFORGE_PREFIXES);
+   public static BasicItem WANING_FOCUS = new GearModificationItem(VaultMod.id("waning_focus"), ModGearModifications.REFORGE_SUFFIXES);
    public static VaultCrystalItem VAULT_CRYSTAL = new VaultCrystalItem(VAULT_MOD_GROUP, VaultMod.id("vault_crystal"));
    public static BasicItem SOUL_FLAME = new BasicItem(VaultMod.id("soul_flame"));
    public static VaultCatalystItem VAULT_CATALYST = new VaultCatalystItem(VAULT_MOD_GROUP, VaultMod.id("vault_catalyst"));
@@ -408,7 +418,8 @@ public class ModItems {
    public static BasicItem DREAMSTONE = new BasicItem(VaultMod.id("dreamstone"));
    public static BasicItem EYE_OF_AVARICE = new BasicItem(VaultMod.id("eye_of_avarice"));
    public static BasicItem MYSTICAL_POWDER = new BasicItem(VaultMod.id("mystical_powder"));
-   public static MagnetItem MAGNET_ITEM = new MagnetItem(VaultMod.id("magnet"));
+   public static BasicItem ABYSSAL_ICHOR = new BasicItem(VaultMod.id("abyssal_ichor"));
+   public static MagnetItem MAGNET = new MagnetItem(VaultMod.id("magnet"), new Properties().tab(GEAR_GROUP).stacksTo(1));
    public static BasicItem MAGNETITE = new BasicItem(VaultMod.id("magnetite"));
    public static BasicItem MAGNETITE_INGOT = new BasicItem(VaultMod.id("magnetite_ingot"));
    public static BasicItem UNKNOWN_EGG = new BasicItem(VaultMod.id("unknown_egg"));
@@ -442,6 +453,9 @@ public class ModItems {
    public static CrystalShardItem CRYSTAL_SHARD_MALEVOLENCE = new CrystalShardItem(
       VaultMod.id("shard_malevolence"), VAULT_MOD_GROUP, new TranslatableComponent("tooltip.the_vault.shard_malevolence")
    );
+   public static BasicItem LOST_BOUNTY = new BasicItem(VaultMod.id("lost_bounty"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).rarity(Rarity.UNCOMMON));
+   public static BasicItem BOUNTY_PEARL = new BasicItem(VaultMod.id("bounty_pearl"), new Properties().tab(VAULT_MOD_GROUP));
+   public static OldNotesItem OLD_NOTES = new OldNotesItem(VaultMod.id("old_notes"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).rarity(Rarity.UNCOMMON));
    public static AnimalJarItem ANIMAL_JAR = new AnimalJarItem(VaultMod.id("animal_jar"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BasicItem DRILL_ARROW_PART = new BasicItem(VaultMod.id("drill_arrow_part"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(8));
    public static ItemDrillArrow DRILL_ARROW = new ItemDrillArrow(VAULT_MOD_GROUP, VaultMod.id("drill_arrow"));
@@ -741,6 +755,11 @@ public class ModItems {
          public boolean hasSearchBar() {
             return true;
          }
+
+         @Nonnull
+         public ResourceLocation getBackgroundImage() {
+            return CreativeModeTab.TAB_SEARCH.getBackgroundImage();
+         }
       };
    }
 
@@ -777,6 +796,8 @@ public class ModItems {
       registry.register(PHOENIX_FEATHER);
       registry.register(DREAMSTONE);
       registry.register(EYE_OF_AVARICE);
+      registry.register(MYSTICAL_POWDER);
+      registry.register(ABYSSAL_ICHOR);
       registry.register(MOTE_CLARITY);
       registry.register(MOTE_PURITY);
       registry.register(MOTE_SANCTITY);
@@ -914,6 +935,9 @@ public class ModItems {
       registry.register(IDOL_OMNISCIENT);
       registry.register(IDOL_TIMEKEEPER);
       registry.register(IDOL_MALEVOLENCE);
+      registry.register(TOOL);
+      registry.register(JEWEL);
+      registry.register(GEMSTONE);
       registry.register(INFUSED_ETERNAL_SOUL);
       registry.register(UNKNOWN_EGG);
       registry.register(VAULT_APPLE);
@@ -941,6 +965,8 @@ public class ModItems {
       registry.register(FUNDAMENTAL_FOCUS);
       registry.register(FACETED_FOCUS);
       registry.register(CHAOTIC_FOCUS);
+      registry.register(WAXING_FOCUS);
+      registry.register(WANING_FOCUS);
       registry.register(VAULT_CATALYST);
       registry.register(VAULT_CATALYST_INFUSED);
       registry.register(RUNE);
@@ -972,7 +998,7 @@ public class ModItems {
       registry.register(ECHOING_PICKAXE);
       registry.register(INFINITE_WATER_BUCKET);
       registry.register(VAULT_PEARL);
-      registry.register(MAGNET_ITEM);
+      registry.register(MAGNET);
       registry.register(SCAVENGER_CREEPER_EYE);
       registry.register(SCAVENGER_CREEPER_FOOT);
       registry.register(SCAVENGER_CREEPER_FUSE);
@@ -1142,7 +1168,9 @@ public class ModItems {
       registry.register(MEMORY_SHARD);
       registry.register(MEMORY_CRYSTAL);
       registry.register(SUBLIME_VAULT_VISION);
-      registry.register(MYSTICAL_POWDER);
       registry.register(ANIMAL_JAR);
+      registry.register(LOST_BOUNTY);
+      registry.register(BOUNTY_PEARL);
+      registry.register(OLD_NOTES);
    }
 }

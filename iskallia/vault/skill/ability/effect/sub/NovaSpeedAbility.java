@@ -1,5 +1,7 @@
 package iskallia.vault.skill.ability.effect.sub;
 
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.event.common.EntityStunnedEvent;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.sub.NovaSpeedConfig;
@@ -26,6 +28,7 @@ public class NovaSpeedAbility extends AbstractNovaAbility<NovaSpeedConfig> {
             player.getBoundingBox().inflate(config.getRadius())
          )) {
          nearbyEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, config.getDurationTicks(), config.getAmplifier()));
+         CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(player, nearbyEntity));
       }
 
       return AbilityActionResult.SUCCESS_COOLDOWN;

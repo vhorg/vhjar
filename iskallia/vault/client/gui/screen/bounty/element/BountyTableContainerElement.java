@@ -18,12 +18,11 @@ import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.client.gui.screen.bounty.BountyScreen;
 import iskallia.vault.container.BountyContainer;
-import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.bounty.ServerboundRerollMessage;
 import iskallia.vault.util.TextUtil;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -78,9 +77,9 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
                   return true;
                } else {
                   Bounty bounty = this.bountyElement.getSelectedBounty();
-                  ItemStack bronze = this.container.getBronzeSlot().getItem();
+                  ItemStack bronze = this.container.getBountyPearlSlot().getItem();
                   int amount = bronze.getCount();
-                  int cost = ModConfigs.BOUNTY_CONFIG.getCost(this.container.getVaultLevel(), bounty.getExpiration() - Instant.now().toEpochMilli());
+                  int cost = ModConfigs.BOUNTY_CONFIG.getCost(this.container.getVaultLevel());
                   return cost > amount;
                }
             })
@@ -99,15 +98,15 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
             } else {
                List<Component> tooltips = new ArrayList<>();
                tooltips.add(new TextComponent("Reroll Selected Bounty"));
-               ItemStack bronze = this.container.getBronzeSlot().getItem();
-               int amount = bronze.getCount();
-               int cost = ModConfigs.BOUNTY_CONFIG.getCost(this.container.getVaultLevel(), bounty.getExpiration() - Instant.now().toEpochMilli());
+               ItemStack pearl = this.container.getBountyPearlSlot().getItem();
+               int amount = pearl.getCount();
+               int cost = ModConfigs.BOUNTY_CONFIG.getCost(this.container.getVaultLevel());
                tooltips.add(new TextComponent(""));
                tooltips.add(
                   new TextComponent("Current Cost: ")
-                     .append(new ItemStack(ModBlocks.VAULT_BRONZE).getHoverName())
+                     .append(new ItemStack(ModItems.BOUNTY_PEARL).getHoverName())
                      .append(" x" + cost)
-                     .append(" [%s]".formatted(bronze.getCount()))
+                     .append(" [%s]".formatted(pearl.getCount()))
                      .withStyle(cost > amount ? ChatFormatting.RED : ChatFormatting.GREEN)
                );
                return tooltips;
@@ -119,9 +118,9 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
    private void handleReroll() {
       Bounty bounty = this.bountyElement.getSelectedBounty();
       if (bounty != null) {
-         ItemStack bronze = this.container.getBronzeSlot().getItem();
-         int amount = bronze.getCount();
-         int cost = ModConfigs.BOUNTY_CONFIG.getCost(this.container.getVaultLevel(), bounty.getExpiration() - Instant.now().toEpochMilli());
+         ItemStack pearl = this.container.getBountyPearlSlot().getItem();
+         int amount = pearl.getCount();
+         int cost = ModConfigs.BOUNTY_CONFIG.getCost(this.container.getVaultLevel());
          if (amount >= cost) {
             ModNetwork.CHANNEL.sendToServer(new ServerboundRerollMessage(bounty.getId()));
             Minecraft.getInstance().player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.7F, 1.0F);
@@ -167,7 +166,7 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
       int buttonWidth = 18;
       int labelX = 7;
       int labelY = 23;
-      int buttonX = this.getWorldSpatial().width() / 2 - 14 - buttonWidth * 3 - 32;
+      int buttonX = this.getWorldSpatial().width() / 2 - 14 - buttonWidth * 3 - 54;
       int buttonY = labelY + 25;
       int activeRow = 0;
       int availableRow = 1;
@@ -178,6 +177,12 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
             new TextComponent("Bounty Selection"),
             true
          )
+      );
+      this.createButton(
+         buttonX + buttonWidth * 3 + 11,
+         buttonY + 11,
+         this.container.getLegendary().size() > 0 ? this.container.getLegendary().get(0) : null,
+         BountyElement.Status.LEGENDARY
       );
 
       for (int row = 0; row < 3; row++) {
@@ -235,7 +240,7 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
          }
 
          labelX += 58;
-         buttonX = this.getWorldSpatial().width() / 2 - 14 - buttonWidth * 3 - 32;
+         buttonX = this.getWorldSpatial().width() / 2 - 14 - buttonWidth * 3 - 54;
          buttonY += buttonWidth + 3;
       }
    }
@@ -253,7 +258,20 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
             .add(
                Pair.of(
                   this.addElement(
-                     new BountyTableContainerElement.BountyButtonElement(null, Spatials.positionXY(buttonX, buttonY), ScreenTextures.BUTTON_EMPTY_16_TEXTURES)
+                     new BountyTableContainerElement.BountyButtonElement(
+                           null,
+                           Spatials.positionXY(buttonX, buttonY),
+                           status == BountyElement.Status.LEGENDARY ? ScreenTextures.BUTTON_EMPTY_LEGENDARY_TEXTURES : ScreenTextures.BUTTON_EMPTY_16_TEXTURES
+                        )
+                        .tooltip(
+                           Tooltips.multi(
+                              () -> (List<Component>)(status == BountyElement.Status.LEGENDARY
+                                 ? List.of(
+                                    new TextComponent("Legendary:"), new TextComponent("Find Legendary Bounties"), new TextComponent("in Treasure Rooms!")
+                                 )
+                                 : new ArrayList<>())
+                           )
+                        )
                         .setDisabled(true)
                   ),
                   new TextureAtlasElement(Spatials.zero(), ScreenTextures.EMPTY)
@@ -265,7 +283,10 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
                Pair.of(
                   this.addElement(
                      new BountyTableContainerElement.BountyButtonElement(
-                           bounty.getId(), Spatials.positionXY(buttonX, buttonY), ScreenTextures.BUTTON_EMPTY_16_TEXTURES, () -> {
+                           bounty.getId(),
+                           Spatials.positionXY(buttonX, buttonY),
+                           status == BountyElement.Status.LEGENDARY ? ScreenTextures.BUTTON_EMPTY_LEGENDARY_TEXTURES : ScreenTextures.BUTTON_EMPTY_16_TEXTURES,
+                           () -> {
                               this.bountyElement.setBounty(bounty.getId(), status);
                               Minecraft.getInstance().player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.7F, 1.0F);
                            }
@@ -279,7 +300,16 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
                         .enableSpatialDebugRender(false, true)
                   ),
                   this.addElement(
-                     new TextureAtlasElement(Spatials.positionXYZ(buttonX + 1, buttonY + 1, 10), BountyScreen.TASK_ICON_MAP.get(bounty.getTask().getTaskType()))
+                     new TextureAtlasElement(
+                        Spatials.positionXYZ(
+                           status == BountyElement.Status.LEGENDARY ? buttonX : buttonX + 1,
+                           status == BountyElement.Status.LEGENDARY ? buttonY : buttonY + 1,
+                           10
+                        ),
+                        status == BountyElement.Status.LEGENDARY
+                           ? BountyScreen.TASK_ICON_MAP_LEGENDARY.get(bounty.getTask().getTaskType())
+                           : BountyScreen.TASK_ICON_MAP.get(bounty.getTask().getTaskType())
+                     )
                   )
                )
             );

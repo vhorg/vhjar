@@ -19,8 +19,9 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLootItem;
+import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -70,17 +71,16 @@ public class ClassicLootLogic extends LootLogic {
       if (!canBeTrapped) {
          return false;
       } else {
-         AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(data.getPlayer());
-         float disarmChance = snapshot.getAttributeValue(ModGearAttributes.TRAP_DISARMING, VaultGearAttributeTypeMerger.floatSum());
-         float chance = data.getRandom().nextFloat();
-         if (chance < disarmChance) {
-            world.playSound(null, data.getPos(), ModSounds.DISARM_TRAP, SoundSource.BLOCKS, 1.0F, 1.0F);
-            return false;
-         } else {
-            double probability = ModConfigs.VAULT_CHEST.getTrapProbability(vault.get(Vault.LEVEL).get());
-            WeightedList<String> pool = ModConfigs.VAULT_CHEST.getEffectPool(vault.get(Vault.LEVEL).get());
-            probability = CommonEvents.CHEST_TRAP_GENERATION.invoke(data.getPlayer(), probability, pool).getProbability();
-            if (!(data.getRandom().nextFloat() >= probability) && pool != null) {
+         double probability = ModConfigs.VAULT_CHEST.getTrapProbability(vault.get(Vault.LEVEL).get());
+         WeightedList<String> pool = ModConfigs.VAULT_CHEST.getEffectPool(vault.get(Vault.LEVEL).get());
+         probability = CommonEvents.CHEST_TRAP_GENERATION.invoke(data.getPlayer(), probability, pool).getProbability();
+         if (!(data.getRandom().nextFloat() >= probability) && pool != null) {
+            AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(data.getPlayer());
+            float disarmChance = snapshot.getAttributeValue(ModGearAttributes.TRAP_DISARMING, VaultGearAttributeTypeMerger.floatSum());
+            if (data.getRandom().nextFloat() < disarmChance) {
+               world.playSound(null, data.getPos(), ModSounds.DISARM_TRAP, SoundSource.BLOCKS, 1.0F, 1.0F);
+               return false;
+            } else {
                pool.getRandom(data.getRandom()).map(ModConfigs.VAULT_CHEST::getEffectByName).ifPresent(effect -> {
                   if (effect instanceof MobTrapEffect) {
                      world.playSound(null, data.getPos(), ModSounds.MOB_TRAP, SoundSource.BLOCKS, 1.0F, 1.0F);
@@ -93,26 +93,22 @@ public class ClassicLootLogic extends LootLogic {
                   .map(c -> c.get(data.getPlayer().getUUID()))
                   .ifPresent(stats -> stats.get(StatCollector.CHESTS).add(ChestStat.ofTrapped(((VaultChestBlock)data.getState().getBlock()).getType())));
                return true;
-            } else {
-               return false;
             }
+         } else {
+            return false;
          }
       }
    }
 
    private void initLootData(Vault vault, ChestGenerationEvent.Data data) {
       List<ItemStack> loot = data.getLoot();
-      loot.forEach(stackx -> {
-         if (stackx.getItem() instanceof VaultLootItem lootItemx) {
-            lootItemx.initializeLoot(vault, stackx);
-         }
-      });
 
       for (int i = 0; i < loot.size(); i++) {
          ItemStack stack = loot.get(i);
-         if (stack.getItem() instanceof DataTransferItem lootItem) {
-            loot.set(i, lootItem.convertStack(stack, data.getRandom()));
-         }
+         VaultLevelItem.doInitializeVaultLoot(stack, vault, data.getPos());
+         stack = DataTransferItem.doConvertStack(stack);
+         DataInitializationItem.doInitialize(stack);
+         loot.set(i, stack);
       }
    }
 

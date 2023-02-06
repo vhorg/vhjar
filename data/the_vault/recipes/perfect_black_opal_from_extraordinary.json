@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "the_vault:extraordinary_black_opal"
+    }
+  ],
+  "result": {
+    "item": "the_vault:perfect_black_opal",
+    "count": 4
+  }
+}

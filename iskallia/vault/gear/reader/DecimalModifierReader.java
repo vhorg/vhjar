@@ -63,13 +63,20 @@ public abstract class DecimalModifierReader<T extends Number> extends VaultGearM
    }
 
    public static class Round<T extends Float> extends DecimalModifierReader<T> {
+      private final float multiplier;
+
       public Round(String modifierName, int rgbColor) {
+         this(modifierName, rgbColor, 1.0F);
+      }
+
+      public Round(String modifierName, int rgbColor, float multiplier) {
          super(modifierName, rgbColor);
+         this.multiplier = multiplier;
       }
 
       @Nullable
       public MutableComponent getValueDisplay(T value) {
-         return new TextComponent(String.valueOf(Math.round(value)));
+         return new TextComponent(String.valueOf(Math.round(value * this.multiplier)));
       }
    }
 }

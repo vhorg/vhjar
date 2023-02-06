@@ -563,9 +563,11 @@ public class CrystalData implements INBTSerializable<CompoundTag> {
             modifierName.setStyle(Style.EMPTY.withColor(vaultModifier.getDisplayTextColor()));
             tooltip.add(new TextComponent("  ").append(modifierName));
             if (Screen.hasShiftDown()) {
-               Component description = new TextComponent("  " + vaultModifier.getDisplayDescriptionFormatted(modifierStack.getSize()))
-                  .withStyle(ChatFormatting.DARK_GRAY);
-               tooltip.add(description);
+               String descriptionTxt = vaultModifier.getDisplayDescriptionFormatted(modifierStack.getSize());
+               if (!descriptionTxt.isEmpty()) {
+                  Component description = new TextComponent("  " + descriptionTxt).withStyle(ChatFormatting.DARK_GRAY);
+                  tooltip.add(description);
+               }
             }
          }
       }

@@ -43,6 +43,7 @@ import iskallia.vault.block.SoulAltarBlock;
 import iskallia.vault.block.SpiritExtractorBlock;
 import iskallia.vault.block.StabilizerBlock;
 import iskallia.vault.block.TimeAltarBlock;
+import iskallia.vault.block.ToolStationBlock;
 import iskallia.vault.block.ToolViseBlock;
 import iskallia.vault.block.TransmogTableBlock;
 import iskallia.vault.block.TreasureDoorBlock;
@@ -59,6 +60,7 @@ import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.block.VaultDiffuserBlock;
 import iskallia.vault.block.VaultForgeBlock;
+import iskallia.vault.block.VaultLogBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.VaultRaidControllerBlock;
@@ -100,6 +102,7 @@ import iskallia.vault.block.entity.SoulAltarTileEntity;
 import iskallia.vault.block.entity.SpiritExtractorTileEntity;
 import iskallia.vault.block.entity.StabilizerTileEntity;
 import iskallia.vault.block.entity.TimeAltarTileEntity;
+import iskallia.vault.block.entity.ToolStationTileEntity;
 import iskallia.vault.block.entity.ToolViseTile;
 import iskallia.vault.block.entity.TransmogTableTileEntity;
 import iskallia.vault.block.entity.TreasureDoorTileEntity;
@@ -142,6 +145,7 @@ import iskallia.vault.block.render.ScavengerAltarRenderer;
 import iskallia.vault.block.render.ShopPedestalBlockTileRenderer;
 import iskallia.vault.block.render.SpawnerRenderer;
 import iskallia.vault.block.render.SpiritExtractorRenderer;
+import iskallia.vault.block.render.ToolStationRenderer;
 import iskallia.vault.block.render.ToolViseRenderer;
 import iskallia.vault.block.render.TrophyRenderer;
 import iskallia.vault.block.render.VaultAltarRenderer;
@@ -154,6 +158,7 @@ import iskallia.vault.core.vault.stat.VaultChestType;
 import iskallia.vault.fluid.block.VoidFluidBlock;
 import iskallia.vault.item.CoinBlockItem;
 import iskallia.vault.item.VaultChestBlockItem;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.resources.ResourceLocation;
@@ -256,6 +261,7 @@ public class ModBlocks {
    public static final TrophyBlock TROPHY_STATUE = new TrophyBlock();
    public static final TransmogTableBlock TRANSMOG_TABLE = new TransmogTableBlock();
    public static final VaultForgeBlock VAULT_FORGE = new VaultForgeBlock();
+   public static final ToolStationBlock TOOL_STATION = new ToolStationBlock();
    public static final VaultArtisanStationBlock VAULT_ARTISAN_STATION = new VaultArtisanStationBlock();
    public static final VaultRecyclerBlock VAULT_RECYCLER = new VaultRecyclerBlock();
    public static final VaultDiffuserBlock VAULT_DIFFUSER = new VaultDiffuserBlock();
@@ -263,13 +269,13 @@ public class ModBlocks {
       VaultChestType.WOODEN, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(40.0F, 5.0F)
    );
    public static final Block GILDED_CHEST = new VaultChestBlock(
-      VaultChestType.GILDED, net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.STONE).strength(2.4F, 5.0F).sound(SoundType.STONE)
+      VaultChestType.GILDED, net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.STONE).strength(4.2F, 5.0F).sound(SoundType.STONE)
    );
    public static final Block LIVING_CHEST = new VaultChestBlock(
-      VaultChestType.LIVING, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(2.4F, 5.0F)
+      VaultChestType.LIVING, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(3.5F, 5.0F)
    );
    public static final Block ORNATE_CHEST = new VaultChestBlock(
-      VaultChestType.ORNATE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(2.4F, 5.0F).sound(SoundType.STONE)
+      VaultChestType.ORNATE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(5.5F, 5.0F).sound(SoundType.STONE)
    );
    public static final Block TREASURE_CHEST = new VaultChestBlock(
       VaultChestType.TREASURE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(-1.0F, 5.0F).sound(SoundType.METAL)
@@ -352,6 +358,10 @@ public class ModBlocks {
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.ALLIUM),
       Block.box(5.0, 0.0, 5.0, 11.0, 10.0, 11.0)
    );
+   public static final DiscoverTriggeringBlock GOLDEN_TOOTH = new DiscoverTriggeringBlock(
+      Collections.singletonList(new Pair(DiscoverTriggeringBlock.ARMOR_MODEL_DISCOVERY, ModDynamicModels.Armor.BUMBO.getId())),
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.GOLD_BLOCK)
+   );
    public static final CubeBlock CUBE_BLOCK = new CubeBlock();
    public static final BountyBlock BOUNTY_BLOCK = new BountyBlock();
    public static final BlackMarketBlock BLACK_MARKET = new BlackMarketBlock();
@@ -365,6 +375,8 @@ public class ModBlocks {
    public static final VaultAnvilBlock VAULT_ANVIL = new VaultAnvilBlock();
    public static final Block WUTODIC_SILVER_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK));
    public static final EternalPedestalBlock ETERNAL_PEDESTAL = new EternalPedestalBlock();
+   public static final Block CHROMATIC_LOG = VaultLogBlock.log(() -> ModBlocks.STRIPPED_CHROMATIC_LOG, MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
+   public static final Block STRIPPED_CHROMATIC_LOG = VaultLogBlock.stripped(MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
    public static final SlabBlock VAULT_STONE_SLAB = new SlabBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_SLAB));
    public static final StairBlock VAULT_STONE_STAIRS = new StairBlock(
       VAULT_STONE::defaultBlockState, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_STAIRS)
@@ -516,6 +528,8 @@ public class ModBlocks {
       .build(null);
    public static final BlockEntityType<VaultForgeTileEntity> VAULT_FORGE_TILE_ENTITY = Builder.of(VaultForgeTileEntity::new, new Block[]{VAULT_FORGE})
       .build(null);
+   public static final BlockEntityType<ToolStationTileEntity> TOOL_STATION_TILE_ENTITY = Builder.of(ToolStationTileEntity::new, new Block[]{TOOL_STATION})
+      .build(null);
    public static final BlockEntityType<VaultArtisanStationTileEntity> VAULT_ARTISAN_STATION_ENTITY = Builder.of(
          VaultArtisanStationTileEntity::new, new Block[]{VAULT_ARTISAN_STATION}
       )
@@ -627,6 +641,7 @@ public class ModBlocks {
       registerBlock(event, TROPHY_STATUE, VaultMod.id("trophy_statue"));
       registerBlock(event, TRANSMOG_TABLE, VaultMod.id("transmog_table"));
       registerBlock(event, VAULT_FORGE, VaultMod.id("vault_forge"));
+      registerBlock(event, TOOL_STATION, VaultMod.id("tool_station"));
       registerBlock(event, VAULT_ARTISAN_STATION, VaultMod.id("vault_artisan_station"));
       registerBlock(event, VAULT_RECYCLER, VaultMod.id("vault_recycler"));
       registerBlock(event, VAULT_DIFFUSER, VaultMod.id("vault_diffuser"));
@@ -684,6 +699,7 @@ public class ModBlocks {
       registerBlock(event, GREEN_PUZZLE_CONCRETE, VaultMod.id("green_puzzle_concrete"));
       registerBlock(event, BLUE_PUZZLE_CONCRETE, VaultMod.id("blue_puzzle_concrete"));
       registerBlock(event, SUGAR_PLUM_FAIRY_FLOWER, VaultMod.id("sugar_plum_fairy_flower"));
+      registerBlock(event, GOLDEN_TOOTH, VaultMod.id("golden_tooth"));
       registerBlock(event, CUBE_BLOCK, VaultMod.id("cube_block"));
       registerBlock(event, BOUNTY_BLOCK, VaultMod.id("bounty_block"));
       registerBlock(event, BLACK_MARKET, VaultMod.id("black_market"));
@@ -699,6 +715,8 @@ public class ModBlocks {
       registerBlock(event, ETERNAL_PEDESTAL, VaultMod.id("eternal_pedestal"));
       registerBlock(event, VAULT_STONE_SLAB, VaultMod.id("vault_stone_slab"));
       registerBlock(event, VAULT_STONE_STAIRS, VaultMod.id("vault_stone_stairs"));
+      registerBlock(event, CHROMATIC_LOG, VaultMod.id("chromatic_log"));
+      registerBlock(event, STRIPPED_CHROMATIC_LOG, VaultMod.id("stripped_chromatic_log"));
    }
 
    public static void registerTileEntities(Register<BlockEntityType<?>> event) {
@@ -739,6 +757,7 @@ public class ModBlocks {
       registerTileEntity(event, COIN_PILE_TILE, VaultMod.id("coin_pile_tile"));
       registerTileEntity(event, TREASURE_SAND_TILE_ENTITY, VaultMod.id("treasure_sand_tile_entity"));
       registerTileEntity(event, VAULT_FORGE_TILE_ENTITY, VaultMod.id("vault_forge_tile_entity"));
+      registerTileEntity(event, TOOL_STATION_TILE_ENTITY, VaultMod.id("tool_station_tile_entity"));
       registerTileEntity(event, VAULT_ARTISAN_STATION_ENTITY, VaultMod.id("vault_artisan_station_tile_entity"));
       registerTileEntity(event, VAULT_RECYCLER_ENTITY, VaultMod.id("vault_recycler_tile_entity"));
       registerTileEntity(event, VAULT_DIFFUSER_ENTITY, VaultMod.id("vault_diffuser_tile_entity"));
@@ -787,6 +806,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(ANIMAL_PEN_ENTITY, AnimalPenRenderer::new);
       event.registerBlockEntityRenderer(ETERNAL_PEDESTAL_TILE_ENTITY, EternalPedestalRenderer::new);
       event.registerBlockEntityRenderer(PYLON_TILE_ENTITY, PylonRenderer::new);
+      event.registerBlockEntityRenderer(TOOL_STATION_TILE_ENTITY, ToolStationRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
@@ -900,6 +920,7 @@ public class ModBlocks {
       registerBlockItem(event, PACKED_VAULT_MEAT_BLOCK);
       registerBlockItem(event, TREASURE_SAND);
       registerBlockItem(event, VAULT_FORGE);
+      registerBlockItem(event, TOOL_STATION);
       registerBlockItem(event, VAULT_ARTISAN_STATION);
       registerBlockItem(event, VAULT_RECYCLER);
       registerBlockItem(event, VAULT_DIFFUSER);
@@ -913,6 +934,7 @@ public class ModBlocks {
       registerBlockItem(event, GREEN_PUZZLE_CONCRETE);
       registerBlockItem(event, BLUE_PUZZLE_CONCRETE);
       registerBlockItem(event, SUGAR_PLUM_FAIRY_FLOWER);
+      registerBlockItem(event, GOLDEN_TOOTH);
       registerBlockItem(event, CUBE_BLOCK);
       registerBlockItem(event, BOUNTY_BLOCK);
       registerBlockItem(event, BLACK_MARKET);
@@ -926,6 +948,8 @@ public class ModBlocks {
       registerBlockItem(event, ETERNAL_PEDESTAL);
       registerBlockItem(event, VAULT_STONE_SLAB);
       registerBlockItem(event, VAULT_STONE_STAIRS);
+      registerBlockItem(event, CHROMATIC_LOG);
+      registerBlockItem(event, STRIPPED_CHROMATIC_LOG);
    }
 
    private static void registerBlock(Register<Block> event, Block block, ResourceLocation id) {

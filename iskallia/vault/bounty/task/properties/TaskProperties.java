@@ -56,6 +56,7 @@ public abstract class TaskProperties implements INBTSerializable<CompoundTag> {
       NBTHelper.writeCollection(tag, "validDimensions", this.validDimensions, StringTag.class, id -> StringTag.valueOf(id.toString()));
       tag.putBoolean("vaultOnly", this.vaultOnly);
       tag.putDouble("amount", this.amount);
+      tag.putString("rewardPool", this.rewardPool == null ? "common" : this.rewardPool);
       return tag;
    }
 
@@ -64,5 +65,6 @@ public abstract class TaskProperties implements INBTSerializable<CompoundTag> {
       this.validDimensions = NBTHelper.readList(nbt, "validDimensions", StringTag.class, stringTag -> new ResourceLocation(stringTag.getAsString()));
       this.vaultOnly = nbt.getBoolean("vaultOnly");
       this.amount = nbt.getDouble("amount");
+      this.rewardPool = nbt.contains("rewardPool") ? nbt.getString("rewardPool") : "common";
    }
 }

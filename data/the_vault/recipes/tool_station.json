@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "aaa",
+    "bcb",
+    "b b"
+  ],
+  "key": {
+    "a": {
+      "item": "the_vault:chromatic_iron_ingot"
+    },
+    "b": {
+      "item": "the_vault:driftwood"
+    },
+    "c": {
+      "item": "minecraft:crafting_table"
+    }
+  },
+  "result": {
+    "item": "the_vault:tool_station",
+    "count": 1
+  }
+}

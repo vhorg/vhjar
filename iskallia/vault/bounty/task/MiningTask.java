@@ -69,17 +69,28 @@ public class MiningTask extends Task<MiningProperties> {
    @SubscribeEvent
    public static void onOreBroken(BreakEvent event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
-         BountyData data = BountyData.get();
-         data.getAllActiveTasksById(player, TaskRegistry.MINING)
-            .stream()
-            .filter(task -> !task.isComplete())
-            .filter(task -> task.validate(player, event))
-            .peek(task -> task.increment(1.0))
-            .filter(Task::isComplete)
-            .forEach(
-               task -> ModNetwork.CHANNEL
-                  .sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT)
-            );
+         for (Task<?> task : BountyData.get().getAllLegendaryById(player, TaskRegistry.MINING).stream().filter(taskx -> !taskx.isComplete()).toList()) {
+            if (task.validate(player, event)) {
+               task.increment(1.0);
+               if (task.isComplete()) {
+                  ModNetwork.CHANNEL.sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+               }
+
+               return;
+            }
+         }
+
+         for (Task<?> taskx : BountyData.get().getAllActiveById(player, TaskRegistry.MINING).stream().filter(taskxx -> !taskxx.isComplete()).toList()) {
+            if (taskx.validate(player, event)) {
+               taskx.increment(1.0);
+               if (taskx.isComplete()) {
+                  ModNetwork.CHANNEL
+                     .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+               }
+
+               return;
+            }
+         }
       }
    }
 }

@@ -12,6 +12,7 @@ import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -49,6 +51,7 @@ public class VaultGearData extends AttributeGearData {
       this.fromNbt(tag, version);
    }
 
+   @Nonnull
    public static VaultGearData read(ItemStack stack) {
       return AttributeGearData.read(stack);
    }
@@ -110,6 +113,16 @@ public class VaultGearData extends AttributeGearData {
       return merged;
    }
 
+   public <T> List<VaultGearAttributeInstance<T>> getModifiers(VaultGearAttribute<T> attribute, VaultGearData.Type type) {
+      List<VaultGearAttributeInstance<T>> modifiers = new ArrayList<>();
+      type.getAttributeSource(this).forEach(instance -> {
+         if (instance.getAttribute().equals(attribute)) {
+            modifiers.add((VaultGearAttributeInstance<T>)instance);
+         }
+      });
+      return modifiers;
+   }
+
    @Override
    public boolean has(VaultGearAttribute<?> attribute) {
       return this.has(attribute, VaultGearData.Type.ALL);
@@ -126,7 +139,11 @@ public class VaultGearData extends AttributeGearData {
    }
 
    public boolean removeModifier(VaultGearModifier<?> modifier) {
-      Iterator<? extends VaultGearAttributeInstance<?>> iterator = VaultGearData.Type.MODIFIERS.getAttributeSource(this).iterator();
+      return this.removeModifier(modifier, VaultGearData.Type.ALL);
+   }
+
+   public boolean removeModifier(VaultGearModifier<?> modifier, VaultGearData.Type type) {
+      Iterator<? extends VaultGearAttributeInstance<?>> iterator = type.getAttributeSource(this).iterator();
 
       while (iterator.hasNext()) {
          VaultGearAttributeInstance<?> instance = (VaultGearAttributeInstance<?>)iterator.next();
@@ -141,7 +158,7 @@ public class VaultGearData extends AttributeGearData {
 
    @Nullable
    public <T> T updateModifier(VaultGearModifier<T> modifier, T value) {
-      for (VaultGearAttributeInstance instance : VaultGearData.Type.MODIFIERS.getAttributeSource(this)) {
+      for (VaultGearAttributeInstance instance : VaultGearData.Type.ALL_MODIFIERS.getAttributeSource(this)) {
          if (instance == modifier) {
             return (T)instance.setValue(value);
          }
@@ -184,8 +201,13 @@ public class VaultGearData extends AttributeGearData {
       return Iterables.concat(this.prefixes, this.suffixes);
    }
 
-   public Set<String> getExistingModifierGroups() {
-      return Streams.stream(Iterables.concat(this.prefixes, this.suffixes)).map(VaultGearModifier::getModifierGroup).collect(Collectors.toSet());
+   public Set<String> getExistingModifierGroups(VaultGearData.Type type) {
+      return Streams.stream(type.getAttributeSource(this))
+         .filter(instance -> instance instanceof VaultGearModifier)
+         .map(instance -> (VaultGearModifier)instance)
+         .map(VaultGearModifier::getModifierGroup)
+         .filter(group -> !group.isEmpty())
+         .collect(Collectors.toSet());
    }
 
    @Override
@@ -298,10 +320,11 @@ public class VaultGearData extends AttributeGearData {
 
    public static enum Type {
       ATTRIBUTES(data -> data.attributes),
-      BASE_MODIFIERS(data -> data.baseModifiers),
       PREFIXES(data -> data.prefixes),
       SUFFIXES(data -> data.suffixes),
-      MODIFIERS(data -> Iterables.concat(data.baseModifiers, data.prefixes, data.suffixes)),
+      ALL_MODIFIERS(data -> Iterables.concat(data.baseModifiers, data.prefixes, data.suffixes)),
+      IMPLICIT_MODIFIERS(data -> data.baseModifiers),
+      EXPLICIT_MODIFIERS(data -> Iterables.concat(data.prefixes, data.suffixes)),
       ALL(data -> Iterables.concat(data.attributes, data.baseModifiers, data.prefixes, data.suffixes));
 
       private final Function<VaultGearData, Iterable<? extends VaultGearAttributeInstance<?>>> attributeSource;

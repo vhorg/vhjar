@@ -7,7 +7,10 @@ public enum VaultGearClassification {
    AXE(VaultGearRarity::getWeaponModifierCount),
    SWORD(VaultGearRarity::getWeaponModifierCount),
    SHIELD(VaultGearRarity::getShieldModifierCount),
-   IDOL(VaultGearRarity::getIdolModifierCount);
+   IDOL(VaultGearRarity::getIdolModifierCount),
+   JEWEL(VaultGearRarity::getJewelModifierCount),
+   MAGNET(VaultGearRarity::getMagnetModifierCount),
+   TOOL(rarity -> 0);
 
    private final Function<VaultGearRarity, Integer> modifierCountFn;
 

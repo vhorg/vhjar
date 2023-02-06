@@ -64,17 +64,28 @@ public class DamageTask extends Task<DamageProperties> {
    @SubscribeEvent
    public static void onDamageEntity(LivingHurtEvent event) {
       if (event.getSource().getEntity() instanceof ServerPlayer player) {
-         BountyData data = BountyData.get();
-         data.getAllActiveTasksById(player, TaskRegistry.DAMAGE_ENTITY)
-            .stream()
-            .filter(task -> !task.isComplete())
-            .filter(task -> task.validate(player, event))
-            .peek(task -> task.increment(event.getAmount()))
-            .filter(Task::isComplete)
-            .forEach(
-               task -> ModNetwork.CHANNEL
-                  .sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT)
-            );
+         for (Task<?> task : BountyData.get().getAllLegendaryById(player, TaskRegistry.DAMAGE_ENTITY).stream().filter(taskx -> !taskx.isComplete()).toList()) {
+            if (task.validate(player, event)) {
+               task.increment(event.getAmount());
+               if (task.isComplete()) {
+                  ModNetwork.CHANNEL.sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+               }
+
+               return;
+            }
+         }
+
+         for (Task<?> taskx : BountyData.get().getAllActiveById(player, TaskRegistry.DAMAGE_ENTITY).stream().filter(taskxx -> !taskxx.isComplete()).toList()) {
+            if (taskx.validate(player, event)) {
+               taskx.increment(event.getAmount());
+               if (taskx.isComplete()) {
+                  ModNetwork.CHANNEL
+                     .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+               }
+
+               return;
+            }
+         }
       }
    }
 }

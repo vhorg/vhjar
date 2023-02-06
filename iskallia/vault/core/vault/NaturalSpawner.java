@@ -100,7 +100,7 @@ public class NaturalSpawner extends DataObject<NaturalSpawner> {
       });
    }
 
-   public void attemptSpawn(VirtualWorld world, Vault vault, ServerPlayer player, Random random) {
+   public LivingEntity attemptSpawn(VirtualWorld world, Vault vault, ServerPlayer player, Random random) {
       double min = this.get(MIN_SPAWN_DISTANCE).intValue();
       double max = this.get(MAX_SPAWN_DISTANCE).intValue();
       double angle = (Math.PI * 2) * random.nextDouble();
@@ -115,6 +115,8 @@ public class NaturalSpawner extends DataObject<NaturalSpawner> {
       if (spawned != null) {
          this.get(SPAWNED_MOBS).add(spawned.getUUID());
       }
+
+      return spawned;
    }
 
    @Nullable

@@ -1,5 +1,6 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.MagnetItem;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -24,8 +25,9 @@ public abstract class ItemEntityMixin extends Entity {
          ordinal = 1
       )}
    )
-   public void onPickupEventCancelled(Player pEntity, CallbackInfo ci) {
-      MagnetItem.onAfterItemPickup(pEntity, (ItemEntity)this);
+   public void onPickupEventCancelled(Player entity, CallbackInfo ci) {
+      LegacyMagnetItem.onAfterItemPickup(entity, (ItemEntity)this);
+      MagnetItem.onPlayerPickup(entity, (ItemEntity)this);
    }
 
    @Inject(
@@ -35,7 +37,8 @@ public abstract class ItemEntityMixin extends Entity {
          ordinal = 2
       )}
    )
-   public void onPartialStackPickup(Player pEntity, CallbackInfo ci) {
-      MagnetItem.onAfterItemPickup(pEntity, (ItemEntity)this);
+   public void onPartialStackPickup(Player entity, CallbackInfo ci) {
+      LegacyMagnetItem.onAfterItemPickup(entity, (ItemEntity)this);
+      MagnetItem.onPlayerPickup(entity, (ItemEntity)this);
    }
 }

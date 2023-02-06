@@ -11,6 +11,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.PlaceholderBlock;
+import iskallia.vault.core.vault.abyss.AbyssVaultEffectModifier;
 import iskallia.vault.core.world.data.PartialTile;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.calc.PlayerStat;
@@ -72,6 +73,7 @@ public class VaultModifiersConfig extends Config {
          .flatMap(map -> map.entrySet().stream())
          .forEach(entry -> VaultModifierRegistry.register(entry.getKey(), entry.getValue()));
       VaultModifierRegistry.register(EmptyModifier.INSTANCE.getId(), EmptyModifier.INSTANCE);
+      VaultModifierRegistry.register(AbyssVaultEffectModifier.INSTANCE.getId(), AbyssVaultEffectModifier.INSTANCE);
       return (T)config;
    }
 

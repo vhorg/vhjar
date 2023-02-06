@@ -219,6 +219,30 @@ public class PlayerVaultStats implements INBTSerializable<CompoundTag> {
       return this;
    }
 
+   public PlayerVaultStats refundSkillPoints(int amount) {
+      this.unspentSkillPoints += amount;
+      this.totalSpentSkillPoints -= amount;
+      return this;
+   }
+
+   public PlayerVaultStats refundKnowledgePoints(int amount) {
+      this.unspentKnowledgePoints += amount;
+      this.totalSpentKnowledgePoints -= amount;
+      return this;
+   }
+
+   public PlayerVaultStats refundArchetypePoints(int amount) {
+      this.unspentArchetypePoints += amount;
+      this.totalSpentArchetypePoints -= amount;
+      return this;
+   }
+
+   public PlayerVaultStats refundRegretPoints(int amount) {
+      this.unspentRegretPoints += amount;
+      this.totalSpentRegretPoints -= amount;
+      return this;
+   }
+
    public void sync(MinecraftServer server) {
       NetcodeUtils.runIfPresent(
          server,

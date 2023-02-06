@@ -8,6 +8,7 @@ import iskallia.vault.core.data.adapter.Adapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.time.TickClock;
@@ -108,6 +109,11 @@ public class VictoryObjective extends Objective {
                            title.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(14536734)));
                            ClientboundSetTitleTextPacket titlePacket = new ClientboundSetTitleTextPacket(title);
                            player.connection.send(titlePacket);
+                           CommonEvents.ENTITY_DAMAGE.register(listener, event -> {
+                              if (event.getEntity().equals(player)) {
+                                 event.setCanceled(true);
+                              }
+                           });
                         }
                      );
                }

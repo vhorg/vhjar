@@ -1,7 +1,7 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

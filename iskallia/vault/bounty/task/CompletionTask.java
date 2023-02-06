@@ -77,17 +77,37 @@ public class CompletionTask extends Task<CompletionProperties> {
 
    @SubscribeEvent
    public static void onVaultLeave(VaultLeaveForgeEvent event) {
-      BountyData.get()
-         .getAllActiveTasksById(event.getPlayer(), TaskRegistry.COMPLETION)
+      for (Task<?> task : BountyData.get()
+         .getAllLegendaryById(event.getPlayer(), TaskRegistry.COMPLETION)
          .stream()
-         .filter(task -> !task.isComplete())
-         .filter(task -> task.validate(event.getPlayer(), event))
-         .peek(task -> task.increment(1.0))
-         .filter(Task::isComplete)
-         .forEach(
-            task -> ModNetwork.CHANNEL
-               .sendTo(new ClientboundBountyCompleteMessage(task.taskType), event.getPlayer().connection.connection, NetworkDirection.PLAY_TO_CLIENT)
-         );
+         .filter(taskx -> !taskx.isComplete())
+         .toList()) {
+         if (task.validate(event.getPlayer(), event)) {
+            task.increment(1.0);
+            if (task.isComplete()) {
+               ModNetwork.CHANNEL
+                  .sendTo(new ClientboundBountyCompleteMessage(task.taskType), event.getPlayer().connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+            }
+
+            return;
+         }
+      }
+
+      for (Task<?> taskx : BountyData.get()
+         .getAllActiveById(event.getPlayer(), TaskRegistry.COMPLETION)
+         .stream()
+         .filter(taskxx -> !taskxx.isComplete())
+         .toList()) {
+         if (taskx.validate(event.getPlayer(), event)) {
+            taskx.increment(1.0);
+            if (taskx.isComplete()) {
+               ModNetwork.CHANNEL
+                  .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), event.getPlayer().connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+            }
+
+            return;
+         }
+      }
    }
 
    @SubscribeEvent

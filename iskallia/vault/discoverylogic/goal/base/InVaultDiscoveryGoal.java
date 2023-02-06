@@ -1,0 +1,13 @@
+package iskallia.vault.discoverylogic.goal.base;
+
+import iskallia.vault.core.vault.DiscoveryGoalsManager;
+import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.world.storage.VirtualWorld;
+
+public abstract class InVaultDiscoveryGoal extends DiscoveryGoal {
+   public InVaultDiscoveryGoal(float targetProgress) {
+      super(targetProgress);
+   }
+
+   public abstract void initServer(DiscoveryGoalsManager var1, VirtualWorld var2, Vault var3);
+}

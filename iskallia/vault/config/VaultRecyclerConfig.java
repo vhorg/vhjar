@@ -4,9 +4,11 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.ChanceItemStackEntry;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -19,6 +21,8 @@ public class VaultRecyclerConfig extends Config {
    private VaultRecyclerConfig.RecyclerOutput gearRecyclingOutput;
    @Expose
    private VaultRecyclerConfig.RecyclerOutput trinketRecyclingOutput;
+   @Expose
+   private VaultRecyclerConfig.RecyclerOutput jewelRecyclingOutput;
 
    @Override
    public String getName() {
@@ -35,6 +39,10 @@ public class VaultRecyclerConfig extends Config {
 
    public VaultRecyclerConfig.RecyclerOutput getTrinketRecyclingOutput() {
       return this.trinketRecyclingOutput;
+   }
+
+   public VaultRecyclerConfig.RecyclerOutput getJewelRecyclingOutput() {
+      return this.jewelRecyclingOutput;
    }
 
    public float getAdditionalOutputRarityChance(VaultGearRarity rarity) {
@@ -60,6 +68,11 @@ public class VaultRecyclerConfig extends Config {
          new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F),
          new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F)
       );
+      this.jewelRecyclingOutput = new VaultRecyclerConfig.RecyclerOutput(
+         new ChanceItemStackEntry(new ItemStack(ModItems.GEMSTONE), 1, 1, 1.0F),
+         new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F),
+         new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F)
+      );
    }
 
    public static class RecyclerOutput {
@@ -77,7 +90,9 @@ public class VaultRecyclerConfig extends Config {
       }
 
       public ItemStack generateMainOutput() {
-         return DataTransferItem.doConvertStack(this.mainOutput.createItemStack(Config.rand));
+         ItemStack out = DataTransferItem.doConvertStack(this.mainOutput.createItemStack(Config.rand));
+         DataInitializationItem.doInitialize(out);
+         return out;
       }
 
       public ChanceItemStackEntry getMainOutput() {
@@ -97,7 +112,9 @@ public class VaultRecyclerConfig extends Config {
       }
 
       public ItemStack generateExtraOutput1() {
-         return DataTransferItem.doConvertStack(this.extraOutput1.createItemStack(Config.rand));
+         ItemStack out = DataTransferItem.doConvertStack(this.extraOutput1.createItemStack(Config.rand));
+         DataInitializationItem.doInitialize(out);
+         return out;
       }
 
       public ItemStack getExtraOutput1Matching() {
@@ -105,11 +122,36 @@ public class VaultRecyclerConfig extends Config {
       }
 
       public ItemStack generateExtraOutput2() {
-         return DataTransferItem.doConvertStack(this.extraOutput2.createItemStack(Config.rand));
+         ItemStack out = DataTransferItem.doConvertStack(this.extraOutput2.createItemStack(Config.rand));
+         DataInitializationItem.doInitialize(out);
+         return out;
       }
 
       public ItemStack getExtraOutput2Matching() {
          return this.extraOutput2.getMatchingStack();
+      }
+
+      public VaultRecyclerConfig.RecyclerOutput process(BiFunction<Integer, ItemStack, ItemStack> processor) {
+         return new VaultRecyclerConfig.RecyclerOutput(
+            new ChanceItemStackEntry(
+               processor.apply(0, this.mainOutput.getMatchingStack()),
+               this.mainOutput.getMinCount(),
+               this.mainOutput.getMaxCount(),
+               this.mainOutput.getChance()
+            ),
+            new ChanceItemStackEntry(
+               processor.apply(1, this.extraOutput1.getMatchingStack()),
+               this.extraOutput1.getMinCount(),
+               this.extraOutput1.getMaxCount(),
+               this.extraOutput1.getChance()
+            ),
+            new ChanceItemStackEntry(
+               processor.apply(2, this.extraOutput2.getMatchingStack()),
+               this.extraOutput2.getMinCount(),
+               this.extraOutput2.getMaxCount(),
+               this.extraOutput2.getChance()
+            )
+         );
       }
    }
 }

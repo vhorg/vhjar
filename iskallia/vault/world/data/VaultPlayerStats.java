@@ -81,7 +81,7 @@ public class VaultPlayerStats extends SavedData {
             PlayerVaultStatsData statsData = PlayerVaultStatsData.get(player.getLevel());
             int experience = stats.getExperience(snapshot.getEnd());
             statsData.addVaultExp(player, experience);
-            VaultDollItem.giveDollExperience(player, vaultId, experience);
+            VaultDollItem.onVaultCompletion(player, vaultId, getSnapshot(vaultId).map(vault -> vault.getEnd().get(Vault.LEVEL).get()).orElse(0), experience);
             if (stats.getCompletion() == Completion.COMPLETED) {
                PlayerSpiritRecoveryData.get(player.getLevel()).decreaseMultiplierOnCompletion(player.getUUID());
             }

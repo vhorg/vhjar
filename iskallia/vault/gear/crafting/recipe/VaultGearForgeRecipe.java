@@ -1,5 +1,6 @@
 package iskallia.vault.gear.crafting.recipe;
 
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.crafting.VaultGearCraftingHelper;
@@ -54,8 +55,8 @@ public class VaultGearForgeRecipe extends VaultForgeRecipe {
    }
 
    @Override
-   public ItemStack createOutput(ServerPlayer crafter) {
-      ItemStack stack = super.createOutput(crafter);
+   public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter) {
+      ItemStack stack = super.createOutput(consumed, crafter);
       Item item = stack.getItem();
       if (item instanceof IdolItem) {
          item = MiscUtils.getRandomEntry(ModItems.IDOL_BENEVOLENT, ModItems.IDOL_MALEVOLENCE, ModItems.IDOL_OMNISCIENT, ModItems.IDOL_TIMEKEEPER);

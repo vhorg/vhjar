@@ -61,6 +61,9 @@ public class Vault extends DataObject<Vault> {
    public static final FieldKey<StatsCollector> STATS = FieldKey.of("stats", StatsCollector.class)
       .with(Version.v1_0, Adapter.ofCompound(), DISK.all(), StatsCollector::new)
       .register(FIELDS);
+   public static final FieldKey<DiscoveryGoalsManager> DISCOVERY = FieldKey.of("discovery", DiscoveryGoalsManager.class)
+      .with(Version.v1_8, Adapter.ofCompound(), DISK.all(), DiscoveryGoalsManager::new)
+      .register(FIELDS);
    public static final FieldKey<CompoundTag> CRYSTAL = FieldKey.of("crystal", CompoundTag.class)
       .with(Version.v1_2, Adapter.ofNBT(CompoundTag.class), DISK.all())
       .register(FIELDS);
@@ -77,6 +80,7 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(MODIFIERS, modifiers -> modifiers.initServer(world, this));
       this.ifPresent(LISTENERS, listeners -> listeners.initServer(world, this));
       this.ifPresent(INFLUENCES, influences -> influences.initServer(world, this));
+      this.ifPresent(DISCOVERY, discovery -> discovery.initServer(world, this));
       this.ifPresent(STATS, stats -> stats.initServer(world, this));
    }
 
@@ -96,6 +100,7 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(MODIFIERS, Modifiers::releaseServer);
       this.ifPresent(LISTENERS, Listeners::releaseServer);
       this.ifPresent(INFLUENCES, LegacyInfluences::releaseServer);
+      this.ifPresent(DISCOVERY, DiscoveryGoalsManager::releaseServer);
       this.ifPresent(STATS, StatsCollector::releaseServer);
    }
 

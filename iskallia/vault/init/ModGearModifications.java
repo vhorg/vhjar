@@ -1,8 +1,10 @@
 package iskallia.vault.init;
 
+import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.gear.modification.operation.AddModifierModification;
 import iskallia.vault.gear.modification.operation.ReforgeAddTaggedModification;
+import iskallia.vault.gear.modification.operation.ReforgeAffixGroupModification;
 import iskallia.vault.gear.modification.operation.ReforgeAllModification;
 import iskallia.vault.gear.modification.operation.ReforgeImplicitModification;
 import iskallia.vault.gear.modification.operation.ReforgeRandomTierModification;
@@ -21,6 +23,8 @@ public class ModGearModifications {
    public static final ReforgeImplicitModification REFORGE_ALL_IMPLICITS = new ReforgeImplicitModification();
    public static final ReforgeAddTaggedModification REFORGE_ALL_ADD_TAG = new ReforgeAddTaggedModification();
    public static final ReforgeRandomTierModification REFORGE_RANDOM_TIER = new ReforgeRandomTierModification();
+   public static final ReforgeAffixGroupModification REFORGE_PREFIXES = new ReforgeAffixGroupModification(VaultGearModifier.AffixType.PREFIX);
+   public static final ReforgeAffixGroupModification REFORGE_SUFFIXES = new ReforgeAffixGroupModification(VaultGearModifier.AffixType.SUFFIX);
 
    public static void init(Register<GearModification> event) {
       IForgeRegistry<GearModification> registry = event.getRegistry();
@@ -32,5 +36,7 @@ public class ModGearModifications {
       registry.register(REFORGE_ALL_IMPLICITS);
       registry.register(REFORGE_ALL_ADD_TAG);
       registry.register(REFORGE_RANDOM_TIER);
+      registry.register(REFORGE_PREFIXES);
+      registry.register(REFORGE_SUFFIXES);
    }
 }

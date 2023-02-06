@@ -30,6 +30,10 @@ public class BountyTableTileEntity extends BlockEntity implements MenuProvider {
       return this.inventory;
    }
 
+   public boolean stillValid(Player player) {
+      return this.level != null && this.level.getBlockEntity(this.worldPosition) == this ? this.inventory.stillValid(player) : false;
+   }
+
    public void load(@NotNull CompoundTag tag) {
       super.load(tag);
       this.inventory.load(tag);

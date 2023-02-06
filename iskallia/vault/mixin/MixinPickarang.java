@@ -1,6 +1,8 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.block.CoinPileBlock;
 import iskallia.vault.block.VaultChestBlock;
+import iskallia.vault.block.VaultOreBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,6 +21,8 @@ public class MixinPickarang {
       )
    )
    protected float getDestroySpeed(BlockState state, BlockGetter world, BlockPos pos) {
-      return state.getBlock() instanceof VaultChestBlock ? 3.6E7F : state.getDestroySpeed(world, pos);
+      return !(state.getBlock() instanceof VaultChestBlock) && !(state.getBlock() instanceof VaultOreBlock) && !(state.getBlock() instanceof CoinPileBlock)
+         ? state.getDestroySpeed(world, pos)
+         : 3.6E7F;
    }
 }

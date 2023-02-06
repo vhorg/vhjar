@@ -6,7 +6,7 @@ import iskallia.vault.client.gui.screen.ToolViseScreen;
 import iskallia.vault.config.PaxelConfigs;
 import iskallia.vault.event.InputEvents;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;

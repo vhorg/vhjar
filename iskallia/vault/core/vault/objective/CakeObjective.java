@@ -248,8 +248,7 @@ public class CakeObjective extends Objective {
 
       while (it.hasNext()) {
          Entry<VaultModifier<?>> entry = (Entry<VaultModifier<?>>)it.next();
-         suffix.append(entry.getIntValue() + "x ");
-         suffix.append(((VaultModifier)entry.getKey()).getNameComponentFormatted(entry.getIntValue()));
+         suffix.append(((VaultModifier)entry.getKey()).getChatDisplayNameComponent(entry.getIntValue()));
          if (it.hasNext()) {
             suffix.append(new TextComponent(", "));
          }

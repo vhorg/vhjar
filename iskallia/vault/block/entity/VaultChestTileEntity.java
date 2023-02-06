@@ -41,10 +41,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 public class VaultChestTileEntity extends ChestBlockEntity {
    private VaultRarity rarity;
    private boolean generated;
+   private int generatedStacksCount;
    private int size;
    private BlockState renderState;
    private int ticksSinceSync;
@@ -67,6 +69,10 @@ public class VaultChestTileEntity extends ChestBlockEntity {
 
    public int getContainerSize() {
       return this.size;
+   }
+
+   public int getGeneratedStacksCount() {
+      return this.generatedStacksCount;
    }
 
    public VaultChestTileEntity(BlockPos pos, BlockState state) {
@@ -153,6 +159,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
                );
             if ((this.lootTable = data.getLootTable()) == null) {
                this.generated = true;
+               this.generatedStacksCount = 0;
                this.setChanged();
             } else {
                this.generateLootTable(data.getVersion(), source, loot, data.getRandom());
@@ -170,11 +177,18 @@ public class VaultChestTileEntity extends ChestBlockEntity {
                      ChestGenerationEvent.Phase.POST
                   );
                this.fillLoot(loot, compress, data.getRandom());
-               this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
                this.generated = true;
+               this.generatedStacksCount = 0;
+
+               for (int i = 0; i < this.getContainerSize(); i++) {
+                  this.generatedStacksCount = this.generatedStacksCount + (this.getItem(i).isEmpty() ? 1 : 0);
+               }
+
+               this.getLevel().sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
             }
          } else {
             this.generated = true;
+            this.generatedStacksCount = 0;
             this.setChanged();
          }
       }
@@ -309,22 +323,24 @@ public class VaultChestTileEntity extends ChestBlockEntity {
       return false;
    }
 
-   public void load(CompoundTag nbt) {
+   public void load(@NotNull CompoundTag nbt) {
       super.load(nbt);
       if (nbt.contains("Rarity", 3)) {
          this.rarity = VaultRarity.values()[nbt.getInt("Rarity")];
       }
 
       this.generated = nbt.getBoolean("Generated");
+      this.generatedStacksCount = nbt.getInt("GeneratedStacksCount");
    }
 
-   protected void saveAdditional(CompoundTag pTag) {
-      super.saveAdditional(pTag);
+   protected void saveAdditional(@NotNull CompoundTag nbt) {
+      super.saveAdditional(nbt);
       if (this.rarity != null) {
-         pTag.putInt("Rarity", this.rarity.ordinal());
+         nbt.putInt("Rarity", this.rarity.ordinal());
       }
 
-      pTag.putBoolean("Generated", this.generated);
+      nbt.putBoolean("Generated", this.generated);
+      nbt.putInt("GeneratedStacksCount", this.generatedStacksCount);
    }
 
    public Component getDisplayName() {

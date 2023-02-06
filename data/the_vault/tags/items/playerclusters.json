@@ -8,6 +8,8 @@
         "the_vault:cluster_puffium",
         "the_vault:cluster_iskallium",
         "the_vault:cluster_gorginite",
-        "the_vault:cluster_sparkletine"
+        "the_vault:cluster_sparkletine",
+        "the_vault:cluster_petzanite",
+        "the_vault:cluster_xenium"
     ]
 }

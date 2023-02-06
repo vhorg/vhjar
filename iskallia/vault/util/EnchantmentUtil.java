@@ -1,7 +1,7 @@
 package iskallia.vault.util;
 
 import iskallia.vault.gear.item.VaultGearItem;
-import iskallia.vault.item.paxel.PaxelItem;
+import iskallia.vault.item.tool.PaxelItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ArrowDamageEnchantment;
 import net.minecraft.world.item.enchantment.ArrowFireEnchantment;
