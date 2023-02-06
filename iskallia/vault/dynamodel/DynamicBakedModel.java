@@ -37,7 +37,7 @@ public class DynamicBakedModel implements BakedModel {
       this.overrides = new ItemOverrides(loader, missing, id2 -> missing, Collections.emptyList()) {
          public BakedModel resolve(@NotNull BakedModel original, @NotNull ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed) {
             if (stack.getItem() instanceof DynamicModelItem dynamicModelItem) {
-               if (stack.is(ModItems.MAGNET) && MagnetItem.hasLegacyData(stack)) {
+               if (stack.is(ModItems.MAGNET) && MagnetItem.isLegacy(stack) && !MagnetItem.hasLegacyDataRemoved(stack)) {
                   MagnetItem.removeLegacyData(stack);
                }
 

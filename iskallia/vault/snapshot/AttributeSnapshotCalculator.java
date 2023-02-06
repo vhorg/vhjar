@@ -15,7 +15,9 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.trinket.GearAttributeTrinket;
 import iskallia.vault.gear.trinket.TrinketHelper;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.integration.IntegrationCurios;
+import iskallia.vault.item.MagnetItem;
 import iskallia.vault.skill.talent.EffectGrantingTalent;
 import iskallia.vault.skill.talent.GearAttributeTalent;
 import iskallia.vault.skill.talent.TalentNode;
@@ -62,15 +64,17 @@ public class AttributeSnapshotCalculator {
                stack -> {
                   if (AttributeGearData.hasData(stack)) {
                      if (!(stack.getItem() instanceof CuriosGearItem curiosGearItem && !curiosGearItem.isIntendedSlot(stack, slot))) {
-                        AttributeGearData data = AttributeGearData.read(stack);
+                        if (!stack.is(ModItems.MAGNET) || !MagnetItem.isLegacy(stack)) {
+                           AttributeGearData data = AttributeGearData.read(stack);
 
-                        for (VaultGearAttribute<?> attribute : VaultGearAttributeRegistry.getRegistry()) {
-                           data.get(attribute, VaultGearAttributeTypeMerger.asList())
-                              .forEach(
-                                 value -> snapshot.gearAttributeValues
-                                    .computeIfAbsent(attribute, v -> new AttributeSnapshot.AttributeValue())
-                                    .addCachedValue(value)
-                              );
+                           for (VaultGearAttribute<?> attribute : VaultGearAttributeRegistry.getRegistry()) {
+                              data.get(attribute, VaultGearAttributeTypeMerger.asList())
+                                 .forEach(
+                                    value -> snapshot.gearAttributeValues
+                                       .computeIfAbsent(attribute, v -> new AttributeSnapshot.AttributeValue())
+                                       .addCachedValue(value)
+                                 );
+                           }
                         }
                      }
                   }

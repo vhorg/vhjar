@@ -147,7 +147,7 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
 
    public void inventoryTick(@NotNull ItemStack stack, @NotNull Level world, @NotNull Entity entity, int itemSlot, boolean isSelected) {
       super.inventoryTick(stack, world, entity, itemSlot, isSelected);
-      if (hasLegacyData(stack)) {
+      if (isLegacy(stack) && !hasLegacyDataRemoved(stack)) {
          removeLegacyData(stack);
       }
 
@@ -249,16 +249,25 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
    }
 
    public static boolean isLegacy(ItemStack stack) {
-      return stack.getOrCreateTag().getBoolean("Legacy") || stack.getOrCreateTag().contains("Durability");
+      return hasLegacyDataRemoved(stack) || hasLegacyData(stack);
    }
 
    public static boolean hasLegacyData(ItemStack stack) {
-      return stack.getOrCreateTag().contains("Durability");
+      for (String key : stack.getOrCreateTag().getAllKeys()) {
+         if (LEGACY_KEYS.contains(key)) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public static boolean hasLegacyDataRemoved(ItemStack stack) {
+      return stack.getOrCreateTag().getBoolean("Legacy");
    }
 
    public static void removeLegacyData(ItemStack stack) {
       stack.getOrCreateTag().remove("vaultGearData");
-      stack.getOrCreateTag().remove("Durability");
       stack.getOrCreateTag().putBoolean("Legacy", true);
    }
 

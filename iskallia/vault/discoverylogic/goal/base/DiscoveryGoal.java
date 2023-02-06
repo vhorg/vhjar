@@ -5,12 +5,28 @@ import iskallia.vault.world.data.DiscoveryGoalStatesData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
-public abstract class DiscoveryGoal {
+public abstract class DiscoveryGoal<G extends DiscoveryGoal<G>> {
    protected ResourceLocation id;
+   protected DiscoveryGoal.RewardGranter<G> reward;
    protected float targetProgress;
 
    public DiscoveryGoal(float targetProgress) {
       this.targetProgress = targetProgress;
+   }
+
+   protected G getSelf() {
+      return (G)this;
+   }
+
+   public G setReward(DiscoveryGoal.RewardGranter<G> reward) {
+      this.reward = reward;
+      return this.getSelf();
+   }
+
+   public void onGoalAchieved(ServerPlayer player) {
+      if (this.reward != null) {
+         this.reward.grant(player, this.getSelf());
+      }
    }
 
    public ResourceLocation getId() {
@@ -29,8 +45,6 @@ public abstract class DiscoveryGoal {
       return this.targetProgress;
    }
 
-   public abstract void onGoalAchieved(ServerPlayer var1);
-
    public void resetProgress(ServerPlayer player) {
       DiscoveryGoalStatesData worldData = DiscoveryGoalStatesData.get(player.getLevel());
       DiscoveryGoalsState state = worldData.getState(player);
@@ -43,5 +57,10 @@ public abstract class DiscoveryGoal {
       DiscoveryGoalsState state = worldData.getState(player);
       state.progress(player, this, deltaProgress);
       worldData.setDirty();
+   }
+
+   @FunctionalInterface
+   public interface RewardGranter<G extends DiscoveryGoal<G>> {
+      void grant(ServerPlayer var1, G var2);
    }
 }

@@ -287,6 +287,11 @@ public class ToolItem extends Item implements VaultGearItem, Vanishable, IManual
       }
    }
 
+   @Override
+   public boolean isImmuneToDamage(ItemStack stack, @Nullable Player player) {
+      return false;
+   }
+
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
       return (Multimap<Attribute, AttributeModifier>)(slot == EquipmentSlot.MAINHAND
          ? VaultGearHelper.getModifiers(VaultGearData.read(stack))

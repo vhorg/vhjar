@@ -4,7 +4,7 @@ import iskallia.vault.core.vault.DiscoveryGoalsManager;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.world.storage.VirtualWorld;
 
-public abstract class InVaultDiscoveryGoal extends DiscoveryGoal {
+public abstract class InVaultDiscoveryGoal<G extends InVaultDiscoveryGoal<G>> extends DiscoveryGoal<G> {
    public InVaultDiscoveryGoal(float targetProgress) {
       super(targetProgress);
    }
