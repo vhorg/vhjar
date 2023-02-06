@@ -163,7 +163,7 @@ public class ModModelDiscoveryGoals {
                DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());
                ResourceLocation modelId = ModDynamicModels.Swords.BAMBOO.getId();
                if (!discoversData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
-                  MutableComponent info = new TextComponent("You have placed " + (int)goal.getTargetProgress() + " 12 bamboos this Vault!")
+                  MutableComponent info = new TextComponent("You have placed " + (int)goal.getTargetProgress() + " bamboos this Vault!")
                      .withStyle(ChatFormatting.GREEN);
                   player.sendMessage(info, Util.NIL_UUID);
                   discoversData.discoverModelAndBroadcast(ModItems.SWORD, modelId, player);
