@@ -24,7 +24,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -60,6 +59,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -90,11 +90,6 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
    }
 
    public boolean isRepairable(@NotNull ItemStack stack) {
-      return false;
-   }
-
-   @Override
-   public boolean isImmuneToDamage(ItemStack stack, @Nullable Player player) {
       return false;
    }
 
@@ -302,13 +297,13 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
       return ProficiencyType.MAGNET;
    }
 
-   @org.jetbrains.annotations.Nullable
+   @Nullable
    @Override
    public EquipmentSlot getIntendedSlot(ItemStack stack) {
       return null;
    }
 
-   @org.jetbrains.annotations.Nullable
+   @Nullable
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       return ModDynamicModels.Magnets.DEFAULT.getId();

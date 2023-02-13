@@ -73,7 +73,7 @@ public class IntegrationCurios {
    public static ItemStack getCurioItemStack(LivingEntity entity, String slotKey, int slotIndex) {
       return entity.getCapability(CuriosCapability.INVENTORY).map(handler -> handler.getStacksHandler(slotKey).map(stackHandler -> {
          int slotCount = stackHandler.getSlots();
-         return slotIndex >= slotCount ? ItemStack.EMPTY : stackHandler.getStacks().getStackInSlot(slotCount);
+         return slotIndex >= slotCount ? ItemStack.EMPTY : stackHandler.getStacks().getStackInSlot(slotIndex);
       }).orElse(ItemStack.EMPTY)).orElse(ItemStack.EMPTY);
    }
 
@@ -83,7 +83,7 @@ public class IntegrationCurios {
          if (slotIndex >= slotCount) {
             return false;
          } else {
-            stackHandler.getStacks().setStackInSlot(slotCount, stack);
+            stackHandler.getStacks().setStackInSlot(slotIndex, stack);
             return true;
          }
       }).orElse(false)).orElse(false);
