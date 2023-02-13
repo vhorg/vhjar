@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearRarity;
+import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.VaultGearData;
@@ -105,7 +106,7 @@ public class VaultSwordItem extends SwordItem implements VaultGearItem, DyeableL
    }
 
    public boolean isDamageable(ItemStack stack) {
-      return true;
+      return VaultGearData.read(stack).getState() == VaultGearState.IDENTIFIED;
    }
 
    public int getMaxDamage(ItemStack stack) {

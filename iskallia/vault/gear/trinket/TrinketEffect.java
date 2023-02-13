@@ -34,11 +34,9 @@ public abstract class TrinketEffect<T extends TrinketEffect.Config> extends Forg
       if (!TrinketItem.isIdentified(trinket)) {
          return false;
       } else {
-         return !TrinketItem.hasUsesLeft(trinket)
-            ? false
-            : MiscUtils.getVault(player)
-               .map(vault -> TrinketItem.isUsableInVault(trinket, vault.get(Vault.ID)))
-               .orElse(!ServerVaults.isVaultWorld(player.getLevel()));
+         return !ServerVaults.isInVault(player)
+            ? TrinketItem.hasUsesLeft(trinket)
+            : MiscUtils.getVault(player).map(vault -> TrinketItem.isUsableInVault(trinket, vault.get(Vault.ID))).orElse(false);
       }
    }
 

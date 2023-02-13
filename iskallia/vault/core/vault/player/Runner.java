@@ -204,11 +204,13 @@ public class Runner extends Listener {
                VaultDollItem.markDollOnVaultJoin(world, player, vault.get(Vault.ID));
 
                for (TrinketHelper.TrinketStack<VaultExperienceTrinket> trinketStack : TrinketHelper.getTrinkets(player, VaultExperienceTrinket.class)) {
-                  vault.getOptional(Vault.STATS)
-                     .map(s -> s.get(player.getUUID()))
-                     .ifPresent(
-                        stats -> stats.modify(StatCollector.EXP_MULTIPLIER, m -> m * (1.0F + trinketStack.trinket().getConfig().getExperienceIncrease()))
-                     );
+                  if (trinketStack.isUsable(player)) {
+                     vault.getOptional(Vault.STATS)
+                        .map(s -> s.get(player.getUUID()))
+                        .ifPresent(
+                           stats -> stats.modify(StatCollector.EXP_MULTIPLIER, m -> m * (1.0F + trinketStack.trinket().getConfig().getExperienceIncrease()))
+                        );
+                  }
                }
 
                PlayerVaultStats playerStats = PlayerVaultStatsData.get(world).getVaultStats(player);

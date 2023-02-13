@@ -133,6 +133,7 @@ public class PlayerEvents {
 
          if (TrinketHelper.getTrinkets(player, DamageImmunityTrinket.class)
             .stream()
+            .filter(trinket -> trinket.isUsable(player))
             .map(TrinketHelper.TrinketStack::trinket)
             .anyMatch(DamageImmunityTrinket::isFireDamage)) {
             player.clearFire();

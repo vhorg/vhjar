@@ -19,7 +19,7 @@ public class InstantItemUseTrinket extends TrinketEffect.Simple {
    @SubscribeEvent
    public static void onItemUse(Tick event) {
       if (event.getEntityLiving() instanceof Player player) {
-         if (!TrinketHelper.getTrinkets(player, InstantItemUseTrinket.class).isEmpty()) {
+         if (!TrinketHelper.getTrinkets(player, InstantItemUseTrinket.class).stream().anyMatch(trinket -> trinket.isUsable(player))) {
             ItemStack inUse = event.getItem();
             if (inUse.isEdible() || inUse.getUseAnimation() == UseAnim.EAT) {
                event.setDuration(1);

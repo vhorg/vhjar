@@ -134,14 +134,16 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
       CommonEvents.ENTITY_DEATH.register(context.getUUID(), event -> {
          if (!event.isCanceled()) {
             if (event.getEntityLiving() instanceof ServerPlayer player) {
-               if (!this.properties().isInstantRevival()) {
-                  PhoenixModifierSnapshotData snapshotData = PhoenixModifierSnapshotData.get(player.getLevel());
-                  if (snapshotData.hasSnapshot(player)) {
-                     snapshotData.removeSnapshot(player);
-                  }
+               if (player.getLevel().equals(world)) {
+                  if (!this.properties().isInstantRevival()) {
+                     PhoenixModifierSnapshotData snapshotData = PhoenixModifierSnapshotData.get(player.getLevel());
+                     if (snapshotData.hasSnapshot(player)) {
+                        snapshotData.removeSnapshot(player);
+                     }
 
-                  snapshotData.createSnapshot(player);
-                  player.getTags().add("the_vault_restore_inventory");
+                     snapshotData.createSnapshot(player);
+                     player.getTags().add("the_vault_restore_inventory");
+                  }
                }
             }
          }

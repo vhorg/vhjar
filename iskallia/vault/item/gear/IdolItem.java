@@ -4,6 +4,7 @@ import com.google.common.collect.Multimap;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
+import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.VaultGearData;
@@ -97,7 +98,7 @@ public class IdolItem extends BasicItem implements VaultGearItem {
    }
 
    public boolean isDamageable(ItemStack stack) {
-      return true;
+      return VaultGearData.read(stack).getState() == VaultGearState.IDENTIFIED;
    }
 
    public int getMaxDamage(ItemStack stack) {

@@ -26,13 +26,11 @@ public class TrinketHelper {
       slotCurios.values().forEach(curios -> curios.forEach(curioTpl -> {
          ItemStack curioStack = (ItemStack)curioTpl.getA();
          if (curioStack.getItem() instanceof TrinketItem) {
-            if (TrinketItem.hasUsesLeft(curioStack)) {
-               TrinketItem.getTrinket(curioStack).ifPresent(trinket -> {
-                  if (trinketClass.isInstance(trinket)) {
-                     trinkets.add(new TrinketHelper.TrinketStack<>(curioStack, (T)trinket));
-                  }
-               });
-            }
+            TrinketItem.getTrinket(curioStack).ifPresent(trinket -> {
+               if (trinketClass.isInstance(trinket)) {
+                  trinkets.add(new TrinketHelper.TrinketStack<>(curioStack, (T)trinket));
+               }
+            });
          }
       }));
       return trinkets;
