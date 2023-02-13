@@ -17,7 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class VaultArtisanStationTileEntity extends BlockEntity implements MenuProvider {
-   private final OverSizedInventory inventory = new OverSizedInventory(10, this);
+   private final OverSizedInventory inventory = new OverSizedInventory(12, this);
    private final SimpleContainer gearInput = new SimpleContainer(1) {
       public void setChanged() {
          super.setChanged();

@@ -94,11 +94,13 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    }
 
    public static Optional<TrinketEffect<?>> getTrinket(ItemStack stack) {
-      if (!stack.isEmpty() && stack.getItem() instanceof TrinketItem) {
+      if (stack.isEmpty() || !(stack.getItem() instanceof TrinketItem)) {
+         return Optional.empty();
+      } else if (!hasUsesLeft(stack)) {
+         return Optional.empty();
+      } else {
          AttributeGearData data = AttributeGearData.read(stack);
          return data.getFirstValue(ModGearAttributes.TRINKET_EFFECT);
-      } else {
-         return Optional.empty();
       }
    }
 

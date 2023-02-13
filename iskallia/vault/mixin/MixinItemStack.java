@@ -2,14 +2,11 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.config.DurabilityConfig;
 import iskallia.vault.gear.VaultGearState;
-import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.IConditionalDamageable;
-import iskallia.vault.snapshot.AttributeSnapshot;
-import iskallia.vault.snapshot.AttributeSnapshotHelper;
+import iskallia.vault.util.calc.DurabilityWearReductionHelper;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -88,8 +85,7 @@ public abstract class MixinItemStack {
 
             int wearReduction = 0;
             if (damager != null) {
-               AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(damager);
-               float wearReductionChance = snapshot.getAttributeValue(ModGearAttributes.DURABILITY_WEAR_REDUCTION, VaultGearAttributeTypeMerger.floatSum());
+               float wearReductionChance = DurabilityWearReductionHelper.getDurabilityWearReduction(damager);
 
                for (int kx = 0; kx < damage; kx++) {
                   if (rand.nextFloat() < wearReductionChance) {

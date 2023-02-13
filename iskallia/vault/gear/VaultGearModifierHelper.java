@@ -7,7 +7,6 @@ import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MiscUtils;
@@ -262,33 +261,6 @@ public class VaultGearModifierHelper {
                return true;
             }
          }
-      }
-   }
-
-   public static boolean generateAbyssalModifiers(ItemStack stack, Random random) {
-      VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
-      if (cfg == null) {
-         VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
-         return false;
-      } else {
-         int modifiers = 1;
-
-         while (random.nextFloat() < ModConfigs.ABYSS.getAbyssalAdditionalModifierChance()) {
-            modifiers++;
-         }
-
-         for (int i = 0; i < modifiers; i++) {
-            Set<String> existingGroups = data.getExistingModifierGroups(VaultGearData.Type.IMPLICIT_MODIFIERS);
-            cfg.getRandomModifier(VaultGearTierConfig.ModifierAffixTagGroup.ABYSSAL_IMPLICIT, data.getItemLevel(), random, existingGroups)
-               .ifPresent(modifier -> {
-                  modifier.setCategory(VaultGearModifier.AffixCategory.ABYSSAL);
-                  data.addModifier(VaultGearModifier.AffixType.IMPLICIT, (VaultGearModifier<?>)modifier);
-               });
-         }
-
-         data.write(stack);
-         return true;
       }
    }
 

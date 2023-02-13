@@ -1,6 +1,6 @@
 package iskallia.vault.gear.crafting;
 
-import iskallia.vault.block.entity.VaultForgeTileEntity;
+import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +9,13 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
 public class VaultForgeHelper {
-   public static List<ItemStack> getMissingInputs(List<ItemStack> recipeInputs, Inventory playerInventory, VaultForgeTileEntity tile) {
+   public static List<ItemStack> getMissingInputs(List<ItemStack> recipeInputs, Inventory playerInventory, OverSizedInventory containerInventory) {
       List<ItemStack> missing = new ArrayList<>();
 
       for (ItemStack input : recipeInputs) {
          int neededCount = input.getCount();
 
-         for (OverSizedItemStack overSized : tile.getInventory().getOverSizedContents()) {
+         for (OverSizedItemStack overSized : containerInventory.getOverSizedContents()) {
             if (isEqualCrafting(input, overSized.stack())) {
                neededCount -= overSized.amount();
             }
@@ -35,18 +35,18 @@ public class VaultForgeHelper {
       return missing;
    }
 
-   public static boolean consumeInputs(List<ItemStack> recipeInputs, Inventory playerInventory, VaultForgeTileEntity tile, boolean simulate) {
-      return consumeInputs(recipeInputs, playerInventory, tile, simulate, new ArrayList<>());
+   public static boolean consumeInputs(List<ItemStack> recipeInputs, Inventory playerInventory, OverSizedInventory tileInv, boolean simulate) {
+      return consumeInputs(recipeInputs, playerInventory, tileInv, simulate, new ArrayList<>());
    }
 
    public static boolean consumeInputs(
-      List<ItemStack> recipeInputs, Inventory playerInventory, VaultForgeTileEntity tile, boolean simulate, List<OverSizedItemStack> consumed
+      List<ItemStack> recipeInputs, Inventory playerInventory, OverSizedInventory tileInv, boolean simulate, List<OverSizedItemStack> consumed
    ) {
       boolean missingInput = true;
 
       for (ItemStack input : recipeInputs) {
          int neededCount = input.getCount();
-         NonNullList<OverSizedItemStack> overSizedContents = tile.getInventory().getOverSizedContents();
+         NonNullList<OverSizedItemStack> overSizedContents = tileInv.getOverSizedContents();
 
          for (int slot = 0; slot < overSizedContents.size(); slot++) {
             OverSizedItemStack overSized = (OverSizedItemStack)overSizedContents.get(slot);
@@ -57,7 +57,7 @@ public class VaultForgeHelper {
             if (isEqualCrafting(input, overSized.stack())) {
                int deductedAmount = Math.min(neededCount, overSized.amount());
                if (!simulate) {
-                  tile.getInventory().setOverSizedStack(slot, overSized.addCopy(-deductedAmount));
+                  tileInv.setOverSizedStack(slot, overSized.addCopy(-deductedAmount));
                   consumed.add(overSized.copyAmount(deductedAmount));
                }
 

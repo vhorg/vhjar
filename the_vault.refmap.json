@@ -101,6 +101,9 @@
     "iskallia/vault/mixin/MixinMinecraft": {
       "createLevel": "Lnet/minecraft/client/Minecraft;m_205185_(Ljava/lang/String;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/levelgen/WorldGenSettings;)V"
     },
+    "iskallia/vault/mixin/MixinFogRenderer": {
+      "setupColor": "Lnet/minecraft/client/renderer/FogRenderer;m_109018_(Lnet/minecraft/client/Camera;FLnet/minecraft/client/multiplayer/ClientLevel;IF)V"
+    },
     "iskallia/vault/mixin/MixinLootTable": {
       "getRandomItems(Lnet/minecraft/world/level/storage/loot/LootContext;)Ljava/util/List;": "Lnet/minecraft/world/level/storage/loot/LootTable;m_79129_(Lnet/minecraft/world/level/storage/loot/LootContext;)Ljava/util/List;"
     },
@@ -185,7 +188,8 @@
       "Lnet/minecraft/world/item/ItemStack;hasCustomHoverName()Z": "Lnet/minecraft/world/item/ItemStack;m_41788_()Z"
     },
     "iskallia/vault/mixin/ItemEntityMixin": {
-      "playerTouch": "Lnet/minecraft/world/entity/item/ItemEntity;m_6123_(Lnet/minecraft/world/entity/player/Player;)V"
+      "playerTouch": "Lnet/minecraft/world/entity/item/ItemEntity;m_6123_(Lnet/minecraft/world/entity/player/Player;)V",
+      "Lnet/minecraft/world/entity/player/Player;onItemPickup(Lnet/minecraft/world/entity/item/ItemEntity;)V": "Lnet/minecraft/world/entity/player/Player;m_21053_(Lnet/minecraft/world/entity/item/ItemEntity;)V"
     },
     "iskallia/vault/mixin/AccessorAbstractContainerMenu": {
       "remoteSlots": "f_150394_:Lnet/minecraft/core/NonNullList;"
@@ -236,6 +240,9 @@
       "getDefenseForSlot": "Lnet/minecraft/world/item/ArmorMaterials;m_7365_(Lnet/minecraft/world/entity/EquipmentSlot;)I",
       "getKnockbackResistance": "Lnet/minecraft/world/item/ArmorMaterials;m_6649_()F",
       "getToughness": "Lnet/minecraft/world/item/ArmorMaterials;m_6651_()F"
+    },
+    "iskallia/vault/mixin/MixinExpandedItemInteractionsModule": {
+      "Lnet/minecraft/world/item/ItemStack;getItem()Lnet/minecraft/world/item/Item;": "Lnet/minecraft/world/item/ItemStack;m_41720_()Lnet/minecraft/world/item/Item;"
     },
     "iskallia/vault/mixin/MixinRepairContainer": {
       "createResult": "Lnet/minecraft/world/inventory/AnvilMenu;m_6640_()V"
@@ -328,7 +335,8 @@
       "height": "f_118424_:I"
     },
     "iskallia/vault/mixin/MixinGameRenderer": {
-      "bobHurt": "Lnet/minecraft/client/renderer/GameRenderer;m_109117_(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"
+      "bobHurt": "Lnet/minecraft/client/renderer/GameRenderer;m_109117_(Lcom/mojang/blaze3d/vertex/PoseStack;F)V",
+      "renderLevel": "Lnet/minecraft/client/renderer/GameRenderer;m_109089_(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"
     },
     "iskallia/vault/mixin/MixinEntity": {
       "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z": "Lnet/minecraft/world/entity/Entity;m_6469_(Lnet/minecraft/world/damagesource/DamageSource;F)Z",
@@ -500,6 +508,9 @@
       "iskallia/vault/mixin/MixinMinecraft": {
         "createLevel": "Lnet/minecraft/client/Minecraft;m_205185_(Ljava/lang/String;Lnet/minecraft/world/level/LevelSettings;Lnet/minecraft/core/RegistryAccess;Lnet/minecraft/world/level/levelgen/WorldGenSettings;)V"
       },
+      "iskallia/vault/mixin/MixinFogRenderer": {
+        "setupColor": "Lnet/minecraft/client/renderer/FogRenderer;m_109018_(Lnet/minecraft/client/Camera;FLnet/minecraft/client/multiplayer/ClientLevel;IF)V"
+      },
       "iskallia/vault/mixin/MixinLootTable": {
         "getRandomItems(Lnet/minecraft/world/level/storage/loot/LootContext;)Ljava/util/List;": "Lnet/minecraft/world/level/storage/loot/LootTable;m_79129_(Lnet/minecraft/world/level/storage/loot/LootContext;)Ljava/util/List;"
       },
@@ -584,7 +595,8 @@
         "Lnet/minecraft/world/item/ItemStack;hasCustomHoverName()Z": "Lnet/minecraft/world/item/ItemStack;m_41788_()Z"
       },
       "iskallia/vault/mixin/ItemEntityMixin": {
-        "playerTouch": "Lnet/minecraft/world/entity/item/ItemEntity;m_6123_(Lnet/minecraft/world/entity/player/Player;)V"
+        "playerTouch": "Lnet/minecraft/world/entity/item/ItemEntity;m_6123_(Lnet/minecraft/world/entity/player/Player;)V",
+        "Lnet/minecraft/world/entity/player/Player;onItemPickup(Lnet/minecraft/world/entity/item/ItemEntity;)V": "Lnet/minecraft/world/entity/player/Player;m_21053_(Lnet/minecraft/world/entity/item/ItemEntity;)V"
       },
       "iskallia/vault/mixin/AccessorAbstractContainerMenu": {
         "remoteSlots": "f_150394_:Lnet/minecraft/core/NonNullList;"
@@ -635,6 +647,9 @@
         "getDefenseForSlot": "Lnet/minecraft/world/item/ArmorMaterials;m_7365_(Lnet/minecraft/world/entity/EquipmentSlot;)I",
         "getKnockbackResistance": "Lnet/minecraft/world/item/ArmorMaterials;m_6649_()F",
         "getToughness": "Lnet/minecraft/world/item/ArmorMaterials;m_6651_()F"
+      },
+      "iskallia/vault/mixin/MixinExpandedItemInteractionsModule": {
+        "Lnet/minecraft/world/item/ItemStack;getItem()Lnet/minecraft/world/item/Item;": "Lnet/minecraft/world/item/ItemStack;m_41720_()Lnet/minecraft/world/item/Item;"
       },
       "iskallia/vault/mixin/MixinRepairContainer": {
         "createResult": "Lnet/minecraft/world/inventory/AnvilMenu;m_6640_()V"
@@ -727,7 +742,8 @@
         "height": "f_118424_:I"
       },
       "iskallia/vault/mixin/MixinGameRenderer": {
-        "bobHurt": "Lnet/minecraft/client/renderer/GameRenderer;m_109117_(Lcom/mojang/blaze3d/vertex/PoseStack;F)V"
+        "bobHurt": "Lnet/minecraft/client/renderer/GameRenderer;m_109117_(Lcom/mojang/blaze3d/vertex/PoseStack;F)V",
+        "renderLevel": "Lnet/minecraft/client/renderer/GameRenderer;m_109089_(FJLcom/mojang/blaze3d/vertex/PoseStack;)V"
       },
       "iskallia/vault/mixin/MixinEntity": {
         "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z": "Lnet/minecraft/world/entity/Entity;m_6469_(Lnet/minecraft/world/damagesource/DamageSource;F)Z",

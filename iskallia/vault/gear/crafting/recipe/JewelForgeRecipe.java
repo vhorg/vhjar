@@ -1,5 +1,6 @@
 package iskallia.vault.gear.crafting.recipe;
 
+import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.gear.data.VaultGearData;
@@ -12,18 +13,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-public class JewelRecipe extends VaultForgeRecipe {
-   protected JewelRecipe(ResourceLocation id, ItemStack output) {
-      super(id, output);
+public class JewelForgeRecipe extends VaultForgeRecipe {
+   public JewelForgeRecipe(ResourceLocation id, ItemStack output) {
+      super(ForgeRecipeType.JEWEL, id, output);
    }
 
-   public JewelRecipe(ResourceLocation id, ItemStack output, List<ItemStack> inputs) {
-      super(id, output, inputs);
-   }
-
-   @Override
-   protected int getClassId() {
-      return 4;
+   public JewelForgeRecipe(ResourceLocation id, ItemStack output, List<ItemStack> inputs) {
+      super(ForgeRecipeType.JEWEL, id, output, inputs);
    }
 
    @Override

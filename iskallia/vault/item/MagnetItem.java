@@ -24,6 +24,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
@@ -36,6 +37,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -58,7 +60,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
@@ -89,6 +90,11 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
    }
 
    public boolean isRepairable(@NotNull ItemStack stack) {
+      return false;
+   }
+
+   @Override
+   public boolean isImmuneToDamage(ItemStack stack, @Nullable Player player) {
       return false;
    }
 
@@ -167,22 +173,35 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
                         VaultGearData data = VaultGearData.read(stack);
                         float range = data.get(ModGearAttributes.RANGE, VaultGearAttributeTypeMerger.floatSum());
                         float speed = data.get(ModGearAttributes.VELOCITY, VaultGearAttributeTypeMerger.floatSum());
-
-                        for (ItemEntity item : world.getEntitiesOfClass(
+                        List<ItemEntity> items = world.getEntitiesOfClass(
                            ItemEntity.class,
                            player.getBoundingBox().inflate(range),
                            entity -> entity.distanceToSqr(player) <= range * range && !entity.getTags().contains("PreventMagnetMovement")
-                        )) {
-                           item.setNoPickUpDelay();
-                           Vec3 velocity = player.position().subtract(item.position()).normalize().scale(speed);
-                           item.push(velocity.x, velocity.y, velocity.z);
-                           item.hurtMarked = true;
-                           item.getTags().add("MagnetPulled");
-                        }
+                        );
+                        List<ExperienceOrb> orbs = world.getEntitiesOfClass(
+                           ExperienceOrb.class,
+                           player.getBoundingBox().inflate(range),
+                           entity -> entity.distanceToSqr(player) <= range * range && !entity.getTags().contains("PreventMagnetMovement")
+                        );
+                        moveToPlayer(player, items, speed);
+                        moveToPlayer(player, orbs, speed);
                      }
                   }
                );
          }
+      }
+   }
+
+   public static void moveToPlayer(Player player, List<? extends Entity> entities, float speed) {
+      for (Entity entity : entities) {
+         if (entity instanceof ItemEntity item) {
+            item.setNoPickUpDelay();
+         }
+
+         Vec3 velocity = player.position().subtract(entity.position()).normalize().scale(speed);
+         entity.push(velocity.x, velocity.y, velocity.z);
+         entity.hurtMarked = true;
+         entity.getTags().add("MagnetPulled");
       }
    }
 
@@ -283,13 +302,13 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
       return ProficiencyType.MAGNET;
    }
 
-   @Nullable
+   @org.jetbrains.annotations.Nullable
    @Override
    public EquipmentSlot getIntendedSlot(ItemStack stack) {
       return null;
    }
 
-   @Nullable
+   @org.jetbrains.annotations.Nullable
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       return ModDynamicModels.Magnets.DEFAULT.getId();

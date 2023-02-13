@@ -80,7 +80,7 @@ public class MixinLootTable {
          iskallia.vault.core.world.loot.LootTable table = ModConfigs.TOOL_PULVERIZING.get(raw.getItem());
          if (table != null) {
             loot.remove(i);
-            LootTableGenerator generator = new LootTableGenerator(Version.latest(), table, 1.0F);
+            LootTableGenerator generator = new LootTableGenerator(Version.latest(), table, 0.0F);
             generator.generate(JavaRandom.ofNanoTime());
             generator.getItems().forEachRemaining(pulverized -> {
                pulverized.setCount(raw.getCount() * pulverized.getCount());

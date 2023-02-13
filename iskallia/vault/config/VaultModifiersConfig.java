@@ -11,7 +11,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.PlaceholderBlock;
-import iskallia.vault.core.vault.abyss.AbyssVaultEffectModifier;
+import iskallia.vault.core.vault.abyss.LegacyAbyssVaultEffectModifier;
 import iskallia.vault.core.world.data.PartialTile;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.calc.PlayerStat;
@@ -73,7 +73,7 @@ public class VaultModifiersConfig extends Config {
          .flatMap(map -> map.entrySet().stream())
          .forEach(entry -> VaultModifierRegistry.register(entry.getKey(), entry.getValue()));
       VaultModifierRegistry.register(EmptyModifier.INSTANCE.getId(), EmptyModifier.INSTANCE);
-      VaultModifierRegistry.register(AbyssVaultEffectModifier.INSTANCE.getId(), AbyssVaultEffectModifier.INSTANCE);
+      VaultModifierRegistry.register(LegacyAbyssVaultEffectModifier.INSTANCE.getId(), LegacyAbyssVaultEffectModifier.INSTANCE);
       return (T)config;
    }
 
@@ -625,7 +625,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerInventoryRestoreModifier(
                      VaultMod.id("phoenix"),
-                     new PlayerInventoryRestoreModifier.Properties(false, 1.0F, 1.0F),
+                     new PlayerInventoryRestoreModifier.Properties(false, 1.0F, 1.0F, true),
                      new VaultModifier.Display(
                         "Phoenix",
                         TextColor.parseColor("#FF8900"),
@@ -637,7 +637,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerInventoryRestoreModifier(
                      VaultMod.id("afterlife"),
-                     new PlayerInventoryRestoreModifier.Properties(true, 1.0F, 0.5F),
+                     new PlayerInventoryRestoreModifier.Properties(true, 1.0F, 0.5F, false),
                      new VaultModifier.Display(
                         "Afterlife",
                         TextColor.parseColor("#0FA6E3"),
@@ -649,7 +649,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new PlayerInventoryRestoreModifier(
                      VaultMod.id("beginners_grace"),
-                     new PlayerInventoryRestoreModifier.Properties(false, 0.0F, 1.0F),
+                     new PlayerInventoryRestoreModifier.Properties(false, 0.0F, 1.0F, false),
                      new VaultModifier.Display(
                         "Beginners Grace",
                         TextColor.parseColor("#FF8900"),

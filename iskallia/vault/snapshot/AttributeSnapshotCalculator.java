@@ -61,7 +61,8 @@ public class AttributeSnapshotCalculator {
       IntegrationCurios.getCuriosItemStacks(player)
          .forEach(
             (slot, stacks) -> stacks.forEach(
-               stack -> {
+               stackTpl -> {
+                  ItemStack stack = (ItemStack)stackTpl.getA();
                   if (AttributeGearData.hasData(stack)) {
                      if (!(stack.getItem() instanceof CuriosGearItem curiosGearItem && !curiosGearItem.isIntendedSlot(stack, slot))) {
                         if (!stack.is(ModItems.MAGNET) || !MagnetItem.isLegacy(stack)) {

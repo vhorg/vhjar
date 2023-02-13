@@ -11,6 +11,8 @@ import net.minecraft.world.level.block.Block;
 
 public class VaultMetaChestConfig extends Config {
    @Expose
+   private int catalystMinLevel;
+   @Expose
    private final Map<Block, Map<VaultRarity, Double>> catalystChances = new HashMap<>();
 
    @Override
@@ -22,8 +24,13 @@ public class VaultMetaChestConfig extends Config {
       return this.catalystChances.getOrDefault(block, Collections.emptyMap()).getOrDefault(rarity, 0.0);
    }
 
+   public int getCatalystMinLevel() {
+      return this.catalystMinLevel;
+   }
+
    @Override
    protected void reset() {
+      this.catalystMinLevel = 25;
       this.catalystChances.clear();
       this.set(ModBlocks.WOODEN_CHEST, 0.0, this.catalystChances);
       this.set(ModBlocks.GILDED_CHEST, 0.2F, this.catalystChances);

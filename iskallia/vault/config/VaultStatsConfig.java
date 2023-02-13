@@ -11,8 +11,6 @@ import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.stat.VaultChestType;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModEntities;
-import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.util.VaultRarity;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,6 +28,10 @@ public class VaultStatsConfig extends Config {
    private Map<ResourceLocation, Float> mobsKilled;
    @Expose
    private Map<String, Map<Completion, Float>> completion;
+   @Expose
+   private float percentOfExperienceDealtAsDurabilityDamage;
+   @Expose
+   private int freeExperienceNotDealtAsDurabilityDamage;
 
    @Override
    public String getName() {
@@ -79,35 +81,11 @@ public class VaultStatsConfig extends Config {
       defaultPool.put(Completion.FAILED, Float.valueOf(0.0F));
       defaultPool.put(Completion.COMPLETED, Float.valueOf(1000.0F));
       this.completion.put("default", defaultPool);
+      this.percentOfExperienceDealtAsDurabilityDamage = 0.2F;
+      this.freeExperienceNotDealtAsDurabilityDamage = 400;
    }
 
-   public int getExperience(Vault vault, StatCollector stats) {
-      float i = 0.0F;
-      float experienceMultiplier = stats.getExpMultiplier();
-
-      for (ChestStat chestStat : stats.get(StatCollector.CHESTS)) {
-         if (!chestStat.has(ChestStat.TRAPPED)) {
-            i += this.chests.get(chestStat.get(ChestStat.TYPE)).get(chestStat.get(ChestStat.RARITY));
-         }
-      }
-
-      for (Entry<ResourceLocation, MinedBlocksStat.Entry> entry : stats.get(StatCollector.MINED_BLOCKS).entrySet()) {
-         float defaultValue = this.blocksMined.getOrDefault(new ResourceLocation("default"), 0.0F);
-         i += this.blocksMined.getOrDefault(entry.getKey(), defaultValue) * entry.getValue().get(MinedBlocksStat.Entry.COUNT).intValue();
-      }
-
-      i += this.treasureRoomsOpened * stats.get(StatCollector.TREASURE_ROOMS_OPENED).intValue();
-
-      for (Entry<ResourceLocation, MobsStat.Entry> entry : stats.get(StatCollector.MOBS).entrySet()) {
-         float defaultValue = this.mobsKilled.getOrDefault(new ResourceLocation("default"), 0.0F);
-         i += this.mobsKilled.getOrDefault(entry.getKey(), defaultValue) * entry.getValue().get(MobsStat.Entry.KILLED).intValue();
-      }
-
-      i += this.getCompletion(vault).get(stats.getCompletion());
-      return (int)(i * experienceMultiplier);
-   }
-
-   public int getExperienceWithoutMultiplier(Vault vault, StatCollector stats) {
+   public int getConfiguredExperience(Vault vault, StatCollector stats) {
       float i = 0.0F;
 
       for (ChestStat chestStat : stats.get(StatCollector.CHESTS)) {
@@ -128,7 +106,6 @@ public class VaultStatsConfig extends Config {
          i += this.mobsKilled.getOrDefault(entry.getKey(), defaultValue) * entry.getValue().get(MobsStat.Entry.KILLED).intValue();
       }
 
-      String pool = vault.getOptional(Vault.CRYSTAL).map(CrystalData::new).map(CrystalData::getObjective).map(CrystalObjective::getId).orElse("default");
       i += this.getCompletion(vault).get(stats.getCompletion());
       return (int)i;
    }
@@ -152,5 +129,13 @@ public class VaultStatsConfig extends Config {
 
    public Map<VaultChestType, Map<VaultRarity, Float>> getChests() {
       return this.chests;
+   }
+
+   public float getPercentOfExperienceDealtAsDurabilityDamage() {
+      return this.percentOfExperienceDealtAsDurabilityDamage;
+   }
+
+   public int getFreeExperienceNotDealtAsDurabilityDamage() {
+      return this.freeExperienceNotDealtAsDurabilityDamage;
    }
 }

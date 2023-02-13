@@ -44,7 +44,6 @@ public class GearDebugCommand extends Command {
    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
       builder.then(Commands.literal("setLevel").then(Commands.argument("level", IntegerArgumentType.integer(0, 100)).executes(this::setLevel)));
       builder.then(Commands.literal("rollType").then(Commands.argument("rollType", StringArgumentType.string()).executes(this::setRollType)));
-      builder.then(Commands.literal("setAbyssal").executes(this::setAbyssal));
       builder.then(Commands.literal("addModifier").executes(this::addModifier));
       builder.then(Commands.literal("removeModifier").executes(this::removeModifier));
       builder.then(Commands.literal("rerollAll").executes(this::rerollAllModifiers));
@@ -122,15 +121,6 @@ public class GearDebugCommand extends Command {
          player.sendMessage(new TextComponent("No empty modifier slots remaining."), Util.NIL_UUID);
       }
 
-      return 0;
-   }
-
-   private int setAbyssal(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
-      ItemStack gear = this.getHeldGear(player);
-      VaultGearData data = VaultGearData.read(gear);
-      data.updateAttribute(ModGearAttributes.IS_ABYSSAL, Boolean.valueOf(true));
-      data.write(gear);
       return 0;
    }
 

@@ -6,7 +6,6 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.util.MiscUtils;
-import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -34,9 +33,8 @@ public abstract class TrinketEffect<T extends TrinketEffect.Config> extends Forg
       if (!TrinketItem.isIdentified(trinket)) {
          return false;
       } else {
-         int usesLeft = TrinketItem.getUses(trinket);
-         return !ServerVaults.isInVault(player)
-            ? usesLeft > 0
+         return !TrinketItem.hasUsesLeft(trinket)
+            ? false
             : MiscUtils.getVault(player).map(vault -> TrinketItem.isUsableInVault(trinket, vault.get(Vault.ID))).orElse(false);
       }
    }

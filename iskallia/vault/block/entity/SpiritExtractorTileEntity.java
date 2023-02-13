@@ -6,22 +6,25 @@ import iskallia.vault.config.SpiritConfig;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.entity.IPlayerSkinHolder;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.integration.IntegrationSB;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.item.gear.TrinketItem;
+import iskallia.vault.item.tool.JewelItem;
+import iskallia.vault.item.tool.ToolItem;
+import iskallia.vault.item.tool.ToolMaterial;
+import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.PlayerSpiritRecoveryData;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -41,17 +44,11 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.BundleItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.CapabilityItemHandler;
 
 public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSkinHolder {
    private static final String OWNER_PROFILE_TAG = "ownerProfile";
@@ -83,42 +80,6 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
    private boolean slimSkin = false;
    private boolean recyclable = false;
    private float rescuedBonus = 0.0F;
-   private static final Set<Function<ItemStack, List<ItemStack>>> CONTENTS_GETTERS = Set.of(
-      stack -> ModList.get().isLoaded("sophisticatedbackpacks") ? IntegrationSB.getBackpackItems(stack) : Collections.emptyList(),
-      SpiritExtractorTileEntity::getShulkerBoxItems,
-      stack -> {
-         if (stack.getItem() instanceof BundleItem && stack.hasTag()) {
-            CompoundTag compoundtag = stack.getTag();
-            ListTag listtag = compoundtag.getList("Items", 10);
-            List<ItemStack> ret = new ArrayList<>();
-
-            for (Tag tag : listtag) {
-               ret.add(ItemStack.of((CompoundTag)tag));
-            }
-
-            return ret;
-         } else {
-            return Collections.emptyList();
-         }
-      },
-      stack -> {
-         if (stack.getItem().getRegistryName().equals("thermal:satchel") && stack.hasTag()) {
-            CompoundTag nbt = stack.getOrCreateTagElement("ItemInv");
-            if (nbt.contains("ItemInv", 9)) {
-               ListTag list = nbt.getList("ItemInv", 10);
-               List<ItemStack> ret = new ArrayList<>();
-
-               for (int i = list.size(); i > 0; i--) {
-                  ret.add(ItemStack.of(list.getCompound(i)));
-               }
-
-               return ret;
-            }
-         }
-
-         return Collections.emptyList();
-      }
-   );
 
    public SpiritExtractorTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.SPIRIT_EXTRACTOR_TILE_ENTITY, pos, state);
@@ -325,6 +286,7 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
             }
 
             this.paymentInventory.setItem(0, ItemStack.EMPTY);
+            this.rescuedBonus = 0.0F;
             this.recoveryCost = new SpiritExtractorTileEntity.RecoveryCost();
             this.spewingItems = true;
             this.spewingCooldownTime = this.level.getGameTime() + 20L;
@@ -395,6 +357,7 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       this.itemsPerDrop = 0;
       this.vaultLevel = 0;
       this.playerLevel = 0;
+      this.rescuedBonus = 0.0F;
       this.dropPaymentInventory();
       this.setChanged();
       this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
@@ -427,31 +390,6 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
 
    public boolean isRecyclable() {
       return this.recyclable;
-   }
-
-   private static List<ItemStack> getShulkerBoxItems(ItemStack stack) {
-      if (isShulkerBox(stack.getItem())) {
-         CompoundTag tag = stack.getOrCreateTag().getCompound("BlockEntityTag");
-         BlockEntity te = BlockEntity.loadStatic(BlockPos.ZERO, ((BlockItem)stack.getItem()).getBlock().defaultBlockState(), tag);
-         if (te != null) {
-            List<ItemStack> ret = new ArrayList<>();
-            te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
-               for (int slot = 0; slot < handler.getSlots(); slot++) {
-                  ItemStack slotStack = handler.getStackInSlot(slot);
-                  if (!slotStack.isEmpty()) {
-                     ret.add(slotStack);
-                  }
-               }
-            });
-            return ret;
-         }
-      }
-
-      return Collections.emptyList();
-   }
-
-   private static boolean isShulkerBox(Item item) {
-      return item instanceof BlockItem blockItem && blockItem.getBlock() instanceof ShulkerBoxBlock;
    }
 
    public static class RecoveryCost {
@@ -507,14 +445,10 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       private int getItemsCost(SpiritConfig.LevelCost cost, List<ItemStack> items) {
          int totalItemCost = 0;
 
-         for (ItemStack item : items) {
-            int itemCost = this.getItemCost(cost, item);
+         for (ItemStack foundItem : InventoryUtil.findAllItems(items)) {
+            int itemCost = this.getItemCost(cost, foundItem);
             if (itemCost > 0) {
                totalItemCost += itemCost;
-            }
-
-            for (Function<ItemStack, List<ItemStack>> contentsGetter : SpiritExtractorTileEntity.CONTENTS_GETTERS) {
-               totalItemCost += this.getItemsCost(cost, contentsGetter.apply(item));
             }
          }
 
@@ -522,25 +456,44 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       }
 
       private int getItemCost(SpiritConfig.LevelCost cost, ItemStack item) {
-         int itemCost = 0;
-         if (item.getItem() instanceof TrinketItem && TrinketItem.hasUsesLeft(item)) {
-            this.stackCost.add(new Tuple(item.copy(), cost.trinketCost));
-            itemCost = cost.trinketCost;
-         } else if (item.getItem() instanceof VaultGearItem) {
-            VaultGearData data = VaultGearData.read(item);
-            if (cost.gearRarityCost.containsKey(data.getRarity())) {
-               int gearCost = cost.gearRarityCost.get(data.getRarity());
-               this.stackCost.add(new Tuple(item.copy(), gearCost));
-               itemCost = gearCost;
-            }
+         if (this.isSoulbound(item)) {
+            return 0;
          } else {
-            itemCost = cost.getStackCost(item);
-            if (itemCost != 0) {
-               this.stackCost.add(new Tuple(item.copy(), itemCost));
+            int itemCost = 0;
+            if (item.getItem() instanceof TrinketItem && TrinketItem.hasUsesLeft(item)) {
+               this.addItemCost(item.copy(), cost.trinketCost);
+               itemCost = cost.trinketCost;
+            } else if (item.getItem() instanceof VaultGearItem && !(item.getItem() instanceof JewelItem) && !(item.getItem() instanceof ToolItem)) {
+               VaultGearData data = VaultGearData.read(item);
+               if (cost.gearRarityCost.containsKey(data.getRarity())) {
+                  int gearCost = cost.gearRarityCost.get(data.getRarity());
+                  this.addItemCost(item.copy(), gearCost);
+                  itemCost = gearCost;
+               }
+            } else if (item.getItem() instanceof ToolItem) {
+               ToolMaterial material = ToolItem.getMaterial(item);
+               if (cost.toolMaterialCost.containsKey(material)) {
+                  int toolCost = cost.toolMaterialCost.get(material);
+                  this.addItemCost(item.copy(), toolCost);
+                  itemCost = toolCost;
+               }
+            } else {
+               itemCost = cost.getStackCost(item);
+               this.addItemCost(item, itemCost);
             }
-         }
 
-         return itemCost;
+            return itemCost;
+         }
+      }
+
+      private void addItemCost(ItemStack item, int itemCost) {
+         if (itemCost != 0) {
+            this.stackCost.add(new Tuple(item.copy(), itemCost));
+         }
+      }
+
+      private boolean isSoulbound(ItemStack stack) {
+         return AttributeGearData.<AttributeGearData>read(stack).get(ModGearAttributes.SOULBOUND, VaultGearAttributeTypeMerger.anyTrue());
       }
 
       private Optional<SpiritConfig.LevelCost> getLevelCost(int vaultLevel) {

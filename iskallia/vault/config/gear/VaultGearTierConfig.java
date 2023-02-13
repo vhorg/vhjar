@@ -386,8 +386,7 @@ public class VaultGearTierConfig extends Config {
    public static enum ModifierAffixTagGroup {
       IMPLICIT(VaultGearModifier.AffixType.IMPLICIT),
       PREFIX(VaultGearModifier.AffixType.PREFIX),
-      SUFFIX(VaultGearModifier.AffixType.SUFFIX),
-      ABYSSAL_IMPLICIT(VaultGearModifier.AffixType.IMPLICIT);
+      SUFFIX(VaultGearModifier.AffixType.SUFFIX);
 
       private final VaultGearModifier.AffixType targetAffixType;
 

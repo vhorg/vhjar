@@ -3,7 +3,7 @@
     "pattern": [
       "ccc",
       "clc",
-      "ebe"
+      "e e"
     ],
     "key": {
       "c": {
@@ -14,9 +14,6 @@
       },
       "e": {
         "item": "the_vault:vault_essence"
-      },
-      "b": {
-        "item": "minecraft:netherite_block"
       }
     },
     "result": {

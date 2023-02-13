@@ -11,6 +11,11 @@ public record GearTooltip(boolean displayModifierDetail, boolean displayCrafting
    }
 
    @OnlyIn(Dist.CLIENT)
+   public static GearTooltip toolTooltip() {
+      return new GearTooltip(Screen.hasShiftDown(), true, true);
+   }
+
+   @OnlyIn(Dist.CLIENT)
    public static GearTooltip craftingView() {
       return new GearTooltip(true, true, false);
    }

@@ -26,6 +26,7 @@ import iskallia.vault.network.message.EternalInteractionMessage;
 import iskallia.vault.network.message.EternalSyncMessage;
 import iskallia.vault.network.message.FighterSizeMessage;
 import iskallia.vault.network.message.ForgeParticleMessage;
+import iskallia.vault.network.message.ForgeRecipeSyncMessage;
 import iskallia.vault.network.message.HistoricFavoritesMessage;
 import iskallia.vault.network.message.InvalidConfigsMessage;
 import iskallia.vault.network.message.KnownTalentsMessage;
@@ -74,13 +75,10 @@ import iskallia.vault.network.message.SyncOverSizedContentMessage;
 import iskallia.vault.network.message.SyncOverSizedStackMessage;
 import iskallia.vault.network.message.TalentLevelMessage;
 import iskallia.vault.network.message.ToolMessage;
-import iskallia.vault.network.message.ToolStationRecipeMessage;
-import iskallia.vault.network.message.ToolStationRequestCraftMessage;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.network.message.TrinketJumpMessage;
 import iskallia.vault.network.message.VaultArtisanRequestModificationMessage;
 import iskallia.vault.network.message.VaultCharmControllerScrollMessage;
-import iskallia.vault.network.message.VaultForgeRecipeMessage;
 import iskallia.vault.network.message.VaultForgeRequestCraftMessage;
 import iskallia.vault.network.message.VaultGoalMessage;
 import iskallia.vault.network.message.VaultLevelMessage;
@@ -317,9 +315,6 @@ public class ModNetwork {
          ServerboundToggleEternalPlayerSkinMessage::encode,
          ServerboundToggleEternalPlayerSkinMessage::decode,
          ServerboundToggleEternalPlayerSkinMessage::handle
-      );
-      CHANNEL.registerMessage(
-         nextId(), VaultForgeRecipeMessage.class, VaultForgeRecipeMessage::encode, VaultForgeRecipeMessage::decode, VaultForgeRecipeMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),
@@ -559,14 +554,7 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(nextId(), ToolMessage.Offset.class, ToolMessage.Offset::encode, ToolMessage.Offset::decode, ToolMessage.Offset::handle);
       CHANNEL.registerMessage(
-         nextId(), ToolStationRecipeMessage.class, ToolStationRecipeMessage::encode, ToolStationRecipeMessage::decode, ToolStationRecipeMessage::handle
-      );
-      CHANNEL.registerMessage(
-         nextId(),
-         ToolStationRequestCraftMessage.class,
-         ToolStationRequestCraftMessage::encode,
-         ToolStationRequestCraftMessage::decode,
-         ToolStationRequestCraftMessage::handle
+         nextId(), ForgeRecipeSyncMessage.class, ForgeRecipeSyncMessage::encode, ForgeRecipeSyncMessage::decode, ForgeRecipeSyncMessage::handle
       );
    }
 

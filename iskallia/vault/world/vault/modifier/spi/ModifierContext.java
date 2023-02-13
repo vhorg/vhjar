@@ -36,6 +36,10 @@ public class ModifierContext extends DataObject<ModifierContext> {
       return this.has(TICKS_LEFT) && this.get(TICKS_LEFT) <= 0;
    }
 
+   public void setExpired() {
+      this.set(TICKS_LEFT, Integer.valueOf(0));
+   }
+
    public boolean hasTarget() {
       return this.has(TARGET);
    }

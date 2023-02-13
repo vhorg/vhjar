@@ -11,6 +11,7 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.world.data.BountyData;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
@@ -24,10 +25,7 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
-   private List<ItemStack> cachedItems;
-   static long time = 0L;
-   static int iterations = 100;
-   static List<Long> times = new ArrayList<>();
+   private static final HashMap<UUID, List<ItemStack>> cachedItems = new HashMap<>();
 
    public ItemDiscoveryTask(UUID bountyId, ItemDiscoveryProperties properties, TaskReward taskReward) {
       super(TaskRegistry.ITEM_DISCOVERY, bountyId, properties, taskReward);
@@ -37,14 +35,10 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
       this.deserializeNBT(tag);
    }
 
-   public void setCachedItems(List<ItemStack> cachedItems) {
-      this.cachedItems = cachedItems;
-   }
-
    @Override
    protected <E> boolean doValidate(ServerPlayer player, E event) {
-      if (this.cachedItems != null && !this.cachedItems.isEmpty()) {
-         for (ItemStack stack : this.cachedItems) {
+      if (cachedItems.containsKey(player.getUUID()) && !cachedItems.get(player.getUUID()).isEmpty()) {
+         for (ItemStack stack : cachedItems.get(player.getUUID())) {
             Item item = stack.getItem();
             ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
             ResourceLocation requiredItem = this.getProperties().getItemId();
@@ -78,7 +72,6 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
    }
 
    public static <T> void onLootGeneration(T event) {
-      time = System.currentTimeMillis();
       ServerPlayer player;
       List<ItemStack> items;
       if (event instanceof ChestGenerationEvent.Data e) {
@@ -104,24 +97,30 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
          items = e.getLoot();
       }
 
+      cachedItems.put(player.getUUID(), new ArrayList<>(items));
+      boolean legendaryComplete = false;
       BountyData data = BountyData.get();
 
       for (ItemDiscoveryTask task : data.getAllLegendaryById(player, TaskRegistry.ITEM_DISCOVERY)) {
          if (!task.isComplete()) {
-            task.setCachedItems(items);
+            List<ItemStack> cached = cachedItems.get(player.getUUID());
             if (task.validate(player, event)) {
                for (ItemStack stack : items) {
+                  if (legendaryComplete) {
+                     break;
+                  }
+
                   Item item = stack.getItem();
                   ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
                   ResourceLocation requiredItem = task.getProperties().getItemId();
                   if (itemId != null && itemId.equals(requiredItem)) {
                      task.increment(stack.getCount());
+                     cached.remove(stack);
                      if (task.isComplete()) {
+                        legendaryComplete = true;
                         ModNetwork.CHANNEL
                            .sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
                      }
-
-                     return;
                   }
                }
             }
@@ -129,33 +128,26 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
       }
 
       for (ItemDiscoveryTask taskx : data.getAllActiveById(player, TaskRegistry.ITEM_DISCOVERY)) {
-         if (!taskx.isComplete()) {
-            taskx.setCachedItems(items);
-            if (taskx.validate(player, event)) {
-               for (ItemStack stackx : items) {
-                  Item item = stackx.getItem();
-                  ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
-                  ResourceLocation requiredItem = taskx.getProperties().getItemId();
-                  if (itemId != null && itemId.equals(requiredItem)) {
-                     taskx.increment(stackx.getCount());
-                     if (taskx.isComplete()) {
-                        ModNetwork.CHANNEL
-                           .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
-                     }
+         if (!taskx.isComplete() && taskx.validate(player, event)) {
+            List<ItemStack> cached = cachedItems.get(player.getUUID());
 
-                     return;
+            for (ItemStack stack : new ArrayList<>(cached)) {
+               Item item = stack.getItem();
+               ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
+               ResourceLocation requiredItem = taskx.getProperties().getItemId();
+               if (itemId != null && itemId.equals(requiredItem)) {
+                  taskx.increment(stack.getCount());
+                  cached.remove(stack);
+                  if (taskx.isComplete()) {
+                     ModNetwork.CHANNEL
+                        .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                     break;
                   }
                }
             }
          }
       }
 
-      if (times.size() < iterations) {
-         times.add(System.currentTimeMillis() - time);
-      } else {
-         long average = (long)times.stream().mapToLong(value -> value).average().orElse(0.0);
-         VaultMod.LOGGER.debug("ItemDiscovery Last {} Iteration Time: {}ms", iterations, average);
-         times.clear();
-      }
+      cachedItems.remove(player.getUUID());
    }
 }

@@ -14,6 +14,7 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.Entropy;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.ChainHelper;
 import iskallia.vault.util.calc.FatalStrikeHelper;
@@ -26,6 +27,7 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -133,7 +135,7 @@ public class GearAttributeEvents {
             if (!(attacker instanceof Player player && PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE))) {
                AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
                float stunChance = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_STUN, VaultGearAttributeTypeMerger.floatSum());
-               if (!(stunChance <= 0.0F) && !(rand.nextFloat() >= stunChance)) {
+               if (Entropy.canExecute(attacker, Entropy.Stat.STUN_ATTACK_CHANCE, stunChance)) {
                   LivingEntity attacked = event.getEntityLiving();
                   attacked.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 9));
                   attacked.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 30, 9));
@@ -157,7 +159,7 @@ public class GearAttributeEvents {
          if (shieldStack != null) {
             if (AttributeSnapshotHelper.canHaveSnapshot(attacked)) {
                float blockChance = BlockChanceHelper.getBlockChance(attacked);
-               if (rand.nextFloat() >= blockChance) {
+               if (!Entropy.canExecute(attacked, Entropy.Stat.BLOCK, blockChance)) {
                   CommonEvents.ENTITY_DAMAGE_BLOCK.invoke(new EntityDamageBlockEvent.Data(true, damageSource, attacked));
                } else {
                   event.setCanceled(true);
@@ -216,11 +218,14 @@ public class GearAttributeEvents {
                LivingEntity attacked = event.getEntityLiving();
                AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
                snapshot.getAttributeValue(ModGearAttributes.EFFECT_CLOUD, VaultGearAttributeTypeMerger.asList()).forEach(cloud -> {
-                  if (!(rand.nextFloat() >= cloud.getTriggerChance())) {
-                     EffectCloudEntity cloudEntity = new EffectCloudEntity(attacker.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
-                     cloud.apply(cloudEntity);
-                     cloudEntity.setOwner(attacker);
-                     attacker.getLevel().addFreshEntity(cloudEntity);
+                  MobEffect effect = cloud.getPrimaryEffect();
+                  if (effect != null) {
+                     if (Entropy.canExecute(attacker, Entropy.Stat.effectCloud(effect), cloud.getTriggerChance())) {
+                        EffectCloudEntity cloudEntity = new EffectCloudEntity(attacker.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
+                        cloud.apply(cloudEntity);
+                        cloudEntity.setOwner(attacker);
+                        attacker.getLevel().addFreshEntity(cloudEntity);
+                     }
                   }
                });
             }
@@ -240,11 +245,14 @@ public class GearAttributeEvents {
                true,
                (attacked, snapshot) -> snapshot.getAttributeValue(ModGearAttributes.EFFECT_CLOUD_WHEN_HIT, VaultGearAttributeTypeMerger.asList())
                   .forEach(cloud -> {
-                     if (!(rand.nextFloat() >= cloud.getTriggerChance())) {
-                        EffectCloudEntity cloudEntity = new EffectCloudEntity(attacked.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
-                        cloud.apply(cloudEntity);
-                        cloudEntity.setOwner(attacked);
-                        attacked.getLevel().addFreshEntity(cloudEntity);
+                     MobEffect effect = cloud.getPrimaryEffect();
+                     if (effect != null) {
+                        if (Entropy.canExecute(attacked, Entropy.Stat.effectCloudWhenHit(effect), cloud.getTriggerChance())) {
+                           EffectCloudEntity cloudEntity = new EffectCloudEntity(attacked.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
+                           cloud.apply(cloudEntity);
+                           cloudEntity.setOwner(attacked);
+                           attacked.getLevel().addFreshEntity(cloudEntity);
+                        }
                      }
                   })
             );
@@ -270,7 +278,7 @@ public class GearAttributeEvents {
    public static void forceVanillaCrit(CriticalHitEvent event) {
       withSnapshot(event, true, (entity, snapshot) -> {
          float criticalChance = snapshot.getAttributeValue(ModGearAttributes.VANILLA_CRITICAL_HIT_CHANCE, VaultGearAttributeTypeMerger.floatSum());
-         if (rand.nextFloat() < criticalChance) {
+         if (Entropy.canExecute(entity, Entropy.Stat.VANILLA_CRITICAL, criticalChance)) {
             if (event.getDamageModifier() < 1.5F) {
                event.setDamageModifier(1.5F);
             }
@@ -286,7 +294,7 @@ public class GearAttributeEvents {
       if (source instanceof LivingEntity attacker) {
          if (!source.getLevel().isClientSide()) {
             float fatalStrikeChance = FatalStrikeHelper.getFatalStrikeChance(attacker);
-            if (!(rand.nextFloat() >= fatalStrikeChance)) {
+            if (Entropy.canExecute(attacker, Entropy.Stat.FATAL_STRIKE, fatalStrikeChance)) {
                float fatalPercentDamage = FatalStrikeHelper.getFatalStrikeDamage(attacker);
                float damage = event.getAmount() * (1.0F + fatalPercentDamage);
                event.setAmount(damage);
@@ -303,7 +311,7 @@ public class GearAttributeEvents {
          if (event.getSource().getEntity() instanceof LivingEntity attacker) {
             withSnapshot(event, true, (attacked, snapshot) -> {
                float thornsChance = ThornsHelper.getThornsChance(attacked);
-               if (!(rand.nextFloat() >= thornsChance)) {
+               if (Entropy.canExecute(attacked, Entropy.Stat.THORNS, thornsChance)) {
                   float thornsMultiplier = ThornsHelper.getThornsDamage(attacked);
                   if (!(thornsMultiplier <= 0.0F)) {
                      float dmg = (float)attacked.getAttributeValue(Attributes.ATTACK_DAMAGE);

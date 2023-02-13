@@ -24,13 +24,12 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.DrawSelectionEvent.HighlightBlock;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-@EventBusSubscriber
+@Deprecated(
+   forRemoval = true
+)
 public class PaxelHighlightBlockEvent {
    @OnlyIn(Dist.CLIENT)
-   @SubscribeEvent
    public static void onBlockHighlight(HighlightBlock event) {
       if (event.getCamera().getEntity() instanceof Player player) {
          BlockPos var18 = event.getTarget().getBlockPos();

@@ -1,11 +1,12 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.block.entity.VaultForgeTileEntity;
-import iskallia.vault.container.VaultForgeContainer;
+import iskallia.vault.block.entity.base.ForgeRecipeTileEntity;
+import iskallia.vault.config.recipe.ForgeRecipeType;
+import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedItemStack;
+import iskallia.vault.container.spi.ForgeRecipeContainer;
 import iskallia.vault.gear.crafting.VaultForgeHelper;
 import iskallia.vault.gear.crafting.recipe.VaultForgeRecipe;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,19 +38,31 @@ public class VaultForgeRequestCraftMessage {
       context.enqueueWork(
          () -> {
             ServerPlayer requester = context.getSender();
-            if (requester != null && requester.containerMenu instanceof VaultForgeContainer container) {
+            if (requester != null && requester.containerMenu instanceof ForgeRecipeContainer container) {
                if (container.getResultSlot().getItem().isEmpty()) {
-                  VaultForgeRecipe recipe = ModConfigs.VAULT_GEAR_RECIPES_CONFIG.getRecipe(message.recipe);
-                  if (recipe != null && recipe.canCraft(requester)) {
-                     Inventory playerInventory = requester.getInventory();
-                     VaultForgeTileEntity tile = container.getTileEntity();
-                     List<OverSizedItemStack> consumed = new ArrayList<>();
-                     if (VaultForgeHelper.consumeInputs(recipe.getInputs(), playerInventory, tile, true)
-                        && VaultForgeHelper.consumeInputs(recipe.getInputs(), playerInventory, tile, false, consumed)) {
-                        container.getResultSlot().set(recipe.createOutput(consumed, requester));
-                        requester.level.levelEvent(1030, tile.getBlockPos(), 0);
-                        container.broadcastChanges();
-                        ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ForgeParticleMessage(tile.getBlockPos()));
+                  ForgeRecipeTileEntity tile = container.getTile();
+                  if (tile != null) {
+                     VaultForgeRecipe recipe = null;
+
+                     for (ForgeRecipeType type : tile.getSupportedRecipeTypes()) {
+                        VaultForgeRecipe found = type.getRecipe(message.recipe);
+                        if (found != null && found.canCraft(requester)) {
+                           recipe = found;
+                           break;
+                        }
+                     }
+
+                     if (recipe != null) {
+                        Inventory playerInventory = requester.getInventory();
+                        OverSizedInventory tileInventory = tile.getInventory();
+                        List<OverSizedItemStack> consumed = new ArrayList<>();
+                        if (VaultForgeHelper.consumeInputs(recipe.getInputs(), playerInventory, tileInventory, true)
+                           && VaultForgeHelper.consumeInputs(recipe.getInputs(), playerInventory, tileInventory, false, consumed)) {
+                           container.getResultSlot().set(recipe.createOutput(consumed, requester));
+                           requester.level.levelEvent(1030, tile.getBlockPos(), 0);
+                           container.broadcastChanges();
+                           ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ForgeParticleMessage(tile.getBlockPos()));
+                        }
                      }
                   }
                }

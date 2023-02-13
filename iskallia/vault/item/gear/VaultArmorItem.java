@@ -63,6 +63,7 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGearItem {
       this.setRegistryName(id);
    }
 
+   @Nullable
    public EquipmentSlot getEquipmentSlot(ItemStack stack) {
       return this.getSlot();
    }

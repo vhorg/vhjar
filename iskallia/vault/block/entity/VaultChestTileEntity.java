@@ -51,6 +51,10 @@ public class VaultChestTileEntity extends ChestBlockEntity {
    private BlockState renderState;
    private int ticksSinceSync;
 
+   public VaultChestTileEntity(BlockPos pos, BlockState state) {
+      this(ModBlocks.VAULT_CHEST_TILE_ENTITY, pos, state);
+   }
+
    protected VaultChestTileEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
       super(typeIn, pos, state);
       this.size = this.getSize(state);
@@ -73,10 +77,6 @@ public class VaultChestTileEntity extends ChestBlockEntity {
 
    public int getGeneratedStacksCount() {
       return this.generatedStacksCount;
-   }
-
-   public VaultChestTileEntity(BlockPos pos, BlockState state) {
-      this(ModBlocks.VAULT_CHEST_TILE_ENTITY, pos, state);
    }
 
    @Nullable
@@ -197,6 +197,11 @@ public class VaultChestTileEntity extends ChestBlockEntity {
    private void generateLootTable(Version version, @Nullable Player player, List<ItemStack> loot, RandomSource random) {
       float quantity = ItemQuantityHelper.getItemQuantity(player);
       float rarity = ItemRarityHelper.getItemRarity(player);
+      if (this.getBlockState().is(ModBlocks.TREASURE_CHEST) || this.getBlockState().is(ModBlocks.TREASURE_CHEST_PLACEABLE)) {
+         quantity = 0.0F;
+         rarity = 0.0F;
+      }
+
       LootTableKey key = VaultRegistry.LOOT_TABLE.getKey(this.lootTable);
       if (key != null) {
          TieredLootTableGenerator generator = new TieredLootTableGenerator(version, key, rarity, quantity);

@@ -269,13 +269,13 @@ public class ModBlocks {
       VaultChestType.WOODEN, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(40.0F, 5.0F)
    );
    public static final Block GILDED_CHEST = new VaultChestBlock(
-      VaultChestType.GILDED, net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.STONE).strength(4.2F, 5.0F).sound(SoundType.STONE)
+      VaultChestType.GILDED, net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.STONE).strength(3.0F, 5.0F).sound(SoundType.STONE)
    );
    public static final Block LIVING_CHEST = new VaultChestBlock(
-      VaultChestType.LIVING, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(3.5F, 5.0F)
+      VaultChestType.LIVING, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(2.8F, 5.0F)
    );
    public static final Block ORNATE_CHEST = new VaultChestBlock(
-      VaultChestType.ORNATE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(5.5F, 5.0F).sound(SoundType.STONE)
+      VaultChestType.ORNATE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(3.5F, 5.0F).sound(SoundType.STONE)
    );
    public static final Block TREASURE_CHEST = new VaultChestBlock(
       VaultChestType.TREASURE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(-1.0F, 5.0F).sound(SoundType.METAL)

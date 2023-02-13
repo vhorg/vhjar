@@ -7,11 +7,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 
 public enum VaultDifficulty {
-   EASY(0, "easy", 0.5, 0.5),
-   NORMAL(1, "normal", 0.75, 0.75),
-   HARD(2, "hard", 1.0, 1.0),
-   IMPOSSIBLE(3, "impossible", 2.0, 2.0),
-   FRAGGED(3, "fragged", 4.0, 2.0);
+   EASY(0, "easy", 0.5, 0.5, false),
+   NORMAL(1, "normal", 0.75, 0.75, false),
+   HARD(2, "hard", 1.0, 1.0, true),
+   IMPOSSIBLE(3, "impossible", 2.0, 2.0, true),
+   FRAGGED(4, "fragged", 4.0, 2.0, true);
 
    private static final VaultDifficulty[] BY_ID = Arrays.stream(values())
       .sorted(Comparator.comparingInt(VaultDifficulty::getId))
@@ -20,12 +20,14 @@ public enum VaultDifficulty {
    private final String key;
    private final double damageMultiplier;
    private final double heathMultiplier;
+   private final boolean antiNerdPoleAi;
 
-   private VaultDifficulty(int id, String key, double damageMultiplier, double heathMultiplier) {
+   private VaultDifficulty(int id, String key, double damageMultiplier, double heathMultiplier, boolean antiNerdPoleAi) {
       this.id = id;
       this.key = key;
       this.damageMultiplier = damageMultiplier;
       this.heathMultiplier = heathMultiplier;
+      this.antiNerdPoleAi = antiNerdPoleAi;
    }
 
    public int getId() {
@@ -49,6 +51,10 @@ public enum VaultDifficulty {
       }
 
       return null;
+   }
+
+   public boolean shouldAddAntiNerdPoleAi() {
+      return this.antiNerdPoleAi;
    }
 
    public String getKey() {

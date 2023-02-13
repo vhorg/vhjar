@@ -90,43 +90,46 @@ public class PartyCommand extends Command {
       ServerPlayer target = EntityArgument.getPlayer(ctx, "target");
       Optional<VaultPartyData.Party> party = data.getParty(player.getUUID());
       if (!party.isPresent()) {
-         player.sendMessage(new TextComponent("You are not in a party!").withStyle(ChatFormatting.RED), player.getUUID());
-         return 0;
-      } else {
-         if (data.getParty(target.getUUID()).isPresent()) {
-            player.sendMessage(new TextComponent("This player is already in another party.").withStyle(ChatFormatting.RED), player.getUUID());
-         } else {
-            party.get()
-               .getMembers()
-               .forEach(
-                  uuid -> {
-                     ServerPlayer player2 = ((CommandSourceStack)ctx.getSource()).getServer().getPlayerList().getPlayer(uuid);
-                     if (player2 != null) {
-                        player2.sendMessage(
-                           new TextComponent("Inviting " + target.getName().getString() + " to the party.").withStyle(ChatFormatting.GREEN), player.getUUID()
-                        );
-                     }
-                  }
-               );
-            String partyAccept = "/party accept_invite " + player.getName().getString();
-            MutableComponent acceptTxt = new TextComponent(partyAccept).withStyle(ChatFormatting.AQUA);
-            acceptTxt.withStyle(
-               style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, new TextComponent("Click to accept!")))
-                  .withClickEvent(new ClickEvent(net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND, partyAccept))
-            );
-            Component acceptMessage = new TextComponent("")
-               .append(new TextComponent("Run '").withStyle(ChatFormatting.GREEN))
-               .append(acceptTxt)
-               .append(new TextComponent("' to accept their invite!").withStyle(ChatFormatting.GREEN));
-            party.get().invite(target.getUUID());
-            target.sendMessage(
-               new TextComponent(player.getName().getString() + " has invited you to their party.").withStyle(ChatFormatting.GREEN), player.getUUID()
-            );
-            target.sendMessage(acceptMessage, player.getUUID());
+         this.create(ctx);
+         party = data.getParty(player.getUUID());
+         if (!party.isPresent()) {
+            return 0;
          }
-
-         return 0;
       }
+
+      if (data.getParty(target.getUUID()).isPresent()) {
+         player.sendMessage(new TextComponent("This player is already in another party.").withStyle(ChatFormatting.RED), player.getUUID());
+      } else {
+         party.get()
+            .getMembers()
+            .forEach(
+               uuid -> {
+                  ServerPlayer player2 = ((CommandSourceStack)ctx.getSource()).getServer().getPlayerList().getPlayer(uuid);
+                  if (player2 != null) {
+                     player2.sendMessage(
+                        new TextComponent("Inviting " + target.getName().getString() + " to the party.").withStyle(ChatFormatting.GREEN), player.getUUID()
+                     );
+                  }
+               }
+            );
+         String partyAccept = "/party accept_invite " + player.getName().getString();
+         MutableComponent acceptTxt = new TextComponent(partyAccept).withStyle(ChatFormatting.AQUA);
+         acceptTxt.withStyle(
+            style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, new TextComponent("Click to accept!")))
+               .withClickEvent(new ClickEvent(net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND, partyAccept))
+         );
+         Component acceptMessage = new TextComponent("")
+            .append(new TextComponent("Run '").withStyle(ChatFormatting.GREEN))
+            .append(acceptTxt)
+            .append(new TextComponent("' to accept their invite!").withStyle(ChatFormatting.GREEN));
+         party.get().invite(target.getUUID());
+         target.sendMessage(
+            new TextComponent(player.getName().getString() + " has invited you to their party.").withStyle(ChatFormatting.GREEN), player.getUUID()
+         );
+         target.sendMessage(acceptMessage, player.getUUID());
+      }
+
+      return 0;
    }
 
    private int accept(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

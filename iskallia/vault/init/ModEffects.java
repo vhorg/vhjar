@@ -2,6 +2,7 @@ package iskallia.vault.init;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.effect.BasicEffect;
+import iskallia.vault.effect.NoAiEffect;
 import iskallia.vault.effect.PoisonOverrideEffect;
 import iskallia.vault.effect.TimerAccelerationEffect;
 import iskallia.vault.skill.ability.effect.ExecuteAbility;
@@ -53,6 +54,7 @@ public class ModEffects {
       .addAttributeModifier((Attribute)ForgeMod.REACH_DISTANCE.get(), "c55181ae-a259-11ed-a8fc-0242ac120002", 2.0, Operation.ADDITION);
    public static final MobEffect TIMER_ACCELERATION = new TimerAccelerationEffect(MobEffectCategory.HARMFUL, -16448251, VaultMod.id("time_acceleration"));
    public static final MobEffect POISON_OVERRIDE = new PoisonOverrideEffect();
+   public static final MobEffect NO_AI = new NoAiEffect(VaultMod.id("noai"), -2039584);
 
    public static void register(Register<MobEffect> event) {
       event.getRegistry()
@@ -71,6 +73,7 @@ public class ModEffects {
                RAGE,
                TIMER_ACCELERATION,
                POISON_OVERRIDE,
+               NO_AI,
                RESISTANCE,
                REACH,
                TAUNT,

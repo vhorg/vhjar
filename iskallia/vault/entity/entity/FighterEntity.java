@@ -91,7 +91,7 @@ public class FighterEntity extends Zombie {
 
    private void registerProjectileGoal(Vault vault) {
       VaultDifficulty vaultDifficulty = WorldSettings.get(this.level).getPlayerDifficulty(vault.get(Vault.OWNER));
-      if (vaultDifficulty == VaultDifficulty.HARD || vaultDifficulty == VaultDifficulty.IMPOSSIBLE) {
+      if (vaultDifficulty.shouldAddAntiNerdPoleAi()) {
          this.goalSelector.addGoal(3, new ThrowProjectilesGoal<FighterEntity>(this, ModConfigs.FIGHTER.chancerPerTick, 1, FighterEntity.ThrowableBrick::new) {
             @Override
             public void start() {

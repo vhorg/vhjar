@@ -1,6 +1,7 @@
 package iskallia.vault.gear.crafting.recipe;
 
 import iskallia.vault.client.gui.overlay.VaultBarOverlay;
+import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.item.tool.ToolItem;
 import iskallia.vault.item.tool.ToolMaterial;
@@ -16,23 +17,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public class ToolStationRecipe extends VaultForgeRecipe {
+public class ToolForgeRecipe extends VaultForgeRecipe {
    protected ToolType toolType = ToolType.PICK;
    protected ToolMaterial toolMaterial = ToolMaterial.CHROMATIC_IRON_INGOT;
 
-   protected ToolStationRecipe(ResourceLocation id, ItemStack output) {
-      super(id, output);
+   public ToolForgeRecipe(ResourceLocation id, ItemStack output) {
+      super(ForgeRecipeType.TOOL, id, output);
    }
 
-   public ToolStationRecipe(ResourceLocation id, ItemStack output, List<ItemStack> inputs, ToolType toolType, ToolMaterial toolMaterial) {
-      super(id, output, inputs);
+   public ToolForgeRecipe(ResourceLocation id, ItemStack output, List<ItemStack> inputs, ToolType toolType, ToolMaterial toolMaterial) {
+      super(ForgeRecipeType.TOOL, id, output, inputs);
       this.toolType = toolType;
       this.toolMaterial = toolMaterial;
-   }
-
-   @Override
-   protected int getClassId() {
-      return 3;
    }
 
    @Override

@@ -2,12 +2,9 @@ package iskallia.vault.block;
 
 import com.google.common.base.Functions;
 import iskallia.vault.block.item.VaultOreBlockItem;
-import iskallia.vault.core.vault.abyss.AbyssVaultLootHelper;
-import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
-import iskallia.vault.gear.data.AttributeGearData;
-import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.tool.PaxelItem;
+import iskallia.vault.item.tool.ToolItem;
+import iskallia.vault.util.calc.CopiousHelper;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,6 +22,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
@@ -85,8 +83,8 @@ public class VaultOreBlock extends OreBlock {
 
    public List<ItemStack> getDrops(BlockState state, net.minecraft.world.level.storage.loot.LootContext.Builder builder) {
       List<ItemStack> drops = new ArrayList<>();
-      ItemStack tool = (ItemStack)builder.getOptionalParameter(LootContextParams.TOOL);
-      if (tool != null && HAS_SILK_TOUCH.matches(tool)) {
+      ItemStack stack = (ItemStack)builder.getOptionalParameter(LootContextParams.TOOL);
+      if (stack != null && HAS_SILK_TOUCH.matches(stack)) {
          drops.add(VaultOreBlockItem.fromType(this, (VaultOreBlock.Type)state.getValue(TYPE)));
       } else {
          drops = super.getDrops(state, builder);
@@ -99,6 +97,12 @@ public class VaultOreBlock extends OreBlock {
             BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
             player.level.playSound(null, pos, ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.1F, 0.85F);
             drops.addAll(drops);
+            if (stack != null && stack.getItem() instanceof ToolItem tool) {
+               Entity entity = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
+               if (entity instanceof LivingEntity livingEntity) {
+                  tool.hurt(stack, builder.getLevel(), livingEntity, 6.0);
+               }
+            }
          }
       }
 
@@ -107,19 +111,8 @@ public class VaultOreBlock extends OreBlock {
 
    private static float getCopiouslyChance(net.minecraft.world.level.storage.loot.LootContext.Builder ctx) {
       float chance = 0.0F;
-      ItemStack tool = (ItemStack)ctx.getOptionalParameter(LootContextParams.TOOL);
-      if (tool != null && !tool.isEmpty()) {
-         if (tool.getItem() instanceof PaxelItem) {
-            chance += PaxelItem.getUsableStat(tool, PaxelItem.Stat.COPIOUSLY) / 100.0F;
-         }
-
-         AttributeGearData data = AttributeGearData.read(tool);
-         chance += data.get(ModGearAttributes.COPIOUSLY, VaultGearAttributeTypeMerger.floatSum());
-      }
-
-      Entity harvestingEntity = (Entity)ctx.getOptionalParameter(LootContextParams.THIS_ENTITY);
-      if (harvestingEntity != null) {
-         chance += AbyssVaultLootHelper.getCopiouslyChance(harvestingEntity);
+      if (ctx.getOptionalParameter(LootContextParams.THIS_ENTITY) instanceof LivingEntity entity) {
+         chance += CopiousHelper.getCopiousChance(entity);
       }
 
       return chance;

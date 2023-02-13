@@ -1,6 +1,5 @@
 package iskallia.vault.util;
 
-import iskallia.vault.VaultMod;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jetbrains.annotations.NotNull;
 
@@ -84,10 +83,6 @@ public class ModVersion implements ArtifactVersion {
 
    public boolean accepted(String version) {
       ModVersion other = new ModVersion(version);
-      VaultMod.LOGGER.info("Major      : {}, {}", this.getMajorVersion(), other.getMajorVersion());
-      VaultMod.LOGGER.info("Minor      : {}, {}", this.getMinorVersion(), other.getMinorVersion());
-      VaultMod.LOGGER.info("Incremental: {}, {}", this.getIncrementalVersion(), other.getIncrementalVersion());
-      VaultMod.LOGGER.info("Build      : {}, {}", this.getBuildNumber(), other.getBuildNumber());
       if (this.getMajorVersion() != other.getMajorVersion()) {
          return false;
       } else {

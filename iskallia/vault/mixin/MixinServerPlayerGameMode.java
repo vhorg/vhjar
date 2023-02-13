@@ -167,7 +167,7 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
             for (HammerTile tile : this.hammer.tiles) {
                tile.destroyProgressStart = this.gameTicks;
                float f = 1.0F;
-               BlockState blockstate = this.level.getBlockState(pos);
+               BlockState blockstate = this.level.getBlockState(tile.destroyPos);
                if (!blockstate.isAir()) {
                   blockstate.attack(this.level, tile.destroyPos, this.player);
                   f = blockstate.getDestroyProgress(this.player, this.player.level, tile.destroyPos);
@@ -215,8 +215,8 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
                         this.level.destroyBlockProgress(-1, tile.destroyPos, -1);
                         BlockState state3 = this.level.getBlockState(tile.destroyPos);
                         float f2 = state3.getDestroyProgress(this.player, this.player.level, tile.destroyPos)
-                           * (this.gameTicks - this.destroyProgressStart + 1);
-                        if (f2 >= 1.0F) {
+                           * (this.gameTicks - tile.destroyProgressStart + 1);
+                        if (f2 >= f1) {
                            this.destroyAndAck(tile.destroyPos, action, "destroyed");
                         }
                      }

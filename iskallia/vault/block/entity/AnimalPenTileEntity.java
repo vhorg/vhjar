@@ -2,7 +2,10 @@ package iskallia.vault.block.entity;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.container.VaultDiffuserContainer;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.AnimalJarItem;
@@ -532,7 +535,13 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
 
                return true;
             } else {
-               if (!player.isCrouching() && !itemInPen.isEmpty() && itemInHand.getItem() instanceof ShearsItem shearsItem) {
+               if (!player.isCrouching()
+                  && !itemInPen.isEmpty()
+                  && (
+                     itemInHand.getItem() instanceof ShearsItem shearsItem
+                        || itemInHand.is(ModItems.TOOL)
+                           && VaultGearData.read(itemInHand).get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())
+                  )) {
                   if (this.animalToReference == null && AnimalJarItem.containsEntity(this.inventory.getItem(0))) {
                      this.animalToReference = AnimalJarItem.getAnimalFromItemStack(this.inventory.getItem(0), level);
                   }

@@ -1,11 +1,11 @@
 package iskallia.vault.gear.crafting.recipe;
 
+import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.util.NetcodeUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.BiFunction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -15,24 +15,21 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-public class VaultForgeRecipe {
+public abstract class VaultForgeRecipe {
+   private final ForgeRecipeType type;
    private final ResourceLocation id;
    protected final ItemStack output;
    private final List<ItemStack> inputs = new ArrayList<>();
 
-   protected VaultForgeRecipe(ResourceLocation id, ItemStack output) {
-      this.id = id;
-      this.output = output;
+   protected VaultForgeRecipe(ForgeRecipeType type, ResourceLocation id, ItemStack output) {
+      this(type, id, output, new ArrayList<>());
    }
 
-   public VaultForgeRecipe(ResourceLocation id, ItemStack output, List<ItemStack> inputs) {
+   public VaultForgeRecipe(ForgeRecipeType type, ResourceLocation id, ItemStack output, List<ItemStack> inputs) {
+      this.type = type;
       this.id = id;
       this.output = output;
       this.inputs.addAll(inputs);
-   }
-
-   protected int getClassId() {
-      return 0;
    }
 
    protected void readAdditional(FriendlyByteBuf buf) {
@@ -69,35 +66,18 @@ public class VaultForgeRecipe {
       return new TextComponent("Undiscovered").withStyle(ChatFormatting.ITALIC);
    }
 
-   private static BiFunction<ResourceLocation, ItemStack, VaultForgeRecipe> ctor(int id) {
-      switch (id) {
-         case 0:
-            return VaultForgeRecipe::new;
-         case 1:
-            return VaultGearForgeRecipe::new;
-         case 2:
-            return TrinketForgeRecipe::new;
-         case 3:
-            return ToolStationRecipe::new;
-         case 4:
-            return JewelRecipe::new;
-         default:
-            throw new IllegalArgumentException("Unknown forge recipe type: " + id);
-      }
-   }
-
    public static VaultForgeRecipe read(FriendlyByteBuf buf) {
-      int classId = buf.readInt();
+      ForgeRecipeType recipeType = (ForgeRecipeType)buf.readEnum(ForgeRecipeType.class);
       ResourceLocation id = buf.readResourceLocation();
       ItemStack out = buf.readItem();
-      VaultForgeRecipe recipe = ctor(classId).apply(id, out);
+      VaultForgeRecipe recipe = recipeType.makeRecipe(id, out);
       ((ArrayList)NetcodeUtils.readCollection(buf, ArrayList::new, buffer -> OverSizedItemStack.read(buf).overSizedStack())).forEach(recipe.inputs::add);
       recipe.readAdditional(buf);
       return recipe;
    }
 
    public final void write(FriendlyByteBuf buf) {
-      buf.writeInt(this.getClassId());
+      buf.writeEnum(this.type);
       buf.writeResourceLocation(this.getId());
       buf.writeItemStack(this.output, false);
       NetcodeUtils.writeCollection(buf, this.inputs, (stack, buffer) -> new OverSizedItemStack(stack, stack.getCount()).write(buf));

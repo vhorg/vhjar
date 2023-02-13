@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.minecraft.world.item.ItemStack;
 
 public class ScrollableItemStackSelectorElement<E extends ScrollableItemStackSelectorElement<E, S>, S extends ScrollableItemStackSelectorElement.ItemSelectorEntry>
@@ -43,6 +44,10 @@ public class ScrollableItemStackSelectorElement<E extends ScrollableItemStackSel
       this.elementCt.removeAllElements();
       this.elementCt.buildElements();
       ScreenLayout.requestLayout();
+   }
+
+   protected ScrollableItemStackSelectorElement.SelectorModel<S> getSelectorModel() {
+      return this.selectorModel;
    }
 
    protected List<FakeItemSlotElement<?>> getSelectorElements() {
@@ -113,6 +118,7 @@ public class ScrollableItemStackSelectorElement<E extends ScrollableItemStackSel
 
    public abstract static class SelectorModel<E extends ScrollableItemStackSelectorElement.ItemSelectorEntry> {
       private Consumer<FakeItemSlotElement<?>> onSlotSelect = slot -> {};
+      private E selectedElement = (E)null;
 
       protected void onSlotSelect(Consumer<FakeItemSlotElement<?>> onSlotSelect) {
          this.onSlotSelect = onSlotSelect;
@@ -121,7 +127,13 @@ public class ScrollableItemStackSelectorElement<E extends ScrollableItemStackSel
       public abstract List<E> getEntries();
 
       public void onSelect(FakeItemSlotElement<?> slot, E entry) {
+         this.selectedElement = entry;
          this.onSlotSelect.accept(slot);
+      }
+
+      @Nullable
+      public E getSelectedElement() {
+         return this.selectedElement;
       }
    }
 }
