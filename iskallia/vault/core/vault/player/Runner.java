@@ -165,7 +165,7 @@ public class Runner extends Listener {
                   int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
                   int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
                   if (diff > 0) {
-                     float reduction = Math.min(0.25F * diff * 0.05F, 1.0F);
+                     float reduction = Math.min(0.25F + diff * 0.05F, 1.0F);
                      data.setValue(data.getValue() + reduction);
                   }
                }
