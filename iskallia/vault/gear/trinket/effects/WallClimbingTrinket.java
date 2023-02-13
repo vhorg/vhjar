@@ -21,7 +21,7 @@ public class WallClimbingTrinket extends TrinketEffect.Simple {
    public static void onTick(LivingUpdateEvent event) {
       if (event.getEntityLiving() instanceof Player player) {
          List<TrinketHelper.TrinketStack<WallClimbingTrinket>> trinkets = TrinketHelper.getTrinkets(player, WallClimbingTrinket.class);
-         if (!trinkets.isEmpty() && !trinkets.stream().noneMatch(trinketStack -> trinketStack.isUsable(player))) {
+         if (!trinkets.stream().noneMatch(trinketStack -> trinketStack.isUsable(player))) {
             if (player.horizontalCollision && !player.isInWater()) {
                player.fallDistance = 0.0F;
                Vec3 motion = player.getDeltaMovement();

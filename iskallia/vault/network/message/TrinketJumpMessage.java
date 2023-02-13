@@ -28,9 +28,11 @@ public class TrinketJumpMessage {
       Context context = contextSupplier.get();
       context.enqueueWork(() -> {
          ServerPlayer sender = context.getSender();
-         if (sender != null && !TrinketHelper.getTrinkets(sender, MultiJumpTrinket.class).isEmpty()) {
-            sender.fallDistance = 0.0F;
-            sender.causeFoodExhaustion(0.2F);
+         if (sender != null) {
+            if (!TrinketHelper.getTrinkets(sender, MultiJumpTrinket.class).stream().noneMatch(trinket -> trinket.isUsable(sender))) {
+               sender.fallDistance = 0.0F;
+               sender.causeFoodExhaustion(0.2F);
+            }
          }
       });
       context.setPacketHandled(true);

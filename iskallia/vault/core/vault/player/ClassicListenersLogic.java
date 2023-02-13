@@ -169,10 +169,8 @@ public class ClassicListenersLogic extends ListenersLogic {
 
             listener.getPlayer().ifPresent(player -> {
                TrinketHelper.getTrinkets(player).forEach(trinket -> {
-                  if (TrinketItem.hasUsesLeft(trinket.stack())) {
-                     if (TrinketItem.isIdentified(trinket.stack())) {
-                        TrinketItem.addUsedVault(trinket.stack(), vault.get(Vault.ID));
-                     }
+                  if (trinket.isUsable(player)) {
+                     TrinketItem.addUsedVault(trinket.stack(), vault.get(Vault.ID));
                   }
                });
                TrinketHelper.getTrinkets(player, VaultTimeExtensionTrinket.class).forEach(timeTrinket -> {

@@ -126,7 +126,7 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGearItem {
    }
 
    public boolean isDamageable(ItemStack stack) {
-      return true;
+      return VaultGearData.read(stack).getState() == VaultGearState.IDENTIFIED;
    }
 
    public int getMaxDamage(ItemStack stack) {

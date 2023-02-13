@@ -82,7 +82,7 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
    }
 
    public boolean isDamageable(ItemStack stack) {
-      return true;
+      return VaultGearData.read(stack).getState() == VaultGearState.IDENTIFIED;
    }
 
    public int getMaxDamage(ItemStack stack) {
