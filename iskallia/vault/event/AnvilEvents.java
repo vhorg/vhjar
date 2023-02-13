@@ -330,7 +330,7 @@ public class AnvilEvents {
       }
 
       if (event.getLeft().getItem() instanceof VaultGearItem && event.getRight().getItem() instanceof VaultGearItem && !event.getRight().is(ModItems.JEWEL)) {
-         event.setCanceled(true);
+         event.setOutput(ItemStack.EMPTY);
       }
    }
 
@@ -364,12 +364,27 @@ public class AnvilEvents {
          CrystalData data = VaultCrystalItem.getData(output);
          VaultModifierRegistry.getOpt(VaultMod.id("phoenix")).ifPresent(modifier -> {
             VaultModifierStack modifierStack = VaultModifierStack.of((VaultModifier<?>)modifier);
+            boolean hasPhoenix = false;
+
+            for (VaultModifierStack stack : data.getModifiers()) {
+               if (stack.getModifier() == modifier) {
+                  hasPhoenix = true;
+                  break;
+               }
+            }
+
+            if (hasPhoenix) {
+               data.setModifiable(true);
+            }
+
             if (data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
                data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
                data.setModifiable(false);
                event.setOutput(output);
                event.setMaterialCost(1);
                event.setCost(10);
+            } else if (hasPhoenix) {
+               data.setModifiable(false);
             }
          });
       }
@@ -388,25 +403,6 @@ public class AnvilEvents {
                event.setOutput(output);
                event.setMaterialCost(1);
                event.setCost(10);
-            }
-         });
-      }
-   }
-
-   @SubscribeEvent
-   public static void onApplyAbyssalIchor(AnvilUpdateEvent event) {
-      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == ModItems.ABYSSAL_ICHOR) {
-         ItemStack output = event.getLeft().copy();
-         int amt = event.getRight().getCount();
-         CrystalData data = VaultCrystalItem.getData(output);
-         VaultModifierRegistry.getOpt(VaultMod.id("abyss_effect")).ifPresent(modifier -> {
-            VaultModifierStack modifierStack = VaultModifierStack.of((VaultModifier<?>)modifier);
-            modifierStack.setSize(amt);
-            if (data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
-               data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
-               event.setOutput(output);
-               event.setMaterialCost(amt);
-               event.setCost(1);
             }
          });
       }

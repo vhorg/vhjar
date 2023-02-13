@@ -15,6 +15,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -55,18 +56,37 @@ public class IntegrationCurios {
       }).orElse(Collections.emptyList());
    }
 
-   public static Map<String, List<ItemStack>> getCuriosItemStacks(LivingEntity entity) {
+   public static Map<String, List<Tuple<ItemStack, Integer>>> getCuriosItemStacks(LivingEntity entity) {
       return entity.getCapability(CuriosCapability.INVENTORY).map(inv -> {
-         Map<String, List<ItemStack>> contents = new HashMap<>();
+         Map<String, List<Tuple<ItemStack, Integer>>> contents = new HashMap<>();
          inv.getCurios().forEach((key, handle) -> {
             IDynamicStackHandler stackHandler = handle.getStacks();
 
             for (int index = 0; index < stackHandler.getSlots(); index++) {
-               contents.computeIfAbsent(key, str -> new ArrayList<>()).add(stackHandler.getStackInSlot(index));
+               contents.computeIfAbsent(key, str -> new ArrayList<>()).add(new Tuple(stackHandler.getStackInSlot(index), index));
             }
          });
          return contents;
       }).orElse(Collections.emptyMap());
+   }
+
+   public static ItemStack getCurioItemStack(LivingEntity entity, String slotKey, int slotIndex) {
+      return entity.getCapability(CuriosCapability.INVENTORY).map(handler -> handler.getStacksHandler(slotKey).map(stackHandler -> {
+         int slotCount = stackHandler.getSlots();
+         return slotIndex >= slotCount ? ItemStack.EMPTY : stackHandler.getStacks().getStackInSlot(slotCount);
+      }).orElse(ItemStack.EMPTY)).orElse(ItemStack.EMPTY);
+   }
+
+   public static boolean setCurioItemStack(LivingEntity entity, ItemStack stack, String slotKey, int slotIndex) {
+      return entity.getCapability(CuriosCapability.INVENTORY).map(handler -> handler.getStacksHandler(slotKey).map(stackHandler -> {
+         int slotCount = stackHandler.getSlots();
+         if (slotIndex >= slotCount) {
+            return false;
+         } else {
+            stackHandler.getStacks().setStackInSlot(slotCount, stack);
+            return true;
+         }
+      }).orElse(false)).orElse(false);
    }
 
    public static void clearCurios(LivingEntity entity) {

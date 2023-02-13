@@ -52,9 +52,10 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.Tiers;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.item.Item.Properties;
@@ -73,17 +74,17 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import org.jetbrains.annotations.NotNull;
 
 @EventBusSubscriber(
    modid = "the_vault",
    bus = Bus.FORGE
 )
-public class ToolItem extends Item implements VaultGearItem, Vanishable, IManualModelLoading {
-   public static final int ENCHANTABILITY = 15;
+public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, IManualModelLoading {
    public static final ResourceLocation SPAWNER_ID = new ResourceLocation("ispawner", "spawner");
 
    public ToolItem(ResourceLocation id, Properties properties) {
-      super(properties);
+      super(Tiers.NETHERITE, properties);
       this.setRegistryName(id);
    }
 
@@ -95,18 +96,23 @@ public class ToolItem extends Item implements VaultGearItem, Vanishable, IManual
       return VaultGearData.read(stack).get(ModGearAttributes.DURABILITY, VaultGearAttributeTypeMerger.intSum());
    }
 
-   public int getEnchantmentValue() {
-      return 15;
+   public boolean isValidRepairItem(@NotNull ItemStack toRepair, @NotNull ItemStack material) {
+      return false;
    }
 
+   @NotNull
    public Component getName(@Nonnull ItemStack stack) {
       ToolType type = ToolType.of(stack);
-      ToolMaterial material = VaultGearData.read(stack).get(ModGearAttributes.TOOL_MATERIAL, VaultGearAttributeTypeMerger.of(() -> null, (a, b) -> b));
+      ToolMaterial material = getMaterial(stack);
       return (Component)(material == null
          ? new TextComponent("")
          : new TranslatableComponent(material.getDescription())
             .append(" ")
             .append((Component)(type == null ? new TextComponent("") : new TranslatableComponent(type.getDescription()))));
+   }
+
+   public static ToolMaterial getMaterial(@NotNull ItemStack stack) {
+      return VaultGearData.read(stack).get(ModGearAttributes.TOOL_MATERIAL, VaultGearAttributeTypeMerger.of(() -> null, (a, b) -> b));
    }
 
    public static boolean canUse(ItemStack stack, Entity entity) {
@@ -165,6 +171,7 @@ public class ToolItem extends Item implements VaultGearItem, Vanishable, IManual
       }
    }
 
+   @NotNull
    public InteractionResult useOn(@Nonnull UseOnContext context) {
       InteractionResult result = InteractionResult.PASS;
       if (canUse(context.getItemInHand(), context.getPlayer())) {
@@ -191,6 +198,7 @@ public class ToolItem extends Item implements VaultGearItem, Vanishable, IManual
       return result;
    }
 
+   @NotNull
    public InteractionResult interactLivingEntity(@Nonnull ItemStack stack, @Nonnull Player player, @Nonnull LivingEntity target, @Nonnull InteractionHand hand) {
       InteractionResult result = InteractionResult.PASS;
       if (canUse(stack, target)) {
@@ -256,7 +264,13 @@ public class ToolItem extends Item implements VaultGearItem, Vanishable, IManual
             && state.getBlock() instanceof VaultChestBlock block
             && block.hasStepBreaking()
             && world.getBlockEntity(pos) instanceof VaultChestTileEntity chest) {
-            damage = 1.0 / chest.getGeneratedStacksCount();
+            if (block == ModBlocks.WOODEN_CHEST) {
+               damage = 3.0;
+            } else if (block == ModBlocks.GILDED_CHEST || block == ModBlocks.LIVING_CHEST || block == ModBlocks.ORNATE_CHEST) {
+               damage = 0.25;
+            }
+         } else if (SPAWNER_ID.equals(state.getBlock().getRegistryName())) {
+            damage = 10.0;
          }
 
          this.hurt(stack, world, owner, damage);
@@ -272,19 +286,22 @@ public class ToolItem extends Item implements VaultGearItem, Vanishable, IManual
    }
 
    public boolean hurt(@Nonnull ItemStack stack, @Nonnull Level world, @Nonnull LivingEntity owner, double damage) {
-      VaultGearData data = VaultGearData.read(stack);
-      if (ServerVaults.get(world).isEmpty()
-         && world.getRandom().nextFloat() < data.get(ModGearAttributes.IMMMORTALITY, VaultGearAttributeTypeMerger.floatSum())) {
-         return true;
+      int result = (int)damage + (world.getRandom().nextFloat() < damage - (int)damage ? 1 : 0);
+      if (result <= 0) {
+         return false;
       } else {
-         int result = (int)damage + (world.getRandom().nextFloat() < damage - (int)damage ? 1 : 0);
-         if (result <= 0) {
-            return false;
-         } else {
-            stack.hurtAndBreak(result, owner, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
-            return true;
-         }
+         stack.hurtAndBreak(result, owner, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+         return true;
       }
+   }
+
+   public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<T> onBroken) {
+      Level world = entity.level;
+      VaultGearData data = VaultGearData.read(stack);
+      return ServerVaults.get(world).isEmpty()
+            && world.getRandom().nextFloat() < data.get(ModGearAttributes.IMMMORTALITY, VaultGearAttributeTypeMerger.floatSum())
+         ? 0
+         : amount;
    }
 
    @Override
@@ -309,7 +326,7 @@ public class ToolItem extends Item implements VaultGearItem, Vanishable, IManual
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(@Nonnull ItemStack stack, Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag flag) {
       super.appendHoverText(stack, world, tooltip, flag);
-      tooltip.addAll(this.createTooltip(stack, GearTooltip.itemTooltip()));
+      tooltip.addAll(this.createTooltip(stack, GearTooltip.toolTooltip()));
    }
 
    @Override

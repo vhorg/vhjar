@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.client.render.IVaultOptions;
+import iskallia.vault.core.event.ClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.world.damagesource.DamageSource;
@@ -59,5 +60,16 @@ public abstract class MixinGameRenderer {
       }
 
       return false;
+   }
+
+   @Inject(
+      method = {"renderLevel"},
+      at = {@At(
+         value = "INVOKE",
+         target = "Lnet/minecraftforge/client/ForgeHooksClient;dispatchRenderLast(Lnet/minecraft/client/renderer/LevelRenderer;Lcom/mojang/blaze3d/vertex/PoseStack;FLcom/mojang/math/Matrix4f;J)V"
+      )}
+   )
+   private void doRenderLevelLastEvent(float pTicks, long nanoTime, PoseStack poseStack, CallbackInfo ci) {
+      ClientEvents.RENDER_LEVEL_LAST.invoke(pTicks, nanoTime, poseStack);
    }
 }

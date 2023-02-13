@@ -22,6 +22,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
@@ -80,7 +81,9 @@ public final class PlayerRageHelper {
       }
    }
 
-   @SubscribeEvent
+   @SubscribeEvent(
+      priority = EventPriority.LOW
+   )
    public static void on(LivingDeathEvent event) {
       if (event.getEntityLiving() instanceof ServerPlayer player) {
          LAST_ATTACK_TICK_MAP.remove(player.getUUID());

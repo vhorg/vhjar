@@ -107,7 +107,7 @@ public class VaultCoopPlayersElement<E extends VaultCoopPlayersElement<E>> exten
                               MutableComponent titleText = new TextComponent("Vault Xp").withStyle(Style.EMPTY.withColor(VaultEndScreen.XP_COLOR));
                               MutableComponent spacer = new TextComponent("");
                               String totalXpString = shiftDown
-                                 ? String.format("(x%.1f) %s xp", xpMultiplier, ModConfigs.VAULT_STATS.getExperienceWithoutMultiplier(vault, statCollector))
+                                 ? String.format("(x%.1f) %s xp", xpMultiplier, ModConfigs.VAULT_STATS.getConfiguredExperience(vault, statCollector))
                                  : String.format("%s xp", statCollector.getExperience(vault));
 
                               for (int i = 0; i < maxWidth / spaceWidth - 10 - TextBorder.DEFAULT_FONT.get().width(totalXpString) / spaceWidth; i++) {

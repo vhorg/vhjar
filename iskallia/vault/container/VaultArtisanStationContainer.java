@@ -60,12 +60,12 @@ public class VaultArtisanStationContainer extends OverSizedSlotContainer {
    private void initSlots(Inventory playerInventory) {
       for (int row = 0; row < 3; row++) {
          for (int column = 0; column < 9; column++) {
-            this.addSlot(new TabSlot(playerInventory, column + row * 9 + 9, 8 + column * 18, 124 + row * 18));
+            this.addSlot(new TabSlot(playerInventory, column + row * 9 + 9, 8 + column * 18, 148 + row * 18));
          }
       }
 
       for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
-         this.addSlot(new TabSlot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 182));
+         this.addSlot(new TabSlot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 206));
       }
 
       Container invContainer = this.tileEntity.getInventory();
@@ -87,8 +87,10 @@ public class VaultArtisanStationContainer extends OverSizedSlotContainer {
       this.addModSlot(new OverSizedTabSlot(invContainer, 7, 150, 44), ModGearModifications.REFORGE_REPAIR_SLOTS, false);
       this.addModSlot(new OverSizedTabSlot(invContainer, 8, 150, 68), ModGearModifications.REFORGE_ALL_IMPLICITS, false);
       this.addModSlot(new OverSizedTabSlot(invContainer, 9, 150, 92), ModGearModifications.REFORGE_RANDOM_TIER, false);
+      this.addModSlot(new OverSizedTabSlot(invContainer, 10, 8, 116), ModGearModifications.REFORGE_PREFIXES, true);
+      this.addModSlot(new OverSizedTabSlot(invContainer, 11, 150, 116), ModGearModifications.REFORGE_SUFFIXES, false);
       Container inputContainer = this.tileEntity.getGearInput();
-      this.addSlot(new TabSlot(inputContainer, 0, 79, 60) {
+      this.addSlot(new TabSlot(inputContainer, 0, 79, 72) {
          public boolean mayPlace(ItemStack stack) {
             return stack.getItem() instanceof VaultGearItem && stack.getItem() != ModItems.JEWEL;
          }

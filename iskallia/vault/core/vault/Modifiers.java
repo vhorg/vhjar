@@ -16,6 +16,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.UUID;
+import javax.annotation.Nullable;
 
 public class Modifiers extends DataObject<Modifiers> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
@@ -50,6 +51,17 @@ public class Modifiers extends DataObject<Modifiers> {
 
    public ModifierContext getContext(Modifiers.Entry entry) {
       return entry.get(Modifiers.Entry.CONTEXT).copy();
+   }
+
+   @Nullable
+   public ModifierContext getContext(VaultModifier<?> modifier) {
+      for (Modifiers.Entry entry : this.get(ENTRIES)) {
+         if (entry.has(Modifiers.Entry.MODIFIER) && entry.get(Modifiers.Entry.MODIFIER) == modifier) {
+            return entry.get(Modifiers.Entry.CONTEXT);
+         }
+      }
+
+      return null;
    }
 
    public java.util.List<VaultModifier<?>> getModifiers() {

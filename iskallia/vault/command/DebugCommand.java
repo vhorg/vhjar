@@ -34,6 +34,7 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.gear.EtchingItem;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.world.data.PlayerProficiencyData;
 import iskallia.vault.world.data.PlayerStatsData;
@@ -53,6 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandRuntimeException;
@@ -115,6 +117,10 @@ public class DebugCommand extends Command {
       );
       builder.then(Commands.literal("dump_item_nbt").executes(this::dumpItemNBT));
       builder.then(Commands.literal("dump_vault_sizes").executes(this::dumpVaultSizes));
+      builder.then(Commands.literal("scan_inventory").executes(this::scanInventory));
+      builder.then(
+         Commands.literal("damage_all_gear").then(Commands.argument("damageAmount", IntegerArgumentType.integer(1)).executes(this::damageInventoryGear))
+      );
       builder.then(Commands.literal("vault_kick").then(Commands.argument("player", EntityArgument.player()).executes(this::kickFromVault)));
       builder.then(Commands.literal("apply_etching").then(Commands.argument("etching", ResourceLocationArgument.id()).executes(this::testApplyEtching)));
       builder.then(Commands.literal("give_all_etchings").executes(this::testGiveAllEtchings));
@@ -345,6 +351,31 @@ public class DebugCommand extends Command {
       BlockState blockState = world.getBlockState(blockPos);
       VaultMod.LOGGER.info("Blockstate {} = {}", blockPos, blockState);
       player.sendMessage(new TextComponent(blockState.toString()), Util.NIL_UUID);
+      return 0;
+   }
+
+   private int damageInventoryGear(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      int durabilityAmount = IntegerArgumentType.getInteger(context, "damageAmount");
+      InventoryUtil.findAllItems(player).forEach(access -> {
+         ItemStack foundStack = access.getStack();
+         if (foundStack.getItem() instanceof VaultGearItem && foundStack.isDamageableItem()) {
+            foundStack.hurtAndBreak(durabilityAmount, player, pl -> pl.broadcastBreakEvent(InteractionHand.MAIN_HAND));
+            access.setStack(foundStack);
+         }
+      });
+      return 0;
+   }
+
+   private int scanInventory(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      String msg = InventoryUtil.findAllItems(player)
+         .stream()
+         .map(InventoryUtil.ItemAccess::getStack)
+         .<CharSequence>map(ItemStack::toString)
+         .collect(Collectors.joining(", "));
+      VaultMod.LOGGER.info(msg);
+      player.sendMessage(new TextComponent(msg), Util.NIL_UUID);
       return 0;
    }
 

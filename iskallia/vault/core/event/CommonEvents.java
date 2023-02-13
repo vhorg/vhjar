@@ -2,6 +2,7 @@ package iskallia.vault.core.event;
 
 import iskallia.vault.core.event.common.AltarProgressEvent;
 import iskallia.vault.core.event.common.ArtifactChanceEvent;
+import iskallia.vault.core.event.common.BlockBreakSpeedEvent;
 import iskallia.vault.core.event.common.BlockSetEvent;
 import iskallia.vault.core.event.common.BlockUseEvent;
 import iskallia.vault.core.event.common.CarversGenerationEvent;
@@ -71,6 +72,7 @@ public class CommonEvents {
    public static final CrateAwardEvent CRATE_AWARD_EVENT = register(new CrateAwardEvent());
    public static final BlockUseEvent BLOCK_USE = register(new BlockUseEvent());
    public static final BlockSetEvent BLOCK_SET = register(new BlockSetEvent());
+   public static final BlockBreakSpeedEvent BLOCK_BREAK_SPEED = register(new BlockBreakSpeedEvent());
    public static final VaultPortalCollideEvent VAULT_PORTAL_COLLIDE = register(new VaultPortalCollideEvent());
    public static final AltarProgressEvent ALTAR_PROGRESS = register(new AltarProgressEvent());
    public static final EntityCreationEvent ENTITY_CREATION = register(new EntityCreationEvent());

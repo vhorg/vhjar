@@ -10,6 +10,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.Map.Entry;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -59,12 +60,12 @@ public class AttributeSnapshotNotifier {
                }
             }
 
-            for (Entry<String, List<ItemStack>> entry : IntegrationCurios.getCuriosItemStacks(sPlayer).entrySet()) {
+            for (Entry<String, List<Tuple<ItemStack, Integer>>> entry : IntegrationCurios.getCuriosItemStacks(sPlayer).entrySet()) {
                String slotIdentifier = entry.getKey();
-               List<ItemStack> stacks = entry.getValue();
+               List<Tuple<ItemStack, Integer>> stackTuples = entry.getValue();
 
-               for (int slotx = 0; slotx < stacks.size(); slotx++) {
-                  ItemStack equipped = stacks.get(slotx);
+               for (int slotx = 0; slotx < stackTuples.size(); slotx++) {
+                  ItemStack equipped = (ItemStack)stackTuples.get(slotx).getA();
                   AttributeSnapshotNotifier.CurioSlot curioSlot = new AttributeSnapshotNotifier.CurioSlot(slotIdentifier, slotx);
                   UUID savedId = snapshot.curioIdentifiers.get(curioSlot);
                   if (!equipped.isEmpty() && AttributeGearData.hasData(equipped)) {

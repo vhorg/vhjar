@@ -5,6 +5,7 @@ import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.init.ModGearAttributes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
@@ -41,12 +42,10 @@ public class SoulboundSnapshotData extends InventorySnapshotData {
       priority = EventPriority.HIGH
    )
    public static void onDeath(LivingDeathEvent event) {
-      if (event.getEntity() instanceof Player && event.getEntity().level instanceof ServerLevel) {
-         Player player = (Player)event.getEntity();
-         ServerLevel world = (ServerLevel)player.level;
-         SoulboundSnapshotData data = get(world);
-         if (!data.hasSnapshot(player)) {
-            data.createSnapshot(player);
+      if (event.getEntity() instanceof ServerPlayer sPlayer) {
+         SoulboundSnapshotData data = get(sPlayer.getLevel());
+         if (!data.hasSnapshot(sPlayer)) {
+            data.createSnapshot(sPlayer);
          }
       }
    }

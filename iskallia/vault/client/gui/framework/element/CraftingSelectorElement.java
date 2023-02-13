@@ -10,7 +10,7 @@ import iskallia.vault.util.function.ObservableSupplier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
@@ -29,7 +29,7 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
       int slotColumns,
       List<VaultForgeRecipe> recipes,
       ObservableSupplier<Set<ResourceLocation>> discoveredTrinkets,
-      Consumer<VaultForgeRecipe> onRecipeSelect,
+      BiConsumer<VaultForgeRecipe, Boolean> onRecipeSelect,
       Function<List<ItemStack>, List<ItemStack>> inputItemCheck
    ) {
       super(spatial, slotColumns, new CraftingSelectorElement.CraftingSelector(recipes, onRecipeSelect, inputItemCheck));
@@ -54,6 +54,17 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
       this.discoveredTrinkets.ifChanged(models -> this.refreshElements());
    }
 
+   public boolean canCraftSelectedEntry() {
+      if (this.getSelectorModel() instanceof CraftingSelectorElement.CraftingSelector craftingSelector) {
+         CraftingSelectorElement.CraftingEntry entry = (CraftingSelectorElement.CraftingEntry)craftingSelector.getSelectedElement();
+         if (entry != null) {
+            return entry.canCraft();
+         }
+      }
+
+      return false;
+   }
+
    @Override
    protected FakeItemSlotElement<?> makeElementSlot(
       ISpatial spatial, Supplier<ItemStack> itemStack, TextureAtlasRegion slotTexture, TextureAtlasRegion disabledSlotTexture, Supplier<Boolean> disabled
@@ -69,6 +80,11 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
          super(recipe.getDisplayOutput(), Minecraft.getInstance().player == null || !recipe.canCraft(Minecraft.getInstance().player));
          this.recipe = recipe;
          this.inputItemCheck = inputItemCheck;
+      }
+
+      public boolean canCraft() {
+         List<ItemStack> inputs = this.recipe.getInputs();
+         return this.inputItemCheck.apply(inputs).isEmpty();
       }
 
       @Override
@@ -105,11 +121,11 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
 
    public static class CraftingSelector extends ScrollableItemStackSelectorElement.SelectorModel<CraftingSelectorElement.CraftingEntry> {
       private final List<VaultForgeRecipe> recipes;
-      private final Consumer<VaultForgeRecipe> onRecipeSelect;
+      private final BiConsumer<VaultForgeRecipe, Boolean> onRecipeSelect;
       private final Function<List<ItemStack>, List<ItemStack>> inputItemCheck;
 
       public CraftingSelector(
-         List<VaultForgeRecipe> recipes, Consumer<VaultForgeRecipe> onRecipeSelect, Function<List<ItemStack>, List<ItemStack>> inputItemCheck
+         List<VaultForgeRecipe> recipes, BiConsumer<VaultForgeRecipe, Boolean> onRecipeSelect, Function<List<ItemStack>, List<ItemStack>> inputItemCheck
       ) {
          this.recipes = recipes;
          this.onRecipeSelect = onRecipeSelect;
@@ -123,7 +139,7 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
 
       public void onSelect(FakeItemSlotElement<?> slot, CraftingSelectorElement.CraftingEntry entry) {
          super.onSelect(slot, entry);
-         this.onRecipeSelect.accept(entry.recipe);
+         this.onRecipeSelect.accept(entry.recipe, entry.canCraft());
       }
    }
 }

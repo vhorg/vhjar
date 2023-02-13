@@ -8,6 +8,7 @@ import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
 import iskallia.vault.core.event.ClientEvents;
 import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.vault.abyss.LegacyAbyssManager;
 import iskallia.vault.core.vault.influence.LegacyInfluences;
 import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.overlay.VaultOverlay;
@@ -64,6 +65,9 @@ public class Vault extends DataObject<Vault> {
    public static final FieldKey<DiscoveryGoalsManager> DISCOVERY = FieldKey.of("discovery", DiscoveryGoalsManager.class)
       .with(Version.v1_8, Adapter.ofCompound(), DISK.all(), DiscoveryGoalsManager::new)
       .register(FIELDS);
+   public static final FieldKey<LegacyAbyssManager> ABYSS = FieldKey.of("abyssal", LegacyAbyssManager.class)
+      .with(Version.v1_9, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), LegacyAbyssManager::new)
+      .register(FIELDS);
    public static final FieldKey<CompoundTag> CRYSTAL = FieldKey.of("crystal", CompoundTag.class)
       .with(Version.v1_2, Adapter.ofNBT(CompoundTag.class), DISK.all())
       .register(FIELDS);
@@ -79,7 +83,6 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(OBJECTIVES, objectives -> objectives.initServer(world, this));
       this.ifPresent(MODIFIERS, modifiers -> modifiers.initServer(world, this));
       this.ifPresent(LISTENERS, listeners -> listeners.initServer(world, this));
-      this.ifPresent(INFLUENCES, influences -> influences.initServer(world, this));
       this.ifPresent(DISCOVERY, discovery -> discovery.initServer(world, this));
       this.ifPresent(STATS, stats -> stats.initServer(world, this));
    }
@@ -90,7 +93,6 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(CLOCK, clock -> clock.tickServer(world));
       this.ifPresent(MODIFIERS, modifiers -> modifiers.tickServer(world, this));
       this.ifPresent(LISTENERS, listeners -> listeners.tickServer(world, this));
-      this.ifPresent(INFLUENCES, influences -> influences.tickServer(world, this));
    }
 
    public void releaseServer() {
@@ -99,7 +101,6 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(OBJECTIVES, Objectives::releaseServer);
       this.ifPresent(MODIFIERS, Modifiers::releaseServer);
       this.ifPresent(LISTENERS, Listeners::releaseServer);
-      this.ifPresent(INFLUENCES, LegacyInfluences::releaseServer);
       this.ifPresent(DISCOVERY, DiscoveryGoalsManager::releaseServer);
       this.ifPresent(STATS, StatsCollector::releaseServer);
    }

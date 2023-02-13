@@ -333,6 +333,10 @@ public class CrystalData implements INBTSerializable<CompoundTag> {
       this.updateDelegate();
    }
 
+   public boolean canGenerateCatalystFragments() {
+      return !this.preventsRandomModifiers && this.getType().canGenerateRandomModifiers();
+   }
+
    public boolean canTriggerInfluences() {
       return this.canTriggerInfluences;
    }
@@ -561,7 +565,13 @@ public class CrystalData implements INBTSerializable<CompoundTag> {
             VaultModifier<?> vaultModifier = modifierStack.getModifier();
             TextComponent modifierName = new TextComponent(vaultModifier.getDisplayNameFormatted(modifierStack.getSize()));
             modifierName.setStyle(Style.EMPTY.withColor(vaultModifier.getDisplayTextColor()));
-            tooltip.add(new TextComponent("  ").append(modifierName));
+            if (modifierStack.getSize() > 1) {
+               Component stackSize = new TextComponent("%dx".formatted(modifierStack.getSize())).withStyle(ChatFormatting.GRAY);
+               tooltip.add(new TextComponent("  ").withStyle(ChatFormatting.GRAY).append(stackSize).append(" ").append(modifierName));
+            } else {
+               tooltip.add(new TextComponent("  ").append(modifierName));
+            }
+
             if (Screen.hasShiftDown()) {
                String descriptionTxt = vaultModifier.getDisplayDescriptionFormatted(modifierStack.getSize());
                if (!descriptionTxt.isEmpty()) {

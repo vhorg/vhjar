@@ -8,6 +8,7 @@ import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.ChestGenerationEvent;
+import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.stat.ChestStat;
 import iskallia.vault.core.vault.stat.StatCollector;
@@ -27,6 +28,7 @@ import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.world.vault.chest.MobTrapEffect;
 import java.util.List;
+import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -50,7 +52,7 @@ public class ClassicLootLogic extends LootLogic {
    }
 
    @Override
-   protected void onPreGenerate(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
+   protected void onChestPreGenerate(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
       if (this.applyTrap(world, vault, data)) {
          data.setLootTable(null);
          world.setBlock(data.getPos(), Blocks.AIR.defaultBlockState(), 3);
@@ -58,9 +60,18 @@ public class ClassicLootLogic extends LootLogic {
    }
 
    @Override
-   protected void onPostGenerate(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
-      this.initLootData(vault, data);
-      this.generateCatalystFragments(data);
+   protected void onChestPostGenerate(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
+      this.initLootData(vault, data.getLoot(), data.getPos());
+      this.generateCatalystFragments(data, vault);
+   }
+
+   @Override
+   protected void onBlockPreGenerate(VirtualWorld world, Vault vault, LootableBlockGenerationEvent.Data data) {
+   }
+
+   @Override
+   protected void onBlockPostGenerate(VirtualWorld world, Vault vault, LootableBlockGenerationEvent.Data data) {
+      this.initLootData(vault, data.getLoot(), data.getPos());
    }
 
    protected boolean applyTrap(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
@@ -100,24 +111,24 @@ public class ClassicLootLogic extends LootLogic {
       }
    }
 
-   private void initLootData(Vault vault, ChestGenerationEvent.Data data) {
-      List<ItemStack> loot = data.getLoot();
-
+   private void initLootData(Vault vault, List<ItemStack> loot, BlockPos pos) {
       for (int i = 0; i < loot.size(); i++) {
          ItemStack stack = loot.get(i);
-         VaultLevelItem.doInitializeVaultLoot(stack, vault, data.getPos());
+         VaultLevelItem.doInitializeVaultLoot(stack, vault, pos);
          stack = DataTransferItem.doConvertStack(stack);
          DataInitializationItem.doInitialize(stack);
          loot.set(i, stack);
       }
    }
 
-   protected void generateCatalystFragments(ChestGenerationEvent.Data data) {
+   protected void generateCatalystFragments(ChestGenerationEvent.Data data, Vault vault) {
       if (this.has(ADD_CATALYST_FRAGMENTS)) {
-         double probability = ModConfigs.VAULT_CHEST_META.getCatalystChance(data.getState().getBlock(), data.getRarity());
-         probability = CommonEvents.CHEST_CATALYST_GENERATION.invoke(data.getPlayer(), probability).getProbability();
-         if (data.getRandom().nextFloat() < probability) {
-            data.getLoot().add(new ItemStack(ModItems.VAULT_CATALYST_FRAGMENT));
+         if (!vault.has(Vault.LEVEL) || vault.get(Vault.LEVEL).get() >= ModConfigs.VAULT_CHEST_META.getCatalystMinLevel()) {
+            double probability = ModConfigs.VAULT_CHEST_META.getCatalystChance(data.getState().getBlock(), data.getRarity());
+            probability = CommonEvents.CHEST_CATALYST_GENERATION.invoke(data.getPlayer(), probability).getProbability();
+            if (data.getRandom().nextFloat() < probability) {
+               data.getLoot().add(new ItemStack(ModItems.VAULT_CATALYST_FRAGMENT));
+            }
          }
       }
    }

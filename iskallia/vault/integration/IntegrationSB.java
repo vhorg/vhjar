@@ -1,5 +1,6 @@
 package iskallia.vault.integration;
 
+import iskallia.vault.util.InventoryUtil;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,19 +46,32 @@ public class IntegrationSB {
       });
    }
 
-   public static List<ItemStack> getBackpackItems(ItemStack stack) {
-      return stack.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> {
-         List<ItemStack> ret = new ArrayList<>();
+   public static List<InventoryUtil.ItemAccess> getBackpackItemAccess(InventoryUtil.ItemAccess backpackAccess) {
+      return backpackAccess.getStack().getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> {
+         List<InventoryUtil.ItemAccess> accesses = new ArrayList<>();
          InventoryHandler invHandler = wrapper.getInventoryHandler();
 
          for (int slot = 0; slot < invHandler.getSlots(); slot++) {
             ItemStack slotStack = invHandler.getStackInSlot(slot);
             if (!slotStack.isEmpty()) {
-               ret.add(slotStack);
+               int finalSlot = slot;
+               accesses.add(backpackAccess.chain(slotStack, (backpackCt, newStack) -> setBackpackItem(backpackCt, newStack, finalSlot)));
             }
          }
 
-         return ret;
+         return accesses;
       }).orElse(Collections.emptyList());
+   }
+
+   public static boolean setBackpackItem(ItemStack container, ItemStack toInsert, int slotId) {
+      return container.getCapability(CapabilityBackpackWrapper.getCapabilityInstance()).map(wrapper -> {
+         InventoryHandler invHandler = wrapper.getInventoryHandler();
+         if (slotId >= invHandler.getSlots()) {
+            return false;
+         } else {
+            invHandler.setStackInSlot(slotId, toInsert);
+            return true;
+         }
+      }).orElse(false);
    }
 }

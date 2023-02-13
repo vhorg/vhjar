@@ -6,12 +6,9 @@ import iskallia.vault.init.ModGearAttributes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -50,16 +47,6 @@ public class PhoenixSetSnapshotData extends InventorySnapshotData {
 
             player.removeTag("the_vault_restore_phoenixset");
          }
-      }
-   }
-
-   @SubscribeEvent(
-      priority = EventPriority.HIGHEST
-   )
-   public static void onDeath(LivingDeathEvent event) {
-      if (event.getEntity() instanceof ServerPlayer && event.getEntity().level instanceof ServerLevel) {
-         ServerPlayer player = (ServerPlayer)event.getEntity();
-         ServerLevel world = (ServerLevel)player.level;
       }
    }
 

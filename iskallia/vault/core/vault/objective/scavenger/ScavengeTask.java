@@ -74,6 +74,23 @@ public abstract class ScavengeTask {
                }
 
                return new CoinStacksScavengeTask(object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries);
+            case "vault_ore":
+               WeightedList<VaultOreScavengeTask.Entry> entries = new WeightedList<>();
+               JsonObject obj = object.get("entries").getAsJsonObject();
+
+               for (String key : obj.keySet()) {
+                  JsonObject value = obj.get(key).getAsJsonObject();
+                  entries.put(
+                     new VaultOreScavengeTask.Entry(
+                        (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
+                     ),
+                     value.get("weight").getAsInt()
+                  );
+               }
+
+               return new VaultOreScavengeTask(
+                  object.get("target").getAsString(), object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries
+               );
             case "mob":
                List<MobScavengeTask.Entry> entries = new ArrayList<>();
                JsonObject obj = object.get("entries").getAsJsonObject();
@@ -124,6 +141,19 @@ public abstract class ScavengeTask {
             object.addProperty("icon", coin.icon.toString());
             JsonObject entries = new JsonObject();
             coin.entries.forEach((entryx, weight) -> {
+               JsonObject obj = new JsonObject();
+               obj.addProperty("weight", weight);
+               obj.addProperty("color", entryx.color);
+               entries.add(entryx.item.getRegistryName().toString(), obj);
+            });
+            object.add("entries", entries);
+         } else if (value instanceof VaultOreScavengeTask ore) {
+            object.addProperty("type", "vault_ore");
+            object.addProperty("target", ore.target);
+            object.addProperty("probability", ore.probability);
+            object.addProperty("icon", ore.icon.toString());
+            JsonObject entries = new JsonObject();
+            ore.entries.forEach((entryx, weight) -> {
                JsonObject obj = new JsonObject();
                obj.addProperty("weight", weight);
                obj.addProperty("color", entryx.color);

@@ -39,7 +39,9 @@ public class VaultFactory {
             new WorldManager()
                .set(WorldManager.FACING, Direction.from2DDataValue(random.nextInt(4)))
                .set(WorldManager.RANDOM_TICK_SPEED, Integer.valueOf(0))
-               .set(WorldManager.LOOT_LOGIC, new ClassicLootLogic().setIf(ClassicLootLogic.ADD_CATALYST_FRAGMENTS, () -> !crystal.preventsRandomModifiers()))
+               .set(
+                  WorldManager.LOOT_LOGIC, new ClassicLootLogic().setIf(ClassicLootLogic.ADD_CATALYST_FRAGMENTS, () -> crystal.canGenerateCatalystFragments())
+               )
                .set(WorldManager.PORTAL_LOGIC, new ClassicPortalLogic())
                .set(WorldManager.MOB_LOGIC, new ClassicMobLogic())
                .set(WorldManager.GENERATOR, new GridGenerator().set(GridGenerator.CELL_X, Integer.valueOf(47)).set(GridGenerator.CELL_Z, Integer.valueOf(47)))
@@ -78,7 +80,7 @@ public class VaultFactory {
       }
 
       if (casual) {
-         vault.ifPresent(Vault.MODIFIERS, m -> m.addPermanentModifier(VaultModifierRegistry.getOrDefault(VaultMod.id("phoenix"), null), 1, false));
+         vault.ifPresent(Vault.MODIFIERS, m -> m.addPermanentModifier(VaultModifierRegistry.getOrDefault(VaultMod.id("casual"), null), 1, false));
       }
 
       if (!crystal.preventsRandomModifiers()) {

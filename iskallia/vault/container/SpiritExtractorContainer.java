@@ -63,8 +63,8 @@ public class SpiritExtractorContainer extends OverSizedSlotContainer {
 
       if (ModList.get().isLoaded("curios")) {
          IntegrationCurios.getCuriosItemStacks(this.player).forEach((slotType, stacks) -> stacks.forEach(stack -> {
-            if (shouldAddItem(stack)) {
-               items.add(stack.copy());
+            if (shouldAddItem((ItemStack)stack.getA())) {
+               items.add(((ItemStack)stack.getA()).copy());
             }
          }));
       }

@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.item.tool.ToolMaterial;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,11 +52,19 @@ public class SpiritConfig extends Config {
       gearRarityCost.put(VaultGearRarity.EPIC, 4);
       gearRarityCost.put(VaultGearRarity.OMEGA, 5);
       gearRarityCost.put(VaultGearRarity.UNIQUE, 6);
+      Map<ToolMaterial, Integer> toolMaterialCost = new LinkedHashMap<>();
+      toolMaterialCost.put(ToolMaterial.CHROMATIC_IRON_INGOT, 1);
+      toolMaterialCost.put(ToolMaterial.CHROMATIC_STEEL_INGOT, 2);
+      toolMaterialCost.put(ToolMaterial.VAULTERITE_INGOT, 3);
+      toolMaterialCost.put(ToolMaterial.VAULT_ALLOY, 4);
+      toolMaterialCost.put(ToolMaterial.BLACK_CHROMATIC_STEEL_INGOT, 5);
+      toolMaterialCost.put(ToolMaterial.ECHOING_INGOT, 6);
+      toolMaterialCost.put(ToolMaterial.OMEGA_POG, 7);
       Map<ItemStack, Integer> itemCost = new LinkedHashMap<>();
       itemCost.put(new ItemStack(ModItems.VAULT_PICKAXE), 1);
       itemCost.put(new ItemStack(ModItems.MAGNET), 1);
-      this.levelCosts.add(new SpiritConfig.LevelCost(0, ModBlocks.VAULT_BRONZE, 2.5F, gearRarityCost, 3, itemCost));
-      this.levelCosts.add(new SpiritConfig.LevelCost(5, ModBlocks.VAULT_SILVER, 3.0F, gearRarityCost, 3, itemCost));
+      this.levelCosts.add(new SpiritConfig.LevelCost(0, ModBlocks.VAULT_BRONZE, 2.5F, gearRarityCost, toolMaterialCost, 3, itemCost));
+      this.levelCosts.add(new SpiritConfig.LevelCost(5, ModBlocks.VAULT_SILVER, 3.0F, gearRarityCost, toolMaterialCost, 3, itemCost));
    }
 
    public float getCompletionMultiplierDecrease() {
@@ -80,15 +89,26 @@ public class SpiritConfig extends Config {
       @Expose
       public Map<VaultGearRarity, Integer> gearRarityCost;
       @Expose
+      public Map<ToolMaterial, Integer> toolMaterialCost;
+      @Expose
       public Map<ItemStack, Integer> itemCost;
       @Expose
       public int trinketCost;
 
-      public LevelCost(int minLevel, Item item, float count, Map<VaultGearRarity, Integer> gearRarityCost, int trinketCost, Map<ItemStack, Integer> itemCost) {
+      public LevelCost(
+         int minLevel,
+         Item item,
+         float count,
+         Map<VaultGearRarity, Integer> gearRarityCost,
+         Map<ToolMaterial, Integer> toolMaterialCost,
+         int trinketCost,
+         Map<ItemStack, Integer> itemCost
+      ) {
          this.minLevel = minLevel;
          this.item = item;
          this.count = count;
          this.gearRarityCost = gearRarityCost;
+         this.toolMaterialCost = toolMaterialCost;
          this.trinketCost = trinketCost;
          this.itemCost = itemCost;
       }

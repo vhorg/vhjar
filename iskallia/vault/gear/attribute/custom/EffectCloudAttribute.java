@@ -1,5 +1,6 @@
 package iskallia.vault.gear.attribute.custom;
 
+import com.google.common.collect.Iterables;
 import com.google.gson.JsonArray;
 import com.google.gson.annotations.Expose;
 import io.netty.buffer.ByteBuf;
@@ -15,6 +16,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -24,7 +26,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 
 public class EffectCloudAttribute {
    private final EffectCloudAttribute.EffectCloud effectCloud;
@@ -39,6 +40,14 @@ public class EffectCloudAttribute {
 
    public float getTriggerChance() {
       return this.effectCloud.getTriggerChance();
+   }
+
+   @Nullable
+   public MobEffect getPrimaryEffect() {
+      EffectCloudAttribute.AdditionalCloudEffect first = (EffectCloudAttribute.AdditionalCloudEffect)Iterables.getFirst(
+         this.effectCloud.additionalEffects, null
+      );
+      return first == null ? null : first.effect;
    }
 
    public static VaultGearAttributeType<EffectCloudAttribute> type() {

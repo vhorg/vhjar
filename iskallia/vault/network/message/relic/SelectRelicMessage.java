@@ -29,6 +29,7 @@ public record SelectRelicMessage(ResourceLocation relicId) {
                   ItemStack itemStack = container.getInternalInventory().getItem(relativeIndex);
                   if (!itemStack.isEmpty()) {
                      EntityHelper.giveItem(sender, itemStack);
+                     container.getInternalInventory().setItem(relativeIndex, ItemStack.EMPTY);
                   }
                });
                container.selectRelic(message.relicId);

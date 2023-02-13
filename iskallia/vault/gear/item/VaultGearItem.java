@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.vault.abyss.AbyssHelper;
 import iskallia.vault.dynamodel.DynamicModelItem;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import iskallia.vault.gear.GearRollHelper;
@@ -90,14 +89,6 @@ public interface VaultGearItem extends IForgeItem, VaultGearTooltipItem, DataTra
       VaultGearData data = VaultGearData.read(stack);
       data.setItemLevel(vault.get(Vault.LEVEL).get());
       data.updateAttribute(ModGearAttributes.IS_LOOT, Boolean.valueOf(true));
-      if (pos != null && AbyssHelper.hasAbyssEffect(vault)) {
-         float chance = AbyssHelper.getAbyssEffect(vault) * AbyssHelper.getAbyssDistanceModifier(pos, vault);
-         chance *= ModConfigs.ABYSS.getAbyssalModifierChance();
-         if (random.nextFloat() < chance) {
-            data.updateAttribute(ModGearAttributes.IS_ABYSSAL, Boolean.valueOf(true));
-         }
-      }
-
       data.write(stack);
    }
 

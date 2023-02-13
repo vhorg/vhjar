@@ -65,10 +65,6 @@ public class GearRollHelper {
       if (data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false) && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance()) {
          VaultGearModifierHelper.generateLegendaryModifier(stack, rand);
       }
-
-      if (data.getFirstValue(ModGearAttributes.IS_ABYSSAL).orElse(false)) {
-         VaultGearModifierHelper.generateAbyssalModifiers(stack, rand);
-      }
    }
 
    public static void tickToll(ItemStack stack, ServerPlayer player, Consumer<ItemStack> onRollTick, Consumer<ItemStack> onFinish) {

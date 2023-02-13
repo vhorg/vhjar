@@ -183,8 +183,8 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
 
       if (ModList.get().isLoaded("curios")) {
          IntegrationCurios.getCuriosItemStacks(player).forEach((slotType, stacks) -> stacks.forEach(stack -> {
-            if (shouldAddItem(stack)) {
-               this.items.add(stack.copy());
+            if (shouldAddItem((ItemStack)stack.getA())) {
+               this.items.add(((ItemStack)stack.getA()).copy());
             }
          }));
       }

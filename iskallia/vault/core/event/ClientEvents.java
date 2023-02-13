@@ -4,7 +4,10 @@ import iskallia.vault.core.event.client.AmbientLightEvent;
 import iskallia.vault.core.event.client.AmbientParticlesEvent;
 import iskallia.vault.core.event.client.BiomeColorsEvent;
 import iskallia.vault.core.event.client.ClientTickEvent;
+import iskallia.vault.core.event.client.FogColorsEvent;
+import iskallia.vault.core.event.client.RenderLevelLastEvent;
 import iskallia.vault.core.event.client.RenderOverlayEvent;
+import iskallia.vault.core.event.client.UpdateLightEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +18,9 @@ public class ClientEvents {
    public static final AmbientLightEvent AMBIENT_LIGHT = register(new AmbientLightEvent());
    public static final BiomeColorsEvent BIOME_COLORS = register(new BiomeColorsEvent());
    public static final AmbientParticlesEvent AMBIENT_PARTICLE = register(new AmbientParticlesEvent());
+   public static final FogColorsEvent FOG_COLORS = register(new FogColorsEvent());
+   public static final UpdateLightEvent UPDATE_LIGHT = register(new UpdateLightEvent());
+   public static final RenderLevelLastEvent RENDER_LEVEL_LAST = register(new RenderLevelLastEvent());
 
    public static void release(Object reference) {
       REGISTRY.forEach(event -> event.release(reference));

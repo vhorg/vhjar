@@ -5,9 +5,14 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class ObservableSupplier<T> implements Supplier<T> {
+   private static final ObservableSupplier<?> EMPTY = new ObservableSupplier<>(() -> null, (o1, o2) -> true);
    protected T previousValue;
    protected final Supplier<T> supplier;
    protected final BiPredicate<T, T> equivalenceTest;
+
+   public static <T> ObservableSupplier<T> empty() {
+      return (ObservableSupplier<T>)EMPTY;
+   }
 
    public static <T> ObservableSupplier<T> of(Supplier<T> supplier, BiPredicate<T, T> equivalenceFunction) {
       return new ObservableSupplier<>(supplier, equivalenceFunction);

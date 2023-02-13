@@ -3,7 +3,6 @@ package iskallia.vault.entity;
 import iskallia.vault.config.VaultMobGearConfig;
 import iskallia.vault.config.VaultMobsConfig;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.vault.abyss.AbyssVaultMobHelper;
 import iskallia.vault.entity.entity.EternalEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,7 +23,6 @@ public class EntityScaler {
    public static void scale(Vault vault, LivingEntity entity) {
       if (!(entity instanceof Player) && !(entity instanceof EternalEntity)) {
          if (!isScaled(entity)) {
-            AbyssVaultMobHelper.scaleAbyssal(vault, entity);
             vault.ifPresent(Vault.LEVEL, level -> {
                VaultMobsConfig.scale(vault.get(Vault.OWNER), entity, level.get());
                VaultMobGearConfig.applyEquipment(entity, level.get());

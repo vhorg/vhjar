@@ -22,9 +22,11 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.skill.PlayerVaultStats;
+import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultJoinSnapshotData;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 public class Runner extends Listener {
    public static final SupplierKey<Listener> KEY = SupplierKey.of("runner", Listener.class).with(Version.v1_0, Runner::new);
@@ -156,6 +158,20 @@ public class Runner extends Listener {
             }
          }
       }, -100);
+      CommonEvents.PLAYER_STAT.of(PlayerStat.DURABILITY_WEAR_REDUCTION).register(this, data -> {
+         if (data.getEntity() instanceof Player player) {
+            if (player.level == world) {
+               if (player.getUUID().equals(this.get(ID))) {
+                  int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
+                  int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
+                  if (diff > 0) {
+                     float reduction = Math.min(0.25F * diff * 0.05F, 1.0F);
+                     data.setValue(data.getValue() + reduction);
+                  }
+               }
+            }
+         }
+      });
       this.ifPresent(INFLUENCES, influences -> influences.initServer(world, vault, this));
    }
 

@@ -1,6 +1,7 @@
 package iskallia.vault.gear.crafting.recipe;
 
 import iskallia.vault.client.ClientDiscoveredEntriesData;
+import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.trinket.TrinketEffect;
@@ -17,18 +18,13 @@ import net.minecraft.world.item.ItemStack;
 public class TrinketForgeRecipe extends VaultForgeRecipe {
    private TrinketEffect<?> effect;
 
-   protected TrinketForgeRecipe(ResourceLocation id, ItemStack output) {
-      super(id, output);
+   public TrinketForgeRecipe(ResourceLocation id, ItemStack output) {
+      super(ForgeRecipeType.TRINKET, id, output);
    }
 
    public TrinketForgeRecipe(ResourceLocation id, ItemStack output, List<ItemStack> inputs, TrinketEffect<?> effect) {
-      super(id, output, inputs);
+      super(ForgeRecipeType.TRINKET, id, output, inputs);
       this.effect = effect;
-   }
-
-   @Override
-   protected int getClassId() {
-      return 2;
    }
 
    @Override

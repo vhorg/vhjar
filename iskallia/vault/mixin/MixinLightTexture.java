@@ -1,7 +1,7 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.core.event.ClientEvents;
-import iskallia.vault.core.vault.abyss.AbyssVaultLightHelper;
+import iskallia.vault.core.event.client.UpdateLightEvent;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
@@ -23,9 +23,17 @@ public class MixinLightTexture {
 
    @Inject(
       method = {"updateLightTexture"},
+      at = {@At("HEAD")}
+   )
+   private void adjustLightPre(float pPartialTicks, CallbackInfo ci) {
+      ClientEvents.UPDATE_LIGHT.invoke(UpdateLightEvent.Phase.PRE);
+   }
+
+   @Inject(
+      method = {"updateLightTexture"},
       at = {@At("RETURN")}
    )
-   private void adjustLight(float pPartialTicks, CallbackInfo ci) {
-      AbyssVaultLightHelper.onSetupLight();
+   private void adjustLightPost(float pPartialTicks, CallbackInfo ci) {
+      ClientEvents.UPDATE_LIGHT.invoke(UpdateLightEvent.Phase.POST);
    }
 }

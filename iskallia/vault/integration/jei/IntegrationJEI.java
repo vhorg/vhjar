@@ -34,7 +34,7 @@ import net.minecraft.world.item.crafting.RecipeManager;
 @JeiPlugin
 public class IntegrationJEI implements IModPlugin {
    public void registerItemSubtypes(ISubtypeRegistration registration) {
-      registration.useNbtForSubtypes(new Item[]{ModItems.RESPEC_FLASK, ModItems.FACETED_FOCUS, ModItems.TRINKET, ModItems.ETCHING});
+      registration.useNbtForSubtypes(new Item[]{ModItems.RESPEC_FLASK, ModItems.FACETED_FOCUS, ModItems.TRINKET, ModItems.ETCHING, ModItems.GOD_BLESSING});
    }
 
    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {

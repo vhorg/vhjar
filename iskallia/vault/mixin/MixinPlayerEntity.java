@@ -1,5 +1,6 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.entity.entity.SpiritEntity;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModGearAttributes;
@@ -7,6 +8,7 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -26,6 +28,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({Player.class})
 public abstract class MixinPlayerEntity extends LivingEntity implements BlockChanceHelper.PlayerBlockAnimationAccess {
@@ -37,6 +40,9 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
 
    @Shadow
    public abstract void remove(RemovalReason var1);
+
+   @Shadow
+   public abstract void handleEntityEvent(byte var1);
 
    protected MixinPlayerEntity(EntityType<? extends LivingEntity> type, Level worldIn) {
       super(type, worldIn);
@@ -120,5 +126,16 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
       } else {
          return base > 1.0F ? base + bonus : base;
       }
+   }
+
+   @Inject(
+      method = {"getDigSpeed"},
+      at = {@At("RETURN")},
+      remap = false,
+      cancellable = true
+   )
+   private void adjustBreakSpeed(BlockState state, BlockPos pos, CallbackInfoReturnable<Float> cir) {
+      Player thisPlayer = (Player)this;
+      cir.setReturnValue(CommonEvents.BLOCK_BREAK_SPEED.invoke(thisPlayer, pos, state, cir.getReturnValueF()).getSpeed());
    }
 }

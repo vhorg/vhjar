@@ -152,7 +152,7 @@ public class StatCollector extends DataObject<StatCollector> {
    }
 
    public int getExperience(Vault vault) {
-      return ModConfigs.VAULT_STATS.getExperience(vault, this);
+      return (int)(ModConfigs.VAULT_STATS.getConfiguredExperience(vault, this) * this.getExpMultiplier());
    }
 
    public Completion getCompletion() {

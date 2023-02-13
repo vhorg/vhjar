@@ -30,7 +30,7 @@ public class VaultArtisanStationScreen extends AbstractElementContainerScreen<Va
    public VaultArtisanStationScreen(VaultArtisanStationContainer container, Inventory inventory, Component title) {
       super(container, inventory, title, ScreenRenderers.getImmediate(), ScreenTooltipRenderer::create);
       this.playerInventory = inventory;
-      this.setGuiSize(Spatials.size(176, 206));
+      this.setGuiSize(Spatials.size(176, 230));
       this.addElement(
          (NineSliceElement)new NineSliceElement(this.getGuiSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
@@ -47,7 +47,7 @@ public class VaultArtisanStationScreen extends AbstractElementContainerScreen<Va
       MutableComponent inventoryName = inventory.getDisplayName().copy();
       inventoryName.withStyle(Style.EMPTY.withColor(-12632257));
       this.addElement(
-         (LabelElement)new LabelElement(Spatials.positionXY(8, 113), inventoryName, LabelTextStyle.defaultStyle())
+         (LabelElement)new LabelElement(Spatials.positionXY(8, 137), inventoryName, LabelTextStyle.defaultStyle())
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
 

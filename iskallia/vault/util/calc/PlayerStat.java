@@ -23,6 +23,8 @@ public enum PlayerStat {
    THORNS_DAMAGE,
    @SerializedName("durability_damage")
    DURABILITY_DAMAGE,
+   @SerializedName("durability_wear_reduction")
+   DURABILITY_WEAR_REDUCTION,
    @SerializedName("on_hit_chain")
    ON_HIT_CHAIN,
    @SerializedName("item_quantity")
@@ -42,5 +44,7 @@ public enum PlayerStat {
    @SerializedName("wendarr_affinity")
    WENDARR_AFFINITY,
    @SerializedName("idona_affinity")
-   IDONA_AFFINITY;
+   IDONA_AFFINITY,
+   @SerializedName("copiously")
+   COPIOUSLY;
 }

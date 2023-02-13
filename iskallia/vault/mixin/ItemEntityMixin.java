@@ -27,7 +27,6 @@ public abstract class ItemEntityMixin extends Entity {
    )
    public void onPickupEventCancelled(Player entity, CallbackInfo ci) {
       LegacyMagnetItem.onAfterItemPickup(entity, (ItemEntity)this);
-      MagnetItem.onPlayerPickup(entity, (ItemEntity)this);
    }
 
    @Inject(
@@ -39,6 +38,16 @@ public abstract class ItemEntityMixin extends Entity {
    )
    public void onPartialStackPickup(Player entity, CallbackInfo ci) {
       LegacyMagnetItem.onAfterItemPickup(entity, (ItemEntity)this);
+   }
+
+   @Inject(
+      method = {"playerTouch"},
+      at = {@At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/entity/player/Player;onItemPickup(Lnet/minecraft/world/entity/item/ItemEntity;)V"
+      )}
+   )
+   public void onPickup(Player entity, CallbackInfo ci) {
       MagnetItem.onPlayerPickup(entity, (ItemEntity)this);
    }
 }

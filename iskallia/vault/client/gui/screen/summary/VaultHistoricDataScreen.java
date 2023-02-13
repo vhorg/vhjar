@@ -457,7 +457,7 @@ public class VaultHistoricDataScreen extends AbstractElementScreen {
                            MutableComponent titleText = new TextComponent("Vault Xp").withStyle(Style.EMPTY.withColor(VaultHistoricDataScreen.XP_COLOR));
                            MutableComponent spacer = new TextComponent("");
                            String totalXpString = shiftDown
-                              ? String.format("(x%.1f) %s xp", xpMultiplier, ModConfigs.VAULT_STATS.getExperienceWithoutMultiplier(vault, statCollector))
+                              ? String.format("(x%.1f) %s xp", xpMultiplier, ModConfigs.VAULT_STATS.getConfiguredExperience(vault, statCollector))
                               : String.format("%s xp", statCollector.getExperience(vault));
 
                            for (int j = 0; j < maxWidth / spaceWidth - 10 - TextBorder.DEFAULT_FONT.get().width(totalXpString) / spaceWidth; j++) {

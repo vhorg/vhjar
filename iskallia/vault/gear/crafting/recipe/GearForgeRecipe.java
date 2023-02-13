@@ -1,5 +1,6 @@
 package iskallia.vault.gear.crafting.recipe;
 
+import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.crafting.ProficiencyType;
@@ -16,21 +17,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-public class VaultGearForgeRecipe extends VaultForgeRecipe {
+public class GearForgeRecipe extends VaultForgeRecipe {
    private ProficiencyType proficiencyType;
 
-   protected VaultGearForgeRecipe(ResourceLocation id, ItemStack output) {
-      super(id, output);
+   public GearForgeRecipe(ResourceLocation id, ItemStack output) {
+      super(ForgeRecipeType.GEAR, id, output);
    }
 
-   public VaultGearForgeRecipe(ResourceLocation id, ItemStack output, List<ItemStack> inputs, ProficiencyType proficiencyType) {
-      super(id, output, inputs);
+   public GearForgeRecipe(ResourceLocation id, ItemStack output, List<ItemStack> inputs, ProficiencyType proficiencyType) {
+      super(ForgeRecipeType.GEAR, id, output, inputs);
       this.proficiencyType = proficiencyType;
-   }
-
-   @Override
-   protected int getClassId() {
-      return 1;
    }
 
    @Override
