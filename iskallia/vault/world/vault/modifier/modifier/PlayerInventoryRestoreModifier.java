@@ -103,7 +103,7 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
                            StatsCollector statsCollector = vault.get(Vault.STATS);
                            StatCollector playerStatCollector = statsCollector.get(sPlayer.getUUID());
                            if (playerStatCollector != null) {
-                              int experience = ModConfigs.VAULT_STATS.getConfiguredExperience(vault, playerStatCollector);
+                              int experience = ModConfigs.VAULT_STATS.getConfiguredVaultElementExperience(playerStatCollector);
                               int durabilityExperience = experience - ModConfigs.VAULT_STATS.getFreeExperienceNotDealtAsDurabilityDamage();
                               int durabilityDamage = (int)(durabilityExperience * ModConfigs.VAULT_STATS.getPercentOfExperienceDealtAsDurabilityDamage());
                               if (durabilityDamage > 0) {

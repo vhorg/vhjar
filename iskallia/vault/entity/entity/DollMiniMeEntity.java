@@ -95,8 +95,10 @@ public class DollMiniMeEntity extends Monster implements IPlayerSkinHolder {
 
    protected void dropCustomDeathLoot(DamageSource source, int looting, boolean recentlyHit) {
       super.dropCustomDeathLoot(source, looting, recentlyHit);
-      Entity killedByEntity = source.getEntity();
-      if (killedByEntity instanceof ServerPlayer player && !(killedByEntity instanceof FakePlayer) && this.level instanceof ServerLevel serverLevel) {
+      if (recentlyHit
+         && this.lastHurtByPlayer instanceof ServerPlayer player
+         && !(this.lastHurtByPlayer instanceof FakePlayer)
+         && this.level instanceof ServerLevel serverLevel) {
          DollLootData dollLootData = DollLootData.get(serverLevel, this.dollId);
          List<ItemStack> loot = dollLootData.getLoot();
          loot.forEach(this::spawnAtLocation);
