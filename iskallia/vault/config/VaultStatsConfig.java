@@ -85,29 +85,35 @@ public class VaultStatsConfig extends Config {
       this.freeExperienceNotDealtAsDurabilityDamage = 400;
    }
 
-   public int getConfiguredExperience(Vault vault, StatCollector stats) {
-      float i = 0.0F;
+   public int getConfiguredVaultElementExperience(StatCollector stats) {
+      float exp = 0.0F;
 
       for (ChestStat chestStat : stats.get(StatCollector.CHESTS)) {
          if (!chestStat.has(ChestStat.TRAPPED)) {
-            i += this.chests.get(chestStat.get(ChestStat.TYPE)).get(chestStat.get(ChestStat.RARITY));
+            exp += this.chests.get(chestStat.get(ChestStat.TYPE)).get(chestStat.get(ChestStat.RARITY));
          }
       }
 
       for (Entry<ResourceLocation, MinedBlocksStat.Entry> entry : stats.get(StatCollector.MINED_BLOCKS).entrySet()) {
          float defaultValue = this.blocksMined.getOrDefault(new ResourceLocation("default"), 0.0F);
-         i += this.blocksMined.getOrDefault(entry.getKey(), defaultValue) * entry.getValue().get(MinedBlocksStat.Entry.COUNT).intValue();
+         exp += this.blocksMined.getOrDefault(entry.getKey(), defaultValue) * entry.getValue().get(MinedBlocksStat.Entry.COUNT).intValue();
       }
 
-      i += this.treasureRoomsOpened * stats.get(StatCollector.TREASURE_ROOMS_OPENED).intValue();
+      exp += this.treasureRoomsOpened * stats.get(StatCollector.TREASURE_ROOMS_OPENED).intValue();
 
       for (Entry<ResourceLocation, MobsStat.Entry> entry : stats.get(StatCollector.MOBS).entrySet()) {
          float defaultValue = this.mobsKilled.getOrDefault(new ResourceLocation("default"), 0.0F);
-         i += this.mobsKilled.getOrDefault(entry.getKey(), defaultValue) * entry.getValue().get(MobsStat.Entry.KILLED).intValue();
+         exp += this.mobsKilled.getOrDefault(entry.getKey(), defaultValue) * entry.getValue().get(MobsStat.Entry.KILLED).intValue();
       }
 
-      i += this.getCompletion(vault).get(stats.getCompletion());
-      return (int)i;
+      return (int)exp;
+   }
+
+   public int getConfiguredVaultExperience(Vault vault, StatCollector stats) {
+      float exp = 0.0F;
+      exp += this.getConfiguredVaultElementExperience(stats);
+      exp += this.getCompletion(vault).get(stats.getCompletion());
+      return (int)exp;
    }
 
    public Map<ResourceLocation, Float> getBlocksMined() {
