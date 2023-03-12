@@ -103,7 +103,7 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
 
    @Override
    public boolean shouldPreventAnvilCombination(ItemStack other) {
-      return !other.is(ModItems.JEWEL);
+      return !other.is(ModItems.JEWEL) && !other.is(Items.ENCHANTED_BOOK);
    }
 
    public boolean isDamageable(ItemStack stack) {
