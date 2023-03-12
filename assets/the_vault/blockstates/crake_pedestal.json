@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "consumed=false": {
+      "model": "the_vault:block/crake_pedestal"
+    },
+    "consumed=true": {
+      "model": "the_vault:block/crake_pedestal_empty"
+    }
+  }
+}

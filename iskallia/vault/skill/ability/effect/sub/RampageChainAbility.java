@@ -3,9 +3,9 @@ package iskallia.vault.skill.ability.effect.sub;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.skill.ability.config.sub.RampageChainConfig;
+import iskallia.vault.skill.ability.effect.RampageAbility;
 import iskallia.vault.skill.ability.effect.spi.AbstractRampageAbility;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
-import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
 import iskallia.vault.util.calc.PlayerStat;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -32,7 +32,7 @@ public class RampageChainAbility extends AbstractRampageAbility<RampageChainConf
       player.removeEffect(ModEffects.RAMPAGE_CHAIN);
    }
 
-   public static class RampageChainEffect extends ToggleAbilityEffect {
+   public static class RampageChainEffect extends RampageAbility.RampageEffect {
       public RampageChainEffect(int color, ResourceLocation resourceLocation) {
          super("Rampage", color, resourceLocation);
       }

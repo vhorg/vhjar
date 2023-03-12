@@ -26,7 +26,7 @@ public class ServerboundOpenVaultExitMessage {
 
    public static void encode(ServerboundOpenVaultExitMessage message, FriendlyByteBuf buffer) {
       ArrayBitBuffer buffer2 = ArrayBitBuffer.empty();
-      message.snapshot.write(buffer2);
+      message.snapshot.writeBits(buffer2);
       buffer.writeLongArray(buffer2.toLongArray());
    }
 
@@ -41,7 +41,7 @@ public class ServerboundOpenVaultExitMessage {
          ServerPlayer sender = context.getSender();
          if (sender != null) {
             ArrayBitBuffer buf = ArrayBitBuffer.empty();
-            message.snapshot.write(buf);
+            message.snapshot.writeBits(buf);
             NetworkHooks.openGui(sender, new MenuProvider() {
                @Nonnull
                public Component getDisplayName() {

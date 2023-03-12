@@ -8,7 +8,8 @@ import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataMap;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -52,14 +53,23 @@ public class ScavengerObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("scavenger", Objective.class).with(Version.v1_0, ScavengerObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<ScavengerObjective.GoalMap> GOALS = FieldKey.of("goals", ScavengerObjective.GoalMap.class)
-      .with(Version.v1_0, Adapter.ofCompound(ScavengerObjective.GoalMap::new), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, CompoundAdapter.of(ScavengerObjective.GoalMap::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Float> OBJECTIVE_PROBABILITY = FieldKey.of("objective_probability", Float.class)
-      .with(Version.v1_2, Adapter.ofFloat(), DISK.all())
+      .with(Version.v1_2, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
 
-   public ScavengerObjective() {
+   protected ScavengerObjective() {
       this.set(GOALS, new ScavengerObjective.GoalMap());
+   }
+
+   protected ScavengerObjective(float objectiveProbability) {
+      this.set(GOALS, new ScavengerObjective.GoalMap());
+      this.set(OBJECTIVE_PROBABILITY, Float.valueOf(objectiveProbability));
+   }
+
+   public static ScavengerObjective of(float objectiveProbability) {
+      return new ScavengerObjective(objectiveProbability);
    }
 
    @Override
@@ -132,13 +142,13 @@ public class ScavengerObjective extends Objective {
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       ScavengerGoal.ObjList goals = this.get(GOALS).get(player.getUUID());
       if (goals == null || goals.areAllCompleted()) {
          boolean rendered = false;
 
          for (Objective objective : this.get(CHILDREN)) {
-            rendered |= objective.render(matrixStack, window, partialTicks, player);
+            rendered |= objective.render(vault, matrixStack, window, partialTicks, player);
          }
 
          if (rendered) {
@@ -246,7 +256,7 @@ public class ScavengerObjective extends Objective {
 
    public static class GoalMap extends DataMap<ScavengerObjective.GoalMap, UUID, ScavengerGoal.ObjList> {
       public GoalMap() {
-         super(new HashMap<>(), Adapter.ofUUID(), Adapter.ofCompound(ScavengerGoal.ObjList::new));
+         super(new HashMap<>(), Adapters.UUID, CompoundAdapter.of(ScavengerGoal.ObjList::new));
       }
 
       public boolean areAllCompleted(Vault vault) {

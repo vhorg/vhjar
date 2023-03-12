@@ -2,8 +2,10 @@ package iskallia.vault.integration;
 
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.world.data.ServerVaults;
+import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -50,17 +52,42 @@ public class IntegrationMinimap {
                      if (zoom < 2) {
                         try {
                            settings.setOptionValue(ModOptions.ZOOM, 2);
-                        } catch (NullPointerException var6) {
+                        } catch (NullPointerException var8) {
                         }
                      }
 
-                     settings.setOptionValue(ModOptions.COORDS, false);
-                  } else {
+                     if ((Boolean)settings.getOptionValue(ModOptions.COORDS)) {
+                        settings.setOptionValue(ModOptions.COORDS, false);
+                     }
+
+                     double size = settings.getOptionDoubleValue(ModOptions.SIZE);
+                     int defaultSize = getDefaultMinimapSize(settings);
+                     if (size > defaultSize) {
+                        settings.setOptionDoubleValue(ModOptions.SIZE, 0.0);
+                     }
+                  } else if (!(Boolean)settings.getOptionValue(ModOptions.COORDS)) {
                      settings.setOptionValue(ModOptions.COORDS, true);
                   }
                }
             });
          }
       }
+   }
+
+   public static Optional<ModSettings> getMinimapSettings() {
+      return ModList.get()
+         .getModObjectById("xaerominimap")
+         .filter(mod -> mod instanceof XaeroMinimap)
+         .map(mod -> (XaeroMinimap)mod)
+         .map(XaeroMinimap::getSettings);
+   }
+
+   public static int getDefaultMinimapSize(ModSettings settings) {
+      int height = Minecraft.getInstance().getWindow().getHeight();
+      int width = Minecraft.getInstance().getWindow().getWidth();
+      int settingsSize = Mth.floor(Math.min(height, width) / settings.getMinimapScale());
+      return Math.min(
+         Math.max((int)(ModOptions.SIZE.getValueMin() + ModOptions.SIZE.getValueStep()), 2 * settingsSize * 130 / 1080), (int)ModOptions.SIZE.getValueMax()
+      );
    }
 }

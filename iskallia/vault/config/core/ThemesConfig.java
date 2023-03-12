@@ -19,6 +19,6 @@ public class ThemesConfig extends KeyRegistryConfig<KeyRegistry<ThemeKey, Theme>
 
    @Override
    protected void reset() {
-      this.keys.add(ThemeKey.create(VaultMod.id("classic_desert"), "Desert").with(Version.v1_0, null));
+      this.keys.add(ThemeKey.create(VaultMod.id("classic_desert"), "Desert", 16777215).with(Version.v1_0, null));
    }
 }

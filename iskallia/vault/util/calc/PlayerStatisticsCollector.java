@@ -16,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -143,22 +144,26 @@ public class PlayerStatisticsCollector {
                      }
 
                      for (ItemStack reward : stats.get(StatCollector.REWARD)) {
-                        Block patt3210$temp = ((BlockItem)reward.getItem()).getBlock();
-                        if (patt3210$temp instanceof VaultCrateBlock) {
-                           VaultCrateBlock block = (VaultCrateBlock)patt3210$temp;
-                           if (reward.getTag() != null) {
-                              CompoundTag tag = reward.getOrCreateTag().getCompound("BlockEntityTag").copy();
-                              tag.putString("id", ModBlocks.VAULT_CRATE_TILE_ENTITY.getRegistryName().toString());
-                              BlockEntity te = BlockEntity.loadStatic(BlockPos.ZERO, block.defaultBlockState(), tag);
-                              if (te != null) {
-                                 te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
-                                    for (int i = 0; i < handler.getSlots(); i++) {
-                                       ItemStack stack = handler.getStackInSlot(i);
-                                       if (stack.getItem() == ModItems.UNIDENTIFIED_ARTIFACT) {
-                                          data.artifacts++;
+                        Item patt3134$temp = reward.getItem();
+                        if (patt3134$temp instanceof BlockItem) {
+                           BlockItem blockItem = (BlockItem)patt3134$temp;
+                           Block patt3189$temp = blockItem.getBlock();
+                           if (patt3189$temp instanceof VaultCrateBlock) {
+                              VaultCrateBlock block = (VaultCrateBlock)patt3189$temp;
+                              if (reward.getTag() != null) {
+                                 CompoundTag tag = reward.getOrCreateTag().getCompound("BlockEntityTag").copy();
+                                 tag.putString("id", ModBlocks.VAULT_CRATE_TILE_ENTITY.getRegistryName().toString());
+                                 BlockEntity te = BlockEntity.loadStatic(BlockPos.ZERO, block.defaultBlockState(), tag);
+                                 if (te != null) {
+                                    te.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
+                                       for (int i = 0; i < handler.getSlots(); i++) {
+                                          ItemStack stack = handler.getStackInSlot(i);
+                                          if (stack.getItem() == ModItems.UNIDENTIFIED_ARTIFACT) {
+                                             data.artifacts++;
+                                          }
                                        }
-                                    }
-                                 });
+                                    });
+                                 }
                               }
                            }
                         }

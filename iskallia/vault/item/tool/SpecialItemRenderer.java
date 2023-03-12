@@ -27,7 +27,7 @@ public class SpecialItemRenderer extends BlockEntityWithoutLevelRenderer {
       super(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
    }
 
-   protected void renderModel(
+   public void renderModel(
       ModelResourceLocation location,
       int tint,
       ItemStack stack,
@@ -35,7 +35,8 @@ public class SpecialItemRenderer extends BlockEntityWithoutLevelRenderer {
       PoseStack matrices,
       MultiBufferSource buffer,
       int light,
-      int overlay
+      int overlay,
+      Boolean foil
    ) {
       BakedModel model = Minecraft.getInstance().getModelManager().getModel(location);
       if (transformType == TransformType.GUI && !model.usesBlockLight()) {
@@ -53,7 +54,7 @@ public class SpecialItemRenderer extends BlockEntityWithoutLevelRenderer {
             BakedModel layer = (BakedModel)layerModel.getFirst();
             RenderType renderType = (RenderType)layerModel.getSecond();
             ForgeHooksClient.setRenderType(renderType);
-            VertexConsumer consumer = ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil());
+            VertexConsumer consumer = ItemRenderer.getFoilBufferDirect(buffer, renderType, true, foil == null ? stack.hasFoil() : foil);
             Minecraft.getInstance().getItemRenderer().renderModelLists(layer, stack, light, overlay, matrices, consumer);
             if (buffer instanceof BufferSource src) {
                src.endBatch(renderType);
@@ -63,7 +64,7 @@ public class SpecialItemRenderer extends BlockEntityWithoutLevelRenderer {
          ForgeHooksClient.setRenderType(null);
       } else {
          RenderType renderType = ItemBlockRenderTypes.getRenderType(stack, true);
-         VertexConsumer consumer = ItemRenderer.getFoilBufferDirect(buffer, renderType, true, stack.hasFoil());
+         VertexConsumer consumer = ItemRenderer.getFoilBufferDirect(buffer, renderType, true, foil == null ? stack.hasFoil() : foil);
          this.renderModelLists(model, tint, matrices, consumer, light, overlay);
          if (buffer instanceof BufferSource src) {
             src.endBatch(renderType);

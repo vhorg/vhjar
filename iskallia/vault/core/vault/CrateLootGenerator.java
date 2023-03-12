@@ -7,6 +7,7 @@ import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
@@ -42,48 +43,6 @@ public class CrateLootGenerator {
       return loot;
    }
 
-   public NonNullList<ItemStack> createLootForCommand(RandomSource random, int vaultLevel) {
-      NonNullList<ItemStack> loot = NonNullList.create();
-      if (this.lootTable != null) {
-         LootTableGenerator generator = new LootTableGenerator(Version.v1_0, this.lootTable, 0.0F);
-         generator.generate(random);
-         generator.getItems().forEachRemaining(loot::add);
-      }
-
-      loot.removeIf(ItemStack::isEmpty);
-      NonNullList<ItemStack> specialLoot = this.createSpecialLoot(random);
-
-      for (int i = 0; i < loot.size() - 54 + specialLoot.size(); i++) {
-         loot.remove(random.nextInt(loot.size()));
-      }
-
-      loot.addAll(specialLoot);
-      Collections.shuffle(loot);
-      loot.forEach(stackx -> {
-         if (stackx.getItem() instanceof VaultGearItem lootItemx) {
-            lootItemx.setItemLevel(stackx, vaultLevel);
-         }
-      });
-
-      for (int i = 0; i < loot.size(); i++) {
-         ItemStack stack = (ItemStack)loot.get(i);
-         if (stack.getItem() instanceof DataTransferItem lootItem) {
-            loot.set(i, lootItem.convertStack(stack, random));
-         }
-      }
-
-      return loot;
-   }
-
-   private NonNullList<ItemStack> createSpecialLoot(RandomSource random) {
-      NonNullList<ItemStack> loot = NonNullList.create();
-      if (this.addArtifact && random.nextFloat() < this.artifactChance) {
-         loot.add(new ItemStack(ModItems.UNIDENTIFIED_ARTIFACT));
-      }
-
-      return loot;
-   }
-
    public NonNullList<ItemStack> createLoot(Vault vault, Listener listener, RandomSource random) {
       NonNullList<ItemStack> loot = NonNullList.create();
       if (this.lootTable != null) {
@@ -104,12 +63,53 @@ public class CrateLootGenerator {
       return loot;
    }
 
-   public NonNullList<ItemStack> createSpecialLoot(Listener listener, RandomSource random) {
+   public NonNullList<ItemStack> createSpecialLoot(@Nullable Listener listener, RandomSource random) {
       NonNullList<ItemStack> loot = NonNullList.create();
       if (this.addArtifact) {
-         float probability = CommonEvents.ARTIFACT_CHANCE.invoke(listener, this.artifactChance).getProbability();
+         float probability = this.artifactChance;
+         if (listener != null) {
+            probability = CommonEvents.ARTIFACT_CHANCE.invoke(listener, probability).getProbability();
+         }
+
          if (random.nextFloat() < probability) {
             loot.add(new ItemStack(ModItems.UNIDENTIFIED_ARTIFACT));
+         }
+      }
+
+      if (random.nextFloat() < ModConfigs.AUGMENT.getDropChance()) {
+         loot.add(new ItemStack(ModItems.AUGMENT));
+      }
+
+      return loot;
+   }
+
+   public NonNullList<ItemStack> createLootForCommand(RandomSource random, int vaultLevel) {
+      NonNullList<ItemStack> loot = NonNullList.create();
+      if (this.lootTable != null) {
+         LootTableGenerator generator = new LootTableGenerator(Version.v1_0, this.lootTable, 0.0F);
+         generator.generate(random);
+         generator.getItems().forEachRemaining(loot::add);
+      }
+
+      loot.removeIf(ItemStack::isEmpty);
+      NonNullList<ItemStack> specialLoot = this.createSpecialLoot(null, random);
+
+      for (int i = 0; i < loot.size() - 54 + specialLoot.size(); i++) {
+         loot.remove(random.nextInt(loot.size()));
+      }
+
+      loot.addAll(specialLoot);
+      Collections.shuffle(loot);
+      loot.forEach(stackx -> {
+         if (stackx.getItem() instanceof VaultGearItem lootItemx) {
+            lootItemx.setItemLevel(stackx, vaultLevel);
+         }
+      });
+
+      for (int i = 0; i < loot.size(); i++) {
+         ItemStack stack = (ItemStack)loot.get(i);
+         if (stack.getItem() instanceof DataTransferItem lootItem) {
+            loot.set(i, lootItem.convertStack(stack, random));
          }
       }
 

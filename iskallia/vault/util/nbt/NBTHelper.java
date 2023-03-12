@@ -6,9 +6,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -74,6 +77,35 @@ public class NBTHelper {
       }
    }
 
+   public static <K, V> void writeMap(CompoundTag tag, String key, Map<K, V> map, Function<K, String> getStringKey, Function<V, Tag> getNbtValue) {
+      tag.put(key, serializeMap(map, getStringKey, getNbtValue));
+   }
+
+   public static <K, V> CompoundTag serializeMap(Map<K, V> map, Function<K, String> getStringKey, Function<V, Tag> getNbtValue) {
+      CompoundTag mapNbt = new CompoundTag();
+
+      for (Entry<K, V> entry : map.entrySet()) {
+         mapNbt.put(getStringKey.apply(entry.getKey()), getNbtValue.apply(entry.getValue()));
+      }
+
+      return mapNbt;
+   }
+
+   public static <K, V> Optional<Map<K, V>> readMap(CompoundTag tag, String key, Function<String, K> getKey, BiFunction<String, Tag, Optional<V>> getValue) {
+      CompoundTag mapNbt = tag.getCompound(key);
+      return Optional.of(deserializeMap(mapNbt, getKey, getValue));
+   }
+
+   public static <K, V> Map<K, V> deserializeMap(CompoundTag mapNbt, Function<String, K> getKey, BiFunction<String, Tag, Optional<V>> getValue) {
+      Map<K, V> map = new HashMap<>();
+
+      for (String tagName : mapNbt.getAllKeys()) {
+         getValue.apply(tagName, mapNbt.get(tagName)).ifPresent(value -> map.put(getKey.apply(tagName), (V)value));
+      }
+
+      return map;
+   }
+
    public static <T, N extends Tag> void writeMap(CompoundTag nbt, String name, Map<UUID, T> map, Class<N> nbtType, Function<T, N> mapper) {
       ListTag uuidList = new ListTag();
       ListTag valuesList = new ListTag();
@@ -96,11 +128,16 @@ public class NBTHelper {
    public static <T, C extends Collection<T>, N extends Tag> C readCollection(
       CompoundTag nbt, String name, Class<N> nbtType, Function<N, T> mapper, C collection
    ) {
-      for (Tag inbt : (ListTag)nbt.get(name)) {
-         collection.add(mapper.apply((N)inbt));
-      }
+      ListTag listNBT = (ListTag)nbt.get(name);
+      if (listNBT == null) {
+         return collection;
+      } else {
+         for (Tag inbt : listNBT) {
+            collection.add(mapper.apply((N)inbt));
+         }
 
-      return collection;
+         return collection;
+      }
    }
 
    public static <T, N extends Tag> void writeCollection(CompoundTag nbt, String name, Collection<T> list, Class<N> nbtType, Function<T, N> mapper) {

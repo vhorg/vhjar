@@ -1,7 +1,6 @@
 package iskallia.vault.block.entity;
 
 import com.mojang.math.Vector3f;
-import iskallia.vault.VaultMod;
 import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.init.ModBlocks;
@@ -9,7 +8,6 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.PlayerVaultAltarData;
@@ -242,10 +240,10 @@ public class VaultAltarTileEntity extends BlockEntity {
    @NotNull
    private ItemStack createCrystal(ServerLevel serverLevel) {
       ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
-      CrystalData crystal = new CrystalData(stack);
+      CrystalData crystal = CrystalData.read(stack);
       int level = PlayerVaultStatsData.get(serverLevel).getVaultStats(this.owner).getVaultLevel();
-      crystal.setTheme(new PoolCrystalTheme(VaultMod.id("default")));
       crystal.setLevel(level);
+      crystal.write(stack);
       return stack;
    }
 

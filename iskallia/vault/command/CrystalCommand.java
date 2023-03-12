@@ -1,17 +1,15 @@
 package iskallia.vault.command;
 
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.gen.VaultRoomNames;
-import iskallia.vault.world.vault.logic.objective.VaultObjective;
+import iskallia.vault.item.crystal.objective.NullCrystalObjective;
 import iskallia.vault.world.vault.modifier.VaultModifierStack;
 import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
@@ -26,7 +24,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.server.command.EnumArgument;
 
 public class CrystalCommand extends Command {
    private static final SuggestionProvider<CommandSourceStack> SUGGEST_MODIFIER = (context, builder) -> SharedSuggestionProvider.suggestResource(
@@ -45,12 +42,9 @@ public class CrystalCommand extends Command {
 
    @Override
    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
-      builder.then(Commands.literal("preventRandomModifiers").then(Commands.argument("random", BoolArgumentType.bool()).executes(this::setRollsRandom)));
-      builder.then(Commands.literal("canTriggerInfluences").then(Commands.argument("trigger", BoolArgumentType.bool()).executes(this::setCanTriggerInfluences)));
-      builder.then(
-         Commands.literal("canGenerateTreasureRooms").then(Commands.argument("generate", BoolArgumentType.bool()).executes(this::canGenerateTreasureRooms))
-      );
-      builder.then(Commands.literal("setModifiable").then(Commands.argument("modifiable", BoolArgumentType.bool()).executes(this::setModifiable)));
+      builder.then(Commands.literal("setRandomModifiers").then(Commands.argument("random", BoolArgumentType.bool()).executes(this::setRandomModifiers)));
+      builder.then(Commands.literal("setExhausted").then(Commands.argument("unmodifiable", BoolArgumentType.bool()).executes(this::setUnmodifiable)));
+      builder.then(Commands.literal("setUnmodifiable").then(Commands.argument("unmodifiable", BoolArgumentType.bool()).executes(this::setUnmodifiable)));
       builder.then(
          Commands.literal("addModifier")
             .then(
@@ -59,83 +53,40 @@ public class CrystalCommand extends Command {
                   .then(Commands.argument("stackSize", IntegerArgumentType.integer(1, 100)).executes(this::addModifier))
             )
       );
-      builder.then(
-         Commands.literal("addRoom")
-            .then(
-               Commands.argument("roomKey", StringArgumentType.string())
-                  .then(Commands.argument("amount", IntegerArgumentType.integer(1, 100)).executes(this::addRoom))
-            )
-      );
-      builder.then(Commands.literal("objectiveCount").then(Commands.argument("count", IntegerArgumentType.integer(1)).executes(this::setObjectiveCount)));
-      builder.then(Commands.literal("objective").then(Commands.argument("crystalObjective", StringArgumentType.string()).executes(this::setObjective)));
       builder.then(Commands.literal("clearObjective").executes(this::clearObjective));
-      builder.then(Commands.literal("type").then(Commands.argument("crystalType", EnumArgument.enumArgument(CrystalData.Type.class)).executes(this::setType)));
-      builder.then(
-         Commands.literal("setInstabilityCounter").then(Commands.argument("instabilityCounter", IntegerArgumentType.integer(0)).executes(this::setInstability))
-      );
+      builder.then(Commands.literal("setInstability").then(Commands.argument("instability", FloatArgumentType.floatArg(0.0F)).executes(this::setInstability)));
       builder.then(Commands.literal("setLevel").then(Commands.argument("level", IntegerArgumentType.integer(0)).executes(this::setLevel)));
    }
 
    private int setLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       ItemStack crystal = this.getCrystal(context);
+      CrystalData data = CrystalData.read(crystal);
       int level = IntegerArgumentType.getInteger(context, "level");
-      VaultCrystalItem.getData(crystal).setLevel(level);
+      data.setLevel(level);
+      data.write(crystal);
       return 0;
    }
 
-   private int canGenerateTreasureRooms(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+   private int setRandomModifiers(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      boolean generateTreasureRooms = BoolArgumentType.getBool(ctx, "generate");
-      data.setCanGenerateTreasureRooms(generateTreasureRooms);
-      return 0;
-   }
-
-   private int setCanTriggerInfluences(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      boolean triggerInfluences = BoolArgumentType.getBool(ctx, "trigger");
-      data.setCanTriggerInfluences(triggerInfluences);
-      return 0;
-   }
-
-   private int setRollsRandom(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
+      CrystalData data = CrystalData.read(crystal);
       boolean randomModifiers = BoolArgumentType.getBool(ctx, "random");
-      data.setPreventsRandomModifiers(randomModifiers);
+      data.getModifiers().setRandomModifiers(randomModifiers);
+      data.write(crystal);
       return 0;
    }
 
-   private int setModifiable(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+   private int setUnmodifiable(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      boolean modifiable = BoolArgumentType.getBool(ctx, "modifiable");
-      data.setModifiable(modifiable);
+      CrystalData data = CrystalData.read(crystal);
+      data.setUnmodifiable(BoolArgumentType.getBool(ctx, "unmodifiable"));
+      data.write(crystal);
       return 0;
-   }
-
-   private int addRoom(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      String roomKey = StringArgumentType.getString(ctx, "roomKey");
-      if (VaultRoomNames.getName(roomKey) == null) {
-         ((CommandSourceStack)ctx.getSource()).getPlayerOrException().sendMessage(new TextComponent("Unknown Room: " + roomKey), Util.NIL_UUID);
-         return 0;
-      } else {
-         int amount = IntegerArgumentType.getInteger(ctx, "amount");
-
-         for (int i = 0; i < amount; i++) {
-            data.addGuaranteedRoom(roomKey);
-         }
-
-         return 0;
-      }
    }
 
    private int addModifier(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
+      CrystalData data = CrystalData.read(crystal);
       ResourceLocation id = ResourceLocationArgument.getId(ctx, "modifier");
       VaultModifier<?> modifier = VaultModifierRegistry.getOrDefault(id, null);
       if (modifier == null) {
@@ -143,54 +94,26 @@ public class CrystalCommand extends Command {
          return 0;
       } else {
          int stackSize = IntegerArgumentType.getInteger(ctx, "stackSize");
-         data.addModifier(VaultModifierStack.of(modifier, stackSize));
+         data.getModifiers().add(VaultModifierStack.of(modifier, stackSize));
+         data.write(crystal);
          return 0;
       }
-   }
-
-   private int setObjectiveCount(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      int count = IntegerArgumentType.getInteger(ctx, "count");
-      return 0;
    }
 
    private int clearObjective(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      return 0;
-   }
-
-   private int setObjective(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      String objectiveStr = StringArgumentType.getString(ctx, "crystalObjective");
-      VaultRaid.ARCHITECT_EVENT.get();
-      VaultObjective objective = VaultObjective.getObjective(new ResourceLocation(objectiveStr));
-      if (objective == null) {
-         ((CommandSourceStack)ctx.getSource()).getPlayerOrException().sendMessage(new TextComponent("Unknown Objective: " + objectiveStr), Util.NIL_UUID);
-         return 0;
-      } else {
-         return 0;
-      }
-   }
-
-   private int setType(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      CrystalData.Type type = (CrystalData.Type)ctx.getArgument("crystalType", CrystalData.Type.class);
-      if (type != CrystalData.Type.RAFFLE) {
-         data.setType(type);
-      }
-
+      CrystalData data = CrystalData.read(crystal);
+      data.setObjective(NullCrystalObjective.INSTANCE);
+      data.write(crystal);
       return 0;
    }
 
    private int setInstability(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ItemStack crystal = this.getCrystal(ctx);
-      CrystalData data = VaultCrystalItem.getData(crystal);
-      int instabilityCounter = IntegerArgumentType.getInteger(ctx, "instabilityCounter");
-      data.setInstabilityCounter(instabilityCounter);
+      CrystalData data = CrystalData.read(crystal);
+      float instability = FloatArgumentType.getFloat(ctx, "instability");
+      data.setInstability(instability);
+      data.write(crystal);
       return 0;
    }
 

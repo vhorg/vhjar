@@ -26,5 +26,14 @@ public class ModModelLayers {
    public static final ModelLayerLocation T2_HUSK = new ModelLayerLocation(VaultMod.id("t2_husk"), "main");
    public static final ModelLayerLocation T2_CREEPER = new ModelLayerLocation(VaultMod.id("t2_creeper"), "main");
    public static final ModelLayerLocation T2_ENDERMAN = new ModelLayerLocation(VaultMod.id("t2_enderman"), "main");
+   public static final ModelLayerLocation T3_CREEPER = new ModelLayerLocation(VaultMod.id("t3_creeper"), "main");
+   public static final ModelLayerLocation T3_DROWNED = new ModelLayerLocation(VaultMod.id("t3_drowned"), "main");
+   public static final ModelLayerLocation T3_ENDERMAN = new ModelLayerLocation(VaultMod.id("t3_enderman"), "main");
+   public static final ModelLayerLocation T3_HUSK = new ModelLayerLocation(VaultMod.id("t3_husk"), "main");
+   public static final ModelLayerLocation T3_SKELETON = new ModelLayerLocation(VaultMod.id("t3_skeleton"), "main");
+   public static final ModelLayerLocation T3_STRAY = new ModelLayerLocation(VaultMod.id("t3_stray"), "main");
+   public static final ModelLayerLocation T3_WITHER_SKELETON = new ModelLayerLocation(VaultMod.id("t3_wither_skeleton"), "main");
+   public static final ModelLayerLocation T3_PIGLIN = new ModelLayerLocation(VaultMod.id("t3_piglin"), "main");
+   public static final ModelLayerLocation T3_ZOMBIE = new ModelLayerLocation(VaultMod.id("t3_zombie"), "main");
    public static final ModelLayerLocation VAULT_SPIDER_BABY = new ModelLayerLocation(VaultMod.id("vault_spider_baby"), "main");
 }

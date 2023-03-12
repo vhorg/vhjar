@@ -6,12 +6,14 @@ import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataMap;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
-import iskallia.vault.core.data.adapter.DirectAdapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.DirectAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.init.ModBlocks;
 import java.util.HashMap;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
@@ -23,10 +25,10 @@ public class MinedBlocksStat extends DataMap<MinedBlocksStat, ResourceLocation, 
       super(
          new HashMap<>(),
          new DirectAdapter<>(
-            (buffer, context, value) -> buffer.writeIntSegmented((Integer)ALLOWED_BLOCKS.get(value), 7),
-            (buffer, context) -> (ResourceLocation)ALLOWED_BLOCKS.inverse().get(buffer.readIntSegmented(7))
+            (value, buffer, context) -> buffer.writeIntSegmented((Integer)ALLOWED_BLOCKS.get(value), 7),
+            (buffer, context) -> Optional.ofNullable((ResourceLocation)ALLOWED_BLOCKS.inverse().get(buffer.readIntSegmented(7)))
          ),
-         Adapter.ofCompound(MinedBlocksStat.Entry::new)
+         CompoundAdapter.of(MinedBlocksStat.Entry::new)
       );
       ALLOWED_BLOCKS.keySet().forEach(block -> this.put(block, new MinedBlocksStat.Entry()));
    }
@@ -65,7 +67,7 @@ public class MinedBlocksStat extends DataMap<MinedBlocksStat, ResourceLocation, 
    public static class Entry extends DataObject<MinedBlocksStat.Entry> {
       public static final FieldRegistry FIELDS = new FieldRegistry();
       public static final FieldKey<Integer> COUNT = FieldKey.of("count", Integer.class)
-         .with(Version.v1_0, Adapter.ofSegmentedInt(7), DISK.all())
+         .with(Version.v1_0, Adapters.INT_SEGMENTED_7, DISK.all())
          .register(FIELDS);
 
       public Entry() {

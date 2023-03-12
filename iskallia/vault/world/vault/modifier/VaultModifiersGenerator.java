@@ -21,14 +21,6 @@ public final class VaultModifiersGenerator {
          type = VaultModifierPoolsConfig.ModifierPoolType.RAFFLE;
       } else if (vault.getActiveObjective(RaidChallengeObjective.class).isPresent()) {
          type = VaultModifierPoolsConfig.ModifierPoolType.RAID;
-      } else if (data != null && data.getType() == CrystalData.Type.FINAL_VELARA) {
-         type = VaultModifierPoolsConfig.ModifierPoolType.FINAL_VELARA;
-      } else if (data != null && data.getType() == CrystalData.Type.FINAL_TENOS) {
-         type = VaultModifierPoolsConfig.ModifierPoolType.FINAL_TENOS;
-      } else if (data != null && data.getType() == CrystalData.Type.FINAL_WENDARR) {
-         type = VaultModifierPoolsConfig.ModifierPoolType.FINAL_WENDARR;
-      } else if (data != null && data.getType() == CrystalData.Type.FINAL_IDONA) {
-         type = VaultModifierPoolsConfig.ModifierPoolType.FINAL_IDONA;
       }
 
       ResourceLocation objectiveKey = vault.getAllObjectives().stream().findFirst().map(VaultObjective::getId).orElse(null);

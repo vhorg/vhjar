@@ -56,6 +56,7 @@ public final class Entropy {
       public static final Entropy.Stat FATAL_STRIKE = new Entropy.Stat(2);
       public static final Entropy.Stat VANILLA_CRITICAL = new Entropy.Stat(3);
       public static final Entropy.Stat STUN_ATTACK_CHANCE = new Entropy.Stat(4);
+      public static final Entropy.Stat KNOCKBACK_ATTACK_CHANCE = new Entropy.Stat(5);
       private final int hash;
 
       private Stat(int hash) {

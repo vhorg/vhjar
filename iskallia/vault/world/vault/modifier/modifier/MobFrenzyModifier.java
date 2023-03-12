@@ -5,6 +5,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.KillBossObjective;
+import iskallia.vault.core.vault.objective.ObeliskObjective;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.world.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.world.vault.modifier.spi.EntityAttributeModifier;
@@ -55,6 +56,16 @@ public class MobFrenzyModifier extends VaultModifier<MobFrenzyModifier.Propertie
             boolean isBoss = vault.map(Vault.OBJECTIVES, objectives -> objectives.forEach(KillBossObjective.class, objective -> {
                UUID bossId = objective.get(KillBossObjective.BOSS_ID);
                return event.getEntity().getUUID().equals(bossId);
+            }) || objectives.forEach(ObeliskObjective.class, objective -> {
+               ObeliskObjective.Wave[] waves = objective.get(ObeliskObjective.WAVES);
+
+               for (ObeliskObjective.Wave wave : waves) {
+                  if (wave.get(ObeliskObjective.Wave.MOBS).contains(entity.getUUID())) {
+                     return true;
+                  }
+               }
+
+               return false;
             }), Boolean.valueOf(false));
             if (!isBoss && entity.getHealth() > this.properties.maxHealth) {
                entity.setHealth(this.properties.maxHealth);

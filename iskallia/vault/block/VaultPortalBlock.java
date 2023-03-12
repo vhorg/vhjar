@@ -11,7 +11,6 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.entity.entity.SpiritEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModGameRules;
 import iskallia.vault.util.BlockHelper;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.Arrays;
@@ -100,9 +99,7 @@ public class VaultPortalBlock extends NetherPortalBlock implements EntityBlock {
                   UUID vaultId = portal.getData().getVaultId();
                   Vault vault;
                   if (vaultId == null) {
-                     vault = ServerVaults.add(
-                        VaultFactory.create(Version.latest(), portal.getData().copy(), level.getGameRules().getBoolean(ModGameRules.CASUAL_VAULTS))
-                     );
+                     vault = ServerVaults.add(VaultFactory.create(Version.latest(), portal.getData().copy()));
                      this.fill(level, pos, tileEntity -> {
                         tileEntity.getData().setVaultId(vault.get(Vault.ID));
                         tileEntity.setChanged();

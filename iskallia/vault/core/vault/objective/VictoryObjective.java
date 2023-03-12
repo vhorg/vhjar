@@ -4,7 +4,9 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataMap;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.primitive.LegacySegmentedIntAdapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -33,11 +35,11 @@ public class VictoryObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("victory", Objective.class).with(Version.v1_0, VictoryObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Integer> TICKS_LEFT = FieldKey.of("ticks_left", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(7), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_7, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
-   public static final FieldKey<Void> TICKED = FieldKey.of("ticked", Void.class).with(Version.v1_0, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> TICKED = FieldKey.of("ticked", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
    public static final FieldKey<VictoryObjective.TicksMap> TICKS = FieldKey.of("ticks", VictoryObjective.TicksMap.class)
-      .with(Version.v1_1, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), VictoryObjective.TicksMap::new)
+      .with(Version.v1_1, CompoundAdapter.of(VictoryObjective.TicksMap::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    protected VictoryObjective() {
@@ -133,7 +135,7 @@ public class VictoryObjective extends Objective {
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       return false;
    }
 
@@ -144,7 +146,7 @@ public class VictoryObjective extends Objective {
 
    private static class TicksMap extends DataMap<VictoryObjective.TicksMap, UUID, Integer> {
       public TicksMap() {
-         super(new HashMap<>(), Adapter.ofUUID(), Adapter.ofSegmentedInt(7));
+         super(new HashMap<>(), Adapters.UUID, LegacySegmentedIntAdapter._7);
       }
    }
 }

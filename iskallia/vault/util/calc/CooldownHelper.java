@@ -1,12 +1,13 @@
 package iskallia.vault.util.calc;
 
 import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.gear.attribute.ability.AbilityCooldownFlatAttribute;
+import iskallia.vault.gear.attribute.ability.AbilityCooldownPercentAttribute;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModEtchings;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
-import iskallia.vault.skill.ability.group.AbilityGroup;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,20 +20,32 @@ public class CooldownHelper {
          return 0;
       } else {
          int cooldownTicks = abilityConfig.getCooldownTicks();
-         AbilityGroup<?, ?> abilityGroup = abilityNode.getGroup();
-         return adjustCooldown(player, cooldownTicks);
+         return adjustCooldown(player, abilityNode.getName(), cooldownTicks);
       }
    }
 
-   public static int adjustCooldown(ServerPlayer player, int cooldownTicks) {
+   public static int adjustCooldown(ServerPlayer player, String ability, int cooldownTicks) {
       float cooldownMultiplier = getCooldownMultiplier(player);
-      cooldownTicks -= Mth.floor(cooldownTicks * cooldownMultiplier);
+      float cooldown = cooldownTicks;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(player);
-      if (snapshot.hasEtching(ModEtchings.RIFT)) {
-         cooldownTicks = (int)(cooldownTicks * ModEtchings.RIFT.getCooldownMultiplier());
+
+      for (AbilityCooldownFlatAttribute attribute : snapshot.getAttributeValue(ModGearAttributes.ABILITY_COOLDOWN_FLAT, VaultGearAttributeTypeMerger.asList())) {
+         cooldown = attribute.adjustCooldown(ability, cooldown);
       }
 
-      return cooldownTicks;
+      cooldown -= cooldownTicks * cooldownMultiplier;
+
+      for (AbilityCooldownPercentAttribute attribute : snapshot.getAttributeValue(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, VaultGearAttributeTypeMerger.asList()
+      )) {
+         cooldown = attribute.adjustCooldown(ability, cooldown);
+      }
+
+      if (snapshot.hasEtching(ModEtchings.RIFT)) {
+         cooldown *= ModEtchings.RIFT.getCooldownMultiplier();
+      }
+
+      return Math.max(Mth.floor(cooldown), 0);
    }
 
    public static float getCooldownMultiplier(ServerPlayer player) {

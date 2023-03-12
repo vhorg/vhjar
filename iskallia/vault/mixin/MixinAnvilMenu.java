@@ -1,6 +1,7 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.init.ModItems;
+import iskallia.vault.item.IAnvilPreventCombination;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -18,6 +19,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(
    value = {AnvilMenu.class},
@@ -32,6 +37,30 @@ public abstract class MixinAnvilMenu extends ItemCombinerMenu {
 
    public MixinAnvilMenu(@Nullable MenuType<?> p_39773_, int p_39774_, Inventory p_39775_, ContainerLevelAccess p_39776_) {
       super(p_39773_, p_39774_, p_39775_, p_39776_);
+   }
+
+   @Inject(
+      method = {"createResult"},
+      at = {@At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getEnchantments(Lnet/minecraft/world/item/ItemStack;)Ljava/util/Map;",
+         ordinal = 1
+      )},
+      locals = LocalCapture.CAPTURE_FAILHARD,
+      cancellable = true
+   )
+   protected void preventRepairResult(
+      CallbackInfo ci, ItemStack inputLeft, int cost, int baseCost, int costIncrease, ItemStack inputLeftCopy, ItemStack inputRight
+   ) {
+      if (!inputLeftCopy.isEmpty() && !inputRight.isEmpty()) {
+         if (inputLeftCopy.getItem() instanceof IAnvilPreventCombination preventCombination && preventCombination.shouldPreventAnvilCombination(inputRight)) {
+            ci.cancel();
+         }
+
+         if (inputRight.getItem() instanceof IAnvilPreventCombination preventCombination && preventCombination.shouldPreventAnvilCombination(inputLeft)) {
+            ci.cancel();
+         }
+      }
    }
 
    @Overwrite

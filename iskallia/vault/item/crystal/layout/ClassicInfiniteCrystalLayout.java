@@ -1,19 +1,23 @@
 package iskallia.vault.item.crystal.layout;
 
 import com.google.gson.JsonObject;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.layout.ClassicInfiniteLayout;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.TooltipFlag;
 
 public class ClassicInfiniteCrystalLayout extends CrystalLayout {
    protected int tunnelSpan;
 
-   protected ClassicInfiniteCrystalLayout() {
+   public ClassicInfiniteCrystalLayout() {
    }
 
    public ClassicInfiniteCrystalLayout(int tunnelSpan) {
@@ -21,7 +25,7 @@ public class ClassicInfiniteCrystalLayout extends CrystalLayout {
    }
 
    @Override
-   public void configure(Vault vault) {
+   public void configure(Vault vault, RandomSource random) {
       vault.getOptional(Vault.WORLD).map(world -> world.get(WorldManager.GENERATOR)).ifPresent(generator -> {
          if (generator instanceof GridGenerator grid) {
             grid.set(GridGenerator.LAYOUT, new ClassicInfiniteLayout(this.tunnelSpan));
@@ -30,31 +34,30 @@ public class ClassicInfiniteCrystalLayout extends CrystalLayout {
    }
 
    @Override
-   public Component getName() {
-      return new TextComponent("Infinite").withStyle(ChatFormatting.RED);
+   public void addText(List<Component> tooltip, TooltipFlag flag) {
+      tooltip.add(new TextComponent("Layout: ").append(new TextComponent("Infinite").withStyle(ChatFormatting.RED)));
    }
 
-   public CompoundTag serializeNBT() {
+   @Override
+   public Optional<CompoundTag> writeNbt() {
       CompoundTag nbt = new CompoundTag();
-      nbt.putString("type", "infinite");
       nbt.putInt("tunnel_span", this.tunnelSpan);
-      return nbt;
+      return Optional.of(nbt);
    }
 
-   public void deserializeNBT(CompoundTag nbt) {
+   public void readNbt(CompoundTag nbt) {
       this.tunnelSpan = nbt.getInt("tunnel_span");
    }
 
    @Override
-   public JsonObject serializeJson() {
-      JsonObject object = new JsonObject();
-      object.addProperty("type", "infinite");
-      object.addProperty("tunnel_span", this.tunnelSpan);
-      return object;
+   public Optional<JsonObject> writeJson() {
+      JsonObject json = new JsonObject();
+      json.addProperty("type", "infinite");
+      json.addProperty("tunnel_span", this.tunnelSpan);
+      return Optional.of(json);
    }
 
-   @Override
-   public void deserializeJson(JsonObject object) {
-      this.tunnelSpan = object.get("tunnel_span").getAsInt();
+   public void readJson(JsonObject json) {
+      this.tunnelSpan = json.get("tunnel_span").getAsInt();
    }
 }

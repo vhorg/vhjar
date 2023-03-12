@@ -7,6 +7,11 @@
           "type": "minecraft:item",
           "name": "the_vault:magnet_modification_table"
         }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
       ]
     }
   ]

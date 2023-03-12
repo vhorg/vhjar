@@ -1,9 +1,12 @@
 package iskallia.vault.block;
 
 import iskallia.vault.block.entity.ShopPedestalBlockTile;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.event.event.ShopPedestalPriceEvent;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.BlockHelper;
+import iskallia.vault.util.InventoryUtil;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -76,23 +79,13 @@ public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterB
             ShopPedestalPriceEvent event = new ShopPedestalPriceEvent(player, offerStack, tile.getCurrencyStack());
             MinecraftForge.EVENT_BUS.post(event);
             ItemStack currency = event.getCost();
-            int required = currency.getCount();
             return player.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, null)
                .map(
                   itemHandler -> {
-                     int amount = 0;
+                     List<InventoryUtil.ItemAccess> allItems = List.of();
                      if (!player.isCreative()) {
-                        for (int i = 0; i < itemHandler.getSlots(); i++) {
-                           ItemStack stack = itemHandler.getStackInSlot(i);
-                           if (stack.is(currency.getItem())) {
-                              amount += stack.getCount();
-                              if (amount >= required) {
-                                 break;
-                              }
-                           }
-                        }
-
-                        if (amount < required) {
+                        allItems = InventoryUtil.findAllItems(player);
+                        if (!this.hasEnoughCurrency(allItems, currency)) {
                            if (worldIn.isClientSide) {
                               player.displayClientMessage(
                                  new TranslatableComponent("message.the_vault.shop_pedestal.fail", new Object[]{currency.getHoverName()}), true
@@ -105,18 +98,7 @@ public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterB
 
                      if (!worldIn.isClientSide) {
                         if (!player.isCreative()) {
-                           for (int ix = 0; ix < itemHandler.getSlots(); ix++) {
-                              ItemStack stack = itemHandler.getStackInSlot(ix);
-                              if (stack.is(currency.getItem())) {
-                                 int min = Math.min(required, stack.getCount());
-                                 itemHandler.extractItem(ix, min, false);
-                                 amount -= min;
-                                 if (amount <= 0) {
-                                    break;
-                                 }
-                              }
-                           }
-
+                           this.extractCurrency(allItems, currency);
                            BlockState inactiveState = (BlockState)state.setValue(ACTIVE, false);
                            tile.setRemoved();
                            worldIn.setBlockAndUpdate(pos, inactiveState);
@@ -152,7 +134,7 @@ public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterB
             if (!c.isEmpty() && !o.isEmpty()) {
                worldIn.setBlockAndUpdate(pos, (BlockState)state.setValue(ACTIVE, true));
                if (worldIn.getBlockEntity(pos) instanceof ShopPedestalBlockTile tilex) {
-                  tilex.setOffer(o.copy(), c.copy());
+                  tilex.setOffer(o.copy(), OverSizedItemStack.of(c.copy()));
                   tilex.setChanged();
                   return InteractionResult.sidedSuccess(worldIn.isClientSide);
                }
@@ -162,6 +144,38 @@ public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterB
          }
 
          return InteractionResult.PASS;
+      }
+   }
+
+   private boolean hasEnoughCurrency(List<InventoryUtil.ItemAccess> allItems, ItemStack currency) {
+      int amount = 0;
+
+      for (InventoryUtil.ItemAccess itemAccess : allItems) {
+         ItemStack stack = itemAccess.getStack();
+         if (stack.is(currency.getItem())) {
+            amount += stack.getCount();
+            if (amount >= currency.getCount()) {
+               return true;
+            }
+         }
+      }
+
+      return false;
+   }
+
+   private void extractCurrency(List<InventoryUtil.ItemAccess> allItems, ItemStack currency) {
+      int required = currency.getCount();
+
+      for (InventoryUtil.ItemAccess itemAccess : allItems) {
+         ItemStack stack = itemAccess.getStack();
+         if (stack.is(currency.getItem())) {
+            int min = Math.min(required, stack.getCount());
+            itemAccess.setStack(ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - min));
+            required -= min;
+            if (required <= 0) {
+               break;
+            }
+         }
       }
    }
 

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "the_vault:chromatic_log"
+  },
+  "result": "minecraft:charcoal",
+  "experience": 1.0,
+  "cookingtime": 200
+}

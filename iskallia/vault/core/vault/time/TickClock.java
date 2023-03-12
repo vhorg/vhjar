@@ -8,7 +8,8 @@ import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
@@ -23,28 +24,28 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class TickClock extends DataObject<TickClock> implements ISupplierKey<TickClock> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<Integer> GLOBAL_TIME = FieldKey.of("global_time", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> LOGICAL_TIME = FieldKey.of("logical_time", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> DISPLAY_TIME = FieldKey.of("display_time", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Void> PAUSED = FieldKey.of("paused", Void.class)
-      .with(Version.v1_0, Adapter.ofVoid(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.ofVoid(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Void> VISIBLE = FieldKey.of("visible", Void.class)
-      .with(Version.v1_0, Adapter.ofVoid(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.ofVoid(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> TEXT_COLOR = FieldKey.of("text_color", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> ROTATION_TIME = FieldKey.of("rotation_time", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<ClockModifier.List> MODIFIERS = FieldKey.of("modifiers", ClockModifier.List.class)
-      .with(Version.v1_0, Adapter.ofCompound(ClockModifier.List::new), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(ClockModifier.List::new), DISK.all())
       .register(FIELDS);
 
    public TickClock() {

@@ -2,20 +2,24 @@ package iskallia.vault.item.crystal.layout;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.layout.ClassicPolygonLayout;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.TooltipFlag;
 
 public class ClassicPolygonCrystalLayout extends ClassicInfiniteCrystalLayout {
    protected int[] vertices;
 
-   protected ClassicPolygonCrystalLayout() {
+   public ClassicPolygonCrystalLayout() {
    }
 
    public ClassicPolygonCrystalLayout(int tunnelSpan, int[] vertices) {
@@ -24,7 +28,7 @@ public class ClassicPolygonCrystalLayout extends ClassicInfiniteCrystalLayout {
    }
 
    @Override
-   public void configure(Vault vault) {
+   public void configure(Vault vault, RandomSource random) {
       vault.getOptional(Vault.WORLD).map(world -> world.get(WorldManager.GENERATOR)).ifPresent(generator -> {
          if (generator instanceof GridGenerator grid) {
             grid.set(GridGenerator.LAYOUT, new ClassicPolygonLayout(this.tunnelSpan, this.vertices));
@@ -33,30 +37,30 @@ public class ClassicPolygonCrystalLayout extends ClassicInfiniteCrystalLayout {
    }
 
    @Override
-   public Component getName() {
-      return new TextComponent("Polygon").withStyle(ChatFormatting.GOLD);
+   public void addText(List<Component> tooltip, TooltipFlag flag) {
+      tooltip.add(new TextComponent("Layout: ").append(new TextComponent("Polygon").withStyle(ChatFormatting.GOLD)));
    }
 
    @Override
-   public CompoundTag serializeNBT() {
-      CompoundTag nbt = super.serializeNBT();
-      nbt.putString("type", "polygon");
-      ListTag list = new ListTag();
+   public Optional<CompoundTag> writeNbt() {
+      return super.writeNbt().map(nbt -> {
+         ListTag list = new ListTag();
 
-      for (int i = 0; i < this.vertices.length; i += 2) {
-         CompoundTag element = new CompoundTag();
-         element.putInt("x", this.vertices[i]);
-         element.putInt("z", this.vertices[i + 1]);
-         list.add(element);
-      }
+         for (int i = 0; i < this.vertices.length; i += 2) {
+            CompoundTag element = new CompoundTag();
+            element.putInt("x", this.vertices[i]);
+            element.putInt("z", this.vertices[i + 1]);
+            list.add(element);
+         }
 
-      nbt.put("vertices", list);
-      return nbt;
+         nbt.put("vertices", list);
+         return (CompoundTag)nbt;
+      });
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
-      super.deserializeNBT(nbt);
+   public void readNbt(CompoundTag nbt) {
+      super.readNbt(nbt);
       ListTag list = nbt.getList("vertices", 10);
       this.vertices = new int[list.size() * 2];
 
@@ -68,26 +72,26 @@ public class ClassicPolygonCrystalLayout extends ClassicInfiniteCrystalLayout {
    }
 
    @Override
-   public JsonObject serializeJson() {
-      JsonObject object = super.serializeJson();
-      object.addProperty("type", "polygon");
-      JsonArray list = new JsonArray();
+   public Optional<JsonObject> writeJson() {
+      return super.writeJson().map(json -> {
+         JsonArray list = new JsonArray();
 
-      for (int i = 0; i < this.vertices.length; i += 2) {
-         JsonObject element = new JsonObject();
-         element.addProperty("x", this.vertices[i]);
-         element.addProperty("z", this.vertices[i + 1]);
-         list.add(element);
-      }
+         for (int i = 0; i < this.vertices.length; i += 2) {
+            JsonObject element = new JsonObject();
+            element.addProperty("x", this.vertices[i]);
+            element.addProperty("z", this.vertices[i + 1]);
+            list.add(element);
+         }
 
-      object.add("vertices", list);
-      return object;
+         json.add("vertices", list);
+         return (JsonObject)json;
+      });
    }
 
    @Override
-   public void deserializeJson(JsonObject object) {
-      super.deserializeJson(object);
-      JsonArray list = object.get("vertices").getAsJsonArray();
+   public void readJson(JsonObject json) {
+      super.readJson(json);
+      JsonArray list = json.get("vertices").getAsJsonArray();
       this.vertices = new int[list.size() * 2];
 
       for (int i = 0; i < list.size(); i++) {

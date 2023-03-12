@@ -1,7 +1,9 @@
 package iskallia.vault.init;
 
 import iskallia.vault.container.BountyContainer;
+import iskallia.vault.container.InscriptionTableContainer;
 import iskallia.vault.container.LootStatueContainer;
+import iskallia.vault.container.ModifierWorkbenchContainer;
 import iskallia.vault.container.NBTElementContainer;
 import iskallia.vault.container.RelicPedestalContainer;
 import iskallia.vault.container.RenamingContainer;
@@ -16,8 +18,10 @@ import iskallia.vault.container.VaultCharmControllerContainer;
 import iskallia.vault.container.VaultCrateContainer;
 import iskallia.vault.container.VaultDiffuserContainer;
 import iskallia.vault.container.VaultEndContainer;
+import iskallia.vault.container.VaultEnhancementAltarContainer;
 import iskallia.vault.container.VaultForgeContainer;
 import iskallia.vault.container.VaultRecyclerContainer;
+import iskallia.vault.container.WardrobeContainer;
 import iskallia.vault.container.inventory.CatalystInfusionTableContainer;
 import iskallia.vault.container.inventory.CryochamberContainer;
 import iskallia.vault.container.inventory.EtchingTradeContainer;
@@ -63,13 +67,18 @@ public class ModContainers {
    public static MenuType<MagnetTableContainerMenu> MAGNET_TABLE_CONTAINER;
    public static MenuType<VaultForgeContainer> VAULT_FORGE_CONTAINER;
    public static MenuType<ToolStationContainer> TOOL_STATION_CONTAINER;
+   public static MenuType<InscriptionTableContainer> INSCRIPTION_TABLE_CONTAINER;
    public static MenuType<VaultArtisanStationContainer> VAULT_ARTISAN_STATION_CONTAINER;
    public static MenuType<VaultRecyclerContainer> VAULT_RECYCLER_CONTAINER;
    public static MenuType<VaultDiffuserContainer> VAULT_DIFFUSER_CONTAINER;
    public static MenuType<VaultEndContainer> VAULT_END_CONTAINER;
    public static MenuType<RelicPedestalContainer> RELIC_PEDESTAL_CONTAINER;
    public static MenuType<SpiritExtractorContainer> SPIRIT_EXTRACTOR_CONTAINER;
+   public static MenuType<WardrobeContainer.Gear> WARDROBE_GEAR_CONTAINER;
+   public static MenuType<WardrobeContainer.Hotbar> WARDROBE_HOTBAR_CONTAINER;
    public static MenuType<BountyContainer> BOUNTY_CONTAINER;
+   public static MenuType<VaultEnhancementAltarContainer> ENHANCEMENT_ALTAR_CONTAINER;
+   public static MenuType<ModifierWorkbenchContainer> MODIFIER_WORKBENCH_CONTAINER;
 
    public static void register(Register<MenuType<?>> event) {
       STATISTICS_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
@@ -156,6 +165,11 @@ public class ModContainers {
          BlockPos pos = buffer.readBlockPos();
          return new ToolStationContainer(windowId, world, pos, inventory);
       });
+      INSCRIPTION_TABLE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new InscriptionTableContainer(windowId, world, pos, inventory);
+      });
       VAULT_ARTISAN_STATION_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          Level world = inventory.player.getCommandSenderWorld();
          BlockPos pos = buffer.readBlockPos();
@@ -184,10 +198,28 @@ public class ModContainers {
          BlockPos blockPos = buffer.readBlockPos();
          return new SpiritExtractorContainer(windowId, inventory, blockPos);
       });
+      WARDROBE_GEAR_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         BlockPos blockPos = buffer.readBlockPos();
+         return new WardrobeContainer.Gear(windowId, inventory, blockPos);
+      });
+      WARDROBE_HOTBAR_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         BlockPos blockPos = buffer.readBlockPos();
+         return new WardrobeContainer.Hotbar(windowId, inventory, blockPos);
+      });
       BOUNTY_CONTAINER = IForgeMenuType.create((windowId, inv, data) -> {
          CompoundTag tag = data.readNbt();
          Level world = inv.player.getCommandSenderWorld();
          return new BountyContainer(windowId, world, inv, tag == null ? new CompoundTag() : tag);
+      });
+      ENHANCEMENT_ALTAR_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new VaultEnhancementAltarContainer(windowId, world, pos, inventory);
+      });
+      MODIFIER_WORKBENCH_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new ModifierWorkbenchContainer(windowId, world, pos, inventory);
       });
       event.getRegistry()
          .registerAll(
@@ -212,13 +244,18 @@ public class ModContainers {
                (MenuType)MAGNET_TABLE_CONTAINER.setRegistryName("magnet_table_container"),
                (MenuType)VAULT_FORGE_CONTAINER.setRegistryName("vault_forge_container"),
                (MenuType)TOOL_STATION_CONTAINER.setRegistryName("tool_station_container"),
+               (MenuType)INSCRIPTION_TABLE_CONTAINER.setRegistryName("inscription_table_container"),
                (MenuType)VAULT_ARTISAN_STATION_CONTAINER.setRegistryName("vault_artisan_station_container"),
                (MenuType)VAULT_RECYCLER_CONTAINER.setRegistryName("vault_recycler_container"),
                (MenuType)VAULT_DIFFUSER_CONTAINER.setRegistryName("vault_diffuser_container"),
                (MenuType)VAULT_END_CONTAINER.setRegistryName("vault_end_container"),
                (MenuType)RELIC_PEDESTAL_CONTAINER.setRegistryName("relic_pedestal_container"),
                (MenuType)SPIRIT_EXTRACTOR_CONTAINER.setRegistryName("spirit_extractor_container"),
-               (MenuType)BOUNTY_CONTAINER.setRegistryName("bounty_container")
+               (MenuType)WARDROBE_GEAR_CONTAINER.setRegistryName("wardrobe_gear_container"),
+               (MenuType)WARDROBE_HOTBAR_CONTAINER.setRegistryName("wardrobe_hotbar_container"),
+               (MenuType)BOUNTY_CONTAINER.setRegistryName("bounty_container"),
+               (MenuType)ENHANCEMENT_ALTAR_CONTAINER.setRegistryName("enhancement_altar_container"),
+               (MenuType)MODIFIER_WORKBENCH_CONTAINER.setRegistryName("modifier_workbench_container")
             }
          );
    }

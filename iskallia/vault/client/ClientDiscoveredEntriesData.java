@@ -2,9 +2,13 @@ package iskallia.vault.client;
 
 import iskallia.vault.network.message.transmog.DiscoveredEntriesMessage;
 import iskallia.vault.util.function.ObservableSupplier;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 
 public class ClientDiscoveredEntriesData {
    public static void receiveMessage(DiscoveredEntriesMessage message) {
@@ -50,6 +54,22 @@ public class ClientDiscoveredEntriesData {
       private static void receiveMessage(Set<ResourceLocation> trinkets) {
          discoveredTrinkets.clear();
          discoveredTrinkets.addAll(trinkets);
+      }
+   }
+
+   public static class WorkbenchCrafts {
+      private static Map<Item, Set<ResourceLocation>> discoveredWorkbenchCrafts = new HashMap<>();
+
+      public static Set<ResourceLocation> getDiscoveredWorkbenchCrafts(Item gearItem) {
+         return new HashSet<>(discoveredWorkbenchCrafts.getOrDefault(gearItem, Collections.emptySet()));
+      }
+
+      public static ObservableSupplier<Set<ResourceLocation>> getObserverWorkbenchCrafts(Item gearItem) {
+         return ObservableSupplier.of(() -> getDiscoveredWorkbenchCrafts(gearItem), (crafts, newCrafts) -> crafts.size() == newCrafts.size());
+      }
+
+      public static void receiveMessage(Map<Item, Set<ResourceLocation>> workbenchCrafts) {
+         discoveredWorkbenchCrafts = workbenchCrafts;
       }
    }
 }

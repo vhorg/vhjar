@@ -40,12 +40,12 @@ public class TrinketForgeRecipe extends VaultForgeRecipe {
    }
 
    @Override
-   public ItemStack getDisplayOutput() {
+   public ItemStack getDisplayOutput(int vaultLevel) {
       return TrinketItem.createBaseTrinket(this.effect);
    }
 
    @Override
-   public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter) {
+   public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter, int vaultLevel) {
       ItemStack trinket = TrinketItem.createRandomTrinket(this.effect);
       AttributeGearData data = AttributeGearData.read(trinket);
       data.updateAttribute(ModGearAttributes.CRAFTED_BY, crafter.getName().getContents());

@@ -74,7 +74,11 @@ public class VersionedKeyAdapter implements JsonSerializer<VersionedKey<?, ?>>, 
          }, key::with);
          return key;
       } else if (typeOfT == ThemeKey.class) {
-         ThemeKey key = ThemeKey.create(new ResourceLocation(keyObject.get("id").getAsString()), keyObject.get("name").getAsString());
+         ThemeKey key = ThemeKey.create(
+            new ResourceLocation(keyObject.get("id").getAsString()),
+            keyObject.get("name").getAsString(),
+            !keyObject.has("color") ? 16777215 : keyObject.get("color").getAsInt()
+         );
          this.deserializeBody(keyObject, e -> Theme.fromPath(e.getAsString()), key::with);
          return key;
       } else {

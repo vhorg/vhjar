@@ -5,25 +5,25 @@ import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.VaultPortalSize;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.random.JavaRandom;
-import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
+import iskallia.vault.item.crystal.model.RawCrystalModel;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
-import iskallia.vault.util.EntityHelper;
+import iskallia.vault.item.tool.IManualModelLoading;
 import iskallia.vault.world.vault.modifier.VaultModifierStack;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
+import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.ChatFormatting;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -37,13 +37,9 @@ import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -51,20 +47,18 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.IItemRenderProperties;
 
-public class VaultCrystalItem extends Item {
-   private static final Random RANDOM = new Random();
+public class VaultCrystalItem extends Item implements IManualModelLoading {
    public static final String KEY_SCHEDULED_TASKS = "scheduledTasks";
-   public static final String CLONED = "Cloned";
    private static final Map<String, VaultCrystalItem.IScheduledTaskDeserializer> SCHEDULED_TASK_DESERIALIZER_MAP = new HashMap<String, VaultCrystalItem.IScheduledTaskDeserializer>() {
       {
          this.put("exhaust", VaultCrystalItem.ExhaustTask::deserializeNBT);
          this.put("removeRandomCurse", VaultCrystalItem.RemoveRandomCurseTask::deserializeNBT);
-         this.put("addCurses", VaultCrystalItem.AddCursesTask::deserializeNBT);
+         this.put("addCurses", VaultCrystalItem.AddModifiersTask::deserializeNBT);
          this.put("addClarity", VaultCrystalItem.AddClarityTask::deserializeNBT);
          this.put("echo", VaultCrystalItem.EchoTask::deserializeNBT);
          this.put("clone", VaultCrystalItem.CloneTask::deserializeNBT);
@@ -78,81 +72,44 @@ public class VaultCrystalItem extends Item {
       this.setRegistryName(id);
    }
 
-   public static CrystalData getData(ItemStack stack) {
-      return new CrystalData(stack);
-   }
-
-   public static ItemStack getCrystalWithBoss(String playerBossName) {
-      ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
-      CrystalData data = new CrystalData(stack);
-      data.setType(CrystalData.Type.RAFFLE);
-      return stack;
-   }
-
-   public static ItemStack getCrystalWithObjective(ResourceLocation objectiveKey) {
-      ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
-      CrystalData data = new CrystalData(stack);
-      if (RANDOM.nextBoolean()) {
-         data.setType(CrystalData.Type.COOP);
-      }
-
-      return stack;
-   }
-
    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
       if (this.allowdedIn(group)) {
-         this.addEmptyCrystal(items);
-         this.addDebugCrystal(items);
+         this.addCrystal(items, data -> {});
+         this.addCrystal(items, crystal -> crystal.setLayout(new ClassicInfiniteCrystalLayout(1)));
+         this.addCrystal(items, crystal -> {
+            crystal.setModel(new RawCrystalModel());
+            crystal.setTheme(new PoolCrystalTheme(VaultMod.id("raw")));
+         });
       }
    }
 
-   private void addEmptyCrystal(NonNullList<ItemStack> items) {
+   private void addCrystal(NonNullList<ItemStack> items, Consumer<CrystalData> action) {
       ItemStack stack = new ItemStack(this);
-      CrystalData crystal = new CrystalData(stack);
-      crystal.setTheme(new PoolCrystalTheme(VaultMod.id("default")));
+      CrystalData crystal = CrystalData.read(stack);
+      action.accept(crystal);
+      crystal.write(stack);
       items.add(stack);
-   }
-
-   private void addDebugCrystal(NonNullList<ItemStack> items) {
-      ItemStack stack = new ItemStack(this);
-      CrystalData crystal = new CrystalData(stack);
-      crystal.setTheme(new PoolCrystalTheme(VaultMod.id("default")));
-      crystal.setLayout(new ClassicInfiniteCrystalLayout(1));
-      items.add(stack);
-   }
-
-   @Nonnull
-   public Component getName(@Nonnull ItemStack stack) {
-      CrystalData data = getData(stack);
-      return (Component)(data.getEchoData().getEchoCount() > 0
-         ? new TextComponent("Echoed Vault Crystal").withStyle(ChatFormatting.DARK_PURPLE)
-         : super.getName(stack));
    }
 
    @Nonnull
    public InteractionResult useOn(UseOnContext context) {
       if (!context.getLevel().isClientSide && context.getPlayer() != null) {
-         ItemStack stack = context.getPlayer().getItemInHand(context.getHand());
-         CrystalData data = new CrystalData(stack);
-         if (data.getEchoData().getEchoCount() > 0) {
+         CrystalData data = CrystalData.read(context.getItemInHand());
+         BlockPos pos = context.getClickedPos();
+         if (this.tryCreatePortal(context.getLevel(), pos, context.getClickedFace(), data)) {
+            context.getLevel().playSound(null, pos.getX(), pos.getY(), pos.getZ(), ModSounds.VAULT_PORTAL_OPEN, SoundSource.BLOCKS, 1.0F, 1.0F);
+            MutableComponent playerName = context.getPlayer().getDisplayName().copy();
+            playerName.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(9974168)));
+            String suffix = " opened a Vault!";
+            TextComponent suffixComponent = new TextComponent(suffix);
+            context.getLevel()
+               .getServer()
+               .getPlayerList()
+               .broadcastMessage(new TextComponent("").append(playerName).append(suffixComponent), ChatType.CHAT, context.getPlayer().getUUID());
+            context.getItemInHand().shrink(1);
             return InteractionResult.SUCCESS;
          } else {
-            BlockPos pos = context.getClickedPos();
-            if (this.tryCreatePortal(context.getLevel(), pos, context.getClickedFace(), data)) {
-               context.getLevel().playSound(null, pos.getX(), pos.getY(), pos.getZ(), ModSounds.VAULT_PORTAL_OPEN, SoundSource.BLOCKS, 1.0F, 1.0F);
-               MutableComponent playerName = context.getPlayer().getDisplayName().copy();
-               playerName.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(9974168)));
-               String suffix = data.getType() == CrystalData.Type.FINAL_LOBBY ? " opened the Final Vault!" : " opened a Vault!";
-               TextComponent suffixComponent = new TextComponent(suffix);
-               context.getLevel()
-                  .getServer()
-                  .getPlayerList()
-                  .broadcastMessage(new TextComponent("").append(playerName).append(suffixComponent), ChatType.CHAT, context.getPlayer().getUUID());
-               context.getItemInHand().shrink(1);
-               return InteractionResult.SUCCESS;
-            } else {
-               return super.useOn(context);
-            }
+            return super.useOn(context);
          }
       } else {
          return InteractionResult.SUCCESS;
@@ -161,24 +118,9 @@ public class VaultCrystalItem extends Item {
 
    private boolean tryCreatePortal(Level world, BlockPos pos, Direction facing, CrystalData data) {
       Optional<VaultPortalSize> optional = VaultPortalSize.getPortalSize(world, pos.relative(facing), Axis.X, VaultPortalBlock.FRAME);
-      if (!optional.isPresent()) {
-         return false;
-      } else {
+      if (optional.isPresent()) {
          VaultPortalSize portal = optional.get();
          BlockState state = (BlockState)ModBlocks.VAULT_PORTAL.defaultBlockState().setValue(VaultPortalBlock.AXIS, portal.getAxis());
-         data.frameData = new FrameData();
-
-         for (int i = -1; i <= portal.getWidth(); i++) {
-            for (int j = -1; j <= portal.getHeight(); j++) {
-               if (i == -1 || j == -1 || i == portal.getWidth() || j == portal.getHeight()) {
-                  BlockPos p = portal.getBottomLeft().relative(portal.getRightDir(), i).above(j);
-                  BlockEntity te = world.getBlockEntity(p);
-                  data.frameData.tiles.add(new FrameData.Tile(world.getBlockState(p).getBlock(), te == null ? new CompoundTag() : te.serializeNBT(), p));
-               }
-            }
-         }
-
-         data.updateDelegate();
          portal.placePortalBlocks(blockPos -> {
             world.setBlock(blockPos, state, 3);
             if (world.getBlockEntity(blockPos) instanceof VaultPortalTileEntity portalTE) {
@@ -186,45 +128,32 @@ public class VaultCrystalItem extends Item {
             }
          });
          return true;
-      }
-   }
-
-   public static long getSeed(ItemStack stack) {
-      if (!(stack.getItem() instanceof VaultCrystalItem)) {
-         return 0L;
       } else {
-         CompoundTag nbt = stack.getOrCreateTag();
-         if (!nbt.contains("Seed", 4)) {
-            setRandomSeed(stack);
-         }
-
-         return nbt.getLong("Seed");
-      }
-   }
-
-   public static void setRandomSeed(ItemStack stack) {
-      if (stack.getItem() instanceof VaultCrystalItem) {
-         stack.getOrCreateTag().putLong("Seed", RANDOM.nextLong());
+         return false;
       }
    }
 
    @OnlyIn(Dist.CLIENT)
    @ParametersAreNonnullByDefault
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-      getData(stack).addInformation(world, tooltip, flag);
+      CrystalData.read(stack).addText(tooltip, flag);
       super.appendHoverText(stack, world, tooltip, flag);
    }
 
-   @Nonnull
-   @ParametersAreNonnullByDefault
-   public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
-      if (!world.isClientSide && hand != InteractionHand.OFF_HAND) {
-         ItemStack stack = player.getMainHandItem();
-         CrystalData data = getData(stack);
-         return super.use(world, player, hand);
-      } else {
-         return super.use(world, player, hand);
-      }
+   @Override
+   public void loadModels(Consumer<ModelResourceLocation> consumer) {
+      consumer.accept(new ModelResourceLocation("the_vault:crystal/core/rainbow#inventory"));
+      consumer.accept(new ModelResourceLocation("the_vault:crystal/core/raw#inventory"));
+      consumer.accept(new ModelResourceLocation("the_vault:crystal/core/grayscale#inventory"));
+      consumer.accept(new ModelResourceLocation("the_vault:crystal/augment/core#inventory"));
+   }
+
+   public void initializeClient(Consumer<IItemRenderProperties> consumer) {
+      consumer.accept(new IItemRenderProperties() {
+         public BlockEntityWithoutLevelRenderer getItemStackRenderer() {
+            return CrystalRenderer.INSTANCE;
+         }
+      });
    }
 
    @ParametersAreNonnullByDefault
@@ -266,7 +195,7 @@ public class VaultCrystalItem extends Item {
             throw new IllegalStateException("Missing scheduled task deserializer registration for key [%s]".formatted(key));
          }
 
-         deserializer.deserialize(scheduledTasks.getCompound(key)).execute(serverPlayer, itemStack, getData(itemStack));
+         deserializer.deserialize(scheduledTasks.getCompound(key)).execute(serverPlayer, itemStack, CrystalData.read(itemStack));
       }
 
       nbt.remove("scheduledTasks");
@@ -285,8 +214,11 @@ public class VaultCrystalItem extends Item {
       }
 
       @Override
-      public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
-         data.setClarity(true);
+      public void execute(ServerPlayer player, ItemStack stack, CrystalData data) {
+         if (!data.getModifiers().hasClarity()) {
+            data.getModifiers().setClarity(true);
+            data.write(stack);
+         }
       }
 
       public static VaultCrystalItem.AddClarityTask deserializeNBT(CompoundTag nbt) {
@@ -294,7 +226,7 @@ public class VaultCrystalItem extends Item {
       }
    }
 
-   public record AddCursesTask(ResourceLocation pool, boolean checkStability) implements VaultCrystalItem.IScheduledTask {
+   public record AddModifiersTask(ResourceLocation pool) implements VaultCrystalItem.IScheduledTask {
       public static final String ID = "addCurses";
 
       @Override
@@ -303,32 +235,29 @@ public class VaultCrystalItem extends Item {
       }
 
       @Override
-      public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
-         RandomSource random = JavaRandom.ofNanoTime();
-         float curseChance = ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.calculateCurseChance(data.getInstability());
-         if (!this.checkStability || !(random.nextFloat() >= curseChance)) {
-            ModConfigs.VAULT_MODIFIER_POOLS
-               .getRandom(this.pool, data.getLevel(), JavaRandom.ofNanoTime())
-               .forEach(modifier -> data.addModifier(VaultModifierStack.of((VaultModifier<?>)modifier)));
-         }
+      public void execute(ServerPlayer player, ItemStack stack, CrystalData data) {
+         ModConfigs.VAULT_MODIFIER_POOLS
+            .getRandom(this.pool, data.getLevel(), JavaRandom.ofNanoTime())
+            .forEach(modifier -> data.getModifiers().add(VaultModifierStack.of((VaultModifier<?>)modifier)));
+         data.write(stack);
       }
 
       @Override
       public CompoundTag serializeNBT() {
          CompoundTag nbt = VaultCrystalItem.IScheduledTask.super.serializeNBT();
          nbt.putString("pool", this.pool.toString());
-         nbt.putBoolean("checkStability", this.checkStability);
          return nbt;
       }
 
-      public static VaultCrystalItem.AddCursesTask deserializeNBT(CompoundTag nbt) {
-         return new VaultCrystalItem.AddCursesTask(new ResourceLocation(nbt.getString("pool")), nbt.getBoolean("checkStability"));
+      public static VaultCrystalItem.AddModifiersTask deserializeNBT(CompoundTag nbt) {
+         return new VaultCrystalItem.AddModifiersTask(new ResourceLocation(nbt.getString("pool")));
       }
    }
 
    public record CloneTask(boolean success) implements VaultCrystalItem.IScheduledTask {
       public static final String ID = "clone";
       private static final String KEY_SUCCESS = "success";
+      public static final String CLONED = "Cloned";
 
       @Override
       public String getId() {
@@ -337,14 +266,7 @@ public class VaultCrystalItem extends Item {
 
       @Override
       public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
-         data.setModifiable(false);
-         if (this.success) {
-            itemStack.getOrCreateTag().putBoolean("Cloned", true);
-            EntityHelper.giveItem(player, itemStack.copy());
-            player.getCommandSenderWorld().playSound(null, player.blockPosition(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8F, 1.5F);
-         } else {
-            player.getCommandSenderWorld().playSound(null, player.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.PLAYERS, 1.0F, 1.0F);
-         }
+         throw new UnsupportedOperationException();
       }
 
       @Override
@@ -370,10 +292,7 @@ public class VaultCrystalItem extends Item {
 
       @Override
       public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
-         int remainder = data.addEchoGems(this.amount);
-         if (remainder > 0) {
-            EntityHelper.giveItem(player, new ItemStack(ModItems.ECHO_GEM, remainder));
-         }
+         throw new UnsupportedOperationException();
       }
 
       @Override
@@ -401,9 +320,10 @@ public class VaultCrystalItem extends Item {
       }
 
       @Override
-      public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
-         if (data.canBeModified() && Math.random() * 100.0 < data.getInstability()) {
-            data.setModifiable(false);
+      public void execute(ServerPlayer player, ItemStack stack, CrystalData data) {
+         if (!data.isUnmodifiable()) {
+            data.setUnmodifiable(true);
+            data.write(stack);
          }
       }
 
@@ -464,8 +384,9 @@ public class VaultCrystalItem extends Item {
       }
 
       @Override
-      public void execute(ServerPlayer player, ItemStack itemStack, CrystalData data) {
-         data.removeRandomCurse(VaultCrystalItem.RANDOM);
+      public void execute(ServerPlayer player, ItemStack stack, CrystalData data) {
+         data.getModifiers().removeRandomCurse();
+         data.write(stack);
       }
 
       public static VaultCrystalItem.RemoveRandomCurseTask deserializeNBT(CompoundTag nbt) {

@@ -1,7 +1,7 @@
 package iskallia.vault.core.vault.influence;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.vault.Modifiers;
@@ -10,9 +10,9 @@ import java.util.UUID;
 
 public class Favours extends Modifiers {
    public static final FieldRegistry FIELDS = Modifiers.FIELDS.merge(new FieldRegistry());
-   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_5, Adapter.ofUUID(), DISK.all()).register(FIELDS);
+   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_5, Adapters.UUID, DISK.all()).register(FIELDS);
    public static final FieldKey<Integer> REPUTATION = FieldKey.of("reputation", Integer.class)
-      .with(Version.v1_5, Adapter.ofSegmentedInt(7), DISK.all())
+      .with(Version.v1_5, Adapters.INT_SEGMENTED_7, DISK.all())
       .register(FIELDS);
 
    public Favours() {

@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import iskallia.vault.client.gui.helper.LightmapHelper;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.compound.IdentifierList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
@@ -33,7 +33,7 @@ public class FindExitObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("find_exit", Objective.class).with(Version.v1_0, FindExitObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<IdentifierList> TAGS = FieldKey.of("tags", IdentifierList.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), IdentifierList::create)
+      .with(Version.v1_0, CompoundAdapter.of(IdentifierList::create), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public FindExitObjective() {
@@ -87,11 +87,11 @@ public class FindExitObjective extends Objective {
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       int midX = window.getGuiScaledWidth() / 2;
       Font font = Minecraft.getInstance().font;
       BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-      Component txt = new TextComponent("Find the Exit!").withStyle(ChatFormatting.AQUA).withStyle(ChatFormatting.BOLD);
+      Component txt = new TextComponent("Find the Exit!").withStyle(ChatFormatting.AQUA);
       font.drawInBatch(
          txt.getVisualOrderText(),
          midX - font.width(txt) / 2.0F,

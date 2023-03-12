@@ -1,7 +1,8 @@
 package iskallia.vault.core.world.generator;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.RegistryValueAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -35,13 +36,13 @@ public class GridGenerator extends VaultGenerator {
    public static final SupplierKey<GridGenerator> KEY = SupplierKey.of("grid", GridGenerator.class).with(Version.v1_0, GridGenerator::new);
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<Integer> CELL_X = FieldKey.of("cell_x", Integer.class)
-      .with(Version.v1_0, Adapter.ofBoundedInt(1, 256), DISK.all())
+      .with(Version.v1_0, Adapters.ofBoundedInt(1, 256), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Integer> CELL_Z = FieldKey.of("cell_z", Integer.class)
-      .with(Version.v1_0, Adapter.ofBoundedInt(1, 256), DISK.all())
+      .with(Version.v1_0, Adapters.ofBoundedInt(1, 256), DISK.all())
       .register(FIELDS);
    public static final FieldKey<GridLayout> LAYOUT = FieldKey.of("layout", GridLayout.class)
-      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.GRID_LAYOUT, ISupplierKey::getKey, Supplier::get), DISK.all())
+      .with(Version.v1_0, RegistryValueAdapter.of(() -> VaultRegistry.GRID_LAYOUT, ISupplierKey::getKey, Supplier::get), DISK.all())
       .register(FIELDS);
    protected ObjectCache<RegionPos, ConfiguredTemplate> cache;
 
@@ -87,6 +88,10 @@ public class GridGenerator extends VaultGenerator {
                random.setCarverSeed(vault.get(Vault.SEED), region.getX(), region.getZ());
             } else {
                random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890);
+            }
+
+            if (this.cache == null) {
+               return;
             }
 
             ConfiguredTemplate template;

@@ -170,7 +170,7 @@ public class ModAbilityLabelBindings {
          NovaConfig.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getRadius()),
+            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
             "damage",
             config -> AbilityLabelFormatters.percentRounded(config.getPercentAttackDamageDealt()),
             "knockback",
@@ -181,7 +181,7 @@ public class ModAbilityLabelBindings {
          NovaDotConfig.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getRadius()),
+            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
             "damage",
             config -> AbilityLabelFormatters.percentRounded(config.getPercentAttackDamageDealt()),
             "duration",
@@ -192,14 +192,14 @@ public class ModAbilityLabelBindings {
          NovaSpeedConfig.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getRadius()),
+            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
             "duration",
             config -> AbilityLabelFormatters.ticks(config.getDurationTicks()),
             "slowness",
             config -> AbilityLabelFormatters.integer(config.getAmplifier())
          )
       );
-      register(RampageConfig.class, Map.of("damage", config -> AbilityLabelFormatters.percentRounded(config.getDamageIncrease())));
+      register(RampageConfig.class, Map.of("damage", config -> AbilityLabelFormatters.percentRounded(config.getUnmodifiedDamageIncrease())));
       register(RampageChainConfig.class, Map.of("chains", config -> AbilityLabelFormatters.integer(config.getAdditionalChainCount())));
       register(RampageLeechConfig.class, Map.of("leech", config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getLeechPercent())));
       register(StonefallConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
@@ -247,7 +247,7 @@ public class ModAbilityLabelBindings {
          TauntConfig.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getRadius()),
+            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
             "duration",
             config -> AbilityLabelFormatters.ticks(config.getDurationTicks())
          )
@@ -256,19 +256,19 @@ public class ModAbilityLabelBindings {
          TauntRepelConfig.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getRadius()),
+            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
             "duration",
             config -> AbilityLabelFormatters.ticks(config.getDurationTicks()),
             "distance",
             config -> AbilityLabelFormatters.decimal(config.getRepelForce())
          )
       );
-      register(VeinMinerConfig.class, Map.of("blocks", config -> AbilityLabelFormatters.decimal((float)config.getBlockLimit())));
+      register(VeinMinerConfig.class, Map.of("blocks", config -> AbilityLabelFormatters.decimal((float)config.getUnmodifiedBlockLimit())));
       register(
          VeinMinerDurabilityConfig.class,
          Map.of(
             "blocks",
-            config -> AbilityLabelFormatters.decimal((float)config.getBlockLimit()),
+            config -> AbilityLabelFormatters.decimal((float)config.getUnmodifiedBlockLimit()),
             "unbreaking",
             config -> AbilityLabelFormatters.integer(config.getAdditionalUnbreakingLevel())
          )
@@ -277,12 +277,12 @@ public class ModAbilityLabelBindings {
          VeinMinerFortuneConfig.class,
          Map.of(
             "blocks",
-            config -> AbilityLabelFormatters.decimal((float)config.getBlockLimit()),
+            config -> AbilityLabelFormatters.decimal((float)config.getUnmodifiedBlockLimit()),
             "fortune",
             config -> AbilityLabelFormatters.integer(config.getAdditionalFortuneLevel())
          )
       );
-      register(VeinMinerVoidConfig.class, Map.of("blocks", config -> AbilityLabelFormatters.decimal((float)config.getBlockLimit())));
+      register(VeinMinerVoidConfig.class, Map.of("blocks", config -> AbilityLabelFormatters.decimal((float)config.getUnmodifiedBlockLimit())));
    }
 
    public static <C extends AbstractAbilityConfig> void register(Class<C> configClass) {

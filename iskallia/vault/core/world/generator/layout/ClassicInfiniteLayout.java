@@ -1,7 +1,7 @@
 package iskallia.vault.core.world.generator.layout;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -13,9 +13,7 @@ import net.minecraft.core.Direction;
 public class ClassicInfiniteLayout extends ClassicVaultLayout {
    public static final SupplierKey<GridLayout> KEY = SupplierKey.of("classic_infinite_vault", GridLayout.class).with(Version.v1_0, ClassicInfiniteLayout::new);
    public static final FieldRegistry FIELDS = ClassicVaultLayout.FIELDS.merge(new FieldRegistry());
-   public static final FieldKey<Integer> TUNNEL_SPAN = FieldKey.of("tunnel_span", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all())
-      .register(FIELDS);
+   public static final FieldKey<Integer> TUNNEL_SPAN = FieldKey.of("tunnel_span", Integer.class).with(Version.v1_0, Adapters.INT, DISK.all()).register(FIELDS);
 
    protected ClassicInfiniteLayout() {
    }

@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "the_vault:block/wood/chromatic_slab"
+    },
+    "type=double": {
+      "model": "the_vault:block/wood/chromatic_planks"
+    },
+    "type=top": {
+      "model": "the_vault:block/wood/chromatic_slab_top"
+    }
+  }
+}

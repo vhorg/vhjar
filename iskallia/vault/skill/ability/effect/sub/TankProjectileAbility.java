@@ -5,10 +5,10 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.sub.TankProjectileConfig;
+import iskallia.vault.skill.ability.effect.TankAbility;
 import iskallia.vault.skill.ability.effect.spi.AbstractTankAbility;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityTickResult;
-import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.Random;
 import net.minecraft.resources.ResourceLocation;
@@ -74,7 +74,7 @@ public class TankProjectileAbility extends AbstractTankAbility<TankProjectileCon
       }
    }
 
-   public static class TankProjectileEffect extends ToggleAbilityEffect {
+   public static class TankProjectileEffect extends TankAbility.TankEffect {
       public TankProjectileEffect(int color, ResourceLocation resourceLocation) {
          super("Tank", color, resourceLocation);
          this.addAttributeModifier(

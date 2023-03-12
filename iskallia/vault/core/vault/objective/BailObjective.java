@@ -3,7 +3,8 @@ package iskallia.vault.core.vault.objective;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.compound.IdentifierList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
@@ -26,10 +27,10 @@ public class BailObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("bail", Objective.class).with(Version.v1_0, BailObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Integer> LOCKED_STACK = FieldKey.of("locked_stack", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all())
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
    public static final FieldKey<IdentifierList> TAGS = FieldKey.of("tags", IdentifierList.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), IdentifierList::create)
+      .with(Version.v1_0, CompoundAdapter.of(IdentifierList::create), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    protected BailObjective() {
@@ -89,7 +90,7 @@ public class BailObjective extends Objective {
    }
 
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       return false;
    }
 

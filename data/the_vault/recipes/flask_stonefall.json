@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " i ",
+    "frb",
+    " e "
+  ],
+  "key": {
+    "i": {
+      "item": "minecraft:blue_ice"
+    },
+    "b": {
+      "item": "minecraft:blaze_powder"
+    },
+    "f": {
+      "item": "minecraft:feather"
+    },
+    "e": {
+      "item": "the_vault:empty_flask"
+    },
+    "r": {
+      "item": "the_vault:red_vault_essence"
+    }
+  },
+  "result": {
+    "item": "the_vault:respec_flask",
+    "count": 1,
+    "nbt": "{Ability:\"Stonefall\"}"
+  }
+}

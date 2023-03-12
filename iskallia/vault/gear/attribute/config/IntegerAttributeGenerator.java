@@ -3,10 +3,10 @@ package iskallia.vault.gear.attribute.config;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.Nullable;
 
 public class IntegerAttributeGenerator extends NumberRangeGenerator<Integer, IntegerAttributeGenerator.Range> {
    @Nullable
@@ -15,10 +15,22 @@ public class IntegerAttributeGenerator extends NumberRangeGenerator<Integer, Int
       return IntegerAttributeGenerator.Range.class;
    }
 
-   public MutableComponent getConfigDisplay(VaultGearModifierReader<Integer> reader, IntegerAttributeGenerator.Range object) {
+   public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<Integer> reader, IntegerAttributeGenerator.Range object) {
       MutableComponent minDisplay = reader.getValueDisplay(object.min);
       MutableComponent maxDisplay = reader.getValueDisplay(object.max);
       return (MutableComponent)(minDisplay != null && maxDisplay != null ? minDisplay.append("-").append(maxDisplay) : new TextComponent(""));
+   }
+
+   @Nullable
+   public MutableComponent getConfigDisplay(VaultGearModifierReader<Integer> reader, IntegerAttributeGenerator.Range object) {
+      MutableComponent range = this.getConfigRangeDisplay(reader, object);
+      return range == null
+         ? null
+         : new TextComponent("")
+            .withStyle(reader.getColoredTextStyle())
+            .append(range.withStyle(reader.getColoredTextStyle()))
+            .append(" ")
+            .append(new TextComponent(reader.getModifierName()).withStyle(reader.getColoredTextStyle()));
    }
 
    public static class Range extends NumberRangeGenerator.NumberRange<Integer> {

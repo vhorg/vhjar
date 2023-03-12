@@ -1,7 +1,7 @@
 package iskallia.vault.config.bounty.task.entry;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
@@ -10,7 +10,7 @@ public class GenericEntry<T> {
    @Expose
    private T value;
    @Expose
-   private RangeEntry amount;
+   private IntRangeEntry amount;
    @Expose
    private boolean floorToNearestTen;
    @Expose
@@ -20,7 +20,7 @@ public class GenericEntry<T> {
    @Expose
    private String rewardPool;
 
-   public GenericEntry(T value, RangeEntry amount) {
+   public GenericEntry(T value, IntRangeEntry amount) {
       this.value = value;
       this.amount = amount;
       this.validDimensions = new HashSet<>();
@@ -52,7 +52,7 @@ public class GenericEntry<T> {
       return this.value;
    }
 
-   public RangeEntry getAmount() {
+   public IntRangeEntry getAmount() {
       return this.amount;
    }
 

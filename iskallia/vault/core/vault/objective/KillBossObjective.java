@@ -5,7 +5,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import iskallia.vault.client.gui.helper.LightmapHelper;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.LegacyBlockPosAdapter;
+import iskallia.vault.core.data.adapter.vault.RegistryKeyAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.data.key.SupplierKey;
@@ -45,22 +47,22 @@ public class KillBossObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("kill_boss", Objective.class).with(Version.v1_0, KillBossObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<UUID> BOSS_ID = FieldKey.of("boss_id", UUID.class)
-      .with(Version.v1_0, Adapter.ofUUID().asNullable(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.UUID.asNullable(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<ResourceLocation> BOSS_TYPE = FieldKey.of("boss_type", ResourceLocation.class)
-      .with(Version.v1_0, Adapter.ofIdentifier(), DISK.all())
+      .with(Version.v1_0, Adapters.IDENTIFIER, DISK.all())
       .register(FIELDS);
    public static final FieldKey<BlockPos> BOSS_POS = FieldKey.of("boss_pos", BlockPos.class)
-      .with(Version.v1_0, Adapter.ofBlockPos().asNullable(), DISK.all())
+      .with(Version.v1_0, LegacyBlockPosAdapter.create().asNullable(), DISK.all())
       .register(FIELDS);
    public static final FieldKey<String> BOSS_NAME = FieldKey.of("boss_name", String.class)
-      .with(Version.v1_0, Adapter.ofString().asNullable(), DISK.all())
+      .with(Version.v1_0, Adapters.UTF_8.asNullable(), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Void> BOSS_DEAD = FieldKey.of("boss_dead", Void.class)
-      .with(Version.v1_0, Adapter.ofVoid(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.ofVoid(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<LootTableKey> LOOT_TABLE = FieldKey.of("loot_table", LootTableKey.class)
-      .with(Version.v1_0, Adapter.<LootTableKey, LootTable>ofRegistryKey(() -> VaultRegistry.LOOT_TABLE).asNullable(), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.<LootTableKey, LootTable>of(() -> VaultRegistry.LOOT_TABLE).asNullable(), DISK.all())
       .register(FIELDS);
 
    protected KillBossObjective() {
@@ -162,12 +164,12 @@ public class KillBossObjective extends Objective {
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       if (this.has(BOSS_DEAD)) {
          boolean rendered = false;
 
          for (Objective objective : this.get(CHILDREN)) {
-            rendered |= objective.render(matrixStack, window, partialTicks, player);
+            rendered |= objective.render(vault, matrixStack, window, partialTicks, player);
          }
 
          if (rendered) {

@@ -19,7 +19,7 @@ public class ToolStationContainer extends ForgeRecipeContainer<ToolStationTileEn
    }
 
    @Override
-   protected Point getOffset() {
+   public Point getOffset() {
       return new Point(8, 23);
    }
 }

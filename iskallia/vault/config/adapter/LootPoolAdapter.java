@@ -12,10 +12,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.util.WeightedTree;
 import iskallia.vault.core.world.loot.LootPool;
-import iskallia.vault.core.world.loot.LootRoll;
 import iskallia.vault.core.world.loot.entry.ItemLootEntry;
 import iskallia.vault.core.world.loot.entry.LootEntry;
 import iskallia.vault.core.world.loot.entry.ReferenceLootEntry;
+import iskallia.vault.core.world.roll.IntRoll;
 import java.lang.reflect.Type;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -56,7 +56,7 @@ public class LootPoolAdapter extends WeightedTreeAdapter<LootEntry> {
          JsonObject object = json.getAsJsonObject();
          Item item = Items.AIR;
          CompoundTag nbt = null;
-         LootRoll count = LootRoll.ofConstant(1);
+         IntRoll count = IntRoll.ofConstant(1);
          if (object.has("id")) {
             ResourceLocation key = new ResourceLocation(object.get("id").getAsString());
             if (!ForgeRegistries.ITEMS.containsKey(key)) {
@@ -76,15 +76,15 @@ public class LootPoolAdapter extends WeightedTreeAdapter<LootEntry> {
 
          if (object.has("count")) {
             count = LootRollAdapter.INSTANCE.deserialize(object.get("count"), typeOfT, context);
-            if (count.getMin() > item.getMaxStackSize() || count.getMax() > item.getMaxStackSize()) {
+            if (IntRoll.getMin(count) > item.getMaxStackSize() || IntRoll.getMax(count) > item.getMaxStackSize()) {
                VaultMod.LOGGER
                   .error(
                      "Loot item entry ["
                         + item.getRegistryName().toString()
                         + "] stacks to ["
-                        + count.getMin()
+                        + IntRoll.getMin(count)
                         + ", "
-                        + count.getMax()
+                        + IntRoll.getMax(count)
                         + "] while its max stack size is "
                         + item.getMaxStackSize()
                   );
@@ -101,7 +101,7 @@ public class LootPoolAdapter extends WeightedTreeAdapter<LootEntry> {
             object.addProperty("nbt", value.getNbt().toString());
          }
 
-         if (!(value.getCount() instanceof LootRoll.Constant constant && constant.getCount() == 1)) {
+         if (!(value.getCount() instanceof IntRoll.Constant constant && constant.getCount() == 1)) {
             object.add("count", LootRollAdapter.INSTANCE.serialize(value.getCount(), typeOfSrc, context));
          }
 

@@ -2,7 +2,7 @@ package iskallia.vault.core.world.generator.layout;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -37,7 +37,7 @@ import net.minecraft.world.level.block.state.BlockState;
 public abstract class VaultLayout extends GridLayout {
    public static final FieldRegistry FIELDS = GridLayout.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Float> OBJECTIVE_PROBABILITY = FieldKey.of("objective_probability", Float.class)
-      .with(Version.v1_0, Adapter.ofFloat(), DISK.all())
+      .with(Version.v1_0, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
 
    @Override

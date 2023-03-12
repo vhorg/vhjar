@@ -27,7 +27,7 @@ public class VaultPlayerHistoricDataMessage {
 
          for (int i = 0; i < size; i++) {
             ArrayBitBuffer buffer2 = ArrayBitBuffer.empty();
-            message.snapshots.get(i).write(buffer2);
+            message.snapshots.get(i).writeBits(buffer2);
             buffer.writeLongArray(buffer2.toLongArray());
          }
       }

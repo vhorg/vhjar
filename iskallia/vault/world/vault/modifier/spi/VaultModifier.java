@@ -2,7 +2,9 @@ package iskallia.vault.world.vault.modifier.spi;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import iskallia.vault.core.random.RandomSource;
 import java.util.Optional;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
@@ -44,6 +46,10 @@ public abstract class VaultModifier<P> implements IVaultModifierBehaviorApply {
 
    public String getDisplayName() {
       return this.display.getName();
+   }
+
+   public Stream<VaultModifier<?>> flatten(RandomSource random) {
+      return Stream.of(this);
    }
 
    protected <T extends VaultModifier<P>> T setNameFormatter(@Nonnull IVaultModifierTextFormatter<P> nameFormatter) {

@@ -2,6 +2,7 @@ package iskallia.vault.util;
 
 import java.util.List;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,6 +21,18 @@ public class EntityHelper {
       if (entity.isDeadOrDying()) {
          entity.die(entity.getLastDamageSource() != null ? entity.getLastDamageSource() : DamageSource.GENERIC);
       }
+   }
+
+   public static void knockback(LivingEntity target, LivingEntity source) {
+      double xDiff = source.getX() - target.getX();
+
+      double zDiff;
+      for (zDiff = source.getZ() - target.getZ(); xDiff * xDiff + zDiff * zDiff < 1.0E-4; zDiff = (Math.random() - Math.random()) * 0.01) {
+         xDiff = (Math.random() - Math.random()) * 0.01;
+      }
+
+      target.hurtDir = (float)(Mth.atan2(zDiff, xDiff) * (180.0 / Math.PI) - target.getYRot());
+      target.knockback(0.4F, xDiff, zDiff);
    }
 
    public static <T extends Entity> T changeSize(T entity, float size, Runnable callback) {

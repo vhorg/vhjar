@@ -26,7 +26,7 @@ public class VaultCharmUpgrade extends BasicItem {
    }
 
    public Component getName(ItemStack stack) {
-      return new TextComponent("Vault Charm Upgrade (" + this.tier.getName() + ")");
+      return new TextComponent("Vault Junk Upgrade (" + this.tier.getName() + ")");
    }
 
    @OnlyIn(Dist.CLIENT)
@@ -42,7 +42,7 @@ public class VaultCharmUpgrade extends BasicItem {
          int slotCount = tier.getSlotAmount();
          tooltip.add(new TextComponent("Increases the amount of slots"));
          tooltip.add(new TextComponent("that items can be added to the"));
-         tooltip.add(new TextComponent("Vault Charm Whitelist to " + ChatFormatting.YELLOW + slotCount));
+         tooltip.add(new TextComponent("Vault Junk Whitelist to " + ChatFormatting.YELLOW + slotCount));
       }
 
       return tooltip;

@@ -35,6 +35,7 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionUtils;
@@ -357,6 +358,10 @@ public class EffectCloudEntity extends Entity {
             if (party != null && party.hasMember(ownerUUID)) {
                return false;
             }
+         }
+
+         if (target instanceof TamableAnimal tamable && ownerUUID.equals(tamable.getOwnerUUID())) {
+            return false;
          }
 
          VaultPartyData.Party party = VaultPartyData.get(sWorld).getParty(ownerUUID).orElse(null);

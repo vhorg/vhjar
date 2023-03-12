@@ -1,9 +1,7 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.util.data.WeightedList;
-import iskallia.vault.world.data.PlayerAliasData;
 import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.StreamData;
 import java.util.function.Supplier;
@@ -13,7 +11,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent.Context;
 
@@ -72,9 +69,6 @@ public class RaffleServerMessage {
    }
 
    public static void dropRewards(ServerPlayer sender, String winner) {
-      winner = PlayerAliasData.applyAlias(sender, winner);
-      ItemStack vaultCrystal = VaultCrystalItem.getCrystalWithBoss(winner);
-      sender.drop(vaultCrystal, false, false);
    }
 
    public static RaffleServerMessage requestRaffle() {

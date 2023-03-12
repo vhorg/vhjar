@@ -44,7 +44,7 @@ public class VaultAltarBlock extends Block implements EntityBlock {
    public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
    public VaultAltarBlock() {
-      super(Properties.of(Material.STONE, MaterialColor.DIAMOND).requiresCorrectToolForDrops().strength(3.0F, 3600000.0F).noOcclusion());
+      super(Properties.of(Material.STONE, MaterialColor.DIAMOND).strength(3.0F, 3600000.0F).noOcclusion());
       this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(POWERED, Boolean.FALSE));
    }
 

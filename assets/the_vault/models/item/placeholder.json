@@ -10,6 +10,7 @@
     { "predicate": { "the_vault:placeholder_type": 6 }, "model": "the_vault:item/placeholder_coin_stacks" },
     { "predicate": { "the_vault:placeholder_type": 7 }, "model": "the_vault:item/placeholder_vendor_pedestal" },
     { "predicate": { "the_vault:placeholder_type": 8 }, "model": "the_vault:item/placeholder_treasure_door" },
-    { "predicate": { "the_vault:placeholder_type": 9 }, "model": "the_vault:item/placeholder_pylon" }
+    { "predicate": { "the_vault:placeholder_type": 9 }, "model": "the_vault:item/placeholder_pylon" },
+    { "predicate": { "the_vault:placeholder_type": 10 }, "model": "the_vault:item/placeholder_dungeon_discoverable" }
   ]
 }

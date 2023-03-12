@@ -1,8 +1,13 @@
 package iskallia.vault.skill.ability.effect.spi;
 
+import iskallia.vault.gear.attribute.ability.special.FarmerAdditionalRangeModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.skill.ability.config.FarmerConfig;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityTickResult;
 import iskallia.vault.skill.ability.effect.spi.core.AbstractHoldManaAbility;
+import iskallia.vault.util.calc.CooldownHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
@@ -28,7 +33,10 @@ public abstract class AbstractFarmerAbility<C extends FarmerConfig> extends Abst
    }
 
    protected AbilityTickResult doActiveTick(C config, ServerPlayer player) {
-      int tickDelay = this.tickCounterMap.computeIfAbsent(player.getUUID(), uuid -> config.getTickDelay());
+      int tickDelay = this.tickCounterMap.computeIfAbsent(player.getUUID(), uuid -> {
+         int delay = config.getTickDelay();
+         return CooldownHelper.adjustCooldown(player, "Farmer", delay);
+      });
       if (tickDelay > 0) {
          this.tickCounterMap.put(player.getUUID(), tickDelay - 1);
          return super.doActiveTick(config, player);
@@ -43,6 +51,14 @@ public abstract class AbstractFarmerAbility<C extends FarmerConfig> extends Abst
       BlockPos playerPos = player.blockPosition();
       int horizontalRange = config.getHorizontalRange();
       int verticalRange = config.getVerticalRange();
+
+      for (ConfiguredModification<IntValueConfig, FarmerAdditionalRangeModification> mod : SpecialAbilityModification.getModifications(
+         player, FarmerAdditionalRangeModification.class
+      )) {
+         horizontalRange = mod.modification().addRange(mod.config(), horizontalRange);
+         verticalRange = mod.modification().addRange(mod.config(), verticalRange);
+      }
+
       MutableBlockPos mutableBlockPos = new MutableBlockPos();
       List<BlockPos> candidateList = new ArrayList<>();
 

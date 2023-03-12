@@ -11,9 +11,10 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MiscUtils;
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import net.minecraft.util.Tuple;
@@ -30,7 +31,7 @@ public class VaultGearModifierHelper {
       generateImplicits(stack, random);
    }
 
-   public static boolean reForgeAllWithTag(VaultGearTagConfig.ModGroupTag modGroupTag, ItemStack stack, Random random) {
+   public static boolean reForgeAllWithTag(VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack, Random random) {
       ItemStack emptyCopy = stack.copy();
       removeAllModifiers(emptyCopy);
       if (getAvailableModGroupOutcomes(modGroupTag, emptyCopy).isEmpty()) {
@@ -46,7 +47,7 @@ public class VaultGearModifierHelper {
       }
    }
 
-   public static boolean addNewModifierOfGroup(VaultGearTagConfig.ModGroupTag modGroupTag, ItemStack stack, Random random) {
+   public static boolean addNewModifierOfGroup(VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack, Random random) {
       WeightedList<VaultGearModifierHelper.TierGroupOutcome> outcomes = getAvailableModGroupOutcomes(modGroupTag, stack);
       Map<VaultGearTierConfig.ModifierTierGroup, Integer> highestTiers = new WeightedList<>();
 
@@ -68,7 +69,7 @@ public class VaultGearModifierHelper {
    }
 
    private static WeightedList<VaultGearModifierHelper.TierGroupOutcome> getAvailableModGroupOutcomes(
-      VaultGearTagConfig.ModGroupTag modGroupTag, ItemStack stack
+      VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack
    ) {
       WeightedList<VaultGearModifierHelper.TierGroupOutcome> groupOutcomes = new WeightedList<>();
       VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
@@ -83,34 +84,32 @@ public class VaultGearModifierHelper {
          if (!generatePrefixes && !generateSuffixes) {
             return groupOutcomes;
          } else {
-            modGroupTag.getGroups()
+            modGroupTag.getTags()
                .forEach(
-                  group -> {
-                     if (!existingGroups.contains(group)) {
-                        cfg.getModifierGroupConfigurations(group)
-                           .forEach(
-                              tpl -> {
-                                 if (((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).isGenericGroup()) {
-                                    VaultGearModifier.AffixType type = ((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).getTargetAffixType();
-                                    if (type != VaultGearModifier.AffixType.PREFIX || generatePrefixes) {
-                                       if (type != VaultGearModifier.AffixType.SUFFIX || generateSuffixes) {
-                                          ((VaultGearTierConfig.ModifierTierGroup)tpl.getB())
-                                             .getModifiersForLevel(itemLevel)
-                                             .forEach(
-                                                tier -> groupOutcomes.add(
-                                                   new VaultGearModifierHelper.TierGroupOutcome(
-                                                      type, (VaultGearTierConfig.ModifierTierGroup)tpl.getB(), (VaultGearTierConfig.ModifierTier<?>)tier
-                                                   ),
-                                                   tier.getWeight()
-                                                )
-                                             );
-                                       }
+                  tag -> cfg.getModifierConfigurationsByTag(tag)
+                     .forEach(
+                        tpl -> {
+                           if (((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).isGenericGroup()) {
+                              if (!existingGroups.contains(((VaultGearTierConfig.ModifierTierGroup)tpl.getB()).getModifierGroup())) {
+                                 VaultGearModifier.AffixType type = ((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).getTargetAffixType();
+                                 if (type != VaultGearModifier.AffixType.PREFIX || generatePrefixes) {
+                                    if (type != VaultGearModifier.AffixType.SUFFIX || generateSuffixes) {
+                                       ((VaultGearTierConfig.ModifierTierGroup)tpl.getB())
+                                          .getModifiersForLevel(itemLevel)
+                                          .forEach(
+                                             tier -> groupOutcomes.add(
+                                                new VaultGearModifierHelper.TierGroupOutcome(
+                                                   type, (VaultGearTierConfig.ModifierTierGroup)tpl.getB(), (VaultGearTierConfig.ModifierTier<?>)tier
+                                                ),
+                                                tier.getWeight()
+                                             )
+                                          );
                                     }
                                  }
                               }
-                           );
-                     }
-                  }
+                           }
+                        }
+                     )
                );
             return groupOutcomes;
          }
@@ -127,15 +126,19 @@ public class VaultGearModifierHelper {
          int itemLevel = data.getItemLevel();
          List<Tuple<VaultGearModifier<?>, VaultGearModifier<?>>> modifierReplacements = new ArrayList<>();
          data.getModifiers(VaultGearModifier.AffixType.PREFIX).forEach(modifier -> {
-            VaultGearModifier<?> randomNew = cfg.generateModifier(modifier.getModifierIdentifier(), itemLevel, random);
-            if (randomNew != null && modifier.getModifierIdentifier().equals(randomNew.getModifierIdentifier())) {
-               modifierReplacements.add(new Tuple(modifier, randomNew));
+            if (modifier.getCategory().isModifiableByArtisanFoci()) {
+               VaultGearModifier<?> randomNew = cfg.generateModifier(modifier.getModifierIdentifier(), itemLevel, random);
+               if (randomNew != null && modifier.getModifierIdentifier().equals(randomNew.getModifierIdentifier())) {
+                  modifierReplacements.add(new Tuple(modifier, randomNew));
+               }
             }
          });
          data.getModifiers(VaultGearModifier.AffixType.SUFFIX).forEach(modifier -> {
-            VaultGearModifier<?> randomNew = cfg.generateModifier(modifier.getModifierIdentifier(), itemLevel, random);
-            if (randomNew != null && modifier.getModifierIdentifier().equals(randomNew.getModifierIdentifier())) {
-               modifierReplacements.add(new Tuple(modifier, randomNew));
+            if (modifier.getCategory().isModifiableByArtisanFoci()) {
+               VaultGearModifier<?> randomNew = cfg.generateModifier(modifier.getModifierIdentifier(), itemLevel, random);
+               if (randomNew != null && modifier.getModifierIdentifier().equals(randomNew.getModifierIdentifier())) {
+                  modifierReplacements.add(new Tuple(modifier, randomNew));
+               }
             }
          });
          Tuple<VaultGearModifier<?>, VaultGearModifier<?>> replacement = MiscUtils.getRandomEntry(modifierReplacements, random);
@@ -207,11 +210,42 @@ public class VaultGearModifierHelper {
          }
 
          VaultGearModifier.AffixType type = MiscUtils.getRandomEntry(types, random);
-         VaultGearModifier<?> randomMod = MiscUtils.getRandomEntry(data.getModifiers(type), random);
-         data.removeModifier(randomMod);
-         data.write(stack);
-         return true;
+         if (type == null) {
+            return false;
+         } else {
+            List<VaultGearModifier<?>> modifiers = new ArrayList<>(data.getModifiers(type));
+            modifiers.removeIf(modifier -> !modifier.getCategory().isModifiableByArtisanFoci());
+            if (modifiers.isEmpty()) {
+               return false;
+            } else {
+               VaultGearModifier<?> randomMod = MiscUtils.getRandomEntry(modifiers, random);
+               data.removeModifier(randomMod);
+               data.write(stack);
+               return true;
+            }
+         }
       }
+   }
+
+   public static boolean hasAnyOpenAffix(ItemStack stack) {
+      VaultGearData data = VaultGearData.read(stack);
+      int prefixes = data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0);
+      int suffixes = data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0);
+      prefixes -= data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
+      suffixes -= data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
+      return prefixes > 0 || suffixes > 0;
+   }
+
+   public static boolean hasOpenPrefix(ItemStack stack) {
+      VaultGearData data = VaultGearData.read(stack);
+      int prefixes = data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0) - data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
+      return prefixes > 0;
+   }
+
+   public static boolean hasOpenSuffix(ItemStack stack) {
+      VaultGearData data = VaultGearData.read(stack);
+      int suffixes = data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0) - data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
+      return suffixes > 0;
    }
 
    public static void removeAllModifiers(ItemStack stack) {
@@ -223,12 +257,42 @@ public class VaultGearModifierHelper {
       VaultGearData data = VaultGearData.read(stack);
 
       for (VaultGearModifier<?> modifier : new ArrayList<>(data.getModifiers(type))) {
-         if (modifier.getCategory() != VaultGearModifier.AffixCategory.ABYSSAL) {
+         if (modifier.getCategory().isModifiableByArtisanFoci()) {
             data.removeModifier(modifier);
          }
       }
 
       data.write(stack);
+   }
+
+   public static boolean createOrReplaceAbilityEnhancementModifier(ItemStack stack, Random random) {
+      VaultGearData data = VaultGearData.read(stack);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      if (cfg == null) {
+         VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
+         return false;
+      } else {
+         Optional<VaultGearModifier<?>> modifierOpt = cfg.getRandomModifier(
+            VaultGearTierConfig.ModifierAffixTagGroup.ABILITY_ENHANCEMENT, data.getItemLevel(), random, Collections.emptySet()
+         );
+         if (modifierOpt.isEmpty()) {
+            return false;
+         } else {
+            VaultGearModifier<?> newModifier = modifierOpt.get();
+            newModifier.setCategory(VaultGearModifier.AffixCategory.ABILITY_ENHANCEMENT);
+            List<VaultGearModifier<?>> implicits = data.getModifiers(VaultGearTierConfig.ModifierAffixTagGroup.ABILITY_ENHANCEMENT.getTargetAffixType());
+
+            for (VaultGearModifier<?> modifier : new ArrayList<>(implicits)) {
+               if (modifier.getCategory() == VaultGearModifier.AffixCategory.ABILITY_ENHANCEMENT) {
+                  data.removeModifier(modifier);
+               }
+            }
+
+            data.addModifierFirst(VaultGearModifier.AffixType.IMPLICIT, newModifier);
+            data.write(stack);
+            return true;
+         }
+      }
    }
 
    public static boolean generateLegendaryModifier(ItemStack stack, Random random) {
@@ -242,6 +306,7 @@ public class VaultGearModifierHelper {
          data.getModifiers(VaultGearModifier.AffixType.PREFIX).forEach(modifier -> modifiers.add(new Tuple(VaultGearModifier.AffixType.PREFIX, modifier)));
          data.getModifiers(VaultGearModifier.AffixType.SUFFIX).forEach(modifier -> modifiers.add(new Tuple(VaultGearModifier.AffixType.SUFFIX, modifier)));
          modifiers.removeIf(tpl -> cfg.getAllTiers(((VaultGearModifier)tpl.getB()).getModifierIdentifier()).size() <= 1);
+         modifiers.removeIf(tpl -> !((VaultGearModifier)tpl.getB()).getCategory().isModifiableByArtisanFoci());
          Tuple<VaultGearModifier.AffixType, VaultGearModifier<?>> randomMod = MiscUtils.getRandomEntry(modifiers, random);
          if (randomMod == null) {
             return false;
@@ -254,7 +319,7 @@ public class VaultGearModifierHelper {
             } else {
                newMod.setCategory(VaultGearModifier.AffixCategory.LEGENDARY);
                if (data.removeModifier((VaultGearModifier<?>)randomMod.getB())) {
-                  data.addModifier((VaultGearModifier.AffixType)randomMod.getA(), newMod, Deque::addFirst);
+                  data.addModifierFirst((VaultGearModifier.AffixType)randomMod.getA(), newMod);
                }
 
                data.write(stack);

@@ -2,7 +2,7 @@ package iskallia.vault.core.vault;
 
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
@@ -18,7 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 public abstract class PortalLogic extends DataObject<PortalLogic> implements ISupplierKey<PortalLogic> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<PortalData.List> DATA = FieldKey.of("data", PortalData.List.class)
-      .with(Version.v1_0, Adapter.ofCompound(PortalData.List::new), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, CompoundAdapter.of(PortalData.List::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public PortalLogic() {

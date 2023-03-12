@@ -3,7 +3,6 @@ package iskallia.vault.core.data.key;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.registry.KeyRegistry;
 import iskallia.vault.core.util.VersionMap;
-import java.util.Optional;
 import java.util.function.UnaryOperator;
 import net.minecraft.resources.ResourceLocation;
 
@@ -28,12 +27,11 @@ public class VersionedKey<K extends VersionedKey<K, T>, T> {
    }
 
    public T get(Version version) {
-      return this.entries.getFor(version).orElseThrow(IllegalStateException::new);
+      return this.entries.getFor(version).orElseThrow(() -> new IllegalStateException(this.id + " does not support version " + version.getName()));
    }
 
    public boolean supports(Version version) {
-      Optional<Version> opt = this.entries.getOldest();
-      return opt.isEmpty() ? false : version.isNewerOrEqualTo(opt.get());
+      return this.entries.getFor(version).isPresent();
    }
 
    public K with(Version version, T value) {
@@ -48,6 +46,11 @@ public class VersionedKey<K extends VersionedKey<K, T>, T> {
    public K withMap(Version version, UnaryOperator<T> value) {
       T previous = this.entries.getFor(version).orElse(null);
       return this.with(version, value.apply(previous));
+   }
+
+   public K remove(Version version) {
+      this.entries.put(version, null);
+      return (K)this;
    }
 
    public <R extends KeyRegistry<? super K, ? super T>> K register(R registry) {

@@ -1,16 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "ddd",
-    "dwd",
-    "ddd"
+    " e ",
+    "wew",
+    "ded"
   ],
   "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
     "d": {
       "item": "the_vault:dreamstone"
     },
     "w": {
-      "item": "the_vault:vault_diamond_block"
+      "item": "the_vault:vault_diamond"
     }
   },
   "result": {

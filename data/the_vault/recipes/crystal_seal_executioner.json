@@ -1,22 +1,22 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " # ",
-        "dsd",
-        " w "
+        "e#e",
+        "ese",
+        "ede"
     ],
     "key": {
+        "e": {
+            "item": "the_vault:vault_essence"
+        },
         "#": {
-            "item": "minecraft:netherite_sword"
+            "item": "minecraft:wooden_sword"
         },
         "d": {
             "item": "the_vault:vault_diamond"
         },
         "s": {
             "item": "the_vault:crystal_seal_empty"
-        },
-        "w": {
-            "item": "the_vault:vault_diamond_block"
         }
     },
     "result": {

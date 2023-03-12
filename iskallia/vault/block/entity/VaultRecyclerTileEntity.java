@@ -4,15 +4,10 @@ import com.google.common.collect.Lists;
 import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.container.VaultRecyclerContainer;
 import iskallia.vault.container.base.SimpleSidedContainer;
-import iskallia.vault.gear.VaultGearState;
-import iskallia.vault.gear.data.AttributeGearData;
-import iskallia.vault.gear.data.VaultGearData;
-import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.gear.TrinketItem;
+import iskallia.vault.item.gear.RecyclableItem;
 import iskallia.vault.network.message.RecyclerParticleMessage;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.nbt.NBTHelper;
@@ -36,7 +31,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -140,16 +134,7 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
       if (!this.isValidInput(input)) {
          return null;
       } else {
-         VaultRecyclerConfig.RecyclerOutput output;
-         if (input.is(ModItems.JEWEL)) {
-            output = ModConfigs.VAULT_RECYCLER.getJewelRecyclingOutput();
-         } else if (input.is(ModItems.TRINKET)) {
-            output = ModConfigs.VAULT_RECYCLER.getTrinketRecyclingOutput();
-         } else {
-            output = ModConfigs.VAULT_RECYCLER.getGearRecyclingOutput();
-         }
-
-         return output;
+         return input.getItem() instanceof RecyclableItem recyclableItem ? recyclableItem.getOutput(input) : null;
       }
    }
 
@@ -157,8 +142,8 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
       ItemStack input = this.inventory.getItem(0);
       if (!this.isValidInput(input)) {
          this.resetProcess(null);
-      } else {
-         AttributeGearData.readUUID(input).ifPresent(itemId -> {
+      } else if (input.getItem() instanceof RecyclableItem recyclableItem) {
+         recyclableItem.getUuid(input).ifPresent(itemId -> {
             if ((this.gearIdProcessing == null || !this.gearIdProcessing.equals(itemId)) && this.canCraft()) {
                this.startProcess(null, itemId);
             }
@@ -167,30 +152,11 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
    }
 
    public boolean isValidInput(ItemStack input) {
-      if (input.isEmpty()) {
-         return false;
-      } else {
-         Item inputItem = input.getItem();
-         return !(inputItem instanceof VaultGearItem) && !(inputItem instanceof TrinketItem) && inputItem != ModItems.JEWEL
-            ? false
-            : AttributeGearData.hasData(input);
-      }
+      return input.getItem() instanceof RecyclableItem recyclableItem ? recyclableItem.isValidInput(input) : false;
    }
 
    public float getResultPercentage(ItemStack input) {
-      if (input.isEmpty()) {
-         return 0.0F;
-      } else if (input.getItem() instanceof VaultGearItem) {
-         if (VaultGearData.read(input).getState() != VaultGearState.IDENTIFIED) {
-            return 1.0F;
-         } else {
-            return !input.isDamageableItem() ? 1.0F : 1.0F - (float)input.getDamageValue() / input.getMaxDamage();
-         }
-      } else if (input.getItem() instanceof TrinketItem) {
-         return !TrinketItem.isIdentified(input) ? 1.0F : 1.0F - (float)TrinketItem.getUsedVaults(input).size() / TrinketItem.getUses(input);
-      } else {
-         return 0.0F;
-      }
+      return input.getItem() instanceof RecyclableItem recyclableItem ? recyclableItem.getResultPercentage(input) : 0.0F;
    }
 
    private void resetProcess(@Nullable Level world) {
@@ -363,7 +329,7 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
          if (stack.isEmpty()) {
             return false;
          } else {
-            return slot != 0 ? false : stack.is(ModItems.TRINKET) || stack.getItem() instanceof VaultGearItem;
+            return slot == 0 && stack.getItem() instanceof RecyclableItem recyclableItem ? recyclableItem.isValidInput(stack) : false;
          }
       }
 

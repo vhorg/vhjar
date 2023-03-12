@@ -1,5 +1,9 @@
 package iskallia.vault.skill.ability.effect;
 
+import iskallia.vault.gear.attribute.ability.special.ExecuteHealthModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.AbilityNode;
@@ -58,8 +62,16 @@ public class ExecuteAbility<C extends ExecuteConfig> extends AbstractInstantAbil
             if (node.getAbility() == this && node.isLearned()) {
                ExecuteConfig config = (ExecuteConfig)node.getAbilityConfig();
                if (config != null) {
+                  float dmgPercentage = config.getDamageHealthPercentage();
+
+                  for (ConfiguredModification<FloatValueConfig, ExecuteHealthModification> mod : SpecialAbilityModification.getModifications(
+                     serverPlayer, ExecuteHealthModification.class
+                  )) {
+                     dmgPercentage = mod.modification().adjustHealthPercent(mod.config(), dmgPercentage);
+                  }
+
                   float maxHealth = event.getEntityLiving().getMaxHealth();
-                  float damageDealt = maxHealth * config.getDamageHealthPercentage();
+                  float damageDealt = maxHealth * dmgPercentage;
                   event.setAmount(event.getAmount() + damageDealt);
                   serverPlayer.removeEffect(ModEffects.EXECUTE);
                }

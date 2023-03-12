@@ -46,15 +46,22 @@ public abstract class VaultForgeRecipe {
       return Collections.unmodifiableList(this.inputs);
    }
 
+   public boolean usesLevel() {
+      return false;
+   }
+
    protected ItemStack getRawOutput() {
       return this.output.copy();
    }
 
-   public ItemStack getDisplayOutput() {
+   public ItemStack getDisplayOutput(int vaultLevel) {
       return this.getRawOutput();
    }
 
-   public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter) {
+   public void addCraftingDisplayTooltip(ItemStack result, List<Component> out) {
+   }
+
+   public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter, int vaultLevel) {
       return this.getRawOutput();
    }
 

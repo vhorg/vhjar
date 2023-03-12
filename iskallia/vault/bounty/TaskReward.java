@@ -3,11 +3,9 @@ package iskallia.vault.bounty;
 import com.google.gson.annotations.Expose;
 import com.mojang.datafixers.util.Pair;
 import iskallia.vault.block.VaultCrateBlock;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.dynamodel.DynamicModel;
-import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModDynamicModels;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
@@ -21,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.extensions.IForgeItemStack;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.items.ItemHandlerHelper;
 
@@ -29,7 +26,7 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
    @Expose
    private int vaultExp;
    @Expose
-   private List<ItemStack> rewardItems;
+   private List<OverSizedItemStack> rewardItems;
    @Expose
    private List<ResourceLocation> discoverModels;
 
@@ -37,13 +34,13 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
       this.deserializeNBT(tag);
    }
 
-   public TaskReward(int vaultExp, List<ItemStack> rewardItems) {
+   public TaskReward(int vaultExp, List<OverSizedItemStack> rewardItems) {
       this.vaultExp = vaultExp;
       this.rewardItems = rewardItems;
       this.discoverModels = new ArrayList<>();
    }
 
-   public TaskReward(int vaultExp, List<ItemStack> items, List<ResourceLocation> discoverModels) {
+   public TaskReward(int vaultExp, List<OverSizedItemStack> items, List<ResourceLocation> discoverModels) {
       this.vaultExp = vaultExp;
       this.rewardItems = items;
       this.discoverModels = discoverModels;
@@ -68,14 +65,14 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
    }
 
    public ItemStack createRewardCrate() {
-      NonNullList<ItemStack> rewardItemStacks = this.createRewardItems();
-      return VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.BOUNTY, rewardItemStacks);
+      NonNullList<OverSizedItemStack> rewardItemStacks = this.createRewardItems();
+      return VaultCrateBlock.getCrateWithLootOversized(VaultCrateBlock.Type.BOUNTY, rewardItemStacks);
    }
 
    @Nonnull
-   public NonNullList<ItemStack> createRewardItems() {
-      NonNullList<ItemStack> rewardItemStacks = NonNullList.create();
-      this.rewardItems.forEach(stack -> rewardItemStacks.add(stack.copy()));
+   public NonNullList<OverSizedItemStack> createRewardItems() {
+      NonNullList<OverSizedItemStack> rewardItemStacks = NonNullList.create();
+      this.rewardItems.stream().map(overSizedItemStack -> overSizedItemStack.addCopy(0)).forEach(rewardItemStacks::add);
       return rewardItemStacks;
    }
 
@@ -83,19 +80,8 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
       return this.vaultExp;
    }
 
-   public List<ItemStack> getRewardItems() {
+   public List<OverSizedItemStack> getRewardItems() {
       return this.rewardItems;
-   }
-
-   public void setGearToPlayerLevel(ServerPlayer player) {
-      for (ItemStack stack : this.rewardItems) {
-         if (player != null && stack.getItem() instanceof VaultGearItem gearItem) {
-            gearItem.setItemLevel(stack, player);
-         }
-
-         DataTransferItem.doConvertStack(stack);
-         DataInitializationItem.doInitialize(stack);
-      }
    }
 
    public List<ResourceLocation> getDiscoverModels() {
@@ -105,12 +91,19 @@ public class TaskReward implements INBTSerializable<CompoundTag> {
    public CompoundTag serializeNBT() {
       CompoundTag tag = new CompoundTag();
       tag.putInt("vaultExp", this.vaultExp);
-      NBTHelper.writeCollection(tag, "items", this.rewardItems, CompoundTag.class, IForgeItemStack::serializeNBT);
-      return (R)tag;
+      NBTHelper.writeCollection(tag, "items", this.rewardItems, CompoundTag.class, OverSizedItemStack::serialize);
+      return tag;
    }
 
    public void deserializeNBT(CompoundTag tag) {
       this.vaultExp = tag.getInt("vaultExp");
-      this.rewardItems = NBTHelper.readList(tag, "items", CompoundTag.class, ItemStack::of);
+      this.rewardItems = NBTHelper.readList(tag, "items", CompoundTag.class, compoundTag -> {
+         if (compoundTag.contains("stack")) {
+            return OverSizedItemStack.deserialize(compoundTag);
+         } else {
+            ItemStack stack = ItemStack.of(compoundTag);
+            return OverSizedItemStack.of(stack);
+         }
+      });
    }
 }

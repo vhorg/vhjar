@@ -28,7 +28,7 @@ public class GearRecipesConfig extends ForgeRecipesConfig<ConfigGearRecipe, Gear
 
       for (ProficiencyType type : ProficiencyType.getCraftableTypes()) {
          ItemStack out = new ItemStack(type.getDisplayStack().get().getItem());
-         ConfigGearRecipe recipe = new ConfigGearRecipe(out, type);
+         ConfigGearRecipe recipe = new ConfigGearRecipe(out);
          recipe.addInput(new ItemStack(Items.DIAMOND, 2));
          this.gearRecipes.add(recipe);
       }

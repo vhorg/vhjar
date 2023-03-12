@@ -3,7 +3,7 @@ package iskallia.vault.config.bounty.task;
 import iskallia.vault.bounty.task.properties.MiningProperties;
 import iskallia.vault.config.bounty.task.entry.GenericEntry;
 import iskallia.vault.config.bounty.task.entry.TaskEntry;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import iskallia.vault.init.ModBlocks;
 import java.util.ArrayList;
 import net.minecraft.resources.ResourceLocation;
@@ -27,8 +27,8 @@ public class MiningTaskConfig extends TaskConfig<TaskEntry<ResourceLocation>, Mi
 
    @Override
    protected TaskEntry<ResourceLocation> generateConfigEntry() {
-      return new TaskEntry<>(new GenericEntry<>(ForgeRegistries.BLOCKS.getKey(ModBlocks.LARIMAR_ORE), new RangeEntry(10, 30)).vaultOnly(), 3)
-         .addEntry(new GenericEntry<>(ForgeRegistries.BLOCKS.getKey(ModBlocks.ISKALLIUM_ORE), new RangeEntry(10, 30)).vaultOnly(), 3)
-         .addEntry(new GenericEntry<>(ForgeRegistries.BLOCKS.getKey(ModBlocks.GORGINITE_ORE), new RangeEntry(10, 30)).vaultOnly(), 3);
+      return new TaskEntry<>(new GenericEntry<>(ForgeRegistries.BLOCKS.getKey(ModBlocks.LARIMAR_ORE), new IntRangeEntry(10, 30)).vaultOnly(), 3)
+         .addEntry(new GenericEntry<>(ForgeRegistries.BLOCKS.getKey(ModBlocks.ISKALLIUM_ORE), new IntRangeEntry(10, 30)).vaultOnly(), 3)
+         .addEntry(new GenericEntry<>(ForgeRegistries.BLOCKS.getKey(ModBlocks.GORGINITE_ORE), new IntRangeEntry(10, 30)).vaultOnly(), 3);
    }
 }

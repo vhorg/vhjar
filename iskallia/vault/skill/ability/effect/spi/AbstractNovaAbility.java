@@ -21,12 +21,13 @@ public abstract class AbstractNovaAbility<C extends NovaConfig> extends Abstract
 
    @NotNull
    protected List<LivingEntity> getTargetEntities(C config, ServerPlayer player) {
+      float radius = config.getRadius(player);
       return player.level
          .getNearbyEntities(
             LivingEntity.class,
-            TargetingConditions.forCombat().range(config.getRadius()).selector(entity -> !(entity instanceof Player)),
+            TargetingConditions.forCombat().range(radius).selector(entity -> !(entity instanceof Player)),
             player,
-            player.getBoundingBox().inflate(config.getRadius() * 2.0F)
+            player.getBoundingBox().inflate(radius * 2.0F)
          );
    }
 
@@ -35,10 +36,9 @@ public abstract class AbstractNovaAbility<C extends NovaConfig> extends Abstract
    }
 
    protected void doParticles(C config, ServerPlayer player) {
-      int particleCount = (int)Mth.clamp(Math.pow(config.getRadius(), 2.0) * (float) Math.PI * 50.0, 50.0, 200.0);
+      float radius = config.getRadius(player);
+      int particleCount = (int)Mth.clamp(Math.pow(radius, 2.0) * (float) Math.PI * 50.0, 50.0, 200.0);
       ((ServerLevel)player.level)
-         .sendParticles(
-            ParticleTypes.POOF, player.getX(), player.getY(), player.getZ(), particleCount, config.getRadius() * 0.5, 0.5, config.getRadius() * 0.5, 0.0
-         );
+         .sendParticles(ParticleTypes.POOF, player.getX(), player.getY(), player.getZ(), particleCount, radius * 0.5, 0.5, radius * 0.5, 0.0);
    }
 }

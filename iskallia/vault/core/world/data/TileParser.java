@@ -48,7 +48,7 @@ public class TileParser {
    private static final SimpleCommandExceptionType IDENTIFIER_EXCEPTION = new SimpleCommandExceptionType(new TranslatableComponent("argument.id.invalid"));
    private final StringReader reader;
    private final boolean allowTag;
-   private final Block error;
+   private final Block fallback;
    private ResourceLocation blockId = new ResourceLocation("");
    private StateDefinition<Block, BlockState> stateFactory;
    private BlockState state;
@@ -62,9 +62,9 @@ public class TileParser {
    private boolean hasState;
    private boolean hasNBT;
 
-   public TileParser(StringReader reader, Block error, boolean allowTag) {
+   public TileParser(StringReader reader, Block fallback, boolean allowTag) {
       this.reader = reader;
-      this.error = error;
+      this.fallback = fallback;
       this.allowTag = allowTag;
       this.parse();
    }
@@ -203,7 +203,7 @@ public class TileParser {
       Block block = ForgeRegistries.BLOCKS.getHolder(this.blockId).<Block>map(Holder::value).orElseGet(() -> {
          this.reader.setCursor(i);
          INVALID_BLOCK_ID_EXCEPTION.createWithContext(this.reader, this.blockId.toString()).printStackTrace();
-         return this.error;
+         return this.fallback;
       });
       if (block != null) {
          this.stateFactory = block.getStateDefinition();

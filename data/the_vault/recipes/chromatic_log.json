@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ddd",
+    "dcd",
+    "ddd"
+  ],
+  "key": {
+    "c": {
+      "item": "the_vault:chromatic_iron_ingot"
+    },
+    "d": {
+      "item": "the_vault:driftwood"
+    }
+  },
+  "result": {
+    "item": "the_vault:chromatic_log",
+    "count": 2
+  }
+}

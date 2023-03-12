@@ -15,6 +15,10 @@ public class Counter {
       return this.value;
    }
 
+   public void setValue(int value) {
+      this.value = value;
+   }
+
    public void decrement() {
       this.value--;
    }

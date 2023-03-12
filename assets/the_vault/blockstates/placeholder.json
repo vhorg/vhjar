@@ -40,6 +40,10 @@
       "x": 180,
       "model": "the_vault:block/placeholder_pylon"
     },
+    "facing=down,type=dungeon_discoverable": {
+      "x": 180,
+      "model": "the_vault:block/placeholder_dungeon_discoverable"
+    },
 
     "facing=east,type=wooden_chest": {
       "x": 90,
@@ -91,6 +95,11 @@
       "y": 90,
       "model": "the_vault:block/placeholder_pylon"
     },
+    "facing=east,type=dungeon_discoverable": {
+      "x": 90,
+      "y": 90,
+      "model": "the_vault:block/placeholder_dungeon_discoverable"
+    },
 
     "facing=north,type=wooden_chest": {
       "x": 90,
@@ -132,6 +141,11 @@
       "x": 90,
       "model": "the_vault:block/placeholder_pylon"
     },
+    "facing=north,type=dungeon_discoverable": {
+      "x": 90,
+      "model": "the_vault:block/placeholder_dungeon_discoverable"
+    },
+
 
     "facing=south,type=wooden_chest": {
       "x": 90,
@@ -183,6 +197,12 @@
       "y": 180,
       "model": "the_vault:block/placeholder_pylon"
     },
+    "facing=south,type=dungeon_discoverable": {
+      "x": 90,
+      "y": 180,
+      "model": "the_vault:block/placeholder_dungeon_discoverable"
+    },
+
 
     "facing=up,type=wooden_chest": {
       "model": "the_vault:block/placeholder_wooden_chest"
@@ -213,6 +233,9 @@
     },
     "facing=up,type=pylon": {
       "model": "the_vault:block/placeholder_pylon"
+    },
+    "facing=up,type=dungeon_discoverable": {
+      "model": "the_vault:block/placeholder_dungeon_discoverable"
     },
 
     "facing=west,type=wooden_chest": {
@@ -264,6 +287,11 @@
       "x": 90,
       "y": 270,
       "model": "the_vault:block/placeholder_pylon"
+    },
+    "facing=west,type=dungeon_discoverable": {
+      "x": 90,
+      "y": 270,
+      "model": "the_vault:block/placeholder_dungeon_discoverable"
     }
   }
 }

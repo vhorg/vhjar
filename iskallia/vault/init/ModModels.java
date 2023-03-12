@@ -8,6 +8,7 @@ import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.block.TreasureDoorBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.model.PylonCrystalModel;
+import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
 import iskallia.vault.core.vault.influence.VaultGod;
@@ -19,9 +20,9 @@ import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
+import iskallia.vault.item.AugmentItem;
 import iskallia.vault.item.ItemDrillArrow;
 import iskallia.vault.item.LegacyMagnetItem;
-import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.tool.JewelItem;
 import iskallia.vault.research.StageManager;
 import iskallia.vault.research.type.Research;
@@ -86,11 +87,13 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLACK_MARKET, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANIMAL_JAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ETERNAL_PEDESTAL, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.MODIFIER_DISCOVERY, RenderType.cutout());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.HOURGLASS, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.RAID_CONTROLLER_BLOCK, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.VAULT_CHARM_CONTROLLER_BLOCK, RenderType.solid(), RenderType.translucent());
+      setRenderLayers(ModBlocks.CRAKE_PEDESTAL, RenderType.translucent());
    }
 
    private static void setRenderLayers(Block block, RenderType... renderTypes) {
@@ -132,6 +135,7 @@ public class ModModels {
          }
       );
       colors.register((stack, tintIndex) -> tintIndex == 0 ? JewelItem.getColor(stack) : -1, new ItemLike[]{ModItems.JEWEL});
+      colors.register((stack, tintIndex) -> tintIndex == 1 ? AugmentItem.getColor(stack) : -1, new ItemLike[]{ModItems.AUGMENT});
    }
 
    @SubscribeEvent
@@ -188,12 +192,10 @@ public class ModModels {
       };
       public static ItemPropertyFunction GOD_BLESSING_TYPE = (stack, world, entity, seed) -> {
          CompoundTag nbt = stack.getTag();
-         if (nbt == null) {
-            return -1.0F;
-         } else {
-            VaultGod type = VaultGod.fromName(nbt.getString("type"));
-            return type == null ? -1.0F : type.ordinal();
-         }
+         VaultGod type;
+         return nbt != null && (type = VaultGod.fromName(nbt.getString("type"))) != null
+            ? type.ordinal()
+            : (float)((ClientScheduler.INSTANCE.getTickCount() >> 4) % VaultGod.values().length);
       };
 
       public static void register() {
@@ -215,9 +217,6 @@ public class ModModels {
             Item.byBlock(ModBlocks.CRYO_CHAMBER),
             new ResourceLocation("type"),
             (stack, world, entity, seed) -> (float)stack.getDamageValue() / CryoChamberBlock.ChamberState.values().length
-         );
-         ItemProperties.register(
-            ModItems.VAULT_CRYSTAL, new ResourceLocation("model"), (stack, world, entity, seed) -> VaultCrystalItem.getData(stack).getModel().getSerializedId()
          );
          ItemProperties.register(ModItems.VAULT_COMPASS, new ResourceLocation("angle"), new ModModels.ItemProperty.CompassPropertyFunction());
          registerItemProperty(ModBlocks.PLACEHOLDER.asItem(), "placeholder_type", PLACEHOLDER_TYPE);

@@ -13,15 +13,19 @@ import iskallia.vault.client.gui.framework.element.LabelElement;
 import iskallia.vault.client.gui.framework.element.NineSliceElement;
 import iskallia.vault.client.gui.framework.element.OutputSlotElement;
 import iskallia.vault.client.gui.framework.element.SlotsElement;
+import iskallia.vault.client.gui.framework.element.TextInputElement;
 import iskallia.vault.client.gui.framework.render.ScreenTooltipRenderer;
+import iskallia.vault.client.gui.framework.render.TooltipDirection;
 import iskallia.vault.client.gui.framework.screen.AbstractElementContainerScreen;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
+import iskallia.vault.client.gui.overlay.VaultBarOverlay;
 import iskallia.vault.container.spi.ForgeRecipeContainer;
-import iskallia.vault.gear.crafting.VaultForgeHelper;
 import iskallia.vault.gear.crafting.recipe.VaultForgeRecipe;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.VaultForgeRequestCraftMessage;
+import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.util.function.ObservableSupplier;
 import java.util.Collections;
 import java.util.List;
@@ -31,17 +35,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.MenuProvider;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity & MenuProvider, T extends ForgeRecipeContainer<V>>
-   extends AbstractElementContainerScreen<T> {
+public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity, T extends ForgeRecipeContainer<V>> extends AbstractElementContainerScreen<T> {
    private final ButtonElement<?> craftButton;
    private final Inventory playerInventory;
    private final CraftingSelectorElement<?> craftingSelectorElement;
+   private final TextInputElement<?> levelInput;
    private VaultForgeRecipe selectedRecipe = null;
 
    public ForgeRecipeContainerScreen(T container, Inventory inventory, Component title, int height) {
@@ -53,6 +58,7 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
       if (tile == null) {
          this.craftButton = null;
          this.craftingSelectorElement = null;
+         this.levelInput = null;
       } else {
          this.addElement(
             (NineSliceElement)new NineSliceElement(this.getGuiSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)
@@ -89,16 +95,78 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
          );
          this.craftButton.setDisabled(true);
          this.craftingSelectorElement = this.addElement(this.createCraftingSelector());
+         int offsetY = ((ForgeRecipeContainer)this.getMenu()).getOffset().y;
+         this.levelInput = ((TextInputElement)this.addElement(
+               (TextInputElement)new TextInputElement(Spatials.positionXY(143, offsetY - 1).size(26, 12), Minecraft.getInstance().font)
+                  .layout((screen, gui, parent, world) -> world.translateXY(gui))
+            ))
+            .adjustEditBox(editBox -> {
+               editBox.setFilter(input -> {
+                  if (input.isEmpty()) {
+                     return true;
+                  } else {
+                     int parsedLevel;
+                     try {
+                        parsedLevel = Integer.parseInt(input);
+                     } catch (NumberFormatException var3x) {
+                        return false;
+                     }
+
+                     return parsedLevel <= VaultBarOverlay.vaultLevel && parsedLevel <= ModConfigs.LEVELS_META.getMaxLevel();
+                  }
+               });
+               editBox.setMaxLength(3);
+               editBox.setValue(String.valueOf(VaultBarOverlay.vaultLevel));
+            });
+         this.levelInput.setVisible(false);
+         this.levelInput.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+            if (!this.levelInput.isVisible()) {
+               return false;
+            } else {
+               Component cmp = new TextComponent("Level of crafted gear");
+               tooltipRenderer.renderTooltip(poseStack, cmp, mouseX, mouseY, TooltipDirection.RIGHT);
+               return true;
+            }
+         });
       }
    }
 
    @Nonnull
    protected abstract CraftingSelectorElement<?> createCraftingSelector();
 
+   protected void setLevelInputVisible(boolean visible) {
+      if (this.levelInput != null) {
+         boolean changed = this.levelInput.isVisible() != visible;
+         this.levelInput.setVisible(visible);
+         if (changed && !visible) {
+            this.levelInput.setInput(String.valueOf(VaultBarOverlay.vaultLevel));
+         }
+      }
+   }
+
+   protected int getCraftedLevel() {
+      int requestedLevel = VaultBarOverlay.vaultLevel;
+      if (this.levelInput != null) {
+         String input = this.levelInput.getInput();
+         if (!input.isEmpty()) {
+            try {
+               requestedLevel = Mth.clamp(Integer.parseInt(input), 0, Math.min(VaultBarOverlay.vaultLevel, ModConfigs.LEVELS_META.getMaxLevel()));
+            } catch (NumberFormatException var4) {
+            }
+         }
+      }
+
+      return requestedLevel;
+   }
+
    protected void containerTick() {
       super.containerTick();
       if (this.craftingSelectorElement != null) {
          this.craftButton.setDisabled(!this.craftingSelectorElement.canCraftSelectedEntry());
+      }
+
+      if (this.levelInput != null) {
+         this.levelInput.tickEditBox();
       }
    }
 
@@ -129,27 +197,37 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
 
    private void onCraftClick() {
       if (this.selectedRecipe != null) {
-         ModNetwork.CHANNEL.sendToServer(new VaultForgeRequestCraftMessage(this.selectedRecipe.getId()));
+         ModNetwork.CHANNEL.sendToServer(new VaultForgeRequestCraftMessage(this.selectedRecipe.getId(), this.getCraftedLevel()));
       }
    }
 
    protected void onRecipeSelect(VaultForgeRecipe recipe, boolean canCraft) {
       this.craftButton.setDisabled(!canCraft);
       this.selectedRecipe = recipe;
+      this.setLevelInputVisible(recipe.usesLevel());
    }
 
    protected List<ItemStack> getMissingRecipeInputs(List<ItemStack> inputs) {
       ForgeRecipeTileEntity tile = ((ForgeRecipeContainer)this.menu).getTile();
-      return tile == null ? inputs : VaultForgeHelper.getMissingInputs(inputs, this.getPlayerInventory(), tile.getInventory());
+      return tile == null ? inputs : InventoryUtil.getMissingInputs(inputs, this.getPlayerInventory(), tile.getInventory());
    }
 
-   public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
-      Key key = InputConstants.getKey(pKeyCode, pScanCode);
-      if (pKeyCode != 256 && !Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key)) {
-         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+   public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+      Key key = InputConstants.getKey(keyCode, scanCode);
+      if (this.levelInput != null && this.levelInput.keyPressed(keyCode, scanCode, modifiers)) {
+         return true;
+      } else if (!Minecraft.getInstance().options.keyInventory.isActiveAndMatches(key)) {
+         return super.keyPressed(keyCode, scanCode, modifiers);
       } else {
-         this.onClose();
+         if (this.levelInput == null || !this.levelInput.isFocused()) {
+            this.onClose();
+         }
+
          return true;
       }
+   }
+
+   public boolean charTyped(char codePoint, int modifiers) {
+      return this.levelInput != null && this.levelInput.charTyped(codePoint, modifiers) ? true : super.charTyped(codePoint, modifiers);
    }
 }

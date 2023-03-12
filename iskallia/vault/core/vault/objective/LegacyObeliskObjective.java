@@ -9,7 +9,7 @@ import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.client.gui.helper.LightmapHelper;
 import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -45,13 +45,13 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class LegacyObeliskObjective extends Objective {
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Integer> COUNT = FieldKey.of("count", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> TARGET = FieldKey.of("target", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Float> OBJECTIVE_PROBABILITY = FieldKey.of("objective_probability", Float.class)
-      .with(Version.v1_2, Adapter.ofFloat(), DISK.all())
+      .with(Version.v1_2, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
 
    protected LegacyObeliskObjective() {
@@ -157,12 +157,12 @@ public class LegacyObeliskObjective extends Objective {
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       if (this.get(COUNT) >= this.get(TARGET)) {
          boolean rendered = false;
 
          for (Objective objective : this.get(CHILDREN)) {
-            rendered |= objective.render(matrixStack, window, partialTicks, player);
+            rendered |= objective.render(vault, matrixStack, window, partialTicks, player);
          }
 
          if (rendered) {

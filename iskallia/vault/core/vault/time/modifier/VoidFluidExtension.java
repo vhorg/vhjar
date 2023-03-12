@@ -1,7 +1,7 @@
 package iskallia.vault.core.vault.time.modifier;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 public class VoidFluidExtension extends ClockModifier {
    public static final SupplierKey<ClockModifier> KEY = SupplierKey.of("void_fluid", ClockModifier.class).with(Version.v1_0, VoidFluidExtension::new);
    public static final FieldRegistry FIELDS = ClockModifier.FIELDS.merge(new FieldRegistry());
-   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_0, Adapter.ofUUID(), DISK.all()).register(FIELDS);
+   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_0, Adapters.UUID, DISK.all()).register(FIELDS);
 
    protected VoidFluidExtension() {
    }

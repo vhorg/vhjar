@@ -1,6 +1,10 @@
 package iskallia.vault.skill.ability.effect;
 
 import iskallia.vault.easteregg.GrasshopperNinja;
+import iskallia.vault.gear.attribute.ability.special.DashVelocityModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.DashConfig;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
@@ -20,8 +24,15 @@ public class DashAbility<C extends DashConfig> extends AbstractInstantManaAbilit
 
    protected AbilityActionResult doAction(C config, ServerPlayer player, boolean active) {
       Vec3 lookVector = player.getLookAngle();
-      double magnitude = (10 + config.getExtraDistance()) * 0.15;
+      float magnitude = (10 + config.getExtraDistance()) * 0.15F;
       double extraPitch = 10.0;
+
+      for (ConfiguredModification<FloatValueConfig, DashVelocityModification> mod : SpecialAbilityModification.getModifications(
+         player, DashVelocityModification.class
+      )) {
+         magnitude = mod.modification().adjustVelocity(mod.config(), magnitude);
+      }
+
       Vec3 dashVector = new Vec3(lookVector.x(), lookVector.y(), lookVector.z());
       float initialYaw = (float)MathUtilities.extractYaw(dashVector);
       dashVector = MathUtilities.rotateYaw(dashVector, initialYaw);

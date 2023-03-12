@@ -1,7 +1,7 @@
 package iskallia.vault.config.altar.entry;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.world.item.ItemStack;
@@ -10,13 +10,13 @@ public class AltarIngredientEntry {
    @Expose
    private List<ItemStack> items = new ArrayList<>();
    @Expose
-   private RangeEntry amount;
+   private IntRangeEntry amount;
    @Expose
    private double scale;
 
    public AltarIngredientEntry(List<ItemStack> items, int min, int max, double scale) {
       this.items = items;
-      this.amount = new RangeEntry(min, max);
+      this.amount = new IntRangeEntry(min, max);
       this.scale = scale;
    }
 

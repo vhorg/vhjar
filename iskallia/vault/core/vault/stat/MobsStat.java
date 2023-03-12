@@ -3,7 +3,8 @@ package iskallia.vault.core.vault.stat;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataMap;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import net.minecraft.world.entity.Entity;
 
 public class MobsStat extends DataMap<MobsStat, ResourceLocation, MobsStat.Entry> {
    public MobsStat() {
-      super(new HashMap<>(), Adapter.ofIdentifier(), Adapter.ofCompound(MobsStat.Entry::new));
+      super(new HashMap<>(), Adapters.IDENTIFIER, CompoundAdapter.of(MobsStat.Entry::new));
    }
 
    public void onKilled(Entity entity) {
@@ -30,13 +31,13 @@ public class MobsStat extends DataMap<MobsStat, ResourceLocation, MobsStat.Entry
    public static class Entry extends DataObject<MobsStat.Entry> {
       public static final FieldRegistry FIELDS = new FieldRegistry();
       public static final FieldKey<Integer> KILLED = FieldKey.of("killed", Integer.class)
-         .with(Version.v1_0, Adapter.ofSegmentedInt(7), DISK.all())
+         .with(Version.v1_0, Adapters.INT_SEGMENTED_7, DISK.all())
          .register(FIELDS);
       public static final FieldKey<Float> DAMAGE_DEALT = FieldKey.of("damage_dealt", Float.class)
-         .with(Version.v1_0, Adapter.ofFloat(), DISK.all())
+         .with(Version.v1_0, Adapters.FLOAT, DISK.all())
          .register(FIELDS);
       public static final FieldKey<Float> DAMAGE_RECEIVED = FieldKey.of("damage_received", Float.class)
-         .with(Version.v1_0, Adapter.ofFloat(), DISK.all())
+         .with(Version.v1_0, Adapters.FLOAT, DISK.all())
          .register(FIELDS);
 
       public Entry() {

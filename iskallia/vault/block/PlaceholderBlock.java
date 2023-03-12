@@ -89,7 +89,8 @@ public class PlaceholderBlock extends Block {
       COIN_STACKS,
       VENDOR_PEDESTAL,
       TREASURE_DOOR,
-      PYLON;
+      PYLON,
+      DUNGEON_DISCOVERABLE;
 
       private static final Map<String, PlaceholderBlock.Type> NAME_TO_TYPE = Arrays.stream(values())
          .collect(Collectors.toMap(PlaceholderBlock.Type::getSerializedName, Functions.identity()));

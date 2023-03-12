@@ -90,7 +90,7 @@ public interface VaultGearTooltipItem {
       VaultGearAttribute<Integer> affixAttribute = type == VaultGearModifier.AffixType.PREFIX ? ModGearAttributes.PREFIXES : ModGearAttributes.SUFFIXES;
       int emptyAffixes = data.getFirstValue(affixAttribute).orElse(0);
       if (displayDetails) {
-         tooltip.add(new TextComponent(type.getDisplayName() + ":").withStyle(ChatFormatting.GRAY));
+         tooltip.add(new TextComponent(type.getPlural() + ":").withStyle(ChatFormatting.GRAY));
       }
 
       affixes.forEach(modifier -> modifier.getDisplay(data, type, stack, displayDetails).ifPresent(tooltip::add));

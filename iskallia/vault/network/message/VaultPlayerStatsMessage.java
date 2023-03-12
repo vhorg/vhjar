@@ -47,7 +47,7 @@ public class VaultPlayerStatsMessage {
 
       public static void encode(VaultPlayerStatsMessage.S2C message, FriendlyByteBuf buffer) {
          ArrayBitBuffer buffer2 = ArrayBitBuffer.empty();
-         message.snapshot.write(buffer2);
+         message.snapshot.writeBits(buffer2);
          buffer.writeLongArray(buffer2.toLongArray());
       }
 

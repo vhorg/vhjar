@@ -8,17 +8,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import iskallia.vault.VaultMod;
-import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.client.gui.helper.LightmapHelper;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.LegacyBlockPosAdapter;
 import iskallia.vault.core.data.compound.IntList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
-import iskallia.vault.core.event.common.BlockSetEvent;
 import iskallia.vault.core.event.common.BlockUseEvent;
 import iskallia.vault.core.event.common.TemplateGenerationEvent;
 import iskallia.vault.core.random.ChunkRandom;
@@ -30,6 +30,7 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
+import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.VaultGenerator;
 import iskallia.vault.core.world.generator.layout.ClassicInfiniteLayout;
@@ -73,7 +74,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -83,38 +83,41 @@ public class CakeObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("cake", Objective.class).with(Version.v1_0, CakeObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<BlockPos> CAKE_POS = FieldKey.of("cake_pos", BlockPos.class)
-      .with(Version.v1_0, Adapter.ofBlockPos().asNullable(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, LegacyBlockPosAdapter.create().asNullable(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<IntList> REGIONS_X = FieldKey.of("regions_x", IntList.class)
-      .with(Version.v1_0, Adapter.ofCompound(() -> IntList.createSegmented(3)), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(() -> IntList.createSegmented(3)), DISK.all())
       .register(FIELDS);
    public static final FieldKey<IntList> REGIONS_Z = FieldKey.of("regions_z", IntList.class)
-      .with(Version.v1_0, Adapter.ofCompound(() -> IntList.createSegmented(3)), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(() -> IntList.createSegmented(3)), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Integer> COUNT = FieldKey.of("count", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> TARGET = FieldKey.of("target", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<ResourceLocation> MODIFIER_POOL = FieldKey.of("modifier_pool", ResourceLocation.class)
-      .with(Version.v1_0, Adapter.ofIdentifier(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.IDENTIFIER, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    protected CakeObjective() {
    }
 
-   protected CakeObjective(int target, ResourceLocation modifierPool) {
+   protected CakeObjective(ResourceLocation modifierPool) {
       this.set(COUNT, Integer.valueOf(0));
-      this.set(TARGET, Integer.valueOf(target));
       this.set(CAKE_POS, null);
       this.set(REGIONS_X, IntList.createSegmented(3));
       this.set(REGIONS_Z, IntList.createSegmented(3));
       this.set(MODIFIER_POOL, modifierPool);
    }
 
+   public static CakeObjective of(ResourceLocation modifierPool) {
+      return new CakeObjective(modifierPool);
+   }
+
    public static CakeObjective of(int target, ResourceLocation modifierPool) {
-      return new CakeObjective(target, modifierPool);
+      return (CakeObjective)new CakeObjective(modifierPool).set(TARGET, Integer.valueOf(target));
    }
 
    @Override
@@ -129,24 +132,18 @@ public class CakeObjective extends Objective {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
-      BlockState targetState = (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
-      CommonEvents.BLOCK_SET
-         .at(BlockSetEvent.Type.RETURN)
-         .of(targetState)
-         .in(world)
-         .register(this, data -> data.getWorld().setBlock(data.getPos(), Blocks.AIR.defaultBlockState(), 3));
       CommonEvents.BLOCK_USE.in(world).at(BlockUseEvent.Phase.HEAD).of(ModBlocks.CAKE).register(this, data -> {
          MinecraftServer server = data.getWorld().getServer();
          if (server != null) {
             server.tell(new TickTask(server.getTickCount() + 1, () -> {
-               if (this.get(COUNT) < this.get(TARGET)) {
+               if (!this.has(TARGET) || this.get(COUNT) < this.get(TARGET)) {
                   BlockPos pos = data.getPos();
                   if (pos.equals(this.get(CAKE_POS))) {
                      if (vault.get(Vault.LISTENERS).getObjectivePriority(data.getPlayer().getUUID(), this) == 0) {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                         this.doEatingEffects(world, pos);
                         this.onCakeEaten(world, vault, vault.get(Vault.WORLD).get(WorldManager.GENERATOR), data.getPlayer());
-                        if (this.get(COUNT) >= this.get(TARGET)) {
+                        if (this.has(TARGET) && this.get(COUNT) >= this.get(TARGET)) {
                            this.onCompleted(world, vault);
                         }
                      }
@@ -167,6 +164,17 @@ public class CakeObjective extends Objective {
             DiscoveredModelsData.get(world).discoverRandomArmorPieceAndBroadcast(data.getPlayer(), ModDynamicModels.Armor.JARDOON_CHEESE, new Random());
          }
       });
+      CommonEvents.LISTENER_LEAVE
+         .register(
+            this,
+            data -> {
+               if (data.getVault() == vault) {
+                  vault.getOptional(Vault.STATS)
+                     .map(stats -> stats.get(data.getListener()))
+                     .ifPresent(stats -> stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, exp -> exp * this.get(COUNT).intValue()));
+               }
+            }
+         );
       super.initServer(world, vault);
    }
 
@@ -195,7 +203,7 @@ public class CakeObjective extends Objective {
          world.getChunkSource().blockChanged(this.get(CAKE_POS));
       }
 
-      if (this.get(COUNT) >= this.get(TARGET)) {
+      if (this.has(TARGET) && this.get(COUNT) >= this.get(TARGET)) {
          super.tickServer(world, vault);
       }
    }
@@ -206,7 +214,7 @@ public class CakeObjective extends Objective {
          listener.addObjective(vault, this);
       }
 
-      if (listener instanceof Runner && this.get(COUNT) >= this.get(TARGET)) {
+      if (listener instanceof Runner && this.has(TARGET) && this.get(COUNT) >= this.get(TARGET)) {
          super.tickListener(world, vault, listener);
       }
    }
@@ -216,13 +224,13 @@ public class CakeObjective extends Objective {
          if (generator.get(GridGenerator.LAYOUT) instanceof ClassicInfiniteLayout layout) {
             this.modify(COUNT, count -> count + 1);
             RegionPos var11 = RegionPos.ofBlockPos(this.get(CAKE_POS), gen.get(GridGenerator.CELL_X), gen.get(GridGenerator.CELL_Z));
-            List<RegionPos> neighbors = this.getValidNeighbors(vault, layout, var11);
-            if (neighbors.isEmpty()) {
+            List neighbors = this.getValidNeighbors(vault, layout, var11);
+            if (this.has(TARGET) && neighbors.isEmpty()) {
                this.set(TARGET, this.get(COUNT));
             } else {
                ChunkRandom random = ChunkRandom.any();
                random.setRegionSeed(vault.get(Vault.SEED), var11.getX(), var11.getZ(), 987654321);
-               RegionPos neighbor = neighbors.get(random.nextInt(neighbors.size()));
+               RegionPos neighbor = (RegionPos)neighbors.get(random.nextInt(neighbors.size()));
                this.generateRoom(vault, world, gen, var11, neighbor);
                this.generateCake(world, neighbor, random);
                this.get(REGIONS_X).add(Integer.valueOf(neighbor.getX()));
@@ -269,7 +277,7 @@ public class CakeObjective extends Objective {
             .append(new TextComponent(".").withStyle(ChatFormatting.GRAY));
       }
 
-      groups.forEach((modifier, count) -> vault.get(Vault.MODIFIERS).addPermanentModifier(modifier, count, true));
+      groups.forEach((modifier, count) -> vault.get(Vault.MODIFIERS).addPermanentModifier(modifier, count, true, random));
 
       for (Listener listener : vault.get(Vault.LISTENERS).getAll()) {
          listener.getPlayer().ifPresent(other -> {
@@ -363,12 +371,12 @@ public class CakeObjective extends Objective {
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
-      if (this.get(COUNT) >= this.get(TARGET)) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
+      if (this.has(TARGET) && this.get(COUNT) >= this.get(TARGET)) {
          boolean rendered = false;
 
          for (Objective objective : this.get(CHILDREN)) {
-            rendered |= objective.render(matrixStack, window, partialTicks, player);
+            rendered |= objective.render(vault, matrixStack, window, partialTicks, player);
          }
 
          if (rendered) {
@@ -381,9 +389,9 @@ public class CakeObjective extends Objective {
       Minecraft mc = Minecraft.getInstance();
       BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
       Font fr = mc.font;
-      float part = (float)this.get(COUNT).intValue() / this.get(TARGET).intValue();
+      float part = this.has(TARGET) ? (float)this.get(COUNT).intValue() / this.get(TARGET).intValue() : 1.0F;
       int midX = width / 2;
-      Component txt = new TextComponent(this.get(COUNT) + " / ?").withStyle(ChatFormatting.LIGHT_PURPLE);
+      Component txt = new TextComponent(this.has(TARGET) ? this.get(COUNT) + " / ?" : String.valueOf(this.get(COUNT))).withStyle(ChatFormatting.LIGHT_PURPLE);
       fr.drawInBatch(
          txt.getVisualOrderText(),
          midX - mc.font.width(txt) / 2.0F,
@@ -447,9 +455,7 @@ public class CakeObjective extends Objective {
 
    @Override
    public boolean isActive(Vault vault, Objective objective) {
-      if (objective == this && this.get(COUNT) < this.get(TARGET)) {
-         return true;
-      } else {
+      if (objective != this || this.has(TARGET) && this.get(COUNT) >= this.get(TARGET)) {
          for (Objective child : this.get(CHILDREN)) {
             if (child.isActive(vault, objective)) {
                return true;
@@ -457,6 +463,8 @@ public class CakeObjective extends Objective {
          }
 
          return false;
+      } else {
+         return true;
       }
    }
 

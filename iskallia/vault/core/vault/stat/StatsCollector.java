@@ -3,7 +3,8 @@ package iskallia.vault.core.vault.stat;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataMap;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
@@ -17,7 +18,7 @@ import java.util.UUID;
 public class StatsCollector extends DataObject<StatsCollector> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<StatsCollector.Map> MAP = FieldKey.of("map", StatsCollector.Map.class)
-      .with(Version.v1_0, Adapter.ofCompound(StatsCollector.Map::new), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(StatsCollector.Map::new), DISK.all())
       .register(FIELDS);
 
    public StatsCollector() {
@@ -68,7 +69,7 @@ public class StatsCollector extends DataObject<StatsCollector> {
 
    public static class Map extends DataMap<StatsCollector.Map, UUID, StatCollector> {
       public Map() {
-         super(new HashMap<>(), Adapter.ofUUID(), Adapter.ofCompound(StatCollector::new));
+         super(new HashMap<>(), Adapters.UUID, CompoundAdapter.of(StatCollector::new));
       }
    }
 }

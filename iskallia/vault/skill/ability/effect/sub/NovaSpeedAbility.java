@@ -20,12 +20,14 @@ import net.minecraft.world.entity.player.Player;
 
 public class NovaSpeedAbility extends AbstractNovaAbility<NovaSpeedConfig> {
    protected AbilityActionResult doAction(NovaSpeedConfig config, ServerPlayer player, boolean active) {
+      float radius = config.getRadius(player);
+
       for (LivingEntity nearbyEntity : player.level
          .getNearbyEntities(
             LivingEntity.class,
-            TargetingConditions.forCombat().selector(entity -> !(entity instanceof Player)).range(config.getRadius()),
+            TargetingConditions.forCombat().selector(entity -> !(entity instanceof Player)).range(radius),
             player,
-            player.getBoundingBox().inflate(config.getRadius())
+            player.getBoundingBox().inflate(radius)
          )) {
          nearbyEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, config.getDurationTicks(), config.getAmplifier()));
          CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(player, nearbyEntity));
@@ -36,7 +38,8 @@ public class NovaSpeedAbility extends AbstractNovaAbility<NovaSpeedConfig> {
 
    protected void doParticles(NovaSpeedConfig config, ServerPlayer player) {
       super.doParticles(config, player);
-      int particleCount = (int)Mth.clamp(Math.pow(config.getRadius(), 2.0) * (float) Math.PI * 100.0, 50.0, 400.0);
+      float radius = config.getRadius(player);
+      int particleCount = (int)Mth.clamp(Math.pow(radius, 2.0) * (float) Math.PI * 100.0, 50.0, 400.0);
       ((ServerLevel)player.level)
          .sendParticles(
             (SimpleParticleType)ModParticles.NOVA_SPEED.get(),
@@ -44,9 +47,9 @@ public class NovaSpeedAbility extends AbstractNovaAbility<NovaSpeedConfig> {
             player.getY(),
             player.getZ(),
             particleCount,
-            config.getRadius() * 0.5,
+            radius * 0.5,
             0.25,
-            config.getRadius() * 0.5,
+            radius * 0.5,
             0.0
          );
    }

@@ -5,7 +5,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataMap;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.RegistryValueAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
@@ -35,12 +37,12 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 
 public abstract class Listener extends DataObject<Listener> implements ISupplierKey<Listener> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
-   public static final FieldKey<UUID> ID = FieldKey.of("id", UUID.class).with(Version.v1_0, Adapter.ofUUID(), DISK.all().or(CLIENT.all())).register(FIELDS);
+   public static final FieldKey<UUID> ID = FieldKey.of("id", UUID.class).with(Version.v1_0, Adapters.UUID, DISK.all().or(CLIENT.all())).register(FIELDS);
    public static final FieldKey<EntityState> JOIN_STATE = FieldKey.of("join_state", EntityState.class)
-      .with(Version.v1_0, Adapter.ofCompound(EntityState::new), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(EntityState::new), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Objective.IdList> OBJECTIVES = FieldKey.of("objectives", Objective.IdList.class)
-      .with(Version.v1_0, Adapter.ofCompound(Objective.IdList::new), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, CompoundAdapter.of(Objective.IdList::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public Listener() {
@@ -122,7 +124,7 @@ public abstract class Listener extends DataObject<Listener> implements ISupplier
    @OnlyIn(Dist.CLIENT)
    public void renderObjectives(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       for (int index : this.get(OBJECTIVES)) {
-         boolean rendered = vault.get(Vault.OBJECTIVES).get(index).map(other -> other.render(matrixStack, window, partialTicks, player)).orElse(false);
+         boolean rendered = vault.get(Vault.OBJECTIVES).get(index).map(other -> other.render(vault, matrixStack, window, partialTicks, player)).orElse(false);
          if (rendered) {
             return;
          }
@@ -131,7 +133,7 @@ public abstract class Listener extends DataObject<Listener> implements ISupplier
 
    public static class Map extends DataMap<Listener.Map, UUID, Listener> {
       public Map() {
-         super(new HashMap<>(), Adapter.ofUUID(), Adapter.ofRegistryValue(() -> VaultRegistry.LISTENER, ISupplierKey::getKey, Supplier::get));
+         super(new HashMap<>(), Adapters.UUID, RegistryValueAdapter.of(() -> VaultRegistry.LISTENER, ISupplierKey::getKey, Supplier::get));
       }
    }
 }

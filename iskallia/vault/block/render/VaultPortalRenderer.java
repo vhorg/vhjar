@@ -3,7 +3,7 @@ package iskallia.vault.block.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
-import net.minecraft.client.Minecraft;
+import iskallia.vault.client.util.ClientScheduler;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -23,7 +23,7 @@ public class VaultPortalRenderer implements BlockEntityRenderer<VaultPortalTileE
    public void render(VaultPortalTileEntity tile, float pPartialTick, PoseStack matrixStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
       BlockState state = tile.getBlockState();
       BakedModel bakedmodel = this.brd.getBlockModel(state);
-      int color = Minecraft.getInstance().getBlockColors().getColor(state, null, null, 0);
+      int color = tile.getData().getModel().getBlockColor(tile.getData(), (float)ClientScheduler.INSTANCE.getTickCount());
       float r = (color >> 16 & 0xFF) / 255.0F;
       float g = (color >> 8 & 0xFF) / 255.0F;
       float b = (color & 0xFF) / 255.0F;

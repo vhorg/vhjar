@@ -1,6 +1,7 @@
 package iskallia.vault.core.random;
 
 import iskallia.vault.core.util.MathUtils;
+import net.minecraft.core.BlockPos;
 
 public class ChunkRandom extends JavaRandom {
    protected ChunkRandom(long seed) {
@@ -17,6 +18,10 @@ public class ChunkRandom extends JavaRandom {
 
    public static ChunkRandom ofScrambled(long seed) {
       return new ChunkRandom(seed ^ MULTIPLIER);
+   }
+
+   public static ChunkRandom wrap(LCGRandom random) {
+      return new ChunkRandom.Wrapper(random);
    }
 
    public long setTerrainSeed(int chunkX, int chunkZ) {
@@ -85,5 +90,46 @@ public class ChunkRandom extends JavaRandom {
 
    public long setSlimeSeed(long worldSeed, int chunkX, int chunkZ) {
       return this.setSlimeSeed(worldSeed, chunkX, chunkZ, 987234911L);
+   }
+
+   public long setModelSeed(int blockX, int blockY, int blockZ) {
+      long seed = blockX * 3129871 ^ blockZ * 116129781L ^ blockY;
+      seed = seed * seed * 42317861L + seed * 11L >> 16;
+      this.setSeed(seed);
+      return seed & MathUtils.MASK_48;
+   }
+
+   public long setBlockSeed(long worldSeed, BlockPos pos, int salt) {
+      return this.setBlockSeed(worldSeed, pos.getX(), pos.getY(), pos.getZ(), salt);
+   }
+
+   public long setBlockSeed(long worldSeed, int blockX, int blockY, int blockZ, int salt) {
+      this.setSeed(worldSeed + salt);
+      long a = this.nextLong() | 1L;
+      long b = this.nextLong() | 1L;
+      long c = this.nextLong() | 1L;
+      long d = this.nextLong() | 1L;
+      long seed = blockX * a + blockY * b + blockZ * c + salt * d ^ worldSeed;
+      this.setSeed(seed);
+      return seed & MathUtils.MASK_48;
+   }
+
+   protected static class Wrapper extends ChunkRandom {
+      private final LCGRandom delegate;
+
+      protected Wrapper(LCGRandom delegate) {
+         super(delegate.getSeed());
+         this.delegate = delegate;
+      }
+
+      @Override
+      public void setSeed(long seed) {
+         this.delegate.setSeed(seed);
+      }
+
+      @Override
+      public long nextLong() {
+         return this.delegate.nextLong();
+      }
    }
 }

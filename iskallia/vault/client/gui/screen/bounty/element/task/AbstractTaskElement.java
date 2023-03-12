@@ -12,7 +12,7 @@ import iskallia.vault.bounty.task.Task;
 import iskallia.vault.client.gui.framework.ScreenTextures;
 import iskallia.vault.client.gui.framework.element.DynamicProgressElement;
 import iskallia.vault.client.gui.framework.element.ElasticContainerElement;
-import iskallia.vault.client.gui.framework.element.FakeItemSlotElement;
+import iskallia.vault.client.gui.framework.element.FakeOversizedItemSlotElement;
 import iskallia.vault.client.gui.framework.element.LabelElement;
 import iskallia.vault.client.gui.framework.element.spi.IElement;
 import iskallia.vault.client.gui.framework.render.Tooltips;
@@ -20,6 +20,7 @@ import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.util.TextUtil;
 import java.text.DecimalFormat;
@@ -31,7 +32,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag.Default;
 
 public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticContainerElement<AbstractTaskElement<T>> {
@@ -90,16 +90,16 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
       int stackX = 2;
       int stackY = vaultExpLabel.y() + vaultExpLabel.height() + 1;
 
-      for (ItemStack stack : this.taskReward.getRewardItems()) {
+      for (OverSizedItemStack stack : this.taskReward.getRewardItems()) {
          this.addElement(
-            (FakeItemSlotElement)new FakeItemSlotElement(Spatials.positionXY(stackX, stackY), () -> stack, () -> false)
+            new FakeOversizedItemSlotElement(Spatials.positionXY(stackX, stackY), () -> stack, () -> false)
                .setLabelStackCount()
                .tooltip(
                   Tooltips.shift(
                      Tooltips.multi(
                         () -> {
-                           List<Component> tooltipLines = stack.getTooltipLines(Minecraft.getInstance().player, Default.NORMAL);
-                           if (stack.getItem() instanceof VaultGearItem) {
+                           List<Component> tooltipLines = stack.stack().getTooltipLines(Minecraft.getInstance().player, Default.NORMAL);
+                           if (stack.stack().getItem() instanceof VaultGearItem) {
                               tooltipLines.add(new TextComponent(" "));
                               tooltipLines.add(
                                  new TextComponent("Vault Gear level is locked to your Vault Level at the time of Bounty generation.")
@@ -112,8 +112,8 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
                      ),
                      Tooltips.multi(
                         () -> {
-                           List<Component> tooltipLines = stack.getTooltipLines(Minecraft.getInstance().player, Default.ADVANCED);
-                           if (stack.getItem() instanceof VaultGearItem) {
+                           List<Component> tooltipLines = stack.stack().getTooltipLines(Minecraft.getInstance().player, Default.ADVANCED);
+                           if (stack.stack().getItem() instanceof VaultGearItem) {
                               tooltipLines.add(new TextComponent(" "));
                               tooltipLines.add(
                                  new TextComponent("Vault Gear level is locked to your Vault Level at the time of Bounty generation.")

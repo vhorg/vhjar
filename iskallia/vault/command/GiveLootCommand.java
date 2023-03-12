@@ -6,7 +6,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import iskallia.vault.VaultMod;
 import iskallia.vault.block.VaultChampionTrophy;
 import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.block.item.FinalVaultFrameBlockItem;
@@ -21,9 +20,6 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.VaultDollItem;
-import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.VaultCrystalItem;
-import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.WeekKey;
 import iskallia.vault.world.data.PlayerVaultStatsData;
@@ -102,24 +98,6 @@ public class GiveLootCommand extends Command {
                   .executes(
                      ctx -> this.giveLootStatue(StringArgumentType.getString(ctx, "name"), ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException())
                   )
-            )
-      );
-      builder.then(
-         Commands.literal("raffle_crystal")
-            .then(
-               Commands.argument("winner", StringArgumentType.word())
-                  .executes(
-                     ctx -> this.giveRaffleCrystal(
-                        ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException(), StringArgumentType.getString(ctx, "winner")
-                     )
-                  )
-            )
-      );
-      builder.then(
-         Commands.literal("crystal")
-            .then(
-               ((RequiredArgumentBuilder)Commands.argument("type", EnumArgument.enumArgument(CrystalData.Type.class)).executes(this::giveCrystal))
-                  .then(Commands.argument("level", IntegerArgumentType.integer()).executes(this::giveCrystal))
             )
       );
       builder.then(
@@ -271,26 +249,6 @@ public class GiveLootCommand extends Command {
       return 0;
    }
 
-   public int giveCrystal(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-      int level = 0;
-
-      try {
-         level = (Integer)context.getArgument("level", Integer.class);
-      } catch (IllegalArgumentException var6) {
-      }
-
-      CrystalData.Type type = (CrystalData.Type)context.getArgument("type", CrystalData.Type.class);
-      ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
-      CrystalData crystal = new CrystalData(stack);
-      crystal.setTheme(new PoolCrystalTheme(VaultMod.id("default")));
-      crystal.setLevel(level);
-      if (type == CrystalData.Type.RAFFLE) {
-      }
-
-      EntityHelper.giveItem(((CommandSourceStack)context.getSource()).getPlayerOrException(), stack);
-      return 0;
-   }
-
    public int giveArenaCrate(CommandContext<CommandSourceStack> context, ServerPlayer player, String championName) {
       ServerLevel world = player.getLevel();
       Builder builder = new Builder(world).withRandom(world.random).withLuck(player.getLuck());
@@ -325,12 +283,6 @@ public class GiveLootCommand extends Command {
       int level = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
       ItemStack crate = VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.BOSS, stacks);
       EntityHelper.giveItem(player, crate);
-      return 0;
-   }
-
-   public int giveRaffleCrystal(CommandContext<CommandSourceStack> context, ServerPlayer player, String winner) {
-      ItemStack crystalStack = VaultCrystalItem.getCrystalWithBoss(winner);
-      EntityHelper.giveItem(player, crystalStack);
       return 0;
    }
 

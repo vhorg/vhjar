@@ -11,7 +11,6 @@ import iskallia.vault.util.MiscUtils;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -109,29 +108,37 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
          if (!displayDetail) {
             return (MutableComponent)displayText;
          } else {
-            MutableComponent tierDisplay = VaultGearTierConfig.getConfig(stack.getItem()).map(tierConfig -> {
-               Object config = tierConfig.getTierConfig(this);
-               if (config != null) {
-                  ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
-                  return configGen.getConfigDisplay(this.getAttribute().getReader(), config);
-               } else {
-                  return null;
-               }
-            }).orElse(null);
-            if (tierDisplay != null) {
-               Style txtStyle = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false).withUnderlined(false).withBold(false);
-               String categoryInfo = this.getCategory().getTooltipDescriptor();
-               if (tierDisplay.getString().isEmpty()) {
-                  displayText.append(new TextComponent(" (%sT%s)".formatted(categoryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
-               } else {
-                  displayText.append(new TextComponent(" (%sT%s: ".formatted(categoryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
-                  displayText.append(tierDisplay.setStyle(txtStyle));
-                  displayText.append(new TextComponent(")").setStyle(txtStyle));
-               }
+            MutableComponent tierDisplay = this.getConfigRangeDisplay(stack).orElse(new TextComponent(""));
+            Style txtStyle = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false).withUnderlined(false).withBold(false);
+            String categoryInfo = this.getCategory().getTooltipDescriptor();
+            if (tierDisplay.getString().isEmpty()) {
+               displayText.append(new TextComponent(" (%sT%s)".formatted(categoryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
+            } else {
+               displayText.append(new TextComponent(" (%sT%s: ".formatted(categoryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
+               displayText.append(tierDisplay.setStyle(txtStyle));
+               displayText.append(new TextComponent(")").setStyle(txtStyle));
             }
 
             return (MutableComponent)displayText;
          }
+      });
+   }
+
+   public <V> Optional<V> withModifierConfig(ItemStack stack, Function<Object, V> configFn) {
+      return VaultGearTierConfig.getConfig(stack.getItem()).map(tierCfg -> tierCfg.getTierConfig(this)).map(configFn);
+   }
+
+   public Optional<MutableComponent> getConfigRangeDisplay(ItemStack stack) {
+      return this.withModifierConfig(stack, cfg -> {
+         ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
+         return configGen.getConfigRangeDisplay(this.getAttribute().getReader(), cfg);
+      });
+   }
+
+   public Optional<MutableComponent> getConfigDisplay(ItemStack stack) {
+      return this.withModifierConfig(stack, cfg -> {
+         ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
+         return configGen.getConfigDisplay(this.getAttribute().getReader(), cfg);
       });
    }
 
@@ -192,18 +199,24 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    public static enum AffixCategory {
       NONE,
       LEGENDARY("Legendary", ModifierCategoryTooltip::modifyLegendaryTooltip),
-      ABYSSAL("Abyssal", ModifierCategoryTooltip::modifyAbyssalTooltip);
+      ABYSSAL("Abyssal", ModifierCategoryTooltip::modifyAbyssalTooltip),
+      ABILITY_ENHANCEMENT("Enhancement"),
+      CRAFTED("Crafted", ModifierCategoryTooltip::modifyCraftedTooltip);
 
       private final String descriptor;
       private final Function<MutableComponent, MutableComponent> modifierFormatter;
 
       private AffixCategory() {
-         this(null, null);
+         this("");
       }
 
-      private AffixCategory(@Nullable String descriptor, @Nullable Function<MutableComponent, MutableComponent> modifierFormatter) {
-         this.descriptor = descriptor == null ? "" : descriptor + " ";
-         this.modifierFormatter = modifierFormatter == null ? Function.identity() : modifierFormatter;
+      private AffixCategory(String descriptor) {
+         this(descriptor, Function.identity());
+      }
+
+      private AffixCategory(String descriptor, Function<MutableComponent, MutableComponent> modifierFormatter) {
+         this.descriptor = descriptor.isEmpty() ? descriptor : descriptor + " ";
+         this.modifierFormatter = modifierFormatter;
       }
 
       @Nonnull
@@ -213,6 +226,10 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
 
       public Function<MutableComponent, MutableComponent> getModifierFormatter() {
          return this.modifierFormatter;
+      }
+
+      public boolean isModifiableByArtisanFoci() {
+         return this != ABYSSAL && this != ABILITY_ENHANCEMENT;
       }
 
       public void write(BitBuffer buf) {
@@ -241,21 +258,27 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    }
 
    public static enum AffixType {
-      IMPLICIT("Implicits", isPositive -> ""),
-      PREFIX("Prefixes", isPositive -> isPositive ? "+" : "-"),
-      SUFFIX("Suffixes", isPositive -> isPositive ? "+" : "-");
+      IMPLICIT("Implicits", "Implicit", isPositive -> ""),
+      PREFIX("Prefixes", "Prefix", isPositive -> isPositive ? "+" : ""),
+      SUFFIX("Suffixes", "Suffix", isPositive -> isPositive ? "+" : "");
 
       private static final VaultGearModifier.AffixType[] EXPLICITS = new VaultGearModifier.AffixType[]{PREFIX, SUFFIX};
-      private final String displayName;
+      private final String plural;
+      private final String singular;
       private final Function<Boolean, String> affixPrefix;
 
-      private AffixType(String displayName, Function<Boolean, String> affixPrefix) {
-         this.displayName = displayName;
+      private AffixType(String plural, String singular, Function<Boolean, String> affixPrefix) {
+         this.plural = plural;
+         this.singular = singular;
          this.affixPrefix = affixPrefix;
       }
 
-      public String getDisplayName() {
-         return this.displayName;
+      public String getPlural() {
+         return this.plural;
+      }
+
+      public String getSingular() {
+         return this.singular;
       }
 
       public String getAffixPrefix(boolean isPositive) {

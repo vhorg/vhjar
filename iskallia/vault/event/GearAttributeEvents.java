@@ -10,6 +10,7 @@ import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModDynamicModels;
+import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -20,6 +21,7 @@ import iskallia.vault.util.calc.ChainHelper;
 import iskallia.vault.util.calc.FatalStrikeHelper;
 import iskallia.vault.util.calc.GrantedEffectHelper;
 import iskallia.vault.util.calc.ThornsHelper;
+import iskallia.vault.util.damage.AttackScaleHelper;
 import iskallia.vault.util.damage.ThornsReflectDamageSource;
 import java.util.Comparator;
 import java.util.List;
@@ -29,7 +31,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -39,6 +40,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -69,23 +71,35 @@ public class GearAttributeEvents {
    public static void triggerAoEAttack(LivingHurtEvent event) {
       if (event.getSource().getEntity() instanceof LivingEntity attacker) {
          if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
-            if (!(attacker instanceof Player player && PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE))) {
-               LivingEntity attacked = event.getEntityLiving();
-               Level world = attacker.getLevel();
-               AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
-               int aoeSize = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_AOE, VaultGearAttributeTypeMerger.intSum());
-               if (aoeSize > 0) {
-                  ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-                     List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), aoeSize, Mob.class);
-                     nearby.remove(attacked);
-                     nearby.remove(attacker);
-                     nearby.removeIf(mob -> (attacker instanceof EternalEntity || attacker instanceof Player) && mob instanceof EternalEntity);
-                     nearby.forEach(mob -> mob.hurt(event.getSource(), event.getAmount() * 0.6F));
-                     if (attacker instanceof Player playerx) {
-                        PlayerActiveFlags.set(playerx, PlayerActiveFlags.Flag.ATTACK_AOE, 2);
-                     }
-                  });
+            if (attacker instanceof Player player) {
+               if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE)) {
+                  return;
                }
+
+               if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
+                  return;
+               }
+            }
+
+            LivingEntity attacked = event.getEntityLiving();
+            Level world = attacker.getLevel();
+            AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
+            int aoeSize = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_AOE, VaultGearAttributeTypeMerger.intSum());
+            if (aoeSize > 0) {
+               ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                  List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), aoeSize, Mob.class);
+                  nearby.remove(attacked);
+                  nearby.remove(attacker);
+                  nearby.removeIf(mob -> (attacker instanceof EternalEntity || attacker instanceof Player) && mob instanceof EternalEntity);
+                  nearby.forEach(mob -> {
+                     Vec3 movement = mob.getDeltaMovement();
+                     mob.hurt(event.getSource(), event.getAmount() * 0.6F);
+                     mob.setDeltaMovement(movement);
+                  });
+                  if (attacker instanceof Player player) {
+                     PlayerActiveFlags.set(player, PlayerActiveFlags.Flag.ATTACK_AOE, 2);
+                  }
+               });
             }
          }
       }
@@ -95,34 +109,77 @@ public class GearAttributeEvents {
    public static void triggerChainAttack(LivingHurtEvent event) {
       if (event.getSource().getEntity() instanceof LivingEntity attacker) {
          if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
-            if (!(attacker instanceof Player player && PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.CHAINING_AOE))) {
-               LivingEntity attacked = event.getEntityLiving();
-               Level world = attacker.getLevel();
-               int chainCount = ChainHelper.getChainCount(attacker);
-               if (chainCount > 0) {
-                  ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-                     List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), 5.0F, Mob.class);
-                     nearby.remove(attacked);
-                     nearby.remove(attacker);
-                     nearby.removeIf(mobx -> (attacker instanceof EternalEntity || attacker instanceof Player) && mobx instanceof EternalEntity);
-                     if (!nearby.isEmpty()) {
-                        nearby.sort(Comparator.comparing(e -> e.distanceTo(attacked)));
-                        nearby = nearby.subList(0, Math.min(chainCount, nearby.size()));
-                        float multiplier = 0.5F;
-
-                        for (Mob mob : nearby) {
-                           mob.hurt(event.getSource(), event.getAmount() * multiplier);
-                           multiplier *= 0.5F;
-                        }
-
-                        CommonEvents.ENTITY_CHAIN_ATTACKED.invoke(new EntityChainAttackedEvent.Data(attacker, nearby));
-                     }
-
-                     if (attacker instanceof Player playerx) {
-                        PlayerActiveFlags.set(playerx, PlayerActiveFlags.Flag.CHAINING_AOE, 2);
-                     }
-                  });
+            if (attacker instanceof Player player) {
+               if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.CHAINING_AOE)) {
+                  return;
                }
+
+               if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
+                  return;
+               }
+            }
+
+            LivingEntity attacked = event.getEntityLiving();
+            Level world = attacker.getLevel();
+            int chainCount = ChainHelper.getChainCount(attacker);
+            if (chainCount > 0) {
+               ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                  List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), 5.0F, Mob.class);
+                  nearby.remove(attacked);
+                  nearby.remove(attacker);
+                  nearby.removeIf(mobx -> (attacker instanceof EternalEntity || attacker instanceof Player) && mobx instanceof EternalEntity);
+                  if (!nearby.isEmpty()) {
+                     nearby.sort(Comparator.comparing(e -> e.distanceTo(attacked)));
+                     nearby = nearby.subList(0, Math.min(chainCount, nearby.size()));
+                     float multiplier = 0.5F;
+
+                     for (Mob mob : nearby) {
+                        Vec3 movement = mob.getDeltaMovement();
+                        mob.hurt(event.getSource(), event.getAmount() * multiplier);
+                        mob.setDeltaMovement(movement);
+                        multiplier *= 0.5F;
+                     }
+
+                     CommonEvents.ENTITY_CHAIN_ATTACKED.invoke(new EntityChainAttackedEvent.Data(attacker, nearby));
+                  }
+
+                  if (attacker instanceof Player player) {
+                     PlayerActiveFlags.set(player, PlayerActiveFlags.Flag.CHAINING_AOE, 2);
+                  }
+               });
+            }
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void triggerKnockbackAttack(LivingHurtEvent event) {
+      if (event.getSource().getEntity() instanceof LivingEntity attacker) {
+         if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
+            if (attacker instanceof Player player) {
+               if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE)) {
+                  return;
+               }
+
+               if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
+                  return;
+               }
+            }
+
+            AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
+            float knockbackChance = snapshot.getAttributeValue(ModGearAttributes.SHOCKING_HIT_CHANCE, VaultGearAttributeTypeMerger.floatSum());
+            if (Entropy.canExecute(attacker, Entropy.Stat.KNOCKBACK_ATTACK_CHANCE, knockbackChance)) {
+               Level world = attacker.getLevel();
+               LivingEntity attacked = event.getEntityLiving();
+               ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                  List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), 5.0F, Mob.class);
+                  nearby.remove(attacker);
+                  nearby.removeIf(mob -> (attacker instanceof EternalEntity || attacker instanceof Player) && mob instanceof EternalEntity);
+                  nearby.forEach(mob -> EntityHelper.knockback(mob, attacker));
+                  if (attacker instanceof Player player) {
+                     PlayerActiveFlags.set(player, PlayerActiveFlags.Flag.ATTACK_AOE, 2);
+                  }
+               });
             }
          }
       }
@@ -132,15 +189,22 @@ public class GearAttributeEvents {
    public static void triggerStunAttack(LivingHurtEvent event) {
       if (event.getSource().getEntity() instanceof LivingEntity attacker) {
          if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
-            if (!(attacker instanceof Player player && PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE))) {
-               AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
-               float stunChance = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_STUN, VaultGearAttributeTypeMerger.floatSum());
-               if (Entropy.canExecute(attacker, Entropy.Stat.STUN_ATTACK_CHANCE, stunChance)) {
-                  LivingEntity attacked = event.getEntityLiving();
-                  attacked.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 30, 9));
-                  attacked.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 30, 9));
-                  CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(attacker, attacked));
+            if (attacker instanceof Player player) {
+               if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE)) {
+                  return;
                }
+
+               if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
+                  return;
+               }
+            }
+
+            AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
+            float stunChance = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_STUN, VaultGearAttributeTypeMerger.floatSum());
+            if (Entropy.canExecute(attacker, Entropy.Stat.STUN_ATTACK_CHANCE, stunChance)) {
+               LivingEntity attacked = event.getEntityLiving();
+               attacked.addEffect(new MobEffectInstance(ModEffects.NO_AI, 30, 1));
+               CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(attacker, attacked));
             }
          }
       }
@@ -211,23 +275,25 @@ public class GearAttributeEvents {
    public static void triggerEffectCloudsActive(LivingHurtEvent event) {
       if (event.getSource().getEntity() instanceof LivingEntity attacker) {
          if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
-            boolean doEffectClouds = !ActiveFlags.IS_AOE_ATTACKING.isSet()
-               && !ActiveFlags.IS_DOT_ATTACKING.isSet()
-               && !ActiveFlags.IS_REFLECT_ATTACKING.isSet();
-            if (doEffectClouds) {
-               LivingEntity attacked = event.getEntityLiving();
-               AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
-               snapshot.getAttributeValue(ModGearAttributes.EFFECT_CLOUD, VaultGearAttributeTypeMerger.asList()).forEach(cloud -> {
-                  MobEffect effect = cloud.getPrimaryEffect();
-                  if (effect != null) {
-                     if (Entropy.canExecute(attacker, Entropy.Stat.effectCloud(effect), cloud.getTriggerChance())) {
-                        EffectCloudEntity cloudEntity = new EffectCloudEntity(attacker.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
-                        cloud.apply(cloudEntity);
-                        cloudEntity.setOwner(attacker);
-                        attacker.getLevel().addFreshEntity(cloudEntity);
+            if (!(attacker instanceof Player player && AttackScaleHelper.getLastAttackScale(player) < 1.0F)) {
+               boolean doEffectClouds = !ActiveFlags.IS_AOE_ATTACKING.isSet()
+                  && !ActiveFlags.IS_DOT_ATTACKING.isSet()
+                  && !ActiveFlags.IS_REFLECT_ATTACKING.isSet();
+               if (doEffectClouds) {
+                  LivingEntity attacked = event.getEntityLiving();
+                  AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
+                  snapshot.getAttributeValue(ModGearAttributes.EFFECT_CLOUD, VaultGearAttributeTypeMerger.asList()).forEach(cloud -> {
+                     MobEffect effect = cloud.getPrimaryEffect();
+                     if (effect != null) {
+                        if (Entropy.canExecute(attacker, Entropy.Stat.effectCloud(effect), cloud.getTriggerChance())) {
+                           EffectCloudEntity cloudEntity = new EffectCloudEntity(attacker.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
+                           cloud.apply(cloudEntity);
+                           cloudEntity.setOwner(attacker);
+                           attacker.getLevel().addFreshEntity(cloudEntity);
+                        }
                      }
-                  }
-               });
+                  });
+               }
             }
          }
       }

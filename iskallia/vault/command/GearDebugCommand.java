@@ -83,7 +83,7 @@ public class GearDebugCommand extends Command {
       ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
       ItemStack gear = this.getHeldGear(player);
       String tag = StringArgumentType.getString(ctx, "tag");
-      VaultGearTagConfig.ModGroupTag groupTag = ModConfigs.VAULT_GEAR_TAG_CONFIG.getGroupTag(tag);
+      VaultGearTagConfig.ModTagGroup groupTag = ModConfigs.VAULT_GEAR_TAG_CONFIG.getGroupTag(tag);
       if (groupTag == null) {
          player.sendMessage(new TextComponent("Could not add modifier of tag " + tag), Util.NIL_UUID);
          return 0;

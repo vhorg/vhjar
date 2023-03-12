@@ -9,6 +9,6 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 @EventBusSubscriber
 public class VaultAnvilBlock extends AnvilBlock {
    public VaultAnvilBlock() {
-      super(Properties.copy(Blocks.ANVIL).requiresCorrectToolForDrops().strength(5.0F, 1200.0F).sound(SoundType.ANVIL));
+      super(Properties.copy(Blocks.ANVIL).strength(5.0F, 1200.0F).sound(SoundType.ANVIL));
    }
 }

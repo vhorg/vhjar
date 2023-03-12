@@ -1,7 +1,9 @@
 package iskallia.vault.gear.attribute.config;
 
+import iskallia.vault.gear.reader.VaultGearModifierReader;
 import java.util.Random;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
+import net.minecraft.network.chat.MutableComponent;
 
 public class EnumAttributeGenerator<T extends Enum<T>> extends ConfigurableAttributeGenerator<T, Integer> {
    private final Class<T> enumClass;
@@ -18,5 +20,10 @@ public class EnumAttributeGenerator<T extends Enum<T>> extends ConfigurableAttri
 
    public T generateRandomValue(Integer object, Random random) {
       return this.enumClass.getEnumConstants()[object];
+   }
+
+   @Nullable
+   public MutableComponent getConfigDisplay(VaultGearModifierReader<T> reader, Integer object) {
+      return null;
    }
 }

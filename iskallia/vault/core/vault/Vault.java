@@ -2,13 +2,18 @@ package iskallia.vault.core.vault;
 
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.EnumAdapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.LegacyNbtAdapter;
+import iskallia.vault.core.data.adapter.vault.RegistryValueAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
 import iskallia.vault.core.event.ClientEvents;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.abyss.LegacyAbyssManager;
+import iskallia.vault.core.vault.enhancement.EnhancementTaskManager;
 import iskallia.vault.core.vault.influence.LegacyInfluences;
 import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.overlay.VaultOverlay;
@@ -27,49 +32,52 @@ import net.minecraftforge.event.TickEvent.Phase;
 public class Vault extends DataObject<Vault> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<Version> VERSION = FieldKey.of("version", Version.class)
-      .with(Version.v1_0, Adapter.ofEnum(Version.class), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.ofEnum(Version.class, EnumAdapter.Mode.ORDINAL), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
-   public static final FieldKey<UUID> ID = FieldKey.of("id", UUID.class).with(Version.v1_0, Adapter.ofUUID(), DISK.all().or(CLIENT.all())).register(FIELDS);
-   public static final FieldKey<Long> SEED = FieldKey.of("seed", Long.class).with(Version.v1_0, Adapter.ofLong(), DISK.all()).register(FIELDS);
-   public static final FieldKey<UUID> OWNER = FieldKey.of("owner", UUID.class).with(Version.v1_0, Adapter.ofUUID(), DISK.all()).register(FIELDS);
+   public static final FieldKey<UUID> ID = FieldKey.of("id", UUID.class).with(Version.v1_0, Adapters.UUID, DISK.all().or(CLIENT.all())).register(FIELDS);
+   public static final FieldKey<Long> SEED = FieldKey.of("seed", Long.class).with(Version.v1_0, Adapters.LONG, DISK.all()).register(FIELDS);
+   public static final FieldKey<UUID> OWNER = FieldKey.of("owner", UUID.class).with(Version.v1_0, Adapters.UUID, DISK.all()).register(FIELDS);
    public static final FieldKey<VaultLevel> LEVEL = FieldKey.of("level", VaultLevel.class)
-      .with(Version.v1_0, Adapter.ofCompound(VaultLevel::new), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(VaultLevel::new), DISK.all())
       .register(FIELDS);
    public static final FieldKey<TickClock> CLOCK = FieldKey.of("clock", TickClock.class)
-      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.CLOCK, ISupplierKey::getKey, Supplier::get), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, RegistryValueAdapter.of(() -> VaultRegistry.CLOCK, ISupplierKey::getKey, Supplier::get), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<WorldManager> WORLD = FieldKey.of("world_manager", WorldManager.class)
-      .with(Version.v1_0, Adapter.ofCompound(WorldManager::new), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, CompoundAdapter.of(WorldManager::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<VaultOverlay> OVERLAY = FieldKey.of("overlay", VaultOverlay.class)
-      .with(Version.v1_0, Adapter.ofCompound(VaultOverlay::new), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, CompoundAdapter.of(VaultOverlay::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Void> FINISHED = FieldKey.of("finished", Void.class)
-      .with(Version.v1_0, Adapter.ofVoid(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.ofVoid(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Listeners> LISTENERS = FieldKey.of("listeners", Listeners.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Listeners::new)
+      .with(Version.v1_0, CompoundAdapter.of(Listeners::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Objectives> OBJECTIVES = FieldKey.of("objectives", Objectives.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Objectives::new)
+      .with(Version.v1_0, CompoundAdapter.of(Objectives::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Modifiers> MODIFIERS = FieldKey.of("modifiers", Modifiers.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Modifiers::new)
+      .with(Version.v1_0, CompoundAdapter.of(Modifiers::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<LegacyInfluences> INFLUENCES = FieldKey.of("influences", LegacyInfluences.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), LegacyInfluences::new)
+      .with(Version.v1_0, CompoundAdapter.of(LegacyInfluences::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<StatsCollector> STATS = FieldKey.of("stats", StatsCollector.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all(), StatsCollector::new)
+      .with(Version.v1_0, CompoundAdapter.of(StatsCollector::new), DISK.all())
       .register(FIELDS);
    public static final FieldKey<DiscoveryGoalsManager> DISCOVERY = FieldKey.of("discovery", DiscoveryGoalsManager.class)
-      .with(Version.v1_8, Adapter.ofCompound(), DISK.all(), DiscoveryGoalsManager::new)
+      .with(Version.v1_8, CompoundAdapter.of(DiscoveryGoalsManager::new), DISK.all())
       .register(FIELDS);
    public static final FieldKey<LegacyAbyssManager> ABYSS = FieldKey.of("abyssal", LegacyAbyssManager.class)
-      .with(Version.v1_9, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), LegacyAbyssManager::new)
+      .with(Version.v1_9, CompoundAdapter.of(LegacyAbyssManager::new), DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
+   public static final FieldKey<EnhancementTaskManager> ENHANCEMENT_TASKS = FieldKey.of("enhancement_tasks", EnhancementTaskManager.class)
+      .with(Version.v1_12, CompoundAdapter.of(EnhancementTaskManager::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<CompoundTag> CRYSTAL = FieldKey.of("crystal", CompoundTag.class)
-      .with(Version.v1_2, Adapter.ofNBT(CompoundTag.class), DISK.all())
+      .with(Version.v1_2, LegacyNbtAdapter.COMPOUND, DISK.all())
       .register(FIELDS);
 
    @Override
@@ -85,6 +93,7 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(LISTENERS, listeners -> listeners.initServer(world, this));
       this.ifPresent(DISCOVERY, discovery -> discovery.initServer(world, this));
       this.ifPresent(STATS, stats -> stats.initServer(world, this));
+      this.ifPresent(ENHANCEMENT_TASKS, tasksMgr -> tasksMgr.initServer(world, this));
    }
 
    protected void tickServer(VirtualWorld world) {
@@ -103,6 +112,7 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(LISTENERS, Listeners::releaseServer);
       this.ifPresent(DISCOVERY, DiscoveryGoalsManager::releaseServer);
       this.ifPresent(STATS, StatsCollector::releaseServer);
+      this.ifPresent(ENHANCEMENT_TASKS, EnhancementTaskManager::releaseServer);
    }
 
    @OnlyIn(Dist.CLIENT)

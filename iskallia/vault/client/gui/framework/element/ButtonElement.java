@@ -8,20 +8,21 @@ import iskallia.vault.client.gui.framework.element.spi.IRenderedElement;
 import iskallia.vault.client.gui.framework.render.spi.IElementRenderer;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.IPosition;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import org.jetbrains.annotations.NotNull;
 
 public class ButtonElement<E extends ButtonElement<E>> extends AbstractSpatialElement<E> implements IRenderedElement, IGuiEventElement {
-   private final ButtonElement.ButtonTextures textures;
-   private final Runnable onClick;
+   protected final ButtonElement.ButtonTextures textures;
+   private Consumer<E> onClick;
    protected boolean visible;
    protected Supplier<Boolean> disabled;
-   private boolean clickHeld = false;
+   protected boolean clickHeld = false;
 
    public ButtonElement(IPosition position, ButtonElement.ButtonTextures textures, Runnable onClick) {
       super(Spatials.positionXYZ(position).size(textures.button().size()));
       this.textures = textures;
-      this.onClick = onClick;
+      this.onClick = btn -> onClick.run();
       this.setVisible(true);
       this.setDisabled(false);
    }
@@ -34,6 +35,14 @@ public class ButtonElement<E extends ButtonElement<E>> extends AbstractSpatialEl
    @Override
    public boolean isVisible() {
       return this.visible;
+   }
+
+   public void setOnClick(Consumer<E> onClick) {
+      this.onClick = this.onClick.andThen(onClick);
+   }
+
+   public void setOnClick(Runnable onClick) {
+      this.setOnClick(btn -> onClick.run());
    }
 
    public ButtonElement<E> setDisabled(boolean disabled) {
@@ -52,7 +61,10 @@ public class ButtonElement<E extends ButtonElement<E>> extends AbstractSpatialEl
 
    @Override
    public boolean onMouseClicked(double mouseX, double mouseY, int buttonIndex) {
-      this.clickHeld = true;
+      if (buttonIndex == 0) {
+         this.clickHeld = true;
+      }
+
       return true;
    }
 
@@ -69,7 +81,7 @@ public class ButtonElement<E extends ButtonElement<E>> extends AbstractSpatialEl
    @Override
    public boolean onMouseReleased(double mouseX, double mouseY, int buttonIndex) {
       if (!this.isDisabled() && this.clickHeld) {
-         this.onClick.run();
+         this.onClick.accept((E)this);
       }
 
       return true;

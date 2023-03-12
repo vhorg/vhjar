@@ -1,19 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "pep",
-    "ece",
-    "pep"
+    "pcp",
+    "blb",
+    "pcp"
   ],
   "key": {
     "p": {
-      "item": "the_vault:perfect_black_opal"
+      "item": "the_vault:gem_pog"
+    },
+    "l": {
+      "item": "the_vault:extraordinary_larimar"
+    },
+    "b": {
+      "item": "the_vault:black_chromatic_steel_ingot"
     },
     "c": {
-      "item": "the_vault:vault_crate_scavenger"
-    },
-    "e": {
-      "item": "the_vault:perfect_echo_gem"
+      "item": "the_vault:chromatic_steel_ingot"
     }
   },
   "result": {

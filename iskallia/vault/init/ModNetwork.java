@@ -21,6 +21,7 @@ import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
 import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
 import iskallia.vault.network.message.DiffuserParticleMessage;
+import iskallia.vault.network.message.DiscoveredModifierCraftsMessage;
 import iskallia.vault.network.message.EffectMessage;
 import iskallia.vault.network.message.EternalInteractionMessage;
 import iskallia.vault.network.message.EternalSyncMessage;
@@ -30,6 +31,7 @@ import iskallia.vault.network.message.ForgeRecipeSyncMessage;
 import iskallia.vault.network.message.HistoricFavoritesMessage;
 import iskallia.vault.network.message.InvalidConfigsMessage;
 import iskallia.vault.network.message.KnownTalentsMessage;
+import iskallia.vault.network.message.ModifierWorkbenchCraftMessage;
 import iskallia.vault.network.message.MonolithIgniteMessage;
 import iskallia.vault.network.message.OmegaStatueUIMessage;
 import iskallia.vault.network.message.OpenVaultSnapshotMessage;
@@ -66,11 +68,15 @@ import iskallia.vault.network.message.ServerboundRenameEternalMessage;
 import iskallia.vault.network.message.ServerboundSelectArchetypeMessage;
 import iskallia.vault.network.message.ServerboundSendSnapshotLinkMessage;
 import iskallia.vault.network.message.ServerboundToggleEternalPlayerSkinMessage;
+import iskallia.vault.network.message.ServerboundWardrobeSwapMessage;
+import iskallia.vault.network.message.ServerboundWardrobeTabMessage;
+import iskallia.vault.network.message.ServerboundWardrobeToggleSolidRenderMessage;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.network.message.ShardTradeTradeMessage;
 import iskallia.vault.network.message.SpiritExtractorMessage;
 import iskallia.vault.network.message.StepHeightMessage;
+import iskallia.vault.network.message.SummonElixirOrbMessage;
 import iskallia.vault.network.message.SyncOverSizedContentMessage;
 import iskallia.vault.network.message.SyncOverSizedStackMessage;
 import iskallia.vault.network.message.TalentLevelMessage;
@@ -79,6 +85,7 @@ import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.network.message.TrinketJumpMessage;
 import iskallia.vault.network.message.VaultArtisanRequestModificationMessage;
 import iskallia.vault.network.message.VaultCharmControllerScrollMessage;
+import iskallia.vault.network.message.VaultEnhancementRequestMessage;
 import iskallia.vault.network.message.VaultForgeRequestCraftMessage;
 import iskallia.vault.network.message.VaultGoalMessage;
 import iskallia.vault.network.message.VaultLevelMessage;
@@ -555,6 +562,51 @@ public class ModNetwork {
       CHANNEL.registerMessage(nextId(), ToolMessage.Offset.class, ToolMessage.Offset::encode, ToolMessage.Offset::decode, ToolMessage.Offset::handle);
       CHANNEL.registerMessage(
          nextId(), ForgeRecipeSyncMessage.class, ForgeRecipeSyncMessage::encode, ForgeRecipeSyncMessage::decode, ForgeRecipeSyncMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundWardrobeSwapMessage.class,
+         ServerboundWardrobeSwapMessage::encode,
+         ServerboundWardrobeSwapMessage::decode,
+         ServerboundWardrobeSwapMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundWardrobeToggleSolidRenderMessage.class,
+         ServerboundWardrobeToggleSolidRenderMessage::encode,
+         ServerboundWardrobeToggleSolidRenderMessage::decode,
+         ServerboundWardrobeToggleSolidRenderMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), SummonElixirOrbMessage.class, SummonElixirOrbMessage::encode, SummonElixirOrbMessage::decode, SummonElixirOrbMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundWardrobeTabMessage.class,
+         ServerboundWardrobeTabMessage::encode,
+         ServerboundWardrobeTabMessage::decode,
+         ServerboundWardrobeTabMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         VaultEnhancementRequestMessage.class,
+         VaultEnhancementRequestMessage::encode,
+         VaultEnhancementRequestMessage::decode,
+         VaultEnhancementRequestMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         DiscoveredModifierCraftsMessage.class,
+         DiscoveredModifierCraftsMessage::encode,
+         DiscoveredModifierCraftsMessage::decode,
+         DiscoveredModifierCraftsMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ModifierWorkbenchCraftMessage.class,
+         ModifierWorkbenchCraftMessage::encode,
+         ModifierWorkbenchCraftMessage::decode,
+         ModifierWorkbenchCraftMessage::handle
       );
    }
 

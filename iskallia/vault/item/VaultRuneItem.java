@@ -1,16 +1,14 @@
 package iskallia.vault.item;
 
-import iskallia.vault.core.random.JavaRandom;
-import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.world.generator.layout.DIYRoomEntry;
-import iskallia.vault.core.world.loot.LootRoll;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.item.gear.VaultLevelItem;
+import iskallia.vault.item.gear.DataInitializationItem;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -26,7 +24,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class VaultRuneItem extends Item implements VaultLevelItem {
+public class VaultRuneItem extends Item implements DataInitializationItem {
    public VaultRuneItem(CreativeModeTab group, ResourceLocation id) {
       super(new Properties().tab(group).stacksTo(8));
       this.setRegistryName(id);
@@ -81,17 +79,13 @@ public class VaultRuneItem extends Item implements VaultLevelItem {
    }
 
    @Override
-   public void initializeVaultLoot(Vault vault, ItemStack stack, @Nullable BlockPos pos) {
+   public void initialize(ItemStack stack, RandomSource random) {
       if (stack.getTag() != null) {
          ListTag list = stack.getTag().getList("entries", 10);
 
          for (int i = 0; i < list.size(); i++) {
             CompoundTag entry = list.getCompound(i);
-            if (entry.contains("count", 10)) {
-               LootRoll roll = LootRoll.fromNBT(entry.getCompound("count"));
-               JavaRandom random = JavaRandom.ofNanoTime();
-               entry.putInt("count", roll.get(random));
-            }
+            Adapters.INT_ROLL.readNbt(entry.getCompound("count")).ifPresent(roll -> entry.putInt("count", roll.get(random)));
          }
       }
    }

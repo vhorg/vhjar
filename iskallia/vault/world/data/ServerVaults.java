@@ -133,7 +133,8 @@ public class ServerVaults extends SavedData {
    }
 
    public static Optional<Vault> get(UUID uuid) {
-      return get(ServerLifecycleHooks.getCurrentServer()).vaults.stream().filter(vault -> vault.get(Vault.ID).equals(uuid)).findFirst();
+      MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+      return server == null ? Optional.empty() : get(server).vaults.stream().filter(vault -> vault.get(Vault.ID).equals(uuid)).findFirst();
    }
 
    public static Optional<Vault> get(Level world) {

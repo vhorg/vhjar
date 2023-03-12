@@ -5,6 +5,7 @@ import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.reader.DecimalModifierReader;
 import iskallia.vault.gear.reader.FlagModifierReader;
+import iskallia.vault.gear.reader.IncreasedPercentageReader;
 import iskallia.vault.gear.reader.IntegerModifierReader;
 import iskallia.vault.gear.reader.StringConstantModifierReader;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
@@ -14,6 +15,10 @@ import net.minecraft.network.chat.MutableComponent;
 public class ModGearAttributeReaders {
    public static IntegerModifierReader addedIntReader(String modifierName, int rgbColor) {
       return new IntegerModifierReader(modifierName, rgbColor);
+   }
+
+   public static <T extends Number> IncreasedPercentageReader<T> increasedReader(String modifierName, int rgbColor) {
+      return new IncreasedPercentageReader<>(modifierName, rgbColor);
    }
 
    public static <T extends Number> DecimalModifierReader<T> percentageReader(String modifierName, int rgbColor) {

@@ -2,6 +2,7 @@ package iskallia.vault.item.crystal.objective;
 
 import com.google.gson.JsonObject;
 import iskallia.vault.block.VaultCrateBlock;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.ClassicPortalLogic;
 import iskallia.vault.core.vault.Vault;
@@ -9,22 +10,28 @@ import iskallia.vault.core.vault.objective.AwardCrateObjective;
 import iskallia.vault.core.vault.objective.BailObjective;
 import iskallia.vault.core.vault.objective.DeathObjective;
 import iskallia.vault.core.vault.objective.ObeliskObjective;
+import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.objective.VictoryObjective;
-import iskallia.vault.core.world.loot.LootRoll;
+import iskallia.vault.core.world.roll.IntRoll;
+import iskallia.vault.item.crystal.CrystalData;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.TooltipFlag;
 
 public class BossCrystalObjective extends CrystalObjective {
-   protected LootRoll target;
-   protected LootRoll wave;
+   protected IntRoll target;
+   protected IntRoll wave;
    protected float objectiveProbability;
 
    public BossCrystalObjective() {
    }
 
-   public BossCrystalObjective(LootRoll target, LootRoll wave, float objectiveProbability) {
+   public BossCrystalObjective(IntRoll target, IntRoll wave, float objectiveProbability) {
       this.target = target;
       this.wave = wave;
       this.objectiveProbability = objectiveProbability;
@@ -43,50 +50,50 @@ public class BossCrystalObjective extends CrystalObjective {
             );
             objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
             objectives.add(DeathObjective.create(true));
+            objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getId(this));
          }
       );
    }
 
    @Override
-   public Component getName() {
-      return new TextComponent("Hunt the Guardians").withStyle(ChatFormatting.GOLD);
+   public void addText(List<Component> tooltip, TooltipFlag flag) {
+      tooltip.add(
+         new TextComponent("Objective: ").append(new TextComponent("Hunt the Guardians").withStyle(Style.EMPTY.withColor(this.getColor().orElseThrow())))
+      );
    }
 
    @Override
-   public JsonObject serializeJson() {
-      JsonObject object = new JsonObject();
-      object.addProperty("type", "boss");
-      object.add("target", this.target.serializeJson());
-      object.add("wave", this.wave.serializeJson());
-      object.addProperty("objective_probability", this.objectiveProbability);
-      return object;
+   public Optional<Integer> getColor() {
+      return Optional.ofNullable(ChatFormatting.GOLD.getColor());
    }
 
    @Override
-   public void deserializeJson(JsonObject json) {
-      this.target = LootRoll.fromJson(json.get("target").getAsJsonObject());
-      this.wave = LootRoll.fromJson(json.get("wave").getAsJsonObject());
-      this.objectiveProbability = json.get("objective_probability").getAsFloat();
-      if (this.wave == null) {
-         this.wave = LootRoll.ofConstant(3);
-      }
-   }
-
-   public CompoundTag serializeNBT() {
+   public Optional<CompoundTag> writeNbt() {
       CompoundTag nbt = new CompoundTag();
-      nbt.putString("type", "boss");
-      nbt.put("target", this.target.serializeNBT());
-      nbt.put("wave", this.wave.serializeNBT());
-      nbt.putFloat("objective_probability", this.objectiveProbability);
-      return nbt;
+      Adapters.INT_ROLL.writeNbt(this.target).ifPresent(target -> nbt.put("target", target));
+      Adapters.INT_ROLL.writeNbt(this.wave).ifPresent(wave -> nbt.put("wave", wave));
+      Adapters.FLOAT.writeNbt(Float.valueOf(this.objectiveProbability)).ifPresent(tag -> nbt.put("objective_probability", tag));
+      return Optional.of(nbt);
    }
 
-   public void deserializeNBT(CompoundTag nbt) {
-      this.target = LootRoll.fromNBT(nbt.getCompound("target"));
-      this.wave = LootRoll.fromNBT(nbt.getCompound("wave"));
-      this.objectiveProbability = nbt.getFloat("objective_probability");
-      if (this.wave == null) {
-         this.wave = LootRoll.ofConstant(3);
-      }
+   public void readNbt(CompoundTag nbt) {
+      this.target = Adapters.INT_ROLL.readNbt(nbt.getCompound("target")).orElse(null);
+      this.wave = Adapters.INT_ROLL.readNbt(nbt.getCompound("wave")).orElse(IntRoll.ofConstant(3));
+      this.objectiveProbability = Adapters.FLOAT.readNbt(nbt.get("objective_probability")).orElse(0.0F);
+   }
+
+   @Override
+   public Optional<JsonObject> writeJson() {
+      JsonObject json = new JsonObject();
+      Adapters.INT_ROLL.writeJson(this.target).ifPresent(target -> json.add("target", target));
+      Adapters.INT_ROLL.writeJson(this.wave).ifPresent(wave -> json.add("wave", wave));
+      Adapters.FLOAT.writeJson(Float.valueOf(this.objectiveProbability)).ifPresent(tag -> json.add("objective_probability", tag));
+      return Optional.of(json);
+   }
+
+   public void readJson(JsonObject json) {
+      this.target = Adapters.INT_ROLL.readJson(json.getAsJsonObject("target")).orElse(null);
+      this.wave = Adapters.INT_ROLL.readJson(json.getAsJsonObject("wave")).orElse(IntRoll.ofConstant(3));
+      this.objectiveProbability = Adapters.FLOAT.readJson(json.get("objective_probability")).orElse(0.0F);
    }
 }

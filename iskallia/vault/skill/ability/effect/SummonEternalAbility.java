@@ -4,6 +4,10 @@ import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.eternal.ActiveEternalData;
 import iskallia.vault.entity.eternal.EternalData;
 import iskallia.vault.entity.eternal.EternalHelper;
+import iskallia.vault.gear.attribute.ability.special.EternalsSpeedModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.skill.ability.config.SummonEternalConfig;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
 import iskallia.vault.skill.ability.effect.spi.core.AbstractInstantManaAbility;
@@ -12,6 +16,7 @@ import iskallia.vault.world.data.EternalsData;
 import iskallia.vault.world.data.PlayerArchetypeData;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
+import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.TextComponent;
@@ -20,11 +25,16 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class SummonEternalAbility<C extends SummonEternalConfig> extends AbstractInstantManaAbility<C> {
+   private static final UUID SPEED_INCREASE_ID = UUID.fromString("849085f9-1195-45fd-b219-243e7aec29e3");
+
    @Override
    public String getAbilityGroupName() {
       return "Summon Eternal";
@@ -48,21 +58,23 @@ public class SummonEternalAbility<C extends SummonEternalConfig> extends Abstrac
    }
 
    protected AbilityActionResult doAction(C config, ServerPlayer player, boolean active) {
-      if (player.getCommandSenderWorld() instanceof ServerLevel serverLevel) {
-         EternalsData.EternalGroup var11 = EternalsData.get(serverLevel).getEternals(player);
+      if (!(player.getCommandSenderWorld() instanceof ServerLevel serverLevel)) {
+         return AbilityActionResult.FAIL;
+      } else {
+         EternalsData.EternalGroup var12 = EternalsData.get(serverLevel).getEternals(player);
          ArrayList eternals = new ArrayList();
          int count = config.getNumberOfEternals();
 
-         for (int i = 0; i < count; i++) {
+         for (int speedIncrease = 0; speedIncrease < count; speedIncrease++) {
             EternalData eternal = null;
             if (RANDOM.nextFloat() < config.getAncientChance()) {
-               eternal = var11.getRandomAliveAncient(
+               eternal = var12.getRandomAliveAncient(
                   RANDOM, eternalDatax -> !eternals.contains(eternalDatax) && !ActiveEternalData.getInstance().isEternalActive(eternalDatax.getId())
                );
             }
 
             if (eternal == null) {
-               eternal = var11.getRandomAlive(
+               eternal = var12.getRandomAlive(
                   RANDOM, eternalDatax -> !eternals.contains(eternalDatax) && !ActiveEternalData.getInstance().isEternalActive(eternalDatax.getId())
                );
             }
@@ -76,6 +88,14 @@ public class SummonEternalAbility<C extends SummonEternalConfig> extends Abstrac
             player.sendMessage(new TextComponent("You have no (alive) eternals to summon.").withStyle(ChatFormatting.RED), Util.NIL_UUID);
             return AbilityActionResult.FAIL;
          } else {
+            float speedIncrease = 0.0F;
+
+            for (ConfiguredModification<FloatValueConfig, EternalsSpeedModification> mod : SpecialAbilityModification.getModifications(
+               player, EternalsSpeedModification.class
+            )) {
+               speedIncrease = mod.modification().adjustEternalSpeed(mod.config(), speedIncrease);
+            }
+
             for (EternalData eternalData : eternals) {
                EternalEntity eternalx = EternalHelper.spawnEternal(serverLevel, eternalData);
                eternalx.moveTo(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
@@ -83,6 +103,11 @@ public class SummonEternalAbility<C extends SummonEternalConfig> extends Abstrac
                eternalx.setOwner(player.getUUID());
                eternalx.setEternalId(eternalData.getId());
                eternalx.addEffect(new MobEffectInstance(MobEffects.GLOWING, Integer.MAX_VALUE, 0, true, false));
+               if (speedIncrease > 0.0F && eternalx.getAttributes().hasAttribute(Attributes.MOVEMENT_SPEED)) {
+                  eternalx.getAttribute(Attributes.MOVEMENT_SPEED)
+                     .addPermanentModifier(new AttributeModifier(SPEED_INCREASE_ID, "Gear Speed Increase", speedIncrease, Operation.MULTIPLY_BASE));
+               }
+
                PlayerArchetypeData.get(serverLevel)
                   .getArchetypeContainer(player)
                   .ifCurrentArchetype(CommanderArchetype.class, archetype -> archetype.applyToEternal(eternal));
@@ -95,8 +120,6 @@ public class SummonEternalAbility<C extends SummonEternalConfig> extends Abstrac
 
             return AbilityActionResult.SUCCESS_COOLDOWN;
          }
-      } else {
-         return AbilityActionResult.FAIL;
       }
    }
 

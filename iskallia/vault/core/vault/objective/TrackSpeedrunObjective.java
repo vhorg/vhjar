@@ -3,7 +3,7 @@ package iskallia.vault.core.vault.objective;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -24,7 +24,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class TrackSpeedrunObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("track_speedrun", Objective.class).with(Version.v1_0, TrackSpeedrunObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
-   public static final FieldKey<Void> INITIALIZED = FieldKey.of("initialized", Void.class).with(Version.v1_0, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> INITIALIZED = FieldKey.of("initialized", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
 
    public static TrackSpeedrunObjective create() {
       return new TrackSpeedrunObjective();
@@ -71,7 +71,7 @@ public class TrackSpeedrunObjective extends Objective {
 
    @OnlyIn(Dist.CLIENT)
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       return false;
    }
 

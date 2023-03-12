@@ -442,7 +442,8 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
             if (!player.isCrouching() && !itemInPen.isEmpty() && this.animalToReference instanceof Bee) {
                CompoundTag tag = this.inventory.getItem(0).getOrCreateTag();
                if (tag.contains("honeyReady") && tag.getBoolean("honeyReady")) {
-                  if (itemInHand.getItem() instanceof ShearsItem) {
+                  if (itemInHand.getItem() instanceof ShearsItem
+                     || itemInHand.is(ModItems.TOOL) && VaultGearData.read(itemInHand).get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())) {
                      if (level instanceof ServerLevel serverWorld) {
                         resetHoney(tag);
                         level.playSound(null, this.getBlockPos(), SoundEvents.BEEHIVE_SHEAR, SoundSource.BLOCKS, 1.0F, 1.0F);

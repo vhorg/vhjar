@@ -29,6 +29,10 @@ public class AttributeSnapshot {
       this.read(buf);
    }
 
+   public <T> List<T> getAttributeValueList(VaultGearAttribute<T> attribute) {
+      return this.getAttributeValue(attribute, VaultGearAttributeTypeMerger.asList());
+   }
+
    public <T, V> V getAttributeValue(VaultGearAttribute<T> attribute, VaultGearAttributeTypeMerger<T, V> merger) {
       AttributeSnapshot.AttributeValue<T, V> attributeCache = (AttributeSnapshot.AttributeValue<T, V>)this.gearAttributeValues.get(attribute);
       V merged = merger.getBaseValue();

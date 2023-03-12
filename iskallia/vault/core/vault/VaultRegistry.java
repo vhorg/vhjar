@@ -11,15 +11,23 @@ import iskallia.vault.core.data.key.registry.SupplierRegistry;
 import iskallia.vault.core.vault.objective.AwardCrateObjective;
 import iskallia.vault.core.vault.objective.BailObjective;
 import iskallia.vault.core.vault.objective.CakeObjective;
+import iskallia.vault.core.vault.objective.CrakePedestalObjective;
 import iskallia.vault.core.vault.objective.DeathObjective;
+import iskallia.vault.core.vault.objective.ElixirObjective;
 import iskallia.vault.core.vault.objective.FindExitObjective;
 import iskallia.vault.core.vault.objective.KillBossObjective;
+import iskallia.vault.core.vault.objective.LodestoneObjective;
 import iskallia.vault.core.vault.objective.MonolithObjective;
 import iskallia.vault.core.vault.objective.ObeliskObjective;
 import iskallia.vault.core.vault.objective.Objective;
 import iskallia.vault.core.vault.objective.ScavengerObjective;
 import iskallia.vault.core.vault.objective.TrackSpeedrunObjective;
 import iskallia.vault.core.vault.objective.VictoryObjective;
+import iskallia.vault.core.vault.objective.elixir.ChestElixirTask;
+import iskallia.vault.core.vault.objective.elixir.CoinStacksElixirTask;
+import iskallia.vault.core.vault.objective.elixir.ElixirTask;
+import iskallia.vault.core.vault.objective.elixir.MobElixirTask;
+import iskallia.vault.core.vault.objective.elixir.OreElixirTask;
 import iskallia.vault.core.vault.player.ClassicListenersLogic;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.ListenersLogic;
@@ -36,6 +44,7 @@ import iskallia.vault.core.vault.time.modifier.TrinketExtension;
 import iskallia.vault.core.vault.time.modifier.VoidFluidExtension;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.VaultGenerator;
+import iskallia.vault.core.world.generator.layout.ArchitectVaultLayout;
 import iskallia.vault.core.world.generator.layout.ClassicCircleLayout;
 import iskallia.vault.core.world.generator.layout.ClassicInfiniteLayout;
 import iskallia.vault.core.world.generator.layout.ClassicPolygonLayout;
@@ -70,7 +79,8 @@ public class VaultRegistry {
       .add(ClassicSpiralLayout.KEY)
       .add(ClassicCircleLayout.KEY)
       .add(ClassicPolygonLayout.KEY)
-      .add(DIYVaultLayout.KEY);
+      .add(DIYVaultLayout.KEY)
+      .add(ArchitectVaultLayout.KEY);
    public static final SupplierRegistry<VaultGenerator> GENERATOR = new SupplierRegistry<GridGenerator>().add(GridGenerator.KEY);
    public static final SupplierRegistry<Listener> LISTENER = new SupplierRegistry<Listener>().add(Runner.KEY);
    public static final SupplierRegistry<Objective> OBJECTIVE = new SupplierRegistry<Objective>()
@@ -84,9 +94,17 @@ public class VaultRegistry {
       .add(AwardCrateObjective.KEY)
       .add(FindExitObjective.KEY)
       .add(TrackSpeedrunObjective.KEY)
-      .add(MonolithObjective.KEY);
+      .add(MonolithObjective.KEY)
+      .add(ElixirObjective.KEY)
+      .add(LodestoneObjective.KEY)
+      .add(CrakePedestalObjective.KEY);
    public static final SupplierRegistry<ListenersLogic> LISTENERS_LOGIC = new SupplierRegistry<ListenersLogic>().add(ClassicListenersLogic.KEY);
    public static final SupplierRegistry<LootLogic> CHEST_LOGIC = new SupplierRegistry<LootLogic>().add(ClassicLootLogic.KEY);
    public static final SupplierRegistry<PortalLogic> PORTAL_LOGIC = new SupplierRegistry<PortalLogic>().add(ClassicPortalLogic.KEY);
    public static final SupplierRegistry<MobLogic> MOB_LOGIC = new SupplierRegistry<MobLogic>().add(ClassicMobLogic.KEY);
+   public static final SupplierRegistry<ElixirTask> ELIXIR_TASK = new SupplierRegistry<ElixirTask>()
+      .add(ChestElixirTask.KEY)
+      .add(CoinStacksElixirTask.KEY)
+      .add(OreElixirTask.KEY)
+      .add(MobElixirTask.KEY);
 }

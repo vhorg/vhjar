@@ -47,7 +47,7 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
    }
 
    public static void tick(Level level, BlockPos pos, BlockState state, SoulAltarTileEntity tile) {
-      if (!level.isClientSide()) {
+      if (!level.isClientSide() && !tile.isCompleted()) {
          tile.ticksExisted++;
          if (tile.ticksExisted % 10 != 0) {
             return;
@@ -77,11 +77,14 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
                BlockPos altarRef = CodecUtils.readNBT(BlockPos.CODEC, tag.get("the_vault_SoulAltarPos"), null);
                if (altarRef != null && world.hasChunkAt(altarRef)) {
                   BlockState state = world.getBlockState(altarRef);
-                  BlockEntity te = world.getBlockEntity(altarRef);
-                  if (te instanceof SoulAltarTileEntity && state.getBlock() instanceof SoulAltarBlock) {
-                     ParticleOptions particle = ((SoulAltarBlock)state.getBlock()).getFlameParticle();
-                     Vec3 at = MiscUtils.getRandomOffset(entity.getBoundingBox().inflate(0.2F), rand);
-                     sWorld.sendParticles(particle, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+                  if (world.getBlockEntity(altarRef) instanceof SoulAltarTileEntity altarTile && state.getBlock() instanceof SoulAltarBlock) {
+                     if (altarTile.isCompleted()) {
+                        entity.removeTag("the_vault_SoulAltar");
+                     } else {
+                        ParticleOptions particle = ((SoulAltarBlock)state.getBlock()).getFlameParticle();
+                        Vec3 at = MiscUtils.getRandomOffset(entity.getBoundingBox().inflate(0.2F), rand);
+                        sWorld.sendParticles(particle, at.x, at.y, at.z, 1, 0.0, 0.0, 0.0, 0.0);
+                     }
                   }
                }
             }
@@ -94,14 +97,14 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
       LivingEntity deadEntity = event.getEntityLiving();
       Level world = deadEntity.getCommandSenderWorld();
       if (!world.isClientSide()) {
-         DamageSource src = event.getSource();
-         Entity sourceEntity = src.getEntity();
-         if (sourceEntity instanceof EternalEntity) {
-            sourceEntity = (Entity)((EternalEntity)sourceEntity).getOwner().right().orElse(null);
-         }
+         if (deadEntity.getTags().contains("the_vault_SoulAltar")) {
+            DamageSource src = event.getSource();
+            Entity sourceEntity = src.getEntity();
+            if (sourceEntity instanceof EternalEntity) {
+               sourceEntity = (Entity)((EternalEntity)sourceEntity).getOwner().right().orElse(null);
+            }
 
-         if (sourceEntity instanceof ServerPlayer killer) {
-            if (deadEntity.getTags().contains("the_vault_SoulAltar")) {
+            if (sourceEntity instanceof ServerPlayer killer) {
                CompoundTag tag = deadEntity.getPersistentData();
                if (tag.contains("the_vault_SoulAltarPos")) {
                   BlockPos altarRef = CodecUtils.readNBT(BlockPos.CODEC, tag.get("the_vault_SoulAltarPos"), null);

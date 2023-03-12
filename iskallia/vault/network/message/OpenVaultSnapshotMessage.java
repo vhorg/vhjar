@@ -24,7 +24,7 @@ public class OpenVaultSnapshotMessage {
 
       public static void encode(OpenVaultSnapshotMessage.S2C message, FriendlyByteBuf buffer) {
          ArrayBitBuffer buffer2 = ArrayBitBuffer.empty();
-         message.snapshot.write(buffer2);
+         message.snapshot.writeBits(buffer2);
          buffer.writeLongArray(buffer2.toLongArray());
          buffer.writeUUID(message.uuid);
       }

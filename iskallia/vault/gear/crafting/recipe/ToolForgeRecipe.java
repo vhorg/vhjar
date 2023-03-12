@@ -51,12 +51,12 @@ public class ToolForgeRecipe extends VaultForgeRecipe {
    }
 
    @Override
-   public ItemStack getDisplayOutput() {
+   public ItemStack getDisplayOutput(int vaultLevel) {
       return ToolItem.create(this.toolMaterial, this.toolType);
    }
 
    @Override
-   public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter) {
+   public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter, int vaultLevel) {
       return ToolItem.create(this.toolMaterial, this.toolType);
    }
 

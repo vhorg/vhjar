@@ -3,7 +3,7 @@ package iskallia.vault.core.vault.objective;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.compound.ItemStackList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
@@ -20,11 +20,11 @@ import net.minecraft.world.entity.player.Player;
 public class DeathObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("death", Objective.class).with(Version.v1_0, DeathObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
-   public static final FieldKey<Void> TIMER_DEATH = FieldKey.of("timer_death", Void.class).with(Version.v1_0, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> TIMER_DEATH = FieldKey.of("timer_death", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
    public static final FieldKey<Integer> KILL_ALL_STACK = FieldKey.of("kill_all_stack", Integer.class)
-      .with(Version.v1_1, Adapter.ofSegmentedInt(3), DISK.all())
+      .with(Version.v1_1, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
-   public static final FieldKey<Void> KILL_ALL = FieldKey.of("kill_all", Void.class).with(Version.v1_1, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> KILL_ALL = FieldKey.of("kill_all", Void.class).with(Version.v1_1, Adapters.ofVoid(), DISK.all()).register(FIELDS);
 
    protected DeathObjective() {
    }
@@ -74,7 +74,7 @@ public class DeathObjective extends Objective {
    }
 
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       return false;
    }
 

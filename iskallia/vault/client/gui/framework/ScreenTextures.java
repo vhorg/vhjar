@@ -215,6 +215,12 @@ public final class ScreenTextures {
    public static final TextureAtlasRegion TAB_COUNTDOWN_BACKGROUND = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_countdown_background")
    );
+   public static final TextureAtlasRegion TAB_ICON_WARDROBE_GEAR = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/tab_icon_gear")
+   );
+   public static final TextureAtlasRegion TAB_ICON_WARDROBE_HOTBAR = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/tab_icon_hotbar")
+   );
    public static final TextureAtlasRegion ICON_COIN_STACKS = TextureAtlasRegion.of(ModTextureAtlases.SCAVENGER, VaultMod.id("gui/scavenger/coin_stacks"));
    public static final TextureAtlasRegion ICON_GILDED_CHEST = TextureAtlasRegion.of(ModTextureAtlases.SCAVENGER, VaultMod.id("gui/scavenger/gilded_chest"));
    public static final TextureAtlasRegion ICON_LIVING_CHEST = TextureAtlasRegion.of(ModTextureAtlases.SCAVENGER, VaultMod.id("gui/scavenger/living_chest"));
@@ -273,6 +279,21 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_EMPTY_16_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_EMPTY_16, BUTTON_EMPTY_16_HOVER, BUTTON_EMPTY_16_PRESSED, BUTTON_EMPTY_16_DISABLED
    );
+   public static final TextureAtlasRegion BUTTON_EMPTY_16_48 = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_empty_16_48")
+   );
+   public static final TextureAtlasRegion BUTTON_EMPTY_16_48_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_empty_16_48_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_EMPTY_16_48_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_empty_16_48_pressed")
+   );
+   public static final TextureAtlasRegion BUTTON_EMPTY_16_48_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_empty_16_48_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_EMPTY_16_48_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_EMPTY_16_48, BUTTON_EMPTY_16_48_HOVER, BUTTON_EMPTY_16_48_PRESSED, BUTTON_EMPTY_16_48_DISABLED
+   );
    public static final TextureAtlasRegion BUTTON_EMPTY_32 = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_empty_32"));
    public static final TextureAtlasRegion BUTTON_EMPTY_32_HOVER = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_empty_32_hover")
@@ -300,6 +321,21 @@ public final class ScreenTextures {
    );
    public static final ButtonElement.ButtonTextures BUTTON_EMPTY_LEGENDARY_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_EMPTY_LEGENDARY, BUTTON_EMPTY_LEGENDARY_HOVER, BUTTON_EMPTY_LEGENDARY_PRESSED, BUTTON_EMPTY_LEGENDARY_DISABLED
+   );
+   public static final TextureAtlasRegion BUTTON_WORKBENCH_MODIFIER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_workbench_select")
+   );
+   public static final TextureAtlasRegion BUTTON_WORKBENCH_MODIFIER_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_workbench_select_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_WORKBENCH_MODIFIER_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_workbench_select_pressed")
+   );
+   public static final TextureAtlasRegion BUTTON_WORKBENCH_MODIFIER_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_workbench_select_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_WORKBENCH_MODIFIER_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_WORKBENCH_MODIFIER, BUTTON_WORKBENCH_MODIFIER_HOVER, BUTTON_WORKBENCH_MODIFIER_PRESSED, BUTTON_WORKBENCH_MODIFIER_DISABLED
    );
    public static final DynamicProgressElement.ProgressTextures BOUNTY_PROGRESS_BAR = new DynamicProgressElement.ProgressTextures(
       INSET_GREY_BACKGROUND, SLOT_FOREGROUND
@@ -351,6 +387,35 @@ public final class ScreenTextures {
    );
    public static final ButtonElement.ButtonTextures BUTTON_BUTTON_REROLL_TEXTURES = new ButtonElement.ButtonTextures(
       BOUNTY_REROLL, BOUNTY_REROLL_HOVER, BOUNTY_REROLL_PRESSED, BOUNTY_REROLL_DISABLED
+   );
+   public static final TextureAtlasRegion WARDROBE_SWAP = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/button_swap"));
+   public static final TextureAtlasRegion WARDROBE_SWAP_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/button_swap_hover")
+   );
+   public static final TextureAtlasRegion WARDROBE_SWAP_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/button_swap_pressed")
+   );
+   public static final TextureAtlasRegion WARDROBE_SWAP_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/button_swap_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_WARDROBE_SWAP_TEXTURES = new ButtonElement.ButtonTextures(
+      WARDROBE_SWAP, WARDROBE_SWAP_HOVER, WARDROBE_SWAP_PRESSED, WARDROBE_SWAP_DISABLED
+   );
+   public static final TextureAtlasRegion WARDROBE_TRANSPARENT = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/button_transparent")
+   );
+   public static final TextureAtlasRegion WARDROBE_TRANSPARENT_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/button_transparent_hover")
+   );
+   public static final TextureAtlasRegion WARDROBE_SOLID = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/button_solid"));
+   public static final TextureAtlasRegion WARDROBE_SOLID_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/wardrobe/button_solid_hover")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_WARDROBE_TRANSPARENT_TEXTURES = new ButtonElement.ButtonTextures(
+      WARDROBE_TRANSPARENT, WARDROBE_TRANSPARENT_HOVER, WARDROBE_TRANSPARENT, WARDROBE_TRANSPARENT
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_WARDROBE_SOLID_TEXTURES = new ButtonElement.ButtonTextures(
+      WARDROBE_SOLID, WARDROBE_SOLID_HOVER, WARDROBE_SOLID, WARDROBE_SOLID
    );
    public static final ResourceLocation UI_RESOURCE = new ResourceLocation("the_vault", "textures/gui/ability_tree.png");
    public static final ResourceLocation BACKGROUNDS_RESOURCE = new ResourceLocation("the_vault", "textures/gui/ability_tree_bgs.png");

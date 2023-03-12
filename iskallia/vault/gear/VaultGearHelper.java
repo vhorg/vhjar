@@ -3,8 +3,11 @@ package iskallia.vault.gear;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
+import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
+import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
@@ -12,9 +15,9 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.item.tool.ColorBlender;
 import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.data.ServerVaults;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
@@ -67,20 +70,13 @@ public class VaultGearHelper {
    public static InteractionResultHolder<ItemStack> rightClick(Level world, Player player, InteractionHand hand, InteractionResultHolder<ItemStack> defaultUse) {
       if (world.isClientSide()) {
          return defaultUse;
-      } else if (!ServerVaults.isVaultWorld(world) && !VHSmpUtil.isArenaWorld(world)) {
-         ItemStack stack = player.getItemInHand(hand);
-         if (!stack.isEmpty()) {
-            VaultGearData data = VaultGearData.read(stack);
-            if (data.getState() == VaultGearState.UNIDENTIFIED) {
-               data.setState(VaultGearState.ROLLING);
-               data.write(stack);
-               return InteractionResultHolder.fail(stack);
-            }
-         }
-
+      } else if (VHSmpUtil.isArenaWorld(world)) {
          return defaultUse;
       } else {
-         return defaultUse;
+         ItemStack stack = player.getItemInHand(hand);
+         return !stack.isEmpty() && stack.getItem() instanceof VaultGearItem gearItem && gearItem.tryStartIdentification(player, stack)
+            ? InteractionResultHolder.fail(stack)
+            : defaultUse;
       }
    }
 
@@ -97,10 +93,21 @@ public class VaultGearHelper {
                .orElse(defaultName.getStyle());
             return new TextComponent("Unidentified ").setStyle(style).append(defaultName.copy().setStyle(style));
          } else {
-            VaultGearRarity rarity = data.getRarity();
+            ColorBlender colorBlender = new ColorBlender(1.0F);
+            colorBlender.add(data.getRarity().getColor().getValue(), 60.0F);
+
+            for (VaultGearAttributeInstance<?> attributeInstance : data.getAllAttributes()) {
+               if (attributeInstance instanceof VaultGearModifier<?> modifier && modifier.getCategory() == VaultGearModifier.AffixCategory.LEGENDARY) {
+                  colorBlender.add(15853364, 60.0F);
+                  break;
+               }
+            }
+
+            float time = (float)ClientScheduler.INSTANCE.getTickCount();
+            int color = colorBlender.getColor(time);
             Optional<String> customName = data.getFirstValue(ModGearAttributes.GEAR_NAME);
-            return (Component)customName.<MutableComponent>map(s -> new TextComponent(s).setStyle(Style.EMPTY.withColor(rarity.getColor())))
-               .orElseGet(() -> defaultName.copy().setStyle(defaultName.getStyle().withColor(rarity.getColor())));
+            return (Component)customName.<MutableComponent>map(s -> new TextComponent(s).setStyle(Style.EMPTY.withColor(color)))
+               .orElseGet(() -> defaultName.copy().setStyle(defaultName.getStyle().withColor(color)));
          }
       }
    }

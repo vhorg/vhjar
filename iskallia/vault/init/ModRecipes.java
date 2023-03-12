@@ -3,7 +3,7 @@ package iskallia.vault.init;
 import iskallia.vault.VaultMod;
 import iskallia.vault.recipe.InitDollRecipe;
 import iskallia.vault.recipe.MysteryEggRecipe;
-import iskallia.vault.recipe.NonRaffleCrystalShapedRecipe;
+import iskallia.vault.recipe.NonGrantedCrystalShapedRecipe;
 import iskallia.vault.recipe.ShapelessCopyNbtRecipe;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -19,13 +19,13 @@ public class ModRecipes {
    }
 
    public static class Serializer {
-      public static NonRaffleCrystalShapedRecipe.Serializer NON_RAFFLE_CRYSTAL_SHAPED;
+      public static NonGrantedCrystalShapedRecipe.Serializer NON_RAFFLE_CRYSTAL_SHAPED;
       public static ShapelessCopyNbtRecipe.Serializer COPY_NBT_SHAPELESS;
       public static SimpleRecipeSerializer<MysteryEggRecipe> MYSTERY_EGG_RECIPE;
       public static SimpleRecipeSerializer<InitDollRecipe> INIT_DOLL_RECIPE;
 
       public static void register(Register<RecipeSerializer<?>> event) {
-         NON_RAFFLE_CRYSTAL_SHAPED = register(event, "non_raffle_crystal_shaped", new NonRaffleCrystalShapedRecipe.Serializer());
+         NON_RAFFLE_CRYSTAL_SHAPED = register(event, "non_raffle_crystal_shaped", new NonGrantedCrystalShapedRecipe.Serializer());
          COPY_NBT_SHAPELESS = register(event, "crafting_shapeless_copy_nbt", new ShapelessCopyNbtRecipe.Serializer());
          MYSTERY_EGG_RECIPE = register(event, "mystery_egg", new SimpleRecipeSerializer(MysteryEggRecipe::new));
          INIT_DOLL_RECIPE = register(event, "init_doll", new SimpleRecipeSerializer(InitDollRecipe::new));

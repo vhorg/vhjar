@@ -3,7 +3,7 @@ package iskallia.vault.config.bounty.task;
 import iskallia.vault.bounty.task.properties.CompletionProperties;
 import iskallia.vault.config.bounty.task.entry.GenericEntry;
 import iskallia.vault.config.bounty.task.entry.TaskEntry;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import java.util.ArrayList;
 
 public class CompletionTaskConfig extends TaskConfig<TaskEntry<String>, CompletionProperties> {
@@ -24,8 +24,8 @@ public class CompletionTaskConfig extends TaskConfig<TaskEntry<String>, Completi
 
    @Override
    protected TaskEntry<String> generateConfigEntry() {
-      return new TaskEntry<>(new GenericEntry<>("vault", new RangeEntry(1, 3)).vaultOnly(), 3)
-         .addEntry(new GenericEntry<>("cake", new RangeEntry(1, 3)).vaultOnly(), 3)
-         .addEntry(new GenericEntry<>("scavenger", new RangeEntry(1, 3)).vaultOnly(), 3);
+      return new TaskEntry<>(new GenericEntry<>("vault", new IntRangeEntry(1, 3)).vaultOnly(), 3)
+         .addEntry(new GenericEntry<>("cake", new IntRangeEntry(1, 3)).vaultOnly(), 3)
+         .addEntry(new GenericEntry<>("scavenger", new IntRangeEntry(1, 3)).vaultOnly(), 3);
    }
 }

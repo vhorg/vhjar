@@ -28,6 +28,7 @@ import iskallia.vault.gear.model.armor.layers.BoneDragonArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BotaniaArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BuilderArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BumboCactoniArmorLayers;
+import iskallia.vault.gear.model.armor.layers.BunnyGuardianArmorLayers;
 import iskallia.vault.gear.model.armor.layers.CakeArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ClericArmorLayers;
 import iskallia.vault.gear.model.armor.layers.CrayonArmorLayers;
@@ -43,6 +44,7 @@ import iskallia.vault.gear.model.armor.layers.FlamingoArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FluxArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FurnaceArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GladiatorArmorLayers;
+import iskallia.vault.gear.model.armor.layers.GoatArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GrizzlyArmorLayers;
 import iskallia.vault.gear.model.armor.layers.HellCowArmorLayers;
 import iskallia.vault.gear.model.armor.layers.HellDuckArmorLayers;
@@ -997,6 +999,24 @@ public class ModDynamicModels {
             .addSlot(EquipmentSlot.CHEST, "Wendarr's Chestplate")
             .addSlot(EquipmentSlot.LEGS, "Wendarr's Leggings")
             .addSlot(EquipmentSlot.FEET, "Wendarr's Boots")
+      );
+      public static final ArmorModel BUNNY_GUARDIAN = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/bunny_guardian"), "Bunny Guardian")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new BunnyGuardianArmorLayers())
+            .addSlot(EquipmentSlot.HEAD, "Bunny Guardian Ears")
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel GOAT = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/goat"), "Goat")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new GoatArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
       );
    }
 

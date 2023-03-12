@@ -4,7 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.ClientEvents;
@@ -23,28 +23,28 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class WorldRenderer extends DataObject<WorldRenderer> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<Float> AMBIENT_LIGHT = FieldKey.of("ambient_light", Float.class)
-      .with(Version.v1_0, Adapter.ofFloat(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.FLOAT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> FOG_COLOR = FieldKey.of("fog_color", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> GRASS_COLOR = FieldKey.of("grass_color", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> FOLIAGE_COLOR = FieldKey.of("foliage_color", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> WATER_COLOR = FieldKey.of("water_color", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> WATER_FOG_COLOR = FieldKey.of("water_fog_color", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<String> PARTICLE = FieldKey.of("particle", String.class)
-      .with(Version.v1_0, Adapter.ofString(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.UTF_8, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Float> PARTICLE_PROBABILITY = FieldKey.of("particle_probability", Float.class)
-      .with(Version.v1_0, Adapter.ofFloat(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.FLOAT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    private float prevAmbientLight;
    private float[] ambientLightRamp;

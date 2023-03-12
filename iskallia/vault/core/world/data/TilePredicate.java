@@ -2,7 +2,9 @@ package iskallia.vault.core.world.data;
 
 import com.mojang.brigadier.StringReader;
 import iskallia.vault.VaultMod;
+import iskallia.vault.init.ModConfigs;
 import java.util.function.Predicate;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -20,14 +22,20 @@ public interface TilePredicate extends Predicate<PartialTile> {
    }
 
    static TilePredicate of(String target) {
-      TileParser parser = new TileParser(new StringReader(target), null, true);
-      if (parser.hasTag()) {
-         return parser.hasNBT() ? of(parser.getTag(), parser.getPartialNBT()) : of(parser.getTag());
-      } else if (parser.hasBlock()) {
-         return parser.hasNBT() ? of(parser.getPartialState(), parser.getPartialNBT()) : of(parser.getPartialState());
+      target = target.trim();
+      if (target.startsWith("@")) {
+         ResourceLocation groupId = new ResourceLocation(target.substring(1));
+         return (state, nbt) -> ModConfigs.TILE_GROUPS.isInGroup(groupId, state, nbt);
       } else {
-         VaultMod.LOGGER.error("Unknown predicate for input <" + target + ">");
-         return (state, nbt) -> false;
+         TileParser parser = new TileParser(new StringReader(target), null, true);
+         if (parser.hasTag()) {
+            return parser.hasNBT() ? of(parser.getTag(), parser.getPartialNBT()) : of(parser.getTag());
+         } else if (parser.hasBlock()) {
+            return parser.hasNBT() ? of(parser.getPartialState(), parser.getPartialNBT()) : of(parser.getPartialState());
+         } else {
+            VaultMod.LOGGER.error("Unknown predicate for input <" + target + ">");
+            return (state, nbt) -> false;
+         }
       }
    }
 

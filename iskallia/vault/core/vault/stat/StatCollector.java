@@ -3,7 +3,9 @@ package iskallia.vault.core.vault.stat;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.EnumAdapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.compound.ItemStackList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -26,25 +28,28 @@ import net.minecraft.world.item.ItemStack;
 public class StatCollector extends DataObject<StatCollector> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<ChestStat.List> CHESTS = FieldKey.of("chests", ChestStat.List.class)
-      .with(Version.v1_0, Adapter.ofCompound(ChestStat.List::new), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(ChestStat.List::new), DISK.all())
       .register(FIELDS);
    public static final FieldKey<MinedBlocksStat> MINED_BLOCKS = FieldKey.of("mined_blocks", MinedBlocksStat.class)
-      .with(Version.v1_0, Adapter.ofCompound(MinedBlocksStat::new), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(MinedBlocksStat::new), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Integer> TREASURE_ROOMS_OPENED = FieldKey.of("treasure_rooms_opened", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(7), DISK.all())
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_7, DISK.all())
       .register(FIELDS);
    public static final FieldKey<MobsStat> MOBS = FieldKey.of("mobs", MobsStat.class)
-      .with(Version.v1_0, Adapter.ofCompound(MobsStat::new), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(MobsStat::new), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Completion> COMPLETION = FieldKey.of("completion", Completion.class)
-      .with(Version.v1_0, Adapter.ofEnum(Completion.class), DISK.all())
+      .with(Version.v1_0, Adapters.ofEnum(Completion.class, EnumAdapter.Mode.ORDINAL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Float> EXP_MULTIPLIER = FieldKey.of("exp_multiplier", Float.class)
-      .with(Version.v1_0, Adapter.ofFloat(), DISK.all())
+      .with(Version.v1_0, Adapters.FLOAT, DISK.all())
+      .register(FIELDS);
+   public static final FieldKey<Float> OBJECTIVE_EXP_MULTIPLIER = FieldKey.of("objective_exp_multiplier", Float.class)
+      .with(Version.v1_14, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
    public static final FieldKey<ItemStackList> REWARD = FieldKey.of("reward", ItemStackList.class)
-      .with(Version.v1_0, Adapter.ofCompound(ItemStackList::create), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(ItemStackList::createLegacy), DISK.all())
       .register(FIELDS);
 
    public StatCollector() {
@@ -54,7 +59,8 @@ public class StatCollector extends DataObject<StatCollector> {
       this.set(MOBS, new MobsStat());
       this.set(COMPLETION, Completion.COMPLETED);
       this.set(EXP_MULTIPLIER, Float.valueOf(1.0F));
-      this.set(REWARD, ItemStackList.create());
+      this.set(OBJECTIVE_EXP_MULTIPLIER, Float.valueOf(1.0F));
+      this.set(REWARD, ItemStackList.createLegacy());
    }
 
    @Override
@@ -152,7 +158,9 @@ public class StatCollector extends DataObject<StatCollector> {
    }
 
    public int getExperience(Vault vault) {
-      return (int)(ModConfigs.VAULT_STATS.getConfiguredVaultExperience(vault, this) * this.getExpMultiplier());
+      int objectiveExp = ModConfigs.VAULT_STATS.getCompletionExperience(vault, this);
+      int statsExp = ModConfigs.VAULT_STATS.getStatsExperience(this);
+      return (int)(objectiveExp * this.getOr(OBJECTIVE_EXP_MULTIPLIER, this.get(EXP_MULTIPLIER)) + statsExp * this.get(EXP_MULTIPLIER));
    }
 
    public Completion getCompletion() {

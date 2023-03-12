@@ -71,7 +71,7 @@ public class FragmentedVaultGenerator extends VaultGenerator {
       pos.move(Direction.EAST, 8192);
       boolean raffle = vault.getProperties().getBase(VaultRaid.IS_RAFFLE).orElse(false);
       int level = vault.getProperties().getBase(VaultRaid.LEVEL).orElse(0);
-      boolean generatesTreasureRooms = vault.getProperties().getBase(VaultRaid.CRYSTAL_DATA).map(CrystalData::canGenerateTreasureRooms).orElse(true);
+      boolean generatesTreasureRooms = true;
       VaultSizeConfig.SizeLayout layout = this.layout != null ? this.layout : ModConfigs.VAULT_SIZE.getLayout(level, raffle);
       if (this.layoutGenerator == null) {
          this.layoutGenerator = vault.getAllObjectives().stream().findFirst().map(VaultObjective::getCustomLayout).orElse(this.provideLayoutGenerator(layout));
@@ -105,9 +105,9 @@ public class FragmentedVaultGenerator extends VaultGenerator {
    }
 
    private void setGuaranteedRooms(VaultRoomLayoutGenerator.Layout vaultLayout, VaultRaid vault) {
-      CrystalData data = vault.getProperties().getBaseOrDefault(VaultRaid.CRYSTAL_DATA, CrystalData.EMPTY);
+      CrystalData data = vault.getProperties().getBaseOrDefault(VaultRaid.CRYSTAL_DATA, (CrystalData)null);
       Collection<VaultRoomLayoutGenerator.Room> rooms = vaultLayout.getRooms();
-      List<String> roomKeys = data.getGuaranteedRoomFilters();
+      List<String> roomKeys = null;
       if (roomKeys.size() > rooms.size()) {
          roomKeys = roomKeys.subList(0, rooms.size());
       }

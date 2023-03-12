@@ -134,7 +134,7 @@ public abstract class DataObject<D extends DataObject<D>> implements ICompound<D
       this.values.forEach((keyx, value) -> {
          if (keyx.canSync(this, context)) {
             buffer.writeIntBounded(fields.getIndex(keyx, version), 0, fields.getSize(version) - 1);
-            keyx.writeValue(version, buffer, context, keyx.validate(version, value, context));
+            keyx.writeValue(version, buffer, context, value);
          }
       });
       return (D)this;
@@ -178,7 +178,7 @@ public abstract class DataObject<D extends DataObject<D>> implements ICompound<D
          if (updatedKey.canSync(this, context)) {
             buffer.writeBoolean(true);
             buffer.writeIntBounded(fields.getIndex(updatedKey, version), fields.getSize(version));
-            updatedKey.writeValue(version, buffer, context, updatedKey.validate(version, this.values.get(updatedKey), context));
+            updatedKey.writeValue(version, buffer, context, this.values.get(updatedKey));
          }
       }
 

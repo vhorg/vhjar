@@ -3,9 +3,9 @@ package iskallia.vault.skill.ability.effect.sub;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.skill.ability.config.sub.RampageLeechConfig;
+import iskallia.vault.skill.ability.effect.RampageAbility;
 import iskallia.vault.skill.ability.effect.spi.AbstractRampageAbility;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
-import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
 import iskallia.vault.util.calc.PlayerStat;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -35,7 +35,7 @@ public class RampageLeechAbility extends AbstractRampageAbility<RampageLeechConf
       player.removeEffect(ModEffects.RAMPAGE_LEECH);
    }
 
-   public static class RampageLeechEffect extends ToggleAbilityEffect {
+   public static class RampageLeechEffect extends RampageAbility.RampageEffect {
       public RampageLeechEffect(int color, ResourceLocation resourceLocation) {
          super("Rampage", color, resourceLocation);
       }

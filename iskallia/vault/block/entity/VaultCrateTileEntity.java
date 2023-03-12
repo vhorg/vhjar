@@ -1,12 +1,18 @@
 package iskallia.vault.block.entity;
 
 import iskallia.vault.block.VaultCrateBlock;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.util.nbt.NBTHelper;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ShulkerBoxBlock;
@@ -21,9 +27,14 @@ import net.minecraftforge.items.ItemStackHandler;
 public class VaultCrateTileEntity extends BlockEntity {
    private final ItemStackHandler itemHandler = this.createHandler();
    private final LazyOptional<IItemHandler> handler = LazyOptional.of(() -> this.itemHandler);
+   private final List<OverSizedItemStack> items = new ArrayList<>();
 
    public VaultCrateTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.VAULT_CRATE_TILE_ENTITY, pos, state);
+   }
+
+   public List<OverSizedItemStack> getItems() {
+      return this.items;
    }
 
    public void sendUpdates() {
@@ -34,13 +45,30 @@ public class VaultCrateTileEntity extends BlockEntity {
 
    protected void saveAdditional(CompoundTag pTag) {
       super.saveAdditional(pTag);
-      pTag.put("inv", this.itemHandler.serializeNBT());
+      NBTHelper.writeCollection(pTag, "items", this.items, CompoundTag.class, OverSizedItemStack::serialize);
    }
 
    public void load(CompoundTag pTag) {
       super.load(pTag);
-      pTag.getCompound("inv").remove("Size");
-      this.itemHandler.deserializeNBT(pTag.getCompound("inv"));
+      if (pTag.contains("inv")) {
+         pTag.getCompound("inv").remove("Size");
+         this.itemHandler.deserializeNBT(pTag.getCompound("inv"));
+
+         for (int i = 0; i < this.itemHandler.getSlots(); i++) {
+            ItemStack stack = this.itemHandler.getStackInSlot(i);
+            this.items.add(i, OverSizedItemStack.of(stack));
+         }
+      } else if (pTag.contains("Items")) {
+         this.items.clear();
+         NonNullList<ItemStack> itemStacks = NonNullList.withSize(pTag.getList("Items", 10).size(), ItemStack.EMPTY);
+         ContainerHelper.loadAllItems(pTag, itemStacks);
+
+         for (ItemStack stack : itemStacks) {
+            this.items.add(OverSizedItemStack.of(stack));
+         }
+      } else if (pTag.contains("items")) {
+         NBTHelper.readCollection(pTag, "items", CompoundTag.class, OverSizedItemStack::deserialize, this.items);
+      }
    }
 
    private ItemStackHandler createHandler() {
@@ -65,13 +93,5 @@ public class VaultCrateTileEntity extends BlockEntity {
    @Nonnull
    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
       return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.handler.cast() : super.getCapability(cap, side);
-   }
-
-   public CompoundTag saveToNbt() {
-      return this.itemHandler.serializeNBT();
-   }
-
-   public void loadFromNBT(CompoundTag nbt) {
-      this.itemHandler.deserializeNBT(nbt);
    }
 }

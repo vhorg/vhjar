@@ -106,6 +106,7 @@ public class VaultOreBlock extends OreBlock {
          }
       }
 
+      ToolItem.handleLoot(builder, drops);
       return drops;
    }
 

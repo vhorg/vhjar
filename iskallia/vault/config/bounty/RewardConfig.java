@@ -3,9 +3,10 @@ package iskallia.vault.config.bounty;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.config.Config;
+import iskallia.vault.config.entry.IntRangeEntry;
 import iskallia.vault.config.entry.ItemStackPool;
 import iskallia.vault.config.entry.LevelEntryMap;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
@@ -45,7 +46,7 @@ public class RewardConfig extends Config {
          ItemStack sword = new ItemStack(Items.STONE_SWORD);
          EnchantmentHelper.enchantItem(rand, sword, i + 10, true);
          pool.addItemStack(sword, 1);
-         entryMap.put(Integer.valueOf(i), new RewardConfig.RewardEntry(new RangeEntry(1, 2), pool, new ArrayList<>()));
+         entryMap.put(Integer.valueOf(i), new RewardConfig.RewardEntry(new IntRangeEntry(1, 2), pool, new ArrayList<>()));
       }
 
       this.POOLS.put(poolId, entryMap);
@@ -60,7 +61,7 @@ public class RewardConfig extends Config {
          RewardConfig.RewardEntry rewardEntry = entry.get();
          int vaultExp = rewardEntry.vaultExp.getRandom();
          List<ResourceLocation> discoverModels = rewardEntry.discoverModels;
-         List<ItemStack> items = new ArrayList<>();
+         List<OverSizedItemStack> items = new ArrayList<>();
 
          for (ItemStack reward : rewardEntry.itemPool.getRandomStacks()) {
             if (reward.getItem() instanceof VaultGearItem gearItem) {
@@ -69,7 +70,7 @@ public class RewardConfig extends Config {
 
             reward = DataTransferItem.doConvertStack(reward);
             DataInitializationItem.doInitialize(reward);
-            items.add(reward);
+            items.add(OverSizedItemStack.of(reward));
          }
 
          return new TaskReward(vaultExp, items, discoverModels);
@@ -78,19 +79,19 @@ public class RewardConfig extends Config {
 
    public static class RewardEntry {
       @Expose
-      private RangeEntry vaultExp;
+      private IntRangeEntry vaultExp;
       @Expose
       private ItemStackPool itemPool;
       @Expose
       private List<ResourceLocation> discoverModels;
 
-      public RewardEntry(RangeEntry vaultExp, ItemStackPool itemPool) {
+      public RewardEntry(IntRangeEntry vaultExp, ItemStackPool itemPool) {
          this.vaultExp = vaultExp;
          this.itemPool = itemPool;
          this.discoverModels = new ArrayList<>();
       }
 
-      public RewardEntry(RangeEntry vaultExp, ItemStackPool itemPool, List<ResourceLocation> discoverModels) {
+      public RewardEntry(IntRangeEntry vaultExp, ItemStackPool itemPool, List<ResourceLocation> discoverModels) {
          this.vaultExp = vaultExp;
          this.itemPool = itemPool;
          this.discoverModels = discoverModels;

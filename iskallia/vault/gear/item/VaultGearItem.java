@@ -1,11 +1,12 @@
 package iskallia.vault.gear.item;
 
 import com.google.gson.JsonObject;
+import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.dynamodel.DynamicModelItem;
-import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import iskallia.vault.gear.GearRollHelper;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
@@ -16,10 +17,11 @@ import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.tooltip.VaultGearTooltipItem;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.item.IAnvilPreventCombination;
 import iskallia.vault.item.IConditionalDamageable;
 import iskallia.vault.item.gear.DataTransferItem;
+import iskallia.vault.item.gear.RecyclableItem;
 import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.VHSmpUtil;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -43,7 +46,16 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.extensions.IForgeItem;
 
-public interface VaultGearItem extends IForgeItem, VaultGearTooltipItem, DataTransferItem, VaultLevelItem, DynamicModelItem, IConditionalDamageable {
+public interface VaultGearItem
+   extends IForgeItem,
+   VaultGearTooltipItem,
+   DataTransferItem,
+   VaultLevelItem,
+   RecyclableItem,
+   DynamicModelItem,
+   IConditionalDamageable,
+   IAnvilPreventCombination,
+   IdentifiableItem {
    JavaRandom random = JavaRandom.ofNanoTime();
 
    default Item getItem() {
@@ -73,6 +85,11 @@ public interface VaultGearItem extends IForgeItem, VaultGearTooltipItem, DataTra
    }
 
    @Override
+   default boolean shouldPreventAnvilCombination(ItemStack other) {
+      return other.getItem() instanceof VaultGearItem;
+   }
+
+   @Override
    default boolean isImmuneToDamage(ItemStack stack, @Nullable Player player) {
       return player == null ? false : !ServerVaults.isVaultWorld(player.getLevel()) && !VHSmpUtil.isArenaWorld(player);
    }
@@ -82,6 +99,10 @@ public interface VaultGearItem extends IForgeItem, VaultGearTooltipItem, DataTra
    default Optional<ResourceLocation> getDynamicModelId(ItemStack itemStack) {
       VaultGearData gearData = VaultGearData.read(itemStack);
       return gearData.getState() == VaultGearState.UNIDENTIFIED ? Optional.empty() : gearData.getFirstValue(ModGearAttributes.GEAR_MODEL);
+   }
+
+   default Optional<? extends DynamicModel<?>> resolveDynamicModel(ItemStack stack, ResourceLocation key) {
+      return Optional.empty();
    }
 
    @Override
@@ -107,16 +128,13 @@ public interface VaultGearItem extends IForgeItem, VaultGearTooltipItem, DataTra
                      models.addAll(modelList);
                   }
                });
-               List<? extends ArmorPieceModel> armorModelSet = models.stream()
+               List<? extends DynamicModel<?>> armorModelSet = models.stream()
                   .<ResourceLocation>map(ResourceLocation::new)
-                  .map(ModDynamicModels.Armor.MODEL_REGISTRY::get)
-                  .filter(Optional::isPresent)
-                  .map(Optional::get)
-                  .map(model -> model.getPiece(slot))
+                  .map(key -> this.resolveDynamicModel(stack, key))
                   .filter(Optional::isPresent)
                   .map(Optional::get)
                   .toList();
-               ArmorPieceModel randomModel = armorModelSet.isEmpty() ? null : armorModelSet.get(random.nextInt(armorModelSet.size()));
+               DynamicModel<?> randomModel = (DynamicModel<?>)(armorModelSet.isEmpty() ? null : armorModelSet.get(random.nextInt(armorModelSet.size())));
                if (randomModel != null) {
                   VaultGearData data = VaultGearData.read(stack);
                   data.updateAttribute(ModGearAttributes.GEAR_MODEL, randomModel.getId());
@@ -131,6 +149,32 @@ public interface VaultGearItem extends IForgeItem, VaultGearTooltipItem, DataTra
       ItemStack result = DataTransferItem.super.convertStack(stack, random);
       VaultGearHelper.initializeGearRollType(result, VaultGearData.read(result).getItemLevel(), random);
       return result;
+   }
+
+   @Override
+   default Optional<UUID> getUuid(ItemStack stack) {
+      return AttributeGearData.readUUID(stack);
+   }
+
+   @Override
+   default boolean isValidInput(ItemStack input) {
+      return !input.isEmpty() && AttributeGearData.hasData(input);
+   }
+
+   @Override
+   default VaultRecyclerConfig.RecyclerOutput getOutput(ItemStack input) {
+      return ModConfigs.VAULT_RECYCLER.getGearRecyclingOutput();
+   }
+
+   @Override
+   default float getResultPercentage(ItemStack input) {
+      if (input.isEmpty()) {
+         return 0.0F;
+      } else if (VaultGearData.read(input).getState() != VaultGearState.IDENTIFIED) {
+         return 1.0F;
+      } else {
+         return !input.isDamageableItem() ? 1.0F : 1.0F - (float)input.getDamageValue() / input.getMaxDamage();
+      }
    }
 
    default void setItemLevel(ItemStack stack, Player player) {
@@ -169,6 +213,16 @@ public interface VaultGearItem extends IForgeItem, VaultGearTooltipItem, DataTra
 
    default void vaultGearTick(ItemStack stack, ServerPlayer player) {
       VaultGearHelper.initializeGearRollType(stack, player);
-      GearRollHelper.tickRollVaultGear(stack, player);
+      this.inventoryIdentificationTick(player, stack);
+   }
+
+   @Override
+   default void tickRoll(ItemStack stack) {
+      GearRollHelper.tickGearRoll(stack);
+   }
+
+   @Override
+   default void tickFinishRoll(ItemStack stack, Player player) {
+      GearRollHelper.initializeAndDiscoverGear(stack, player);
    }
 }

@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sss",
+    "scs",
+    "bdb"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:chromatic_steel_ingot"
+    },
+    "b": {
+      "item": "the_vault:black_chromatic_steel_ingot"
+    },
+    "d": {
+      "item": "the_vault:vault_diamond_block"
+    },
+    "c": {
+      "item": "the_vault:catalyst_infusion_table"
+    }
+  },
+  "result": {
+    "item": "the_vault:inscription_table",
+    "count": 1
+  }
+}

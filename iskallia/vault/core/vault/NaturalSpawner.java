@@ -3,7 +3,8 @@ package iskallia.vault.core.vault;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.compound.UUIDList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -28,22 +29,22 @@ import net.minecraft.world.phys.AABB;
 public class NaturalSpawner extends DataObject<NaturalSpawner> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<Integer> BASE_MAX_MOBS = FieldKey.of("base_max_mobs", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all())
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
    public static final FieldKey<Integer> EXTRA_MAX_MOBS = FieldKey.of("extra_max_mobs", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all())
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
    public static final FieldKey<Integer> MIN_SPAWN_DISTANCE = FieldKey.of("min_spawn_distance", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all())
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
    public static final FieldKey<Integer> MAX_SPAWN_DISTANCE = FieldKey.of("max_spawn_distance", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all())
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
    public static final FieldKey<Integer> DESPAWN_DISTANCE = FieldKey.of("despawn_distance", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all())
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
    public static final FieldKey<UUIDList> SPAWNED_MOBS = FieldKey.of("spawned_mobs", UUIDList.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all(), UUIDList::create)
+      .with(Version.v1_0, CompoundAdapter.of(UUIDList::create), DISK.all())
       .register(FIELDS);
 
    public NaturalSpawner() {

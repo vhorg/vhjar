@@ -1,5 +1,9 @@
 package iskallia.vault.skill.ability.effect;
 
+import iskallia.vault.gear.attribute.ability.special.GhostWalkDurationModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.AbilityNode;
@@ -40,7 +44,15 @@ public class GhostWalkAbility<C extends GhostWalkConfig> extends AbstractInstant
       if (player.hasEffect(ModEffects.GHOST_WALK)) {
          return AbilityActionResult.FAIL;
       } else {
-         MobEffectInstance newEffect = new MobEffectInstance(ModEffects.GHOST_WALK, config.getDurationTicks(), 0, false, false, true);
+         int duration = config.getDurationTicks();
+
+         for (ConfiguredModification<IntValueConfig, GhostWalkDurationModification> mod : SpecialAbilityModification.getModifications(
+            player, GhostWalkDurationModification.class
+         )) {
+            duration = mod.modification().addDuration(mod.config(), duration);
+         }
+
+         MobEffectInstance newEffect = new MobEffectInstance(ModEffects.GHOST_WALK, duration, 0, false, false, true);
          player.addEffect(newEffect);
          return AbilityActionResult.SUCCESS_COOLDOWN_DEFERRED;
       }

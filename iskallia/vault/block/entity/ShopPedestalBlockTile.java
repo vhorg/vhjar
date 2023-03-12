@@ -1,6 +1,7 @@
 package iskallia.vault.block.entity;
 
 import iskallia.vault.config.ShopPedestalConfig;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.gear.DataInitializationItem;
@@ -21,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 public class ShopPedestalBlockTile extends BlockEntity {
    private boolean initialized = false;
    private ItemStack offer = ItemStack.EMPTY;
-   private ItemStack currency = ItemStack.EMPTY;
+   private OverSizedItemStack currency = OverSizedItemStack.EMPTY;
 
    public ShopPedestalBlockTile(BlockPos pos, BlockState state) {
       super(ModBlocks.SHOP_PEDESTAL_TILE_ENTITY, pos, state);
@@ -43,7 +44,7 @@ public class ShopPedestalBlockTile extends BlockEntity {
                offerStack = DataTransferItem.doConvertStack(offerStack);
                DataInitializationItem.doInitialize(offerStack);
                tile.offer = offerStack.copy();
-               tile.currency = shopOffer.currency().copy();
+               tile.currency = OverSizedItemStack.of(shopOffer.currency().overSizedStack());
             }
 
             tile.setChanged();
@@ -56,14 +57,14 @@ public class ShopPedestalBlockTile extends BlockEntity {
       super.load(tag);
       this.initialized = tag.getBoolean("initialized");
       this.offer = ItemStack.of(tag.getCompound("offerStack"));
-      this.currency = ItemStack.of(tag.getCompound("currencyStack"));
+      this.currency = OverSizedItemStack.deserialize(tag.getCompound("currencyStack"));
    }
 
    public void saveAdditional(CompoundTag tag) {
       super.saveAdditional(tag);
       tag.putBoolean("initialized", this.initialized);
       tag.put("offerStack", this.offer.serializeNBT());
-      tag.put("currencyStack", this.currency.serializeNBT());
+      tag.put("currencyStack", this.currency.serialize());
    }
 
    public boolean isInitialized() {
@@ -75,7 +76,7 @@ public class ShopPedestalBlockTile extends BlockEntity {
    }
 
    public ItemStack getCurrencyStack() {
-      return this.currency.copy();
+      return this.currency.overSizedStack().copy();
    }
 
    public CompoundTag getUpdateTag() {
@@ -90,15 +91,15 @@ public class ShopPedestalBlockTile extends BlockEntity {
    public void clear() {
       this.initialized = false;
       this.offer = ItemStack.EMPTY;
-      this.currency = ItemStack.EMPTY;
+      this.currency = OverSizedItemStack.EMPTY;
       this.setChanged();
       this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
    }
 
-   public void setOffer(ItemStack offer, ItemStack currency) {
+   public void setOffer(ItemStack offer, OverSizedItemStack currency) {
       this.initialized = true;
       this.offer = offer.copy();
-      this.currency = currency.copy();
+      this.currency = OverSizedItemStack.of(currency.overSizedStack());
       this.setChanged();
       this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
    }

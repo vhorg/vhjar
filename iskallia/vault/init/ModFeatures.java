@@ -67,12 +67,12 @@ public class ModFeatures {
       CONFIGURED_CHROMATIC_IRON_ORE_SMALL = register(
          "chromatic_iron_ore_small",
          OverworldOreFeature.INSTANCE,
-         new OreConfiguration(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, ModBlocks.CHROMATIC_IRON_ORE.defaultBlockState(), 12, 1.0F)
+         new OreConfiguration(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, ModBlocks.CHROMATIC_IRON_ORE.defaultBlockState(), 12, 0.25F)
       );
       CONFIGURED_CHROMATIC_IRON_ORE_LARGE = register(
          "chromatic_iron_ore_large",
          OverworldOreFeature.INSTANCE,
-         new OreConfiguration(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, ModBlocks.CHROMATIC_IRON_ORE.defaultBlockState(), 36, 1.0F)
+         new OreConfiguration(OreFeatures.DEEPSLATE_ORE_REPLACEABLES, ModBlocks.CHROMATIC_IRON_ORE.defaultBlockState(), 36, 0.25F)
       );
       CONFIGURED_VAULT_STONE = register(
          "vault_stone",

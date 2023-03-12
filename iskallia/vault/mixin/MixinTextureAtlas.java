@@ -1,7 +1,7 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.VaultMod;
-import iskallia.vault.item.tool.MergingAtlasSprite;
+import iskallia.vault.item.tool.ToolHeadSprite;
 import java.util.regex.Pattern;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -26,7 +26,7 @@ public abstract class MixinTextureAtlas {
          String[] data = id.getPath().replace("textures/item/tool/", "").split(Pattern.quote("/"));
          ResourceLocation tool = VaultMod.id("textures/item/tool/" + data[0] + "/head.png");
          ResourceLocation material = VaultMod.id("textures/item/tool/material/" + data[2]);
-         ci.setReturnValue(MergingAtlasSprite.create((TextureAtlas)this, info, mipLevel, storageX, storageY, x, y, material, tool));
+         ci.setReturnValue(ToolHeadSprite.create((TextureAtlas)this, info, mipLevel, storageX, storageY, x, y, material, tool));
       }
    }
 

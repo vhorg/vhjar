@@ -65,7 +65,9 @@ public class BountyScreen extends AbstractElementContainerScreen<BountyContainer
       "vault",
       new TextComponent("Any Vault"),
       "monolith",
-      new TextComponent("Light the Monoliths")
+      new TextComponent("Light the Monoliths"),
+      "elixir",
+      new TextComponent("Gather Elixir")
    );
    private final BountyTableContainerElement bountyTableContainerElement;
    private static final boolean debug = false;

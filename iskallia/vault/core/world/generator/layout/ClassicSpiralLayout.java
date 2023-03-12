@@ -1,7 +1,7 @@
 package iskallia.vault.core.world.generator.layout;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -15,11 +15,9 @@ import net.minecraft.world.level.block.Rotation;
 public class ClassicSpiralLayout extends ClassicInfiniteLayout {
    public static final SupplierKey<GridLayout> KEY = SupplierKey.of("classic_spiral_vault", GridLayout.class).with(Version.v1_0, ClassicSpiralLayout::new);
    public static final FieldRegistry FIELDS = ClassicInfiniteLayout.FIELDS.merge(new FieldRegistry());
-   public static final FieldKey<Integer> HALF_LENGTH = FieldKey.of("half_length", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all())
-      .register(FIELDS);
+   public static final FieldKey<Integer> HALF_LENGTH = FieldKey.of("half_length", Integer.class).with(Version.v1_0, Adapters.INT, DISK.all()).register(FIELDS);
    public static final FieldKey<Rotation> ROTATION = FieldKey.of("rotation", Rotation.class)
-      .with(Version.v1_0, Adapter.ofOrdinal(r -> r.ordinal() >> 1, Rotation.CLOCKWISE_90, Rotation.COUNTERCLOCKWISE_90), DISK.all())
+      .with(Version.v1_0, Adapters.ofOrdinal(r -> r.ordinal() >> 1, Rotation.CLOCKWISE_90, Rotation.COUNTERCLOCKWISE_90), DISK.all())
       .register(FIELDS);
 
    protected ClassicSpiralLayout() {

@@ -1,7 +1,7 @@
 package iskallia.vault.core.world.generator.layout;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.vault.RegistryKeyAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -19,13 +19,13 @@ import net.minecraft.core.Direction.Axis;
 public abstract class ClassicVaultLayout extends VaultLayout {
    public static final FieldRegistry FIELDS = VaultLayout.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<TemplatePoolKey> START_POOL = FieldKey.of("start_pool", TemplatePoolKey.class)
-      .with(Version.v1_0, Adapter.ofRegistryKey(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<TemplatePoolKey> ROOM_POOL = FieldKey.of("room_pool", TemplatePoolKey.class)
-      .with(Version.v1_0, Adapter.ofRegistryKey(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<TemplatePoolKey> TUNNEL_POOL = FieldKey.of("tunnel_pool", TemplatePoolKey.class)
-      .with(Version.v1_0, Adapter.ofRegistryKey(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);
 
    protected ClassicVaultLayout() {

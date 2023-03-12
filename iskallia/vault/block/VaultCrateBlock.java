@@ -2,8 +2,10 @@ package iskallia.vault.block;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.entity.VaultCrateTileEntity;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.util.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -16,7 +18,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -39,7 +40,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.items.CapabilityItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 public class VaultCrateBlock extends Block implements EntityBlock {
@@ -65,6 +65,7 @@ public class VaultCrateBlock extends Block implements EntityBlock {
          case CHAMPION -> ModBlocks.VAULT_CRATE_CHAMPION;
          case BOUNTY -> ModBlocks.VAULT_CRATE_BOUNTY;
          case MONOLITH -> ModBlocks.VAULT_CRATE_MONOLITH;
+         case ELIXIR -> ModBlocks.VAULT_CRATE_ELIXIR;
       };
       if (items.size() > 54) {
          VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
@@ -74,6 +75,32 @@ public class VaultCrateBlock extends Block implements EntityBlock {
       ItemStack crate = new ItemStack(block);
       CompoundTag nbt = new CompoundTag();
       ContainerHelper.saveAllItems(nbt, items);
+      if (!nbt.isEmpty()) {
+         crate.addTagElement("BlockEntityTag", nbt);
+      }
+
+      return crate;
+   }
+
+   public static ItemStack getCrateWithLootOversized(VaultCrateBlock.Type type, NonNullList<OverSizedItemStack> items) {
+      Block block = switch (type) {
+         case BOSS -> ModBlocks.VAULT_CRATE;
+         case SCAVENGER -> ModBlocks.VAULT_CRATE_SCAVENGER;
+         case CAKE -> ModBlocks.VAULT_CRATE_CAKE;
+         case ARENA -> ModBlocks.VAULT_CRATE_ARENA;
+         case CHAMPION -> ModBlocks.VAULT_CRATE_CHAMPION;
+         case BOUNTY -> ModBlocks.VAULT_CRATE_BOUNTY;
+         case MONOLITH -> ModBlocks.VAULT_CRATE_MONOLITH;
+         case ELIXIR -> ModBlocks.VAULT_CRATE_ELIXIR;
+      };
+      if (items.size() > 54) {
+         VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
+         items = NonNullList.of(OverSizedItemStack.EMPTY, items.stream().limit(54L).toArray(OverSizedItemStack[]::new));
+      }
+
+      ItemStack crate = new ItemStack(block);
+      CompoundTag nbt = new CompoundTag();
+      NBTHelper.writeCollection(nbt, "items", items, CompoundTag.class, OverSizedItemStack::serialize);
       if (!nbt.isEmpty()) {
          crate.addTagElement("BlockEntityTag", nbt);
       }
@@ -93,13 +120,8 @@ public class VaultCrateBlock extends Block implements EntityBlock {
    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
       if (player.isShiftKeyDown() && !world.isClientSide) {
          if (world.getBlockEntity(pos) instanceof VaultCrateTileEntity crate) {
-            crate.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(inventory -> {
-               for (int i = 0; i < inventory.getSlots(); i++) {
-                  if (!inventory.getStackInSlot(i).isEmpty()) {
-                     popResource(world, pos, inventory.getStackInSlot(i));
-                  }
-               }
-            });
+            crate.getItems().forEach(oversizedStack -> oversizedStack.splitByStackSize().forEach(split -> popResource(world, pos, split)));
+            crate.getItems().clear();
          }
 
          world.removeBlock(pos, false);
@@ -117,7 +139,7 @@ public class VaultCrateBlock extends Block implements EntityBlock {
       super.playerWillDestroy(world, pos, state, player);
       if (world.getBlockEntity(pos) instanceof VaultCrateTileEntity crate) {
          ItemStack itemstack = new ItemStack(this);
-         CompoundTag compoundnbt = crate.saveToNbt();
+         CompoundTag compoundnbt = crate.saveWithoutMetadata();
          if (!compoundnbt.isEmpty()) {
             itemstack.addTagElement("BlockEntityTag", compoundnbt);
          }
@@ -144,19 +166,6 @@ public class VaultCrateBlock extends Block implements EntityBlock {
       return (BlockState)((BlockState)this.defaultBlockState().setValue(FACING, placeDir)).setValue(HORIZONTAL_FACING, horizontalDir);
    }
 
-   public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, @javax.annotation.Nullable LivingEntity placer, ItemStack stack) {
-      if (!worldIn.isClientSide()) {
-         CompoundTag tag = stack.getTagElement("BlockEntityTag");
-         if (tag != null) {
-            VaultCrateTileEntity crate = this.getCrateTileEntity(worldIn, pos);
-            if (crate != null) {
-               crate.loadFromNBT(tag);
-               super.setPlacedBy(worldIn, pos, state, placer, stack);
-            }
-         }
-      }
-   }
-
    private VaultCrateTileEntity getCrateTileEntity(Level worldIn, BlockPos pos) {
       BlockEntity var4 = worldIn.getBlockEntity(pos);
       return var4 instanceof VaultCrateTileEntity ? (VaultCrateTileEntity)var4 : null;
@@ -169,6 +178,7 @@ public class VaultCrateBlock extends Block implements EntityBlock {
       ARENA,
       CHAMPION,
       BOUNTY,
-      MONOLITH;
+      MONOLITH,
+      ELIXIR;
    }
 }

@@ -3,6 +3,7 @@ package iskallia.vault;
 import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.core.SkyVaultsPreset;
 import iskallia.vault.dump.VaultDataDump;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModificationRegistry;
 import iskallia.vault.init.ModClientCommands;
 import iskallia.vault.init.ModCommands;
 import iskallia.vault.init.ModConfigs;
@@ -19,6 +20,7 @@ import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.scheduler.DailyScheduler;
 import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.DiscoveredTrinketsData;
+import iskallia.vault.world.data.DiscoveredWorkbenchModifiersData;
 import iskallia.vault.world.data.EternalsData;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerArchetypeData;
@@ -70,6 +72,7 @@ public class VaultMod {
       MinecraftForge.EVENT_BUS.addListener(DailyScheduler::start);
       MinecraftForge.EVENT_BUS.addListener(DailyScheduler::stop);
       MinecraftForge.EVENT_BUS.addListener(VaultDataDump::onStart);
+      SpecialAbilityModificationRegistry.init();
       this.registerDeferredRegistries();
       ModCommands.registerArgumentTypes();
       if (ModList.get().isLoaded("dankstorage")) {
@@ -148,11 +151,13 @@ public class VaultMod {
       PlayerHistoricFavoritesData.get(serverWorld).getHistoricFavorites(player).syncToClient(server);
       DiscoveredModelsData.get(serverWorld).syncTo(player);
       DiscoveredTrinketsData.get(serverWorld).syncTo(player);
+      DiscoveredWorkbenchModifiersData.get(serverWorld).syncTo(player);
       ModConfigs.SOUL_SHARD.syncTo(ModConfigs.SOUL_SHARD, player);
-      ModConfigs.GEAR_RECIPES_CONFIG.syncTo(ModConfigs.GEAR_RECIPES_CONFIG, player);
-      ModConfigs.JEWEL_RECIPES_CONFIG.syncTo(ModConfigs.JEWEL_RECIPES_CONFIG, player);
-      ModConfigs.TRINKET_RECIPES_CONFIG.syncTo(ModConfigs.TRINKET_RECIPES_CONFIG, player);
-      ModConfigs.TOOL_RECIPES_CONFIG.syncTo(ModConfigs.TOOL_RECIPES_CONFIG, player);
+      ModConfigs.GEAR_RECIPES.syncTo(ModConfigs.GEAR_RECIPES, player);
+      ModConfigs.JEWEL_RECIPES.syncTo(ModConfigs.JEWEL_RECIPES, player);
+      ModConfigs.TRINKET_RECIPES.syncTo(ModConfigs.TRINKET_RECIPES, player);
+      ModConfigs.TOOL_RECIPES.syncTo(ModConfigs.TOOL_RECIPES, player);
+      ModConfigs.INSCRIPTION_RECIPES.syncTo(ModConfigs.INSCRIPTION_RECIPES, player);
       DiscoveredModelsData.get(serverWorld).ensureResearchDiscoverables(player);
    }
 

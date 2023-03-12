@@ -1,5 +1,9 @@
 package iskallia.vault.skill.ability.effect;
 
+import iskallia.vault.gear.attribute.ability.special.MegaJumpVelocityModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.MegaJumpConfig;
 import iskallia.vault.skill.ability.effect.spi.AbstractMegaJumpAbility;
@@ -11,12 +15,24 @@ import net.minecraft.sounds.SoundSource;
 
 public class MegaJumpAbility<C extends MegaJumpConfig> extends AbstractMegaJumpAbility<C> {
    protected AbilityActionResult doAction(C config, ServerPlayer player, boolean active) {
-      double magnitude = config.getHeight() * 0.15;
-      double addY = -Math.min(0.0, player.getDeltaMovement().y());
-      player.push(0.0, addY + magnitude, 0.0);
-      player.startFallFlying();
-      player.hurtMarked = true;
-      return AbilityActionResult.SUCCESS_COOLDOWN;
+      int height = config.getHeight();
+
+      for (ConfiguredModification<IntValueConfig, MegaJumpVelocityModification> mod : SpecialAbilityModification.getModifications(
+         player, MegaJumpVelocityModification.class
+      )) {
+         height = mod.modification().adjustHeightConfig(mod.config(), height);
+      }
+
+      if (height == 0) {
+         return AbilityActionResult.SUCCESS_COOLDOWN;
+      } else {
+         double magnitude = height * 0.15;
+         double addY = -Math.min(0.0, player.getDeltaMovement().y());
+         player.push(0.0, addY + magnitude, 0.0);
+         player.startFallFlying();
+         player.hurtMarked = true;
+         return AbilityActionResult.SUCCESS_COOLDOWN;
+      }
    }
 
    protected void doParticles(C config, ServerPlayer player) {

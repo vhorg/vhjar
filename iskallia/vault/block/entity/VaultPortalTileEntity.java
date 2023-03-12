@@ -6,6 +6,7 @@ import iskallia.vault.world.data.ServerVaults;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 public class VaultPortalTileEntity extends BlockEntity {
-   private CrystalData data = new CrystalData();
+   private CrystalData data = CrystalData.empty();
 
    public VaultPortalTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.VAULT_PORTAL_TILE_ENTITY, pos, state);
@@ -27,14 +28,12 @@ public class VaultPortalTileEntity extends BlockEntity {
 
    protected void saveAdditional(@NotNull CompoundTag nbt) {
       super.saveAdditional(nbt);
-      nbt.put("Data", this.data.serializeNBT());
+      this.data.writeNbt().ifPresent(data -> nbt.put("Data", data));
    }
 
    public void load(@NotNull CompoundTag nbt) {
       super.load(nbt);
-      if (nbt.contains("Data", 10)) {
-         this.data.deserializeNBT(nbt.getCompound("Data"));
-      }
+      this.data.readNbt(nbt.getCompound("Data"));
    }
 
    public CrystalData getData() {
@@ -44,6 +43,14 @@ public class VaultPortalTileEntity extends BlockEntity {
    public void setCrystalData(CrystalData data) {
       this.data = data;
       this.setChanged();
+   }
+
+   public CompoundTag getUpdateTag() {
+      return this.saveWithoutMetadata();
+   }
+
+   public ClientboundBlockEntityDataPacket getUpdatePacket() {
+      return ClientboundBlockEntityDataPacket.create(this);
    }
 
    public static void tick(Level level, BlockPos pos, BlockState state, VaultPortalTileEntity te) {
