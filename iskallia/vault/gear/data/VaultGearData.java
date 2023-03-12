@@ -167,8 +167,12 @@ public class VaultGearData extends AttributeGearData {
       return null;
    }
 
+   public void addModifierFirst(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier) {
+      this.addModifier(type, modifier, Deque::addFirst);
+   }
+
    public void addModifier(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier) {
-      this.addModifier(type, modifier, Deque::add);
+      this.addModifier(type, modifier, Deque::addLast);
    }
 
    public void addModifier(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier, BiConsumer<Deque<VaultGearModifier<?>>, VaultGearModifier<?>> addFn) {
@@ -195,6 +199,10 @@ public class VaultGearData extends AttributeGearData {
          default:
             return Collections.emptyList();
       }
+   }
+
+   public Iterable<? extends VaultGearAttributeInstance<?>> getAllAttributes() {
+      return VaultGearData.Type.ALL_MODIFIERS.getAttributeSource(this);
    }
 
    public Iterable<VaultGearModifier<?>> getAllModifierAffixes() {

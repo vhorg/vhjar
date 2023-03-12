@@ -5,7 +5,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.config.LegacyLootTablesConfig;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.EnumAdapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.RegistryKeyAdapter;
 import iskallia.vault.core.data.compound.UUIDList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.LootTableKey;
@@ -33,18 +36,18 @@ public class AwardCrateObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("award_crate", Objective.class).with(Version.v1_0, AwardCrateObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<VaultCrateBlock.Type> TYPE = FieldKey.of("type", VaultCrateBlock.Type.class)
-      .with(Version.v1_0, Adapter.ofEnum(VaultCrateBlock.Type.class), DISK.all())
+      .with(Version.v1_0, Adapters.ofEnum(VaultCrateBlock.Type.class, EnumAdapter.Mode.ORDINAL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<LootTableKey> LOOT_TABLE = FieldKey.of("loot_table", LootTableKey.class)
-      .with(Version.v1_0, Adapter.<LootTableKey, LootTable>ofRegistryKey(() -> VaultRegistry.LOOT_TABLE).asNullable(), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.<LootTableKey, LootTable>of(() -> VaultRegistry.LOOT_TABLE).asNullable(), DISK.all())
       .register(FIELDS);
-   public static final FieldKey<Void> ADD_ARTIFACT = FieldKey.of("add_artifact", Void.class).with(Version.v1_0, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> ADD_ARTIFACT = FieldKey.of("add_artifact", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
    public static final FieldKey<Float> ARTIFACT_CHANCE = FieldKey.of("artifact_chance", Float.class)
-      .with(Version.v1_0, Adapter.ofFloat(), DISK.all())
+      .with(Version.v1_0, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
-   public static final FieldKey<Void> AWARDED = FieldKey.of("awarded", Void.class).with(Version.v1_0, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> AWARDED = FieldKey.of("awarded", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
    public static final FieldKey<UUIDList> AWARDED_PLAYERS = FieldKey.of("awarded_players", UUIDList.class)
-      .with(Version.v1_1, Adapter.ofCompound(), DISK.all(), UUIDList::create)
+      .with(Version.v1_1, CompoundAdapter.of(UUIDList::create), DISK.all())
       .register(FIELDS);
 
    protected AwardCrateObjective() {
@@ -139,7 +142,7 @@ public class AwardCrateObjective extends Objective {
    }
 
    @Override
-   public boolean render(PoseStack matrixStack, Window window, float partialTicks, Player player) {
+   public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {
       return false;
    }
 

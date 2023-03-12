@@ -5,11 +5,15 @@ import com.google.gson.JsonObject;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.util.TextComponentUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.LogicalSide;
 
 public abstract class VaultGearModifierReader<T> {
    private final String modifierName;
@@ -49,6 +53,11 @@ public abstract class VaultGearModifierReader<T> {
    }
 
    protected abstract void serializeTextElements(JsonArray var1, VaultGearAttributeInstance<T> var2, VaultGearModifier.AffixType var3);
+
+   public MutableComponent formatConfigDisplay(LogicalSide side, Component configRange) {
+      MutableComponent cmp = new TextComponent("%s " + this.getModifierName()).withStyle(this.getColoredTextStyle());
+      return TextComponentUtils.replace(TextComponentUtils.createSourceStack(side), cmp, "%s", configRange);
+   }
 
    @Nullable
    public MutableComponent getDisplay(VaultGearAttributeInstance<T> instance, VaultGearData data, VaultGearModifier.AffixType type, ItemStack stack) {

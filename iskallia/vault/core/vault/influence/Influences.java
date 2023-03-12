@@ -3,7 +3,9 @@ package iskallia.vault.core.vault.influence;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.EnumAdapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
@@ -37,12 +39,12 @@ import net.minecraft.resources.ResourceLocation;
 public class Influences extends DataObject<Influences> {
    private static final Map<VaultGod, List<String>> MESSAGES = new HashMap<>();
    public static final FieldRegistry FIELDS = new FieldRegistry();
-   public static final FieldKey<Void> INITIALIZED = FieldKey.of("initialized", Void.class).with(Version.v1_5, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> INITIALIZED = FieldKey.of("initialized", Void.class).with(Version.v1_5, Adapters.ofVoid(), DISK.all()).register(FIELDS);
    public static final FieldKey<VaultGod> CURRENT = FieldKey.of("current", VaultGod.class)
-      .with(Version.v1_5, Adapter.ofEnum(VaultGod.class), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_5, Adapters.ofEnum(VaultGod.class, EnumAdapter.Mode.ORDINAL), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Favours> FAVOURS = FieldKey.of("favours", Favours.class)
-      .with(Version.v1_5, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Favours::new)
+      .with(Version.v1_5, CompoundAdapter.of(Favours::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    @Override
@@ -108,7 +110,7 @@ public class Influences extends DataObject<Influences> {
          ModConfigs.VAULT_MODIFIER_POOLS
             .getRandom(id, reputation, random)
             .forEach(modifier -> modifiers.put(modifier, modifiers.getOrDefault(modifier, 0) + 1));
-         modifiers.forEach((modifier, count) -> this.get(FAVOURS).addPermanentModifier(modifier, count, true));
+         modifiers.forEach((modifier, count) -> this.get(FAVOURS).addPermanentModifier(modifier, count, true, random));
          this.printGodMessage(runner, modifiers, random);
       }
    }

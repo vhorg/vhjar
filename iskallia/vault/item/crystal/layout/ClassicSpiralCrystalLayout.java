@@ -1,21 +1,25 @@
 package iskallia.vault.item.crystal.layout;
 
 import com.google.gson.JsonObject;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.layout.ClassicSpiralLayout;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.block.Rotation;
 
 public class ClassicSpiralCrystalLayout extends ClassicInfiniteCrystalLayout {
    protected int halfLength;
    protected Rotation rotation;
 
-   protected ClassicSpiralCrystalLayout() {
+   public ClassicSpiralCrystalLayout() {
    }
 
    public ClassicSpiralCrystalLayout(int tunnelSpan, int halfLength, Rotation rotation) {
@@ -25,7 +29,7 @@ public class ClassicSpiralCrystalLayout extends ClassicInfiniteCrystalLayout {
    }
 
    @Override
-   public void configure(Vault vault) {
+   public void configure(Vault vault, RandomSource random) {
       vault.getOptional(Vault.WORLD).map(world -> world.get(WorldManager.GENERATOR)).ifPresent(generator -> {
          if (generator instanceof GridGenerator grid) {
             grid.set(GridGenerator.LAYOUT, new ClassicSpiralLayout(this.tunnelSpan, this.halfLength, this.rotation));
@@ -34,39 +38,39 @@ public class ClassicSpiralCrystalLayout extends ClassicInfiniteCrystalLayout {
    }
 
    @Override
-   public Component getName() {
-      return new TextComponent("Spiral").withStyle(ChatFormatting.BLUE);
+   public void addText(List<Component> tooltip, TooltipFlag flag) {
+      tooltip.add(new TextComponent("Layout: ").append(new TextComponent("Spiral").withStyle(ChatFormatting.BLUE)));
    }
 
    @Override
-   public CompoundTag serializeNBT() {
-      CompoundTag nbt = super.serializeNBT();
-      nbt.putString("type", "spiral");
-      nbt.putInt("half_length", this.halfLength);
-      nbt.putString("rotation", this.rotation.name());
-      return nbt;
+   public Optional<CompoundTag> writeNbt() {
+      return super.writeNbt().map(nbt -> {
+         nbt.putInt("half_length", this.halfLength);
+         nbt.putString("rotation", this.rotation.name());
+         return (CompoundTag)nbt;
+      });
    }
 
    @Override
-   public void deserializeNBT(CompoundTag nbt) {
-      super.deserializeNBT(nbt);
+   public void readNbt(CompoundTag nbt) {
+      super.readNbt(nbt);
       this.halfLength = nbt.getInt("half_length");
       this.rotation = Enum.valueOf(Rotation.class, nbt.getString("rotation"));
    }
 
    @Override
-   public JsonObject serializeJson() {
-      JsonObject object = super.serializeJson();
-      object.addProperty("type", "spiral");
-      object.addProperty("half_length", this.halfLength);
-      object.addProperty("rotation", this.rotation.name());
-      return object;
+   public Optional<JsonObject> writeJson() {
+      return super.writeJson().map(json -> {
+         json.addProperty("half_length", this.halfLength);
+         json.addProperty("rotation", this.rotation.name());
+         return (JsonObject)json;
+      });
    }
 
    @Override
-   public void deserializeJson(JsonObject object) {
-      super.deserializeJson(object);
-      this.halfLength = object.get("half_length").getAsInt();
-      this.rotation = (Rotation)Rotation.valueOf(Rotation.class, object.get("rotation").getAsString());
+   public void readJson(JsonObject json) {
+      super.readJson(json);
+      this.halfLength = json.get("half_length").getAsInt();
+      this.rotation = (Rotation)Rotation.valueOf(Rotation.class, json.get("rotation").getAsString());
    }
 }

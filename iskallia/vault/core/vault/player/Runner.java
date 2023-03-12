@@ -1,7 +1,7 @@
 package iskallia.vault.core.vault.player;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -32,10 +32,10 @@ public class Runner extends Listener {
    public static final SupplierKey<Listener> KEY = SupplierKey.of("runner", Listener.class).with(Version.v1_0, Runner::new);
    public static final FieldRegistry FIELDS = Listener.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<NaturalSpawner> SPAWNER = FieldKey.of("spawner", NaturalSpawner.class)
-      .with(Version.v1_0, Adapter.ofCompound(NaturalSpawner::new), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(NaturalSpawner::new), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Influences> INFLUENCES = FieldKey.of("influences", Influences.class)
-      .with(Version.v1_5, Adapter.ofCompound(Influences::new), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_5, CompoundAdapter.of(Influences::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public Runner() {
@@ -153,7 +153,6 @@ public class Runner extends Listener {
                int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
                if (diff > 0) {
                   data.setChance(data.getChance() - diff * 0.05F);
-                  data.setChance(Math.max(data.getChance(), 0.2F));
                }
             }
          }

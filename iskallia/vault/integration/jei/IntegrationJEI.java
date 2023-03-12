@@ -34,7 +34,33 @@ import net.minecraft.world.item.crafting.RecipeManager;
 @JeiPlugin
 public class IntegrationJEI implements IModPlugin {
    public void registerItemSubtypes(ISubtypeRegistration registration) {
-      registration.useNbtForSubtypes(new Item[]{ModItems.RESPEC_FLASK, ModItems.FACETED_FOCUS, ModItems.TRINKET, ModItems.ETCHING, ModItems.GOD_BLESSING});
+      registration.useNbtForSubtypes(
+         new Item[]{
+            ModItems.RESPEC_FLASK,
+            ModItems.FACETED_FOCUS,
+            ModItems.TRINKET,
+            ModItems.ETCHING,
+            ModItems.GOD_BLESSING,
+            ModItems.TOOL,
+            ModBlocks.ASHIUM_ORE.asItem(),
+            ModBlocks.ALEXANDRITE_ORE.asItem(),
+            ModBlocks.BLACK_OPAL_ORE.asItem(),
+            ModBlocks.BOMIGNITE_ORE.asItem(),
+            ModBlocks.ECHO_ORE.asItem(),
+            ModBlocks.GORGINITE_ORE.asItem(),
+            ModBlocks.ISKALLIUM_ORE.asItem(),
+            ModBlocks.LARIMAR_ORE.asItem(),
+            ModBlocks.PAINITE_ORE.asItem(),
+            ModBlocks.PETZANITE_ORE.asItem(),
+            ModBlocks.PUFFIUM_ORE.asItem(),
+            ModBlocks.SPARKLETINE_ORE.asItem(),
+            ModBlocks.TUBIUM_ORE.asItem(),
+            ModBlocks.UPALINE_ORE.asItem(),
+            ModBlocks.WUTODIE_ORE.asItem(),
+            ModBlocks.XENIUM_ORE.asItem(),
+            ModBlocks.PLACEHOLDER.asItem()
+         }
+      );
    }
 
    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {

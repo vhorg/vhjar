@@ -1,7 +1,9 @@
 package iskallia.vault.core.world.generator.layout;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.RegistryKeyAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.TemplatePoolKey;
@@ -26,25 +28,23 @@ public class DIYVaultLayout extends VaultLayout {
    public static final SupplierKey<GridLayout> KEY = SupplierKey.of("diy_vault", GridLayout.class).with(Version.v1_0, DIYVaultLayout::new);
    public static final FieldRegistry FIELDS = ClassicVaultLayout.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<TemplatePoolKey> START_POOL = FieldKey.of("start_pool", TemplatePoolKey.class)
-      .with(Version.v1_0, Adapter.ofRegistryKey(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<TemplatePoolKey> COMMON_ROOM_POOL = FieldKey.of("common_room_pool", TemplatePoolKey.class)
-      .with(Version.v1_0, Adapter.ofRegistryKey(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<TemplatePoolKey> CHALLENGE_ROOM_POOL = FieldKey.of("challenge_room_pool", TemplatePoolKey.class)
-      .with(Version.v1_0, Adapter.ofRegistryKey(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<TemplatePoolKey> OMEGA_ROOM_POOL = FieldKey.of("omega_room_pool", TemplatePoolKey.class)
-      .with(Version.v1_0, Adapter.ofRegistryKey(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<TemplatePoolKey> TUNNEL_POOL = FieldKey.of("tunnel_pool", TemplatePoolKey.class)
-      .with(Version.v1_0, Adapter.ofRegistryKey(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
+      .with(Version.v1_0, RegistryKeyAdapter.of(() -> VaultRegistry.TEMPLATE_POOL), DISK.all())
       .register(FIELDS);
-   public static final FieldKey<Integer> TUNNEL_SPAN = FieldKey.of("tunnel_span", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all())
-      .register(FIELDS);
+   public static final FieldKey<Integer> TUNNEL_SPAN = FieldKey.of("tunnel_span", Integer.class).with(Version.v1_0, Adapters.INT, DISK.all()).register(FIELDS);
    public static final FieldKey<DIYRoomEntry.List> ROOM_ENTRIES = FieldKey.of("room_entries", DIYRoomEntry.List.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all(), DIYRoomEntry.List::new)
+      .with(Version.v1_0, CompoundAdapter.of(DIYRoomEntry.List::new), DISK.all())
       .register(FIELDS);
 
    protected DIYVaultLayout() {

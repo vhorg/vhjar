@@ -5,10 +5,12 @@ import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.item.InscriptionItem;
 import iskallia.vault.item.ItemShardPouch;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.util.MiscUtils;
+import iskallia.vault.util.SidedHelper;
 import iskallia.vault.world.data.PlayerBlackMarketData;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -78,6 +80,8 @@ public class ShardTradeTradeMessage {
                   if (resultStack.getItem() instanceof VaultGearItem gearItem) {
                      gearItem.setItemLevel(resultStack, sender);
                      VaultGearHelper.initializeGearRollType(resultStack, sender);
+                  } else if (resultStack.getItem() instanceof InscriptionItem) {
+                     resultStack.getOrCreateTag().putInt("level", SidedHelper.getVaultLevel(sender));
                   }
 
                   DataInitializationItem.doInitialize(resultStack);

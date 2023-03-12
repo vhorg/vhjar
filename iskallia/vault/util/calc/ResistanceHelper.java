@@ -15,6 +15,7 @@ import iskallia.vault.world.data.PlayerTalentsData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 public class ResistanceHelper {
    public static float getResistance(LivingEntity entity) {
@@ -33,6 +34,10 @@ public class ResistanceHelper {
          if (aura.getAura() instanceof ResistanceAuraConfig) {
             resistancePercent += ((ResistanceAuraConfig)aura.getAura()).getAdditionalResistance();
          }
+      }
+
+      if (entity instanceof Player player) {
+         boolean var10 = false;
       }
 
       if (entity instanceof ServerPlayer sPlayer) {

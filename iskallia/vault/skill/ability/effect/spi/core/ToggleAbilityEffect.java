@@ -17,6 +17,10 @@ public abstract class ToggleAbilityEffect extends InfiniteDurationEffect {
       this.abilityGroup = abilityGroup;
    }
 
+   public String getAbilityGroup() {
+      return this.abilityGroup;
+   }
+
    @ParametersAreNonnullByDefault
    public void removeAttributeModifiers(LivingEntity livingEntity, AttributeMap attributeMap, int amplifier) {
       super.removeAttributeModifiers(livingEntity, attributeMap, amplifier);

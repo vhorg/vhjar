@@ -7,22 +7,26 @@ import iskallia.vault.config.adapter.CompoundTagAdapter;
 import iskallia.vault.config.adapter.IdentifierAdapter;
 import iskallia.vault.config.adapter.ItemStackAdapter;
 import iskallia.vault.config.adapter.LootPoolAdapter;
-import iskallia.vault.config.adapter.LootRollAdapter;
 import iskallia.vault.config.adapter.PartialTileAdapter;
 import iskallia.vault.config.adapter.RegistryCodecAdapter;
 import iskallia.vault.config.adapter.TextColorAdapter;
 import iskallia.vault.config.adapter.VersionedKeyAdapter;
 import iskallia.vault.config.adapter.WeightedListAdapter;
 import iskallia.vault.config.gear.VaultGearTierConfig;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.VersionedKey;
+import iskallia.vault.core.vault.objective.elixir.ElixirTask;
 import iskallia.vault.core.vault.objective.scavenger.ScavengeTask;
 import iskallia.vault.core.world.loot.LootPool;
-import iskallia.vault.core.world.loot.LootRoll;
+import iskallia.vault.core.world.roll.FloatRoll;
+import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.CrystalModifiers;
 import iskallia.vault.item.crystal.layout.CrystalLayout;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
+import iskallia.vault.item.crystal.time.CrystalTime;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -52,13 +56,16 @@ public abstract class Config {
       .registerTypeAdapter(VaultModifiersConfig.ModifierTypeGroups.class, new VaultModifiersConfig.ModifierTypeGroups.Serializer())
       .registerTypeAdapter(CompoundTag.class, CompoundTagAdapter.INSTANCE)
       .registerTypeHierarchyAdapter(VersionedKey.class, VersionedKeyAdapter.INSTANCE)
-      .registerTypeHierarchyAdapter(CrystalLayout.class, CrystalLayout.Adapter.INSTANCE)
-      .registerTypeHierarchyAdapter(CrystalObjective.class, CrystalObjective.Adapter.INSTANCE)
-      .registerTypeHierarchyAdapter(CrystalTheme.class, CrystalTheme.Adapter.INSTANCE)
-      .registerTypeHierarchyAdapter(CrystalModifiers.class, CrystalModifiers.Adapter.INSTANCE)
+      .registerTypeHierarchyAdapter(CrystalTheme.class, CrystalData.THEME)
+      .registerTypeHierarchyAdapter(CrystalLayout.class, CrystalData.LAYOUT)
+      .registerTypeHierarchyAdapter(CrystalObjective.class, CrystalData.OBJECTIVE)
+      .registerTypeHierarchyAdapter(CrystalTime.class, CrystalData.TIME)
+      .registerTypeHierarchyAdapter(CrystalModifiers.class, CrystalModifiers.ADAPTER)
       .registerTypeHierarchyAdapter(ScavengeTask.class, ScavengeTask.Adapter.INSTANCE)
       .registerTypeHierarchyAdapter(LootPool.class, LootPoolAdapter.INSTANCE)
-      .registerTypeHierarchyAdapter(LootRoll.class, LootRollAdapter.INSTANCE)
+      .registerTypeHierarchyAdapter(IntRoll.class, Adapters.INT_ROLL)
+      .registerTypeHierarchyAdapter(FloatRoll.class, FloatRoll.Adapter.INSTANCE)
+      .registerTypeAdapter(ElixirTask.Config.class, ElixirTask.Config.Serializer.INSTANCE)
       .excludeFieldsWithoutExposeAnnotation()
       .enableComplexMapKeySerialization()
       .setPrettyPrinting()

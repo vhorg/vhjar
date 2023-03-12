@@ -4,8 +4,8 @@ import iskallia.vault.core.Version;
 import iskallia.vault.core.data.sync.context.DiskSyncContext;
 import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.core.net.IBitSerializable;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.item.crystal.data.serializable.IBitSerializable;
 
 public class VaultSnapshot implements IBitSerializable {
    private Version version;
@@ -23,7 +23,7 @@ public class VaultSnapshot implements IBitSerializable {
    }
 
    public VaultSnapshot(BitBuffer buffer) {
-      this.read(buffer);
+      this.readBits(buffer);
    }
 
    public Version getVersion() {
@@ -61,7 +61,7 @@ public class VaultSnapshot implements IBitSerializable {
    }
 
    @Override
-   public void write(BitBuffer buffer) {
+   public void writeBits(BitBuffer buffer) {
       buffer.writeEnum(this.version);
       buffer.writeBoolean(this.start != null);
       if (this.start != null) {
@@ -75,7 +75,7 @@ public class VaultSnapshot implements IBitSerializable {
    }
 
    @Override
-   public void read(BitBuffer buffer) {
+   public void readBits(BitBuffer buffer) {
       this.version = buffer.readEnum(Version.class);
       if (buffer.readBoolean()) {
          this.start = new Vault().read(buffer, new DiskSyncContext(this.version));

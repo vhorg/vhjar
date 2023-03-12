@@ -3,7 +3,8 @@ package iskallia.vault.core.vault.time.modifier;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataList;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.RegistryValueAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
@@ -16,7 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 
 public abstract class ClockModifier extends DataObject<ClockModifier> implements ISupplierKey<ClockModifier> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
-   public static final FieldKey<Void> CONSUMED = FieldKey.of("consumed", Void.class).with(Version.v1_0, Adapter.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> CONSUMED = FieldKey.of("consumed", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
 
    @Override
    public FieldRegistry getFields() {
@@ -36,7 +37,7 @@ public abstract class ClockModifier extends DataObject<ClockModifier> implements
 
    public static class List extends DataList<ClockModifier.List, ClockModifier> {
       public List() {
-         super(new ArrayList<>(), Adapter.ofRegistryValue(() -> VaultRegistry.CLOCK_MODIFIER, ISupplierKey::getKey, Supplier::get));
+         super(new ArrayList<>(), RegistryValueAdapter.of(() -> VaultRegistry.CLOCK_MODIFIER, ISupplierKey::getKey, Supplier::get));
       }
    }
 }

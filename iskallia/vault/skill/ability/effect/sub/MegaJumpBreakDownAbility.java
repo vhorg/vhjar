@@ -1,5 +1,9 @@
 package iskallia.vault.skill.ability.effect.sub;
 
+import iskallia.vault.gear.attribute.ability.special.MegaJumpVelocityModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.sub.MegaJumpBreakDownConfig;
@@ -23,21 +27,34 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility<MegaJumpBreakDownC
    }
 
    protected AbilityActionResult doAction(MegaJumpBreakDownConfig config, ServerPlayer player, boolean active) {
-      double magnitude = config.getHeight() * 0.15;
-      double addY = -Math.min(0.0, player.getDeltaMovement().y());
-      player.push(0.0, -(addY + magnitude), 0.0);
-      player.startFallFlying();
-      player.hurtMarked = true;
-      this.breakBlocks(config, player);
-      return AbilityActionResult.SUCCESS_COOLDOWN;
+      int height = config.getHeight();
+
+      for (ConfiguredModification<IntValueConfig, MegaJumpVelocityModification> mod : SpecialAbilityModification.getModifications(
+         player, MegaJumpVelocityModification.class
+      )) {
+         height = mod.modification().adjustHeightConfig(mod.config(), height);
+      }
+
+      if (height == 0) {
+         this.breakBlocks(height, player);
+         return AbilityActionResult.SUCCESS_COOLDOWN;
+      } else {
+         double magnitude = height * 0.15;
+         double addY = -Math.min(0.0, player.getDeltaMovement().y());
+         player.push(0.0, -(addY + magnitude), 0.0);
+         player.startFallFlying();
+         player.hurtMarked = true;
+         this.breakBlocks(height, player);
+         return AbilityActionResult.SUCCESS_COOLDOWN;
+      }
    }
 
-   private void breakBlocks(MegaJumpBreakDownConfig config, ServerPlayer player) {
+   private void breakBlocks(int height, ServerPlayer player) {
       ServerLevel sWorld = (ServerLevel)player.getCommandSenderWorld();
       AbilityTree abilityTree = PlayerAbilitiesData.get(sWorld).getAbilities(player);
       AbilityNode<?, ?> focusedAbilityNode = abilityTree.getSelectedAbility();
       if (focusedAbilityNode != null && focusedAbilityNode.getAbility() == this) {
-         BlockHelper.withEllipsoidPositions(player.blockPosition().below(3), 4.0F, config.getHeight(), 4.0F, offset -> {
+         BlockHelper.withEllipsoidPositions(player.blockPosition().below(3), 4.0F, Math.max(height, 5), 4.0F, offset -> {
             BlockState state = sWorld.getBlockState(offset);
             if (this.canBreakBlock(state)) {
                float hardness = state.getDestroySpeed(sWorld, offset);

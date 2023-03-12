@@ -21,11 +21,19 @@ public class RegistryAttributeGenerator<T extends IForgeRegistryEntry<T>> extend
    }
 
    public T generateRandomValue(RegistryAttributeGenerator.RegistryLookup object, Random random) {
-      return (T)this.registry.getValue(object.registryKey);
+      return this.getEntry(object);
+   }
+
+   public T getEntry(RegistryAttributeGenerator.RegistryLookup lookup) {
+      return (T)this.registry.getValue(lookup.getRegistryKey());
    }
 
    public static class RegistryLookup {
       @Expose
       private ResourceLocation registryKey;
+
+      public ResourceLocation getRegistryKey() {
+         return this.registryKey;
+      }
    }
 }

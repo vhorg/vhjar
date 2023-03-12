@@ -44,6 +44,8 @@ public class PointsResetConfig extends Config {
    private List<UUID> archetypePointsCurrentlyReset = new ArrayList<>();
    @Expose
    private List<UUID> knowledgePointsCurrentlyReset = new ArrayList<>();
+   @Expose
+   private List<String> removedTalents = new ArrayList<>();
 
    @Override
    public String getName() {
@@ -55,6 +57,10 @@ public class PointsResetConfig extends Config {
       this.resetSkillPoints = false;
       this.resetKnowledgePoints = false;
       this.resetArchetypePoints = false;
+      this.removedTalents.add(ModConfigs.TALENTS.REACH.getParentName());
+      this.removedTalents.add(ModConfigs.TALENTS.LUCKY_ALTAR.getParentName());
+      this.removedTalents.add(ModConfigs.TALENTS.BLACKSMITH.getParentName());
+      this.removedTalents.add(ModConfigs.TALENTS.BARTERING.getParentName());
    }
 
    public void enableResetSkillPoints() {
@@ -147,7 +153,12 @@ public class PointsResetConfig extends Config {
    @SubscribeEvent
    public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
-         removeAndRefundTalent(player, ModConfigs.TALENTS.REACH);
+         ModConfigs.PLAYER_RESETS.removedTalents.forEach(name -> {
+            TalentGroup<?> talent = ModConfigs.TALENTS.getByName(name);
+            if (talent != null) {
+               removeAndRefundTalent(player, talent);
+            }
+         });
          PointsResetConfig config = ModConfigs.PLAYER_RESETS;
          if (config.skillPointsCurrentlyReset.contains(player.getUUID())) {
             migrateSkillPointsData(player.getUUID());

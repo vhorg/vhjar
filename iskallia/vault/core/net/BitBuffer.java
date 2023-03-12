@@ -161,14 +161,19 @@ public abstract class BitBuffer {
    }
 
    public void writeIntSegmented(int value, int segment) {
-      int mask = (1 << segment) - 1;
+      long mask = (1L << segment) - 1L;
 
-      while (true) {
+      for (int shift = 0; shift < 32; shift += segment) {
          long bits = value & mask;
          value >>>= segment;
+         if (32 - shift <= segment) {
+            this.writeBits(bits, 32 - shift);
+            break;
+         }
+
          if (value == 0) {
             this.writeBits(1L << segment | bits, segment + 1);
-            return;
+            break;
          }
 
          this.writeBits(bits, segment + 1);
@@ -176,19 +181,25 @@ public abstract class BitBuffer {
    }
 
    public int readIntSegmented(int segment) {
-      int mask = 1 << segment;
+      long mask = 1L << segment;
       int value = 0;
-      int shift = 0;
 
-      while (true) {
+      for (int shift = 0; shift < 32; shift += segment) {
+         if (32 - shift <= segment) {
+            value = (int)(value | this.readBits(32 - shift) << shift);
+            break;
+         }
+
          long bits = this.readBits(segment + 1);
          if ((bits & mask) != 0L) {
-            return (int)(value | bits - mask << shift);
+            value = (int)(value | bits - mask << shift);
+            break;
          }
 
          value = (int)(value | bits << shift);
-         shift += segment;
       }
+
+      return value;
    }
 
    public void writeFloat(float value) {
@@ -239,15 +250,20 @@ public abstract class BitBuffer {
       return this.readLongBounded(max - min + 1L) + min;
    }
 
-   public BitBuffer writeLongSegmented(long value, int segment) {
+   public void writeLongSegmented(long value, int segment) {
       long mask = (1L << segment) - 1L;
 
-      while (true) {
+      for (int shift = 0; shift < 64; shift += segment) {
          long bits = value & mask;
          value >>>= segment;
+         if (64 - shift <= segment) {
+            this.writeBits(bits, 64 - shift);
+            break;
+         }
+
          if (value == 0L) {
             this.writeBits(1L << segment | bits, segment + 1);
-            return this;
+            break;
          }
 
          this.writeBits(bits, segment + 1);
@@ -257,17 +273,23 @@ public abstract class BitBuffer {
    public long readLongSegmented(int segment) {
       long mask = 1L << segment;
       long value = 0L;
-      int shift = 0;
 
-      while (true) {
+      for (int shift = 0; shift < 64; shift += segment) {
+         if (64 - shift <= segment) {
+            value |= this.readBits(64 - shift) << shift;
+            break;
+         }
+
          long bits = this.readBits(segment + 1);
          if ((bits & mask) != 0L) {
-            return value | bits - mask << shift;
+            value |= bits - mask << shift;
+            break;
          }
 
          value |= bits << shift;
-         shift += segment;
       }
+
+      return value;
    }
 
    public void writeDouble(double value) {

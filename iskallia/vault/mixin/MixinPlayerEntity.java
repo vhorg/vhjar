@@ -22,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,6 +33,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({Player.class})
 public abstract class MixinPlayerEntity extends LivingEntity implements BlockChanceHelper.PlayerBlockAnimationAccess {
+   private boolean actualOnGround;
+   @Shadow
+   @Final
+   private Inventory inventory;
    private static EntityDataAccessor<Boolean> PLAYER_BLOCKING;
    private int shieldActiveTimeout = 0;
 
@@ -43,6 +48,9 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
 
    @Shadow
    public abstract void handleEntityEvent(byte var1);
+
+   @Shadow
+   protected abstract void actuallyHurt(DamageSource var1, float var2);
 
    protected MixinPlayerEntity(EntityType<? extends LivingEntity> type, Level worldIn) {
       super(type, worldIn);

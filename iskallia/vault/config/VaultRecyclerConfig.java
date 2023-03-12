@@ -23,6 +23,8 @@ public class VaultRecyclerConfig extends Config {
    private VaultRecyclerConfig.RecyclerOutput trinketRecyclingOutput;
    @Expose
    private VaultRecyclerConfig.RecyclerOutput jewelRecyclingOutput;
+   @Expose
+   private VaultRecyclerConfig.RecyclerOutput inscriptionRecyclingOutput;
 
    @Override
    public String getName() {
@@ -43,6 +45,10 @@ public class VaultRecyclerConfig extends Config {
 
    public VaultRecyclerConfig.RecyclerOutput getJewelRecyclingOutput() {
       return this.jewelRecyclingOutput;
+   }
+
+   public VaultRecyclerConfig.RecyclerOutput getInscriptionRecyclingOutput() {
+      return this.inscriptionRecyclingOutput;
    }
 
    public float getAdditionalOutputRarityChance(VaultGearRarity rarity) {
@@ -70,6 +76,11 @@ public class VaultRecyclerConfig extends Config {
       );
       this.jewelRecyclingOutput = new VaultRecyclerConfig.RecyclerOutput(
          new ChanceItemStackEntry(new ItemStack(ModItems.GEMSTONE), 1, 1, 1.0F),
+         new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F),
+         new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F)
+      );
+      this.inscriptionRecyclingOutput = new VaultRecyclerConfig.RecyclerOutput(
+         new ChanceItemStackEntry(new ItemStack(ModItems.INSCRIPTION_PIECE), 1, 1, 1.0F),
          new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F),
          new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F)
       );

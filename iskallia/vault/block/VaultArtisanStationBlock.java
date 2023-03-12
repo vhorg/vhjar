@@ -23,7 +23,7 @@ import net.minecraftforge.network.NetworkHooks;
 
 public class VaultArtisanStationBlock extends FacedBlock implements EntityBlock {
    public VaultArtisanStationBlock() {
-      super(Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(0.5F).noOcclusion());
+      super(Properties.of(Material.STONE).strength(0.5F).noOcclusion());
    }
 
    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {

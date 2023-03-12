@@ -2,9 +2,9 @@ package iskallia.vault.core.data;
 
 import iskallia.vault.core.data.action.ListAction;
 import iskallia.vault.core.data.action.ListTracker;
-import iskallia.vault.core.data.adapter.Adapter;
 import iskallia.vault.core.data.sync.context.SyncContext;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.item.crystal.data.adapter.IBitAdapter;
 import java.util.AbstractList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,17 +12,17 @@ import java.util.function.Supplier;
 
 public class DataList<D extends DataList<D, E>, E> extends AbstractList<E> implements ICompound<D> {
    private final List<E> delegate;
-   private final Adapter<E> adapter;
+   private final IBitAdapter<E, SyncContext> adapter;
    private final Supplier<E> supplier;
    protected final ListTracker tracker = new ListTracker();
 
-   public DataList(List<E> delegate, Adapter<E> adapter, Supplier<E> supplier) {
+   public DataList(List<E> delegate, IBitAdapter<E, ?> adapter, Supplier<E> supplier) {
       this.delegate = delegate;
-      this.adapter = adapter;
+      this.adapter = (IBitAdapter<E, SyncContext>)adapter;
       this.supplier = supplier;
    }
 
-   public DataList(List<E> delegate, Adapter<E> adapter) {
+   public DataList(List<E> delegate, IBitAdapter<E, ?> adapter) {
       this(delegate, adapter, () -> null);
    }
 
@@ -71,7 +71,7 @@ public class DataList<D extends DataList<D, E>, E> extends AbstractList<E> imple
       buffer.writeIntSegmented(this.delegate.size(), 4);
 
       for (E value : this.delegate) {
-         this.adapter.writeValue(buffer, context, this.adapter.validate(value, context));
+         this.adapter.writeBits(value, buffer, context);
       }
 
       return (D)this;
@@ -82,7 +82,7 @@ public class DataList<D extends DataList<D, E>, E> extends AbstractList<E> imple
       this.delegate.clear();
 
       for (int i = 0; i < size; i++) {
-         this.add(this.adapter.readValue(buffer, context, this.supplier.get()));
+         this.add(this.adapter.readBits(buffer, context).orElseGet(this.supplier));
       }
 
       this.resetDiff();
@@ -111,7 +111,7 @@ public class DataList<D extends DataList<D, E>, E> extends AbstractList<E> imple
             }
 
             if (action.type != ListAction.Type.REMOVE) {
-               this.adapter.writeValue(packet, context, this.adapter.validate((E)action.value, context));
+               this.adapter.writeBits((E)action.value, packet, context);
             }
          }
 
@@ -136,7 +136,7 @@ public class DataList<D extends DataList<D, E>, E> extends AbstractList<E> imple
             }
 
             if (action.type != DataList.ActionType.REMOVE) {
-               action.value = this.adapter.readValue(packet, context, this.supplier.get());
+               action.value = this.adapter.readBits(packet, context).orElseGet(this.supplier);
             }
 
             action.apply(this);

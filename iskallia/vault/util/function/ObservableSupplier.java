@@ -1,5 +1,6 @@
 package iskallia.vault.util.function;
 
+import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -12,6 +13,10 @@ public class ObservableSupplier<T> implements Supplier<T> {
 
    public static <T> ObservableSupplier<T> empty() {
       return (ObservableSupplier<T>)EMPTY;
+   }
+
+   public static <T> ObservableSupplier<T> ofIdentity(Supplier<T> supplier) {
+      return new ObservableSupplier<>(supplier, Objects::equals);
    }
 
    public static <T> ObservableSupplier<T> of(Supplier<T> supplier, BiPredicate<T, T> equivalenceFunction) {

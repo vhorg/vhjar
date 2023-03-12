@@ -4,9 +4,13 @@ import com.google.common.collect.Sets;
 import iskallia.vault.aura.AuraManager;
 import iskallia.vault.aura.type.EffectAuraConfig;
 import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.gear.attribute.ability.special.TankImmunityModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.NoOpConfig;
 import iskallia.vault.gear.attribute.type.EffectAvoidanceSingleMerger;
 import iskallia.vault.init.ModEtchings;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.skill.ability.effect.TankAbility;
 import iskallia.vault.skill.talent.type.EffectTalent;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -107,9 +111,14 @@ public class GrantedEffectHelper {
          return false;
       } else {
          AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
-         return snapshot.hasEtching(ModEtchings.DIVINITY) && effect.getCategory() == MobEffectCategory.HARMFUL
-            ? true
-            : snapshot.getImmunities().contains(effect);
+         if (snapshot.hasEtching(ModEtchings.DIVINITY) && effect.getCategory() == MobEffectCategory.HARMFUL) {
+            return true;
+         } else {
+            return TankAbility.hasTankEffectActive(entity)
+                  && !SpecialAbilityModification.<NoOpConfig, TankImmunityModification>getModifications(entity, TankImmunityModification.class).isEmpty()
+               ? true
+               : snapshot.getImmunities().contains(effect);
+         }
       }
    }
 
@@ -119,7 +128,9 @@ public class GrantedEffectHelper {
       } else {
          AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
          Set<MobEffect> immunities = new HashSet<>(snapshot.getImmunities());
-         if (snapshot.hasEtching(ModEtchings.DIVINITY)) {
+         if (snapshot.hasEtching(ModEtchings.DIVINITY)
+            || TankAbility.hasTankEffectActive(entity)
+               && !SpecialAbilityModification.<NoOpConfig, TankImmunityModification>getModifications(entity, TankImmunityModification.class).isEmpty()) {
             ForgeRegistries.MOB_EFFECTS.getValues().stream().filter(e -> e.getCategory() == MobEffectCategory.HARMFUL).forEach(immunities::add);
          }
 

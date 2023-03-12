@@ -75,7 +75,6 @@ import iskallia.vault.world.vault.logic.objective.raid.ActiveRaid;
 import iskallia.vault.world.vault.logic.objective.raid.RaidChallengeObjective;
 import iskallia.vault.world.vault.logic.task.VaultTask;
 import iskallia.vault.world.vault.modifier.VaultModifiers;
-import iskallia.vault.world.vault.modifier.VaultModifiersGenerator;
 import iskallia.vault.world.vault.modifier.modifier.MobAttributeModifier;
 import iskallia.vault.world.vault.modifier.modifier.MobFrenzyModifier;
 import iskallia.vault.world.vault.modifier.modifier.PlayerNoExitModifier;
@@ -189,9 +188,7 @@ public class VaultRaid implements INBTSerializable<CompoundTag> {
    public static final VAttribute<Direction, EnumAttribute<Direction>> START_FACING = new VAttribute<>(
       VaultMod.id("start_facing"), () -> new EnumAttribute(Direction.class)
    );
-   public static final VAttribute<CrystalData, CompoundAttribute<CrystalData>> CRYSTAL_DATA = new VAttribute<>(
-      VaultMod.id("crystal_data"), () -> CompoundAttribute.of(CrystalData::new)
-   );
+   public static final VAttribute<CrystalData, CompoundAttribute<CrystalData>> CRYSTAL_DATA = new VAttribute<>(VaultMod.id("crystal_data"), () -> null);
    public static final VAttribute<Boolean, BooleanAttribute> IS_RAFFLE = new VAttribute<>(VaultMod.id("is_raffle"), BooleanAttribute::new);
    public static final VAttribute<Boolean, BooleanAttribute> COW_VAULT = new VAttribute<>(VaultMod.id("cow"), BooleanAttribute::new);
    public static final VAttribute<UUID, UUIDAttribute> HOST = new VAttribute<>(VaultMod.id("host"), UUIDAttribute::new);
@@ -539,37 +536,12 @@ public class VaultRaid implements INBTSerializable<CompoundTag> {
          player.getBehaviours().add(new VaultBehaviour(IS_FINISHED.negate(), TICK_SAND_EVENT));
       }
    });
-   public static final VaultTask INIT_COW_VAULT = VaultTask.register(VaultMod.id("init_cow_vault"), (vault, player, world) -> {
-      if (!vault.getProperties().exists(COW_VAULT)) {
-         CrystalData crystalData = vault.getProperties().getBase(CRYSTAL_DATA).orElse(CrystalData.EMPTY);
-         if (crystalData.getType().canBeCowVault() && crystalData.getModifiers().isEmpty() && !vault.getProperties().getBaseOrDefault(IS_RAFFLE, false)) {
-            boolean isCowVault = VaultCowOverrides.forceSpecialVault;
-            vault.getProperties().create(COW_VAULT, isCowVault);
-            if (isCowVault) {
-               VaultCowOverrides.setupVault(vault);
-               vault.getModifiers().setInitialized();
-               vault.getAllObjectives().clear();
-               VaultObjective objective = new SummonAndKillBossObjective(VaultMod.id("summon_and_kill_boss"));
-               vault.getAllObjectives().add(objective.thenComplete(VaultRaid.LEVEL_UP_GEAR).thenComplete(VaultRaid.VICTORY_SCENE));
-            }
-         } else {
-            vault.getProperties().create(COW_VAULT, false);
-         }
-      }
-
-      VaultCowOverrides.forceSpecialVault = false;
-   });
+   public static final VaultTask INIT_COW_VAULT = VaultTask.register(
+      VaultMod.id("init_cow_vault"), (vault, player, world) -> VaultCowOverrides.forceSpecialVault = false
+   );
    public static final VaultTask INIT_GLOBAL_MODIFIERS = VaultTask.register(VaultMod.id("init_global_modifiers"), (vault, player, world) -> {
       Random rand = world.getRandom();
       if (!vault.getModifiers().isInitialized()) {
-         CrystalData crystalData = vault.getProperties().getBase(CRYSTAL_DATA).orElse(CrystalData.EMPTY);
-         crystalData.apply(vault);
-         if (!crystalData.preventsRandomModifiers()) {
-            VaultModifiers vaultModifiers = vault.getModifiers();
-            VaultModifiersGenerator.generateGlobal(vault, rand).forEach(vaultModifiers::addPermanentModifier);
-         }
-
-         vault.getModifiers().setInitialized();
       }
 
       vault.getModifiers().apply(vault, player, world, rand);

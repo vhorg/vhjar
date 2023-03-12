@@ -97,7 +97,7 @@ public abstract class AbstractVeinMinerAbility<C extends VeinMinerConfig> extend
          }
 
          AbstractVeinMinerAbility.IItemDamageHandler damageHandler = getDamageHandler(heldItem);
-         int limit = config.getBlockLimit();
+         int limit = config.getBlockLimit(player);
          Set<BlockPos> traversedBlocks = new HashSet<>();
          Queue<BlockPos> positionQueue = new LinkedList<>();
          positionQueue.add(pos);

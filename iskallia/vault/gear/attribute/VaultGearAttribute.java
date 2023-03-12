@@ -2,7 +2,7 @@ package iskallia.vault.gear.attribute;
 
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
-import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
@@ -13,20 +13,20 @@ public class VaultGearAttribute<T> extends ForgeRegistryEntry<VaultGearAttribute
    private final VaultGearAttributeType<T> type;
    private final ConfigurableAttributeGenerator<T, ?> generator;
    private final VaultGearModifierReader<T> reader;
-   private final VaultGearAttributeTypeMerger<T, T> identityMerger;
+   private final VaultGearAttributeComparator<T> attributeComparator;
 
    public VaultGearAttribute(
       ResourceLocation name,
       VaultGearAttributeType<T> type,
       ConfigurableAttributeGenerator<T, ?> generator,
       VaultGearModifierReader<T> reader,
-      @Nullable VaultGearAttributeTypeMerger<T, T> identityMerger
+      @Nullable VaultGearAttributeComparator<T> attributeComparator
    ) {
       this.setRegistryName(name);
       this.generator = generator;
       this.reader = reader;
       this.type = type;
-      this.identityMerger = identityMerger;
+      this.attributeComparator = attributeComparator;
    }
 
    public VaultGearAttribute(
@@ -48,8 +48,8 @@ public class VaultGearAttribute<T> extends ForgeRegistryEntry<VaultGearAttribute
    }
 
    @Nullable
-   public VaultGearAttributeTypeMerger<T, T> getIdentityMerger() {
-      return this.identityMerger;
+   public VaultGearAttributeComparator<T> getAttributeComparator() {
+      return this.attributeComparator;
    }
 
    public Component getValueDisplay(T value) {

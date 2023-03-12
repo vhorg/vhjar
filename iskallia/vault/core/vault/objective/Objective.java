@@ -5,7 +5,9 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataList;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.RegistryValueAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
@@ -23,10 +25,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public abstract class Objective extends DataObject<Objective> implements ISupplierKey<Objective> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<Integer> ID = FieldKey.of("id", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Objective.ObjList> CHILDREN = FieldKey.of("children", Objective.ObjList.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Objective.ObjList::new)
+      .with(Version.v1_0, CompoundAdapter.of(Objective.ObjList::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public Objective() {
@@ -56,7 +58,7 @@ public abstract class Objective extends DataObject<Objective> implements ISuppli
    }
 
    @OnlyIn(Dist.CLIENT)
-   public abstract boolean render(PoseStack var1, Window var2, float var3, Player var4);
+   public abstract boolean render(Vault var1, PoseStack var2, Window var3, float var4, Player var5);
 
    public Objective add(Objective child) {
       this.get(CHILDREN).add(child);
@@ -67,13 +69,13 @@ public abstract class Objective extends DataObject<Objective> implements ISuppli
 
    public static class IdList extends DataList<Objective.IdList, Integer> {
       public IdList() {
-         super(new ArrayList<>(), Adapter.ofSegmentedInt(3));
+         super(new ArrayList<>(), Adapters.INT_SEGMENTED_3);
       }
    }
 
    public static class ObjList extends DataList<Objective.ObjList, Objective> {
       public ObjList() {
-         super(new ArrayList<>(), Adapter.ofRegistryValue(() -> VaultRegistry.OBJECTIVE, ISupplierKey::getKey, Supplier::get));
+         super(new ArrayList<>(), RegistryValueAdapter.of(() -> VaultRegistry.OBJECTIVE, ISupplierKey::getKey, Supplier::get));
       }
    }
 }

@@ -6,6 +6,7 @@ import iskallia.vault.core.event.Event;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.util.VaultRarity;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -103,6 +104,7 @@ public class ChestGenerationEvent extends Event<ChestGenerationEvent, ChestGener
          return this.loot;
       }
 
+      @Nullable
       public VaultRarity getRarity() {
          return this.rarity;
       }

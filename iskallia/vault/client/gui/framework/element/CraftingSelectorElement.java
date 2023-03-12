@@ -5,6 +5,7 @@ import iskallia.vault.client.atlas.TextureAtlasRegion;
 import iskallia.vault.client.gui.framework.render.TooltipDirection;
 import iskallia.vault.client.gui.framework.render.spi.IElementRenderer;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
+import iskallia.vault.client.gui.overlay.VaultBarOverlay;
 import iskallia.vault.gear.crafting.recipe.VaultForgeRecipe;
 import iskallia.vault.util.function.ObservableSupplier;
 import java.util.ArrayList;
@@ -32,7 +33,19 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
       BiConsumer<VaultForgeRecipe, Boolean> onRecipeSelect,
       Function<List<ItemStack>, List<ItemStack>> inputItemCheck
    ) {
-      super(spatial, slotColumns, new CraftingSelectorElement.CraftingSelector(recipes, onRecipeSelect, inputItemCheck));
+      this(spatial, slotColumns, recipes, discoveredTrinkets, onRecipeSelect, inputItemCheck, () -> VaultBarOverlay.vaultLevel);
+   }
+
+   public CraftingSelectorElement(
+      ISpatial spatial,
+      int slotColumns,
+      List<VaultForgeRecipe> recipes,
+      ObservableSupplier<Set<ResourceLocation>> discoveredTrinkets,
+      BiConsumer<VaultForgeRecipe, Boolean> onRecipeSelect,
+      Function<List<ItemStack>, List<ItemStack>> inputItemCheck,
+      Supplier<Integer> craftingLevelSupplier
+   ) {
+      super(spatial, slotColumns, new CraftingSelectorElement.CraftingSelector(recipes, onRecipeSelect, inputItemCheck, craftingLevelSupplier));
       this.discoveredTrinkets = discoveredTrinkets;
       this.selectorModel.onSlotSelect(this::changeSelection);
    }
@@ -75,16 +88,23 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
    public static class CraftingEntry extends ScrollableItemStackSelectorElement.ItemSelectorEntry {
       private final VaultForgeRecipe recipe;
       private final Function<List<ItemStack>, List<ItemStack>> inputItemCheck;
+      private final Supplier<Integer> craftingLevelSupplier;
 
-      public CraftingEntry(VaultForgeRecipe recipe, Function<List<ItemStack>, List<ItemStack>> inputItemCheck) {
-         super(recipe.getDisplayOutput(), Minecraft.getInstance().player == null || !recipe.canCraft(Minecraft.getInstance().player));
+      public CraftingEntry(VaultForgeRecipe recipe, Function<List<ItemStack>, List<ItemStack>> inputItemCheck, Supplier<Integer> craftingLevelSupplier) {
+         super(recipe.getDisplayOutput(craftingLevelSupplier.get()), Minecraft.getInstance().player == null || !recipe.canCraft(Minecraft.getInstance().player));
          this.recipe = recipe;
          this.inputItemCheck = inputItemCheck;
+         this.craftingLevelSupplier = craftingLevelSupplier;
       }
 
       public boolean canCraft() {
          List<ItemStack> inputs = this.recipe.getInputs();
          return this.inputItemCheck.apply(inputs).isEmpty();
+      }
+
+      @Override
+      public ItemStack getDisplayStack() {
+         return this.recipe.getDisplayOutput(this.craftingLevelSupplier.get());
       }
 
       @Override
@@ -100,7 +120,9 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
                List<ItemStack> inputs = this.recipe.getInputs();
                List<ItemStack> missingInputs = this.inputItemCheck.apply(inputs);
                List<Component> text = new ArrayList<>();
-               text.add(new TextComponent("Craft: ").append(this.recipe.getDisplayOutput().getHoverName()));
+               ItemStack result = this.recipe.getDisplayOutput(this.craftingLevelSupplier.get());
+               text.add(new TextComponent("Craft: ").append(result.getHoverName()));
+               this.recipe.addCraftingDisplayTooltip(result, text);
 
                for (ItemStack in : this.recipe.getInputs()) {
                   ChatFormatting color = ChatFormatting.GREEN;
@@ -123,18 +145,23 @@ public class CraftingSelectorElement<E extends CraftingSelectorElement<E>> exten
       private final List<VaultForgeRecipe> recipes;
       private final BiConsumer<VaultForgeRecipe, Boolean> onRecipeSelect;
       private final Function<List<ItemStack>, List<ItemStack>> inputItemCheck;
+      private final Supplier<Integer> craftingLevelSupplier;
 
       public CraftingSelector(
-         List<VaultForgeRecipe> recipes, BiConsumer<VaultForgeRecipe, Boolean> onRecipeSelect, Function<List<ItemStack>, List<ItemStack>> inputItemCheck
+         List<VaultForgeRecipe> recipes,
+         BiConsumer<VaultForgeRecipe, Boolean> onRecipeSelect,
+         Function<List<ItemStack>, List<ItemStack>> inputItemCheck,
+         Supplier<Integer> craftingLevelSupplier
       ) {
          this.recipes = recipes;
          this.onRecipeSelect = onRecipeSelect;
          this.inputItemCheck = inputItemCheck;
+         this.craftingLevelSupplier = craftingLevelSupplier;
       }
 
       @Override
       public List<CraftingSelectorElement.CraftingEntry> getEntries() {
-         return this.recipes.stream().map(entry -> new CraftingSelectorElement.CraftingEntry(entry, this.inputItemCheck)).toList();
+         return this.recipes.stream().map(entry -> new CraftingSelectorElement.CraftingEntry(entry, this.inputItemCheck, this.craftingLevelSupplier)).toList();
       }
 
       public void onSelect(FakeItemSlotElement<?> slot, CraftingSelectorElement.CraftingEntry entry) {

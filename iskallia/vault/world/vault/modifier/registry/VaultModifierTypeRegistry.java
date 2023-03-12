@@ -6,8 +6,10 @@ import iskallia.vault.world.vault.modifier.modifier.ChanceCatalystModifier;
 import iskallia.vault.world.vault.modifier.modifier.ChanceChestTrapModifier;
 import iskallia.vault.world.vault.modifier.modifier.ChanceSoulShardModifier;
 import iskallia.vault.world.vault.modifier.modifier.DecoratorAddModifier;
+import iskallia.vault.world.vault.modifier.modifier.DecoratorCascadeModifier;
 import iskallia.vault.world.vault.modifier.modifier.ExperienceModifier;
 import iskallia.vault.world.vault.modifier.modifier.GameControlsModifier;
+import iskallia.vault.world.vault.modifier.modifier.InlinePoolModifier;
 import iskallia.vault.world.vault.modifier.modifier.LootItemQuantityModifier;
 import iskallia.vault.world.vault.modifier.modifier.LootItemRarityModifier;
 import iskallia.vault.world.vault.modifier.modifier.MobAttributeModifier;
@@ -125,6 +127,14 @@ public final class VaultModifierTypeRegistry {
          this.put(
             VaultMod.id("modifier_type/experience"),
             VaultModifierType.of(ExperienceModifier.class, ExperienceModifier.Properties.class, ExperienceModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/inline_pool"),
+            VaultModifierType.of(InlinePoolModifier.class, InlinePoolModifier.Properties.class, InlinePoolModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/decorator_cascade"),
+            VaultModifierType.of(DecoratorCascadeModifier.class, DecoratorCascadeModifier.Properties.class, DecoratorCascadeModifier::new)
          );
       }
    };

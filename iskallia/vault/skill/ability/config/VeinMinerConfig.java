@@ -1,7 +1,12 @@
 package iskallia.vault.skill.ability.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.gear.attribute.ability.special.VeinMinerAdditionalBlocksModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
+import net.minecraft.world.entity.player.Player;
 
 public class VeinMinerConfig extends AbstractAbilityConfig {
    @Expose
@@ -12,7 +17,19 @@ public class VeinMinerConfig extends AbstractAbilityConfig {
       this.blockLimit = blockLimit;
    }
 
-   public int getBlockLimit() {
+   public int getUnmodifiedBlockLimit() {
       return this.blockLimit;
+   }
+
+   public int getBlockLimit(Player player) {
+      int blocks = this.getUnmodifiedBlockLimit();
+
+      for (ConfiguredModification<IntValueConfig, VeinMinerAdditionalBlocksModification> mod : SpecialAbilityModification.getModifications(
+         player, VeinMinerAdditionalBlocksModification.class
+      )) {
+         blocks = mod.modification().adjustBlockCount(mod.config(), blocks);
+      }
+
+      return blocks;
    }
 }

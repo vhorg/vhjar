@@ -1,9 +1,10 @@
 package iskallia.vault.item.gear;
 
 import iskallia.vault.config.TrinketConfig;
-import iskallia.vault.gear.GearRollHelper;
+import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.gear.item.IdentifiableItem;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.init.ModConfigs;
@@ -47,7 +48,7 @@ import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
-public class TrinketItem extends BasicItem implements ICurioItem, DataTransferItem {
+public class TrinketItem extends BasicItem implements ICurioItem, DataTransferItem, RecyclableItem, IdentifiableItem {
    public TrinketItem(ResourceLocation id) {
       super(id, new Properties().tab(ModItems.GEAR_GROUP).stacksTo(1));
    }
@@ -94,13 +95,11 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    }
 
    public static Optional<TrinketEffect<?>> getTrinket(ItemStack stack) {
-      if (stack.isEmpty() || !(stack.getItem() instanceof TrinketItem)) {
-         return Optional.empty();
-      } else if (!hasUsesLeft(stack)) {
-         return Optional.empty();
-      } else {
+      if (!stack.isEmpty() && stack.getItem() instanceof TrinketItem) {
          AttributeGearData data = AttributeGearData.read(stack);
          return data.getFirstValue(ModGearAttributes.TRINKET_EFFECT);
+      } else {
+         return Optional.empty();
       }
    }
 
@@ -220,19 +219,13 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
 
    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
       ItemStack stack = player.getItemInHand(hand);
+      InteractionResultHolder<ItemStack> defaultAction = super.use(world, player, hand);
       if (world.isClientSide()) {
-         return InteractionResultHolder.pass(stack);
+         return defaultAction;
+      } else if (VHSmpUtil.isArenaWorld(world)) {
+         return defaultAction;
       } else {
-         if (!ServerVaults.isVaultWorld(world) && !VHSmpUtil.isArenaWorld(world)) {
-            AttributeGearData data = AttributeGearData.read(stack);
-            if (data.getFirstValue(ModGearAttributes.STATE).orElse(VaultGearState.UNIDENTIFIED) == VaultGearState.UNIDENTIFIED) {
-               data.updateAttribute(ModGearAttributes.STATE, VaultGearState.ROLLING);
-               data.write(stack);
-               return InteractionResultHolder.fail(stack);
-            }
-         }
-
-         return InteractionResultHolder.pass(stack);
+         return this.tryStartIdentification(player, stack) ? InteractionResultHolder.fail(stack) : defaultAction;
       }
    }
 
@@ -248,32 +241,37 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
             }
          }
 
-         if (AttributeGearData.<AttributeGearData>read(stack).getFirstValue(ModGearAttributes.STATE).orElse(VaultGearState.UNIDENTIFIED)
-            == VaultGearState.ROLLING) {
-            GearRollHelper.tickToll(stack, sPlayer, rollStack -> {
-               AttributeGearData data = AttributeGearData.read(stack);
-               TrinketEffect<?> randomTrinket = ModConfigs.TRINKET.getRandomTrinketSet();
-               if (randomTrinket != null) {
-                  data.updateAttribute(ModGearAttributes.TRINKET_EFFECT, randomTrinket);
-               }
+         this.inventoryIdentificationTick(sPlayer, stack);
+      }
+   }
 
-               data.write(rollStack);
-            }, finishStack -> {
-               AttributeGearData data = AttributeGearData.read(stack);
-               TrinketEffect<?> randomTrinket = ModConfigs.TRINKET.getRandomTrinketSet();
-               if (randomTrinket != null) {
-                  data.updateAttribute(ModGearAttributes.TRINKET_EFFECT, randomTrinket);
-                  setUses(stack, randomTrinket.getTrinketConfig().getRandomUses());
-                  data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
-               } else {
-                  data.updateAttribute(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
-               }
+   @Override
+   public void tickRoll(ItemStack stack) {
+      AttributeGearData data = AttributeGearData.read(stack);
+      TrinketEffect<?> randomTrinket = ModConfigs.TRINKET.getRandomTrinketSet();
+      if (randomTrinket != null) {
+         data.updateAttribute(ModGearAttributes.TRINKET_EFFECT, randomTrinket);
+      }
 
-               data.write(finishStack);
-               DiscoveredTrinketsData trinketData = DiscoveredTrinketsData.get(sPlayer.getLevel().getServer());
-               trinketData.discoverTrinketAndBroadcast(finishStack, sPlayer);
-            });
-         }
+      data.write(stack);
+   }
+
+   @Override
+   public void tickFinishRoll(ItemStack stack, Player player) {
+      AttributeGearData data = AttributeGearData.read(stack);
+      Optional<TrinketEffect<?>> optTrinketEffect = data.getFirstValue(ModGearAttributes.TRINKET_EFFECT);
+      if (optTrinketEffect.isPresent()) {
+         TrinketEffect<?> trinketEffect = optTrinketEffect.get();
+         setUses(stack, trinketEffect.getTrinketConfig().getRandomUses());
+         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
+      } else {
+         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
+      }
+
+      data.write(stack);
+      if (player instanceof ServerPlayer sPlayer) {
+         DiscoveredTrinketsData trinketData = DiscoveredTrinketsData.get(sPlayer.getLevel().getServer());
+         trinketData.discoverTrinketAndBroadcast(stack, sPlayer);
       }
    }
 
@@ -321,5 +319,29 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
 
    public boolean canUnequip(SlotContext slotContext, ItemStack stack) {
       return slotContext.entity() instanceof Player player && ServerVaults.isInVault(player) ? false : super.canUnequip(slotContext, stack);
+   }
+
+   @Override
+   public Optional<UUID> getUuid(ItemStack stack) {
+      return AttributeGearData.readUUID(stack);
+   }
+
+   @Override
+   public boolean isValidInput(ItemStack input) {
+      return !input.isEmpty() && AttributeGearData.hasData(input);
+   }
+
+   @Override
+   public VaultRecyclerConfig.RecyclerOutput getOutput(ItemStack input) {
+      return ModConfigs.VAULT_RECYCLER.getTrinketRecyclingOutput();
+   }
+
+   @Override
+   public float getResultPercentage(ItemStack input) {
+      if (input.isEmpty()) {
+         return 0.0F;
+      } else {
+         return !isIdentified(input) ? 1.0F : 1.0F - (float)getUsedVaults(input).size() / getUses(input);
+      }
    }
 }

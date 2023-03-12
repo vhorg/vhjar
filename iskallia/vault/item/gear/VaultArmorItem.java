@@ -1,6 +1,7 @@
 package iskallia.vault.item.gear;
 
 import com.google.common.collect.Multimap;
+import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearRarity;
@@ -13,10 +14,12 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.renderer.VaultArmorRenderProperties;
 import iskallia.vault.gear.tooltip.GearTooltip;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MiscUtils;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -105,6 +108,12 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGearItem {
       EquipmentSlot intendedSlot = this.getIntendedSlot(stack);
       Set<ResourceLocation> possibleIds = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getPossibleRolls(this, rarity, intendedSlot);
       return MiscUtils.getRandomEntry(possibleIds, random);
+   }
+
+   @Override
+   public Optional<? extends DynamicModel<?>> resolveDynamicModel(ItemStack stack, ResourceLocation key) {
+      EquipmentSlot intended = this.getIntendedSlot(stack);
+      return intended == null ? Optional.empty() : ModDynamicModels.Armor.MODEL_REGISTRY.get(key).flatMap(model -> model.getPiece(intended));
    }
 
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {

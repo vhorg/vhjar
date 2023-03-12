@@ -2,7 +2,8 @@ package iskallia.vault.core.vault.player;
 
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.RegistryValueAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
@@ -21,10 +22,10 @@ import java.util.function.Supplier;
 public class Listeners extends DataObject<Listeners> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    protected static FieldKey<Listener.Map> MAP = FieldKey.of("map", Listener.Map.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Listener.Map::new)
+      .with(Version.v1_0, CompoundAdapter.of(Listener.Map::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static FieldKey<ListenersLogic> LOGIC = FieldKey.of("logic", ListenersLogic.class)
-      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.LISTENERS_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, RegistryValueAdapter.of(() -> VaultRegistry.LISTENERS_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public Listeners() {

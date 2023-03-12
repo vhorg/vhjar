@@ -1,7 +1,7 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +11,7 @@ public class EternalConfig extends Config {
    @Expose
    private int expPerLevel;
    @Expose
-   private final Map<String, RangeEntry> foodExpRanges = new HashMap<>();
+   private final Map<String, IntRangeEntry> foodExpRanges = new HashMap<>();
 
    @Override
    public String getName() {
@@ -23,7 +23,7 @@ public class EternalConfig extends Config {
    }
 
    public Optional<Integer> getFoodExp(Item foodItem) {
-      return Optional.ofNullable(this.foodExpRanges.get(foodItem.getRegistryName().toString())).map(RangeEntry::getRandom);
+      return Optional.ofNullable(this.foodExpRanges.get(foodItem.getRegistryName().toString())).map(IntRangeEntry::getRandom);
    }
 
    @Override

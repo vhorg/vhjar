@@ -49,11 +49,11 @@ public class CompletionTaskElement extends AbstractTaskElement<CompletionTask> {
 
    @Override
    protected MutableComponent getTargetDisplayName() {
-      return (MutableComponent)BountyScreen.OBJECTIVE_NAME.get(this.getTask().getProperties().getId());
+      return (MutableComponent)BountyScreen.OBJECTIVE_NAME.getOrDefault(this.getTask().getProperties().getId(), new TextComponent("Empty - Report to Dev"));
    }
 
    @Override
    protected List<Component> getExtendedDisplay() {
-      return List.of((Component)BountyScreen.OBJECTIVE_NAME.get(this.getTask().getProperties().getId()));
+      return List.of((Component)BountyScreen.OBJECTIVE_NAME.getOrDefault(this.getTask().getProperties().getId(), new TextComponent("Empty - Report to Dev")));
    }
 }

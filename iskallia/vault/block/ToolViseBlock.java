@@ -39,7 +39,7 @@ public class ToolViseBlock extends Block implements EntityBlock {
    public static final EnumProperty<Axis> AXIS = BlockStateProperties.AXIS;
 
    public ToolViseBlock() {
-      super(Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(0.5F).noOcclusion());
+      super(Properties.of(Material.METAL).strength(0.5F).noOcclusion());
    }
 
    protected void createBlockStateDefinition(Builder<Block, BlockState> pBuilder) {

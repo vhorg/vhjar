@@ -9,6 +9,7 @@ import iskallia.vault.core.event.common.ChestGenerationEvent;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.VaultRegistry;
+import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.core.world.loot.generator.TieredLootTableGenerator;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
@@ -48,6 +49,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
    private boolean generated;
    private int generatedStacksCount;
    private int size;
+   private boolean isHidden;
    private BlockState renderState;
    private int ticksSinceSync;
 
@@ -197,18 +199,21 @@ public class VaultChestTileEntity extends ChestBlockEntity {
    private void generateLootTable(Version version, @Nullable Player player, List<ItemStack> loot, RandomSource random) {
       float quantity = ItemQuantityHelper.getItemQuantity(player);
       float rarity = ItemRarityHelper.getItemRarity(player);
-      if (this.getBlockState().is(ModBlocks.TREASURE_CHEST) || this.getBlockState().is(ModBlocks.TREASURE_CHEST_PLACEABLE)) {
-         quantity = 0.0F;
-         rarity = 0.0F;
-      }
-
       LootTableKey key = VaultRegistry.LOOT_TABLE.getKey(this.lootTable);
       if (key != null) {
-         TieredLootTableGenerator generator = new TieredLootTableGenerator(version, key, rarity, quantity);
-         generator.source = player;
-         generator.generate(random);
-         this.rarity = ModConfigs.VAULT_CHEST.getRarity(generator.getCDF());
-         generator.getItems().forEachRemaining(loot::add);
+         if (this.getBlockState().is(ModBlocks.TREASURE_CHEST)) {
+            LootTableGenerator generator = new LootTableGenerator(version, key, 0.0F);
+            generator.source = player;
+            generator.generate(random);
+            this.rarity = VaultRarity.COMMON;
+            generator.getItems().forEachRemaining(loot::add);
+         } else {
+            TieredLootTableGenerator generator = new TieredLootTableGenerator(version, key, rarity, quantity);
+            generator.source = player;
+            generator.generate(random);
+            this.rarity = ModConfigs.VAULT_CHEST.getRarity(generator.getCDF());
+            generator.getItems().forEachRemaining(loot::add);
+         }
       } else {
          this.rarity = VaultRarity.COMMON;
       }
@@ -318,6 +323,18 @@ public class VaultChestTileEntity extends ChestBlockEntity {
       return this.renderState != null ? this.renderState : super.getBlockState();
    }
 
+   public boolean isHidden() {
+      return this.isHidden;
+   }
+
+   public void setHidden(boolean hidden) {
+      boolean change = this.isHidden != hidden;
+      this.isHidden = hidden;
+      if (change) {
+         this.setChanged();
+      }
+   }
+
    protected boolean tryLoadLootTable(CompoundTag nbt) {
       super.tryLoadLootTable(nbt);
       return false;
@@ -336,6 +353,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
 
       this.generated = nbt.getBoolean("Generated");
       this.generatedStacksCount = nbt.getInt("GeneratedStacksCount");
+      this.isHidden = nbt.getBoolean("hidden");
    }
 
    protected void saveAdditional(@NotNull CompoundTag nbt) {
@@ -346,6 +364,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
 
       nbt.putBoolean("Generated", this.generated);
       nbt.putInt("GeneratedStacksCount", this.generatedStacksCount);
+      nbt.putBoolean("hidden", this.isHidden);
    }
 
    public Component getDisplayName() {

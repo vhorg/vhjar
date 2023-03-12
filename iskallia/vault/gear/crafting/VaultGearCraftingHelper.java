@@ -12,7 +12,6 @@ import iskallia.vault.skill.talent.TalentNode;
 import iskallia.vault.skill.talent.type.BlacksmithTalent;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.PlayerProficiencyData;
-import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.Random;
 import javax.annotation.Nonnull;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,10 +41,9 @@ public class VaultGearCraftingHelper {
    }
 
    @Nonnull
-   public static <T extends IForgeItem & VaultGearItem> ItemStack doCraftGear(T item, ServerPlayer crafter, boolean simulate) {
+   public static <T extends IForgeItem & VaultGearItem> ItemStack doCraftGear(T item, ServerPlayer crafter, int level, boolean simulate) {
       ItemStack stack = new ItemStack(item.getItem());
       VaultGearData data = VaultGearData.read(stack);
-      int level = PlayerVaultStatsData.get(crafter.getLevel()).getVaultStats(crafter).getVaultLevel();
       data.setItemLevel(level);
       data.updateAttribute(ModGearAttributes.CRAFTED_BY, crafter.getName().getContents());
       data.updateAttribute(ModGearAttributes.GEAR_ROLL_TYPE, getCraftedRollType(stack, crafter).getName());

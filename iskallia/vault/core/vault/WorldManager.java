@@ -2,8 +2,12 @@ package iskallia.vault.core.vault;
 
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.EnumAdapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.RegistryValueAdapter;
 import iskallia.vault.core.data.key.FieldKey;
+import iskallia.vault.core.data.key.ThemeKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
 import iskallia.vault.core.world.generator.VaultGenerator;
@@ -20,28 +24,31 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class WorldManager extends DataObject<WorldManager> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<ResourceLocation> KEY = FieldKey.of("key", ResourceLocation.class)
-      .with(Version.v1_0, Adapter.ofIdentifier(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.IDENTIFIER, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Direction> FACING = FieldKey.of("facing", Direction.class)
-      .with(Version.v1_0, Adapter.ofEnum(Direction.class), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.ofEnum(Direction.class, EnumAdapter.Mode.ORDINAL), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> RANDOM_TICK_SPEED = FieldKey.of("random_tick_speed", Integer.class)
-      .with(Version.v1_0, Adapter.ofBoundedInt(0, 31), DISK.all())
+      .with(Version.v1_0, Adapters.ofBoundedInt(0, 31), DISK.all())
+      .register(FIELDS);
+   public static final FieldKey<ResourceLocation> THEME = FieldKey.of("theme", ResourceLocation.class)
+      .with(Version.v1_11, Adapters.IDENTIFIER, DISK.all())
       .register(FIELDS);
    public static final FieldKey<LootLogic> LOOT_LOGIC = FieldKey.of("loot_logic", LootLogic.class)
-      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.CHEST_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all())
+      .with(Version.v1_0, RegistryValueAdapter.of(() -> VaultRegistry.CHEST_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all())
       .register(FIELDS);
    public static final FieldKey<PortalLogic> PORTAL_LOGIC = FieldKey.of("portal_logic", PortalLogic.class)
-      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.PORTAL_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, RegistryValueAdapter.of(() -> VaultRegistry.PORTAL_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<MobLogic> MOB_LOGIC = FieldKey.of("mob_logic", MobLogic.class)
-      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.MOB_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all())
+      .with(Version.v1_0, RegistryValueAdapter.of(() -> VaultRegistry.MOB_LOGIC, ISupplierKey::getKey, Supplier::get), DISK.all())
       .register(FIELDS);
    public static final FieldKey<VaultGenerator> GENERATOR = FieldKey.of("generator", VaultGenerator.class)
-      .with(Version.v1_0, Adapter.ofRegistryValue(() -> VaultRegistry.GENERATOR, ISupplierKey::getKey, Supplier::get), DISK.all())
+      .with(Version.v1_0, RegistryValueAdapter.of(() -> VaultRegistry.GENERATOR, ISupplierKey::getKey, Supplier::get), DISK.all())
       .register(FIELDS);
    public static final FieldKey<WorldRenderer> RENDERER = FieldKey.of("renderer", WorldRenderer.class)
-      .with(Version.v1_0, Adapter.ofCompound(WorldRenderer::new), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, CompoundAdapter.of(WorldRenderer::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    @Override
@@ -71,5 +78,11 @@ public class WorldManager extends DataObject<WorldManager> {
    @OnlyIn(Dist.CLIENT)
    public void initClient(Vault vault) {
       this.ifPresent(RENDERER, renderer -> renderer.initClient(vault));
+   }
+
+   public WorldManager setTheme(ThemeKey theme, Version version) {
+      this.set(THEME, theme.getId());
+      this.ifPresent(RENDERER, renderer -> renderer.setTheme(theme.get(version)));
+      return this;
    }
 }

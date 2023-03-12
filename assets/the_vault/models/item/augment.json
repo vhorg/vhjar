@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "the_vault:item/augment/frame",
+    "layer1": "the_vault:item/augment/core"
+  }
+}

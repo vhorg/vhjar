@@ -25,7 +25,7 @@ public class MagnetTableBlock extends Block implements EntityBlock {
    public static final VoxelShape SHAPE = Shapes.or(Block.box(0.0, 12.0, 0.0, 16.0, 16.0, 16.0), Block.box(2.0, 0.0, 2.0, 14.0, 12.0, 14.0));
 
    public MagnetTableBlock() {
-      super(Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(0.5F).noOcclusion());
+      super(Properties.of(Material.STONE).strength(0.5F).noOcclusion());
    }
 
    public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {

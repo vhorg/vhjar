@@ -3,10 +3,12 @@ package iskallia.vault.core.vault;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataList;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
-import iskallia.vault.core.data.adapter.DirectAdapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.adapter.vault.DirectAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
@@ -21,7 +23,7 @@ import javax.annotation.Nullable;
 public class Modifiers extends DataObject<Modifiers> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    protected static final FieldKey<Modifiers.Entry.List> ENTRIES = FieldKey.of("entries", Modifiers.Entry.List.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Modifiers.Entry.List::new)
+      .with(Version.v1_0, CompoundAdapter.of(Modifiers.Entry.List::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public Modifiers() {
@@ -33,17 +35,17 @@ public class Modifiers extends DataObject<Modifiers> {
       return FIELDS;
    }
 
-   public Modifiers addPermanentModifier(VaultModifier<?> modifier, int amount, boolean display) {
+   public Modifiers addPermanentModifier(VaultModifier<?> modifier, int amount, boolean display, RandomSource random) {
       for (int i = 0; i < amount; i++) {
-         this.get(ENTRIES).add(new Modifiers.Entry(modifier, display));
+         modifier.flatten(random).forEach(child -> this.get(ENTRIES).add(new Modifiers.Entry((VaultModifier<?>)child, display)));
       }
 
       return this;
    }
 
-   public Modifiers addTemporaryModifier(VaultModifier<?> modifier, int amount, int timeLeft, boolean display) {
+   public Modifiers addTemporaryModifier(VaultModifier<?> modifier, int amount, int timeLeft, boolean display, RandomSource random) {
       for (int i = 0; i < amount; i++) {
-         this.get(ENTRIES).add(new Modifiers.Entry(modifier, timeLeft, display));
+         modifier.flatten(random).forEach(child -> this.get(ENTRIES).add(new Modifiers.Entry((VaultModifier<?>)child, timeLeft, display)));
       }
 
       return this;
@@ -158,20 +160,19 @@ public class Modifiers extends DataObject<Modifiers> {
          .with(
             Version.v1_0,
             new DirectAdapter<>(
-               (buffer, context, value) -> buffer.writeIdentifier(value.getId()),
-               (buffer, context) -> (VaultModifier)VaultModifierRegistry.getOpt(buffer.readIdentifier()).orElseThrow()
+               (value, buffer, context) -> buffer.writeIdentifier(value.getId()), (buffer, context) -> VaultModifierRegistry.getOpt(buffer.readIdentifier())
             ),
             DISK.all().or(CLIENT.all())
          )
          .register(FIELDS);
       public static final FieldKey<ModifierContext> CONTEXT = FieldKey.of("context", ModifierContext.class)
-         .with(Version.v1_0, Adapter.ofCompound(ModifierContext::new), DISK.all().or(CLIENT.all()))
+         .with(Version.v1_0, CompoundAdapter.of(ModifierContext::new), DISK.all().or(CLIENT.all()))
          .register(FIELDS);
       public static final FieldKey<Void> DISPLAY = FieldKey.of("display", Void.class)
-         .with(Version.v1_0, Adapter.ofVoid(), DISK.all().or(CLIENT.all()))
+         .with(Version.v1_0, Adapters.ofVoid(), DISK.all().or(CLIENT.all()))
          .register(FIELDS);
       public static final FieldKey<Void> CONSUMED = FieldKey.of("consumed", Void.class)
-         .with(Version.v1_0, Adapter.ofVoid(), DISK.all().or(CLIENT.all()))
+         .with(Version.v1_0, Adapters.ofVoid(), DISK.all().or(CLIENT.all()))
          .register(FIELDS);
 
       private Entry() {
@@ -206,7 +207,7 @@ public class Modifiers extends DataObject<Modifiers> {
 
       public static class List extends DataList<Modifiers.Entry.List, Modifiers.Entry> {
          public List() {
-            super(new ArrayList<>(), Adapter.ofCompound(Modifiers.Entry::new));
+            super(new ArrayList<>(), CompoundAdapter.of(Modifiers.Entry::new));
          }
       }
    }

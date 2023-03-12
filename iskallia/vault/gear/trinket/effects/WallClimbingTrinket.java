@@ -25,9 +25,9 @@ public class WallClimbingTrinket extends TrinketEffect.Simple {
             if (player.horizontalCollision && !player.isInWater()) {
                player.fallDistance = 0.0F;
                Vec3 motion = player.getDeltaMovement();
-               double yAccel = 0.1;
+               float yAccel = player.getSpeed() * 1.4F;
                if (player.isShiftKeyDown() || !player.getFeetBlockState().isScaffolding(player) && player.isSuppressingSlidingDownLadder()) {
-                  yAccel = 0.0;
+                  yAccel = 0.0F;
                }
 
                motion = new Vec3(Mth.clamp(motion.x, -0.15F, 0.15F), yAccel, Mth.clamp(motion.z, -0.15F, 0.15F));

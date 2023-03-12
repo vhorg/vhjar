@@ -65,7 +65,7 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
    }
 
    @Nullable
-   public static VaultGearTagConfig.ModGroupTag getModifierTag(ItemStack stack) {
+   public static VaultGearTagConfig.ModTagGroup getModifierTag(ItemStack stack) {
       if (!stack.isEmpty() && stack.getItem() instanceof ReforgeTagModificationFocus) {
          String tagStr = stack.getOrCreateTag().getString("modTag");
          return ModConfigs.VAULT_GEAR_TAG_CONFIG.getGroupTag(tagStr);
@@ -85,30 +85,32 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
    public void appendHoverText(ItemStack stack, Level worldIn, List<Component> tooltip, TooltipFlag flag) {
       super.appendHoverText(stack, worldIn, tooltip, flag);
       if (Screen.hasShiftDown()) {
-         getAttributes(getModifierTag(stack))
-            .forEach(
-               (attribute, items) -> {
-                  VaultGearModifierReader<?> reader = attribute.getReader();
-                  MutableComponent text = new TextComponent(" - ")
-                     .withStyle(ChatFormatting.GRAY)
-                     .append(new TextComponent(reader.getModifierName()).withStyle(reader.getColoredTextStyle()));
-                  if (Screen.hasAltDown()) {
-                     text.append(new TextComponent(" (" + getItemsDisplay((List<Item>)items) + ")").withStyle(ChatFormatting.GRAY));
-                  }
+         VaultGearTagConfig.ModTagGroup group = getModifierTag(stack);
+         if (group != null) {
+            getAttributes(group)
+               .forEach(
+                  (attribute, items) -> {
+                     VaultGearModifierReader<?> reader = attribute.getReader();
+                     MutableComponent text = new TextComponent(" - ")
+                        .withStyle(ChatFormatting.GRAY)
+                        .append(new TextComponent(reader.getModifierName()).withStyle(reader.getColoredTextStyle()));
+                     if (Screen.hasAltDown()) {
+                        text.append(new TextComponent(" (" + getItemsDisplay((List<Item>)items) + ")").withStyle(ChatFormatting.GRAY));
+                     }
 
-                  tooltip.add(text);
-               }
-            );
+                     tooltip.add(text);
+                  }
+               );
+         }
       }
    }
 
-   private static Map<VaultGearAttribute<?>, List<Item>> getAttributes(VaultGearTagConfig.ModGroupTag modGroupTag) {
+   private static Map<VaultGearAttribute<?>, List<Item>> getAttributes(VaultGearTagConfig.ModTagGroup tagGroup) {
       Map<VaultGearAttribute<?>, List<Item>> attributes = new LinkedHashMap<>();
-      ModConfigs.VAULT_GEAR_CONFIG
-         .forEach((item, config) -> modGroupTag.getGroups().forEach(group -> config.getModifierGroupConfigurations(group).forEach(tpl -> {
-            VaultGearAttribute<?> attribute = VaultGearAttributeRegistry.getAttribute(((VaultGearTierConfig.ModifierTierGroup)tpl.getB()).getAttribute());
-            attributes.computeIfAbsent(attribute, a -> new ArrayList<>()).add(item);
-         })));
+      ModConfigs.VAULT_GEAR_CONFIG.forEach((item, config) -> tagGroup.getTags().forEach(tag -> config.getModifierConfigurationsByTag(tag).forEach(tpl -> {
+         VaultGearAttribute<?> attribute = VaultGearAttributeRegistry.getAttribute(((VaultGearTierConfig.ModifierTierGroup)tpl.getB()).getAttribute());
+         attributes.computeIfAbsent(attribute, a -> new ArrayList<>()).add(item);
+      })));
       return attributes;
    }
 
@@ -154,6 +156,10 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
 
       if (items.contains(ModItems.SHIELD)) {
          lines.add("Shield");
+      }
+
+      if (items.contains(ModItems.MAGNET)) {
+         lines.add("Magnet");
       }
 
       List<Item> idols = new ArrayList<>();

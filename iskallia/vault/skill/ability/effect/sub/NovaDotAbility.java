@@ -38,7 +38,7 @@ public class NovaDotAbility extends AbstractNovaAbility<NovaDotConfig> {
    protected void doParticles(NovaDotConfig config, ServerPlayer player) {
       AreaEffectCloud areaEffectCloud = new AreaEffectCloud(player.level, player.getX(), player.getY(), player.getZ());
       areaEffectCloud.setOwner(player);
-      areaEffectCloud.setRadius(config.getRadius());
+      areaEffectCloud.setRadius(config.getRadius(player));
       areaEffectCloud.setRadiusOnUse(-0.5F);
       areaEffectCloud.setWaitTime(0);
       areaEffectCloud.setDuration(4);

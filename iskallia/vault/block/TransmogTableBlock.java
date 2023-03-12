@@ -42,7 +42,7 @@ public class TransmogTableBlock extends Block implements EntityBlock {
    );
 
    public TransmogTableBlock() {
-      super(Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(0.5F).lightLevel(state -> 1).noOcclusion());
+      super(Properties.of(Material.STONE).strength(0.5F).lightLevel(state -> 1).noOcclusion());
    }
 
    public BlockState getStateForPlacement(BlockPlaceContext context) {

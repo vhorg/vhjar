@@ -34,7 +34,7 @@ public abstract class ForgeRecipeContainer<T extends ForgeRecipeTileEntity> exte
 
    protected abstract Class<T> getTileClass();
 
-   protected abstract Point getOffset();
+   public abstract Point getOffset();
 
    public final Slot getResultSlot() {
       return this.getSlot(42);

@@ -1,7 +1,7 @@
 package iskallia.vault.core.vault.time;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -16,7 +16,7 @@ public class TickTimer extends TickClock {
    public static final SupplierKey<TickClock> KEY = SupplierKey.of("tick_timer", TickClock.class).with(Version.v1_0, TickTimer::new);
    public static final FieldRegistry FIELDS = TickClock.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Integer> PANIC_TIME = FieldKey.of("panic_time", Integer.class)
-      .with(Version.v1_0, Adapter.ofInt(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public TickTimer() {

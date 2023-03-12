@@ -43,56 +43,54 @@ public abstract class ScavengeTask {
          String var5 = object.get("type").getAsString();
          switch (var5) {
             case "chest":
-               WeightedList<ChestScavengeTask.Entry> entries = new WeightedList<>();
+               WeightedList<ChestScavengerTask.Entry> entries = new WeightedList<>();
                JsonObject obj = object.get("entries").getAsJsonObject();
 
                for (String key : obj.keySet()) {
                   JsonObject value = obj.get(key).getAsJsonObject();
                   entries.put(
-                     new ChestScavengeTask.Entry(
+                     new ChestScavengerTask.Entry(
                         (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
                      ),
                      value.get("weight").getAsInt()
                   );
                }
 
-               return new ChestScavengeTask(
+               return new ChestScavengerTask(
                   object.get("target").getAsString(), object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries
                );
             case "coin_stacks":
-               WeightedList<CoinStacksScavengeTask.Entry> entries = new WeightedList<>();
+               WeightedList<CoinStacksScavengerTask.Entry> entries = new WeightedList<>();
                JsonObject obj = object.get("entries").getAsJsonObject();
 
                for (String key : obj.keySet()) {
                   JsonObject value = obj.get(key).getAsJsonObject();
                   entries.put(
-                     new CoinStacksScavengeTask.Entry(
+                     new CoinStacksScavengerTask.Entry(
                         (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
                      ),
                      value.get("weight").getAsInt()
                   );
                }
 
-               return new CoinStacksScavengeTask(object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries);
-            case "vault_ore":
-               WeightedList<VaultOreScavengeTask.Entry> entries = new WeightedList<>();
+               return new CoinStacksScavengerTask(object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries);
+            case "ore":
+               WeightedList<OreScavengerTask.Entry> entries = new WeightedList<>();
                JsonObject obj = object.get("entries").getAsJsonObject();
 
                for (String key : obj.keySet()) {
                   JsonObject value = obj.get(key).getAsJsonObject();
                   entries.put(
-                     new VaultOreScavengeTask.Entry(
+                     new OreScavengerTask.Entry(
                         (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
                      ),
                      value.get("weight").getAsInt()
                   );
                }
 
-               return new VaultOreScavengeTask(
-                  object.get("target").getAsString(), object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries
-               );
+               return new OreScavengerTask(object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries);
             case "mob":
-               List<MobScavengeTask.Entry> entries = new ArrayList<>();
+               List<MobScavengerTask.Entry> entries = new ArrayList<>();
                JsonObject obj = object.get("entries").getAsJsonObject();
 
                for (String key : obj.keySet()) {
@@ -105,15 +103,15 @@ public abstract class ScavengeTask {
                   }
 
                   entries.add(
-                     new MobScavengeTask.Entry((Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), entry.get("multiplier").getAsDouble(), group)
+                     new MobScavengerTask.Entry((Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), entry.get("multiplier").getAsDouble(), group)
                   );
                }
 
-               return new MobScavengeTask(
+               return new MobScavengerTask(
                   object.get("probability").getAsDouble(),
                   new ResourceLocation(object.get("icon").getAsString()),
                   object.get("color").getAsInt(),
-                  entries.toArray(MobScavengeTask.Entry[]::new)
+                  entries.toArray(MobScavengerTask.Entry[]::new)
                );
             default:
                return null;
@@ -122,7 +120,7 @@ public abstract class ScavengeTask {
 
       public JsonElement serialize(ScavengeTask value, Type typeOfSrc, JsonSerializationContext context) {
          JsonObject object = new JsonObject();
-         if (value instanceof ChestScavengeTask chest) {
+         if (value instanceof ChestScavengerTask chest) {
             object.addProperty("type", "chest");
             object.addProperty("target", chest.target);
             object.addProperty("probability", chest.probability);
@@ -135,7 +133,7 @@ public abstract class ScavengeTask {
                entries.add(entryx.item.getRegistryName().toString(), obj);
             });
             object.add("entries", entries);
-         } else if (value instanceof CoinStacksScavengeTask coin) {
+         } else if (value instanceof CoinStacksScavengerTask coin) {
             object.addProperty("type", "coin_stacks");
             object.addProperty("probability", coin.probability);
             object.addProperty("icon", coin.icon.toString());
@@ -147,9 +145,8 @@ public abstract class ScavengeTask {
                entries.add(entryx.item.getRegistryName().toString(), obj);
             });
             object.add("entries", entries);
-         } else if (value instanceof VaultOreScavengeTask ore) {
-            object.addProperty("type", "vault_ore");
-            object.addProperty("target", ore.target);
+         } else if (value instanceof OreScavengerTask ore) {
+            object.addProperty("type", "ore");
             object.addProperty("probability", ore.probability);
             object.addProperty("icon", ore.icon.toString());
             JsonObject entries = new JsonObject();
@@ -160,14 +157,14 @@ public abstract class ScavengeTask {
                entries.add(entryx.item.getRegistryName().toString(), obj);
             });
             object.add("entries", entries);
-         } else if (value instanceof MobScavengeTask mob) {
+         } else if (value instanceof MobScavengerTask mob) {
             object.addProperty("type", "mob");
             object.addProperty("probability", mob.probability);
             object.addProperty("icon", mob.icon.toString());
             object.addProperty("color", mob.color);
             JsonObject entries = new JsonObject();
 
-            for (MobScavengeTask.Entry entry : mob.entries) {
+            for (MobScavengerTask.Entry entry : mob.entries) {
                JsonArray group = new JsonArray();
                entry.group.forEach(id -> group.add(id.toString()));
                entries.add(entry.item.getRegistryName().toString(), group);

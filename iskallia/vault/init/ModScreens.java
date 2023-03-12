@@ -27,14 +27,18 @@ import iskallia.vault.client.gui.screen.ShardTradeScreen;
 import iskallia.vault.client.gui.screen.ToolViseScreen;
 import iskallia.vault.client.gui.screen.VaultCharmControllerScreen;
 import iskallia.vault.client.gui.screen.VaultCrateScreen;
+import iskallia.vault.client.gui.screen.block.InscriptionTableScreen;
+import iskallia.vault.client.gui.screen.block.ModifierWorkbenchScreen;
 import iskallia.vault.client.gui.screen.block.RelicPedestalScreen;
 import iskallia.vault.client.gui.screen.block.SpiritExtractorScreen;
 import iskallia.vault.client.gui.screen.block.ToolStationScreen;
 import iskallia.vault.client.gui.screen.block.TransmogTableScreen;
 import iskallia.vault.client.gui.screen.block.VaultArtisanStationScreen;
 import iskallia.vault.client.gui.screen.block.VaultDiffuserScreen;
+import iskallia.vault.client.gui.screen.block.VaultEnhancementAltarScreen;
 import iskallia.vault.client.gui.screen.block.VaultForgeScreen;
 import iskallia.vault.client.gui.screen.block.VaultRecyclerScreen;
+import iskallia.vault.client.gui.screen.block.WardrobeScreen;
 import iskallia.vault.client.gui.screen.bounty.BountyScreen;
 import iskallia.vault.client.gui.screen.player.AbilitiesElementContainerScreen;
 import iskallia.vault.client.gui.screen.player.ArchetypesElementContainerScreen;
@@ -73,12 +77,17 @@ public class ModScreens {
       MenuScreens.register(ModContainers.MAGNET_TABLE_CONTAINER, MagnetTableScreen::new);
       MenuScreens.register(ModContainers.VAULT_FORGE_CONTAINER, VaultForgeScreen::new);
       MenuScreens.register(ModContainers.TOOL_STATION_CONTAINER, ToolStationScreen::new);
+      MenuScreens.register(ModContainers.INSCRIPTION_TABLE_CONTAINER, InscriptionTableScreen::new);
       MenuScreens.register(ModContainers.VAULT_ARTISAN_STATION_CONTAINER, VaultArtisanStationScreen::new);
       MenuScreens.register(ModContainers.VAULT_RECYCLER_CONTAINER, VaultRecyclerScreen::new);
       MenuScreens.register(ModContainers.VAULT_DIFFUSER_CONTAINER, VaultDiffuserScreen::new);
       MenuScreens.register(ModContainers.RELIC_PEDESTAL_CONTAINER, RelicPedestalScreen::new);
       MenuScreens.register(ModContainers.SPIRIT_EXTRACTOR_CONTAINER, SpiritExtractorScreen::new);
+      MenuScreens.register(ModContainers.WARDROBE_GEAR_CONTAINER, WardrobeScreen.Gear::new);
+      MenuScreens.register(ModContainers.WARDROBE_HOTBAR_CONTAINER, WardrobeScreen.Hotbar::new);
       MenuScreens.register(ModContainers.BOUNTY_CONTAINER, BountyScreen::new);
+      MenuScreens.register(ModContainers.ENHANCEMENT_ALTAR_CONTAINER, VaultEnhancementAltarScreen::new);
+      MenuScreens.register(ModContainers.MODIFIER_WORKBENCH_CONTAINER, ModifierWorkbenchScreen::new);
    }
 
    public static void registerOverlayEvents() {
@@ -93,7 +102,7 @@ public class ModScreens {
    public static void registerOverlays() {
       registerTop(new VignetteOverlay());
       registerTop(new HarmfulPotionOverlay());
-      registerAbove(new PlayerDamageOverlay(), ForgeIngameGui.PLAYER_HEALTH_ELEMENT);
+      registerAbove(new PlayerDamageOverlay(), ForgeIngameGui.ARMOR_LEVEL_ELEMENT);
       registerAbove(new PlayerRageOverlay(), ForgeIngameGui.EXPERIENCE_BAR_ELEMENT);
       registerAbove(new PlayerArmorOverlay(), ForgeIngameGui.ARMOR_LEVEL_ELEMENT);
       OverlayRegistry.enableOverlay(ForgeIngameGui.ARMOR_LEVEL_ELEMENT, false);

@@ -188,7 +188,8 @@ public abstract class OverSizedSlotContainer extends AbstractElementContainer {
          } else if (clickTypeIn == ClickType.THROW && this.getCarried().isEmpty() && slotId >= 0) {
             Slot slot = (Slot)this.slots.get(slotId);
             if (slot != null && slot.hasItem() && slot.mayPickup(player)) {
-               ItemStack itemstack4 = slot.remove(dragType == 0 ? 1 : slot.getItem().getCount());
+               int removeCount = Math.min(dragType == 0 ? 1 : slot.getItem().getCount(), slot.getItem().getMaxStackSize());
+               ItemStack itemstack4 = slot.remove(removeCount);
                slot.onTake(player, itemstack4);
                player.drop(itemstack4, true);
             }

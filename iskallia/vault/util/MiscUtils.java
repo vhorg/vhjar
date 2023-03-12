@@ -6,6 +6,7 @@ import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import iskallia.vault.client.ClientTalentData;
 import iskallia.vault.core.data.key.FieldKey;
+import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.integration.IntegrationCurios;
@@ -376,6 +377,15 @@ public class MiscUtils {
 
    public static <T> Optional<T> getVaultData(Player player, FieldKey<T> key) {
       return getVault(player).filter(vault -> vault.has(key)).map(vault -> vault.get(key));
+   }
+
+   public static JavaRandom getVaultPositionRandom(Vault vault, BlockPos at) {
+      JavaRandom random = JavaRandom.ofInternal(vault.get(Vault.SEED));
+      long a = random.nextLong() | 1L;
+      long b = random.nextLong() | 1L;
+      long c = random.nextLong() | 1L;
+      random.setSeed(a * at.getX() + b * at.getY() + c * at.getZ() ^ vault.get(Vault.SEED));
+      return random;
    }
 
    public static void fillContainer(AbstractContainerMenu ct, NonNullList<ItemStack> items) {

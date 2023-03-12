@@ -2,7 +2,7 @@ package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.data.WeightedList;
 import iskallia.vault.world.vault.logic.objective.architect.modifier.BlockPlacementModifier;
@@ -42,7 +42,7 @@ public class ArchitectEventConfig extends Config {
    @Expose
    private BossExitModifier BOSS;
    @Expose
-   private RangeEntry requiredPolls;
+   private IntRangeEntry requiredPolls;
    @Expose
    private int temporaryModifierMinutes;
    @Expose
@@ -138,7 +138,7 @@ public class ArchitectEventConfig extends Config {
       );
       this.RANDOM = Arrays.asList(new RandomVoteModifier("Random", "? Random ?", -15));
       this.BOSS = new BossExitModifier("BossExit", "Summon Boss", 0, 0.1F);
-      this.requiredPolls = new RangeEntry(12, 20);
+      this.requiredPolls = new IntRangeEntry(12, 20);
       this.temporaryModifierMinutes = 10;
       this.enabled = false;
       this.rolls = new WeightedList<>();

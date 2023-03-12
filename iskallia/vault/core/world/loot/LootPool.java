@@ -9,6 +9,7 @@ import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.util.WeightedTree;
 import iskallia.vault.core.world.loot.entry.ItemLootEntry;
 import iskallia.vault.core.world.loot.entry.LootEntry;
+import iskallia.vault.core.world.roll.IntRoll;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Optional;
@@ -21,7 +22,7 @@ public class LootPool extends WeightedTree<LootEntry> {
    private static final Gson GSON = new GsonBuilder().registerTypeAdapter(LootPool.class, LootPoolAdapter.INSTANCE).setPrettyPrinting().create();
    protected String path;
 
-   public LootPool addItem(Item item, CompoundTag nbt, LootRoll count, int weight) {
+   public LootPool addItem(Item item, CompoundTag nbt, IntRoll count, int weight) {
       this.addLeaf(new ItemLootEntry(item, nbt, count), weight);
       return this;
    }

@@ -1,7 +1,8 @@
 package iskallia.vault.core.vault.player;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.compound.UUIDList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
@@ -44,16 +45,16 @@ public class ClassicListenersLogic extends ListenersLogic {
    public static final SupplierKey<ListenersLogic> KEY = SupplierKey.of("classic", ListenersLogic.class).with(Version.v1_0, ClassicListenersLogic::new);
    public static final FieldRegistry FIELDS = ListenersLogic.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Integer> MAX_PLAYERS = FieldKey.of("max_players", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all())
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
    public static final FieldKey<Void> NATURAL_REGEN = FieldKey.of("natural_regen", Void.class)
-      .with(Version.v1_0, Adapter.ofVoid(), DISK.all())
+      .with(Version.v1_0, Adapters.ofVoid(), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Void> ADDED_BONUS_TIME = FieldKey.of("added_bonus_time", Void.class)
-      .with(Version.v1_0, Adapter.ofVoid(), DISK.all())
+      .with(Version.v1_0, Adapters.ofVoid(), DISK.all())
       .register(FIELDS);
    public static final FieldKey<UUIDList> LEAVERS = FieldKey.of("leavers", UUIDList.class)
-      .with(Version.v1_0, Adapter.ofCompound(UUIDList::create), DISK.all())
+      .with(Version.v1_0, CompoundAdapter.of(UUIDList::create), DISK.all())
       .register(FIELDS);
 
    public ClassicListenersLogic() {

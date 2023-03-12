@@ -15,6 +15,7 @@ import iskallia.vault.gear.tooltip.GearTooltip;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.util.SidedHelper;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -259,6 +260,9 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
          }
 
          return null;
+      }).map(stack -> {
+         VaultGearData data = VaultGearData.read(stack);
+         return (ItemStack)(entity instanceof Player player && SidedHelper.getVaultLevel(player) < data.getItemLevel() ? null : stack);
       });
    }
 

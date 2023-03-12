@@ -6,10 +6,10 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.AbilityNode;
 import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.config.sub.TankReflectConfig;
+import iskallia.vault.skill.ability.effect.TankAbility;
 import iskallia.vault.skill.ability.effect.spi.AbstractTankAbility;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityTickResult;
-import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
 import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.Optional;
@@ -92,7 +92,7 @@ public class TankReflectAbility extends AbstractTankAbility<TankReflectConfig> {
       }
    }
 
-   public static class TankReflectEffect extends ToggleAbilityEffect {
+   public static class TankReflectEffect extends TankAbility.TankEffect {
       public TankReflectEffect(int color, ResourceLocation resourceLocation) {
          super("Tank", color, resourceLocation);
       }

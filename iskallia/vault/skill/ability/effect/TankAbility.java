@@ -85,9 +85,23 @@ public class TankAbility extends AbstractTankAbility<TankConfig> {
       }
    }
 
+   public static boolean hasTankEffectActive(LivingEntity entity) {
+      for (MobEffectInstance instance : entity.getActiveEffects()) {
+         if (instance.getEffect() instanceof TankAbility.TankEffect) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
    public static class TankEffect extends ToggleAbilityEffect {
+      protected TankEffect(String abilityGroup, int color, ResourceLocation resourceLocation) {
+         super(abilityGroup, color, resourceLocation);
+      }
+
       public TankEffect(int color, ResourceLocation resourceLocation) {
-         super("Tank", color, resourceLocation);
+         this("Tank", color, resourceLocation);
       }
    }
 

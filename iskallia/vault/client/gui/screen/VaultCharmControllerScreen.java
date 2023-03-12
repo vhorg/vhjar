@@ -45,12 +45,12 @@ public class VaultCharmControllerScreen extends AbstractContainerScreen<VaultCha
    }
 
    protected void renderLabels(PoseStack matrixStack, int x, int y) {
-      String title = "Charm Inscription - "
+      String title = "Junk Whitelist - "
          + ((VaultCharmControllerContainer)this.menu).getCurrentAmountWhitelisted()
          + "/"
          + ((VaultCharmControllerContainer)this.menu).getInventorySize()
          + " slots";
-      this.font.draw(matrixStack, new TextComponent(title), 5.0F, 5.0F, 4210752);
+      this.font.draw(matrixStack, new TextComponent(title), 7.0F, 6.0F, 4210752);
       if (this.needsScrollBars()) {
          RenderSystem.setShaderTexture(0, TEXTURE);
          this.blit(matrixStack, 175, 18 + (int)(95.0F * this.currentScroll), 195 + (this.needsScrollBars() ? 0 : 12), 19, 12, 15);

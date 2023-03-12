@@ -74,7 +74,7 @@ public abstract class MixinItemStack {
             int unbreaking = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.UNBREAKING, (ItemStack)this);
             int durabilityNegation = 0;
             boolean isArmor = ((ItemStack)this).getItem() instanceof ArmorItem;
-            DurabilityConfig cfg = ModConfigs.DURBILITY;
+            DurabilityConfig cfg = ModConfigs.DURABILITY;
             float chance = isArmor ? cfg.getArmorDurabilityIgnoreChance(unbreaking) : cfg.getDurabilityIgnoreChance(unbreaking);
 
             for (int k = 0; unbreaking > 0 && k < damage; k++) {

@@ -9,6 +9,7 @@ import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.util.NetcodeUtils;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.MutableComponent;
@@ -16,7 +17,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 
 public class EffectGearAttribute {
    private final MobEffect effect;
@@ -104,6 +104,14 @@ public class EffectGearAttribute {
       public EffectGearAttribute generateRandomValue(EffectGearAttribute.Config object, Random random) {
          MobEffect effect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(object.effectKey);
          return new EffectGearAttribute(effect, object.amplifier);
+      }
+
+      @Nullable
+      public MutableComponent getConfigDisplay(VaultGearModifierReader<EffectGearAttribute> reader, EffectGearAttribute.Config object) {
+         MobEffect effect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(object.effectKey);
+         return effect == null
+            ? null
+            : new TextComponent(String.valueOf(object.amplifier)).withStyle(reader.getColoredTextStyle()).append(" ").append(effect.getDisplayName());
       }
    }
 

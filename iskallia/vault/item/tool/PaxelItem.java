@@ -8,6 +8,7 @@ import iskallia.vault.event.InputEvents;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.item.IAnvilPreventCombination;
 import iskallia.vault.item.IConditionalDamageable;
 import iskallia.vault.util.nbt.NBTHelper;
 import java.util.ArrayList;
@@ -57,19 +58,19 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.common.TierSortingRegistry;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import org.jetbrains.annotations.Nullable;
 
-@EventBusSubscriber(
-   bus = Bus.FORGE
-)
-public class PaxelItem extends DiggerItem implements IConditionalDamageable {
+public class PaxelItem extends DiggerItem implements IConditionalDamageable, IAnvilPreventCombination {
    private static final UUID PAXEL_REACH_ID = UUID.randomUUID();
 
    public PaxelItem(ResourceLocation id) {
       super(3.0F, -3.0F, PaxelItemTier.INSTANCE, BlockTags.MINEABLE_WITH_PICKAXE, new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(1));
       this.setRegistryName(id);
+   }
+
+   @Override
+   public boolean shouldPreventAnvilCombination(ItemStack other) {
+      return other.getItem() instanceof PaxelItem;
    }
 
    @Override

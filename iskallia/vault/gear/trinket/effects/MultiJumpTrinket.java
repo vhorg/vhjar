@@ -9,11 +9,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class MultiJumpTrinket extends TrinketEffect.Simple {
-   private static final int MAX_JUMPS = 3;
+   private static final int MAX_JUMPS = 2;
    private static int clientJumpCount = 0;
    private static boolean clientIsJumpHeld = false;
 
@@ -24,7 +25,7 @@ public class MultiJumpTrinket extends TrinketEffect.Simple {
    @Override
    public void onWornTick(LivingEntity entity, ItemStack stack) {
       super.onWornTick(entity, stack);
-      if (entity.getLevel().isClientSide() && entity instanceof Player player) {
+      if (entity.getLevel().isClientSide() && entity instanceof Player player && this.isUsable(stack, player)) {
          this.onClientTick(player);
       }
    }
@@ -37,9 +38,11 @@ public class MultiJumpTrinket extends TrinketEffect.Simple {
                if (clientPlayer.isOnGround()) {
                   clientJumpCount = 0;
                } else if (clientPlayer.input.jumping) {
-                  if (!clientIsJumpHeld && clientJumpCount <= 3) {
+                  if (!clientIsJumpHeld && clientJumpCount <= 2) {
                      clientJumpCount++;
                      clientPlayer.jumpFromGround();
+                     Vec3 movement = clientPlayer.getDeltaMovement();
+                     clientPlayer.setDeltaMovement(new Vec3(movement.x(), movement.y() + 0.2, movement.z()));
                      ModNetwork.CHANNEL.sendToServer(TrinketJumpMessage.getInstance());
                   }
 

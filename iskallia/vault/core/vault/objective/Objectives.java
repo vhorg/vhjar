@@ -2,7 +2,8 @@ package iskallia.vault.core.vault.objective;
 
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.vault.Vault;
@@ -14,12 +15,12 @@ import java.util.function.Predicate;
 
 public class Objectives extends DataObject<Objectives> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
-   public static final FieldKey<String> KEY = FieldKey.of("key", String.class).with(Version.v1_3, Adapter.ofString(), DISK.all()).register(FIELDS);
+   public static final FieldKey<String> KEY = FieldKey.of("key", String.class).with(Version.v1_3, Adapters.UTF_8, DISK.all()).register(FIELDS);
    public static final FieldKey<Integer> INDEX = FieldKey.of("index", Integer.class)
-      .with(Version.v1_0, Adapter.ofSegmentedInt(3), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Objective.ObjList> LIST = FieldKey.of("list", Objective.ObjList.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all().or(CLIENT.all()), Objective.ObjList::new)
+      .with(Version.v1_0, CompoundAdapter.of(Objective.ObjList::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public Objectives() {

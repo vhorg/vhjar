@@ -320,6 +320,11 @@ public class EffectCloudAttribute {
       public EffectCloudAttribute generateRandomValue(EffectCloudAttribute.CloudConfig object, Random random) {
          return new EffectCloudAttribute(EffectCloudAttribute.EffectCloud.fromConfig(object));
       }
+
+      @Nullable
+      public MutableComponent getConfigDisplay(VaultGearModifierReader<EffectCloudAttribute> reader, EffectCloudAttribute.CloudConfig object) {
+         return reader.getValueDisplay(new EffectCloudAttribute(EffectCloudAttribute.EffectCloud.fromConfig(object)));
+      }
    }
 
    private static class Reader extends VaultGearModifierReader<EffectCloudAttribute> {

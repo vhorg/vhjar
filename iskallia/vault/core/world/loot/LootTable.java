@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.adapter.LootPoolAdapter;
 import iskallia.vault.config.adapter.LootRollAdapter;
+import iskallia.vault.core.world.roll.IntRoll;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public class LootTable {
    private static final Gson GSON = new GsonBuilder()
-      .registerTypeHierarchyAdapter(LootRoll.class, LootRollAdapter.INSTANCE)
+      .registerTypeHierarchyAdapter(IntRoll.class, LootRollAdapter.INSTANCE)
       .registerTypeHierarchyAdapter(LootPool.class, LootPoolAdapter.INSTANCE)
       .setPrettyPrinting()
       .excludeFieldsWithoutExposeAnnotation()
@@ -48,23 +49,23 @@ public class LootTable {
       return this.entries;
    }
 
-   public LootTable add(LootRoll roll, LootPool pool) {
+   public LootTable add(IntRoll roll, LootPool pool) {
       this.entries.add(new LootTable.Entry(roll, pool));
       return this;
    }
 
    public static class Entry {
       @Expose
-      protected LootRoll roll;
+      protected IntRoll roll;
       @Expose
       protected LootPool pool;
 
-      public Entry(LootRoll roll, LootPool pool) {
+      public Entry(IntRoll roll, LootPool pool) {
          this.roll = roll;
          this.pool = pool;
       }
 
-      public LootRoll getRoll() {
+      public IntRoll getRoll() {
          return this.roll;
       }
 

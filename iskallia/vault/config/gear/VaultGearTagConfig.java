@@ -18,7 +18,7 @@ import net.minecraft.network.chat.TextComponent;
 
 public class VaultGearTagConfig extends Config {
    @Expose
-   private final Map<String, VaultGearTagConfig.ModGroupTag> tags = new LinkedHashMap<>();
+   private final Map<String, VaultGearTagConfig.ModTagGroup> tags = new LinkedHashMap<>();
 
    @Override
    public String getName() {
@@ -26,7 +26,7 @@ public class VaultGearTagConfig extends Config {
    }
 
    @Nullable
-   public VaultGearTagConfig.ModGroupTag getGroupTag(String tag) {
+   public VaultGearTagConfig.ModTagGroup getGroupTag(String tag) {
       return this.tags.get(tag);
    }
 
@@ -44,12 +44,12 @@ public class VaultGearTagConfig extends Config {
    @Override
    protected void reset() {
       this.tags.clear();
-      this.tags.put("Armor", new VaultGearTagConfig.ModGroupTag("Armor", 4766456).addGroup("ModArmor"));
+      this.tags.put("Armor", new VaultGearTagConfig.ModTagGroup("Armor", 4766456).addTag("ModArmor"));
    }
 
-   public static class ModGroupTag {
+   public static class ModTagGroup {
       @Expose
-      private List<String> groups = new ArrayList<>();
+      private List<String> tags = new ArrayList<>();
       @Expose
       private String display;
       @Expose
@@ -57,18 +57,18 @@ public class VaultGearTagConfig extends Config {
       @Expose
       private int weight = 10;
 
-      public ModGroupTag(String display, int color) {
+      public ModTagGroup(String display, int color) {
          this.display = display;
          this.color = color;
       }
 
-      public VaultGearTagConfig.ModGroupTag addGroup(String modGroup) {
-         this.groups.add(modGroup);
+      public VaultGearTagConfig.ModTagGroup addTag(String modGroup) {
+         this.tags.add(modGroup);
          return this;
       }
 
-      public List<String> getGroups() {
-         return this.groups;
+      public List<String> getTags() {
+         return this.tags;
       }
 
       public String getDisplayName() {

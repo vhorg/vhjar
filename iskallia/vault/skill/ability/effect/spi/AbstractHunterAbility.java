@@ -1,5 +1,9 @@
 package iskallia.vault.skill.ability.effect.spi;
 
+import iskallia.vault.gear.attribute.ability.special.HunterRangeModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.skill.ability.config.HunterConfig;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
@@ -82,6 +86,13 @@ public abstract class AbstractHunterAbility<C extends HunterConfig> extends Abst
    protected void forEachTileEntity(C config, Level world, Player player, BiConsumer<BlockPos, BlockEntity> consumer) {
       BlockPos playerOffset = player.blockPosition();
       double radius = config.getSearchRadius();
+
+      for (ConfiguredModification<FloatValueConfig, HunterRangeModification> mod : SpecialAbilityModification.getModifications(
+         player, HunterRangeModification.class
+      )) {
+         radius = mod.modification().adjustRange(mod.config(), radius);
+      }
+
       double radiusSq = radius * radius;
       int iRadius = Mth.ceil(radius);
       Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);

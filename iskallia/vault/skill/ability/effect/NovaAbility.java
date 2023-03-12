@@ -44,18 +44,15 @@ public class NovaAbility<C extends NovaConfig> extends AbstractNovaAbility<C> {
    @Override
    protected void doParticles(C config, ServerPlayer player) {
       super.doParticles(config, player);
-      int particleCount = (int)Mth.clamp(Math.pow(config.getRadius(), 2.0) * (float) Math.PI * 100.0, 50.0, 400.0);
+      float radius = config.getRadius(player);
+      int particleCount = (int)Mth.clamp(Math.pow(radius, 2.0) * (float) Math.PI * 100.0, 50.0, 400.0);
       ((ServerLevel)player.level)
-         .sendParticles(
-            ParticleTypes.EXPLOSION, player.getX(), player.getY(), player.getZ(), particleCount, config.getRadius() * 0.5, 0.5, config.getRadius() * 0.5, 0.0
-         );
+         .sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY(), player.getZ(), particleCount, radius * 0.5, 0.5, radius * 0.5, 0.0);
       ((ServerLevel)player.level)
-         .sendParticles(
-            ParticleTypes.SMOKE, player.getX(), player.getY(), player.getZ(), particleCount / 2, config.getRadius() * 0.5, 0.5, config.getRadius() * 0.5, 0.0
-         );
+         .sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY(), player.getZ(), particleCount / 2, radius * 0.5, 0.5, radius * 0.5, 0.0);
       AreaEffectCloud areaEffectCloud = new AreaEffectCloud(player.level, player.getX(), player.getY(), player.getZ());
       areaEffectCloud.setOwner(player);
-      areaEffectCloud.setRadius(config.getRadius());
+      areaEffectCloud.setRadius(radius);
       areaEffectCloud.setRadiusOnUse(-0.5F);
       areaEffectCloud.setWaitTime(0);
       areaEffectCloud.setDuration(4);

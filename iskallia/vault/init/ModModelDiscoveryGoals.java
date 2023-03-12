@@ -41,7 +41,7 @@ public class ModModelDiscoveryGoals {
    );
    public static VaultMobStunGoal MOB_STUNNED = registerGoal(
       VaultMod.id("mob_stunned"),
-      new VaultMobStunGoal(100)
+      new VaultMobStunGoal(400)
          .setReward(
             (player, goal) -> {
                DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());
@@ -75,7 +75,7 @@ public class ModModelDiscoveryGoals {
    );
    public static VaultThornsDamageGoal THORNS_DAMAGE_DEALT = registerGoal(
       VaultMod.id("thorns_damage_dealt"),
-      new VaultThornsDamageGoal(1000.0F)
+      new VaultThornsDamageGoal(10000.0F)
          .setReward(
             (player, goal) -> {
                DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());

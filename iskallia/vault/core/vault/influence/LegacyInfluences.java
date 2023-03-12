@@ -3,7 +3,7 @@ package iskallia.vault.core.vault.influence;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
@@ -33,8 +33,8 @@ import net.minecraft.resources.ResourceLocation;
 public class LegacyInfluences extends DataObject<LegacyInfluences> {
    private static final Map<VaultGod, LegacyInfluences.InfluenceMessages> MESSAGES = new HashMap<>();
    public static final FieldRegistry FIELDS = new FieldRegistry();
-   public static final FieldKey<Void> INITIALIZED = FieldKey.of("initialized", Void.class).with(Version.v1_0, Adapter.ofVoid(), DISK.all()).register(FIELDS);
-   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_0, Adapter.ofUUID(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Void> INITIALIZED = FieldKey.of("initialized", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
+   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_0, Adapters.UUID, DISK.all()).register(FIELDS);
 
    @Override
    public FieldRegistry getFields() {

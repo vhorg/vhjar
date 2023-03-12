@@ -2,7 +2,7 @@ package iskallia.vault.core.vault;
 
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.entity.entity.SpiritEntity;
@@ -24,16 +24,16 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class EntityState extends DataObject<EntityState> implements INBTSerializable<CompoundTag> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
-   public static final FieldKey<Double> POS_X = FieldKey.of("pos_x", Double.class).with(Version.v1_0, Adapter.ofDouble(), DISK.all()).register(FIELDS);
-   public static final FieldKey<Double> POS_Y = FieldKey.of("pos_y", Double.class).with(Version.v1_0, Adapter.ofDouble(), DISK.all()).register(FIELDS);
-   public static final FieldKey<Double> POS_Z = FieldKey.of("pos_z", Double.class).with(Version.v1_0, Adapter.ofDouble(), DISK.all()).register(FIELDS);
-   public static final FieldKey<Float> YAW = FieldKey.of("yaw", Float.class).with(Version.v1_0, Adapter.ofFloat(), DISK.all()).register(FIELDS);
-   public static final FieldKey<Float> PITCH = FieldKey.of("pitch", Float.class).with(Version.v1_0, Adapter.ofFloat(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Double> POS_X = FieldKey.of("pos_x", Double.class).with(Version.v1_0, Adapters.DOUBLE, DISK.all()).register(FIELDS);
+   public static final FieldKey<Double> POS_Y = FieldKey.of("pos_y", Double.class).with(Version.v1_0, Adapters.DOUBLE, DISK.all()).register(FIELDS);
+   public static final FieldKey<Double> POS_Z = FieldKey.of("pos_z", Double.class).with(Version.v1_0, Adapters.DOUBLE, DISK.all()).register(FIELDS);
+   public static final FieldKey<Float> YAW = FieldKey.of("yaw", Float.class).with(Version.v1_0, Adapters.FLOAT, DISK.all()).register(FIELDS);
+   public static final FieldKey<Float> PITCH = FieldKey.of("pitch", Float.class).with(Version.v1_0, Adapters.FLOAT, DISK.all()).register(FIELDS);
    public static final FieldKey<GameType> GAME_MODE = FieldKey.of("game_mode", GameType.class)
-      .with(Version.v1_0, Adapter.ofOrdinal(Enum::ordinal, GameType.values()), DISK.all())
+      .with(Version.v1_0, Adapters.ofOrdinal(Enum::ordinal, GameType.values()), DISK.all())
       .register(FIELDS);
    public static final FieldKey<ResourceKey<Level>> WORLD = FieldKey.ofResourceKey("world", Level.class)
-      .with(Version.v1_0, Adapter.ofResourceKey(Registry.DIMENSION_REGISTRY), DISK.all())
+      .with(Version.v1_0, Adapters.ofResourceKey(Registry.DIMENSION_REGISTRY), DISK.all())
       .register(FIELDS);
 
    public EntityState() {

@@ -5,10 +5,10 @@ import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataList;
 import iskallia.vault.core.data.DataMap;
 import iskallia.vault.core.data.Field;
-import iskallia.vault.core.data.adapter.Adapter;
 import iskallia.vault.core.data.sync.context.SyncContext;
 import iskallia.vault.core.data.sync.handler.SyncHandler;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.item.crystal.data.adapter.IBitAdapter;
 import java.util.function.Supplier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -58,16 +58,12 @@ public class FieldKey<T> extends VersionedKey<FieldKey<T>, Field<T>> {
       return new FieldKey<>(id);
    }
 
-   public FieldKey<T> with(Version version, Adapter<T> adapter, SyncHandler handler) {
+   public FieldKey<T> with(Version version, IBitAdapter<T, ?> adapter, SyncHandler handler) {
       return this.with(version, adapter, handler, () -> null);
    }
 
-   public FieldKey<T> with(Version version, Adapter<T> adapter, SyncHandler handler, Supplier<T> defaultValue) {
-      return (FieldKey<T>)super.with(version, (T)(new Field<T>(adapter, handler, defaultValue)));
-   }
-
-   public T validate(Version version, T value, SyncContext context) {
-      return this.get(version).validate(value, context);
+   public FieldKey<T> with(Version version, IBitAdapter<T, ?> adapter, SyncHandler handler, Supplier<T> defaultValue) {
+      return (FieldKey<T>)super.with(version, (T)(new Field<T>((IBitAdapter<T, SyncContext>)adapter, handler, defaultValue)));
    }
 
    public void writeValue(Version version, BitBuffer buffer, SyncContext context, T value) {

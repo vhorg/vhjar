@@ -12,6 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class OverSizedInventory implements Container {
+   public static final OverSizedInventory EMPTY = new OverSizedInventory(0, () -> {}, player -> false);
    private final NonNullList<OverSizedItemStack> contents;
    private final Runnable onChange;
    private final Predicate<Player> stillValid;

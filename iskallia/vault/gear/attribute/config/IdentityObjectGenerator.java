@@ -1,7 +1,10 @@
 package iskallia.vault.gear.attribute.config;
 
+import iskallia.vault.gear.reader.VaultGearModifierReader;
 import java.util.Random;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 
 public class IdentityObjectGenerator<T> extends ConfigurableAttributeGenerator<T, T> {
    private final Class<T> configObjectClass;
@@ -19,5 +22,11 @@ public class IdentityObjectGenerator<T> extends ConfigurableAttributeGenerator<T
    @Override
    public T generateRandomValue(T object, Random random) {
       return object;
+   }
+
+   @Nullable
+   @Override
+   public MutableComponent getConfigDisplay(VaultGearModifierReader<T> reader, T object) {
+      return new TextComponent(reader.getModifierName()).withStyle(reader.getColoredTextStyle());
    }
 }

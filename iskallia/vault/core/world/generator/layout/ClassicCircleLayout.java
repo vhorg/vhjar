@@ -1,7 +1,7 @@
 package iskallia.vault.core.world.generator.layout;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -11,7 +11,7 @@ import iskallia.vault.core.vault.Vault;
 public class ClassicCircleLayout extends ClassicInfiniteLayout {
    public static final SupplierKey<GridLayout> KEY = SupplierKey.of("classic_circle_vault", GridLayout.class).with(Version.v1_0, ClassicCircleLayout::new);
    public static final FieldRegistry FIELDS = ClassicInfiniteLayout.FIELDS.merge(new FieldRegistry());
-   public static final FieldKey<Integer> RADIUS = FieldKey.of("radius", Integer.class).with(Version.v1_0, Adapter.ofInt(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Integer> RADIUS = FieldKey.of("radius", Integer.class).with(Version.v1_0, Adapters.INT, DISK.all()).register(FIELDS);
 
    protected ClassicCircleLayout() {
    }

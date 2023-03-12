@@ -6,7 +6,8 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
+import iskallia.vault.item.crystal.model.RawCrystalModel;
+import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.vault.modifier.VaultModifierStack;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
@@ -142,18 +143,20 @@ public class CrystalClusterBlock extends Block implements SimpleWaterloggedBlock
       List<ItemStack> drops = super.getDrops(blockState, builder);
       if (blockState.getBlock() == ModBlocks.CRYSTAL_CLUSTER) {
          ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
-         CrystalData crystal = new CrystalData(stack);
+         CrystalData crystal = CrystalData.read(stack);
          Entity entity = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
          int level = entity instanceof Player player ? PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player).getVaultLevel() : 0;
          crystal.setLevel(level);
-         crystal.setModel(CrystalData.Model.RAW);
-         crystal.setTheme(new ValueCrystalTheme(VaultMod.id("raw_vault_cave")));
+         crystal.setModel(new RawCrystalModel());
+         crystal.setTheme(new PoolCrystalTheme(VaultMod.id("raw")));
 
          for (VaultModifier<?> modifier : ModConfigs.VAULT_MODIFIER_POOLS.getRandom(VaultMod.id("raw"), level, JavaRandom.ofNanoTime())) {
-            crystal.addModifier(VaultModifierStack.of(modifier, 1));
+            crystal.getModifiers().add(VaultModifierStack.of(modifier, 1));
          }
 
-         crystal.setModifiable(false);
+         crystal.setUnmodifiable(true);
+         crystal.getModifiers().setRandomModifiers(false);
+         crystal.write(stack);
          drops.add(stack);
       }
 

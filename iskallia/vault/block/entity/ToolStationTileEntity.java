@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class ToolStationTileEntity extends ForgeRecipeTileEntity implements MenuProvider {
    public ToolStationTileEntity(BlockPos pWorldPosition, BlockState pBlockState) {
-      super(ModBlocks.TOOL_STATION_TILE_ENTITY, pWorldPosition, pBlockState, 6, ForgeRecipeType.TOOL);
+      super(ModBlocks.TOOL_STATION_TILE_ENTITY, pWorldPosition, pBlockState, 6, ForgeRecipeType.JEWEL, ForgeRecipeType.TOOL);
    }
 
    @Override

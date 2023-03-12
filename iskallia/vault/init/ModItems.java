@@ -5,6 +5,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.item.AnimalJarItem;
 import iskallia.vault.item.ArchetypeStarItem;
+import iskallia.vault.item.AugmentItem;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.item.BasicMobEggItem;
 import iskallia.vault.item.BasicScavengerItem;
@@ -12,6 +13,8 @@ import iskallia.vault.item.BurntCrystalItem;
 import iskallia.vault.item.GatedLootableItem;
 import iskallia.vault.item.GodBlessingItem;
 import iskallia.vault.item.InfiniteWaterBucketItem;
+import iskallia.vault.item.InscriptionItem;
+import iskallia.vault.item.InscriptionPieceItem;
 import iskallia.vault.item.ItemDrillArrow;
 import iskallia.vault.item.ItemGiftBomb;
 import iskallia.vault.item.ItemKnowledgeStar;
@@ -402,6 +405,7 @@ public class ModItems {
    public static BasicItem SOUL_FLAME = new BasicItem(VaultMod.id("soul_flame"));
    public static VaultCatalystItem VAULT_CATALYST = new VaultCatalystItem(VAULT_MOD_GROUP, VaultMod.id("vault_catalyst"));
    public static VaultCatalystInfusedItem VAULT_CATALYST_INFUSED = new VaultCatalystInfusedItem(VAULT_MOD_GROUP, VaultMod.id("vault_catalyst_infused"));
+   public static BasicItem VAULT_CATALYST_CHAOS = new BasicItem(VaultMod.id("vault_catalyst_chaos"));
    public static BasicItem CRYSTAL_SEAL_EMPTY = new BasicItem(VaultMod.id("crystal_seal_empty"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_EXECUTIONER = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_executioner"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_HUNTER = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_hunter"));
@@ -409,8 +413,12 @@ public class ModItems {
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_ANCIENTS = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_ancients"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_RAID = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_raid"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_CAKE = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_cake"));
+   public static ItemVaultCrystalSeal CRYSTAL_SEAL_SAGE = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_sage"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_SPEEDRUN = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_speedrun"));
    public static VaultRuneItem RUNE = new VaultRuneItem(VAULT_MOD_GROUP, VaultMod.id("rune"));
+   public static InscriptionItem INSCRIPTION = new InscriptionItem(VAULT_MOD_GROUP, VaultMod.id("inscription"));
+   public static InscriptionPieceItem INSCRIPTION_PIECE = new InscriptionPieceItem(VAULT_MOD_GROUP, VaultMod.id("inscription_piece"));
+   public static AugmentItem AUGMENT = new AugmentItem(VAULT_MOD_GROUP, VaultMod.id("augment"));
    public static BasicItem VAULT_CATALYST_FRAGMENT = new BasicItem(VaultMod.id("vault_catalyst_fragment"))
       .withTooltip(new TranslatableComponent("tooltip.the_vault.vault_catalyst_fragment").withStyle(ChatFormatting.GRAY));
    public static BasicItem PHOENIX_DUST = new BasicItem(VaultMod.id("phoenix_dust"));
@@ -725,6 +733,33 @@ public class ModItems {
    public static final BasicMobEggItem T2_ZOMBIE_EGG = new BasicMobEggItem(
       VaultMod.id("t2_zombie_egg"), () -> ModEntities.T2_ZOMBIE, 44975, 7969893, new Properties().tab(VAULT_MOD_GROUP)
    );
+   public static final BasicMobEggItem T3_CREEPER_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_creeper_egg"), () -> ModEntities.T3_CREEPER, 894731, 0, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_DROWNED_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_drowned_egg"), () -> ModEntities.T3_DROWNED, 9433559, 7969893, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_ENDERMAN_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_enderman_egg"), () -> ModEntities.T3_ENDERMAN, 1447446, 0, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_HUSK_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_husk_egg"), () -> ModEntities.T3_HUSK, 7958625, 15125652, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_SKELETON_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_skeleton_egg"), () -> ModEntities.T3_SKELETON, 12698049, 4802889, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_STRAY_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_stray_egg"), () -> ModEntities.T3_STRAY, 6387319, 14543594, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_WITHER_SKELETON_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_wither_skeleton_egg"), () -> ModEntities.T3_WITHER_SKELETON, 1315860, 4672845, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_PIGLIN_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_piglin_egg"), () -> ModEntities.T3_PIGLIN, 10051392, 16380836, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_zombie_egg"), () -> ModEntities.T3_ZOMBIE, 44975, 7969893, new Properties().tab(VAULT_MOD_GROUP)
+   );
    public static final BasicMobEggItem VAULT_GREEN_GUMMY_SOLDIER_EGG = new BasicMobEggItem(
       VaultMod.id("vault_green_gummy_soldier_egg"), () -> ModEntities.VAULT_GREEN_GUMMY_SOLDIER, 2538582, 3593854, new Properties().tab(VAULT_MOD_GROUP)
    );
@@ -969,7 +1004,11 @@ public class ModItems {
       registry.register(WANING_FOCUS);
       registry.register(VAULT_CATALYST);
       registry.register(VAULT_CATALYST_INFUSED);
+      registry.register(VAULT_CATALYST_CHAOS);
       registry.register(RUNE);
+      registry.register(INSCRIPTION);
+      registry.register(INSCRIPTION_PIECE);
+      registry.register(AUGMENT);
       registry.register(VAULT_CATALYST_FRAGMENT);
       registry.register(CRYSTAL_SHARD_BENEVOLENT);
       registry.register(CRYSTAL_SHARD_OMNISCIENT);
@@ -983,6 +1022,7 @@ public class ModItems {
       registry.register(CRYSTAL_SEAL_ANCIENTS);
       registry.register(CRYSTAL_SEAL_RAID);
       registry.register(CRYSTAL_SEAL_CAKE);
+      registry.register(CRYSTAL_SEAL_SAGE);
       registry.register(CRYSTAL_SEAL_SPEEDRUN);
       registry.register(IDENTIFICATION_TOME);
       registry.register(UNKNOWN_ITEM);
@@ -1148,6 +1188,15 @@ public class ModItems {
       registry.register(T2_STRAY_EGG);
       registry.register(T2_WITHER_SKELETON_EGG);
       registry.register(T2_ZOMBIE_EGG);
+      registry.register(T3_CREEPER_EGG);
+      registry.register(T3_DROWNED_EGG);
+      registry.register(T3_ENDERMAN_EGG);
+      registry.register(T3_HUSK_EGG);
+      registry.register(T3_PIGLIN_EGG);
+      registry.register(T3_SKELETON_EGG);
+      registry.register(T3_STRAY_EGG);
+      registry.register(T3_WITHER_SKELETON_EGG);
+      registry.register(T3_ZOMBIE_EGG);
       registry.register(VAULT_GREEN_GUMMY_SOLDIER_EGG);
       registry.register(VAULT_BLUE_GUMMY_SOLDIER_EGG);
       registry.register(VAULT_YELLOW_GUMMY_SOLDIER_EGG);

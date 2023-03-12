@@ -1,6 +1,7 @@
 package iskallia.vault.item.tool;
 
 import iskallia.vault.client.util.ClientScheduler;
+import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.gear.GearRollHelper;
@@ -95,6 +96,16 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
       data.setRarity(rarity);
       data.write(stack);
       GearRollHelper.initializeGear(stack);
+   }
+
+   @Override
+   public VaultRecyclerConfig.RecyclerOutput getOutput(ItemStack input) {
+      return ModConfigs.VAULT_RECYCLER.getJewelRecyclingOutput();
+   }
+
+   @Override
+   public float getResultPercentage(ItemStack input) {
+      return 1.0F;
    }
 
    @Nonnull

@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "e",
+    "a",
+    "d"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "a": {
+      "item": "minecraft:armor_stand"
+    },
+    "d": {
+      "item": "the_vault:vault_diamond_block"
+    }
+  },
+  "result": {
+    "item": "the_vault:wardrobe",
+    "count": 1
+  }
+}

@@ -1,5 +1,6 @@
 package iskallia.vault.util.damage;
 
+import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.PlayerDamageMultiplierMessage;
 import java.util.ArrayList;
@@ -159,7 +160,7 @@ public class PlayerDamageHelper {
    @SubscribeEvent
    public static void onPlayerDamage(LivingHurtEvent event) {
       Entity source = event.getSource().getEntity();
-      if (source instanceof ServerPlayer) {
+      if (source instanceof ServerPlayer && !ActiveFlags.IS_AOE_ATTACKING.isSet()) {
          event.setAmount(event.getAmount() * getDamageMultiplier((ServerPlayer)source, true));
       }
    }

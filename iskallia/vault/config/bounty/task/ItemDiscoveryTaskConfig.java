@@ -3,7 +3,7 @@ package iskallia.vault.config.bounty.task;
 import iskallia.vault.bounty.task.properties.ItemDiscoveryProperties;
 import iskallia.vault.config.bounty.task.entry.GenericEntry;
 import iskallia.vault.config.bounty.task.entry.TaskEntry;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import java.util.ArrayList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Items;
@@ -27,8 +27,8 @@ public class ItemDiscoveryTaskConfig extends TaskConfig<TaskEntry<ResourceLocati
 
    @Override
    protected TaskEntry<ResourceLocation> generateConfigEntry() {
-      return new TaskEntry<>(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(Items.APPLE), new RangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3)
-         .addEntry(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(Items.STICK), new RangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3)
-         .addEntry(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(Items.DIAMOND), new RangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3);
+      return new TaskEntry<>(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(Items.APPLE), new IntRangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3)
+         .addEntry(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(Items.STICK), new IntRangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3)
+         .addEntry(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(Items.DIAMOND), new IntRangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3);
    }
 }

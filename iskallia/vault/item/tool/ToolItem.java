@@ -6,7 +6,11 @@ import com.google.common.collect.Multimap;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.entity.VaultChestTileEntity;
+import iskallia.vault.core.Version;
+import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.util.iterator.MappingIterator;
+import iskallia.vault.core.world.loot.LootTable;
+import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
@@ -19,6 +23,7 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.SidedHelper;
@@ -27,6 +32,7 @@ import it.unimi.dsi.fastutil.ints.IntIterators;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
@@ -40,11 +46,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -60,11 +68,16 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.MendingEnchantment;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootContext.Builder;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.IItemRenderProperties;
@@ -86,6 +99,11 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    public ToolItem(ResourceLocation id, Properties properties) {
       super(Tiers.NETHERITE, properties);
       this.setRegistryName(id);
+   }
+
+   @Override
+   public boolean shouldPreventAnvilCombination(ItemStack other) {
+      return !other.is(ModItems.JEWEL);
    }
 
    public boolean isDamageable(ItemStack stack) {
@@ -468,8 +486,8 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
 
    private static <T> T merge(VaultGearAttributeInstance<T> attributeInstance, T toAdd) {
       VaultGearAttribute<T> attribute = attributeInstance.getAttribute();
-      if (attribute.getIdentityMerger() != null) {
-         return attribute.getIdentityMerger().merge(attributeInstance.getValue(), toAdd);
+      if (attribute.getAttributeComparator() != null) {
+         return attribute.getAttributeComparator().merge(attributeInstance.getValue(), toAdd);
       } else {
          VaultMod.LOGGER.error("Unsupported merging on attribute " + attribute.getRegistryName(), new UnsupportedOperationException());
          return attributeInstance.getValue();
@@ -498,5 +516,72 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       return null;
+   }
+
+   public static boolean handleLoot(LootContext context, List<ItemStack> loot) {
+      ItemStack stack = (ItemStack)context.getParamOrNull(LootContextParams.TOOL);
+      Entity entity = (Entity)context.getParamOrNull(LootContextParams.THIS_ENTITY);
+      return handleLoot(context.getLevel(), stack, entity, loot);
+   }
+
+   public static boolean handleLoot(Builder context, List<ItemStack> loot) {
+      ItemStack stack = (ItemStack)context.getOptionalParameter(LootContextParams.TOOL);
+      Entity entity = (Entity)context.getOptionalParameter(LootContextParams.THIS_ENTITY);
+      return handleLoot(context.getLevel(), stack, entity, loot);
+   }
+
+   public static boolean handleLoot(ServerLevel world, ItemStack stack, Entity entity, List<ItemStack> loot) {
+      if (stack != null && stack.getItem() == ModItems.TOOL) {
+         VaultGearData data = VaultGearData.read(stack);
+         if (entity != null && entity.isShiftKeyDown()) {
+            if (data.get(ModGearAttributes.SMELTING, VaultGearAttributeTypeMerger.anyTrue())) {
+               handleSmelting(world, loot);
+            }
+
+            if (data.get(ModGearAttributes.PULVERIZING, VaultGearAttributeTypeMerger.anyTrue())) {
+               handlePulverizing(loot);
+            }
+         } else {
+            if (data.get(ModGearAttributes.PULVERIZING, VaultGearAttributeTypeMerger.anyTrue())) {
+               handlePulverizing(loot);
+            }
+
+            if (data.get(ModGearAttributes.SMELTING, VaultGearAttributeTypeMerger.anyTrue())) {
+               handleSmelting(world, loot);
+            }
+         }
+
+         return true;
+      } else {
+         return false;
+      }
+   }
+
+   public static void handleSmelting(ServerLevel world, List<ItemStack> loot) {
+      for (int i = loot.size() - 1; i >= 0; i--) {
+         ItemStack raw = loot.get(i);
+         Optional<SmeltingRecipe> opt = world.getRecipeManager().getRecipeFor(RecipeType.SMELTING, new SimpleContainer(new ItemStack[]{raw}), world.getLevel());
+         if (opt.isPresent()) {
+            ItemStack smelted = opt.get().getResultItem().copy();
+            smelted.setCount(raw.getCount() * smelted.getCount());
+            loot.set(i, smelted);
+         }
+      }
+   }
+
+   public static void handlePulverizing(List<ItemStack> loot) {
+      for (int i = loot.size() - 1; i >= 0; i--) {
+         ItemStack raw = loot.get(i);
+         LootTable table = ModConfigs.TOOL_PULVERIZING.get(raw.getItem());
+         if (table != null) {
+            loot.remove(i);
+            LootTableGenerator generator = new LootTableGenerator(Version.latest(), table, 0.0F);
+            generator.generate(JavaRandom.ofNanoTime());
+            generator.getItems().forEachRemaining(pulverized -> {
+               pulverized.setCount(raw.getCount() * pulverized.getCount());
+               loot.add(pulverized);
+            });
+         }
+      }
    }
 }

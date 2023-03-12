@@ -3,7 +3,7 @@ package iskallia.vault.config.bounty.task;
 import iskallia.vault.bounty.task.properties.KillEntityProperties;
 import iskallia.vault.config.bounty.task.entry.GenericEntry;
 import iskallia.vault.config.bounty.task.entry.TaskEntry;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import java.util.ArrayList;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
@@ -30,17 +30,17 @@ public class KillEntityTaskConfig extends TaskConfig<TaskEntry<ResourceLocation>
    @Override
    protected TaskEntry<ResourceLocation> generateConfigEntry() {
       return new TaskEntry<>(
-            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.SKELETON), new RangeEntry(10, 50))
+            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.SKELETON), new IntRangeEntry(10, 50))
                .setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())),
             3
          )
          .addEntry(
-            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.ZOMBIE), new RangeEntry(10, 50))
+            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.ZOMBIE), new IntRangeEntry(10, 50))
                .setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())),
             3
          )
          .addEntry(
-            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.CREEPER), new RangeEntry(10, 50))
+            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.CREEPER), new IntRangeEntry(10, 50))
                .setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())),
             3
          );

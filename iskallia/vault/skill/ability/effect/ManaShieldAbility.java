@@ -1,5 +1,9 @@
 package iskallia.vault.skill.ability.effect;
 
+import iskallia.vault.gear.attribute.ability.special.ManaShieldAbsorptionModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.mana.Mana;
@@ -62,9 +66,17 @@ public class ManaShieldAbility<C extends ManaShieldConfig> extends AbstractToggl
          AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
          AbilityNode<?, ?> node = abilities.getNodeOf(this);
          if (node.getAbility() == this && node.isLearned() && node.getAbilityConfig() instanceof ManaShieldConfig config) {
-            float var12 = Mth.clamp(config.getPercentageDamageAbsorbed(), 0.0F, 1.0F);
-            float manaUsed = Math.min(event.getAmount() * var12 * config.getManaPerDamageScalar(), Mana.get(player));
-            float damageAbsorbed = manaUsed / config.getManaPerDamageScalar();
+            float var13 = Mth.clamp(config.getPercentageDamageAbsorbed(), 0.0F, 1.0F);
+            float manaCostPerDamage = config.getManaPerDamageScalar();
+
+            for (ConfiguredModification<FloatValueConfig, ManaShieldAbsorptionModification> mod : SpecialAbilityModification.getModifications(
+               player, ManaShieldAbsorptionModification.class
+            )) {
+               manaCostPerDamage = mod.modification().adjustAbsorptionDamageCost(mod.config(), manaCostPerDamage);
+            }
+
+            float manaUsed = Math.min(event.getAmount() * var13 * manaCostPerDamage, Mana.get(player));
+            float damageAbsorbed = manaUsed / manaCostPerDamage;
             if (!Mth.equal(damageAbsorbed, 0.0F)) {
                if (Mth.equal(damageAbsorbed, event.getAmount())) {
                   event.setCanceled(true);

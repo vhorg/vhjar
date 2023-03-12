@@ -1,10 +1,12 @@
 package iskallia.vault.gear.attribute.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.gear.reader.VaultGearModifierReader;
 import java.util.Random;
 import java.util.function.Function;
+import javax.annotation.Nullable;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 
 public class CustomRegistryAttributeGenerator<T> extends ConfigurableAttributeGenerator<T, CustomRegistryAttributeGenerator.RegistryLookup> {
    private final Function<ResourceLocation, T> registryLookup;
@@ -21,6 +23,11 @@ public class CustomRegistryAttributeGenerator<T> extends ConfigurableAttributeGe
 
    public T generateRandomValue(CustomRegistryAttributeGenerator.RegistryLookup object, Random random) {
       return this.registryLookup.apply(object.registryKey);
+   }
+
+   @Nullable
+   public MutableComponent getConfigDisplay(VaultGearModifierReader<T> reader, CustomRegistryAttributeGenerator.RegistryLookup object) {
+      return null;
    }
 
    public static class RegistryLookup {

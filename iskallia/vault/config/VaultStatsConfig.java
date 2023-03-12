@@ -85,7 +85,7 @@ public class VaultStatsConfig extends Config {
       this.freeExperienceNotDealtAsDurabilityDamage = 400;
    }
 
-   public int getConfiguredVaultElementExperience(StatCollector stats) {
+   public int getStatsExperience(StatCollector stats) {
       float exp = 0.0F;
 
       for (ChestStat chestStat : stats.get(StatCollector.CHESTS)) {
@@ -109,10 +109,15 @@ public class VaultStatsConfig extends Config {
       return (int)exp;
    }
 
-   public int getConfiguredVaultExperience(Vault vault, StatCollector stats) {
+   public int getExperience(Vault vault, StatCollector stats) {
       float exp = 0.0F;
-      exp += this.getConfiguredVaultElementExperience(stats);
+      exp += this.getStatsExperience(stats);
       exp += this.getCompletion(vault).get(stats.getCompletion());
+      return (int)exp;
+   }
+
+   public int getCompletionExperience(Vault vault, StatCollector stats) {
+      float exp = this.getCompletion(vault).get(stats.getCompletion());
       return (int)exp;
    }
 
@@ -126,7 +131,7 @@ public class VaultStatsConfig extends Config {
 
    public Map<Completion, Float> getCompletion(Vault vault) {
       String pool = vault.getOptional(Vault.OBJECTIVES).flatMap(objectives -> objectives.getOptional(Objectives.KEY)).orElse("default");
-      return this.completion.get(pool);
+      return !this.completion.containsKey(pool) ? this.completion.get("default") : this.completion.get(pool);
    }
 
    public float getTreasureRoomsOpened() {

@@ -2,9 +2,9 @@ package iskallia.vault.core.data;
 
 import iskallia.vault.core.data.action.ListAction;
 import iskallia.vault.core.data.action.ListTracker;
-import iskallia.vault.core.data.adapter.Adapter;
 import iskallia.vault.core.data.sync.context.SyncContext;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.item.crystal.data.adapter.IBitAdapter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,22 +16,22 @@ import java.util.function.Supplier;
 
 public class DataMap<D extends DataMap<D, K, V>, K, V> extends AbstractMap<K, V> implements ICompound<D> {
    protected final Map<K, V> delegate;
-   private final Adapter<K> keyAdapter;
+   private final IBitAdapter<K, SyncContext> keyAdapter;
    private final Supplier<K> keySupplier;
-   private final Adapter<V> valueAdapter;
+   private final IBitAdapter<V, SyncContext> valueAdapter;
    private final Supplier<V> valueSupplier;
    protected final List<K> keys = new ArrayList<>();
    private final ListTracker tracker = new ListTracker();
 
-   public DataMap(Map<K, V> delegate, Adapter<K> keyAdapter, Supplier<K> keySupplier, Adapter<V> valueAdapter, Supplier<V> valueSupplier) {
-      this.keyAdapter = keyAdapter;
+   public DataMap(Map<K, V> delegate, IBitAdapter<K, ?> keyAdapter, Supplier<K> keySupplier, IBitAdapter<V, ?> valueAdapter, Supplier<V> valueSupplier) {
+      this.keyAdapter = (IBitAdapter<K, SyncContext>)keyAdapter;
       this.keySupplier = keySupplier;
-      this.valueAdapter = valueAdapter;
+      this.valueAdapter = (IBitAdapter<V, SyncContext>)valueAdapter;
       this.valueSupplier = valueSupplier;
       this.delegate = delegate;
    }
 
-   public DataMap(Map<K, V> delegate, Adapter<K> keyAdapter, Adapter<V> valueAdapter) {
+   public DataMap(Map<K, V> delegate, IBitAdapter<K, ?> keyAdapter, IBitAdapter<V, ?> valueAdapter) {
       this(delegate, keyAdapter, () -> null, valueAdapter, () -> null);
    }
 
@@ -67,8 +67,8 @@ public class DataMap<D extends DataMap<D, K, V>, K, V> extends AbstractMap<K, V>
       buffer.writeIntSegmented(this.keys.size(), 4);
 
       for (K key : this.keys) {
-         this.keyAdapter.writeValue(buffer, context, key);
-         this.valueAdapter.writeValue(buffer, context, this.delegate.get(key));
+         this.keyAdapter.writeBits(key, buffer, context);
+         this.valueAdapter.writeBits(this.delegate.get(key), buffer, context);
       }
 
       return (D)this;
@@ -80,8 +80,8 @@ public class DataMap<D extends DataMap<D, K, V>, K, V> extends AbstractMap<K, V>
       int size = buffer.readIntSegmented(4);
 
       for (int i = 0; i < size; i++) {
-         K key = this.keyAdapter.readValue(buffer, context, this.keySupplier.get());
-         V value = this.valueAdapter.readValue(buffer, context, this.valueSupplier.get());
+         K key = this.keyAdapter.readBits(buffer, context).orElseGet(this.keySupplier);
+         V value = this.valueAdapter.readBits(buffer, context).orElseGet(this.valueSupplier);
          this.delegate.put(key, value);
          this.keys.add(key);
       }
@@ -111,11 +111,11 @@ public class DataMap<D extends DataMap<D, K, V>, K, V> extends AbstractMap<K, V>
             if (action.type != ListAction.Type.APPEND) {
                packet.writeIntBounded(action.index, 0, action.size - 1);
             } else {
-               this.keyAdapter.writeValue(packet, context, this.keyAdapter.validate((K)action.value, context));
+               this.keyAdapter.writeBits((K)action.value, packet, context);
             }
 
             if (action.type != ListAction.Type.REMOVE) {
-               this.valueAdapter.writeValue(packet, context, this.valueAdapter.validate(this.delegate.get(action.value), context));
+               this.valueAdapter.writeBits(this.delegate.get(action.value), packet, context);
             }
          }
 
@@ -141,11 +141,11 @@ public class DataMap<D extends DataMap<D, K, V>, K, V> extends AbstractMap<K, V>
             if (type != ListAction.Type.APPEND) {
                index = packet.readIntBounded(0, this.delegate.size() - 1);
             } else {
-               key = this.keyAdapter.readValue(packet, context, this.keySupplier.get());
+               key = this.keyAdapter.readBits(packet, context).orElseGet(this.keySupplier);
             }
 
             if (type != ListAction.Type.REMOVE) {
-               value = this.valueAdapter.readValue(packet, context, this.valueSupplier.get());
+               value = this.valueAdapter.readBits(packet, context).orElseGet(this.valueSupplier);
             }
 
             switch (type) {

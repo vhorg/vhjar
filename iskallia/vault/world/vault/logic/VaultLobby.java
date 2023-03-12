@@ -88,7 +88,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
                   if (branch.vaultId == null || VaultRaidData.get(world).get(branch.vaultId) == null) {
                      CrystalData data = this.createCrystalData(branch);
                      if (data != null) {
-                        VaultRaid.Builder builder = data.createVault(world, null);
+                        VaultRaid.Builder builder = null;
                         VaultRaid newVault = VaultRaidData.get(world).startVault(world, builder, v -> {
                            v.getProperties().create(VaultRaid.LEVEL, 1000);
                            v.getProperties().create(VaultRaid.FORCE_ACTIVE, true);
@@ -131,22 +131,7 @@ public class VaultLobby implements INBTSerializable<CompoundTag>, IVaultTask {
    }
 
    private CrystalData createCrystalData(VaultLobby.Branch branch) {
-      CrystalData data = new CrystalData();
-      data.setCanGenerateTreasureRooms(false);
-      data.setCanTriggerInfluences(false);
-      if (branch.type == VaultGod.VELARA) {
-         data.setType(CrystalData.Type.FINAL_VELARA);
-      } else if (branch.type == VaultGod.TENOS) {
-         data.setType(CrystalData.Type.FINAL_TENOS);
-      } else if (branch.type == VaultGod.WENDARR) {
-         data.setType(CrystalData.Type.FINAL_WENDARR);
-      } else if (branch.type == VaultGod.IDONA) {
-         data.setType(CrystalData.Type.FINAL_IDONA);
-      } else {
-         data = null;
-      }
-
-      return data;
+      return null;
    }
 
    private void initialize(VaultLobby.Branch branch, VaultRaid vault) {

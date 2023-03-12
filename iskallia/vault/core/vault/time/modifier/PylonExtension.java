@@ -1,7 +1,7 @@
 package iskallia.vault.core.vault.time.modifier;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -13,9 +13,9 @@ import net.minecraft.world.entity.player.Player;
 public class PylonExtension extends ClockModifier {
    public static final SupplierKey<ClockModifier> KEY = SupplierKey.of("pylon", ClockModifier.class).with(Version.v1_6, PylonExtension::new);
    public static final FieldRegistry FIELDS = ClockModifier.FIELDS.merge(new FieldRegistry());
-   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_6, Adapter.ofUUID(), DISK.all()).register(FIELDS);
+   public static final FieldKey<UUID> PLAYER = FieldKey.of("player", UUID.class).with(Version.v1_6, Adapters.UUID, DISK.all()).register(FIELDS);
    public static final FieldKey<Integer> INCREMENT = FieldKey.of("increment", Integer.class)
-      .with(Version.v1_6, Adapter.ofSegmentedInt(7), DISK.all())
+      .with(Version.v1_6, Adapters.INT_SEGMENTED_7, DISK.all())
       .register(FIELDS);
 
    protected PylonExtension() {

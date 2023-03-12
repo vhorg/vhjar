@@ -4,13 +4,14 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataList;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.EnumAdapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.vault.VaultRegistry;
 import java.util.ArrayList;
-import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -21,13 +22,13 @@ import net.minecraftforge.common.util.INBTSerializable;
 public class DIYRoomEntry extends DataObject<DIYRoomEntry> implements INBTSerializable<CompoundTag> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<DIYRoomEntry.Type> TYPE = FieldKey.of("type", DIYRoomEntry.Type.class)
-      .with(Version.v1_0, Adapter.ofEnum(DIYRoomEntry.Type.class), DISK.all())
+      .with(Version.v1_0, Adapters.ofEnum(DIYRoomEntry.Type.class, EnumAdapter.Mode.ORDINAL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<ResourceLocation> POOL = FieldKey.of("pool", ResourceLocation.class)
-      .with(Version.v1_0, Adapter.ofIdentifier(), DISK.all())
+      .with(Version.v1_0, Adapters.IDENTIFIER, DISK.all())
       .register(FIELDS);
-   public static final FieldKey<Integer> COUNT = FieldKey.of("count", Integer.class).with(Version.v1_0, Adapter.ofSegmentedInt(7), DISK.all()).register(FIELDS);
-   public static final FieldKey<Integer> COLOR = FieldKey.of("color", Integer.class).with(Version.v1_0, Adapter.ofInt(), DISK.all()).register(FIELDS);
+   public static final FieldKey<Integer> COUNT = FieldKey.of("count", Integer.class).with(Version.v1_0, Adapters.INT_SEGMENTED_7, DISK.all()).register(FIELDS);
+   public static final FieldKey<Integer> COLOR = FieldKey.of("color", Integer.class).with(Version.v1_0, Adapters.INT, DISK.all()).register(FIELDS);
 
    private DIYRoomEntry() {
    }
@@ -58,14 +59,15 @@ public class DIYRoomEntry extends DataObject<DIYRoomEntry> implements INBTSerial
    }
 
    public Component getName() {
+      String name;
       if (this.has(TYPE)) {
-         return this.get(TYPE).getDisplay();
+         name = this.get(TYPE).getName();
       } else {
          TemplatePoolKey pool = VaultRegistry.TEMPLATE_POOL.getKey(this.get(POOL));
-         return (Component)(pool == null
-            ? new TextComponent("UNKNOWN")
-            : new TextComponent(pool.getName()).withStyle(Style.EMPTY.withColor(this.getOr(COLOR, Integer.valueOf(16777215)))));
+         name = pool == null ? "Unknown" : pool.getName();
       }
+
+      return new TextComponent(name).withStyle(Style.EMPTY.withColor(this.getOr(COLOR, Integer.valueOf(16777215))));
    }
 
    public void mergeWith(DIYRoomEntry other) {
@@ -158,7 +160,7 @@ public class DIYRoomEntry extends DataObject<DIYRoomEntry> implements INBTSerial
 
    public static class List extends DataList<DIYRoomEntry.List, DIYRoomEntry> {
       public List() {
-         super(new ArrayList<>(), Adapter.ofCompound(DIYRoomEntry::new));
+         super(new ArrayList<>(), CompoundAdapter.of(DIYRoomEntry::new));
       }
 
       public java.util.List<TemplatePoolKey> flatten(DIYVaultLayout layout) {
@@ -192,11 +194,11 @@ public class DIYRoomEntry extends DataObject<DIYRoomEntry> implements INBTSerial
       CHALLENGE,
       OMEGA;
 
-      public Component getDisplay() {
+      public String getName() {
          return switch (this) {
-            case COMMON -> new TextComponent("Common").withStyle(ChatFormatting.WHITE);
-            case CHALLENGE -> new TextComponent("Challenge").withStyle(ChatFormatting.LIGHT_PURPLE);
-            case OMEGA -> new TextComponent("Omega").withStyle(ChatFormatting.GREEN);
+            case COMMON -> "Common";
+            case CHALLENGE -> "Challenge";
+            case OMEGA -> "Omega";
          };
       }
    }

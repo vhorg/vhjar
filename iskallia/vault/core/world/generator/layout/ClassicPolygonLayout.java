@@ -1,7 +1,7 @@
 package iskallia.vault.core.world.generator.layout;
 
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.compound.IntList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
@@ -13,7 +13,7 @@ public class ClassicPolygonLayout extends ClassicInfiniteLayout {
    public static final SupplierKey<GridLayout> KEY = SupplierKey.of("classic_polygon_vault", GridLayout.class).with(Version.v1_0, ClassicPolygonLayout::new);
    public static final FieldRegistry FIELDS = ClassicInfiniteLayout.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<IntList> VERTICES = FieldKey.of("vertices", IntList.class)
-      .with(Version.v1_0, Adapter.ofCompound(), DISK.all(), () -> IntList.createSegmented(7))
+      .with(Version.v1_0, CompoundAdapter.of(() -> IntList.createSegmented(7)), DISK.all())
       .register(FIELDS);
 
    protected ClassicPolygonLayout() {

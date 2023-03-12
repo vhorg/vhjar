@@ -1,22 +1,22 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " c ",
-        "dsd",
-        " w "
+        "e#e",
+        "ese",
+        "ede"
     ],
     "key": {
-        "c": {
+        "e": {
+            "item": "the_vault:vault_essence"
+        },
+        "#": {
             "item": "minecraft:cake"
         },
         "d": {
-            "item": "the_vault:vault_diamond"
+            "item": "the_vault:vault_diamond_block"
         },
         "s": {
             "item": "the_vault:crystal_seal_empty"
-        },
-        "w": {
-            "item": "the_vault:vault_diamond_block"
         }
     },
     "result": {

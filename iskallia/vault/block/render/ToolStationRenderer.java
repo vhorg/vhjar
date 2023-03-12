@@ -28,7 +28,7 @@ public class ToolStationRenderer implements BlockEntityRenderer<ToolStationTileE
       ItemStack craftedTool = tile.getResultContainer().getItem(0);
       if (!craftedTool.isEmpty()) {
          poseStack.pushPose();
-         poseStack.translate(0.5, 0.5, 0.5);
+         poseStack.translate(0.5, 0.65, 0.5);
          Direction facing = (Direction)tile.getBlockState().getValue(ToolStationBlock.FACING);
          poseStack.translate(0.0, 0.21, 0.0);
          poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F - facing.toYRot()));

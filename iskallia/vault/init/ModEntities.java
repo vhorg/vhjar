@@ -11,6 +11,7 @@ import iskallia.vault.entity.entity.BoogiemanEntity;
 import iskallia.vault.entity.entity.DollMiniMeEntity;
 import iskallia.vault.entity.entity.DrillArrowEntity;
 import iskallia.vault.entity.entity.EffectCloudEntity;
+import iskallia.vault.entity.entity.ElixirOrbEntity;
 import iskallia.vault.entity.entity.EtchingVendorEntity;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.entity.EternalSpiritEntity;
@@ -56,6 +57,15 @@ import iskallia.vault.entity.entity.tier2.Tier2SkeletonEntity;
 import iskallia.vault.entity.entity.tier2.Tier2StrayEntity;
 import iskallia.vault.entity.entity.tier2.Tier2WitherSkeletonEntity;
 import iskallia.vault.entity.entity.tier2.Tier2ZombieEntity;
+import iskallia.vault.entity.entity.tier2.Tier3ZombieEntity;
+import iskallia.vault.entity.entity.tier3.Tier3CreeperEntity;
+import iskallia.vault.entity.entity.tier3.Tier3DrownedEntity;
+import iskallia.vault.entity.entity.tier3.Tier3EndermanEntity;
+import iskallia.vault.entity.entity.tier3.Tier3HuskEntity;
+import iskallia.vault.entity.entity.tier3.Tier3PiglinEntity;
+import iskallia.vault.entity.entity.tier3.Tier3SkeletonEntity;
+import iskallia.vault.entity.entity.tier3.Tier3StrayEntity;
+import iskallia.vault.entity.entity.tier3.Tier3WitherSkeletonEntity;
 import iskallia.vault.entity.model.FighterModel;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.TreasureGoblinModel;
@@ -73,6 +83,15 @@ import iskallia.vault.entity.model.eyesore.EyestalkModel;
 import iskallia.vault.entity.model.tier2.Tier2CreeperModel;
 import iskallia.vault.entity.model.tier2.Tier2EndermanModel;
 import iskallia.vault.entity.model.tier2.Tier2HuskModel;
+import iskallia.vault.entity.model.tier3.Tier3CreeperModel;
+import iskallia.vault.entity.model.tier3.Tier3DrownedModel;
+import iskallia.vault.entity.model.tier3.Tier3EndermanModel;
+import iskallia.vault.entity.model.tier3.Tier3HuskModel;
+import iskallia.vault.entity.model.tier3.Tier3PiglinModel;
+import iskallia.vault.entity.model.tier3.Tier3SkeletonModel;
+import iskallia.vault.entity.model.tier3.Tier3StrayModel;
+import iskallia.vault.entity.model.tier3.Tier3WitherSkeletonModel;
+import iskallia.vault.entity.model.tier3.Tier3ZombieModel;
 import iskallia.vault.entity.renderer.elite.EliteEnderOrnamentLayer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -161,12 +180,22 @@ public class ModEntities {
    public static EntityType<Tier2StrayEntity> T2_STRAY;
    public static EntityType<Tier2WitherSkeletonEntity> T2_WITHER_SKELETON;
    public static EntityType<Tier2ZombieEntity> T2_ZOMBIE;
+   public static EntityType<Tier3CreeperEntity> T3_CREEPER;
+   public static EntityType<Tier3DrownedEntity> T3_DROWNED;
+   public static EntityType<Tier3EndermanEntity> T3_ENDERMAN;
+   public static EntityType<Tier3HuskEntity> T3_HUSK;
+   public static EntityType<Tier3PiglinEntity> T3_PIGLIN;
+   public static EntityType<Tier3SkeletonEntity> T3_SKELETON;
+   public static EntityType<Tier3StrayEntity> T3_STRAY;
+   public static EntityType<Tier3WitherSkeletonEntity> T3_WITHER_SKELETON;
+   public static EntityType<Tier3ZombieEntity> T3_ZOMBIE;
    public static EntityType<DrillArrowEntity> DRILL_ARROW;
    public static EntityType<EffectCloudEntity> EFFECT_CLOUD;
    public static EntityType<VaultSandEntity> VAULT_SAND;
    public static EntityType<FloatingItemEntity> FLOATING_ITEM;
    public static EntityType<EyesoreFireballEntity> EYESORE_FIREBALL;
    public static EntityType<FixedArrowEntity> FIXED_ARROW;
+   public static EntityType<ElixirOrbEntity> ELIXIR_ORB;
    public static EntityType<SpiritEntity> SPIRIT;
    public static EntityType<EternalSpiritEntity> ETERNAL_SPIRIT;
    public static EntityType<FighterEntity.ThrowableBrick> BRICK;
@@ -296,76 +325,198 @@ public class ModEntities {
          "elite_witch", Builder.of(Witch::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Witch::createAttributes, event
       );
       T1_CREEPER = registerLiving(
-         "t1_creeper", Builder.of(Tier1CreeperEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Creeper::createAttributes, event
+         "t1_creeper",
+         Builder.of(Tier1CreeperEntity::new, MobCategory.MONSTER).sized(EntityType.CREEPER.getWidth(), EntityType.CREEPER.getHeight()).clientTrackingRange(8),
+         Creeper::createAttributes,
+         event
       );
       T1_DROWNED = registerLiving(
-         "t1_drowned", Builder.of(Tier1DrownedEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+         "t1_drowned",
+         Builder.of(Tier1DrownedEntity::new, MobCategory.MONSTER).sized(EntityType.DROWNED.getWidth(), EntityType.DROWNED.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
       );
       T1_ENDERMAN = registerLiving(
-         "t1_enderman", Builder.of(Tier1EndermanEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), EnderMan::createAttributes, event
+         "t1_enderman",
+         Builder.of(Tier1EndermanEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.ENDERMAN.getWidth(), EntityType.ENDERMAN.getHeight())
+            .clientTrackingRange(8),
+         EnderMan::createAttributes,
+         event
       );
       T1_HUSK = registerLiving(
-         "t1_husk", Builder.of(Tier1HuskEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+         "t1_husk",
+         Builder.of(Tier1HuskEntity::new, MobCategory.MONSTER).sized(EntityType.HUSK.getWidth(), EntityType.HUSK.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
       );
       T1_PIGLIN = registerLiving(
-         "t1_piglin", Builder.of(Tier1PiglinEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Piglin::createAttributes, event
+         "t1_piglin",
+         Builder.of(Tier1PiglinEntity::new, MobCategory.MONSTER)
+            .fireImmune()
+            .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())
+            .clientTrackingRange(8),
+         Piglin::createAttributes,
+         event
       );
       T1_SKELETON = registerLiving(
          "t1_skeleton",
-         Builder.of(Tier1SkeletonEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         Builder.of(Tier1SkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+            .clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T1_STRAY = registerLiving(
          "t1_stray",
-         Builder.of(Tier1StrayEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         Builder.of(Tier1StrayEntity::new, MobCategory.MONSTER).sized(EntityType.STRAY.getWidth(), EntityType.STRAY.getHeight()).clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T1_WITHER_SKELETON = registerLiving(
          "t1_wither_skeleton",
-         Builder.of(Tier1WitherSkeletonEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         Builder.of(Tier1WitherSkeletonEntity::new, MobCategory.MONSTER)
+            .fireImmune()
+            .sized(EntityType.WITHER_SKELETON.getWidth(), EntityType.WITHER_SKELETON.getHeight())
+            .clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T1_ZOMBIE = registerLiving(
-         "t1_zombie", Builder.of(Tier1ZombieEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+         "t1_zombie",
+         Builder.of(Tier1ZombieEntity::new, MobCategory.MONSTER).sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
       );
       T2_CREEPER = registerLiving(
-         "t2_creeper", Builder.of(Tier2CreeperEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Creeper::createAttributes, event
+         "t2_creeper",
+         Builder.of(Tier2CreeperEntity::new, MobCategory.MONSTER).sized(EntityType.CREEPER.getWidth(), EntityType.CREEPER.getHeight()).clientTrackingRange(8),
+         Creeper::createAttributes,
+         event
       );
       T2_DROWNED = registerLiving(
-         "t2_drowned", Builder.of(Tier2DrownedEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+         "t2_drowned",
+         Builder.of(Tier2DrownedEntity::new, MobCategory.MONSTER).sized(EntityType.DROWNED.getWidth(), EntityType.DROWNED.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
       );
       T2_ENDERMAN = registerLiving(
-         "t2_enderman", Builder.of(Tier2EndermanEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), EnderMan::createAttributes, event
+         "t2_enderman",
+         Builder.of(Tier2EndermanEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.ENDERMAN.getWidth(), EntityType.ENDERMAN.getHeight())
+            .clientTrackingRange(8),
+         EnderMan::createAttributes,
+         event
       );
       T2_HUSK = registerLiving(
-         "t2_husk", Builder.of(Tier2HuskEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+         "t2_husk",
+         Builder.of(Tier2HuskEntity::new, MobCategory.MONSTER).sized(EntityType.HUSK.getWidth(), EntityType.HUSK.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
       );
       T2_PIGLIN = registerLiving(
-         "t2_piglin", Builder.of(Tier2PiglinEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Piglin::createAttributes, event
+         "t2_piglin",
+         Builder.of(Tier2PiglinEntity::new, MobCategory.MONSTER)
+            .fireImmune()
+            .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())
+            .clientTrackingRange(8),
+         Piglin::createAttributes,
+         event
       );
       T2_SKELETON = registerLiving(
          "t2_skeleton",
-         Builder.of(Tier2SkeletonEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         Builder.of(Tier2SkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+            .clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T2_STRAY = registerLiving(
          "t2_stray",
-         Builder.of(Tier2StrayEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         Builder.of(Tier2StrayEntity::new, MobCategory.MONSTER).sized(EntityType.STRAY.getWidth(), EntityType.STRAY.getHeight()).clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T2_WITHER_SKELETON = registerLiving(
          "t2_wither_skeleton",
-         Builder.of(Tier2WitherSkeletonEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8),
+         Builder.of(Tier2WitherSkeletonEntity::new, MobCategory.MONSTER)
+            .fireImmune()
+            .sized(EntityType.WITHER_SKELETON.getWidth(), EntityType.WITHER_SKELETON.getHeight())
+            .clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T2_ZOMBIE = registerLiving(
-         "t2_zombie", Builder.of(Tier2ZombieEntity::new, MobCategory.MONSTER).sized(0.72F, 2.34F).clientTrackingRange(8), Zombie::createAttributes, event
+         "t2_zombie",
+         Builder.of(Tier2ZombieEntity::new, MobCategory.MONSTER).sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
+      );
+      T3_CREEPER = registerLiving(
+         "t3_creeper",
+         Builder.of(Tier3CreeperEntity::new, MobCategory.MONSTER).sized(EntityType.CREEPER.getWidth(), EntityType.CREEPER.getHeight()).clientTrackingRange(8),
+         Creeper::createAttributes,
+         event
+      );
+      T3_DROWNED = registerLiving(
+         "t3_drowned",
+         Builder.of(Tier3DrownedEntity::new, MobCategory.MONSTER).sized(EntityType.DROWNED.getWidth(), EntityType.DROWNED.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
+      );
+      T3_ENDERMAN = registerLiving(
+         "t3_enderman",
+         Builder.of(Tier3EndermanEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.ENDERMAN.getWidth(), EntityType.ENDERMAN.getHeight())
+            .clientTrackingRange(8),
+         EnderMan::createAttributes,
+         event
+      );
+      T3_HUSK = registerLiving(
+         "t3_husk",
+         Builder.of(Tier3HuskEntity::new, MobCategory.MONSTER).sized(EntityType.HUSK.getWidth(), EntityType.HUSK.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
+      );
+      T3_PIGLIN = registerLiving(
+         "t3_piglin",
+         Builder.of(Tier3PiglinEntity::new, MobCategory.MONSTER)
+            .fireImmune()
+            .sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight())
+            .clientTrackingRange(8),
+         Piglin::createAttributes,
+         event
+      );
+      T3_SKELETON = registerLiving(
+         "t3_skeleton",
+         Builder.of(Tier3SkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T3_STRAY = registerLiving(
+         "t3_stray",
+         Builder.of(Tier3StrayEntity::new, MobCategory.MONSTER)
+            .fireImmune()
+            .sized(EntityType.STRAY.getWidth(), EntityType.STRAY.getHeight())
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T3_WITHER_SKELETON = registerLiving(
+         "t3_wither_skeleton",
+         Builder.of(Tier3WitherSkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T3_ZOMBIE = registerLiving(
+         "t3_zombie",
+         Builder.of(Tier3ZombieEntity::new, MobCategory.MONSTER).sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight()).clientTrackingRange(8),
+         Zombie::createAttributes,
+         event
       );
       DRILL_ARROW = register("drill_arrow", Builder.of(DrillArrowEntity::new, MobCategory.MISC), event);
       EFFECT_CLOUD = register("effect_cloud", Builder.of(EffectCloudEntity::new, MobCategory.MISC), event);
@@ -375,6 +526,7 @@ public class ModEntities {
       FIXED_ARROW = register(
          "fixed_arrow", Builder.of(FixedArrowEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20), event
       );
+      ELIXIR_ORB = register("elixir_orb", Builder.of(ElixirOrbEntity::new, MobCategory.MISC).sized(0.5F, 0.5F), event);
       SPIRIT = registerLiving(
          "spirit", Builder.of(SpiritEntity::new, MobCategory.MONSTER).sized(0.6F, 1.8F).clientTrackingRange(8), Witch::createAttributes, event
       );
@@ -446,6 +598,15 @@ public class ModEntities {
          event.registerLayerDefinition(ModModelLayers.T2_HUSK, Tier2HuskModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.T2_CREEPER, Tier2CreeperModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.T2_ENDERMAN, Tier2EndermanModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_CREEPER, Tier3CreeperModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_DROWNED, Tier3DrownedModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_ENDERMAN, Tier3EndermanModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_HUSK, Tier3HuskModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_SKELETON, Tier3SkeletonModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_STRAY, Tier3StrayModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_WITHER_SKELETON, Tier3WitherSkeletonModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_PIGLIN, Tier3PiglinModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_ZOMBIE, Tier3ZombieModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.VAULT_SPIDER_BABY, VaultSpiderBabyModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.WINTER_WOLF, WinterWolfModel::createBodyLayer);
       }

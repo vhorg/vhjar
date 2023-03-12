@@ -45,6 +45,10 @@ public class AttributeGearData {
       this.fromNbt(tag, version);
    }
 
+   public List<VaultGearAttributeInstance<?>> getAttributes() {
+      return this.attributes;
+   }
+
    public static boolean hasData(ItemStack stack) {
       CompoundTag tag = stack.getTag();
       return tag != null && tag.contains("vaultGearData", 12);

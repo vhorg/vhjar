@@ -1,5 +1,7 @@
 package iskallia.vault.util;
 
+import iskallia.vault.container.oversized.OverSizedInventory;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.integration.IntegrationSB;
 import java.util.ArrayList;
@@ -86,6 +88,106 @@ public class InventoryUtil {
       }
 
       return itemAccesses.stream().map(InventoryUtil.ItemAccess::getStack).collect(Collectors.toList());
+   }
+
+   public static List<ItemStack> getMissingInputs(List<ItemStack> recipeInputs, Inventory playerInventory) {
+      return getMissingInputs(recipeInputs, playerInventory, OverSizedInventory.EMPTY);
+   }
+
+   public static List<ItemStack> getMissingInputs(List<ItemStack> recipeInputs, Inventory playerInventory, OverSizedInventory containerInventory) {
+      List<ItemStack> missing = new ArrayList<>();
+
+      for (ItemStack input : recipeInputs) {
+         int neededCount = input.getCount();
+
+         for (OverSizedItemStack overSized : containerInventory.getOverSizedContents()) {
+            if (isEqualCrafting(input, overSized.stack())) {
+               neededCount -= overSized.amount();
+            }
+         }
+
+         for (ItemStack plStack : playerInventory.items) {
+            if (isEqualCrafting(input, plStack)) {
+               neededCount -= plStack.getCount();
+            }
+         }
+
+         if (neededCount > 0) {
+            missing.add(input);
+         }
+      }
+
+      return missing;
+   }
+
+   public static boolean consumeInputs(List<ItemStack> recipeInputs, Inventory playerInventory, boolean simulate) {
+      return consumeInputs(recipeInputs, playerInventory, OverSizedInventory.EMPTY, simulate);
+   }
+
+   public static boolean consumeInputs(List<ItemStack> recipeInputs, Inventory playerInventory, OverSizedInventory tileInv, boolean simulate) {
+      return consumeInputs(recipeInputs, playerInventory, tileInv, simulate, new ArrayList<>());
+   }
+
+   public static boolean consumeInputs(List<ItemStack> recipeInputs, Inventory playerInventory, boolean simulate, List<OverSizedItemStack> consumed) {
+      return consumeInputs(recipeInputs, playerInventory, OverSizedInventory.EMPTY, simulate, consumed);
+   }
+
+   public static boolean consumeInputs(
+      List<ItemStack> recipeInputs, Inventory playerInventory, OverSizedInventory tileInv, boolean simulate, List<OverSizedItemStack> consumed
+   ) {
+      boolean success = true;
+
+      for (ItemStack input : recipeInputs) {
+         int neededCount = input.getCount();
+         NonNullList<OverSizedItemStack> overSizedContents = tileInv.getOverSizedContents();
+
+         for (int slot = 0; slot < overSizedContents.size(); slot++) {
+            OverSizedItemStack overSized = (OverSizedItemStack)overSizedContents.get(slot);
+            if (neededCount <= 0) {
+               break;
+            }
+
+            if (isEqualCrafting(input, overSized.stack())) {
+               int deductedAmount = Math.min(neededCount, overSized.amount());
+               if (!simulate) {
+                  tileInv.setOverSizedStack(slot, overSized.addCopy(-deductedAmount));
+                  consumed.add(overSized.copyAmount(deductedAmount));
+               }
+
+               neededCount -= overSized.amount();
+            }
+         }
+
+         for (ItemStack plStack : playerInventory.items) {
+            if (neededCount <= 0) {
+               break;
+            }
+
+            if (isEqualCrafting(input, plStack)) {
+               int deductedAmount = Math.min(neededCount, plStack.getCount());
+               if (!simulate) {
+                  plStack.shrink(deductedAmount);
+                  ItemStack deducted = plStack.copy();
+                  deducted.setCount(deductedAmount);
+                  consumed.add(OverSizedItemStack.of(deducted));
+               }
+
+               neededCount -= deductedAmount;
+            }
+         }
+
+         if (neededCount > 0) {
+            success = false;
+         }
+      }
+
+      return success;
+   }
+
+   private static boolean isEqualCrafting(ItemStack thisStack, ItemStack thatStack) {
+      return thisStack.getItem() == thatStack.getItem()
+         && thisStack.getDamageValue() == thatStack.getDamageValue()
+         && (thisStack.getTag() == null || thisStack.areShareTagsEqual(thatStack));
    }
 
    private static List<InventoryUtil.ItemAccess> getBotaniaBaubleBoxAccess(InventoryUtil.ItemAccess containerAccess) {

@@ -26,7 +26,7 @@ import net.minecraftforge.network.NetworkHooks;
 
 public class VaultDiffuserBlock extends Block implements EntityBlock {
    public VaultDiffuserBlock() {
-      super(Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(0.5F).lightLevel(state -> 13).noOcclusion());
+      super(Properties.of(Material.STONE).strength(0.5F).lightLevel(state -> 13).noOcclusion());
    }
 
    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {

@@ -1,8 +1,13 @@
 {
-    "replace": "false",
+    "replace": false,
     "values": [
         "the_vault:bounty_block",
         "the_vault:black_market",
-        "the_vault:animal_pen"
+        "the_vault:animal_pen",
+        "the_vault:chromatic_log",
+        "the_vault:stripped_chromatic_log",
+        "the_vault:chromatic_planks",
+        "the_vault:chromatic_slab",
+        "the_vault:chromatic_stairs"
     ]
 }

@@ -1,6 +1,5 @@
 package iskallia.vault.world.vault.builder;
 
-import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.world.data.VaultPartyData;
@@ -9,7 +8,6 @@ import iskallia.vault.world.vault.player.VaultPlayerType;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -26,13 +24,7 @@ public class FinalLobbyBuilder extends VaultRaidBuilder {
    @Override
    public VaultRaid.Builder initializeBuilder(ServerLevel world, ServerPlayer player, CrystalData crystal) {
       VaultRaid.Builder builder = this.getDefaultBuilder(crystal, world, player);
-      Set<UUID> players = crystal.getFrameData()
-         .tiles
-         .stream()
-         .filter(tile -> tile.block == ModBlocks.FINAL_VAULT_FRAME)
-         .filter(tile -> tile.data.contains("OwnerUUID", 8))
-         .map(tile -> UUID.fromString(tile.data.getString("OwnerUUID")))
-         .collect(Collectors.toSet());
+      Set<UUID> players = null;
       if (!players.contains(player.getUUID())) {
          return null;
       } else {

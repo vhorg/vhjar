@@ -5,7 +5,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.core.world.loot.LootRoll;
+import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.CrystalModifiers;
@@ -19,6 +19,7 @@ import iskallia.vault.item.crystal.objective.CakeCrystalObjective;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.item.crystal.objective.ScavengerCrystalObjective;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
+import iskallia.vault.item.crystal.time.CrystalTime;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Rotation;
 
 public class VaultCrystalConfig extends Config {
@@ -40,6 +41,8 @@ public class VaultCrystalConfig extends Config {
    public LevelEntryList<VaultCrystalConfig.LayoutEntry> LAYOUTS;
    @Expose
    public LevelEntryList<VaultCrystalConfig.ObjectiveEntry> OBJECTIVES;
+   @Expose
+   public Map<ResourceLocation, LevelEntryList<VaultCrystalConfig.TimeEntry>> TIMES;
    @Expose
    private Map<ResourceLocation, LevelEntryList<VaultCrystalConfig.SealEntry>> SEALS;
 
@@ -60,16 +63,17 @@ public class VaultCrystalConfig extends Config {
       return this.OBJECTIVES.getForLevel(level).flatMap(entry -> entry.pool.getRandom(random));
    }
 
-   public boolean applySeal(Item seal, Item input, CrystalData crystal) {
-      return !this.SEALS.containsKey(seal.getRegistryName()) ? false : this.SEALS.get(seal.getRegistryName()).getForLevel(crystal.getLevel()).map(entry -> {
-         if (!entry.input.contains(input.getRegistryName())) {
-            return false;
-         } else if (!crystal.canBeModified()) {
-            return false;
-         } else {
-            String existing = CrystalObjective.getId(crystal.getObjective());
-            String attempted = CrystalObjective.getId(entry.objective);
-            if (existing.equals(attempted)) {
+   public Optional<CrystalTime> getRandomTime(ResourceLocation id, int level, RandomSource random) {
+      return this.TIMES.getOrDefault(id, LevelEntryList.empty()).getForLevel(level).flatMap(entry -> entry.pool.getRandom(random));
+   }
+
+   public boolean applySeal(ItemStack seal, ItemStack input, CrystalData crystal) {
+      return !this.SEALS.containsKey(seal.getItem().getRegistryName())
+         ? false
+         : this.SEALS.get(seal.getItem().getRegistryName()).getForLevel(crystal.getLevel()).map(entry -> {
+            if (!entry.input.contains(input.getItem().getRegistryName())) {
+               return false;
+            } else if (crystal.isUnmodifiable()) {
                return false;
             } else {
                crystal.setObjective(entry.objective);
@@ -81,22 +85,26 @@ public class VaultCrystalConfig extends Config {
                   crystal.setTheme(entry.theme);
                }
 
+               if (entry.time != null) {
+                  crystal.setTime(entry.time);
+               }
+
                if (entry.modifiers != null) {
                   crystal.setModifiers(entry.modifiers);
                }
 
-               if (entry.preventsRandomModifiers != null) {
-                  crystal.setPreventsRandomModifiers(entry.preventsRandomModifiers);
+               if (entry.randomModifiers != null) {
+                  crystal.getModifiers().setRandomModifiers(entry.randomModifiers);
                }
 
-               if (entry.canBeModified != null) {
-                  crystal.setModifiable(entry.canBeModified);
+               if (entry.exhausted != null) {
+                  crystal.setUnmodifiable(entry.exhausted);
                }
 
+               crystal.write(input);
                return true;
             }
-         }
-      }).orElse(false);
+         }).orElse(false);
    }
 
    @Override
@@ -135,7 +143,7 @@ public class VaultCrystalConfig extends Config {
             new VaultCrystalConfig.ObjectiveEntry(
                0,
                new WeightedList<CrystalObjective>()
-                  .add(new BossCrystalObjective(LootRoll.ofUniform(3, 6), LootRoll.ofUniform(3, 6), 0.1F), 1)
+                  .add(new BossCrystalObjective(IntRoll.ofUniform(3, 6), IntRoll.ofUniform(3, 6), 0.1F), 1)
                   .add(new ScavengerCrystalObjective(0.1F), 1)
             )
          );
@@ -146,8 +154,9 @@ public class VaultCrystalConfig extends Config {
          new VaultCrystalConfig.SealEntry(
             0,
             Arrays.asList(ModItems.VAULT_CRYSTAL.getRegistryName()),
-            new BossCrystalObjective(LootRoll.ofUniform(3, 6), LootRoll.ofUniform(3, 6), 0.1F),
+            new BossCrystalObjective(IntRoll.ofUniform(3, 6), IntRoll.ofUniform(3, 6), 0.1F),
             new ClassicInfiniteCrystalLayout(1),
+            null,
             null,
             null,
             null,
@@ -165,6 +174,7 @@ public class VaultCrystalConfig extends Config {
             null,
             null,
             null,
+            null,
             null
          )
       );
@@ -174,8 +184,9 @@ public class VaultCrystalConfig extends Config {
          new VaultCrystalConfig.SealEntry(
             0,
             Arrays.asList(ModItems.VAULT_CRYSTAL.getRegistryName()),
-            new CakeCrystalObjective(LootRoll.ofUniform(10, 15)),
+            new CakeCrystalObjective(IntRoll.ofUniform(10, 15)),
             new ClassicSpiralCrystalLayout(1, 99, Rotation.CLOCKWISE_90),
+            null,
             null,
             null,
             null,
@@ -186,46 +197,28 @@ public class VaultCrystalConfig extends Config {
 
    private static class LayoutEntry implements LevelEntryList.ILevelEntry {
       @Expose
-      public int minLevel;
+      public int level;
       @Expose
       public WeightedList<CrystalLayout> pool;
 
-      public LayoutEntry(int minLevel, WeightedList<CrystalLayout> pool) {
-         this.minLevel = minLevel;
+      public LayoutEntry(int level, WeightedList<CrystalLayout> pool) {
+         this.level = level;
          this.pool = pool;
       }
 
       @Override
       public int getLevel() {
-         return this.minLevel;
+         return this.level;
       }
    }
 
    public static class ModifierStability {
       @Expose
-      public int craftsBeforeInstability = 5;
-      @Expose
       public float instabilityPerCraft = 0.1F;
       @Expose
-      public float instabilityCap = 0.9F;
-      @Expose
-      public float curseInstabilityThreshold = 0.5F;
-      @Expose
-      public float curseChanceMin = 0.25F;
-      @Expose
-      public float curseChanceMax = 0.5F;
+      public float exhaustProbability = 0.25F;
       @Expose
       public TextColor curseColor = TextColor.parseColor("#9C6E3B");
-
-      public float calculateCurseChance(int instability) {
-         float instabilityPercentage = instability / 100.0F;
-         if (instabilityPercentage < this.curseInstabilityThreshold) {
-            return 0.0F;
-         } else {
-            float t = (instabilityPercentage - this.curseInstabilityThreshold) / (1.0F - this.curseInstabilityThreshold);
-            return this.curseChanceMin + (this.curseChanceMax - this.curseChanceMin) * t;
-         }
-      }
    }
 
    public static class Motes {
@@ -239,18 +232,18 @@ public class VaultCrystalConfig extends Config {
 
    private static class ObjectiveEntry implements LevelEntryList.ILevelEntry {
       @Expose
-      public int minLevel;
+      public int level;
       @Expose
       public WeightedList<CrystalObjective> pool;
 
-      public ObjectiveEntry(int minLevel, WeightedList<CrystalObjective> pool) {
-         this.minLevel = minLevel;
+      public ObjectiveEntry(int level, WeightedList<CrystalObjective> pool) {
+         this.level = level;
          this.pool = pool;
       }
 
       @Override
       public int getLevel() {
-         return this.minLevel;
+         return this.level;
       }
    }
 
@@ -266,11 +259,13 @@ public class VaultCrystalConfig extends Config {
       @Expose
       private final CrystalTheme theme;
       @Expose
+      private final CrystalTime time;
+      @Expose
       private final CrystalModifiers modifiers;
       @Expose
-      private final Boolean preventsRandomModifiers;
+      private final Boolean randomModifiers;
       @Expose
-      private final Boolean canBeModified;
+      private final Boolean exhausted;
 
       public SealEntry(
          int level,
@@ -278,18 +273,20 @@ public class VaultCrystalConfig extends Config {
          CrystalObjective objective,
          CrystalLayout layout,
          CrystalTheme theme,
+         CrystalTime time,
          CrystalModifiers modifiers,
-         Boolean preventsRandomModifiers,
-         Boolean canBeModified
+         Boolean randomModifiers,
+         Boolean exhausted
       ) {
          this.level = level;
          this.input = input;
          this.objective = objective;
          this.layout = layout;
          this.theme = theme;
+         this.time = time;
          this.modifiers = modifiers;
-         this.preventsRandomModifiers = preventsRandomModifiers;
-         this.canBeModified = canBeModified;
+         this.randomModifiers = randomModifiers;
+         this.exhausted = exhausted;
       }
 
       @Override
@@ -300,18 +297,35 @@ public class VaultCrystalConfig extends Config {
 
    private static class ThemeEntry implements LevelEntryList.ILevelEntry {
       @Expose
-      public int minLevel;
+      public int level;
       @Expose
       public WeightedList<ResourceLocation> pool;
 
-      public ThemeEntry(int minLevel, WeightedList<ResourceLocation> pool) {
-         this.minLevel = minLevel;
+      public ThemeEntry(int level, WeightedList<ResourceLocation> pool) {
+         this.level = level;
          this.pool = pool;
       }
 
       @Override
       public int getLevel() {
-         return this.minLevel;
+         return this.level;
+      }
+   }
+
+   private static class TimeEntry implements LevelEntryList.ILevelEntry {
+      @Expose
+      public int level;
+      @Expose
+      public WeightedList<CrystalTime> pool;
+
+      public TimeEntry(int level, WeightedList<CrystalTime> pool) {
+         this.level = level;
+         this.pool = pool;
+      }
+
+      @Override
+      public int getLevel() {
+         return this.level;
       }
    }
 }

@@ -2,18 +2,24 @@ package iskallia.vault.item.crystal.objective;
 
 import com.google.gson.JsonObject;
 import iskallia.vault.block.VaultCrateBlock;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.ClassicPortalLogic;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.AwardCrateObjective;
 import iskallia.vault.core.vault.objective.BailObjective;
 import iskallia.vault.core.vault.objective.DeathObjective;
+import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.objective.ScavengerObjective;
 import iskallia.vault.core.vault.objective.VictoryObjective;
-import net.minecraft.ChatFormatting;
+import iskallia.vault.item.crystal.CrystalData;
+import java.util.List;
+import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.item.TooltipFlag;
 
 public class ScavengerCrystalObjective extends CrystalObjective {
    protected float objectiveProbability;
@@ -32,42 +38,46 @@ public class ScavengerCrystalObjective extends CrystalObjective {
          Vault.OBJECTIVES,
          objectives -> {
             objectives.add(
-               new ScavengerObjective()
+               ScavengerObjective.of(this.objectiveProbability)
                   .add(AwardCrateObjective.ofConfig(VaultCrateBlock.Type.SCAVENGER, "scavenger", level, true))
                   .add(VictoryObjective.of(300))
             );
             objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
             objectives.add(DeathObjective.create(true));
+            objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getId(this));
          }
       );
    }
 
    @Override
-   public Component getName() {
-      return new TextComponent("Scavenger Hunt").withStyle(ChatFormatting.GREEN);
+   public void addText(List<Component> tooltip, TooltipFlag flag) {
+      tooltip.add(new TextComponent("Objective: ").append(new TextComponent("Scavenger Hunt").withStyle(Style.EMPTY.withColor(this.getColor().orElseThrow()))));
    }
 
    @Override
-   public JsonObject serializeJson() {
-      JsonObject object = new JsonObject();
-      object.addProperty("type", "scavenger");
-      object.addProperty("objective_probability", this.objectiveProbability);
-      return object;
+   public Optional<Integer> getColor() {
+      return Optional.of(11136021);
    }
 
    @Override
-   public void deserializeJson(JsonObject json) {
-      this.objectiveProbability = json.get("objective_probability").getAsFloat();
-   }
-
-   public CompoundTag serializeNBT() {
+   public Optional<CompoundTag> writeNbt() {
       CompoundTag nbt = new CompoundTag();
-      nbt.putString("type", "scavenger");
-      nbt.putFloat("objective_probability", this.objectiveProbability);
-      return nbt;
+      Adapters.FLOAT.writeNbt(Float.valueOf(this.objectiveProbability)).ifPresent(tag -> nbt.put("objective_probability", tag));
+      return Optional.of(nbt);
    }
 
-   public void deserializeNBT(CompoundTag nbt) {
-      this.objectiveProbability = nbt.getFloat("objective_probability");
+   public void readNbt(CompoundTag nbt) {
+      this.objectiveProbability = Adapters.FLOAT.readNbt(nbt.get("objective_probability")).orElse(0.0F);
+   }
+
+   @Override
+   public Optional<JsonObject> writeJson() {
+      JsonObject json = new JsonObject();
+      Adapters.FLOAT.writeJson(Float.valueOf(this.objectiveProbability)).ifPresent(tag -> json.add("objective_probability", tag));
+      return Optional.of(json);
+   }
+
+   public void readJson(JsonObject json) {
+      this.objectiveProbability = Adapters.FLOAT.readJson(json.get("objective_probability")).orElse(0.0F);
    }
 }

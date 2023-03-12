@@ -3,17 +3,17 @@ package iskallia.vault.item.gear;
 import iskallia.vault.config.EtchingConfig;
 import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
-import iskallia.vault.gear.GearRollHelper;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.gear.item.IdentifiableItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.VHSmpUtil;
-import iskallia.vault.world.data.ServerVaults;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -36,7 +36,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class EtchingItem extends BasicItem implements DataTransferItem {
+public class EtchingItem extends BasicItem implements DataTransferItem, IdentifiableItem {
    public EtchingItem(ResourceLocation id, Properties properties) {
       super(id, properties);
    }
@@ -75,16 +75,9 @@ public class EtchingItem extends BasicItem implements DataTransferItem {
       if (world.isClientSide()) {
          return InteractionResultHolder.pass(stack);
       } else {
-         if (!ServerVaults.isVaultWorld(world) && !VHSmpUtil.isArenaWorld(world)) {
-            AttributeGearData data = AttributeGearData.read(stack);
-            if (data.getFirstValue(ModGearAttributes.STATE).orElse(VaultGearState.UNIDENTIFIED) == VaultGearState.UNIDENTIFIED) {
-               data.updateAttribute(ModGearAttributes.STATE, VaultGearState.ROLLING);
-               data.write(stack);
-               return InteractionResultHolder.fail(stack);
-            }
-         }
-
-         return InteractionResultHolder.pass(stack);
+         return !VHSmpUtil.isArenaWorld(world) && this.tryStartIdentification(player, stack)
+            ? InteractionResultHolder.fail(stack)
+            : InteractionResultHolder.pass(stack);
       }
    }
 
@@ -100,30 +93,32 @@ public class EtchingItem extends BasicItem implements DataTransferItem {
             }
          }
 
-         if (AttributeGearData.<AttributeGearData>read(stack).getFirstValue(ModGearAttributes.STATE).orElse(VaultGearState.UNIDENTIFIED)
-            == VaultGearState.ROLLING) {
-            GearRollHelper.tickToll(stack, player, rollStack -> {
-               AttributeGearData data = AttributeGearData.read(stack);
-               EtchingSet<?> etchingSet = ModConfigs.ETCHING.getRandomEtchingSet();
-               if (etchingSet != null) {
-                  data.updateAttribute(ModGearAttributes.ETCHING, etchingSet);
-               }
-
-               data.write(rollStack);
-            }, finishStack -> {
-               AttributeGearData data = AttributeGearData.read(stack);
-               EtchingSet<?> etchingSet = ModConfigs.ETCHING.getRandomEtchingSet();
-               if (etchingSet != null) {
-                  data.updateAttribute(ModGearAttributes.ETCHING, etchingSet);
-                  data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
-               } else {
-                  data.updateAttribute(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
-               }
-
-               data.write(finishStack);
-            });
-         }
+         this.inventoryIdentificationTick(player, stack);
       }
+   }
+
+   @Override
+   public void tickRoll(ItemStack stack) {
+      AttributeGearData data = AttributeGearData.read(stack);
+      EtchingSet<?> etchingSet = ModConfigs.ETCHING.getRandomEtchingSet();
+      if (etchingSet != null) {
+         data.updateAttribute(ModGearAttributes.ETCHING, etchingSet);
+      }
+
+      data.write(stack);
+   }
+
+   @Override
+   public void tickFinishRoll(ItemStack stack, Player player) {
+      AttributeGearData data = AttributeGearData.read(stack);
+      Optional<EtchingSet<?>> optEtchingSet = data.getFirstValue(ModGearAttributes.ETCHING);
+      if (optEtchingSet.isPresent()) {
+         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.IDENTIFIED);
+      } else {
+         data.updateAttribute(ModGearAttributes.STATE, VaultGearState.UNIDENTIFIED);
+      }
+
+      data.write(stack);
    }
 
    @OnlyIn(Dist.CLIENT)

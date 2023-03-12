@@ -45,12 +45,10 @@ public class TauntAbility extends AbstractTauntAbility<TauntConfig> {
    protected AbilityActionResult doAction(TauntConfig config, ServerPlayer player, boolean active) {
       player.removeEffect(ModEffects.TAUNT);
       player.addEffect(new MobEffectInstance(ModEffects.TAUNT, config.getDurationTicks(), 0, false, false, true));
+      float radius = config.getRadius(player);
       List<Mob> nearbyMobs = player.level
          .getNearbyEntities(
-            Mob.class,
-            TargetingConditions.forCombat().range(config.getRadius()).selector(MONSTER_PREDICATE),
-            player,
-            player.getBoundingBox().inflate(config.getRadius())
+            Mob.class, TargetingConditions.forCombat().range(radius).selector(MONSTER_PREDICATE), player, player.getBoundingBox().inflate(radius)
          );
       List<BlockPos> candidateTeleportPositionList = this.getCandidateTeleportPositionList(player, 2, 8);
 
@@ -137,26 +135,15 @@ public class TauntAbility extends AbstractTauntAbility<TauntConfig> {
    }
 
    protected void doParticles(TauntConfig config, ServerPlayer player) {
-      int particleCount = (int)Mth.clamp(Math.pow(config.getRadius(), 2.0) * (float) Math.PI * 100.0, 50.0, 400.0);
+      float radius = config.getRadius(player);
+      int particleCount = (int)Mth.clamp(Math.pow(radius, 2.0) * (float) Math.PI * 100.0, 50.0, 400.0);
       ((ServerLevel)player.level)
-         .sendParticles(
-            ParticleTypes.SMOKE, player.getX(), player.getY(), player.getZ(), particleCount / 2, config.getRadius() * 0.5, 0.5, config.getRadius() * 0.5, 0.0
-         );
+         .sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY(), player.getZ(), particleCount / 2, radius * 0.5, 0.5, radius * 0.5, 0.0);
       ((ServerLevel)player.level)
-         .sendParticles(
-            ParticleTypes.ANGRY_VILLAGER,
-            player.getX(),
-            player.getY(),
-            player.getZ(),
-            particleCount / 8,
-            config.getRadius() * 0.5,
-            0.5,
-            config.getRadius() * 0.5,
-            0.0
-         );
+         .sendParticles(ParticleTypes.ANGRY_VILLAGER, player.getX(), player.getY(), player.getZ(), particleCount / 8, radius * 0.5, 0.5, radius * 0.5, 0.0);
       AreaEffectCloud areaEffectCloud = new AreaEffectCloud(player.level, player.getX(), player.getY(), player.getZ());
       areaEffectCloud.setOwner(player);
-      areaEffectCloud.setRadius(config.getRadius());
+      areaEffectCloud.setRadius(radius);
       areaEffectCloud.setRadiusOnUse(-0.5F);
       areaEffectCloud.setWaitTime(0);
       areaEffectCloud.setDuration(4);

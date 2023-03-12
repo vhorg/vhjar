@@ -28,7 +28,7 @@ public class ReforgeAddTaggedModification extends GearModification {
    @Override
    public List<Component> getDescription(ItemStack materialStack) {
       if (!materialStack.isEmpty() && materialStack.getItem() instanceof ReforgeTagModificationFocus) {
-         VaultGearTagConfig.ModGroupTag modTag = ReforgeTagModificationFocus.getModifierTag(materialStack);
+         VaultGearTagConfig.ModTagGroup modTag = ReforgeTagModificationFocus.getModifierTag(materialStack);
          return modTag == null
             ? Lists.newArrayList(
                new Component[]{
@@ -55,7 +55,7 @@ public class ReforgeAddTaggedModification extends GearModification {
    @Override
    public Component getInvalidDescription(ItemStack materialStack) {
       if (!materialStack.isEmpty() && materialStack.getItem() instanceof ReforgeTagModificationFocus) {
-         VaultGearTagConfig.ModGroupTag modTag = ReforgeTagModificationFocus.getModifierTag(materialStack);
+         VaultGearTagConfig.ModTagGroup modTag = ReforgeTagModificationFocus.getModifierTag(materialStack);
          return (Component)(modTag == null
             ? super.getInvalidDescription(materialStack)
             : new TranslatableComponent("the_vault.gear_modification.reforge_all_add_tag.value.invalid", new Object[]{modTag.getDisplayComponent()})
@@ -68,7 +68,7 @@ public class ReforgeAddTaggedModification extends GearModification {
    @Override
    public boolean doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
       if (!materialStack.isEmpty() && materialStack.getItem() instanceof ReforgeTagModificationFocus) {
-         VaultGearTagConfig.ModGroupTag modTag = ReforgeTagModificationFocus.getModifierTag(materialStack);
+         VaultGearTagConfig.ModTagGroup modTag = ReforgeTagModificationFocus.getModifierTag(materialStack);
          return modTag == null ? false : VaultGearModifierHelper.reForgeAllWithTag(modTag, stack, rand);
       } else {
          return false;

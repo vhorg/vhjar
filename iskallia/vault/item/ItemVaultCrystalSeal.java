@@ -5,10 +5,8 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
@@ -26,7 +24,7 @@ public class ItemVaultCrystalSeal extends Item {
    }
 
    public boolean configure(CrystalData crystal) {
-      return ModConfigs.VAULT_CRYSTAL.applySeal(this, ModItems.VAULT_CRYSTAL, crystal);
+      return ModConfigs.VAULT_CRYSTAL.applySeal(new ItemStack(this), new ItemStack(ModItems.VAULT_CRYSTAL), crystal);
    }
 
    @Nullable
@@ -60,16 +58,9 @@ public class ItemVaultCrystalSeal extends Item {
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
       if (ModConfigs.isInitialized()) {
-         CrystalData crystal = new CrystalData();
+         CrystalData crystal = CrystalData.empty();
          if (this.configure(crystal)) {
-            tooltip.add(new TextComponent("Sets a vault crystal's objective").withStyle(ChatFormatting.GRAY));
-            tooltip.add(new TextComponent("to: ").withStyle(ChatFormatting.GRAY).append(crystal.getObjective().getName()));
-         }
-
-         String eventKey = getEventKey(stack);
-         if (eventKey != null) {
-            tooltip.add(new TextComponent("Event Item").withStyle(ChatFormatting.AQUA));
-            tooltip.add(new TextComponent("Expires after the event finishes.").withStyle(ChatFormatting.GRAY));
+            crystal.getObjective().addText(tooltip, flag);
          }
       }
    }

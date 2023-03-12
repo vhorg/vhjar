@@ -235,7 +235,9 @@ public class PlayerEvents {
       }
    }
 
-   @SubscribeEvent
+   @SubscribeEvent(
+      priority = EventPriority.HIGH
+   )
    public static void onVaultCharmUse(EntityItemPickupEvent event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
          ItemEntity itemEntity = event.getItem();

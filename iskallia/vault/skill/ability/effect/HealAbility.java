@@ -1,5 +1,9 @@
 package iskallia.vault.skill.ability.effect;
 
+import iskallia.vault.gear.attribute.ability.special.HealAdditionalHealthModification;
+import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
+import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.config.HealConfig;
@@ -20,7 +24,15 @@ public class HealAbility extends AbstractHealAbility<HealConfig> {
    }
 
    protected AbilityActionResult doAction(HealConfig config, ServerPlayer player, boolean active) {
-      player.heal(config.getFlatLifeHealed());
+      float healed = config.getFlatLifeHealed();
+
+      for (ConfiguredModification<IntValueConfig, HealAdditionalHealthModification> mod : SpecialAbilityModification.getModifications(
+         player, HealAdditionalHealthModification.class
+      )) {
+         healed = mod.modification().adjustHealHealth(mod.config(), healed);
+      }
+
+      player.heal(healed);
       return AbilityActionResult.SUCCESS_COOLDOWN;
    }
 

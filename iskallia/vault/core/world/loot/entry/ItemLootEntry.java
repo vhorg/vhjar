@@ -2,7 +2,7 @@ package iskallia.vault.core.world.loot.entry;
 
 import iskallia.vault.core.Version;
 import iskallia.vault.core.random.RandomSource;
-import iskallia.vault.core.world.loot.LootRoll;
+import iskallia.vault.core.world.roll.IntRoll;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -10,9 +10,9 @@ import net.minecraft.world.item.ItemStack;
 public class ItemLootEntry implements LootEntry {
    protected Item item;
    protected CompoundTag nbt;
-   protected LootRoll count;
+   protected IntRoll count;
 
-   public ItemLootEntry(Item item, CompoundTag nbt, LootRoll count) {
+   public ItemLootEntry(Item item, CompoundTag nbt, IntRoll count) {
       this.item = item;
       this.nbt = nbt;
       this.count = count;
@@ -26,7 +26,7 @@ public class ItemLootEntry implements LootEntry {
       return this.nbt;
    }
 
-   public LootRoll getCount() {
+   public IntRoll getCount() {
       return this.count;
    }
 

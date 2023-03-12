@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataObject;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.ClientEvents;
@@ -31,7 +31,7 @@ public class VaultOverlay extends DataObject<VaultOverlay> {
    public static final ResourceLocation VIGNETTE = VaultMod.id("textures/gui/vignette.png");
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<Void> HIDDEN = FieldKey.of("hidden", Void.class)
-      .with(Version.v1_0, Adapter.ofVoid(), DISK.all().or(CLIENT.all()))
+      .with(Version.v1_0, Adapters.ofVoid(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    @Override

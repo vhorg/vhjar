@@ -27,10 +27,10 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
 
 public class ToolStationBlock extends FacedBlock implements EntityBlock {
-   public static VoxelShape SHAPE = Shapes.or(Block.box(1.0, 8.0, 1.0, 15.0, 11.0, 15.0), Block.box(3.0, 0.0, 3.0, 13.0, 8.0, 13.0));
+   public static VoxelShape SHAPE = Shapes.or(Block.box(1.0, 10.0, 1.0, 15.0, 13.0, 15.0), Block.box(3.0, 0.0, 3.0, 13.0, 10.0, 13.0));
 
    public ToolStationBlock() {
-      super(Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(0.5F).lightLevel(state -> 13).noOcclusion());
+      super(Properties.of(Material.STONE).strength(0.5F).noOcclusion());
    }
 
    @Nonnull

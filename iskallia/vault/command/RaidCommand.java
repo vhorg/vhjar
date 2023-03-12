@@ -4,7 +4,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.world.data.ArenaRaidData;
 import iskallia.vault.world.data.VaultRaidData;
 import iskallia.vault.world.vault.VaultRaid;
@@ -41,7 +40,7 @@ public class RaidCommand extends Command {
    private int startRaid(CommandContext<CommandSourceStack> context, RaidCommand.Type type) throws CommandSyntaxException {
       if (type == RaidCommand.Type.VAULT) {
          ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
-         VaultRaid.Builder vault = RaidCommandVaultBuilder.get().initializeBuilder(player.getLevel(), player, CrystalData.EMPTY);
+         VaultRaid.Builder vault = RaidCommandVaultBuilder.get().initializeBuilder(player.getLevel(), player, null);
          VaultRaidData.get(((CommandSourceStack)context.getSource()).getLevel()).startVault(((CommandSourceStack)context.getSource()).getLevel(), vault);
       } else if (type == RaidCommand.Type.ARENA) {
          ArenaRaidData.get(((CommandSourceStack)context.getSource()).getLevel()).startNew(((CommandSourceStack)context.getSource()).getPlayerOrException());

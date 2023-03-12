@@ -19,7 +19,7 @@ public class VaultForgeContainer extends ForgeRecipeContainer<VaultForgeTileEnti
    }
 
    @Override
-   protected Point getOffset() {
+   public Point getOffset() {
       return new Point(8, 56);
    }
 }

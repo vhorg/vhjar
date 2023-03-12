@@ -10,6 +10,7 @@ import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.util.NetcodeUtils;
 import java.text.DecimalFormat;
 import java.util.Random;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.MutableComponent;
@@ -18,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
 
 public class EffectAvoidanceGearAttribute {
    private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
@@ -105,6 +105,10 @@ public class EffectAvoidanceGearAttribute {
          this.maxChance = maxChance;
          this.step = step;
       }
+
+      private MobEffect getEffect() {
+         return (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(this.effectKey);
+      }
    }
 
    private static class Generator extends ConfigurableAttributeGenerator<EffectAvoidanceGearAttribute, EffectAvoidanceGearAttribute.Config> {
@@ -114,7 +118,7 @@ public class EffectAvoidanceGearAttribute {
          return EffectAvoidanceGearAttribute.Config.class;
       }
 
-      public MutableComponent getConfigDisplay(VaultGearModifierReader<EffectAvoidanceGearAttribute> reader, EffectAvoidanceGearAttribute.Config object) {
+      public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<EffectAvoidanceGearAttribute> reader, EffectAvoidanceGearAttribute.Config object) {
          return this.getChanceDisplay(object.minChance).append("-").append(this.getChanceDisplay(object.maxChance));
       }
 
@@ -122,10 +126,21 @@ public class EffectAvoidanceGearAttribute {
          return new TextComponent(EffectAvoidanceGearAttribute.FORMAT.format(value * 100.0F) + "%");
       }
 
+      @Nullable
+      public MutableComponent getConfigDisplay(VaultGearModifierReader<EffectAvoidanceGearAttribute> reader, EffectAvoidanceGearAttribute.Config object) {
+         MutableComponent range = this.getConfigRangeDisplay(reader, object);
+         MobEffect effect = object.getEffect();
+         return new TextComponent("")
+            .withStyle(reader.getColoredTextStyle())
+            .append(range.withStyle(reader.getColoredTextStyle()))
+            .append(" ")
+            .append(effect.getDisplayName())
+            .append(new TextComponent(" Avoidance"));
+      }
+
       public EffectAvoidanceGearAttribute generateRandomValue(EffectAvoidanceGearAttribute.Config object, Random random) {
-         MobEffect effect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(object.effectKey);
          int steps = Mth.floor(Math.max(object.maxChance - object.minChance, 0.0F) / object.step) + 1;
-         return new EffectAvoidanceGearAttribute(effect, object.minChance + random.nextInt(steps) * object.step);
+         return new EffectAvoidanceGearAttribute(object.getEffect(), object.minChance + random.nextInt(steps) * object.step);
       }
    }
 

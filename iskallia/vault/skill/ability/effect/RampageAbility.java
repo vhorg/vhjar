@@ -53,6 +53,10 @@ public class RampageAbility extends AbstractRampageAbility<RampageConfig> {
    public static class RampageEffect extends ToggleAbilityEffect {
       private static final UUID DAMAGE_MULTIPLIER_ID = UUID.fromString("a69017ec-a50e-40a3-ac07-b19cb0ff705d");
 
+      protected RampageEffect(String abilityGroup, int color, ResourceLocation resourceLocation) {
+         super(abilityGroup, color, resourceLocation);
+      }
+
       public RampageEffect(int color, ResourceLocation resourceLocation) {
          super("Rampage", color, resourceLocation);
       }
@@ -62,10 +66,14 @@ public class RampageAbility extends AbstractRampageAbility<RampageConfig> {
          if (livingEntity instanceof ServerPlayer player) {
             this.removeExistingDamageBuff(player);
             AbilityTree abilities = PlayerAbilitiesData.get((ServerLevel)player.getCommandSenderWorld()).getAbilities(player);
-            AbilityNode<?, ?> abilityNode = abilities.getNodeByName("Rampage");
-            RampageConfig config = (RampageConfig)abilityNode.getAbilityConfig();
-            if (config != null) {
-               PlayerDamageHelper.applyMultiplier(DAMAGE_MULTIPLIER_ID, player, config.getDamageIncrease(), PlayerDamageHelper.Operation.ADDITIVE_MULTIPLY);
+            AbilityNode<?, ?> abilityNode = abilities.getNodeByName(this.getAbilityGroup());
+            if (abilityNode.isLearned()) {
+               RampageConfig config = (RampageConfig)abilityNode.getAbilityConfig();
+               if (config != null) {
+                  PlayerDamageHelper.applyMultiplier(
+                     DAMAGE_MULTIPLIER_ID, player, config.getDamageIncrease(player), PlayerDamageHelper.Operation.ADDITIVE_MULTIPLY
+                  );
+               }
             }
          }
 

@@ -2,7 +2,6 @@ package iskallia.vault.integration.jei;
 
 import com.google.common.collect.Lists;
 import iskallia.vault.VaultMod;
-import iskallia.vault.core.world.generator.layout.DIYRoomEntry;
 import iskallia.vault.gear.VaultGearModifierHelper;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
@@ -15,12 +14,7 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.VaultCatalystInfusedItem;
-import iskallia.vault.item.VaultRuneItem;
 import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.VaultCrystalItem;
-import iskallia.vault.item.crystal.layout.CrystalLayout;
-import iskallia.vault.item.crystal.layout.DIYCrystalLayout;
-import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.world.vault.modifier.VaultModifierStack;
 import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.world.vault.modifier.spi.VaultModifier;
@@ -30,7 +24,6 @@ import java.util.Optional;
 import java.util.Random;
 import mezz.jei.api.recipe.vanilla.IJeiAnvilRecipe;
 import mezz.jei.api.recipe.vanilla.IVanillaRecipeFactory;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -100,9 +93,8 @@ public class AnvilRecipesJEI {
       for (ItemStack seal : vaultSeals) {
          ItemStack input = new ItemStack(ModItems.VAULT_CRYSTAL);
          ItemStack copy = input.getItem() == ModItems.VAULT_CRYSTAL ? input.copy() : new ItemStack(ModItems.VAULT_CRYSTAL);
-         CrystalData crystal = new CrystalData(copy);
-         ModConfigs.VAULT_CRYSTAL.applySeal(seal.getItem(), input.getItem(), crystal);
-         VaultCrystalItem.setRandomSeed(copy);
+         CrystalData crystal = CrystalData.read(copy);
+         ModConfigs.VAULT_CRYSTAL.applySeal(seal, input, crystal);
          recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(new ItemStack(ModItems.VAULT_CRYSTAL)), List.of(seal), List.of(copy)));
       }
 
@@ -110,90 +102,67 @@ public class AnvilRecipesJEI {
       ItemStack right = new ItemStack(ModItems.VAULT_CATALYST_INFUSED);
       ItemStack output = new ItemStack(ModItems.VAULT_CRYSTAL);
       VaultCatalystInfusedItem.setJeiModifiers(right, List.of(VaultMod.id("living"), VaultMod.id("wild")));
-      CrystalData data = VaultCrystalItem.getData(output);
+      CrystalData data = CrystalData.read(output);
       List<VaultModifierStack> modifierStackList = VaultCatalystInfusedItem.getModifiers(right)
          .stream()
          .map(VaultModifierRegistry::getOpt)
          .flatMap(Optional::stream)
          .map(VaultModifierStack::of)
          .toList();
-      if (data.addModifiersByCrafting(modifierStackList, CrystalData.Simulate.FALSE)) {
-         VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddCursesTask(VaultMod.id("catalyst_curse"), true), output);
-         VaultCrystalItem.scheduleTask(VaultCrystalItem.ExhaustTask.INSTANCE, output);
+      if (data.getModifiers().addByCrafting(data, modifierStackList, CrystalData.Simulate.FALSE)) {
+         data.write(output);
       }
 
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
       left = new ItemStack(ModItems.VAULT_CRYSTAL);
       right = new ItemStack(Items.WITHER_SKELETON_SKULL);
       output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(output);
+      data = CrystalData.read(output);
       addModifier(data, VaultMod.id("hunger"));
+      data.write(output);
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
       left = new ItemStack(ModItems.VAULT_CRYSTAL);
       right = new ItemStack(ModItems.MOTE_CLARITY);
       output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(left);
-      CrystalData dataOutput = VaultCrystalItem.getData(output);
+      data = CrystalData.read(left);
+      CrystalData dataOutput = CrystalData.read(output);
       data.setLevel(5);
       dataOutput.setLevel(5);
       addModifier(dataOutput, VaultMod.id("hunger"));
       addModifier(dataOutput, VaultMod.id("tired"));
       addModifier(data, VaultMod.id("hunger"));
       addModifier(data, VaultMod.id("tired"));
-      dataOutput.setClarity(true);
+      dataOutput.getModifiers().setClarity(true);
+      dataOutput.write(output);
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
       left = new ItemStack(ModItems.VAULT_CRYSTAL);
       right = new ItemStack(ModItems.MOTE_PURITY);
       output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(left);
-      CrystalData dataOutputx = VaultCrystalItem.getData(output);
+      data = CrystalData.read(left);
+      CrystalData dataOutputx = CrystalData.read(output);
       data.setLevel(5);
       dataOutputx.setLevel(5);
       addModifier(dataOutputx, VaultMod.id("hunger"));
       addModifier(dataOutputx, VaultMod.id("tired"));
       addModifier(data, VaultMod.id("hunger"));
       addModifier(data, VaultMod.id("tired"));
-      dataOutputx.removeRandomCurse(random);
+      dataOutputx.getModifiers().removeRandomCurse();
+      dataOutputx.write(output);
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
       left = new ItemStack(ModItems.VAULT_CRYSTAL);
       right = new ItemStack(ModItems.MOTE_SANCTITY);
       output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(left);
-      CrystalData dataOutputxx = VaultCrystalItem.getData(output);
+      data = CrystalData.read(left);
+      CrystalData dataOutputxx = CrystalData.read(output);
       data.setLevel(5);
       dataOutputxx.setLevel(5);
       addModifier(dataOutputxx, VaultMod.id("hunger"));
       addModifier(dataOutputxx, VaultMod.id("tired"));
       addModifier(data, VaultMod.id("hunger"));
       addModifier(data, VaultMod.id("tired"));
-      VaultCrystalItem.getData(output).removeAllCurses();
-      recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
-      left = new ItemStack(ModItems.VAULT_CRYSTAL);
-      right = new ItemStack(ModItems.RUNE);
-      output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      ListTag list = new ListTag();
-      list.add(DIYRoomEntry.ofType(DIYRoomEntry.Type.COMMON, 1).serializeNBT());
-      right.getOrCreateTag().put("entries", list);
-      CrystalData dataLeft = VaultCrystalItem.getData(left);
-      CrystalData dataOutputxxx = VaultCrystalItem.getData(output);
-      dataLeft.setLevel(5);
-      dataOutputxxx.setLevel(5);
-      CrystalData datax = VaultCrystalItem.getData(output);
-      datax.setTheme(new PoolCrystalTheme(VaultMod.id("diy")));
-      CrystalLayout layout = datax.getLayout();
-      List<DIYRoomEntry> entries = new ArrayList<>();
-
-      for (int i = 0; i < right.getCount(); i++) {
-         entries.addAll(VaultRuneItem.getEntries(right));
-      }
-
-      if (!(layout instanceof DIYCrystalLayout)) {
-         layout = new DIYCrystalLayout(1, new ArrayList<>());
-      }
-
-      entries.forEach(((DIYCrystalLayout)layout)::add);
-      datax.setLayout(layout);
-      VaultCrystalItem.getData(output).removeAllCurses();
+      CrystalData crystal = CrystalData.read(output);
+      crystal.getModifiers().removeAllCurses();
+      crystal.write(output);
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
 
       for (ItemStack armorItem : vaultArmorListUnidentified) {
@@ -201,87 +170,72 @@ public class AnvilRecipesJEI {
          ItemStack input = armorItem.copy();
          ItemStack result = armorItem.copy();
          VaultGearData dataInput = VaultGearData.read(input);
-         VaultGearData dataOutputxxxx = VaultGearData.read(result);
+         VaultGearData dataOutputxxx = VaultGearData.read(result);
          dataInput.setItemLevel(5);
-         dataOutputxxxx.setItemLevel(4);
+         dataOutputxxx.setItemLevel(4);
          dataInput.write(input);
-         dataOutputxxxx.write(result);
+         dataOutputxxx.write(result);
          recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(input), List.of(output), List.of(result)));
       }
 
       left = new ItemStack(ModItems.VAULT_CRYSTAL);
-      right = new ItemStack(ModItems.ECHO_GEM);
-      output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(left);
-      CrystalData dataOutputxxxx = VaultCrystalItem.getData(output);
-      dataOutputxxxx.addEchoGems(1);
-      dataOutputxxxx.setModifiable(false);
-      recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
-      left = new ItemStack(ModItems.VAULT_CRYSTAL);
       right = new ItemStack(Items.DIAMOND);
       output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(left);
-      CrystalData dataOutputxxxxx = VaultCrystalItem.getData(output);
+      data = CrystalData.read(left);
+      CrystalData dataOutputxxx = CrystalData.read(output);
       data.setLevel(5);
-      dataOutputxxxxx.setLevel(4);
+      dataOutputxxx.setLevel(4);
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
       left = new ItemStack(ModItems.VAULT_CRYSTAL);
       right = new ItemStack(ModItems.SOUL_FLAME);
       output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(left);
-      CrystalData dataOutputxxxxxx = VaultCrystalItem.getData(output);
+      data = CrystalData.read(left);
+      CrystalData dataOutputxxxx = CrystalData.read(output);
       data.setLevel(10);
-      dataOutputxxxxxx.setLevel(10);
+      dataOutputxxxx.setLevel(10);
       VaultModifierRegistry.getOpt(VaultMod.id("afterlife")).ifPresent(vaultModifier -> {
          VaultModifierStack modifierStack = VaultModifierStack.of((VaultModifier<?>)vaultModifier);
          if (dataOutput.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
             dataOutput.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
             addModifier(dataOutput, VaultMod.id("hunger"));
             addModifier(dataOutput, VaultMod.id("tired"));
-            dataOutput.setModifiable(false);
+            dataOutput.setUnmodifiable(true);
+            dataOutput.write(output);
          }
       });
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
       left = new ItemStack(ModItems.VAULT_CRYSTAL);
       right = new ItemStack(ModItems.PHOENIX_FEATHER);
       output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(left);
-      CrystalData dataOutputxxxxxxx = VaultCrystalItem.getData(output);
+      data = CrystalData.read(left);
+      CrystalData dataOutputxxxxx = CrystalData.read(output);
       data.setLevel(10);
-      dataOutputxxxxxxx.setLevel(10);
+      dataOutputxxxxx.setLevel(10);
       VaultModifierRegistry.getOpt(VaultMod.id("phoenix")).ifPresent(modifier -> {
          VaultModifierStack modifierStack = VaultModifierStack.of((VaultModifier<?>)modifier);
          if (dataOutput.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
             dataOutput.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
-            dataOutput.setModifiable(false);
+            dataOutput.setUnmodifiable(true);
+            dataOutput.write(output);
          }
       });
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
       left = new ItemStack(ModItems.VAULT_CRYSTAL);
       right = new ItemStack(ModItems.EYE_OF_AVARICE);
       output = new ItemStack(ModItems.VAULT_CRYSTAL);
-      data = VaultCrystalItem.getData(left);
-      CrystalData dataOutputxxxxxxxx = VaultCrystalItem.getData(output);
+      data = CrystalData.read(left);
+      CrystalData dataOutputxxxxxx = CrystalData.read(output);
       data.setLevel(10);
-      dataOutputxxxxxxxx.setLevel(10);
+      dataOutputxxxxxx.setLevel(10);
       VaultModifierRegistry.getOpt(VaultMod.id("looters_dream")).ifPresent(modifier -> {
          VaultModifierStack modifierStack = VaultModifierStack.of((VaultModifier<?>)modifier);
          if (dataOutput.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
             dataOutput.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
-            dataOutput.setModifiable(false);
+            dataOutput.setUnmodifiable(true);
+            dataOutput.write(output);
          }
       });
       recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(output)));
-      left = new ItemStack(ModItems.VAULT_CRYSTAL);
-      right = new ItemStack(ModItems.VAULT_CRYSTAL);
-      CrystalData dataLeftx = VaultCrystalItem.getData(left);
-      data = VaultCrystalItem.getData(right);
-      data.addEchoGems(1);
-      data.setModifiable(false);
-      addModifier(dataLeftx, VaultMod.id("gilded"));
-      addModifier(dataLeftx, VaultMod.id("lucky"));
-      ItemStack outputx = left.copy();
-      recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(left), List.of(right), List.of(outputx)));
       left = new ItemStack(ModItems.MAGNET);
       right = new ItemStack(ModItems.REPAIR_CORE);
       output = new ItemStack(ModItems.MAGNET);
@@ -291,10 +245,10 @@ public class AnvilRecipesJEI {
 
       for (ItemStack leftx : vaultPicks) {
          output = new ItemStack(ModItems.REPAIR_CORE);
-         ItemStack outputxx = leftx.copy();
-         LegacyMagnetItem.useRepairSlot(outputxx);
+         ItemStack outputx = leftx.copy();
+         LegacyMagnetItem.useRepairSlot(outputx);
          leftx.setDamageValue(leftx.getMaxDamage() - 5);
-         recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(leftx), List.of(output), List.of(outputxx)));
+         recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(leftx), List.of(output), List.of(outputx)));
       }
 
       recipeList.add(
@@ -351,7 +305,7 @@ public class AnvilRecipesJEI {
    private static void addModifier(CrystalData data, ResourceLocation id) {
       VaultModifier<?> modifier = VaultModifierRegistry.getOrDefault(id, null);
       if (modifier != null) {
-         data.addModifier(VaultModifierStack.of(modifier));
+         data.getModifiers().add(VaultModifierStack.of(modifier));
       }
    }
 

@@ -24,7 +24,7 @@ import net.minecraftforge.network.NetworkHooks;
 
 public class VaultForgeBlock extends FacedBlock implements EntityBlock {
    public VaultForgeBlock() {
-      super(Properties.of(Material.STONE).requiresCorrectToolForDrops().strength(0.5F).lightLevel(state -> 13).noOcclusion());
+      super(Properties.of(Material.STONE).strength(0.5F).lightLevel(state -> 13).noOcclusion());
    }
 
    @Nonnull

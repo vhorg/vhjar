@@ -319,7 +319,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    }
 
    public boolean isInvulnerableTo(DamageSource pSource) {
-      return true;
+      return pSource != DamageSource.OUT_OF_WORLD;
    }
 
    public Iterable<ItemStack> getArmorSlots() {

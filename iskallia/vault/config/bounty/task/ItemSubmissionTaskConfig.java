@@ -3,7 +3,7 @@ package iskallia.vault.config.bounty.task;
 import iskallia.vault.bounty.task.properties.ItemSubmissionProperties;
 import iskallia.vault.config.bounty.task.entry.GenericEntry;
 import iskallia.vault.config.bounty.task.entry.TaskEntry;
-import iskallia.vault.config.entry.RangeEntry;
+import iskallia.vault.config.entry.IntRangeEntry;
 import iskallia.vault.init.ModItems;
 import java.util.ArrayList;
 import net.minecraft.resources.ResourceLocation;
@@ -27,8 +27,12 @@ public class ItemSubmissionTaskConfig extends TaskConfig<TaskEntry<ResourceLocat
 
    @Override
    protected TaskEntry<ResourceLocation> generateConfigEntry() {
-      return new TaskEntry<>(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(ModItems.VAULT_APPLE), new RangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3)
-         .addEntry(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(ModItems.VAULT_DIAMOND), new RangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3)
-         .addEntry(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(ModItems.CHROMATIC_IRON_NUGGET), new RangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3);
+      return new TaskEntry<>(
+            new GenericEntry<>(ForgeRegistries.ITEMS.getKey(ModItems.VAULT_APPLE), new IntRangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3
+         )
+         .addEntry(new GenericEntry<>(ForgeRegistries.ITEMS.getKey(ModItems.VAULT_DIAMOND), new IntRangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3)
+         .addEntry(
+            new GenericEntry<>(ForgeRegistries.ITEMS.getKey(ModItems.CHROMATIC_IRON_NUGGET), new IntRangeEntry(10, 100)).floorToNearestTen().vaultOnly(), 3
+         );
    }
 }

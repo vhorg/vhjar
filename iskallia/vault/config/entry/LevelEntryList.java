@@ -48,6 +48,11 @@ public class LevelEntryList<T extends LevelEntryList.ILevelEntry> extends ArrayL
       }
    }
 
+   public LevelEntryList<T> put(T element) {
+      this.add(element);
+      return this;
+   }
+
    public interface ILevelEntry {
       int getLevel();
    }

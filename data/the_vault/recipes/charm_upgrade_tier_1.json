@@ -1,18 +1,18 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "pep",
-    "ece",
-    "pep"
+    " p ",
+    "ded",
+    " p "
   ],
   "key": {
     "p": {
       "item": "the_vault:gem_pog"
     },
-    "c": {
-      "item": "the_vault:echo_pog"
-    },
     "e": {
+      "item": "the_vault:gem_echo"
+    },
+    "d": {
       "item": "the_vault:vault_diamond"
     }
   },

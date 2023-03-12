@@ -17,7 +17,7 @@ public class VaultSnapshots extends SavedData {
    protected static final String DATA_NAME = "the_vault_VaultSnapshots";
    private final VListNBT<VaultSnapshot, LongArrayTag> snapshots = new VListNBT<>(new ArrayList<>(), snapshot -> {
       ArrayBitBuffer buffer = ArrayBitBuffer.empty();
-      snapshot.write(buffer);
+      snapshot.writeBits(buffer);
       return new LongArrayTag(buffer.toLongArray());
    }, nbt -> new VaultSnapshot(ArrayBitBuffer.backing(nbt.getAsLongArray(), 0)));
 

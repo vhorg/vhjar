@@ -26,7 +26,7 @@ public abstract class VaultRaidBuilder {
    }
 
    protected VaultRaid.Builder getDefaultBuilder(CrystalData crystal, int vaultLevel, @Nullable VaultObjective objective) {
-      return VaultRaid.builder(crystal.getType().getLogic(), vaultLevel, objective)
+      return VaultRaid.builder(null, vaultLevel, objective)
          .setInitializer(this.getDefaultInitializer())
          .addEvents(this.getDefaultEvents())
          .set(VaultRaid.CRYSTAL_DATA, crystal)

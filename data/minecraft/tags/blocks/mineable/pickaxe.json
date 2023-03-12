@@ -29,22 +29,6 @@
     "the_vault:ore_upaline",
     "the_vault:ore_wutodie",
     "the_vault:ore_xenium",
-    "the_vault:vaultstone_ore_alexandrite",
-    "the_vault:vaultstone_ore_ashium",
-    "the_vault:vaultstone_ore_benitoite",
-    "the_vault:vaultstone_ore_black_opal",
-    "the_vault:vaultstone_ore_bomignite",
-    "the_vault:vaultstone_ore_echo",
-    "the_vault:vaultstone_ore_gorginite",
-    "the_vault:vaultstone_ore_iskallium",
-    "the_vault:vaultstone_ore_larimar",
-    "the_vault:vaultstone_ore_painite",
-    "the_vault:vaultstone_ore_petzanite",
-    "the_vault:vaultstone_ore_sparkletine",
-    "the_vault:vaultstone_ore_tubium",
-    "the_vault:vaultstone_ore_upaline",
-    "the_vault:vaultstone_ore_wutodie",
-    "the_vault:vaultstone_ore_xenium",
     "the_vault:ore_vault_rock",
     "the_vault:cube_block",
     "the_vault:spirit_extractor",
@@ -66,6 +50,7 @@
     "the_vault:wutodic_silver_block",
     "the_vault:eternal_pedestal",
     "the_vault:tool_station",
-    "the_vault:golden_tooth"
+    "the_vault:golden_tooth",
+    "the_vault:wardrobe"
   ]
 }

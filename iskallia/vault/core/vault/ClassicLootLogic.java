@@ -2,13 +2,14 @@ package iskallia.vault.core.vault;
 
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.core.Version;
-import iskallia.vault.core.data.adapter.Adapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.ChestGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.stat.ChestStat;
 import iskallia.vault.core.vault.stat.StatCollector;
@@ -38,8 +39,9 @@ public class ClassicLootLogic extends LootLogic {
    public static final SupplierKey<LootLogic> KEY = SupplierKey.of("classic", LootLogic.class).with(Version.v1_0, ClassicLootLogic::new);
    public static final FieldRegistry FIELDS = LootLogic.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Void> ADD_CATALYST_FRAGMENTS = FieldKey.of("add_catalyst_fragments", Void.class)
-      .with(Version.v1_0, Adapter.ofVoid(), DISK.all())
+      .with(Version.v1_0, Adapters.ofVoid(), DISK.all())
       .register(FIELDS);
+   public static final FieldKey<Void> ADD_RUNES = FieldKey.of("add_runes", Void.class).with(Version.v1_11, Adapters.ofVoid(), DISK.all()).register(FIELDS);
 
    @Override
    public SupplierKey<LootLogic> getKey() {
@@ -61,8 +63,9 @@ public class ClassicLootLogic extends LootLogic {
 
    @Override
    protected void onChestPostGenerate(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
-      this.initLootData(vault, data.getLoot(), data.getPos());
       this.generateCatalystFragments(data, vault);
+      this.generateRunes(data, vault);
+      this.initLootData(vault, data.getLoot(), data.getPos(), data.getRandom());
    }
 
    @Override
@@ -71,7 +74,7 @@ public class ClassicLootLogic extends LootLogic {
 
    @Override
    protected void onBlockPostGenerate(VirtualWorld world, Vault vault, LootableBlockGenerationEvent.Data data) {
-      this.initLootData(vault, data.getLoot(), data.getPos());
+      this.initLootData(vault, data.getLoot(), data.getPos(), data.getRandom());
    }
 
    protected boolean applyTrap(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
@@ -111,12 +114,12 @@ public class ClassicLootLogic extends LootLogic {
       }
    }
 
-   private void initLootData(Vault vault, List<ItemStack> loot, BlockPos pos) {
+   private void initLootData(Vault vault, List<ItemStack> loot, BlockPos pos, RandomSource random) {
       for (int i = 0; i < loot.size(); i++) {
          ItemStack stack = loot.get(i);
          VaultLevelItem.doInitializeVaultLoot(stack, vault, pos);
-         stack = DataTransferItem.doConvertStack(stack);
-         DataInitializationItem.doInitialize(stack);
+         stack = DataTransferItem.doConvertStack(stack, random);
+         DataInitializationItem.doInitialize(stack, random);
          loot.set(i, stack);
       }
    }
@@ -129,6 +132,15 @@ public class ClassicLootLogic extends LootLogic {
             if (data.getRandom().nextFloat() < probability) {
                data.getLoot().add(new ItemStack(ModItems.VAULT_CATALYST_FRAGMENT));
             }
+         }
+      }
+   }
+
+   protected void generateRunes(ChestGenerationEvent.Data data, Vault vault) {
+      if (this.has(ADD_RUNES)) {
+         double probability = ModConfigs.VAULT_CHEST_META.getRuneChance(data.getState().getBlock(), data.getRarity());
+         if (data.getRandom().nextFloat() < probability) {
+            data.getLoot().add(new ItemStack(ModItems.RUNE));
          }
       }
    }

@@ -3,6 +3,7 @@ package iskallia.vault.config;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.LevelEntryList;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.data.WeightedList;
 import java.util.Map;
@@ -16,7 +17,7 @@ import net.minecraft.world.item.Items;
 public class ShopPedestalConfig extends Config {
    @Expose
    public LevelEntryList<ShopPedestalConfig.ShopTier> LEVELS;
-   public static final ShopPedestalConfig.ShopOffer EMPTY = new ShopPedestalConfig.ShopOffer(ItemStack.EMPTY, ItemStack.EMPTY);
+   public static final ShopPedestalConfig.ShopOffer EMPTY = new ShopPedestalConfig.ShopOffer(ItemStack.EMPTY, OverSizedItemStack.EMPTY);
 
    @Override
    public String getName() {
@@ -67,6 +68,9 @@ public class ShopPedestalConfig extends Config {
       this.LEVELS = LevelEntryList.of(
          new ShopPedestalConfig.ShopTier(
             0, new WeightedList<>(Map.of(new ShopPedestalConfig.ShopEntry(Items.DIORITE.getDefaultInstance(), ModBlocks.VAULT_BRONZE, 1, 2), 1))
+         ),
+         new ShopPedestalConfig.ShopTier(
+            10, new WeightedList<>(Map.of(new ShopPedestalConfig.ShopEntry(Items.DIORITE.getDefaultInstance(), ModBlocks.VAULT_BRONZE, 128, 256), 1))
          )
       );
    }
@@ -89,24 +93,26 @@ public class ShopPedestalConfig extends Config {
       }
 
       public ShopPedestalConfig.ShopOffer roll(Random random) {
-         return ShopPedestalConfig.ShopOffer.of(this.OFFER, new ItemStack(this.CURRENCY, Mth.randomBetweenInclusive(random, this.MIN_COST, this.MAX_COST)));
+         return ShopPedestalConfig.ShopOffer.of(
+            this.OFFER, new OverSizedItemStack(new ItemStack(this.CURRENCY), Mth.randomBetweenInclusive(random, this.MIN_COST, this.MAX_COST))
+         );
       }
    }
 
-   public record ShopOffer(ItemStack offer, ItemStack currency) {
+   public record ShopOffer(ItemStack offer, OverSizedItemStack currency) {
       public static ShopPedestalConfig.ShopOffer load(CompoundTag tag) {
          ItemStack i = ItemStack.of(tag.getCompound("offer"));
-         ItemStack c = ItemStack.of(tag.getCompound("currency"));
+         OverSizedItemStack c = OverSizedItemStack.deserialize(tag.getCompound("currency"));
          return of(i, c);
       }
 
-      public static ShopPedestalConfig.ShopOffer of(ItemStack offer, ItemStack currency) {
-         return !offer.isEmpty() && !currency.isEmpty() ? new ShopPedestalConfig.ShopOffer(offer, currency) : ShopPedestalConfig.EMPTY;
+      public static ShopPedestalConfig.ShopOffer of(ItemStack offer, OverSizedItemStack currency) {
+         return !offer.isEmpty() && !currency.overSizedStack().isEmpty() ? new ShopPedestalConfig.ShopOffer(offer, currency) : ShopPedestalConfig.EMPTY;
       }
 
       public void save(CompoundTag tag) {
          tag.put("offer", this.offer.save(new CompoundTag()));
-         tag.put("currency", this.currency.save(new CompoundTag()));
+         tag.put("currency", this.currency.serialize());
       }
 
       public boolean isEmpty() {

@@ -15,6 +15,21 @@ import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
+import iskallia.vault.gear.attribute.ability.AbilityFloatValueAttribute;
+import iskallia.vault.gear.attribute.ability.special.DashVelocityModification;
+import iskallia.vault.gear.attribute.ability.special.EternalsSpeedModification;
+import iskallia.vault.gear.attribute.ability.special.ExecuteHealthModification;
+import iskallia.vault.gear.attribute.ability.special.FarmerAdditionalRangeModification;
+import iskallia.vault.gear.attribute.ability.special.GhostWalkDurationModification;
+import iskallia.vault.gear.attribute.ability.special.HealAdditionalHealthModification;
+import iskallia.vault.gear.attribute.ability.special.HunterRangeModification;
+import iskallia.vault.gear.attribute.ability.special.ManaShieldAbsorptionModification;
+import iskallia.vault.gear.attribute.ability.special.MegaJumpVelocityModification;
+import iskallia.vault.gear.attribute.ability.special.NovaRadiusModification;
+import iskallia.vault.gear.attribute.ability.special.RampageDamageModification;
+import iskallia.vault.gear.attribute.ability.special.TankImmunityModification;
+import iskallia.vault.gear.attribute.ability.special.TauntRadiusModification;
+import iskallia.vault.gear.attribute.ability.special.VeinMinerAdditionalBlocksModification;
 import iskallia.vault.gear.attribute.config.BooleanFlagGenerator;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.attribute.config.DoubleAttributeGenerator;
@@ -30,6 +45,7 @@ import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -114,6 +130,32 @@ public class VaultGearTierConfig extends Config {
       } else {
          return null;
       }
+   }
+
+   public Optional<VaultGearTierConfig.ModifierOutcome<?>> getConfiguredModifierTier(
+      VaultGearTierConfig.ModifierAffixTagGroup affixTagGroup, ResourceLocation identifier, int modifierTier
+   ) {
+      if (!this.modifierGroup.containsKey(affixTagGroup)) {
+         return Optional.empty();
+      } else {
+         for (VaultGearTierConfig.ModifierTierGroup group : this.modifierGroup.get(affixTagGroup)) {
+            if (group.identifier.equals(identifier)) {
+               for (VaultGearTierConfig.ModifierTier<?> tier : group) {
+                  if (tier.getModifierTier() == modifierTier) {
+                     return Optional.of(new VaultGearTierConfig.ModifierOutcome<>(tier, group));
+                  }
+               }
+            }
+         }
+
+         return Optional.empty();
+      }
+   }
+
+   public Optional<VaultGearModifier<?>> createModifier(
+      VaultGearTierConfig.ModifierAffixTagGroup affixTagGroup, ResourceLocation identifier, int modifierTier, Random random
+   ) {
+      return this.getConfiguredModifierTier(affixTagGroup, identifier, modifierTier).map(outcome -> outcome.makeModifier(random));
    }
 
    public List<VaultGearTierConfig.ModifierTier<?>> getAllTiers(@Nullable ResourceLocation identifier) {
@@ -221,13 +263,13 @@ public class VaultGearTierConfig extends Config {
       }
    }
 
-   public List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> getModifierGroupConfigurations(String modGroup) {
+   public List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> getModifierConfigurationsByTag(String modTag) {
       List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> configs = new ArrayList<>();
 
       for (Entry<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.AttributeGroup> entry : this.modifierGroup.entrySet()) {
          if (entry.getKey().isGenericGroup()) {
             for (VaultGearTierConfig.ModifierTierGroup group : entry.getValue()) {
-               if (modGroup.isEmpty() || group.modifierGroup.equals(modGroup)) {
+               if (modTag.isEmpty() || group.getTags().contains(modTag)) {
                   configs.add(new Tuple(entry.getKey(), group));
                }
             }
@@ -284,6 +326,227 @@ public class VaultGearTierConfig extends Config {
       suffixes.add(fireImmunityGroup);
       suffixes.add(soulboundGroup);
       this.modifierGroup.put(VaultGearTierConfig.ModifierAffixTagGroup.SUFFIX, suffixes);
+      VaultGearTierConfig.AttributeGroup enhancements = new VaultGearTierConfig.AttributeGroup();
+      this.modifierGroup.put(VaultGearTierConfig.ModifierAffixTagGroup.ABILITY_ENHANCEMENT, enhancements);
+      if (this.gearItem == ModItems.HELMET) {
+         this.addHelmetEnhancementConfigs();
+      }
+   }
+
+   private void addHelmetEnhancementConfigs() {
+      VaultGearTierConfig.AttributeGroup enhancements = this.modifierGroup.get(VaultGearTierConfig.ModifierAffixTagGroup.ABILITY_ENHANCEMENT);
+      VaultGearTierConfig.ModifierTierGroup modDashVelocity = this.enhancementGroup(DashVelocityModification.ID);
+      modDashVelocity.add(new VaultGearTierConfig.ModifierTier<>(0, 10, DashVelocityModification.newConfig(0.2F)));
+      modDashVelocity.add(new VaultGearTierConfig.ModifierTier<>(0, 4, DashVelocityModification.newConfig(0.4F)));
+      enhancements.add(modDashVelocity);
+      VaultGearTierConfig.ModifierTierGroup modEternalSpeed = this.enhancementGroup(EternalsSpeedModification.ID);
+      modEternalSpeed.add(new VaultGearTierConfig.ModifierTier<>(0, 10, EternalsSpeedModification.newConfig(0.35F)));
+      modEternalSpeed.add(new VaultGearTierConfig.ModifierTier<>(0, 4, EternalsSpeedModification.newConfig(0.6F)));
+      enhancements.add(modEternalSpeed);
+      VaultGearTierConfig.ModifierTierGroup modExecuteHealth = this.enhancementGroup(ExecuteHealthModification.ID);
+      modExecuteHealth.add(new VaultGearTierConfig.ModifierTier<>(0, 10, ExecuteHealthModification.newConfig(0.2F)));
+      modExecuteHealth.add(new VaultGearTierConfig.ModifierTier<>(0, 4, ExecuteHealthModification.newConfig(0.35F)));
+      enhancements.add(modExecuteHealth);
+      VaultGearTierConfig.ModifierTierGroup modFarmerRange = this.enhancementGroup(FarmerAdditionalRangeModification.ID);
+      modFarmerRange.add(new VaultGearTierConfig.ModifierTier<>(0, 10, FarmerAdditionalRangeModification.newConfig(4)));
+      modFarmerRange.add(new VaultGearTierConfig.ModifierTier<>(0, 4, FarmerAdditionalRangeModification.newConfig(10)));
+      enhancements.add(modFarmerRange);
+      VaultGearTierConfig.ModifierTierGroup modGhostWalk = this.enhancementGroup(GhostWalkDurationModification.ID);
+      modGhostWalk.add(new VaultGearTierConfig.ModifierTier<>(0, 10, GhostWalkDurationModification.newConfig(60)));
+      modGhostWalk.add(new VaultGearTierConfig.ModifierTier<>(0, 4, GhostWalkDurationModification.newConfig(120)));
+      enhancements.add(modGhostWalk);
+      VaultGearTierConfig.ModifierTierGroup modHealHealth = this.enhancementGroup(HealAdditionalHealthModification.ID);
+      modHealHealth.add(new VaultGearTierConfig.ModifierTier<>(0, 10, HealAdditionalHealthModification.newConfig(4)));
+      modHealHealth.add(new VaultGearTierConfig.ModifierTier<>(0, 4, HealAdditionalHealthModification.newConfig(8)));
+      enhancements.add(modHealHealth);
+      VaultGearTierConfig.ModifierTierGroup modHunterRange = this.enhancementGroup(HunterRangeModification.ID);
+      modHunterRange.add(new VaultGearTierConfig.ModifierTier<>(0, 10, HunterRangeModification.newConfig(0.6F)));
+      modHunterRange.add(new VaultGearTierConfig.ModifierTier<>(0, 4, HunterRangeModification.newConfig(1.5F)));
+      enhancements.add(modHunterRange);
+      VaultGearTierConfig.ModifierTierGroup modManaShield = this.enhancementGroup(ManaShieldAbsorptionModification.ID);
+      modManaShield.add(new VaultGearTierConfig.ModifierTier<>(0, 10, ManaShieldAbsorptionModification.newConfig(0.25F)));
+      modManaShield.add(new VaultGearTierConfig.ModifierTier<>(0, 4, ManaShieldAbsorptionModification.newConfig(0.6F)));
+      enhancements.add(modManaShield);
+      VaultGearTierConfig.ModifierTierGroup modMegaJump = this.enhancementGroup(MegaJumpVelocityModification.ID);
+      modMegaJump.add(new VaultGearTierConfig.ModifierTier<>(0, 10, MegaJumpVelocityModification.newConfig(6)));
+      modMegaJump.add(new VaultGearTierConfig.ModifierTier<>(0, 4, MegaJumpVelocityModification.newConfig(12)));
+      modMegaJump.add(new VaultGearTierConfig.ModifierTier<>(0, 4, MegaJumpVelocityModification.newConfig(0)));
+      enhancements.add(modMegaJump);
+      VaultGearTierConfig.ModifierTierGroup modNovaRadius = this.enhancementGroup(NovaRadiusModification.ID);
+      modNovaRadius.add(new VaultGearTierConfig.ModifierTier<>(0, 10, NovaRadiusModification.newConfig(0.6F)));
+      modNovaRadius.add(new VaultGearTierConfig.ModifierTier<>(0, 4, NovaRadiusModification.newConfig(1.4F)));
+      enhancements.add(modNovaRadius);
+      VaultGearTierConfig.ModifierTierGroup modRampageDamage = this.enhancementGroup(RampageDamageModification.ID);
+      modRampageDamage.add(new VaultGearTierConfig.ModifierTier<>(0, 10, RampageDamageModification.newConfig(0.3F)));
+      modRampageDamage.add(new VaultGearTierConfig.ModifierTier<>(0, 4, RampageDamageModification.newConfig(0.65F)));
+      enhancements.add(modRampageDamage);
+      VaultGearTierConfig.ModifierTierGroup modTankImmunity = this.enhancementGroup(TankImmunityModification.ID);
+      modTankImmunity.add(new VaultGearTierConfig.ModifierTier<>(0, 4, TankImmunityModification.newConfig()));
+      enhancements.add(modTankImmunity);
+      VaultGearTierConfig.ModifierTierGroup modTauntRadius = this.enhancementGroup(TauntRadiusModification.ID);
+      modTauntRadius.add(new VaultGearTierConfig.ModifierTier<>(0, 10, TauntRadiusModification.newConfig(0.75F)));
+      modTauntRadius.add(new VaultGearTierConfig.ModifierTier<>(0, 4, TauntRadiusModification.newConfig(1.5F)));
+      enhancements.add(modTauntRadius);
+      VaultGearTierConfig.ModifierTierGroup modVeinMiner = this.enhancementGroup(VeinMinerAdditionalBlocksModification.ID);
+      modVeinMiner.add(new VaultGearTierConfig.ModifierTier<>(0, 10, VeinMinerAdditionalBlocksModification.newConfig(60)));
+      modVeinMiner.add(new VaultGearTierConfig.ModifierTier<>(0, 4, VeinMinerAdditionalBlocksModification.newConfig(140)));
+      enhancements.add(modVeinMiner);
+      VaultGearTierConfig.ModifierTierGroup modManaDash = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_FLAT, "ModEnhancement", "enhancement_mana_dash"
+      );
+      modManaDash.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Dash", -6.0F)));
+      modManaDash.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Dash", -14.0F)));
+      enhancements.add(modManaDash);
+      VaultGearTierConfig.ModifierTierGroup modManaEternal = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_eternal"
+      );
+      modManaEternal.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Summon Eternal", -0.6F)));
+      modManaEternal.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Summon Eternal", -1.0F)));
+      enhancements.add(modManaEternal);
+      VaultGearTierConfig.ModifierTierGroup modManaFarmer = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_FLAT, "ModEnhancement", "enhancement_mana_farmer"
+      );
+      modManaFarmer.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Farmer", -2.0F)));
+      modManaFarmer.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Farmer", -3.0F)));
+      enhancements.add(modManaFarmer);
+      VaultGearTierConfig.ModifierTierGroup modManaGhostWalk = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_ghost_walk"
+      );
+      modManaGhostWalk.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Ghost Walk", -0.3F)));
+      modManaGhostWalk.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Ghost Walk", -0.8F)));
+      enhancements.add(modManaGhostWalk);
+      VaultGearTierConfig.ModifierTierGroup modManaHeal = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_heal"
+      );
+      modManaHeal.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Heal", -0.35F)));
+      modManaHeal.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Heal", -0.75F)));
+      enhancements.add(modManaHeal);
+      VaultGearTierConfig.ModifierTierGroup modManaHunter = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_FLAT, "ModEnhancement", "enhancement_mana_hunter"
+      );
+      modManaHunter.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Hunter", -6.0F)));
+      modManaHunter.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Hunter", -8.0F)));
+      enhancements.add(modManaHunter);
+      VaultGearTierConfig.ModifierTierGroup modManaManaShield = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_mana_shield"
+      );
+      modManaManaShield.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Mana Shield", -0.3F)));
+      modManaManaShield.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Mana Shield", -0.65F)));
+      enhancements.add(modManaManaShield);
+      VaultGearTierConfig.ModifierTierGroup modManaMegaJump = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_FLAT, "ModEnhancement", "enhancement_mana_mega_jump"
+      );
+      modManaMegaJump.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Mega Jump", -8.0F)));
+      modManaMegaJump.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Mega Jump", -16.0F)));
+      enhancements.add(modManaMegaJump);
+      VaultGearTierConfig.ModifierTierGroup modManaNova = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_nova"
+      );
+      modManaNova.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Nova", -0.4F)));
+      modManaNova.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Nova", -0.8F)));
+      enhancements.add(modManaNova);
+      VaultGearTierConfig.ModifierTierGroup modManaRampage = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_FLAT, "ModEnhancement", "enhancement_mana_rampage"
+      );
+      modManaRampage.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Rampage", -1.0F)));
+      modManaRampage.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Rampage", -2.5F)));
+      enhancements.add(modManaRampage);
+      VaultGearTierConfig.ModifierTierGroup modManaTank = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_tank"
+      );
+      modManaTank.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Tank", -0.35F)));
+      modManaTank.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Tank", -0.7F)));
+      enhancements.add(modManaTank);
+      VaultGearTierConfig.ModifierTierGroup modManaTaunt = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_taunt"
+      );
+      modManaTaunt.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Taunt", -0.6F)));
+      modManaTaunt.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Taunt", -1.0F)));
+      enhancements.add(modManaTaunt);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownDash = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_dash"
+      );
+      modCoolDownDash.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Dash", -0.25F)));
+      modCoolDownDash.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Dash", -0.6F)));
+      enhancements.add(modCoolDownDash);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownEternal = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_eternal"
+      );
+      modCoolDownEternal.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Summon Eternal", -0.2F)));
+      modCoolDownEternal.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Summon Eternal", -0.45F)));
+      enhancements.add(modCoolDownEternal);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownExecute = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_execute"
+      );
+      modCoolDownExecute.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Execute", -0.3F)));
+      modCoolDownExecute.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Execute", -0.5F)));
+      enhancements.add(modCoolDownExecute);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownFarmer = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_farmer"
+      );
+      modCoolDownFarmer.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Farmer", -0.6F)));
+      modCoolDownFarmer.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Farmer", -1.0F)));
+      enhancements.add(modCoolDownFarmer);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownGhostWalk = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_ghost_walk"
+      );
+      modCoolDownGhostWalk.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Ghost Walk", -0.25F)));
+      modCoolDownGhostWalk.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Ghost Walk", -0.5F)));
+      enhancements.add(modCoolDownGhostWalk);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownHeal = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_FLAT, "ModEnhancement", "enhancement_cooldown_heal"
+      );
+      modCoolDownHeal.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Heal", -50.0F)));
+      modCoolDownHeal.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Heal", -120.0F)));
+      enhancements.add(modCoolDownHeal);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownHunter = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_hunter"
+      );
+      modCoolDownHunter.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Hunter", -0.3F)));
+      modCoolDownHunter.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Hunter", -0.5F)));
+      enhancements.add(modCoolDownHunter);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownManaShield = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_FLAT, "ModEnhancement", "enhancement_cooldown_hunter"
+      );
+      modCoolDownManaShield.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Mana Shield", -180.0F)));
+      modCoolDownManaShield.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Mana Shield", -340.0F)));
+      enhancements.add(modCoolDownManaShield);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownMegaJump = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_FLAT, "ModEnhancement", "enhancement_cooldown_mega_jump"
+      );
+      modCoolDownMegaJump.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Mega Jump", -80.0F)));
+      modCoolDownMegaJump.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Mega Jump", -140.0F)));
+      enhancements.add(modCoolDownMegaJump);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownNova = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_FLAT, "ModEnhancement", "enhancement_cooldown_nova"
+      );
+      modCoolDownNova.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Nova", -60.0F)));
+      modCoolDownNova.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Nova", -120.0F)));
+      enhancements.add(modCoolDownNova);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownRampage = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_rampage"
+      );
+      modCoolDownRampage.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Rampage", -0.3F)));
+      modCoolDownRampage.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Rampage", -0.7F)));
+      enhancements.add(modCoolDownRampage);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownTank = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_tank"
+      );
+      modCoolDownTank.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Tank", -0.3F)));
+      modCoolDownTank.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Tank", -0.7F)));
+      enhancements.add(modCoolDownTank);
+      VaultGearTierConfig.ModifierTierGroup modCoolDownTaunt = new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_taunt"
+      );
+      modCoolDownTaunt.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Taunt", -0.25F)));
+      modCoolDownTaunt.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Taunt", -0.4F)));
+      enhancements.add(modCoolDownTaunt);
+   }
+
+   private VaultGearTierConfig.ModifierTierGroup enhancementGroup(ResourceLocation idSpecialModification) {
+      return new VaultGearTierConfig.ModifierTierGroup(
+         ModGearAttributes.ABILITY_SPECIAL_MODIFICATION, "ModEnhancement", "enhancement_" + idSpecialModification.getPath()
+      );
    }
 
    @Override
@@ -328,19 +591,27 @@ public class VaultGearTierConfig extends Config {
                      VaultGearTierConfig.ModifierTierGroup group = new VaultGearTierConfig.ModifierTierGroup(
                         attributeKey, tierGroupObject.get("group").getAsString(), identifier
                      );
+                     if (tierGroupObject.has("tags")) {
+                        group.tags.addAll((Collection<? extends String>)context.deserialize(tierGroupObject.get("tags"), List.class));
+                     }
+
                      JsonArray groupArray = tierGroupObject.getAsJsonArray("tiers");
 
                      for (int i = 0; i < groupArray.size(); i++) {
                         JsonObject tierObject = groupArray.get(i).getAsJsonObject();
                         int minLevel = tierObject.get("minLevel").getAsInt();
-                        int maxLevel = tierObject.get("maxLevel").getAsInt();
+                        int maxLevel = tierObject.has("maxLevel") ? tierObject.get("maxLevel").getAsInt() : -1;
                         int weight = tierObject.get("weight").getAsInt();
                         VaultGearTierConfig.ModifierTier<?> tier = new VaultGearTierConfig.ModifierTier(minLevel, weight);
                         tier.modifierTier = i;
                         tier.maxLevel = maxLevel;
                         Class<?> configClass = attribute.getGenerator().getConfigurationObjectClass();
                         if (configClass != null) {
-                           tier.modifierConfiguration = context.deserialize(tierObject.get("value"), configClass);
+                           JsonObject configObject = tierObject.getAsJsonObject("value");
+                           tier.modifierConfiguration = context.deserialize(configObject, configClass);
+                           if (tier.modifierConfiguration instanceof ConfigurableAttributeGenerator.CustomTierConfig customCfg) {
+                              customCfg.deserializeAdditional(configObject, context);
+                           }
                         }
 
                         group.add(tier);
@@ -362,6 +633,7 @@ public class VaultGearTierConfig extends Config {
                   groupObject.addProperty("attribute", group.attribute.toString());
                   groupObject.addProperty("group", group.modifierGroup);
                   groupObject.addProperty("identifier", group.identifier.toString());
+                  groupObject.add("tags", context.serialize(group.tags, List.class));
                   JsonArray groupArray = new JsonArray();
                   group.forEach(modifierTier -> {
                      JsonObject tierObject = new JsonObject();
@@ -369,7 +641,13 @@ public class VaultGearTierConfig extends Config {
                      tierObject.addProperty("maxLevel", modifierTier.getMaxLevel());
                      tierObject.addProperty("weight", modifierTier.getWeight());
                      if (attribute.getGenerator().getConfigurationObjectClass() != null) {
-                        tierObject.add("value", context.serialize(modifierTier.getModifierConfiguration()));
+                        Object configuration = modifierTier.getModifierConfiguration();
+                        JsonObject configObject = context.serialize(configuration).getAsJsonObject();
+                        if (configuration instanceof ConfigurableAttributeGenerator.CustomTierConfig customCfg) {
+                           customCfg.serializeAdditional(configObject, context);
+                        }
+
+                        tierObject.add("value", configObject);
                      }
 
                      groupArray.add(tierObject);
@@ -386,7 +664,10 @@ public class VaultGearTierConfig extends Config {
    public static enum ModifierAffixTagGroup {
       IMPLICIT(VaultGearModifier.AffixType.IMPLICIT),
       PREFIX(VaultGearModifier.AffixType.PREFIX),
-      SUFFIX(VaultGearModifier.AffixType.SUFFIX);
+      SUFFIX(VaultGearModifier.AffixType.SUFFIX),
+      ABILITY_ENHANCEMENT(VaultGearModifier.AffixType.IMPLICIT),
+      CRAFTED_PREFIX(VaultGearModifier.AffixType.PREFIX),
+      CRAFTED_SUFFIX(VaultGearModifier.AffixType.SUFFIX);
 
       private final VaultGearModifier.AffixType targetAffixType;
 
@@ -417,7 +698,7 @@ public class VaultGearTierConfig extends Config {
       }
    }
 
-   private record ModifierOutcome<C>(VaultGearTierConfig.ModifierTier<C> tier, VaultGearTierConfig.ModifierTierGroup tierGroup) {
+   public record ModifierOutcome<C>(VaultGearTierConfig.ModifierTier<C> tier, VaultGearTierConfig.ModifierTierGroup tierGroup) {
       private <T> VaultGearModifier<T> makeModifier(Random random) {
          return this.tier().makeModifier(this.tierGroup(), random);
       }
@@ -476,6 +757,7 @@ public class VaultGearTierConfig extends Config {
       private final ResourceLocation attribute;
       private final String modifierGroup;
       private final ResourceLocation identifier;
+      private final List<String> tags = new ArrayList<>();
 
       public ModifierTierGroup(VaultGearAttribute<?> attribute, String modifierGroup, String identifierStr) {
          this(attribute.getRegistryName(), modifierGroup, VaultMod.id(identifierStr));
@@ -518,6 +800,10 @@ public class VaultGearTierConfig extends Config {
 
       public String getModifierGroup() {
          return this.modifierGroup;
+      }
+
+      public List<String> getTags() {
+         return this.tags;
       }
 
       public ResourceLocation getIdentifier() {
