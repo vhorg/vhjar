@@ -90,6 +90,8 @@ public class FindExitObjective extends Objective {
       if (listener instanceof Runner && !listener.isActive(vault, this)) {
          listener.addObjective(vault, this);
       }
+
+      super.tickListener(world, vault, listener);
    }
 
    @OnlyIn(Dist.CLIENT)
