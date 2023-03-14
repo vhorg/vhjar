@@ -9,16 +9,11 @@ import iskallia.vault.core.net.BitBuffer;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import net.minecraft.nbt.ByteTag;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.FloatTag;
-import net.minecraft.nbt.IntTag;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NumericTag;
-import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.Nullable;
 
 public class DoubleAdapter extends NumberAdapter<Double> {
    public DoubleAdapter(boolean nullable) {
@@ -53,16 +48,9 @@ public class DoubleAdapter extends NumberAdapter<Double> {
       return data.readDouble();
    }
 
+   @Nullable
    protected Tag writeNumberNbt(Double value) {
-      if (value.byteValue() == value) {
-         return ByteTag.valueOf(value.byteValue());
-      } else if (value.shortValue() == value) {
-         return ShortTag.valueOf(value.shortValue());
-      } else if (value.intValue() == value) {
-         return IntTag.valueOf(value.intValue());
-      } else {
-         return (Tag)(value.floatValue() == value ? FloatTag.valueOf(value.floatValue()) : DoubleTag.valueOf(value));
-      }
+      return wrap(reduce(value));
    }
 
    @Nullable
@@ -71,17 +59,12 @@ public class DoubleAdapter extends NumberAdapter<Double> {
          return numeric.getAsDouble();
       } else if (nbt instanceof ListTag list && list.size() == 1) {
          return this.readNumberNbt(list.get(0));
-      } else if (nbt instanceof StringTag string) {
-         try {
-            return Double.parseDouble(string.getAsString());
-         } catch (NumberFormatException var6) {
-            return null;
-         }
       } else {
-         return null;
+         return nbt instanceof StringTag string ? parse(string.getAsString()).map(Number::doubleValue).orElse(null) : null;
       }
    }
 
+   @Nullable
    protected JsonElement writeNumberJson(Double value) {
       return new JsonPrimitive(value);
    }
@@ -99,11 +82,7 @@ public class DoubleAdapter extends NumberAdapter<Double> {
             }
 
             if (primitive.isString()) {
-               try {
-                  return Double.parseDouble(primitive.getAsString());
-               } catch (NumberFormatException var5) {
-                  return null;
-               }
+               return parse(primitive.getAsString()).map(Number::doubleValue).orElse(null);
             }
          }
 

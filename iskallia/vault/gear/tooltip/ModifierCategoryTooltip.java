@@ -36,4 +36,9 @@ public class ModifierCategoryTooltip {
       MutableComponent abyssalCt = new TextComponent("⛏ ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(16109454)));
       return abyssalCt.append(cmp);
    }
+
+   public static MutableComponent modifyEnhancementTooltip(MutableComponent cmp) {
+      MutableComponent abyssalCt = new TextComponent("⏶ ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(37544)));
+      return abyssalCt.append(cmp);
+   }
 }

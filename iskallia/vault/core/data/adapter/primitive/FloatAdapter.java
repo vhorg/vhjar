@@ -9,14 +9,11 @@ import iskallia.vault.core.net.BitBuffer;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import net.minecraft.nbt.ByteTag;
-import net.minecraft.nbt.FloatTag;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NumericTag;
-import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.Nullable;
 
 public class FloatAdapter extends NumberAdapter<Float> {
    public FloatAdapter(boolean nullable) {
@@ -51,12 +48,9 @@ public class FloatAdapter extends NumberAdapter<Float> {
       return data.readFloat();
    }
 
+   @Nullable
    protected Tag writeNumberNbt(Float value) {
-      if (value.byteValue() == value) {
-         return ByteTag.valueOf(value.byteValue());
-      } else {
-         return (Tag)(value.shortValue() == value ? ShortTag.valueOf(value.shortValue()) : FloatTag.valueOf(value));
-      }
+      return wrap(reduce(value));
    }
 
    @Nullable
@@ -65,17 +59,12 @@ public class FloatAdapter extends NumberAdapter<Float> {
          return numeric.getAsFloat();
       } else if (nbt instanceof ListTag list && list.size() == 1) {
          return this.readNumberNbt(list.get(0));
-      } else if (nbt instanceof StringTag string) {
-         try {
-            return Float.parseFloat(string.getAsString());
-         } catch (NumberFormatException var6) {
-            return null;
-         }
       } else {
-         return null;
+         return nbt instanceof StringTag string ? parse(string.getAsString()).map(Number::floatValue).orElse(null) : null;
       }
    }
 
+   @Nullable
    protected JsonElement writeNumberJson(Float value) {
       return new JsonPrimitive(value);
    }
@@ -93,11 +82,7 @@ public class FloatAdapter extends NumberAdapter<Float> {
             }
 
             if (primitive.isString()) {
-               try {
-                  return Float.parseFloat(primitive.getAsString());
-               } catch (NumberFormatException var5) {
-                  return null;
-               }
+               return parse(primitive.getAsString()).map(Number::floatValue).orElse(null);
             }
          }
 

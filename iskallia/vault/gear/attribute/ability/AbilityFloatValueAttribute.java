@@ -1,6 +1,7 @@
 package iskallia.vault.gear.attribute.ability;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
@@ -12,6 +13,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Style;
 
 public abstract class AbilityFloatValueAttribute extends AbilityGearAttribute {
    protected final float amount;
@@ -112,11 +114,19 @@ public abstract class AbilityFloatValueAttribute extends AbilityGearAttribute {
       private static final DecimalFormat FORMAT = new DecimalFormat("0.#");
 
       protected Reader() {
-         this(9020415);
+         this(11842740);
       }
 
       protected Reader(int rgbColor) {
          super("", rgbColor);
+      }
+
+      protected Style getAbilityStyle() {
+         return SpecialAbilityModification.getAbilityStyle();
+      }
+
+      protected Style getValueStyle() {
+         return SpecialAbilityModification.getValueStyle();
       }
 
       protected String formatValue(float value) {

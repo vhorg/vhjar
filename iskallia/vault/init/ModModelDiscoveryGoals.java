@@ -141,13 +141,13 @@ public class ModModelDiscoveryGoals {
    );
    public static OverworldSpiritExtractionGoal SPIRIT_EXTRACTION = registerGoal(
       VaultMod.id("spirit_extraction"),
-      new OverworldSpiritExtractionGoal(200.0F)
+      new OverworldSpiritExtractionGoal(189.0F)
          .setReward(
             (player, goal) -> {
                DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());
                ResourceLocation modelId = ModDynamicModels.Swords.DEATHS_DOOR.getId();
                if (!discoversData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
-                  MutableComponent info = new TextComponent("You have revived a spirit " + (int)goal.getTargetProgress() + " for at least 200 gold!")
+                  MutableComponent info = new TextComponent("You have revived a spirit " + (int)goal.getTargetProgress() + " for at least 189 gold!")
                      .withStyle(ChatFormatting.GOLD);
                   player.sendMessage(info, Util.NIL_UUID);
                   discoversData.discoverModelAndBroadcast(ModItems.SWORD, modelId, player);

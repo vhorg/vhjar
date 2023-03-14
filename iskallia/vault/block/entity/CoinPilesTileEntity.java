@@ -1,5 +1,6 @@
 package iskallia.vault.block.entity;
 
+import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.event.CommonEvents;
@@ -18,11 +19,24 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class CoinPilesTileEntity extends BlockEntity {
+public class CoinPilesTileEntity extends BlockEntity implements HunterHiddenTileEntity {
    private ResourceLocation lootTable;
+   private boolean hidden;
 
    public CoinPilesTileEntity(BlockPos p_155630_, BlockState p_155631_) {
       super(ModBlocks.COIN_PILE_TILE, p_155630_, p_155631_);
+   }
+
+   @Override
+   public boolean isHidden() {
+      return this.hidden;
+   }
+
+   @Override
+   public void setHidden(boolean hidden) {
+      if (this.hidden != (this.hidden = hidden)) {
+         this.setChanged();
+      }
    }
 
    public List<ItemStack> generateLoot(ServerPlayer player) {
@@ -67,6 +81,8 @@ public class CoinPilesTileEntity extends BlockEntity {
       if (nbt.contains("LootTable", 8)) {
          this.lootTable = new ResourceLocation(nbt.getString("LootTable"));
       }
+
+      this.hidden = nbt.getBoolean("Hidden");
    }
 
    protected void saveAdditional(CompoundTag nbt) {
@@ -74,5 +90,7 @@ public class CoinPilesTileEntity extends BlockEntity {
       if (this.lootTable != null) {
          nbt.putString("LootTable", this.lootTable.toString());
       }
+
+      nbt.putBoolean("Hidden", this.hidden);
    }
 }

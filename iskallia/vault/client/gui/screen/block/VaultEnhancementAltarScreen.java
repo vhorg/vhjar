@@ -17,7 +17,6 @@ import iskallia.vault.container.VaultEnhancementAltarContainer;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.VaultEnhancementRequestMessage;
-import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -75,14 +74,12 @@ public class VaultEnhancementAltarScreen extends AbstractElementContainerScreen<
    private void tryCraft() {
       Player player = Minecraft.getInstance().player;
       if (player != null) {
-         if (ServerVaults.isInVault(player)) {
-            VaultEnhancementAltarTileEntity altarTile = ((VaultEnhancementAltarContainer)this.getMenu()).getTileEntity();
-            if (altarTile.canBeUsed(player)) {
-               ItemStack gearItem = altarTile.getInventory().getItem(0);
-               if (AttributeGearData.hasData(gearItem)) {
-                  ModNetwork.CHANNEL.sendToServer(new VaultEnhancementRequestMessage(((VaultEnhancementAltarContainer)this.getMenu()).getTilePos()));
-                  altarTile.setUsedByPlayer(player);
-               }
+         VaultEnhancementAltarTileEntity altarTile = ((VaultEnhancementAltarContainer)this.getMenu()).getTileEntity();
+         if (altarTile.canBeUsed(player)) {
+            ItemStack gearItem = altarTile.getInventory().getItem(0);
+            if (AttributeGearData.hasData(gearItem)) {
+               ModNetwork.CHANNEL.sendToServer(new VaultEnhancementRequestMessage(((VaultEnhancementAltarContainer)this.getMenu()).getTilePos()));
+               altarTile.setUsedByPlayer(player);
             }
          }
       }

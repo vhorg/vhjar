@@ -35,15 +35,16 @@ public class TauntRadiusModification extends FloatValueAbilityModification<Float
 
    @Nullable
    public MutableComponent getDisplay(FloatValueConfig config, Style style, VaultGearModifier.AffixType type) {
-      Component valueDisplay = this.getValueDisplay(config);
+      MutableComponent valueDisplay = this.getValueDisplay(config);
       return valueDisplay == null
          ? null
-         : new TextComponent(type.getAffixPrefix(config.getValue() >= 0.0F))
+         : new TextComponent("")
             .withStyle(style)
-            .append(valueDisplay)
-            .withStyle(style)
-            .append(new TextComponent(" increased Taunt radius"))
-            .withStyle(style);
+            .append(type.getAffixPrefixComponent(config.getValue() >= 0.0F).withStyle(getValueStyle()))
+            .append(valueDisplay.withStyle(getValueStyle()))
+            .append(" increased ")
+            .append(new TextComponent("Taunt").withStyle(getAbilityStyle()))
+            .append(" radius");
    }
 
    @Nullable

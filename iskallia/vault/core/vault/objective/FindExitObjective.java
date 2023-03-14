@@ -85,6 +85,13 @@ public class FindExitObjective extends Objective {
          );
    }
 
+   @Override
+   public void tickListener(VirtualWorld world, Vault vault, Listener listener) {
+      if (listener instanceof Runner && !listener.isActive(vault, this)) {
+         listener.addObjective(vault, this);
+      }
+   }
+
    @OnlyIn(Dist.CLIENT)
    @Override
    public boolean render(Vault vault, PoseStack matrixStack, Window window, float partialTicks, Player player) {

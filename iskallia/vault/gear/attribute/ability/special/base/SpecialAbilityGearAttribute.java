@@ -105,7 +105,7 @@ public class SpecialAbilityGearAttribute<C extends SpecialAbilityModification.Co
    public static class Reader<C extends SpecialAbilityModification.Config<C>, T extends SpecialAbilityModification<C>>
       extends VaultGearModifierReader<SpecialAbilityGearAttribute<C, T>> {
       private Reader() {
-         super("", 9020415);
+         super("", 11842740);
       }
 
       @Nullable

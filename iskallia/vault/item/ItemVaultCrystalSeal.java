@@ -24,7 +24,7 @@ public class ItemVaultCrystalSeal extends Item {
    }
 
    public boolean configure(CrystalData crystal) {
-      return ModConfigs.VAULT_CRYSTAL.applySeal(new ItemStack(this), new ItemStack(ModItems.VAULT_CRYSTAL), crystal);
+      return ModConfigs.VAULT_CRYSTAL.applySeal(new ItemStack(ModItems.VAULT_CRYSTAL), new ItemStack(this), new ItemStack(ModItems.VAULT_CRYSTAL), crystal);
    }
 
    @Nullable

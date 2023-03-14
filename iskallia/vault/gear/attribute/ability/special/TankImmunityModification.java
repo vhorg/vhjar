@@ -25,15 +25,17 @@ public class TankImmunityModification extends NoOpAbilityModification {
 
    @Nullable
    public MutableComponent getDisplay(NoOpConfig config, Style style, VaultGearModifier.AffixType type) {
-      return new TextComponent(type.getAffixPrefix(true)).withStyle(style).append(this.getDescription()).withStyle(style);
+      return new TextComponent("")
+         .withStyle(style)
+         .append(type.getAffixPrefix(true))
+         .withStyle(getValueStyle())
+         .append(new TextComponent("Immunity").withStyle(getValueStyle()))
+         .append(" against negative potion effects during ")
+         .append(new TextComponent("Tank").withStyle(getAbilityStyle()));
    }
 
    public void serializeTextElements(JsonArray out, NoOpConfig config, VaultGearModifier.AffixType type) {
       out.add(type.getAffixPrefix(true));
-      out.add(this.getDescription());
-   }
-
-   private String getDescription() {
-      return "Immunity against negative potion effects during Tank";
+      out.add("Immunity against negative potion effects during Tank");
    }
 }

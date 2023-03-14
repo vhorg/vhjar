@@ -4,8 +4,10 @@ import com.google.gson.JsonArray;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
+import iskallia.vault.init.ModConfigs;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 
 public class AbilityManaCostPercentAttribute extends AbilityFloatValueAttribute {
@@ -41,17 +43,21 @@ public class AbilityManaCostPercentAttribute extends AbilityFloatValueAttribute 
          AbilityManaCostPercentAttribute attribute = instance.getValue();
          MutableComponent valueDisplay = this.getValueComponent(Math.abs(attribute.getAmount()));
          boolean positive = attribute.getAmount() >= 0.0F;
+         MutableComponent manaCostCmp = new TextComponent("Mana Cost").withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("manaCost")));
          String cdInfo;
          if (positive) {
-            cdInfo = " increased Mana Cost of ";
+            cdInfo = " increased ";
          } else {
-            cdInfo = " reduced Mana Cost of ";
+            cdInfo = " reduced ";
          }
 
-         return new TextComponent(type.getAffixPrefix(positive))
-            .append(valueDisplay)
+         return new TextComponent("")
+            .append(type.getAffixPrefixComponent(positive).withStyle(this.getValueStyle()))
+            .append(valueDisplay.withStyle(this.getValueStyle()))
             .append(cdInfo)
-            .append(attribute.getAbilityKey())
+            .append(manaCostCmp)
+            .append(" of ")
+            .append(new TextComponent(attribute.getAbilityKey()).withStyle(this.getAbilityStyle()))
             .setStyle(this.getColoredTextStyle());
       }
 

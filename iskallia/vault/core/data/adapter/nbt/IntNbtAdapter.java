@@ -8,15 +8,16 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
-public class IntTagAdapter extends NbtAdapter<IntTag> {
-   public IntTagAdapter(boolean nullable) {
+public class IntNbtAdapter extends NbtAdapter<IntTag> {
+   public IntNbtAdapter(boolean nullable) {
       super(IntTag.class, nullable);
    }
 
-   public IntTagAdapter asNullable() {
-      return new IntTagAdapter(this.isNullable());
+   public IntNbtAdapter asNullable() {
+      return new IntNbtAdapter(this.isNullable());
    }
 
    protected void writeTagBits(IntTag value, BitBuffer buffer) {
@@ -36,7 +37,6 @@ public class IntTagAdapter extends NbtAdapter<IntTag> {
    }
 
    protected void writeTagData(IntTag value, DataOutput data) throws IOException {
-      value.write(data);
       Adapters.INT.writeData(Integer.valueOf(value.getAsInt()), data);
    }
 
@@ -44,7 +44,15 @@ public class IntTagAdapter extends NbtAdapter<IntTag> {
       return IntTag.valueOf(Adapters.INT.readData(data).orElseThrow());
    }
 
+   protected Tag writeTagNbt(IntTag value) {
+      return value;
+   }
+
    @Nullable
+   protected IntTag readTagNbt(Tag nbt) {
+      return nbt instanceof IntTag tag ? tag : null;
+   }
+
    protected JsonElement writeTagJson(IntTag value) {
       return Adapters.INT.writeJson(Integer.valueOf(value.getAsInt())).orElseThrow();
    }

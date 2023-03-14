@@ -140,7 +140,7 @@ public class AnvilEvents {
             ItemStack copy = input.getItem() == ModItems.VAULT_CRYSTAL ? input.copy() : new ItemStack(ModItems.VAULT_CRYSTAL);
             CrystalData crystal = CrystalData.read(copy);
             if (crystal.getModifiers().isEmpty()) {
-               if (ModConfigs.VAULT_CRYSTAL.applySeal(seal, copy, crystal)) {
+               if (ModConfigs.VAULT_CRYSTAL.applySeal(input, seal, copy, crystal)) {
                   event.setOutput(copy);
                   event.setMaterialCost(1);
                   event.setCost(8);
@@ -245,6 +245,7 @@ public class AnvilEvents {
             int newLevel = Math.max(0, data.getLevel() - event.getRight().getCount());
             int price = data.getLevel() - newLevel;
             data.setLevel(newLevel);
+            data.write(output);
             event.setMaterialCost(price);
             event.setCost(price);
             event.setOutput(output);

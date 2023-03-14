@@ -152,9 +152,10 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
 
    @Override
    public void onListenerAdd(VirtualWorld world, Vault vault, ModifierContext context, Listener listener) {
-      vault.getOptional(Vault.STATS)
-         .map(stats -> stats.get(listener))
-         .ifPresent(stats -> stats.modify(StatCollector.EXP_MULTIPLIER, m -> m * this.properties().experienceMultiplierOnSuccess()));
+      vault.getOptional(Vault.STATS).map(stats -> stats.get(listener)).ifPresent(stats -> {
+         stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> m * this.properties().experienceMultiplierOnSuccess());
+         stats.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> m * this.properties().experienceMultiplierOnSuccess());
+      });
    }
 
    @Override
@@ -162,7 +163,8 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
       vault.ifPresent(Vault.STATS, stats -> {
          StatCollector statCollector = stats.get(listener);
          if (statCollector != null && statCollector.getCompletion() == Completion.FAILED) {
-            statCollector.modify(StatCollector.EXP_MULTIPLIER, m -> m * this.properties.experienceMultiplierOnDeath());
+            statCollector.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> m * this.properties.experienceMultiplierOnDeath());
+            statCollector.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> m * this.properties.experienceMultiplierOnDeath());
          }
       });
    }
