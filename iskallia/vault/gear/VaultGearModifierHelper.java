@@ -127,17 +127,21 @@ public class VaultGearModifierHelper {
          List<Tuple<VaultGearModifier<?>, VaultGearModifier<?>>> modifierReplacements = new ArrayList<>();
          data.getModifiers(VaultGearModifier.AffixType.PREFIX).forEach(modifier -> {
             if (modifier.getCategory().isModifiableByArtisanFoci()) {
-               VaultGearModifier<?> randomNew = cfg.generateModifier(modifier.getModifierIdentifier(), itemLevel, random);
-               if (randomNew != null && modifier.getModifierIdentifier().equals(randomNew.getModifierIdentifier())) {
-                  modifierReplacements.add(new Tuple(modifier, randomNew));
+               if (modifier.getCategory() != VaultGearModifier.AffixCategory.CRAFTED) {
+                  VaultGearModifier<?> randomNew = cfg.generateModifier(modifier.getModifierIdentifier(), itemLevel, random);
+                  if (randomNew != null && modifier.getModifierIdentifier().equals(randomNew.getModifierIdentifier())) {
+                     modifierReplacements.add(new Tuple(modifier, randomNew));
+                  }
                }
             }
          });
          data.getModifiers(VaultGearModifier.AffixType.SUFFIX).forEach(modifier -> {
             if (modifier.getCategory().isModifiableByArtisanFoci()) {
-               VaultGearModifier<?> randomNew = cfg.generateModifier(modifier.getModifierIdentifier(), itemLevel, random);
-               if (randomNew != null && modifier.getModifierIdentifier().equals(randomNew.getModifierIdentifier())) {
-                  modifierReplacements.add(new Tuple(modifier, randomNew));
+               if (modifier.getCategory() != VaultGearModifier.AffixCategory.CRAFTED) {
+                  VaultGearModifier<?> randomNew = cfg.generateModifier(modifier.getModifierIdentifier(), itemLevel, random);
+                  if (randomNew != null && modifier.getModifierIdentifier().equals(randomNew.getModifierIdentifier())) {
+                     modifierReplacements.add(new Tuple(modifier, randomNew));
+                  }
                }
             }
          });
