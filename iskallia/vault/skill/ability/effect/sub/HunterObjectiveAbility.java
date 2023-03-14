@@ -1,6 +1,6 @@
 package iskallia.vault.skill.ability.effect.sub;
 
-import iskallia.vault.block.entity.VaultChestTileEntity;
+import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
 import iskallia.vault.skill.ability.config.sub.HunterObjectiveConfig;
 import iskallia.vault.skill.ability.effect.HunterAbility;
 import iskallia.vault.skill.ability.effect.spi.AbstractHunterAbility;
@@ -15,7 +15,7 @@ public class HunterObjectiveAbility extends HunterAbility<HunterObjectiveConfig>
       Color c = new Color(config.getColor(), false);
       this.forEachTileEntity(config, world, player, (pos, tile) -> {
          if (config.shouldHighlightTileEntity(tile)) {
-            if (tile instanceof VaultChestTileEntity chestTile && chestTile.isHidden()) {
+            if (tile instanceof HunterHiddenTileEntity hiddenTile && hiddenTile.isHidden()) {
                return;
             }
 

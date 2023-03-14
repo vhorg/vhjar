@@ -67,7 +67,7 @@ public class VaultCrystalConfig extends Config {
       return this.TIMES.getOrDefault(id, LevelEntryList.empty()).getForLevel(level).flatMap(entry -> entry.pool.getRandom(random));
    }
 
-   public boolean applySeal(ItemStack seal, ItemStack input, CrystalData crystal) {
+   public boolean applySeal(ItemStack input, ItemStack seal, ItemStack output, CrystalData crystal) {
       return !this.SEALS.containsKey(seal.getItem().getRegistryName())
          ? false
          : this.SEALS.get(seal.getItem().getRegistryName()).getForLevel(crystal.getLevel()).map(entry -> {
@@ -101,7 +101,7 @@ public class VaultCrystalConfig extends Config {
                   crystal.setUnmodifiable(entry.exhausted);
                }
 
-               crystal.write(input);
+               crystal.write(output);
                return true;
             }
          }).orElse(false);

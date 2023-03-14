@@ -6,11 +6,13 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.item.gear.VaultLevelItem;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -35,6 +37,16 @@ public class AugmentItem extends Item implements VaultLevelItem, DataTransferIte
       super.appendHoverText(stack, world, tooltip, advanced);
       getTheme(stack)
          .ifPresent(key -> tooltip.add(new TextComponent("Theme: ").append(new TextComponent(key.getName()).withStyle(Style.EMPTY.withColor(key.getColor())))));
+   }
+
+   public void fillItemCategory(CreativeModeTab category, NonNullList<ItemStack> items) {
+      if (this.allowdedIn(category)) {
+         for (ThemeKey key : VaultRegistry.THEME.getKeys()) {
+            ItemStack stack = new ItemStack(ModItems.AUGMENT);
+            stack.getOrCreateTag().putString("theme", key.getId().toString());
+            items.add(stack);
+         }
+      }
    }
 
    public static int getColor(ItemStack stack) {

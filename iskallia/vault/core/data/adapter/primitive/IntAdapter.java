@@ -9,14 +9,11 @@ import iskallia.vault.core.net.BitBuffer;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import net.minecraft.nbt.ByteTag;
-import net.minecraft.nbt.IntTag;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NumericTag;
-import net.minecraft.nbt.ShortTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.Nullable;
 
 public class IntAdapter extends NumberAdapter<Integer> {
    public IntAdapter(boolean nullable) {
@@ -52,11 +49,7 @@ public class IntAdapter extends NumberAdapter<Integer> {
    }
 
    protected Tag writeNumberNbt(Integer value) {
-      if (value.byteValue() == value) {
-         return ByteTag.valueOf(value.byteValue());
-      } else {
-         return (Tag)(value.shortValue() == value ? ShortTag.valueOf(value.shortValue()) : IntTag.valueOf(value));
-      }
+      return wrap(reduce(value));
    }
 
    @Nullable
@@ -65,24 +58,8 @@ public class IntAdapter extends NumberAdapter<Integer> {
          return numeric.getAsInt();
       } else if (nbt instanceof ListTag list && list.size() == 1) {
          return this.readNumberNbt(list.get(0));
-      } else if (nbt instanceof StringTag string) {
-         String value = string.getAsString();
-         String exception = value.substring(0, 2);
-
-         int radix = switch (exception) {
-            case "0x" -> 16;
-            case "0o" -> 8;
-            case "0b" -> 2;
-            default -> 10;
-         };
-
-         try {
-            return Integer.parseInt(value.substring(2), radix);
-         } catch (NumberFormatException var9) {
-            return null;
-         }
       } else {
-         return null;
+         return nbt instanceof StringTag string ? parse(string.getAsString()).map(Number::intValue).orElse(null) : null;
       }
    }
 
@@ -103,21 +80,7 @@ public class IntAdapter extends NumberAdapter<Integer> {
             }
 
             if (primitive.isString()) {
-               String value = primitive.getAsString();
-               String exception = value.substring(0, 2);
-
-               int radix = switch (exception) {
-                  case "0x" -> 16;
-                  case "0o" -> 8;
-                  case "0b" -> 2;
-                  default -> 10;
-               };
-
-               try {
-                  return Integer.parseInt(value.substring(2), radix);
-               } catch (NumberFormatException var8) {
-                  return null;
-               }
+               return parse(primitive.getAsString()).map(Number::intValue).orElse(null);
             }
          }
 

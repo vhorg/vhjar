@@ -2,6 +2,7 @@ package iskallia.vault.block.entity;
 
 import com.google.common.collect.Lists;
 import com.mojang.math.Vector3f;
+import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.event.CommonEvents;
@@ -39,17 +40,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-public class VaultChestTileEntity extends ChestBlockEntity {
+public class VaultChestTileEntity extends ChestBlockEntity implements HunterHiddenTileEntity {
    private VaultRarity rarity;
    private boolean generated;
    private int generatedStacksCount;
    private int size;
-   private boolean isHidden;
+   private boolean hidden;
    private BlockState renderState;
    private int ticksSinceSync;
 
@@ -86,9 +85,16 @@ public class VaultChestTileEntity extends ChestBlockEntity {
       return this.rarity;
    }
 
-   @OnlyIn(Dist.CLIENT)
-   public void setRenderState(BlockState renderState) {
-      this.renderState = renderState;
+   @Override
+   public boolean isHidden() {
+      return this.hidden;
+   }
+
+   @Override
+   public void setHidden(boolean hidden) {
+      if (this.hidden != (this.hidden = hidden)) {
+         this.setChanged();
+      }
    }
 
    public void startOpen(Player player) {
@@ -323,18 +329,6 @@ public class VaultChestTileEntity extends ChestBlockEntity {
       return this.renderState != null ? this.renderState : super.getBlockState();
    }
 
-   public boolean isHidden() {
-      return this.isHidden;
-   }
-
-   public void setHidden(boolean hidden) {
-      boolean change = this.isHidden != hidden;
-      this.isHidden = hidden;
-      if (change) {
-         this.setChanged();
-      }
-   }
-
    protected boolean tryLoadLootTable(CompoundTag nbt) {
       super.tryLoadLootTable(nbt);
       return false;
@@ -353,7 +347,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
 
       this.generated = nbt.getBoolean("Generated");
       this.generatedStacksCount = nbt.getInt("GeneratedStacksCount");
-      this.isHidden = nbt.getBoolean("hidden");
+      this.hidden = nbt.getBoolean("Hidden");
    }
 
    protected void saveAdditional(@NotNull CompoundTag nbt) {
@@ -364,7 +358,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
 
       nbt.putBoolean("Generated", this.generated);
       nbt.putInt("GeneratedStacksCount", this.generatedStacksCount);
-      nbt.putBoolean("hidden", this.isHidden);
+      nbt.putBoolean("Hidden", this.hidden);
    }
 
    public Component getDisplayName() {
@@ -388,7 +382,7 @@ public class VaultChestTileEntity extends ChestBlockEntity {
          }
 
          if (state.getBlock() == ModBlocks.TREASURE_CHEST || state.getBlock() == ModBlocks.TREASURE_CHEST_PLACEABLE) {
-            return new TextComponent(rarity + " Treasure Chest");
+            return new TextComponent("Treasure Chest");
          }
 
          if (state.getBlock() == ModBlocks.ALTAR_CHEST || state.getBlock() == ModBlocks.ALTAR_CHEST_PLACEABLE) {

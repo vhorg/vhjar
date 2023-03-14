@@ -36,20 +36,18 @@ public class MegaJumpVelocityModification extends IntValueAbilityModification<In
    @Nullable
    public MutableComponent getDisplay(IntValueConfig config, Style style, VaultGearModifier.AffixType type) {
       if (config.getValue() == 0) {
-         return new TextComponent(type.getAffixPrefix(config.getValue() >= 0))
-            .withStyle(style)
-            .append(new TextComponent("Mega Jump no longer jumps"))
-            .withStyle(style);
+         return new TextComponent("").withStyle(style).append(new TextComponent("Mega Jump").withStyle(getAbilityStyle())).append(" no longer jumps");
       } else {
-         Component valueDisplay = this.getValueDisplay(config);
+         MutableComponent valueDisplay = this.getValueDisplay(config);
          return valueDisplay == null
             ? null
-            : new TextComponent(type.getAffixPrefix(config.getValue() >= 0))
+            : new TextComponent("")
                .withStyle(style)
-               .append(valueDisplay)
-               .withStyle(style)
-               .append(new TextComponent(" additional Mega Jump height"))
-               .withStyle(style);
+               .append(type.getAffixPrefixComponent(config.getValue() >= 0).withStyle(getValueStyle()))
+               .append(valueDisplay.withStyle(getValueStyle()))
+               .append(" additional ")
+               .append(new TextComponent("Mega Jump").withStyle(getAbilityStyle()))
+               .append(" height");
       }
    }
 

@@ -13,9 +13,11 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.ElixirObjective;
 import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.init.ModConfigs;
 import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -49,7 +51,12 @@ public class MobElixirTask extends ElixirTask {
          CommonEvents.ENTITY_DROPS.register(this, event -> {
             LivingEntity entity = event.getEntityLiving();
             if (entity.level == world) {
-               if (event.getSource().getEntity() instanceof Player player) {
+               Entity killer = event.getSource().getEntity();
+               if (killer instanceof EternalEntity eternal) {
+                  killer = (Entity)eternal.getOwner().right().orElse(null);
+               }
+
+               if (killer instanceof Player player) {
                   if (player.getUUID().equals(listener)) {
                      if (ModConfigs.ELIXIR.isEntityInGroup(event.getEntity(), this.get(GROUP))) {
                         this.summonOrbs(world, entity.position(), this.get(ELIXIR));

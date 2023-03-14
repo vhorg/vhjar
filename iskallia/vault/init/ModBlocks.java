@@ -246,9 +246,7 @@ public class ModBlocks {
    public static final VaultEnhancementAltar ENHANCEMENT_ALTAR = new VaultEnhancementAltar();
    public static final MVPCrownBlock MVP_CROWN = new MVPCrownBlock();
    public static final VaultBedrockBlock VAULT_BEDROCK = new VaultBedrockBlock();
-   public static final Block VAULT_STONE = new Block(
-      net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.STONE).strength(1.5F, 6.0F).isValidSpawn((a, b, c, d) -> false)
-   );
+   public static final Block VAULT_STONE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.STONE).strength(1.5F, 6.0F));
    public static final Block CHISELED_VAULT_STONE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
    public static final Block POLISHED_VAULT_STONE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
    public static final Block BUMBO_POLISHED_VAULT_STONE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));

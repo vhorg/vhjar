@@ -45,9 +45,9 @@ public class ItemStackAdapter implements ISimpleAdapter<ItemStack, Tag, JsonElem
 
          Adapters.ITEM.writeBits((IForgeRegistryEntry)value.getItem(), buffer);
          Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(value.getCount()), buffer);
-         Adapters.COMPOUND_TAG.asNullable().writeBits(value.getTag(), buffer);
+         Adapters.COMPOUND_NBT.asNullable().writeBits(value.getTag(), buffer);
          CompoundTag caps = value.serializeNBT().getCompound("ForgeCaps");
-         Adapters.COMPOUND_TAG.asNullable().writeBits(caps.isEmpty() ? null : caps, buffer);
+         Adapters.COMPOUND_NBT.asNullable().writeBits(caps.isEmpty() ? null : caps, buffer);
       }
    }
 
@@ -60,8 +60,8 @@ public class ItemStackAdapter implements ISimpleAdapter<ItemStack, Tag, JsonElem
       } else {
          Item item = Adapters.ITEM.readBits(buffer).orElse(Items.AIR);
          int count = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
-         CompoundTag tag = Adapters.COMPOUND_TAG.asNullable().readBits(buffer).orElse(null);
-         CompoundTag caps = Adapters.COMPOUND_TAG.asNullable().readBits(buffer).orElse(null);
+         CompoundTag tag = Adapters.COMPOUND_NBT.asNullable().readBits(buffer).orElse(null);
+         CompoundTag caps = Adapters.COMPOUND_NBT.asNullable().readBits(buffer).orElse(null);
          ItemStack stack = new ItemStack(item, count, caps);
          stack.setTag(tag);
          return Optional.of(stack);
@@ -81,9 +81,9 @@ public class ItemStackAdapter implements ISimpleAdapter<ItemStack, Tag, JsonElem
 
          Adapters.ITEM.writeBytes((IForgeRegistryEntry)value.getItem(), buffer);
          Adapters.INT_SEGMENTED_7.writeBytes(Integer.valueOf(value.getCount()), buffer);
-         Adapters.COMPOUND_TAG.asNullable().writeBytes(value.getTag(), buffer);
+         Adapters.COMPOUND_NBT.asNullable().writeBytes(value.getTag(), buffer);
          CompoundTag caps = value.serializeNBT().getCompound("ForgeCaps");
-         Adapters.COMPOUND_TAG.asNullable().writeBytes(caps.isEmpty() ? null : caps, buffer);
+         Adapters.COMPOUND_NBT.asNullable().writeBytes(caps.isEmpty() ? null : caps, buffer);
       }
    }
 
@@ -96,8 +96,8 @@ public class ItemStackAdapter implements ISimpleAdapter<ItemStack, Tag, JsonElem
       } else {
          Item item = Adapters.ITEM.readBytes(buffer).orElse(Items.AIR);
          int count = Adapters.INT_SEGMENTED_7.readBytes(buffer).orElseThrow();
-         CompoundTag tag = Adapters.COMPOUND_TAG.asNullable().readBytes(buffer).orElse(null);
-         CompoundTag caps = Adapters.COMPOUND_TAG.asNullable().readBytes(buffer).orElse(null);
+         CompoundTag tag = Adapters.COMPOUND_NBT.asNullable().readBytes(buffer).orElse(null);
+         CompoundTag caps = Adapters.COMPOUND_NBT.asNullable().readBytes(buffer).orElse(null);
          ItemStack stack = new ItemStack(item, count, caps);
          stack.setTag(tag);
          return Optional.of(stack);
@@ -117,9 +117,9 @@ public class ItemStackAdapter implements ISimpleAdapter<ItemStack, Tag, JsonElem
 
          Adapters.ITEM.writeData((IForgeRegistryEntry)value.getItem(), data);
          Adapters.INT_SEGMENTED_7.writeData(Integer.valueOf(value.getCount()), data);
-         Adapters.COMPOUND_TAG.asNullable().writeData(value.getTag(), data);
+         Adapters.COMPOUND_NBT.asNullable().writeData(value.getTag(), data);
          CompoundTag caps = value.serializeNBT().getCompound("ForgeCaps");
-         Adapters.COMPOUND_TAG.asNullable().writeData(caps.isEmpty() ? null : caps, data);
+         Adapters.COMPOUND_NBT.asNullable().writeData(caps.isEmpty() ? null : caps, data);
       }
    }
 
@@ -132,8 +132,8 @@ public class ItemStackAdapter implements ISimpleAdapter<ItemStack, Tag, JsonElem
       } else {
          Item item = Adapters.ITEM.readData(data).orElse(Items.AIR);
          int count = Adapters.INT_SEGMENTED_7.readData(data).orElseThrow();
-         CompoundTag tag = Adapters.COMPOUND_TAG.asNullable().readData(data).orElse(null);
-         CompoundTag caps = Adapters.COMPOUND_TAG.asNullable().readData(data).orElse(null);
+         CompoundTag tag = Adapters.COMPOUND_NBT.asNullable().readData(data).orElse(null);
+         CompoundTag caps = Adapters.COMPOUND_NBT.asNullable().readData(data).orElse(null);
          ItemStack stack = new ItemStack(item, count, caps);
          stack.setTag(tag);
          return Optional.of(stack);

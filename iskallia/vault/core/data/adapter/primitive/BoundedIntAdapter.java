@@ -5,8 +5,8 @@ import iskallia.vault.core.net.BitBuffer;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.Tag;
-import org.jetbrains.annotations.Nullable;
 
 public class BoundedIntAdapter extends IntAdapter {
    protected final int min;
@@ -82,6 +82,7 @@ public class BoundedIntAdapter extends IntAdapter {
       return number;
    }
 
+   @Nullable
    @Override
    protected Tag writeNumberNbt(Integer value) {
       return super.writeNumberNbt(value - this.min);

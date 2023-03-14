@@ -55,6 +55,14 @@ public abstract class SpecialAbilityModification<C extends SpecialAbilityModific
    @Nullable
    public abstract MutableComponent getDisplay(C var1, Style var2, VaultGearModifier.AffixType var3);
 
+   public static Style getAbilityStyle() {
+      return Style.EMPTY.withColor(14076214);
+   }
+
+   public static Style getValueStyle() {
+      return Style.EMPTY.withColor(6082075);
+   }
+
    @Nullable
    public abstract MutableComponent getValueDisplay(C var1);
 

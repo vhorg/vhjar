@@ -74,7 +74,7 @@ public abstract class ItemEntityMixin extends Entity {
       )}
    )
    public void onPickupModded(Player player, CallbackInfo ci) {
-      if (!this.getItem().equals(this.previousStack)) {
+      if (!ItemStack.matches(this.getItem(), this.previousStack)) {
          MagnetItem.onPlayerPickup(player, (ItemEntity)this);
       }
    }
@@ -87,8 +87,9 @@ public abstract class ItemEntityMixin extends Entity {
       )}
    )
    public void onPickupCanceled(Player player, CallbackInfo ci) {
-      if (!this.getItem().equals(this.previousStack)) {
+      if (!ItemStack.matches(this.getItem(), this.previousStack)) {
          MagnetItem.onPlayerPickup(player, (ItemEntity)this);
+         this.previousStack = this.getItem().copy();
       }
    }
 }

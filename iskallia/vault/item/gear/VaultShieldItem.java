@@ -106,7 +106,8 @@ public class VaultShieldItem extends ShieldItem implements VaultGearItem {
    }
 
    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {
-      return VaultGearHelper.rightClick(world, player, hand, super.use(world, player, hand));
+      ItemStack heldStack = player.getItemInHand(hand);
+      return VaultGearHelper.rightClick(world, player, hand, InteractionResultHolder.pass(heldStack));
    }
 
    public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {

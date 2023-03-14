@@ -4,8 +4,10 @@ import com.google.gson.JsonArray;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
+import iskallia.vault.init.ModConfigs;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 
 public class AbilityManaCostFlatAttribute extends AbilityFloatValueAttribute {
@@ -40,13 +42,19 @@ public class AbilityManaCostFlatAttribute extends AbilityFloatValueAttribute {
       public MutableComponent getDisplay(VaultGearAttributeInstance<AbilityManaCostFlatAttribute> instance, VaultGearModifier.AffixType type) {
          AbilityManaCostFlatAttribute attribute = instance.getValue();
          MutableComponent valueDisplay = this.getValueDisplay(attribute);
-         return valueDisplay == null
-            ? null
-            : new TextComponent(type.getAffixPrefix(attribute.getAmount() >= 0.0F))
-               .append(valueDisplay)
-               .append(" to Mana Cost of ")
-               .append(attribute.getAbilityKey())
+         if (valueDisplay == null) {
+            return null;
+         } else {
+            MutableComponent manaCostCmp = new TextComponent("Mana Cost").withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("manaCost")));
+            return new TextComponent("")
+               .append(type.getAffixPrefixComponent(attribute.getAmount() >= 0.0F).withStyle(this.getValueStyle()))
+               .append(valueDisplay.withStyle(this.getValueStyle()))
+               .append(" to ")
+               .append(manaCostCmp)
+               .append(" of ")
+               .append(new TextComponent(attribute.getAbilityKey()).withStyle(this.getAbilityStyle()))
                .setStyle(this.getColoredTextStyle());
+         }
       }
 
       @Nullable

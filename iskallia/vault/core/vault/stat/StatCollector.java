@@ -42,7 +42,7 @@ public class StatCollector extends DataObject<StatCollector> {
    public static final FieldKey<Completion> COMPLETION = FieldKey.of("completion", Completion.class)
       .with(Version.v1_0, Adapters.ofEnum(Completion.class, EnumAdapter.Mode.ORDINAL), DISK.all())
       .register(FIELDS);
-   public static final FieldKey<Float> EXP_MULTIPLIER = FieldKey.of("exp_multiplier", Float.class)
+   public static final FieldKey<Float> BONUS_EXP_MULTIPLIER = FieldKey.of("exp_multiplier", Float.class)
       .with(Version.v1_0, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
    public static final FieldKey<Float> OBJECTIVE_EXP_MULTIPLIER = FieldKey.of("objective_exp_multiplier", Float.class)
@@ -58,7 +58,7 @@ public class StatCollector extends DataObject<StatCollector> {
       this.set(TREASURE_ROOMS_OPENED, Integer.valueOf(0));
       this.set(MOBS, new MobsStat());
       this.set(COMPLETION, Completion.COMPLETED);
-      this.set(EXP_MULTIPLIER, Float.valueOf(1.0F));
+      this.set(BONUS_EXP_MULTIPLIER, Float.valueOf(1.0F));
       this.set(OBJECTIVE_EXP_MULTIPLIER, Float.valueOf(1.0F));
       this.set(REWARD, ItemStackList.createLegacy());
    }
@@ -128,7 +128,7 @@ public class StatCollector extends DataObject<StatCollector> {
    }
 
    public float getExpMultiplier() {
-      return this.get(EXP_MULTIPLIER);
+      return this.get(BONUS_EXP_MULTIPLIER);
    }
 
    public List<ItemStack> getReward() {
@@ -160,7 +160,7 @@ public class StatCollector extends DataObject<StatCollector> {
    public int getExperience(Vault vault) {
       int objectiveExp = ModConfigs.VAULT_STATS.getCompletionExperience(vault, this);
       int statsExp = ModConfigs.VAULT_STATS.getStatsExperience(this);
-      return (int)(objectiveExp * this.getOr(OBJECTIVE_EXP_MULTIPLIER, this.get(EXP_MULTIPLIER)) + statsExp * this.get(EXP_MULTIPLIER));
+      return (int)(objectiveExp * this.getOr(OBJECTIVE_EXP_MULTIPLIER, this.get(BONUS_EXP_MULTIPLIER)) + statsExp * this.get(BONUS_EXP_MULTIPLIER));
    }
 
    public Completion getCompletion() {

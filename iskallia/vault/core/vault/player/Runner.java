@@ -196,33 +196,31 @@ public class Runner extends Listener {
    @Override
    public void onJoin(VirtualWorld world, Vault vault) {
       super.onJoin(world, vault);
-      this.getPlayer()
-         .ifPresent(
-            player -> {
-               VaultJoinSnapshotData.get(player.getLevel()).createSnapshot(player);
-               VaultDollItem.markDollOnVaultJoin(world, player, vault.get(Vault.ID));
+      this.getPlayer().ifPresent(player -> {
+         VaultJoinSnapshotData.get(player.getLevel()).createSnapshot(player);
+         VaultDollItem.markDollOnVaultJoin(world, player, vault.get(Vault.ID));
 
-               for (TrinketHelper.TrinketStack<VaultExperienceTrinket> trinketStack : TrinketHelper.getTrinkets(player, VaultExperienceTrinket.class)) {
-                  if (trinketStack.isUsable(player)) {
-                     vault.getOptional(Vault.STATS)
-                        .map(s -> s.get(player.getUUID()))
-                        .ifPresent(
-                           stats -> stats.modify(StatCollector.EXP_MULTIPLIER, m -> m * (1.0F + trinketStack.trinket().getConfig().getExperienceIncrease()))
-                        );
-                  }
-               }
-
-               PlayerVaultStats playerStats = PlayerVaultStatsData.get(world).getVaultStats(player);
-               int vaultLevel = vault.get(Vault.LEVEL).get();
-               int playerLevel = playerStats.getVaultLevel();
-               int diff = playerLevel - vaultLevel - 3;
-               if (diff > 0) {
-                  vault.getOptional(Vault.STATS)
-                     .map(s -> s.get(player.getUUID()))
-                     .ifPresent(stats -> stats.modify(StatCollector.EXP_MULTIPLIER, m -> Math.max(0.0F, m - 0.1F * diff)));
-               }
+         for (TrinketHelper.TrinketStack<VaultExperienceTrinket> trinketStack : TrinketHelper.getTrinkets(player, VaultExperienceTrinket.class)) {
+            if (trinketStack.isUsable(player)) {
+               vault.getOptional(Vault.STATS).map(s -> s.get(player.getUUID())).ifPresent(stats -> {
+                  float multiplier = 1.0F + trinketStack.trinket().getConfig().getExperienceIncrease();
+                  stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> m * multiplier);
+                  stats.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> m * multiplier);
+               });
             }
-         );
+         }
+
+         PlayerVaultStats playerStats = PlayerVaultStatsData.get(world).getVaultStats(player);
+         int vaultLevel = vault.get(Vault.LEVEL).get();
+         int playerLevel = playerStats.getVaultLevel();
+         int diff = playerLevel - vaultLevel - 3;
+         if (diff > 0) {
+            vault.getOptional(Vault.STATS).map(s -> s.get(player.getUUID())).ifPresent(stats -> {
+               stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> Math.max(0.0F, m - 0.1F * diff));
+               stats.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> Math.max(0.0F, m - 0.1F * diff));
+            });
+         }
+      });
    }
 
    @Override

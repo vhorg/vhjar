@@ -94,7 +94,7 @@ public class AnvilRecipesJEI {
          ItemStack input = new ItemStack(ModItems.VAULT_CRYSTAL);
          ItemStack copy = input.getItem() == ModItems.VAULT_CRYSTAL ? input.copy() : new ItemStack(ModItems.VAULT_CRYSTAL);
          CrystalData crystal = CrystalData.read(copy);
-         ModConfigs.VAULT_CRYSTAL.applySeal(seal, input, crystal);
+         ModConfigs.VAULT_CRYSTAL.applySeal(input, seal, input, crystal);
          recipeList.add(vanillaRecipeFactory.createAnvilRecipe(List.of(new ItemStack(ModItems.VAULT_CRYSTAL)), List.of(seal), List.of(copy)));
       }
 

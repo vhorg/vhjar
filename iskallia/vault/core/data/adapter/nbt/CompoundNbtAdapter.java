@@ -1,6 +1,7 @@
 package iskallia.vault.core.data.adapter.nbt;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.netty.buffer.ByteBuf;
@@ -14,13 +15,13 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import org.jetbrains.annotations.Nullable;
 
-public class CompoundTagAdapter extends NbtAdapter<CompoundTag> {
-   public CompoundTagAdapter(boolean nullable) {
+public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
+   public CompoundNbtAdapter(boolean nullable) {
       super(CompoundTag.class, nullable);
    }
 
-   public CompoundTagAdapter asNullable() {
-      return new CompoundTagAdapter(true);
+   public CompoundNbtAdapter asNullable() {
+      return new CompoundNbtAdapter(true);
    }
 
    protected void writeTagBits(CompoundTag value, BitBuffer buffer) {
@@ -95,6 +96,15 @@ public class CompoundTagAdapter extends NbtAdapter<CompoundTag> {
       return compound;
    }
 
+   protected Tag writeTagNbt(CompoundTag value) {
+      return null;
+   }
+
+   @Nullable
+   protected CompoundTag readTagNbt(Tag nbt) {
+      return null;
+   }
+
    protected JsonElement writeTagJson(CompoundTag value) {
       return new JsonPrimitive(value.getAsString());
    }
@@ -104,11 +114,20 @@ public class CompoundTagAdapter extends NbtAdapter<CompoundTag> {
       if (json instanceof JsonPrimitive primitive && primitive.isString()) {
          try {
             return TagParser.parseTag(primitive.getAsString());
-         } catch (CommandSyntaxException var4) {
+         } catch (CommandSyntaxException var8) {
             return null;
          }
-      } else {
+      } else if (!(json instanceof JsonObject object)) {
          return null;
+      } else {
+         CompoundTag nbt = new CompoundTag();
+
+         for (String key : object.keySet()) {
+            JsonElement element = object.get(key);
+            Adapters.GENERIC_NBT.readJson(element).ifPresent(tag -> nbt.put(key, tag));
+         }
+
+         return nbt;
       }
    }
 }

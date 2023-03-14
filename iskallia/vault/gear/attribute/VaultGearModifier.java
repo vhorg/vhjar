@@ -200,7 +200,7 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
       NONE,
       LEGENDARY("Legendary", ModifierCategoryTooltip::modifyLegendaryTooltip),
       ABYSSAL("Abyssal", ModifierCategoryTooltip::modifyAbyssalTooltip),
-      ABILITY_ENHANCEMENT("Enhancement"),
+      ABILITY_ENHANCEMENT("Enhancement", ModifierCategoryTooltip::modifyEnhancementTooltip),
       CRAFTED("Crafted", ModifierCategoryTooltip::modifyCraftedTooltip);
 
       private final String descriptor;
@@ -283,6 +283,10 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
 
       public String getAffixPrefix(boolean isPositive) {
          return this.affixPrefix.apply(isPositive);
+      }
+
+      public MutableComponent getAffixPrefixComponent(boolean isPositive) {
+         return new TextComponent(this.getAffixPrefix(isPositive));
       }
 
       public static VaultGearModifier.AffixType[] explicits() {

@@ -1,6 +1,7 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.block.entity.VaultEnhancementAltarTileEntity;
+import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.enhancement.EnhancementData;
 import iskallia.vault.core.vault.enhancement.EnhancementTask;
 import iskallia.vault.gear.GearRollHelper;
@@ -41,21 +42,19 @@ public class VaultEnhancementRequestMessage {
                if (altarTile.canBeUsed(player)) {
                   ItemStack gearItem = altarTile.getInventory().getItem(0);
                   if (AttributeGearData.hasData(gearItem)) {
-                     ServerVaults.get(player.getLevel())
-                        .ifPresent(
-                           vault -> {
-                              EnhancementTask<?> task = EnhancementData.getForAltar(altarTile.getUUID()).get(player.getUUID());
-                              if (task != null && task.isFinished()) {
-                                 if (VaultGearModifierHelper.createOrReplaceAbilityEnhancementModifier(gearItem, GearRollHelper.rand)) {
-                                    altarTile.setUsedByPlayer(player);
-                                    player.getLevel()
-                                       .playSound(
-                                          null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0F, player.getRandom().nextFloat() * 0.1F + 0.9F
-                                       );
-                                 }
-                              }
-                           }
-                        );
+                     Vault vault = ServerVaults.get(player.getLevel()).orElse(null);
+                     if (vault != null) {
+                        EnhancementTask<?> task = EnhancementData.getForAltar(altarTile.getUUID()).get(player.getUUID());
+                        if (task == null || !task.isFinished()) {
+                           return;
+                        }
+                     }
+
+                     if (VaultGearModifierHelper.createOrReplaceAbilityEnhancementModifier(gearItem, GearRollHelper.rand)) {
+                        altarTile.setUsedByPlayer(player);
+                        player.getLevel()
+                           .playSound(null, pos, SoundEvents.ENCHANTMENT_TABLE_USE, SoundSource.BLOCKS, 1.0F, player.getRandom().nextFloat() * 0.1F + 0.9F);
+                     }
                   }
                }
             }

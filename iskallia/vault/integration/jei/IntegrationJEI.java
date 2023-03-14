@@ -42,6 +42,7 @@ public class IntegrationJEI implements IModPlugin {
             ModItems.ETCHING,
             ModItems.GOD_BLESSING,
             ModItems.TOOL,
+            ModItems.AUGMENT,
             ModBlocks.ASHIUM_ORE.asItem(),
             ModBlocks.ALEXANDRITE_ORE.asItem(),
             ModBlocks.BLACK_OPAL_ORE.asItem(),
