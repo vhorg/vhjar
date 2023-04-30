@@ -17,6 +17,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -168,6 +170,7 @@ public class WardrobeTileEntity extends BlockEntity {
       this.swapEquipmentSlots(player, swapEverything);
       this.swapCuriosSlots(player, swapEverything);
       this.swapHotbar(player, swapEverything);
+      this.level.playSound(null, this.getBlockPos(), SoundEvents.ARMOR_EQUIP_DIAMOND, SoundSource.BLOCKS, 1.0F, 1.0F);
    }
 
    private void swapHotbar(Player player, boolean swapEverything) {

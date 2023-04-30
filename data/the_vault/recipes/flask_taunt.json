@@ -1,22 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " a ",
-    "dbd",
-    " c "
+    "ada",
+    "aba",
+    "aca"
   ],
   "key": {
     "a": {
-      "item": "minecraft:wither_skeleton_skull"
+      "item": "the_vault:vault_essence"
     },
     "b": {
       "item": "the_vault:empty_flask"
     },
     "c": {
-      "item": "the_vault:red_vault_essence"
+      "item": "the_vault:perfect_benitoite"
     },
     "d": {
-      "item": "architects_palette:withered_bone"
+      "item": "minecraft:ghast_tear"
     }
   },
   "result": {

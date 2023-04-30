@@ -60,6 +60,10 @@ public class AttributeGearData {
       return tag != null && tag.contains("vaultGearData", 12) ? bufferCtor.apply(ArrayBitBuffer.backing(tag.getLongArray("vaultGearData"), 0)) : ctor.get();
    }
 
+   public static AttributeGearData empty() {
+      return new AttributeGearData();
+   }
+
    @Nonnull
    public static <T extends AttributeGearData> T read(ItemStack stack) {
       if (stack.getItem() == ModItems.MAGNET && MagnetItem.isLegacy(stack)) {
@@ -100,6 +104,10 @@ public class AttributeGearData {
    @Nonnull
    public UUID getIdentifier() {
       return this.identifier.get();
+   }
+
+   public void setIdentifier(UUID uuid) {
+      this.identifier.set(uuid);
    }
 
    public <T> Optional<T> getFirstValue(VaultGearAttribute<T> attribute) {

@@ -15,13 +15,13 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.abyss.LegacyAbyssManager;
 import iskallia.vault.core.vault.enhancement.EnhancementTaskManager;
 import iskallia.vault.core.vault.influence.LegacyInfluences;
+import iskallia.vault.core.vault.modifier.modifier.GameControlsModifier;
 import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.overlay.VaultOverlay;
 import iskallia.vault.core.vault.player.Listeners;
 import iskallia.vault.core.vault.stat.StatsCollector;
 import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.world.storage.VirtualWorld;
-import iskallia.vault.world.vault.modifier.modifier.GameControlsModifier;
 import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.nbt.CompoundTag;
@@ -70,6 +70,9 @@ public class Vault extends DataObject<Vault> {
    public static final FieldKey<DiscoveryGoalsManager> DISCOVERY = FieldKey.of("discovery", DiscoveryGoalsManager.class)
       .with(Version.v1_8, CompoundAdapter.of(DiscoveryGoalsManager::new), DISK.all())
       .register(FIELDS);
+   public static final FieldKey<QuestManager> QUESTS = FieldKey.of("quests", QuestManager.class)
+      .with(Version.v1_16, CompoundAdapter.of(QuestManager::new), DISK.all())
+      .register(FIELDS);
    public static final FieldKey<LegacyAbyssManager> ABYSS = FieldKey.of("abyssal", LegacyAbyssManager.class)
       .with(Version.v1_9, CompoundAdapter.of(LegacyAbyssManager::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
@@ -92,6 +95,7 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(MODIFIERS, modifiers -> modifiers.initServer(world, this));
       this.ifPresent(LISTENERS, listeners -> listeners.initServer(world, this));
       this.ifPresent(DISCOVERY, discovery -> discovery.initServer(world, this));
+      this.ifPresent(QUESTS, quests -> quests.initServer(world, this));
       this.ifPresent(STATS, stats -> stats.initServer(world, this));
       this.ifPresent(ENHANCEMENT_TASKS, tasksMgr -> tasksMgr.initServer(world, this));
    }
@@ -111,6 +115,7 @@ public class Vault extends DataObject<Vault> {
       this.ifPresent(MODIFIERS, Modifiers::releaseServer);
       this.ifPresent(LISTENERS, Listeners::releaseServer);
       this.ifPresent(DISCOVERY, DiscoveryGoalsManager::releaseServer);
+      this.ifPresent(QUESTS, QuestManager::releaseServer);
       this.ifPresent(STATS, StatsCollector::releaseServer);
       this.ifPresent(ENHANCEMENT_TASKS, EnhancementTaskManager::releaseServer);
    }

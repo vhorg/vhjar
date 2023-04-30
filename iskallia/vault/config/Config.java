@@ -3,10 +3,8 @@ package iskallia.vault.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import iskallia.vault.VaultMod;
-import iskallia.vault.config.adapter.CompoundTagAdapter;
 import iskallia.vault.config.adapter.IdentifierAdapter;
 import iskallia.vault.config.adapter.ItemStackAdapter;
-import iskallia.vault.config.adapter.LootPoolAdapter;
 import iskallia.vault.config.adapter.PartialTileAdapter;
 import iskallia.vault.config.adapter.RegistryCodecAdapter;
 import iskallia.vault.config.adapter.TextColorAdapter;
@@ -17,6 +15,9 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.VersionedKey;
 import iskallia.vault.core.vault.objective.elixir.ElixirTask;
 import iskallia.vault.core.vault.objective.scavenger.ScavengeTask;
+import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.item.ItemPredicate;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.loot.LootPool;
 import iskallia.vault.core.world.roll.FloatRoll;
 import iskallia.vault.core.world.roll.IntRoll;
@@ -27,6 +28,9 @@ import iskallia.vault.item.crystal.layout.CrystalLayout;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
 import iskallia.vault.item.crystal.time.CrystalTime;
+import iskallia.vault.quest.base.Quest;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.util.EnchantmentCost;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -36,6 +40,7 @@ import java.util.Random;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -45,6 +50,7 @@ public abstract class Config {
       .registerTypeHierarchyAdapter(MobEffect.class, RegistryCodecAdapter.of(ForgeRegistries.MOB_EFFECTS))
       .registerTypeHierarchyAdapter(Item.class, RegistryCodecAdapter.of(ForgeRegistries.ITEMS))
       .registerTypeHierarchyAdapter(Block.class, RegistryCodecAdapter.of(ForgeRegistries.BLOCKS))
+      .registerTypeHierarchyAdapter(Enchantment.class, Adapters.ENCHANTMENT)
       .registerTypeAdapterFactory(IdentifierAdapter.FACTORY)
       .registerTypeAdapterFactory(TextColorAdapter.FACTORY)
       .registerTypeAdapterFactory(ItemStackAdapter.FACTORY)
@@ -54,7 +60,8 @@ public abstract class Config {
       .registerTypeHierarchyAdapter(EtchingConfig.EtchingMap.class, new EtchingConfig.EtchingMap.Serializer())
       .registerTypeHierarchyAdapter(TrinketConfig.TrinketMap.class, new TrinketConfig.TrinketMap.Serializer())
       .registerTypeAdapter(VaultModifiersConfig.ModifierTypeGroups.class, new VaultModifiersConfig.ModifierTypeGroups.Serializer())
-      .registerTypeAdapter(CompoundTag.class, CompoundTagAdapter.INSTANCE)
+      .registerTypeAdapter(CompoundTag.class, Adapters.COMPOUND_NBT)
+      .registerTypeAdapter(EnchantmentCost.class, EnchantmentCost.ADAPTER)
       .registerTypeHierarchyAdapter(VersionedKey.class, VersionedKeyAdapter.INSTANCE)
       .registerTypeHierarchyAdapter(CrystalTheme.class, CrystalData.THEME)
       .registerTypeHierarchyAdapter(CrystalLayout.class, CrystalData.LAYOUT)
@@ -62,10 +69,15 @@ public abstract class Config {
       .registerTypeHierarchyAdapter(CrystalTime.class, CrystalData.TIME)
       .registerTypeHierarchyAdapter(CrystalModifiers.class, CrystalModifiers.ADAPTER)
       .registerTypeHierarchyAdapter(ScavengeTask.class, ScavengeTask.Adapter.INSTANCE)
-      .registerTypeHierarchyAdapter(LootPool.class, LootPoolAdapter.INSTANCE)
+      .registerTypeHierarchyAdapter(LootPool.class, Adapters.LOOT_POOL)
       .registerTypeHierarchyAdapter(IntRoll.class, Adapters.INT_ROLL)
       .registerTypeHierarchyAdapter(FloatRoll.class, FloatRoll.Adapter.INSTANCE)
+      .registerTypeHierarchyAdapter(Skill.class, Adapters.SKILL)
       .registerTypeAdapter(ElixirTask.Config.class, ElixirTask.Config.Serializer.INSTANCE)
+      .registerTypeHierarchyAdapter(Quest.class, Quest.Adapter.INSTANCE)
+      .registerTypeAdapter(TilePredicate.class, Adapters.TILE_PREDICATE)
+      .registerTypeAdapter(EntityPredicate.class, Adapters.ENTITY_PREDICATE)
+      .registerTypeAdapter(ItemPredicate.class, Adapters.ITEM_PREDICATE)
       .excludeFieldsWithoutExposeAnnotation()
       .enableComplexMapKeySerialization()
       .setPrettyPrinting()
@@ -109,11 +121,14 @@ public abstract class Config {
                   config.reset();
                }
 
+               ModConfigs.CONFIGS.add(config);
                return config;
             } catch (Exception var5) {
                VaultMod.LOGGER.warn("Invalid config {}, using defaults", this, var5);
                this.reset();
                ModConfigs.INVALID_CONFIGS.add(this.getConfigFile().getName() + " - Exception: " + var5.getMessage());
+               ModConfigs.CONFIGS.add(this);
+               var5.printStackTrace();
                var3 = this;
             }
          }
@@ -122,6 +137,7 @@ public abstract class Config {
       } catch (Exception var7) {
          VaultMod.LOGGER.warn("Config file {} not found, generating new", this);
          this.generateConfig();
+         ModConfigs.CONFIGS.add(this);
          return (T)this;
       }
    }
@@ -131,6 +147,9 @@ public abstract class Config {
    }
 
    protected void onLoad(Config oldConfigInstance) {
+   }
+
+   public void onUnload() {
    }
 
    public static boolean checkAllFieldsAreNotNull(Object o) throws IllegalAccessException {

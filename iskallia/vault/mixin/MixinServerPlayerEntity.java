@@ -32,6 +32,6 @@ public abstract class MixinServerPlayerEntity extends Player {
       )
    )
    public boolean yes(GameRules instance, Key<BooleanValue> key) {
-      return ServerVaults.isVaultWorld(this.getLevel()) || instance.getBoolean(key);
+      return ServerVaults.get(this.getLevel()).isPresent() || instance.getBoolean(key);
    }
 }

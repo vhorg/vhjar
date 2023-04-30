@@ -118,8 +118,11 @@ public class EffectAvoidanceGearAttribute {
          return EffectAvoidanceGearAttribute.Config.class;
       }
 
-      public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<EffectAvoidanceGearAttribute> reader, EffectAvoidanceGearAttribute.Config object) {
-         return this.getChanceDisplay(object.minChance).append("-").append(this.getChanceDisplay(object.maxChance));
+      @Nullable
+      public MutableComponent getConfigRangeDisplay(
+         VaultGearModifierReader<EffectAvoidanceGearAttribute> reader, EffectAvoidanceGearAttribute.Config min, EffectAvoidanceGearAttribute.Config max
+      ) {
+         return this.getChanceDisplay(min.minChance).append("-").append(this.getChanceDisplay(max.maxChance));
       }
 
       private MutableComponent getChanceDisplay(float value) {

@@ -70,7 +70,7 @@ public class GearRollHelper {
       if (ticks >= 120) {
          onFinish.accept(stack);
          stack.removeTagKey("RollHelper");
-         world.playSound(null, player.blockPosition(), ModSounds.CONFETTI_SFX, SoundSource.PLAYERS, 0.3F, 1.0F);
+         world.playSound(null, player.blockPosition(), ModSounds.IDENTIFICATION_SFX, SoundSource.PLAYERS, 0.3F, 1.0F);
       } else {
          if ((int)displacement != lastHit || ticks == 0) {
             onRollTick.accept(stack);

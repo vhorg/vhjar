@@ -30,7 +30,23 @@ public class DiscoveryGoalsState implements INBTSerializable<CompoundTag> {
       this.ongoingGoals = new HashMap<>();
    }
 
-   public void progress(ServerPlayer player, DiscoveryGoal goal, float deltaProgress) {
+   public float getProcess(DiscoveryGoal<?> goal) {
+      return this.ongoingGoals.getOrDefault(goal.getId(), 0.0F);
+   }
+
+   public void setProgress(ServerPlayer player, DiscoveryGoal<?> goal, float progress) {
+      ResourceLocation goalId = goal.getId();
+      if (!this.completedGoals.contains(goalId)) {
+         this.ongoingGoals.put(goalId, progress);
+         if (progress >= goal.getTargetProgress()) {
+            goal.onGoalAchieved(player);
+            this.ongoingGoals.remove(goalId);
+            this.completedGoals.add(goalId);
+         }
+      }
+   }
+
+   public void progress(ServerPlayer player, DiscoveryGoal<?> goal, float deltaProgress) {
       ResourceLocation goalId = goal.getId();
       if (!this.completedGoals.contains(goalId)) {
          float progress = this.ongoingGoals.merge(goalId, deltaProgress, Float::sum);
@@ -48,6 +64,10 @@ public class DiscoveryGoalsState implements INBTSerializable<CompoundTag> {
 
    public void resetGoalIf(Predicate<ResourceLocation> predicate) {
       this.ongoingGoals.keySet().stream().filter(predicate).toList().forEach(this.ongoingGoals::remove);
+   }
+
+   public void deleteCompletions() {
+      this.completedGoals.clear();
    }
 
    public CompoundTag serializeNBT() {

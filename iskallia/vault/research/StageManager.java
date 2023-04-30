@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.ItemCraftedEvent;
@@ -41,7 +42,11 @@ public class StageManager {
    public static ResearchTree RESEARCH_TREE = ResearchTree.empty();
 
    public static ResearchTree getResearchTree(Player player) {
-      return player.level.isClientSide ? RESEARCH_TREE : PlayerResearchesData.get((ServerLevel)player.level).getResearches(player);
+      if (player instanceof FakePlayer) {
+         return ResearchTree.empty();
+      } else {
+         return player.level.isClientSide ? RESEARCH_TREE : PlayerResearchesData.get((ServerLevel)player.level).getResearches(player);
+      }
    }
 
    private static void warnResearchRequirement(String researchName, String i18nKey) {
@@ -61,7 +66,7 @@ public class StageManager {
          ResearchTree researchTree = getResearchTree(player);
          ItemStack craftedItemStack = event.getCrafting();
          Container craftingMatrix = event.getInventory();
-         String restrictedBy = researchTree.restrictedBy(craftedItemStack.getItem(), Restrictions.Type.CRAFTABILITY);
+         String restrictedBy = researchTree.restrictedBy(craftedItemStack, Restrictions.Type.CRAFTABILITY);
          if (restrictedBy != null) {
             if (event.getPlayer().level.isClientSide) {
                warnResearchRequirement(restrictedBy, "craft");
@@ -98,7 +103,7 @@ public class StageManager {
          if (!player.isCreative()) {
             ResearchTree researchTree = getResearchTree(player);
             Item usedItem = event.getItemStack().getItem();
-            String restrictedBy = researchTree.restrictedBy(usedItem, Restrictions.Type.USABILITY);
+            String restrictedBy = researchTree.restrictedBy(event.getItemStack(), Restrictions.Type.USABILITY);
             if (restrictedBy != null) {
                if (event.getSide() == LogicalSide.CLIENT) {
                   warnResearchRequirement(restrictedBy, "usage");
@@ -117,7 +122,7 @@ public class StageManager {
          if (!player.isCreative()) {
             ResearchTree researchTree = getResearchTree(player);
             Item usedItem = event.getItemStack().getItem();
-            String restrictedBy = researchTree.restrictedBy(usedItem, Restrictions.Type.USABILITY);
+            String restrictedBy = researchTree.restrictedBy(event.getItemStack(), Restrictions.Type.USABILITY);
             if (restrictedBy != null) {
                if (event.getSide() == LogicalSide.CLIENT) {
                   warnResearchRequirement(restrictedBy, "usage");
@@ -146,8 +151,7 @@ public class StageManager {
             } else {
                ItemStack itemStack = event.getItemStack();
                if (itemStack != ItemStack.EMPTY) {
-                  Item item = itemStack.getItem();
-                  restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
+                  restrictedBy = researchTree.restrictedBy(itemStack, Restrictions.Type.USABILITY);
                   if (restrictedBy != null) {
                      if (event.getSide() == LogicalSide.CLIENT) {
                         warnResearchRequirement(restrictedBy, "usage");
@@ -178,8 +182,7 @@ public class StageManager {
             } else {
                ItemStack itemStack = event.getItemStack();
                if (itemStack != ItemStack.EMPTY) {
-                  Item item = itemStack.getItem();
-                  restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
+                  restrictedBy = researchTree.restrictedBy(itemStack, Restrictions.Type.USABILITY);
                   if (restrictedBy != null) {
                      if (event.getSide() == LogicalSide.CLIENT) {
                         warnResearchRequirement(restrictedBy, "usage");
@@ -210,8 +213,7 @@ public class StageManager {
             } else {
                ItemStack itemStack = event.getItemStack();
                if (itemStack != ItemStack.EMPTY) {
-                  Item item = itemStack.getItem();
-                  restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
+                  restrictedBy = researchTree.restrictedBy(itemStack, Restrictions.Type.USABILITY);
                   if (restrictedBy != null) {
                      if (event.getSide() == LogicalSide.CLIENT) {
                         warnResearchRequirement(restrictedBy, "usage");
@@ -242,8 +244,7 @@ public class StageManager {
             } else {
                ItemStack itemStack = player.getMainHandItem();
                if (itemStack != ItemStack.EMPTY) {
-                  Item item = itemStack.getItem();
-                  restrictedBy = researchTree.restrictedBy(item, Restrictions.Type.USABILITY);
+                  restrictedBy = researchTree.restrictedBy(itemStack, Restrictions.Type.USABILITY);
                   if (restrictedBy != null) {
                      if (player.level.isClientSide) {
                         warnResearchRequirement(restrictedBy, "usage");
@@ -265,9 +266,8 @@ public class StageManager {
       Player player = event.getPlayer();
       if (player != null) {
          ResearchTree researchTree = getResearchTree(player);
-         Item item = event.getItemStack().getItem();
          String restrictionCausedBy = Arrays.stream(Restrictions.Type.values())
-            .map(type -> researchTree.restrictedBy(item, type))
+            .map(type -> researchTree.restrictedBy(event.getItemStack(), type))
             .filter(Objects::nonNull)
             .findFirst()
             .orElseGet(() -> null);

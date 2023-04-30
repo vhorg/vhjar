@@ -9,6 +9,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.function.Supplier;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -16,16 +17,16 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 public class ForgeRegistryAdapter<V extends IForgeRegistryEntry<V>> implements ISimpleAdapter<V, Tag, JsonElement> {
-   private final IForgeRegistry<V> registry;
+   private final Supplier<IForgeRegistry<V>> registry;
    private final boolean nullable;
 
-   public ForgeRegistryAdapter(IForgeRegistry<V> registry, boolean nullable) {
+   public ForgeRegistryAdapter(Supplier<IForgeRegistry<V>> registry, boolean nullable) {
       this.registry = registry;
       this.nullable = nullable;
    }
 
    public IForgeRegistry<V> getRegistry() {
-      return this.registry;
+      return this.registry.get();
    }
 
    public boolean isNullable() {
@@ -52,7 +53,7 @@ public class ForgeRegistryAdapter<V extends IForgeRegistryEntry<V>> implements I
          return Optional.empty();
       } else {
          ResourceLocation id = Adapters.IDENTIFIER.readBits(buffer).orElseThrow();
-         return this.registry.containsKey(id) ? Optional.ofNullable((V)this.registry.getValue(id)) : Optional.empty();
+         return this.getRegistry().containsKey(id) ? Optional.ofNullable((V)this.getRegistry().getValue(id)) : Optional.empty();
       }
    }
 
@@ -72,7 +73,7 @@ public class ForgeRegistryAdapter<V extends IForgeRegistryEntry<V>> implements I
          return Optional.empty();
       } else {
          ResourceLocation id = Adapters.IDENTIFIER.readBytes(buffer).orElseThrow();
-         return this.registry.containsKey(id) ? Optional.ofNullable((V)this.registry.getValue(id)) : Optional.empty();
+         return this.getRegistry().containsKey(id) ? Optional.ofNullable((V)this.getRegistry().getValue(id)) : Optional.empty();
       }
    }
 
@@ -92,7 +93,7 @@ public class ForgeRegistryAdapter<V extends IForgeRegistryEntry<V>> implements I
          return Optional.empty();
       } else {
          ResourceLocation id = Adapters.IDENTIFIER.readData(data).orElseThrow();
-         return this.registry.containsKey(id) ? Optional.ofNullable((V)this.registry.getValue(id)) : Optional.empty();
+         return this.getRegistry().containsKey(id) ? Optional.ofNullable((V)this.getRegistry().getValue(id)) : Optional.empty();
       }
    }
 
@@ -103,7 +104,7 @@ public class ForgeRegistryAdapter<V extends IForgeRegistryEntry<V>> implements I
    @Override
    public Optional<V> readNbt(@Nullable Tag nbt) {
       ResourceLocation id = Adapters.IDENTIFIER.readNbt(nbt).orElse(null);
-      return id != null && this.registry.containsKey(id) ? Optional.ofNullable((V)this.registry.getValue(id)) : Optional.empty();
+      return id != null && this.getRegistry().containsKey(id) ? Optional.ofNullable((V)this.getRegistry().getValue(id)) : Optional.empty();
    }
 
    public Optional<JsonElement> writeJson(@Nullable V value) {
@@ -113,6 +114,6 @@ public class ForgeRegistryAdapter<V extends IForgeRegistryEntry<V>> implements I
    @Override
    public Optional<V> readJson(@Nullable JsonElement json) {
       ResourceLocation id = Adapters.IDENTIFIER.readJson(json).orElse(null);
-      return id != null && this.registry.containsKey(id) ? Optional.ofNullable((V)this.registry.getValue(id)) : Optional.empty();
+      return id != null && this.getRegistry().containsKey(id) ? Optional.ofNullable((V)this.getRegistry().getValue(id)) : Optional.empty();
    }
 }

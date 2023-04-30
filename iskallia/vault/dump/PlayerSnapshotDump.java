@@ -9,8 +9,10 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.skill.PlayerVaultStats;
-import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.CooldownHelper;
 import iskallia.vault.util.calc.FatalStrikeHelper;
@@ -50,7 +52,7 @@ public class PlayerSnapshotDump {
    public static PlayerSnapshotDump.PlayerSnapshot createSnapshot(ServerPlayer sPlayer) {
       PlayerSnapshotDump.PlayerSnapshot snapshot = new PlayerSnapshotDump.PlayerSnapshot(sPlayer);
       ServerLevel sWorld = sPlayer.getLevel();
-      snapshot.inVault = ServerVaults.isInVault(sPlayer);
+      snapshot.inVault = ServerVaults.get(sPlayer.level).isPresent();
       PlayerVaultStats stats = PlayerVaultStatsData.get(sWorld).getVaultStats(sPlayer);
       snapshot.vaultLevel = stats.getVaultLevel();
       if (snapshot.vaultLevel >= ModConfigs.LEVELS_META.getMaxLevel()) {
@@ -74,7 +76,7 @@ public class PlayerSnapshotDump {
       snapshot.fatalStrikeChance = FatalStrikeHelper.getFatalStrikeChance(sPlayer);
       snapshot.fatalStrikeDamage = FatalStrikeHelper.getFatalStrikeDamage(sPlayer);
       snapshot.thornsChance = ThornsHelper.getThornsChance(sPlayer);
-      snapshot.thornsDamage = ThornsHelper.getThornsDamage(sPlayer);
+      snapshot.thornsDamage = ThornsHelper.getThornsDamageMultiplier(sPlayer);
       Arrays.stream(EquipmentSlot.values()).forEach(slotType -> {
          ItemStack stack = sPlayer.getItemBySlot(slotType);
          if (!stack.isEmpty()) {
@@ -82,15 +84,17 @@ public class PlayerSnapshotDump {
          }
       });
       AbilityTree abilities = PlayerAbilitiesData.get(sWorld).getAbilities(sPlayer);
-      abilities.getLearnedNodes().forEach(node -> {
-         if (node.getSpecialization() != null) {
-            snapshot.abilities.put(node.getGroup().getParentName() + ": " + node.getSpecializationName(), node.getLevel());
-         } else {
-            snapshot.abilities.put(node.getGroup().getParentName(), node.getLevel());
+      abilities.iterate(Skill.class, skill -> {
+         if (skill.isUnlocked() && skill instanceof TieredSkill tiered && skill.getId() != null) {
+            snapshot.abilities.put(tiered.getId(), tiered.getTier());
          }
       });
       TalentTree talents = PlayerTalentsData.get(sWorld).getTalents(sPlayer);
-      talents.getLearnedNodes().forEach(node -> snapshot.talents.put(node.getGroup().getParentName(), node.getLevel()));
+      talents.iterate(Skill.class, skill -> {
+         if (skill.isUnlocked() && skill instanceof TieredSkill tiered && skill.getId() != null) {
+            snapshot.talents.put(skill.getId(), tiered.getTier());
+         }
+      });
       ResearchTree researches = PlayerResearchesData.get(sWorld).getResearches(sPlayer);
       snapshot.researches.addAll(researches.getResearchesDone());
       PlayerStatisticsCollector.VaultRunsSnapshot vaultRunsSnapshot = PlayerStatisticsCollector.VaultRunsSnapshot.ofPlayer(sPlayer);

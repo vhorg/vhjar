@@ -43,13 +43,13 @@ public class KillMobsEnhancementTask extends IntFilterEnhancementTask<KillMobsEn
    }
 
    public static class Config extends IntFilterEnhancementTask.Config<KillMobsEnhancementTask> {
-      private static final ArrayAdapter<String> FILTER = Adapters.ofArray(String[]::new, Adapters.UTF_8);
-      protected String[] filter;
+      private static final ArrayAdapter<EntityPredicate> FILTER = Adapters.ofArray(EntityPredicate[]::new, Adapters.ENTITY_PREDICATE);
+      protected EntityPredicate[] filter;
 
       public Config() {
       }
 
-      public Config(String display, IntRoll range, String... filter) {
+      public Config(String display, IntRoll range, EntityPredicate... filter) {
          super(display, range);
          this.filter = filter;
       }
@@ -59,8 +59,8 @@ public class KillMobsEnhancementTask extends IntFilterEnhancementTask<KillMobsEn
       }
 
       public boolean isValid(Entity entity) {
-         for (String filter : this.filter) {
-            if (EntityPredicate.of(filter).test(entity)) {
+         for (EntityPredicate filter : this.filter) {
+            if (filter.test(entity)) {
                return true;
             }
          }
@@ -79,7 +79,7 @@ public class KillMobsEnhancementTask extends IntFilterEnhancementTask<KillMobsEn
       @Override
       public void readNbt(CompoundTag nbt) {
          super.readNbt(nbt);
-         this.filter = FILTER.readNbt(nbt.get("filter")).orElse(new String[0]);
+         this.filter = FILTER.readNbt(nbt.get("filter")).orElse(new EntityPredicate[0]);
       }
    }
 }

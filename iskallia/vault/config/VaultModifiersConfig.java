@@ -12,37 +12,39 @@ import com.google.gson.annotations.SerializedName;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.core.vault.abyss.LegacyAbyssVaultEffectModifier;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.vault.modifier.modifier.ChanceArtifactModifier;
+import iskallia.vault.core.vault.modifier.modifier.ChanceCatalystModifier;
+import iskallia.vault.core.vault.modifier.modifier.ChanceChestTrapModifier;
+import iskallia.vault.core.vault.modifier.modifier.ChanceSoulShardModifier;
+import iskallia.vault.core.vault.modifier.modifier.DecoratorAddModifier;
+import iskallia.vault.core.vault.modifier.modifier.EmptyModifier;
+import iskallia.vault.core.vault.modifier.modifier.GameControlsModifier;
+import iskallia.vault.core.vault.modifier.modifier.LootItemQuantityModifier;
+import iskallia.vault.core.vault.modifier.modifier.LootItemRarityModifier;
+import iskallia.vault.core.vault.modifier.modifier.MobAttributeModifier;
+import iskallia.vault.core.vault.modifier.modifier.MobCurseOnHitModifier;
+import iskallia.vault.core.vault.modifier.modifier.MobFrenzyModifier;
+import iskallia.vault.core.vault.modifier.modifier.MobSpawnCountModifier;
+import iskallia.vault.core.vault.modifier.modifier.PlayerAttributeModifier;
+import iskallia.vault.core.vault.modifier.modifier.PlayerDurabilityDamageModifier;
+import iskallia.vault.core.vault.modifier.modifier.PlayerEffectModifier;
+import iskallia.vault.core.vault.modifier.modifier.PlayerInventoryRestoreModifier;
+import iskallia.vault.core.vault.modifier.modifier.PlayerNoExitModifier;
+import iskallia.vault.core.vault.modifier.modifier.PlayerNoVaultFruitModifier;
+import iskallia.vault.core.vault.modifier.modifier.PlayerStatModifier;
+import iskallia.vault.core.vault.modifier.modifier.VaultLevelModifier;
+import iskallia.vault.core.vault.modifier.modifier.VaultLootableWeightModifier;
+import iskallia.vault.core.vault.modifier.modifier.VaultTimeModifier;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierTypeRegistry;
+import iskallia.vault.core.vault.modifier.spi.AbstractChanceModifier;
+import iskallia.vault.core.vault.modifier.spi.EntityAttributeModifier;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.calc.PlayerStat;
-import iskallia.vault.world.vault.modifier.modifier.ChanceArtifactModifier;
-import iskallia.vault.world.vault.modifier.modifier.ChanceCatalystModifier;
-import iskallia.vault.world.vault.modifier.modifier.ChanceChestTrapModifier;
-import iskallia.vault.world.vault.modifier.modifier.ChanceSoulShardModifier;
-import iskallia.vault.world.vault.modifier.modifier.DecoratorAddModifier;
-import iskallia.vault.world.vault.modifier.modifier.EmptyModifier;
-import iskallia.vault.world.vault.modifier.modifier.GameControlsModifier;
-import iskallia.vault.world.vault.modifier.modifier.LootItemQuantityModifier;
-import iskallia.vault.world.vault.modifier.modifier.LootItemRarityModifier;
-import iskallia.vault.world.vault.modifier.modifier.MobAttributeModifier;
-import iskallia.vault.world.vault.modifier.modifier.MobCurseOnHitModifier;
-import iskallia.vault.world.vault.modifier.modifier.MobFrenzyModifier;
-import iskallia.vault.world.vault.modifier.modifier.MobSpawnCountModifier;
-import iskallia.vault.world.vault.modifier.modifier.PlayerAttributeModifier;
-import iskallia.vault.world.vault.modifier.modifier.PlayerDurabilityDamageModifier;
-import iskallia.vault.world.vault.modifier.modifier.PlayerEffectModifier;
-import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
-import iskallia.vault.world.vault.modifier.modifier.PlayerNoExitModifier;
-import iskallia.vault.world.vault.modifier.modifier.PlayerNoVaultFruitModifier;
-import iskallia.vault.world.vault.modifier.modifier.PlayerStatModifier;
-import iskallia.vault.world.vault.modifier.modifier.VaultLevelModifier;
-import iskallia.vault.world.vault.modifier.modifier.VaultLootableWeightModifier;
-import iskallia.vault.world.vault.modifier.modifier.VaultTimeModifier;
-import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
-import iskallia.vault.world.vault.modifier.registry.VaultModifierTypeRegistry;
-import iskallia.vault.world.vault.modifier.spi.AbstractChanceModifier;
-import iskallia.vault.world.vault.modifier.spi.EntityAttributeModifier;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.lang.reflect.Type;
 import java.util.Comparator;
 import java.util.Map;
@@ -722,7 +724,11 @@ public class VaultModifiersConfig extends Config {
                      VaultMod.id("gilded"),
                      new DecoratorAddModifier.Properties(
                         PartialTile.of(
-                           (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.GILDED_CHEST)
+                           PartialBlockState.of(
+                              (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.GILDED_CHEST)
+                           ),
+                           PartialCompoundNbt.empty(),
+                           null
                         ),
                         1,
                         true,
@@ -736,7 +742,11 @@ public class VaultModifiersConfig extends Config {
                      VaultMod.id("living"),
                      new DecoratorAddModifier.Properties(
                         PartialTile.of(
-                           (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.LIVING_CHEST)
+                           PartialBlockState.of(
+                              (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.LIVING_CHEST)
+                           ),
+                           PartialCompoundNbt.empty(),
+                           null
                         ),
                         1,
                         true,
@@ -750,7 +760,11 @@ public class VaultModifiersConfig extends Config {
                      VaultMod.id("ornate"),
                      new DecoratorAddModifier.Properties(
                         PartialTile.of(
-                           (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.ORNATE_CHEST)
+                           PartialBlockState.of(
+                              (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.ORNATE_CHEST)
+                           ),
+                           PartialCompoundNbt.empty(),
+                           null
                         ),
                         1,
                         true,
@@ -763,7 +777,13 @@ public class VaultModifiersConfig extends Config {
                   new DecoratorAddModifier(
                      VaultMod.id("coin_pile"),
                      new DecoratorAddModifier.Properties(
-                        PartialTile.of((BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.COIN_STACKS)),
+                        PartialTile.of(
+                           PartialBlockState.of(
+                              (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.COIN_STACKS)
+                           ),
+                           PartialCompoundNbt.empty(),
+                           null
+                        ),
                         1,
                         true,
                         null

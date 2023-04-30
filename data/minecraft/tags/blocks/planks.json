@@ -1,6 +1,7 @@
 {
     "replace": false,
     "values": [
-        "the_vault:chromatic_planks"
+        "the_vault:chromatic_planks",
+        "the_vault:driftwood_planks"
     ]
 }

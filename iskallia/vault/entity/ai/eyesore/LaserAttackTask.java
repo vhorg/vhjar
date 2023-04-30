@@ -2,13 +2,11 @@ package iskallia.vault.entity.ai.eyesore;
 
 import iskallia.vault.entity.entity.eyesore.EyesoreEntity;
 import iskallia.vault.init.ModConfigs;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
@@ -34,12 +32,7 @@ public class LaserAttackTask extends EyesoreTask<EyesoreEntity> {
    public void tick() {
       if (!this.isFinished()) {
          if (this.target == null) {
-            List<ServerPlayer> players = this.getVault()
-               .getPlayers()
-               .stream()
-               .map(p -> p.getServerPlayer(this.getWorld().getServer()))
-               .flatMap(Optional::stream)
-               .toList();
+            List<ServerPlayer> players = new ArrayList<>();
             if (players.size() == 0) {
                return;
             }
@@ -47,12 +40,6 @@ public class LaserAttackTask extends EyesoreTask<EyesoreEntity> {
             ServerPlayer player = players.get(this.getRandom().nextInt(players.size()));
             this.target = player.getUUID();
             this.getEntity().getEntityData().set(EyesoreEntity.LASER_TARGET, player.getId());
-            this.getVault()
-               .getPlayers()
-               .stream()
-               .map(p -> p.getServerPlayer(this.getWorld().getServer()))
-               .flatMap(Optional::stream)
-               .forEach(p -> this.getWorld().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ELDER_GUARDIAN_CURSE, SoundSource.HOSTILE, 10.0F, 1.0F));
          }
 
          Entity entity = this.getWorld().getEntity(this.target);
@@ -126,7 +113,7 @@ public class LaserAttackTask extends EyesoreTask<EyesoreEntity> {
    }
 
    public boolean isFinished() {
-      return this.getVault() == null ? true : this.tick >= 100;
+      return this.tick >= 100;
    }
 
    public void reset() {

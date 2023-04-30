@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import javax.annotation.Nullable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.sounds.SoundEvents;
 
 public abstract class ScrollableListSelectorElement<E extends ScrollableListSelectorElement<E, V, S>, V, S extends SelectableElement<S>>
    extends VerticalScrollClipContainer<E> {
@@ -39,6 +42,7 @@ public abstract class ScrollableListSelectorElement<E extends ScrollableListSele
 
       public void buildElements() {
          this.selectables.clear();
+         ScrollableListSelectorElement.this.verticalScrollBarElement.setValue(0.0F);
          ScrollableListSelectorElement.SelectorModel<S, V> selectorModel = ScrollableListSelectorElement.this.getSelectorModel();
          int offsetY = 0;
 
@@ -72,6 +76,7 @@ public abstract class ScrollableListSelectorElement<E extends ScrollableListSele
       }
 
       public void select(S entry) {
+         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
          this.selectedElement = entry;
          this.onSelect.accept(entry);
       }

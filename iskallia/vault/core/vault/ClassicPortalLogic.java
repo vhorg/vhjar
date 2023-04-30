@@ -4,12 +4,14 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
-import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.core.event.ClientEvents;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ClassicPortalLogic extends PortalLogic {
    public static final SupplierKey<PortalLogic> KEY = SupplierKey.of("classic", PortalLogic.class).with(Version.v1_0, ClassicPortalLogic::new);
@@ -27,7 +29,13 @@ public class ClassicPortalLogic extends PortalLogic {
       return FIELDS;
    }
 
-   public Optional<BlockPos> getStart(VirtualWorld world, Vault vault) {
+   @OnlyIn(Dist.CLIENT)
+   @Override
+   public void initClient(Vault vault) {
+      ClientEvents.COMPASS_PROPERTY.register(vault, data -> this.getPlayerStartPos(vault).ifPresent(data::setTarget));
+   }
+
+   public Optional<BlockPos> getStart() {
       return this.getPortals(ENTRANCE).findAny().map(portalData -> {
          BlockPos min = portalData.get(PortalData.MIN);
          BlockPos max = portalData.get(PortalData.MAX);

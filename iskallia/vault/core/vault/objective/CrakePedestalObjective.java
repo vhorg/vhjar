@@ -17,18 +17,17 @@ import iskallia.vault.core.event.common.BlockUseEvent;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class CrakePedestalObjective extends Objective {
    public static final SupplierKey<Objective> KEY = SupplierKey.of("crake_pedestal", Objective.class).with(Version.v1_13, CrakePedestalObjective::new);
@@ -65,17 +64,15 @@ public class CrakePedestalObjective extends Objective {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
-      BlockState targetState = (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
       CommonEvents.OBJECTIVE_PIECE_GENERATION
          .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
-      CommonEvents.BLOCK_SET.at(BlockSetEvent.Type.RETURN).of(targetState).in(world).register(this, data -> {
-         Block pedestal = (Block)ForgeRegistries.BLOCKS.getValue(new ResourceLocation("supplementaries:pedestal"));
-         if (pedestal == null) {
-            pedestal = Blocks.AIR;
+      CommonEvents.BLOCK_SET.at(BlockSetEvent.Type.RETURN).in(world).register(this, data -> {
+         PartialTile target = PartialTile.of(PartialBlockState.of(ModBlocks.PLACEHOLDER), PartialCompoundNbt.empty());
+         target.getState().set(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
+         if (target.isSubsetOf(PartialTile.of(data.getState()))) {
+            data.getWorld().setBlock(data.getPos(), ModBlocks.CRAKE_COLUMN.defaultBlockState(), 3);
+            data.getWorld().setBlock(data.getPos().above(), ModBlocks.CRAKE_PEDESTAL.defaultBlockState(), 3);
          }
-
-         data.getWorld().setBlock(data.getPos(), pedestal.defaultBlockState(), 3);
-         data.getWorld().setBlock(data.getPos().above(), ModBlocks.CRAKE_PEDESTAL.defaultBlockState(), 3);
       });
       CommonEvents.BLOCK_USE.in(world).at(BlockUseEvent.Phase.HEAD).of(ModBlocks.CRAKE_PEDESTAL).register(this, data -> {
          if (data.getHand() != InteractionHand.MAIN_HAND) {

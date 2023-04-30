@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
@@ -13,6 +14,8 @@ import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -42,6 +45,14 @@ public class DepthFireworkParticle extends SimpleAnimatedParticle {
 
    public void render(VertexConsumer buffer, Camera renderInfo, float partialTicks) {
       if (this.age < this.lifetime / 3 || (this.age + this.lifetime) / 3 % 2 == 0) {
+         Player player = Minecraft.getInstance().player;
+         if (player != null) {
+            double dist = player.distanceToSqr(this.x, this.y, this.z);
+            if (dist < 100.0) {
+               this.alpha = Mth.clamp((float)Math.sqrt(dist) / 10.0F, 0.25F, 1.0F);
+            }
+         }
+
          super.render(buffer, renderInfo, partialTicks);
       }
    }

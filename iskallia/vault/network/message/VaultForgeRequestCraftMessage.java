@@ -5,6 +5,7 @@ import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.container.spi.ForgeRecipeContainer;
+import iskallia.vault.event.event.ForgeGearEvent;
 import iskallia.vault.gear.crafting.recipe.VaultForgeRecipe;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
@@ -18,6 +19,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.NetworkEvent.Context;
 
@@ -69,6 +71,7 @@ public class VaultForgeRequestCraftMessage {
                            requester.level.levelEvent(1030, tile.getBlockPos(), 0);
                            container.broadcastChanges();
                            ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ForgeParticleMessage(tile.getBlockPos()));
+                           MinecraftForge.EVENT_BUS.post(new ForgeGearEvent(requester, recipe));
                         }
                      }
                   }

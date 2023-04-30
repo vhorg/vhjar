@@ -23,7 +23,7 @@ public record ServerboundAbandonBountyMessage(UUID bountyId) {
       context.enqueueWork(() -> {
          ServerPlayer serverPlayer = context.getSender();
          if (serverPlayer != null) {
-            BountyData.get().abandon(serverPlayer.getUUID(), message.bountyId);
+            BountyData.get().abandon(serverPlayer, message.bountyId);
             if (serverPlayer.containerMenu instanceof BountyContainer container) {
                container.replaceComplete(BountyData.get().getAllCompletedFor(serverPlayer.getUUID()));
                container.broadcastChanges();

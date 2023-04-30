@@ -19,7 +19,7 @@ public abstract class MixinLavaFluid {
       cancellable = true
    )
    public void onRandomTick(Level world, BlockPos pos, FluidState state, Random random, CallbackInfo ci) {
-      if (ServerVaults.isVaultWorld(world)) {
+      if (ServerVaults.get(world).isPresent()) {
          ci.cancel();
       }
    }

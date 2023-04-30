@@ -4,9 +4,8 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.research.type.Research;
-import iskallia.vault.skill.ability.group.AbilityGroup;
-import iskallia.vault.skill.talent.TalentGroup;
-import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.tree.SkillTree;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -21,87 +20,76 @@ public class SkillGates {
       this.entries.put(skillName, entry);
    }
 
-   public List<AbilityGroup<?, ?>> getDependencyAbilities(String abilityName) {
-      List<AbilityGroup<?, ?>> abilities = new LinkedList<>();
+   public List<String> getDependencyAbilities(String abilityName) {
+      List<String> abilities = new LinkedList<>();
       SkillGates.Entry entry = this.entries.get(abilityName);
       if (entry == null) {
          return abilities;
       } else {
          entry.dependsOn.forEach(dependencyName -> {
-            AbilityGroup<?, ?> dependency = ModConfigs.ABILITIES.getAbilityGroupByName(dependencyName);
-            abilities.add(dependency);
+            Skill dependency = ModConfigs.ABILITIES.getAbilityById(dependencyName).orElseThrow();
+            abilities.add(dependency.getId());
          });
          return abilities;
       }
    }
 
-   public List<AbilityGroup<?, ?>> getLockedByAbilities(String abilityName) {
-      List<AbilityGroup<?, ?>> abilities = new LinkedList<>();
+   public List<String> getLockedByAbilities(String abilityName) {
+      List<String> abilities = new LinkedList<>();
       SkillGates.Entry entry = this.entries.get(abilityName);
       if (entry == null) {
          return abilities;
       } else {
          entry.lockedBy.forEach(dependencyName -> {
-            AbilityGroup<?, ?> dependency = ModConfigs.ABILITIES.getAbilityGroupByName(dependencyName);
-            abilities.add(dependency);
+            Skill dependency = ModConfigs.ABILITIES.getAbilityById(dependencyName).orElseThrow();
+            abilities.add(dependency.getId());
          });
          return abilities;
       }
    }
 
-   public List<AbilityGroup<?, ?>> getAbilitiesDependingOn(String abilityName) {
-      List<AbilityGroup<?, ?>> abilities = new LinkedList<>();
-      AbilityGroup<?, ?> ability = ModConfigs.ABILITIES.getAbilityGroupByName(abilityName);
-
-      for (AbilityGroup<?, ?> otherAbility : ModConfigs.ABILITIES.getAll()) {
-         List<AbilityGroup<?, ?>> dependencies = ModConfigs.SKILL_GATES.getGates().getDependencyAbilities(otherAbility.getParentName());
-         if (dependencies.contains(ability)) {
-            abilities.add(otherAbility);
+   public List<String> getAbilitiesDependingOn(String abilityName) {
+      List<String> abilities = new LinkedList<>();
+      Skill ability = ModConfigs.ABILITIES.getAbilityById(abilityName).orElseThrow();
+      ModConfigs.ABILITIES.get().ifPresent(tree -> tree.iterate(Skill.class, skill -> {
+         List<String> dependencies = ModConfigs.SKILL_GATES.getGates().getDependencyAbilities(skill.getId());
+         if (dependencies.contains(ability.getId())) {
+            abilities.add(skill.getId());
          }
-      }
-
+      }));
       return abilities;
    }
 
-   public List<TalentGroup<?>> getDependencyTalents(String talentName) {
-      List<TalentGroup<?>> talents = new LinkedList<>();
+   public List<String> getDependencySkills(String talentName) {
+      List<String> talents = new LinkedList<>();
       SkillGates.Entry entry = this.entries.get(talentName);
       if (entry == null) {
          return talents;
       } else {
-         entry.dependsOn.forEach(dependencyName -> {
-            TalentGroup<?> dependency = ModConfigs.TALENTS.getByName(dependencyName);
-            talents.add(dependency);
-         });
+         talents.addAll(entry.dependsOn);
          return talents;
       }
    }
 
-   public List<TalentGroup<?>> getLockedByTalents(String talentName) {
-      List<TalentGroup<?>> talents = new LinkedList<>();
+   public List<String> getLockedBySkills(String talentName) {
+      List<String> talents = new LinkedList<>();
       SkillGates.Entry entry = this.entries.get(talentName);
       if (entry == null) {
          return talents;
       } else {
-         entry.lockedBy.forEach(dependencyName -> {
-            TalentGroup<?> dependency = ModConfigs.TALENTS.getByName(dependencyName);
-            talents.add(dependency);
-         });
+         talents.addAll(entry.lockedBy);
          return talents;
       }
    }
 
-   public List<TalentGroup<?>> getTalentsDependingOn(String talentName) {
-      List<TalentGroup<?>> talents = new LinkedList<>();
-      TalentGroup<?> talent = ModConfigs.TALENTS.getByName(talentName);
-
-      for (TalentGroup<?> otherTalent : ModConfigs.TALENTS.getAll()) {
-         List<TalentGroup<?>> dependencies = ModConfigs.SKILL_GATES.getGates().getDependencyTalents(otherTalent.getParentName());
-         if (dependencies.contains(talent)) {
-            talents.add(otherTalent);
+   public List<String> getSkillsDependingOn(String talentName, SkillTree tree) {
+      List<String> talents = new LinkedList<>();
+      tree.iterate(Skill.class, skill -> {
+         List<String> dependencies = ModConfigs.SKILL_GATES.getGates().getDependencySkills(skill.getId());
+         if (dependencies.contains(talentName)) {
+            talents.add(skill.getId());
          }
-      }
-
+      });
       return talents;
    }
 
@@ -152,17 +140,17 @@ public class SkillGates {
       return false;
    }
 
-   public boolean isLocked(TalentGroup<?> talent, TalentTree talentTree) {
+   public boolean isLocked(String skill, SkillTree tree) {
       SkillGates gates = ModConfigs.SKILL_GATES.getGates();
 
-      for (TalentGroup<?> dependencyTalent : gates.getDependencyTalents(talent.getParentName())) {
-         if (!talentTree.getNodeOf(dependencyTalent).isLearned()) {
+      for (String dependencyTalent : gates.getDependencySkills(skill)) {
+         if (!tree.getForId(dependencyTalent).map(Skill::isUnlocked).orElse(false)) {
             return true;
          }
       }
 
-      for (TalentGroup<?> lockedByTalent : gates.getLockedByTalents(talent.getParentName())) {
-         if (talentTree.getNodeOf(lockedByTalent).isLearned()) {
+      for (String lockedByTalent : gates.getLockedBySkills(skill)) {
+         if (tree.getForId(lockedByTalent).map(Skill::isUnlocked).orElse(false)) {
             return true;
          }
       }

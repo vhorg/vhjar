@@ -3,8 +3,7 @@ package iskallia.vault.core.world.loot;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
-import iskallia.vault.config.adapter.LootPoolAdapter;
-import iskallia.vault.config.adapter.LootRollAdapter;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.world.roll.IntRoll;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -13,8 +12,8 @@ import java.util.List;
 
 public class LootTable {
    private static final Gson GSON = new GsonBuilder()
-      .registerTypeHierarchyAdapter(IntRoll.class, LootRollAdapter.INSTANCE)
-      .registerTypeHierarchyAdapter(LootPool.class, LootPoolAdapter.INSTANCE)
+      .registerTypeHierarchyAdapter(IntRoll.class, Adapters.INT_ROLL)
+      .registerTypeHierarchyAdapter(LootPool.class, Adapters.LOOT_POOL)
       .setPrettyPrinting()
       .excludeFieldsWithoutExposeAnnotation()
       .create();

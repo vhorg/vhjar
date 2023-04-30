@@ -24,6 +24,7 @@ public abstract class KeyRegistryConfig<R extends KeyRegistry<T, ?>, T extends V
    public R toRegistry() {
       R registry = this.create();
       this.keys.forEach(registry::register);
+      this.keys.clear();
       return registry;
    }
 }

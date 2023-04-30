@@ -1,10 +1,12 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -89,5 +91,13 @@ public abstract class MixinEntity {
          destination.getServer().execute(() -> this.changeDimension(destination, teleporter));
          ci.setReturnValue(null);
       }
+   }
+
+   @Inject(
+      method = {"load"},
+      at = {@At("RETURN")}
+   )
+   public void load(CompoundTag nbt, CallbackInfo ci) {
+      CommonEvents.ENTITY_READ.invoke((Entity)this, nbt);
    }
 }

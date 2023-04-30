@@ -27,6 +27,10 @@ public class ToolPulverizingConfig extends Config {
       return this.loot.get(item) == null ? null : new LootTable(this.loot.get(item));
    }
 
+   public Map<Item, List<LootTable.Entry>> getLoot() {
+      return this.loot;
+   }
+
    @Override
    protected void reset() {
       this.loot = new LinkedHashMap<>();

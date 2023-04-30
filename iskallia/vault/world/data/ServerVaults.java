@@ -11,14 +11,10 @@ import iskallia.vault.nbt.VListNBT;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
-import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -86,34 +82,6 @@ public class ServerVaults extends SavedData {
       return VaultMod.id("vault_" + vault.get(Vault.ID).toString());
    }
 
-   public static boolean isInVault(@Nullable Entity entity) {
-      return entity == null ? false : isVaultWorld(entity.getLevel().dimension().location());
-   }
-
-   public static boolean isVaultWorld(Level level) {
-      return isVaultWorld(level.dimension().location());
-   }
-
-   public static boolean isVaultWorld(ResourceKey<Level> dimKey) {
-      return isVaultWorld(dimKey.location());
-   }
-
-   public static boolean isVaultWorld(ResourceLocation dimKey) {
-      String dimStr = dimKey.getPath();
-      if (!dimStr.startsWith("vault_")) {
-         return false;
-      } else {
-         String vaultIdPart = dimStr.substring(6);
-
-         try {
-            UUID.fromString(vaultIdPart);
-            return true;
-         } catch (IllegalArgumentException var4) {
-            return false;
-         }
-      }
-   }
-
    public static Optional<VirtualWorld> getWorld(Vault vault) {
       if (vault == null) {
          return Optional.empty();
@@ -128,25 +96,21 @@ public class ServerVaults extends SavedData {
       }
    }
 
-   public static int getVaultLevelOrZero(ServerLevel level) {
-      return get(level).filter(vault -> vault.has(Vault.LEVEL)).map(vault -> vault.get(Vault.LEVEL).get()).orElse(0);
-   }
-
    public static Optional<Vault> get(UUID uuid) {
       MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
       return server == null ? Optional.empty() : get(server).vaults.stream().filter(vault -> vault.get(Vault.ID).equals(uuid)).findFirst();
    }
 
    public static Optional<Vault> get(Level world) {
-      if (world == null) {
-         return Optional.empty();
-      } else {
+      if (world != null && !world.isClientSide) {
          for (Vault vault : get(ServerLifecycleHooks.getCurrentServer()).vaults) {
             if (world.dimension().location().toString().contains(vault.get(Vault.ID).toString())) {
                return Optional.of(vault);
             }
          }
 
+         return Optional.empty();
+      } else {
          return Optional.empty();
       }
    }

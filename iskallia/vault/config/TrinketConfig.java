@@ -73,6 +73,10 @@ public class TrinketConfig extends Config {
       private int minUses;
       @Expose
       private int maxUses;
+      @Expose
+      private int minCraftedUses;
+      @Expose
+      private int maxCraftedUses;
       private Object trinketConfig;
 
       public Trinket(int weight, String name, String effectText, int color) {
@@ -86,6 +90,8 @@ public class TrinketConfig extends Config {
          this.color = color;
          this.minUses = minUses;
          this.maxUses = maxUses;
+         this.minCraftedUses = minUses;
+         this.maxCraftedUses = maxUses;
       }
 
       public int getWeight() {
@@ -110,6 +116,10 @@ public class TrinketConfig extends Config {
 
       public int getRandomUses() {
          return Mth.randomBetweenInclusive(Config.rand, this.minUses, this.maxUses);
+      }
+
+      public int getRandomCraftedUses() {
+         return Mth.randomBetweenInclusive(Config.rand, this.minCraftedUses, this.maxCraftedUses);
       }
 
       public Object getConfig() {

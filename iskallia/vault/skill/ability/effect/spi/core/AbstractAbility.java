@@ -37,6 +37,6 @@ public abstract class AbstractAbility<C extends AbstractAbilityConfig> {
    }
 
    public AbilityActionResult onAction(C config, ServerPlayer player, boolean active) {
-      return AbilityActionResult.FAIL;
+      return AbilityActionResult.fail();
    }
 }

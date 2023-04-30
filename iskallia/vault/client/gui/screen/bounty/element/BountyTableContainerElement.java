@@ -215,11 +215,11 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
             );
          }
 
+         int activeBountyCount = this.container.getActive().size();
+
          for (int column = 0; column < 3; column++) {
-            if (row == activeRow && column == 0) {
-               this.createButton(
-                  buttonX, buttonY, this.container.getActive().size() > column ? this.container.getActive().get(column) : null, BountyElement.Status.ACTIVE
-               );
+            if (row == activeRow && column < activeBountyCount) {
+               this.createButton(buttonX, buttonY, this.container.getActive().get(column), BountyElement.Status.ACTIVE);
             } else if (row == availableRow) {
                this.createButton(
                   buttonX,

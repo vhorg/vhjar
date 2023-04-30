@@ -1,7 +1,8 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
@@ -29,31 +30,26 @@ public class ServerboundAbilityKeyMessage {
    }
 
    public static void handle(ServerboundAbilityKeyMessage message, Supplier<Context> contextSupplier) {
-      Context context = contextSupplier.get();
-      context.enqueueWork(() -> {
-         ServerPlayer sender = context.getSender();
+      Context ctx = contextSupplier.get();
+      ctx.enqueueWork(() -> {
+         ServerPlayer sender = ctx.getSender();
          if (sender != null) {
             PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
             AbilityTree abilityTree = abilitiesData.getAbilities(sender);
+            SkillContext context = SkillContext.of(sender);
             switch (message.opcode) {
                case KeyUp:
-                  abilityTree.keyUp(sender.server);
+                  abilityTree.onKeyUp(context);
                   break;
                case KeyDown:
-                  abilityTree.keyDown(sender.server);
-                  break;
-               case ScrollUp:
-                  abilityTree.scrollUp(sender.server);
-                  break;
-               case ScrollDown:
-                  abilityTree.scrollDown(sender.server);
+                  abilityTree.onKeyDown(context);
                   break;
                case CancelKeyDown:
-                  abilityTree.cancelKeyDown(sender.server);
+                  abilityTree.onCancelKeyDown(context);
             }
          }
       });
-      context.setPacketHandled(true);
+      ctx.setPacketHandled(true);
    }
 
    public static enum Opcode {

@@ -8,6 +8,8 @@ import iskallia.vault.integration.jei.lootinfo.LootInfoFactory;
 import iskallia.vault.integration.jei.lootinfo.LootInfoGroupDefinition;
 import iskallia.vault.integration.jei.lootinfo.LootInfoGroupDefinitionRegistry;
 import iskallia.vault.integration.jei.lootinfo.LootInfoRecipeCategory;
+import iskallia.vault.item.tool.Pulverizing;
+import iskallia.vault.item.tool.Smelting;
 import iskallia.vault.recipe.CatalystInfusionTableRecipe;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +32,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @JeiPlugin
 public class IntegrationJEI implements IModPlugin {
@@ -62,6 +65,10 @@ public class IntegrationJEI implements IModPlugin {
             ModBlocks.PLACEHOLDER.asItem()
          }
       );
+      Item item = (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation("ispawner", "spawn_egg"));
+      if (item != null) {
+         registration.useNbtForSubtypes(new Item[]{item});
+      }
    }
 
    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
@@ -71,6 +78,9 @@ public class IntegrationJEI implements IModPlugin {
       for (LootInfoGroupDefinition definition : LootInfoGroupDefinitionRegistry.get().values()) {
          registration.addRecipeCatalyst(definition.itemStack(), new RecipeType[]{definition.recipeType()});
       }
+
+      Pulverizing.register(registration);
+      Smelting.register(registration);
    }
 
    public void registerCategories(IRecipeCategoryRegistration registration) {
@@ -84,6 +94,9 @@ public class IntegrationJEI implements IModPlugin {
             new IRecipeCategory[]{new LootInfoRecipeCategory(guiHelper, definition.recipeType(), definition.itemStack(), definition.titleComponent())}
          );
       }
+
+      Pulverizing.register(registration);
+      Smelting.register(registration);
    }
 
    public void registerRecipes(IRecipeRegistration registration) {
@@ -95,6 +108,8 @@ public class IntegrationJEI implements IModPlugin {
          .forEach((resourceLocation, definition) -> registration.addRecipes(definition.recipeType(), LootInfoFactory.create(resourceLocation)));
       IVanillaRecipeFactory vanillaRecipeFactory = registration.getVanillaRecipeFactory();
       registration.addRecipes(RecipeTypes.ANVIL, AnvilRecipesJEI.getAnvilRecipes(vanillaRecipeFactory));
+      Pulverizing.register(registration);
+      Smelting.register(registration);
    }
 
    public void registerGuiHandlers(IGuiHandlerRegistration registration) {

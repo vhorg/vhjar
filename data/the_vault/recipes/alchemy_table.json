@@ -1,0 +1,38 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "cbg",
+    "hsm",
+    "tnt"
+  ],
+  "key": {
+    "b": {
+      "item": "minecraft:glass_bottle"
+    },
+    "c": {
+      "item": "the_vault:vault_diamond"
+    },
+    "t": {
+      "item": "the_vault:chromatic_steel_block"
+    },
+    "g": {
+      "item": "minecraft:ghast_tear"
+    },
+    "h": {
+      "item": "minecraft:heart_of_the_sea"
+    },
+    "s": {
+      "item": "minecraft:smooth_stone"
+    },
+    "m": {
+      "item": "minecraft:glistering_melon_slice"
+    },
+    "n": {
+      "item": "minecraft:nether_wart"
+    }
+  },
+  "result": {
+    "item": "the_vault:alchemy_table",
+    "count": 1
+  }
+}

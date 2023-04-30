@@ -26,15 +26,17 @@ import java.util.function.Consumer;
 
 public class TieredLootTableGenerator extends LootTableGenerator {
    public static final Map<TieredLootTableGenerator.CDFKey, TieredLootTableGenerator.CDF> CACHE = new HashMap<>();
-   private int[] key;
+   private double[] key;
    protected final Map<LootPool, Integer> poolToIndex = new HashMap<>();
    protected int[] frequencies;
    protected double cdf;
    public float itemRarity;
+   private final int maxRolls;
 
-   public TieredLootTableGenerator(Version version, LootTableKey table, float itemRarity, float itemQuantity) {
+   public TieredLootTableGenerator(Version version, LootTableKey table, float itemRarity, float itemQuantity, int maxRolls) {
       super(version, table, itemQuantity);
       this.itemRarity = itemRarity;
+      this.maxRolls = maxRolls;
    }
 
    public static void clearCache() {
@@ -43,15 +45,15 @@ public class TieredLootTableGenerator extends LootTableGenerator {
 
    public static void addCache(LootTable table) {
       LootPool pool = table.getEntries().get(0).getPool();
-      int[] base = new int[pool.getChildren().size() + 1];
+      double[] base = new double[pool.getChildren().size() + 1];
       int index = 1;
 
-      for (Entry<Object, Integer> e : pool.getChildren().entrySet()) {
+      for (Entry<Object, Double> e : pool.getChildren().entrySet()) {
          base[index++] = e.getValue();
       }
 
       for (int i = 1; i < 54; i++) {
-         int[] key = new int[base.length];
+         double[] key = new double[base.length];
          System.arraycopy(base, 0, key, 0, key.length);
          key[0] = i;
          CACHE.computeIfAbsent(new TieredLootTableGenerator.CDFKey(key), TieredLootTableGenerator.CDF::new);
@@ -64,7 +66,7 @@ public class TieredLootTableGenerator extends LootTableGenerator {
          : !table.getEntries().get(0).getPool().getChildren().keySet().stream().anyMatch(o -> !(o instanceof LootPool));
    }
 
-   public int[] getKey() {
+   public double[] getKey() {
       return this.key;
    }
 
@@ -83,17 +85,25 @@ public class TieredLootTableGenerator extends LootTableGenerator {
       int roll = entry.getRoll().get(random);
       if (this.version.isOlderThan(Version.v1_4)) {
          roll = (int)(roll * (1.0F + this.itemQuantity));
-      } else {
+      } else if (this.version.isOlderThan(Version.v1_15)) {
          float fRoll = roll * (1.0F + this.itemQuantity);
          roll = (int)fRoll + (random.nextFloat() < fRoll - roll ? 1 : 0);
+      } else {
+         float fRoll = roll * (1.0F + this.itemQuantity);
+
+         for (roll = 0; fRoll > 0.0F && random.nextFloat() < fRoll; fRoll--) {
+            roll++;
+         }
+
+         roll = Math.min(roll, this.maxRolls);
       }
 
       LootPool pool = entry.getPool();
-      this.key = new int[pool.getChildren().size() + 1];
+      this.key = new double[pool.getChildren().size() + 1];
       this.key[0] = roll;
       int index = 1;
 
-      for (Entry<Object, Integer> e : pool.getChildren().entrySet()) {
+      for (Entry<Object, Double> e : pool.getChildren().entrySet()) {
          this.poolToIndex.put((LootPool)e.getKey(), index - 1);
          this.key[index++] = e.getValue();
       }
@@ -106,12 +116,12 @@ public class TieredLootTableGenerator extends LootTableGenerator {
 
    protected void generateEntry(int roll, LootTable.Entry entry, RandomSource random) {
       LootPool adjustedPool = new LootPool();
-      Iterator<Entry<Object, Integer>> it = entry.getPool().getChildren().entrySet().iterator();
+      Iterator<Entry<Object, Double>> it = entry.getPool().getChildren().entrySet().iterator();
 
       for (int index = 0; it.hasNext(); index++) {
-         Entry<Object, Integer> child = it.next();
+         Entry<Object, Double> child = it.next();
          if (index != 0) {
-            adjustedPool.addTree((LootPool)child.getKey(), (int)(child.getValue().intValue() * (1.0F + this.itemRarity)));
+            adjustedPool.addTree((LootPool)child.getKey(), child.getValue() * (1.0F + this.itemRarity));
          } else {
             adjustedPool.addTree((LootPool)child.getKey(), child.getValue());
          }
@@ -129,20 +139,20 @@ public class TieredLootTableGenerator extends LootTableGenerator {
    public static class CDF {
       public static BigDecimal[] FACTORIAL = new BigDecimal[256];
       private final int samples;
-      private final int[] weights;
-      private final int totalWeight;
+      private final double[] weights;
+      private final double totalWeight;
       private final double[] scores;
       private final double[] probabilities;
       private final int packBits;
       private final Long2DoubleMap map;
 
       protected CDF(TieredLootTableGenerator.CDFKey key) {
-         this.samples = key.key[0];
-         this.weights = new int[key.key.length - 1];
+         this.samples = (int)key.key[0];
+         this.weights = new double[key.key.length - 1];
          System.arraycopy(key.key, 1, this.weights, 0, this.weights.length);
          this.totalWeight = Arrays.stream(this.weights).sum();
-         this.scores = Arrays.stream(this.weights).mapToDouble(x -> (double)this.totalWeight / x).toArray();
-         this.probabilities = Arrays.stream(this.weights).mapToDouble(x -> (double)x / this.totalWeight).toArray();
+         this.scores = Arrays.stream(this.weights).map(x -> this.totalWeight / x).toArray();
+         this.probabilities = Arrays.stream(this.weights).map(x -> x / this.totalWeight).toArray();
          this.packBits = 64 / this.weights.length;
          this.map = this.compute();
       }
@@ -259,9 +269,9 @@ public class TieredLootTableGenerator extends LootTableGenerator {
    }
 
    public static class CDFKey {
-      public final int[] key;
+      public final double[] key;
 
-      public CDFKey(int[] key) {
+      public CDFKey(double[] key) {
          this.key = key;
       }
 

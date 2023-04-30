@@ -1,14 +1,11 @@
 package iskallia.vault.item;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
@@ -56,20 +53,6 @@ public class ItemRelicBoosterPack extends Item {
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flagIn) {
       super.appendHoverText(stack, world, tooltip, flagIn);
-      if ("architect_event".equals(getKey(stack))) {
-         tooltip.add(new TextComponent("Architect").withStyle(ChatFormatting.AQUA));
-      }
-   }
-
-   public static ItemStack getArchitectBoosterPack() {
-      ItemStack stack = new ItemStack(ModItems.RELIC_BOOSTER_PACK);
-      stack.getOrCreateTag().putString("eventKey", "architect_event");
-      return stack;
-   }
-
-   @Nullable
-   public static String getKey(ItemStack stack) {
-      return !stack.hasTag() ? null : stack.getOrCreateTag().getString("eventKey");
    }
 
    public static void successEffects(Level world, Vec3 pos) {

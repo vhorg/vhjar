@@ -8,12 +8,14 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.skill.talent.TalentNode;
-import iskallia.vault.skill.talent.type.BlacksmithTalent;
-import iskallia.vault.util.MiscUtils;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.ArtisanExpertise;
+import iskallia.vault.skill.tree.ExpertiseTree;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerProficiencyData;
 import java.util.Random;
 import javax.annotation.Nonnull;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,8 +26,14 @@ public class VaultGearCraftingHelper {
 
    public static void reducePotential(ItemStack stack, Player player, GearModification action) {
       if (!stack.isEmpty() && stack.getItem() instanceof VaultGearItem) {
-         BlacksmithTalent talent = MiscUtils.getTalent(player, ModConfigs.TALENTS.BLACKSMITH).map(TalentNode::getTalent).orElse(null);
-         if (talent == null || !(rand.nextFloat() < talent.getChanceToNotConsumePotential())) {
+         float chance = 0.0F;
+         ExpertiseTree expertises = PlayerExpertisesData.get((ServerLevel)player.level).getExpertises(player);
+
+         for (ArtisanExpertise expertise : expertises.getAll(ArtisanExpertise.class, Skill::isUnlocked)) {
+            chance += expertise.getChanceToNotConsumePotential();
+         }
+
+         if (!(rand.nextFloat() < chance)) {
             VaultGearData data = VaultGearData.read(stack);
             int potentialReduction = ModConfigs.VAULT_GEAR_MODIFICATION_CONFIG.getPotentialUsed(action);
             int potential = data.getFirstValue(ModGearAttributes.CRAFTING_POTENTIAL).orElse(0);

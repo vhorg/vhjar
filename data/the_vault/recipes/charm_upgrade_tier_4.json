@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",   
+  "ingredients": [
+    {
+        "item": "the_vault:charm_upgrade_tier_3"
+    },
+    {
+        "item": "the_vault:omega_pog"
+    }
+],
+  "result": {
+    "item": "the_vault:charm_upgrade_tier_4"
+  }
+}

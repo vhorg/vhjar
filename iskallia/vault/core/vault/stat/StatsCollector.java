@@ -12,6 +12,8 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.init.ModGameRules;
+import iskallia.vault.world.VaultLoot;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -32,14 +34,34 @@ public class StatsCollector extends DataObject<StatsCollector> {
 
    public void initServer(VirtualWorld world, Vault vault) {
       this.get(MAP).forEach((uuid, collector) -> collector.initServer(world, vault, uuid));
-      CommonEvents.LISTENER_JOIN.register(this, data -> {
-         if (data.getVault() == vault) {
-            if (data.getListener() instanceof Runner) {
-               UUID uuid = data.getListener().get(Listener.ID);
-               this.get(MAP).computeIfAbsent(uuid, _uuid -> new StatCollector()).initServer(world, vault, uuid);
+      CommonEvents.LISTENER_JOIN
+         .register(
+            this,
+            data -> {
+               if (data.getVault() == vault) {
+                  if (data.getListener() instanceof Runner) {
+                     UUID uuid = data.getListener().get(Listener.ID);
+                     this.get(MAP)
+                        .computeIfAbsent(
+                           uuid,
+                           _uuid -> {
+                              StatCollector stats = new StatCollector();
+                              stats.modify(
+                                 StatCollector.BONUS_EXP_MULTIPLIER,
+                                 m -> m * ((VaultLoot.GameRuleValue)world.getGameRules().getRule(ModGameRules.LOOT)).get().getMultiplier()
+                              );
+                              stats.modify(
+                                 StatCollector.OBJECTIVE_EXP_MULTIPLIER,
+                                 m -> m * ((VaultLoot.GameRuleValue)world.getGameRules().getRule(ModGameRules.LOOT)).get().getMultiplier()
+                              );
+                              return stats;
+                           }
+                        )
+                        .initServer(world, vault, uuid);
+                  }
+               }
             }
-         }
-      });
+         );
       CommonEvents.LISTENER_LEAVE.register(this, data -> {
          if (data.getVault() == vault) {
             UUID uuid = data.getListener().get(Listener.ID);

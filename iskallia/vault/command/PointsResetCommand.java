@@ -3,7 +3,6 @@ package iskallia.vault.command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import iskallia.vault.init.ModConfigs;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,28 +53,6 @@ public class PointsResetCommand extends Command {
             );
          return 0;
       } else {
-         try {
-            switch (type) {
-               case "skill":
-                  ModConfigs.PLAYER_RESETS.enableResetSkillPoints();
-                  break;
-               case "knowledge":
-                  ModConfigs.PLAYER_RESETS.enableResetKnowledgePoints();
-                  break;
-               case "archetype":
-                  ModConfigs.PLAYER_RESETS.enableResetArchetypePoints();
-                  break;
-               default:
-                  ((CommandSourceStack)context.getSource()).sendFailure(new TextComponent("Invalid Points Type: " + type));
-                  currentlyRunning.remove(type);
-                  return 0;
-            }
-         } catch (Exception var5) {
-            ((CommandSourceStack)context.getSource()).sendFailure(new TextComponent(var5.getMessage()));
-            currentlyRunning.remove(type);
-            return 0;
-         }
-
          ((CommandSourceStack)context.getSource()).sendSuccess(new TextComponent("You have reset " + type + " points").withStyle(ChatFormatting.GREEN), true);
          currentlyRunning.remove(type);
          return 1;

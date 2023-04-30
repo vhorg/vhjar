@@ -5,7 +5,7 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.vault.Modifiers;
-import iskallia.vault.world.vault.modifier.spi.ModifierContext;
+import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import java.util.UUID;
 
 public class Favours extends Modifiers {

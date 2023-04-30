@@ -1,8 +1,7 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientAbilityData;
-import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.util.MiscUtils;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,13 +11,9 @@ public class AbilityActivityMessage {
    private final String ability;
    private final int cooldownTicks;
    private final int maxCooldownTicks;
-   private final AbilityTree.ActivityFlag activeFlag;
+   private final Ability.ActivityFlag activeFlag;
 
-   public AbilityActivityMessage(AbilityGroup<?, ?> ability, int cooldownTicks, int maxCooldownTicks, AbilityTree.ActivityFlag activeFlag) {
-      this(ability.getParentName(), cooldownTicks, maxCooldownTicks, activeFlag);
-   }
-
-   private AbilityActivityMessage(String ability, int cooldownTicks, int maxCooldownTicks, AbilityTree.ActivityFlag activeFlag) {
+   public AbilityActivityMessage(String ability, int cooldownTicks, int maxCooldownTicks, Ability.ActivityFlag activeFlag) {
       this.ability = ability;
       this.cooldownTicks = cooldownTicks;
       this.maxCooldownTicks = maxCooldownTicks;
@@ -37,7 +32,7 @@ public class AbilityActivityMessage {
       return this.maxCooldownTicks;
    }
 
-   public AbilityTree.ActivityFlag getActiveFlag() {
+   public Ability.ActivityFlag getActiveFlag() {
       return this.activeFlag;
    }
 
@@ -52,7 +47,7 @@ public class AbilityActivityMessage {
       String selectedAbility = buffer.readUtf(32767);
       int cooldownTicks = buffer.readInt();
       int maxCooldownTicks = buffer.readInt();
-      AbilityTree.ActivityFlag activeFlag = MiscUtils.getEnumEntry(AbilityTree.ActivityFlag.class, buffer.readInt());
+      Ability.ActivityFlag activeFlag = MiscUtils.getEnumEntry(Ability.ActivityFlag.class, buffer.readInt());
       return new AbilityActivityMessage(selectedAbility, cooldownTicks, maxCooldownTicks, activeFlag);
    }
 

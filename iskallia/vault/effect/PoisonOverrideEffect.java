@@ -24,7 +24,7 @@ public class PoisonOverrideEffect extends MobEffect {
       MobEffectInstance instance = entity.getEffect(MobEffects.POISON);
       if (instance != null) {
          int duration = instance.getDuration();
-         if (!ServerVaults.isInVault(entity)) {
+         if (ServerVaults.get(entity.level).isEmpty()) {
             int tickPart = 25 >> amplifier;
             boolean doEffect = true;
             if (tickPart > 0) {

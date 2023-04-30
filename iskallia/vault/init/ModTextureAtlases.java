@@ -9,9 +9,10 @@ import iskallia.vault.client.gui.screen.player.legacy.widget.ArchetypeNodeTextur
 import iskallia.vault.config.AbilitiesGUIConfig;
 import iskallia.vault.config.ArchetypeGUIConfig;
 import iskallia.vault.config.entry.ResearchGroupStyle;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.quest.base.Quest;
 import iskallia.vault.util.function.Memo;
-import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -70,14 +71,24 @@ public class ModTextureAtlases {
       VaultMod.id("textures/gui/research_groups"),
       () -> ModConfigs.RESEARCH_GROUP_STYLES.getStyles().values().stream().map(ResearchGroupStyle::getIcon).toList()
    );
-   public static final Supplier<ITextureAtlas> TALENTS = register(
-      VaultMod.id("textures/atlas/talents.png"),
-      VaultMod.id("textures/gui/talents"),
+   public static final Supplier<ITextureAtlas> SKILLS = register(
+      VaultMod.id("textures/atlas/skills.png"),
+      VaultMod.id("textures/gui/skills"),
       () -> ModConfigs.TALENTS_GUI.getStyles().values().stream().map(skillStyle -> skillStyle.icon).toList()
    );
    public static final Supplier<ITextureAtlas> SCREEN = register(VaultMod.id("textures/atlas/screen.png"), VaultMod.id("textures/gui/screen"), null);
    public static final Supplier<ITextureAtlas> SCAVENGER = register(VaultMod.id("textures/atlas/scavenger.png"), VaultMod.id("textures/gui/scavenger"), null);
    public static final Supplier<ITextureAtlas> MOB_HEADS = register(VaultMod.id("textures/atlas/mob_heads.png"), VaultMod.id("textures/gui/mob_heads"), null);
+   public static final Supplier<ITextureAtlas> QUESTS = register(VaultMod.id("textures/atlas/quests.png"), VaultMod.id("textures/gui/quests"), () -> {
+      List<ResourceLocation> icons = new ArrayList<>(ModConfigs.QUESTS.getQuests().stream().map(Quest::getIcon).toList());
+      ModConfigs.SKY_QUESTS.getQuests().forEach(quest -> {
+         if (!icons.contains(quest.getIcon())) {
+            icons.add(quest.getIcon());
+         }
+      });
+      icons.add(VaultMod.id("gui/quests/check"));
+      return icons;
+   });
 
    @SubscribeEvent
    public static void on(RegisterClientReloadListenersEvent event) {

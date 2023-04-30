@@ -14,17 +14,22 @@ import iskallia.vault.gear.item.CuriosGearItem;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.trinket.GearAttributeTrinket;
 import iskallia.vault.gear.trinket.TrinketHelper;
+import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.integration.IntegrationCurios;
+import iskallia.vault.item.BottleItem;
 import iskallia.vault.item.MagnetItem;
-import iskallia.vault.skill.talent.EffectGrantingTalent;
-import iskallia.vault.skill.talent.GearAttributeTalent;
-import iskallia.vault.skill.talent.TalentNode;
-import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.talent.GearAttributeSkill;
+import iskallia.vault.skill.tree.ExpertiseTree;
+import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.world.data.PlayerEtchingData;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,9 +43,11 @@ public class AttributeSnapshotCalculator {
    public static void computeSnapshot(ServerPlayer player, AttributeSnapshot snapshot) {
       addEtchingInformationToSnapshot(PlayerEtchingData.get(player.server).getEtchingSets(player), snapshot);
       addTalentInformationToSnapshot(player, snapshot);
+      addExpertiseInformationToSnapshot(player, snapshot);
       computeCuriosSnapshot(player, snapshot);
       int playerLevel = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player).getVaultLevel();
       computeGearSnapshot(player::getItemBySlot, playerLevel, snapshot);
+      computeBottleSnapshot(player, playerLevel, snapshot);
    }
 
    private static void computeCuriosSnapshot(ServerPlayer player, AttributeSnapshot snapshot) {
@@ -126,6 +133,28 @@ public class AttributeSnapshotCalculator {
       computeAvoidances(snapshot);
    }
 
+   private static void computeBottleSnapshot(ServerPlayer player, int playerLevel, AttributeSnapshot snapshot) {
+      if (player.hasEffect(ModEffects.BOTTLE)) {
+         ServerVaults.get(player.level)
+            .flatMap(vault -> BottleItem.getActive(vault, player))
+            .ifPresent(
+               stack -> {
+                  AttributeGearData data = AttributeGearData.read(stack);
+                  if (!(data instanceof VaultGearData vData && vData.getItemLevel() > playerLevel)) {
+                     for (VaultGearAttribute<?> attribute : VaultGearAttributeRegistry.getRegistry()) {
+                        data.get(attribute, VaultGearAttributeTypeMerger.asList())
+                           .forEach(
+                              value -> snapshot.gearAttributeValues
+                                 .computeIfAbsent(attribute, v -> new AttributeSnapshot.AttributeValue())
+                                 .addCachedValue(value)
+                           );
+                     }
+                  }
+               }
+            );
+      }
+   }
+
    private static void computeAvoidances(AttributeSnapshot snapshot) {
       snapshot.getAttributeValue(ModGearAttributes.EFFECT_AVOIDANCE, EffectAvoidanceCombinedMerger.getInstance())
          .getAvoidanceChances()
@@ -164,24 +193,35 @@ public class AttributeSnapshotCalculator {
 
    private static void addTalentInformationToSnapshot(ServerPlayer player, AttributeSnapshot snapshot) {
       TalentTree talents = PlayerTalentsData.get(player.getLevel()).getTalents(player);
-      talents.getLearnedNodes(EffectGrantingTalent.class)
-         .stream()
-         .map(TalentNode::getTalent)
-         .forEach(
-            effectTalent -> snapshot.gearAttributeValues
-               .computeIfAbsent(ModGearAttributes.EFFECT, v -> new AttributeSnapshot.AttributeValue())
-               .addCachedValue(effectTalent.asGearAttribute())
-         );
-      talents.getLearnedNodes(GearAttributeTalent.class)
-         .stream()
-         .map(TalentNode::getTalent)
-         .forEach(
-            gearTalent -> gearTalent.getAttributes()
-               .forEach(
-                  attributeValue -> snapshot.gearAttributeValues
-                     .computeIfAbsent(attributeValue.getAttribute(), v -> new AttributeSnapshot.AttributeValue())
-                     .addCachedValue(attributeValue.getValue())
-               )
-         );
+      talents.iterate(
+         GearAttributeSkill.class,
+         attributeSkill -> {
+            if (attributeSkill instanceof Skill skill && skill.isUnlocked()) {
+               attributeSkill.getGearAttributes(SkillContext.of(player))
+                  .forEach(
+                     attributeValue -> snapshot.gearAttributeValues
+                        .computeIfAbsent(attributeValue.getAttribute(), v -> new AttributeSnapshot.AttributeValue())
+                        .addCachedValue(attributeValue.getValue())
+                  );
+            }
+         }
+      );
+   }
+
+   private static void addExpertiseInformationToSnapshot(ServerPlayer player, AttributeSnapshot snapshot) {
+      ExpertiseTree expertise = PlayerExpertisesData.get(player.getLevel()).getExpertises(player);
+      expertise.iterate(
+         GearAttributeSkill.class,
+         attributeSkill -> {
+            if (attributeSkill instanceof Skill skill && skill.isUnlocked()) {
+               attributeSkill.getGearAttributes(SkillContext.ofExpertise(player))
+                  .forEach(
+                     attributeValue -> snapshot.gearAttributeValues
+                        .computeIfAbsent(attributeValue.getAttribute(), v -> new AttributeSnapshot.AttributeValue())
+                        .addCachedValue(attributeValue.getValue())
+                  );
+            }
+         }
+      );
    }
 }

@@ -16,6 +16,9 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class BlackMarketRenderer implements BlockEntityRenderer<BlackMarketTileEntity> {
    public BlackMarketRenderer(Context context) {
@@ -32,18 +35,27 @@ public class BlackMarketRenderer implements BlockEntityRenderer<BlackMarketTileE
       Level world = blackMarketTile.getLevel();
       if (world != null) {
          Direction dir = (Direction)blackMarketTile.getBlockState().getValue(BlackMarketBlock.FACING);
-         ItemStack itemStack = (ItemStack)ClientShardTradeData.getTradeInfo(1).getA();
-         matrixStack.pushPose();
-         this.renderInputItem(matrixStack, buffer, combinedLight, combinedOverlay, 0.64F, 0.35F, itemStack, dir, 0);
-         matrixStack.popPose();
-         itemStack = (ItemStack)ClientShardTradeData.getTradeInfo(0).getA();
-         matrixStack.pushPose();
-         this.renderInputItem(matrixStack, buffer, combinedLight, combinedOverlay, 0.64F, 0.35F, itemStack, dir, 1);
-         matrixStack.popPose();
-         itemStack = (ItemStack)ClientShardTradeData.getTradeInfo(2).getA();
-         matrixStack.pushPose();
-         this.renderInputItem(matrixStack, buffer, combinedLight, combinedOverlay, 0.64F, 0.35F, itemStack, dir, 2);
-         matrixStack.popPose();
+         if (ClientShardTradeData.getAvailableTrades().containsKey(1)) {
+            ItemStack itemStack = (ItemStack)ClientShardTradeData.getTradeInfo(1).getA();
+            matrixStack.pushPose();
+            this.renderInputItem(matrixStack, buffer, combinedLight, combinedOverlay, 0.64F, 0.35F, itemStack, dir, 0);
+            matrixStack.popPose();
+         }
+
+         if (ClientShardTradeData.getAvailableTrades().containsKey(0)) {
+            ItemStack itemStack = (ItemStack)ClientShardTradeData.getTradeInfo(0).getA();
+            matrixStack.pushPose();
+            this.renderInputItem(matrixStack, buffer, combinedLight, combinedOverlay, 0.64F, 0.35F, itemStack, dir, 1);
+            matrixStack.popPose();
+         }
+
+         if (ClientShardTradeData.getAvailableTrades().containsKey(2)) {
+            ItemStack itemStack = (ItemStack)ClientShardTradeData.getTradeInfo(2).getA();
+            matrixStack.pushPose();
+            this.renderInputItem(matrixStack, buffer, combinedLight, combinedOverlay, 0.64F, 0.35F, itemStack, dir, 2);
+            matrixStack.popPose();
+         }
+
          matrixStack.pushPose();
          this.renderOutputItem(matrixStack, buffer, combinedLight, combinedOverlay, 0.64F, 0.35F, new ItemStack(ModItems.SOUL_SHARD), dir, 0);
          matrixStack.popPose();
@@ -71,6 +83,8 @@ public class BlackMarketRenderer implements BlockEntityRenderer<BlackMarketTileE
       matrixStack.scale(scale, scale, scale);
       BakedModel bakedModel = minecraft.getItemRenderer().getModel(itemStack, null, null, 0);
       boolean is3d = bakedModel.isGui3d();
+      Block itemBlock = (Block)ForgeRegistries.BLOCKS.getValue(itemStack.getItem().getRegistryName());
+      boolean shouldLower = is3d && (itemBlock == null || itemBlock == Blocks.AIR);
       int rot = 0;
       if (dir == Direction.WEST) {
          rot = 90;
@@ -86,7 +100,9 @@ public class BlackMarketRenderer implements BlockEntityRenderer<BlackMarketTileE
 
       matrixStack.mulPose(Vector3f.YP.rotationDegrees(rot));
       matrixStack.mulPose(Vector3f.XP.rotationDegrees(90.0F));
-      matrixStack.translate(i == 0 ? 0.0 : (i == 1 ? 0.8 : -0.8), 0.7 + (i == 0 ? 0.0 : -0.05), (i == 0 ? -0.01 : 0.0) - (is3d ? 0.2 : 0.0));
+      matrixStack.translate(
+         i == 0 ? 0.0 : (i == 1 ? 0.8 : -0.8), 0.7 + (i == 0 ? 0.0 : -0.05), (i == 0 ? -0.01 : 0.0) - (is3d ? (shouldLower ? 0.05 : 0.2) : 0.0)
+      );
       matrixStack.mulPose(Vector3f.ZP.rotationDegrees(i == 0 ? 0.0F : (i == 1 ? -30.0F : 30.0F)));
       minecraft.getItemRenderer().render(itemStack, TransformType.FIXED, true, matrixStack, buffer, lightLevel, overlay, bakedModel);
       matrixStack.popPose();

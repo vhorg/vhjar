@@ -1,7 +1,6 @@
 package iskallia.vault.gear.attribute.ability;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.init.ModConfigs;
 
 public abstract class AbilityGearAttribute {
    protected final String abilityKey;
@@ -15,7 +14,7 @@ public abstract class AbilityGearAttribute {
    }
 
    public boolean affectsAbility(String playerAbility) {
-      return ModConfigs.ABILITIES.getAbility(playerAbility).map(abilityGroup -> abilityGroup.getParentName().equals(this.abilityKey)).orElse(false);
+      return this.abilityKey.equals(playerAbility);
    }
 
    public abstract static class AbilityAttributeConfig {

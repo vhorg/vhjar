@@ -36,7 +36,7 @@ public class MixinQIOCraftingWindow {
    public void preventShiftCrafting(Player player, List<HotBarSlot> hotBarSlots, List<MainInventorySlot> mainInventorySlots, CallbackInfo ci) {
       ItemStack resultStack = this.outputSlot.getStack().copy();
       ResearchTree researchTree = StageManager.getResearchTree(player);
-      String restrictedBy = researchTree.restrictedBy(resultStack.getItem(), Restrictions.Type.CRAFTABILITY);
+      String restrictedBy = researchTree.restrictedBy(resultStack, Restrictions.Type.CRAFTABILITY);
       if (restrictedBy != null) {
          ci.cancel();
       }
@@ -51,7 +51,7 @@ public class MixinQIOCraftingWindow {
    public void preventCrafting(Player player, ItemStack result, int amountCrafted, CallbackInfoReturnable<ItemStack> cir) {
       if (!result.isEmpty()) {
          ResearchTree researchTree = StageManager.getResearchTree(player);
-         String restrictedBy = researchTree.restrictedBy(result.getItem(), Restrictions.Type.CRAFTABILITY);
+         String restrictedBy = researchTree.restrictedBy(result, Restrictions.Type.CRAFTABILITY);
          if (restrictedBy != null) {
             cir.setReturnValue(ItemStack.EMPTY);
          }

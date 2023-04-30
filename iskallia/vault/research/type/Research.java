@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.research.Restrictions;
 import java.util.List;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 public abstract class Research {
@@ -42,7 +42,7 @@ public abstract class Research {
       return this.discoversModels;
    }
 
-   public abstract boolean restricts(Item var1, Restrictions.Type var2);
+   public abstract boolean restricts(ItemStack var1, Restrictions.Type var2);
 
    public abstract boolean restricts(Block var1, Restrictions.Type var2);
 

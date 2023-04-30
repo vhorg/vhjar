@@ -3,6 +3,7 @@ package iskallia.vault.core.event.common;
 import iskallia.vault.core.event.ForgeEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityEvent.EntityConstructing;
+import net.minecraftforge.eventbus.api.EventPriority;
 
 public class EntityCreationEvent extends ForgeEvent<EntityCreationEvent, EntityConstructing> {
    public EntityCreationEvent() {
@@ -14,7 +15,9 @@ public class EntityCreationEvent extends ForgeEvent<EntityCreationEvent, EntityC
 
    @Override
    protected void register() {
-      MinecraftForge.EVENT_BUS.addListener(event -> this.invoke(event));
+      for (EventPriority priority : EventPriority.values()) {
+         MinecraftForge.EVENT_BUS.addListener(priority, true, event -> this.invoke(event));
+      }
    }
 
    public EntityCreationEvent createChild() {

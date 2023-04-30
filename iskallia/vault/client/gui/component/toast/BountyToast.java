@@ -42,7 +42,7 @@ public class BountyToast implements Toast {
    private boolean changed;
    private ResourceLocation taskId;
 
-   public BountyToast(Component title, Component message, ResourceLocation taskId) {
+   private BountyToast(Component title, Component message, ResourceLocation taskId) {
       this.title = title;
       this.message = Minecraft.getInstance().font.split(message, 122);
       this.taskId = taskId;

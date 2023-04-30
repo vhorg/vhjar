@@ -1,16 +1,16 @@
 package iskallia.vault.core.world.template;
 
+import iskallia.vault.VaultMod;
 import iskallia.vault.core.data.key.Keyed;
 import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.core.world.data.PartialEntity;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TilePredicate;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.template.configured.ConfiguredTemplate;
 import iskallia.vault.init.ModBlocks;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -29,6 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 public abstract class Template extends Keyed<Template> {
    public static final TilePredicate ALL_TILES = (state, nbt) -> true;
@@ -55,17 +56,17 @@ public abstract class Template extends Keyed<Template> {
       return this.getEntities(ALL_ENTITIES, settings);
    }
 
-   public Iterator<PartialTile> getTiles(Predicate<PartialTile> filter) {
+   public Iterator<PartialTile> getTiles(TilePredicate filter) {
       return this.getTiles(filter, PlacementSettings.EMPTY);
    }
 
-   public Iterator<PartialEntity> getEntities(Predicate<PartialEntity> filter) {
+   public Iterator<PartialEntity> getEntities(EntityPredicate filter) {
       return this.getEntities(filter, PlacementSettings.EMPTY);
    }
 
-   public abstract Iterator<PartialTile> getTiles(Predicate<PartialTile> var1, PlacementSettings var2);
+   public abstract Iterator<PartialTile> getTiles(TilePredicate var1, PlacementSettings var2);
 
-   public abstract Iterator<PartialEntity> getEntities(Predicate<PartialEntity> var1, PlacementSettings var2);
+   public abstract Iterator<PartialEntity> getEntities(EntityPredicate var1, PlacementSettings var2);
 
    public <T extends ConfiguredTemplate> T configure(ConfiguredTemplate.Factory<T> factory, PlacementSettings settings) {
       return factory.create(this, settings);
@@ -85,43 +86,57 @@ public abstract class Template extends Keyed<Template> {
          Template.TilePlacementResult result = new Template.TilePlacementResult(
             new ArrayList<>(1024), new ArrayList<>(settings.doKeepFluids() ? 4096 : 0), new ArrayList<>(settings.doKeepFluids() ? 4096 : 0)
          );
-         this.getTiles(settings).forEachRemaining(tile -> {
-            FluidState fluidPresent = settings.doKeepFluids() ? world.getFluidState(tile.getPos()) : null;
-            BlockState state = tile.getState().asBlockState();
-            if (tile.getNbt() != null) {
-               BlockEntity blockentity = world.getBlockEntity(tile.getPos());
-               Clearable.tryClear(blockentity);
-               world.setBlock(tile.getPos(), Blocks.BARRIER.defaultBlockState(), 20);
-            }
+         this.getTiles(settings)
+            .forEachRemaining(
+               tile -> {
+                  FluidState fluidPresent = settings.doKeepFluids() ? world.getFluidState(tile.getPos()) : null;
+                  BlockState state = tile.getState()
+                     .asWhole()
+                     .orElseGet(
+                        () -> {
+                           if (FMLEnvironment.production) {
+                              VaultMod.LOGGER
+                                 .error(
+                                    "Could not resolve tile '%s' at (%d, %d, %d)"
+                                       .formatted(tile.toString(), tile.getPos().getX(), tile.getPos().getY(), tile.getPos().getZ())
+                                 );
+                           }
 
-            if (world.setBlock(tile.getPos(), state, settings.getFlags())) {
-               if (tile.getNbt() != null) {
-                  result.placedBlockEntities.add(tile);
-               }
+                           return ModBlocks.ERROR_BLOCK.defaultBlockState();
+                        }
+                     );
+                  if (tile.getEntity().asWhole().isPresent()) {
+                     BlockEntity blockentity = world.getBlockEntity(tile.getPos());
+                     Clearable.tryClear(blockentity);
+                     world.setBlock(tile.getPos(), Blocks.BARRIER.defaultBlockState(), 20);
+                  }
 
-               if (fluidPresent != null) {
-                  if (state.getFluidState().isSource()) {
-                     result.sourcePositions.add(tile.getPos());
-                  } else if (state.getBlock() instanceof LiquidBlockContainer container) {
-                     container.placeLiquid(world, tile.getPos(), state, fluidPresent);
-                     if (!fluidPresent.isSource()) {
-                        result.flowingPositions.add(tile.getPos());
+                  if (world.setBlock(tile.getPos(), state, settings.getFlags())) {
+                     if (fluidPresent != null) {
+                        if (state.getFluidState().isSource()) {
+                           result.sourcePositions.add(tile.getPos());
+                        } else if (state.getBlock() instanceof LiquidBlockContainer container) {
+                           container.placeLiquid(world, tile.getPos(), state, fluidPresent);
+                           if (!fluidPresent.isSource()) {
+                              result.flowingPositions.add(tile.getPos());
+                           }
+                        }
                      }
+
+                     tile.getEntity().asWhole().ifPresent(nbt -> {
+                        result.placedBlockEntities.add(tile);
+                        BlockEntity blockEntity = world.getBlockEntity(tile.getPos());
+                        if (blockEntity != null) {
+                           blockEntity.load(nbt);
+                        }
+
+                        if (blockEntity instanceof CommandBlockEntity) {
+                           world.scheduleTick(tile.getPos(), state.getBlock(), 1);
+                        }
+                     });
                   }
                }
-
-               if (tile.getNbt() != null) {
-                  BlockEntity blockEntity = world.getBlockEntity(tile.getPos());
-                  if (blockEntity != null) {
-                     blockEntity.load(tile.getNbt());
-                  }
-
-                  if (blockEntity instanceof CommandBlockEntity) {
-                     world.scheduleTick(tile.getPos(), tile.getState().getBlock(), 1);
-                  }
-               }
-            }
-         });
+            );
          return result;
       }
    }
@@ -170,7 +185,7 @@ public abstract class Template extends Keyed<Template> {
    protected void placeEntities(ServerLevelAccessor world, PlacementSettings settings) {
       if (!settings.doIgnoreEntities()) {
          this.getEntities(settings).forEachRemaining(entity -> {
-            CompoundTag nbt = entity.getNBT().copy();
+            CompoundTag nbt = entity.getNbt().asWhole().<CompoundTag>map(CompoundTag::copy).orElseGet(CompoundTag::new);
             ListTag posNBT = new ListTag();
             posNBT.add(DoubleTag.valueOf(entity.getPos().x));
             posNBT.add(DoubleTag.valueOf(entity.getPos().y));

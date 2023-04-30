@@ -29,24 +29,18 @@ public class VignetteOverlay implements IIngameOverlay {
          if (minecraft.player != null) {
             if (minecraft.player.hasEffect(ModEffects.GHOST_WALK)) {
                this.render(ModConfigs.ABILITIES_VIGNETTE.GHOST_WALK, matrixStack, width, height, VIGNETTE_LOCATION);
-            } else if (minecraft.player.hasEffect(ModEffects.TANK)) {
-               if (minecraft.player.hasEffect(ModEffects.TANK_RESISTANCE)) {
-                  int amplifier = minecraft.player.getEffect(ModEffects.TANK_RESISTANCE).getAmplifier();
-                  float alpha = Math.min(ModConfigs.ABILITIES_VIGNETTE.TANK.alpha + amplifier / 255.0F, 0.4F);
-                  TextColor color = ModConfigs.ABILITIES_VIGNETTE.TANK.color;
-                  AbilitiesVignetteConfig.VignetteStyle style = ModConfigs.ABILITIES_VIGNETTE.TANK.style;
-                  this.render(color, alpha, style, matrixStack, width, height, VIGNETTE_LOCATION);
-               } else {
-                  this.render(ModConfigs.ABILITIES_VIGNETTE.TANK, matrixStack, width, height, VIGNETTE_LOCATION);
-               }
-            } else if (minecraft.player.hasEffect(ModEffects.TANK_PROJECTILE)) {
-               this.render(ModConfigs.ABILITIES_VIGNETTE.TANK_PROJECTILE, matrixStack, width, height, VIGNETTE_LOCATION);
-            } else if (minecraft.player.hasEffect(ModEffects.TANK_REFLECT)) {
-               this.render(ModConfigs.ABILITIES_VIGNETTE.TANK_REFLECT, matrixStack, width, height, VIGNETTE_LOCATION);
+            } else if (minecraft.player.hasEffect(ModEffects.EMPOWER)) {
+               this.render(ModConfigs.ABILITIES_VIGNETTE.EMPOWER, matrixStack, width, height, VIGNETTE_LOCATION);
+            } else if (minecraft.player.hasEffect(ModEffects.EMPOWER_ICE_ARMOUR)) {
+               this.render(ModConfigs.ABILITIES_VIGNETTE.EMPOWER_ICE_ARMOUR, matrixStack, width, height, VIGNETTE_LOCATION);
+            } else if (minecraft.player.hasEffect(ModEffects.SHELL_PORCUPINE)) {
+               this.render(ModConfigs.ABILITIES_VIGNETTE.SHELL_PORCUPINE, matrixStack, width, height, VIGNETTE_LOCATION);
             } else if (minecraft.player.hasEffect(ModEffects.EXECUTE)) {
                this.render(ModConfigs.ABILITIES_VIGNETTE.EXECUTE, matrixStack, width, height, VIGNETTE_LOCATION);
             } else if (minecraft.player.hasEffect(ModEffects.MANA_SHIELD)) {
                this.render(ModConfigs.ABILITIES_VIGNETTE.MANA_SHIELD, matrixStack, width, height, VIGNETTE_LOCATION);
+            } else if (minecraft.player.hasEffect(ModEffects.MANA_SHIELD_RETRIBUTION)) {
+               this.render(ModConfigs.ABILITIES_VIGNETTE.MANA_SHIELD_RETRIBUTION, matrixStack, width, height, VIGNETTE_LOCATION);
             } else if (minecraft.player.hasEffect(ModEffects.RAMPAGE)) {
                this.render(ModConfigs.ABILITIES_VIGNETTE.RAMPAGE, matrixStack, width, height, VIGNETTE_LOCATION);
             } else if (minecraft.player.hasEffect(ModEffects.RAMPAGE_LEECH)) {
@@ -62,7 +56,9 @@ public class VignetteOverlay implements IIngameOverlay {
             } else if (minecraft.player.hasEffect(ModEffects.STONEFALL)) {
                this.render(ModConfigs.ABILITIES_VIGNETTE.STONEFALL, matrixStack, width, height, VIGNETTE_LOCATION);
             } else if (minecraft.player.hasEffect(ModEffects.STONEFALL_COLD)) {
-               this.render(ModConfigs.ABILITIES_VIGNETTE.STONEFALL_COLD, matrixStack, width, height, POWDER_SNOW_OUTLINE);
+               this.render(ModConfigs.ABILITIES_VIGNETTE.STONEFALL_COLD, matrixStack, width, height, VIGNETTE_LOCATION);
+            } else if (minecraft.player.hasEffect(ModEffects.STONEFALL_SHOCKWAVE)) {
+               this.render(ModConfigs.ABILITIES_VIGNETTE.STONEFALL_SHOCKWAVE, matrixStack, width, height, VIGNETTE_LOCATION);
             }
          }
       }

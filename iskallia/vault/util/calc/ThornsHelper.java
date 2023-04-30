@@ -15,10 +15,17 @@ public class ThornsHelper {
       return CommonEvents.PLAYER_STAT.invoke(PlayerStat.THORNS_CHANCE, entity, chance).getValue();
    }
 
-   public static float getThornsDamage(LivingEntity entity) {
+   public static float getThornsDamageMultiplier(LivingEntity entity) {
       float additionalMultiplier = 0.0F;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
       additionalMultiplier += snapshot.getAttributeValue(ModGearAttributes.THORNS_DAMAGE, VaultGearAttributeTypeMerger.floatSum());
-      return CommonEvents.PLAYER_STAT.invoke(PlayerStat.THORNS_DAMAGE, entity, additionalMultiplier).getValue();
+      return additionalMultiplier + CommonEvents.PLAYER_STAT.invoke(PlayerStat.THORNS_DAMAGE_MULTIPLIER, entity, additionalMultiplier).getValue();
+   }
+
+   public static float getAdditionalThornsFlatDamage(LivingEntity entity) {
+      float additionalMultiplier = 0.0F;
+      AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
+      additionalMultiplier += snapshot.getAttributeValue(ModGearAttributes.THORNS_DAMAGE_FLAT, VaultGearAttributeTypeMerger.floatSum());
+      return CommonEvents.PLAYER_STAT.invoke(PlayerStat.THORNS_DAMAGE_FLAT, entity, additionalMultiplier).getValue();
    }
 }

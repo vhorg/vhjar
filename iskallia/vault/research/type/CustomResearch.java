@@ -1,17 +1,19 @@
 package iskallia.vault.research.type;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.core.world.data.item.ItemPredicate;
 import iskallia.vault.research.Restrictions;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 public class CustomResearch extends Research {
    @Expose
-   protected Map<String, Restrictions> itemRestrictions = new HashMap<>();
+   protected Map<ItemPredicate, Restrictions> itemRestrictions = new HashMap<>();
    @Expose
    protected Map<String, Restrictions> blockRestrictions = new HashMap<>();
    @Expose
@@ -21,7 +23,7 @@ public class CustomResearch extends Research {
       super(name, cost);
    }
 
-   public Map<String, Restrictions> getItemRestrictions() {
+   public Map<ItemPredicate, Restrictions> getItemRestrictions() {
       return this.itemRestrictions;
    }
 
@@ -34,15 +36,14 @@ public class CustomResearch extends Research {
    }
 
    @Override
-   public boolean restricts(Item item, Restrictions.Type restrictionType) {
-      ResourceLocation registryName = item.getRegistryName();
-      if (registryName == null) {
-         return false;
-      } else {
-         String sid = registryName.getNamespace() + ":" + registryName.getPath();
-         Restrictions restrictions = this.itemRestrictions.get(sid);
-         return restrictions == null ? false : restrictions.restricts(restrictionType);
+   public boolean restricts(ItemStack stack, Restrictions.Type restrictionType) {
+      for (Entry<ItemPredicate, Restrictions> entry : this.itemRestrictions.entrySet()) {
+         if (entry.getKey().test(stack)) {
+            return entry.getValue().restricts(restrictionType);
+         }
       }
+
+      return false;
    }
 
    @Override

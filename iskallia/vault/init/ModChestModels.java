@@ -25,6 +25,8 @@ public class ModChestModels {
       event.registerLayerDefinition(VaultChestModel.MOSSY_LOCATION, VaultChestModel::createMossylayer);
       event.registerLayerDefinition(VaultChestModel.SCAVENGER_LOCATION, VaultChestModel::createScavangerLayer);
       event.registerLayerDefinition(VaultChestModel.PRESENT_LOCATION, VaultChestModel::createPresentLayer);
+      event.registerLayerDefinition(VaultChestModel.STRONGBOX_LOCATION, VaultChestModel::createStrongboxlayer);
+      event.registerLayerDefinition(VaultChestModel.LIVING_STRONGBOX_LOCATION, VaultChestModel::createLivingStrongboxlayer);
    }
 
    @SubscribeEvent

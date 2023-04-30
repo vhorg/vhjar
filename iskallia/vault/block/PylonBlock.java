@@ -2,6 +2,8 @@ package iskallia.vault.block;
 
 import iskallia.vault.block.entity.PylonTileEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.PylonConsumeParticleMessage;
 import iskallia.vault.util.BlockHelper;
 import iskallia.vault.world.data.PlayerPylons;
 import iskallia.vault.world.data.ServerVaults;
@@ -26,8 +28,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.PacketDistributor;
 
 public class PylonBlock extends Block implements EntityBlock {
    private static final VoxelShape SHAPE = Block.box(2.0, 0.0, 2.0, 14.0, 18.0, 14.0);
@@ -70,6 +74,12 @@ public class PylonBlock extends Block implements EntityBlock {
             PlayerPylons.add(ServerVaults.get(player.level).orElse(null), player, pylon.config);
             pylon.setConsumed(true);
             world.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 2.0F);
+            world.playSound(null, pos, SoundEvents.CONDUIT_ACTIVATE, SoundSource.BLOCKS, 1.0F, 2.0F);
+            ModNetwork.CHANNEL
+               .send(
+                  PacketDistributor.ALL.noArg(),
+                  new PylonConsumeParticleMessage(new Vec3(pos.getX(), pos.getY(), pos.getZ()), player.getId(), pylon.config.getColor())
+               );
          }
 
          return InteractionResult.SUCCESS;

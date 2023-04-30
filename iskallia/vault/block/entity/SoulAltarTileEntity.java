@@ -56,7 +56,10 @@ public class SoulAltarTileEntity extends FillableAltarTileEntity {
          level.getEntitiesOfClass(
                LivingEntity.class,
                SEARCH_BOX.move(pos),
-               entity -> entity.isAlive() && !entity.isSpectator() && !entity.isInvulnerable() && entity.getType().getCategory() == MobCategory.MONSTER
+               entity -> entity.isAlive()
+                  && !entity.isSpectator()
+                  && !entity.isInvulnerable()
+                  && (entity.getType().getCategory() == MobCategory.MONSTER || entity.getType().getCategory() == MobCategory.CREATURE)
             )
             .forEach(entity -> {
                if (entity.addTag("the_vault_SoulAltar")) {

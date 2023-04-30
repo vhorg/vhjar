@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class IntNbtAdapter extends NbtAdapter<IntTag> {
    public IntNbtAdapter(boolean nullable) {
-      super(IntTag.class, nullable);
+      super(nullable);
    }
 
    public IntNbtAdapter asNullable() {

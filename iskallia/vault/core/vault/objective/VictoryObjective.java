@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataMap;
 import iskallia.vault.core.data.adapter.Adapters;
-import iskallia.vault.core.data.adapter.primitive.LegacySegmentedIntAdapter;
+import iskallia.vault.core.data.adapter.number.LegacySegmentedIntAdapter;
 import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;

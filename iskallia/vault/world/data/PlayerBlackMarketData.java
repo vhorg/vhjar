@@ -3,9 +3,7 @@ package iskallia.vault.world.data;
 import iskallia.vault.config.SoulShardConfig;
 import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.ItemVaultCrystalSeal;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.NetcodeUtils;
@@ -150,16 +148,6 @@ public class PlayerBlackMarketData extends SavedData {
             this.trades.put(i, new PlayerBlackMarketData.BlackMarket.SelectedTrade(ModConfigs.SOUL_SHARD.getRandomTrade()));
          }
 
-         if (ModConfigs.RAID_EVENT_CONFIG.isEnabled()) {
-            ItemStack eventSeal = new ItemStack(ModItems.CRYSTAL_SEAL_RAID);
-            ItemVaultCrystalSeal.setEventKey(eventSeal, "raid");
-            PlayerBlackMarketData.BlackMarket.SelectedTrade eventTrade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(
-               eventSeal, ModConfigs.RAID_EVENT_CONFIG.getSoulShardTradeCost()
-            );
-            eventTrade.isInfinite = true;
-            this.trades.put(0, eventTrade);
-         }
-
          this.setNextReset();
          PlayerBlackMarketData.this.setDirty();
          this.syncToClient(ServerLifecycleHooks.getCurrentServer());
@@ -170,9 +158,11 @@ public class PlayerBlackMarketData extends SavedData {
          if (trade != null && trade.isInfinite) {
             return true;
          } else {
-            this.trades.remove(tradeId);
+            if (!this.trades.get(tradeId).isInfinite()) {
+               this.trades.remove(tradeId);
+            }
+
             PlayerBlackMarketData.this.setDirty();
-            this.resetTrades();
             return true;
          }
       }

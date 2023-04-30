@@ -42,7 +42,7 @@ public class VaultEntitiesConfig extends Config {
       config.setAdditionalEffect(new EffectCloudAttribute.CloudEffectConfig(MobEffects.POISON.getRegistryName(), 900, 0));
       this.slimeClouds.add(new VaultEntitiesConfig.SlimeEffectLevel(0, config));
       this.witchThrownEffects.clear();
-      this.witchThrownEffects.add(new VaultEntitiesConfig.WitchEffectsLevel(0).addEffect(new VaultEntitiesConfig.CustomEffect(MobEffects.POISON, 0, 900)));
+      this.witchThrownEffects.add(new VaultEntitiesConfig.WitchEffectsLevel(0).addEffect(new VaultEntitiesConfig.CustomEffect(MobEffects.POISON, 0, 120)));
    }
 
    public static class CustomEffect {

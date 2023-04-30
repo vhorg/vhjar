@@ -1,0 +1,43 @@
+{
+	"parent": "block/block",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "the_vault:block/totem_of_spirit",
+		"particle": "the_vault:block/totem_of_spirit"
+	},
+	"ambientocclusion": false,
+	"elements": [
+		{
+			"from": [7, 6, 5.8],
+			"to": [9, 8, 5.8],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [9, 8, 12.5, 12.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [7, 6, 10.2],
+			"to": [9, 8, 10.2],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"south": {"uv": [6, 8, 9.5, 12.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [10.2, 6, 7],
+			"to": [10.2, 8, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"east": {"uv": [0, 8, 3.5, 12.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [5.8, 6, 7],
+			"to": [5.8, 8, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"west": {"uv": [3, 8, 6.5, 12.5], "texture": "#0"}
+			}
+		}
+	]
+}

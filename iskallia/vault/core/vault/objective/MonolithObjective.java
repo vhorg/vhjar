@@ -19,6 +19,9 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.overlay.VaultOverlay;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModNetwork;
@@ -117,21 +120,23 @@ public class MonolithObjective extends Objective {
                }
             }
          );
-      BlockState targetState = (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
       CommonEvents.BLOCK_SET
          .at(BlockSetEvent.Type.RETURN)
-         .of(targetState)
          .in(world)
          .register(
             this,
             data -> {
-               BlockPos pos = data.getPos();
-               BlockState lower = (BlockState)((BlockState)ModBlocks.MONOLITH.defaultBlockState().setValue(MonolithBlock.HALF, DoubleBlockHalf.LOWER))
-                  .setValue(MonolithBlock.FILLED, false);
-               BlockState upper = (BlockState)((BlockState)ModBlocks.MONOLITH.defaultBlockState().setValue(MonolithBlock.HALF, DoubleBlockHalf.UPPER))
-                  .setValue(MonolithBlock.FILLED, false);
-               data.getWorld().setBlock(pos, lower, 3);
-               data.getWorld().setBlock(pos.above(), upper, 3);
+               PartialTile target = PartialTile.of(PartialBlockState.of(ModBlocks.PLACEHOLDER), PartialCompoundNbt.empty());
+               target.getState().set(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
+               if (target.isSubsetOf(PartialTile.of(data.getState()))) {
+                  data.getWorld()
+                     .setBlock(
+                        data.getPos(),
+                        (BlockState)((BlockState)ModBlocks.MONOLITH.defaultBlockState().setValue(MonolithBlock.HALF, DoubleBlockHalf.LOWER))
+                           .setValue(MonolithBlock.FILLED, false),
+                        3
+                     );
+               }
             }
          );
       super.initServer(world, vault);

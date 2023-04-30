@@ -8,11 +8,11 @@ import net.minecraft.network.chat.TextComponent;
 import org.apache.commons.lang3.StringUtils;
 
 public enum VaultGearRarity {
-   SCRAPPY(ChatFormatting.GRAY, 2, 2, 1, 1, 0, 0),
-   COMMON(ChatFormatting.AQUA, 3, 3, 2, 2, 1, 1),
-   RARE(ChatFormatting.YELLOW, 4, 4, 3, 3, 2, 2),
-   EPIC(ChatFormatting.LIGHT_PURPLE, 5, 5, 4, 4, 3, 3),
-   OMEGA(ChatFormatting.GREEN, 6, 6, 5, 5, 4, 4),
+   SCRAPPY(ChatFormatting.GRAY, 2, 2, 1, 1, 0, 1),
+   COMMON(ChatFormatting.AQUA, 3, 3, 2, 2, 1, 2),
+   RARE(ChatFormatting.YELLOW, 4, 4, 3, 3, 2, 3),
+   EPIC(ChatFormatting.LIGHT_PURPLE, 5, 5, 4, 4, 3, 4),
+   OMEGA(ChatFormatting.GREEN, 6, 6, 5, 5, 4, 5),
    UNIQUE(TextColor.fromRgb(-1213660), 0, 0, 0, 0, 0, 0);
 
    private final TextColor color;

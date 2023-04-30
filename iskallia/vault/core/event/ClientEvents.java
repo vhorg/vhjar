@@ -8,6 +8,7 @@ import iskallia.vault.core.event.client.FogColorsEvent;
 import iskallia.vault.core.event.client.RenderLevelLastEvent;
 import iskallia.vault.core.event.client.RenderOverlayEvent;
 import iskallia.vault.core.event.client.UpdateLightEvent;
+import iskallia.vault.core.event.common.CompassPropertyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,7 @@ public class ClientEvents {
    public static final FogColorsEvent FOG_COLORS = register(new FogColorsEvent());
    public static final UpdateLightEvent UPDATE_LIGHT = register(new UpdateLightEvent());
    public static final RenderLevelLastEvent RENDER_LEVEL_LAST = register(new RenderLevelLastEvent());
+   public static final CompassPropertyEvent COMPASS_PROPERTY = register(new CompassPropertyEvent());
 
    public static void release(Object reference) {
       REGISTRY.forEach(event -> event.release(reference));

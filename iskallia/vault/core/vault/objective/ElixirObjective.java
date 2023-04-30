@@ -170,11 +170,9 @@ public class ElixirObjective extends Objective {
          int previousTexture = RenderSystem.getShaderTexture(0);
          RenderSystem.setShaderTexture(0, HUD);
          float progress = (float)current / total;
-         matrixStack.translate(midX, 8.0, 0.0);
-         matrixStack.scale(1.0F, 1.5F, 1.5F);
-         matrixStack.translate(-60.0, 0.0, 0.0);
-         GuiComponent.blit(matrixStack, 0, 0, 0.0F, 0.0F, 120, 10, 120, 20);
-         GuiComponent.blit(matrixStack, 0, 0, 0.0F, 10.0F, (int)(120.0F * progress), 10, (int)(120.0F * progress), 20);
+         matrixStack.translate(midX - 80, 8.0, 0.0);
+         GuiComponent.blit(matrixStack, 0, 0, 0.0F, 0.0F, 200, 26, 200, 50);
+         GuiComponent.blit(matrixStack, 0, 8, 0.0F, 28.0F, 15 + (int)(130.0F * progress), 10, 200, 50);
          RenderSystem.setShader(GameRenderer::getPositionTexShader);
          RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
          RenderSystem.setShaderTexture(0, previousTexture);
@@ -186,7 +184,7 @@ public class ElixirObjective extends Objective {
          font.drawInBatch(
             txt.getVisualOrderText(),
             midX / 0.6F - font.width(txt) / 2.0F,
-            9 + 12,
+            9 + 22,
             -1,
             true,
             matrixStack.last().pose(),

@@ -5,8 +5,6 @@ import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.bounty.task.properties.MiningProperties;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModNetwork;
-import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.world.data.BountyData;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
@@ -16,7 +14,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.registries.ForgeRegistries;
 
 @EventBusSubscriber
@@ -73,7 +70,7 @@ public class MiningTask extends Task<MiningProperties> {
             if (task.validate(player, event)) {
                task.increment(1.0);
                if (task.isComplete()) {
-                  ModNetwork.CHANNEL.sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                  task.complete(player);
                }
 
                return;
@@ -84,8 +81,7 @@ public class MiningTask extends Task<MiningProperties> {
             if (taskx.validate(player, event)) {
                taskx.increment(1.0);
                if (taskx.isComplete()) {
-                  ModNetwork.CHANNEL
-                     .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                  taskx.complete(player);
                }
 
                return;

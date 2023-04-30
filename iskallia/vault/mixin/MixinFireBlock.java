@@ -19,7 +19,7 @@ public class MixinFireBlock {
       cancellable = true
    )
    public void onFireTick(BlockState state, ServerLevel world, BlockPos pos, Random rand, CallbackInfo ci) {
-      if (ServerVaults.isVaultWorld(world)) {
+      if (ServerVaults.get(world).isPresent()) {
          ci.cancel();
       }
    }

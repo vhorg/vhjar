@@ -4,8 +4,11 @@ import iskallia.vault.block.entity.BountyTableTileEntity;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.world.data.BountyData;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -140,6 +143,9 @@ public class BountyBlock extends HorizontalDirectionalBlock implements EntityBlo
                   }
                }
 
+               ExpertiseTree expertises = PlayerExpertisesData.get(sPlayer.getLevel()).getExpertises(sPlayer);
+               SkillContext context = SkillContext.ofExpertise(sPlayer);
+               expertises.sync(context);
                CompoundTag tag = data.getAllBountiesAsTagFor(sPlayer.getUUID());
                tag.put("pos", NbtUtils.writeBlockPos(pos));
                tag.putInt("vaultLevel", vaultLevel);

@@ -6,7 +6,6 @@ import iskallia.vault.entity.entity.guardian.FixedArrowEntity;
 import iskallia.vault.entity.entity.guardian.GuardianStats;
 import iskallia.vault.entity.entity.guardian.GuardianType;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.effect.sub.NovaDotAbility;
 import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -89,9 +88,7 @@ public class VaultGuardianEntity extends Piglin {
    }
 
    public boolean hurt(DamageSource source, float amount) {
-      if (!(source instanceof NovaDotAbility.PlayerDamageOverTimeSource)
-         && !(source.getEntity() instanceof Player)
-         && !(source.getEntity() instanceof EternalEntity)) {
+      if (!(source.getEntity() instanceof Player) && !(source.getEntity() instanceof EternalEntity)) {
          return false;
       } else if (this.isInvulnerableTo(source)) {
          return false;

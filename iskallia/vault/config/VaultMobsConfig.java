@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.NaturalSpawner;
+import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.VaultDifficulty;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +29,7 @@ import net.minecraft.world.level.Level;
 
 public class VaultMobsConfig extends Config {
    @Expose
-   private Map<String, List<VaultMobsConfig.Mob.AttributeOverride>> ATTRIBUTE_OVERRIDES = new LinkedHashMap<>();
+   private Map<EntityPredicate, List<VaultMobsConfig.Mob.AttributeOverride>> ATTRIBUTE_OVERRIDES = new LinkedHashMap<>();
    @Expose
    private LevelEntryList<VaultMobsConfig.LevelOverride> LEVEL_OVERRIDES = new LevelEntryList<>();
 
@@ -41,18 +43,27 @@ public class VaultMobsConfig extends Config {
    }
 
    public static LivingEntity scale(UUID ownerId, LivingEntity entity, int vaultLevel) {
-      List<VaultMobsConfig.Mob.AttributeOverride> attributes = ModConfigs.VAULT_MOBS.ATTRIBUTE_OVERRIDES.get(entity.getType().getRegistryName().toString());
+      List<VaultMobsConfig.Mob.AttributeOverride> attributes = null;
+
+      for (Entry<EntityPredicate, List<VaultMobsConfig.Mob.AttributeOverride>> entry : ModConfigs.VAULT_MOBS.ATTRIBUTE_OVERRIDES.entrySet()) {
+         if (entry.getKey().test(entity)) {
+            attributes = entry.getValue();
+         }
+      }
+
       if (attributes == null) {
          return entity;
       } else {
          VaultDifficulty difficulty = WorldSettings.get(entity.level).getPlayerDifficulty(ownerId);
 
-         for (VaultMobsConfig.Mob.AttributeOverride override : attributes) {
-            if (!(entity.level.random.nextDouble() >= override.ROLL_CHANCE)) {
-               Registry.ATTRIBUTE.getOptional(new ResourceLocation(override.NAME)).ifPresent(attribute -> {
+         for (VaultMobsConfig.Mob.AttributeOverride property : attributes) {
+            VaultMobsConfig.Mob.AttributeOverrideOverride override = property.LEVELS == null ? null : property.LEVELS.getForLevel(vaultLevel).orElse(null);
+            double rollChance = override == null ? property.ROLL_CHANCE : override.ROLL_CHANCE;
+            if (!(entity.level.random.nextDouble() >= rollChance)) {
+               Registry.ATTRIBUTE.getOptional(new ResourceLocation(property.NAME)).ifPresent(attribute -> {
                   AttributeInstance instance = entity.getAttribute(attribute);
                   if (instance != null) {
-                     double baseValue = override.getValue(instance.getBaseValue(), vaultLevel, entity.level.getRandom());
+                     double baseValue = property.getValue(instance.getBaseValue(), vaultLevel, entity.level.getRandom());
                      if (instance.getAttribute() == Attributes.MAX_HEALTH) {
                         baseValue *= difficulty.getHeathMultiplier();
                      } else if (instance.getAttribute() == Attributes.ATTACK_DAMAGE) {
@@ -86,7 +97,6 @@ public class VaultMobsConfig extends Config {
       List<VaultMobsConfig.Mob.AttributeOverride> attributes = new ArrayList<>();
       attributes.add(new VaultMobsConfig.Mob.AttributeOverride(ModAttributes.CRIT_CHANCE, 0.0, 0.5, "set", 0.8, 0.05));
       attributes.add(new VaultMobsConfig.Mob.AttributeOverride(ModAttributes.CRIT_MULTIPLIER, 0.0, 0.1, "set", 0.8, 0.1));
-      this.ATTRIBUTE_OVERRIDES.put(EntityType.ZOMBIE.getRegistryName().toString(), attributes);
       this.LEVEL_OVERRIDES.add(new VaultMobsConfig.LevelOverride(0));
    }
 
@@ -184,6 +194,8 @@ public class VaultMobsConfig extends Config {
          public double SCALE_PER_LEVEL;
          @Expose
          public int SCALE_MAX_LEVEL = -1;
+         @Expose
+         public LevelEntryList<VaultMobsConfig.Mob.AttributeOverrideOverride> LEVELS;
 
          public AttributeOverride(Attribute attribute, double min, double max, String operator, double rollChance, double scalePerLevel) {
             this.NAME = attribute.getRegistryName().toString();
@@ -195,27 +207,56 @@ public class VaultMobsConfig extends Config {
          }
 
          public double getValue(double baseValue, int level, Random random) {
-            double value = this.getStartValue(baseValue, random);
-            if (this.SCALE_MAX_LEVEL >= 0) {
-               level = Math.min(level, this.SCALE_MAX_LEVEL);
+            VaultMobsConfig.Mob.AttributeOverrideOverride override = this.LEVELS == null ? null : this.LEVELS.getForLevel(level).orElse(null);
+            int scaleMaxLevel = override == null ? this.SCALE_MAX_LEVEL : override.SCALE_MAX_LEVEL;
+            double scalePerLevel = override == null ? this.SCALE_PER_LEVEL : override.SCALE_PER_LEVEL;
+            double value = this.getStartValue(baseValue, level, random);
+            if (scaleMaxLevel >= 0) {
+               level = Math.min(level, scaleMaxLevel);
             }
 
             for (int i = 0; i < level; i++) {
-               value += this.getStartValue(baseValue, random) * this.SCALE_PER_LEVEL;
+               value += this.getStartValue(baseValue, level, random) * scalePerLevel;
             }
 
             return value;
          }
 
-         public double getStartValue(double baseValue, Random random) {
-            double value = Math.min(this.MIN, this.MAX) + random.nextFloat() * Math.abs(this.MAX - this.MIN);
-            if (this.OPERATOR.equalsIgnoreCase("multiply")) {
+         public double getStartValue(double baseValue, int level, Random random) {
+            VaultMobsConfig.Mob.AttributeOverrideOverride override = this.LEVELS == null ? null : this.LEVELS.getForLevel(level).orElse(null);
+            double min = override == null ? this.MIN : override.MIN;
+            double max = override == null ? this.MAX : override.MAX;
+            String operator = override == null ? this.OPERATOR : override.OPERATOR;
+            double value = Math.min(min, max) + random.nextFloat() * Math.abs(max - min);
+            if (operator.equalsIgnoreCase("multiply")) {
                return baseValue * value;
-            } else if (this.OPERATOR.equalsIgnoreCase("add")) {
+            } else if (operator.equalsIgnoreCase("add")) {
                return baseValue + value;
             } else {
-               return this.OPERATOR.equalsIgnoreCase("set") ? value : baseValue;
+               return operator.equalsIgnoreCase("set") ? value : baseValue;
             }
+         }
+      }
+
+      public static class AttributeOverrideOverride implements LevelEntryList.ILevelEntry {
+         @Expose
+         public int MIN_LEVEL;
+         @Expose
+         public double MIN;
+         @Expose
+         public double MAX;
+         @Expose
+         public String OPERATOR;
+         @Expose
+         public double ROLL_CHANCE;
+         @Expose
+         public double SCALE_PER_LEVEL;
+         @Expose
+         public int SCALE_MAX_LEVEL = -1;
+
+         @Override
+         public int getLevel() {
+            return this.MIN_LEVEL;
          }
       }
    }

@@ -1,8 +1,10 @@
 package iskallia.vault.core.world.template.configured;
 
 import iskallia.vault.core.util.iterator.MappingIterator;
+import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.core.world.data.PartialEntity;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.processor.entity.EntityProcessor;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
 import iskallia.vault.core.world.template.PlacementSettings;
@@ -13,7 +15,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -81,7 +82,7 @@ public class ChunkedTemplate extends ConfiguredTemplate {
       }
 
       @Override
-      public Iterator<PartialTile> getTiles(Predicate<PartialTile> filter, PlacementSettings settings) {
+      public Iterator<PartialTile> getTiles(TilePredicate filter, PlacementSettings settings) {
          return new MappingIterator<>(this.parent.getTiles(filter, settings), tile -> {
             ChunkedTemplate.this.onTile(tile);
             return this.tileBound.process(tile, settings.getProcessorContext());
@@ -89,7 +90,7 @@ public class ChunkedTemplate extends ConfiguredTemplate {
       }
 
       @Override
-      public Iterator<PartialEntity> getEntities(Predicate<PartialEntity> filter, PlacementSettings settings) {
+      public Iterator<PartialEntity> getEntities(EntityPredicate filter, PlacementSettings settings) {
          return new MappingIterator<>(this.parent.getEntities(filter, settings), tile -> {
             ChunkedTemplate.this.onEntity(tile);
             return this.entityBound.process(tile, settings.getProcessorContext());

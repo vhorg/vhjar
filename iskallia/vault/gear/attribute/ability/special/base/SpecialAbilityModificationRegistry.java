@@ -1,6 +1,7 @@
 package iskallia.vault.gear.attribute.ability.special.base;
 
 import iskallia.vault.gear.attribute.ability.special.DashVelocityModification;
+import iskallia.vault.gear.attribute.ability.special.EmpowerImmunityModification;
 import iskallia.vault.gear.attribute.ability.special.EternalsSpeedModification;
 import iskallia.vault.gear.attribute.ability.special.ExecuteHealthModification;
 import iskallia.vault.gear.attribute.ability.special.FarmerAdditionalRangeModification;
@@ -11,7 +12,6 @@ import iskallia.vault.gear.attribute.ability.special.ManaShieldAbsorptionModific
 import iskallia.vault.gear.attribute.ability.special.MegaJumpVelocityModification;
 import iskallia.vault.gear.attribute.ability.special.NovaRadiusModification;
 import iskallia.vault.gear.attribute.ability.special.RampageDamageModification;
-import iskallia.vault.gear.attribute.ability.special.TankImmunityModification;
 import iskallia.vault.gear.attribute.ability.special.TauntRadiusModification;
 import iskallia.vault.gear.attribute.ability.special.VeinMinerAdditionalBlocksModification;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public class SpecialAbilityModificationRegistry {
       register(new MegaJumpVelocityModification());
       register(new NovaRadiusModification());
       register(new RampageDamageModification());
-      register(new TankImmunityModification());
+      register(new EmpowerImmunityModification());
       register(new TauntRadiusModification());
       register(new VeinMinerAdditionalBlocksModification());
       register(new EternalsSpeedModification());

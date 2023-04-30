@@ -7,9 +7,16 @@ import iskallia.vault.core.data.key.registry.ISupplierKey;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.ChestGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
+import iskallia.vault.core.event.common.ShopPedestalGenerationEvent;
 import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.item.gear.DataInitializationItem;
+import iskallia.vault.item.gear.DataTransferItem;
+import iskallia.vault.item.gear.VaultLevelItem;
+import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class LootLogic extends DataObject<LootLogic> implements ISupplierKey<LootLogic> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
@@ -44,6 +51,12 @@ public abstract class LootLogic extends DataObject<LootLogic> implements ISuppli
             this.onBlockPostGenerate(world, vault, data);
          }
       });
+      CommonEvents.SHOP_PEDESTAL_LOOT_GENERATION.register(vault, data -> {
+         if (data.getTileEntity().getLevel() == world) {
+            data.setRandom(this.createPositionRandom(vault, data.getPos()));
+            this.onShopPedestalGenerate(world, vault, data);
+         }
+      });
    }
 
    private JavaRandom createPositionRandom(Vault vault, BlockPos at) {
@@ -70,4 +83,17 @@ public abstract class LootLogic extends DataObject<LootLogic> implements ISuppli
    protected abstract void onBlockPreGenerate(VirtualWorld var1, Vault var2, LootableBlockGenerationEvent.Data var3);
 
    protected abstract void onBlockPostGenerate(VirtualWorld var1, Vault var2, LootableBlockGenerationEvent.Data var3);
+
+   protected abstract void onShopPedestalGenerate(VirtualWorld var1, Vault var2, ShopPedestalGenerationEvent.Data var3);
+
+   protected void initializeLoot(Vault vault, List<ItemStack> loot, BlockPos pos, RandomSource random) {
+      loot.replaceAll(stack -> this.initializeLoot(vault, stack, pos, random));
+   }
+
+   protected ItemStack initializeLoot(Vault vault, ItemStack stack, BlockPos pos, RandomSource random) {
+      VaultLevelItem.doInitializeVaultLoot(stack, vault, pos);
+      stack = DataTransferItem.doConvertStack(stack, random);
+      DataInitializationItem.doInitialize(stack, random);
+      return stack;
+   }
 }

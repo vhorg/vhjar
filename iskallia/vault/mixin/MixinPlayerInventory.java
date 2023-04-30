@@ -42,7 +42,7 @@ public abstract class MixinPlayerInventory implements InventorySnapshotData.Inve
       )
    )
    public void hurtItemStack(ItemStack stack, int amount, LivingEntity entity, Consumer<LivingEntity> onBroken) {
-      if (ServerVaults.isVaultWorld(this.player.level)) {
+      if (ServerVaults.get(this.player.level).isPresent()) {
          amount = Math.min(amount, 5);
       } else if (stack.getItem() instanceof VaultGearItem) {
          return;

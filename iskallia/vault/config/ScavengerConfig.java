@@ -11,6 +11,8 @@ import iskallia.vault.core.vault.objective.scavenger.MobScavengerTask;
 import iskallia.vault.core.vault.objective.scavenger.OreScavengerTask;
 import iskallia.vault.core.vault.objective.scavenger.ScavengeTask;
 import iskallia.vault.core.vault.objective.scavenger.ScavengerGoal;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.roll.IntRoll;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -65,17 +67,17 @@ public class ScavengerConfig extends Config {
          if (task instanceof ChestScavengerTask) {
             ChestScavengerTask scavengeTask = (ChestScavengerTask)task;
 
-            for (Map.Entry<ChestScavengerTask.Entry, Integer> entry : scavengeTask.entries.entrySet()) {
+            for (Map.Entry<ChestScavengerTask.Entry, Double> entry : scavengeTask.entries.entrySet()) {
                ChestScavengerTask.Entry taskEntry = entry.getKey();
                nameColors.put(taskEntry.item, taskEntry.color);
             }
          } else if (task instanceof CoinStacksScavengerTask scavengeTask) {
-            for (Map.Entry<CoinStacksScavengerTask.Entry, Integer> entry : scavengeTask.entries.entrySet()) {
+            for (Map.Entry<CoinStacksScavengerTask.Entry, Double> entry : scavengeTask.entries.entrySet()) {
                CoinStacksScavengerTask.Entry taskEntry = entry.getKey();
                nameColors.put(taskEntry.item, taskEntry.color);
             }
          } else if (task instanceof OreScavengerTask scavengeTask) {
-            for (Map.Entry<OreScavengerTask.Entry, Integer> entry : scavengeTask.entries.entrySet()) {
+            for (Map.Entry<OreScavengerTask.Entry, Double> entry : scavengeTask.entries.entrySet()) {
                OreScavengerTask.Entry taskEntry = entry.getKey();
                nameColors.put(taskEntry.item, taskEntry.color);
             }
@@ -96,7 +98,7 @@ public class ScavengerConfig extends Config {
       this.tasks
          .add(
             new ChestScavengerTask(
-               "the_vault:wooden_chest",
+               TilePredicate.of("the_vault:wooden_chest", true).orElse(PartialTile.ERROR),
                0.5,
                VaultMod.id("gui/scav/wooden_chest"),
                new WeightedList<ChestScavengerTask.Entry>()

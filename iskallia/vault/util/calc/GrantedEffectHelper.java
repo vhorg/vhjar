@@ -4,13 +4,13 @@ import com.google.common.collect.Sets;
 import iskallia.vault.aura.AuraManager;
 import iskallia.vault.aura.type.EffectAuraConfig;
 import iskallia.vault.core.event.CommonEvents;
-import iskallia.vault.gear.attribute.ability.special.TankImmunityModification;
+import iskallia.vault.gear.attribute.ability.special.EmpowerImmunityModification;
 import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
 import iskallia.vault.gear.attribute.ability.special.base.template.NoOpConfig;
 import iskallia.vault.gear.attribute.type.EffectAvoidanceSingleMerger;
 import iskallia.vault.init.ModEtchings;
 import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.skill.ability.effect.TankAbility;
+import iskallia.vault.skill.ability.effect.EmpowerAbility;
 import iskallia.vault.skill.talent.type.EffectTalent;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -114,8 +114,8 @@ public class GrantedEffectHelper {
          if (snapshot.hasEtching(ModEtchings.DIVINITY) && effect.getCategory() == MobEffectCategory.HARMFUL) {
             return true;
          } else {
-            return TankAbility.hasTankEffectActive(entity)
-                  && !SpecialAbilityModification.<NoOpConfig, TankImmunityModification>getModifications(entity, TankImmunityModification.class).isEmpty()
+            return EmpowerAbility.hasEmpowerEffectActive(entity)
+                  && !SpecialAbilityModification.<NoOpConfig, EmpowerImmunityModification>getModifications(entity, EmpowerImmunityModification.class).isEmpty()
                ? true
                : snapshot.getImmunities().contains(effect);
          }
@@ -129,8 +129,8 @@ public class GrantedEffectHelper {
          AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
          Set<MobEffect> immunities = new HashSet<>(snapshot.getImmunities());
          if (snapshot.hasEtching(ModEtchings.DIVINITY)
-            || TankAbility.hasTankEffectActive(entity)
-               && !SpecialAbilityModification.<NoOpConfig, TankImmunityModification>getModifications(entity, TankImmunityModification.class).isEmpty()) {
+            || EmpowerAbility.hasEmpowerEffectActive(entity)
+               && !SpecialAbilityModification.<NoOpConfig, EmpowerImmunityModification>getModifications(entity, EmpowerImmunityModification.class).isEmpty()) {
             ForgeRegistries.MOB_EFFECTS.getValues().stream().filter(e -> e.getCategory() == MobEffectCategory.HARMFUL).forEach(immunities::add);
          }
 

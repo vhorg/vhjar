@@ -9,7 +9,7 @@ import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.IPosition;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.core.vault.Modifiers;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.HashMap;

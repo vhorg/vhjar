@@ -3,7 +3,7 @@ package iskallia.vault.core.event.common;
 import iskallia.vault.core.event.Event;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.processor.tile.VaultLootTileProcessor;
 
 public class PlaceholderGenerationEvent extends Event<PlaceholderGenerationEvent, PlaceholderGenerationEvent.Data> {

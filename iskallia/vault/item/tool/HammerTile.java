@@ -5,8 +5,8 @@ import net.minecraft.core.BlockPos;
 public class HammerTile {
    public boolean isDestroyingBlock;
    public int destroyProgressStart;
-   public BlockPos destroyPos = BlockPos.ZERO;
-   public int lastSentState = -1;
+   public BlockPos destroyPos;
+   public int lastSentState;
 
    public HammerTile(boolean isDestroyingBlock, int destroyProgressStart, BlockPos destroyPos, int lastSentState) {
       this.isDestroyingBlock = isDestroyingBlock;

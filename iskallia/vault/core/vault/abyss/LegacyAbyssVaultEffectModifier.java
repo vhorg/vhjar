@@ -2,7 +2,7 @@ package iskallia.vault.core.vault.abyss;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;

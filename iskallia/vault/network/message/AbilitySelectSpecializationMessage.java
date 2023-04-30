@@ -1,11 +1,8 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.skill.PlayerVaultStats;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
-import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.network.FriendlyByteBuf;
@@ -40,32 +37,9 @@ public class AbilitySelectSpecializationMessage {
       context.enqueueWork(() -> {
          ServerPlayer sender = context.getSender();
          if (sender != null) {
-            String specialization = message.specialization;
             PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
             AbilityTree abilityTree = abilitiesData.getAbilities(sender);
-            AbilityNode<?, ?> abilityNode = abilityTree.getNodeByName(message.ability);
-            if (abilityNode != null) {
-               PlayerVaultStatsData statsData = PlayerVaultStatsData.get((ServerLevel)sender.level);
-               PlayerVaultStats stats = statsData.getVaultStats(sender);
-               if (specialization != null) {
-                  if (!abilityNode.getGroup().hasSpecialization(specialization)) {
-                     return;
-                  }
-
-                  AbstractAbilityConfig specConfig = abilityNode.getGroup().getAbilityConfig(specialization, abilityNode.getLevel());
-                  if (specConfig == null) {
-                     return;
-                  }
-
-                  if (stats.getVaultLevel() < specConfig.getLevelRequirement()) {
-                     return;
-                  }
-               } else if (abilityNode.getSpecialization() == null) {
-                  return;
-               }
-
-               abilitiesData.selectSpecialization(sender, abilityNode, specialization);
-            }
+            abilityTree.specialize(message.specialization, SkillContext.of(sender));
          }
       });
       context.setPacketHandled(true);

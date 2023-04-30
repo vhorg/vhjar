@@ -1,6 +1,5 @@
 package iskallia.vault.item;
 
-import iskallia.vault.world.data.PlayerVaultStatsData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
@@ -21,8 +20,6 @@ public class ItemSkillOrb extends UsableItem {
 
    @Override
    protected void doUse(ServerLevel level, ServerPlayer player) {
-      PlayerVaultStatsData statsData = PlayerVaultStatsData.get(level);
-      statsData.addSkillPoints(player, 1);
    }
 
    @Override

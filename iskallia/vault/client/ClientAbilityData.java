@@ -1,51 +1,72 @@
 package iskallia.vault.client;
 
-import iskallia.vault.init.ModConfigs;
+import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.network.message.AbilityActivityMessage;
 import iskallia.vault.network.message.AbilityFocusMessage;
 import iskallia.vault.network.message.AbilityKnownOnesMessage;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.ability.group.AbilityGroup;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.tree.AbilityTree;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class ClientAbilityData {
-   private static final Map<String, ClientAbilityData.CooldownData> cooldowns = new HashMap<>();
-   private static final Object2BooleanMap<String> active = new Object2BooleanOpenHashMap();
-   private static List<AbilityNode<?, ?>> learnedAbilities = new ArrayList<>();
-   private static AbilityGroup<?, ?> selectedAbility;
+   private static AbilityTree ABILITIES = new AbilityTree();
 
-   public static AbilityGroup<?, ?> getSelectedAbility() {
-      return selectedAbility;
+   public static AbilityTree getTree() {
+      return ABILITIES;
    }
 
-   public static boolean isActive(String abilityGroup) {
-      return active.getBoolean(abilityGroup);
+   public static boolean isSelectedAbility(SpecializedSkill ability) {
+      SpecializedSkill selected = ABILITIES.getSelected();
+      return selected != null && selected.getId().equals(ability.getId());
    }
 
    @Nonnull
-   public static List<AbilityNode<?, ?>> getLearnedAbilityNodes() {
-      return Collections.unmodifiableList(learnedAbilities);
+   public static List<TieredSkill> getLearnedAbilities() {
+      List<TieredSkill> abilities = new ArrayList<>();
+      ABILITIES.iterate(TieredSkill.class, ability -> {
+         if (ability.isUnlocked()) {
+            abilities.add(ability);
+         }
+      });
+      return abilities;
    }
 
-   public static int getIndexOf(AbilityNode<?, ?> node) {
-      return getLearnedAbilityNodes().indexOf(node);
+   public static SpecializedSkill getSelected() {
+      return ABILITIES.getSelected();
    }
 
-   public static int getIndexOf(AbilityGroup<?, ?> group) {
-      List<AbilityNode<?, ?>> nodes = getLearnedAbilityNodes();
+   public static Ability getSelectedAbility() {
+      return (Ability)Optional.ofNullable(getSelected())
+         .map(SpecializedSkill::getSpecialization)
+         .filter(skill -> skill instanceof TieredSkill)
+         .map(skill -> ((TieredSkill)skill).getChild())
+         .filter(skill -> skill instanceof Ability)
+         .orElse(null);
+   }
+
+   public static Skill getParent(Ability ability) {
+      List<Skill> candidates = new ArrayList<>();
+      ABILITIES.iterate(SpecializedSkill.class, skill -> {
+         if (ability.getId().equals(skill.getSpecialization().getId())) {
+            candidates.add(skill);
+         }
+      });
+      return candidates.isEmpty() ? null : candidates.get(0);
+   }
+
+   public static int getIndexOf(String ability) {
+      List<TieredSkill> nodes = getLearnedAbilities();
 
       for (int i = 0; i < nodes.size(); i++) {
-         AbilityNode<?, ?> node = nodes.get(i);
-         if (node.getGroup().equals(group)) {
+         TieredSkill node = nodes.get(i);
+         if (node.getId().equals(ability)) {
             return i;
          }
       }
@@ -53,31 +74,10 @@ public class ClientAbilityData {
       return -1;
    }
 
-   public static int getCooldown(AbilityGroup<?, ?> abilityGroup) {
-      return getCooldown(abilityGroup.getParentName());
-   }
-
-   public static int getCooldown(String abilityGroupName) {
-      return !cooldowns.containsKey(abilityGroupName) ? 0 : cooldowns.get(abilityGroupName).getCooldownTicks();
-   }
-
-   public static int getMaxCooldown(AbilityGroup<?, ?> abilityGroup) {
-      return getMaxCooldown(abilityGroup.getParentName());
-   }
-
-   public static int getMaxCooldown(String abilityGroupName) {
-      return !cooldowns.containsKey(abilityGroupName) ? 0 : cooldowns.get(abilityGroupName).getMaxCooldownTicks();
-   }
-
    @Nullable
-   public static AbilityNode<?, ?> getLearnedAbilityNode(AbilityGroup<?, ?> ability) {
-      return getLearnedAbilityNode(ability.getParentName());
-   }
-
-   @Nullable
-   public static AbilityNode<?, ?> getLearnedAbilityNode(String abilityName) {
-      for (AbilityNode<?, ?> node : learnedAbilities) {
-         if (node.getGroup().getParentName().equals(abilityName)) {
+   public static TieredSkill getLearnedAbilityNode(String abilityName) {
+      for (TieredSkill node : getLearnedAbilities()) {
+         if (node.getId().equals(abilityName)) {
             return node;
          }
       }
@@ -86,39 +86,15 @@ public class ClientAbilityData {
    }
 
    public static void updateAbilities(AbilityKnownOnesMessage pkt) {
-      learnedAbilities = pkt.getLearnedAbilities();
-   }
-
-   public static void updateActivity(AbilityActivityMessage pkt) {
-      cooldowns.put(pkt.getAbility(), new ClientAbilityData.CooldownData(pkt.getCooldownTicks(), pkt.getMaxCooldownTicks()));
-      if (pkt.getActiveFlag() != AbilityTree.ActivityFlag.NO_OP) {
-         active.put(pkt.getAbility(), pkt.getActiveFlag() == AbilityTree.ActivityFlag.ACTIVATE_ABILITY);
-      }
+      ArrayBitBuffer buffer = ArrayBitBuffer.empty();
+      pkt.getTree().writeBits(buffer);
+      buffer.setPosition(0);
+      ABILITIES.readBits(buffer);
    }
 
    public static void updateSelectedAbility(AbilityFocusMessage pkt) {
-      selectedAbility = ModConfigs.ABILITIES.getAbilityGroupByName(pkt.getSelectedAbility());
    }
 
-   static {
-      active.defaultReturnValue(false);
-   }
-
-   public static class CooldownData {
-      private final int cooldownTicks;
-      private final int maxCooldownTicks;
-
-      public CooldownData(int cooldownTicks, int maxCooldownTicks) {
-         this.cooldownTicks = cooldownTicks;
-         this.maxCooldownTicks = maxCooldownTicks;
-      }
-
-      public int getCooldownTicks() {
-         return this.cooldownTicks;
-      }
-
-      public int getMaxCooldownTicks() {
-         return this.maxCooldownTicks;
-      }
+   public static void updateActivity(AbilityActivityMessage pkt) {
    }
 }

@@ -1,49 +1,35 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientAbilityData;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityTree;
-import java.util.ArrayList;
-import java.util.List;
+import iskallia.vault.core.net.ArrayBitBuffer;
+import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.skill.tree.AbilityTree;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 public class AbilityKnownOnesMessage {
-   private final List<AbilityNode<?, ?>> learnedAbilities;
+   private AbilityTree tree;
 
-   public AbilityKnownOnesMessage(AbilityTree abilityTree) {
-      this(abilityTree.getLearnedNodes());
+   public AbilityKnownOnesMessage(AbilityTree tree) {
+      this.tree = tree;
    }
 
-   private AbilityKnownOnesMessage(List<AbilityNode<?, ?>> learnedAbilities) {
-      this.learnedAbilities = learnedAbilities;
-   }
-
-   public List<AbilityNode<?, ?>> getLearnedAbilities() {
-      return this.learnedAbilities;
+   public AbilityTree getTree() {
+      return this.tree;
    }
 
    public static void encode(AbilityKnownOnesMessage message, FriendlyByteBuf buffer) {
-      CompoundTag nbt = new CompoundTag();
-      ListTag abilities = new ListTag();
-      message.learnedAbilities.stream().map(AbilityNode::serializeNBT).forEach(abilities::add);
-      nbt.put("LearnedAbilities", abilities);
-      buffer.writeNbt(nbt);
+      ArrayBitBuffer bits = ArrayBitBuffer.empty();
+      message.tree.writeBits(bits);
+      buffer.writeLongArray(bits.toLongArray());
    }
 
    public static AbilityKnownOnesMessage decode(FriendlyByteBuf buffer) {
-      ArrayList<AbilityNode<?, ?>> abilities = new ArrayList<>();
-      CompoundTag nbt = buffer.readNbt();
-      ListTag learnedAbilities = nbt.getList("LearnedAbilities", 10);
-
-      for (int i = 0; i < learnedAbilities.size(); i++) {
-         abilities.add(AbilityNode.fromNBT(learnedAbilities.getCompound(i)));
-      }
-
-      return new AbilityKnownOnesMessage(abilities);
+      BitBuffer bits = ArrayBitBuffer.backing(buffer.readLongArray(), 0);
+      AbilityTree tree = new AbilityTree();
+      tree.readBits(bits);
+      return new AbilityKnownOnesMessage(tree);
    }
 
    public static void handle(AbilityKnownOnesMessage message, Supplier<Context> contextSupplier) {

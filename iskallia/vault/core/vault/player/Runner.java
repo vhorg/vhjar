@@ -20,11 +20,13 @@ import iskallia.vault.gear.trinket.TrinketHelper;
 import iskallia.vault.gear.trinket.effects.VaultExperienceTrinket;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
+import iskallia.vault.item.BottleItem;
 import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.skill.PlayerVaultStats;
 import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultJoinSnapshotData;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -59,8 +61,10 @@ public class Runner extends Listener {
          if (event.getPlayer().level == world) {
             if (event.isCancelable()) {
                if (event.getPlayer().getUUID().equals(this.get(ID))) {
-                  if (ModConfigs.VAULT_GENERAL.isBlacklisted(event.getItemStack())) {
-                     event.setCanceled(true);
+                  if (!event.getPlayer().isCreative()) {
+                     if (ModConfigs.VAULT_GENERAL.isBlacklisted(event.getItemStack())) {
+                        event.setCanceled(true);
+                     }
                   }
                }
             }
@@ -70,8 +74,10 @@ public class Runner extends Listener {
          if (event.getPlayer().level == world) {
             if (event.isCancelable()) {
                if (event.getPlayer().getUUID().equals(this.get(ID))) {
-                  if (ModConfigs.VAULT_GENERAL.isBlacklisted(event.getWorld().getBlockState(event.getPos()))) {
-                     event.setCanceled(true);
+                  if (!event.getPlayer().isCreative()) {
+                     if (ModConfigs.VAULT_GENERAL.isBlacklisted(event.getWorld().getBlockState(event.getPos()))) {
+                        event.setCanceled(true);
+                     }
                   }
                }
             }
@@ -82,15 +88,17 @@ public class Runner extends Listener {
             if (event.getEntity().level == world) {
                if (event.isCancelable()) {
                   if (event.getEntity().getUUID().equals(this.get(ID))) {
-                     if (ModConfigs.VAULT_GENERAL.isBlacklisted(event.getWorld().getBlockState(event.getPos()))) {
-                        event.setCanceled(true);
+                     if (!(event.getEntity() instanceof Player player && player.isCreative())) {
+                        if (ModConfigs.VAULT_GENERAL.isBlacklisted(event.getWorld().getBlockState(event.getPos()))) {
+                           event.setCanceled(true);
+                        }
                      }
                   }
                }
             }
          }
       });
-      CommonEvents.EFFECT_ADDED
+      CommonEvents.EFFECT_ADD
          .register(
             this,
             event -> {
@@ -171,6 +179,13 @@ public class Runner extends Listener {
             }
          }
       });
+      CommonEvents.ENTITY_DEATH.register(this, event -> {
+         if (event.getEntity().level == world) {
+            if (event.getEntity().getTags().contains("soul_shards")) {
+               this.getPlayer().flatMap(player -> BottleItem.getActive(vault, player)).ifPresent(BottleItem::onMobKill);
+            }
+         }
+      });
       this.ifPresent(INFLUENCES, influences -> influences.initServer(world, vault, this));
    }
 
@@ -185,6 +200,7 @@ public class Runner extends Listener {
          }
       });
       this.ifPresent(INFLUENCES, influences -> influences.tickServer(world, vault, this));
+      this.getPlayer().flatMap(player -> BottleItem.getActive(vault, player)).ifPresent(BottleItem::onTimeTick);
    }
 
    @Override
@@ -220,6 +236,12 @@ public class Runner extends Listener {
                stats.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> Math.max(0.0F, m - 0.1F * diff));
             });
          }
+
+         BottleItem.getAnyInactive(player).ifPresent(stack -> {
+            CompoundTag nbt = stack.getOrCreateTag();
+            nbt.putString("vault", vault.get(Vault.ID).toString());
+            nbt.remove("progress");
+         });
       });
    }
 

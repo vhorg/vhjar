@@ -17,6 +17,7 @@ import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.ability.AbilityFloatValueAttribute;
 import iskallia.vault.gear.attribute.ability.special.DashVelocityModification;
+import iskallia.vault.gear.attribute.ability.special.EmpowerImmunityModification;
 import iskallia.vault.gear.attribute.ability.special.EternalsSpeedModification;
 import iskallia.vault.gear.attribute.ability.special.ExecuteHealthModification;
 import iskallia.vault.gear.attribute.ability.special.FarmerAdditionalRangeModification;
@@ -27,7 +28,6 @@ import iskallia.vault.gear.attribute.ability.special.ManaShieldAbsorptionModific
 import iskallia.vault.gear.attribute.ability.special.MegaJumpVelocityModification;
 import iskallia.vault.gear.attribute.ability.special.NovaRadiusModification;
 import iskallia.vault.gear.attribute.ability.special.RampageDamageModification;
-import iskallia.vault.gear.attribute.ability.special.TankImmunityModification;
 import iskallia.vault.gear.attribute.ability.special.TauntRadiusModification;
 import iskallia.vault.gear.attribute.ability.special.VeinMinerAdditionalBlocksModification;
 import iskallia.vault.gear.attribute.config.BooleanFlagGenerator;
@@ -86,7 +86,8 @@ public class VaultGearTierConfig extends Config {
          ModItems.IDOL_OMNISCIENT,
          ModItems.IDOL_TIMEKEEPER,
          ModItems.JEWEL,
-         ModItems.MAGNET
+         ModItems.MAGNET,
+         ModItems.BOTTLE
       )) {
          gearConfig.put(item, new VaultGearTierConfig(item).readConfig());
       }
@@ -109,27 +110,40 @@ public class VaultGearTierConfig extends Config {
 
    @Nullable
    public Object getTierConfig(VaultGearModifier<?> modifier) {
-      ResourceLocation modGroup = modifier.getModifierIdentifier();
-      int tier = modifier.getRolledTier();
-      if (modGroup != null && tier != -1) {
-         for (VaultGearTierConfig.AttributeGroup attributePool : this.modifierGroup.values()) {
-            if (!attributePool.isEmpty()) {
-               for (VaultGearTierConfig.ModifierTierGroup group : attributePool) {
-                  if (group.identifier.equals(modGroup)) {
-                     if (tier >= group.size()) {
-                        return null;
-                     }
+      for (VaultGearTierConfig.ModifierTier<?> modTier : this.getAllTiers(modifier.getModifierIdentifier())) {
+         if (modTier.getModifierTier() == modifier.getRolledTier()) {
+            return modTier.getModifierConfiguration();
+         }
+      }
 
-                     return group.get(tier).getModifierConfiguration();
-                  }
-               }
+      return null;
+   }
+
+   @Nonnull
+   public VaultGearTierConfig.ModifierConfigRange getTierConfigRange(VaultGearModifier<?> modifier, int level) {
+      Object currentTierCfg = null;
+      VaultGearTierConfig.ModifierTier<?> min = null;
+      VaultGearTierConfig.ModifierTier<?> max = null;
+
+      for (VaultGearTierConfig.ModifierTier<?> modTier : this.getAllTiers(modifier.getModifierIdentifier())) {
+         if (modTier.getMinLevel() <= level && (modTier.getMaxLevel() == -1 || modTier.getMaxLevel() >= level)) {
+            if (modTier.getModifierTier() == modifier.getRolledTier()) {
+               currentTierCfg = modTier.getModifierConfiguration();
+            }
+
+            if (min == null || modTier.getMinLevel() < min.getMinLevel()) {
+               min = modTier;
+            }
+
+            if (max == null || modTier.getMinLevel() > max.getMinLevel()) {
+               max = modTier;
             }
          }
-
-         return null;
-      } else {
-         return null;
       }
+
+      Object minCfg = min == null ? null : min.getModifierConfiguration();
+      Object maxCfg = max == null ? null : max.getModifierConfiguration();
+      return new VaultGearTierConfig.ModifierConfigRange(currentTierCfg, minCfg, maxCfg);
    }
 
    public Optional<VaultGearTierConfig.ModifierOutcome<?>> getConfiguredModifierTier(
@@ -138,12 +152,11 @@ public class VaultGearTierConfig extends Config {
       if (!this.modifierGroup.containsKey(affixTagGroup)) {
          return Optional.empty();
       } else {
-         for (VaultGearTierConfig.ModifierTierGroup group : this.modifierGroup.get(affixTagGroup)) {
-            if (group.identifier.equals(identifier)) {
-               for (VaultGearTierConfig.ModifierTier<?> tier : group) {
-                  if (tier.getModifierTier() == modifierTier) {
-                     return Optional.of(new VaultGearTierConfig.ModifierOutcome<>(tier, group));
-                  }
+         VaultGearTierConfig.ModifierTierGroup group = this.getTierGroup(identifier);
+         if (group != null) {
+            for (VaultGearTierConfig.ModifierTier<?> tier : group) {
+               if (tier.getModifierTier() == modifierTier) {
+                  return Optional.of(new VaultGearTierConfig.ModifierOutcome<>(tier, group));
                }
             }
          }
@@ -159,50 +172,28 @@ public class VaultGearTierConfig extends Config {
    }
 
    public List<VaultGearTierConfig.ModifierTier<?>> getAllTiers(@Nullable ResourceLocation identifier) {
-      if (identifier == null) {
-         return Collections.emptyList();
-      } else {
-         for (VaultGearTierConfig.AttributeGroup attributePool : this.modifierGroup.values()) {
-            for (VaultGearTierConfig.ModifierTierGroup group : attributePool) {
-               if (group.identifier.equals(identifier)) {
-                  return Collections.unmodifiableList(group);
-               }
-            }
-         }
-
-         return Collections.emptyList();
-      }
+      VaultGearTierConfig.ModifierTierGroup group = this.getTierGroup(identifier);
+      return group != null ? Collections.unmodifiableList(group) : Collections.emptyList();
    }
 
    @Nullable
    public VaultGearModifier<?> generateModifier(ResourceLocation identifier, int level, Random random) {
-      for (VaultGearTierConfig.AttributeGroup attributePool : this.modifierGroup.values()) {
-         for (VaultGearTierConfig.ModifierTierGroup group : attributePool) {
-            if (group.identifier.equals(identifier)) {
-               WeightedList<VaultGearTierConfig.ModifierOutcome<?>> outcomes = new WeightedList<>();
-               group.getModifiersForLevel(level)
-                  .forEach(tier -> outcomes.add(new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight()));
-               return outcomes.getRandom().map(modifierOutcome -> modifierOutcome.makeModifier(random)).orElse(null);
-            }
-         }
+      VaultGearTierConfig.ModifierTierGroup group = this.getTierGroup(identifier);
+      if (group != null) {
+         WeightedList<VaultGearTierConfig.ModifierOutcome<?>> outcomes = new WeightedList<>();
+         group.getModifiersForLevel(level)
+            .forEach(tier -> outcomes.add(new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight()));
+         return outcomes.getRandom().map(modifierOutcome -> modifierOutcome.makeModifier(random)).orElse(null);
+      } else {
+         return null;
       }
-
-      return null;
    }
 
    @Nullable
    public VaultGearModifier<?> maxAndIncreaseTier(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier, int level, int tierIncrease, Random random) {
       VaultGearTierConfig.AttributeGroup attributeGroup = this.modifierGroup.get(VaultGearTierConfig.ModifierAffixTagGroup.ofAffixType(type));
       if (attributeGroup != null && !attributeGroup.isEmpty()) {
-         VaultGearTierConfig.ModifierTierGroup tierGroup = null;
-
-         for (VaultGearTierConfig.ModifierTierGroup configTierGroup : attributeGroup) {
-            if (configTierGroup.identifier.equals(modifier.getModifierIdentifier())) {
-               tierGroup = configTierGroup;
-               break;
-            }
-         }
-
+         VaultGearTierConfig.ModifierTierGroup tierGroup = this.getTierGroup(modifier.getModifierIdentifier());
          if (tierGroup == null) {
             return null;
          } else {
@@ -217,6 +208,19 @@ public class VaultGearTierConfig extends Config {
       } else {
          return null;
       }
+   }
+
+   @Nullable
+   private VaultGearTierConfig.ModifierTierGroup getTierGroup(@Nullable ResourceLocation identifier) {
+      for (VaultGearTierConfig.AttributeGroup attributePool : this.modifierGroup.values()) {
+         for (VaultGearTierConfig.ModifierTierGroup group : attributePool) {
+            if (group.identifier.equals(identifier)) {
+               return group;
+            }
+         }
+      }
+
+      return null;
    }
 
    public List<VaultGearModifier<?>> generateImplicits(int level, Random random) {
@@ -380,8 +384,8 @@ public class VaultGearTierConfig extends Config {
       modRampageDamage.add(new VaultGearTierConfig.ModifierTier<>(0, 10, RampageDamageModification.newConfig(0.3F)));
       modRampageDamage.add(new VaultGearTierConfig.ModifierTier<>(0, 4, RampageDamageModification.newConfig(0.65F)));
       enhancements.add(modRampageDamage);
-      VaultGearTierConfig.ModifierTierGroup modTankImmunity = this.enhancementGroup(TankImmunityModification.ID);
-      modTankImmunity.add(new VaultGearTierConfig.ModifierTier<>(0, 4, TankImmunityModification.newConfig()));
+      VaultGearTierConfig.ModifierTierGroup modTankImmunity = this.enhancementGroup(EmpowerImmunityModification.ID);
+      modTankImmunity.add(new VaultGearTierConfig.ModifierTier<>(0, 4, EmpowerImmunityModification.newConfig()));
       enhancements.add(modTankImmunity);
       VaultGearTierConfig.ModifierTierGroup modTauntRadius = this.enhancementGroup(TauntRadiusModification.ID);
       modTauntRadius.add(new VaultGearTierConfig.ModifierTier<>(0, 10, TauntRadiusModification.newConfig(0.75F)));
@@ -454,8 +458,8 @@ public class VaultGearTierConfig extends Config {
       VaultGearTierConfig.ModifierTierGroup modManaTank = new VaultGearTierConfig.ModifierTierGroup(
          ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_tank"
       );
-      modManaTank.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Tank", -0.35F)));
-      modManaTank.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Tank", -0.7F)));
+      modManaTank.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Empower", -0.35F)));
+      modManaTank.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Empower", -0.7F)));
       enhancements.add(modManaTank);
       VaultGearTierConfig.ModifierTierGroup modManaTaunt = new VaultGearTierConfig.ModifierTierGroup(
          ModGearAttributes.ABILITY_MANACOST_PERCENT, "ModEnhancement", "enhancement_mana_taunt"
@@ -532,8 +536,8 @@ public class VaultGearTierConfig extends Config {
       VaultGearTierConfig.ModifierTierGroup modCoolDownTank = new VaultGearTierConfig.ModifierTierGroup(
          ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_tank"
       );
-      modCoolDownTank.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Tank", -0.3F)));
-      modCoolDownTank.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Tank", -0.7F)));
+      modCoolDownTank.add(new VaultGearTierConfig.ModifierTier<>(0, 10, new AbilityFloatValueAttribute.Config("Empower", -0.3F)));
+      modCoolDownTank.add(new VaultGearTierConfig.ModifierTier<>(0, 4, new AbilityFloatValueAttribute.Config("Empower", -0.7F)));
       enhancements.add(modCoolDownTank);
       VaultGearTierConfig.ModifierTierGroup modCoolDownTaunt = new VaultGearTierConfig.ModifierTierGroup(
          ModGearAttributes.ABILITY_COOLDOWN_PERCENT, "ModEnhancement", "enhancement_cooldown_taunt"
@@ -695,6 +699,12 @@ public class VaultGearTierConfig extends Config {
             default:
                throw new IllegalArgumentException("Unknown AffixType: " + type.name());
          }
+      }
+   }
+
+   public record ModifierConfigRange(@Nullable Object tierConfig, @Nullable Object minAvailableConfig, @Nullable Object maxAvailableConfig) {
+      public static VaultGearTierConfig.ModifierConfigRange empty() {
+         return new VaultGearTierConfig.ModifierConfigRange(null, null, null);
       }
    }
 

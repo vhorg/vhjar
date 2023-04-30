@@ -1,5 +1,6 @@
 package iskallia.vault.init;
 
+import iskallia.vault.container.AlchemyTableContainer;
 import iskallia.vault.container.BountyContainer;
 import iskallia.vault.container.InscriptionTableContainer;
 import iskallia.vault.container.LootStatueContainer;
@@ -7,7 +8,7 @@ import iskallia.vault.container.ModifierWorkbenchContainer;
 import iskallia.vault.container.NBTElementContainer;
 import iskallia.vault.container.RelicPedestalContainer;
 import iskallia.vault.container.RenamingContainer;
-import iskallia.vault.container.ScavengerChestContainer;
+import iskallia.vault.container.SkillAltarContainer;
 import iskallia.vault.container.SpiritExtractorContainer;
 import iskallia.vault.container.StatisticsTabContainer;
 import iskallia.vault.container.ToolStationContainer;
@@ -17,6 +18,7 @@ import iskallia.vault.container.VaultArtisanStationContainer;
 import iskallia.vault.container.VaultCharmControllerContainer;
 import iskallia.vault.container.VaultCrateContainer;
 import iskallia.vault.container.VaultDiffuserContainer;
+import iskallia.vault.container.VaultEnchanterContainer;
 import iskallia.vault.container.VaultEndContainer;
 import iskallia.vault.container.VaultEnhancementAltarContainer;
 import iskallia.vault.container.VaultForgeContainer;
@@ -32,14 +34,17 @@ import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.vault.stat.StatTotals;
 import iskallia.vault.core.vault.stat.VaultSnapshot;
 import iskallia.vault.research.ResearchTree;
-import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.archetype.ArchetypeContainer;
-import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.skill.tree.ExpertiseTree;
+import iskallia.vault.skill.tree.TalentTree;
+import iskallia.vault.world.data.SkillAltarData;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.Level;
@@ -50,13 +55,13 @@ public class ModContainers {
    public static MenuType<StatisticsTabContainer> STATISTICS_TAB_CONTAINER;
    public static MenuType<NBTElementContainer<AbilityTree>> ABILITY_TAB_CONTAINER;
    public static MenuType<NBTElementContainer<TalentTree>> TALENT_TAB_CONTAINER;
+   public static MenuType<NBTElementContainer<ExpertiseTree>> EXPERTISE_TAB_CONTAINER;
    public static MenuType<NBTElementContainer<ArchetypeContainer>> ARCHETYPE_TAB_CONTAINER;
    public static MenuType<NBTElementContainer<ResearchTree>> RESEARCH_TAB_CONTAINER;
    public static MenuType<VaultCrateContainer> VAULT_CRATE_CONTAINER;
    public static MenuType<RenamingContainer> RENAMING_CONTAINER;
    public static MenuType<LootStatueContainer> LOOT_STATUE_CONTAINER;
    public static MenuType<TransmogTableContainer> TRANSMOG_TABLE_CONTAINER;
-   public static MenuType<ScavengerChestContainer> SCAVENGER_CHEST_CONTAINER;
    public static MenuType<CatalystInfusionTableContainer> CATALYST_INFUSION_TABLE_CONTAINER;
    public static MenuType<ShardPouchContainer> SHARD_POUCH_CONTAINER;
    public static MenuType<ShardTradeContainer> SHARD_TRADE_CONTAINER;
@@ -79,6 +84,9 @@ public class ModContainers {
    public static MenuType<BountyContainer> BOUNTY_CONTAINER;
    public static MenuType<VaultEnhancementAltarContainer> ENHANCEMENT_ALTAR_CONTAINER;
    public static MenuType<ModifierWorkbenchContainer> MODIFIER_WORKBENCH_CONTAINER;
+   public static MenuType<AlchemyTableContainer> ALCHEMY_TABLE_CONTAINER;
+   public static MenuType<VaultEnchanterContainer> VAULT_ENCHANTER_CONTAINER;
+   public static MenuType<SkillAltarContainer> SKILL_ALTAR_CONTAINER;
 
    public static void register(Register<MenuType<?>> event) {
       STATISTICS_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
@@ -87,16 +95,19 @@ public class ModContainers {
          return new StatisticsTabContainer(windowId, inventory, statTotals);
       });
       ABILITY_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
-         UUID uniqueID = inventory.player.getUUID();
-         AbilityTree abilityTree = new AbilityTree(uniqueID);
-         abilityTree.deserializeNBT(Optional.ofNullable(buffer.readNbt()).orElse(new CompoundTag()));
+         AbilityTree abilityTree = new AbilityTree();
+         abilityTree.readBits(ArrayBitBuffer.backing(buffer.readLongArray(), 0));
          return new NBTElementContainer(() -> ABILITY_TAB_CONTAINER, windowId, inventory.player, abilityTree);
       });
       TALENT_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
-         UUID uniqueID = inventory.player.getUUID();
-         TalentTree talentTree = new TalentTree(uniqueID);
-         talentTree.deserializeNBT(Optional.ofNullable(buffer.readNbt()).orElse(new CompoundTag()));
+         TalentTree talentTree = new TalentTree();
+         talentTree.readBits(ArrayBitBuffer.backing(buffer.readLongArray(), 0));
          return new NBTElementContainer(() -> TALENT_TAB_CONTAINER, windowId, inventory.player, talentTree);
+      });
+      EXPERTISE_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         ExpertiseTree expertiseTree = new ExpertiseTree();
+         expertiseTree.readBits(ArrayBitBuffer.backing(buffer.readLongArray(), 0));
+         return new NBTElementContainer(() -> EXPERTISE_TAB_CONTAINER, windowId, inventory.player, expertiseTree);
       });
       ARCHETYPE_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          UUID uniqueID = inventory.player.getUUID();
@@ -125,10 +136,6 @@ public class ModContainers {
          Level world = inventory.player.getCommandSenderWorld();
          BlockPos pos = buffer.readBlockPos();
          return new TransmogTableContainer(windowId, world, pos, inventory);
-      });
-      SCAVENGER_CHEST_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
-         SimpleContainer inv = new SimpleContainer(45);
-         return new ScavengerChestContainer(windowId, inventory, inv, inv);
       });
       CATALYST_INFUSION_TABLE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          Level world = inventory.player.getCommandSenderWorld();
@@ -206,6 +213,13 @@ public class ModContainers {
          BlockPos blockPos = buffer.readBlockPos();
          return new WardrobeContainer.Hotbar(windowId, inventory, blockPos);
       });
+      SKILL_ALTAR_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         BlockPos blockPos = buffer.readBlockPos();
+         SkillAltarData.SkillTemplate template = SkillAltarData.SkillTemplate.readFrom(buffer);
+         int templateIndex = buffer.readInt();
+         List<SkillAltarData.SkillIcon> skillIcons = (List<SkillAltarData.SkillIcon>)buffer.readCollection(ArrayList::new, SkillAltarData.SkillIcon::readFrom);
+         return new SkillAltarContainer(windowId, inventory, blockPos, template, templateIndex, skillIcons);
+      });
       BOUNTY_CONTAINER = IForgeMenuType.create((windowId, inv, data) -> {
          CompoundTag tag = data.readNbt();
          Level world = inv.player.getCommandSenderWorld();
@@ -221,19 +235,29 @@ public class ModContainers {
          BlockPos pos = buffer.readBlockPos();
          return new ModifierWorkbenchContainer(windowId, world, pos, inventory);
       });
+      ALCHEMY_TABLE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new AlchemyTableContainer(windowId, world, pos, inventory);
+      });
+      VAULT_ENCHANTER_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new VaultEnchanterContainer(windowId, world, pos, inventory);
+      });
       event.getRegistry()
          .registerAll(
             new MenuType[]{
                (MenuType)STATISTICS_TAB_CONTAINER.setRegistryName("statistics_tab"),
                (MenuType)ABILITY_TAB_CONTAINER.setRegistryName("ability_tab"),
                (MenuType)TALENT_TAB_CONTAINER.setRegistryName("talent_tab"),
+               (MenuType)EXPERTISE_TAB_CONTAINER.setRegistryName("expertise_tab"),
                (MenuType)ARCHETYPE_TAB_CONTAINER.setRegistryName("archetype_tab"),
                (MenuType)RESEARCH_TAB_CONTAINER.setRegistryName("research_tab"),
                (MenuType)VAULT_CRATE_CONTAINER.setRegistryName("vault_crate"),
                (MenuType)RENAMING_CONTAINER.setRegistryName("renaming_container"),
                (MenuType)LOOT_STATUE_CONTAINER.setRegistryName("omega_statue_container"),
                (MenuType)TRANSMOG_TABLE_CONTAINER.setRegistryName("transmog_table_container"),
-               (MenuType)SCAVENGER_CHEST_CONTAINER.setRegistryName("scavenger_chest_container"),
                (MenuType)CATALYST_INFUSION_TABLE_CONTAINER.setRegistryName("catalyst_infusion_table_container"),
                (MenuType)SHARD_POUCH_CONTAINER.setRegistryName("shard_pouch_container"),
                (MenuType)SHARD_TRADE_CONTAINER.setRegistryName("shard_trade_container"),
@@ -255,7 +279,10 @@ public class ModContainers {
                (MenuType)WARDROBE_HOTBAR_CONTAINER.setRegistryName("wardrobe_hotbar_container"),
                (MenuType)BOUNTY_CONTAINER.setRegistryName("bounty_container"),
                (MenuType)ENHANCEMENT_ALTAR_CONTAINER.setRegistryName("enhancement_altar_container"),
-               (MenuType)MODIFIER_WORKBENCH_CONTAINER.setRegistryName("modifier_workbench_container")
+               (MenuType)MODIFIER_WORKBENCH_CONTAINER.setRegistryName("modifier_workbench_container"),
+               (MenuType)ALCHEMY_TABLE_CONTAINER.setRegistryName("alchemy_table_container"),
+               (MenuType)VAULT_ENCHANTER_CONTAINER.setRegistryName("vault_enchanter_container"),
+               (MenuType)SKILL_ALTAR_CONTAINER.setRegistryName("skill_altar_container")
             }
          );
    }

@@ -143,12 +143,31 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
       }
    }
 
+   public static void addFreeUsedVault(ItemStack stack, UUID vaultId) {
+      if (!stack.isEmpty() && stack.getItem() instanceof TrinketItem) {
+         ListTag list = stack.getOrCreateTag().getList("freeUsedVaults", 10);
+         CompoundTag tag = new CompoundTag();
+         tag.putUUID("id", vaultId);
+         list.add(tag);
+         stack.getOrCreateTag().put("freeUsedVaults", list);
+      }
+   }
+
    public static boolean isUsableInVault(ItemStack stack, UUID vaultId) {
       if (!stack.isEmpty() && stack.getItem() instanceof TrinketItem && vaultId != null) {
          ListTag list = stack.getOrCreateTag().getList("usedVaults", 10);
 
          for (int i = 0; i < list.size(); i++) {
             CompoundTag tag = list.getCompound(i);
+            if (vaultId.equals(tag.getUUID("id"))) {
+               return true;
+            }
+         }
+
+         ListTag freeList = stack.getOrCreateTag().getList("freeUsedVaults", 10);
+
+         for (int ix = 0; ix < freeList.size(); ix++) {
+            CompoundTag tag = freeList.getCompound(ix);
             if (vaultId.equals(tag.getUUID("id"))) {
                return true;
             }
@@ -294,7 +313,7 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    }
 
    public boolean canEquip(SlotContext slotContext, ItemStack stack) {
-      if (slotContext.entity() instanceof Player player && ServerVaults.isInVault(player)) {
+      if (slotContext.entity() instanceof Player player && ServerVaults.get(player.level).isPresent()) {
          return false;
       } else if (!isIdentified(stack)) {
          return false;
@@ -318,7 +337,7 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    }
 
    public boolean canUnequip(SlotContext slotContext, ItemStack stack) {
-      return slotContext.entity() instanceof Player player && ServerVaults.isInVault(player) ? false : super.canUnequip(slotContext, stack);
+      return slotContext.entity() instanceof Player player && ServerVaults.get(player.level).isPresent() ? false : super.canUnequip(slotContext, stack);
    }
 
    @Override

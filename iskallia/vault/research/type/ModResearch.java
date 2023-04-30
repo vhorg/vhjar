@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 
 public class ModResearch extends Research {
@@ -39,11 +39,11 @@ public class ModResearch extends Research {
    }
 
    @Override
-   public boolean restricts(Item item, Restrictions.Type restrictionType) {
+   public boolean restricts(ItemStack stack, Restrictions.Type restrictionType) {
       if (!this.restrictions.restricts(restrictionType)) {
          return false;
       } else {
-         ResourceLocation registryName = item.getRegistryName();
+         ResourceLocation registryName = stack.getItem().getRegistryName();
          return registryName == null ? false : this.modIds.contains(registryName.getNamespace());
       }
    }

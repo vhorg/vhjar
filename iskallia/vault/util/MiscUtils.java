@@ -4,18 +4,9 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-import iskallia.vault.client.ClientTalentData;
-import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.random.JavaRandom;
-import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.integration.IntegrationCurios;
-import iskallia.vault.skill.talent.Talent;
-import iskallia.vault.skill.talent.TalentGroup;
-import iskallia.vault.skill.talent.TalentNode;
-import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.world.data.PlayerTalentsData;
-import iskallia.vault.world.data.ServerVaults;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D.Float;
 import java.util.ArrayList;
@@ -41,7 +32,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -74,16 +64,6 @@ public class MiscUtils {
 
    public static Float getMidpoint(Rectangle r) {
       return new Float(r.x + r.width / 2.0F, r.y + r.height / 2.0F);
-   }
-
-   public static <T extends Talent> Optional<TalentNode<T>> getTalent(Player player, TalentGroup<T> talentGroup) {
-      if (player instanceof ServerPlayer) {
-         TalentTree talents = PlayerTalentsData.get(((ServerPlayer)player).getLevel()).getTalents(player);
-         TalentNode<T> node = talents.getNodeOf(talentGroup);
-         return node.isLearned() ? Optional.of(node) : Optional.empty();
-      } else {
-         return Optional.ofNullable(ClientTalentData.getLearnedTalentNode(talentGroup));
-      }
    }
 
    public static boolean hasEmptySlot(Container inventory) {
@@ -365,18 +345,6 @@ public class MiscUtils {
       }
 
       return null;
-   }
-
-   public static Optional<Vault> getVault(Entity entity) {
-      if (!ServerVaults.isInVault(entity)) {
-         return Optional.empty();
-      } else {
-         return entity.getLevel().isClientSide() ? Optional.ofNullable(ClientVaults.ACTIVE) : ServerVaults.get(entity.getLevel());
-      }
-   }
-
-   public static <T> Optional<T> getVaultData(Player player, FieldKey<T> key) {
-      return getVault(player).filter(vault -> vault.has(key)).map(vault -> vault.get(key));
    }
 
    public static JavaRandom getVaultPositionRandom(Vault vault, BlockPos at) {

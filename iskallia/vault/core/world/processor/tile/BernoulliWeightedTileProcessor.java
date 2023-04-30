@@ -1,13 +1,13 @@
 package iskallia.vault.core.world.processor.tile;
 
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TilePredicate;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import java.util.Optional;
 
 public class BernoulliWeightedTileProcessor extends TargetTileProcessor<WeightedTileProcessor> {
-   public TilePredicate target = TilePredicate.all();
+   public TilePredicate target = TilePredicate.TRUE;
    public double probability = 0.0;
    public WeightedList<PartialTile> success = new WeightedList<>();
    public WeightedList<PartialTile> failure = new WeightedList<>();
@@ -24,7 +24,7 @@ public class BernoulliWeightedTileProcessor extends TargetTileProcessor<Weighted
          }
 
          Optional<PartialTile> output = pool.getRandom(context.random);
-         output.ifPresent(out -> out.copyInto(tile));
+         output.ifPresent(out -> out.fillInto(tile));
       }
 
       return tile;

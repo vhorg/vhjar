@@ -1,7 +1,8 @@
 {
-  "parent": "the_vault:block/ore_sparkletine",
+  "parent": "the_vault:block/ore/stone/sparkletine",
   "overrides": [
     { "predicate": { "the_vault:vault_ore_type": 0 }, "model": "the_vault:item/ore_sparkletine" },
-    { "predicate": { "the_vault:vault_ore_type": 1 }, "model": "the_vault:item/vaultstone_ore_sparkletine" }
+    { "predicate": { "the_vault:vault_ore_type": 1 }, "model": "the_vault:item/ore/vault_stone/sparkletine" },
+    { "predicate": { "the_vault:vault_ore_type": 2 }, "model": "the_vault:item/ore/white/sparkletine" }
   ]
 }

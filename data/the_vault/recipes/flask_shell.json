@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ada",
+    "aba",
+    "aca"
+  ],
+  "key": {
+    "a": {
+      "item": "the_vault:vault_essence"
+    },
+    "b": {
+      "item": "the_vault:empty_flask"
+    },
+    "c": {
+      "item": "the_vault:perfect_benitoite"
+    },
+    "d": {
+      "item": "minecraft:bowl"
+    }
+  },
+  "result": {
+    "item": "the_vault:respec_flask",
+    "count": 1,
+    "nbt": "{Ability:\"Shell\"}"
+  }
+}

@@ -20,6 +20,7 @@ import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -130,6 +131,13 @@ public class VaultGearHelper {
          : getModifiers(VaultGearData.read(stack)));
    }
 
+   public static Multimap<Attribute, AttributeModifier> getModifiers(UUID uuid, Stream<VaultGearAttributeInstance<?>> instances) {
+      AttributeGearData data = AttributeGearData.empty();
+      data.setIdentifier(uuid);
+      instances.forEach(instance -> data.updateAttribute(instance.getAttribute(), instance.getValue()));
+      return getModifiers(data);
+   }
+
    public static Multimap<Attribute, AttributeModifier> getModifiers(AttributeGearData data) {
       Builder<Attribute, AttributeModifier> builder = ImmutableMultimap.builder();
       UUID identifier = data.getIdentifier();
@@ -171,6 +179,11 @@ public class VaultGearHelper {
       if (data.has(ModGearAttributes.REACH)) {
          double reach = data.get(ModGearAttributes.REACH, VaultGearAttributeTypeMerger.doubleSum());
          addAttribute(builder, (Attribute)ForgeMod.REACH_DISTANCE.get(), reach, identifier);
+      }
+
+      if (data.has(ModGearAttributes.ATTACK_RANGE)) {
+         double reach = data.get(ModGearAttributes.ATTACK_RANGE, VaultGearAttributeTypeMerger.doubleSum());
+         addAttribute(builder, (Attribute)ForgeMod.ATTACK_RANGE.get(), reach, identifier);
       }
 
       if (data.has(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE)) {

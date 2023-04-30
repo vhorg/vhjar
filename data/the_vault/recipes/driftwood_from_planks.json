@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "the_vault:driftwood_planks"
+    }
+  ],
+  "result": {
+    "item": "the_vault:driftwood",
+    "count": 4
+  }
+}

@@ -6,23 +6,34 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import io.netty.buffer.ByteBuf;
 import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.number.BoundedByteAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.ByteArrayTag;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntArrayTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.LongArrayTag;
 import net.minecraft.nbt.Tag;
 
 public class GenericNbtAdapter extends NbtAdapter<Tag> {
+   protected static final NbtAdapter[] ADAPTERS = new NbtAdapter[]{
+      Adapters.END_NBT,
+      Adapters.BYTE_NBT,
+      Adapters.SHORT_NBT,
+      Adapters.INT_NBT,
+      Adapters.LONG_NBT,
+      Adapters.FLOAT_NBT,
+      Adapters.DOUBLE_NBT,
+      Adapters.BYTE_ARRAY_NBT,
+      Adapters.STRING_NBT,
+      Adapters.LIST_NBT,
+      Adapters.COMPOUND_NBT,
+      Adapters.INT_ARRAY_NBT,
+      Adapters.LONG_ARRAY_NBT
+   };
+   protected static final BoundedByteAdapter NBT_ID = new BoundedByteAdapter((byte)0, (byte)(ADAPTERS.length - 1), false);
+
    public GenericNbtAdapter(boolean nullable) {
-      super(Tag.class, nullable);
+      super(nullable);
    }
 
    public GenericNbtAdapter asNullable() {
@@ -31,47 +42,47 @@ public class GenericNbtAdapter extends NbtAdapter<Tag> {
 
    @Override
    protected void writeTagBits(Tag value, BitBuffer buffer) {
-      buffer.writeIntBounded(value.getId(), 0, 12);
+      NBT_ID.writeBits(Byte.valueOf(value.getId()), buffer);
       ADAPTERS[value.getId()].writeBits(value, buffer);
    }
 
    @Override
    protected Tag readTagBits(BitBuffer buffer) {
-      return (Tag)ADAPTERS[buffer.readIntBounded(0, 12)].readBits(buffer).orElseThrow();
+      return (Tag)ADAPTERS[NBT_ID.readBits(buffer).orElseThrow()].readBits(buffer).orElseThrow();
    }
 
    @Override
    protected void writeTagBytes(Tag value, ByteBuf buffer) {
-      buffer.writeByte(value.getId());
+      NBT_ID.writeBytes(Byte.valueOf(value.getId()), buffer);
       ADAPTERS[value.getId()].writeBytes(value, buffer);
    }
 
    @Override
    protected Tag readTagBytes(ByteBuf buffer) {
-      return (Tag)ADAPTERS[buffer.readByte()].readBytes(buffer).orElseThrow();
+      return (Tag)ADAPTERS[NBT_ID.readBytes(buffer).orElseThrow()].readBytes(buffer).orElseThrow();
    }
 
    @Override
    protected void writeTagData(Tag value, DataOutput data) throws IOException {
-      data.writeByte(value.getId());
+      NBT_ID.writeData(Byte.valueOf(value.getId()), data);
       ADAPTERS[value.getId()].writeData(value, data);
    }
 
    @Override
    protected Tag readTagData(DataInput data) throws IOException {
-      return (Tag)ADAPTERS[data.readByte()].readData(data).orElseThrow();
+      return (Tag)ADAPTERS[NBT_ID.readData(data).orElseThrow()].readData(data).orElseThrow();
    }
 
    @Nullable
    @Override
    protected Tag writeTagNbt(Tag value) {
-      return value;
+      return ADAPTERS[value.getId()].writeNbt(value).orElse(null);
    }
 
    @Nullable
    @Override
    protected Tag readTagNbt(Tag nbt) {
-      return nbt;
+      return (Tag)ADAPTERS[nbt.getId()].readNbt(nbt).orElse(null);
    }
 
    @Nullable
@@ -85,11 +96,11 @@ public class GenericNbtAdapter extends NbtAdapter<Tag> {
    protected Tag readTagJson(JsonElement json) {
       if (json instanceof JsonPrimitive value) {
          if (value.isNumber()) {
-            return Adapters.NUMERIC.writeNbt(value.getAsNumber()).orElse(null);
+            return (Tag)Adapters.NUMERIC_NBT.readJson(value).orElse(null);
          }
 
          if (value.isString()) {
-            return Adapters.UTF_8.writeNbt(value.getAsString()).orElse(null);
+            return (Tag)Adapters.STRING_NBT.readJson(value).orElse(null);
          }
 
          if (value.isBoolean()) {
@@ -97,60 +108,11 @@ public class GenericNbtAdapter extends NbtAdapter<Tag> {
          }
       } else {
          if (json instanceof JsonObject value) {
-            CompoundTag tag = new CompoundTag();
-
-            for (String key : value.keySet()) {
-               this.readJson(value.get(key)).ifPresent(tag1 -> tag.put(key, tag1));
-            }
-
-            return tag;
+            return (Tag)Adapters.COMPOUND_NBT.readJson(value).orElse(null);
          }
 
          if (json instanceof JsonArray value) {
-            String hint = null;
-            if (!value.isEmpty() && value.get(0) instanceof JsonPrimitive primitive && primitive.isString()) {
-               hint = primitive.getAsString();
-            }
-
-            if (hint == null) {
-               ListTag tag = new ListTag();
-
-               for (JsonElement element : value) {
-                  this.readJson(element).ifPresent(tag::add);
-               }
-
-               return tag;
-            }
-
-            if ("B".equals(hint)) {
-               List<Byte> list = new ArrayList<>();
-
-               for (int i = 1; i < value.size(); i++) {
-                  list.add(Adapters.BYTE.readJson(value.get(i)).orElseThrow());
-               }
-
-               return new ByteArrayTag(list);
-            }
-
-            if ("I".equals(hint)) {
-               List<Integer> list = new ArrayList<>();
-
-               for (int i = 1; i < value.size(); i++) {
-                  list.add(Adapters.INT.readJson(value.get(i)).orElseThrow());
-               }
-
-               return new IntArrayTag(list);
-            }
-
-            if ("L".equals(hint)) {
-               List<Long> list = new ArrayList<>();
-
-               for (int i = 1; i < value.size(); i++) {
-                  list.add(Adapters.LONG.readJson(value.get(i)).orElseThrow());
-               }
-
-               return new LongArrayTag(list);
-            }
+            return (Tag)Adapters.COLLECTION_NBT.readJson(value).orElse(null);
          }
       }
 

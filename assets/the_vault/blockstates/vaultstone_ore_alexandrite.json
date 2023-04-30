@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "the_vault:block/vaultstone_ore_alexandrite"
+      "model": "the_vault:block/ore/vault_stone/alexandrite"
     }
   }
 }

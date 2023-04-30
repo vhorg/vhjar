@@ -3,8 +3,6 @@ package iskallia.vault.core.data.adapter.nbt;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import io.netty.buffer.ByteBuf;
-import iskallia.vault.core.data.adapter.Adapters;
-import iskallia.vault.core.data.adapter.primitive.BoundedByteAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
 import java.io.DataInput;
@@ -15,18 +13,10 @@ import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class NbtAdapter<T extends Tag> implements ISimpleAdapter<T, Tag, JsonElement> {
-   protected static final NbtAdapter[] ADAPTERS = new NbtAdapter[]{Adapters.INT_NBT};
-   protected static final BoundedByteAdapter TAG_ID = new BoundedByteAdapter((byte)0, (byte)(ADAPTERS.length - 1), false);
-   private final Class<T> type;
    private final boolean nullable;
 
-   public NbtAdapter(Class<T> type, boolean nullable) {
-      this.type = type;
+   public NbtAdapter(boolean nullable) {
       this.nullable = nullable;
-   }
-
-   public Class<T> getType() {
-      return this.type;
    }
 
    public boolean isNullable() {

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "type=base": {
+      "model": "the_vault:block/totem_of_wrath"
+    },
+    "type=glow": {
+      "model": "the_vault:block/totem_of_wrath_glow"
+    }
+  }
+}

@@ -1,10 +1,13 @@
 {
   "variants": {
     "type=stone": {
-      "model": "the_vault:block/ore_black_opal"
+      "model": "the_vault:block/ore/stone/black_opal"
     },
     "type=vault_stone": {
-      "model": "the_vault:block/vaultstone_ore_black_opal"
+      "model": "the_vault:block/ore/vault_stone/black_opal"
+    },
+    "type=white": {
+      "model": "the_vault:block/ore/white/black_opal"
     }
   }
 }

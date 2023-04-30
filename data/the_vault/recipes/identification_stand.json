@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ctc",
+    "ebe",
+    " c "
+  ],
+  "key": {
+    "e": {
+      "item": "minecraft:obsidian"
+    },
+    "b": {
+      "item": "minecraft:lectern"
+    },
+    "c": {
+      "item": "the_vault:vault_diamond"
+    },
+    "t": {
+      "item": "the_vault:identification_tome"
+    }
+  },
+  "result": {
+    "item": "the_vault:identification_stand",
+    "count": 1
+  }
+}

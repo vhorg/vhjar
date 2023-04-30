@@ -1,7 +1,7 @@
 package iskallia.vault.core.world.processor.tile;
 
 import iskallia.vault.core.random.RandomSource;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.processor.Processor;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import net.minecraft.core.Vec3i;

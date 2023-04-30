@@ -9,15 +9,16 @@ import iskallia.vault.core.data.adapter.vault.DirectAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.core.vault.modifier.spi.ModifierContext;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.world.storage.VirtualWorld;
-import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
-import iskallia.vault.world.vault.modifier.spi.ModifierContext;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 public class Modifiers extends DataObject<Modifiers> {
@@ -35,17 +36,17 @@ public class Modifiers extends DataObject<Modifiers> {
       return FIELDS;
    }
 
-   public Modifiers addPermanentModifier(VaultModifier<?> modifier, int amount, boolean display, RandomSource random) {
-      for (int i = 0; i < amount; i++) {
-         modifier.flatten(random).forEach(child -> this.get(ENTRIES).add(new Modifiers.Entry((VaultModifier<?>)child, display)));
-      }
-
-      return this;
+   public Modifiers addModifier(VaultModifier<?> modifier, int amount, boolean display, RandomSource random) {
+      return this.addModifier(modifier, amount, display, random, context -> {});
    }
 
-   public Modifiers addTemporaryModifier(VaultModifier<?> modifier, int amount, int timeLeft, boolean display, RandomSource random) {
+   public Modifiers addModifier(VaultModifier<?> modifier, int amount, boolean display, RandomSource random, Consumer<ModifierContext> configurator) {
       for (int i = 0; i < amount; i++) {
-         modifier.flatten(random).forEach(child -> this.get(ENTRIES).add(new Modifiers.Entry((VaultModifier<?>)child, timeLeft, display)));
+         modifier.flatten(random).forEach(child -> {
+            Modifiers.Entry entry = new Modifiers.Entry((VaultModifier<?>)child, display);
+            configurator.accept(entry.getContext());
+            this.get(ENTRIES).add(entry);
+         });
       }
 
       return this;
@@ -76,6 +77,10 @@ public class Modifiers extends DataObject<Modifiers> {
       }
 
       return modifiers;
+   }
+
+   public java.util.List<Modifiers.Entry> getEntries() {
+      return this.get(ENTRIES);
    }
 
    public void onListenerAdd(VirtualWorld world, Vault vault, Listener listener) {
@@ -154,7 +159,7 @@ public class Modifiers extends DataObject<Modifiers> {
       this.get(ENTRIES).forEach(entry -> entry.get(Modifiers.Entry.MODIFIER).releaseServer(this.getContext(entry)));
    }
 
-   protected static class Entry extends DataObject<Modifiers.Entry> {
+   public static class Entry extends DataObject<Modifiers.Entry> {
       public static final FieldRegistry FIELDS = new FieldRegistry();
       public static final FieldKey<VaultModifier> MODIFIER = FieldKey.of("modifier", VaultModifier.class)
          .with(
@@ -193,6 +198,10 @@ public class Modifiers extends DataObject<Modifiers> {
       @Override
       public FieldRegistry getFields() {
          return FIELDS;
+      }
+
+      public ModifierContext getContext() {
+         return this.get(CONTEXT);
       }
 
       public boolean hasExpired() {

@@ -77,6 +77,10 @@ public record LabelTextStyle(TextBorder.ITextBorder textBorder, TextWrap.ITextWr
       return this.textWrap.process(component, width).size();
    }
 
+   public int getLabelHeight(Component component, int width) {
+      return this.calculateLines(component, width) * 9;
+   }
+
    public static class Builder {
       private TextBorder.ITextBorder border = TextBorder.none();
       private TextWrap.ITextWrap wrap = TextWrap.overflow();

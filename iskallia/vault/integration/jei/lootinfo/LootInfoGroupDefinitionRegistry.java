@@ -48,5 +48,8 @@ public final class LootInfoGroupDefinitionRegistry {
       register("treasure_chest", () -> new ItemStack(ModBlocks.TREASURE_CHEST));
       register("completion_crate", () -> new ItemStack(ModBlocks.VAULT_CRATE));
       register("altar_chest", () -> new ItemStack(ModBlocks.ALTAR_CHEST));
+      register("living_strongbox", () -> new ItemStack(ModBlocks.LIVING_STRONGBOX));
+      register("gilded_strongbox", () -> new ItemStack(ModBlocks.GILDED_STRONGBOX));
+      register("ornate_strongbox", () -> new ItemStack(ModBlocks.ORNATE_STRONGBOX));
    }
 }

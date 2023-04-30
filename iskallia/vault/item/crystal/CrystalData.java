@@ -3,8 +3,10 @@ package iskallia.vault.item.crystal;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.basic.EnumAdapter;
+import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
 import iskallia.vault.item.crystal.layout.ArchitectCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicCircleCrystalLayout;
@@ -37,7 +39,6 @@ import iskallia.vault.item.crystal.time.CrystalTime;
 import iskallia.vault.item.crystal.time.NullCrystalTime;
 import iskallia.vault.item.crystal.time.PoolCrystalTime;
 import iskallia.vault.item.crystal.time.ValueCrystalTime;
-import iskallia.vault.world.vault.modifier.VaultModifierStack;
 import java.awt.Color;
 import java.util.List;
 import java.util.Optional;
@@ -54,36 +55,36 @@ import org.jetbrains.annotations.Nullable;
 public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
    public static final String NBT_KEY = "CrystalData";
    public static EnumAdapter<CrystalVersion> VERSION = Adapters.ofEnum(CrystalVersion.class, EnumAdapter.Mode.ORDINAL);
-   public static ObjectEntryAdapter<CrystalModel> MODEL = new ObjectEntryAdapter<CrystalModel>("type")
-      .register("null", NullCrystalModel.class, () -> NullCrystalModel.INSTANCE)
-      .register("compound", CompoundCrystalModel.class, CompoundCrystalModel::new)
-      .register("rainbow", RainbowCrystalModel.class, RainbowCrystalModel::new)
-      .register("raw", RawCrystalModel.class, RawCrystalModel::new)
-      .register("grayscale", GrayscaleCrystalModel.class, GrayscaleCrystalModel::new)
+   public static TypeSupplierAdapter<CrystalModel> MODEL = new TypeSupplierAdapter<CrystalModel>("type", false)
+      .<TypeSupplierAdapter<CompoundCrystalModel>>register("null", NullCrystalModel.class, () -> NullCrystalModel.INSTANCE)
+      .<TypeSupplierAdapter<RainbowCrystalModel>>register("compound", CompoundCrystalModel.class, CompoundCrystalModel::new)
+      .<TypeSupplierAdapter<RawCrystalModel>>register("rainbow", RainbowCrystalModel.class, RainbowCrystalModel::new)
+      .<TypeSupplierAdapter<GrayscaleCrystalModel>>register("raw", RawCrystalModel.class, RawCrystalModel::new)
+      .<TypeSupplierAdapter<AugmentCrystalModel>>register("grayscale", GrayscaleCrystalModel.class, GrayscaleCrystalModel::new)
       .register("augment", AugmentCrystalModel.class, AugmentCrystalModel::new);
-   public static ObjectEntryAdapter<CrystalTheme> THEME = new ObjectEntryAdapter<CrystalTheme>("type")
-      .register("null", NullCrystalTheme.class, () -> NullCrystalTheme.INSTANCE)
-      .register("value", ValueCrystalTheme.class, ValueCrystalTheme::new)
+   public static TypeSupplierAdapter<CrystalTheme> THEME = new TypeSupplierAdapter<CrystalTheme>("type", false)
+      .<TypeSupplierAdapter<ValueCrystalTheme>>register("null", NullCrystalTheme.class, () -> NullCrystalTheme.INSTANCE)
+      .<TypeSupplierAdapter<PoolCrystalTheme>>register("value", ValueCrystalTheme.class, ValueCrystalTheme::new)
       .register("pool", PoolCrystalTheme.class, PoolCrystalTheme::new);
-   public static ObjectEntryAdapter<CrystalLayout> LAYOUT = new ObjectEntryAdapter<CrystalLayout>("type")
-      .register("null", NullCrystalLayout.class, () -> NullCrystalLayout.INSTANCE)
-      .register("infinite", ClassicInfiniteCrystalLayout.class, ClassicInfiniteCrystalLayout::new)
-      .register("circle", ClassicCircleCrystalLayout.class, ClassicCircleCrystalLayout::new)
-      .register("polygon", ClassicPolygonCrystalLayout.class, ClassicPolygonCrystalLayout::new)
-      .register("spiral", ClassicSpiralCrystalLayout.class, ClassicSpiralCrystalLayout::new)
+   public static TypeSupplierAdapter<CrystalLayout> LAYOUT = new TypeSupplierAdapter<CrystalLayout>("type", false)
+      .<TypeSupplierAdapter<ClassicInfiniteCrystalLayout>>register("null", NullCrystalLayout.class, () -> NullCrystalLayout.INSTANCE)
+      .<TypeSupplierAdapter<ClassicCircleCrystalLayout>>register("infinite", ClassicInfiniteCrystalLayout.class, ClassicInfiniteCrystalLayout::new)
+      .<TypeSupplierAdapter<ClassicPolygonCrystalLayout>>register("circle", ClassicCircleCrystalLayout.class, ClassicCircleCrystalLayout::new)
+      .<TypeSupplierAdapter<ClassicSpiralCrystalLayout>>register("polygon", ClassicPolygonCrystalLayout.class, ClassicPolygonCrystalLayout::new)
+      .<TypeSupplierAdapter<ArchitectCrystalLayout>>register("spiral", ClassicSpiralCrystalLayout.class, ClassicSpiralCrystalLayout::new)
       .register("architect", ArchitectCrystalLayout.class, ArchitectCrystalLayout::new);
-   public static ObjectEntryAdapter<CrystalObjective> OBJECTIVE = new ObjectEntryAdapter<CrystalObjective>("type")
-      .register("null", NullCrystalObjective.class, () -> NullCrystalObjective.INSTANCE)
-      .register("empty", EmptyCrystalObjective.class, EmptyCrystalObjective::new)
-      .register("boss", BossCrystalObjective.class, BossCrystalObjective::new)
-      .register("cake", CakeCrystalObjective.class, CakeCrystalObjective::new)
-      .register("scavenger", ScavengerCrystalObjective.class, ScavengerCrystalObjective::new)
-      .register("speedrun", SpeedrunCrystalObjective.class, SpeedrunCrystalObjective::new)
-      .register("monolith", MonolithCrystalObjective.class, MonolithCrystalObjective::new)
+   public static TypeSupplierAdapter<CrystalObjective> OBJECTIVE = new TypeSupplierAdapter<CrystalObjective>("type", false)
+      .<TypeSupplierAdapter<EmptyCrystalObjective>>register("null", NullCrystalObjective.class, () -> NullCrystalObjective.INSTANCE)
+      .<TypeSupplierAdapter<BossCrystalObjective>>register("empty", EmptyCrystalObjective.class, EmptyCrystalObjective::new)
+      .<TypeSupplierAdapter<CakeCrystalObjective>>register("boss", BossCrystalObjective.class, BossCrystalObjective::new)
+      .<TypeSupplierAdapter<ScavengerCrystalObjective>>register("cake", CakeCrystalObjective.class, CakeCrystalObjective::new)
+      .<TypeSupplierAdapter<SpeedrunCrystalObjective>>register("scavenger", ScavengerCrystalObjective.class, ScavengerCrystalObjective::new)
+      .<TypeSupplierAdapter<MonolithCrystalObjective>>register("speedrun", SpeedrunCrystalObjective.class, SpeedrunCrystalObjective::new)
+      .<TypeSupplierAdapter<ElixirCrystalObjective>>register("monolith", MonolithCrystalObjective.class, MonolithCrystalObjective::new)
       .register("elixir", ElixirCrystalObjective.class, ElixirCrystalObjective::new);
-   public static ObjectEntryAdapter<CrystalTime> TIME = new ObjectEntryAdapter<CrystalTime>("type")
-      .register("null", NullCrystalTime.class, () -> NullCrystalTime.INSTANCE)
-      .register("value", ValueCrystalTime.class, ValueCrystalTime::new)
+   public static TypeSupplierAdapter<CrystalTime> TIME = new TypeSupplierAdapter<CrystalTime>("type", false)
+      .<TypeSupplierAdapter<ValueCrystalTime>>register("null", NullCrystalTime.class, () -> NullCrystalTime.INSTANCE)
+      .<TypeSupplierAdapter<PoolCrystalTime>>register("value", ValueCrystalTime.class, ValueCrystalTime::new)
       .register("pool", PoolCrystalTime.class, PoolCrystalTime::new);
    private CrystalVersion version = CrystalVersion.latest();
    private UUID vaultId = null;
@@ -226,7 +227,7 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
       this.layout.addText(tooltip, flag);
       this.time.addText(tooltip, flag);
       if (this.instability > 0.0F) {
-         TextComponent instabilityComponent = new TextComponent(Math.round(this.instability * 100.0F) + "%");
+         TextComponent instabilityComponent = new TextComponent("%.1f%%".formatted(this.instability * 100.0F));
          instabilityComponent.setStyle(Style.EMPTY.withColor(this.getInstabilityTextColor(Math.round(this.instability * 100.0F))));
          tooltip.add(new TextComponent("Instability: ").append(instabilityComponent));
       }

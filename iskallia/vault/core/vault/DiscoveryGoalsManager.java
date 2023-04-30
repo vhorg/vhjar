@@ -1,6 +1,8 @@
 package iskallia.vault.core.vault;
 
+import iskallia.vault.block.entity.AlchemyArchiveTileEntity;
 import iskallia.vault.block.entity.ModifierDiscoveryTileEntity;
+import iskallia.vault.config.gear.VaultAlchemyTableConfig;
 import iskallia.vault.config.gear.VaultGearWorkbenchConfig;
 import iskallia.vault.core.data.DataObject;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -17,7 +19,9 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModModelDiscoveryGoals;
+import iskallia.vault.item.BottleItem;
 import iskallia.vault.util.MiscUtils;
+import iskallia.vault.world.data.DiscoveredAlchemyModifiersData;
 import iskallia.vault.world.data.DiscoveredWorkbenchModifiersData;
 import iskallia.vault.world.data.DiscoveryGoalStatesData;
 import java.util.ArrayList;
@@ -45,6 +49,11 @@ public class DiscoveryGoalsManager extends DataObject<DiscoveryGoalsManager> {
    }
 
    public void initServer(VirtualWorld world, Vault vault) {
+      ModModelDiscoveryGoals.REGISTRY.forEach((id, discoveryGoal) -> {
+         if (discoveryGoal instanceof InVaultDiscoveryGoal<?> goal) {
+            goal.initServer(this, world, vault);
+         }
+      });
       CommonEvents.LISTENER_LEAVE.register(this, data -> data.getListener().getPlayer().ifPresent(serverPlayer -> {
          DiscoveryGoalStatesData worldData = DiscoveryGoalStatesData.get(serverPlayer.getLevel());
          DiscoveryGoalsState state = worldData.getState(serverPlayer);
@@ -53,11 +62,6 @@ public class DiscoveryGoalsManager extends DataObject<DiscoveryGoalsManager> {
             return goal instanceof InVaultDiscoveryGoal;
          });
       }));
-      ModModelDiscoveryGoals.REGISTRY.forEach((id, discoveryGoal) -> {
-         if (discoveryGoal instanceof InVaultDiscoveryGoal<?> goal) {
-            goal.initServer(this, world, vault);
-         }
-      });
       CommonEvents.BLOCK_USE
          .of(ModBlocks.MODIFIER_DISCOVERY)
          .at(BlockUseEvent.Phase.HEAD)
@@ -93,7 +97,7 @@ public class DiscoveryGoalsManager extends DataObject<DiscoveryGoalsManager> {
                               MutableComponent cmp = new TextComponent("No modifiers left to discover at your current level").withStyle(ChatFormatting.RED);
                               sPlayer.sendMessage(cmp, Util.NIL_UUID);
                            } else if (discoveryTile.setUsedByPlayer(sPlayer)) {
-                              if (discoveredModifiers.discoverWorkbenchCraft(sPlayer, (Item)tpl.getA(), (ResourceLocation)tpl.getB())) {
+                              if (discoveredModifiers.compoundDiscoverWorkbenchCraft(sPlayer, (Item)tpl.getA(), (ResourceLocation)tpl.getB())) {
                                  data.setResult(InteractionResult.SUCCESS);
                                  VaultGearWorkbenchConfig.getConfig((Item)tpl.getA())
                                     .ifPresent(
@@ -128,6 +132,76 @@ public class DiscoveryGoalsManager extends DataObject<DiscoveryGoalsManager> {
                                           }
                                        }
                                     );
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         );
+      CommonEvents.BLOCK_USE
+         .of(ModBlocks.ALCHEMY_ARCHIVE)
+         .at(BlockUseEvent.Phase.HEAD)
+         .in(world)
+         .register(
+            this,
+            data -> {
+               if (data.getWorld() == world) {
+                  Player player = data.getPlayer();
+                  if (player instanceof ServerPlayer sPlayer) {
+                     BlockPos pos = data.getPos();
+                     if (world.getBlockEntity(pos) instanceof AlchemyArchiveTileEntity discoveryTile) {
+                        if (discoveryTile.canBeUsed(player)) {
+                           int vaultLevel = vault.has(Vault.LEVEL) ? vault.get(Vault.LEVEL).get() : 0;
+                           List<ResourceLocation> itemConfigs = new ArrayList<>();
+                           DiscoveredAlchemyModifiersData discoveredModifiers = DiscoveredAlchemyModifiersData.get(world);
+
+                           for (VaultAlchemyTableConfig.CraftableModifierConfig cfg : ModConfigs.VAULT_ALCHEMY_TABLE.getAllCraftableModifiers()) {
+                              if (cfg.getUnlockCategory() == VaultAlchemyTableConfig.UnlockCategory.VAULT_DISCOVERY) {
+                                 ResourceLocation key = cfg.getWorkbenchCraftIdentifier();
+                                 if (!discoveredModifiers.hasDiscoveredCraft(player, key) && cfg.getMinLevel() <= vaultLevel) {
+                                    itemConfigs.add(key);
+                                 }
+                              }
+                           }
+
+                           ResourceLocation tpl = MiscUtils.getRandomEntry(itemConfigs);
+                           if (tpl == null) {
+                              MutableComponent cmp = new TextComponent("No modifiers left to discover at your current level").withStyle(ChatFormatting.RED);
+                              sPlayer.sendMessage(cmp, Util.NIL_UUID);
+                           } else if (discoveryTile.setUsedByPlayer(sPlayer)) {
+                              if (discoveredModifiers.compoundDiscoverWorkbenchCraft(sPlayer, tpl)) {
+                                 data.setResult(InteractionResult.SUCCESS);
+                                 VaultAlchemyTableConfig cfgx = ModConfigs.VAULT_ALCHEMY_TABLE;
+                                 VaultAlchemyTableConfig.CraftableModifierConfig modifierCfg = cfgx.getConfig(tpl);
+                                 if (modifierCfg != null) {
+                                    modifierCfg.createModifier()
+                                       .ifPresent(
+                                          modifier -> {
+                                             ItemStack stack = BottleItem.create(null, null);
+                                             if (stack.getItem() instanceof VaultGearItem) {
+                                                VaultGearData vgData = VaultGearData.read(stack);
+                                                vgData.setState(VaultGearState.IDENTIFIED);
+                                                vgData.setRarity(VaultGearRarity.COMMON);
+                                                vgData.write(stack);
+                                             }
+
+                                             modifier.getConfigDisplay(stack)
+                                                .ifPresent(
+                                                   configDisplay -> {
+                                                      MutableComponent cmp = new TextComponent("")
+                                                         .append(player.getDisplayName())
+                                                         .append(" discovered the ")
+                                                         .append(stack.getHoverName())
+                                                         .append(" modifier: ")
+                                                         .append(configDisplay);
+                                                      MiscUtils.broadcast(cmp);
+                                                   }
+                                                );
+                                          }
+                                       );
+                                 }
                               }
                            }
                         }

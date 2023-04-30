@@ -33,7 +33,7 @@ public abstract class MixinBossOverlayGui {
       )
    )
    private Collection<LerpingBossEvent> thing(Map<UUID, LerpingBossEvent> map) {
-      if (ServerVaults.isVaultWorld(Minecraft.getInstance().level)) {
+      if (ServerVaults.get(Minecraft.getInstance().level).isEmpty()) {
          return this.events.values();
       } else {
          Map<UUID, Entity> entities = new HashMap<>();

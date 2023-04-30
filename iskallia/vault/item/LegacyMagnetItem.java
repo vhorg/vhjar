@@ -74,7 +74,7 @@ public class LegacyMagnetItem extends Item implements DyeableLeatherItem, ICondi
 
    @Override
    public boolean isImmuneToDamage(ItemStack stack, Player player) {
-      return getPerk(stack) == LegacyMagnetItem.Perk.IMMORTAL && !ServerVaults.isInVault(player);
+      return getPerk(stack) == LegacyMagnetItem.Perk.IMMORTAL && ServerVaults.get(player.level).isEmpty();
    }
 
    public static int getTextureColor(ItemStack stack) {
@@ -475,7 +475,7 @@ public class LegacyMagnetItem extends Item implements DyeableLeatherItem, ICondi
 
    private static void handleMagnetDurabilityAndManaCost(Player player, ItemStack magnet, int stackSize) {
       LegacyMagnetItem.Perk perk = getPerk(magnet);
-      if (perk != LegacyMagnetItem.Perk.IMMORTAL || ServerVaults.isInVault(player)) {
+      if (perk != LegacyMagnetItem.Perk.IMMORTAL || !ServerVaults.get(player.level).isEmpty()) {
          float itemsForOneDurability = ModConfigs.MAGNET_CONFIG.getItemsForOneDurability();
          float amount = stackSize / itemsForOneDurability;
          if (player.level.random.nextFloat() < amount) {

@@ -1,6 +1,7 @@
 package iskallia.vault.client.gui.screen.bounty.element;
 
 import iskallia.vault.bounty.Bounty;
+import iskallia.vault.client.ClientExpertiseData;
 import iskallia.vault.client.gui.framework.ScreenTextures;
 import iskallia.vault.client.gui.framework.element.ContainerElement;
 import iskallia.vault.client.gui.framework.element.DynamicLabelElement;
@@ -13,6 +14,7 @@ import iskallia.vault.client.gui.framework.spatial.spi.IPosition;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.client.gui.framework.text.TextBorder;
+import iskallia.vault.client.gui.screen.bounty.BountyScreen;
 import iskallia.vault.client.gui.screen.bounty.element.task.TaskScrollContainerElement;
 import iskallia.vault.container.BountyContainer;
 import iskallia.vault.init.ModConfigs;
@@ -20,6 +22,8 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.bounty.ServerboundAbandonBountyMessage;
 import iskallia.vault.network.message.bounty.ServerboundActivateBountyMessage;
 import iskallia.vault.network.message.bounty.ServerboundClaimRewardMessage;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.expertise.type.BountyHunterExpertise;
 import iskallia.vault.util.TextUtil;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -68,7 +72,8 @@ public class BountyElement extends ContainerElement<BountyElement> {
             .setRenderButtonHeld(
                () -> (this.status == BountyElement.Status.ACTIVE || this.status == BountyElement.Status.LEGENDARY) && !this.bounty.getTask().isComplete()
             )
-            .label(this.getButtonLabel(), LabelTextStyle.center().shadow())
+            .setDisabled(this::hasMaxActive)
+            .label(this::getButtonLabel, LabelTextStyle.center().shadow())
       );
       this.headerElement.enableSpatialDebugRender(false, true);
       this.taskScrollContainerElement.enableSpatialDebugRender(false, true);
@@ -77,9 +82,23 @@ public class BountyElement extends ContainerElement<BountyElement> {
          this.setBounty(this.container.getLegendary().get(0).getId(), BountyElement.Status.LEGENDARY);
       } else if (!this.container.getActive().isEmpty()) {
          this.setBounty(this.container.getActive().get(0).getId(), BountyElement.Status.ACTIVE);
-      } else {
-         this.actionButton.setDisabled(true);
       }
+   }
+
+   private boolean hasMaxActive() {
+      int maxActive = 0;
+
+      for (TieredSkill learnedTalentNode : ClientExpertiseData.getLearnedTalentNodes()) {
+         if (learnedTalentNode.getChild() instanceof BountyHunterExpertise bountyHunter) {
+            maxActive += bountyHunter.getMaxActive();
+         }
+      }
+
+      if (maxActive == 0) {
+         maxActive = 1;
+      }
+
+      return this.container.getActive().size() >= maxActive;
    }
 
    @NotNull
@@ -141,7 +160,7 @@ public class BountyElement extends ContainerElement<BountyElement> {
             this.parent.refreshBountySelection();
             break;
          case AVAILABLE:
-            if (this.container.getActive().isEmpty()) {
+            if (!this.hasMaxActive()) {
                this.container.getActive().add(this.bounty);
                this.container.getAvailable().removeById(this.bounty.getId());
                this.status = BountyElement.Status.ACTIVE;
@@ -164,15 +183,15 @@ public class BountyElement extends ContainerElement<BountyElement> {
    public void update(Bounty bounty) {
       MutableComponent bountyTitle = TextUtil.formatLocationPathAsProperNoun(bounty.getTask().getTaskType()).withStyle(this.status.display.getStyle());
       this.headerElement.setTitle(bountyTitle);
-      this.headerElement.setIcon(bounty.getTask().getTaskType());
+      this.headerElement.setIcon(BountyScreen.TASK_ICON_MAP.get(bounty.getTask().getTaskType()));
       this.headerElement.tooltip(Tooltips.single(() -> this.status.getDisplay()));
       this.taskScrollContainerElement.setTaskElement(bounty.getTask(), this.status);
-      this.actionButton.label(this.getButtonLabel(), LabelTextStyle.center().shadow());
+      this.actionButton.label(this::getButtonLabel, LabelTextStyle.center().shadow());
       this.actionButton.setDisabled(this.status == BountyElement.Status.COMPLETE || this.bounty == null);
       if (this.status == BountyElement.Status.COMPLETE) {
          this.replaceExpirationLabel();
       } else {
-         if (this.status == BountyElement.Status.AVAILABLE && !this.container.getActive().isEmpty()) {
+         if (this.status == BountyElement.Status.AVAILABLE && this.hasMaxActive()) {
             this.actionButton.setDisabled(true);
          }
 

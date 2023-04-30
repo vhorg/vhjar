@@ -1,5 +1,6 @@
 package iskallia.vault.client.gui.screen.player;
 
+import iskallia.vault.VaultMod;
 import iskallia.vault.client.gui.framework.ScreenRenderers;
 import iskallia.vault.client.gui.framework.ScreenTextures;
 import iskallia.vault.client.gui.framework.element.ButtonElement;
@@ -15,9 +16,12 @@ import iskallia.vault.client.gui.screen.player.element.StatListPlayerContainerEl
 import iskallia.vault.client.gui.screen.player.element.StatListVaultContainerElement;
 import iskallia.vault.client.gui.screen.player.element.StatTabContainerElement;
 import iskallia.vault.client.gui.screen.player.element.VaultLevelBarElement;
+import iskallia.vault.client.gui.screen.quest.QuestOverviewElementScreen;
 import iskallia.vault.container.StatisticsTabContainer;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ServerboundOpenHistoricMessage;
+import iskallia.vault.network.message.quest.QuestRequestSyncMessage;
+import iskallia.vault.quest.client.ClientQuestState;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -109,12 +113,29 @@ public class StatisticsElementContainerScreen extends AbstractSkillTabElementCon
                ModNetwork.CHANNEL.sendToServer(ServerboundOpenHistoricMessage.INSTANCE);
                Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
             }).layout(
-               (screen, gui, parent, world) -> world.width(21).height(21).translateX(gui.right() + 4).translateY(this.getTabContentSpatial().bottom() + 68)
+               (screen, gui, parent, world) -> world.width(21).height(21).translateX(gui.right() + 4).translateY(this.getTabContentSpatial().bottom() + 61)
             ))
             .tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
                tooltipRenderer.renderTooltip(
                   poseStack, List.of(new TextComponent("Open Vault History")), mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT
                );
+               return false;
+            })
+      );
+      this.addElement(
+         (ButtonElement)((ButtonElement)new ButtonElement(Spatials.positionXY(-3, 3), ScreenTextures.BUTTON_QUEST_TEXTURES, () -> {
+               if (ClientQuestState.INSTANCE.getState() == null) {
+                  VaultMod.LOGGER.debug("Client Quest State is null. Requesting sync.");
+                  ModNetwork.CHANNEL.sendToServer(new QuestRequestSyncMessage());
+               } else {
+                  Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
+                  Minecraft.getInstance().setScreen(new QuestOverviewElementScreen());
+               }
+            }).layout(
+               (screen, gui, parent, world) -> world.width(21).height(21).translateX(gui.right() + 4).translateY(this.getTabContentSpatial().bottom() + 85)
+            ))
+            .tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+               tooltipRenderer.renderTooltip(poseStack, List.of(new TextComponent("Quests")), mouseX, mouseY, ItemStack.EMPTY, TooltipDirection.RIGHT);
                return false;
             })
       );

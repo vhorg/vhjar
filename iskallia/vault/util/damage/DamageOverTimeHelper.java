@@ -12,6 +12,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -68,7 +69,11 @@ public class DamageOverTimeHelper {
                if (entry.valid && entry.ticks % 20 == 0) {
                   Entity e = world.getEntity(entry.entityId);
                   if (e instanceof LivingEntity && e.isAlive()) {
-                     DamageUtil.shotgunAttack(e, entity -> entity.hurt(entry.source, entry.damagePerSecond));
+                     DamageUtil.shotgunAttack(e, entity -> {
+                        Vec3 movement = entity.getDeltaMovement();
+                        entity.hurt(entry.source, entry.damagePerSecond);
+                        entity.setDeltaMovement(movement);
+                     });
                   } else {
                      entry.invalidate();
                   }

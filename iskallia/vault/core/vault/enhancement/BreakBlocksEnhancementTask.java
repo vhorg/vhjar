@@ -6,9 +6,10 @@ import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.world.data.PartialNBT;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TilePredicate;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.roll.IntRoll;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,13 +45,13 @@ public class BreakBlocksEnhancementTask extends IntFilterEnhancementTask<BreakBl
    }
 
    public static class Config extends IntFilterEnhancementTask.Config<BreakBlocksEnhancementTask> {
-      private static final ArrayAdapter<String> FILTER = Adapters.ofArray(String[]::new, Adapters.UTF_8);
-      protected String[] filter;
+      private static final ArrayAdapter<TilePredicate> FILTER = Adapters.ofArray(TilePredicate[]::new, Adapters.TILE_PREDICATE);
+      protected TilePredicate[] filter;
 
       public Config() {
       }
 
-      public Config(String display, IntRoll range, String... filter) {
+      public Config(String display, IntRoll range, TilePredicate... filter) {
          super(display, range);
          this.filter = filter;
       }
@@ -60,10 +61,10 @@ public class BreakBlocksEnhancementTask extends IntFilterEnhancementTask<BreakBl
       }
 
       public boolean isValid(BlockState state, BlockEntity entity) {
-         PartialTile tile = PartialTile.of(state, (CompoundTag)(entity == null ? PartialNBT.empty() : entity.serializeNBT()));
+         PartialTile tile = PartialTile.of(PartialBlockState.of(state), PartialCompoundNbt.of(entity));
 
-         for (String filter : this.filter) {
-            if (TilePredicate.of(filter).test(tile)) {
+         for (TilePredicate filter : this.filter) {
+            if (filter.test(tile)) {
                return true;
             }
          }
@@ -82,7 +83,7 @@ public class BreakBlocksEnhancementTask extends IntFilterEnhancementTask<BreakBl
       @Override
       public void readNbt(CompoundTag nbt) {
          super.readNbt(nbt);
-         this.filter = FILTER.readNbt(nbt.get("filter")).orElse(new String[0]);
+         this.filter = FILTER.readNbt(nbt.get("filter")).orElse(new TilePredicate[0]);
       }
    }
 }

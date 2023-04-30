@@ -17,10 +17,14 @@ public enum PlayerStat {
    LEECH,
    @SerializedName("resistance")
    RESISTANCE,
+   @SerializedName("speed")
+   SPEED,
    @SerializedName("thorns_chance")
    THORNS_CHANCE,
    @SerializedName("thorns_damage")
-   THORNS_DAMAGE,
+   THORNS_DAMAGE_FLAT,
+   @SerializedName("thorns_damage_multiplier")
+   THORNS_DAMAGE_MULTIPLIER,
    @SerializedName("durability_damage")
    DURABILITY_DAMAGE,
    @SerializedName("durability_wear_reduction")
@@ -46,5 +50,9 @@ public enum PlayerStat {
    @SerializedName("idona_affinity")
    IDONA_AFFINITY,
    @SerializedName("copiously")
-   COPIOUSLY;
+   COPIOUSLY,
+   @SerializedName("lucky_hit_chance")
+   LUCKY_HIT_CHANCE,
+   @SerializedName("soul_chance")
+   SOUL_CHANCE;
 }

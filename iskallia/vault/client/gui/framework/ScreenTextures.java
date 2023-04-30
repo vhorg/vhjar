@@ -198,6 +198,7 @@ public final class ScreenTextures {
    public static final TextureAtlasRegion TAB_ICON_STATISTICS = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_statistics"));
    public static final TextureAtlasRegion TAB_ICON_ABILITIES = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_abilities"));
    public static final TextureAtlasRegion TAB_ICON_TALENTS = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_talents"));
+   public static final TextureAtlasRegion TAB_ICON_EXPERTISES = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_expertises"));
    public static final TextureAtlasRegion TAB_ICON_ARCHETYPES = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_archetypes"));
    public static final TextureAtlasRegion TAB_ICON_RESEARCHES = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_researches"));
    public static final TextureAtlasRegion TAB_ICON_PORTAL_VAULT = TextureAtlasRegion.of(
@@ -337,6 +338,21 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_WORKBENCH_MODIFIER_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_WORKBENCH_MODIFIER, BUTTON_WORKBENCH_MODIFIER_HOVER, BUTTON_WORKBENCH_MODIFIER_PRESSED, BUTTON_WORKBENCH_MODIFIER_DISABLED
    );
+   public static final TextureAtlasRegion BUTTON_ENCHANTER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_enchanter_select")
+   );
+   public static final TextureAtlasRegion BUTTON_ENCHANTER_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_enchanter_select_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_ENCHANTER_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_enchanter_select_pressed")
+   );
+   public static final TextureAtlasRegion BUTTON_ENCHANTER_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_enchanter_select_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_ENCHANTER_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_ENCHANTER, BUTTON_ENCHANTER_HOVER, BUTTON_ENCHANTER_PRESSED, BUTTON_ENCHANTER_DISABLED
+   );
    public static final DynamicProgressElement.ProgressTextures BOUNTY_PROGRESS_BAR = new DynamicProgressElement.ProgressTextures(
       INSET_GREY_BACKGROUND, SLOT_FOREGROUND
    );
@@ -417,6 +433,48 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_WARDROBE_SOLID_TEXTURES = new ButtonElement.ButtonTextures(
       WARDROBE_SOLID, WARDROBE_SOLID_HOVER, WARDROBE_SOLID, WARDROBE_SOLID
    );
+   public static final TextureAtlasRegion SKILL_ALTAR_SAVE = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_save"));
+   public static final TextureAtlasRegion SKILL_ALTAR_SAVE_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_save_hover")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_SAVE_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_save_pressed")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_SAVE_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_save_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_SKILL_ALTAR_SAVE_TEXTURES = new ButtonElement.ButtonTextures(
+      SKILL_ALTAR_SAVE, SKILL_ALTAR_SAVE_HOVER, SKILL_ALTAR_SAVE_PRESSED, SKILL_ALTAR_SAVE_DISABLED
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_LOAD = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_load"));
+   public static final TextureAtlasRegion SKILL_ALTAR_LOAD_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_load_hover")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_LOAD_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_load_pressed")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_LOAD_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_load_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_SKILL_ALTAR_LOAD_TEXTURES = new ButtonElement.ButtonTextures(
+      SKILL_ALTAR_LOAD, SKILL_ALTAR_LOAD_HOVER, SKILL_ALTAR_LOAD_PRESSED, SKILL_ALTAR_LOAD_DISABLED
+   );
+   public static final TextureAtlasRegion BUTTON_QUEST = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_quest"));
+   public static final TextureAtlasRegion BUTTON_QUEST_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_quest_disabled")
+   );
+   public static final TextureAtlasRegion BUTTON_QUEST_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_quest_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_QUEST_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_quest_pressed")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_QUEST_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_QUEST, BUTTON_QUEST_HOVER, BUTTON_QUEST_PRESSED, BUTTON_QUEST_DISABLED
+   );
+   public static final TextureAtlasRegion SLIDER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider"));
+   public static final TextureAtlasRegion SLIDER_BACKGROUND = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_background"));
+   public static final TextureAtlasRegion SLIDER_HOVER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_hover"));
    public static final ResourceLocation UI_RESOURCE = new ResourceLocation("the_vault", "textures/gui/ability_tree.png");
    public static final ResourceLocation BACKGROUNDS_RESOURCE = new ResourceLocation("the_vault", "textures/gui/ability_tree_bgs.png");
 

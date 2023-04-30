@@ -2,8 +2,8 @@ package iskallia.vault.core.world.loot;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import iskallia.vault.config.adapter.LootPoolAdapter;
 import iskallia.vault.core.Version;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.util.WeightedTree;
@@ -19,7 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
 
 public class LootPool extends WeightedTree<LootEntry> {
-   private static final Gson GSON = new GsonBuilder().registerTypeAdapter(LootPool.class, LootPoolAdapter.INSTANCE).setPrettyPrinting().create();
+   private static final Gson GSON = new GsonBuilder().registerTypeAdapter(LootPool.class, Adapters.LOOT_POOL).setPrettyPrinting().create();
    protected String path;
 
    public LootPool addItem(Item item, CompoundTag nbt, IntRoll count, int weight) {
@@ -55,6 +55,6 @@ public class LootPool extends WeightedTree<LootEntry> {
    }
 
    public Optional<LootEntry> getRandomFlat(Version version, RandomSource random, BiConsumer<WeightedList<Object>, Object> step) {
-      return super.getRandom(random::nextInt, step).map(entry -> entry.flatten(version, random));
+      return super.getRandom(random::nextDouble, step).map(entry -> entry.flatten(version, random));
    }
 }

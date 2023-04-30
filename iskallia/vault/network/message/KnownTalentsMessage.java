@@ -1,49 +1,35 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientTalentData;
-import iskallia.vault.skill.talent.TalentNode;
-import iskallia.vault.skill.talent.TalentTree;
-import java.util.ArrayList;
-import java.util.List;
+import iskallia.vault.core.net.ArrayBitBuffer;
+import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.skill.tree.TalentTree;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 public class KnownTalentsMessage {
-   private final List<TalentNode<?>> learnedTalents;
+   private TalentTree tree;
 
-   public KnownTalentsMessage(TalentTree talentTree) {
-      this(talentTree.getLearnedNodes());
+   public KnownTalentsMessage(TalentTree tree) {
+      this.tree = tree;
    }
 
-   private KnownTalentsMessage(List<TalentNode<?>> learnedTalents) {
-      this.learnedTalents = learnedTalents;
-   }
-
-   public List<TalentNode<?>> getLearnedTalents() {
-      return this.learnedTalents;
+   public TalentTree getTree() {
+      return this.tree;
    }
 
    public static void encode(KnownTalentsMessage message, FriendlyByteBuf buffer) {
-      CompoundTag nbt = new CompoundTag();
-      ListTag talents = new ListTag();
-      message.learnedTalents.stream().map(TalentNode::serializeNBT).forEach(talents::add);
-      nbt.put("LearnedTalents", talents);
-      buffer.writeNbt(nbt);
+      ArrayBitBuffer bits = ArrayBitBuffer.empty();
+      message.tree.writeBits(bits);
+      buffer.writeLongArray(bits.toLongArray());
    }
 
    public static KnownTalentsMessage decode(FriendlyByteBuf buffer) {
-      List<TalentNode<?>> abilities = new ArrayList<>();
-      CompoundTag nbt = buffer.readNbt();
-      ListTag learnedTalents = nbt.getList("LearnedTalents", 10);
-
-      for (int i = 0; i < learnedTalents.size(); i++) {
-         abilities.add(new TalentNode(learnedTalents.getCompound(i)));
-      }
-
-      return new KnownTalentsMessage(abilities);
+      BitBuffer bits = ArrayBitBuffer.backing(buffer.readLongArray(), 0);
+      TalentTree tree = new TalentTree();
+      tree.readBits(bits);
+      return new KnownTalentsMessage(tree);
    }
 
    public static void handle(KnownTalentsMessage message, Supplier<Context> contextSupplier) {

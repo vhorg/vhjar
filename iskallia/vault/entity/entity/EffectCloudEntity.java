@@ -7,6 +7,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModEntities;
+import iskallia.vault.init.ModParticles;
 import iskallia.vault.world.data.VaultPartyData;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +83,7 @@ public class EffectCloudEntity extends Entity {
       this.getEntityData().define(COLOR, 0);
       this.getEntityData().define(RADIUS, 0.5F);
       this.getEntityData().define(IGNORE_RADIUS, false);
-      this.getEntityData().define(PARTICLE, ParticleTypes.ENTITY_EFFECT);
+      this.getEntityData().define(PARTICLE, (ParticleOptions)ModParticles.CLOUD_EFFECT.get());
    }
 
    public void setRadius(float radiusIn) {
@@ -274,15 +275,17 @@ public class EffectCloudEntity extends Entity {
                float randomDst = Mth.sqrt(this.random.nextFloat()) * 0.2F;
                float xOffset = Mth.cos(randomRad) * randomDst;
                float zOffset = Mth.sin(randomRad) * randomDst;
-               if (iparticledata.getType() == ParticleTypes.ENTITY_EFFECT) {
-                  int color = this.random.nextBoolean() ? 16777215 : this.getColor();
-                  int r = color >> 16 & 0xFF;
-                  int g = color >> 8 & 0xFF;
-                  int b = color & 0xFF;
-                  this.level
-                     .addAlwaysVisibleParticle(iparticledata, this.getX() + xOffset, this.getY(), this.getZ() + zOffset, r / 255.0F, g / 255.0F, b / 255.0F);
-               } else {
-                  this.level.addAlwaysVisibleParticle(iparticledata, this.getX() + xOffset, this.getY(), this.getZ() + zOffset, 0.0, 0.0, 0.0);
+               if (this.random.nextInt(25) == 0) {
+                  if (iparticledata.getType() != ParticleTypes.ENTITY_EFFECT && iparticledata.getType() != ModParticles.CLOUD_EFFECT.get()) {
+                     this.level.addAlwaysVisibleParticle(iparticledata, this.getX() + xOffset, this.getY(), this.getZ() + zOffset, 0.0, 0.0, 0.0);
+                  } else {
+                     int color = this.random.nextBoolean() ? 16777215 : this.getColor();
+                     int r = color >> 16 & 0xFF;
+                     int g = color >> 8 & 0xFF;
+                     int b = color & 0xFF;
+                     this.level
+                        .addAlwaysVisibleParticle(iparticledata, this.getX() + xOffset, this.getY(), this.getZ() + zOffset, r / 255.0F, g / 255.0F, b / 255.0F);
+                  }
                }
             }
          }
@@ -294,24 +297,26 @@ public class EffectCloudEntity extends Entity {
             float randomDst = Mth.sqrt(this.random.nextFloat()) * radius;
             float xOffset = Mth.cos(randomRad) * randomDst;
             float zOffset = Mth.sin(randomRad) * randomDst;
-            if (iparticledata.getType() == ParticleTypes.ENTITY_EFFECT) {
-               int color = this.getColor();
-               int r = color >> 16 & 0xFF;
-               int g = color >> 8 & 0xFF;
-               int b = color & 0xFF;
-               this.level
-                  .addAlwaysVisibleParticle(iparticledata, this.getX() + xOffset, this.getY(), this.getZ() + zOffset, r / 255.0F, g / 255.0F, b / 255.0F);
-            } else {
-               this.level
-                  .addAlwaysVisibleParticle(
-                     iparticledata,
-                     this.getX() + xOffset,
-                     this.getY(),
-                     this.getZ() + zOffset,
-                     (0.5 - this.random.nextDouble()) * 0.15,
-                     0.01F,
-                     (0.5 - this.random.nextDouble()) * 0.15
-                  );
+            if (this.random.nextInt(25) == 0) {
+               if (iparticledata.getType() != ParticleTypes.ENTITY_EFFECT && iparticledata.getType() != ModParticles.CLOUD_EFFECT.get()) {
+                  this.level
+                     .addAlwaysVisibleParticle(
+                        iparticledata,
+                        this.getX() + xOffset,
+                        this.getY(),
+                        this.getZ() + zOffset,
+                        (0.5 - this.random.nextDouble()) * 0.15,
+                        0.01F,
+                        (0.5 - this.random.nextDouble()) * 0.15
+                     );
+               } else {
+                  int color = this.getColor();
+                  int r = color >> 16 & 0xFF;
+                  int g = color >> 8 & 0xFF;
+                  int b = color & 0xFF;
+                  this.level
+                     .addAlwaysVisibleParticle(iparticledata, this.getX() + xOffset, this.getY(), this.getZ() + zOffset, r / 255.0F, g / 255.0F, b / 255.0F);
+               }
             }
          }
       }

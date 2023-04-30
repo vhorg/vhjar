@@ -84,21 +84,21 @@ public class ModFeatures {
          "placed_chromatic_iron_ore_small",
          CONFIGURED_CHROMATIC_IRON_ORE_SMALL,
          RarityFilter.onAverageOnceEvery(8),
-         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-30)),
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-32)),
          InSquarePlacement.spread()
       );
       PLACED_CHROMATIC_IRON_ORE_LARGE = register(
          "placed_chromatic_iron_ore_large",
          CONFIGURED_CHROMATIC_IRON_ORE_LARGE,
          RarityFilter.onAverageOnceEvery(8),
-         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-30)),
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-32)),
          InSquarePlacement.spread()
       );
       PLACED_VAULT_STONE = register(
          "placed_vault_stone",
          CONFIGURED_VAULT_STONE,
          RarityFilter.onAverageOnceEvery(10),
-         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-32)),
+         HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(-5)),
          InSquarePlacement.spread()
       );
    }

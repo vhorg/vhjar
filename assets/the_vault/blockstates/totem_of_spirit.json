@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "type=base": {
+      "model": "the_vault:block/totem_of_spirit"
+    },
+    "type=floaties": {
+      "model": "the_vault:block/totem_of_spirit_floaties"
+    },
+    "type=masks": {
+      "model": "the_vault:block/totem_of_spirit_masks"
+    },
+    "type=masks_glow": {
+      "model": "the_vault:block/totem_of_spirit_masks_glow"
+    },
+    "type=mid": {
+      "model": "the_vault:block/totem_of_spirit_mid"
+    },
+    "type=mid_glow": {
+      "model": "the_vault:block/totem_of_spirit_mid_glow"
+    },
+    "type=top": {
+      "model": "the_vault:block/totem_of_spirit_top"
+    },
+    "type=top_glow": {
+      "model": "the_vault:block/totem_of_spirit_top_glow"
+    }
+  }
+}

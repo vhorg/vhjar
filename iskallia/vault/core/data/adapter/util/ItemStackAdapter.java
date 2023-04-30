@@ -1,6 +1,8 @@
 package iskallia.vault.core.data.adapter.util;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import io.netty.buffer.ByteBuf;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
@@ -14,6 +16,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
@@ -150,11 +153,31 @@ public class ItemStackAdapter implements ISimpleAdapter<ItemStack, Tag, JsonElem
    }
 
    public Optional<JsonElement> writeJson(@Nullable ItemStack value) {
-      throw new UnsupportedOperationException();
+      if (value == null) {
+         return Optional.empty();
+      } else {
+         JsonObject json = new JsonObject();
+         Adapters.ITEM.writeJson((IForgeRegistryEntry)value.getItem()).ifPresent(element -> json.add("id", element));
+         Adapters.COMPOUND_NBT.writeJson(value.getTag()).ifPresent(element -> json.add("nbt", element));
+         Adapters.INT.writeJson(Integer.valueOf(value.getCount())).ifPresent(element -> json.add("count", element));
+         return Optional.of(json);
+      }
    }
 
    @Override
    public Optional<ItemStack> readJson(@Nullable JsonElement json) {
-      throw new UnsupportedOperationException();
+      if (json instanceof JsonPrimitive primitive && primitive.isString()) {
+         return Adapters.ITEM.readJson(primitive).map(ItemStack::new);
+      } else {
+         return json instanceof JsonObject object
+            ? Optional.of(
+               new ItemStack(
+                  (ItemLike)Adapters.ITEM.readJson(object.get("id")).orElse(Items.AIR),
+                  Adapters.INT.readJson(object.get("count")).orElse(1),
+                  Adapters.COMPOUND_NBT.readJson(object.get("nbt")).orElse(null)
+               )
+            )
+            : Optional.empty();
+      }
    }
 }

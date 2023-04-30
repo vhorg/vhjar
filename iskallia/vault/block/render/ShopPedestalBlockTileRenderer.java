@@ -100,7 +100,7 @@ public class ShopPedestalBlockTileRenderer implements BlockEntityRenderer<ShopPe
          matrixStack.scale(0.6125F, 0.6125F, 0.6125F);
          this.itemRenderer.renderStatic(stack, TransformType.GROUND, combinedLight, combinedOverlay, matrixStack, buffer, 0);
          matrixStack.popPose();
-         matrixStack.translate(0.0, -0.25, 0.005);
+         matrixStack.translate(0.0, 0.36, 0.075);
          float scale = 0.015F;
          matrixStack.scale(scale, -scale, scale);
          fr.drawInBatch(text, 1.0F - xOffset / 2.0F, 1.0F - 9.0F / 2.0F, -16777216, false, matrixStack.last().pose(), buffer, false, 0, combinedLight);

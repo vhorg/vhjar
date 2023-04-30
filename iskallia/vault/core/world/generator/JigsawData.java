@@ -1,8 +1,7 @@
 package iskallia.vault.core.world.generator;
 
-import com.mojang.brigadier.StringReader;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TileParser;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -27,10 +26,10 @@ public class JigsawData implements INBTSerializable<CompoundTag> {
 
    public JigsawData(PartialTile tile) {
       this.tile = tile;
-      this.orientation = (FrontAndTop)tile.getState().asBlockState().getValue(JigsawBlock.ORIENTATION);
+      this.orientation = tile.getState().get(JigsawBlock.ORIENTATION);
       this.facing = this.orientation.front();
       this.side = this.orientation.top();
-      this.deserializeNBT((CompoundTag)(tile.getNbt() != null ? tile.getNbt() : new CompoundTag()));
+      this.deserializeNBT(tile.getEntity().asWhole().orElseGet(CompoundTag::new));
    }
 
    public CompoundTag serializeNBT() {
@@ -51,12 +50,17 @@ public class JigsawData implements INBTSerializable<CompoundTag> {
       }
 
       if (nbt.contains("final_state")) {
-         this.finalState = new TileParser(new StringReader(nbt.getString("final_state")), ModBlocks.ERROR_BLOCK, true).getPartialState().asBlockState();
+         this.finalState = PartialTile.parse(nbt.getString("final_state"), true)
+            .map(PartialTile::getState)
+            .flatMap(PartialBlockState::asWhole)
+            .orElse(ModBlocks.ERROR_BLOCK.defaultBlockState());
       }
 
       if (nbt.contains("joint")) {
          this.joint = JointType.byName(nbt.getString("joint"))
-            .orElseGet(() -> JigsawBlock.getFrontFacing(this.tile.getState().asBlockState()).getAxis().isHorizontal() ? JointType.ALIGNED : JointType.ROLLABLE);
+            .orElseGet(
+               () -> ((FrontAndTop)this.tile.getState().get(JigsawBlock.ORIENTATION)).front().getAxis().isHorizontal() ? JointType.ALIGNED : JointType.ROLLABLE
+            );
       }
    }
 

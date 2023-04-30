@@ -2,6 +2,7 @@ package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.ItemEntry;
+import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
@@ -9,9 +10,10 @@ import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.data.WeightedList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -24,7 +26,7 @@ public class SoulShardConfig extends Config {
    @Expose
    private SoulShardConfig.DropRange defaultShardDrops;
    @Expose
-   private final Map<String, SoulShardConfig.DropRange> shardDrops = new HashMap<>();
+   private final Map<EntityPredicate, SoulShardConfig.DropRange> shardDrops = new HashMap<>();
 
    @Override
    public String getName() {
@@ -39,7 +41,7 @@ public class SoulShardConfig extends Config {
       this.shardTrades.add(new SoulShardConfig.ShardTrade(new ItemEntry(ModItems.KNOWLEDGE_STAR_ESSENCE, 1), 900, 1200), 1);
       this.defaultShardDrops = new SoulShardConfig.DropRange(1, 1, 1.0F);
       this.shardDrops.clear();
-      this.shardDrops.put(EntityType.ZOMBIE.getRegistryName().toString(), new SoulShardConfig.DropRange(1, 1, 0.5F));
+      this.shardDrops.put(EntityPredicate.of("minecraft:zombie", true).orElseThrow(), new SoulShardConfig.DropRange(1, 1, 0.5F));
    }
 
    public int getShardTradePrice() {
@@ -50,9 +52,14 @@ public class SoulShardConfig extends Config {
       return this.shardTrades.getRandom(rand);
    }
 
-   public int getRandomShards(EntityType<?> type, float chanceMultiplier) {
-      SoulShardConfig.DropRange range = this.shardDrops.get(type.getRegistryName().toString());
-      return range == null ? this.defaultShardDrops.getRandomAmount(chanceMultiplier) : range.getRandomAmount(chanceMultiplier);
+   public int getRandomShards(Entity entity, float chanceMultiplier) {
+      for (Entry<EntityPredicate, SoulShardConfig.DropRange> entry : this.shardDrops.entrySet()) {
+         if (entry.getKey().test(entity)) {
+            return entry.getValue().getRandomAmount(chanceMultiplier);
+         }
+      }
+
+      return this.defaultShardDrops.getRandomAmount(chanceMultiplier);
    }
 
    public WeightedList<SoulShardConfig.ShardTrade> getShardTrades() {

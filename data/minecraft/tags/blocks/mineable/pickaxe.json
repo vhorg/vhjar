@@ -51,6 +51,14 @@
     "the_vault:eternal_pedestal",
     "the_vault:tool_station",
     "the_vault:golden_tooth",
-    "the_vault:wardrobe"
+    "the_vault:wardrobe",
+    "the_vault:skill_altar",
+    "the_vault:vault_enchanter",
+    "the_vault:identification_stand",
+    "the_vault:crake_column",
+    "the_vault:angel_block",
+    "the_vault:skill_altar",
+    "the_vault:alchemy_table",
+    "the_vault:identification_stand"
   ]
 }

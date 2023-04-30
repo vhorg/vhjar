@@ -6,11 +6,7 @@ import com.google.common.collect.Multimap;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.entity.VaultChestTileEntity;
-import iskallia.vault.core.Version;
-import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.util.iterator.MappingIterator;
-import iskallia.vault.core.world.loot.LootTable;
-import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
@@ -23,7 +19,6 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.SidedHelper;
@@ -32,7 +27,6 @@ import it.unimi.dsi.fastutil.ints.IntIterators;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
@@ -43,7 +37,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -52,7 +45,6 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -68,8 +60,6 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.Vanishable;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.MendingEnchantment;
@@ -106,8 +96,17 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       return !other.is(ModItems.JEWEL) && !other.is(Items.ENCHANTED_BOOK);
    }
 
+   @Override
+   public boolean isValidInput(ItemStack input) {
+      return false;
+   }
+
    public boolean isDamageable(ItemStack stack) {
       return true;
+   }
+
+   public boolean isRepairable(ItemStack stack) {
+      return false;
    }
 
    public int getMaxDamage(ItemStack stack) {
@@ -122,11 +121,15 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    public Component getName(@Nonnull ItemStack stack) {
       ToolType type = ToolType.of(stack);
       ToolMaterial material = getMaterial(stack);
-      return (Component)(material == null
-         ? new TextComponent("")
-         : new TranslatableComponent(material.getDescription())
-            .append(" ")
-            .append((Component)(type == null ? new TextComponent("") : new TranslatableComponent(type.getDescription()))));
+      if (type != null && material != null) {
+         return new TranslatableComponent(material.getDescription()).append(" ").append(new TranslatableComponent(type.getDescription()));
+      } else if (type != null) {
+         return new TranslatableComponent(type.getDescription());
+      } else {
+         return (Component)(material != null
+            ? new TranslatableComponent(material.getDescription()).append(" ").append(super.getName(stack))
+            : super.getName(stack));
+      }
    }
 
    public static ToolMaterial getMaterial(@NotNull ItemStack stack) {
@@ -173,16 +176,23 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
             && !Items.SHEARS.isCorrectToolForDrops(stack, state)) {
          if (data.get(ModGearAttributes.WOODEN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.WOODEN_CHEST)) {
             return true;
-         } else if (data.get(ModGearAttributes.ORNATE_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.ORNATE_CHEST)) {
-            return true;
-         } else if (data.get(ModGearAttributes.GILDED_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.GILDED_CHEST)) {
-            return true;
-         } else if (data.get(ModGearAttributes.LIVING_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.LIVING_CHEST)) {
-            return true;
+         } else if (!data.get(ModGearAttributes.ORNATE_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+            || !state.is(ModBlocks.ORNATE_CHEST) && !state.is(ModBlocks.ORNATE_STRONGBOX)) {
+            if (!data.get(ModGearAttributes.GILDED_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+               || !state.is(ModBlocks.GILDED_CHEST) && !state.is(ModBlocks.GILDED_STRONGBOX)) {
+               if (!data.get(ModGearAttributes.LIVING_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+                  || !state.is(ModBlocks.LIVING_CHEST) && !state.is(ModBlocks.LIVING_STRONGBOX)) {
+                  return data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)
+                     ? true
+                     : SPAWNER_ID.equals(state.getBlock().getRegistryName());
+               } else {
+                  return true;
+               }
+            } else {
+               return true;
+            }
          } else {
-            return data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)
-               ? true
-               : SPAWNER_ID.equals(state.getBlock().getRegistryName());
+            return true;
          }
       } else {
          return true;
@@ -282,7 +292,10 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
             && state.getBlock() instanceof VaultChestBlock block
             && block.hasStepBreaking()
             && world.getBlockEntity(pos) instanceof VaultChestTileEntity chest) {
-            if (block == ModBlocks.WOODEN_CHEST) {
+            if (block == ModBlocks.WOODEN_CHEST
+               || block == ModBlocks.ORNATE_STRONGBOX
+               || block == ModBlocks.GILDED_STRONGBOX
+               || block == ModBlocks.LIVING_STRONGBOX) {
                damage = 3.0;
             } else if (block == ModBlocks.GILDED_CHEST || block == ModBlocks.LIVING_CHEST || block == ModBlocks.ORNATE_CHEST) {
                damage = 0.25;
@@ -382,6 +395,10 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    }
 
    public static ItemStack create(ToolMaterial material, ToolType type) {
+      return create(material, type, data -> {});
+   }
+
+   public static ItemStack create(ToolMaterial material, ToolType type, Consumer<VaultGearData> consumer) {
       ItemStack stack = new ItemStack(ModItems.TOOL);
       VaultGearData data = VaultGearData.read(stack);
       data.setState(VaultGearState.IDENTIFIED);
@@ -400,6 +417,7 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
          data.addModifier(VaultGearModifier.AffixType.PREFIX, new VaultGearModifier<>(attribute, true));
       }
 
+      consumer.accept(data);
       data.write(stack);
       stack.getOrCreateTag().putLong("offset", 0L);
       return stack;
@@ -535,53 +553,25 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
          VaultGearData data = VaultGearData.read(stack);
          if (entity != null && entity.isShiftKeyDown()) {
             if (data.get(ModGearAttributes.SMELTING, VaultGearAttributeTypeMerger.anyTrue())) {
-               handleSmelting(world, loot);
+               Smelting.handle(world, loot);
             }
 
             if (data.get(ModGearAttributes.PULVERIZING, VaultGearAttributeTypeMerger.anyTrue())) {
-               handlePulverizing(loot);
+               Pulverizing.handle(loot);
             }
          } else {
             if (data.get(ModGearAttributes.PULVERIZING, VaultGearAttributeTypeMerger.anyTrue())) {
-               handlePulverizing(loot);
+               Pulverizing.handle(loot);
             }
 
             if (data.get(ModGearAttributes.SMELTING, VaultGearAttributeTypeMerger.anyTrue())) {
-               handleSmelting(world, loot);
+               Smelting.handle(world, loot);
             }
          }
 
          return true;
       } else {
          return false;
-      }
-   }
-
-   public static void handleSmelting(ServerLevel world, List<ItemStack> loot) {
-      for (int i = loot.size() - 1; i >= 0; i--) {
-         ItemStack raw = loot.get(i);
-         Optional<SmeltingRecipe> opt = world.getRecipeManager().getRecipeFor(RecipeType.SMELTING, new SimpleContainer(new ItemStack[]{raw}), world.getLevel());
-         if (opt.isPresent()) {
-            ItemStack smelted = opt.get().getResultItem().copy();
-            smelted.setCount(raw.getCount() * smelted.getCount());
-            loot.set(i, smelted);
-         }
-      }
-   }
-
-   public static void handlePulverizing(List<ItemStack> loot) {
-      for (int i = loot.size() - 1; i >= 0; i--) {
-         ItemStack raw = loot.get(i);
-         LootTable table = ModConfigs.TOOL_PULVERIZING.get(raw.getItem());
-         if (table != null) {
-            loot.remove(i);
-            LootTableGenerator generator = new LootTableGenerator(Version.latest(), table, 0.0F);
-            generator.generate(JavaRandom.ofNanoTime());
-            generator.getItems().forEachRemaining(pulverized -> {
-               pulverized.setCount(raw.getCount() * pulverized.getCount());
-               loot.add(pulverized);
-            });
-         }
       }
    }
 }

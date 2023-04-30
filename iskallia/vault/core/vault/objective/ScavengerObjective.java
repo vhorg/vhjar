@@ -21,6 +21,9 @@ import iskallia.vault.core.vault.objective.scavenger.ScavengeTask;
 import iskallia.vault.core.vault.objective.scavenger.ScavengerGoal;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
@@ -44,7 +47,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.RenderProperties;
@@ -86,10 +88,12 @@ public class ScavengerObjective extends Objective {
    public void initServer(VirtualWorld world, Vault vault) {
       CommonEvents.OBJECTIVE_PIECE_GENERATION
          .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
-      BlockState targetState = (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
-      CommonEvents.BLOCK_SET.at(BlockSetEvent.Type.RETURN).of(targetState).in(world).register(this, data -> {
-         BlockState state = ModBlocks.SCAVENGER_ALTAR.defaultBlockState();
-         data.getWorld().setBlock(data.getPos(), state, 3);
+      CommonEvents.BLOCK_SET.at(BlockSetEvent.Type.RETURN).in(world).register(this, data -> {
+         PartialTile target = PartialTile.of(PartialBlockState.of(ModBlocks.PLACEHOLDER), PartialCompoundNbt.empty());
+         target.getState().set(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
+         if (target.isSubsetOf(PartialTile.of(data.getState()))) {
+            data.getWorld().setBlock(data.getPos(), ModBlocks.SCAVENGER_ALTAR.defaultBlockState(), 3);
+         }
       });
       CommonEvents.SCAVENGER_ALTAR_CONSUME.register(this, data -> {
          if (data.getLevel() == world && data.getTile().getItemPlacedBy() != null) {

@@ -18,13 +18,12 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.init.ModTextureAtlases;
 import iskallia.vault.network.message.AbilityLevelMessage;
 import iskallia.vault.network.message.AbilitySelectSpecializationMessage;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityRegistry;
-import iskallia.vault.skill.ability.AbilityTree;
 import iskallia.vault.skill.ability.component.AbilityDescriptionFactory;
-import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
-import iskallia.vault.skill.ability.effect.spi.core.AbstractAbility;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.tree.AbilityTree;
 import java.awt.Rectangle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -47,10 +46,10 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
    @Override
    public void update() {
       if (this.selectedAbility != null) {
-         AbstractAbility<?> ability = AbilityRegistry.getAbility(this.selectedAbility);
+         TieredSkill ability = (TieredSkill)this.abilityTree.getForId(this.selectedAbility).orElse(null);
          if (ability != null) {
-            AbilityNode<?, ?> existingNode = this.abilityTree.getNodeOf(ability);
-            boolean isSpecialization = !ability.getAbilityGroupName().equals(this.selectedAbility);
+            SpecializedSkill existing = (SpecializedSkill)ability.getParent();
+            boolean isSpecialization = existing.getIndex() != 0;
             this.selectedAbilityWidget = new AbilityWidget(
                this.selectedAbility,
                this.abilityTree,
@@ -59,44 +58,37 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
                isSpecialization ? AbilityNodeTextures.SECONDARY_NODE : AbilityNodeTextures.PRIMARY_NODE,
                TextureAtlasRegion.of(ModTextureAtlases.ABILITIES, ModConfigs.ABILITIES_GUI.getIcon(this.selectedAbility))
             );
-            AbilityNode<?, ?> targetAbilityNode = this.selectedAbilityWidget.makeAbilityNode();
-            AbilityGroup<?, ?> targetAbilityGroup = targetAbilityNode.getGroup();
+            SpecializedSkill current = this.selectedAbilityWidget.getAbilityGroup();
+            SpecializedSkill target = this.selectedAbilityWidget.makeAbilityNode();
             OnPress pressAction;
             String buttonText;
             boolean activeState;
-            if (targetAbilityNode.getSpecialization() != null) {
+            if (target.getIndex() != 0) {
                buttonText = "Select Specialization";
                pressAction = button -> this.selectSpecialization();
-               activeState = existingNode.getSpecialization() == null
-                  && existingNode.isLearned()
-                  && VaultBarOverlay.vaultLevel >= targetAbilityNode.getAbilityConfig().getLevelRequirement();
+               activeState = existing.getIndex() == 0 && existing.isUnlocked() && VaultBarOverlay.vaultLevel >= target.getUnlockLevel();
                this.regretButton = null;
             } else {
-               if (!targetAbilityNode.isLearned()) {
-                  buttonText = "Learn (" + targetAbilityGroup.learningCost() + ")";
+               if (!target.isUnlocked()) {
+                  buttonText = "Learn (" + current.getLearnPointCost() + ")";
                } else {
-                  buttonText = existingNode.getLevel() >= targetAbilityGroup.getMaxLevel()
+                  buttonText = ((TieredSkill)existing.getSpecialization()).getTier() >= ((TieredSkill)target.getSpecialization()).getMaxTier()
                      ? "Fully Learned"
-                     : "Upgrade (" + targetAbilityGroup.levelUpCost(targetAbilityNode.getSpecialization(), targetAbilityNode.getLevel()) + ")";
+                     : "Upgrade (" + current.getSpecialization().getLearnPointCost() + ")";
                }
 
                pressAction = button -> this.upgradeAbility();
-               AbstractAbilityConfig config = targetAbilityNode.getAbilityConfig();
-               int cost = config == null
-                  ? targetAbilityGroup.learningCost()
-                  : targetAbilityGroup.levelUpCost(targetAbilityNode.getSpecialization(), targetAbilityNode.getLevel());
-               int regretCost = existingNode.isLearned() ? existingNode.getAbilityConfig().getRegretCost() : 0;
+               int cost = target.getLearnPointCost();
+               int regretCost = existing.isUnlocked() ? existing.getRegretPointCost() : 0;
                activeState = cost <= VaultBarOverlay.unspentSkillPoints
-                  && existingNode.getLevel() < targetAbilityGroup.getMaxLevel()
-                  && targetAbilityNode.getLevel() < targetAbilityGroup.getMaxLevel() + 1
-                  && VaultBarOverlay.vaultLevel >= targetAbilityNode.getAbilityConfig().getLevelRequirement();
-               String regretButtonText = !existingNode.isLearned() ? "Unlearn" : "Unlearn (" + regretCost + ")";
+                  && ((TieredSkill)existing.getSpecialization()).getTier() < ((TieredSkill)target.getSpecialization()).getMaxTier()
+                  && ((TieredSkill)target.getSpecialization()).getTier() < ((TieredSkill)target.getSpecialization()).getMaxTier() + 1
+                  && VaultBarOverlay.vaultLevel >= current.getUnlockLevel();
+               String regretButtonText = !existing.isUnlocked() ? "Unlearn" : "Unlearn (" + regretCost + ")";
                boolean hasDependants = false;
-               if (existingNode.getLevel() == 1) {
-                  for (AbilityGroup<?, ?> dependent : ModConfigs.SKILL_GATES
-                     .getGates()
-                     .getAbilitiesDependingOn(existingNode.getAbility().getAbilityGroupName())) {
-                     if (this.abilityTree.getNodeOf(dependent).isLearned()) {
+               if (((TieredSkill)existing.getSpecialization()).getTier() == 1) {
+                  for (String dependent : ModConfigs.SKILL_GATES.getGates().getAbilitiesDependingOn(existing.getId())) {
+                     if (this.abilityTree.getForId(dependent).map(Skill::isUnlocked).orElse(false)) {
                         hasDependants = true;
                         break;
                      }
@@ -104,12 +96,15 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
                }
 
                this.regretButton = new Button(0, 0, 0, 0, new TextComponent(regretButtonText), button -> this.downgradeAbility(), Button.NO_TOOLTIP);
-               this.regretButton.active = existingNode.isLearned() && regretCost <= VaultBarOverlay.unspentRegretPoints && !hasDependants;
+               this.regretButton.active = existing.isUnlocked() && regretCost <= VaultBarOverlay.unspentRegretPoints && !hasDependants;
             }
 
             this.descriptionComponent = new ScrollableContainer(this::renderDescriptions);
             this.descriptionContentComponent = AbilityDescriptionFactory.create(
-               existingNode.getGroup(), targetAbilityNode.getSpecialization(), existingNode.getLevel(), VaultBarOverlay.vaultLevel
+               (TieredSkill)target.getSpecialization(),
+               ((TieredSkill)current.getSpecialization()).getTier(),
+               ((TieredSkill)current.getSpecialization()).getMaxTier(),
+               VaultBarOverlay.vaultLevel
             );
             this.learnButton = new Button(0, 0, 0, 0, new TextComponent(buttonText), pressAction, Button.NO_TOOLTIP);
             this.learnButton.active = activeState;
@@ -123,44 +118,37 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
    }
 
    private void upgradeAbility() {
-      AbilityNode<?, ?> abilityNode = this.abilityTree.getNodeByName(AbilityRegistry.getAbility(this.selectedAbility).getAbilityGroupName());
-      if (abilityNode.getLevel() < abilityNode.getGroup().getMaxLevel()) {
-         Minecraft.getInstance().player.playSound(abilityNode.isLearned() ? ModSounds.SKILL_TREE_UPGRADE_SFX : ModSounds.SKILL_TREE_LEARN_SFX, 1.0F, 1.0F);
-         this.abilityTree.upgradeAbility(null, abilityNode);
+      TieredSkill ability = (TieredSkill)this.abilityTree.getForId(this.selectedAbility).orElse(null);
+      if (ability.getTier() < ability.getMaxTier()) {
+         Minecraft.getInstance().player.playSound(ability.isUnlocked() ? ModSounds.SKILL_TREE_UPGRADE_SFX : ModSounds.SKILL_TREE_LEARN_SFX, 1.0F, 1.0F);
+         ((SpecializedSkill)ability.getParent()).learn(SkillContext.ofClient());
          this.update();
-         ModNetwork.CHANNEL.sendToServer(new AbilityLevelMessage(abilityNode.getGroup().getParentName(), true));
+         ModNetwork.CHANNEL.sendToServer(new AbilityLevelMessage(ability.getParent().getId(), true));
       }
    }
 
    private void downgradeAbility() {
-      AbstractAbility<?> ability = AbilityRegistry.getAbility(this.selectedAbility);
+      TieredSkill ability = (TieredSkill)this.abilityTree.getForId(this.selectedAbility).orElse(null);
       if (ability != null) {
-         boolean isSpecialization = !ability.getAbilityGroupName().equals(this.selectedAbility);
-         if (!isSpecialization) {
-            AbilityNode<?, ?> abilityNode = this.abilityTree.getNodeOf(ability);
-            if (abilityNode.isLearned()) {
-               Minecraft.getInstance().player.playSound(ModSounds.SKILL_TREE_UPGRADE_SFX, 1.0F, 1.0F);
-               if (abilityNode.getLevel() == 1) {
-                  this.abilityTree.selectSpecialization(ability.getAbilityGroupName(), null);
-               }
-
-               this.abilityTree.downgradeAbility(null, abilityNode);
-               this.update();
-               ModNetwork.CHANNEL.sendToServer(new AbilityLevelMessage(abilityNode.getGroup().getParentName(), false));
-            }
+         SpecializedSkill group = (SpecializedSkill)ability.getParent();
+         if (group.isUnlocked()) {
+            Minecraft.getInstance().player.playSound(ModSounds.SKILL_TREE_UPGRADE_SFX, 1.0F, 1.0F);
+            group.regret(SkillContext.ofClient());
+            this.update();
+            ModNetwork.CHANNEL.sendToServer(new AbilityLevelMessage(group.getId(), false));
          }
       }
    }
 
    private void selectSpecialization() {
-      AbilityNode<?, ?> targetNode = this.selectedAbilityWidget.makeAbilityNode();
-      AbilityNode<?, ?> existingNode = this.abilityTree.getNodeByName(AbilityRegistry.getAbility(this.selectedAbility).getAbilityGroupName());
-      String toSelect = targetNode.getSpecialization();
-      String abilityName = existingNode.getGroup().getParentName();
-      if (existingNode.getSpecialization() == null || !targetNode.getGroup().equals(existingNode.getGroup())) {
-         if (VaultBarOverlay.vaultLevel >= targetNode.getAbilityConfig().getLevelRequirement()) {
+      SpecializedSkill targetNode = this.selectedAbilityWidget.makeAbilityNode();
+      SpecializedSkill existingNode = (SpecializedSkill)this.abilityTree.getForId(this.selectedAbility).map(Skill::getParent).orElse(null);
+      String toSelect = targetNode.getSpecialization().getId();
+      String abilityName = existingNode.getId();
+      if (existingNode.getIndex() == 0 || !targetNode.getId().equals(existingNode.getId())) {
+         if (VaultBarOverlay.vaultLevel >= targetNode.getUnlockLevel()) {
             Minecraft.getInstance().player.playSound(ModSounds.SKILL_TREE_UPGRADE_SFX, 1.0F, 1.0F);
-            this.abilityTree.selectSpecialization(abilityName, toSelect);
+            this.abilityTree.specialize(toSelect, SkillContext.ofClient());
             this.skillTreeScreen.update();
             ModNetwork.CHANNEL.sendToServer(new AbilitySelectSpecializationMessage(abilityName, toSelect));
          }
@@ -186,22 +174,25 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
       RenderSystem.setShader(GameRenderer::getPositionTexShader);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
       RenderSystem.setShaderTexture(0, ScreenTextures.UI_RESOURCE);
-      AbilityNode<?, ?> targetAbilityNode = this.selectedAbilityWidget.makeAbilityNode();
-      AbilityNode<?, ?> currentAbilityNode = this.abilityTree.getNodeOf(targetAbilityNode.getGroup());
+      SpecializedSkill targetAbilityNode = this.selectedAbilityWidget.makeAbilityNode();
+      SpecializedSkill currentAbilityNode = (SpecializedSkill)this.abilityTree.getForId(targetAbilityNode.getId()).orElse(null);
       boolean learned;
       String abilityName;
       String subText;
-      if (targetAbilityNode.getSpecialization() != null) {
-         learned = targetAbilityNode.getSpecialization().equals(currentAbilityNode.getSpecialization());
-         abilityName = targetAbilityNode.getGroup().getParentName() + ": " + targetAbilityNode.getSpecializationName();
+      if (targetAbilityNode.getIndex() != 0) {
+         learned = targetAbilityNode.getIndex() == currentAbilityNode.getIndex();
+         abilityName = targetAbilityNode.getSpecialization().getName();
          subText = learned ? "Selected" : "Not selected";
       } else {
-         learned = targetAbilityNode.isLearned();
-         abilityName = targetAbilityNode.getGroup().getParentName();
+         learned = targetAbilityNode.isUnlocked();
+         abilityName = targetAbilityNode.getSpecialization().getName();
          if (!learned) {
             subText = "Not learned yet";
          } else {
-            subText = "Level: " + currentAbilityNode.getLevel() + "/" + targetAbilityNode.getGroup().getMaxLevel();
+            subText = "Level: "
+               + ((TieredSkill)currentAbilityNode.getSpecialization()).getTier()
+               + "/"
+               + ((TieredSkill)currentAbilityNode.getSpecialization()).getMaxTier();
          }
       }
 

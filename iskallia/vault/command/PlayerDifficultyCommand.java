@@ -42,7 +42,7 @@ public class PlayerDifficultyCommand extends Command {
       for (VaultDifficulty vaultDifficulty : VaultDifficulty.values()) {
          argument.then(
             ((LiteralArgumentBuilder)Commands.literal(vaultDifficulty.getKey())
-                  .requires(s -> s.hasPermission(s.getLevel().getGameRules().getBoolean(ModGameRules.VAULT_NO_OP_DIFFICULTY) ? 0 : 2)))
+                  .requires(s -> s.hasPermission(s.getLevel().getGameRules().getBoolean(ModGameRules.NO_OP_DIFFICULTY) ? 0 : 2)))
                .executes(ctx -> setDifficulty((CommandSourceStack)ctx.getSource(), EntityArgument.getPlayer(ctx, "player"), vaultDifficulty))
          );
       }

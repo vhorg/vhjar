@@ -2,6 +2,7 @@ package iskallia.vault;
 
 import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.core.SkyVaultsPreset;
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.dump.VaultDataDump;
 import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModificationRegistry;
 import iskallia.vault.init.ModClientCommands;
@@ -16,6 +17,7 @@ import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.integration.IntegrationDankStorage;
 import iskallia.vault.integration.IntegrationMinimap;
 import iskallia.vault.integration.IntegrationWorldMap;
+import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.scheduler.DailyScheduler;
 import iskallia.vault.world.data.DiscoveredModelsData;
@@ -30,7 +32,8 @@ import iskallia.vault.world.data.PlayerProficiencyData;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.gen.structure.VaultJigsawHelper;
+import iskallia.vault.world.data.SkillAltarData;
+import java.util.Objects;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -68,7 +71,6 @@ public class VaultMod {
       MinecraftForge.EVENT_BUS.addListener(EventPriority.LOWEST, this::onBiomeLoadPost);
       MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, this::onPlayerLoggedIn);
       MinecraftForge.EVENT_BUS.addListener(ServerScheduler.INSTANCE::onServerTick);
-      MinecraftForge.EVENT_BUS.addListener(VaultJigsawHelper::preloadVaultRooms);
       MinecraftForge.EVENT_BUS.addListener(DailyScheduler::start);
       MinecraftForge.EVENT_BUS.addListener(DailyScheduler::stop);
       MinecraftForge.EVENT_BUS.addListener(VaultDataDump::onStart);
@@ -96,6 +98,8 @@ public class VaultMod {
          MinecraftForge.EVENT_BUS.addListener(this::onClientCommandRegister);
          SkyVaultsPreset.register();
       }
+
+      CommonEvents.init();
    }
 
    public void registerDeferredRegistries() {
@@ -121,15 +125,7 @@ public class VaultMod {
    }
 
    public void onBiomeLoadPost(BiomeLoadingEvent event) {
-      if (event.getName().equals(id("spoopy"))) {
-         for (Decoration stage : Decoration.values()) {
-            event.getGeneration().getFeatures(stage).clear();
-         }
-
-         event.getGeneration().addFeature(Decoration.UNDERGROUND_DECORATION, ModFeatures.PLACED_BREADCRUMB_CHEST);
-      }
-
-      if (event.getName().equals(Biomes.THE_VOID.location())) {
+      if (Objects.equals(event.getName(), Biomes.THE_VOID.location())) {
          for (Decoration stage : Decoration.values()) {
             event.getGeneration().getFeatures(stage).clear();
          }
@@ -142,8 +138,8 @@ public class VaultMod {
       MinecraftServer server = player.getServer();
       PlayerVaultStatsData.get(serverWorld).getVaultStats(player).sync(server);
       PlayerResearchesData.get(serverWorld).sync(player);
-      PlayerAbilitiesData.get(serverWorld).getAbilities(player).sync(server);
-      PlayerTalentsData.get(serverWorld).getTalents(player).sync(server);
+      PlayerAbilitiesData.get(serverWorld).getAbilities(player).sync(SkillContext.of(player));
+      PlayerTalentsData.get(serverWorld).getTalents(player).sync(SkillContext.of(player));
       PlayerArchetypeData.get(serverWorld).getArchetypeContainer(player).syncToClient(server);
       PlayerProficiencyData.get(serverWorld).sendProficiencyInformation(player);
       EternalsData.get(serverWorld).syncTo(player);
@@ -152,6 +148,7 @@ public class VaultMod {
       DiscoveredModelsData.get(serverWorld).syncTo(player);
       DiscoveredTrinketsData.get(serverWorld).syncTo(player);
       DiscoveredWorkbenchModifiersData.get(serverWorld).syncTo(player);
+      SkillAltarData.get(serverWorld).syncTo(player);
       ModConfigs.SOUL_SHARD.syncTo(ModConfigs.SOUL_SHARD, player);
       ModConfigs.GEAR_RECIPES.syncTo(ModConfigs.GEAR_RECIPES, player);
       ModConfigs.JEWEL_RECIPES.syncTo(ModConfigs.JEWEL_RECIPES, player);

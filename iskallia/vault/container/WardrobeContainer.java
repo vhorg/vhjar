@@ -99,6 +99,10 @@ public abstract class WardrobeContainer extends AbstractElementContainer {
       return ret;
    }
 
+   public ItemStackHandler getHotbarItems() {
+      return this.tileEntity.getHotbarItems();
+   }
+
    public boolean isOwner() {
       return this.tileEntity.isOwner(this.player);
    }
@@ -241,7 +245,7 @@ public abstract class WardrobeContainer extends AbstractElementContainer {
          ItemStack originalStack = ItemStack.EMPTY;
          Slot slot = (Slot)this.slots.get(index);
          if (slot != null && slot.hasItem()) {
-            ItemStack slotStack = slot.getItem().copy();
+            ItemStack slotStack = slot.getItem();
             originalStack = slotStack.copy();
             boolean didNotMoveAnything;
             if (this.curioSlotIndexRange.contains(index)) {
@@ -281,6 +285,12 @@ public abstract class WardrobeContainer extends AbstractElementContainer {
             } else {
                slot.setChanged();
             }
+
+            if (slotStack.getCount() == originalStack.getCount()) {
+               return ItemStack.EMPTY;
+            }
+
+            slot.onTake(player, slotStack);
          }
 
          return originalStack;
@@ -292,6 +302,14 @@ public abstract class WardrobeContainer extends AbstractElementContainer {
 
       public void toggleSolidRender() {
          ModNetwork.CHANNEL.sendToServer(new ServerboundWardrobeToggleSolidRenderMessage(this.tileEntity.getBlockPos()));
+      }
+
+      public Player getDummyRenderPlayer() {
+         return this.tileEntity.getDummyRenderPlayer();
+      }
+
+      public BlockPos getBlockPos() {
+         return this.tileEntity.getBlockPos();
       }
    }
 

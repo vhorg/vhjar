@@ -1,16 +1,16 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TilePredicate;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ArchitectConfig extends Config {
    @Expose
-   private List<String> whitelist;
+   private List<TilePredicate> whitelist;
    @Expose
-   private List<String> blacklist;
+   private List<TilePredicate> blacklist;
 
    @Override
    public String getName() {
@@ -18,8 +18,8 @@ public class ArchitectConfig extends Config {
    }
 
    public boolean isWhitelisted(PartialTile tile) {
-      for (String predicate : this.whitelist) {
-         if (TilePredicate.of(predicate).test(tile)) {
+      for (TilePredicate predicate : this.whitelist) {
+         if (predicate.test(tile)) {
             return true;
          }
       }
@@ -28,8 +28,8 @@ public class ArchitectConfig extends Config {
    }
 
    public boolean isBlacklisted(PartialTile tile) {
-      for (String predicate : this.blacklist) {
-         if (TilePredicate.of(predicate).test(tile)) {
+      for (TilePredicate predicate : this.blacklist) {
+         if (predicate.test(tile)) {
             return true;
          }
       }

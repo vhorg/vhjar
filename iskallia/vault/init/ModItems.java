@@ -1,6 +1,5 @@
 package iskallia.vault.init;
 
-import com.google.common.collect.Lists;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.item.AnimalJarItem;
@@ -9,14 +8,13 @@ import iskallia.vault.item.AugmentItem;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.item.BasicMobEggItem;
 import iskallia.vault.item.BasicScavengerItem;
-import iskallia.vault.item.BurntCrystalItem;
+import iskallia.vault.item.BottleItem;
 import iskallia.vault.item.GatedLootableItem;
 import iskallia.vault.item.GodBlessingItem;
 import iskallia.vault.item.InfiniteWaterBucketItem;
 import iskallia.vault.item.InscriptionItem;
 import iskallia.vault.item.InscriptionPieceItem;
 import iskallia.vault.item.ItemDrillArrow;
-import iskallia.vault.item.ItemGiftBomb;
 import iskallia.vault.item.ItemKnowledgeStar;
 import iskallia.vault.item.ItemLegendaryTreasure;
 import iskallia.vault.item.ItemRelicBoosterPack;
@@ -29,8 +27,10 @@ import iskallia.vault.item.ItemVaultFruit;
 import iskallia.vault.item.ItemVaultKey;
 import iskallia.vault.item.LootableItem;
 import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.NeuralizerItem;
 import iskallia.vault.item.OldNotesItem;
 import iskallia.vault.item.PaxelJewelItem;
+import iskallia.vault.item.QuestBookItem;
 import iskallia.vault.item.RegretOrbItem;
 import iskallia.vault.item.RelicFragmentItem;
 import iskallia.vault.item.RelicItem;
@@ -40,7 +40,6 @@ import iskallia.vault.item.VaultCatalystInfusedItem;
 import iskallia.vault.item.VaultCatalystItem;
 import iskallia.vault.item.VaultCharmUpgrade;
 import iskallia.vault.item.VaultDollItem;
-import iskallia.vault.item.VaultPearlItem;
 import iskallia.vault.item.VaultRuneItem;
 import iskallia.vault.item.VaultXPFoodItem;
 import iskallia.vault.item.consumable.AbsorptionAppleItem;
@@ -64,9 +63,6 @@ import iskallia.vault.util.function.Memo;
 import java.util.Random;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -233,12 +229,9 @@ public class ModItems {
    public static ItemVaultKey PUFFIUM_KEY = new ItemVaultKey(VAULT_MOD_GROUP, VaultMod.id("key_puffium"));
    public static ItemVaultKey PETZANITE_KEY = new ItemVaultKey(VAULT_MOD_GROUP, VaultMod.id("key_petzanite"));
    public static ItemVaultKey XENIUM_KEY = new ItemVaultKey(VAULT_MOD_GROUP, VaultMod.id("key_xenium"));
-   public static BasicItem MOTE_CLARITY = new BasicItem(VaultMod.id("mote_clarity"))
-      .withTooltip(new TextComponent("Reveals all curses on a Vault Crystal.").withStyle(ChatFormatting.GRAY));
-   public static BasicItem MOTE_PURITY = new BasicItem(VaultMod.id("mote_purity"))
-      .withTooltip(new TextComponent("Removes a random curse from a Vault Crystal.").withStyle(ChatFormatting.GRAY));
-   public static BasicItem MOTE_SANCTITY = new BasicItem(VaultMod.id("mote_sanctity"))
-      .withTooltip(new TextComponent("Removes all curses from a Vault Crystal.").withStyle(ChatFormatting.GRAY));
+   public static BasicItem MOTE_CLARITY = new BasicItem(VaultMod.id("mote_clarity"));
+   public static BasicItem MOTE_PURITY = new BasicItem(VaultMod.id("mote_purity"));
+   public static BasicItem MOTE_SANCTITY = new BasicItem(VaultMod.id("mote_sanctity"));
    public static VaultXPFoodItem PLAIN_BURGER = new VaultXPFoodItem.Flat(
       VaultMod.id("plain_burger"),
       () -> ModConfigs.VAULT_ITEMS.PLAIN_BURGER.minExp,
@@ -324,10 +317,6 @@ public class ModItems {
    public static ItemLegendaryTreasure LEGENDARY_TREASURE_OMEGA = new ItemLegendaryTreasure(
       VAULT_MOD_GROUP, VaultMod.id("legendary_treasure_omega"), VaultRarity.OMEGA
    );
-   public static ItemGiftBomb NORMAL_GIFT_BOMB = new ItemGiftBomb(VAULT_MOD_GROUP, ItemGiftBomb.Variant.NORMAL, VaultMod.id("gift_bomb_normal"));
-   public static ItemGiftBomb SUPER_GIFT_BOMB = new ItemGiftBomb(VAULT_MOD_GROUP, ItemGiftBomb.Variant.SUPER, VaultMod.id("gift_bomb_super"));
-   public static ItemGiftBomb MEGA_GIFT_BOMB = new ItemGiftBomb(VAULT_MOD_GROUP, ItemGiftBomb.Variant.MEGA, VaultMod.id("gift_bomb_mega"));
-   public static ItemGiftBomb OMEGA_GIFT_BOMB = new ItemGiftBomb(VAULT_MOD_GROUP, ItemGiftBomb.Variant.OMEGA, VaultMod.id("gift_bomb_omega"));
    public static LootableItem MYSTERY_BOX = new LootableItem(
       VaultMod.id("mystery_box"), new Properties().tab(VAULT_MOD_GROUP), () -> ModConfigs.MYSTERY_BOX.POOL.getRandom(new Random()).generateItemStack()
    );
@@ -347,9 +336,7 @@ public class ModItems {
       new Properties().tab(VAULT_MOD_GROUP),
       () -> ModConfigs.UNIDENTIFIED_RELIC_FRAGMENTS.getRandomFragment(new Random())
    );
-   public static GatedLootableItem MOD_BOX = new GatedLootableItem(
-      VaultMod.id("mod_box"), new Properties().tab(VAULT_MOD_GROUP), new TextComponent("Contains a random modded item from any of your unlocked mods")
-   );
+   public static GatedLootableItem MOD_BOX = new GatedLootableItem(VaultMod.id("mod_box"), new Properties().tab(VAULT_MOD_GROUP));
    public static LootableItem UNIDENTIFIED_TREASURE_KEY = new LootableItem(
       VaultMod.id("unidentified_treasure_key"), new Properties().tab(VAULT_MOD_GROUP), () -> ModConfigs.UNIDENTIFIED_TREASURE_KEY.getRandomKey(new Random())
    );
@@ -367,6 +354,7 @@ public class ModItems {
    public static BasicItem REGRET_NUGGET = new BasicItem(VaultMod.id("regret_nugget"));
    public static BasicItem REGRET_CHUNK = new BasicItem(VaultMod.id("regret_chunk"));
    public static RegretOrbItem REGRET_ORB = new RegretOrbItem(VaultMod.id("regret_orb"));
+   public static NeuralizerItem NEURALIZER = new NeuralizerItem(VaultMod.id("neuralizer"));
    public static ArchetypeStarItem ARCHETYPE_STAR = new ArchetypeStarItem(VaultMod.id("archetype_star"));
    public static BasicItem ARCHETYPE_STAR_SHARD = new BasicItem(VaultMod.id("archetype_star_shard"));
    public static BasicItem ARCHETYPE_STAR_CORE = new BasicItem(VaultMod.id("archetype_star_core"));
@@ -387,6 +375,7 @@ public class ModItems {
    public static ToolItem TOOL = new ToolItem(VaultMod.id("tool"), new Properties().tab(GEAR_GROUP).stacksTo(1));
    public static JewelItem JEWEL = new JewelItem(VaultMod.id("jewel"), new Properties().tab(GEAR_GROUP).stacksTo(1));
    public static GemstoneItem GEMSTONE = new GemstoneItem(VaultMod.id("gemstone"), new Properties().tab(GEAR_GROUP));
+   public static BottleItem BOTTLE = new BottleItem(VaultMod.id("bottle"), new Properties().stacksTo(1).tab(GEAR_GROUP));
    public static BasicItem VAULT_PLATING = new BasicItem(VaultMod.id("vault_plating"));
    public static BasicItem REPAIR_CORE = new BasicItem(VaultMod.id("repair_core"));
    public static BasicItem VAULT_ALLOY = new BasicItem(VaultMod.id("vault_alloy"));
@@ -419,8 +408,7 @@ public class ModItems {
    public static InscriptionItem INSCRIPTION = new InscriptionItem(VAULT_MOD_GROUP, VaultMod.id("inscription"));
    public static InscriptionPieceItem INSCRIPTION_PIECE = new InscriptionPieceItem(VAULT_MOD_GROUP, VaultMod.id("inscription_piece"));
    public static AugmentItem AUGMENT = new AugmentItem(VAULT_MOD_GROUP, VaultMod.id("augment"));
-   public static BasicItem VAULT_CATALYST_FRAGMENT = new BasicItem(VaultMod.id("vault_catalyst_fragment"))
-      .withTooltip(new TranslatableComponent("tooltip.the_vault.vault_catalyst_fragment").withStyle(ChatFormatting.GRAY));
+   public static BasicItem VAULT_CATALYST_FRAGMENT = new BasicItem(VaultMod.id("vault_catalyst_fragment"));
    public static BasicItem PHOENIX_DUST = new BasicItem(VaultMod.id("phoenix_dust"));
    public static BasicItem PHOENIX_FEATHER = new BasicItem(VaultMod.id("phoenix_feather"));
    public static BasicItem DREAMSTONE = new BasicItem(VaultMod.id("dreamstone"));
@@ -432,17 +420,8 @@ public class ModItems {
    public static BasicItem MAGNETITE_INGOT = new BasicItem(VaultMod.id("magnetite_ingot"));
    public static BasicItem UNKNOWN_EGG = new BasicItem(VaultMod.id("unknown_egg"));
    public static InfiniteWaterBucketItem INFINITE_WATER_BUCKET = new InfiniteWaterBucketItem(VaultMod.id("infinite_water_bucket"));
-   public static VaultPearlItem VAULT_PEARL = new VaultPearlItem(VaultMod.id("vault_pearl"));
    public static BasicItem ACCELERATION_CHIP = new BasicItem(VaultMod.id("acceleration_chip"));
-   public static BasicItem IDENTIFICATION_TOME = new BasicItem(VaultMod.id("identification_tome"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1))
-      .withTooltip(
-         Lists.newArrayList(
-            new Component[]{
-               new TextComponent("Hold in the off hand to instantly").withStyle(ChatFormatting.GRAY),
-               new TextComponent("identify vault gear.").withStyle(ChatFormatting.GRAY)
-            }
-         )
-      );
+   public static BasicItem IDENTIFICATION_TOME = new BasicItem(VaultMod.id("identification_tome"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static VaultDollItem VAULT_DOLL = new VaultDollItem(VaultMod.id("vault_doll"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BasicItem VAULT_COMPASS = new BasicItem(VaultMod.id("vault_compass"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BucketItem VOID_LIQUID_BUCKET = (BucketItem)new BucketItem(
@@ -464,6 +443,7 @@ public class ModItems {
    public static BasicItem LOST_BOUNTY = new BasicItem(VaultMod.id("lost_bounty"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).rarity(Rarity.UNCOMMON));
    public static BasicItem BOUNTY_PEARL = new BasicItem(VaultMod.id("bounty_pearl"), new Properties().tab(VAULT_MOD_GROUP));
    public static OldNotesItem OLD_NOTES = new OldNotesItem(VaultMod.id("old_notes"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).rarity(Rarity.UNCOMMON));
+   public static QuestBookItem QUEST_BOOK = new QuestBookItem(VaultMod.id("quest_book"));
    public static AnimalJarItem ANIMAL_JAR = new AnimalJarItem(VaultMod.id("animal_jar"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BasicItem DRILL_ARROW_PART = new BasicItem(VaultMod.id("drill_arrow_part"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(8));
    public static ItemDrillArrow DRILL_ARROW = new ItemDrillArrow(VAULT_MOD_GROUP, VaultMod.id("drill_arrow"));
@@ -529,10 +509,8 @@ public class ModItems {
    public static BasicScavengerItem SCAVENGER_MOB_BLACK = new BasicScavengerItem("mob_black");
    public static BasicScavengerItem SCAVENGER_MOB_GREEN = new BasicScavengerItem("mob_green");
    public static BasicScavengerItem SCAVENGER_MOB_PURPLE = new BasicScavengerItem("mob_purple");
-   public static BasicItem LIFE_SCROLL = new BasicItem(VaultMod.id("life_scroll"))
-      .withTooltip(new TextComponent("Revives a unalived eternal").withStyle(ChatFormatting.GRAY));
-   public static BasicItem AURA_SCROLL = new BasicItem(VaultMod.id("aura_scroll"))
-      .withTooltip(new TextComponent("Rerolls an eternal's available auras").withStyle(ChatFormatting.GRAY));
+   public static BasicItem LIFE_SCROLL = new BasicItem(VaultMod.id("life_scroll"));
+   public static BasicItem AURA_SCROLL = new BasicItem(VaultMod.id("aura_scroll"));
    public static BasicItem MEMORY_POWDER = new BasicItem(VaultMod.id("memory_powder"));
    public static BasicItem MEMORY_SHARD = new BasicItem(VaultMod.id("memory_shard"));
    public static BasicItem MEMORY_CRYSTAL = new BasicItem(VaultMod.id("memory_crystal"));
@@ -553,17 +531,7 @@ public class ModItems {
    public static PaxelJewelItem XEN_JEWEL = new PaxelJewelItem(VaultMod.id("xen_jewel"), PaxelItem.Perk.AXING);
    public static PaxelJewelItem ASH_JEWEL = new PaxelJewelItem(VaultMod.id("ash_jewel"), PaxelItem.Perk.STURDY);
    public static PaxelJewelItem PETZAN_JEWEL = new PaxelJewelItem(VaultMod.id("petzan_jewel"), PaxelItem.Perk.REINFORCED);
-   public static BasicItem VAULT_CHARM = new BasicItem(VaultMod.id("vault_charm"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1))
-      .withTooltip(
-         Lists.newArrayList(
-            new Component[]{
-               new TextComponent("When this charm is in your inventory").withStyle(ChatFormatting.GRAY),
-               new TextComponent("it will automatically void any item").withStyle(ChatFormatting.GRAY),
-               new TextComponent("whitelisted in the Vault Controller").withStyle(ChatFormatting.GRAY),
-               new TextComponent("on pickup in a Vault.").withStyle(ChatFormatting.GRAY)
-            }
-         )
-      );
+   public static BasicItem VAULT_CHARM = new BasicItem(VaultMod.id("vault_charm"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static VaultCharmUpgrade CHARM_UPGRADE_TIER_1 = new VaultCharmUpgrade(
       VaultMod.id("charm_upgrade_tier_1"), VaultCharmUpgrade.Tier.ONE, new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).fireResistant()
    );
@@ -775,10 +743,138 @@ public class ModItems {
    public static final BasicMobEggItem WINTER_WOLF_EGG = new BasicMobEggItem(
       VaultMod.id("winter_wolf_egg"), () -> ModEntities.WINTER_WOLF, 10000793, 2845360, new Properties().tab(VAULT_MOD_GROUP)
    );
+   public static final BasicMobEggItem SHIVER_EGG = new BasicMobEggItem(
+      VaultMod.id("shiver_egg"), () -> ModEntities.SHIVER, 3498338, 9677749, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T0_SKELETON_PIRATE_EGG = new BasicMobEggItem(
+      VaultMod.id("t0_skeleton_pirate_egg"), () -> ModEntities.T0_SKELETON_PIRATE, 4549221, 7520684, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T1_SKELETON_PIRATE_EGG = new BasicMobEggItem(
+      VaultMod.id("t1_skeleton_pirate_egg"), () -> ModEntities.T1_SKELETON_PIRATE, 4549221, 7520684, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_SKELETON_PIRATE_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_skeleton_pirate_egg"), () -> ModEntities.T2_SKELETON_PIRATE, 4549221, 7520684, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_SKELETON_PIRATE_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_skeleton_pirate_egg"), () -> ModEntities.T3_SKELETON_PIRATE, 4549221, 7520684, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T4_SKELETON_PIRATE_EGG = new BasicMobEggItem(
+      VaultMod.id("t4_skeleton_pirate_egg"), () -> ModEntities.T4_SKELETON_PIRATE, 4549221, 7520684, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T5_SKELETON_PIRATE_EGG = new BasicMobEggItem(
+      VaultMod.id("t5_skeleton_pirate_egg"), () -> ModEntities.T5_SKELETON_PIRATE, 4549221, 7520684, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T0_WINTERWALKER_EGG = new BasicMobEggItem(
+      VaultMod.id("t0_winterwalker_egg"), () -> ModEntities.T0_WINTERWALKER, 5732472, 13623005, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_WINTERWALKER_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_winterwalker_egg"), () -> ModEntities.T2_WINTERWALKER, 5732472, 13623005, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T1_WINTERWALKER_EGG = new BasicMobEggItem(
+      VaultMod.id("t1_winterwalker_egg"), () -> ModEntities.T1_WINTERWALKER, 5732472, 13623005, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_WINTERWALKER_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_winterwalker_egg"), () -> ModEntities.T3_WINTERWALKER, 5732472, 13623005, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T4_WINTERWALKER_EGG = new BasicMobEggItem(
+      VaultMod.id("t4_winterwalker_egg"), () -> ModEntities.T4_WINTERWALKER, 5732472, 13623005, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T5_WINTERWALKER_EGG = new BasicMobEggItem(
+      VaultMod.id("t5_winterwalker_egg"), () -> ModEntities.T5_WINTERWALKER, 5732472, 13623005, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T0_OVERGROWN_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t0_overgrown_zombie_egg"), () -> ModEntities.T0_OVERGROWN_ZOMBIE, 3161882, 8035635, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T1_OVERGROWN_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t1_overgrown_zombie_egg"), () -> ModEntities.T1_OVERGROWN_ZOMBIE, 3161882, 8035635, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_OVERGROWN_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_overgrown_zombie_egg"), () -> ModEntities.T2_OVERGROWN_ZOMBIE, 3161882, 8035635, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_OVERGROWN_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_overgrown_zombie_egg"), () -> ModEntities.T3_OVERGROWN_ZOMBIE, 3161882, 8035635, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T4_OVERGROWN_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t4_overgrown_zombie_egg"), () -> ModEntities.T4_OVERGROWN_ZOMBIE, 3161882, 8035635, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T5_OVERGROWN_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t5_overgrown_zombie_egg"), () -> ModEntities.T5_OVERGROWN_ZOMBIE, 3161882, 8035635, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T0_MUMMY_EGG = new BasicMobEggItem(
+      VaultMod.id("t0_mummy_egg"), () -> ModEntities.T0_MUMMY, 11046226, 5656643, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T1_MUMMY_EGG = new BasicMobEggItem(
+      VaultMod.id("t1_mummy_egg"), () -> ModEntities.T1_MUMMY, 11046226, 5656643, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_MUMMY_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_mummy_egg"), () -> ModEntities.T2_MUMMY, 11046226, 5656643, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T0_MUSHROOM_EGG = new BasicMobEggItem(
+      VaultMod.id("t0_mushroom_egg"), () -> ModEntities.T0_MUSHROOM, 7696744, 13157045, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T1_MUSHROOM_EGG = new BasicMobEggItem(
+      VaultMod.id("t1_mushroom_egg"), () -> ModEntities.T1_MUSHROOM, 7696744, 13157045, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_MUSHROOM_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_mushroom_egg"), () -> ModEntities.T2_MUSHROOM, 7696744, 13157045, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_MUSHROOM_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_mushroom_egg"), () -> ModEntities.T3_MUSHROOM, 7696744, 13157045, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T4_MUSHROOM_EGG = new BasicMobEggItem(
+      VaultMod.id("t4_mushroom_egg"), () -> ModEntities.T4_MUSHROOM, 7696744, 13157045, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T5_MUSHROOM_EGG = new BasicMobEggItem(
+      VaultMod.id("t5_mushroom_egg"), () -> ModEntities.T5_MUSHROOM, 7696744, 13157045, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem DEATHCAP_EGG = new BasicMobEggItem(
+      VaultMod.id("deathcap_egg"), () -> ModEntities.DEATHCAP, 7696744, 13157045, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem SMOLCAP_EGG = new BasicMobEggItem(
+      VaultMod.id("smolcap_egg"), () -> ModEntities.SMOLCAP, 7696744, 13157045, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T0_MINER_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t0_miner_zombie_egg"), () -> ModEntities.T0_MINER_ZOMBIE, 2698001, 4406815, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T1_MINER_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t1_miner_zombie_egg"), () -> ModEntities.T1_MINER_ZOMBIE, 2698001, 4406815, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T2_MINER_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t2_miner_zombie_egg"), () -> ModEntities.T2_MINER_ZOMBIE, 2698001, 4406815, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T3_MINER_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t3_miner_zombie_egg"), () -> ModEntities.T3_MINER_ZOMBIE, 2698001, 4406815, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T4_MINER_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t4_miner_zombie_egg"), () -> ModEntities.T4_MINER_ZOMBIE, 2698001, 4406815, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem T5_MINER_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("t5_miner_zombie_egg"), () -> ModEntities.T5_MINER_ZOMBIE, 2698001, 4406815, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem DEEP_DARK_ZOMBIE_EGG = new BasicMobEggItem(
+      VaultMod.id("deep_dark_zombie_egg"), () -> ModEntities.DEEP_DARK_ZOMBIE, 660249, 2331531, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem DEEP_DARK_SKELETON_EGG = new BasicMobEggItem(
+      VaultMod.id("deep_dark_skeleton_egg"), () -> ModEntities.DEEP_DARK_SKELETON, 660249, 2331531, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem DEEP_DARK_PIGLIN_EGG = new BasicMobEggItem(
+      VaultMod.id("deep_dark_piglin_egg"), () -> ModEntities.DEEP_DARK_PIGLIN, 660249, 2331531, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem DEEP_DARK_SILVERFISH_EGG = new BasicMobEggItem(
+      VaultMod.id("deep_dark_silverfish_egg"), () -> ModEntities.DEEP_DARK_SILVERFISH, 660249, 2331531, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem DEEP_DARK_HORROR_EGG = new BasicMobEggItem(
+      VaultMod.id("deep_dark_horror_egg"), () -> ModEntities.DEEP_DARK_HORROR, 660249, 2331531, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem VAULT_HORSE_EGG = new BasicMobEggItem(
+      VaultMod.id("vault_horse_egg"), () -> ModEntities.VAULT_HORSE, 12623485, 15656192, new Properties().tab(VAULT_MOD_GROUP)
+   );
+   public static final BasicMobEggItem VAULT_DOOD_EGG = new BasicMobEggItem(
+      VaultMod.id("vault_dood_egg"), () -> ModEntities.VAULT_DOOD, 9534058, 12693665, new Properties().tab(VAULT_MOD_GROUP)
+   );
    public static final BasicMobEggItem SPIRIT_EGG = new BasicMobEggItem(
       VaultMod.id("spirit_egg"), () -> ModEntities.SPIRIT, 12698049, 4802889, new Properties().tab(VAULT_MOD_GROUP)
    );
-   public static BurntCrystalItem BURNT_CRYSTAL = new BurntCrystalItem(VAULT_MOD_GROUP, VaultMod.id("burnt_crystal"));
 
    private static CreativeModeTab createCreativeTab(String label, final Supplier<ItemStack> itemStack) {
       return new CreativeModeTab(label) {
@@ -891,10 +987,6 @@ public class ModItems {
       registry.register(LEGENDARY_TREASURE_EPIC);
       registry.register(LEGENDARY_TREASURE_OMEGA);
       registry.register(UNIDENTIFIED_ARTIFACT);
-      registry.register(NORMAL_GIFT_BOMB);
-      registry.register(SUPER_GIFT_BOMB);
-      registry.register(MEGA_GIFT_BOMB);
-      registry.register(OMEGA_GIFT_BOMB);
       registry.register(RELIC);
       registry.register(RELIC_FRAGMENT);
       registry.register(SKILL_ORB_FRAME);
@@ -973,6 +1065,7 @@ public class ModItems {
       registry.register(TOOL);
       registry.register(JEWEL);
       registry.register(GEMSTONE);
+      registry.register(BOTTLE);
       registry.register(INFUSED_ETERNAL_SOUL);
       registry.register(UNKNOWN_EGG);
       registry.register(VAULT_APPLE);
@@ -1037,7 +1130,6 @@ public class ModItems {
       registry.register(BLACK_CHROMATIC_PICKAXE);
       registry.register(ECHOING_PICKAXE);
       registry.register(INFINITE_WATER_BUCKET);
-      registry.register(VAULT_PEARL);
       registry.register(MAGNET);
       registry.register(SCAVENGER_CREEPER_EYE);
       registry.register(SCAVENGER_CREEPER_FOOT);
@@ -1106,7 +1198,6 @@ public class ModItems {
       registry.register(CHARM_UPGRADE_TIER_2);
       registry.register(CHARM_UPGRADE_TIER_3);
       registry.register(CHARM_UPGRADE_TIER_4);
-      registry.register(BURNT_CRYSTAL);
       registry.register(KEYSTONE_IDONA);
       registry.register(KEYSTONE_VELARA);
       registry.register(KEYSTONE_TENOS);
@@ -1202,6 +1293,49 @@ public class ModItems {
       registry.register(VAULT_YELLOW_GUMMY_SOLDIER_EGG);
       registry.register(VAULT_RED_GUMMY_SOLDIER_EGG);
       registry.register(WINTER_WOLF_EGG);
+      registry.register(SHIVER_EGG);
+      registry.register(T0_SKELETON_PIRATE_EGG);
+      registry.register(T1_SKELETON_PIRATE_EGG);
+      registry.register(T2_SKELETON_PIRATE_EGG);
+      registry.register(T3_SKELETON_PIRATE_EGG);
+      registry.register(T4_SKELETON_PIRATE_EGG);
+      registry.register(T5_SKELETON_PIRATE_EGG);
+      registry.register(T0_WINTERWALKER_EGG);
+      registry.register(T1_WINTERWALKER_EGG);
+      registry.register(T2_WINTERWALKER_EGG);
+      registry.register(T3_WINTERWALKER_EGG);
+      registry.register(T4_WINTERWALKER_EGG);
+      registry.register(T5_WINTERWALKER_EGG);
+      registry.register(T0_OVERGROWN_ZOMBIE_EGG);
+      registry.register(T1_OVERGROWN_ZOMBIE_EGG);
+      registry.register(T2_OVERGROWN_ZOMBIE_EGG);
+      registry.register(T3_OVERGROWN_ZOMBIE_EGG);
+      registry.register(T4_OVERGROWN_ZOMBIE_EGG);
+      registry.register(T5_OVERGROWN_ZOMBIE_EGG);
+      registry.register(T0_MUMMY_EGG);
+      registry.register(T1_MUMMY_EGG);
+      registry.register(T2_MUMMY_EGG);
+      registry.register(T0_MUSHROOM_EGG);
+      registry.register(T1_MUSHROOM_EGG);
+      registry.register(T2_MUSHROOM_EGG);
+      registry.register(T3_MUSHROOM_EGG);
+      registry.register(T4_MUSHROOM_EGG);
+      registry.register(T5_MUSHROOM_EGG);
+      registry.register(DEATHCAP_EGG);
+      registry.register(SMOLCAP_EGG);
+      registry.register(T0_MINER_ZOMBIE_EGG);
+      registry.register(T1_MINER_ZOMBIE_EGG);
+      registry.register(T2_MINER_ZOMBIE_EGG);
+      registry.register(T3_MINER_ZOMBIE_EGG);
+      registry.register(T4_MINER_ZOMBIE_EGG);
+      registry.register(T5_MINER_ZOMBIE_EGG);
+      registry.register(DEEP_DARK_ZOMBIE_EGG);
+      registry.register(DEEP_DARK_SKELETON_EGG);
+      registry.register(DEEP_DARK_PIGLIN_EGG);
+      registry.register(DEEP_DARK_SILVERFISH_EGG);
+      registry.register(DEEP_DARK_HORROR_EGG);
+      registry.register(VAULT_HORSE_EGG);
+      registry.register(VAULT_DOOD_EGG);
       registry.register(SPIRIT_EGG);
       registry.register(EXTRAORDINARY_ALEXANDRITE);
       registry.register(EXTRAORDINARY_PAINITE);
@@ -1213,6 +1347,7 @@ public class ModItems {
       registry.register(REGRET_NUGGET);
       registry.register(REGRET_CHUNK);
       registry.register(REGRET_ORB);
+      registry.register(NEURALIZER);
       registry.register(MEMORY_POWDER);
       registry.register(MEMORY_SHARD);
       registry.register(MEMORY_CRYSTAL);
@@ -1221,5 +1356,6 @@ public class ModItems {
       registry.register(LOST_BOUNTY);
       registry.register(BOUNTY_PEARL);
       registry.register(OLD_NOTES);
+      registry.register(QUEST_BOOK);
    }
 }

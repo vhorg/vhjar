@@ -3,7 +3,6 @@ package iskallia.vault.block.entity;
 import iskallia.vault.entity.entity.EtchingVendorEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModEntities;
-import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -29,20 +28,18 @@ public class EtchingVendorControllerTileEntity extends BlockEntity {
 
    public static void tick(Level level, BlockPos pos, BlockState state, EtchingVendorControllerTileEntity tile) {
       if (!level.isClientSide()) {
-         if (ServerVaults.isVaultWorld(level)) {
-            if (tile.trades.isEmpty()) {
-               tile.sendUpdates();
-            }
-
-            Entity monitoredEntity;
-            if (tile.monitoredEntityId == -1) {
-               monitoredEntity = tile.createVendor();
-            } else if ((monitoredEntity = level.getEntity(tile.monitoredEntityId)) == null) {
-               monitoredEntity = tile.createVendor();
-            }
-
-            monitoredEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+         if (tile.trades.isEmpty()) {
+            tile.sendUpdates();
          }
+
+         Entity monitoredEntity;
+         if (tile.monitoredEntityId == -1) {
+            monitoredEntity = tile.createVendor();
+         } else if ((monitoredEntity = level.getEntity(tile.monitoredEntityId)) == null) {
+            monitoredEntity = tile.createVendor();
+         }
+
+         monitoredEntity.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
       }
    }
 

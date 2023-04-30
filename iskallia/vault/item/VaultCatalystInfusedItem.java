@@ -2,12 +2,12 @@ package iskallia.vault.item;
 
 import iskallia.vault.config.VaultCrystalCatalystConfig;
 import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.vault.modifier.modifier.PlayerInventoryRestoreModifier;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.CodecUtils;
-import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
-import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;

@@ -11,10 +11,8 @@ import iskallia.vault.client.gui.framework.render.spi.IElementRenderer;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
-import iskallia.vault.client.gui.screen.bounty.BountyScreen;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +43,7 @@ public class HeaderElement extends ContainerElement<HeaderElement> {
       );
       if (icon != null) {
          this.iconBackground = this.addElement(new NineSliceElement(Spatials.positionXYZ(5, -2, 15).size(24, 24), ScreenTextures.VAULT_EXIT_ELEMENT_ICON));
-         this.iconElement = this.addElement(new TextureAtlasElement(Spatials.positionXYZ(9, 1, 16), icon));
+         this.iconElement = this.addElement(new TextureAtlasElement(Spatials.positionXYZ(9, 2, 16), icon));
       }
 
       if (contentBackgroundVisible) {
@@ -67,8 +65,9 @@ public class HeaderElement extends ContainerElement<HeaderElement> {
       this.title = component;
    }
 
-   public void setIcon(ResourceLocation taskType) {
-      this.iconElement = this.addElement(new TextureAtlasElement(Spatials.positionXYZ(9, 1, 16), BountyScreen.TASK_ICON_MAP.get(taskType)));
+   public void setIcon(TextureAtlasRegion textureAtlasRegion) {
+      this.iconBackground = this.addElement(new NineSliceElement(Spatials.positionXYZ(5, -2, 15).size(24, 24), ScreenTextures.VAULT_EXIT_ELEMENT_ICON));
+      this.iconElement = this.addElement(new TextureAtlasElement(Spatials.positionXYZ(9, 1, 16), textureAtlasRegion));
    }
 
    @Override

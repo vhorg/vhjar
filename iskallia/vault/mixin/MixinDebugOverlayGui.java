@@ -1,7 +1,7 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.block.property.HiddenIntegerProperty;
-import iskallia.vault.world.data.ServerVaults;
+import iskallia.vault.core.vault.ClientVaults;
 import java.util.List;
 import java.util.Map.Entry;
 import net.minecraft.ChatFormatting;
@@ -33,7 +33,7 @@ public class MixinDebugOverlayGui {
    )
    public void hideCoordinateInformation(CallbackInfoReturnable<List<String>> cir) {
       Player player = Minecraft.getInstance().player;
-      if (ServerVaults.isInVault(player) && !player.isCreative() && !player.isSpectator()) {
+      if (!ClientVaults.getActive().isEmpty() && !player.isCreative() && !player.isSpectator()) {
          List<String> information = (List<String>)cir.getReturnValue();
          information.removeIf(str -> str.startsWith("XYZ: ") || str.startsWith("Block: ") || str.startsWith("Chunk: "));
       }
@@ -45,7 +45,7 @@ public class MixinDebugOverlayGui {
    )
    public void hideCoordinateBlockInformation(CallbackInfoReturnable<List<String>> cir) {
       Player player = Minecraft.getInstance().player;
-      if (ServerVaults.isInVault(player) && !player.isCreative() && !player.isSpectator()) {
+      if (!ClientVaults.getActive().isEmpty() && !player.isCreative() && !player.isSpectator()) {
          List<String> information = (List<String>)cir.getReturnValue();
 
          for (int i = 0; i < information.size(); i++) {

@@ -2,9 +2,10 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.PlayerVaultStats;
-import iskallia.vault.skill.talent.TalentGroup;
-import iskallia.vault.skill.talent.TalentNode;
-import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.base.GroupedSkill;
+import iskallia.vault.skill.base.LearnableSkill;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.function.Supplier;
@@ -48,48 +49,47 @@ public class TalentLevelMessage {
 
    private static void upgradeTalent(TalentLevelMessage message, ServerPlayer player) {
       ServerLevel level = player.getLevel();
-      TalentGroup<?> talentGroup = ModConfigs.TALENTS.getByName(message.talentName);
       PlayerVaultStatsData statsData = PlayerVaultStatsData.get(level);
       PlayerTalentsData abilitiesData = PlayerTalentsData.get(level);
       TalentTree talentTree = abilitiesData.getTalents(player);
-      if (!ModConfigs.SKILL_GATES.getGates().isLocked(talentGroup, talentTree)) {
-         TalentNode<?> talentNode = talentTree.getNodeByName(message.talentName);
-         PlayerVaultStats stats = statsData.getVaultStats(player);
-         if (talentNode.getLevel() < talentGroup.getMaxLevel()) {
-            if (stats.getVaultLevel() >= talentNode.getGroup().getTalent(talentNode.getLevel() + 1).getLevelRequirement()) {
-               int requiredSkillPts = talentGroup.cost(talentNode.getLevel() + 1);
-               if (stats.getUnspentSkillPoints() >= requiredSkillPts) {
-                  abilitiesData.upgradeTalent(player, talentNode);
-                  statsData.spendSkillPoints(player, requiredSkillPts);
-               }
+      if (!ModConfigs.SKILL_GATES.getGates().isLocked(message.talentName, talentTree)) {
+         talentTree.getForId(message.talentName).ifPresent(skill -> {
+            SkillContext context = SkillContext.of(player);
+            if (skill.getParent() instanceof GroupedSkill grouped) {
+               grouped.select(skill.getId());
+               skill = grouped;
             }
-         }
+
+            if (skill instanceof LearnableSkill learnable && learnable.canLearn(context)) {
+               learnable.learn(context);
+               PlayerVaultStats stats = statsData.getVaultStats(player);
+               stats.setSkillPoints(context.getLearnPoints());
+               stats.setRegretPoints(context.getRegretPoints());
+               talentTree.sync(context);
+            }
+         });
       }
    }
 
    private static void downgradeTalent(TalentLevelMessage message, ServerPlayer player) {
       ServerLevel level = player.getLevel();
-      TalentGroup<?> talentGroup = ModConfigs.TALENTS.getByName(message.talentName);
       PlayerVaultStatsData statsData = PlayerVaultStatsData.get(level);
       PlayerTalentsData talentsData = PlayerTalentsData.get(level);
       TalentTree talentTree = talentsData.getTalents(player);
-      TalentNode<?> talentNode = talentTree.getNodeByName(message.talentName);
-      PlayerVaultStats stats = statsData.getVaultStats(player);
-      if (talentNode.isLearned()) {
-         int requiredRegretPoints = talentNode.getTalent().getRegretCost();
-         if (talentNode.getLevel() == 1) {
-            for (TalentGroup<?> dependent : ModConfigs.SKILL_GATES.getGates().getTalentsDependingOn(talentGroup.getParentName())) {
-               if (talentTree.getNodeOf(dependent).isLearned()) {
-                  return;
-               }
-            }
+      talentTree.getForId(message.talentName).ifPresent(skill -> {
+         SkillContext context = SkillContext.of(player);
+         if (skill.getParent() instanceof GroupedSkill grouped) {
+            grouped.select(skill.getId());
+            skill = grouped;
          }
 
-         if (stats.getUnspentRegretPoints() >= requiredRegretPoints) {
-            talentsData.downgradeTalent(player, talentNode);
-            statsData.spendSkillPoints(player, -talentNode.getTalent().getLearningCost());
-            statsData.spendRegretPoints(player, requiredRegretPoints);
+         if (skill instanceof LearnableSkill learnable && learnable.canRegret(context)) {
+            learnable.regret(context);
+            PlayerVaultStats stats = statsData.getVaultStats(player);
+            stats.setSkillPoints(context.getLearnPoints());
+            stats.setRegretPoints(context.getRegretPoints());
+            talentTree.sync(context);
          }
-      }
+      });
    }
 }

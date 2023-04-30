@@ -1,7 +1,6 @@
 package iskallia.vault.core.data.adapter.nbt;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonPrimitive;
 import io.netty.buffer.ByteBuf;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
@@ -14,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class ByteNbtAdapter extends NbtAdapter<ByteTag> {
    public ByteNbtAdapter(boolean nullable) {
-      super(ByteTag.class, nullable);
+      super(nullable);
    }
 
    public ByteNbtAdapter asNullable() {
@@ -60,17 +59,6 @@ public class ByteNbtAdapter extends NbtAdapter<ByteTag> {
 
    @Nullable
    protected ByteTag readTagJson(JsonElement json) {
-      if (json instanceof JsonPrimitive primitive && primitive.isString()) {
-         String string = primitive.getAsString();
-         char suffix = string.charAt(string.length() - 1);
-         if (suffix != 'b' && suffix != 'B') {
-            return null;
-         } else {
-            String parsed = string.substring(0, string.length() - 1);
-            return Adapters.BYTE.readJson(new JsonPrimitive(parsed)).<ByteTag>map(ByteTag::valueOf).orElse(null);
-         }
-      } else {
-         return Adapters.BYTE.readJson(json).<ByteTag>map(ByteTag::valueOf).orElse(null);
-      }
+      return Adapters.BYTE.readJson(json).<ByteTag>map(ByteTag::valueOf).orElse(null);
    }
 }

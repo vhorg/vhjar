@@ -22,7 +22,7 @@ public class MixinAbstractSkeletonEntity {
       )
    )
    public boolean applySkeletonDamage(Level level, Entity entity) {
-      if (!ServerVaults.isVaultWorld(level)) {
+      if (ServerVaults.get(level).isEmpty()) {
          return level.addFreshEntity(entity);
       } else {
          AbstractSkeleton shooter = (AbstractSkeleton)this;

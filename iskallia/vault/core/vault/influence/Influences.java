@@ -14,6 +14,7 @@ import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Modifiers;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.player.Completion;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.vault.time.TickClock;
@@ -21,7 +22,6 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.data.PlayerInfluences;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
@@ -110,7 +110,7 @@ public class Influences extends DataObject<Influences> {
          ModConfigs.VAULT_MODIFIER_POOLS
             .getRandom(id, reputation, random)
             .forEach(modifier -> modifiers.put(modifier, modifiers.getOrDefault(modifier, 0) + 1));
-         modifiers.forEach((modifier, count) -> this.get(FAVOURS).addPermanentModifier(modifier, count, true, random));
+         modifiers.forEach((modifier, count) -> this.get(FAVOURS).addModifier(modifier, count, true, random));
          this.printGodMessage(runner, modifiers, random);
       }
    }

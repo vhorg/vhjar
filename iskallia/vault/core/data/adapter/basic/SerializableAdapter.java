@@ -4,7 +4,11 @@ import com.google.gson.JsonElement;
 import io.netty.buffer.ByteBuf;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
-import iskallia.vault.item.crystal.data.serializable.ISerializable;
+import iskallia.vault.item.crystal.data.serializable.IBitSerializable;
+import iskallia.vault.item.crystal.data.serializable.IByteSerializable;
+import iskallia.vault.item.crystal.data.serializable.IDataSerializable;
+import iskallia.vault.item.crystal.data.serializable.IJsonSerializable;
+import iskallia.vault.item.crystal.data.serializable.INbtSerializable;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
@@ -13,7 +17,7 @@ import java.util.function.Supplier;
 import net.minecraft.nbt.Tag;
 import org.jetbrains.annotations.Nullable;
 
-public class SerializableAdapter<T extends ISerializable<N, J>, N extends Tag, J extends JsonElement> implements ISimpleAdapter<T, N, J> {
+public class SerializableAdapter<T, N extends Tag, J extends JsonElement> implements ISimpleAdapter<T, N, J> {
    private final Supplier<T> constructor;
    private final boolean nullable;
 
@@ -34,13 +38,14 @@ public class SerializableAdapter<T extends ISerializable<N, J>, N extends Tag, J
       return new SerializableAdapter<>(this.constructor, true);
    }
 
+   @Override
    public void writeBits(@Nullable T value, BitBuffer buffer) {
       if (this.nullable) {
          buffer.writeBoolean(value == null);
       }
 
       if (value != null) {
-         value.writeBits(buffer);
+         ((IBitSerializable)value).writeBits(buffer);
       }
    }
 
@@ -50,18 +55,19 @@ public class SerializableAdapter<T extends ISerializable<N, J>, N extends Tag, J
          return Optional.empty();
       } else {
          T value = this.constructor.get();
-         value.readBits(buffer);
+         ((IBitSerializable)value).readBits(buffer);
          return Optional.of(value);
       }
    }
 
+   @Override
    public void writeBytes(@Nullable T value, ByteBuf buffer) {
       if (this.nullable) {
          buffer.writeBoolean(value == null);
       }
 
       if (value != null) {
-         value.writeBytes(buffer);
+         ((IByteSerializable)value).writeBytes(buffer);
       }
    }
 
@@ -71,18 +77,19 @@ public class SerializableAdapter<T extends ISerializable<N, J>, N extends Tag, J
          return Optional.empty();
       } else {
          T value = this.constructor.get();
-         value.readBytes(buffer);
+         ((IByteSerializable)value).readBytes(buffer);
          return Optional.of(value);
       }
    }
 
+   @Override
    public void writeData(@Nullable T value, DataOutput data) throws IOException {
       if (this.nullable) {
          data.writeBoolean(value == null);
       }
 
       if (value != null) {
-         value.writeData(data);
+         ((IDataSerializable)value).writeData(data);
       }
    }
 
@@ -92,13 +99,14 @@ public class SerializableAdapter<T extends ISerializable<N, J>, N extends Tag, J
          return Optional.empty();
       } else {
          T value = this.constructor.get();
-         value.readData(data);
+         ((IDataSerializable)value).readData(data);
          return Optional.of(value);
       }
    }
 
+   @Override
    public Optional<N> writeNbt(@Nullable T value) {
-      return value == null ? Optional.empty() : value.writeNbt();
+      return value == null ? Optional.empty() : ((INbtSerializable)value).writeNbt();
    }
 
    @Override
@@ -107,13 +115,14 @@ public class SerializableAdapter<T extends ISerializable<N, J>, N extends Tag, J
          return Optional.empty();
       } else {
          T value = this.constructor.get();
-         value.readNbt(nbt);
+         ((INbtSerializable)value).readNbt(nbt);
          return Optional.of(value);
       }
    }
 
+   @Override
    public Optional<J> writeJson(@Nullable T value) {
-      return value == null ? Optional.empty() : value.writeJson();
+      return value == null ? Optional.empty() : ((IJsonSerializable)value).writeJson();
    }
 
    @Override
@@ -122,7 +131,7 @@ public class SerializableAdapter<T extends ISerializable<N, J>, N extends Tag, J
          return Optional.empty();
       } else {
          T value = this.constructor.get();
-         value.readJson(json);
+         ((IJsonSerializable)value).readJson(json);
          return Optional.of(value);
       }
    }

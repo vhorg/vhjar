@@ -1,14 +1,15 @@
 package iskallia.vault.core.world.template;
 
 import iskallia.vault.core.util.iterator.MappingIterator;
+import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.core.world.data.PartialEntity;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.processor.Processor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 
 public class DynamicTemplate extends Template {
@@ -34,7 +35,7 @@ public class DynamicTemplate extends Template {
    }
 
    @Override
-   public Iterator<PartialTile> getTiles(Predicate<PartialTile> filter, PlacementSettings settings) {
+   public Iterator<PartialTile> getTiles(TilePredicate filter, PlacementSettings settings) {
       return new MappingIterator<>(this.tiles.iterator(), tile -> {
          if (!filter.test(tile)) {
             return null;
@@ -56,7 +57,7 @@ public class DynamicTemplate extends Template {
    }
 
    @Override
-   public Iterator<PartialEntity> getEntities(Predicate<PartialEntity> filter, PlacementSettings settings) {
+   public Iterator<PartialEntity> getEntities(EntityPredicate filter, PlacementSettings settings) {
       return new MappingIterator<>(this.entities.iterator(), entity -> {
          if (!filter.test(entity)) {
             return null;

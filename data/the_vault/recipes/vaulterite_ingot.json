@@ -1,25 +1,20 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "nc",
-    "sg"
-  ],
-  "key": {
-    "g": {
-      "item": "the_vault:gem_painite"
+  "type": "minecraft:crafting_shapeless",   
+  "ingredients": [
+    {
+        "item": "the_vault:gem_painite"
     },
-    "n": {
-      "item": "minecraft:netherite_scrap"
+    {
+        "item": "minecraft:netherite_scrap"
     },
-    "s": {
-      "item": "the_vault:vault_scrap"
+    {
+        "item": "the_vault:vault_scrap"
     },
-    "c": {
-      "item": "the_vault:chromatic_iron_ingot"
+    {
+        "item": "the_vault:chromatic_iron_ingot"
     }
-  },
+],
   "result": {
-    "item": "the_vault:vaulterite_ingot",
-    "count": 1
+    "item": "the_vault:vaulterite_ingot"
   }
 }

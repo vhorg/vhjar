@@ -7,8 +7,6 @@ import iskallia.vault.bounty.task.properties.ItemDiscoveryProperties;
 import iskallia.vault.core.event.common.ChestGenerationEvent;
 import iskallia.vault.core.event.common.CoinStacksGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
-import iskallia.vault.init.ModNetwork;
-import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.world.data.BountyData;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,7 +19,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
@@ -118,8 +115,7 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
                      cached.remove(stack);
                      if (task.isComplete()) {
                         legendaryComplete = true;
-                        ModNetwork.CHANNEL
-                           .sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                        task.complete(player);
                      }
                   }
                }
@@ -139,8 +135,7 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
                   taskx.increment(stack.getCount());
                   cached.remove(stack);
                   if (taskx.isComplete()) {
-                     ModNetwork.CHANNEL
-                        .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                     taskx.complete(player);
                      break;
                   }
                }

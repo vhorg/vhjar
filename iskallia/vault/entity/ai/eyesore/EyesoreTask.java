@@ -1,6 +1,5 @@
 package iskallia.vault.entity.ai.eyesore;
 
-import iskallia.vault.world.vault.VaultRaid;
 import java.util.Random;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,10 +18,6 @@ public class EyesoreTask<T extends LivingEntity> {
 
    public ServerLevel getWorld() {
       return (ServerLevel)this.getEntity().level;
-   }
-
-   public VaultRaid getVault() {
-      return null;
    }
 
    public Random getRandom() {

@@ -2,7 +2,6 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -18,8 +17,7 @@ public class MixinInventoryTransferHandler {
       cancellable = true
    )
    private static void onTransfer(Player player, boolean isRestock, boolean smart, CallbackInfo ci) {
-      Level level = player.getLevel();
-      if (ServerVaults.isVaultWorld(level.dimension())) {
+      if (ServerVaults.get(player.level).isPresent()) {
          ci.cancel();
       }
    }

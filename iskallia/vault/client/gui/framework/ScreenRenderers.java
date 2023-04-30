@@ -19,6 +19,9 @@ public final class ScreenRenderers {
          .add(ModTextureAtlases.SCAVENGER, Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
          .add(ModTextureAtlases.MODIFIERS, Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
          .add(ModTextureAtlases.MOB_HEADS, Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+         .add(ModTextureAtlases.QUESTS, Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+         .add(ModTextureAtlases.ABILITIES, Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
+         .add(ModTextureAtlases.SKILLS, Mode.QUADS, DefaultVertexFormat.POSITION_TEX)
          .create()
    );
    private static final LazyOptional<BufferBuilder> DEBUG_BUFFERED = LazyOptional.of(() -> new BufferBuilder(256));

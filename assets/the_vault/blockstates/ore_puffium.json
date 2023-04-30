@@ -1,10 +1,13 @@
 {
   "variants": {
     "type=stone": {
-      "model": "the_vault:block/ore_puffium"
+      "model": "the_vault:block/ore/stone/puffium"
     },
     "type=vault_stone": {
-      "model": "the_vault:block/vaultstone_ore_puffium"
+      "model": "the_vault:block/ore/vault_stone/puffium"
+    },
+    "type=white": {
+      "model": "the_vault:block/ore/white/puffium"
     }
   }
 }

@@ -1,7 +1,7 @@
 package iskallia.vault.core.world.processor.tile;
 
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import java.util.LinkedHashMap;
 import java.util.Map;

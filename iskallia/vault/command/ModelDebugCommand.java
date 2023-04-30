@@ -13,6 +13,7 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.DiscoveredRelicsData;
+import iskallia.vault.world.data.DiscoveryGoalStatesData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.resources.ResourceLocation;
@@ -85,9 +86,13 @@ public class ModelDebugCommand extends Command {
       ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
       DiscoveredModelsData modelsData = DiscoveredModelsData.get(player.server);
       modelsData.reset(player.getUUID());
+      modelsData.setDirty();
       DiscoveredRelicsData relicsData = DiscoveredRelicsData.get(player.server);
       relicsData.getDiscoveredRelics(player.getUUID()).clear();
       relicsData.setDirty();
+      DiscoveryGoalStatesData goalStatesData = DiscoveryGoalStatesData.get(player.getLevel());
+      goalStatesData.getState(player).deleteCompletions();
+      goalStatesData.setDirty();
       return 0;
    }
 

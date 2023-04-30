@@ -371,9 +371,7 @@ public class VaultExitContainerScreenData {
       StatCollector statCollector = this.getStatsCollector();
       return List.of(
          StatLabelListElement.Stat.ofInteger(() -> "Coin Piles Collected", () -> "Coin Piles: " + getCoinPile(statCollector), () -> getCoinPile(statCollector)),
-         StatLabelListElement.Stat.ofInteger(
-            () -> "Treasure Sand Broken", () -> "Treasure Sand: " + getTreasureSand(statCollector), () -> getTreasureSand(statCollector)
-         ),
+         StatLabelListElement.Stat.ofInteger(() -> "Ores Mined", () -> "Value: " + getMinedOresXp(statCollector) + "xp", () -> getOresMined(statCollector)),
          StatLabelListElement.Stat.ofInteger(
             () -> "Treasure Rooms Opened", () -> "Value: " + getTreasureRoomXp(statCollector) + "xp", statCollector::getTreasureRoomsOpened
          ),

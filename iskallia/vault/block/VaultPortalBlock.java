@@ -91,30 +91,37 @@ public class VaultPortalBlock extends NetherPortalBlock implements EntityBlock {
                ServerPlayer player = (ServerPlayer)entity;
                BlockEntity te = level.getBlockEntity(pos);
                VaultPortalTileEntity portal = te instanceof VaultPortalTileEntity ? (VaultPortalTileEntity)te : null;
-               if (player.isOnPortalCooldown()) {
+               if (player.isOnPortalCooldown() || portal == null) {
                   player.setPortalCooldown();
                } else if (ServerVaults.get(level).isPresent()) {
                   CommonEvents.VAULT_PORTAL_COLLIDE.invoke((ServerLevel)level, state, pos, player);
                } else {
-                  UUID vaultId = portal.getData().getVaultId();
-                  Vault vault;
-                  if (vaultId == null) {
-                     vault = ServerVaults.add(VaultFactory.create(Version.latest(), portal.getData().copy()));
-                     this.fill(level, pos, tileEntity -> {
-                        tileEntity.getData().setVaultId(vault.get(Vault.ID));
-                        tileEntity.setChanged();
-                     }, new HashSet<>());
-                  } else {
-                     vault = ServerVaults.get(vaultId).orElse(null);
-                  }
+                  portal.getData()
+                     .ifPresent(
+                        data -> {
+                           UUID vaultId = data.getVaultId();
+                           Vault vault;
+                           if (vaultId == null) {
+                              vault = ServerVaults.add(VaultFactory.create(Version.latest(), data.copy()));
+                              this.fill(level, pos, tileEntity -> tileEntity.getData().ifPresent(crystalData -> {
+                                 crystalData.setVaultId(vault.get(Vault.ID));
+                                 tileEntity.setChanged();
+                              }), new HashSet<>());
+                           } else {
+                              vault = ServerVaults.get(vaultId).orElse(null);
+                           }
 
-                  VirtualWorld world = ServerVaults.getWorld(vault).orElse(null);
-                  if (world != null && vault != null) {
-                     vault.ifPresent(
-                        Vault.LISTENERS,
-                        listeners -> listeners.add(world, vault, new Runner().set(Runner.JOIN_STATE, new EntityState(player)).set(Runner.ID, player.getUUID()))
+                           VirtualWorld world = ServerVaults.getWorld(vault).orElse(null);
+                           if (world != null && vault != null) {
+                              vault.ifPresent(
+                                 Vault.LISTENERS,
+                                 listeners -> listeners.add(
+                                    world, vault, new Runner().set(Runner.JOIN_STATE, new EntityState(player)).set(Runner.ID, player.getUUID())
+                                 )
+                              );
+                           }
+                        }
                      );
-                  }
                }
             }
          }
@@ -135,7 +142,7 @@ public class VaultPortalBlock extends NetherPortalBlock implements EntityBlock {
 
    public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor iWorld, BlockPos currentPos, BlockPos facingPos) {
       if (iWorld instanceof ServerLevel sLevel) {
-         if (ServerVaults.isVaultWorld(sLevel)) {
+         if (!ServerVaults.get(sLevel).isEmpty()) {
             return state;
          } else {
             Axis facingAxis = facing.getAxis();

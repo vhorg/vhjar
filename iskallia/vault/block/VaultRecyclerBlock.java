@@ -6,6 +6,7 @@ import iskallia.vault.util.BlockHelper;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -50,6 +51,17 @@ public class VaultRecyclerBlock extends Block implements EntityBlock {
 
    public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
       return false;
+   }
+
+   public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+      if (!pState.is(pNewState.getBlock())) {
+         if (pLevel.getBlockEntity(pPos) instanceof VaultRecyclerTileEntity recycler) {
+            Containers.dropContents(pLevel, pPos, recycler.getInventory());
+            pLevel.updateNeighbourForOutputSignal(pPos, this);
+         }
+
+         super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+      }
    }
 
    @Nullable

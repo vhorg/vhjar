@@ -81,6 +81,7 @@ public class FighterEntity extends Zombie {
       this.bossInfo.setDarkenScreen(true);
       this.bossInfo.setVisible(false);
       this.setCustomName(new TextComponent(this.lastName));
+      this.setPersistenceRequired();
    }
 
    protected void registerGoals() {

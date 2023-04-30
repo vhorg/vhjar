@@ -9,6 +9,7 @@ import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.client.gui.screen.bounty.element.BountyProgressElement;
 import iskallia.vault.init.ModKeybinds;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TextComponent;
@@ -20,6 +21,10 @@ public class BountyProgressScreen extends AbstractElementScreen {
    public BountyProgressScreen(List<Bounty> bounties) {
       super(new TextComponent(""), ScreenRenderers.getBuffered(), ScreenTooltipRenderer::create);
       this.bounties = bounties;
+      if (this.bounties == null) {
+         this.bounties = new ArrayList<>();
+      }
+
       if (!this.bounties.isEmpty()) {
          this.active = this.bounties.get(0);
       }
@@ -48,7 +53,9 @@ public class BountyProgressScreen extends AbstractElementScreen {
 
    private void getNextBounty() {
       if (this.bounties.size() > 1) {
-         this.active = this.bounties.stream().filter(bounty -> !this.active.getId().equals(bounty.getId())).findFirst().orElse(null);
+         int index = this.bounties.indexOf(this.active);
+         int next = index + 1 >= this.bounties.size() ? 0 : index + 1;
+         this.active = this.bounties.get(next);
       }
    }
 

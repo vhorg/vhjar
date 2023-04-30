@@ -8,7 +8,7 @@ import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.VaultRegistry;
-import iskallia.vault.core.world.data.PartialState;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
 import iskallia.vault.core.world.template.JigsawTemplate;
 import iskallia.vault.core.world.template.PlacementSettings;
@@ -34,6 +34,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryCodecs;
 import net.minecraft.core.SectionPos;
 import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.WorldGenRegion;
@@ -182,12 +183,10 @@ public class SkyVaultsChunkGenerator extends ChunkGenerator {
             settings.addProcessor(TileProcessor.translate(0, 128, 0));
             settings.addProcessor(TileProcessor.bound(chunk.getPos(), genRegion.getMinBuildHeight(), genRegion.getMaxBuildHeight()));
             settings.addProcessor(TileProcessor.of((tile, context) -> {
-               if (tile.getState().getBlock() == ModBlocks.PLACEHOLDER) {
+               if (tile.getState().is(ModBlocks.PLACEHOLDER)) {
                   Direction facing = tile.getState().get(PlaceholderBlock.FACING);
-                  System.out.println(world.getSharedSpawnPos() + ": " + Direction.fromYRot(world.getSharedSpawnAngle()));
                   world.setDefaultSpawnPos(tile.getPos(), facing.toYRot());
-                  tile.setState(PartialState.of(Blocks.AIR.defaultBlockState()));
-                  System.out.println(tile.getPos() + ": " + facing.name());
+                  tile.setState(PartialBlockState.of(Blocks.AIR.defaultBlockState()));
 
                   for (ServerPlayer player : world.getPlayers(playerx -> true)) {
                      player.setRespawnPosition(Level.OVERWORLD, tile.getPos(), facing.toYRot(), true, false);
@@ -293,5 +292,10 @@ public class SkyVaultsChunkGenerator extends ChunkGenerator {
       int k = levelheightaccessor.getMinBuildHeight() + 1;
       int l = levelheightaccessor.getMaxBuildHeight() - 1;
       return new BoundingBox(i, k, j, i + 15, l, j + 15);
+   }
+
+   public static boolean matches(Level world) {
+      MinecraftServer server = world.getServer();
+      return server == null ? false : server.overworld().getChunkSource().getGenerator() instanceof SkyVaultsChunkGenerator;
    }
 }

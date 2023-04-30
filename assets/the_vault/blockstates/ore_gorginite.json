@@ -1,10 +1,13 @@
 {
   "variants": {
     "type=stone": {
-      "model": "the_vault:block/ore_gorginite"
+      "model": "the_vault:block/ore/stone/gorginite"
     },
     "type=vault_stone": {
-      "model": "the_vault:block/vaultstone_ore_gorginite"
+      "model": "the_vault:block/ore/vault_stone/gorginite"
+    },
+    "type=white": {
+      "model": "the_vault:block/ore/white/gorginite"
     }
   }
 }

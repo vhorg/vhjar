@@ -15,7 +15,7 @@ import iskallia.vault.core.util.RegionPos;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.WorldManager;
-import iskallia.vault.core.world.data.PartialState;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
 import iskallia.vault.core.world.storage.VirtualWorld;
@@ -32,7 +32,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class ArchitectVaultLayout extends VaultLayout {
    public static final SupplierKey<GridLayout> KEY = SupplierKey.of("architect_vault", GridLayout.class).with(Version.v1_10, ArchitectVaultLayout::new);
@@ -86,22 +85,20 @@ public class ArchitectVaultLayout extends VaultLayout {
          .at(TemplateGenerationEvent.Phase.PRE)
          .in(world)
          .register(this, data -> data.getTemplate().getSettings().addProcessor(TileProcessor.of((tile, context) -> {
-            BlockState state = tile.getState().asBlockState();
-            if (ModConfigs.ARCHITECT.isWhitelisted(tile)) {
-               return tile;
-            } else if (ModConfigs.ARCHITECT.isBlacklisted(tile)) {
-               return tile.setState(PartialState.of(Blocks.AIR));
-            } else {
-               if (context.random.nextFloat() >= this.get(COMPLETION)) {
-                  if (state.isCollisionShapeFullBlock(data.getWorld(), tile.getPos())) {
-                     tile.setState(PartialState.of(ModBlocks.VAULT_BEDROCK));
-                  } else {
-                     tile.setState(PartialState.of(Blocks.AIR));
+            tile.getState().asWhole().ifPresent(state -> {
+               if (!ModConfigs.ARCHITECT.isWhitelisted(tile)) {
+                  if (ModConfigs.ARCHITECT.isBlacklisted(tile)) {
+                     tile.setState(PartialBlockState.of(Blocks.AIR));
+                  } else if (context.random.nextFloat() >= this.get(COMPLETION)) {
+                     if (state.isCollisionShapeFullBlock(data.getWorld(), tile.getPos())) {
+                        tile.setState(PartialBlockState.of(ModBlocks.VAULT_BEDROCK));
+                     } else {
+                        tile.setState(PartialBlockState.of(Blocks.AIR));
+                     }
                   }
                }
-
-               return tile;
-            }
+            });
+            return tile;
          })));
    }
 

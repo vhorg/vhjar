@@ -4,12 +4,10 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.container.oversized.OverSizedItemStack;
+import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.util.data.WeightedList;
-import java.util.Map;
-import java.util.Random;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -24,12 +22,12 @@ public class ShopPedestalConfig extends Config {
       return "shop_pedestal";
    }
 
-   public ShopPedestalConfig.ShopOffer getForLevel(int vaultLevel, Random random) {
+   public ShopPedestalConfig.ShopOffer getForLevel(int vaultLevel, RandomSource random) {
       return this.LEVELS
          .getForLevel(vaultLevel)
          .map(shopTier -> shopTier.TRADE_POOL)
          .filter(entries -> !entries.isEmpty())
-         .map(entries -> entries.getRandom(random))
+         .flatMap(entries -> entries.getRandom(random))
          .map(shopEntry -> shopEntry.roll(random))
          .orElse(EMPTY);
    }
@@ -43,13 +41,13 @@ public class ShopPedestalConfig extends Config {
                return false;
             }
 
-            for (WeightedList.Entry<ShopPedestalConfig.ShopEntry> p : v.TRADE_POOL) {
-               if (p.value == null || p.value.CURRENCY == null || p.value.OFFER == null) {
+            for (ShopPedestalConfig.ShopEntry value : v.TRADE_POOL.keySet()) {
+               if (value == null || value.CURRENCY == null || value.OFFER == null) {
                   VaultMod.LOGGER.error("Pedestal loot entry cannot be empty");
                   return false;
                }
 
-               if (p.value.MIN_COST > p.value.MAX_COST) {
+               if (value.MIN_COST > value.MAX_COST) {
                   VaultMod.LOGGER.error("Pedestal entry min cost cannot be larger than max cost");
                   return false;
                }
@@ -67,10 +65,14 @@ public class ShopPedestalConfig extends Config {
    protected void reset() {
       this.LEVELS = LevelEntryList.of(
          new ShopPedestalConfig.ShopTier(
-            0, new WeightedList<>(Map.of(new ShopPedestalConfig.ShopEntry(Items.DIORITE.getDefaultInstance(), ModBlocks.VAULT_BRONZE, 1, 2), 1))
+            0,
+            new WeightedList<ShopPedestalConfig.ShopEntry>()
+               .add(new ShopPedestalConfig.ShopEntry(Items.DIORITE.getDefaultInstance(), ModBlocks.VAULT_BRONZE, 1, 2), 1)
          ),
          new ShopPedestalConfig.ShopTier(
-            10, new WeightedList<>(Map.of(new ShopPedestalConfig.ShopEntry(Items.DIORITE.getDefaultInstance(), ModBlocks.VAULT_BRONZE, 128, 256), 1))
+            10,
+            new WeightedList<ShopPedestalConfig.ShopEntry>()
+               .add(new ShopPedestalConfig.ShopEntry(Items.DIORITE.getDefaultInstance(), ModBlocks.VAULT_BRONZE, 128, 256), 1)
          )
       );
    }
@@ -92,9 +94,9 @@ public class ShopPedestalConfig extends Config {
          this.MAX_COST = MAX_COST;
       }
 
-      public ShopPedestalConfig.ShopOffer roll(Random random) {
+      public ShopPedestalConfig.ShopOffer roll(RandomSource random) {
          return ShopPedestalConfig.ShopOffer.of(
-            this.OFFER, new OverSizedItemStack(new ItemStack(this.CURRENCY), Mth.randomBetweenInclusive(random, this.MIN_COST, this.MAX_COST))
+            this.OFFER, new OverSizedItemStack(new ItemStack(this.CURRENCY), random.nextInt(this.MIN_COST, this.MAX_COST + 1))
          );
       }
    }

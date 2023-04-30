@@ -8,10 +8,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.ScavengerObjective;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -57,7 +59,10 @@ public abstract class ScavengeTask {
                }
 
                return new ChestScavengerTask(
-                  object.get("target").getAsString(), object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries
+                  Adapters.TILE_PREDICATE.readJson(object.get("target")).orElse(TilePredicate.FALSE),
+                  object.get("probability").getAsDouble(),
+                  new ResourceLocation(object.get("icon").getAsString()),
+                  entries
                );
             case "coin_stacks":
                WeightedList<CoinStacksScavengerTask.Entry> entries = new WeightedList<>();
@@ -122,7 +127,7 @@ public abstract class ScavengeTask {
          JsonObject object = new JsonObject();
          if (value instanceof ChestScavengerTask chest) {
             object.addProperty("type", "chest");
-            object.addProperty("target", chest.target);
+            Adapters.TILE_PREDICATE.writeJson(chest.target).ifPresent(element -> object.add("target", element));
             object.addProperty("probability", chest.probability);
             object.addProperty("icon", chest.icon.toString());
             JsonObject entries = new JsonObject();

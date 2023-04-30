@@ -7,15 +7,15 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.skill.talent.type.LowHealthResistanceTalent;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.talent.type.health.LowHealthResistanceTalent;
+import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.world.data.PlayerTalentsData;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 
 public class ResistanceHelper {
    public static float getResistance(LivingEntity entity) {
@@ -36,14 +36,10 @@ public class ResistanceHelper {
          }
       }
 
-      if (entity instanceof Player player) {
-         boolean var10 = false;
-      }
-
       if (entity instanceof ServerPlayer sPlayer) {
          TalentTree tree = PlayerTalentsData.get(sPlayer.getLevel()).getTalents(sPlayer);
 
-         for (LowHealthResistanceTalent talent : tree.getTalents(LowHealthResistanceTalent.class)) {
+         for (LowHealthResistanceTalent talent : tree.getAll(LowHealthResistanceTalent.class, Skill::isUnlocked)) {
             if (talent.shouldGetBenefits(sPlayer)) {
                resistancePercent += talent.getAdditionalResistance();
             }

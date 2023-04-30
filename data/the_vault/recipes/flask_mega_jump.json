@@ -1,24 +1,27 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " a ",
+    "ada",
     "aba",
-    " c "
+    "aca"
   ],
   "key": {
     "a": {
-      "item": "minecraft:rabbit_foot"
+      "item": "the_vault:vault_essence"
     },
     "b": {
       "item": "the_vault:empty_flask"
     },
     "c": {
-      "item": "the_vault:red_vault_essence"
+      "item": "the_vault:perfect_benitoite"
+    },
+    "d": {
+      "item": "minecraft:big_dripleaf"
     }
   },
   "result": {
     "item": "the_vault:respec_flask",
     "count": 1,
-    "nbt": "{Ability:\"Mega Jump\"}"
+    "nbt": "{Ability:\"Mega_Jump\"}"
   }
 }

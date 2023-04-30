@@ -20,7 +20,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.MenuProvider;
@@ -138,7 +137,7 @@ public class VaultEnhancementAltarTileEntity extends BlockEntity implements Menu
       nbt.put("inventory", NBTHelper.serializeSimpleContainer(this.inventory));
       Adapters.UUID.writeNbt(this.uuid).ifPresent(tag -> nbt.put("uuid", tag));
       Adapters.ENHANCEMENT_CONFIG.writeNbt(this.config).ifPresent(tag -> nbt.put("config", tag));
-      NBTHelper.writeMap(nbt, "tasks", this.tasks, UUID::toString, t -> (Tag)Adapters.ENHANCEMENT_TASK.writeNbt(t).orElseThrow());
+      NBTHelper.writeMap(nbt, "tasks", this.tasks, UUID::toString, t -> Adapters.ENHANCEMENT_TASK.writeNbt(t).orElseThrow());
       NBTHelper.writeCollection(nbt, "players", this.usedPlayers, StringTag.class, uuid -> StringTag.valueOf(uuid.toString()));
    }
 

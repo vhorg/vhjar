@@ -29,8 +29,8 @@ public class SkillStyleConverter {
       );
       extractSkillStyles(
          Paths.get(".local/old_configs/talents_gui_styles.json"),
-         Paths.get("src/main/resources/assets/the_vault/textures/gui/talents.png"),
-         Paths.get("src/main/resources/assets/the_vault/textures/gui/talents")
+         Paths.get("src/main/resources/assets/the_vault/textures/gui/skills.png"),
+         Paths.get("src/main/resources/assets/the_vault/textures/gui/skills")
       );
    }
 

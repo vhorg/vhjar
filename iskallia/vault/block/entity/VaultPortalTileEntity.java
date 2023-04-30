@@ -1,8 +1,10 @@
 package iskallia.vault.block.entity;
 
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.world.data.ServerVaults;
+import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -14,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 public class VaultPortalTileEntity extends BlockEntity {
-   private CrystalData data = CrystalData.empty();
+   private CrystalData data;
 
    public VaultPortalTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.VAULT_PORTAL_TILE_ENTITY, pos, state);
@@ -28,16 +30,16 @@ public class VaultPortalTileEntity extends BlockEntity {
 
    protected void saveAdditional(@NotNull CompoundTag nbt) {
       super.saveAdditional(nbt);
-      this.data.writeNbt().ifPresent(data -> nbt.put("Data", data));
+      Adapters.CRYSTAL.writeNbt(this.data).ifPresent(data -> nbt.put("Data", data));
    }
 
    public void load(@NotNull CompoundTag nbt) {
       super.load(nbt);
-      this.data.readNbt(nbt.getCompound("Data"));
+      this.data = Adapters.CRYSTAL.readNbt((CompoundTag)nbt.get("Data")).orElse(null);
    }
 
-   public CrystalData getData() {
-      return this.data;
+   public Optional<CrystalData> getData() {
+      return Optional.ofNullable(this.data);
    }
 
    public void setCrystalData(CrystalData data) {
@@ -54,7 +56,7 @@ public class VaultPortalTileEntity extends BlockEntity {
    }
 
    public static void tick(Level level, BlockPos pos, BlockState state, VaultPortalTileEntity te) {
-      UUID vaultId = te.getData().getVaultId();
+      UUID vaultId = te.getData().map(CrystalData::getVaultId).orElse(null);
       if (vaultId != null) {
          if (ServerVaults.get(vaultId).isEmpty()) {
             level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);

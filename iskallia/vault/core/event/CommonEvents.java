@@ -13,14 +13,20 @@ import iskallia.vault.core.event.common.ClockModifierEvent;
 import iskallia.vault.core.event.common.CoinStacksGenerationEvent;
 import iskallia.vault.core.event.common.CrateAwardEvent;
 import iskallia.vault.core.event.common.EffectAddedEvent;
+import iskallia.vault.core.event.common.EffectCheckEvent;
 import iskallia.vault.core.event.common.EntityChainAttackedEvent;
+import iskallia.vault.core.event.common.EntityCheckSpawnEvent;
 import iskallia.vault.core.event.common.EntityCreationEvent;
 import iskallia.vault.core.event.common.EntityDamageBlockEvent;
 import iskallia.vault.core.event.common.EntityDamageEvent;
 import iskallia.vault.core.event.common.EntityDeathEvent;
 import iskallia.vault.core.event.common.EntityDropsEvent;
+import iskallia.vault.core.event.common.EntityHealEvent;
+import iskallia.vault.core.event.common.EntityInitializationEvent;
+import iskallia.vault.core.event.common.EntityJoinEvent;
 import iskallia.vault.core.event.common.EntityLeechEvent;
 import iskallia.vault.core.event.common.EntityPlaceEvent;
+import iskallia.vault.core.event.common.EntityReadEvent;
 import iskallia.vault.core.event.common.EntitySpawnEvent;
 import iskallia.vault.core.event.common.EntityStunnedEvent;
 import iskallia.vault.core.event.common.EntityTickEvent;
@@ -42,6 +48,7 @@ import iskallia.vault.core.event.common.PlayerStatEvent;
 import iskallia.vault.core.event.common.PlayerTickEvent;
 import iskallia.vault.core.event.common.ScavengerAltarConsumeEvent;
 import iskallia.vault.core.event.common.ServerTickEvent;
+import iskallia.vault.core.event.common.ShopPedestalGenerationEvent;
 import iskallia.vault.core.event.common.SoulShardChanceEvent;
 import iskallia.vault.core.event.common.SpawnGenerationEvent;
 import iskallia.vault.core.event.common.SurfaceGenerationEvent;
@@ -50,6 +57,7 @@ import iskallia.vault.core.event.common.TreasureRoomOpenEvent;
 import iskallia.vault.core.event.common.VaultEndEvent;
 import iskallia.vault.core.event.common.VaultPortalCollideEvent;
 import iskallia.vault.core.event.common.VaultStartEvent;
+import iskallia.vault.core.event.common.ZombieReinforcementEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +73,7 @@ public class CommonEvents {
    public static final PlaceholderGenerationEvent PLACEHOLDER_GENERATION = register(new PlaceholderGenerationEvent());
    public static final ObjectivePieceGenerationEvent OBJECTIVE_PIECE_GENERATION = register(new ObjectivePieceGenerationEvent());
    public static final ChestGenerationEvent CHEST_LOOT_GENERATION = register(new ChestGenerationEvent());
+   public static final ShopPedestalGenerationEvent SHOP_PEDESTAL_LOOT_GENERATION = register(new ShopPedestalGenerationEvent());
    public static final ChestTrapGenerationEvent CHEST_TRAP_GENERATION = register(new ChestTrapGenerationEvent());
    public static final ChestCatalystGenerationEvent CHEST_CATALYST_GENERATION = register(new ChestCatalystGenerationEvent());
    public static final CoinStacksGenerationEvent COIN_STACK_LOOT_GENERATION = register(new CoinStacksGenerationEvent());
@@ -76,18 +85,25 @@ public class CommonEvents {
    public static final VaultPortalCollideEvent VAULT_PORTAL_COLLIDE = register(new VaultPortalCollideEvent());
    public static final AltarProgressEvent ALTAR_PROGRESS = register(new AltarProgressEvent());
    public static final EntityCreationEvent ENTITY_CREATION = register(new EntityCreationEvent());
+   public static final EntityCheckSpawnEvent ENTITY_CHECK_SPAWN = register(new EntityCheckSpawnEvent());
+   public static final EntityInitializationEvent ENTITY_INITIALIZE = register(new EntityInitializationEvent());
+   public static final EntityReadEvent ENTITY_READ = register(new EntityReadEvent());
+   public static final EntityJoinEvent ENTITY_JOIN = register(new EntityJoinEvent());
    public static final EntitySpawnEvent ENTITY_SPAWN = register(new EntitySpawnEvent());
    public static final EntityTickEvent ENTITY_TICK = register(new EntityTickEvent());
    public static final EntityPlaceEvent ENTITY_PLACE = register(new EntityPlaceEvent());
    public static final EntityDamageEvent ENTITY_DAMAGE = register(new EntityDamageEvent());
    public static final EntityDropsEvent ENTITY_DROPS = register(new EntityDropsEvent());
    public static final EntityDeathEvent ENTITY_DEATH = register(new EntityDeathEvent());
+   public static final EntityHealEvent ENTITY_HEAL = register(new EntityHealEvent());
+   public static final ZombieReinforcementEvent ZOMBIE_REINFORCEMENT = register(new ZombieReinforcementEvent());
    public static final EntityStunnedEvent ENTITY_STUNNED = register(new EntityStunnedEvent());
    public static final EntityChainAttackedEvent ENTITY_CHAIN_ATTACKED = register(new EntityChainAttackedEvent());
    public static final EntityDamageBlockEvent ENTITY_DAMAGE_BLOCK = register(new EntityDamageBlockEvent());
    public static final EntityLeechEvent ENTITY_LEECH = register(new EntityLeechEvent());
    public static final FruitEatenEvent FRUIT_EATEN = register(new FruitEatenEvent());
-   public static final EffectAddedEvent EFFECT_ADDED = register(new EffectAddedEvent());
+   public static final EffectCheckEvent EFFECT_CHECK = register(new EffectCheckEvent());
+   public static final EffectAddedEvent EFFECT_ADD = register(new EffectAddedEvent());
    public static final ClockModifierEvent CLOCK_MODIFIER = register(new ClockModifierEvent());
    public static final GrantedEffectEvent GRANTED_EFFECT = register(new GrantedEffectEvent());
    public static final ArtifactChanceEvent ARTIFACT_CHANCE = register(new ArtifactChanceEvent());
@@ -113,5 +129,8 @@ public class CommonEvents {
    private static <T extends Event<?, ?>> T register(T event) {
       REGISTRY.add(event);
       return event;
+   }
+
+   public static void init() {
    }
 }

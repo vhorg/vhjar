@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "color=pink": {
+      "model": "the_vault:block/easter_egg/pink"
+    },
+    "color=yellow": {
+      "model": "the_vault:block/easter_egg/yellow"
+    },
+    "color=green": {
+      "model": "the_vault:block/easter_egg/green"
+    },
+    "color=purple": {
+      "model": "the_vault:block/easter_egg/purple"
+    },
+    "color=magenta": {
+      "model": "the_vault:block/easter_egg/magenta"
+    },
+    "color=gold": {
+      "model": "the_vault:block/easter_egg/gold"
+    }
+  }
+}

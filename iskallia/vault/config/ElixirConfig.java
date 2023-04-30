@@ -10,9 +10,9 @@ import iskallia.vault.core.vault.objective.elixir.ElixirTask;
 import iskallia.vault.core.vault.objective.elixir.MobElixirTask;
 import iskallia.vault.core.vault.objective.elixir.OreElixirTask;
 import iskallia.vault.core.vault.stat.VaultChestType;
+import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.core.world.roll.IntRoll;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +24,7 @@ public class ElixirConfig extends Config {
    @Expose
    private Map<Integer, Integer> elixirToSize;
    @Expose
-   private Map<ResourceLocation, List<ResourceLocation>> mobGroups;
+   private Map<ResourceLocation, EntityPredicate> mobGroups;
    @Expose
    private LevelEntryList<ElixirConfig.Entry> entries;
 
@@ -42,7 +42,7 @@ public class ElixirConfig extends Config {
       }
 
       this.mobGroups = new LinkedHashMap<>();
-      this.mobGroups.put(new ResourceLocation("main"), Arrays.asList(new ResourceLocation("zombie"), new ResourceLocation("skeleton")));
+      this.mobGroups.put(new ResourceLocation("main"), EntityPredicate.of("minecraft:zombie", true).orElseThrow());
       this.entries = new LevelEntryList<>();
       List<ElixirTask.Config<?>> tasks = new ArrayList<>();
       tasks.add(new ChestElixirTask.Config(new WeightedList<IntRoll>().add(IntRoll.ofUniform(1, 10), 1), VaultChestType.WOODEN));
@@ -68,7 +68,7 @@ public class ElixirConfig extends Config {
    }
 
    public boolean isEntityInGroup(Entity entity, ResourceLocation group) {
-      return this.mobGroups.containsKey(group) && this.mobGroups.get(group).contains(entity.getType().getRegistryName());
+      return this.mobGroups.containsKey(group) && this.mobGroups.get(group).test(entity);
    }
 
    public int generateTarget(int level, RandomSource random) {

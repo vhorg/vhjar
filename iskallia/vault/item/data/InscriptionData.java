@@ -11,6 +11,9 @@ import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.crystal.layout.ArchitectCrystalLayout;
 import iskallia.vault.item.crystal.time.ValueCrystalTime;
 import iskallia.vault.nbt.VListNBT;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.MysticExpertise;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
@@ -21,6 +24,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
@@ -106,7 +111,7 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
       this.color = color;
    }
 
-   public boolean apply(ItemStack stack, CrystalData crystal) {
+   public boolean apply(Player player, ItemStack stack, CrystalData crystal) {
       if (crystal.isUnmodifiable()) {
          return false;
       } else if (!(crystal.getLayout() instanceof ArchitectCrystalLayout layout)) {
@@ -128,10 +133,22 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
          float instability = crystal.getInstability();
          Random random = new Random();
          if (random.nextFloat() < instability) {
-            if (random.nextFloat() < ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.exhaustProbability) {
-               VaultCrystalItem.scheduleTask(VaultCrystalItem.ExhaustTask.INSTANCE, stack);
-            } else {
-               VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("catalyst_curse")), stack);
+            double instabilityAvoidanceChance = 0.0;
+            if (player instanceof ServerPlayer serverPlayer) {
+               instabilityAvoidanceChance = PlayerExpertisesData.get(serverPlayer.getLevel())
+                  .getExpertises(serverPlayer)
+                  .getAll(MysticExpertise.class, Skill::isUnlocked)
+                  .stream()
+                  .mapToDouble(MysticExpertise::getInstabilityChanceReduction)
+                  .sum();
+            }
+
+            if (random.nextDouble() > instabilityAvoidanceChance) {
+               if (random.nextFloat() < ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.exhaustProbability) {
+                  VaultCrystalItem.scheduleTask(VaultCrystalItem.ExhaustTask.INSTANCE, stack);
+               } else {
+                  VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("catalyst_curse")), stack);
+               }
             }
          }
 
@@ -186,7 +203,7 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
          new TextComponent("Completion: ").append(new TextComponent(Math.round(this.completion * 100.0F) + "%").withStyle(Style.EMPTY.withColor(4766456)))
       );
       tooltip.add(new TextComponent("Time: ").append(new TextComponent(UIHelper.formatTimeString(this.time)).withStyle(ChatFormatting.GRAY)));
-      tooltip.add(new TextComponent("Instability: ").append(new TextComponent(Math.round(this.instability * 100.0F) + "%").withStyle(ChatFormatting.RED)));
+      tooltip.add(new TextComponent("Instability: ").append(new TextComponent("%.1f%%".formatted(this.instability * 100.0F)).withStyle(ChatFormatting.RED)));
 
       for (InscriptionData.Entry entry : this.entries) {
          String roomStr = entry.count > 1 ? "Rooms" : "Room";

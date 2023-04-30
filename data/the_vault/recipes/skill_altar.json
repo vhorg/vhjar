@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " g ",
+        "ewe",
+        "bbb"
+    ],
+    "key": {
+        "g": {
+            "item": "minecraft:glass_pane"
+        },
+        "w": {
+            "item": "minecraft:red_wool"
+        },
+        "e": {
+            "item": "the_vault:vault_essence"
+        },
+        "b": {
+            "item": "the_vault:black_chromatic_steel_ingot"
+        }
+    },
+    "result": {
+        "item": "the_vault:skill_altar",
+        "count": 1
+    }
+}
