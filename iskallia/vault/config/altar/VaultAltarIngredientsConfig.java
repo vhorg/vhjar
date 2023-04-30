@@ -5,13 +5,15 @@ import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.config.Config;
 import iskallia.vault.config.altar.entry.AltarIngredientEntry;
 import iskallia.vault.config.entry.LevelEntryMap;
-import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.talent.TalentTree;
-import iskallia.vault.skill.talent.type.LuckyAltarTalent;
+import iskallia.vault.init.ModGameRules;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.LuckyAltarExpertise;
+import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.data.WeightedList;
+import iskallia.vault.world.VaultCrystalMode;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerStatsData;
-import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,16 +78,17 @@ public class VaultAltarIngredientsConfig extends Config {
       ServerLevel level = player.getLevel();
       int altarLevel = PlayerVaultStatsData.get(level).getVaultStats(player).getVaultLevel();
       int crystalsCrafted = PlayerStatsData.get(level.getServer()).get(player.getUUID()).getCrystals().size();
-      float amtMultiplier = 1.0F;
-      float luckyAltarChance = ModConfigs.VAULT_ALTAR.LUCKY_ALTAR_CHANCE;
-      TalentTree talents = PlayerTalentsData.get(level).getTalents(player);
+      VaultCrystalMode mode = ((VaultCrystalMode.GameRuleValue)player.getLevel().getGameRules().getRule(ModGameRules.CRYSTAL_MODE)).get();
+      float amtMultiplier = mode.getMultiplier();
+      float luckyAltarChance = 0.0F;
+      ExpertiseTree expertises = PlayerExpertisesData.get(level).getExpertises(player);
 
-      for (LuckyAltarTalent talent : talents.getTalents(LuckyAltarTalent.class)) {
-         luckyAltarChance += talent.getLuckyAltarChance();
+      for (LuckyAltarExpertise expertise : expertises.getAll(LuckyAltarExpertise.class, Skill::isUnlocked)) {
+         luckyAltarChance += expertise.getLuckyAltarChance();
       }
 
       if (Config.rand.nextFloat() < luckyAltarChance) {
-         amtMultiplier = 0.1F;
+         amtMultiplier *= 0.1F;
          this.spawnLuckyEffects(level, pos);
       }
 
@@ -99,9 +102,9 @@ public class VaultAltarIngredientsConfig extends Config {
          int amount = ingredientEntry.getAmount();
          if (ingredientEntry.getScale() != 0.0) {
             double scale = this.getScale(poolId, crystalsCrafted);
-            amount = Math.max((int)(Math.round(amount * scale * amtMultiplier) * ingredientEntry.getScale()), 1);
+            amount = Math.max((int)(Math.round(amount * scale * amtMultiplier) * ingredientEntry.getScale()), mode.getMinCost());
          } else {
-            amount = Math.max(Math.round(amount * amtMultiplier), 1);
+            amount = Math.max(Math.round(amount * amtMultiplier), mode.getMinCost());
          }
 
          requiredItems.add(new RequiredItems(poolId, items, amount));

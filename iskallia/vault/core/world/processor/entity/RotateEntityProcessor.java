@@ -1,11 +1,11 @@
 package iskallia.vault.core.world.processor.entity;
 
 import iskallia.vault.core.world.data.PartialEntity;
-import iskallia.vault.core.world.data.PartialNBT;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.util.Mth;
@@ -99,11 +99,11 @@ public class RotateEntityProcessor extends EntityProcessor {
    public PartialEntity process(PartialEntity entity, ProcessorContext context) {
       entity.setBlockPos(this.transform(entity.getBlockPos()));
       entity.setPos(this.transform(entity.getPos()));
-      PartialNBT nbt = entity.getNBT();
-      if (nbt.contains("Rotation", 5)) {
+      CompoundTag nbt = entity.getNbt().asWhole().orElse(null);
+      if (nbt != null && nbt.contains("Rotation", 5)) {
          ListTag rotation = nbt.getList("Rotation", 5);
          float yaw = rotation.getFloat(0);
-         EntityType<?> type = EntityType.by(entity.getNBT()).orElse(EntityType.ARMOR_STAND);
+         EntityType<?> type = EntityType.by(nbt).orElse(EntityType.ARMOR_STAND);
          if (type == EntityType.ITEM_FRAME || type == EntityType.GLOW_ITEM_FRAME) {
             Direction direction = Direction.from3DDataValue(nbt.getByte("Facing"));
             Tuple<Float, Direction> result = this.transformHangingEntity(yaw, direction);

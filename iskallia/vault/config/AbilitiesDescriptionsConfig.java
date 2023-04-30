@@ -70,6 +70,13 @@ public class AbilitiesDescriptionsConfig extends Config {
          );
       this.data
          .put(
+            "Dash_Warp",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Dash_Warp"), List.of("cooldown", "manaCost", "force"), List.of("level", "cooldown", "manaCost", "force")
+            )
+         );
+      this.data
+         .put(
             "Execute",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Execute"), List.of("cooldown", "duration", "damage"), List.of("level", "cooldown", "duration", "damage")
@@ -116,6 +123,15 @@ public class AbilitiesDescriptionsConfig extends Config {
             "Ghost Walk",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Ghost Walk"), List.of("cooldown", "manaCost", "duration"), List.of("level", "cooldown", "manaCost", "duration")
+            )
+         );
+      this.data
+         .put(
+            "Ghost Walk_Spirit_Walk",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Ghost Walk_Spirit_Walk"),
+               List.of("cooldown", "manaCost", "duration"),
+               List.of("level", "cooldown", "manaCost", "duration")
             )
          );
       this.data
@@ -215,6 +231,15 @@ public class AbilitiesDescriptionsConfig extends Config {
          );
       this.data
          .put(
+            "Mana Shield_Retribution",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Mana Shield_Retribution"),
+               List.of("cooldown", "manaCostPerSecond", "absorb", "radius", "damage"),
+               List.of("level", "cooldown", "manaCostPerSecond", "absorb", "radius", "damage")
+            )
+         );
+      this.data
+         .put(
             "Mega Jump",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Mega Jump"),
@@ -236,8 +261,8 @@ public class AbilitiesDescriptionsConfig extends Config {
             "Mega Jump_Break_Down",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Mega Jump_Break_Down"),
-               List.of("cooldown", "manaCost", "rangeVertical"),
-               List.of("level", "cooldown", "manaCost", "rangeVertical")
+               List.of("cooldown", "manaCost", "rangeVertical", "radius"),
+               List.of("level", "cooldown", "manaCost", "rangeVertical", "radius")
             )
          );
       this.data
@@ -305,29 +330,20 @@ public class AbilitiesDescriptionsConfig extends Config {
          );
       this.data
          .put(
-            "Tank",
+            "Empower",
             new AbilitiesDescriptionsConfig.DescriptionData(
-               this.defaultDescription("Tank"),
-               List.of("cooldown", "manaCostPerSecond", "duration", "resistance"),
-               List.of("level", "cooldown", "manaCostPerSecond", "duration", "resistance")
+               this.defaultDescription("Empower"),
+               List.of("cooldown", "manaCostPerSecond", "speed"),
+               List.of("level", "cooldown", "manaCostPerSecond", "speed")
             )
          );
       this.data
          .put(
-            "Tank_Projectile",
+            "Empower_Ice_Armour",
             new AbilitiesDescriptionsConfig.DescriptionData(
-               this.defaultDescription("Tank_Projectile"),
-               List.of("cooldown", "manaCostPerSecond", "reducedProjectileDamageTaken", "resistanceKnockback"),
-               List.of("level", "cooldown", "manaCostPerSecond", "reducedProjectileDamageTaken", "resistanceKnockback")
-            )
-         );
-      this.data
-         .put(
-            "Tank_Reflect",
-            new AbilitiesDescriptionsConfig.DescriptionData(
-               this.defaultDescription("Tank_Reflect"),
-               List.of("cooldown", "manaCostPerSecond", "chance", "damage"),
-               List.of("level", "cooldown", "manaCostPerSecond", "chance", "damage")
+               this.defaultDescription("Empower_Ice_Armour"),
+               List.of("cooldown", "manaCostPerSecond", "slowness", "radius"),
+               List.of("level", "cooldown", "manaCostPerSecond", "slowness", "radius")
             )
          );
       this.data
@@ -346,6 +362,15 @@ public class AbilitiesDescriptionsConfig extends Config {
                this.defaultDescription("Taunt_Repel"),
                List.of("cooldown", "manaCost", "radius", "duration", "distance"),
                List.of("level", "cooldown", "manaCost", "radius", "duration", "distance")
+            )
+         );
+      this.data
+         .put(
+            "Taunt_Charm",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Taunt_Charm"),
+               List.of("cooldown", "manaCost", "radius", "duration", "maxTargets", "damage"),
+               List.of("level", "cooldown", "manaCost", "radius", "duration", "maxTargets", "damage")
             )
          );
       this.data
@@ -382,21 +407,153 @@ public class AbilitiesDescriptionsConfig extends Config {
          .put(
             "Stonefall",
             new AbilitiesDescriptionsConfig.DescriptionData(
-               this.defaultDescription("Stonefall"), List.of("cooldown", "manaCost", "duration"), List.of("level", "cooldown", "manaCost", "duration")
+               this.defaultDescription("Stonefall"),
+               List.of("cooldown", "manaCost", "duration", "damageReduction", "radius", "knockback"),
+               List.of("level", "cooldown", "manaCost", "duration", "damageReduction", "radius", "knockback")
             )
          );
       this.data
          .put(
             "Stonefall_Snow",
             new AbilitiesDescriptionsConfig.DescriptionData(
-               this.defaultDescription("Stonefall_Snow"), List.of("cooldown", "manaCost", "radius"), List.of("level", "cooldown", "manaCost", "radius")
+               this.defaultDescription("Stonefall_Snow"),
+               List.of("cooldown", "manaCost", "duration", "damageReduction", "radius", "damage"),
+               List.of("level", "cooldown", "manaCost", "duration", "damageReduction", "radius", "damage")
             )
          );
       this.data
          .put(
             "Stonefall_Cold",
             new AbilitiesDescriptionsConfig.DescriptionData(
-               this.defaultDescription("Stonefall"), List.of("cooldown", "manaCost", "duration"), List.of("level", "cooldown", "manaCost", "duration")
+               this.defaultDescription("Stonefall"),
+               List.of("cooldown", "manaCost", "duration", "damageReduction", "freezeDuration", "amplifier", "radius"),
+               List.of("level", "cooldown", "manaCost", "duration", "damageReduction", "freezeDuration", "amplifier", "radius")
+            )
+         );
+      this.data
+         .put(
+            "Totem",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Totem"),
+               List.of("cooldown", "manaCost", "duration", "radius", "heal"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius", "heal")
+            )
+         );
+      this.data
+         .put(
+            "Totem_Mob_Damage",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Totem_Mob_Damage"),
+               List.of("cooldown", "manaCost", "duration", "radius", "damage"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius", "damage")
+            )
+         );
+      this.data
+         .put(
+            "Totem_Mana_Regen",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Totem_Mob_Damage"),
+               List.of("cooldown", "manaCost", "duration", "radius", "manaRegen"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius", "manaRegen")
+            )
+         );
+      this.data
+         .put(
+            "Totem_Player_Damage",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Totem_Mob_Damage"),
+               List.of("cooldown", "manaCost", "duration", "radius", "damage"),
+               List.of("level", "cooldown", "manaCost", "duration", "radius", "damage")
+            )
+         );
+      this.data
+         .put(
+            "Javelin",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Javelin"),
+               List.of("cooldown", "manaCost", "damage", "throwPower", "knockback"),
+               List.of("level", "cooldown", "manaCost", "damage", "throwPower", "knockback")
+            )
+         );
+      this.data
+         .put(
+            "Javelin_Piercing",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Javelin"),
+               List.of("cooldown", "manaCost", "damage", "throwPower", "piercing"),
+               List.of("level", "cooldown", "manaCost", "damage", "throwPower", "piercing")
+            )
+         );
+      this.data
+         .put(
+            "Javelin_Scatter",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Javelin"),
+               List.of("cooldown", "manaCost", "damage", "throwPower", "numberOfBounces", "numberOfJavelins"),
+               List.of("level", "cooldown", "manaCost", "damage", "throwPower", "numberOfBounces", "numberOfJavelins")
+            )
+         );
+      this.data
+         .put(
+            "Javelin_Sight",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Javelin"),
+               List.of("cooldown", "manaCost", "damage", "throwPower", "radius", "duration"),
+               List.of("level", "cooldown", "manaCost", "damage", "throwPower", "radius", "duration")
+            )
+         );
+      this.data
+         .put(
+            "Smite",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Smite"),
+               List.of("cooldown", "manaCostPerSecond", "radius", "damage", "damageInterval", "additionalManaPerBolt"),
+               List.of("level", "cooldown", "manaCostPerSecond", "radius", "damage", "damageInterval", "additionalManaPerBolt")
+            )
+         );
+      this.data
+         .put(
+            "Smite_Archon",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Smite_Archon"),
+               List.of("cooldown", "manaCostPerSecond", "radius", "damage", "damageInterval", "additionalManaPerBolt"),
+               List.of("level", "cooldown", "manaCostPerSecond", "radius", "damage", "damageInterval", "additionalManaPerBolt")
+            )
+         );
+      this.data
+         .put(
+            "Smite_Thunderstorm",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Smite_Thunderstorm"),
+               List.of("cooldown", "manaCostPerSecond", "radius", "damage", "damageInterval", "additionalManaPerBolt"),
+               List.of("level", "cooldown", "manaCostPerSecond", "radius", "damage", "damageInterval", "additionalManaPerBolt")
+            )
+         );
+      this.data
+         .put(
+            "Shell",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Shell"),
+               List.of("cooldown", "manaCostPerSecond", "additionalManaPerHit", "stunChance", "stunAmplifier", "stunDuration"),
+               List.of("level", "cooldown", "manaCostPerSecond", "additionalManaPerHit", "stunChance", "stunAmplifier", "stunDuration")
+            )
+         );
+      this.data
+         .put(
+            "Shell_Porcupine",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Shell_Porcupine"),
+               List.of("cooldown", "manaCostPerSecond", "durabilityWearReduction", "damage", "additionalManaPerHit"),
+               List.of("level", "cooldown", "manaCostPerSecond", "durabilityWearReduction", "damage", "additionalManaPerHit")
+            )
+         );
+      this.data
+         .put(
+            "Shell_Quill",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Shell_Quill"),
+               List.of("cooldown", "manaCostPerSecond", "durabilityWearReduction", "damage", "additionalManaPerHit", "quillCount"),
+               List.of("level", "cooldown", "manaCostPerSecond", "durabilityWearReduction", "damage", "additionalManaPerHit", "quillCount")
             )
          );
    }

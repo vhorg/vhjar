@@ -1,6 +1,5 @@
 package iskallia.vault.block.base;
 
-import com.mojang.brigadier.StringReader;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.AltarProgressEvent;
@@ -8,11 +7,9 @@ import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.influence.VaultGod;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TileParser;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.loot.LootPool;
-import iskallia.vault.entity.entity.FloatingItemEntity;
-import iskallia.vault.init.ModBlocks;
+import iskallia.vault.entity.entity.FloatingGodAltarItemEntity;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.item.gear.VaultLevelItem;
@@ -20,6 +17,7 @@ import iskallia.vault.world.data.ServerVaults;
 import java.awt.Color;
 import java.util.Random;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -105,7 +103,7 @@ public abstract class FillableAltarTileEntity extends BlockEntity {
       this.maxProgress = nbt.contains("MaxProgress") ? nbt.getInt("MaxProgress") : -1;
       this.consumed = nbt.getBoolean("Consumed");
       if (nbt.contains("Replacement", 8)) {
-         this.replacement = new TileParser(new StringReader(nbt.getString("Replacement")), ModBlocks.ERROR_BLOCK, true).toTile();
+         this.replacement = PartialTile.parse(nbt.getString("Replacement"), true).orElse(PartialTile.ERROR);
       }
 
       if (nbt.contains("Reward", 8)) {
@@ -132,27 +130,34 @@ public abstract class FillableAltarTileEntity extends BlockEntity {
    public void placeReplacement(Level world, BlockPos pos) {
       if (this.replacement != null) {
          PartialTile tile = PartialTile.at(world, pos);
-         this.replacement.copyInto(tile);
-         world.setBlock(pos, tile.getState().asBlockState(), 3);
-         if (tile.getNbt() != null) {
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (blockEntity != null) {
-               blockEntity.load(tile.getNbt());
-            }
-         }
+         this.replacement.fillInto(tile);
+         tile.place(world, pos, 3);
       }
    }
 
    public void placeReward(Level world, BlockPos pos, int color, RandomSource random) {
       LootPool pool = VaultRegistry.LOOT_POOL.getKey(this.reward).get(Version.latest());
-      pool.getRandomFlat(Version.latest(), random).ifPresent(entry -> {
-         ItemStack stack = entry.getStack(random);
-         Vault vault = ServerVaults.get(world).orElse(null);
-         VaultLevelItem.doInitializeVaultLoot(stack, vault, null);
-         stack = DataTransferItem.doConvertStack(stack);
-         DataInitializationItem.doInitialize(stack);
-         world.addFreshEntity(FloatingItemEntity.create(world, pos, stack).setColor(color));
-         world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8F, 0.2F);
-      });
+      pool.getRandomFlat(Version.latest(), random)
+         .ifPresent(
+            entry -> {
+               ItemStack stack = entry.getStack(random);
+               Vault vault = ServerVaults.get(world).orElse(null);
+               VaultLevelItem.doInitializeVaultLoot(stack, vault, null);
+               stack = DataTransferItem.doConvertStack(stack);
+               DataInitializationItem.doInitialize(stack);
+               Direction facing = this.getBlockState().hasProperty(FacedBlock.FACING)
+                  ? (Direction)this.getBlockState().getValue(FacedBlock.FACING)
+                  : Direction.NORTH;
+               FloatingGodAltarItemEntity floatingItemEntity = new FloatingGodAltarItemEntity(
+                  world,
+                  pos.getX() + 0.5 - facing.getNormal().getX() / 3.0F,
+                  pos.getY() + 0.5 - facing.getNormal().getY() / 3.0F,
+                  pos.getZ() + 0.5 - facing.getNormal().getZ() / 3.0F,
+                  stack
+               );
+               world.addFreshEntity(floatingItemEntity.setColor(color));
+               world.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 0.8F, 0.2F);
+            }
+         );
    }
 }

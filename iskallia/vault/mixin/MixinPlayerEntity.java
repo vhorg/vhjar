@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.entity.entity.SpiritEntity;
+import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
@@ -28,6 +29,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -92,6 +94,7 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
       )
    )
    private float getSweepingEdgeRatio(LivingEntity entity) {
+      ActiveFlags.IS_AOE_ATTACKING.push();
       Player thisPlayer = (Player)this;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(thisPlayer);
       float chance = snapshot.getAttributeValue(ModGearAttributes.SWEEPING_HIT_CHANCE, VaultGearAttributeTypeMerger.floatSum());
@@ -101,6 +104,18 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
          int level = 1;
          return 1.0F - 1.0F / (level + 1);
       }
+   }
+
+   @Inject(
+      method = {"attack"},
+      at = {@At(
+         value = "INVOKE",
+         shift = Shift.AFTER,
+         target = "Lnet/minecraft/world/entity/player/Player;sweepAttack()V"
+      )}
+   )
+   public void sweepAttack(Entity pTargetEntity, CallbackInfo ci) {
+      ActiveFlags.IS_AOE_ATTACKING.pop();
    }
 
    @Override

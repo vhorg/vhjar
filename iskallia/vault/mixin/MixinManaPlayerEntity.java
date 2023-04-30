@@ -1,6 +1,7 @@
 package iskallia.vault.mixin;
 
 import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModModelDiscoveryGoals;
 import iskallia.vault.mana.ManaPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -69,10 +70,14 @@ public abstract class MixinManaPlayerEntity extends LivingEntity implements Mana
    @Override
    public float setMana(float amount) {
       Player player = this.player();
-      ManaPlayer manaPlayer = (ManaPlayer)player;
-      float manaMax = manaPlayer.getManaMax();
+      ManaPlayer manaSource = (ManaPlayer)player;
+      float manaMax = manaSource.getManaMax();
       float clampedAmount = Mth.clamp(amount, 0.0F, manaMax);
       if (player instanceof ServerPlayer serverPlayer) {
+         if (clampedAmount < manaMax) {
+            ModModelDiscoveryGoals.LV50_VAULT_COMPLETED_WITHOUT_MANA_USAGE.markFailed(serverPlayer);
+         }
+
          serverPlayer.getEntityData().set(MANA, clampedAmount);
          return clampedAmount;
       } else {

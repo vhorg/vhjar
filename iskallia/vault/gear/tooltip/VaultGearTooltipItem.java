@@ -12,6 +12,7 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.item.BottleItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -76,7 +77,7 @@ public interface VaultGearTooltipItem {
                }
             }
 
-            if (maxSuffixes > 0 || !suffixes.isEmpty()) {
+            if (maxSuffixes > 0 || !suffixes.isEmpty() || this instanceof BottleItem) {
                this.addTooltipAffixGroup(data, VaultGearModifier.AffixType.SUFFIX, stack, tooltip, flag.displayModifierDetail());
             }
          }
@@ -204,7 +205,7 @@ public interface VaultGearTooltipItem {
    }
 
    default void addTooltipDurability(List<Component> tooltip, ItemStack stack) {
-      if (stack.isDamageableItem()) {
+      if (stack.isDamageableItem() && stack.getMaxDamage() > 0) {
          tooltip.add(
             new TextComponent("Durability: ")
                .append(new TextComponent("%d/%d".formatted(stack.getMaxDamage() - stack.getDamageValue(), stack.getMaxDamage())).withStyle(ChatFormatting.GRAY))

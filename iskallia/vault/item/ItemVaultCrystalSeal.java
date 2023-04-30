@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -40,18 +39,6 @@ public class ItemVaultCrystalSeal extends Item {
    public static void setEventKey(ItemStack stack, String eventKey) {
       if (!stack.isEmpty() && stack.getItem() instanceof ItemVaultCrystalSeal) {
          stack.getOrCreateTag().putString("eventKey", eventKey);
-      }
-   }
-
-   public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
-      if (!world.isClientSide()) {
-         String eventKey = getEventKey(stack);
-         if (eventKey != null) {
-            boolean hasEvent = ModConfigs.ARCHITECT_EVENT.isEnabled() || ModConfigs.RAID_EVENT_CONFIG.isEnabled();
-            if (!hasEvent) {
-               stack.setCount(0);
-            }
-         }
       }
    }
 

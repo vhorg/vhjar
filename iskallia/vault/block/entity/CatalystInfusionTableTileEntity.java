@@ -6,6 +6,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.VaultCatalystInfusedItem;
+import iskallia.vault.world.VaultMode;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
@@ -90,7 +91,9 @@ public class CatalystInfusionTableTileEntity extends BlockEntity implements Menu
          tile.catalystStackHandler.getStackInSlot(0).shrink(1);
          tile.infuserStackHandler.getStackInSlot(0).shrink(1);
          ItemStack itemStack = new ItemStack(ModItems.VAULT_CATALYST_INFUSED);
-         VaultCatalystInfusedItem.initializeModifiers(itemStack, world.getGameRules().getBoolean(ModGameRules.CASUAL_VAULTS));
+         VaultCatalystInfusedItem.initializeModifiers(
+            itemStack, ((VaultMode.GameRuleValue)world.getGameRules().getRule(ModGameRules.MODE)).get() == VaultMode.CASUAL
+         );
          tile.outputStackHandler.setStackInSlot(0, itemStack);
          tile.progress = 0;
       }

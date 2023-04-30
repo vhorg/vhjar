@@ -17,7 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
    public CompoundNbtAdapter(boolean nullable) {
-      super(CompoundTag.class, nullable);
+      super(nullable);
    }
 
    public CompoundNbtAdapter asNullable() {
@@ -28,10 +28,8 @@ public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
       Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(value.size()), buffer);
 
       for (String key : value.getAllKeys()) {
-         Tag tag = value.get(key);
          Adapters.UTF_8.writeBits(key, buffer);
-         TAG_ID.writeBits(Byte.valueOf(value.getId()), buffer);
-         ADAPTERS[tag.getId()].writeBits(tag, buffer);
+         Adapters.GENERIC_NBT.writeBits(value.get(key), buffer);
       }
    }
 
@@ -41,7 +39,7 @@ public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
 
       for (int i = 0; i < size; i++) {
          String key = Adapters.UTF_8.readBits(buffer).orElseThrow();
-         Tag tag = (Tag)ADAPTERS[TAG_ID.readBits(buffer).orElseThrow()].readBits(buffer).orElseThrow();
+         Tag tag = Adapters.GENERIC_NBT.readBits(buffer).orElseThrow();
          compound.put(key, tag);
       }
 
@@ -52,10 +50,8 @@ public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
       Adapters.INT_SEGMENTED_3.writeBytes(Integer.valueOf(value.size()), buffer);
 
       for (String key : value.getAllKeys()) {
-         Tag tag = value.get(key);
          Adapters.UTF_8.writeBytes(key, buffer);
-         TAG_ID.writeBytes(Byte.valueOf(value.getId()), buffer);
-         ADAPTERS[tag.getId()].writeBytes(tag, buffer);
+         Adapters.GENERIC_NBT.writeBytes(value.get(key), buffer);
       }
    }
 
@@ -65,7 +61,7 @@ public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
 
       for (int i = 0; i < size; i++) {
          String key = Adapters.UTF_8.readBytes(buffer).orElseThrow();
-         Tag tag = (Tag)ADAPTERS[TAG_ID.readBytes(buffer).orElseThrow()].readBytes(buffer).orElseThrow();
+         Tag tag = Adapters.GENERIC_NBT.readBytes(buffer).orElseThrow();
          compound.put(key, tag);
       }
 
@@ -76,10 +72,8 @@ public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
       Adapters.INT_SEGMENTED_3.writeData(Integer.valueOf(value.size()), data);
 
       for (String key : value.getAllKeys()) {
-         Tag tag = value.get(key);
          Adapters.UTF_8.writeData(key, data);
-         TAG_ID.writeData(Byte.valueOf(value.getId()), data);
-         ADAPTERS[tag.getId()].writeData(tag, data);
+         Adapters.GENERIC_NBT.writeData(value.get(key), data);
       }
    }
 
@@ -89,7 +83,7 @@ public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
 
       for (int i = 0; i < size; i++) {
          String key = Adapters.UTF_8.readData(data).orElseThrow();
-         Tag tag = (Tag)ADAPTERS[TAG_ID.readData(data).orElseThrow()].readData(data).orElseThrow();
+         Tag tag = Adapters.GENERIC_NBT.readData(data).orElseThrow();
          compound.put(key, tag);
       }
 
@@ -97,12 +91,12 @@ public class CompoundNbtAdapter extends NbtAdapter<CompoundTag> {
    }
 
    protected Tag writeTagNbt(CompoundTag value) {
-      return null;
+      return value.copy();
    }
 
    @Nullable
    protected CompoundTag readTagNbt(Tag nbt) {
-      return null;
+      return nbt instanceof CompoundTag tag ? tag.copy() : null;
    }
 
    protected JsonElement writeTagJson(CompoundTag value) {

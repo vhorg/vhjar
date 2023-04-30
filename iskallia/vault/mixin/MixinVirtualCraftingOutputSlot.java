@@ -24,7 +24,7 @@ public abstract class MixinVirtualCraftingOutputSlot {
       if (thisSlot.hasItem()) {
          ItemStack resultStack = thisSlot.getItem();
          ResearchTree researchTree = StageManager.getResearchTree(player);
-         String restrictedBy = researchTree.restrictedBy(resultStack.getItem(), Restrictions.Type.CRAFTABILITY);
+         String restrictedBy = researchTree.restrictedBy(resultStack, Restrictions.Type.CRAFTABILITY);
          if (restrictedBy != null) {
             cir.setReturnValue(false);
          }

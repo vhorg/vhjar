@@ -8,7 +8,7 @@ import iskallia.vault.client.gui.screen.player.legacy.TabContent;
 import iskallia.vault.client.gui.screen.player.legacy.tab.split.dialog.AbilityDialog;
 import iskallia.vault.client.gui.screen.player.legacy.tab.split.pan.AbilityPanRegion;
 import iskallia.vault.container.NBTElementContainer;
-import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.tree.AbilityTree;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;

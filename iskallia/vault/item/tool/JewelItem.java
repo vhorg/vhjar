@@ -15,11 +15,13 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
@@ -142,5 +144,13 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
 
       float time = (float)ClientScheduler.INSTANCE.getTickCount();
       return blender.getColor(time);
+   }
+
+   public static ItemStack create(Consumer<VaultGearData> consumer) {
+      ItemStack stack = new ItemStack(ModItems.JEWEL);
+      VaultGearData data = VaultGearData.read(stack);
+      consumer.accept(data);
+      data.write(stack);
+      return stack;
    }
 }

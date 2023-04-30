@@ -32,7 +32,7 @@ public abstract class MixinSlot {
          if (this.hasItem()) {
             ItemStack resultStack = this.getItem();
             ResearchTree researchTree = StageManager.getResearchTree(player);
-            String restrictedBy = researchTree.restrictedBy(resultStack.getItem(), Restrictions.Type.CRAFTABILITY);
+            String restrictedBy = researchTree.restrictedBy(resultStack, Restrictions.Type.CRAFTABILITY);
             if (restrictedBy != null) {
                cir.setReturnValue(false);
             }

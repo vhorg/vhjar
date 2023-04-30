@@ -22,7 +22,7 @@ public class EmptyCrystalObjective extends CrystalObjective {
       vault.ifPresent(Vault.OBJECTIVES, objectives -> {
          objectives.add(FindExitObjective.create(ClassicPortalLogic.EXIT));
          objectives.add(DeathObjective.create(true));
-         objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getId(this));
+         objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
       });
    }
 

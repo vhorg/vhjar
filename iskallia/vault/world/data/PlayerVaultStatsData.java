@@ -1,6 +1,14 @@
 package iskallia.vault.world.data;
 
 import iskallia.vault.skill.PlayerVaultStats;
+import iskallia.vault.skill.base.GroupedSkill;
+import iskallia.vault.skill.base.LearnableSkill;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.skill.tree.ExpertiseTree;
+import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.util.WeekKey;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -74,6 +82,12 @@ public class PlayerVaultStatsData extends SavedData {
       return this;
    }
 
+   public PlayerVaultStatsData addExpertisePoints(ServerPlayer player, int amount) {
+      this.getVaultStats(player).addExpertisePoints(amount).sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
    public PlayerVaultStatsData refundSkillPoints(ServerPlayer player, int amount) {
       this.getVaultStats(player).refundSkillPoints(amount).sync(player.getLevel().getServer());
       this.setDirty();
@@ -116,8 +130,113 @@ public class PlayerVaultStatsData extends SavedData {
       return this;
    }
 
+   public PlayerVaultStatsData resetLevelAbilitiesAndExpertise(ServerPlayer player) {
+      this.resetLevel(player);
+      this.resetAbilities(player);
+      this.resetExpertises(player);
+      this.setDirty();
+      return this;
+   }
+
+   public PlayerVaultStatsData resetAbilities(ServerPlayer player) {
+      this.getVaultStats(player).resetAbilitiesTalents(player.getLevel().getServer()).sync(player.getLevel().getServer());
+      PlayerVaultStatsData statsData = get(player.getLevel());
+      PlayerTalentsData talentsData = PlayerTalentsData.get(player.getLevel());
+      PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get(player.getLevel());
+      TalentTree talentTree = talentsData.getTalents(player);
+      AbilityTree abilityTree = abilitiesData.getAbilities(player);
+      PlayerVaultStats stats = statsData.getVaultStats(player);
+      stats.setRegretPoints(9999);
+
+      for (Skill skill : talentTree.getAll(LearnableSkill.class, Skill::isUnlocked)) {
+         while (skill.isUnlocked()) {
+            SkillContext context = SkillContext.of(player);
+            if (skill.getParent() instanceof GroupedSkill grouped) {
+               grouped.select(skill.getId());
+               skill = grouped;
+            }
+
+            if (skill instanceof LearnableSkill learnable && learnable.canRegret(context)) {
+               learnable.regret(context);
+               talentTree.sync(context);
+            }
+         }
+      }
+
+      for (Skill skill : abilityTree.getAll(LearnableSkill.class, Skill::isUnlocked)) {
+         while (skill.isUnlocked()) {
+            SkillContext contextx = SkillContext.of(player);
+            if (skill.getParent() instanceof GroupedSkill grouped) {
+               grouped.select(skill.getId());
+               skill = grouped;
+            }
+
+            if (skill.isUnlocked() && skill instanceof SpecializedSkill specialized) {
+               specialized.resetSpecialization(SkillContext.of(player));
+            }
+
+            if (skill instanceof LearnableSkill learnable && learnable.canRegret(contextx)) {
+               learnable.regret(contextx);
+               abilityTree.sync(contextx);
+            }
+         }
+      }
+
+      stats.setRegretPoints(0);
+      stats.setSkillPoints(0);
+      stats.sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
+   public PlayerVaultStatsData resetKnowledge(ServerPlayer player) {
+      this.getVaultStats(player).resetKnowledge(player.getLevel().getServer()).sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
+   public PlayerVaultStatsData resetExpertises(ServerPlayer player) {
+      this.getVaultStats(player).resetExpertise(player.getLevel().getServer()).sync(player.getLevel().getServer());
+      PlayerVaultStatsData statsData = get(player.getLevel());
+      PlayerExpertisesData expertisesData = PlayerExpertisesData.get(player.getLevel());
+      ExpertiseTree expertisesTree = expertisesData.getExpertises(player);
+      PlayerVaultStats stats = statsData.getVaultStats(player);
+
+      for (Skill skill : expertisesTree.getAll(LearnableSkill.class, Skill::isUnlocked)) {
+         while (skill.isUnlocked()) {
+            SkillContext context = SkillContext.of(player);
+            if (skill.getParent() instanceof GroupedSkill grouped) {
+               grouped.select(skill.getId());
+               skill = grouped;
+            }
+
+            if (skill instanceof LearnableSkill learnable && learnable.canRegret(context)) {
+               learnable.regret(context);
+               expertisesTree.sync(context);
+            }
+         }
+      }
+
+      stats.setExpertisePoints(0);
+      stats.sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
+   public PlayerVaultStatsData resetLevel(ServerPlayer player) {
+      this.getVaultStats(player).resetLevel(player.getLevel().getServer()).sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
    public PlayerVaultStatsData resetAndReturnSkillPoints(ServerPlayer player) {
       this.getVaultStats(player).resetAndReturnSkillPoints().sync(player.getLevel().getServer());
+      this.setDirty();
+      return this;
+   }
+
+   public PlayerVaultStatsData resetAndReturnExpertisePoints(ServerPlayer player) {
+      this.getVaultStats(player).resetAndReturnExpertisePoints().sync(player.getLevel().getServer());
       this.setDirty();
       return this;
    }
@@ -167,6 +286,10 @@ public class PlayerVaultStatsData extends SavedData {
    private void updateFastestVaultTime(PlayerVaultStatsData.PlayerRecordEntry entry) {
       this.weeklyVaultRecords.computeIfAbsent(WeekKey.current(), key -> new ArrayList<>()).add(entry);
       this.setDirty();
+   }
+
+   public boolean isDirty() {
+      return true;
    }
 
    public static PlayerVaultStatsData get(ServerLevel world) {

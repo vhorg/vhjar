@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "dd",
+    "dd"
+  ],
+  "key": {
+    "d": {
+      "item": "the_vault:driftwood"
+    }
+  },
+  "result": {
+    "item": "the_vault:driftwood_planks"
+  }
+}

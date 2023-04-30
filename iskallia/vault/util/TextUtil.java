@@ -7,7 +7,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.lang3.StringUtils;
 
 public class TextUtil {
    static final ChatFormatting[] rainbow = new ChatFormatting[]{
@@ -39,7 +38,7 @@ public class TextUtil {
    public static TextComponent formatLocationPathAsProperNoun(ResourceLocation location) {
       String[] split = location.getPath().split("_");
       AtomicReference<String> name = new AtomicReference<>("");
-      Arrays.stream(split).forEach(s -> name.set(name.get() + StringUtils.capitalize(s) + " "));
+      Arrays.stream(split).forEach(s -> name.set(name.get() + org.apache.commons.lang3.StringUtils.capitalize(s) + " "));
       return new TextComponent(name.get().trim());
    }
 

@@ -84,6 +84,7 @@ public class MenuPlayerStatDescriptionConfig extends Config {
             this.put(ModGearAttributes.ATTACK_SPEED.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.ATTACK_SPEED_PERCENT.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.REACH.getRegistryName(), "Configure me!");
+            this.put(ModGearAttributes.ATTACK_RANGE.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.KNOCKBACK_RESISTANCE.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.HEALTH.getRegistryName(), "Configure me!");
             this.put(ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE.getRegistryName(), "Configure me!");

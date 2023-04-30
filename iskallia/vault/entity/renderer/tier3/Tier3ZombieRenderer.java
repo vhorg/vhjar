@@ -1,7 +1,7 @@
 package iskallia.vault.entity.renderer.tier3;
 
 import iskallia.vault.VaultMod;
-import iskallia.vault.entity.entity.tier2.Tier3ZombieEntity;
+import iskallia.vault.entity.entity.tier3.Tier3ZombieEntity;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.tier3.Tier3ZombieModel;
 import javax.annotation.Nonnull;

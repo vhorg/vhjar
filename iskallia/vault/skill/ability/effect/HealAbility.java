@@ -6,9 +6,9 @@ import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModifica
 import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.skill.ability.config.HealConfig;
 import iskallia.vault.skill.ability.effect.spi.AbstractHealAbility;
-import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.base.SkillContext;
 import java.awt.Color;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
@@ -17,42 +17,62 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.item.alchemy.Potions;
 
-public class HealAbility extends AbstractHealAbility<HealConfig> {
+public class HealAbility extends AbstractHealAbility {
+   public HealAbility(int unlockLevel, int learnPointCost, int regretPointCost, int cooldownTicks, float manaCost) {
+      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost);
+   }
+
+   public HealAbility() {
+   }
+
    @Override
-   public String getAbilityGroupName() {
-      return "Heal";
+   protected Ability.ActionResult doAction(SkillContext context) {
+      return context.getSource()
+         .as(ServerPlayer.class)
+         .map(
+            player -> {
+               float healed = this.getFlatLifeHealed();
+
+               for (ConfiguredModification<IntValueConfig, HealAdditionalHealthModification> mod : SpecialAbilityModification.getModifications(
+                  player, HealAdditionalHealthModification.class
+               )) {
+                  healed = mod.modification().adjustHealHealth(mod.config(), healed);
+               }
+
+               player.heal(healed);
+               return Ability.ActionResult.successCooldownImmediate();
+            }
+         )
+         .orElse(Ability.ActionResult.fail());
    }
 
-   protected AbilityActionResult doAction(HealConfig config, ServerPlayer player, boolean active) {
-      float healed = config.getFlatLifeHealed();
-
-      for (ConfiguredModification<IntValueConfig, HealAdditionalHealthModification> mod : SpecialAbilityModification.getModifications(
-         player, HealAdditionalHealthModification.class
-      )) {
-         healed = mod.modification().adjustHealHealth(mod.config(), healed);
-      }
-
-      player.heal(healed);
-      return AbilityActionResult.SUCCESS_COOLDOWN;
+   @Override
+   protected void doParticles(SkillContext context) {
+      context.getSource()
+         .as(ServerPlayer.class)
+         .ifPresent(
+            player -> {
+               ((ServerLevel)player.level)
+                  .sendParticles((SimpleParticleType)ModParticles.HEAL.get(), player.getX(), player.getY(), player.getZ(), 25, 1.0, 0.5, 1.0, 0.0);
+               AreaEffectCloud areaEffectCloud = new AreaEffectCloud(player.level, player.getX(), player.getY(), player.getZ());
+               areaEffectCloud.setOwner(player);
+               areaEffectCloud.setRadius(1.5F);
+               areaEffectCloud.setRadiusOnUse(-0.5F);
+               areaEffectCloud.setWaitTime(0);
+               areaEffectCloud.setDuration(4);
+               areaEffectCloud.setPotion(Potions.EMPTY);
+               areaEffectCloud.setRadiusPerTick(0.0F);
+               areaEffectCloud.setFixedColor(Color.RED.getRGB());
+               player.level.addFreshEntity(areaEffectCloud);
+            }
+         );
    }
 
-   protected void doParticles(HealConfig config, ServerPlayer player) {
-      ((ServerLevel)player.level)
-         .sendParticles((SimpleParticleType)ModParticles.HEAL.get(), player.getX(), player.getY(), player.getZ(), 25, 1.0, 0.5, 1.0, 0.0);
-      AreaEffectCloud areaEffectCloud = new AreaEffectCloud(player.level, player.getX(), player.getY(), player.getZ());
-      areaEffectCloud.setOwner(player);
-      areaEffectCloud.setRadius(1.5F);
-      areaEffectCloud.setRadiusOnUse(-0.5F);
-      areaEffectCloud.setWaitTime(0);
-      areaEffectCloud.setDuration(4);
-      areaEffectCloud.setPotion(Potions.EMPTY);
-      areaEffectCloud.setRadiusPerTick(0.0F);
-      areaEffectCloud.setFixedColor(Color.RED.getRGB());
-      player.level.addFreshEntity(areaEffectCloud);
-   }
-
-   protected void doSound(HealConfig config, ServerPlayer player) {
-      player.level.playSound(player, player.getX(), player.getY(), player.getZ(), ModSounds.HEAL, SoundSource.PLAYERS, 0.5F, 1.0F);
-      player.playNotifySound(ModSounds.HEAL, SoundSource.PLAYERS, 0.5F, 1.0F);
+   @Override
+   protected void doSound(SkillContext context) {
+      context.getSource().as(ServerPlayer.class).ifPresent(player -> {
+         player.level.playSound(player, player.getX(), player.getY(), player.getZ(), ModSounds.HEAL, SoundSource.PLAYERS, 0.5F, 1.0F);
+         player.playNotifySound(ModSounds.HEAL, SoundSource.PLAYERS, 0.5F, 1.0F);
+      });
    }
 }

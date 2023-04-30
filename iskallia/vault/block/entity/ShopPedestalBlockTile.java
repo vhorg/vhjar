@@ -1,13 +1,9 @@
 package iskallia.vault.block.entity;
 
-import iskallia.vault.config.ShopPedestalConfig;
 import iskallia.vault.container.oversized.OverSizedItemStack;
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModConfigs;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
-import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -35,20 +31,7 @@ public class ShopPedestalBlockTile extends BlockEntity {
    public static void tick(Level world, BlockPos pos, BlockState state, ShopPedestalBlockTile tile) {
       if (world instanceof ServerLevel serverLevel) {
          if (!tile.initialized) {
-            tile.initialized = true;
-            int level = ServerVaults.getVaultLevelOrZero(serverLevel);
-            ShopPedestalConfig.ShopOffer shopOffer = ModConfigs.SHOP_PEDESTAL.getForLevel(level, serverLevel.getRandom());
-            if (shopOffer != null && !shopOffer.isEmpty()) {
-               ItemStack offerStack = shopOffer.offer().copy();
-               VaultLevelItem.doInitializeVaultLoot(offerStack, serverLevel, pos);
-               offerStack = DataTransferItem.doConvertStack(offerStack);
-               DataInitializationItem.doInitialize(offerStack);
-               tile.offer = offerStack.copy();
-               tile.currency = OverSizedItemStack.of(shopOffer.currency().overSizedStack());
-            }
-
-            tile.setChanged();
-            world.sendBlockUpdated(pos, state, state, 3);
+            CommonEvents.SHOP_PEDESTAL_LOOT_GENERATION.invoke(serverLevel, state, pos, tile, JavaRandom.ofNanoTime());
          }
       }
    }
@@ -69,6 +52,10 @@ public class ShopPedestalBlockTile extends BlockEntity {
 
    public boolean isInitialized() {
       return this.initialized;
+   }
+
+   public void setInitialized(boolean initialized) {
+      this.initialized = initialized;
    }
 
    public ItemStack getOfferStack() {
@@ -98,8 +85,8 @@ public class ShopPedestalBlockTile extends BlockEntity {
 
    public void setOffer(ItemStack offer, OverSizedItemStack currency) {
       this.initialized = true;
-      this.offer = offer.copy();
-      this.currency = OverSizedItemStack.of(currency.overSizedStack());
+      this.offer = offer;
+      this.currency = currency;
       this.setChanged();
       this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
    }

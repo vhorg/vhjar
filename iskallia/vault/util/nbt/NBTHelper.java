@@ -140,9 +140,36 @@ public class NBTHelper {
       }
    }
 
+   public static <T, N extends Tag> List<T> readListOptional(CompoundTag nbt, String name, Class<N> nbtType, Function<N, Optional<T>> mapper) {
+      return readCollectionOptional(nbt, name, nbtType, mapper, new ArrayList<>());
+   }
+
+   public static <T, C extends Collection<T>, N extends Tag> C readCollectionOptional(
+      CompoundTag nbt, String name, Class<N> nbtType, Function<N, Optional<T>> mapper, C collection
+   ) {
+      ListTag listNBT = (ListTag)nbt.get(name);
+      if (listNBT == null) {
+         return collection;
+      } else {
+         for (Tag inbt : listNBT) {
+            mapper.apply((N)inbt).ifPresent(collection::add);
+         }
+
+         return collection;
+      }
+   }
+
    public static <T, N extends Tag> void writeCollection(CompoundTag nbt, String name, Collection<T> list, Class<N> nbtType, Function<T, N> mapper) {
       ListTag listNBT = new ListTag();
       list.forEach(item -> listNBT.add(mapper.apply((T)item)));
+      nbt.put(name, listNBT);
+   }
+
+   public static <T, N extends Tag> void writeCollectionOptional(
+      CompoundTag nbt, String name, Collection<T> list, Class<N> nbtType, Function<T, Optional<N>> mapper
+   ) {
+      ListTag listNBT = new ListTag();
+      list.forEach(item -> mapper.apply((T)item).ifPresent(listNBT::add));
       nbt.put(name, listNBT);
    }
 

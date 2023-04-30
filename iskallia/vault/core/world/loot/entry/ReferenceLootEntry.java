@@ -1,14 +1,20 @@
 package iskallia.vault.core.world.loot.entry;
 
+import com.google.gson.JsonElement;
 import iskallia.vault.core.Version;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.LootPoolKey;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.VaultRegistry;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 public class ReferenceLootEntry implements LootEntry {
-   private final ResourceLocation reference;
+   private ResourceLocation reference;
+
+   public ReferenceLootEntry() {
+   }
 
    public ReferenceLootEntry(ResourceLocation reference) {
       this.reference = reference;
@@ -31,6 +37,16 @@ public class ReferenceLootEntry implements LootEntry {
    public LootEntry flatten(Version version, RandomSource random) {
       LootEntry flattened = this.getReference().get(version).getRandom(random).orElse(null);
       return flattened == null ? null : flattened.flatten(version, random);
+   }
+
+   @Override
+   public Optional<JsonElement> writeJson() {
+      return Adapters.IDENTIFIER.writeJson(this.reference);
+   }
+
+   @Override
+   public void readJson(JsonElement json) {
+      Adapters.IDENTIFIER.readJson(json).ifPresent(value -> this.reference = value);
    }
 
    @Override

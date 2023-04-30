@@ -1,6 +1,7 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.core.world.data.item.ItemPredicate;
 import iskallia.vault.research.Restrictions;
 import iskallia.vault.research.type.CustomResearch;
 import iskallia.vault.research.type.ModResearch;
@@ -86,10 +87,10 @@ public class ResearchConfig extends Config {
       this.MOD_RESEARCHES.add(new ModResearch("Nuclear Power", 6, ""));
       this.CUSTOM_RESEARCHES = new LinkedList<>();
       CustomResearch customResearch = new CustomResearch("Automatic Genius", 100);
-      customResearch.getItemRestrictions().put("refinedstorage:crafter", Restrictions.forItems(true));
-      customResearch.getItemRestrictions().put("rftoolsutility:crafter1", Restrictions.forItems(true));
-      customResearch.getItemRestrictions().put("appliedenergistics2:molecular_assembler", Restrictions.forItems(true));
-      customResearch.getItemRestrictions().put("mekanism:formulaic_assemblicator", Restrictions.forItems(true));
+      customResearch.getItemRestrictions().put(ItemPredicate.of("refinedstorage:crafter", false).orElseThrow(), Restrictions.forItems(true));
+      customResearch.getItemRestrictions().put(ItemPredicate.of("rftoolsutility:crafter1", false).orElseThrow(), Restrictions.forItems(true));
+      customResearch.getItemRestrictions().put(ItemPredicate.of("appliedenergistics2:molecular_assembler", false).orElseThrow(), Restrictions.forItems(true));
+      customResearch.getItemRestrictions().put(ItemPredicate.of("mekanism:formulaic_assemblicator", false).orElseThrow(), Restrictions.forItems(true));
       this.CUSTOM_RESEARCHES.add(customResearch);
    }
 }

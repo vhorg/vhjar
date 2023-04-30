@@ -47,6 +47,7 @@ public class TrinketForgeRecipe extends VaultForgeRecipe {
    @Override
    public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter, int vaultLevel) {
       ItemStack trinket = TrinketItem.createRandomTrinket(this.effect);
+      TrinketItem.setUses(trinket, this.effect.getTrinketConfig().getRandomCraftedUses());
       AttributeGearData data = AttributeGearData.read(trinket);
       data.updateAttribute(ModGearAttributes.CRAFTED_BY, crafter.getName().getContents());
       data.write(trinket);

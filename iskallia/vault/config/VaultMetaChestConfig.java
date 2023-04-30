@@ -43,6 +43,9 @@ public class VaultMetaChestConfig extends Config {
       this.set(ModBlocks.ORNATE_CHEST, 0.5, this.catalystChances);
       this.set(ModBlocks.ALTAR_CHEST, 0.7F, this.catalystChances);
       this.set(ModBlocks.TREASURE_CHEST, 0.5, this.catalystChances);
+      this.set(ModBlocks.ORNATE_STRONGBOX, 0.5, this.catalystChances);
+      this.set(ModBlocks.GILDED_STRONGBOX, 0.2F, this.catalystChances);
+      this.set(ModBlocks.LIVING_STRONGBOX, 0.0, this.catalystChances);
       this.runeChances.clear();
       this.set(ModBlocks.WOODEN_CHEST, 0.0, this.runeChances);
       this.set(ModBlocks.GILDED_CHEST, 0.2F, this.runeChances);
@@ -50,6 +53,9 @@ public class VaultMetaChestConfig extends Config {
       this.set(ModBlocks.ORNATE_CHEST, 0.5, this.runeChances);
       this.set(ModBlocks.ALTAR_CHEST, 0.7F, this.runeChances);
       this.set(ModBlocks.TREASURE_CHEST, 0.5, this.runeChances);
+      this.set(ModBlocks.ORNATE_STRONGBOX, 0.5, this.runeChances);
+      this.set(ModBlocks.GILDED_STRONGBOX, 0.2F, this.runeChances);
+      this.set(ModBlocks.LIVING_STRONGBOX, 0.0, this.runeChances);
    }
 
    private void set(Block block, double chance, Map<Block, Map<VaultRarity, Double>> mapOut) {

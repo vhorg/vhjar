@@ -46,7 +46,7 @@ public class SpeedrunCrystalObjective extends CrystalObjective {
             );
             objectives.add(DeathObjective.create(false));
             objectives.add(TrackSpeedrunObjective.create());
-            objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getId(this));
+            objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
          }
       );
    }

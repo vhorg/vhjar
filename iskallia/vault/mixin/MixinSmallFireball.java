@@ -21,7 +21,7 @@ public class MixinSmallFireball {
       )
    )
    public boolean transferAttackDamage(Entity target, DamageSource src, float damage) {
-      if (src.getEntity() instanceof LivingEntity livingEntity && ServerVaults.isInVault(livingEntity)) {
+      if (src.getEntity() instanceof LivingEntity livingEntity && ServerVaults.get(livingEntity.level).isPresent()) {
          AttributeInstance inst = livingEntity.getAttribute(Attributes.ATTACK_DAMAGE);
          if (inst != null) {
             damage = (float)inst.getValue();

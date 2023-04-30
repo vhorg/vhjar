@@ -2,6 +2,9 @@ package iskallia.vault.event;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.EnchantedBookEntry;
+import iskallia.vault.core.vault.modifier.VaultModifierStack;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -19,18 +22,21 @@ import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.item.data.InscriptionData;
 import iskallia.vault.item.tool.PaxelItem;
 import iskallia.vault.item.tool.ToolItem;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.InfuserExpertise;
+import iskallia.vault.skill.expertise.type.MysticExpertise;
 import iskallia.vault.util.EnchantmentUtil;
 import iskallia.vault.util.OverlevelEnchantHelper;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.ServerVaults;
-import iskallia.vault.world.vault.modifier.VaultModifierStack;
-import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -57,7 +63,7 @@ public class AnvilEvents {
       Item repairItem = event.getRight().getItem();
       if (repairItem != ModItems.REPAIR_CORE) {
          if (!(repairItem instanceof PaxelJewelItem)) {
-            if (ServerVaults.isVaultWorld(world)) {
+            if (ServerVaults.get(world).isPresent()) {
                event.setCanceled(true);
             }
          }
@@ -152,7 +158,9 @@ public class AnvilEvents {
 
    @SubscribeEvent
    public static void onApplyCatalyst(AnvilUpdateEvent event) {
-      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() instanceof VaultCatalystInfusedItem) {
+      if (!event.getPlayer().getLevel().isClientSide()
+         && event.getLeft().getItem() instanceof VaultCrystalItem
+         && event.getRight().getItem() instanceof VaultCatalystInfusedItem) {
          ItemStack output = event.getLeft().copy();
          CrystalData data = CrystalData.read(output);
          List<VaultModifierStack> modifierStackList = VaultCatalystInfusedItem.getModifiers(event.getRight())
@@ -164,7 +172,11 @@ public class AnvilEvents {
          float instability = data.getInstability();
          if (data.getModifiers().addByCrafting(data, modifierStackList, CrystalData.Simulate.FALSE)) {
             Random random = new Random();
-            if (random.nextFloat() < instability) {
+            if (shouldRemoveRandomModifier(event.getPlayer(), modifierStackList, random)) {
+               VaultCrystalItem.scheduleTask(VaultCrystalItem.RemoveRandomNegativeModifierTask.INSTANCE, output);
+            }
+
+            if (random.nextFloat() < instability && random.nextDouble() > getInstabilityAvoidanceChance(event.getPlayer())) {
                if (random.nextFloat() < ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.exhaustProbability) {
                   VaultCrystalItem.scheduleTask(VaultCrystalItem.ExhaustTask.INSTANCE, output);
                } else {
@@ -178,6 +190,40 @@ public class AnvilEvents {
             event.setMaterialCost(1);
          }
       }
+   }
+
+   private static boolean shouldRemoveRandomModifier(Player player, List<VaultModifierStack> modifierStackList, Random random) {
+      double negativeModifierRemovalChance = getNegativeModifierRemovalChance(player);
+      return random.nextDouble() < negativeModifierRemovalChance
+         && modifierStackList.stream().anyMatch(m -> m.getModifier().getId().equals(VaultCrystalItem.NEGATIVE_MODIFIER_POOL_NAME));
+   }
+
+   private static double getInstabilityAvoidanceChance(Player player) {
+      double instabilityAvoidanceChance = 0.0;
+      if (player instanceof ServerPlayer serverPlayer) {
+         instabilityAvoidanceChance = PlayerExpertisesData.get(serverPlayer.getLevel())
+            .getExpertises(serverPlayer)
+            .getAll(MysticExpertise.class, Skill::isUnlocked)
+            .stream()
+            .mapToDouble(MysticExpertise::getInstabilityChanceReduction)
+            .sum();
+      }
+
+      return instabilityAvoidanceChance;
+   }
+
+   private static double getNegativeModifierRemovalChance(Player player) {
+      double instabilityAvoidanceChance = 0.0;
+      if (player instanceof ServerPlayer serverPlayer) {
+         instabilityAvoidanceChance = PlayerExpertisesData.get(serverPlayer.getLevel())
+            .getExpertises(serverPlayer)
+            .getAll(InfuserExpertise.class, Skill::isUnlocked)
+            .stream()
+            .mapToDouble(InfuserExpertise::getNegativeModifierRemovalChance)
+            .sum();
+      }
+
+      return instabilityAvoidanceChance;
    }
 
    @SubscribeEvent
@@ -195,13 +241,15 @@ public class AnvilEvents {
    public static void onApplyChaosCatalyst(AnvilUpdateEvent event) {
       if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == ModItems.VAULT_CATALYST_CHAOS) {
          ItemStack output = event.getLeft().copy();
-         VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("vault_catalyst_chaos")), output);
          CrystalData data = CrystalData.read(output);
-         data.setUnmodifiable(true);
-         data.write(output);
-         event.setOutput(output);
-         event.setCost(1);
-         event.setMaterialCost(1);
+         if (!data.isUnmodifiable()) {
+            data.setUnmodifiable(true);
+            data.write(output);
+            VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("vault_catalyst_chaos")), output);
+            event.setOutput(output);
+            event.setCost(1);
+            event.setMaterialCost(1);
+         }
       }
    }
 
@@ -430,14 +478,16 @@ public class AnvilEvents {
 
    @SubscribeEvent
    public static void onApplyInscription(AnvilUpdateEvent event) {
-      if (event.getLeft().getItem() == ModItems.VAULT_CRYSTAL) {
-         if (event.getRight().getItem() == ModItems.INSCRIPTION) {
-            ItemStack output = event.getLeft().copy();
-            CrystalData data = CrystalData.read(output);
-            if (InscriptionData.from(event.getRight()).apply(output, data)) {
-               event.setMaterialCost(1);
-               event.setCost(1);
-               event.setOutput(output);
+      if (!event.getPlayer().getLevel().isClientSide()) {
+         if (event.getLeft().getItem() == ModItems.VAULT_CRYSTAL) {
+            if (event.getRight().getItem() == ModItems.INSCRIPTION) {
+               ItemStack output = event.getLeft().copy();
+               CrystalData data = CrystalData.read(output);
+               if (InscriptionData.from(event.getRight()).apply(event.getPlayer(), output, data)) {
+                  event.setMaterialCost(1);
+                  event.setCost(1);
+                  event.setOutput(output);
+               }
             }
          }
       }
@@ -450,11 +500,13 @@ public class AnvilEvents {
             AugmentItem.getTheme(event.getRight()).ifPresent(key -> {
                ItemStack output = event.getLeft().copy();
                CrystalData data = CrystalData.read(output);
-               data.setTheme(new ValueCrystalTheme(key.getId()));
-               data.write(output);
-               event.setMaterialCost(1);
-               event.setCost(1);
-               event.setOutput(output);
+               if (!data.isUnmodifiable()) {
+                  data.setTheme(new ValueCrystalTheme(key.getId()));
+                  data.write(output);
+                  event.setMaterialCost(1);
+                  event.setCost(1);
+                  event.setOutput(output);
+               }
             });
          }
       }

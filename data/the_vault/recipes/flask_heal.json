@@ -1,19 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " a ",
+    "ada",
     "aba",
-    " c "
+    "aca"
   ],
   "key": {
     "a": {
-      "item": "minecraft:golden_apple"
+      "item": "the_vault:vault_essence"
     },
     "b": {
       "item": "the_vault:empty_flask"
     },
     "c": {
-      "item": "the_vault:red_vault_essence"
+      "item": "the_vault:perfect_benitoite"
+    },
+    "d": {
+      "item": "minecraft:glistering_melon_slice"
     }
   },
   "result": {

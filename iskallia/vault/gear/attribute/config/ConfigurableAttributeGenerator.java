@@ -16,6 +16,11 @@ public abstract class ConfigurableAttributeGenerator<T, C> {
 
    @Nullable
    public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<T> reader, C object) {
+      return this.getConfigRangeDisplay(reader, object, object);
+   }
+
+   @Nullable
+   public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<T> reader, C min, C max) {
       return null;
    }
 

@@ -30,7 +30,7 @@ public abstract class WeightedTreeAdapter<T> implements JsonSerializer<WeightedT
          keys.remove("weight");
          String name = keys.iterator().next();
          if (name.equals("pool")) {
-            tree.addTree(this.deserialize(element.get(name), typeOfT, context), weight);
+            tree.addTree(this.deserialize(element.get(name), typeOfT, context), (double)weight);
          } else {
             tree.addLeaf((T)((JsonDeserializer)this.getAdapter(name)).deserialize(element.get(name), typeOfT, context), weight);
          }

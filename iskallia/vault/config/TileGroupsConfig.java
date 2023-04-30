@@ -1,10 +1,11 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.core.world.data.PartialNBT;
-import iskallia.vault.core.world.data.PartialState;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TilePredicate;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -12,16 +13,16 @@ import net.minecraft.resources.ResourceLocation;
 
 public class TileGroupsConfig extends Config {
    @Expose
-   private Map<ResourceLocation, Set<String>> groups;
+   private Map<ResourceLocation, Set<TilePredicate>> groups;
 
    @Override
    public String getName() {
       return "tile_groups";
    }
 
-   public boolean isInGroup(ResourceLocation groupId, PartialState state, PartialNBT nbt) {
-      for (String predicate : this.groups.get(groupId)) {
-         if (TilePredicate.of(predicate).test(state, nbt)) {
+   public boolean isInGroup(ResourceLocation groupId, PartialBlockState state, PartialCompoundNbt nbt) {
+      for (TilePredicate predicate : this.groups.getOrDefault(groupId, new HashSet<>())) {
+         if (predicate.test(state, nbt)) {
             return true;
          }
       }
@@ -30,7 +31,7 @@ public class TileGroupsConfig extends Config {
    }
 
    public boolean isInGroup(ResourceLocation groupId, PartialTile tile) {
-      return this.isInGroup(groupId, tile.getState(), tile.getNbt());
+      return this.isInGroup(groupId, tile.getState(), tile.getEntity());
    }
 
    @Override

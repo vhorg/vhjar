@@ -4,14 +4,25 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.CryoChamberBlock;
+import iskallia.vault.block.EasterEggBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.block.TreasureDoorBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.model.PylonCrystalModel;
+import iskallia.vault.block.render.AngelBlockRenderer;
+import iskallia.vault.block.render.IdentificationStandRenderer;
+import iskallia.vault.block.render.PotionModifierDiscoveryRenderer;
+import iskallia.vault.block.render.VaultEnchanterRenderer;
 import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
+import iskallia.vault.core.event.ClientEvents;
 import iskallia.vault.core.vault.influence.VaultGod;
+import iskallia.vault.entity.model.ModModelLayers;
+import iskallia.vault.entity.model.PiercingJavelinModel;
+import iskallia.vault.entity.model.ScatterJavelinModel;
+import iskallia.vault.entity.model.ScrappyJavelinModel;
+import iskallia.vault.entity.model.SightJavelinModel;
 import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
 import iskallia.vault.gear.VaultGearHelper;
@@ -27,7 +38,6 @@ import iskallia.vault.item.tool.JewelItem;
 import iskallia.vault.research.StageManager;
 import iskallia.vault.research.type.Research;
 import iskallia.vault.util.calc.BlockChanceHelper;
-import iskallia.vault.world.data.ServerVaults;
 import java.util.Arrays;
 import javax.annotation.Nullable;
 import net.minecraft.client.color.item.ItemColors;
@@ -76,6 +86,7 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.TIME_ALTAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.SOUL_ALTAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_GLASS, RenderType.translucent());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.SKILL_ALTAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.FINAL_VAULT_FRAME, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ELITE_SPAWNER, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.SUGAR_PLUM_FAIRY_FLOWER, RenderType.cutout());
@@ -88,10 +99,14 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANIMAL_JAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ETERNAL_PEDESTAL, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.MODIFIER_DISCOVERY, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.TOTEM_PLAYER_HEALTH, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.TOTEM_MOB_DAMAGE, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.TOTEM_PLAYER_DAMAGE, RenderType.cutout());
+      setRenderLayers(ModBlocks.ALCHEMY_ARCHIVE, RenderType.solid(), RenderType.translucent());
+      setRenderLayers(ModBlocks.ALCHEMY_TABLE, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.HOURGLASS, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.solid(), RenderType.translucent());
-      setRenderLayers(ModBlocks.RAID_CONTROLLER_BLOCK, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.VAULT_CHARM_CONTROLLER_BLOCK, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.CRAKE_PEDESTAL, RenderType.translucent());
    }
@@ -142,6 +157,13 @@ public class ModModels {
    @OnlyIn(Dist.CLIENT)
    public static void registerLayerDefinitions(RegisterLayerDefinitions event) {
       event.registerLayerDefinition(PylonCrystalModel.MODEL_LOCATION, PylonCrystalModel::createBodyLayer);
+      event.registerLayerDefinition(ScrappyJavelinModel.MODEL_LOCATION, ScrappyJavelinModel::createBodyLayer);
+      event.registerLayerDefinition(SightJavelinModel.MODEL_LOCATION, SightJavelinModel::createBodyLayer);
+      event.registerLayerDefinition(ScatterJavelinModel.MODEL_LOCATION, ScatterJavelinModel::createBodyLayer);
+      event.registerLayerDefinition(PiercingJavelinModel.MODEL_LOCATION, PiercingJavelinModel::createBodyLayer);
+      event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_EYE, AngelBlockRenderer::createEyeLayer);
+      event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_WIND, AngelBlockRenderer::createWindLayer);
+      event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_CAGE, AngelBlockRenderer::createCageLayer);
    }
 
    @SubscribeEvent
@@ -149,6 +171,14 @@ public class ModModels {
    public static void stitchTextures(Pre event) {
       if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
          event.addSprite(PylonCrystalModel.TEXTURE_LOCATION);
+         event.addSprite(VaultEnchanterRenderer.BOOK_TEXTURE);
+         event.addSprite(IdentificationStandRenderer.BOOK_TEXTURE);
+         event.addSprite(PotionModifierDiscoveryRenderer.BOOK_TEXTURE.texture());
+         event.addSprite(AngelBlockRenderer.ANGEL_OUTTER.texture());
+         event.addSprite(AngelBlockRenderer.ANGEL_OUTTER2.texture());
+         event.addSprite(AngelBlockRenderer.ANGEL_CENTER.texture());
+         event.addSprite(AngelBlockRenderer.ANGEL_WIND.texture());
+         event.addSprite(AngelBlockRenderer.ANGEL_WIND_VERTICAL.texture());
       }
    }
 
@@ -179,6 +209,15 @@ public class ModModels {
          } else {
             VaultOreBlock.Type type = VaultOreBlock.Type.fromString(nbt.getString("type"));
             return type == null ? -1.0F : type.ordinal();
+         }
+      };
+      public static ItemPropertyFunction EASTER_EGG_TYPE = (stack, world, entity, seed) -> {
+         CompoundTag nbt = stack.getTag();
+         if (nbt == null) {
+            return -1.0F;
+         } else {
+            EasterEggBlock.Color color = EasterEggBlock.Color.fromString(nbt.getString("color"));
+            return color == null ? -1.0F : color.ordinal();
          }
       };
       public static ItemPropertyFunction TREASURE_DOOR_TYPE = (stack, world, entity, seed) -> {
@@ -228,6 +267,7 @@ public class ModModels {
             registerItemProperty(block.asItem(), "vault_ore_type", VAULT_ORE_TYPE);
          }
 
+         registerItemProperty(ModBlocks.EASTER_EGG.asItem(), "easter_egg_type", EASTER_EGG_TYPE);
          registerItemProperty(ModItems.GOD_BLESSING, "god_blessing_type", GOD_BLESSING_TYPE);
       }
 
@@ -262,16 +302,14 @@ public class ModModels {
                   level = clientLevel;
                }
 
-               BlockPos portalPos = new BlockPos(24, 24, 24);
+               BlockPos target = ClientEvents.COMPASS_PROPERTY.invoke(level, livingEntity, compass, seed, null).getTarget();
                long gameTime = level.getGameTime();
                Research vaultCompass = ModConfigs.RESEARCHES.getByName("Vault Compass");
                boolean researched = vaultCompass != null && StageManager.getResearchTree(player).isResearched(vaultCompass);
-               if (ServerVaults.isInVault(player)
-                  && player.position().distanceToSqr(portalPos.getX() + 0.5, player.position().y(), portalPos.getZ() + 0.5) > 1.0E-5
-                  && researched) {
+               if (target != null && player.position().distanceToSqr(target.getX() + 0.5, player.position().y(), target.getZ() + 0.5) > 1.0E-5 && researched) {
                   double yRotation = player.getYRot();
                   yRotation = Mth.positiveModulo(yRotation / 360.0, 1.0);
-                  double index = this.getAngleTo(Vec3.atCenterOf(portalPos), player) / (float) (Math.PI * 2);
+                  double index = this.getAngleTo(Vec3.atCenterOf(target), player) / (float) (Math.PI * 2);
                   if (this.wobble.shouldUpdate(gameTime)) {
                      this.wobble.update(gameTime, 0.5 - (yRotation - 0.25));
                   }

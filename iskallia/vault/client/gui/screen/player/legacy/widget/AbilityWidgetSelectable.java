@@ -16,9 +16,9 @@ import iskallia.vault.client.util.TooltipUtil;
 import iskallia.vault.config.AbilitiesGUIConfig;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModKeybinds;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.tree.AbilityTree;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,9 +42,8 @@ public class AbilityWidgetSelectable extends AbilityWidget implements ComponentW
    ) {
       super(abilityName, abilityTree, x, y, background, icon);
       if (!this.isSpecialization()) {
-         AbilityNode<?, ?> node = this.makeAbilityNode();
-         AbilityGroup<?, ?> group = node.getGroup();
-         KeyMapping keyMapping = ModKeybinds.abilityQuickfireKey.get(group.getParentName());
+         SpecializedSkill node = this.makeAbilityNode();
+         KeyMapping keyMapping = ModKeybinds.abilityQuickfireKey.get(node.getId());
 
          for (KeyMapping km : Minecraft.getInstance().options.keyMappings) {
             if (km != keyMapping && keyMapping.same(km)) {
@@ -115,18 +114,18 @@ public class AbilityWidgetSelectable extends AbilityWidget implements ComponentW
    @Override
    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
       RenderSystem.enableBlend();
-      AbilityNode<?, ?> abilityNode = this.abilityTree.getNodeOf(this.getAbility());
-      int abilityLevel = abilityNode.getLevel();
-      int abilityLevelMax = abilityNode.getGroup().getMaxLevel();
+      SpecializedSkill abilityNode = this.getAbilityGroup();
+      int abilityLevel = ((TieredSkill)abilityNode.getSpecialization()).getTier();
+      int abilityLevelMax = ((TieredSkill)abilityNode.getSpecialization()).getMaxTier();
       boolean isSpecialization = this.isSpecialization();
       NodeState state;
-      if (isSpecialization && abilityNode.isLearned() && this.abilityName.equals(abilityNode.getSpecialization())) {
+      if (isSpecialization && abilityNode.isUnlocked() && this.abilityName.equals(abilityNode.getSpecialization().getId())) {
          state = NodeState.SELECTED;
-      } else if (!this.isLocked() || !isSpecialization && abilityNode.isLearned()) {
+      } else if (!this.isLocked() || !isSpecialization && abilityNode.isUnlocked()) {
          if (this.selected || this.getClickableBounds().contains(mouseX, mouseY)) {
             state = NodeState.HOVERED;
          } else if (isSpecialization) {
-            if (this.abilityName.equals(abilityNode.getSpecialization())) {
+            if (this.abilityName.equals(abilityNode.getSpecialization().getId())) {
                state = NodeState.SELECTED;
             } else {
                state = NodeState.DEFAULT;
@@ -143,34 +142,36 @@ public class AbilityWidgetSelectable extends AbilityWidget implements ComponentW
       matrixStack.pushPose();
       matrixStack.translate(0.0, 0.0, 1.0);
       if (!isSpecialization) {
-         AbilitiesGUIConfig.AbilityStyle abilityStyle = ModConfigs.ABILITIES_GUI.getStyles().get(this.abilityName);
-         int specializationCount = abilityStyle.getSpecializationStyles().size();
-         boolean hasSpecialization = abilityNode.getSpecialization() != null;
-         if (specializationCount > 0) {
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            matrixStack.pushPose();
-            BufferBuilder builder = Tesselator.getInstance().getBuilder();
-            builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-            matrixStack.translate(0.0, 0.0, -1.0);
-            int secondaryNodeHeight = AbilityNodeTextures.SECONDARY_NODE.get(NodeState.DEFAULT).height();
-            float lineY1 = this.y + this.height / 2.0F + 3.0F + secondaryNodeHeight / 2.0F + secondaryNodeHeight * (specializationCount - 1);
-            LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 5.0, -16777216);
-            if (hasSpecialization) {
-               LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -3755746);
-               LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 3.0, -7130);
-               LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 2.0, -5016);
-            } else {
-               LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -11184811);
-            }
+         AbilitiesGUIConfig.AbilityStyle abilityStyle = ModConfigs.ABILITIES_GUI.getStyles().get(this.getAbilityGroup().getId());
+         if (abilityStyle != null) {
+            int specializationCount = abilityStyle.getSpecializationStyles().size() - 1;
+            boolean hasSpecialization = this.getAbilityGroup().getIndex() != 0;
+            if (specializationCount > 0) {
+               RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+               matrixStack.pushPose();
+               BufferBuilder builder = Tesselator.getInstance().getBuilder();
+               builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+               matrixStack.translate(0.0, 0.0, -1.0);
+               int secondaryNodeHeight = AbilityNodeTextures.SECONDARY_NODE.get(NodeState.DEFAULT).height();
+               float lineY1 = this.y + this.height / 2.0F + 3.0F + secondaryNodeHeight / 2.0F + secondaryNodeHeight * (specializationCount - 1);
+               LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 5.0, -16777216);
+               if (hasSpecialization) {
+                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -3755746);
+                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 3.0, -7130);
+                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 2.0, -5016);
+               } else {
+                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -11184811);
+               }
 
-            builder.end();
-            RenderSystem.setShader(GameRenderer::getPositionColorShader);
-            BufferUploader.end(builder);
-            matrixStack.popPose();
+               builder.end();
+               RenderSystem.setShader(GameRenderer::getPositionColorShader);
+               BufferUploader.end(builder);
+               matrixStack.popPose();
+            }
          }
       }
 
-      if (!isSpecialization && abilityNode.isLearned()) {
+      if (!isSpecialization && this.getAbilityGroup().isUnlocked()) {
          RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
          matrixStack.pushPose();
          TextureAtlasRegion region = AbilityNodeTextures.NODE_BACKGROUND_LEVEL;
@@ -202,22 +203,22 @@ public class AbilityWidgetSelectable extends AbilityWidget implements ComponentW
 
    private void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
       if (this.getClickableBounds().contains(mouseX, mouseY)) {
-         AbilityNode<?, ?> node = this.makeAbilityNode();
-         AbilityNode<?, ?> existing = this.abilityTree.getNodeOf(this.getAbility());
-         AbilityGroup<?, ?> group = node.getGroup();
+         SpecializedSkill node = this.makeAbilityNode();
+         TieredSkill existing = this.getAbility();
          List<FormattedCharSequence> tooltip = new ArrayList<>();
-         tooltip.add(FormattedCharSequence.forward(group.getParentName(), Style.EMPTY));
+         tooltip.add(FormattedCharSequence.forward(node.getSpecialization().getName(), Style.EMPTY));
          boolean specialization = this.isSpecialization();
          if (specialization) {
-            tooltip.add(FormattedCharSequence.forward(node.getSpecializationName(), Style.EMPTY.withItalic(true).withColor(ChatFormatting.GOLD)));
+            tooltip.add(FormattedCharSequence.forward(node.getName(), Style.EMPTY.withItalic(true).withColor(ChatFormatting.GOLD)));
          }
 
-         if (this.isLocked() && specialization && existing.getSpecialization() != null && !existing.getSpecialization().equals(node.getSpecialization())) {
-            tooltip.add(FormattedCharSequence.forward("Specialization already in use:", Style.EMPTY.withColor(ChatFormatting.RED)));
-            tooltip.add(FormattedCharSequence.forward(existing.getSpecializationName(), Style.EMPTY.withColor(ChatFormatting.RED)));
+         if (this.isLocked() && specialization && this.getAbilityGroup().getIndex() != 0 && this.getAbilityGroup().getIndex() != node.getIndex()) {
+            tooltip.add(
+               FormattedCharSequence.forward("Already using " + this.getAbilityGroup().getSpecialization().getName(), Style.EMPTY.withColor(ChatFormatting.RED))
+            );
          }
 
-         int levelRequirement = group.getAbilityConfig(this.abilityName, Math.max(existing.getLevel() - 1, 0)).getLevelRequirement();
+         int levelRequirement = this.getAbility().getUnlockLevel();
          if (levelRequirement > 0) {
             ChatFormatting color;
             if (VaultBarOverlay.vaultLevel < levelRequirement) {
@@ -229,7 +230,7 @@ public class AbilityWidgetSelectable extends AbilityWidget implements ComponentW
             tooltip.add(FormattedCharSequence.forward("Requires level: " + levelRequirement, Style.EMPTY.withColor(color)));
          }
 
-         KeyMapping keyMapping = ModKeybinds.abilityQuickfireKey.get(group.getParentName());
+         KeyMapping keyMapping = ModKeybinds.abilityQuickfireKey.get(node.getId());
          if (keyMapping != null && !specialization) {
             int color;
             if (keyMapping.isUnbound()) {

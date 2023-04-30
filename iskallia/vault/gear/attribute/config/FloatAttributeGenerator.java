@@ -18,9 +18,10 @@ public class FloatAttributeGenerator extends NumberRangeGenerator<Float, FloatAt
       return FloatAttributeGenerator.Range.class;
    }
 
-   public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<Float> reader, FloatAttributeGenerator.Range object) {
-      MutableComponent minDisplay = reader.getValueDisplay(object.min);
-      MutableComponent maxDisplay = reader.getValueDisplay(object.max);
+   @Nullable
+   public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<Float> reader, FloatAttributeGenerator.Range min, FloatAttributeGenerator.Range max) {
+      MutableComponent minDisplay = reader.getValueDisplay(min.min);
+      MutableComponent maxDisplay = reader.getValueDisplay(max.max);
       return (MutableComponent)(minDisplay != null && maxDisplay != null ? minDisplay.append("-").append(maxDisplay) : new TextComponent(""));
    }
 

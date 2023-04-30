@@ -2,6 +2,8 @@ package iskallia.vault.block;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.vault.modifier.VaultModifierStack;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
@@ -9,8 +11,6 @@ import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.model.RawCrystalModel;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.vault.modifier.VaultModifierStack;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nonnull;

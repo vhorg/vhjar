@@ -1,6 +1,7 @@
 package iskallia.vault.gear.modification;
 
 import com.google.common.collect.Lists;
+import iskallia.vault.event.event.GearModificationEvent;
 import iskallia.vault.gear.crafting.VaultGearCraftingHelper;
 import java.util.List;
 import java.util.Random;
@@ -11,6 +12,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class GearModification extends ForgeRegistryEntry<GearModification> {
@@ -52,6 +54,7 @@ public abstract class GearModification extends ForgeRegistryEntry<GearModificati
          return false;
       } else {
          VaultGearCraftingHelper.reducePotential(stack, player, this);
+         MinecraftForge.EVENT_BUS.post(new GearModificationEvent(player, this));
          return true;
       }
    }

@@ -43,10 +43,10 @@ public class StatCollector extends DataObject<StatCollector> {
       .with(Version.v1_0, Adapters.ofEnum(Completion.class, EnumAdapter.Mode.ORDINAL), DISK.all())
       .register(FIELDS);
    public static final FieldKey<Float> BONUS_EXP_MULTIPLIER = FieldKey.of("exp_multiplier", Float.class)
-      .with(Version.v1_0, Adapters.FLOAT, DISK.all())
+      .with(Version.v1_0, Adapters.FLOAT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Float> OBJECTIVE_EXP_MULTIPLIER = FieldKey.of("objective_exp_multiplier", Float.class)
-      .with(Version.v1_14, Adapters.FLOAT, DISK.all())
+      .with(Version.v1_14, Adapters.FLOAT, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<ItemStackList> REWARD = FieldKey.of("reward", ItemStackList.class)
       .with(Version.v1_0, CompoundAdapter.of(ItemStackList::createLegacy), DISK.all())

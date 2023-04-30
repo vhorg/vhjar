@@ -1,7 +1,8 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
@@ -35,7 +36,7 @@ public class ServerboundAbilitySelectMessage {
          if (sender != null) {
             PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
             AbilityTree abilityTree = abilitiesData.getAbilities(sender);
-            abilityTree.quickSelectAbility(sender.server, message.selectedAbility);
+            abilityTree.onQuickSelect(message.selectedAbility, SkillContext.of(sender));
          }
       });
       context.setPacketHandled(true);

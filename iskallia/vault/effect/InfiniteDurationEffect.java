@@ -21,6 +21,10 @@ public class InfiniteDurationEffect extends MobEffect {
       return new MobEffectInstance(this, 32767, amplifier, false, false, true);
    }
 
+   public MobEffectInstance instance(int amplifier, boolean visible) {
+      return new MobEffectInstance(this, 32767, amplifier, false, visible, true);
+   }
+
    public boolean isDurationEffectTick(int duration, int amplifier) {
       return duration < 32687;
    }

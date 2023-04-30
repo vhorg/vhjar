@@ -8,31 +8,49 @@ import iskallia.vault.network.message.AbilityLevelMessage;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
 import iskallia.vault.network.message.AbilitySelectSpecializationMessage;
 import iskallia.vault.network.message.ActiveEternalMessage;
+import iskallia.vault.network.message.AngelToggleMessage;
 import iskallia.vault.network.message.AnimalPenParticleMessage;
-import iskallia.vault.network.message.BossMusicMessage;
-import iskallia.vault.network.message.CheerReceiveMessage;
+import iskallia.vault.network.message.ChainingParticleMessage;
 import iskallia.vault.network.message.ClientboundArchetypeMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
+import iskallia.vault.network.message.ClientboundHunterParticlesFromJavelinMessage;
+import iskallia.vault.network.message.ClientboundHunterParticlesMessage;
+import iskallia.vault.network.message.ClientboundMobEffectRemoveMessage;
+import iskallia.vault.network.message.ClientboundMobEffectUpdateMessage;
+import iskallia.vault.network.message.ClientboundNightVisionGogglesParticlesMessage;
 import iskallia.vault.network.message.ClientboundPlayerLastDamageSourceMessage;
 import iskallia.vault.network.message.ClientboundRefreshSpiritExtractorMessage;
 import iskallia.vault.network.message.ClientboundRefreshToolViseMessage;
 import iskallia.vault.network.message.ClientboundResetCryoChamberMessage;
+import iskallia.vault.network.message.ClientboundSyncSkillAltarDataMessage;
 import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
+import iskallia.vault.network.message.ClientboundToastMessage;
 import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
 import iskallia.vault.network.message.DiffuserParticleMessage;
-import iskallia.vault.network.message.DiscoveredModifierCraftsMessage;
+import iskallia.vault.network.message.DiscoveredAlchemyModifierCraftsMessage;
+import iskallia.vault.network.message.DiscoveredWorkbenchModifierCraftsMessage;
 import iskallia.vault.network.message.EffectMessage;
 import iskallia.vault.network.message.EternalInteractionMessage;
 import iskallia.vault.network.message.EternalSyncMessage;
+import iskallia.vault.network.message.ExpertiseLevelMessage;
 import iskallia.vault.network.message.FighterSizeMessage;
+import iskallia.vault.network.message.FloatingAltarItemParticleMessage;
 import iskallia.vault.network.message.ForgeParticleMessage;
 import iskallia.vault.network.message.ForgeRecipeSyncMessage;
 import iskallia.vault.network.message.HistoricFavoritesMessage;
 import iskallia.vault.network.message.InvalidConfigsMessage;
+import iskallia.vault.network.message.KnownExpertisesMessage;
 import iskallia.vault.network.message.KnownTalentsMessage;
+import iskallia.vault.network.message.LuckyHitDamageParticleMessage;
+import iskallia.vault.network.message.LuckyHitLeechParticleMessage;
+import iskallia.vault.network.message.LuckyHitManaParticleMessage;
+import iskallia.vault.network.message.LuckyHitParticleMessage;
+import iskallia.vault.network.message.LuckyHitSweepingParticleMessage;
+import iskallia.vault.network.message.ModifierAlchemyCraftMessage;
 import iskallia.vault.network.message.ModifierWorkbenchCraftMessage;
 import iskallia.vault.network.message.MonolithIgniteMessage;
+import iskallia.vault.network.message.NovaParticleMessage;
 import iskallia.vault.network.message.OmegaStatueUIMessage;
 import iskallia.vault.network.message.OpenVaultSnapshotMessage;
 import iskallia.vault.network.message.PartyMembersMessage;
@@ -41,8 +59,7 @@ import iskallia.vault.network.message.PlayerDamageMultiplierMessage;
 import iskallia.vault.network.message.PlayerSnapshotMessage;
 import iskallia.vault.network.message.PlayerStatisticsMessage;
 import iskallia.vault.network.message.ProficiencyMessage;
-import iskallia.vault.network.message.RaffleClientMessage;
-import iskallia.vault.network.message.RaffleServerMessage;
+import iskallia.vault.network.message.PylonConsumeParticleMessage;
 import iskallia.vault.network.message.RecyclerParticleMessage;
 import iskallia.vault.network.message.RenameUIMessage;
 import iskallia.vault.network.message.ResearchMessage;
@@ -50,14 +67,15 @@ import iskallia.vault.network.message.ResearchTreeMessage;
 import iskallia.vault.network.message.SandEventContributorMessage;
 import iskallia.vault.network.message.SandEventUpdateMessage;
 import iskallia.vault.network.message.ScavengerAltarConsumeMessage;
-import iskallia.vault.network.message.ScoreboardDamageMessage;
 import iskallia.vault.network.message.ServerboundAbilityKeyMessage;
 import iskallia.vault.network.message.ServerboundAbilitySelectMessage;
 import iskallia.vault.network.message.ServerboundAddHistoricFavoriteMessage;
 import iskallia.vault.network.message.ServerboundChangeDifficultyMessage;
 import iskallia.vault.network.message.ServerboundCuriosScrollMessage;
+import iskallia.vault.network.message.ServerboundMagnetToggleMessage;
 import iskallia.vault.network.message.ServerboundOpenAbilitiesMessage;
 import iskallia.vault.network.message.ServerboundOpenArchetypesMessage;
+import iskallia.vault.network.message.ServerboundOpenExpertisesMessage;
 import iskallia.vault.network.message.ServerboundOpenHistoricMessage;
 import iskallia.vault.network.message.ServerboundOpenResearchesMessage;
 import iskallia.vault.network.message.ServerboundOpenStatisticsMessage;
@@ -67,6 +85,7 @@ import iskallia.vault.network.message.ServerboundPickaxeOffsetKeyMessage;
 import iskallia.vault.network.message.ServerboundRenameEternalMessage;
 import iskallia.vault.network.message.ServerboundSelectArchetypeMessage;
 import iskallia.vault.network.message.ServerboundSendSnapshotLinkMessage;
+import iskallia.vault.network.message.ServerboundSkillAltarActionMessage;
 import iskallia.vault.network.message.ServerboundToggleEternalPlayerSkinMessage;
 import iskallia.vault.network.message.ServerboundWardrobeSwapMessage;
 import iskallia.vault.network.message.ServerboundWardrobeTabMessage;
@@ -74,24 +93,27 @@ import iskallia.vault.network.message.ServerboundWardrobeToggleSolidRenderMessag
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.network.message.ShardTradeTradeMessage;
+import iskallia.vault.network.message.ShockedParticleMessage;
 import iskallia.vault.network.message.SpiritExtractorMessage;
 import iskallia.vault.network.message.StepHeightMessage;
+import iskallia.vault.network.message.StonefallFrostParticleMessage;
+import iskallia.vault.network.message.StonefallParticleMessage;
+import iskallia.vault.network.message.StunnedParticleMessage;
 import iskallia.vault.network.message.SummonElixirOrbMessage;
 import iskallia.vault.network.message.SyncOverSizedContentMessage;
 import iskallia.vault.network.message.SyncOverSizedStackMessage;
 import iskallia.vault.network.message.TalentLevelMessage;
+import iskallia.vault.network.message.TauntParticleMessage;
 import iskallia.vault.network.message.ToolMessage;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.network.message.TrinketJumpMessage;
 import iskallia.vault.network.message.VaultArtisanRequestModificationMessage;
 import iskallia.vault.network.message.VaultCharmControllerScrollMessage;
+import iskallia.vault.network.message.VaultEnchanterEnchantMessage;
 import iskallia.vault.network.message.VaultEnhancementRequestMessage;
 import iskallia.vault.network.message.VaultForgeRequestCraftMessage;
-import iskallia.vault.network.message.VaultGoalMessage;
 import iskallia.vault.network.message.VaultLevelMessage;
 import iskallia.vault.network.message.VaultMessage;
-import iskallia.vault.network.message.VaultModifierMessage;
-import iskallia.vault.network.message.VaultOverlayMessage;
 import iskallia.vault.network.message.VaultPlayerHistoricDataMessage;
 import iskallia.vault.network.message.VaultPlayerStatsMessage;
 import iskallia.vault.network.message.WorldListUpdateMessage;
@@ -103,6 +125,11 @@ import iskallia.vault.network.message.bounty.ServerboundActivateBountyMessage;
 import iskallia.vault.network.message.bounty.ServerboundBountyProgressMessage;
 import iskallia.vault.network.message.bounty.ServerboundClaimRewardMessage;
 import iskallia.vault.network.message.bounty.ServerboundRerollMessage;
+import iskallia.vault.network.message.quest.QuestCompleteMessage;
+import iskallia.vault.network.message.quest.QuestDebugModeMessage;
+import iskallia.vault.network.message.quest.QuestProgressMessage;
+import iskallia.vault.network.message.quest.QuestRequestSyncMessage;
+import iskallia.vault.network.message.quest.QuestSyncMessage;
 import iskallia.vault.network.message.relic.RelicAssembleButtonMessage;
 import iskallia.vault.network.message.relic.SelectRelicMessage;
 import iskallia.vault.network.message.transmog.DiscoveredEntriesMessage;
@@ -154,6 +181,13 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(),
+         ServerboundOpenExpertisesMessage.class,
+         ServerboundOpenExpertisesMessage::encode,
+         ServerboundOpenExpertisesMessage::decode,
+         ServerboundOpenExpertisesMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
          ServerboundOpenResearchesMessage.class,
          ServerboundOpenResearchesMessage::encode,
          ServerboundOpenResearchesMessage::decode,
@@ -168,6 +202,9 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(nextId(), VaultLevelMessage.class, VaultLevelMessage::encode, VaultLevelMessage::decode, VaultLevelMessage::handle);
       CHANNEL.registerMessage(nextId(), TalentLevelMessage.class, TalentLevelMessage::encode, TalentLevelMessage::decode, TalentLevelMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(), ExpertiseLevelMessage.class, ExpertiseLevelMessage::encode, ExpertiseLevelMessage::decode, ExpertiseLevelMessage::handle
+      );
       CHANNEL.registerMessage(nextId(), ResearchMessage.class, ResearchMessage::encode, ResearchMessage::decode, ResearchMessage::handle);
       CHANNEL.registerMessage(nextId(), ResearchTreeMessage.class, ResearchTreeMessage::encode, ResearchTreeMessage::decode, ResearchTreeMessage::handle);
       CHANNEL.registerMessage(
@@ -199,22 +236,20 @@ public class ModNetwork {
       CHANNEL.registerMessage(
          nextId(), AbilityActivityMessage.class, AbilityActivityMessage::encode, AbilityActivityMessage::decode, AbilityActivityMessage::handle
       );
-      CHANNEL.registerMessage(nextId(), VaultOverlayMessage.class, VaultOverlayMessage::encode, VaultOverlayMessage::decode, VaultOverlayMessage::handle);
       CHANNEL.registerMessage(nextId(), FighterSizeMessage.class, FighterSizeMessage::encode, FighterSizeMessage::decode, FighterSizeMessage::handle);
-      CHANNEL.registerMessage(
-         nextId(), ScoreboardDamageMessage.class, ScoreboardDamageMessage::encode, ScoreboardDamageMessage::decode, ScoreboardDamageMessage::handle
-      );
-      CHANNEL.registerMessage(nextId(), RaffleServerMessage.class, RaffleServerMessage::encode, RaffleServerMessage::decode, RaffleServerMessage::handle);
-      CHANNEL.registerMessage(nextId(), RaffleClientMessage.class, RaffleClientMessage::encode, RaffleClientMessage::decode, RaffleClientMessage::handle);
       CHANNEL.registerMessage(nextId(), RenameUIMessage.class, RenameUIMessage::encode, RenameUIMessage::decode, RenameUIMessage::handle);
       CHANNEL.registerMessage(nextId(), StepHeightMessage.class, StepHeightMessage::encode, StepHeightMessage::decode, StepHeightMessage::handle);
-      CHANNEL.registerMessage(nextId(), BossMusicMessage.class, BossMusicMessage::encode, BossMusicMessage::decode, BossMusicMessage::handle);
       CHANNEL.registerMessage(nextId(), OmegaStatueUIMessage.class, OmegaStatueUIMessage::encode, OmegaStatueUIMessage::decode, OmegaStatueUIMessage::handle);
-      CHANNEL.registerMessage(nextId(), VaultModifierMessage.class, VaultModifierMessage::encode, VaultModifierMessage::decode, VaultModifierMessage::handle);
-      CHANNEL.registerMessage(nextId(), CheerReceiveMessage.class, CheerReceiveMessage::encode, CheerReceiveMessage::decode, CheerReceiveMessage::handle);
-      CHANNEL.registerMessage(nextId(), VaultGoalMessage.class, VaultGoalMessage::encode, VaultGoalMessage::decode, VaultGoalMessage::handle);
       CHANNEL.registerMessage(
          nextId(), AbilityQuickselectMessage.class, AbilityQuickselectMessage::encode, AbilityQuickselectMessage::decode, AbilityQuickselectMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), AngelToggleMessage.class, AngelToggleMessage::encode, AngelToggleMessage::decode, AngelToggleMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundMagnetToggleMessage.class,
+         ServerboundMagnetToggleMessage::encode,
+         ServerboundMagnetToggleMessage::decode,
+         ServerboundMagnetToggleMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(), PlayerStatisticsMessage.class, PlayerStatisticsMessage::encode, PlayerStatisticsMessage::decode, PlayerStatisticsMessage::handle
@@ -233,6 +268,9 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(nextId(), EffectMessage.class, EffectMessage::encode, EffectMessage::decode, EffectMessage::handle);
       CHANNEL.registerMessage(nextId(), KnownTalentsMessage.class, KnownTalentsMessage::encode, KnownTalentsMessage::decode, KnownTalentsMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(), KnownExpertisesMessage.class, KnownExpertisesMessage::encode, KnownExpertisesMessage::decode, KnownExpertisesMessage::handle
+      );
       CHANNEL.registerMessage(nextId(), ShardTradeMessage.class, ShardTradeMessage::encode, ShardTradeMessage::decode, ShardTradeMessage::handle);
       CHANNEL.registerMessage(
          nextId(), ShardTradeTradeMessage.class, ShardTradeTradeMessage::encode, ShardTradeTradeMessage::decode, ShardTradeTradeMessage::handle
@@ -539,6 +577,72 @@ public class ModNetwork {
          ClientboundResetCryoChamberMessage::handle
       );
       CHANNEL.registerMessage(
+         nextId(), ChainingParticleMessage.class, ChainingParticleMessage::encode, ChainingParticleMessage::decode, ChainingParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), ShockedParticleMessage.class, ShockedParticleMessage::encode, ShockedParticleMessage::decode, ShockedParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         FloatingAltarItemParticleMessage.class,
+         FloatingAltarItemParticleMessage::encode,
+         FloatingAltarItemParticleMessage::decode,
+         FloatingAltarItemParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         PylonConsumeParticleMessage.class,
+         PylonConsumeParticleMessage::encode,
+         PylonConsumeParticleMessage::decode,
+         PylonConsumeParticleMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), NovaParticleMessage.class, NovaParticleMessage::encode, NovaParticleMessage::decode, NovaParticleMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(),
+         StonefallFrostParticleMessage.class,
+         StonefallFrostParticleMessage::encode,
+         StonefallFrostParticleMessage::decode,
+         StonefallFrostParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), StonefallParticleMessage.class, StonefallParticleMessage::encode, StonefallParticleMessage::decode, StonefallParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), StunnedParticleMessage.class, StunnedParticleMessage::encode, StunnedParticleMessage::decode, StunnedParticleMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), TauntParticleMessage.class, TauntParticleMessage::encode, TauntParticleMessage::decode, TauntParticleMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(), LuckyHitParticleMessage.class, LuckyHitParticleMessage::encode, LuckyHitParticleMessage::decode, LuckyHitParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         LuckyHitSweepingParticleMessage.class,
+         LuckyHitSweepingParticleMessage::encode,
+         LuckyHitSweepingParticleMessage::decode,
+         LuckyHitSweepingParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         LuckyHitManaParticleMessage.class,
+         LuckyHitManaParticleMessage::encode,
+         LuckyHitManaParticleMessage::decode,
+         LuckyHitManaParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         LuckyHitLeechParticleMessage.class,
+         LuckyHitLeechParticleMessage::encode,
+         LuckyHitLeechParticleMessage::decode,
+         LuckyHitLeechParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         LuckyHitDamageParticleMessage.class,
+         LuckyHitDamageParticleMessage::encode,
+         LuckyHitDamageParticleMessage::decode,
+         LuckyHitDamageParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
          nextId(),
          ClientboundRefreshToolViseMessage.class,
          ClientboundRefreshToolViseMessage::encode,
@@ -596,10 +700,17 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(),
-         DiscoveredModifierCraftsMessage.class,
-         DiscoveredModifierCraftsMessage::encode,
-         DiscoveredModifierCraftsMessage::decode,
-         DiscoveredModifierCraftsMessage::handle
+         DiscoveredWorkbenchModifierCraftsMessage.class,
+         DiscoveredWorkbenchModifierCraftsMessage::encode,
+         DiscoveredWorkbenchModifierCraftsMessage::decode,
+         DiscoveredWorkbenchModifierCraftsMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         DiscoveredAlchemyModifierCraftsMessage.class,
+         DiscoveredAlchemyModifierCraftsMessage::encode,
+         DiscoveredAlchemyModifierCraftsMessage::decode,
+         DiscoveredAlchemyModifierCraftsMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),
@@ -607,6 +718,81 @@ public class ModNetwork {
          ModifierWorkbenchCraftMessage::encode,
          ModifierWorkbenchCraftMessage::decode,
          ModifierWorkbenchCraftMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ModifierAlchemyCraftMessage.class,
+         ModifierAlchemyCraftMessage::encode,
+         ModifierAlchemyCraftMessage::decode,
+         ModifierAlchemyCraftMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         VaultEnchanterEnchantMessage.class,
+         VaultEnchanterEnchantMessage::encode,
+         VaultEnchanterEnchantMessage::decode,
+         VaultEnchanterEnchantMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundSkillAltarActionMessage.class,
+         ServerboundSkillAltarActionMessage::encode,
+         ServerboundSkillAltarActionMessage::decode,
+         ServerboundSkillAltarActionMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundSyncSkillAltarDataMessage.class,
+         ClientboundSyncSkillAltarDataMessage::encode,
+         ClientboundSyncSkillAltarDataMessage::decode,
+         ClientboundSyncSkillAltarDataMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), QuestSyncMessage.class, QuestSyncMessage::encode, QuestSyncMessage::decode, QuestSyncMessage::handle);
+      CHANNEL.registerMessage(nextId(), QuestCompleteMessage.class, QuestCompleteMessage::encode, QuestCompleteMessage::decode, QuestCompleteMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(), QuestRequestSyncMessage.class, QuestRequestSyncMessage::encode, QuestRequestSyncMessage::decode, QuestRequestSyncMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), QuestProgressMessage.class, QuestProgressMessage::encode, QuestProgressMessage::decode, QuestProgressMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(), QuestDebugModeMessage.class, QuestDebugModeMessage::encode, QuestDebugModeMessage::decode, QuestDebugModeMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), ClientboundToastMessage.class, ClientboundToastMessage::encode, ClientboundToastMessage::decode, ClientboundToastMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundMobEffectUpdateMessage.class,
+         ClientboundMobEffectUpdateMessage::encode,
+         ClientboundMobEffectUpdateMessage::decode,
+         ClientboundMobEffectUpdateMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundMobEffectRemoveMessage.class,
+         ClientboundMobEffectRemoveMessage::encode,
+         ClientboundMobEffectRemoveMessage::decode,
+         ClientboundMobEffectRemoveMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundHunterParticlesMessage.class,
+         ClientboundHunterParticlesMessage::encode,
+         ClientboundHunterParticlesMessage::decode,
+         ClientboundHunterParticlesMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundHunterParticlesFromJavelinMessage.class,
+         ClientboundHunterParticlesFromJavelinMessage::encode,
+         ClientboundHunterParticlesFromJavelinMessage::decode,
+         ClientboundHunterParticlesFromJavelinMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundNightVisionGogglesParticlesMessage.class,
+         ClientboundNightVisionGogglesParticlesMessage::encode,
+         ClientboundNightVisionGogglesParticlesMessage::decode,
+         ClientboundNightVisionGogglesParticlesMessage::handle
       );
    }
 

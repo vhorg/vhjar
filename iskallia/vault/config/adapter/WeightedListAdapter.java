@@ -36,7 +36,7 @@ public class WeightedListAdapter<E> extends TypeAdapter<WeightedList<E>> {
       } else {
          out.beginArray();
 
-         for (Entry<E, Integer> e : value.entrySet()) {
+         for (Entry<E, Double> e : value.entrySet()) {
             out.beginObject();
             out.name("value");
             this.elementTypeAdapter.write(out, e.getKey());
@@ -73,7 +73,7 @@ public class WeightedListAdapter<E> extends TypeAdapter<WeightedList<E>> {
                }
             }
 
-            collection.put(instance, weight);
+            collection.put(instance, (Number)weight);
             in.endObject();
          }
 

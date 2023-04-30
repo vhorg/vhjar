@@ -6,7 +6,7 @@ import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.template.PlacementSettings;
 import iskallia.vault.core.world.template.Template;
 import java.util.Collection;
@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public abstract class PortalLogic extends DataObject<PortalLogic> implements ISupplierKey<PortalLogic> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
@@ -23,6 +25,10 @@ public abstract class PortalLogic extends DataObject<PortalLogic> implements ISu
 
    public PortalLogic() {
       this.set(DATA, new PortalData.List());
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   public void initClient(Vault vault) {
    }
 
    public Stream<PortalData> getPortals() {

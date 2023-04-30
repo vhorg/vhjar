@@ -36,7 +36,7 @@ public class ClientboundSyncVaultAllowWaypointsMessage {
       Minecraft minecraft = Minecraft.getInstance();
       LocalPlayer player = minecraft.player;
       if (player != null) {
-         ((BooleanValue)player.getLevel().getGameRules().getRule(ModGameRules.VAULT_ALLOW_WAYPOINTS)).set(message.vaultAllowWaypoints, null);
+         ((BooleanValue)player.getLevel().getGameRules().getRule(ModGameRules.ALLOW_WAYPOINTS)).set(message.vaultAllowWaypoints, null);
       }
    }
 }

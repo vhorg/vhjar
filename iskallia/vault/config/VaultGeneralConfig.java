@@ -6,11 +6,8 @@ import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.GlobUtils;
 import iskallia.vault.util.data.WeightedList;
-import iskallia.vault.world.vault.VaultRaid;
-import iskallia.vault.world.vault.logic.objective.VaultObjective;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -21,8 +18,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class VaultGeneralConfig extends Config {
-   @Expose
-   private int TICK_COUNTER;
    @Expose
    private List<String> ITEM_BLACKLIST;
    @Expose
@@ -43,21 +38,8 @@ public class VaultGeneralConfig extends Config {
       return "vault_general";
    }
 
-   public int getTickCounter() {
-      return this.TICK_COUNTER;
-   }
-
-   public VaultObjective generateObjective(int vaultLevel) {
-      return this.getObjective(vaultLevel, false);
-   }
-
-   public VaultObjective generateCoopObjective(int vaultLevel) {
-      return this.getObjective(vaultLevel, true);
-   }
-
    @Override
    protected void reset() {
-      this.TICK_COUNTER = 30000;
       this.ITEM_BLACKLIST = new ArrayList<>();
       this.ITEM_BLACKLIST.add(Items.ENDER_CHEST.getRegistryName().toString());
       this.BLOCK_BLACKLIST = new ArrayList<>();
@@ -75,17 +57,6 @@ public class VaultGeneralConfig extends Config {
       objectives.add(VaultMod.id("summon_and_kill_boss").toString(), 1);
       objectives.add(VaultMod.id("scavenger_hunt").toString(), 1);
       this.VAULT_COOP_OBJECTIVES.add(new VaultGeneralConfig.Level(0, objectives));
-   }
-
-   @Nonnull
-   private VaultObjective getObjective(int vaultLevel, boolean coop) {
-      VaultGeneralConfig.Level levelConfig = this.getForLevel(coop ? this.VAULT_COOP_OBJECTIVES : this.VAULT_OBJECTIVES, vaultLevel);
-      if (levelConfig == null) {
-         return VaultRaid.SUMMON_AND_KILL_BOSS.get();
-      } else {
-         String objective = levelConfig.outcomes.getRandom(rand);
-         return objective == null ? VaultRaid.SUMMON_AND_KILL_BOSS.get() : VaultObjective.getObjective(new ResourceLocation(objective));
-      }
    }
 
    @Nullable

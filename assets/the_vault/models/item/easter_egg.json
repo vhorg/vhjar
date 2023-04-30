@@ -1,0 +1,11 @@
+{
+  "parent": "the_vault:block/easter_egg/pink",
+  "overrides": [
+    { "predicate": { "the_vault:easter_egg_type": 0 }, "model": "the_vault:block/easter_egg/pink" },
+    { "predicate": { "the_vault:easter_egg_type": 1 }, "model": "the_vault:block/easter_egg/yellow" },
+    { "predicate": { "the_vault:easter_egg_type": 2 }, "model": "the_vault:block/easter_egg/green" },
+    { "predicate": { "the_vault:easter_egg_type": 3 }, "model": "the_vault:block/easter_egg/purple" },
+    { "predicate": { "the_vault:easter_egg_type": 4 }, "model": "the_vault:block/easter_egg/magenta" },
+    { "predicate": { "the_vault:easter_egg_type": 5 }, "model": "the_vault:block/easter_egg/gold" }
+  ]
+}

@@ -3,6 +3,7 @@ package iskallia.vault.block.entity;
 import com.mojang.math.Vector3f;
 import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.altar.RequiredItems;
+import iskallia.vault.event.event.CraftCrystalEvent;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
@@ -34,6 +35,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.NetworkDirection;
 import org.jetbrains.annotations.NotNull;
 
@@ -233,6 +235,7 @@ public class VaultAltarTileEntity extends BlockEntity {
          PlayerStatsData.get(serverLevel.getServer()).onCrystalCrafted(this.owner, this.recipe.getRequiredItems());
          this.resetAltar(serverLevel);
          this.playCompletionEffects(serverLevel);
+         MinecraftForge.EVENT_BUS.post(new CraftCrystalEvent(serverLevel.getPlayerByUUID(this.owner)));
          this.sendUpdates();
       }
    }

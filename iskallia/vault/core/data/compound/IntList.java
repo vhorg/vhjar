@@ -2,7 +2,7 @@ package iskallia.vault.core.data.compound;
 
 import iskallia.vault.core.data.DataList;
 import iskallia.vault.core.data.adapter.Adapters;
-import iskallia.vault.core.data.adapter.primitive.LegacySegmentedIntAdapter;
+import iskallia.vault.core.data.adapter.number.LegacySegmentedIntAdapter;
 import iskallia.vault.item.crystal.data.adapter.IBitAdapter;
 import java.util.ArrayList;
 import java.util.List;

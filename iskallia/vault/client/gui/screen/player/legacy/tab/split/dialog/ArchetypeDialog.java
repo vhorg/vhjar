@@ -17,7 +17,6 @@ import iskallia.vault.skill.archetype.AbstractArchetype;
 import iskallia.vault.skill.archetype.AbstractArchetypeConfig;
 import iskallia.vault.skill.archetype.ArchetypeContainer;
 import iskallia.vault.skill.archetype.ArchetypeRegistry;
-import iskallia.vault.world.data.ServerVaults;
 import java.awt.Rectangle;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -58,8 +57,7 @@ public class ArchetypeDialog extends AbstractDialog<ArchetypesElementContainerSc
          );
          this.learnButton.active = !isEquipped
             && learningCost <= VaultBarOverlay.unspentArchetypePoints
-            && VaultBarOverlay.vaultLevel >= config.getLevelRequirement()
-            && !ServerVaults.isInVault(Minecraft.getInstance().player);
+            && VaultBarOverlay.vaultLevel >= config.getLevelRequirement();
       }
    }
 

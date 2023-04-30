@@ -11,7 +11,6 @@ import iskallia.vault.command.CrystalCommand;
 import iskallia.vault.command.DebugCommand;
 import iskallia.vault.command.DifficultyCommand;
 import iskallia.vault.command.EternalCommand;
-import iskallia.vault.command.EventCommand;
 import iskallia.vault.command.GearDebugCommand;
 import iskallia.vault.command.GiveLootCommand;
 import iskallia.vault.command.InternalCommand;
@@ -21,13 +20,12 @@ import iskallia.vault.command.OpenVaultSnapshotCommand;
 import iskallia.vault.command.PartyCommand;
 import iskallia.vault.command.PlayerDifficultyCommand;
 import iskallia.vault.command.PointsResetCommand;
-import iskallia.vault.command.RaidCommand;
+import iskallia.vault.command.QuestCommand;
 import iskallia.vault.command.ReloadConfigsCommand;
 import iskallia.vault.command.ResearchTeamCommand;
-import iskallia.vault.command.SandEventCommand;
+import iskallia.vault.command.ResetCommand;
 import iskallia.vault.command.SnapshotCommand;
 import iskallia.vault.command.SpiritCommand;
-import iskallia.vault.command.TeamScoreCommand;
 import iskallia.vault.command.VaultAltarCommand;
 import iskallia.vault.command.VaultGodSayCommand;
 import iskallia.vault.command.VaultLevelCommand;
@@ -39,7 +37,6 @@ import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 
 public class ModCommands {
    public static ReloadConfigsCommand RELOAD_CONFIGS;
-   public static RaidCommand RAID;
    public static VaultLevelCommand VAULT_LEVEL;
    public static InternalCommand INTERNAL;
    public static DebugCommand DEBUG;
@@ -47,12 +44,9 @@ public class ModCommands {
    public static AbilityCommand ABILITY_COMMAND;
    public static GiveLootCommand GIVE_LOOT;
    public static VaultGodSayCommand VAULTGOD_SAY;
-   public static SandEventCommand SAND_EVENT;
    public static AliasCommand ALIAS;
-   public static TeamScoreCommand SCORES;
    public static CrystalCommand CRYSTAL;
    public static EternalCommand ETERNAL;
-   public static EventCommand EVENT;
    public static GearDebugCommand GEAR_DEBUG;
    public static MagnetCommand MAGNET;
    public static ResearchTeamCommand RESEARCH_TEAM;
@@ -65,10 +59,11 @@ public class ModCommands {
    public static VaultAltarCommand VAULT_ALTAR;
    public static PointsResetCommand POINTS_RESET;
    public static OpenVaultSnapshotCommand OPEN_VAULT_SNAPSHOT;
+   public static QuestCommand QUEST_COMMAND;
+   public static ResetCommand RESET_COMMAND;
 
    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher, CommandSelection env) {
       RELOAD_CONFIGS = registerCommand(ReloadConfigsCommand::new, dispatcher, env);
-      RAID = registerCommand(RaidCommand::new, dispatcher, env);
       VAULT_LEVEL = registerCommand(VaultLevelCommand::new, dispatcher, env);
       INTERNAL = registerCommand(InternalCommand::new, dispatcher, env);
       DEBUG = registerCommand(DebugCommand::new, dispatcher, env);
@@ -76,12 +71,9 @@ public class ModCommands {
       ABILITY_COMMAND = registerCommand(AbilityCommand::new, dispatcher, env);
       GIVE_LOOT = registerCommand(GiveLootCommand::new, dispatcher, env);
       VAULTGOD_SAY = registerCommand(VaultGodSayCommand::new, dispatcher, env);
-      SAND_EVENT = registerCommand(SandEventCommand::new, dispatcher, env);
       ALIAS = registerCommand(AliasCommand::new, dispatcher, env);
-      SCORES = registerCommand(TeamScoreCommand::new, dispatcher, env);
       CRYSTAL = registerCommand(CrystalCommand::new, dispatcher, env);
       ETERNAL = registerCommand(EternalCommand::new, dispatcher, env);
-      EVENT = registerCommand(EventCommand::new, dispatcher, env);
       GEAR_DEBUG = registerCommand(GearDebugCommand::new, dispatcher, env);
       MAGNET = registerCommand(MagnetCommand::new, dispatcher, env);
       RESEARCH_TEAM = registerCommand(ResearchTeamCommand::new, dispatcher, env);
@@ -94,6 +86,8 @@ public class ModCommands {
       VAULT_ALTAR = registerCommand(VaultAltarCommand::new, dispatcher, env);
       POINTS_RESET = registerCommand(PointsResetCommand::new, dispatcher, env);
       OPEN_VAULT_SNAPSHOT = registerCommand(OpenVaultSnapshotCommand::new, dispatcher, env);
+      QUEST_COMMAND = registerCommand(QuestCommand::new, dispatcher, env);
+      RESET_COMMAND = registerCommand(ResetCommand::new, dispatcher, env);
    }
 
    public static void registerArgumentTypes() {

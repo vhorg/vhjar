@@ -10,10 +10,8 @@ import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.player.Completion;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.stat.StatsCollector;
-import iskallia.vault.event.event.VaultJoinForgeEvent;
-import iskallia.vault.event.event.VaultLeaveForgeEvent;
-import iskallia.vault.init.ModNetwork;
-import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
+import iskallia.vault.event.event.VaultJoinEvent;
+import iskallia.vault.event.event.VaultLeaveEvent;
 import iskallia.vault.world.data.BountyData;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
@@ -21,7 +19,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.network.NetworkDirection;
 
 @EventBusSubscriber
 public class CompletionTask extends Task<CompletionProperties> {
@@ -40,7 +37,7 @@ public class CompletionTask extends Task<CompletionProperties> {
 
    @Override
    protected <E> boolean doValidate(ServerPlayer player, E event) {
-      if (event instanceof VaultLeaveForgeEvent e) {
+      if (event instanceof VaultLeaveEvent e) {
          Objectives objectives = e.getVault().get(Vault.OBJECTIVES);
          String objectiveId = objectives.get(Objectives.KEY);
          if (!this.getProperties().getId().equals("vault") && !this.getProperties().getId().equalsIgnoreCase(objectiveId)) {
@@ -76,7 +73,7 @@ public class CompletionTask extends Task<CompletionProperties> {
    }
 
    @SubscribeEvent
-   public static void onVaultLeave(VaultLeaveForgeEvent event) {
+   public static void onVaultLeave(VaultLeaveEvent event) {
       for (Task<?> task : BountyData.get()
          .getAllLegendaryById(event.getPlayer(), TaskRegistry.COMPLETION)
          .stream()
@@ -85,8 +82,7 @@ public class CompletionTask extends Task<CompletionProperties> {
          if (task.validate(event.getPlayer(), event)) {
             task.increment(1.0);
             if (task.isComplete()) {
-               ModNetwork.CHANNEL
-                  .sendTo(new ClientboundBountyCompleteMessage(task.taskType), event.getPlayer().connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+               task.complete(event.getPlayer());
             }
 
             return;
@@ -101,8 +97,7 @@ public class CompletionTask extends Task<CompletionProperties> {
          if (taskx.validate(event.getPlayer(), event)) {
             taskx.increment(1.0);
             if (taskx.isComplete()) {
-               ModNetwork.CHANNEL
-                  .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), event.getPlayer().connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+               taskx.complete(event.getPlayer());
             }
 
             return;
@@ -111,7 +106,7 @@ public class CompletionTask extends Task<CompletionProperties> {
    }
 
    @SubscribeEvent
-   public static void onVaultEnter(VaultJoinForgeEvent event) {
+   public static void onVaultEnter(VaultJoinEvent event) {
    }
 
    private static boolean isValidObjective(ResourceLocation id, Objective objective) {

@@ -81,11 +81,20 @@ public abstract class LegacySkillTreeElementContainerScreen<T extends INBTSerial
    protected abstract void renderPointOverlay(PoseStack var1);
 
    protected void renderSkillPointOverlay(PoseStack matrixStack) {
-      if (VaultBarOverlay.unspentSkillPoints > 0) {
+      this.renderPointOverlay(
+         matrixStack,
+         VaultBarOverlay.unspentSkillPoints,
+         TextColor.fromRgb(16766976),
+         " unspent skill point" + (VaultBarOverlay.unspentSkillPoints == 1 ? "" : "s")
+      );
+   }
+
+   protected void renderPointOverlay(PoseStack matrixStack, int points, TextColor color, String textSuffix) {
+      if (points > 0) {
          Minecraft minecraft = Minecraft.getInstance();
          FormattedCharSequence text = new TextComponent("")
-            .append(new TextComponent(String.valueOf(VaultBarOverlay.unspentSkillPoints)).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(16766976))))
-            .append(" unspent skill point" + (VaultBarOverlay.unspentSkillPoints == 1 ? "" : "s"))
+            .append(new TextComponent(String.valueOf(points)).withStyle(Style.EMPTY.withColor(color)))
+            .append(textSuffix)
             .getVisualOrderText();
          int unspentWidth = minecraft.font.width(text);
          minecraft.font.drawShadow(matrixStack, text, this.getContentBounds().width - unspentWidth, 12.0F, -1);
@@ -117,14 +126,11 @@ public abstract class LegacySkillTreeElementContainerScreen<T extends INBTSerial
    }
 
    protected void renderArchetypePointOverlay(PoseStack matrixStack) {
-      if (VaultBarOverlay.unspentArchetypePoints > 0) {
-         Minecraft minecraft = Minecraft.getInstance();
-         FormattedCharSequence text = new TextComponent("")
-            .append(new TextComponent(String.valueOf(VaultBarOverlay.unspentArchetypePoints)).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(-1871617))))
-            .append(" unspent archetype point" + (VaultBarOverlay.unspentArchetypePoints == 1 ? "" : "s"))
-            .getVisualOrderText();
-         int unspentWidth = minecraft.font.width(text);
-         minecraft.font.drawShadow(matrixStack, text, this.getContentBounds().width - unspentWidth, 12.0F, -1);
-      }
+      this.renderPointOverlay(
+         matrixStack,
+         VaultBarOverlay.unspentArchetypePoints,
+         TextColor.fromRgb(-1871617),
+         " unspent archetype point" + (VaultBarOverlay.unspentArchetypePoints == 1 ? "" : "s")
+      );
    }
 }

@@ -3,13 +3,18 @@ package iskallia.vault.bounty.task;
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.bounty.task.properties.TaskProperties;
+import iskallia.vault.event.event.BountyCompleteEvent;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.world.data.BountyData;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.network.NetworkDirection;
 
 public abstract class Task<P extends TaskProperties> implements INBTSerializable<CompoundTag> {
    protected ResourceLocation taskType;
@@ -45,6 +50,11 @@ public abstract class Task<P extends TaskProperties> implements INBTSerializable
 
    public abstract boolean isComplete();
 
+   protected void complete(ServerPlayer player) {
+      MinecraftForge.EVENT_BUS.post(new BountyCompleteEvent(player, this));
+      ModNetwork.CHANNEL.sendTo(new ClientboundBountyCompleteMessage(this.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+   }
+
    public UUID getBountyId() {
       return this.bountyId;
    }
@@ -67,7 +77,7 @@ public abstract class Task<P extends TaskProperties> implements INBTSerializable
 
    public boolean inValidDimension(ServerPlayer serverPlayer) {
       return this.getProperties().isVaultOnly()
-         ? this.getTaskType().equals(TaskRegistry.COMPLETION) || ServerVaults.isInVault(serverPlayer)
+         ? this.getTaskType().equals(TaskRegistry.COMPLETION) || ServerVaults.get(serverPlayer.level).isPresent()
          : this.getProperties().getValidDimensions().isEmpty()
             || this.getProperties().getValidDimensions().contains(serverPlayer.getLevel().dimension().location());
    }

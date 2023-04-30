@@ -11,7 +11,7 @@ import iskallia.vault.client.gui.screen.player.legacy.widget.AbilityWidgetSelect
 import iskallia.vault.config.AbilitiesGUIConfig;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModTextureAtlases;
-import iskallia.vault.skill.ability.AbilityTree;
+import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.MiscUtils;
 import java.awt.Rectangle;
 import java.awt.geom.Point2D.Float;
@@ -51,36 +51,39 @@ public class AbilityPanRegion extends AbstractPanRegion<AbilitiesElementContaine
       AbilityTree abilityTree = this.parentScreen.getAbilityTree();
 
       for (Entry<String, AbilitiesGUIConfig.AbilityStyle> abilityEntry : ModConfigs.ABILITIES_GUI.getStyles().entrySet()) {
-         String abilityName = abilityEntry.getKey();
          AbilitiesGUIConfig.AbilityStyle abilityStyle = abilityEntry.getValue();
-         this.abilityWidgets
-            .put(
-               abilityName,
-               new AbilityWidgetSelectable(
-                  abilityName,
-                  abilityTree,
-                  abilityStyle.getX(),
-                  abilityStyle.getY(),
-                  AbilityNodeTextures.PRIMARY_NODE,
-                  TextureAtlasRegion.of(ModTextureAtlases.ABILITIES, abilityStyle.getIcon())
-               )
-            );
-         int index = 1;
+         int index = 0;
 
          for (Entry<String, AbilitiesGUIConfig.SpecializationStyle> specializationEntry : abilityStyle.getSpecializationStyles().entrySet()) {
             String specializationName = specializationEntry.getKey();
-            this.abilityWidgets
-               .put(
-                  specializationName,
-                  new AbilityWidgetSelectable(
+            if (index == 0) {
+               this.abilityWidgets
+                  .put(
                      specializationName,
-                     abilityTree,
-                     abilityStyle.getX(),
-                     abilityStyle.getY() + 2 + 23 * index,
-                     AbilityNodeTextures.SECONDARY_NODE,
-                     TextureAtlasRegion.of(ModTextureAtlases.ABILITIES, specializationEntry.getValue().getIcon())
-                  )
-               );
+                     new AbilityWidgetSelectable(
+                        specializationName,
+                        abilityTree,
+                        abilityStyle.getX(),
+                        abilityStyle.getY(),
+                        AbilityNodeTextures.PRIMARY_NODE,
+                        TextureAtlasRegion.of(ModTextureAtlases.ABILITIES, specializationEntry.getValue().getIcon())
+                     )
+                  );
+            } else {
+               this.abilityWidgets
+                  .put(
+                     specializationName,
+                     new AbilityWidgetSelectable(
+                        specializationName,
+                        abilityTree,
+                        abilityStyle.getX(),
+                        abilityStyle.getY() + 2 + 23 * index,
+                        AbilityNodeTextures.SECONDARY_NODE,
+                        TextureAtlasRegion.of(ModTextureAtlases.ABILITIES, specializationEntry.getValue().getIcon())
+                     )
+                  );
+            }
+
             index++;
          }
       }

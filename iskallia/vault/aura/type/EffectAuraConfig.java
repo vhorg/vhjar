@@ -15,7 +15,7 @@ public class EffectAuraConfig extends EternalAuraConfig.AuraConfig {
    private final EffectTalent effect;
 
    public EffectAuraConfig(MobEffect effect, String name, String icon) {
-      this(new EffectTalent(0, effect, 1), name, icon);
+      this(new EffectTalent(0, 0, 0, effect, 1), name, icon);
    }
 
    public EffectAuraConfig(EffectTalent effect, String name, String icon) {
@@ -31,7 +31,7 @@ public class EffectAuraConfig extends EternalAuraConfig.AuraConfig {
    public void onTick(Level world, ActiveAura aura) {
       super.onTick(world, aura);
       if (aura.getAuraProvider() instanceof EntityAuraProvider) {
-         MobEffectInstance effect = this.getEffect().makeEffect(259);
+         MobEffectInstance effect = this.getEffect().toEffect(259);
          LivingEntity auraTarget = ((EntityAuraProvider)aura.getAuraProvider()).getSource();
          if (!auraTarget.hasEffect(effect.getEffect()) || auraTarget.getEffect(effect.getEffect()).getDuration() < 40) {
             auraTarget.addEffect(effect);

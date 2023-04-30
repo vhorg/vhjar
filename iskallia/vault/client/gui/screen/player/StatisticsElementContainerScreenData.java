@@ -253,6 +253,7 @@ public class StatisticsElementContainerScreenData {
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_SPEED, player -> player.getAttributeValue(Attributes.ATTACK_SPEED) - 4.0),
             GearAttributeStatLabel.ofDouble(this.player, ModGearAttributes.ATTACK_SPEED_PERCENT),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.REACH, IForgePlayer::getReachDistance),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_RANGE, IForgePlayer::getAttackRange),
             GearAttributeStatLabel.of(
                this.player, ModGearAttributes.KNOCKBACK_RESISTANCE, player -> (float)player.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE)
             ),
@@ -281,10 +282,12 @@ public class StatisticsElementContainerScreenData {
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_RARITY),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.TRAP_DISARMING),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.SOUL_CHANCE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.LUCKY_HIT_CHANCE),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_INCREASE),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_ILLAGERS),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_SPIDERS),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_UNDEAD)
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_UNDEAD),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_NETHER)
          )
       );
       result.sort(StatLabelElementBuilder.COMPARATOR);

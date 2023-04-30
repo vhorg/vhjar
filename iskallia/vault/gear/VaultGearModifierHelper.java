@@ -12,6 +12,7 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MiscUtils;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +50,7 @@ public class VaultGearModifierHelper {
 
    public static boolean addNewModifierOfGroup(VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack, Random random) {
       WeightedList<VaultGearModifierHelper.TierGroupOutcome> outcomes = getAvailableModGroupOutcomes(modGroupTag, stack);
-      Map<VaultGearTierConfig.ModifierTierGroup, Integer> highestTiers = new WeightedList<>();
+      Map<VaultGearTierConfig.ModifierTierGroup, Integer> highestTiers = new HashMap<>();
 
       for (VaultGearModifierHelper.TierGroupOutcome outcome : outcomes.keySet()) {
          int current = highestTiers.getOrDefault(outcome.tierGroup, -1);
@@ -149,6 +150,7 @@ public class VaultGearModifierHelper {
          if (replacement == null) {
             return false;
          } else {
+            data.getAllModifierAffixes().forEach(VaultGearModifier::resetGameTimeAdded);
             VaultGearModifier existing = (VaultGearModifier)replacement.getA();
             VaultGearModifier newModifier = (VaultGearModifier)replacement.getB();
             existing.setValue(newModifier.getValue());

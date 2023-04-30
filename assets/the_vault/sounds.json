@@ -1,4 +1,29 @@
 {
+  "smite_bolt": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/smite_bolt"
+    ]
+  },
+  "taunt_charm": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/taunt_charm",
+      "the_vault:ability/taunt_charm_1"
+    ]
+  },
+  "totem": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/totem"
+    ]
+  },
+  "smite": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability/smite"
+    ]
+  },
   "heal": {
     "category": "master",
     "sounds": [
@@ -89,41 +114,34 @@
       "the_vault:ability/execution"
     ]
   },
-  "tank": {
+  "empower": {
     "category": "master",
     "sounds": [
-      "the_vault:ability/tank"
+      "the_vault:ability/empower"
     ]
   },
-  "tank_hit": {
+  "empower_ice_armour": {
     "category": "master",
     "sounds": [
-      "the_vault:ability/tank_hit"
+      "the_vault:ability/empower_ice_armour"
     ]
   },
-  "tank_projectile": {
+  "shell": {
     "category": "master",
     "sounds": [
-      "the_vault:ability/tank_projectile"
+      "the_vault:ability/shell"
     ]
   },
-  "tank_projectile_hit": {
+  "shell_porcupine": {
     "category": "master",
     "sounds": [
-      "the_vault:ability/tank_projectile_hit",
-      "the_vault:ability/tank_projectile_hit_2"
+      "the_vault:ability/shell_porcupine"
     ]
   },
-  "tank_reflect": {
+  "shell_quill": {
     "category": "master",
     "sounds": [
-      "the_vault:ability/tank_reflect"
-    ]
-  },
-  "tank_reflect_hit": {
-    "category": "master",
-    "sounds": [
-      "the_vault:ability/tank_reflect_hit"
+      "the_vault:ability/shell_quill"
     ]
   },
   "hunter": {
@@ -220,6 +238,201 @@
       "the_vault:treasure_goblin/idle_3"
     ]
   },
+  "vault_dood.idle": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:vault_dood/idle1",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:vault_dood/idle1",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:vault_dood/idle1",
+        "pitch": 0.9
+      },
+      {
+        "name": "the_vault:vault_dood/idle2",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:vault_dood/idle2",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:vault_dood/idle2",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "skeleton_pirate.idle": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:skeleton_pirate/idle1",
+      "the_vault:skeleton_pirate/idle2",
+      "the_vault:skeleton_pirate/idle3"
+    ]
+  },
+  "winterwalker.idle": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:winterwalker/idle1",
+      "the_vault:winterwalker/idle2"
+    ]
+  },
+  "winterwalker.step": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:winterwalker/walk1",
+      "the_vault:winterwalker/walk2",
+      "the_vault:winterwalker/walk3"
+    ]
+  },
+  "winterwalker.hurt": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:winterwalker/hurt",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:winterwalker/hurt",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:winterwalker/hurt",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "winterwalker.death": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:winterwalker/death",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:winterwalker/death",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:winterwalker/death",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "overgrown_zombie.idle": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:overgrown_zombie/idle1",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:overgrown_zombie/idle1",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:overgrown_zombie/idle1",
+        "pitch": 0.9
+      },
+      {
+        "name": "the_vault:overgrown_zombie/idle2",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:overgrown_zombie/idle2",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:overgrown_zombie/idle2",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "overgrown_zombie.step": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:overgrown_zombie/step1",
+      "the_vault:overgrown_zombie/step2"
+    ]
+  },
+  "overgrown_zombie.hurt": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:overgrown_zombie/hurt1",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:overgrown_zombie/hurt1",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:overgrown_zombie/hurt1",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "overgrown_zombie.death": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:overgrown_zombie/death",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:overgrown_zombie/death",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:overgrown_zombie/death",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "shiver.idle": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:shiver/idle1",
+      "the_vault:shiver/idle2",
+      "the_vault:shiver/idle3"
+    ]
+  },
+  "shiver.hurt": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:shiver/hurt1",
+      "the_vault:shiver/hurt2"
+    ]
+  },
+  "shiver.death": {
+    "category": "hostile",
+    "sounds": [
+      {
+        "name": "the_vault:shiver/death",
+        "pitch": 1.0
+      },
+      {
+        "name": "the_vault:shiver/death",
+        "pitch": 1.1
+      },
+      {
+        "name": "the_vault:shiver/death",
+        "pitch": 0.9
+      }
+    ]
+  },
+  "burp": {
+    "sounds": [
+      "the_vault:burp/burp1",
+      "the_vault:burp/burp2",
+      "the_vault:burp/burp3"
+    ]
+  },
   "witchskall_idle": {
     "category": "neutral",
     "sounds": [
@@ -264,7 +477,10 @@
   "raffle": {
     "category": "master",
     "sounds": [
-      "the_vault:raffle"
+      {
+        "name": "the_vault:raffle",
+        "volume": 0.9
+      }
     ]
   },
   "timer_kill": {
@@ -324,6 +540,12 @@
       "the_vault:confetti"
     ]
   },
+  "identification": {
+    "category": "master",
+    "sounds": [
+      "the_vault:identification"
+    ]
+  },
   "gift_bomb": {
     "category": "master",
     "sounds": [
@@ -339,7 +561,10 @@
   "vault_level_up": {
     "category": "master",
     "sounds": [
-      "the_vault:vault_level_up"
+      {
+        "name": "the_vault:vault_level_up",
+        "volume": 0.8
+      }
     ]
   },
   "skill_tree_learn": {

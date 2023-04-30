@@ -3,7 +3,7 @@ package iskallia.vault.mixin;
 import com.mojang.authlib.GameProfile;
 import iskallia.vault.core.SkyVaultsChunkGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
-import iskallia.vault.util.MiscUtils;
+import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.data.VirtualWorlds;
 import java.io.IOException;
 import java.util.Arrays;
@@ -101,7 +101,7 @@ public abstract class MixinMinecraftServer {
    public GameProfile setPlayerNameForStatus(ServerPlayer serverPlayer) {
       String name = serverPlayer.getName().getString();
       UUID id = serverPlayer.getUUID();
-      if (MiscUtils.getVault(serverPlayer).isPresent()) {
+      if (ServerVaults.get(serverPlayer.level).isPresent()) {
          name = name + "(vault)";
       }
 

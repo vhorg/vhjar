@@ -8,6 +8,7 @@ import javax.annotation.Nonnull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -61,7 +62,7 @@ public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> exte
          if (tileEntity != null) {
             try {
                if (((FillableAltarTileEntity)tileEntity).isCompleted() && !((FillableAltarTileEntity)tileEntity).isConsumed()) {
-                  ((FillableAltarTileEntity)tileEntity).placeReplacement(world, pos);
+                  this.snuffCandles(state, world, pos);
                   ((FillableAltarTileEntity)tileEntity).setConsumed();
                   CommonEvents.ALTAR_PROGRESS
                      .invoke(
@@ -94,84 +95,109 @@ public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> exte
       Direction facing = (Direction)stateIn.getValue(FACING);
       Direction rightDirection = facing.getClockWise();
       Direction leftDirection = rightDirection.getOpposite();
-
-      for (int i = 0; i < 2; i++) {
-         if (this instanceof BloodAltarBlock) {
-            this.addFlameParticle(
-               world,
-               pos,
-               8.0 - rightDirection.getStepX() * 6.25 - facing.getStepX() * 4.5,
-               7.0,
-               8.0 - rightDirection.getStepZ() * 6.25 - facing.getStepZ() * 4.5
-            );
-            this.addFlameParticle(
-               world,
-               pos,
-               8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 2.5,
-               6.0,
-               8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
-            );
-            this.addFlameParticle(
-               world,
-               pos,
-               8.0 - rightDirection.getStepX() * 5.5 - facing.getStepX() * 6.5,
-               6.0,
-               8.0 - rightDirection.getStepZ() * 5.5 - facing.getStepZ() * 6.5
-            );
-            this.addFlameParticle(
-               world,
-               pos,
-               8.0 - rightDirection.getStepX() * 4.5 - facing.getStepX() * 1.5,
-               8.0,
-               8.0 - rightDirection.getStepZ() * 4.5 - facing.getStepZ() * 1.5
-            );
-            this.addFlameParticle(
-               world,
-               pos,
-               8.0 - leftDirection.getStepX() * 6.25 - facing.getStepX() * 4.5,
-               7.0,
-               8.0 - leftDirection.getStepZ() * 6.25 - facing.getStepZ() * 4.5
-            );
-            this.addFlameParticle(
-               world, pos, 8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 2.5, 6.0, 8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
-            );
-            this.addFlameParticle(
-               world, pos, 8.0 - leftDirection.getStepX() * 5.5 - facing.getStepX() * 6.5, 6.0, 8.0 - leftDirection.getStepZ() * 5.5 - facing.getStepZ() * 6.5
-            );
-            this.addFlameParticle(
-               world, pos, 8.0 - leftDirection.getStepX() * 4.5 - facing.getStepX() * 1.5, 8.0, 8.0 - leftDirection.getStepZ() * 4.5 - facing.getStepZ() * 1.5
-            );
-         } else {
-            this.addFlameParticle(
-               world,
-               pos,
-               8.0 - rightDirection.getStepX() * 5.5 - facing.getStepX() * 4.5,
-               6.5,
-               8.0 - rightDirection.getStepZ() * 5.5 - facing.getStepZ() * 4.5
-            );
-            this.addFlameParticle(
-               world,
-               pos,
-               8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 2.5,
-               6.0,
-               8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
-            );
-            this.addFlameParticle(
-               world,
-               pos,
-               8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 6.5,
-               6.0,
-               8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 6.5
-            );
-            this.addFlameParticle(
-               world, pos, 8.0 - leftDirection.getStepX() * 5.5 - facing.getStepX() * 4.5, 6.5, 8.0 - leftDirection.getStepZ() * 5.5 - facing.getStepZ() * 4.5
-            );
-            this.addFlameParticle(
-               world, pos, 8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 2.5, 6.0, 8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
-            );
-            this.addFlameParticle(
-               world, pos, 8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 6.5, 6.0, 8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 6.5
-            );
+      if (world.getBlockEntity(pos) instanceof FillableAltarTileEntity fillableAltarTileEntity && !fillableAltarTileEntity.isConsumed()) {
+         for (int i = 0; i < 2; i++) {
+            if (this instanceof BloodAltarBlock) {
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - rightDirection.getStepX() * 6.25 - facing.getStepX() * 4.5,
+                  7.0,
+                  8.0 - rightDirection.getStepZ() * 6.25 - facing.getStepZ() * 4.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 2.5,
+                  6.0,
+                  8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - rightDirection.getStepX() * 5.5 - facing.getStepX() * 6.5,
+                  6.0,
+                  8.0 - rightDirection.getStepZ() * 5.5 - facing.getStepZ() * 6.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - rightDirection.getStepX() * 4.5 - facing.getStepX() * 1.5,
+                  8.0,
+                  8.0 - rightDirection.getStepZ() * 4.5 - facing.getStepZ() * 1.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - leftDirection.getStepX() * 6.25 - facing.getStepX() * 4.5,
+                  7.0,
+                  8.0 - leftDirection.getStepZ() * 6.25 - facing.getStepZ() * 4.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 2.5,
+                  6.0,
+                  8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - leftDirection.getStepX() * 5.5 - facing.getStepX() * 6.5,
+                  6.0,
+                  8.0 - leftDirection.getStepZ() * 5.5 - facing.getStepZ() * 6.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - leftDirection.getStepX() * 4.5 - facing.getStepX() * 1.5,
+                  8.0,
+                  8.0 - leftDirection.getStepZ() * 4.5 - facing.getStepZ() * 1.5
+               );
+            } else {
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - rightDirection.getStepX() * 5.5 - facing.getStepX() * 4.5,
+                  6.5,
+                  8.0 - rightDirection.getStepZ() * 5.5 - facing.getStepZ() * 4.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 2.5,
+                  6.0,
+                  8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 6.5,
+                  6.0,
+                  8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 6.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - leftDirection.getStepX() * 5.5 - facing.getStepX() * 4.5,
+                  6.5,
+                  8.0 - leftDirection.getStepZ() * 5.5 - facing.getStepZ() * 4.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 2.5,
+                  6.0,
+                  8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
+               );
+               this.addFlameParticle(
+                  world,
+                  pos,
+                  8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 6.5,
+                  6.0,
+                  8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 6.5
+               );
+            }
          }
       }
    }
@@ -182,5 +208,100 @@ public abstract class FillableAltarBlock<T extends FillableAltarTileEntity> exte
       double y = pos.getY() + yOffset / 16.0;
       double z = pos.getZ() + zOffset / 16.0;
       world.addParticle(this.getFlameParticle(), x, y, z, 0.0, 0.0, 0.0);
+   }
+
+   public void snuffCandles(BlockState stateIn, Level world, BlockPos pos) {
+      Direction facing = (Direction)stateIn.getValue(FACING);
+      Direction rightDirection = facing.getClockWise();
+      Direction leftDirection = rightDirection.getOpposite();
+
+      for (int i = 0; i < 2; i++) {
+         if (this instanceof BloodAltarBlock) {
+            this.addSmokeParticle(
+               world,
+               pos,
+               8.0 - rightDirection.getStepX() * 6.25 - facing.getStepX() * 4.5,
+               7.0,
+               8.0 - rightDirection.getStepZ() * 6.25 - facing.getStepZ() * 4.5
+            );
+            this.addSmokeParticle(
+               world,
+               pos,
+               8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 2.5,
+               6.0,
+               8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
+            );
+            this.addSmokeParticle(
+               world,
+               pos,
+               8.0 - rightDirection.getStepX() * 5.5 - facing.getStepX() * 6.5,
+               6.0,
+               8.0 - rightDirection.getStepZ() * 5.5 - facing.getStepZ() * 6.5
+            );
+            this.addSmokeParticle(
+               world,
+               pos,
+               8.0 - rightDirection.getStepX() * 4.5 - facing.getStepX() * 1.5,
+               8.0,
+               8.0 - rightDirection.getStepZ() * 4.5 - facing.getStepZ() * 1.5
+            );
+            this.addSmokeParticle(
+               world,
+               pos,
+               8.0 - leftDirection.getStepX() * 6.25 - facing.getStepX() * 4.5,
+               7.0,
+               8.0 - leftDirection.getStepZ() * 6.25 - facing.getStepZ() * 4.5
+            );
+            this.addSmokeParticle(
+               world, pos, 8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 2.5, 6.0, 8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
+            );
+            this.addSmokeParticle(
+               world, pos, 8.0 - leftDirection.getStepX() * 5.5 - facing.getStepX() * 6.5, 6.0, 8.0 - leftDirection.getStepZ() * 5.5 - facing.getStepZ() * 6.5
+            );
+            this.addSmokeParticle(
+               world, pos, 8.0 - leftDirection.getStepX() * 4.5 - facing.getStepX() * 1.5, 8.0, 8.0 - leftDirection.getStepZ() * 4.5 - facing.getStepZ() * 1.5
+            );
+         } else {
+            this.addSmokeParticle(
+               world,
+               pos,
+               8.0 - rightDirection.getStepX() * 5.5 - facing.getStepX() * 4.5,
+               6.5,
+               8.0 - rightDirection.getStepZ() * 5.5 - facing.getStepZ() * 4.5
+            );
+            this.addSmokeParticle(
+               world,
+               pos,
+               8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 2.5,
+               6.0,
+               8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
+            );
+            this.addSmokeParticle(
+               world,
+               pos,
+               8.0 - rightDirection.getStepX() * 6.5 - facing.getStepX() * 6.5,
+               6.0,
+               8.0 - rightDirection.getStepZ() * 6.5 - facing.getStepZ() * 6.5
+            );
+            this.addSmokeParticle(
+               world, pos, 8.0 - leftDirection.getStepX() * 5.5 - facing.getStepX() * 4.5, 6.5, 8.0 - leftDirection.getStepZ() * 5.5 - facing.getStepZ() * 4.5
+            );
+            this.addSmokeParticle(
+               world, pos, 8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 2.5, 6.0, 8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 2.5
+            );
+            this.addSmokeParticle(
+               world, pos, 8.0 - leftDirection.getStepX() * 6.5 - facing.getStepX() * 6.5, 6.0, 8.0 - leftDirection.getStepZ() * 6.5 - facing.getStepZ() * 6.5
+            );
+         }
+      }
+   }
+
+   public void addSmokeParticle(Level world, BlockPos pos, double xOffset, double yOffset, double zOffset) {
+      double x = pos.getX() + xOffset / 16.0;
+      double y = pos.getY() + yOffset / 16.0;
+      double z = pos.getZ() + zOffset / 16.0;
+      if (world instanceof ServerLevel serverLevel) {
+         serverLevel.sendParticles(ParticleTypes.SMOKE, x, y, z, 3, 0.0, 0.15F, 0.0, 0.0);
+      }
    }
 }

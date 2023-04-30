@@ -5,7 +5,8 @@ import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.gui.widget.AbilitySelectionWidget;
 import iskallia.vault.init.ModKeybinds;
 import iskallia.vault.network.message.ServerboundAbilitySelectMessage;
-import iskallia.vault.skill.ability.AbilityNode;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.base.TieredSkill;
 import java.util.LinkedList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -27,15 +28,15 @@ public class AbilitySelectionScreen extends Screen {
       float midX = minecraft.getWindow().getGuiScaledWidth() / 2.0F;
       float midY = minecraft.getWindow().getGuiScaledHeight() / 2.0F;
       float radius = 60.0F;
-      List<AbilityNode<?, ?>> learnedAbilities = ClientAbilityData.getLearnedAbilityNodes();
+      List<TieredSkill> learnedAbilities = ClientAbilityData.getLearnedAbilities();
       double clickableAngle = (Math.PI * 2) / learnedAbilities.size();
 
       for (int i = 0; i < learnedAbilities.size(); i++) {
-         AbilityNode<?, ?> ability = learnedAbilities.get(i);
+         TieredSkill ability = learnedAbilities.get(i);
          double angle = i * ((Math.PI * 2) / learnedAbilities.size()) - (Math.PI / 2);
          double x = radius * Math.cos(angle) + midX;
          double y = radius * Math.sin(angle) + midY;
-         AbilitySelectionWidget widget = new AbilitySelectionWidget((int)x, (int)y, ability, clickableAngle / 2.0);
+         AbilitySelectionWidget widget = new AbilitySelectionWidget((int)x, (int)y, (SpecializedSkill)ability.getParent(), clickableAngle / 2.0);
          abilityWidgets.add(widget);
       }
 
@@ -53,7 +54,7 @@ public class AbilitySelectionScreen extends Screen {
    public boolean mouseReleased(double mouseX, double mouseY, int button) {
       for (AbilitySelectionWidget widget : this.getAbilitiesAsWidgets()) {
          if (widget.isMouseOver(mouseX, mouseY)) {
-            this.requestSwap(widget.getAbilityNode());
+            this.requestSwap(widget.getAbility());
             this.onClose();
             return true;
          }
@@ -74,7 +75,7 @@ public class AbilitySelectionScreen extends Screen {
 
          for (AbilitySelectionWidget widget : this.getAbilitiesAsWidgets()) {
             if (widget.isMouseOver(mouseX, mouseY)) {
-               this.requestSwap(widget.getAbilityNode());
+               this.requestSwap(widget.getAbility());
                break;
             }
          }
@@ -84,9 +85,9 @@ public class AbilitySelectionScreen extends Screen {
       }
    }
 
-   public void requestSwap(AbilityNode<?, ?> abilityNode) {
-      if (!abilityNode.getGroup().equals(ClientAbilityData.getSelectedAbility())) {
-         ServerboundAbilitySelectMessage.send(abilityNode.getGroup().getParentName());
+   public void requestSwap(SpecializedSkill ability) {
+      if (!ClientAbilityData.isSelectedAbility(ability)) {
+         ServerboundAbilitySelectMessage.send(ability.getId());
       }
    }
 
@@ -103,20 +104,17 @@ public class AbilitySelectionScreen extends Screen {
          widget.render(matrixStack, mouseX, mouseY, partialTicks);
          if (!focusRendered && widget.isMouseOver(mouseX, mouseY)) {
             int yOffset = 35;
-            if (widget.getAbilityNode().getSpecialization() != null) {
+            if (widget.getSelectedAbility() != null) {
                yOffset += 10;
             }
 
-            String abilityName = widget.getAbilityNode().getName();
+            String abilityName = widget.getSelectedAbility().getId();
             int abilityNameWidth = minecraft.font.width(abilityName);
             minecraft.font.drawShadow(matrixStack, abilityName, midX - abilityNameWidth / 2.0F, midY - (radius + yOffset), 16777215);
-            if (widget.getAbilityNode().getSpecialization() != null) {
-               String specName = widget.getAbilityNode().getSpecializationName();
-               int specNameWidth = minecraft.font.width(specName);
-               minecraft.font.drawShadow(matrixStack, specName, midX - specNameWidth / 2.0F, midY - (radius + yOffset - 10.0F), ChatFormatting.GOLD.getColor());
-            }
-
-            if (widget.getAbilityNode().getGroup().equals(ClientAbilityData.getSelectedAbility())) {
+            String specName = widget.getSelectedAbility().getId();
+            int specNameWidth = minecraft.font.width(specName);
+            minecraft.font.drawShadow(matrixStack, specName, midX - specNameWidth / 2.0F, midY - (radius + yOffset - 10.0F), ChatFormatting.GOLD.getColor());
+            if (ClientAbilityData.isSelectedAbility(widget.getAbility())) {
                String text = "Currently Focused Ability";
                int textWidth = minecraft.font.width(text);
                minecraft.font.drawShadow(matrixStack, text, midX - textWidth / 2.0F, midY + radius + 15.0F, 11266750);

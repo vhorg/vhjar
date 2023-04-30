@@ -1,6 +1,6 @@
 package iskallia.vault.skill.ability.component;
 
-import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
+import iskallia.vault.skill.base.Skill;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -13,15 +13,15 @@ public final class AbilityLabelBindingRegistry {
       CLASS_BINDING_MAP.clear();
    }
 
-   public static <C extends AbstractAbilityConfig> boolean containsKey(Class<C> configClass) {
+   public static <C extends Skill> boolean containsKey(Class<C> configClass) {
       return CLASS_BINDING_MAP.containsKey(configClass);
    }
 
-   public static <C extends AbstractAbilityConfig> void register(Class<C> configClass, String key, IAbilityLabelBinding<C> binding) {
+   public static <C extends Skill> void register(Class<C> configClass, String key, IAbilityLabelBinding<C> binding) {
       CLASS_BINDING_MAP.computeIfAbsent(configClass, aClass -> new HashMap<>()).put(key, binding);
    }
 
-   public static <C extends AbstractAbilityConfig> String getBindingValue(C config, String key) {
+   public static <C extends Skill> String getBindingValue(C config, String key) {
       IAbilityLabelBinding<C> binding = (IAbilityLabelBinding<C>)CLASS_BINDING_MAP.getOrDefault(config.getClass(), Collections.emptyMap()).get(key);
       return binding == null ? "NO BINDING" : binding.get(config);
    }

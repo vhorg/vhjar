@@ -4,6 +4,7 @@ import iskallia.vault.core.event.ForgeEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.Post;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.EventPriority;
 
 public class RenderOverlayEvent extends ForgeEvent<RenderOverlayEvent, Post> {
    public RenderOverlayEvent() {
@@ -15,7 +16,9 @@ public class RenderOverlayEvent extends ForgeEvent<RenderOverlayEvent, Post> {
 
    @Override
    protected void register() {
-      MinecraftForge.EVENT_BUS.addListener(event -> this.invoke(event));
+      for (EventPriority priority : EventPriority.values()) {
+         MinecraftForge.EVENT_BUS.addListener(priority, true, event -> this.invoke(event));
+      }
    }
 
    public RenderOverlayEvent forType(ElementType type) {

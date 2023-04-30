@@ -6,6 +6,7 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.phys.Vec3;
 
 public class NoAiEffect extends MobEffect {
    public NoAiEffect(ResourceLocation key, int liquidColor) {
@@ -24,6 +25,7 @@ public class NoAiEffect extends MobEffect {
       super.removeAttributeModifiers(entity, attributeMap, amplifier);
       if (entity instanceof Mob mob) {
          mob.setNoAi(false);
+         mob.setDeltaMovement(Vec3.ZERO);
       }
    }
 }

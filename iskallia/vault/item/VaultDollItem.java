@@ -9,13 +9,13 @@ import iskallia.vault.core.event.common.ChestGenerationEvent;
 import iskallia.vault.core.event.common.CoinStacksGenerationEvent;
 import iskallia.vault.core.event.common.CrateAwardEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
+import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.integration.IntegrationCurios;
-import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.VHSmpUtil;
 import iskallia.vault.world.data.DollLootData;
 import iskallia.vault.world.data.ServerVaults;
@@ -178,7 +178,7 @@ public class VaultDollItem extends BasicItem {
                      getVaultUUID(stack)
                         .ifPresentOrElse(
                            vaultId -> {
-                              boolean isInThisVault = MiscUtils.getVaultData(player, Vault.ID).map(vaultId::equals).orElse(false);
+                              boolean isInThisVault = ClientVaults.getActive().map(vault -> vaultId.equals(vault.get(Vault.ID))).orElse(false);
                               if (isInThisVault) {
                                  tooltip.add(4, new TranslatableComponent("tooltip.the_vault.doll_status.active").withStyle(ChatFormatting.YELLOW));
                               } else {
@@ -438,7 +438,7 @@ public class VaultDollItem extends BasicItem {
       ItemStack stack = context.getItemInHand();
       Player player = context.getPlayer();
       if (player != null
-         && !ServerVaults.isInVault(player)
+         && !ServerVaults.get(player.level).isPresent()
          && !VHSmpUtil.isArenaWorld(player)
          && !getVaultUUID(stack).isEmpty()
          && !this.playerCannotPlaceDoll(stack, player)) {

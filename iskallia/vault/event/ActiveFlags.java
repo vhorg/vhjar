@@ -6,7 +6,14 @@ public enum ActiveFlags {
    IS_DOT_ATTACKING,
    IS_LEECHING,
    IS_AOE_ATTACKING,
-   IS_REFLECT_ATTACKING;
+   IS_REFLECT_ATTACKING,
+   IS_TOTEM_ATTACKING,
+   IS_CHARMED_ATTACKING,
+   IS_EFFECT_ATTACKING,
+   IS_JAVELIN_ATTACKING,
+   IS_SMITE_ATTACKING,
+   IS_CHAINING_ATTACKING,
+   IS_THORNS_REFLECTING;
 
    private final ThreadLocal<Integer> activeReferences = ThreadLocal.withInitial(() -> 0);
 
@@ -16,13 +23,21 @@ public enum ActiveFlags {
 
    public synchronized void runIfNotSet(Runnable run) {
       if (!this.isSet()) {
-         this.activeReferences.set(this.activeReferences.get() + 1);
+         this.push();
 
          try {
             run.run();
          } finally {
-            this.activeReferences.set(this.activeReferences.get() - 1);
+            this.pop();
          }
       }
+   }
+
+   public synchronized void push() {
+      this.activeReferences.set(this.activeReferences.get() + 1);
+   }
+
+   public synchronized void pop() {
+      this.activeReferences.set(this.activeReferences.get() - 1);
    }
 }

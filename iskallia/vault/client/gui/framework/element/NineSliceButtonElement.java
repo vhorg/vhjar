@@ -13,7 +13,8 @@ import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,7 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
    private final Runnable onClick;
    protected boolean visible;
    protected Supplier<Boolean> disabled;
-   protected MutableComponent component;
+   protected Supplier<Component> component;
    protected LabelTextStyle labelTextStyle;
    private boolean clickHeld = false;
    private double timeHeld = 0.0;
@@ -34,13 +35,14 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
       this.onClick = onClick;
       this.setVisible(true);
       this.setDisabled(false);
+      this.renderButtonHeld = () -> false;
    }
 
-   public NineSliceButtonElement<?> label(MutableComponent component, LabelTextStyle.Builder labelTextStyle) {
+   public <T extends NineSliceButtonElement<E>> T label(Supplier<Component> component, LabelTextStyle.Builder labelTextStyle) {
       this.component = component;
       this.labelTextStyle = labelTextStyle.build();
       ScreenLayout.requestLayout();
-      return this;
+      return (T)this;
    }
 
    @Override
@@ -53,14 +55,14 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
       return this.visible;
    }
 
-   public NineSliceButtonElement<E> setDisabled(boolean disabled) {
+   public <T extends NineSliceButtonElement<E>> T setDisabled(boolean disabled) {
       this.setDisabled(() -> disabled);
-      return this;
+      return (T)this;
    }
 
-   public NineSliceButtonElement<E> setDisabled(Supplier<Boolean> disabled) {
+   public <T extends NineSliceButtonElement<E>> T setDisabled(Supplier<Boolean> disabled) {
       this.disabled = disabled;
-      return this;
+      return (T)this;
    }
 
    public boolean isDisabled() {
@@ -70,7 +72,7 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
    @Override
    public boolean onMouseClicked(double mouseX, double mouseY, int buttonIndex) {
       if (!this.isDisabled()) {
-         Minecraft.getInstance().player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.7F, 1.0F);
+         Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
       }
 
       this.clickHeld = true;
@@ -93,6 +95,7 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
          this.onClick.run();
       }
 
+      ScreenLayout.requestLayout();
       return true;
    }
 
@@ -112,9 +115,9 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
       return this.renderButtonHeld.get();
    }
 
-   public NineSliceButtonElement<E> setRenderButtonHeld(Supplier<Boolean> renderButtonHeld) {
+   public <T extends NineSliceButtonElement<E>> T setRenderButtonHeld(Supplier<Boolean> renderButtonHeld) {
       this.renderButtonHeld = renderButtonHeld;
-      return this;
+      return (T)this;
    }
 
    @Override
@@ -138,20 +141,21 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
       NineSlice.TextureRegion texture = this.textures.selectTexture(this.isDisabled(), this.containsMouse(mouseX, mouseY), this.clickHeld);
       renderer.render(texture, poseStack, this.worldSpatial);
       if (this.component != null) {
-         this.labelTextStyle
-            .textBorder()
-            .render(
-               renderer,
-               poseStack,
-               this.component,
-               this.labelTextStyle.textWrap(),
-               this.labelTextStyle.textAlign(),
-               this.getWorldSpatial().x(),
-               this.getWorldSpatial().y() + this.getWorldSpatial().height() / 2 - 9 / 2,
-               this.getWorldSpatial().z() + 5,
-               this.getWorldSpatial().width()
-            );
+         this.renderLabel(
+            renderer,
+            poseStack,
+            this.getWorldSpatial().x(),
+            this.getWorldSpatial().y() + this.getWorldSpatial().height() / 2 - 9 / 2,
+            this.getWorldSpatial().z() + 5,
+            this.getWorldSpatial().width()
+         );
       }
+   }
+
+   protected void renderLabel(IElementRenderer renderer, PoseStack poseStack, int x, int y, int z, int width) {
+      this.labelTextStyle
+         .textBorder()
+         .render(renderer, poseStack, this.component.get(), this.labelTextStyle.textWrap(), this.labelTextStyle.textAlign(), x, y, z, width);
    }
 
    public record NineSliceButtonTextures(

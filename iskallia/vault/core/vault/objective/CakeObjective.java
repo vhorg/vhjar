@@ -28,6 +28,7 @@ import iskallia.vault.core.vault.ClassicPortalLogic;
 import iskallia.vault.core.vault.PortalLogic;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.vault.stat.StatCollector;
@@ -41,7 +42,6 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.world.data.DiscoveredModelsData;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -183,7 +183,7 @@ public class CakeObjective extends Objective {
       if (this.get(CAKE_POS) == null) {
          PortalLogic logic = vault.get(Vault.WORLD).get(WorldManager.PORTAL_LOGIC);
          if (logic instanceof ClassicPortalLogic classic) {
-            classic.getStart(world, vault).ifPresent(pos -> {
+            classic.getStart().ifPresent(pos -> {
                pos = pos.relative(vault.get(Vault.WORLD).get(WorldManager.FACING), 9);
                pos = pos.relative(Direction.DOWN, 1);
                world.setBlock(pos, ModBlocks.CAKE.defaultBlockState(), 3);
@@ -277,7 +277,7 @@ public class CakeObjective extends Objective {
             .append(new TextComponent(".").withStyle(ChatFormatting.GRAY));
       }
 
-      groups.forEach((modifier, count) -> vault.get(Vault.MODIFIERS).addPermanentModifier(modifier, count, true, random));
+      groups.forEach((modifier, count) -> vault.get(Vault.MODIFIERS).addModifier(modifier, count, true, random));
 
       for (Listener listener : vault.get(Vault.LISTENERS).getAll()) {
          listener.getPlayer().ifPresent(other -> {

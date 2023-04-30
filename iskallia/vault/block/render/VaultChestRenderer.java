@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Vector3f;
 import iskallia.vault.VaultMod;
-import iskallia.vault.block.ScavengerChestBlock;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.model.VaultChestModel;
 import iskallia.vault.init.ModBlocks;
@@ -38,13 +37,15 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       Map.entry(ModBlocks.ORNATE_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_ornate_chest"))),
       Map.entry(ModBlocks.TREASURE_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_treasure_chest"))),
       Map.entry(ModBlocks.ALTAR_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_altar_chest"))),
+      Map.entry(ModBlocks.GILDED_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_gilded_strongbox"))),
+      Map.entry(ModBlocks.ORNATE_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_ornate_strongbox"))),
+      Map.entry(ModBlocks.LIVING_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_living_strongbox"))),
       Map.entry(ModBlocks.WOODEN_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_chest"))),
       Map.entry(ModBlocks.GILDED_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_gilded_chest"))),
       Map.entry(ModBlocks.LIVING_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_mossy_chest"))),
       Map.entry(ModBlocks.ORNATE_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_ornate_chest"))),
       Map.entry(ModBlocks.TREASURE_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_treasure_chest"))),
-      Map.entry(ModBlocks.ALTAR_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_altar_chest"))),
-      Map.entry(ModBlocks.SCAVENGER_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/scavanger_chest")))
+      Map.entry(ModBlocks.ALTAR_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_altar_chest")))
    );
    public static final Map<Block, Material> PRESENT_MATERIAL_MAP = Map.ofEntries(
       Map.entry(ModBlocks.WOODEN_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange"))),
@@ -53,13 +54,15 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       Map.entry(ModBlocks.ORNATE_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/red"))),
       Map.entry(ModBlocks.TREASURE_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/pink"))),
       Map.entry(ModBlocks.ALTAR_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/cyan"))),
+      Map.entry(ModBlocks.ORNATE_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_ornate_strongbox"))),
+      Map.entry(ModBlocks.GILDED_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_gilded_strongbox"))),
+      Map.entry(ModBlocks.LIVING_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_living_strongbox"))),
       Map.entry(ModBlocks.WOODEN_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange"))),
       Map.entry(ModBlocks.GILDED_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/yellow"))),
       Map.entry(ModBlocks.LIVING_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/green"))),
       Map.entry(ModBlocks.ORNATE_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/red"))),
       Map.entry(ModBlocks.TREASURE_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/pink"))),
-      Map.entry(ModBlocks.ALTAR_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/cyan"))),
-      Map.entry(ModBlocks.SCAVENGER_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/red")))
+      Map.entry(ModBlocks.ALTAR_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/cyan")))
    );
    private static final Map<Block, VaultChestModel> NORMAL_MODEL_MAP = new HashMap<>();
    private static final Map<Block, VaultChestModel> PRESENT_MODEL_MAP = new HashMap<>();
@@ -86,7 +89,9 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       super(context);
       VaultChestModel treasureChest = new VaultChestModel(context.bakeLayer(VaultChestModel.TREASURE_LOCATION));
       VaultChestModel livingChest = new VaultChestModel(context.bakeLayer(VaultChestModel.MOSSY_LOCATION));
-      VaultChestModel scavengerChest = new VaultChestModel(context.bakeLayer(VaultChestModel.SCAVENGER_LOCATION));
+      VaultChestModel strongbox = new VaultChestModel(context.bakeLayer(VaultChestModel.STRONGBOX_LOCATION));
+      VaultChestModel livingStrongbox = new VaultChestModel(context.bakeLayer(VaultChestModel.LIVING_STRONGBOX_LOCATION));
+      new VaultChestModel(context.bakeLayer(VaultChestModel.SCAVENGER_LOCATION));
       VaultChestModel presentChest = new VaultChestModel(context.bakeLayer(VaultChestModel.PRESENT_LOCATION));
       NORMAL_MODEL_MAP.put(ModBlocks.TREASURE_CHEST, treasureChest);
       NORMAL_MODEL_MAP.put(ModBlocks.ORNATE_CHEST, livingChest);
@@ -100,7 +105,9 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       NORMAL_MODEL_MAP.put(ModBlocks.WOODEN_CHEST_PLACEABLE, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.GILDED_CHEST_PLACEABLE, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.LIVING_CHEST_PLACEABLE, livingChest);
-      NORMAL_MODEL_MAP.put(ModBlocks.SCAVENGER_CHEST, scavengerChest);
+      NORMAL_MODEL_MAP.put(ModBlocks.ORNATE_STRONGBOX, strongbox);
+      NORMAL_MODEL_MAP.put(ModBlocks.GILDED_STRONGBOX, strongbox);
+      NORMAL_MODEL_MAP.put(ModBlocks.LIVING_STRONGBOX, livingStrongbox);
       PRESENT_MODEL_MAP.put(ModBlocks.TREASURE_CHEST, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.ORNATE_CHEST, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.ALTAR_CHEST, presentChest);
@@ -113,7 +120,9 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       PRESENT_MODEL_MAP.put(ModBlocks.WOODEN_CHEST_PLACEABLE, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.GILDED_CHEST_PLACEABLE, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.LIVING_CHEST_PLACEABLE, presentChest);
-      PRESENT_MODEL_MAP.put(ModBlocks.SCAVENGER_CHEST, scavengerChest);
+      PRESENT_MODEL_MAP.put(ModBlocks.ORNATE_STRONGBOX, strongbox);
+      PRESENT_MODEL_MAP.put(ModBlocks.GILDED_STRONGBOX, strongbox);
+      PRESENT_MODEL_MAP.put(ModBlocks.LIVING_STRONGBOX, livingStrongbox);
    }
 
    @Nonnull
@@ -142,25 +151,23 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       Direction dir = flag ? (Direction)blockState.getValue(ChestBlock.FACING) : Direction.SOUTH;
       float hAngle = dir.toYRot();
       NeighborCombineResult<? extends ChestBlockEntity> lidCallback = Combiner::acceptNone;
-      float lidRotation = ((Float2FloatFunction)lidCallback.apply(ScavengerChestBlock.opennessCombiner(tileEntity))).get(partialTicks);
+      float lidRotation = ((Float2FloatFunction)lidCallback.apply(ChestBlock.opennessCombiner(tileEntity))).get(partialTicks);
       lidRotation = 1.0F - lidRotation;
       lidRotation = 1.0F - lidRotation * lidRotation * lidRotation;
-      if (blockState.getBlock() != ModBlocks.SCAVENGER_CHEST) {
-         model.setLidAngle(lidRotation);
-         VaultChestBlock.Variant variant = (VaultChestBlock.Variant)blockState.getValue(VaultChestBlock.VARIANT);
-         if (variant == VaultChestBlock.Variant.PRESENT) {
-            model.setLidAngle(-lidRotation);
-         }
-
-         int combinedLidLight = ((Int2IntFunction)lidCallback.apply(new BrightnessCombiner())).applyAsInt(combinedLight);
-         Material material = this.getMaterial(tileEntity, null);
-         VertexConsumer vb = material.buffer(buffer, RenderType::entityCutout);
-         matrixStack.pushPose();
-         matrixStack.translate(0.5, 0.5, 0.5);
-         matrixStack.mulPose(Vector3f.YP.rotationDegrees(-hAngle));
-         matrixStack.translate(-0.5, -0.5, -0.5);
-         model.renderToBuffer(matrixStack, vb, combinedLidLight, combinedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
-         matrixStack.popPose();
+      model.setLidAngle(lidRotation);
+      VaultChestBlock.Variant variant = (VaultChestBlock.Variant)blockState.getValue(VaultChestBlock.VARIANT);
+      if (variant == VaultChestBlock.Variant.PRESENT) {
+         model.setLidAngle(-lidRotation);
       }
+
+      int combinedLidLight = ((Int2IntFunction)lidCallback.apply(new BrightnessCombiner())).applyAsInt(combinedLight);
+      Material material = this.getMaterial(tileEntity, null);
+      VertexConsumer vb = material.buffer(buffer, RenderType::entityCutout);
+      matrixStack.pushPose();
+      matrixStack.translate(0.5, 0.5, 0.5);
+      matrixStack.mulPose(Vector3f.YP.rotationDegrees(-hAngle));
+      matrixStack.translate(-0.5, -0.5, -0.5);
+      model.renderToBuffer(matrixStack, vb, combinedLidLight, combinedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
+      matrixStack.popPose();
    }
 }

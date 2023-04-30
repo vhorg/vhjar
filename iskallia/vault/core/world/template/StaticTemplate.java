@@ -1,10 +1,11 @@
 package iskallia.vault.core.world.template;
 
+import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.core.world.data.PartialEntity;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.function.Predicate;
 import net.minecraft.resources.ResourceLocation;
 
 public class StaticTemplate extends Template {
@@ -44,12 +45,12 @@ public class StaticTemplate extends Template {
    }
 
    @Override
-   public Iterator<PartialTile> getTiles(Predicate<PartialTile> filter, PlacementSettings settings) {
+   public Iterator<PartialTile> getTiles(TilePredicate filter, PlacementSettings settings) {
       return this.tiles.iterator();
    }
 
    @Override
-   public Iterator<PartialEntity> getEntities(Predicate<PartialEntity> filter, PlacementSettings settings) {
+   public Iterator<PartialEntity> getEntities(EntityPredicate filter, PlacementSettings settings) {
       return this.entities.iterator();
    }
 }

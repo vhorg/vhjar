@@ -20,8 +20,6 @@ public class VaultAltarConfig extends Config {
    @Expose
    public int INFUSION_TIME;
    @Expose
-   public float LUCKY_ALTAR_CHANCE;
-   @Expose
    public int GROUP_DISPLAY_TICKS;
 
    @Override
@@ -35,7 +33,6 @@ public class VaultAltarConfig extends Config {
       this.PLAYER_RANGE_CHECK = 32.0;
       this.ITEM_RANGE_CHECK = 8.0;
       this.INFUSION_TIME = 5;
-      this.LUCKY_ALTAR_CHANCE = 0.1F;
       this.GROUP_DISPLAY_TICKS = 20;
    }
 

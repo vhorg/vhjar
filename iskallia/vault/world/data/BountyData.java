@@ -10,6 +10,9 @@ import iskallia.vault.bounty.task.properties.TaskProperties;
 import iskallia.vault.config.bounty.task.TaskConfig;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.BountyHunterExpertise;
+import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.util.nbt.NBTHelper;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -41,6 +44,13 @@ public class BountyData extends SavedData {
    private final HashMap<UUID, BountyList> available = new HashMap<>();
    private final HashMap<UUID, BountyList> complete = new HashMap<>();
    private final HashMap<UUID, BountyList> legendary = new HashMap<>();
+
+   public BountyData() {
+      CommonEvents.ENTITY_DROPS.register(this, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.CHEST_LOOT_GENERATION.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.COIN_STACK_LOOT_GENERATION.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
+   }
 
    private Optional<Bounty> getActiveFor(UUID playerId, UUID bountyId) {
       return !this.active.containsKey(playerId) ? Optional.empty() : this.active.get(playerId).findById(bountyId);
@@ -169,10 +179,21 @@ public class BountyData extends SavedData {
       return list;
    }
 
-   public void setActive(UUID playerId, UUID bountyId) {
-      BountyList active = this.getAllActiveFor(playerId);
-      if (active.size() <= 0) {
-         BountyList available = this.getAllAvailableFor(playerId);
+   public void setActive(ServerPlayer player, UUID bountyId) {
+      BountyList active = this.getAllActiveFor(player.getUUID());
+      ExpertiseTree expertises = PlayerExpertisesData.get(player.getLevel()).getExpertises(player);
+      int maxActive = 0;
+
+      for (BountyHunterExpertise expertise : expertises.getAll(BountyHunterExpertise.class, Skill::isUnlocked)) {
+         maxActive += expertise.getMaxActive();
+      }
+
+      if (maxActive == 0) {
+         maxActive = 1;
+      }
+
+      if (active.size() < maxActive) {
+         BountyList available = this.getAllAvailableFor(player.getUUID());
          Optional<Bounty> bountyOptional = available.findById(bountyId);
          if (!bountyOptional.isEmpty()) {
             if (available.removeById(bountyId)) {
@@ -183,7 +204,8 @@ public class BountyData extends SavedData {
       }
    }
 
-   public void abandon(UUID playerId, UUID bountyId) {
+   public void abandon(ServerPlayer player, UUID bountyId) {
+      UUID playerId = player.getUUID();
       Optional<Bounty> legendaryBounty = this.getLegendaryFor(playerId, bountyId);
       if (legendaryBounty.isPresent()) {
          this.getAllLegendaryFor(playerId).removeById(bountyId);
@@ -191,8 +213,19 @@ public class BountyData extends SavedData {
       } else {
          Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
          if (!activeBounty.isEmpty()) {
+            ExpertiseTree expertises = PlayerExpertisesData.get(player.getLevel()).getExpertises(player);
+            float abandonedPenaltyReduction = 0.0F;
+
+            for (BountyHunterExpertise expertise : expertises.getAll(BountyHunterExpertise.class, Skill::isUnlocked)) {
+               abandonedPenaltyReduction += expertise.getAbandonedPenaltyReduction();
+            }
+
             Bounty active = activeBounty.get();
-            active.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltySeconds(), ChronoUnit.SECONDS).toEpochMilli());
+            active.setExpiration(
+               Instant.now()
+                  .plus((long)((float)ModConfigs.BOUNTY_CONFIG.getAbandonedPenaltySeconds() * (1.0F - abandonedPenaltyReduction)), ChronoUnit.SECONDS)
+                  .toEpochMilli()
+            );
             this.getAllActiveFor(playerId).removeById(bountyId);
             this.getAllCompletedFor(playerId).add(active);
             this.setDirty();
@@ -210,8 +243,17 @@ public class BountyData extends SavedData {
       } else {
          Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
          if (!activeBounty.isEmpty()) {
+            ExpertiseTree expertises = PlayerExpertisesData.get(player.getLevel()).getExpertises(player);
+            int waitingPeriodReduction = 0;
+
+            for (BountyHunterExpertise expertise : expertises.getAll(BountyHunterExpertise.class, Skill::isUnlocked)) {
+               waitingPeriodReduction += expertise.getWaitingPeriodReduction();
+            }
+
             Bounty active = activeBounty.get();
-            active.setExpiration(Instant.now().plus(ModConfigs.BOUNTY_CONFIG.getWaitingPeriodSeconds(), ChronoUnit.SECONDS).toEpochMilli());
+            active.setExpiration(
+               Instant.now().plus(Math.max(ModConfigs.BOUNTY_CONFIG.getWaitingPeriodSeconds() - waitingPeriodReduction, 0L), ChronoUnit.SECONDS).toEpochMilli()
+            );
             this.getAllActiveFor(playerId).removeById(bountyId);
             this.getAllCompletedFor(playerId).add(active);
             active.getTask().getTaskReward().apply(player);
@@ -250,10 +292,6 @@ public class BountyData extends SavedData {
 
    public static BountyData create(CompoundTag nbt) {
       BountyData data = new BountyData();
-      CommonEvents.ENTITY_DROPS.register(data, ItemDiscoveryTask::onLootGeneration, -1);
-      CommonEvents.CHEST_LOOT_GENERATION.post().register(data, ItemDiscoveryTask::onLootGeneration, -1);
-      CommonEvents.COIN_STACK_LOOT_GENERATION.post().register(data, ItemDiscoveryTask::onLootGeneration, -1);
-      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.post().register(data, ItemDiscoveryTask::onLootGeneration, -1);
       data.load(nbt);
       return data;
    }

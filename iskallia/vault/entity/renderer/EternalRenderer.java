@@ -5,7 +5,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import iskallia.vault.VaultMod;
-import iskallia.vault.client.gui.overlay.ArenaScoreboardOverlay;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.model.EternalModel;
 import iskallia.vault.entity.model.ModModelLayers;
@@ -96,10 +95,6 @@ public class EternalRenderer extends LivingEntityRenderer<EternalEntity, Eternal
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
       this.setModelVisibilities(entity);
       String nickname = entity.getDisplayName().getString();
-      if (nickname.equals(ArenaScoreboardOverlay.scoreboard.getMVP())) {
-         this.renderCrown(entity, matrixStack, buffer);
-      }
-
       super.render(entity, entityYaw, partialTicks, matrixStack, buffer, packedLightIn);
    }
 

@@ -3,6 +3,7 @@ package iskallia.vault.item;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import iskallia.vault.block.entity.DemagnetizerTileEntity;
+import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
@@ -12,9 +13,13 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.CuriosGearItem;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
+import iskallia.vault.gear.trinket.TrinketHelper;
+import iskallia.vault.gear.trinket.effects.EnderAnchorTrinket;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.init.ModParticles;
 import iskallia.vault.util.SidedHelper;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,10 +30,13 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nonnull;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -73,6 +81,7 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
    public static final String SLOT = "belt";
    public static final String BLACKLIST = "PreventMagnetMovement";
    public static final String PULLED = "MagnetPulled";
+   private static final String SWITCHED_OFF_TAG = "SwitchedOff";
    public static final Set<String> LEGACY_KEYS = new HashSet<>(
       Arrays.asList("Perk", "PerkPower", "UsedRepairs", "Durability", "Range", "Velocity", "ManaEfficiency", "SturdinessDamage")
    );
@@ -158,6 +167,11 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
       }
    }
 
+   @Override
+   public VaultRecyclerConfig.RecyclerOutput getOutput(ItemStack input) {
+      return ModConfigs.VAULT_RECYCLER.getMagnetRecyclingOutput();
+   }
+
    @SubscribeEvent
    public static void onPlayerTick(PlayerTickEvent event) {
       if (event.phase == Phase.START) {
@@ -179,6 +193,12 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
                            player.getBoundingBox().inflate(range),
                            entity -> entity.distanceToSqr(player) <= range * range && !entity.getTags().contains("PreventMagnetMovement")
                         );
+                        TrinketHelper.getTrinkets(player, EnderAnchorTrinket.class).forEach(enderTrinket -> {
+                           if (enderTrinket.isUsable(player)) {
+                              teleportToPlayer(player, items);
+                              teleportToPlayer(player, orbs);
+                           }
+                        });
                         moveToPlayer(player, items, speed);
                         moveToPlayer(player, orbs, speed);
                      }
@@ -190,7 +210,7 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
 
    public static void moveToPlayer(Player player, List<? extends Entity> entities, float speed) {
       for (Entity entity : entities) {
-         if (entity instanceof ItemEntity item) {
+         if (entity instanceof ItemEntity item && allowsNoPickupDelay(item, player)) {
             item.setNoPickUpDelay();
          }
 
@@ -198,6 +218,38 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
          entity.push(velocity.x, velocity.y, velocity.z);
          entity.hurtMarked = true;
          entity.getTags().add("MagnetPulled");
+      }
+   }
+
+   public static void teleportToPlayer(Player player, List<? extends Entity> entities) {
+      for (Entity entity : entities) {
+         if (entity instanceof ItemEntity item && allowsNoPickupDelay(item, player)) {
+            item.setNoPickUpDelay();
+         }
+
+         if (player.level instanceof ServerLevel serverLevel) {
+            serverLevel.sendParticles(
+               (SimpleParticleType)ModParticles.ENDER_ANCHOR.get(), entity.position().x, entity.position().y + 0.25, entity.position().z, 1, 0.0, 0.0, 0.0, 0.0
+            );
+         }
+
+         entity.teleportTo(player.position().x, player.position().y, player.position().z);
+         entity.hurtMarked = true;
+         entity.getTags().add("MagnetPulled");
+      }
+   }
+
+   private static boolean allowsNoPickupDelay(ItemEntity itemEntity, Player player) {
+      if (itemEntity.getThrower() != null && !itemEntity.getThrower().equals(player.getUUID())) {
+         for (Player otherPlayer : player.getLevel().players()) {
+            if (!otherPlayer.getUUID().equals(player.getUUID()) && otherPlayer.getBoundingBox().inflate(1.0).intersects(itemEntity.getBoundingBox())) {
+               return false;
+            }
+         }
+
+         return true;
+      } else {
+         return true;
       }
    }
 
@@ -250,11 +302,44 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
       }
    }
 
+   public static void toggleMagnet(Player player) {
+      getMagnet(player, false)
+         .ifPresent(
+            stack -> {
+               if (stack.hasTag() && stack.getTag().contains("SwitchedOff")) {
+                  stack.getTag().remove("SwitchedOff");
+                  player.displayClientMessage(
+                     new TranslatableComponent(
+                        "message.the_vault.magnet_toggled", new Object[]{new TranslatableComponent("message.the_vault.on").withStyle(ChatFormatting.GREEN)}
+                     ),
+                     true
+                  );
+               } else {
+                  stack.getOrCreateTag().putBoolean("SwitchedOff", true);
+                  player.displayClientMessage(
+                     new TranslatableComponent(
+                        "message.the_vault.magnet_toggled", new Object[]{new TranslatableComponent("message.the_vault.off").withStyle(ChatFormatting.RED)}
+                     ),
+                     true
+                  );
+               }
+            }
+         );
+   }
+
+   private static boolean isSwitchedOn(ItemStack magnet) {
+      return !magnet.hasTag() || !magnet.getTag().contains("SwitchedOff");
+   }
+
    public static Optional<ItemStack> getMagnet(LivingEntity entity) {
+      return getMagnet(entity, true);
+   }
+
+   public static Optional<ItemStack> getMagnet(LivingEntity entity, boolean switchedOnOnly) {
       return CuriosApi.getCuriosHelper().getCuriosHandler(entity).map(handler -> handler).flatMap(handler -> handler.getStacksHandler("belt")).map(handler -> {
          for (int i = 0; i < handler.getSlots(); i++) {
             ItemStack stack = handler.getStacks().getStackInSlot(i);
-            if (stack.getItem() == ModItems.MAGNET && !isLegacy(stack)) {
+            if (stack.getItem() == ModItems.MAGNET && !isLegacy(stack) && (!switchedOnOnly || isSwitchedOn(stack))) {
                return stack;
             }
          }

@@ -139,7 +139,7 @@ public class VaultPortalSize {
    }
 
    private static boolean canConnect(BlockState state) {
-      return state.isAir() || state.is(ModBlocks.VAULT_PORTAL) || state.is(ModBlocks.OTHER_SIDE_PORTAL);
+      return state.isAir() || state.is(ModBlocks.VAULT_PORTAL);
    }
 
    @Nullable
@@ -234,7 +234,7 @@ public class VaultPortalSize {
                return i;
             }
 
-            if (blockstate.is(ModBlocks.VAULT_PORTAL) || blockstate.is(ModBlocks.OTHER_SIDE_PORTAL)) {
+            if (blockstate.is(ModBlocks.VAULT_PORTAL)) {
                this.portalBlockCount++;
             }
          }

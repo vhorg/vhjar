@@ -2,7 +2,6 @@ package iskallia.vault.entity.entity;
 
 import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
 import iskallia.vault.container.inventory.EtchingTradeContainer;
-import iskallia.vault.world.data.ServerVaults;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -72,9 +71,7 @@ public class EtchingVendorEntity extends Mob {
    }
 
    public boolean isValid() {
-      if (!ServerVaults.isVaultWorld(this.level)) {
-         return false;
-      } else if (!this.level.isAreaLoaded(this.getVendorPos(), 1)) {
+      if (!this.level.isAreaLoaded(this.getVendorPos(), 1)) {
          return false;
       } else if (this.distanceToSqr(Vec3.atCenterOf(this.getVendorPos())) > 4.0) {
          return false;

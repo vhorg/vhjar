@@ -5,17 +5,19 @@ import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.platform.InputConstants.Type;
 import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.gui.screen.AbilitySelectionScreen;
+import iskallia.vault.client.gui.screen.quest.QuestOverviewElementScreen;
 import iskallia.vault.init.ModKeybinds;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
+import iskallia.vault.network.message.AngelToggleMessage;
 import iskallia.vault.network.message.ServerboundAbilityKeyMessage;
+import iskallia.vault.network.message.ServerboundMagnetToggleMessage;
 import iskallia.vault.network.message.ServerboundOpenStatisticsMessage;
 import iskallia.vault.network.message.ServerboundPickaxeOffsetKeyMessage;
 import iskallia.vault.network.message.ToolMessage;
 import iskallia.vault.network.message.bounty.ServerboundBountyProgressMessage;
-import iskallia.vault.skill.ability.KeyBehavior;
-import iskallia.vault.skill.ability.effect.spi.core.AbstractAbility;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.ability.effect.spi.core.HoldAbility;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Map.Entry;
@@ -120,6 +122,12 @@ public class InputEvents {
                      ModNetwork.CHANNEL.sendToServer(ServerboundOpenStatisticsMessage.INSTANCE);
                   } else if (ModKeybinds.bountyStatusKey.isActiveAndMatches(key)) {
                      ModNetwork.CHANNEL.sendToServer(ServerboundBountyProgressMessage.INSTANCE);
+                  } else if (ModKeybinds.angelToggleKey.isActiveAndMatches(key)) {
+                     ModNetwork.CHANNEL.sendToServer(AngelToggleMessage.INSTANCE);
+                  } else if (ModKeybinds.magnetToggleKey.isActiveAndMatches(key)) {
+                     ModNetwork.CHANNEL.sendToServer(ServerboundMagnetToggleMessage.INSTANCE);
+                  } else if (ModKeybinds.openQuestScreen.isActiveAndMatches(key)) {
+                     Minecraft.getInstance().setScreen(new QuestOverviewElementScreen());
                   }
                }
             }
@@ -139,18 +147,15 @@ public class InputEvents {
    }
 
    private static void checkAndReleaseHoldAbility(Key key) {
-      AbilityGroup<?, ?> selectedAbility = ClientAbilityData.getSelectedAbility();
-      if (selectedAbility != null) {
-         AbstractAbility<?> ability = selectedAbility.getAbility(null);
-         if (ability != null && ability.getKeyBehavior() == KeyBehavior.ACTIVATE_ON_HOLD && ClientAbilityData.isActive(selectedAbility.getParentName())) {
-            if (!ModKeybinds.abilityKey.getKeyModifier().matches(key) && !ModKeybinds.abilityKey.getKey().equals(key)) {
-               KeyMapping keyMapping = ModKeybinds.abilityQuickfireKey.get(selectedAbility.getParentName());
-               if (keyMapping != null && (keyMapping.getKeyModifier().matches(key) || keyMapping.getKey().equals(key))) {
-                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
-               }
-            } else {
+      Ability ability = ClientAbilityData.getSelectedAbility();
+      if (ability instanceof HoldAbility && ability.isActive()) {
+         if (!ModKeybinds.abilityKey.getKeyModifier().matches(key) && !ModKeybinds.abilityKey.getKey().equals(key)) {
+            KeyMapping keyMapping = ModKeybinds.abilityQuickfireKey.get(ability.getParent().getParent().getId());
+            if (keyMapping != null && (keyMapping.getKeyModifier().matches(key) || keyMapping.getKey().equals(key))) {
                ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
             }
+         } else {
+            ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
          }
       }
    }

@@ -13,6 +13,7 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -90,53 +91,79 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    @OnlyIn(Dist.CLIENT)
    @Override
    public Optional<MutableComponent> getDisplay(VaultGearData data, VaultGearModifier.AffixType type, ItemStack stack, boolean displayDetail) {
-      return super.getDisplay(data, type, stack, displayDetail).map(this.category.getModifierFormatter()).map(displayText -> {
-         if (!this.hasGameTimeAdded()) {
-            return (MutableComponent)displayText;
-         } else {
-            int showDuration = 600;
-            long added = this.getGameTimeAdded();
-            Level currentWorld = Minecraft.getInstance().level;
-            if (currentWorld != null && currentWorld.getGameTime() - added <= showDuration) {
-               displayText.append(new TextComponent(" [new]").withStyle(ChatFormatting.GOLD));
+      return super.getDisplay(data, type, stack, displayDetail)
+         .map(this.category.getModifierFormatter())
+         .map(displayText -> {
+            if (!this.hasGameTimeAdded()) {
                return (MutableComponent)displayText;
             } else {
-               return (MutableComponent)displayText;
+               int showDuration = 600;
+               long added = this.getGameTimeAdded();
+               Level currentWorld = Minecraft.getInstance().level;
+               if (currentWorld != null && currentWorld.getGameTime() - added <= showDuration) {
+                  displayText.append(new TextComponent(" [new]").withStyle(ChatFormatting.GOLD));
+                  return (MutableComponent)displayText;
+               } else {
+                  return (MutableComponent)displayText;
+               }
             }
-         }
-      }).map(displayText -> {
-         if (!displayDetail) {
-            return (MutableComponent)displayText;
-         } else {
-            MutableComponent tierDisplay = this.getConfigRangeDisplay(stack).orElse(new TextComponent(""));
-            Style txtStyle = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false).withUnderlined(false).withBold(false);
-            String categoryInfo = this.getCategory().getTooltipDescriptor();
-            if (tierDisplay.getString().isEmpty()) {
-               displayText.append(new TextComponent(" (%sT%s)".formatted(categoryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
-            } else {
-               displayText.append(new TextComponent(" (%sT%s: ".formatted(categoryInfo, this.getRolledTier() + 1)).setStyle(txtStyle));
-               displayText.append(tierDisplay.setStyle(txtStyle));
-               displayText.append(new TextComponent(")").setStyle(txtStyle));
+         })
+         .map(
+            displayText -> {
+               if (!displayDetail) {
+                  return (MutableComponent)displayText;
+               } else {
+                  Style txtStyle = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false).withUnderlined(false).withBold(false);
+                  String categoryInfo = this.getCategory().getTooltipDescriptor();
+                  VaultGearTierConfig.ModifierConfigRange configRange = VaultGearTierConfig.getConfig(stack.getItem())
+                     .map(tierCfg -> tierCfg.getTierConfigRange(this, data.getItemLevel()))
+                     .orElse(VaultGearTierConfig.ModifierConfigRange.empty());
+                  ConfigurableAttributeGenerator attributeGenerator = this.getAttribute().getGenerator();
+                  MutableComponent cmpRangeDescriptor = new TextComponent(categoryInfo);
+                  if (configRange.minAvailableConfig() != null && configRange.maxAvailableConfig() != null) {
+                     MutableComponent minMaxRangeCmp = attributeGenerator.getConfigRangeDisplay(
+                        this.getAttribute().getReader(), configRange.minAvailableConfig(), configRange.maxAvailableConfig()
+                     );
+                     if (minMaxRangeCmp != null) {
+                        if (!cmpRangeDescriptor.getString().isBlank()) {
+                           cmpRangeDescriptor.append(" ");
+                        }
+
+                        cmpRangeDescriptor.append(minMaxRangeCmp);
+                        if (Screen.hasAltDown()) {
+                           cmpRangeDescriptor.append(",");
+                        }
+                     }
+                  }
+
+                  if (Screen.hasAltDown()) {
+                     if (!cmpRangeDescriptor.getString().isBlank()) {
+                        cmpRangeDescriptor.append(" ");
+                     }
+
+                     if (configRange.tierConfig() != null) {
+                        MutableComponent rangeCmp = attributeGenerator.getConfigRangeDisplay(this.getAttribute().getReader(), configRange.tierConfig());
+                        if (rangeCmp != null) {
+                           cmpRangeDescriptor.append("T%s: ".formatted(this.getRolledTier() + 1));
+                           cmpRangeDescriptor.append(rangeCmp);
+                        }
+                     } else {
+                        cmpRangeDescriptor.append("T%s".formatted(this.getRolledTier() + 1));
+                     }
+                  }
+
+                  if (!cmpRangeDescriptor.getString().isBlank()) {
+                     displayText.append(new TextComponent(" ").withStyle(txtStyle).append("(").append(cmpRangeDescriptor).append(")"));
+                  }
+
+                  return (MutableComponent)displayText;
+               }
             }
-
-            return (MutableComponent)displayText;
-         }
-      });
-   }
-
-   public <V> Optional<V> withModifierConfig(ItemStack stack, Function<Object, V> configFn) {
-      return VaultGearTierConfig.getConfig(stack.getItem()).map(tierCfg -> tierCfg.getTierConfig(this)).map(configFn);
-   }
-
-   public Optional<MutableComponent> getConfigRangeDisplay(ItemStack stack) {
-      return this.withModifierConfig(stack, cfg -> {
-         ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
-         return configGen.getConfigRangeDisplay(this.getAttribute().getReader(), cfg);
-      });
+         );
    }
 
    public Optional<MutableComponent> getConfigDisplay(ItemStack stack) {
-      return this.withModifierConfig(stack, cfg -> {
+      return VaultGearTierConfig.getConfig(stack.getItem()).map(tierCfg -> tierCfg.getTierConfig(this)).map(cfg -> {
          ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
          return configGen.getConfigDisplay(this.getAttribute().getReader(), cfg);
       });
@@ -215,7 +242,7 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
       }
 
       private AffixCategory(String descriptor, Function<MutableComponent, MutableComponent> modifierFormatter) {
-         this.descriptor = descriptor.isEmpty() ? descriptor : descriptor + " ";
+         this.descriptor = descriptor;
          this.modifierFormatter = modifierFormatter;
       }
 

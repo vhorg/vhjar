@@ -7,7 +7,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "the_vault:chromatic_slab"
+          "name": "the_vault:chromatic_stairs"
         }
       ],
       "conditions": [

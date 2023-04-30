@@ -1,6 +1,6 @@
 package iskallia.vault.core.data.key;
 
-import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
 import net.minecraft.resources.ResourceLocation;
 
 public class VaultModifiersKey extends NamedKey<VaultModifiersKey, VaultModifierRegistry> {

@@ -229,7 +229,7 @@ public class PlayerEvents {
 
    @SubscribeEvent
    public static void onPlayerEnterVault(PlayerChangedDimensionEvent event) {
-      if (ServerVaults.isVaultWorld(event.getTo()) && event.getPlayer() instanceof ServerPlayer serverPlayer) {
+      if (event.getPlayer() instanceof ServerPlayer serverPlayer && ServerVaults.get(serverPlayer.level).isPresent()) {
          AdvancementHelper.grantCriterion(serverPlayer, VaultMod.id("main/root"), "entered_vault");
          AdvancementHelper.grantCriterion(serverPlayer, VaultMod.id("armors/root"), "entered_vault");
       }
@@ -244,7 +244,7 @@ public class PlayerEvents {
          ItemStack stack = itemEntity.getItem();
          if (!stack.isEmpty()) {
             ServerLevel world = player.getLevel();
-            if (ServerVaults.isVaultWorld(world)) {
+            if (!ServerVaults.get(world).isEmpty()) {
                if (hasVaultCharm(player.getInventory())) {
                   List<ResourceLocation> whitelist = VaultCharmData.get(world).getWhitelistedItems(player);
                   if (whitelist.contains(stack.getItem().getRegistryName())) {
@@ -299,7 +299,7 @@ public class PlayerEvents {
       priority = EventPriority.LOWEST
    )
    public static void onPlayerDrops(LivingDropsEvent event) {
-      if (event.getEntity() instanceof Player player && ServerVaults.isInVault(player)) {
+      if (event.getEntity() instanceof Player player && ServerVaults.get(player.level).isPresent()) {
          event.setCanceled(true);
       }
    }

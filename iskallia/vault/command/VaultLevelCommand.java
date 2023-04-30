@@ -4,9 +4,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import iskallia.vault.world.data.PlayerAbilitiesData;
-import iskallia.vault.world.data.PlayerResearchesData;
-import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -32,7 +29,8 @@ public class VaultLevelCommand extends Command {
    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
       builder.then(Commands.literal("add_exp").then(Commands.argument("exp", IntegerArgumentType.integer()).executes(this::addExp)));
       builder.then(Commands.literal("set_level").then(Commands.argument("level", IntegerArgumentType.integer()).executes(this::setLevel)));
-      builder.then(Commands.literal("reset_all").executes(this::resetAll));
+      builder.then(Commands.literal("add_skill_points").then(Commands.argument("amount", IntegerArgumentType.integer()).executes(this::addSkillPoints)));
+      builder.then(Commands.literal("add_expertise_points").then(Commands.argument("amount", IntegerArgumentType.integer()).executes(this::addExpertisePoints)));
    }
 
    private int setLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -51,12 +49,17 @@ public class VaultLevelCommand extends Command {
       return 0;
    }
 
-   private int resetAll(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+   private int addSkillPoints(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       CommandSourceStack source = (CommandSourceStack)context.getSource();
-      PlayerVaultStatsData.get(source.getLevel()).reset(source.getPlayerOrException());
-      PlayerAbilitiesData.get(source.getLevel()).resetAbilityTree(source.getPlayerOrException());
-      PlayerTalentsData.get(source.getLevel()).resetTalentTree(source.getPlayerOrException());
-      PlayerResearchesData.get(source.getLevel()).resetResearchTree(source.getPlayerOrException());
+      int amount = IntegerArgumentType.getInteger(context, "amount");
+      PlayerVaultStatsData.get(source.getLevel()).addSkillPoints(source.getPlayerOrException(), amount);
+      return 0;
+   }
+
+   private int addExpertisePoints(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      CommandSourceStack source = (CommandSourceStack)context.getSource();
+      int amount = IntegerArgumentType.getInteger(context, "amount");
+      PlayerVaultStatsData.get(source.getLevel()).addExpertisePoints(source.getPlayerOrException(), amount);
       return 0;
    }
 }

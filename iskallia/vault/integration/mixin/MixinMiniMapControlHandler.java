@@ -1,6 +1,6 @@
 package iskallia.vault.integration.mixin;
 
-import iskallia.vault.util.MiscUtils;
+import iskallia.vault.core.vault.ClientVaults;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -22,7 +22,7 @@ public class MixinMiniMapControlHandler {
    public void exitIfInVault(KeyMapping kb, boolean tickEnd, boolean isRepeat, CallbackInfo ci) {
       LocalPlayer player = Minecraft.getInstance().player;
       if (player != null
-         && MiscUtils.getVault(player).isPresent()
+         && ClientVaults.getActive().isPresent()
          && (kb == ModSettings.keyBindZoom || kb == ModSettings.keyBindZoom1 || kb == ModSettings.keyLargeMap)) {
          ci.cancel();
       }

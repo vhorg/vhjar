@@ -11,6 +11,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class VaultChestBlock extends ChestBlock {
    public static final EnumProperty<VaultChestBlock.Variant> VARIANT = EnumProperty.create("variant", VaultChestBlock.Variant.class);
@@ -58,6 +61,14 @@ public class VaultChestBlock extends ChestBlock {
 
    public boolean hasStepBreaking() {
       return this == ModBlocks.GILDED_CHEST || this == ModBlocks.LIVING_CHEST || this == ModBlocks.ORNATE_CHEST;
+   }
+
+   public boolean isStrongbox() {
+      return this == ModBlocks.ORNATE_STRONGBOX || this == ModBlocks.GILDED_STRONGBOX || this == ModBlocks.LIVING_STRONGBOX;
+   }
+
+   public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+      return this.isStrongbox() && !pPlayer.isCreative() ? InteractionResult.FAIL : super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
    }
 
    @Nullable
@@ -115,6 +126,9 @@ public class VaultChestBlock extends ChestBlock {
                || state.getBlock() == ModBlocks.ORNATE_CHEST_PLACEABLE
                || state.getBlock() == ModBlocks.TREASURE_CHEST_PLACEABLE
                || state.getBlock() == ModBlocks.WOODEN_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.ORNATE_STRONGBOX
+               || state.getBlock() == ModBlocks.GILDED_STRONGBOX
+               || state.getBlock() == ModBlocks.LIVING_STRONGBOX
          )
          && level.getBlockEntity(pos) instanceof VaultChestTileEntity te) {
          return new MenuProvider() {

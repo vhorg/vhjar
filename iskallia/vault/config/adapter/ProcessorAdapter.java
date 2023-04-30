@@ -1,5 +1,6 @@
 package iskallia.vault.config.adapter;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -7,20 +8,20 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.mojang.brigadier.StringReader;
 import iskallia.vault.block.PlaceholderBlock;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TileParser;
-import iskallia.vault.core.world.data.TilePredicate;
+import iskallia.vault.core.util.WeightedList;
+import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.processor.Processor;
 import iskallia.vault.core.world.processor.entity.EntityProcessor;
 import iskallia.vault.core.world.processor.tile.BernoulliWeightedTileProcessor;
 import iskallia.vault.core.world.processor.tile.LeveledTileProcessor;
 import iskallia.vault.core.world.processor.tile.ReferenceTileProcessor;
+import iskallia.vault.core.world.processor.tile.SpawnerTileProcessor;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
 import iskallia.vault.core.world.processor.tile.VaultLootTileProcessor;
 import iskallia.vault.core.world.processor.tile.WeightedTileProcessor;
-import iskallia.vault.init.ModBlocks;
 import java.lang.reflect.Type;
 import net.minecraft.resources.ResourceLocation;
 
@@ -52,7 +53,7 @@ public class ProcessorAdapter implements JsonSerializer<Processor<?>>, JsonDeser
             case "bernoulli_weighted_target":
                BernoulliWeightedTileProcessor processor = new BernoulliWeightedTileProcessor();
                if (object.has("target")) {
-                  processor.target = TilePredicate.of(object.get("target").getAsString());
+                  processor.target = TilePredicate.of(object.get("target").getAsString(), true).orElse(TilePredicate.FALSE);
                }
 
                processor.probability = object.get("probability").getAsDouble();
@@ -60,15 +61,15 @@ public class ProcessorAdapter implements JsonSerializer<Processor<?>>, JsonDeser
                JsonObject failure = object.get("failure").getAsJsonObject();
                if (success != null) {
                   success.keySet().forEach(key -> {
-                     PartialTile tile = new TileParser(new StringReader(key), ModBlocks.ERROR_BLOCK, false).toTile();
-                     processor.success.put(tile, success.get(key).getAsInt());
+                     PartialTile tile = PartialTile.parse(key, true).orElse(PartialTile.ERROR);
+                     processor.success.put(tile, (Number)success.get(key).getAsInt());
                   });
                }
 
                if (failure != null) {
                   failure.keySet().forEach(key -> {
-                     PartialTile tile = new TileParser(new StringReader(key), ModBlocks.ERROR_BLOCK, false).toTile();
-                     processor.failure.put(tile, failure.get(key).getAsInt());
+                     PartialTile tile = PartialTile.parse(key, true).orElse(PartialTile.ERROR);
+                     processor.failure.put(tile, (Number)failure.get(key).getAsInt());
                   });
                }
 
@@ -88,6 +89,25 @@ public class ProcessorAdapter implements JsonSerializer<Processor<?>>, JsonDeser
                for (JsonElement entry : object.get("levels").getAsJsonArray()) {
                   entry.getAsJsonObject().addProperty("type", "bernoulli_weighted_target");
                   processorx.levels.put(entry.getAsJsonObject().get("level").getAsInt(), (TileProcessor)this.deserialize(entry, TileProcessor.class, context));
+               }
+
+               return processorx;
+            case "spawner":
+               SpawnerTileProcessor processorx = new SpawnerTileProcessor();
+               processorx.target(object.get("target").getAsString());
+               JsonArray output = object.get("output").getAsJsonArray();
+               if (output == null) {
+                  return processorx;
+               }
+
+               for (JsonElement e : output) {
+                  WeightedList<PartialEntity> result = new WeightedList<>();
+                  JsonObject element = e.getAsJsonObject();
+                  JsonObject elements = element.get("elements").getAsJsonObject();
+                  int weight = element.get("weight").getAsInt();
+                  elements.keySet()
+                     .forEach(key -> PartialEntity.parse(key, true).ifPresent(entity -> result.put(entity, (Number)elements.get(key).getAsInt())));
+                  processorx.into(result, weight);
                }
 
                return processorx;

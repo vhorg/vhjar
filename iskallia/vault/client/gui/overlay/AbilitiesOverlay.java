@@ -15,8 +15,9 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModShaders;
 import iskallia.vault.init.ModTextureAtlases;
 import iskallia.vault.mana.Mana;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.base.TieredSkill;
 import java.awt.Color;
 import java.util.List;
 import net.minecraft.client.Minecraft;
@@ -147,15 +148,15 @@ public class AbilitiesOverlay implements IIngameOverlay {
       TextureAtlasSprite spriteTraySelectedActive,
       TextureAtlasSprite spriteTraySelectedCooldown
    ) {
-      TextureAtlasSprite spriteAbilityFocused = getAbilityNodeSprite(abilityData.selectAbilityNode, atlas);
-      TextureAtlasSprite spriteAbilityPrevious = getAbilityNodeSprite(abilityData.previousAbilityNode, atlas);
-      TextureAtlasSprite spriteAbilityNext = getAbilityNodeSprite(abilityData.nextAbilityNode, atlas);
-      int selectedCooldown = ClientAbilityData.getCooldown(abilityData.selectedAbilityGroup);
-      int previousCooldown = ClientAbilityData.getCooldown(abilityData.previousAbilityNode.getGroup());
-      int nextCooldown = ClientAbilityData.getCooldown(abilityData.nextAbilityNode.getGroup());
+      TextureAtlasSprite spriteAbilityFocused = getAbilityNodeSprite(abilityData.selectAbilityNode.getParent(), atlas);
+      TextureAtlasSprite spriteAbilityPrevious = getAbilityNodeSprite(abilityData.previousAbilityNode.getParent(), atlas);
+      TextureAtlasSprite spriteAbilityNext = getAbilityNodeSprite(abilityData.nextAbilityNode.getParent(), atlas);
+      int selectedCooldown = abilityData.selectAbilityNode.getRemainingCooldown();
+      int previousCooldown = abilityData.previousAbilityNode.getRemainingCooldown();
+      int nextCooldown = abilityData.nextAbilityNode.getRemainingCooldown();
       renderAbilityCooldowns(
          matrix,
-         abilityData.selectedAbilityGroup,
+         abilityData.selectAbilityNode,
          abilityData.previousAbilityNode,
          abilityData.nextAbilityNode,
          spriteTrayCooldown,
@@ -176,7 +177,7 @@ public class AbilitiesOverlay implements IIngameOverlay {
    ) {
       if (selectedCooldown > 0) {
          BUFFER.add(matrix, 19, 13, 10, spriteTraySelectedCooldown);
-      } else if (ClientAbilityData.isActive(ClientAbilityData.getSelectedAbility().getParentName())) {
+      } else if (ClientAbilityData.getSelectedAbility().isActive()) {
          BUFFER.add(matrix, 19, 13, 10, spriteTraySelectedActive);
       } else {
          BUFFER.add(matrix, 19, 13, 10, spriteTraySelected);
@@ -218,28 +219,28 @@ public class AbilitiesOverlay implements IIngameOverlay {
 
    private static void renderAbilityCooldowns(
       Matrix4f matrix,
-      AbilityGroup<?, ?> selectedAbilityGroup,
-      AbilityNode<?, ?> previousAbilityNode,
-      AbilityNode<?, ?> nextAbilityNode,
+      Ability selectedAbilityGroup,
+      Ability previousAbilityNode,
+      Ability nextAbilityNode,
       TextureAtlasSprite spriteTrayCooldown,
       int selectedCooldown,
       int previousCooldown,
       int nextCooldown
    ) {
       if (selectedCooldown > 0) {
-         int selectedMaxCooldown = ClientAbilityData.getMaxCooldown(selectedAbilityGroup);
+         int selectedMaxCooldown = selectedAbilityGroup.getTotalCooldown();
          int cooldownHeight = getCooldownHeight(selectedCooldown, selectedMaxCooldown);
          BUFFER.add(matrix, 23, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
       }
 
       if (previousCooldown > 0) {
-         int previousMaxCooldown = ClientAbilityData.getMaxCooldown(previousAbilityNode.getGroup());
+         int previousMaxCooldown = previousAbilityNode.getTotalCooldown();
          int cooldownHeight = getCooldownHeight(previousCooldown, previousMaxCooldown);
          BUFFER.add(matrix, 43, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
       }
 
       if (nextCooldown > 0) {
-         int nextMaxCooldown = ClientAbilityData.getMaxCooldown(nextAbilityNode.getGroup());
+         int nextMaxCooldown = nextAbilityNode.getTotalCooldown();
          int cooldownHeight = getCooldownHeight(nextCooldown, nextMaxCooldown);
          BUFFER.add(matrix, 3, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
       }
@@ -345,49 +346,43 @@ public class AbilitiesOverlay implements IIngameOverlay {
       return (int)(16.0F * cooldownPercent);
    }
 
-   private static TextureAtlasSprite getAbilityNodeSprite(AbilityNode<?, ?> node, ITextureAtlas atlas) {
-      String styleKey = node.getSpecialization() != null ? node.getSpecialization() : node.getGroup().getParentName();
+   private static TextureAtlasSprite getAbilityNodeSprite(Skill node, ITextureAtlas atlas) {
+      String styleKey = node.getId();
       return atlas.getSprite(ModConfigs.ABILITIES_GUI.getIcon(styleKey));
    }
 
    public static class AbilityData {
-      private AbilityGroup<?, ?> selectedAbilityGroup;
-      private AbilityNode<?, ?> selectAbilityNode;
-      private AbilityNode<?, ?> previousAbilityNode;
-      private AbilityNode<?, ?> nextAbilityNode;
+      private Ability selectAbilityNode;
+      private Ability previousAbilityNode;
+      private Ability nextAbilityNode;
       public boolean shouldRender;
 
       private void update() {
-         List<AbilityNode<?, ?>> abilities = ClientAbilityData.getLearnedAbilityNodes();
+         List<TieredSkill> abilities = ClientAbilityData.getLearnedAbilities();
          if (abilities.isEmpty()) {
             this.shouldRender = false;
          } else {
-            this.selectedAbilityGroup = ClientAbilityData.getSelectedAbility();
-            if (this.selectedAbilityGroup == null) {
+            this.selectAbilityNode = ClientAbilityData.getSelectedAbility();
+            if (this.selectAbilityNode == null) {
                this.shouldRender = false;
             } else {
-               this.selectAbilityNode = ClientAbilityData.getLearnedAbilityNode(this.selectedAbilityGroup);
-               if (this.selectAbilityNode == null) {
+               int selectedAbilityIndex = ClientAbilityData.getIndexOf(this.selectAbilityNode.getParent().getId());
+               if (selectedAbilityIndex == -1) {
                   this.shouldRender = false;
                } else {
-                  int selectedAbilityIndex = ClientAbilityData.getIndexOf(this.selectedAbilityGroup);
-                  if (selectedAbilityIndex == -1) {
-                     this.shouldRender = false;
-                  } else {
-                     int previousIndex = selectedAbilityIndex - 1;
-                     if (previousIndex < 0) {
-                        previousIndex += abilities.size();
-                     }
-
-                     this.previousAbilityNode = abilities.get(previousIndex);
-                     int nextIndex = selectedAbilityIndex + 1;
-                     if (nextIndex >= abilities.size()) {
-                        nextIndex -= abilities.size();
-                     }
-
-                     this.nextAbilityNode = abilities.get(nextIndex);
-                     this.shouldRender = true;
+                  int previousIndex = selectedAbilityIndex - 1;
+                  if (previousIndex < 0) {
+                     previousIndex += abilities.size();
                   }
+
+                  this.previousAbilityNode = (Ability)abilities.get(previousIndex).getChild();
+                  int nextIndex = selectedAbilityIndex + 1;
+                  if (nextIndex >= abilities.size()) {
+                     nextIndex -= abilities.size();
+                  }
+
+                  this.nextAbilityNode = (Ability)abilities.get(nextIndex).getChild();
+                  this.shouldRender = true;
                }
             }
          }

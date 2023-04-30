@@ -4,7 +4,7 @@ import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.PlaceholderGenerationEvent;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import iskallia.vault.init.ModBlocks;
 import java.util.LinkedHashMap;
@@ -19,17 +19,17 @@ public class VaultLootTileProcessor extends TileProcessor {
    public Map<Integer, TileProcessor> levels = new LinkedHashMap<>();
 
    public PartialTile process(PartialTile tile, ProcessorContext context) {
-      if (tile.getState().getBlock() != ModBlocks.PLACEHOLDER) {
+      if (!tile.getState().is(ModBlocks.PLACEHOLDER)) {
          return tile;
       } else if (tile.getState().get(PlaceholderBlock.TYPE) != this.target) {
          return tile;
       } else {
          Direction facing = tile.getState().get(PlaceholderBlock.FACING);
          if (facing != null && facing.getAxis() != Axis.Y) {
-            tile.getState().with(BlockStateProperties.HORIZONTAL_FACING, facing);
+            tile.getState().set(BlockStateProperties.HORIZONTAL_FACING, facing);
          } else {
             Direction randomFacing = Direction.from2DDataValue(context.random.nextInt(4));
-            tile.getState().with(BlockStateProperties.HORIZONTAL_FACING, randomFacing);
+            tile.getState().set(BlockStateProperties.HORIZONTAL_FACING, randomFacing);
          }
 
          TileProcessor processor = null;

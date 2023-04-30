@@ -9,13 +9,14 @@ import iskallia.vault.core.data.adapter.basic.SerializableAdapter;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.modifier.VaultModifierStack;
+import iskallia.vault.core.vault.modifier.modifier.PlayerInventoryRestoreModifier;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
-import iskallia.vault.world.vault.modifier.VaultModifierStack;
-import iskallia.vault.world.vault.modifier.modifier.PlayerInventoryRestoreModifier;
-import iskallia.vault.world.vault.modifier.registry.VaultModifierRegistry;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
+import iskallia.vault.world.VaultMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -37,7 +38,7 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 
 public class CrystalModifiers implements Iterable<VaultModifierStack>, ISerializable<CompoundTag, JsonObject> {
-   public static final SerializableAdapter<CrystalModifiers, CompoundTag, JsonObject> ADAPTER = new SerializableAdapter(CrystalModifiers::new, false);
+   public static final SerializableAdapter<CrystalModifiers, CompoundTag, JsonObject> ADAPTER = new SerializableAdapter<>(CrystalModifiers::new, false);
    private ArrayList<VaultModifierStack> list = new ArrayList<>();
    private boolean randomModifiers = true;
    private boolean clarity = false;
@@ -65,23 +66,23 @@ public class CrystalModifiers implements Iterable<VaultModifierStack>, ISerializ
    }
 
    public void configure(Vault vault, RandomSource random) {
-      boolean casual = ServerLifecycleHooks.getCurrentServer().getGameRules().getBoolean(ModGameRules.CASUAL_VAULTS);
+      boolean casual = ((VaultMode.GameRuleValue)ServerLifecycleHooks.getCurrentServer().getGameRules().getRule(ModGameRules.MODE)).get() == VaultMode.CASUAL;
 
       for (VaultModifierStack stack : this.list) {
-         vault.ifPresent(Vault.MODIFIERS, m -> m.addPermanentModifier(stack.getModifier(), stack.getSize(), true, random));
+         vault.ifPresent(Vault.MODIFIERS, m -> m.addModifier(stack.getModifier(), stack.getSize(), true, random));
       }
 
       if (casual) {
          VaultModifier<?> modifier = VaultModifierRegistry.getOrDefault(VaultMod.id("casual"), null);
          if (modifier != null) {
-            vault.ifPresent(Vault.MODIFIERS, m -> m.addPermanentModifier(modifier, 1, false, random));
+            vault.ifPresent(Vault.MODIFIERS, m -> m.addModifier(modifier, 1, false, random));
          }
       }
 
       if (this.randomModifiers) {
          for (VaultModifier<?> modifier : ModConfigs.VAULT_MODIFIER_POOLS.getRandom(VaultMod.id("default"), vault.get(Vault.LEVEL).get(), random)) {
             if (!casual || !(modifier instanceof PlayerInventoryRestoreModifier)) {
-               vault.ifPresent(Vault.MODIFIERS, m -> m.addPermanentModifier(modifier, 1, true, random));
+               vault.ifPresent(Vault.MODIFIERS, m -> m.addModifier(modifier, 1, true, random));
             }
          }
       }

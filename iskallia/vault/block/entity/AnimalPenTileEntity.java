@@ -57,6 +57,7 @@ import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ShulkerBoxBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -391,7 +392,10 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
       ItemStack itemInHand = player.getItemInHand(hand).copy();
       ItemStack itemInPen = this.inventory.getItem(0).copy();
       ItemStack blockInPen = this.inventory.getItem(1).copy();
-      if (!player.isCrouching() && blockInPen.isEmpty() && itemInHand.getItem() instanceof BlockItem blockItem) {
+      if (!player.isCrouching()
+         && blockInPen.isEmpty()
+         && itemInHand.getItem() instanceof BlockItem blockItem
+         && !(blockItem.getBlock() instanceof ShulkerBoxBlock)) {
          VoxelShape shape = blockItem.getBlock().getBlockSupportShape(blockItem.getBlock().defaultBlockState(), level, this.getBlockPos());
          if (shape == Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 16.0)) {
             if (level instanceof ServerLevel serverWorld) {

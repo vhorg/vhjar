@@ -5,6 +5,8 @@ import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.VaultPortalSize;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.vault.modifier.VaultModifierStack;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModSounds;
@@ -12,9 +14,8 @@ import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
 import iskallia.vault.item.crystal.model.RawCrystalModel;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.item.tool.IManualModelLoading;
-import iskallia.vault.world.vault.modifier.VaultModifierStack;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,10 +63,12 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
          this.put("addClarity", VaultCrystalItem.AddClarityTask::deserializeNBT);
          this.put("echo", VaultCrystalItem.EchoTask::deserializeNBT);
          this.put("clone", VaultCrystalItem.CloneTask::deserializeNBT);
+         this.put("removeRandomNegativeModifier", VaultCrystalItem.RemoveRandomNegativeModifierTask::deserializeNBT);
          this.put("addRandomCurse", VaultCrystalItem.NoOpTask::deserializeNBT);
          this.put("addRandomCurses", VaultCrystalItem.NoOpTask::deserializeNBT);
       }
    };
+   public static final ResourceLocation NEGATIVE_MODIFIER_POOL_NAME = VaultMod.id("random_negative");
 
    public VaultCrystalItem(CreativeModeTab group, ResourceLocation id) {
       super(new Properties().tab(group).stacksTo(1));
@@ -390,6 +393,41 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
       }
 
       public static VaultCrystalItem.RemoveRandomCurseTask deserializeNBT(CompoundTag nbt) {
+         return INSTANCE;
+      }
+   }
+
+   public static class RemoveRandomNegativeModifierTask implements VaultCrystalItem.IScheduledTask {
+      public static final VaultCrystalItem.RemoveRandomNegativeModifierTask INSTANCE = new VaultCrystalItem.RemoveRandomNegativeModifierTask();
+      public static final String ID = "removeRandomNegativeModifier";
+
+      private RemoveRandomNegativeModifierTask() {
+      }
+
+      @Override
+      public String getId() {
+         return "removeRandomNegativeModifier";
+      }
+
+      @Override
+      public void execute(ServerPlayer player, ItemStack stack, CrystalData data) {
+         Iterator<VaultModifierStack> it = data.getModifiers().iterator();
+
+         while (it.hasNext()) {
+            VaultModifierStack modifier = it.next();
+            if (modifier.getModifier().getId().equals(VaultCrystalItem.NEGATIVE_MODIFIER_POOL_NAME)) {
+               modifier.shrink(1);
+               if (modifier.isEmpty()) {
+                  it.remove();
+               }
+
+               data.write(stack);
+               return;
+            }
+         }
+      }
+
+      public static VaultCrystalItem.RemoveRandomNegativeModifierTask deserializeNBT(CompoundTag nbt) {
          return INSTANCE;
       }
    }

@@ -16,6 +16,7 @@ public class ModSounds {
    public static SoundEvent TIMER_KILL_SFX;
    public static SoundEvent TIMER_PANIC_TICK_SFX;
    public static SoundEvent CONFETTI_SFX;
+   public static SoundEvent IDENTIFICATION_SFX;
    public static SoundEvent MEGA_JUMP_SFX;
    public static SoundEvent DASH_SFX;
    public static SoundEvent VAULT_EXP_SFX;
@@ -44,12 +45,11 @@ public class ModSounds {
    public static SoundEvent INVISIBILITY_SFX;
    public static SoundEvent NIGHT_VISION_SFX;
    public static SoundEvent RAMPAGE_SFX;
-   public static SoundEvent TANK;
-   public static SoundEvent TANK_HIT;
-   public static SoundEvent TANK_PROJECTILE;
-   public static SoundEvent TANK_PROJECTILE_HIT;
-   public static SoundEvent TANK_REFLECT;
-   public static SoundEvent TANK_REFLECT_HIT;
+   public static SoundEvent EMPOWER;
+   public static SoundEvent EMPOWER_ICE_ARMOUR;
+   public static SoundEvent SHELL;
+   public static SoundEvent SHELL_PORCUPINE;
+   public static SoundEvent SHELL_QUILL;
    public static SoundEvent VAMPIRE_HISSING_SFX;
    public static SoundEvent CAULDRON_BUBBLES_SFX;
    public static SoundEvent EXECUTION_SFX;
@@ -57,6 +57,20 @@ public class ModSounds {
    public static SoundEvent GOBLIN_DEATH;
    public static SoundEvent GOBLIN_HURT;
    public static SoundEvent GOBLIN_IDLE;
+   public static SoundEvent VAULT_DOOD_IDLE;
+   public static SoundEvent SKELETON_PIRATE_IDLE;
+   public static SoundEvent WINTERWALKER_IDLE;
+   public static SoundEvent WINTERWALKER_STEP;
+   public static SoundEvent WINTERWALKER_HURT;
+   public static SoundEvent WINTERWALKER_DEATH;
+   public static SoundEvent OVERGROWN_ZOMBIE_IDLE;
+   public static SoundEvent OVERGROWN_ZOMBIE_STEP;
+   public static SoundEvent OVERGROWN_ZOMBIE_HURT;
+   public static SoundEvent OVERGROWN_ZOMBIE_DEATH;
+   public static SoundEvent SHIVER_IDLE;
+   public static SoundEvent SHIVER_HURT;
+   public static SoundEvent SHIVER_DEATH;
+   public static SoundEvent BURP;
    public static SoundEvent PUZZLE_COMPLETION_MAJOR;
    public static SoundEvent PUZZLE_COMPLETION_MINOR;
    public static SoundEvent PUZZLE_COMPLETION_FAIL;
@@ -76,10 +90,14 @@ public class ModSounds {
    public static SoundEvent MANA_SHIELD_HIT;
    public static SoundEvent TAUNT;
    public static SoundEvent TAUNT_REPEL;
+   public static SoundEvent TAUNT_CHARM;
    public static SoundEvent ARTISAN_SMITHING;
    public static SoundEvent HUNTER_SFX;
    public static SoundEvent MOB_TRAP;
    public static SoundEvent DISARM_TRAP;
+   public static SoundEvent TOTEM;
+   public static SoundEvent SMITE_BOLT;
+   public static SoundEvent SMITE;
    public static ForgeSoundType VAULT_GET_SOUND_TYPE = new ForgeSoundType(
       0.25F, 1.0F, () -> VAULT_GEM_BREAK, SoundType.STONE::getStepSound, SoundType.STONE::getPlaceSound, () -> VAULT_GEM_HIT, SoundType.STONE::getFallSound
    );
@@ -99,6 +117,7 @@ public class ModSounds {
       TIMER_KILL_SFX = registerSound(event, "timer_kill");
       TIMER_PANIC_TICK_SFX = registerSound(event, "timer_panic_tick");
       CONFETTI_SFX = registerSound(event, "confetti");
+      IDENTIFICATION_SFX = registerSound(event, "identification");
       MEGA_JUMP_SFX = registerSound(event, "mega_jump");
       DASH_SFX = registerSound(event, "dash");
       VAULT_EXP_SFX = registerSound(event, "vault_exp");
@@ -127,12 +146,11 @@ public class ModSounds {
       INVISIBILITY_SFX = registerSound(event, "invisibility");
       NIGHT_VISION_SFX = registerSound(event, "night_vision");
       RAMPAGE_SFX = registerSound(event, "rampage");
-      TANK = registerSound(event, "tank");
-      TANK_HIT = registerSound(event, "tank_hit");
-      TANK_PROJECTILE = registerSound(event, "tank_projectile");
-      TANK_PROJECTILE_HIT = registerSound(event, "tank_projectile_hit");
-      TANK_REFLECT = registerSound(event, "tank_reflect");
-      TANK_REFLECT_HIT = registerSound(event, "tank_reflect_hit");
+      EMPOWER = registerSound(event, "empower");
+      EMPOWER_ICE_ARMOUR = registerSound(event, "empower_ice_armour");
+      SHELL = registerSound(event, "shell");
+      SHELL_PORCUPINE = registerSound(event, "shell_porcupine");
+      SHELL_QUILL = registerSound(event, "shell_quill");
       VAMPIRE_HISSING_SFX = registerSound(event, "vampire_hissing");
       CAULDRON_BUBBLES_SFX = registerSound(event, "cauldron_bubbles");
       EXECUTION_SFX = registerSound(event, "execution");
@@ -140,6 +158,20 @@ public class ModSounds {
       GOBLIN_DEATH = registerSound(event, "goblin_death");
       GOBLIN_HURT = registerSound(event, "goblin_hurt");
       GOBLIN_IDLE = registerSound(event, "goblin_idle");
+      VAULT_DOOD_IDLE = registerSound(event, "vault_dood.idle");
+      SKELETON_PIRATE_IDLE = registerSound(event, "skeleton_pirate.idle");
+      WINTERWALKER_IDLE = registerSound(event, "winterwalker.idle");
+      WINTERWALKER_STEP = registerSound(event, "winterwalker.step");
+      WINTERWALKER_HURT = registerSound(event, "winterwalker.hurt");
+      WINTERWALKER_DEATH = registerSound(event, "winterwalker.death");
+      OVERGROWN_ZOMBIE_IDLE = registerSound(event, "overgrown_zombie.idle");
+      OVERGROWN_ZOMBIE_STEP = registerSound(event, "overgrown_zombie.step");
+      OVERGROWN_ZOMBIE_HURT = registerSound(event, "overgrown_zombie.hurt");
+      OVERGROWN_ZOMBIE_DEATH = registerSound(event, "overgrown_zombie.death");
+      SHIVER_IDLE = registerSound(event, "shiver.idle");
+      SHIVER_HURT = registerSound(event, "shiver.hurt");
+      SHIVER_DEATH = registerSound(event, "shiver.death");
+      BURP = registerSound(event, "burp");
       PUZZLE_COMPLETION_MAJOR = registerSound(event, "puzzle_completion_major");
       PUZZLE_COMPLETION_MINOR = registerSound(event, "puzzle_completion_minor");
       PUZZLE_COMPLETION_FAIL = registerSound(event, "puzzle_completion_fail");
@@ -159,10 +191,14 @@ public class ModSounds {
       MANA_SHIELD_HIT = registerSound(event, "mana_shield_hit");
       TAUNT = registerSound(event, "taunt");
       TAUNT_REPEL = registerSound(event, "taunt_repel");
+      TAUNT_CHARM = registerSound(event, "taunt_charm");
       ARTISAN_SMITHING = registerSound(event, "artisan_smithing");
       HUNTER_SFX = registerSound(event, "hunter");
       MOB_TRAP = registerSound(event, "mob_trap");
       DISARM_TRAP = registerSound(event, "disarm_trap");
+      TOTEM = registerSound(event, "totem");
+      SMITE_BOLT = registerSound(event, "smite_bolt");
+      SMITE = registerSound(event, "smite");
    }
 
    private static SoundEvent registerSound(Register<SoundEvent> event, String soundName) {

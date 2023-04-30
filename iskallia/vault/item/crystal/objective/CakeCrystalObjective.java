@@ -58,7 +58,7 @@ public class CakeCrystalObjective extends CrystalObjective {
 
             objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
             objectives.add(DeathObjective.create(true));
-            objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getId(this));
+            objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
          }
       );
    }

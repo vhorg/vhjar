@@ -9,20 +9,24 @@ import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.vault.time.modifier.RelicExtension;
 import iskallia.vault.core.vault.time.modifier.TrinketExtension;
 import iskallia.vault.core.world.storage.VirtualWorld;
-import iskallia.vault.event.event.VaultJoinForgeEvent;
-import iskallia.vault.event.event.VaultLeaveForgeEvent;
+import iskallia.vault.entity.entity.SpiritEntity;
+import iskallia.vault.event.event.VaultJoinEvent;
+import iskallia.vault.event.event.VaultLeaveEvent;
 import iskallia.vault.gear.trinket.TrinketHelper;
 import iskallia.vault.gear.trinket.effects.VaultTimeExtensionTrinket;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.item.gear.TrinketItem;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.TrinketerExpertise;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.VaultPartyData;
 import iskallia.vault.world.data.VaultPlayerStats;
-import iskallia.vault.world.vault.modifier.spi.VaultModifier;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.List;
@@ -117,6 +121,7 @@ public class ClassicListenersLogic extends ListenersLogic {
       }
 
       if (vault.get(Vault.LISTENERS).getAll().isEmpty()) {
+         SpiritEntity.onVaultEnd(world, vault.get(Vault.ID));
          world.markForDeletion();
          vault.set(Vault.FINISHED);
          vault.releaseServer();
@@ -149,7 +154,7 @@ public class ClassicListenersLogic extends ListenersLogic {
                .ifPresent(player -> player.displayClientMessage(new TextComponent("You cannot re-enter this vault.").withStyle(ChatFormatting.RED), true));
             return false;
          } else {
-            if (vault.has(Vault.OWNER) && world.getGameRules().getBoolean(ModGameRules.VAULT_JOIN_REQUIRE_PARTY)) {
+            if (vault.has(Vault.OWNER) && world.getGameRules().getBoolean(ModGameRules.JOIN_REQUIRE_PARTY)) {
                VaultPartyData.Party party = VaultPartyData.get(world).getParty(vault.get(Vault.OWNER)).orElse(null);
                if (party == null || !party.hasMember(listener.get(Listener.ID))) {
                   listener.getPlayer()
@@ -168,18 +173,34 @@ public class ClassicListenersLogic extends ListenersLogic {
                this.set(ADDED_BONUS_TIME);
             }
 
-            listener.getPlayer().ifPresent(player -> {
-               TrinketHelper.getTrinkets(player).forEach(trinket -> {
-                  if (trinket.isUsable(player)) {
-                     TrinketItem.addUsedVault(trinket.stack(), vault.get(Vault.ID));
+            listener.getPlayer()
+               .ifPresent(
+                  player -> {
+                     TrinketHelper.getTrinkets(player)
+                        .forEach(
+                           trinket -> {
+                              if (trinket.isUsable(player)) {
+                                 double damageAvoidanceChance = PlayerExpertisesData.get(player.getLevel())
+                                    .getExpertises(player)
+                                    .getAll(TrinketerExpertise.class, Skill::isUnlocked)
+                                    .stream()
+                                    .mapToDouble(TrinketerExpertise::getDamageAvoidanceChance)
+                                    .sum();
+                                 if (player.level.random.nextDouble() < damageAvoidanceChance) {
+                                    TrinketItem.addFreeUsedVault(trinket.stack(), vault.get(Vault.ID));
+                                 } else {
+                                    TrinketItem.addUsedVault(trinket.stack(), vault.get(Vault.ID));
+                                 }
+                              }
+                           }
+                        );
+                     TrinketHelper.getTrinkets(player, VaultTimeExtensionTrinket.class).forEach(timeTrinket -> {
+                        if (timeTrinket.isUsable(player)) {
+                           vault.get(Vault.CLOCK).addModifier(new TrinketExtension(player, timeTrinket.trinket().getConfig().getTimeAdded()));
+                        }
+                     });
                   }
-               });
-               TrinketHelper.getTrinkets(player, VaultTimeExtensionTrinket.class).forEach(timeTrinket -> {
-                  if (timeTrinket.isUsable(player)) {
-                     vault.get(Vault.CLOCK).addModifier(new TrinketExtension(player, timeTrinket.trinket().getConfig().getTimeAdded()));
-                  }
-               });
-            });
+               );
             return true;
          }
       }
@@ -187,7 +208,7 @@ public class ClassicListenersLogic extends ListenersLogic {
 
    @Override
    protected void onTeleport(VirtualWorld world, Vault vault, ServerPlayer player) {
-      MinecraftForge.EVENT_BUS.post(new VaultJoinForgeEvent(vault));
+      MinecraftForge.EVENT_BUS.post(new VaultJoinEvent(vault));
       TextComponent title = new TextComponent("The Vault");
       title.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(14536734)));
       MutableComponent subtitle = new TextComponent("Good luck, ").append(player.getName()).append(new TextComponent("!"));
@@ -231,7 +252,7 @@ public class ClassicListenersLogic extends ListenersLogic {
          }
 
          VaultPlayerStats.addStats(player.getUUID(), vault.get(Vault.ID));
-         MinecraftForge.EVENT_BUS.post(new VaultLeaveForgeEvent(player, vault));
+         MinecraftForge.EVENT_BUS.post(new VaultLeaveEvent(player, vault));
          this.get(LEAVERS).add(player.getUUID());
          return true;
       }).orElse(false);

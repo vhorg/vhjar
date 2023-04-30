@@ -76,7 +76,7 @@ public class MixinOptionsScreen extends Screen {
 
    private CycleButton<VaultDifficulty> createDifficultyButton(int screenWidth, int screenHeight, Minecraft mc) {
       return CycleButton.builder(VaultDifficulty::getDisplayName)
-         .withValues(VaultDifficulty.values())
+         .withValues(VaultDifficulty.getOrderedDifficulties())
          .withInitialValue(WorldSettings.get(mc.level).getGlobalVaultDifficulty())
          .create(
             screenWidth / 2 - 155 + 160,

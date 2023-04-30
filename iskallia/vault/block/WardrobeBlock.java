@@ -19,7 +19,6 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,6 +27,7 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -43,7 +43,7 @@ public class WardrobeBlock extends Block implements EntityBlock {
    protected static final VoxelShape SHAPE = Block.box(1.0, 0.0, 1.0, 15.0, 3.0, 15.0);
 
    public WardrobeBlock() {
-      super(Properties.copy(Blocks.STONE));
+      super(Properties.of(Material.STONE).strength(1.5F, 6.0F));
       this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.NORTH));
    }
 
@@ -72,19 +72,21 @@ public class WardrobeBlock extends Block implements EntityBlock {
    }
 
    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-      if (level.getBlockEntity(pos) instanceof WardrobeTileEntity wardrobeTile) {
-         wardrobeTile.getEquipmentSlots().values().forEach(stack -> dropStack(level, pos, stack));
-         wardrobeTile.getCuriosItems().values().forEach(stacks -> stacks.values().forEach(stack -> dropStack(level, pos, stack)));
+      if (!state.is(newState.getBlock())) {
+         if (level.getBlockEntity(pos) instanceof WardrobeTileEntity wardrobeTile) {
+            wardrobeTile.getEquipmentSlots().values().forEach(stack -> dropStack(level, pos, stack));
+            wardrobeTile.getCuriosItems().values().forEach(stacks -> stacks.values().forEach(stack -> dropStack(level, pos, stack)));
 
-         for (int slot = 0; slot < wardrobeTile.getHotbarItems().getSlots(); slot++) {
-            ItemStack stackInSlot = wardrobeTile.getHotbarItems().getStackInSlot(slot);
-            if (!stackInSlot.isEmpty()) {
-               dropStack(level, pos, stackInSlot);
+            for (int slot = 0; slot < wardrobeTile.getHotbarItems().getSlots(); slot++) {
+               ItemStack stackInSlot = wardrobeTile.getHotbarItems().getStackInSlot(slot);
+               if (!stackInSlot.isEmpty()) {
+                  dropStack(level, pos, stackInSlot);
+               }
             }
          }
-      }
 
-      super.onRemove(state, level, pos, newState, isMoving);
+         super.onRemove(state, level, pos, newState, isMoving);
+      }
    }
 
    private static void dropStack(Level level, BlockPos pos, ItemStack stack) {
@@ -92,7 +94,7 @@ public class WardrobeBlock extends Block implements EntityBlock {
    }
 
    @SubscribeEvent
-   public static void onInteractWithBountyTable(RightClickBlock event) {
+   public static void onInteractWithWardrobe(RightClickBlock event) {
       if (event.getEntity() instanceof ServerPlayer player
          && event.getHand() == InteractionHand.OFF_HAND
          && player.isShiftKeyDown()

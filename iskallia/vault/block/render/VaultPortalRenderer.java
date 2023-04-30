@@ -23,7 +23,7 @@ public class VaultPortalRenderer implements BlockEntityRenderer<VaultPortalTileE
    public void render(VaultPortalTileEntity tile, float pPartialTick, PoseStack matrixStack, MultiBufferSource buffers, int packedLight, int packedOverlay) {
       BlockState state = tile.getBlockState();
       BakedModel bakedmodel = this.brd.getBlockModel(state);
-      int color = tile.getData().getModel().getBlockColor(tile.getData(), (float)ClientScheduler.INSTANCE.getTickCount());
+      int color = tile.getData().map(data -> data.getModel().getBlockColor(data, (float)ClientScheduler.INSTANCE.getTickCount())).orElse(16777215);
       float r = (color >> 16 & 0xFF) / 255.0F;
       float g = (color >> 8 & 0xFF) / 255.0F;
       float b = (color & 0xFF) / 255.0F;

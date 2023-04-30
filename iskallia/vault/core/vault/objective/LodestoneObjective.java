@@ -19,6 +19,9 @@ import iskallia.vault.core.event.common.BlockUseEvent;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
 import net.minecraft.ChatFormatting;
@@ -78,9 +81,13 @@ public class LodestoneObjective extends Objective {
       BlockState targetState = (BlockState)ModBlocks.PLACEHOLDER.defaultBlockState().setValue(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
       CommonEvents.OBJECTIVE_PIECE_GENERATION
          .register(this, data -> this.ifPresent(OBJECTIVE_PROBABILITY, probability -> data.setProbability(probability.floatValue())));
-      CommonEvents.BLOCK_SET.at(BlockSetEvent.Type.RETURN).of(targetState).in(world).register(this, data -> {
-         data.getWorld().setBlock(data.getPos(), Blocks.AIR.defaultBlockState(), 3);
-         data.getWorld().setBlock(data.getPos().above(), ModBlocks.LODESTONE.defaultBlockState(), 3);
+      CommonEvents.BLOCK_SET.at(BlockSetEvent.Type.RETURN).in(world).register(this, data -> {
+         PartialTile target = PartialTile.of(PartialBlockState.of(ModBlocks.PLACEHOLDER), PartialCompoundNbt.empty());
+         target.getState().set(PlaceholderBlock.TYPE, PlaceholderBlock.Type.OBJECTIVE);
+         if (target.isSubsetOf(PartialTile.of(data.getState()))) {
+            data.getWorld().setBlock(data.getPos(), Blocks.AIR.defaultBlockState(), 3);
+            data.getWorld().setBlock(data.getPos().above(), ModBlocks.LODESTONE.defaultBlockState(), 3);
+         }
       });
       CommonEvents.BLOCK_USE.in(world).at(BlockUseEvent.Phase.HEAD).of(ModBlocks.LODESTONE).register(this, data -> {
          if (data.getHand() != InteractionHand.MAIN_HAND) {
@@ -90,6 +97,7 @@ public class LodestoneObjective extends Objective {
                if (world.getBlockEntity(data.getPos()) instanceof LodestoneTileEntity lodestone && !lodestone.isConsumed()) {
                   if (!world.isClientSide) {
                      lodestone.setConsumed(true);
+                     world.setBlock(data.getPos(), Blocks.AIR.defaultBlockState(), 3);
                      world.playSound(null, data.getPos(), SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 2.0F);
                   }
 
@@ -126,7 +134,7 @@ public class LodestoneObjective extends Objective {
          int midX = window.getGuiScaledWidth() / 2;
          Font font = Minecraft.getInstance().font;
          BufferSource buffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-         Component txt = new TextComponent("Find a Lodestone!").withStyle(ChatFormatting.WHITE);
+         Component txt = new TextComponent("Consume a Lodestone!").withStyle(ChatFormatting.WHITE);
          font.drawInBatch(
             txt.getVisualOrderText(),
             midX - font.width(txt) / 2.0F,

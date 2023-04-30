@@ -15,9 +15,10 @@ public class DoubleAttributeGenerator extends NumberRangeGenerator<Double, Doubl
       return DoubleAttributeGenerator.Range.class;
    }
 
-   public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<Double> reader, DoubleAttributeGenerator.Range object) {
-      MutableComponent minDisplay = reader.getValueDisplay(object.min);
-      MutableComponent maxDisplay = reader.getValueDisplay(object.max);
+   @Nullable
+   public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<Double> reader, DoubleAttributeGenerator.Range min, DoubleAttributeGenerator.Range max) {
+      MutableComponent minDisplay = reader.getValueDisplay(min.min);
+      MutableComponent maxDisplay = reader.getValueDisplay(max.max);
       return (MutableComponent)(minDisplay != null && maxDisplay != null ? minDisplay.append("-").append(maxDisplay) : new TextComponent(""));
    }
 

@@ -14,7 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.network.NetworkDirection;
@@ -91,7 +91,7 @@ public class ResearchTree implements INBTSerializable<CompoundTag> {
       return this.researchShares.size() * 0.5F;
    }
 
-   public String restrictedBy(Item item, Restrictions.Type restrictionType) {
+   public String restrictedBy(ItemStack item, Restrictions.Type restrictionType) {
       for (Research research : ModConfigs.RESEARCHES.getAll()) {
          if (!this.researchesDone.contains(research.getName()) && research.restricts(item, restrictionType)) {
             return research.getName();

@@ -11,16 +11,17 @@
         {"predicate": {"the_vault:trinket":  4}, "model": "the_vault:item/trinket/chromatic_powder"},
         {"predicate": {"the_vault:trinket":  5}, "model": "the_vault:item/trinket/crystal_ball"},
         {"predicate": {"the_vault:trinket":  6}, "model": "the_vault:item/trinket/elven_socks"},
-        {"predicate": {"the_vault:trinket":  7}, "model": "the_vault:item/trinket/giants_heart"},
-        {"predicate": {"the_vault:trinket":  8}, "model": "the_vault:item/trinket/gluttony_pendant"},
-        {"predicate": {"the_vault:trinket":  9}, "model": "the_vault:item/trinket/golden_burger"},
-        {"predicate": {"the_vault:trinket": 10}, "model": "the_vault:item/trinket/high_heels"},
-        {"predicate": {"the_vault:trinket": 11}, "model": "the_vault:item/trinket/idonas_blade"},
-        {"predicate": {"the_vault:trinket": 12}, "model": "the_vault:item/trinket/lucky_goose"},
-        {"predicate": {"the_vault:trinket": 13}, "model": "the_vault:item/trinket/night_vision_goggles"},
-        {"predicate": {"the_vault:trinket": 14}, "model": "the_vault:item/trinket/phylactery"},
-        {"predicate": {"the_vault:trinket": 15}, "model": "the_vault:item/trinket/tenos_charm"},
-        {"predicate": {"the_vault:trinket": 16}, "model": "the_vault:item/trinket/velaras_petal"},
-        {"predicate": {"the_vault:trinket": 17}, "model": "the_vault:item/trinket/wendarrs_hourglass"}
+        {"predicate": {"the_vault:trinket":  7}, "model": "the_vault:item/trinket/ender_anchor"},
+        {"predicate": {"the_vault:trinket":  8}, "model": "the_vault:item/trinket/giants_heart"},
+        {"predicate": {"the_vault:trinket":  9}, "model": "the_vault:item/trinket/gluttony_pendant"},
+        {"predicate": {"the_vault:trinket": 10}, "model": "the_vault:item/trinket/golden_burger"},
+        {"predicate": {"the_vault:trinket": 11}, "model": "the_vault:item/trinket/high_heels"},
+        {"predicate": {"the_vault:trinket": 12}, "model": "the_vault:item/trinket/idonas_blade"},
+        {"predicate": {"the_vault:trinket": 13}, "model": "the_vault:item/trinket/lucky_goose"},
+        {"predicate": {"the_vault:trinket": 14}, "model": "the_vault:item/trinket/night_vision_goggles"},
+        {"predicate": {"the_vault:trinket": 15}, "model": "the_vault:item/trinket/phylactery"},
+        {"predicate": {"the_vault:trinket": 16}, "model": "the_vault:item/trinket/tenos_charm"},
+        {"predicate": {"the_vault:trinket": 17}, "model": "the_vault:item/trinket/velaras_petal"},
+        {"predicate": {"the_vault:trinket": 18}, "model": "the_vault:item/trinket/wendarrs_hourglass"}
     ]
 }

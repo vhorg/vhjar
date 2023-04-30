@@ -1,7 +1,7 @@
 package iskallia.vault.event;
 
-import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.world.data.ServerVaults;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -46,7 +46,7 @@ public class PlayerTabNameEvent {
          }
 
          boolean updated;
-         if (MiscUtils.getVault(serverPlayer).isPresent()) {
+         if (ServerVaults.get(serverPlayer.level).isPresent()) {
             updated = IN_VAULT.add(serverPlayer.getUUID());
          } else {
             updated = IN_VAULT.remove(serverPlayer.getUUID());

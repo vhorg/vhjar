@@ -68,7 +68,7 @@ public class ArchitectCrystalLayout extends CrystalLayout {
             .append(
                new TextComponent("Architect")
                   .withStyle(Style.EMPTY.withColor(4766456))
-                  .append(new TextComponent(" | " + Math.min((float)Math.round(this.completion * 100.0F), 100.0F) + "%").withStyle(ChatFormatting.GRAY))
+                  .append(new TextComponent(" | %.1f%%".formatted(Math.min(this.completion, 1.0F) * 100.0F)).withStyle(ChatFormatting.GRAY))
             )
       );
 

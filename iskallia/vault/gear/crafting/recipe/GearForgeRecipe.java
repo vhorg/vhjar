@@ -6,13 +6,9 @@ import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.crafting.VaultGearCraftingHelper;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
-import iskallia.vault.init.ModItems;
-import iskallia.vault.item.gear.IdolItem;
-import iskallia.vault.util.MiscUtils;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public class GearForgeRecipe extends VaultForgeRecipe {
@@ -42,11 +38,6 @@ public class GearForgeRecipe extends VaultForgeRecipe {
    @Override
    public ItemStack createOutput(List<OverSizedItemStack> consumed, ServerPlayer crafter, int vaultLevel) {
       ItemStack stack = super.createOutput(consumed, crafter, vaultLevel);
-      Item item = stack.getItem();
-      if (item instanceof IdolItem) {
-         item = MiscUtils.getRandomEntry(ModItems.IDOL_BENEVOLENT, ModItems.IDOL_MALEVOLENCE, ModItems.IDOL_OMNISCIENT, ModItems.IDOL_TIMEKEEPER);
-      }
-
-      return item instanceof VaultGearItem gearItem ? VaultGearCraftingHelper.doCraftGear(gearItem, crafter, vaultLevel, false) : stack;
+      return stack.getItem() instanceof VaultGearItem gearItem ? VaultGearCraftingHelper.doCraftGear(gearItem, crafter, vaultLevel, false) : stack;
    }
 }

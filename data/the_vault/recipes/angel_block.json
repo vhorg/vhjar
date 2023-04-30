@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "bpb",
+    "eke",
+    "bpb"
+  ],
+  "key": {
+    "b": {
+      "item": "the_vault:black_chromatic_steel_ingot"
+    },
+    "p": {
+      "item": "the_vault:phoenix_feather"
+    },
+    "e": {
+      "item": "the_vault:echo_pog"
+    },
+    "k": {
+      "item": "the_vault:knowledge_star"
+    }
+  },
+  "result": {
+    "item": "the_vault:angel_block",
+    "count": 1
+  }
+}

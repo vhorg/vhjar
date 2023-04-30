@@ -1,10 +1,10 @@
 package iskallia.vault.entity.ai.eyesore;
 
 import iskallia.vault.entity.entity.eyesore.EyesoreFireballEntity;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -22,11 +22,7 @@ public class BasicAttackTask<T extends Mob> extends EyesoreTask<T> {
 
    public void tick() {
       if (!this.isFinished()) {
-         List<Optional<ServerPlayer>> players = this.getVault()
-            .getPlayers()
-            .stream()
-            .map(p -> p.getServerPlayer(this.getWorld().getServer()))
-            .collect(Collectors.toList());
+         List<Optional<ServerPlayer>> players = new ArrayList<>();
          Optional<ServerPlayer> player = this.tick / 27 < players.size() ? players.get(this.tick / 27) : Optional.empty();
          if (player.isPresent()) {
             ServerPlayer target = player.get();
@@ -70,16 +66,7 @@ public class BasicAttackTask<T extends Mob> extends EyesoreTask<T> {
    }
 
    public boolean isFinished() {
-      if (this.getVault() == null) {
-         return true;
-      } else {
-         List<Optional<ServerPlayer>> players = this.getVault()
-            .getPlayers()
-            .stream()
-            .map(p -> p.getServerPlayer(this.getWorld().getServer()))
-            .collect(Collectors.toList());
-         return this.tick / 27 >= players.size();
-      }
+      return this.tick / 27 >= 1;
    }
 
    public void reset() {

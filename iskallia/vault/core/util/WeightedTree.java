@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
-import java.util.function.IntUnaryOperator;
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Predicate;
 import java.util.random.RandomGenerator;
 
@@ -25,12 +25,12 @@ public class WeightedTree<T> {
       return this;
    }
 
-   public WeightedTree<T> addTree(WeightedTree<T> tree, int weight) {
+   public WeightedTree<T> addTree(WeightedTree<T> tree, double weight) {
       this.children.add(tree, weight);
       return this;
    }
 
-   public WeightedTree<T> addTree(Consumer<WeightedTree<T>> root, int weight) {
+   public WeightedTree<T> addTree(Consumer<WeightedTree<T>> root, double weight) {
       WeightedTree<T> tree = new WeightedTree<>();
       this.children.add(tree, weight);
       root.accept(tree);
@@ -42,14 +42,14 @@ public class WeightedTree<T> {
    }
 
    public Optional<T> getRandom(RandomGenerator random) {
-      return this.getRandom(random::nextInt);
+      return this.getRandom(random::nextDouble);
    }
 
    public Optional<T> getRandom(RandomSource random) {
-      return this.getRandom(random::nextInt);
+      return this.getRandom(random::nextDouble);
    }
 
-   public Optional<T> getRandom(IntUnaryOperator random) {
+   public Optional<T> getRandom(DoubleUnaryOperator random) {
       Optional<Object> opt = this.children.getRandom(random);
       if (opt.isEmpty()) {
          return Optional.empty();
@@ -59,7 +59,7 @@ public class WeightedTree<T> {
       }
    }
 
-   public Optional<T> getRandom(IntUnaryOperator random, BiConsumer<WeightedList<Object>, Object> step) {
+   public Optional<T> getRandom(DoubleUnaryOperator random, BiConsumer<WeightedList<Object>, Object> step) {
       Optional<Object> opt = this.children.getRandom(random);
       if (opt.isEmpty()) {
          return Optional.empty();

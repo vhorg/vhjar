@@ -1,6 +1,6 @@
 package iskallia.vault.entity.model.tier3;
 
-import iskallia.vault.entity.entity.tier2.Tier3ZombieEntity;
+import iskallia.vault.entity.entity.tier3.Tier3ZombieEntity;
 import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;

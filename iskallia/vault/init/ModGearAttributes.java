@@ -81,6 +81,13 @@ public class ModGearAttributes {
       ModGearAttributeReaders.addedDecimalReader("Reach", 8706047),
       VaultGearAttributeComparator.doubleComparator()
    );
+   public static final VaultGearAttribute<Double> ATTACK_RANGE = attr(
+      "attack_range",
+      VaultGearAttributeType.doubleType(),
+      ModGearAttributeGenerators.doubleRange(),
+      ModGearAttributeReaders.addedDecimalReader("Attack Range", 8706047),
+      VaultGearAttributeComparator.doubleComparator()
+   );
    public static final VaultGearAttribute<Float> KNOCKBACK_RESISTANCE = attr(
       "knockback_resistance",
       VaultGearAttributeType.floatType(),
@@ -222,6 +229,13 @@ public class ModGearAttributes {
       ModGearAttributeReaders.percentageReader("Fatal Strike Damage", 12520704),
       VaultGearAttributeComparator.floatComparator()
    );
+   public static final VaultGearAttribute<Float> LUCKY_HIT_CHANCE = attr(
+      "lucky_hit_chance",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Lucky Hit Chance", 7206307),
+      VaultGearAttributeComparator.floatComparator()
+   );
    public static final VaultGearAttribute<Float> THORNS_CHANCE = attr(
       "thorns_chance",
       VaultGearAttributeType.floatType(),
@@ -234,6 +248,13 @@ public class ModGearAttributes {
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
       ModGearAttributeReaders.percentageReader("Thorns Damage", 15507136),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> THORNS_DAMAGE_FLAT = attr(
+      "thorns_damage_flat",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.addedDecimalReader("Thorns Damage", 15507136),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Integer> ON_HIT_CHAIN = attr(
@@ -310,21 +331,28 @@ public class ModGearAttributes {
       "damage_illagers",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
-      ModGearAttributeReaders.percentageReader("Spiteful", 40882),
+      ModGearAttributeReaders.percentageReader("Illager Damage", 40882),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> DAMAGE_SPIDERS = attr(
       "damage_spiders",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
-      ModGearAttributeReaders.percentageReader("Baneful", 8281694),
+      ModGearAttributeReaders.percentageReader("Arthropods Damage", 14338221),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> DAMAGE_UNDEAD = attr(
       "damage_undead",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
-      ModGearAttributeReaders.percentageReader("Holy", 16382128),
+      ModGearAttributeReaders.percentageReader("Undead Damage", 16382128),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> DAMAGE_NETHER = attr(
+      "damage_nether",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Nether Damage", 16749406),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> VELARA_AFFINITY = attr(
@@ -599,6 +627,7 @@ public class ModGearAttributes {
       registry.register(ATTACK_SPEED);
       registry.register(ATTACK_SPEED_PERCENT);
       registry.register(REACH);
+      registry.register(ATTACK_RANGE);
       registry.register(KNOCKBACK_RESISTANCE);
       registry.register(HEALTH);
       registry.register(MANA_REGEN_ADDITIVE_PERCENTILE);
@@ -622,8 +651,10 @@ public class ModGearAttributes {
       registry.register(DURABILITY_WEAR_REDUCTION);
       registry.register(FATAL_STRIKE_CHANCE);
       registry.register(FATAL_STRIKE_DAMAGE);
+      registry.register(LUCKY_HIT_CHANCE);
       registry.register(THORNS_CHANCE);
       registry.register(THORNS_DAMAGE);
+      registry.register(THORNS_DAMAGE_FLAT);
       registry.register(ON_HIT_CHAIN);
       registry.register(ON_HIT_AOE);
       registry.register(ON_HIT_STUN);
@@ -637,6 +668,7 @@ public class ModGearAttributes {
       registry.register(DAMAGE_ILLAGERS);
       registry.register(DAMAGE_SPIDERS);
       registry.register(DAMAGE_UNDEAD);
+      registry.register(DAMAGE_NETHER);
       registry.register(VELARA_AFFINITY);
       registry.register(TENOS_AFFINITY);
       registry.register(WENDARR_AFFINITY);
@@ -694,6 +726,7 @@ public class ModGearAttributes {
       VANILLA_ATTRIBUTES.put(Attributes.ATTACK_SPEED, Operation.ADDITION, ATTACK_SPEED);
       VANILLA_ATTRIBUTES.put(Attributes.ATTACK_SPEED, Operation.MULTIPLY_BASE, ATTACK_SPEED_PERCENT);
       VANILLA_ATTRIBUTES.put((Attribute)ForgeMod.REACH_DISTANCE.get(), Operation.ADDITION, REACH);
+      VANILLA_ATTRIBUTES.put((Attribute)ForgeMod.ATTACK_RANGE.get(), Operation.ADDITION, ATTACK_RANGE);
       VANILLA_ATTRIBUTES.put(Attributes.KNOCKBACK_RESISTANCE, Operation.ADDITION, KNOCKBACK_RESISTANCE);
       VANILLA_ATTRIBUTES.put(Attributes.MAX_HEALTH, Operation.ADDITION, HEALTH);
       VANILLA_ATTRIBUTES.put(ModAttributes.MANA_REGEN, Operation.MULTIPLY_BASE, MANA_REGEN_ADDITIVE_PERCENTILE);

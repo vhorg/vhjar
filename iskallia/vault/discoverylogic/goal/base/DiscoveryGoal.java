@@ -41,6 +41,12 @@ public abstract class DiscoveryGoal<G extends DiscoveryGoal<G>> {
       }
    }
 
+   public float getCurrentProgress(ServerPlayer player) {
+      DiscoveryGoalStatesData worldData = DiscoveryGoalStatesData.get(player.getLevel());
+      DiscoveryGoalsState state = worldData.getState(player);
+      return state.getProcess(this);
+   }
+
    public float getTargetProgress() {
       return this.targetProgress;
    }
@@ -56,6 +62,13 @@ public abstract class DiscoveryGoal<G extends DiscoveryGoal<G>> {
       DiscoveryGoalStatesData worldData = DiscoveryGoalStatesData.get(player.getLevel());
       DiscoveryGoalsState state = worldData.getState(player);
       state.progress(player, this, deltaProgress);
+      worldData.setDirty();
+   }
+
+   public void setProgress(ServerPlayer player, float progress) {
+      DiscoveryGoalStatesData worldData = DiscoveryGoalStatesData.get(player.getLevel());
+      DiscoveryGoalsState state = worldData.getState(player);
+      state.setProgress(player, this, progress);
       worldData.setDirty();
    }
 

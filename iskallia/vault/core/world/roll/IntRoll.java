@@ -1,12 +1,19 @@
 package iskallia.vault.core.world.roll;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.random.RandomSource;
-import iskallia.vault.item.crystal.ObjectEntryAdapter;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
 import java.util.Optional;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 
 public interface IntRoll extends ISerializable<CompoundTag, JsonObject> {
    int get(RandomSource var1);
@@ -39,11 +46,35 @@ public interface IntRoll extends ISerializable<CompoundTag, JsonObject> {
       }
    }
 
-   public static class Adapter extends ObjectEntryAdapter<IntRoll> {
+   public static class Adapter extends TypeSupplierAdapter<IntRoll> {
       public Adapter() {
-         super("type");
+         super("type", true);
          this.register("constant", IntRoll.Constant.class, IntRoll.Constant::new);
          this.register("uniform", IntRoll.Uniform.class, IntRoll.Uniform::new);
+      }
+
+      @Nullable
+      protected IntRoll readSuppliedNbt(Tag nbt) {
+         if (nbt instanceof NumericTag || nbt instanceof StringTag) {
+            Optional<Integer> result = Adapters.INT.readNbt(nbt);
+            if (result.isPresent()) {
+               return IntRoll.ofConstant(result.get());
+            }
+         }
+
+         return (IntRoll)super.readSuppliedNbt(nbt);
+      }
+
+      @Nullable
+      protected IntRoll readSuppliedJson(JsonElement json) {
+         if (json instanceof JsonPrimitive primitive && (primitive.isNumber() || primitive.isString())) {
+            Optional<Integer> result = Adapters.INT.readJson(json);
+            if (result.isPresent()) {
+               return IntRoll.ofConstant(result.get());
+            }
+         }
+
+         return (IntRoll)super.readSuppliedJson(json);
       }
    }
 
@@ -68,34 +99,34 @@ public interface IntRoll extends ISerializable<CompoundTag, JsonObject> {
 
       @Override
       public void writeBits(BitBuffer buffer) {
-         buffer.writeIntSegmented(this.count, 7);
+         Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.count), buffer);
       }
 
       @Override
       public void readBits(BitBuffer buffer) {
-         this.count = buffer.readIntSegmented(7);
+         Adapters.INT_SEGMENTED_7.readBits(buffer).ifPresent(value -> this.count = value);
       }
 
       @Override
       public Optional<CompoundTag> writeNbt() {
          CompoundTag nbt = new CompoundTag();
-         nbt.putInt("count", this.count);
+         Adapters.INT.writeNbt(Integer.valueOf(this.count)).ifPresent(tag -> nbt.put("count", tag));
          return Optional.of(nbt);
       }
 
       public void readNbt(CompoundTag nbt) {
-         this.count = nbt.getInt("count");
+         Adapters.INT.readNbt(nbt.get("count")).ifPresent(value -> this.count = value);
       }
 
       @Override
       public Optional<JsonObject> writeJson() {
          JsonObject json = new JsonObject();
-         json.addProperty("count", this.count);
+         Adapters.INT.writeJson(Integer.valueOf(this.count)).ifPresent(tag -> json.add("count", tag));
          return Optional.of(json);
       }
 
       public void readJson(JsonObject json) {
-         this.count = json.get("count").getAsInt();
+         Adapters.INT.readJson(json.get("count")).ifPresent(value -> this.count = value);
       }
    }
 
@@ -126,40 +157,40 @@ public interface IntRoll extends ISerializable<CompoundTag, JsonObject> {
 
       @Override
       public void writeBits(BitBuffer buffer) {
-         buffer.writeIntSegmented(this.min, 7);
-         buffer.writeIntSegmented(this.max, 7);
+         Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.min), buffer);
+         Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.max), buffer);
       }
 
       @Override
       public void readBits(BitBuffer buffer) {
-         this.min = buffer.readIntSegmented(7);
-         this.max = buffer.readIntSegmented(7);
+         Adapters.INT_SEGMENTED_7.readBits(buffer).ifPresent(value -> this.min = value);
+         Adapters.INT_SEGMENTED_7.readBits(buffer).ifPresent(value -> this.max = value);
       }
 
       @Override
       public Optional<CompoundTag> writeNbt() {
          CompoundTag nbt = new CompoundTag();
-         nbt.putInt("min", this.min);
-         nbt.putInt("max", this.max);
+         Adapters.INT.writeNbt(Integer.valueOf(this.min)).ifPresent(tag -> nbt.put("min", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.max)).ifPresent(tag -> nbt.put("max", tag));
          return Optional.of(nbt);
       }
 
       public void readNbt(CompoundTag nbt) {
-         this.min = nbt.getInt("min");
-         this.max = nbt.getInt("max");
+         Adapters.INT.readNbt(nbt.get("min")).ifPresent(value -> this.min = value);
+         Adapters.INT.readNbt(nbt.get("max")).ifPresent(value -> this.max = value);
       }
 
       @Override
       public Optional<JsonObject> writeJson() {
          JsonObject json = new JsonObject();
-         json.addProperty("min", this.min);
-         json.addProperty("max", this.max);
+         Adapters.INT.writeJson(Integer.valueOf(this.min)).ifPresent(tag -> json.add("min", tag));
+         Adapters.INT.writeJson(Integer.valueOf(this.max)).ifPresent(tag -> json.add("max", tag));
          return Optional.of(json);
       }
 
       public void readJson(JsonObject json) {
-         this.min = json.get("min").getAsInt();
-         this.max = json.get("max").getAsInt();
+         Adapters.INT.readJson(json.get("min")).ifPresent(value -> this.min = value);
+         Adapters.INT.readJson(json.get("max")).ifPresent(value -> this.max = value);
       }
    }
 }

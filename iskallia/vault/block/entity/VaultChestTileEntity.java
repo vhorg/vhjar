@@ -2,6 +2,7 @@ package iskallia.vault.block.entity;
 
 import com.google.common.collect.Lists;
 import com.mojang.math.Vector3f;
+import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.LootTableKey;
@@ -65,7 +66,11 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
    private int getSize(BlockState state) {
       if (state.getBlock() == ModBlocks.TREASURE_CHEST || state.getBlock() == ModBlocks.TREASURE_CHEST_PLACEABLE) {
          return 54;
-      } else if (state.getBlock() == ModBlocks.ORNATE_CHEST_PLACEABLE || state.getBlock() == ModBlocks.GILDED_CHEST_PLACEABLE) {
+      } else if (state.getBlock() == ModBlocks.ORNATE_CHEST_PLACEABLE
+         || state.getBlock() == ModBlocks.GILDED_CHEST_PLACEABLE
+         || state.getBlock() == ModBlocks.ORNATE_STRONGBOX
+         || state.getBlock() == ModBlocks.GILDED_STRONGBOX
+         || state.getBlock() == ModBlocks.LIVING_STRONGBOX) {
          return 36;
       } else {
          return state.getBlock() != ModBlocks.LIVING_CHEST_PLACEABLE && state.getBlock() != ModBlocks.ALTAR_CHEST_PLACEABLE ? 27 : 45;
@@ -105,6 +110,12 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
    public static <E extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, VaultChestTileEntity tile) {
       ChestBlockEntity.lidAnimateTick(level, pos, state, tile);
       tile.addParticles();
+   }
+
+   public boolean canOpen(Player pPlayer) {
+      return this.getBlockState().getBlock() instanceof VaultChestBlock chestBlock && chestBlock.isStrongbox() && !pPlayer.isCreative()
+         ? false
+         : super.canOpen(pPlayer);
    }
 
    private void playVaultChestSound() {
@@ -214,7 +225,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
             this.rarity = VaultRarity.COMMON;
             generator.getItems().forEachRemaining(loot::add);
          } else {
-            TieredLootTableGenerator generator = new TieredLootTableGenerator(version, key, rarity, quantity);
+            TieredLootTableGenerator generator = new TieredLootTableGenerator(version, key, rarity, quantity, 54);
             generator.source = player;
             generator.generate(random);
             this.rarity = ModConfigs.VAULT_CHEST.getRarity(generator.getCDF());
@@ -233,6 +244,10 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
          mergedLoot.forEach(stack -> MiscUtils.addItemStack(this, stack));
          this.setChanged();
       } else {
+         if (loot.size() > this.size) {
+            loot = MiscUtils.splitAndLimitStackSize(MiscUtils.mergeItemStacks(loot));
+         }
+
          List<Integer> slots = this.getAvailableSlots(this, random);
          this.shuffleAndSplitItems(loot, slots.size(), random);
 
@@ -387,6 +402,18 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
 
          if (state.getBlock() == ModBlocks.ALTAR_CHEST || state.getBlock() == ModBlocks.ALTAR_CHEST_PLACEABLE) {
             return new TextComponent(rarity + " Altar Chest");
+         }
+
+         if (state.getBlock() == ModBlocks.ORNATE_STRONGBOX) {
+            return new TextComponent(rarity + " Ornate Strongbox");
+         }
+
+         if (state.getBlock() == ModBlocks.GILDED_STRONGBOX) {
+            return new TextComponent(rarity + " Gilded Strongbox");
+         }
+
+         if (state.getBlock() == ModBlocks.LIVING_STRONGBOX) {
+            return new TextComponent(rarity + " Living Strongbox");
          }
       }
 

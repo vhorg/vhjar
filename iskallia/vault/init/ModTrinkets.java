@@ -4,9 +4,11 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.effects.AttributeTrinket;
 import iskallia.vault.gear.trinket.effects.DamageImmunityTrinket;
+import iskallia.vault.gear.trinket.effects.EnderAnchorTrinket;
 import iskallia.vault.gear.trinket.effects.ExplosionBlockPreventionTrinket;
 import iskallia.vault.gear.trinket.effects.InstantItemUseTrinket;
 import iskallia.vault.gear.trinket.effects.MultiJumpTrinket;
+import iskallia.vault.gear.trinket.effects.NightVisionTrinket;
 import iskallia.vault.gear.trinket.effects.PotionEffectTrinket;
 import iskallia.vault.gear.trinket.effects.VanillaAttributeTrinket;
 import iskallia.vault.gear.trinket.effects.VaultExperienceTrinket;
@@ -43,13 +45,14 @@ public class ModTrinkets {
    public static final DamageImmunityTrinket ELVEN_SOCKS = new DamageImmunityTrinket(VaultMod.id("elven_socks"), DamageSource::isFall, false);
    public static final DamageImmunityTrinket CARAPACE = new DamageImmunityTrinket(VaultMod.id("carapace"), DamageSource::isFire, true);
    public static final PotionEffectTrinket VELARAS_PETAL = new PotionEffectTrinket(VaultMod.id("velaras_petal"), MobEffects.REGENERATION, 1);
-   public static final PotionEffectTrinket NIGHT_VISION_GOGGLES = new PotionEffectTrinket(VaultMod.id("night_vision_goggles"), MobEffects.NIGHT_VISION, 1);
+   public static final NightVisionTrinket NIGHT_VISION_GOGGLES = new NightVisionTrinket(VaultMod.id("night_vision_goggles"), MobEffects.NIGHT_VISION, 1, 10.0F);
    public static final VaultTimeExtensionTrinket WENDARRS_HOURGLASS = new VaultTimeExtensionTrinket(VaultMod.id("wendarrs_hourglass"), 3000);
    public static final ExplosionBlockPreventionTrinket CAT_IN_A_JAR = new ExplosionBlockPreventionTrinket(VaultMod.id("cat_in_a_jar"));
    public static final WallClimbingTrinket CENTIPEDE_FEET = new WallClimbingTrinket(VaultMod.id("centipede_feet"));
    public static final MultiJumpTrinket CHROMATIC_FEATHER = new MultiJumpTrinket(VaultMod.id("chromatic_feather"));
    public static final InstantItemUseTrinket GLUTTONY_PENDANT = new InstantItemUseTrinket(VaultMod.id("gluttony_pendant"));
    public static final VaultExperienceTrinket GOLDEN_BURGER = new VaultExperienceTrinket(VaultMod.id("golden_burger"));
+   public static final EnderAnchorTrinket ENDER_ANCHOR = new EnderAnchorTrinket(VaultMod.id("ender_anchor"));
 
    public static void init(Register<TrinketEffect<?>> event) {
       IForgeRegistry<TrinketEffect<?>> registry = event.getRegistry();
@@ -71,5 +74,6 @@ public class ModTrinkets {
       registry.register(CHROMATIC_FEATHER);
       registry.register(GLUTTONY_PENDANT);
       registry.register(GOLDEN_BURGER);
+      registry.register(ENDER_ANCHOR);
    }
 }

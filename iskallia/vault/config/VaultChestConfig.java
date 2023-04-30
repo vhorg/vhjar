@@ -9,7 +9,6 @@ import iskallia.vault.world.vault.chest.ExplosionEffect;
 import iskallia.vault.world.vault.chest.MobTrapEffect;
 import iskallia.vault.world.vault.chest.PotionCloudEffect;
 import iskallia.vault.world.vault.chest.VaultChestEffect;
-import iskallia.vault.world.vault.logic.VaultSpawner;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -73,9 +72,7 @@ public class VaultChestConfig extends Config {
       this.RARITY_DISTRIBUTION.put(VaultRarity.RARE, 0.4);
       this.RARITY_DISTRIBUTION.put(VaultRarity.COMMON, 1.0);
       this.LEVELS = new LevelEntryList<>();
-      this.MOB_TRAP_EFFECTS = Arrays.asList(
-         new MobTrapEffect("Mob Trap", 5, new VaultSpawner.Config().withExtraMaxMobs(15).withMinDistance(1.0).withMaxDistance(12.0).withDespawnDistance(32.0))
-      );
+      this.MOB_TRAP_EFFECTS = Arrays.asList(new MobTrapEffect("Mob Trap", 5));
       this.EXPLOSION_EFFECTS = Arrays.asList(new ExplosionEffect("Explosion", 4.0F, 0.0, 3.0, 0.0, true, 10.0F, BlockInteraction.BREAK));
       this.POTION_CLOUD_EFFECTS = Arrays.asList(new PotionCloudEffect("Poison", Potions.STRONG_POISON));
       VaultChestConfig.Level level = new VaultChestConfig.Level(5);

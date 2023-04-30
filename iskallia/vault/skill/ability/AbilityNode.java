@@ -1,6 +1,5 @@
 package iskallia.vault.skill.ability;
 
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
 import iskallia.vault.skill.ability.effect.spi.core.AbilityTickResult;
@@ -32,7 +31,7 @@ public class AbilityNode<T extends AbstractAbilityConfig, E extends AbstractAbil
    }
 
    public AbilityGroup<T, E> getGroup() {
-      return (AbilityGroup<T, E>)ModConfigs.ABILITIES.getAbilityGroupByName(this.groupName);
+      return null;
    }
 
    public int getLevel() {
@@ -104,7 +103,7 @@ public class AbilityNode<T extends AbstractAbilityConfig, E extends AbstractAbil
    }
 
    public AbilityActionResult onAction(ServerPlayer player, boolean active) {
-      return this.isLearned() && this.getAbility() != null ? this.getAbility().onAction(this.getAbilityConfig(), player, active) : AbilityActionResult.FAIL;
+      return this.isLearned() && this.getAbility() != null ? this.getAbility().onAction(this.getAbilityConfig(), player, active) : AbilityActionResult.fail();
    }
 
    public CompoundTag serializeNBT() {
@@ -119,7 +118,7 @@ public class AbilityNode<T extends AbstractAbilityConfig, E extends AbstractAbil
    }
 
    public void deserializeNBT(CompoundTag nbt) {
-      this.groupName = nbt.getString("Name");
+      this.groupName = LegacyAbilityMapper.mapAbilityName(nbt.getString("Name"));
       this.level = nbt.getInt("Level");
       if (nbt.contains("Specialization", 8)) {
          this.specialization = nbt.getString("Specialization");

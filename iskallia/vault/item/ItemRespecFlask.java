@@ -2,10 +2,11 @@ package iskallia.vault.item;
 
 import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.ability.group.AbilityGroup;
-import iskallia.vault.util.MiscUtils;
+import iskallia.vault.skill.ability.LegacyAbilityMapper;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -42,11 +43,11 @@ public class ItemRespecFlask extends Item {
    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
       if (ModConfigs.ABILITIES != null) {
          if (this.allowdedIn(group)) {
-            for (AbilityGroup<?, ?> abilityGroup : ModConfigs.ABILITIES.getAll()) {
+            ModConfigs.ABILITIES.get().ifPresent(tree -> tree.iterate(SpecializedSkill.class, skill -> {
                ItemStack stack = new ItemStack(this);
-               setAbility(stack, abilityGroup.getParentName());
+               setAbility(stack, skill.getId());
                items.add(stack);
-            }
+            }));
          }
       }
    }
@@ -55,30 +56,16 @@ public class ItemRespecFlask extends Item {
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
       String abilityStr = getAbility(stack);
       if (abilityStr != null) {
-         AbilityGroup<?, ?> grp = ModConfigs.ABILITIES.getAbilityGroupByName(abilityStr);
-         Component ability = new TextComponent(grp.getParentName()).withStyle(ChatFormatting.GOLD);
-         tooltip.add(TextComponent.EMPTY);
-         tooltip.add(new TextComponent("Use to remove selected specialization"));
-         tooltip.add(new TextComponent("of ability ").append(ability));
+         ModConfigs.ABILITIES.getAbilityById(abilityStr).ifPresent(grp -> {
+            Component ability = new TextComponent(grp.getName()).withStyle(ChatFormatting.GOLD);
+            tooltip.add(TextComponent.EMPTY);
+            tooltip.add(new TextComponent("Use to remove selected specialization"));
+            tooltip.add(new TextComponent("of ability ").append(ability));
+         });
       }
    }
 
    public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
-      if (getAbility(stack) == null) {
-         if (world instanceof ServerLevel && entity instanceof ServerPlayer player) {
-            if (stack.getCount() > 1) {
-               while (stack.getCount() > 1) {
-                  stack.shrink(1);
-                  ItemStack flask = new ItemStack(this);
-                  MiscUtils.giveItem(player, flask);
-               }
-            }
-
-            List<AbilityGroup<?, ?>> abilities = ModConfigs.ABILITIES.getAll();
-            AbilityGroup<?, ?> group = abilities.get(world.random.nextInt(abilities.size()));
-            setAbility(stack, group.getParentName());
-         }
-      }
    }
 
    public Rarity getRarity(ItemStack stack) {
@@ -97,7 +84,7 @@ public class ItemRespecFlask extends Item {
          return null;
       } else {
          CompoundTag tag = stack.getOrCreateTag();
-         return tag.contains("Ability", 8) ? tag.getString("Ability") : null;
+         return tag.contains("Ability", 8) ? LegacyAbilityMapper.mapAbilityName(tag.getString("Ability")) : null;
       }
    }
 
@@ -117,8 +104,8 @@ public class ItemRespecFlask extends Item {
             }
 
             AbilityTree tree = PlayerAbilitiesData.get(((ServerPlayer)player).getLevel()).getAbilities(player);
-            AbilityNode<?, ?> node = tree.getNodeByName(abilityStr);
-            if (!node.isLearned() || node.getSpecialization() == null) {
+            Skill skill = tree.getForId(abilityStr).orElse(null);
+            if (skill == null || !skill.isUnlocked() || !(skill instanceof SpecializedSkill specialized) || specialized.getIndex() == 0) {
                return InteractionResultHolder.pass(held);
             }
          }
@@ -130,8 +117,7 @@ public class ItemRespecFlask extends Item {
 
    @OnlyIn(Dist.CLIENT)
    private boolean hasAbilityClient(String abilityStr) {
-      AbilityNode<?, ?> node = ClientAbilityData.getLearnedAbilityNode(abilityStr);
-      return node == null ? false : node.isLearned() && node.getSpecialization() != null;
+      return ClientAbilityData.getTree().getForId(abilityStr).map(Skill::isUnlocked).orElse(false);
    }
 
    public UseAnim getUseAnimation(ItemStack stack) {
@@ -150,15 +136,14 @@ public class ItemRespecFlask extends Item {
          }
 
          PlayerAbilitiesData data = PlayerAbilitiesData.get(sWorld);
-         AbilityNode<?, ?> node = data.getAbilities(player).getNodeByName(abilityStr);
-         if (node.isLearned() && node.getSpecialization() != null) {
-            data.selectSpecialization(player, node, null);
-            if (!player.isCreative()) {
-               stack.shrink(1);
+         data.getAbilities(player).getForId(abilityStr).ifPresent(skill -> {
+            if (skill.isUnlocked() && skill instanceof SpecializedSkill specialized) {
+               specialized.resetSpecialization(SkillContext.of(player));
+               if (!player.isCreative()) {
+                  stack.shrink(1);
+               }
             }
-
-            return stack;
-         }
+         });
       }
 
       return stack;

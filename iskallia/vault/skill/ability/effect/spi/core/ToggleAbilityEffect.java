@@ -10,15 +10,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 
 public abstract class ToggleAbilityEffect extends InfiniteDurationEffect {
-   private final String abilityGroup;
+   private final Class<?> type;
 
-   protected ToggleAbilityEffect(String abilityGroup, int color, ResourceLocation resourceLocation) {
+   protected ToggleAbilityEffect(Class<?> type, int color, ResourceLocation resourceLocation) {
       super(MobEffectCategory.BENEFICIAL, color, resourceLocation);
-      this.abilityGroup = abilityGroup;
+      this.type = type;
    }
 
-   public String getAbilityGroup() {
-      return this.abilityGroup;
+   public Class<?> getType() {
+      return this.type;
    }
 
    @ParametersAreNonnullByDefault
@@ -31,7 +31,7 @@ public abstract class ToggleAbilityEffect extends InfiniteDurationEffect {
 
    protected void removeAttributeModifiers(ServerPlayer player, AttributeMap attributeMap, int amplifier) {
       if (!player.hasEffect(this)) {
-         PlayerAbilitiesData.setAbilityOnCooldown(player, this.abilityGroup);
+         PlayerAbilitiesData.setAbilityOnCooldown(player, this.getType());
       }
    }
 }

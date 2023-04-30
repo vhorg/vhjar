@@ -6,7 +6,9 @@ import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.random.ChunkRandom;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.template.DynamicTemplate;
 import iskallia.vault.core.world.template.JigsawTemplate;
 import iskallia.vault.core.world.template.PlacementSettings;
@@ -113,18 +115,16 @@ public class TreasureDoorTileEntity extends BlockEntity {
 
    public static void tick(Level level, BlockPos pos, BlockState state, TreasureDoorTileEntity tile) {
       if (level instanceof ServerLevel world) {
-         if (ServerVaults.isVaultWorld(level)) {
-            if (tile.getStep() == TreasureDoorTileEntity.Step.PLACED) {
-               fillMissingDoor(world, pos, state);
-               if (state.getValue(TreasureDoorBlock.HALF) == DoubleBlockHalf.LOWER) {
-                  fillTunnel(world, pos, state, ModBlocks.VAULT_BEDROCK.defaultBlockState(), tile);
-               }
-            } else if (tile.getStep() == TreasureDoorTileEntity.Step.FILLED
-               && (Boolean)state.getValue(TreasureDoorBlock.OPEN)
-               && state.getValue(TreasureDoorBlock.HALF) == DoubleBlockHalf.LOWER) {
-               carveTunnel(world, pos, state, Blocks.AIR.defaultBlockState(), tile);
-               generateRoom(world, pos, state, tile);
+         if (tile.getStep() == TreasureDoorTileEntity.Step.PLACED) {
+            fillMissingDoor(world, pos, state);
+            if (state.getValue(TreasureDoorBlock.HALF) == DoubleBlockHalf.LOWER) {
+               fillTunnel(world, pos, state, ModBlocks.VAULT_BEDROCK.defaultBlockState(), tile);
             }
+         } else if (tile.getStep() == TreasureDoorTileEntity.Step.FILLED
+            && (Boolean)state.getValue(TreasureDoorBlock.OPEN)
+            && state.getValue(TreasureDoorBlock.HALF) == DoubleBlockHalf.LOWER) {
+            carveTunnel(world, pos, state, Blocks.AIR.defaultBlockState(), tile);
+            generateRoom(world, pos, state, tile);
          }
       }
    }
@@ -193,15 +193,17 @@ public class TreasureDoorTileEntity extends BlockEntity {
             nbt.putString("target", tile.target.toString());
             nbt.putString("pool", tile.pool.toString());
             nbt.putString("final_state", "minecraft:air");
+            PartialBlockState jigsawState = PartialBlockState.of(
+               (BlockState)Blocks.JIGSAW
+                  .defaultBlockState()
+                  .setValue(
+                     JigsawBlock.ORIENTATION, FrontAndTop.fromFrontAndTop(((Direction)state.getValue(TreasureDoorBlock.FACING)).getOpposite(), Direction.UP)
+                  )
+            );
+            PartialCompoundNbt jigsawNbt = PartialCompoundNbt.of(nbt);
             PartialTile jigsaw = PartialTile.of(
-                  (BlockState)Blocks.JIGSAW
-                     .defaultBlockState()
-                     .setValue(
-                        JigsawBlock.ORIENTATION, FrontAndTop.fromFrontAndTop(((Direction)state.getValue(TreasureDoorBlock.FACING)).getOpposite(), Direction.UP)
-                     ),
-                  nbt
-               )
-               .setPos(pos.relative(((Direction)state.getValue(TreasureDoorBlock.FACING)).getOpposite(), tile.getTunnelSize()));
+               jigsawState, jigsawNbt, pos.relative(((Direction)state.getValue(TreasureDoorBlock.FACING)).getOpposite(), tile.getTunnelSize())
+            );
             DynamicTemplate root = new DynamicTemplate();
             root.add(jigsaw);
             JigsawTemplate template = JigsawTemplate.of(

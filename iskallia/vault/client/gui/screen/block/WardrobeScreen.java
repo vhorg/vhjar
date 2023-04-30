@@ -1,5 +1,6 @@
 package iskallia.vault.client.gui.screen.block;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -41,6 +42,7 @@ import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.item.MagnetItem;
 import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.network.message.ServerboundWardrobeTabMessage;
+import iskallia.vault.util.StatUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -61,6 +63,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
@@ -174,6 +177,8 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
       private final ButtonElement<?> swapButton;
       private final List<Component> swapTooltip = new ArrayList<>();
       private boolean isShiftPressed = false;
+      boolean inTooltipClearCooldown = false;
+      private long tooltipClearTime = 0L;
 
       public Gear(WardrobeContainer.Gear container, Inventory inventory, Component title) {
          super(container, inventory, title);
@@ -205,7 +210,7 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
          this.swapButton = new ButtonElement(
                Spatials.positionXY(this.imageWidth / 2 - 15 - 9, 89),
                ScreenTextures.BUTTON_WARDROBE_SWAP_TEXTURES,
-               () -> ((WardrobeContainer.Gear)this.getMenu()).swap()
+               ((WardrobeContainer.Gear)this.getMenu())::swap
             )
             .layout((screen, gui, parent, world) -> world.translateXY(gui));
          this.swapButton.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
@@ -221,7 +226,18 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
                   ? new TranslatableComponent("screen.the_vault.wardrobe.tooltip.render_solid")
                   : new TranslatableComponent("screen.the_vault.wardrobe.tooltip.render_transparent")
             );
-         ((WardrobeContainer.Gear)this.getMenu()).setSlotChangeListener(this.swapTooltip::clear);
+         ((WardrobeContainer.Gear)this.getMenu()).setSlotChangeListener(() -> {
+            this.inTooltipClearCooldown = true;
+            this.tooltipClearTime = System.currentTimeMillis() + 100L;
+         });
+      }
+
+      protected void containerTick() {
+         super.containerTick();
+         if (this.inTooltipClearCooldown && System.currentTimeMillis() > this.tooltipClearTime) {
+            this.inTooltipClearCooldown = false;
+            this.swapTooltip.clear();
+         }
       }
 
       private List<Component> getSwapButtonTooltipLines() {
@@ -248,6 +264,28 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
 
             this.swapTooltip.add(TextComponent.EMPTY);
             LocalPlayer player = Minecraft.getInstance().player;
+            Player wardrobePlayer = this.getPlayerWithWardrobeItemsSwapped(player);
+            double playerDps = StatUtils.getAverageDps(player);
+            double playerArmor = StatUtils.getDefence(player);
+            double wardrobeDps = StatUtils.getAverageDps(wardrobePlayer);
+            double wardrobeArmor = StatUtils.getDefence(wardrobePlayer);
+            double diffDps = wardrobeDps - playerDps;
+            double diffArmor = wardrobeArmor - playerArmor;
+            boolean showDamage = Math.abs((int)diffDps) > 0;
+            if (showDamage) {
+               this.swapTooltip.add(this.getTooltipWithValue(diffDps, "screen.the_vault.wardrobe.tooltip.damage", "%.1f", Style.EMPTY.withColor(16730699)));
+            }
+
+            boolean showDefense = Math.abs((int)(diffArmor * 100.0)) > 0;
+            if (showDefense) {
+               this.swapTooltip
+                  .add(this.getTooltipWithValue(diffArmor * 100.0, "screen.the_vault.wardrobe.tooltip.defense", "%.0f", Style.EMPTY.withColor(4766456)));
+            }
+
+            if (showDamage || showDefense) {
+               this.swapTooltip.add(TextComponent.EMPTY);
+            }
+
             List<VaultGearAttributeInstance<?>> addingAttributeInstances = new ArrayList<>();
             List<VaultGearAttributeInstance<?>> removingAttributeInstances = new ArrayList<>();
             Map<VaultGearAttribute<?>, VaultGearAttributeInstance<?>> mergeableAttributes = new HashMap<>();
@@ -295,6 +333,73 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
                   );
             }
          }
+      }
+
+      private Player getPlayerWithWardrobeItemsSwapped(LocalPlayer player) {
+         Player gearPlayer = new Player(
+            player.level, ((WardrobeContainer.Gear)this.getMenu()).getBlockPos(), 0.0F, new GameProfile(null, "dummyWardrobeTooltip")
+         ) {
+            public boolean isSpectator() {
+               return false;
+            }
+
+            public boolean isCreative() {
+               return false;
+            }
+         };
+         Map<String, List<Tuple<ItemStack, Integer>>> curiosItemStacks;
+         if (this.isShiftPressed) {
+            curiosItemStacks = ((WardrobeContainer.Gear)this.getMenu()).getStoredCurios();
+         } else {
+            curiosItemStacks = IntegrationCurios.getCuriosItemStacks(player);
+            curiosItemStacks.forEach((slotKey, tuples) -> tuples.forEach(t -> {
+               ItemStack storedStack = ((WardrobeContainer.Gear)this.getMenu()).getStoredCurio(slotKey, (Integer)t.getB());
+               if (!storedStack.isEmpty()) {
+                  t.setA(storedStack);
+               }
+            }));
+         }
+
+         gearPlayer.removeAllEffects();
+         player.getActiveEffects().forEach(gearPlayer::addEffect);
+
+         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+            ItemStack storedEquipment = equipmentSlot != EquipmentSlot.MAINHAND
+               ? ((WardrobeContainer.Gear)this.getMenu()).getStoredEquipmentBySlot(equipmentSlot)
+               : ((WardrobeContainer.Gear)this.getMenu()).getHotbarItems().getStackInSlot(0);
+            if (this.isShiftPressed) {
+               this.updateItemSlot(gearPlayer, equipmentSlot, storedEquipment);
+            } else if (!storedEquipment.isEmpty()) {
+               this.updateItemSlot(gearPlayer, equipmentSlot, storedEquipment);
+            } else {
+               this.updateItemSlot(gearPlayer, equipmentSlot, player.getItemBySlot(equipmentSlot));
+            }
+         }
+
+         curiosItemStacks.forEach(
+            (slotKey, stacks) -> stacks.forEach(t -> IntegrationCurios.setCurioItemStack(gearPlayer, (ItemStack)t.getA(), slotKey, (Integer)t.getB()))
+         );
+         return gearPlayer;
+      }
+
+      private void updateItemSlot(Player player, EquipmentSlot equipmentSlot, ItemStack stack) {
+         player.setItemSlot(equipmentSlot, stack);
+         stack.getAttributeModifiers(equipmentSlot).forEach((attribute, modifier) -> {
+            AttributeInstance attributeInstance = player.getAttribute(attribute);
+            if (attributeInstance != null) {
+               attributeInstance.addTransientModifier(modifier);
+            }
+         });
+      }
+
+      private Component getTooltipWithValue(double value, String translationKey, String format, Style style) {
+         return value > 0.0
+            ? new TextComponent("+")
+               .append(new TranslatableComponent(translationKey, new Object[]{String.format(format, value)}).withStyle(style))
+               .withStyle(ChatFormatting.GREEN)
+            : new TextComponent("-")
+               .append(new TranslatableComponent(translationKey, new Object[]{String.format(format, Math.abs(value))}).withStyle(style))
+               .withStyle(ChatFormatting.RED);
       }
 
       private static <T> void addMergeableAttribute(

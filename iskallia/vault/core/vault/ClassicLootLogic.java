@@ -1,6 +1,8 @@
 package iskallia.vault.core.vault;
 
 import iskallia.vault.block.VaultChestBlock;
+import iskallia.vault.config.ShopPedestalConfig;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
@@ -9,7 +11,7 @@ import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.ChestGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
-import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.event.common.ShopPedestalGenerationEvent;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.stat.ChestStat;
 import iskallia.vault.core.vault.stat.StatCollector;
@@ -21,15 +23,10 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.item.gear.DataInitializationItem;
-import iskallia.vault.item.gear.DataTransferItem;
-import iskallia.vault.item.gear.VaultLevelItem;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.world.vault.chest.MobTrapEffect;
-import java.util.List;
-import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -65,7 +62,7 @@ public class ClassicLootLogic extends LootLogic {
    protected void onChestPostGenerate(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
       this.generateCatalystFragments(data, vault);
       this.generateRunes(data, vault);
-      this.initLootData(vault, data.getLoot(), data.getPos(), data.getRandom());
+      this.initializeLoot(vault, data.getLoot(), data.getPos(), data.getRandom());
    }
 
    @Override
@@ -74,14 +71,31 @@ public class ClassicLootLogic extends LootLogic {
 
    @Override
    protected void onBlockPostGenerate(VirtualWorld world, Vault vault, LootableBlockGenerationEvent.Data data) {
-      this.initLootData(vault, data.getLoot(), data.getPos(), data.getRandom());
+      this.initializeLoot(vault, data.getLoot(), data.getPos(), data.getRandom());
+   }
+
+   @Override
+   protected void onShopPedestalGenerate(VirtualWorld world, Vault vault, ShopPedestalGenerationEvent.Data data) {
+      int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
+      ShopPedestalConfig.ShopOffer offer = ModConfigs.SHOP_PEDESTAL.getForLevel(level, data.getRandom());
+      if (offer != null && !offer.isEmpty()) {
+         ItemStack stack = this.initializeLoot(vault, offer.offer().copy(), data.getPos(), data.getRandom());
+         data.getTileEntity().setOffer(stack, OverSizedItemStack.of(offer.currency().overSizedStack()));
+      }
+
+      data.getTileEntity().setInitialized(true);
+      data.getTileEntity().setChanged();
+      world.sendBlockUpdated(data.getPos(), data.getState(), data.getState(), 3);
    }
 
    protected boolean applyTrap(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
       boolean canBeTrapped = data.getState().getBlock() == ModBlocks.WOODEN_CHEST
          || data.getState().getBlock() == ModBlocks.GILDED_CHEST
          || data.getState().getBlock() == ModBlocks.LIVING_CHEST
-         || data.getState().getBlock() == ModBlocks.ORNATE_CHEST;
+         || data.getState().getBlock() == ModBlocks.ORNATE_CHEST
+         || data.getState().getBlock() == ModBlocks.GILDED_STRONGBOX
+         || data.getState().getBlock() == ModBlocks.ORNATE_STRONGBOX
+         || data.getState().getBlock() == ModBlocks.LIVING_STRONGBOX;
       if (!canBeTrapped) {
          return false;
       } else {
@@ -111,16 +125,6 @@ public class ClassicLootLogic extends LootLogic {
          } else {
             return false;
          }
-      }
-   }
-
-   private void initLootData(Vault vault, List<ItemStack> loot, BlockPos pos, RandomSource random) {
-      for (int i = 0; i < loot.size(); i++) {
-         ItemStack stack = loot.get(i);
-         VaultLevelItem.doInitializeVaultLoot(stack, vault, pos);
-         stack = DataTransferItem.doConvertStack(stack, random);
-         DataInitializationItem.doInitialize(stack, random);
-         loot.set(i, stack);
       }
    }
 

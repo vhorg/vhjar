@@ -71,7 +71,7 @@ public class ItemVaultFruit extends Item {
    @Nonnull
    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
       ItemStack itemStack = player.getItemInHand(hand);
-      if (!ServerVaults.isVaultWorld(level)) {
+      if (!level.isClientSide && ServerVaults.get(level).isEmpty()) {
          return InteractionResultHolder.fail(itemStack);
       } else if (!this.isPlayerMaxHealthGreaterThan(player, 2)) {
          if (player.level.isClientSide) {
@@ -128,7 +128,7 @@ public class ItemVaultFruit extends Item {
 
    @SubscribeEvent
    public static void on(PlayerTickEvent event) {
-      if (event.side != LogicalSide.CLIENT && event.player.getLevel().getGameTime() % 10L == 0L && !ServerVaults.isInVault(event.player)) {
+      if (event.side != LogicalSide.CLIENT && event.player.getLevel().getGameTime() % 10L == 0L && !ServerVaults.get(event.player.level).isPresent()) {
          synchronized (event.player) {
             AttributeInstance attributeInstance = event.player.getAttribute(Attributes.MAX_HEALTH);
             if (attributeInstance != null) {

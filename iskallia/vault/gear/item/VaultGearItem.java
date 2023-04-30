@@ -91,7 +91,7 @@ public interface VaultGearItem
 
    @Override
    default boolean isImmuneToDamage(ItemStack stack, @Nullable Player player) {
-      return player == null ? false : !ServerVaults.isVaultWorld(player.getLevel()) && !VHSmpUtil.isArenaWorld(player);
+      return player == null ? false : ServerVaults.get(player.getLevel()).isEmpty() && !VHSmpUtil.isArenaWorld(player);
    }
 
    @Nullable
@@ -140,9 +140,9 @@ public interface VaultGearItem
                   data.updateAttribute(ModGearAttributes.GEAR_MODEL, randomModel.getId());
                   data.write(stack);
                }
-            }
 
-            tag.remove(modelAttrKey);
+               tag.remove(modelAttrKey);
+            }
          }
       }
 

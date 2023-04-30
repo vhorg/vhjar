@@ -18,7 +18,7 @@ import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.level.Level;
 
 public class AbsorptionAppleItem extends Item {
-   public static FoodProperties VAULT_FOOD = new Builder().saturationMod(0.0F).nutrition(0).fast().alwaysEat().build();
+   public static FoodProperties VAULT_FOOD = new Builder().saturationMod(0.1F).nutrition(1).fast().alwaysEat().build();
 
    public AbsorptionAppleItem(ResourceLocation id) {
       super(new Properties().tab(ModItems.VAULT_MOD_GROUP).food(VAULT_FOOD).stacksTo(64));

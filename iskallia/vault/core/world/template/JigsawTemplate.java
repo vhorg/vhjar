@@ -6,8 +6,10 @@ import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.iterator.FlatteningIterator;
 import iskallia.vault.core.vault.VaultRegistry;
+import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.core.world.data.PartialEntity;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.generator.JigsawData;
 import iskallia.vault.core.world.processor.entity.EntityProcessor;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
@@ -17,7 +19,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -156,7 +157,7 @@ public class JigsawTemplate extends Template {
    }
 
    @Override
-   public Iterator<PartialTile> getTiles(Predicate<PartialTile> filter, PlacementSettings settings) {
+   public Iterator<PartialTile> getTiles(TilePredicate filter, PlacementSettings settings) {
       PlacementSettings copy = settings.copy();
       this.configurator.accept(copy);
       List<Iterator<PartialTile>> iterators = new ArrayList<>();
@@ -166,7 +167,7 @@ public class JigsawTemplate extends Template {
    }
 
    @Override
-   public Iterator<PartialEntity> getEntities(Predicate<PartialEntity> filter, PlacementSettings settings) {
+   public Iterator<PartialEntity> getEntities(EntityPredicate filter, PlacementSettings settings) {
       PlacementSettings copy = settings.copy();
       this.configurator.accept(copy);
       List<Iterator<PartialEntity>> iterators = new ArrayList<>();

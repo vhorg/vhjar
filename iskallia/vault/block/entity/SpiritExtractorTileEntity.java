@@ -436,6 +436,7 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
             this.stackCost.clear();
             totalCost += this.getItemsCost(cost, items);
             totalCost = (int)(totalCost * multiplier * (1.0F - heroDiscount) * (1.0F - rescuedBonus));
+            totalCost = Math.max(1, totalCost);
             this.totalCost = new OverSizedItemStack(new ItemStack(cost.item, totalCost), totalCost);
          });
       }

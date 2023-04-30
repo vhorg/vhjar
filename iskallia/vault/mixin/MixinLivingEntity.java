@@ -2,7 +2,9 @@ package iskallia.vault.mixin;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.entity.entity.FighterEntity;
+import iskallia.vault.entity.entity.VaultGuardianEntity;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModAttributes;
@@ -24,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -33,6 +36,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.ForgeMod;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,6 +52,9 @@ public abstract class MixinLivingEntity extends Entity {
    protected ItemStack useItem;
    @Shadow
    public long lastDamageStamp;
+   @Shadow
+   @Final
+   private AttributeMap attributes;
    private float rawHealth;
    private boolean useRawHealth;
 
@@ -87,6 +94,15 @@ public abstract class MixinLivingEntity extends Entity {
    @Shadow
    public abstract void setHealth(float var1);
 
+   @Shadow
+   protected abstract void hurtArmor(DamageSource var1, float var2);
+
+   @Shadow
+   public abstract double getAttributeValue(Attribute var1);
+
+   @Shadow
+   public abstract AttributeMap getAttributes();
+
    @Redirect(
       method = {"createLivingAttributes"},
       at = @At(
@@ -118,6 +134,21 @@ public abstract class MixinLivingEntity extends Entity {
          .add(ModAttributes.CROSSBOW_CHARGE_TIME)
          .add(ModAttributes.THORNS_CHANCE)
          .add(ModAttributes.THORNS_DAMAGE);
+   }
+
+   @Inject(
+      method = {"getAttributeValue"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   public void getAttributeValue(Attribute attribute, CallbackInfoReturnable<Double> cir) {
+      if (attribute == ForgeMod.REACH_DISTANCE.get()) {
+         if (this.level.isClientSide() && ClientVaults.getActive().isPresent()) {
+            cir.setReturnValue(Math.min(this.getAttributes().getValue(attribute), 7.0));
+         } else if (ServerVaults.get(this.level).isPresent()) {
+            cir.setReturnValue(Math.min(this.getAttributes().getValue(attribute), 7.0));
+         }
+      }
    }
 
    @Redirect(
@@ -173,12 +204,25 @@ public abstract class MixinLivingEntity extends Entity {
       }
    }
 
+   @Redirect(
+      method = {"getDamageAfterArmorAbsorb"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/entity/LivingEntity;hurtArmor(Lnet/minecraft/world/damagesource/DamageSource;F)V"
+      )
+   )
+   public void preventHurtArmor(LivingEntity entity, DamageSource src, float damage) {
+      if (!(src.getEntity() instanceof VaultGuardianEntity)) {
+         this.hurtArmor(src, damage);
+      }
+   }
+
    @Inject(
       method = {"tick"},
       at = {@At("RETURN")}
    )
    public void tick(CallbackInfo ci) {
-      if (this.useRawHealth && this.rawHealth > this.getHealth()) {
+      if (this.useRawHealth && this.rawHealth > 0.0F && this.rawHealth > this.getHealth()) {
          this.setHealth(this.rawHealth);
          this.useRawHealth = false;
       }
@@ -244,7 +288,7 @@ public abstract class MixinLivingEntity extends Entity {
    private void readAdditionalSaveData(CompoundTag nbt, CallbackInfo ci) {
       if (nbt.contains("Health", 99)) {
          float health = nbt.getFloat("Health");
-         if (health > this.getMaxHealth()) {
+         if (health > this.getMaxHealth() && health > 0.0F) {
             this.rawHealth = health;
             this.useRawHealth = true;
          }

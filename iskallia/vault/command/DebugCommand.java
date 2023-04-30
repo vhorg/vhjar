@@ -35,21 +35,13 @@ import iskallia.vault.item.gear.EtchingItem;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.InventoryUtil;
-import iskallia.vault.util.MathUtilities;
 import iskallia.vault.world.data.PlayerProficiencyData;
 import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.ServerVaults;
-import iskallia.vault.world.data.StreamData;
 import iskallia.vault.world.data.VaultPlayerStats;
-import iskallia.vault.world.vault.gen.layout.CircleRoomLayout;
-import iskallia.vault.world.vault.gen.layout.DiamondRoomLayout;
-import iskallia.vault.world.vault.gen.layout.SquareRoomLayout;
-import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutGenerator;
-import iskallia.vault.world.vault.gen.layout.VaultRoomLayoutRegistry;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -106,7 +98,6 @@ public class DebugCommand extends Command {
 
    @Override
    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
-      builder.then(Commands.literal("20_subs").executes(this::random20Subs));
       builder.then(Commands.literal("dump_configs").executes(this::dumpConfigs));
       builder.then(
          Commands.literal("dump_blockstate")
@@ -116,7 +107,6 @@ public class DebugCommand extends Command {
             )
       );
       builder.then(Commands.literal("dump_item_nbt").executes(this::dumpItemNBT));
-      builder.then(Commands.literal("dump_vault_sizes").executes(this::dumpVaultSizes));
       builder.then(Commands.literal("scan_inventory").executes(this::scanInventory));
       builder.then(
          Commands.literal("damage_all_gear").then(Commands.argument("damageAmount", IntegerArgumentType.integer(1)).executes(this::damageInventoryGear))
@@ -332,19 +322,6 @@ public class DebugCommand extends Command {
       return 0;
    }
 
-   private int random20Subs(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
-      MinecraftServer server = player.getServer();
-      StreamData streamData = StreamData.get(player.getLevel());
-
-      for (int i = 0; i < 20; i++) {
-         int randomId = MathUtilities.getRandomInt(0, 9999);
-         streamData.onSub(server, player.getUUID(), "Test" + randomId, i * 5);
-      }
-
-      return 0;
-   }
-
    private int dumpBlockstate(CommandContext<CommandSourceStack> context, BlockPos blockPos) throws CommandSyntaxException {
       ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
       ServerLevel world = player.getLevel();
@@ -384,20 +361,6 @@ public class DebugCommand extends Command {
       ItemStack heldStack = player.getMainHandItem();
       VaultMod.LOGGER.info("Held Stack NBT = {}", heldStack.getTag());
       player.sendMessage(new TextComponent(heldStack.getTag().toString()), Util.NIL_UUID);
-      return 0;
-   }
-
-   private int dumpVaultSizes(CommandContext<CommandSourceStack> context) {
-      for (ResourceLocation layoutKey : Arrays.asList(DiamondRoomLayout.ID, SquareRoomLayout.ID, CircleRoomLayout.ID)) {
-         VaultMod.LOGGER.info("Layout: " + layoutKey.getPath());
-         VaultRoomLayoutGenerator gen = VaultRoomLayoutRegistry.getLayoutGenerator(layoutKey);
-
-         for (int i = 1; i < 33; i += 2) {
-            gen.setSize(i);
-            VaultMod.LOGGER.info("Size: " + i + " Rooms: " + gen.generateLayout().getRooms().size());
-         }
-      }
-
       return 0;
    }
 

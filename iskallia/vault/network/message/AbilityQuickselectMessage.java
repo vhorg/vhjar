@@ -1,10 +1,13 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.ability.KeyBehavior;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.ability.effect.spi.core.HoldAbility;
+import iskallia.vault.skill.ability.effect.spi.core.InstantAbility;
+import iskallia.vault.skill.ability.effect.spi.core.ToggleAbility;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
@@ -37,25 +40,24 @@ public class AbilityQuickselectMessage {
       context.enqueueWork(() -> {
          ServerPlayer sender = context.getSender();
          if (sender != null) {
-            AbilityGroup<?, ?> ability = ModConfigs.ABILITIES.getAbilityGroupByName(pkt.abilityName);
-            if (ability != null) {
-               PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
-               AbilityTree abilityTree = abilitiesData.getAbilities(sender);
-               AbilityNode<?, ?> abilityNode = abilityTree.getNodeOf(ability);
-               if (abilityNode.isLearned()) {
-                  abilityTree.quickSelectAbility(sender.server, ability.getParentName());
-                  if (abilityNode.equals(abilityTree.getSelectedAbility()) && !abilityTree.isOnCooldown(abilityNode)) {
-                     if (abilityNode.getKeyBehavior() != KeyBehavior.INSTANT_ON_RELEASE && abilityNode.getKeyBehavior() != KeyBehavior.TOGGLE_ON_RELEASE) {
-                        if (abilityNode.getKeyBehavior() == KeyBehavior.ACTIVATE_ON_HOLD) {
-                           if (pkt.action == 1) {
-                              abilityTree.keyDown(sender.server);
-                           } else if (pkt.action == 0) {
-                              abilityTree.keyUp(sender.server);
-                           }
+            PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
+            AbilityTree abilityTree = abilitiesData.getAbilities(sender);
+            SpecializedSkill skill = (SpecializedSkill)abilityTree.getForId(pkt.abilityName).orElse(null);
+            if (skill != null && skill.isUnlocked()) {
+               SkillContext ctx = SkillContext.of(sender);
+               abilityTree.onQuickSelect(pkt.abilityName, ctx);
+               Ability ability = (Ability)((TieredSkill)skill.getSpecialization()).getChild();
+               if (skill.getId().equals(abilityTree.getSelected().getId()) && !ability.isOnCooldown()) {
+                  if (!(ability instanceof InstantAbility) && !(ability instanceof ToggleAbility)) {
+                     if (ability instanceof HoldAbility) {
+                        if (pkt.action == 1) {
+                           abilityTree.onKeyDown(ctx);
+                        } else if (pkt.action == 0) {
+                           abilityTree.onKeyUp(ctx);
                         }
-                     } else if (pkt.action == 1) {
-                        abilityTree.keyUp(sender.server);
                      }
+                  } else if (pkt.action == 1) {
+                     abilityTree.onKeyUp(ctx);
                   }
                }
             }

@@ -15,9 +15,12 @@ public class IntegerAttributeGenerator extends NumberRangeGenerator<Integer, Int
       return IntegerAttributeGenerator.Range.class;
    }
 
-   public MutableComponent getConfigRangeDisplay(VaultGearModifierReader<Integer> reader, IntegerAttributeGenerator.Range object) {
-      MutableComponent minDisplay = reader.getValueDisplay(object.min);
-      MutableComponent maxDisplay = reader.getValueDisplay(object.max);
+   @Nullable
+   public MutableComponent getConfigRangeDisplay(
+      VaultGearModifierReader<Integer> reader, IntegerAttributeGenerator.Range min, IntegerAttributeGenerator.Range max
+   ) {
+      MutableComponent minDisplay = reader.getValueDisplay(min.min);
+      MutableComponent maxDisplay = reader.getValueDisplay(max.max);
       return (MutableComponent)(minDisplay != null && maxDisplay != null ? minDisplay.append("-").append(maxDisplay) : new TextComponent(""));
    }
 

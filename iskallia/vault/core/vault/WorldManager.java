@@ -78,6 +78,7 @@ public class WorldManager extends DataObject<WorldManager> {
    @OnlyIn(Dist.CLIENT)
    public void initClient(Vault vault) {
       this.ifPresent(RENDERER, renderer -> renderer.initClient(vault));
+      this.ifPresent(PORTAL_LOGIC, portalLogic -> portalLogic.initClient(vault));
    }
 
    public WorldManager setTheme(ThemeKey theme, Version version) {

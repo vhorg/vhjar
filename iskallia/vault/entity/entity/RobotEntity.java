@@ -7,7 +7,6 @@ import iskallia.vault.entity.ai.TeleportGoal;
 import iskallia.vault.entity.ai.TeleportRandomly;
 import iskallia.vault.entity.ai.ThrowProjectilesGoal;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.skill.ability.effect.sub.NovaDotAbility;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -59,10 +58,7 @@ public class RobotEntity extends IronGolem implements VaultBoss {
    }
 
    public boolean hurt(DamageSource source, float amount) {
-      if (!(source instanceof NovaDotAbility.PlayerDamageOverTimeSource)
-         && !(source.getEntity() instanceof Player)
-         && !(source.getEntity() instanceof EternalEntity)
-         && source != DamageSource.OUT_OF_WORLD) {
+      if (!(source.getEntity() instanceof Player) && !(source.getEntity() instanceof EternalEntity) && source != DamageSource.OUT_OF_WORLD) {
          return false;
       } else if (this.isInvulnerableTo(source) || source == DamageSource.FALL) {
          return false;

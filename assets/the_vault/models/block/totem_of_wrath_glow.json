@@ -1,0 +1,42 @@
+{
+	"parent": "block/block",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "the_vault:block/totem_of_wrath",
+		"particle": "the_vault:block/totem_of_wrath"
+	},
+	"elements": [
+		{
+			"from": [8, 6.5, 2.9],
+			"to": [12, 12.5, 2.9],
+			"rotation": {"angle": -22.5, "axis": "y", "origin": [8, 8.5, 2.75]},
+			"faces": {
+				"north": {"uv": [12, 10, 10, 13], "texture": "#0"}
+			}
+		},
+		{
+			"from": [4, 6.5, 2.9],
+			"to": [8, 12.5, 2.9],
+			"rotation": {"angle": 22.5, "axis": "y", "origin": [8, 8.5, 2.75]},
+			"faces": {
+				"north": {"uv": [10, 10, 8, 13], "texture": "#0"}
+			}
+		},
+		{
+			"from": [8, 6.5, 13.1],
+			"to": [12, 12.5, 13.1],
+			"rotation": {"angle": 22.5, "axis": "y", "origin": [8, 8.5, 13.25]},
+			"faces": {
+				"south": {"uv": [10, 10, 12, 13], "texture": "#0"}
+			}
+		},
+		{
+			"from": [4, 6.5, 13.1],
+			"to": [8, 12.5, 13.1],
+			"rotation": {"angle": -22.5, "axis": "y", "origin": [8, 8.5, 13.25]},
+			"faces": {
+				"south": {"uv": [8, 10, 10, 13], "texture": "#0"}
+			}
+		}
+	]
+}

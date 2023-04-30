@@ -1,8 +1,9 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.container.NBTElementContainer;
+import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.init.ModContainers;
-import iskallia.vault.skill.talent.TalentTree;
+import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.world.data.PlayerTalentsData;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
@@ -46,7 +47,11 @@ public class ServerboundOpenTalentsMessage {
                public AbstractContainerMenu createMenu(int i, Inventory playerInventory, Player playerEntity) {
                   return new NBTElementContainer(() -> ModContainers.TALENT_TAB_CONTAINER, i, playerInventory.player, talentTree);
                }
-            }, buffer -> buffer.writeNbt(talentTree.serializeNBT()));
+            }, buffer -> {
+               ArrayBitBuffer buffer1 = ArrayBitBuffer.empty();
+               talentTree.writeBits(buffer1);
+               buffer.writeLongArray(buffer1.toLongArray());
+            });
          }
       });
       context.setPacketHandled(true);

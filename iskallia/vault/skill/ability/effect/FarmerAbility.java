@@ -1,6 +1,5 @@
 package iskallia.vault.skill.ability.effect;
 
-import iskallia.vault.skill.ability.config.FarmerConfig;
 import iskallia.vault.skill.ability.effect.spi.AbstractFarmerAbility;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -14,7 +13,23 @@ import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.SaplingBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class FarmerAbility<C extends FarmerConfig> extends AbstractFarmerAbility<C> {
+public class FarmerAbility extends AbstractFarmerAbility {
+   public FarmerAbility(
+      int unlockLevel,
+      int learnPointCost,
+      int regretPointCost,
+      int cooldownTicks,
+      float manaCostPerSecond,
+      int tickDelay,
+      int horizontalRange,
+      int verticalRange
+   ) {
+      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCostPerSecond, tickDelay, horizontalRange, verticalRange);
+   }
+
+   public FarmerAbility() {
+   }
+
    @Override
    protected boolean canGrowBlock(ServerLevel world, BlockPos pos, Block block, BlockState blockState) {
       if (block instanceof CropBlock cropBlock) {
@@ -25,7 +40,7 @@ public class FarmerAbility<C extends FarmerConfig> extends AbstractFarmerAbility
    }
 
    @Override
-   protected void doGrowBlock(C config, ServerPlayer player, ServerLevel world, BlockPos pos, Block block, BlockState blockState) {
+   protected void doGrowBlock(ServerPlayer player, ServerLevel world, BlockPos pos, Block block, BlockState blockState) {
       if (block instanceof CropBlock || block instanceof SaplingBlock) {
          BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), world, pos, player);
          world.sendParticles(ParticleTypes.HAPPY_VILLAGER, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 20, 0.5, 0.5, 0.5, 0.0);

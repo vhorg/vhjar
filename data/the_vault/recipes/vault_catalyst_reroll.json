@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "eee",
+    "ede",
     "iai",
-    "eee"
+    "ede"
   ],
   "key": {
     "e": {
@@ -13,7 +13,10 @@
       "item": "the_vault:vault_catalyst_infused"
     },
     "a": {
-      "item": "the_vault:vault_diamond_block"
+      "item": "the_vault:vault_diamond"
+    },
+    "d": {
+      "item": "the_vault:dreamstone"
     }
   },
   "result": {

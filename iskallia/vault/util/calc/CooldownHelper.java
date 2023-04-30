@@ -6,21 +6,20 @@ import iskallia.vault.gear.attribute.ability.AbilityCooldownPercentAttribute;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModEtchings;
 import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 
 public class CooldownHelper {
-   public static int adjustCooldown(ServerPlayer player, AbilityNode<?, ?> abilityNode) {
-      AbstractAbilityConfig abilityConfig = abilityNode.getAbilityConfig();
-      if (abilityConfig == null) {
+   public static int adjustCooldown(ServerPlayer player, Ability ability) {
+      String id = ability.getId();
+      if (id == null) {
          return 0;
       } else {
-         int cooldownTicks = abilityConfig.getCooldownTicks();
-         return adjustCooldown(player, abilityNode.getName(), cooldownTicks);
+         int cooldownTicks = ability.getCooldownTicks();
+         return adjustCooldown(player, id, cooldownTicks);
       }
    }
 

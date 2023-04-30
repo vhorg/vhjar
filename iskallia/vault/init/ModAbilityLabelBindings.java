@@ -3,46 +3,63 @@ package iskallia.vault.init;
 import iskallia.vault.skill.ability.component.AbilityLabelBindingRegistry;
 import iskallia.vault.skill.ability.component.AbilityLabelFormatters;
 import iskallia.vault.skill.ability.component.IAbilityLabelBinding;
-import iskallia.vault.skill.ability.config.DashConfig;
-import iskallia.vault.skill.ability.config.ExecuteConfig;
-import iskallia.vault.skill.ability.config.FarmerConfig;
-import iskallia.vault.skill.ability.config.GhostWalkConfig;
-import iskallia.vault.skill.ability.config.HealConfig;
-import iskallia.vault.skill.ability.config.HunterConfig;
-import iskallia.vault.skill.ability.config.ManaShieldConfig;
-import iskallia.vault.skill.ability.config.MegaJumpConfig;
-import iskallia.vault.skill.ability.config.NovaConfig;
-import iskallia.vault.skill.ability.config.RampageConfig;
-import iskallia.vault.skill.ability.config.StonefallConfig;
-import iskallia.vault.skill.ability.config.SummonEternalConfig;
-import iskallia.vault.skill.ability.config.TankConfig;
-import iskallia.vault.skill.ability.config.TauntConfig;
-import iskallia.vault.skill.ability.config.VeinMinerConfig;
-import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
-import iskallia.vault.skill.ability.config.spi.IInstantManaConfig;
-import iskallia.vault.skill.ability.config.spi.IPerSecondManaConfig;
-import iskallia.vault.skill.ability.config.sub.DashDamageConfig;
-import iskallia.vault.skill.ability.config.sub.FarmerAnimalConfig;
-import iskallia.vault.skill.ability.config.sub.FarmerCactusConfig;
-import iskallia.vault.skill.ability.config.sub.FarmerMelonConfig;
-import iskallia.vault.skill.ability.config.sub.HealEffectConfig;
-import iskallia.vault.skill.ability.config.sub.HealGroupConfig;
-import iskallia.vault.skill.ability.config.sub.HunterObjectiveConfig;
-import iskallia.vault.skill.ability.config.sub.HunterTargetedConfig;
-import iskallia.vault.skill.ability.config.sub.MegaJumpBreakDownConfig;
-import iskallia.vault.skill.ability.config.sub.MegaJumpBreakUpConfig;
-import iskallia.vault.skill.ability.config.sub.NovaDotConfig;
-import iskallia.vault.skill.ability.config.sub.NovaSpeedConfig;
-import iskallia.vault.skill.ability.config.sub.RampageChainConfig;
-import iskallia.vault.skill.ability.config.sub.RampageLeechConfig;
-import iskallia.vault.skill.ability.config.sub.StonefallColdConfig;
-import iskallia.vault.skill.ability.config.sub.StonefallSnowConfig;
-import iskallia.vault.skill.ability.config.sub.TankProjectileConfig;
-import iskallia.vault.skill.ability.config.sub.TankReflectConfig;
-import iskallia.vault.skill.ability.config.sub.TauntRepelConfig;
-import iskallia.vault.skill.ability.config.sub.VeinMinerDurabilityConfig;
-import iskallia.vault.skill.ability.config.sub.VeinMinerFortuneConfig;
-import iskallia.vault.skill.ability.config.sub.VeinMinerVoidConfig;
+import iskallia.vault.skill.ability.effect.DashAbility;
+import iskallia.vault.skill.ability.effect.DashDamageAbility;
+import iskallia.vault.skill.ability.effect.DashWarpAbility;
+import iskallia.vault.skill.ability.effect.EmpowerAbility;
+import iskallia.vault.skill.ability.effect.EmpowerIceArmourAbility;
+import iskallia.vault.skill.ability.effect.ExecuteAbility;
+import iskallia.vault.skill.ability.effect.FarmerAbility;
+import iskallia.vault.skill.ability.effect.FarmerAnimalAbility;
+import iskallia.vault.skill.ability.effect.FarmerCactusAbility;
+import iskallia.vault.skill.ability.effect.FarmerMelonAbility;
+import iskallia.vault.skill.ability.effect.GhostWalkAbility;
+import iskallia.vault.skill.ability.effect.GhostWalkSpiritAbility;
+import iskallia.vault.skill.ability.effect.HealAbility;
+import iskallia.vault.skill.ability.effect.HealEffectAbility;
+import iskallia.vault.skill.ability.effect.HealGroupAbility;
+import iskallia.vault.skill.ability.effect.JavelinAbility;
+import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
+import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
+import iskallia.vault.skill.ability.effect.JavelinSightAbility;
+import iskallia.vault.skill.ability.effect.ManaShieldAbility;
+import iskallia.vault.skill.ability.effect.ManaShieldRetributionAbility;
+import iskallia.vault.skill.ability.effect.MegaJumpAbility;
+import iskallia.vault.skill.ability.effect.MegaJumpBreakDownAbility;
+import iskallia.vault.skill.ability.effect.MegaJumpBreakUpAbility;
+import iskallia.vault.skill.ability.effect.NovaAbility;
+import iskallia.vault.skill.ability.effect.NovaDotAbility;
+import iskallia.vault.skill.ability.effect.NovaSpeedAbility;
+import iskallia.vault.skill.ability.effect.RampageAbility;
+import iskallia.vault.skill.ability.effect.RampageChainAbility;
+import iskallia.vault.skill.ability.effect.RampageLeechAbility;
+import iskallia.vault.skill.ability.effect.ShellAbility;
+import iskallia.vault.skill.ability.effect.ShellPorcupineAbility;
+import iskallia.vault.skill.ability.effect.ShellQuillAbility;
+import iskallia.vault.skill.ability.effect.SmiteAbility;
+import iskallia.vault.skill.ability.effect.SmiteArchonAbility;
+import iskallia.vault.skill.ability.effect.SmiteThunderstormAbility;
+import iskallia.vault.skill.ability.effect.StonefallAbility;
+import iskallia.vault.skill.ability.effect.StonefallColdAbility;
+import iskallia.vault.skill.ability.effect.StonefallSnowAbility;
+import iskallia.vault.skill.ability.effect.SummonEternalAbility;
+import iskallia.vault.skill.ability.effect.TauntAbility;
+import iskallia.vault.skill.ability.effect.TauntCharmAbility;
+import iskallia.vault.skill.ability.effect.TauntRepelAbility;
+import iskallia.vault.skill.ability.effect.TotemAbility;
+import iskallia.vault.skill.ability.effect.TotemManaRegenAbility;
+import iskallia.vault.skill.ability.effect.TotemMobDamageAbility;
+import iskallia.vault.skill.ability.effect.TotemPlayerDamageAbility;
+import iskallia.vault.skill.ability.effect.VeinMinerAbility;
+import iskallia.vault.skill.ability.effect.VeinMinerDurabilityAbility;
+import iskallia.vault.skill.ability.effect.VeinMinerFortuneAbility;
+import iskallia.vault.skill.ability.effect.VeinMinerVoidAbility;
+import iskallia.vault.skill.ability.effect.spi.HunterAbility;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.ability.effect.spi.core.IInstantManaAbility;
+import iskallia.vault.skill.ability.effect.spi.core.IPerSecondManaAbility;
+import iskallia.vault.skill.base.LearnableSkill;
+import iskallia.vault.skill.base.Skill;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -50,261 +67,486 @@ import java.util.Map.Entry;
 public class ModAbilityLabelBindings {
    public static void register() {
       AbilityLabelBindingRegistry.clear();
-      register(DashConfig.class, Map.of("distance", config -> AbilityLabelFormatters.integer(config.getExtraDistance())));
+      register(DashAbility.class, Map.of("distance", ability -> AbilityLabelFormatters.integer(ability.getExtraDistance())));
       register(
-         DashDamageConfig.class,
+         DashDamageAbility.class,
          Map.of(
             "distance",
-            config -> AbilityLabelFormatters.integer(config.getExtraDistance()),
+            ability -> AbilityLabelFormatters.integer(ability.getExtraDistance()),
             "damage",
-            config -> AbilityLabelFormatters.percentRounded(config.getAttackDamagePercentPerDash())
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAttackDamagePercentPerDash())
          )
       );
+      register(DashWarpAbility.class, Map.of("force", ability -> AbilityLabelFormatters.decimal(ability.getProjectileLaunchForce())));
       register(
-         ExecuteConfig.class,
+         ExecuteAbility.class,
          Map.of(
             "damage",
-            config -> AbilityLabelFormatters.percentRounded(config.getDamageHealthPercentage()),
+            ability -> AbilityLabelFormatters.percentRounded(ability.getDamageHealthPercentage()),
             "duration",
-            config -> AbilityLabelFormatters.ticks(config.getEffectDurationTicks())
+            ability -> AbilityLabelFormatters.ticks(ability.getEffectDurationTicks())
          )
       );
       register(
-         FarmerConfig.class,
+         FarmerAbility.class,
          Map.of(
             "delay",
-            config -> AbilityLabelFormatters.ticks(config.getTickDelay()),
+            ability -> AbilityLabelFormatters.ticks(ability.getTickDelay()),
             "rangeHorizontal",
-            config -> AbilityLabelFormatters.integer(config.getHorizontalRange()),
+            ability -> AbilityLabelFormatters.integer(ability.getHorizontalRange()),
             "rangeVertical",
-            config -> AbilityLabelFormatters.integer(config.getVerticalRange())
+            ability -> AbilityLabelFormatters.integer(ability.getVerticalRange())
          )
       );
       register(
-         FarmerCactusConfig.class,
+         FarmerCactusAbility.class,
          Map.of(
             "delay",
-            config -> AbilityLabelFormatters.ticks(config.getTickDelay()),
+            ability -> AbilityLabelFormatters.ticks(ability.getTickDelay()),
             "rangeHorizontal",
-            config -> AbilityLabelFormatters.integer(config.getHorizontalRange()),
+            ability -> AbilityLabelFormatters.integer(ability.getHorizontalRange()),
             "rangeVertical",
-            config -> AbilityLabelFormatters.integer(config.getVerticalRange())
+            ability -> AbilityLabelFormatters.integer(ability.getVerticalRange())
          )
       );
       register(
-         FarmerMelonConfig.class,
+         FarmerMelonAbility.class,
          Map.of(
             "delay",
-            config -> AbilityLabelFormatters.ticks(config.getTickDelay()),
+            ability -> AbilityLabelFormatters.ticks(ability.getTickDelay()),
             "rangeHorizontal",
-            config -> AbilityLabelFormatters.integer(config.getHorizontalRange()),
+            ability -> AbilityLabelFormatters.integer(ability.getHorizontalRange()),
             "rangeVertical",
-            config -> AbilityLabelFormatters.integer(config.getVerticalRange())
+            ability -> AbilityLabelFormatters.integer(ability.getVerticalRange())
          )
       );
       register(
-         FarmerAnimalConfig.class,
+         FarmerAnimalAbility.class,
          Map.of(
             "delay",
-            config -> AbilityLabelFormatters.ticks(config.getTickDelay()),
+            ability -> AbilityLabelFormatters.ticks(ability.getTickDelay()),
             "rangeHorizontal",
-            config -> AbilityLabelFormatters.integer(config.getHorizontalRange()),
+            ability -> AbilityLabelFormatters.integer(ability.getHorizontalRange()),
             "rangeVertical",
-            config -> AbilityLabelFormatters.integer(config.getVerticalRange()),
+            ability -> AbilityLabelFormatters.integer(ability.getVerticalRange()),
             "chance",
-            config -> AbilityLabelFormatters.percentRounded(config.getAdultChance())
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAdultChance())
          )
       );
-      register(GhostWalkConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
-      register(HealConfig.class, Map.of("heal", config -> AbilityLabelFormatters.decimal(config.getFlatLifeHealed())));
-      register(HealEffectConfig.class);
+      register(GhostWalkAbility.class, Map.of("duration", ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks())));
+      register(GhostWalkSpiritAbility.class, Map.of("duration", ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks())));
+      register(HealAbility.class, Map.of("heal", ability -> AbilityLabelFormatters.decimal(ability.getFlatLifeHealed())));
+      register(HealEffectAbility.class);
       register(
-         HealGroupConfig.class,
+         HealGroupAbility.class,
          Map.of(
             "heal",
-            config -> AbilityLabelFormatters.decimal(config.getFlatLifeHealed()),
+            ability -> AbilityLabelFormatters.decimal(ability.getFlatLifeHealed()),
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getRadius())
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius())
          )
       );
       register(
-         HunterConfig.class,
+         HunterAbility.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getSearchRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getSearchRadius()),
             "duration",
-            config -> AbilityLabelFormatters.ticks(config.getDurationTicks())
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks())
          )
       );
       register(
-         HunterObjectiveConfig.class,
-         Map.of(
-            "radius",
-            config -> AbilityLabelFormatters.decimal(config.getSearchRadius()),
-            "duration",
-            config -> AbilityLabelFormatters.ticks(config.getDurationTicks())
-         )
-      );
-      register(
-         HunterTargetedConfig.class,
-         Map.of(
-            "radius",
-            config -> AbilityLabelFormatters.decimal(config.getSearchRadius()),
-            "duration",
-            config -> AbilityLabelFormatters.ticks(config.getDurationTicks())
-         )
-      );
-      register(
-         ManaShieldConfig.class,
+         ManaShieldAbility.class,
          Map.of(
             "absorb",
-            config -> AbilityLabelFormatters.percentRounded(config.getPercentageDamageAbsorbed()),
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentageDamageAbsorbed()),
             "manaPerDamage",
-            config -> AbilityLabelFormatters.decimal(config.getManaPerDamageScalar())
+            ability -> AbilityLabelFormatters.decimal(ability.getManaPerDamageScalar())
          )
       );
-      register(MegaJumpConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
-      register(MegaJumpBreakUpConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
-      register(MegaJumpBreakDownConfig.class, Map.of("rangeVertical", config -> AbilityLabelFormatters.integer(config.getHeight())));
       register(
-         NovaConfig.class,
+         ManaShieldRetributionAbility.class,
+         Map.of(
+            "absorb",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentageDamageAbsorbed()),
+            "manaPerDamage",
+            ability -> AbilityLabelFormatters.decimal(ability.getManaPerDamageScalar()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getDamageRadius()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPercentageDamageDealt())
+         )
+      );
+      register(MegaJumpAbility.class, Map.of("rangeVertical", ability -> AbilityLabelFormatters.integer(ability.getHeight())));
+      register(MegaJumpBreakUpAbility.class, Map.of("rangeVertical", ability -> AbilityLabelFormatters.integer(ability.getHeight())));
+      register(
+         MegaJumpBreakDownAbility.class,
+         Map.of(
+            "rangeVertical",
+            ability -> AbilityLabelFormatters.integer(ability.getHeight()),
+            "radius",
+            ability -> AbilityLabelFormatters.integer(ability.getRadius())
+         )
+      );
+      register(
+         NovaAbility.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "damage",
-            config -> AbilityLabelFormatters.percentRounded(config.getPercentAttackDamageDealt()),
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAttackDamageDealt()),
             "knockback",
-            config -> AbilityLabelFormatters.percentRounded(config.getKnockbackStrengthMultiplier())
+            ability -> AbilityLabelFormatters.percentRounded(ability.getKnockbackStrengthMultiplier())
          )
       );
       register(
-         NovaDotConfig.class,
+         NovaDotAbility.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "damage",
-            config -> AbilityLabelFormatters.percentRounded(config.getPercentAttackDamageDealt()),
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAttackDamageDealt()),
             "duration",
-            config -> AbilityLabelFormatters.seconds(config.getDurationSeconds())
+            ability -> AbilityLabelFormatters.seconds(ability.getDurationSeconds())
          )
       );
       register(
-         NovaSpeedConfig.class,
+         NovaSpeedAbility.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "duration",
-            config -> AbilityLabelFormatters.ticks(config.getDurationTicks()),
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
             "slowness",
-            config -> AbilityLabelFormatters.integer(config.getAmplifier())
+            ability -> AbilityLabelFormatters.integer(ability.getAmplifier())
          )
       );
-      register(RampageConfig.class, Map.of("damage", config -> AbilityLabelFormatters.percentRounded(config.getUnmodifiedDamageIncrease())));
-      register(RampageChainConfig.class, Map.of("chains", config -> AbilityLabelFormatters.integer(config.getAdditionalChainCount())));
-      register(RampageLeechConfig.class, Map.of("leech", config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getLeechPercent())));
-      register(StonefallConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
-      register(StonefallSnowConfig.class, Map.of("radius", config -> AbilityLabelFormatters.decimal(config.getRadius())));
-      register(StonefallColdConfig.class, Map.of("duration", config -> AbilityLabelFormatters.ticks(config.getDurationTicks())));
+      register(RampageAbility.class, Map.of("damage", ability -> AbilityLabelFormatters.percentRounded(ability.getUnmodifiedDamageIncrease())));
+      register(RampageChainAbility.class, Map.of("chains", ability -> AbilityLabelFormatters.integer(ability.getAdditionalChainCount())));
+      register(RampageLeechAbility.class, Map.of("leech", ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getLeechPercent())));
       register(
-         SummonEternalConfig.class,
+         StonefallAbility.class,
+         Map.of(
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
+            "knockback",
+            ability -> AbilityLabelFormatters.decimal(ability.getKnockbackMultiplier()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            "damageReduction",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getDamageReduction())
+         )
+      );
+      register(
+         StonefallSnowAbility.class,
+         Map.of(
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            "damageReduction",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getDamageReduction()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getDamageMultiplier())
+         )
+      );
+      register(
+         StonefallColdAbility.class,
+         Map.of(
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            "damageReduction",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getDamageReduction()),
+            "freezeDuration",
+            ability -> AbilityLabelFormatters.ticks(ability.getFreezeTicks()),
+            "amplifier",
+            ability -> AbilityLabelFormatters.integer(ability.getAmplifier())
+         )
+      );
+      register(
+         SummonEternalAbility.class,
          Map.of(
             "eternals",
-            config -> AbilityLabelFormatters.integer(config.getNumberOfEternals()),
+            ability -> AbilityLabelFormatters.integer(ability.getNumberOfEternals()),
             "duration",
-            config -> AbilityLabelFormatters.ticks(config.getDespawnTime()),
+            ability -> AbilityLabelFormatters.ticks(ability.getDespawnTime()),
             "chance",
-            config -> AbilityLabelFormatters.percentRounded(config.getAncientChance())
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAncientChance())
          )
       );
       register(
-         TankConfig.class,
+         EmpowerAbility.class,
          Map.of(
             "duration",
-            config -> AbilityLabelFormatters.ticks(config.getDurationTicksPerHit()),
-            "resistance",
-            config -> AbilityLabelFormatters.percentRounded(config.getResistancePercentAddedPerHit())
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getBuffRadius()),
+            "speed",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getSpeedPercentAdded())
          )
       );
       register(
-         TankProjectileConfig.class,
+         EmpowerIceArmourAbility.class,
          Map.of(
-            "resistance",
-            config -> AbilityLabelFormatters.percentRounded(config.getKnockbackResistance()),
-            "projectileDamageTaken",
-            config -> AbilityLabelFormatters.percentRounded(config.getPercentageReducedProjectileDamage())
+            "slowness",
+            ability -> AbilityLabelFormatters.integer(ability.getSlownessAmplifier()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius())
          )
       );
       register(
-         TankReflectConfig.class,
-         Map.of(
-            "chance",
-            config -> AbilityLabelFormatters.percentRounded(config.getAdditionalThornsChance()),
-            "damage",
-            config -> AbilityLabelFormatters.percentRounded(config.getThornsDamageMultiplier())
-         )
-      );
-      register(
-         TauntConfig.class,
+         TauntAbility.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "duration",
-            config -> AbilityLabelFormatters.ticks(config.getDurationTicks())
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
+            "damageIncrease",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getDamageModifier())
          )
       );
       register(
-         TauntRepelConfig.class,
+         TauntRepelAbility.class,
          Map.of(
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "duration",
-            config -> AbilityLabelFormatters.ticks(config.getDurationTicks()),
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
             "distance",
-            config -> AbilityLabelFormatters.decimal(config.getRepelForce())
+            ability -> AbilityLabelFormatters.decimal(ability.getRepelForce())
          )
       );
-      register(VeinMinerConfig.class, Map.of("blocks", config -> AbilityLabelFormatters.decimal((float)config.getUnmodifiedBlockLimit())));
       register(
-         VeinMinerDurabilityConfig.class,
+         TauntCharmAbility.class,
+         Map.of(
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
+            "maxTargets",
+            ability -> AbilityLabelFormatters.integer(ability.getMaxCharmedMobs()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPercentPlayerDamage())
+         )
+      );
+      register(VeinMinerAbility.class, Map.of("blocks", ability -> AbilityLabelFormatters.decimal((float)ability.getUnmodifiedBlockLimit())));
+      register(
+         VeinMinerDurabilityAbility.class,
          Map.of(
             "blocks",
-            config -> AbilityLabelFormatters.decimal((float)config.getUnmodifiedBlockLimit()),
+            ability -> AbilityLabelFormatters.decimal((float)ability.getUnmodifiedBlockLimit()),
             "unbreaking",
-            config -> AbilityLabelFormatters.integer(config.getAdditionalUnbreakingLevel())
+            ability -> AbilityLabelFormatters.integer(ability.getAdditionalUnbreakingLevel())
          )
       );
       register(
-         VeinMinerFortuneConfig.class,
+         VeinMinerFortuneAbility.class,
          Map.of(
             "blocks",
-            config -> AbilityLabelFormatters.decimal((float)config.getUnmodifiedBlockLimit()),
+            ability -> AbilityLabelFormatters.decimal((float)ability.getUnmodifiedBlockLimit()),
             "fortune",
-            config -> AbilityLabelFormatters.integer(config.getAdditionalFortuneLevel())
+            ability -> AbilityLabelFormatters.integer(ability.getAdditionalFortuneLevel())
          )
       );
-      register(VeinMinerVoidConfig.class, Map.of("blocks", config -> AbilityLabelFormatters.decimal((float)config.getUnmodifiedBlockLimit())));
+      register(VeinMinerVoidAbility.class, Map.of("blocks", ability -> AbilityLabelFormatters.decimal((float)ability.getUnmodifiedBlockLimit())));
+      register(
+         TotemAbility.class,
+         Map.of(
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getTotemDurationTicks()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getTotemEffectRadius()),
+            "heal",
+            ability -> AbilityLabelFormatters.decimal(ability.getTotemHealthPerSecond())
+         )
+      );
+      register(
+         TotemMobDamageAbility.class,
+         Map.of(
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getTotemDurationTicks()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getTotemEffectRadius()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getTotemPercentDamagePerInterval()),
+            "delay",
+            ability -> AbilityLabelFormatters.ticks(ability.getTotemDamageIntervalTicks())
+         )
+      );
+      register(
+         TotemManaRegenAbility.class,
+         Map.of(
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getTotemDurationTicks()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getTotemEffectRadius()),
+            "manaRegen",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getTotemManaRegenPercent())
+         )
+      );
+      register(
+         TotemPlayerDamageAbility.class,
+         Map.of(
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getTotemDurationTicks()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getTotemEffectRadius()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getTotemPlayerDamagePercent())
+         )
+      );
+      register(
+         JavelinAbility.class,
+         Map.of(
+            "damage",
+            config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getPercentAttackDamageDealt()),
+            "knockback",
+            config -> AbilityLabelFormatters.decimal(config.getKnockback()),
+            "throwPower",
+            config -> AbilityLabelFormatters.decimal(config.getThrowPower())
+         )
+      );
+      register(
+         JavelinPiercingAbility.class,
+         Map.of(
+            "damage",
+            config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getPercentAttackDamageDealt()),
+            "piercing",
+            config -> AbilityLabelFormatters.integer(config.getPiercing()),
+            "throwPower",
+            config -> AbilityLabelFormatters.decimal(config.getThrowPower())
+         )
+      );
+      register(
+         JavelinScatterAbility.class,
+         Map.of(
+            "damage",
+            config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getPercentAttackDamageDealt()),
+            "numberOfJavelins",
+            config -> AbilityLabelFormatters.integer(config.getNumberOfJavelins()),
+            "numberOfBounces",
+            config -> AbilityLabelFormatters.integer(config.getNumberOfBounces()),
+            "throwPower",
+            config -> AbilityLabelFormatters.decimal(config.getThrowPower())
+         )
+      );
+      register(
+         JavelinSightAbility.class,
+         Map.of(
+            "damage",
+            config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getPercentAttackDamageDealt()),
+            "radius",
+            config -> AbilityLabelFormatters.decimal(config.getRadius()),
+            "duration",
+            config -> AbilityLabelFormatters.integer(config.getEffectDuration()),
+            "throwPower",
+            config -> AbilityLabelFormatters.decimal(config.getThrowPower())
+         )
+      );
+      register(
+         SmiteAbility.class,
+         Map.of(
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            "damageInterval",
+            ability -> AbilityLabelFormatters.ticks(ability.getIntervalTicks()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPlayerDamagePercent()),
+            "additionalManaPerBolt",
+            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerBolt())
+         )
+      );
+      register(
+         SmiteArchonAbility.class,
+         Map.of(
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            "damageInterval",
+            ability -> AbilityLabelFormatters.ticks(ability.getIntervalTicks()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPlayerDamagePercent()),
+            "additionalManaPerBolt",
+            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerBolt())
+         )
+      );
+      register(
+         SmiteThunderstormAbility.class,
+         Map.of(
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            "damageInterval",
+            ability -> AbilityLabelFormatters.ticks(ability.getIntervalTicks()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPlayerDamagePercent()),
+            "additionalManaPerBolt",
+            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerBolt())
+         )
+      );
+      register(
+         ShellAbility.class,
+         Map.of(
+            "stunChance",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getStunChance()),
+            "stunDuration",
+            ability -> AbilityLabelFormatters.seconds(ability.getStunDurationSeconds()),
+            "stunAmplifier",
+            ability -> AbilityLabelFormatters.integer(ability.getStunAmplifier()),
+            "additionalManaPerHit",
+            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerHit())
+         )
+      );
+      register(
+         ShellPorcupineAbility.class,
+         Map.of(
+            "durabilityWearReduction",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAdditionalDurabilityWearReduction()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAdditionalThornsDamagePercent()),
+            "additionalManaPerHit",
+            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerHit())
+         )
+      );
+      register(
+         ShellQuillAbility.class,
+         Map.of(
+            "durabilityWearReduction",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAdditionalDurabilityWearReduction()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAdditionalThornsDamagePercent()),
+            "additionalManaPerHit",
+            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerHit()),
+            "quillCount",
+            ability -> AbilityLabelFormatters.integer(ability.getQuillCount())
+         )
+      );
    }
 
-   public static <C extends AbstractAbilityConfig> void register(Class<C> configClass) {
-      register(configClass, Collections.emptyMap());
+   public static <C extends Skill> void register(Class<C> ability) {
+      register(ability, Collections.emptyMap());
    }
 
-   public static <C extends AbstractAbilityConfig> void register(Class<C> configClass, Map<String, IAbilityLabelBinding<C>> bindings) {
-      if (AbilityLabelBindingRegistry.containsKey(configClass)) {
-         throw new IllegalStateException("Ability label bindings already registered for config class " + configClass);
+   public static <C extends Skill> void register(Class<C> ability, Map<String, IAbilityLabelBinding<C>> bindings) {
+      if (AbilityLabelBindingRegistry.containsKey(ability)) {
+         throw new IllegalStateException("Ability label bindings already registered for ability class " + ability);
       } else {
-         AbilityLabelBindingRegistry.register(configClass, "level", config -> String.valueOf(config.getLevelRequirement()));
-         AbilityLabelBindingRegistry.register(configClass, "cooldown", config -> config.getCooldownTicks() / 20.0F + "s");
-         if (IInstantManaConfig.class.isAssignableFrom(configClass)) {
-            AbilityLabelBindingRegistry.register(configClass, "manaCost", config -> String.valueOf(Math.round(((IInstantManaConfig)config).getManaCost())));
-         } else if (IPerSecondManaConfig.class.isAssignableFrom(configClass)) {
-            AbilityLabelBindingRegistry.register(
-               configClass, "manaCost", config -> String.valueOf(Math.round(((IPerSecondManaConfig)config).getManaCostPerSecond()))
-            );
+         if (LearnableSkill.class.isAssignableFrom(ability)) {
+            AbilityLabelBindingRegistry.register(ability, "level", config -> String.valueOf(((LearnableSkill)config).getUnlockLevel()));
+         }
+
+         if (Ability.class.isAssignableFrom(ability)) {
+            AbilityLabelBindingRegistry.register(ability, "cooldown", config -> ((Ability)config).getCooldownTicks() / 20.0F + "s");
+         }
+
+         if (IInstantManaAbility.class.isAssignableFrom(ability)) {
+            AbilityLabelBindingRegistry.register(ability, "manaCost", config -> String.valueOf(Math.round(((IInstantManaAbility)config).getManaCost())));
+         } else if (IPerSecondManaAbility.class.isAssignableFrom(ability)) {
+            AbilityLabelBindingRegistry.register(ability, "manaCost", config -> "%.1f".formatted(((IPerSecondManaAbility)config).getManaCostPerSecond()));
          }
 
          for (Entry<String, IAbilityLabelBinding<C>> entry : bindings.entrySet()) {
-            AbilityLabelBindingRegistry.register(configClass, entry.getKey(), entry.getValue());
+            AbilityLabelBindingRegistry.register(ability, entry.getKey(), entry.getValue());
          }
       }
    }

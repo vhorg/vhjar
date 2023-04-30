@@ -54,7 +54,7 @@ public final class PlayerRageHelper {
 
    @SubscribeEvent
    public static void on(EntityTravelToDimensionEvent event) {
-      if (event.getEntity() instanceof ServerPlayer player && ServerVaults.isVaultWorld(event.getDimension())) {
+      if (event.getEntity() instanceof ServerPlayer player && !ServerVaults.get(player.getLevel()).isEmpty()) {
          player.removeEffect(ModEffects.RAGE);
       }
    }

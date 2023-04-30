@@ -32,7 +32,7 @@ public class TooltipEvents {
          : ModConfigs.VAULT_GENERAL.isBlacklisted(item);
       if (isBlacklisted) {
          toolTip.add(new TextComponent(""));
-         toolTip.add(new TextComponent("☹ Disabled in the Vaults").withStyle(ChatFormatting.DARK_RED));
+         toolTip.add(new TextComponent("Disabled in the Vaults").withStyle(ChatFormatting.DARK_RED));
       }
    }
 }

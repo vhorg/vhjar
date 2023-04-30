@@ -7,6 +7,7 @@ public final class AbilityLabelBindingKeys {
    public static final String MANA_COST = "manaCost";
    public static final String LEVEL = "level";
    public static final String DURATION = "duration";
+   public static final String FREEZE_DURATION = "freezeDuration";
    public static final String DELAY = "delay";
    public static final String RANGE_HORIZONTAL = "rangeHorizontal";
    public static final String RANGE_VERTICAL = "rangeVertical";
@@ -21,10 +22,29 @@ public final class AbilityLabelBindingKeys {
    public static final String LEECH = "leech";
    public static final String ETERNALS = "eternals";
    public static final String RESISTANCE = "resistance";
+   public static final String SPEED = "speed";
+   public static final String DURABILITY_WEAR_REDUCTION = "durabilityWearReduction";
    public static final String PROJECTILE_DAMAGE_TAKEN = "projectileDamageTaken";
    public static final String BLOCKS = "blocks";
    public static final String UNBREAKING = "unbreaking";
    public static final String FORTUNE = "fortune";
+   public static final String MANA_REGEN = "manaRegen";
+   public static final String MAX_TARGETS = "maxTargets";
+   public static final String DAMAGE_REDUCTION = "damageReduction";
+   public static final String DAMAGE_INCREASE = "damageIncrease";
+   public static final String DAMAGE_INTERVAL = "damageInterval";
+   public static final String PIERCING = "piercing";
+   public static final String NUMBER_OF_JAVELINS = "numberOfJavelins";
+   public static final String NUMBER_OF_BOUNCES = "numberOfBounces";
+   public static final String THROW_POWER = "throwPower";
+   public static final String AMPLIFIER = "amplifier";
+   public static final String MANA_PER_BOLT = "additionalManaPerBolt";
+   public static final String FORCE = "force";
+   public static final String MANA_PER_HIT = "additionalManaPerHit";
+   public static final String STUN_CHANCE = "stunChance";
+   public static final String STUN_DURATION = "stunDuration";
+   public static final String STUN_AMPLIFIER = "stunAmplifier";
+   public static final String QUILL_COUNT = "quillCount";
 
    private AbilityLabelBindingKeys() {
    }

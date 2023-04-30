@@ -1,7 +1,7 @@
 package iskallia.vault.integration;
 
+import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.init.ModGameRules;
-import iskallia.vault.world.data.ServerVaults;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -26,7 +26,7 @@ public class IntegrationMinimap {
    public static void onWaypointScreen(ScreenOpenEvent event) {
       Player player = Minecraft.getInstance().player;
       if (player != null) {
-         if (ServerVaults.isInVault(player) && !player.getLevel().getGameRules().getBoolean(ModGameRules.VAULT_ALLOW_WAYPOINTS)) {
+         if (ClientVaults.getActive().isPresent() && !player.getLevel().getGameRules().getBoolean(ModGameRules.ALLOW_WAYPOINTS)) {
             Screen screen = event.getScreen();
             if (screen instanceof GuiWaypoints || screen instanceof GuiAddWaypoint) {
                event.setCanceled(true);
@@ -47,7 +47,7 @@ public class IntegrationMinimap {
                   }
 
                   ModSettings settings = minimap.getSettings();
-                  if (ServerVaults.isInVault(player)) {
+                  if (ClientVaults.getActive().isPresent()) {
                      int zoom = (Integer)settings.getOptionValue(ModOptions.ZOOM);
                      if (zoom < 2) {
                         try {

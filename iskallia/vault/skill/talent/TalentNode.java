@@ -1,11 +1,10 @@
 package iskallia.vault.skill.talent;
 
-import iskallia.vault.init.ModConfigs;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public class TalentNode<T extends Talent> implements INBTSerializable<CompoundTag> {
+public class TalentNode<T extends LegacyTalent> implements INBTSerializable<CompoundTag> {
    private TalentGroup<T> group;
    private int level;
 
@@ -47,7 +46,6 @@ public class TalentNode<T extends Talent> implements INBTSerializable<CompoundTa
 
    public void deserializeNBT(CompoundTag nbt) {
       String groupName = nbt.getString("Name");
-      this.group = (TalentGroup<T>)ModConfigs.TALENTS.getByName(groupName);
       this.level = nbt.getInt("Level");
    }
 

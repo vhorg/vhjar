@@ -1,33 +1,33 @@
 package iskallia.vault.client;
 
+import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.network.message.KnownTalentsMessage;
-import iskallia.vault.skill.talent.Talent;
-import iskallia.vault.skill.talent.TalentGroup;
-import iskallia.vault.skill.talent.TalentNode;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.tree.TalentTree;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class ClientTalentData {
-   private static List<TalentNode<?>> learnedTalents = new ArrayList<>();
+   private static TalentTree TALENTS = new TalentTree();
 
    @Nonnull
-   public static List<TalentNode<?>> getLearnedTalentNodes() {
-      return Collections.unmodifiableList(learnedTalents);
+   public static List<TieredSkill> getLearnedTalentNodes() {
+      List<TieredSkill> talents = new ArrayList<>();
+      TALENTS.iterate(TieredSkill.class, talent -> {
+         if (talent.isUnlocked()) {
+            talents.add(talent);
+         }
+      });
+      return talents;
    }
 
    @Nullable
-   public static <T extends Talent> TalentNode<T> getLearnedTalentNode(TalentGroup<T> talent) {
-      return getLearnedTalentNode(talent.getParentName());
-   }
-
-   @Nullable
-   public static <T extends Talent> TalentNode<T> getLearnedTalentNode(String talentName) {
-      for (TalentNode<?> node : getLearnedTalentNodes()) {
-         if (node.getGroup().getParentName().equals(talentName)) {
-            return (TalentNode<T>)node;
+   public static TieredSkill getLearnedTalentNode(String talentName) {
+      for (TieredSkill node : getLearnedTalentNodes()) {
+         if (node.getId().equals(talentName)) {
+            return node;
          }
       }
 
@@ -35,6 +35,9 @@ public class ClientTalentData {
    }
 
    public static void updateTalents(KnownTalentsMessage pkt) {
-      learnedTalents = pkt.getLearnedTalents();
+      ArrayBitBuffer buffer = ArrayBitBuffer.empty();
+      pkt.getTree().writeBits(buffer);
+      buffer.setPosition(0);
+      TALENTS.readBits(buffer);
    }
 }

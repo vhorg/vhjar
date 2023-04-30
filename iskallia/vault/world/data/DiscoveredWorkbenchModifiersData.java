@@ -1,7 +1,9 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.network.message.DiscoveredModifierCraftsMessage;
+import iskallia.vault.item.gear.IdolItem;
+import iskallia.vault.network.message.DiscoveredWorkbenchModifierCraftsMessage;
 import iskallia.vault.util.nbt.NBTHelper;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -34,7 +37,14 @@ public class DiscoveredWorkbenchModifiersData extends SavedData {
       this.load(tag);
    }
 
-   public boolean discoverWorkbenchCraft(ServerPlayer player, Item gearItem, ResourceLocation key) {
+   public boolean compoundDiscoverWorkbenchCraft(ServerPlayer player, Item gearItem, ResourceLocation key) {
+      return gearItem instanceof IdolItem
+         ? Stream.of(ModItems.IDOL_TIMEKEEPER, ModItems.IDOL_BENEVOLENT, ModItems.IDOL_MALEVOLENCE, ModItems.IDOL_OMNISCIENT)
+            .anyMatch(item -> this.discoverWorkbenchCraft(player, gearItem, key))
+         : this.discoverWorkbenchCraft(player, gearItem, key);
+   }
+
+   private boolean discoverWorkbenchCraft(ServerPlayer player, Item gearItem, ResourceLocation key) {
       Set<ResourceLocation> craftKeys = this.discoveredCrafts
          .computeIfAbsent(player.getUUID(), id -> new LinkedHashMap<>())
          .computeIfAbsent(gearItem, item -> new HashSet<>());
@@ -51,8 +61,8 @@ public class DiscoveredWorkbenchModifiersData extends SavedData {
       return this.discoveredCrafts.getOrDefault(player.getUUID(), Collections.emptyMap()).getOrDefault(gearItem, Collections.emptySet()).contains(key);
    }
 
-   private DiscoveredModifierCraftsMessage getUpdatePacket(UUID playerId) {
-      return new DiscoveredModifierCraftsMessage(this.discoveredCrafts.getOrDefault(playerId, Collections.emptyMap()));
+   private DiscoveredWorkbenchModifierCraftsMessage getUpdatePacket(UUID playerId) {
+      return new DiscoveredWorkbenchModifierCraftsMessage(this.discoveredCrafts.getOrDefault(playerId, Collections.emptyMap()));
    }
 
    public void syncTo(ServerPlayer player) {

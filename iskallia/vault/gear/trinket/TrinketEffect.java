@@ -2,10 +2,10 @@ package iskallia.vault.gear.trinket;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.TrinketConfig;
+import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.gear.TrinketItem;
-import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,9 +34,8 @@ public abstract class TrinketEffect<T extends TrinketEffect.Config> extends Forg
       if (!TrinketItem.isIdentified(trinket)) {
          return false;
       } else {
-         return !ServerVaults.isInVault(player)
-            ? TrinketItem.hasUsesLeft(trinket)
-            : MiscUtils.getVault(player).map(vault -> TrinketItem.isUsableInVault(trinket, vault.get(Vault.ID))).orElse(false);
+         Vault vault = player.level.isClientSide ? ClientVaults.getActive().orElse(null) : ServerVaults.get(player.level).orElse(null);
+         return vault == null ? TrinketItem.hasUsesLeft(trinket) : TrinketItem.isUsableInVault(trinket, vault.get(Vault.ID));
       }
    }
 

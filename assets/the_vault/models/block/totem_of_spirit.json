@@ -1,0 +1,22 @@
+{
+	"parent": "block/block",
+	"texture_size": [32, 32],
+	"textures": {
+		"0": "the_vault:block/totem_of_spirit",
+		"particle": "the_vault:block/totem_of_spirit"
+	},
+	"elements": [
+		{
+			"from": [7, 2, 7],
+			"to": [9, 4, 9],
+			"faces": {
+				"north": {"uv": [6, 0, 7, 1], "texture": "#0"},
+				"east": {"uv": [6, 0, 7, 1], "texture": "#0"},
+				"south": {"uv": [6, 0, 7, 1], "texture": "#0"},
+				"west": {"uv": [6, 0, 7, 1], "texture": "#0"},
+				"up": {"uv": [6, 1.5, 7, 2.5], "texture": "#0"},
+				"down": {"uv": [6, 1.5, 7, 2.5], "texture": "#0"}
+			}
+		}
+	]
+}

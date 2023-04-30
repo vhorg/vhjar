@@ -3,7 +3,7 @@ package iskallia.vault.init;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.platform.InputConstants.Type;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.base.SpecializedSkill;
 import java.util.HashMap;
 import java.util.Map;
 import net.minecraft.client.KeyMapping;
@@ -23,6 +23,9 @@ public class ModKeybinds {
    public static KeyMapping abilityKey;
    public static KeyMapping abilityWheelKey;
    public static KeyMapping bountyStatusKey;
+   public static KeyMapping angelToggleKey;
+   public static KeyMapping magnetToggleKey;
+   public static KeyMapping openQuestScreen;
    public static Map<String, KeyMapping> abilityQuickfireKey = new HashMap<>();
 
    public static void register(FMLClientSetupEvent event) {
@@ -30,11 +33,13 @@ public class ModKeybinds {
       abilityKey = mapping(name("ability_key"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 71));
       abilityWheelKey = mapping(name("ability_wheel_key"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 342));
       bountyStatusKey = mapping(name("bounty_status_key"), KeyConflictContext.UNIVERSAL);
-
-      for (AbilityGroup<?, ?> group : ModConfigs.ABILITIES.getAll()) {
-         String name = "quickselect." + group.getParentName().toLowerCase().replace(' ', '_');
-         abilityQuickfireKey.put(group.getParentName(), mapping(name(name), KeyConflictContext.IN_GAME));
-      }
+      angelToggleKey = mapping(name("angel_toggle_key"), KeyConflictContext.IN_GAME);
+      magnetToggleKey = mapping(name("magnet_toggle_key"), KeyConflictContext.IN_GAME);
+      openQuestScreen = mapping(name("open_quest_screen"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 93));
+      ModConfigs.ABILITIES.get().ifPresent(tree -> tree.iterate(SpecializedSkill.class, skill -> {
+         String name = "quickselect." + skill.getId().toLowerCase().replace(' ', '_');
+         abilityQuickfireKey.put(skill.getId(), mapping(name(name), KeyConflictContext.IN_GAME));
+      }));
    }
 
    @NotNull

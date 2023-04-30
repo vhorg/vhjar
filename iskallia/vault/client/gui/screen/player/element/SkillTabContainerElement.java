@@ -9,7 +9,7 @@ import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.IPosition;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ServerboundOpenAbilitiesMessage;
-import iskallia.vault.network.message.ServerboundOpenArchetypesMessage;
+import iskallia.vault.network.message.ServerboundOpenExpertisesMessage;
 import iskallia.vault.network.message.ServerboundOpenResearchesMessage;
 import iskallia.vault.network.message.ServerboundOpenStatisticsMessage;
 import iskallia.vault.network.message.ServerboundOpenTalentsMessage;
@@ -21,13 +21,13 @@ public class SkillTabContainerElement<E extends SkillTabContainerElement<E>> ext
          ScreenTextures.TAB_ICON_STATISTICS,
          ScreenTextures.TAB_ICON_ABILITIES,
          ScreenTextures.TAB_ICON_TALENTS,
-         ScreenTextures.TAB_ICON_ARCHETYPES,
+         ScreenTextures.TAB_ICON_EXPERTISES,
          ScreenTextures.TAB_ICON_RESEARCHES
       };
       int tabWidth = 28;
       int tabSpacing = 3;
 
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < icons.length; i++) {
          int index = i;
          int x = 31 * i;
          boolean isSelected = selectedIndex == i;
@@ -45,7 +45,7 @@ public class SkillTabContainerElement<E extends SkillTabContainerElement<E>> ext
                      ModNetwork.CHANNEL.sendToServer(ServerboundOpenTalentsMessage.INSTANCE);
                      break;
                   case 3:
-                     ModNetwork.CHANNEL.sendToServer(ServerboundOpenArchetypesMessage.INSTANCE);
+                     ModNetwork.CHANNEL.sendToServer(ServerboundOpenExpertisesMessage.INSTANCE);
                      break;
                   case 4:
                      ModNetwork.CHANNEL.sendToServer(ServerboundOpenResearchesMessage.INSTANCE);

@@ -6,10 +6,12 @@ import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.atlas.ITextureAtlas;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModTextureAtlases;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.base.TieredSkill;
 import iskallia.vault.util.MathUtilities;
 import java.awt.Rectangle;
+import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -20,17 +22,26 @@ import net.minecraft.world.phys.Vec2;
 
 public class AbilitySelectionWidget extends AbstractWidget {
    public static final ResourceLocation HUD_RESOURCE = new ResourceLocation("the_vault", "textures/gui/vault_hud.png");
-   protected AbilityNode<?, ?> abilityNode;
+   protected SpecializedSkill ability;
    protected double angleBoundary;
 
-   public AbilitySelectionWidget(int x, int y, AbilityNode<?, ?> abilityNode, double angleBoundary) {
-      super(x, y, 24, 24, new TextComponent(abilityNode.getName()));
-      this.abilityNode = abilityNode;
+   public AbilitySelectionWidget(int x, int y, SpecializedSkill ability, double angleBoundary) {
+      super(x, y, 24, 24, new TextComponent(ability.getId()));
+      this.ability = ability;
       this.angleBoundary = angleBoundary;
    }
 
-   public AbilityNode<?, ?> getAbilityNode() {
-      return this.abilityNode;
+   public SpecializedSkill getAbility() {
+      return this.ability;
+   }
+
+   public Ability getSelectedAbility() {
+      return (Ability)Optional.of(this.ability)
+         .map(SpecializedSkill::getSpecialization)
+         .filter(skill -> skill instanceof TieredSkill)
+         .map(skill -> ((TieredSkill)skill).getChild())
+         .filter(skill -> skill instanceof Ability)
+         .orElse(null);
    }
 
    public Rectangle getBounds() {
@@ -50,11 +61,10 @@ public class AbilitySelectionWidget extends AbstractWidget {
 
    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
       Rectangle bounds = this.getBounds();
-      String styleKey = this.abilityNode.getSpecialization() != null ? this.abilityNode.getSpecialization() : this.abilityNode.getGroup().getParentName();
-      AbilityGroup<?, ?> thisAbility = this.abilityNode.getGroup();
-      int cooldown = ClientAbilityData.getCooldown(thisAbility);
-      int maxCooldown = ClientAbilityData.getMaxCooldown(thisAbility);
-      if (thisAbility.equals(ClientAbilityData.getSelectedAbility())) {
+      String styleKey = this.ability.getSpecialization().getId();
+      int cooldown = this.getSelectedAbility().getRemainingCooldown();
+      int maxCooldown = this.getSelectedAbility().getTotalCooldown();
+      if (ClientAbilityData.isSelectedAbility(this.ability)) {
          RenderSystem.setShaderColor(0.7F, 0.7F, 0.7F, 0.3F);
       } else {
          RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -74,7 +84,7 @@ public class AbilitySelectionWidget extends AbstractWidget {
          RenderSystem.enableBlend();
       }
 
-      if (thisAbility.equals(ClientAbilityData.getSelectedAbility())) {
+      if (ClientAbilityData.isSelectedAbility(this.ability)) {
          RenderSystem.setShaderTexture(0, HUD_RESOURCE);
          this.blit(matrixStack, bounds.x, bounds.y, 89, 13, 24, 24);
       } else if (this.isMouseOver(mouseX, mouseY)) {

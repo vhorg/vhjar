@@ -23,7 +23,7 @@ public record ServerboundActivateBountyMessage(UUID bountyId) {
       context.enqueueWork(() -> {
          ServerPlayer serverPlayer = context.getSender();
          if (serverPlayer != null) {
-            BountyData.get().setActive(serverPlayer.getUUID(), message.bountyId);
+            BountyData.get().setActive(serverPlayer, message.bountyId);
             if (serverPlayer.containerMenu instanceof BountyContainer container) {
                container.replaceActive(BountyData.get().getAllActiveFor(serverPlayer.getUUID()));
                container.broadcastChanges();

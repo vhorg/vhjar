@@ -1,28 +1,23 @@
 package iskallia.vault.skill.ability.component;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.config.spi.AbstractAbilityConfig;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.base.TieredSkill;
 import java.util.List;
-import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 
 public final class AbilityDescriptionFactory {
-   public static MutableComponent create(AbilityGroup<?, ?> group, @Nullable String specialization, int abilityLevel, int vaultLevel) {
-      String skillName = specialization == null ? group.getParentName() : specialization;
-      MutableComponent component = ModConfigs.ABILITIES_DESCRIPTIONS.getDescriptionFor(skillName);
-      if (abilityLevel > 0) {
-         AbstractAbilityConfig config = group.getAbilityConfig(specialization, abilityLevel - 1);
-         List<String> keys = ModConfigs.ABILITIES_DESCRIPTIONS.getCurrent(skillName);
-         appendLabels(component, keys, "\n\nCurrent", new AbilityLabelContext<>(config, vaultLevel));
+   public static MutableComponent create(TieredSkill skill, int tier, int maxTier, int vaultLevel) {
+      MutableComponent component = ModConfigs.ABILITIES_DESCRIPTIONS.getDescriptionFor(skill.getId());
+      if (tier > 0) {
+         List<String> keys = ModConfigs.ABILITIES_DESCRIPTIONS.getCurrent(skill.getId());
+         appendLabels(component, keys, "\n\nCurrent", new AbilityLabelContext<>(skill.getChild(tier), vaultLevel));
       }
 
-      if (abilityLevel < group.getMaxLevel()) {
-         AbstractAbilityConfig config = group.getAbilityConfig(specialization, abilityLevel);
-         List<String> keys = ModConfigs.ABILITIES_DESCRIPTIONS.getNext(skillName);
-         appendLabels(component, keys, "\n\nNext", new AbilityLabelContext<>(config, vaultLevel));
+      if (tier < maxTier) {
+         List<String> keys = ModConfigs.ABILITIES_DESCRIPTIONS.getNext(skill.getId());
+         appendLabels(component, keys, "\n\nNext", new AbilityLabelContext<>(skill.getChild(tier + 1), vaultLevel));
       }
 
       return component;

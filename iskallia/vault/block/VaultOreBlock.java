@@ -146,7 +146,8 @@ public class VaultOreBlock extends OreBlock {
 
    public static enum Type implements StringRepresentable {
       STONE,
-      VAULT_STONE;
+      VAULT_STONE,
+      WHITE;
 
       private static final Map<String, VaultOreBlock.Type> NAME_TO_TYPE = Arrays.stream(values())
          .collect(Collectors.toMap(VaultOreBlock.Type::getSerializedName, Functions.identity()));

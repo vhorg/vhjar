@@ -6,9 +6,9 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import iskallia.vault.client.gui.helper.AnimationTwoPhased;
 import iskallia.vault.client.gui.helper.FontHelper;
 import iskallia.vault.client.gui.screen.player.AbstractSkillTabElementContainerScreen;
+import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.function.ObservableSupplier;
-import iskallia.vault.world.data.ServerVaults;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -35,20 +35,24 @@ public class VaultBarOverlay implements IIngameOverlay {
    public static int vaultExp;
    public static int tnl;
    public static int unspentSkillPoints;
+   public static int unspentExpertisePoints;
    public static int unspentKnowledgePoints;
    public static int unspentArchetypePoints;
    public static int unspentRegretPoints;
    private static final ObservableSupplier<Integer> VAULT_LEVEL_SUPPLIER = ObservableSupplier.of(() -> vaultLevel, Integer::equals);
    private static final ObservableSupplier<Integer> SKILL_POINT_SUPPLIER = ObservableSupplier.of(() -> unspentSkillPoints, Integer::equals);
+   private static final ObservableSupplier<Integer> EXPERTISE_POINT_SUPPLIER = ObservableSupplier.of(() -> unspentExpertisePoints, Integer::equals);
    private static final ObservableSupplier<Integer> KNOWLEDGE_POINT_SUPPLIER = ObservableSupplier.of(() -> unspentKnowledgePoints, Integer::equals);
    private static final ObservableSupplier<Integer> ARCHETYPE_POINT_SUPPLIER = ObservableSupplier.of(() -> unspentArchetypePoints, Integer::equals);
    private static final ObservableSupplier<Integer> REGRET_POINT_SUPPLIER = ObservableSupplier.of(() -> unspentRegretPoints, Integer::equals);
    private static Component vaultLevelComponent;
    private static Component unspentSkillPointComponent;
+   private static Component unspentExpertisePointComponent;
    private static Component unspentKnowledgePointComponent;
    private static Component unspentArchetypePointComponent;
    private static Component unspentRegretPointComponent;
    private static int unspentSkillPointComponentWidth;
+   private static int unspentExpertisePointComponentWidth;
    private static int unspentKnowledgePointComponentWidth;
    private static int unspentArchetypePointComponentWidth;
    private static int unspentRegretPointComponentWidth;
@@ -102,7 +106,7 @@ public class VaultBarOverlay implements IIngameOverlay {
          }
 
          profiler.popPush("batchKnowledgeAndSkillPointText");
-         if (!ServerVaults.isInVault(player) && !(minecraft.screen instanceof AbstractSkillTabElementContainerScreen)) {
+         if (ClientVaults.getActive().isEmpty() && !(minecraft.screen instanceof AbstractSkillTabElementContainerScreen)) {
             renderPointText(minecraft, player, matrixStack, width, buffer);
          }
 
@@ -130,6 +134,14 @@ public class VaultBarOverlay implements IIngameOverlay {
          SKILL_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentSkillPointsChanged);
          int x = right - unspentSkillPointComponentWidth - gap;
          minecraft.font.drawInBatch(unspentSkillPointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
+         matrixStack.translate(0.0, 12.0, 0.0);
+      }
+
+      minecraft.getProfiler().popPush("batchExpertisePointText");
+      if (unspentExpertisePoints > 0) {
+         EXPERTISE_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentExpertisePointsChanged);
+         int x = right - unspentExpertisePointComponentWidth - gap;
+         minecraft.font.drawInBatch(unspentExpertisePointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
          matrixStack.translate(0.0, 12.0, 0.0);
       }
 
@@ -170,6 +182,16 @@ public class VaultBarOverlay implements IIngameOverlay {
          .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(16766976)))
          .append(new TextComponent(" unspent skill point" + (unspentSkillPoints == 1 ? "" : "s")).withStyle(Style.EMPTY.withColor(TextColor.fromRgb(16777215))));
       unspentSkillPointComponentWidth = Minecraft.getInstance().font.width(unspentSkillPointComponent);
+   }
+
+   private static void onUnspentExpertisePointsChanged(int unspentExpertisePoints) {
+      unspentExpertisePointComponent = new TextComponent(String.valueOf(unspentExpertisePoints))
+         .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(16724414)))
+         .append(
+            new TextComponent(" unspent expertise point" + (unspentExpertisePoints == 1 ? "" : "s"))
+               .withStyle(Style.EMPTY.withColor(TextColor.fromRgb(16777215)))
+         );
+      unspentExpertisePointComponentWidth = Minecraft.getInstance().font.width(unspentExpertisePointComponent);
    }
 
    private static void onUnspentKnowledgePointsChanged(int unspentKnowledgePoints) {

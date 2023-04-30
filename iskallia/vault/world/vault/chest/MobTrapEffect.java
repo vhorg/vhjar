@@ -5,28 +5,20 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.world.storage.VirtualWorld;
-import iskallia.vault.world.vault.logic.VaultSpawner;
 import java.util.Random;
 import net.minecraft.server.level.ServerPlayer;
 
 public class MobTrapEffect extends VaultChestEffect {
    @Expose
    private final int attempts;
-   @Expose
-   private final VaultSpawner.Config appliedConfig;
 
-   public MobTrapEffect(String name, int attempts, VaultSpawner.Config appliedConfig) {
+   public MobTrapEffect(String name, int attempts) {
       super(name);
       this.attempts = attempts;
-      this.appliedConfig = appliedConfig;
    }
 
    public int getAttempts() {
       return this.attempts;
-   }
-
-   public VaultSpawner.Config getAppliedConfig() {
-      return this.appliedConfig;
    }
 
    @Override

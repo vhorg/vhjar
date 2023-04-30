@@ -44,6 +44,24 @@ public class LootStatsContainerElement extends VerticalScrollClipContainer<LootS
       }));
    }
 
+   public static int getOresMined(StatCollector statCollector) {
+      int oresMined = 0;
+      Object2IntMap<ResourceLocation> group = statCollector.getMinedBlocks();
+      ObjectIterator var3 = group.object2IntEntrySet().iterator();
+
+      while (var3.hasNext()) {
+         Entry<ResourceLocation> entry = (Entry<ResourceLocation>)var3.next();
+         ResourceLocation loc = (ResourceLocation)entry.getKey();
+         int amount = entry.getIntValue();
+         String path = loc.getPath();
+         if (!path.equals("treasure_sand") && !path.equals("coin_pile")) {
+            oresMined += amount;
+         }
+      }
+
+      return oresMined;
+   }
+
    private static final class ChestStringElement extends DynamicLabelElement<Component, LootStatsContainerElement.ChestStringElement> {
       private ChestStringElement(IPosition position, ISize size, Supplier<Component> valueSupplier, LabelTextStyle.Builder labelTextStyle) {
          super(position, size, valueSupplier, labelTextStyle);
@@ -122,11 +140,9 @@ public class LootStatsContainerElement extends VerticalScrollClipContainer<LootS
             .append(new TextComponent(String.valueOf(total)).withStyle(ChatFormatting.GREEN))
             .append(new TextComponent(", Trapped: ").withStyle(ChatFormatting.WHITE))
             .append(new TextComponent(String.valueOf(totalTrapped)).withStyle(ChatFormatting.RED));
-         Component component2 = new TextComponent("Total Coin Piles Collected: ")
+         Component component2 = new TextComponent("Total Ores Mined: ")
             .withStyle(ChatFormatting.WHITE)
-            .append(new TextComponent(String.valueOf(coinPile)).withStyle(ChatFormatting.GREEN))
-            .append(new TextComponent(", Treasure Sand: ").withStyle(ChatFormatting.WHITE))
-            .append(new TextComponent(String.valueOf(treasureSand)).withStyle(ChatFormatting.GREEN));
+            .append(new TextComponent(String.valueOf(LootStatsContainerElement.getOresMined(screenData.getStatsCollector()))).withStyle(ChatFormatting.GREEN));
          this.addElements(
             new LootStatsContainerElement.ChestStringElement(
                Spatials.positionXYZ(160, 4, 1), Spatials.size(16, 7), (Supplier<Component>)(() -> component), LabelTextStyle.shadow().center()
@@ -273,7 +289,7 @@ public class LootStatsContainerElement extends VerticalScrollClipContainer<LootS
                float xpMul = map.get(loc);
                this.addElements(
                   new VaultXpIconElement(
-                     Spatials.positionY(55 + LootStatsContainerElement.VERTICAL_SPACING * 3 + 28 * elementsx).positionX(171 - (bottomWidth + 52) / 2),
+                     Spatials.positionY(55 + LootStatsContainerElement.VERTICAL_SPACING * 3 + 19 + 28 * elementsx).positionX(171 - (bottomWidth + 52) / 2),
                      stack,
                      stack.getHoverName(),
                      bottomWidth + 52,
@@ -286,9 +302,18 @@ public class LootStatsContainerElement extends VerticalScrollClipContainer<LootS
             }
          }
 
+         this.addElements(
+            new LootStatsContainerElement.ChestStringElement(
+               Spatials.positionXYZ(160, 42 + LootStatsContainerElement.VERTICAL_SPACING * 3 - 4 + 16, 1),
+               Spatials.size(16, 7),
+               (Supplier<Component>)(() -> component2),
+               LabelTextStyle.shadow().center()
+            ),
+            new IElement[0]
+         );
          this.addElement(
             new TextureAtlasElement(
-               Spatials.positionXYZ(10, 42 + LootStatsContainerElement.VERTICAL_SPACING * 3 + 16 + 28 * elementsx, 0).width(333),
+               Spatials.positionXYZ(10, 42 + LootStatsContainerElement.VERTICAL_SPACING * 3 + 19 + 16 + 28 * elementsx, 0).width(333),
                ScreenTextures.VAULT_EXIT_ELEMENT_HORIZONTAL_SPLITTER
             )
          );

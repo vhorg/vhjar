@@ -6,7 +6,6 @@ import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.util.data.WeightedList;
 import iskallia.vault.world.stats.CrystalStat;
 import iskallia.vault.world.stats.RaffleStat;
-import iskallia.vault.world.vault.VaultRaid;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -27,11 +26,6 @@ public class PlayerStatsData extends SavedData {
 
    public PlayerStatsData.Stats get(UUID playerId) {
       return this.playerStats.computeIfAbsent(playerId, uuid -> new PlayerStatsData.Stats());
-   }
-
-   public void onVaultFinished(UUID playerId, VaultRaid vault) {
-      this.get(playerId).vaults.add(vault);
-      this.setDirty();
    }
 
    public void onCrystalCrafted(UUID playerId, List<RequiredItems> recipe) {
@@ -73,13 +67,8 @@ public class PlayerStatsData extends SavedData {
    }
 
    public static class Stats implements INBTSerializable<CompoundTag> {
-      protected VListNBT<VaultRaid, CompoundTag> vaults = VListNBT.of(VaultRaid::new);
       protected VListNBT<CrystalStat, CompoundTag> crystals = VListNBT.of(() -> new CrystalStat());
       protected VListNBT<RaffleStat, CompoundTag> raffles = VListNBT.of(RaffleStat::new);
-
-      public List<VaultRaid> getVaults() {
-         return Collections.unmodifiableList(this.vaults);
-      }
 
       public List<CrystalStat> getCrystals() {
          return Collections.unmodifiableList(this.crystals);
@@ -91,14 +80,12 @@ public class PlayerStatsData extends SavedData {
 
       public CompoundTag serializeNBT() {
          CompoundTag nbt = new CompoundTag();
-         nbt.put("Vaults", this.vaults.serializeNBT());
          nbt.put("Crystals", this.crystals.serializeNBT());
          nbt.put("Raffles", this.raffles.serializeNBT());
          return nbt;
       }
 
       public void deserializeNBT(CompoundTag nbt) {
-         this.vaults.deserializeNBT(nbt.getList("Vaults", 10));
          this.crystals.deserializeNBT(nbt.getList("Crystals", 10));
          this.raffles.deserializeNBT(nbt.getList("Raffles", 10));
       }

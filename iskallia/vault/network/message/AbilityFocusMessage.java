@@ -1,17 +1,12 @@
 package iskallia.vault.network.message;
 
 import iskallia.vault.client.ClientAbilityData;
-import iskallia.vault.skill.ability.group.AbilityGroup;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 public class AbilityFocusMessage {
    private final String selectedAbility;
-
-   public AbilityFocusMessage(AbilityGroup<?, ?> ability) {
-      this(ability.getParentName());
-   }
 
    public AbilityFocusMessage(String selectedAbility) {
       this.selectedAbility = selectedAbility;

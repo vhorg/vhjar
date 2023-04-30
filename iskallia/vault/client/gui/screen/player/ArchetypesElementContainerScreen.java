@@ -15,7 +15,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.entity.player.Inventory;
 
 public class ArchetypesElementContainerScreen extends LegacySkillTreeElementContainerScreen<ArchetypeContainer> {
-   public static final int TAB_INDEX = 3;
+   public static final int TAB_INDEX = 4;
 
    public ArchetypesElementContainerScreen(NBTElementContainer<ArchetypeContainer> container, Inventory inventory, Component title) {
       super(container, inventory, title, ScreenRenderers.getImmediate());
@@ -27,7 +27,7 @@ public class ArchetypesElementContainerScreen extends LegacySkillTreeElementCont
 
    @Override
    public int getTabIndex() {
-      return 3;
+      return 4;
    }
 
    @Override

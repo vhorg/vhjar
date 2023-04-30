@@ -18,14 +18,14 @@ public class IntegrationWorldMap {
    @SubscribeEvent
    public static void onPotionTick(PlayerTickEvent event) {
       Player player = event.player;
-      if (!player.getLevel().isClientSide() && ServerVaults.isInVault(player)) {
+      if (!player.getLevel().isClientSide() && !ServerVaults.get(player.level).isEmpty()) {
          if (player.tickCount % 5 == 0) {
             List<MobEffect> effectsToApply = new ArrayList<>();
             if (ModList.get().isLoaded("xaeroworldmap")) {
                effectsToApply.add((MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation("xaeroworldmap", "no_world_map")));
             }
 
-            if (!player.getLevel().getGameRules().getBoolean(ModGameRules.VAULT_ALLOW_WAYPOINTS)) {
+            if (!player.getLevel().getGameRules().getBoolean(ModGameRules.ALLOW_WAYPOINTS)) {
                effectsToApply.add(Effects.NO_WAYPOINTS);
             }
 

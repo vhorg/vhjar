@@ -3,12 +3,10 @@ package iskallia.vault.client.gui.screen.player.legacy.widget;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.client.atlas.TextureAtlasRegion;
 import iskallia.vault.client.gui.overlay.VaultBarOverlay;
-import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.AbilityNode;
-import iskallia.vault.skill.ability.AbilityRegistry;
-import iskallia.vault.skill.ability.AbilityTree;
-import iskallia.vault.skill.ability.effect.spi.core.AbstractAbility;
-import iskallia.vault.skill.ability.group.AbilityGroup;
+import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.skill.base.SpecializedSkill;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.tree.AbilityTree;
 import java.awt.Rectangle;
 import java.util.List;
 import java.util.Map;
@@ -32,42 +30,44 @@ public class AbilityWidget extends AbstractWidget {
       this.icon = icon;
    }
 
-   public AbilityNode<?, ?> makeAbilityNode() {
-      AbilityGroup<?, ?> group = this.getAbilityGroup();
-      AbilityNode<?, ?> node = this.abilityTree.getNodeOf(group);
-      int level = node.getLevel();
-      if (node.isLearned() && !this.isSpecialization()) {
-         level = Math.min(level + 1, group.getMaxLevel());
+   public SpecializedSkill makeAbilityNode() {
+      SpecializedSkill group = this.getAbilityGroup();
+      TieredSkill node = (TieredSkill)group.getSpecialization();
+      int level = node.getTier();
+      SpecializedSkill result = group.copy();
+      result.specialize(this.abilityName, SkillContext.ofClient());
+      if (node.isUnlocked() && !this.isSpecialization() && level < node.getMaxTier()) {
+         result.learn(SkillContext.ofClient());
       }
 
-      return new AbilityNode(this.getAbility().getAbilityGroupName(), level, this.isSpecialization() ? this.abilityName : null);
+      return result;
    }
 
-   private AbilityGroup<?, ?> getAbilityGroup() {
-      return ModConfigs.ABILITIES.getAbilityGroupByName(this.getAbility().getAbilityGroupName());
+   public SpecializedSkill getAbilityGroup() {
+      return (SpecializedSkill)this.getAbility().getParent();
    }
 
    public String getAbilityName() {
       return this.abilityName;
    }
 
-   protected AbstractAbility<?> getAbility() {
-      return AbilityRegistry.getAbility(this.abilityName);
+   protected TieredSkill getAbility() {
+      return (TieredSkill)this.abilityTree.getForId(this.abilityName).orElse(null);
    }
 
    protected boolean isSpecialization() {
-      return !this.getAbility().getAbilityGroupName().equals(this.abilityName);
+      return !this.getAbilityGroup().getSpecialization(0).getId().equals(this.abilityName);
    }
 
    protected boolean isLocked() {
       if (this.isSpecialization()) {
-         AbilityNode<?, ?> existing = this.abilityTree.getNodeOf(this.getAbility());
-         if (!existing.isLearned() || existing.getSpecialization() != null && !existing.getSpecialization().equals(this.abilityName)) {
+         SpecializedSkill existing = this.getAbilityGroup();
+         if (!existing.isUnlocked() || existing.getIndex() != 0 && !existing.getSpecialization().getId().equals(this.abilityName)) {
             return true;
          }
       }
 
-      return VaultBarOverlay.vaultLevel < this.makeAbilityNode().getAbilityConfig().getLevelRequirement();
+      return VaultBarOverlay.vaultLevel < this.makeAbilityNode().getUnlockLevel();
    }
 
    public void renderWidget(

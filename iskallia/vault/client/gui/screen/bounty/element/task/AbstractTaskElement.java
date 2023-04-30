@@ -61,7 +61,7 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
                .tooltip(Tooltips.shift(Tooltips.single(this::getTargetDisplayName), Tooltips.multi(this::getExtendedDisplay)))
          )
          .layout((screen, gui, parent, world) -> world.width(this.width() - 4));
-      int descriptionHeight = this.getLabelHeight(this.description);
+      int descriptionHeight = this.description.getTextStyle().getLabelHeight(this.description.getComponent(), this.description.width() - 2 / 2);
       LabelElement<?> progressLabel = new LabelElement(
          Spatials.positionXY(2, descriptionHeight + 18 + 15), new TextComponent("Progress:").withStyle(ChatFormatting.BLACK), LabelTextStyle.defaultStyle()
       );

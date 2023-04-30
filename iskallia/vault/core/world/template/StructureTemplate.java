@@ -2,22 +2,27 @@ package iskallia.vault.core.world.template;
 
 import com.google.common.collect.Lists;
 import iskallia.vault.VaultMod;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.util.iterator.MappingIterator;
+import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.PartialCompoundNbt;
 import iskallia.vault.core.world.data.PartialEntity;
-import iskallia.vault.core.world.data.PartialState;
-import iskallia.vault.core.world.data.PartialTile;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.processor.Processor;
+import iskallia.vault.init.ModBlocks;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
+import java.util.function.Function;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.IdMapper;
@@ -27,9 +32,10 @@ import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.EmptyBlockGetter;
-import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -37,8 +43,8 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
    public static final Comparator<PartialTile> SORTER = Comparator.<PartialTile>comparingInt(tile -> tile.getPos().getY())
       .thenComparingInt(tile -> tile.getPos().getX())
       .thenComparingInt(tile -> tile.getPos().getZ());
-   private Map<Predicate<PartialTile>, List<PartialTile>> tiles = new HashMap<>();
-   private Map<Predicate<PartialEntity>, List<PartialEntity>> entities = new HashMap<>();
+   private Map<TilePredicate, List<PartialTile>> tiles = new IdentityHashMap<>();
+   private Map<EntityPredicate, List<PartialEntity>> entities = new IdentityHashMap<>();
    private StructureTemplate.IdPalette palette;
    private Vec3i size = Vec3i.ZERO;
    private Set<ResourceLocation> tags = new HashSet<>();
@@ -81,7 +87,7 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
    }
 
    @Override
-   public Iterator<PartialTile> getTiles(Predicate<PartialTile> filter, PlacementSettings settings) {
+   public Iterator<PartialTile> getTiles(TilePredicate filter, PlacementSettings settings) {
       return new MappingIterator<>(this.tiles.get(filter).iterator(), tile -> {
          tile = tile.copy();
 
@@ -99,7 +105,7 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
    }
 
    @Override
-   public Iterator<PartialEntity> getEntities(Predicate<PartialEntity> filter, PlacementSettings settings) {
+   public Iterator<PartialEntity> getEntities(EntityPredicate filter, PlacementSettings settings) {
       return new MappingIterator<>(this.entities.get(filter).iterator(), entity -> {
          entity = entity.copy();
 
@@ -126,14 +132,14 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
 
          for (PartialTile tile : this.tiles.get(ALL_TILES)) {
             int paletteId = this.palette.getIdFor(tile.getState());
-            blocksNBT.add(tile.toPaletteNBT(new CompoundTag(), paletteId));
+            blocksNBT.add(this.toPaletteNBT(tile, new CompoundTag(), paletteId));
          }
 
          nbt.put("blocks", blocksNBT);
          ListTag paletteNBT = new ListTag();
 
-         for (PartialState state : this.palette) {
-            paletteNBT.add(state.toNBT(new CompoundTag()));
+         for (PartialBlockState state : this.palette) {
+            Adapters.PARTIAL_BLOCK_STATE.writeNbt(state).ifPresent(paletteNBT::add);
          }
 
          nbt.put("palette", paletteNBT);
@@ -153,10 +159,7 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
          blockPosNBT.add(IntTag.valueOf(entity.getBlockPos().getY()));
          blockPosNBT.add(IntTag.valueOf(entity.getBlockPos().getZ()));
          entityNBT.put("blockPos", blockPosNBT);
-         if (entity.getNBT() != null) {
-            entityNBT.put("nbt", entity.getNBT());
-         }
-
+         entity.getNbt().asWhole().ifPresent(tag -> entityNBT.put("nbt", tag));
          entitiesNBT.add(entityNBT);
       }
 
@@ -197,7 +200,7 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
          ListTag blockPosNBT = entityNBT.getList("blockPos", 3);
          BlockPos blockPos = new BlockPos(blockPosNBT.getInt(0), blockPosNBT.getInt(1), blockPosNBT.getInt(2));
          if (entityNBT.contains("nbt")) {
-            PartialEntity entity = PartialEntity.of(pos, blockPos, entityNBT.getCompound("nbt"));
+            PartialEntity entity = PartialEntity.of(pos, blockPos, PartialCompoundNbt.of(entityNBT.getCompound("nbt")));
             this.entities.forEach((filter, list) -> {
                if (filter.test(entity)) {
                   list.add(entity);
@@ -211,7 +214,10 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
       this.palette = new StructureTemplate.IdPalette();
 
       for (int i = 0; i < paletteNBT.size(); i++) {
-         this.palette.addMapping(PartialState.fromNBT(paletteNBT.getCompound(i)), i);
+         PartialBlockState state = Adapters.PARTIAL_BLOCK_STATE.readNbt(paletteNBT.getCompound(i)).orElse(null);
+         if (state != null) {
+            this.palette.addMapping(state, i);
+         }
       }
 
       List<PartialTile> normal = Lists.newArrayList();
@@ -220,11 +226,11 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
 
       for (int j = 0; j < blocksNBT.size(); j++) {
          CompoundTag blockNBT = blocksNBT.getCompound(j);
-         PartialTile tile = PartialTile.fromPaletteNBT(blockNBT, this.palette::getStateFor);
-         if (tile.getNbt() != null) {
+         PartialTile tile = fromPaletteNBT(blockNBT, this.palette::getStateFor);
+         BlockState state = tile.getState().asWhole().orElse(ModBlocks.ERROR_BLOCK.defaultBlockState());
+         if (tile.getEntity().asWhole().isPresent()) {
             withNBT.add(tile);
-         } else if (!tile.getState().getBlock().hasDynamicShape()
-            && tile.getState().asBlockState().isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
+         } else if (!state.getBlock().hasDynamicShape() && state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
             normal.add(tile);
          } else {
             withSpecialShape.add(tile);
@@ -251,12 +257,46 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
       return tiles;
    }
 
-   public static class IdPalette implements Iterable<PartialState> {
-      public static final PartialState DEFAULT_STATE = PartialState.of(Blocks.AIR.defaultBlockState());
-      private final IdMapper<PartialState> ids = new IdMapper(16);
+   public Tag toPaletteNBT(PartialTile tile, CompoundTag nbt, int index) {
+      nbt.putInt("state", index);
+      tile.getEntity().asWhole().ifPresent(tag -> nbt.put("nbt", tag.copy()));
+      if (tile.getPos() != null) {
+         ListTag posNBT = new ListTag();
+         posNBT.add(IntTag.valueOf(tile.getPos().getX()));
+         posNBT.add(IntTag.valueOf(tile.getPos().getY()));
+         posNBT.add(IntTag.valueOf(tile.getPos().getZ()));
+         nbt.put("pos", posNBT);
+      }
+
+      return nbt;
+   }
+
+   public static PartialTile fromPaletteNBT(CompoundTag tag, Function<Integer, PartialBlockState> stateFunction) {
+      PartialBlockState state = PartialBlockState.of(ModBlocks.ERROR_BLOCK.defaultBlockState());
+      PartialCompoundNbt nbt = PartialCompoundNbt.empty();
+      BlockPos pos = null;
+      if (tag.contains("state", 3)) {
+         state = stateFunction.apply(tag.getInt("state"));
+      }
+
+      if (tag.contains("pos", 9)) {
+         ListTag posNBT = tag.getList("pos", 3);
+         pos = new BlockPos(posNBT.getInt(0), posNBT.getInt(1), posNBT.getInt(2));
+      }
+
+      if (tag.contains("nbt", 10)) {
+         nbt = PartialCompoundNbt.of(tag.getCompound("nbt"));
+      }
+
+      return PartialTile.of(state, nbt, pos);
+   }
+
+   public static class IdPalette implements Iterable<PartialBlockState> {
+      public static final PartialBlockState DEFAULT_STATE = PartialBlockState.of(ModBlocks.ERROR_BLOCK);
+      private final IdMapper<PartialBlockState> ids = new IdMapper(16);
       private int nextId;
 
-      public int getIdFor(PartialState pState) {
+      public int getIdFor(PartialBlockState pState) {
          int i = this.ids.getId(pState);
          if (i == -1) {
             i = this.nextId++;
@@ -266,17 +306,17 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
          return i;
       }
 
-      public PartialState getStateFor(int id) {
-         PartialState state = (PartialState)this.ids.byId(id);
+      public PartialBlockState getStateFor(int id) {
+         PartialBlockState state = (PartialBlockState)this.ids.byId(id);
          return state == null ? DEFAULT_STATE : state;
       }
 
-      public void addMapping(PartialState state, int id) {
+      public void addMapping(PartialBlockState state, int id) {
          this.ids.addMapping(state, id);
       }
 
       @Override
-      public Iterator<PartialState> iterator() {
+      public Iterator<PartialBlockState> iterator() {
          return this.ids.iterator();
       }
    }

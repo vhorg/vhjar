@@ -4,8 +4,6 @@ import iskallia.vault.block.BountyBlock;
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.bounty.task.properties.ItemSubmissionProperties;
-import iskallia.vault.init.ModNetwork;
-import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.world.data.BountyData;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
@@ -21,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.registries.ForgeRegistries;
 
 @EventBusSubscriber
@@ -112,7 +109,7 @@ public class ItemSubmissionTask extends Task<ItemSubmissionProperties> {
                }
 
                if (task.isComplete()) {
-                  ModNetwork.CHANNEL.sendTo(new ClientboundBountyCompleteMessage(task.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                  task.complete(player);
                }
 
                return;
@@ -155,8 +152,7 @@ public class ItemSubmissionTask extends Task<ItemSubmissionProperties> {
                }
 
                if (taskx.isComplete()) {
-                  ModNetwork.CHANNEL
-                     .sendTo(new ClientboundBountyCompleteMessage(taskx.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                  taskx.complete(player);
                }
 
                return;

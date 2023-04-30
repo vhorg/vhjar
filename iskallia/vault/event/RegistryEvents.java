@@ -12,7 +12,6 @@ import iskallia.vault.init.ModAbilities;
 import iskallia.vault.init.ModArchetypes;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModEffects;
@@ -68,13 +67,11 @@ public class RegistryEvents {
 
    @SubscribeEvent
    public static void onBlockRegister(Register<Block> event) {
-      ModConfigs.registerCompressionConfigs();
       ModBlocks.registerBlocks(event);
    }
 
    @SubscribeEvent
    public static void onItemRegister(Register<Item> event) {
-      ModConfigs.registerCompressionConfigs();
       ModItems.registerItems(event);
       ModDynamicModels.initItemAssociations();
       ModDynamicModels.initCauldronWashables();

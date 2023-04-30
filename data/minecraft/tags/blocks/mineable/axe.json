@@ -8,6 +8,11 @@
         "the_vault:stripped_chromatic_log",
         "the_vault:chromatic_planks",
         "the_vault:chromatic_slab",
-        "the_vault:chromatic_stairs"
+        "the_vault:chromatic_stairs",
+        "the_vault:driftwood_log",
+        "the_vault:stripped_driftwood_log",
+        "the_vault:driftwood_planks",
+        "the_vault:driftwood_slab",
+        "the_vault:driftwood_stairs"
     ]
 }

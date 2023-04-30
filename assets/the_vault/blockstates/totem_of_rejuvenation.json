@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "type=base": {
+      "model": "the_vault:block/totem_of_rejuvenation"
+    },
+    "type=glow": {
+      "model": "the_vault:block/totem_of_rejuvenation_glow"
+    }
+  }
+}

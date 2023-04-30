@@ -33,7 +33,7 @@ public class ServerboundSelectArchetypeMessage {
       Context context = contextSupplier.get();
       context.enqueueWork(() -> {
          ServerPlayer player = context.getSender();
-         if (player != null && !ServerVaults.isInVault(player)) {
+         if (player != null && !ServerVaults.get(player.level).isPresent()) {
             PlayerArchetypeData archetypeData = PlayerArchetypeData.get(player.server);
             ArchetypeContainer archetypeContainer = archetypeData.getArchetypeContainer(player);
             PlayerVaultStatsData playerSpeedrunStatsData = PlayerVaultStatsData.get(player.server);

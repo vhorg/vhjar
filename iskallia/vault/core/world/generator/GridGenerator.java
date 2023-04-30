@@ -59,8 +59,7 @@ public class GridGenerator extends VaultGenerator {
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
       this.cache = new ObjectCache<>(
-         world.getGameRules().getInt(ModGameRules.VAULT_TEMPLATE_CACHE_SIZE),
-         region -> MathUtils.mask(region.getX(), 31) | MathUtils.mask(region.getZ(), 31) << 32
+         world.getGameRules().getInt(ModGameRules.TEMPLATE_CACHE_SIZE), region -> MathUtils.mask(region.getX(), 31) | MathUtils.mask(region.getZ(), 31) << 32
       );
       this.get(LAYOUT).initServer(world, vault, this);
       super.initServer(world, vault);

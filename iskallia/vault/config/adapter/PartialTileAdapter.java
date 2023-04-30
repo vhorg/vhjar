@@ -7,10 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import com.mojang.brigadier.StringReader;
-import iskallia.vault.core.world.data.PartialTile;
-import iskallia.vault.core.world.data.TileParser;
-import iskallia.vault.init.ModBlocks;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import java.io.IOException;
 
 public class PartialTileAdapter extends TypeAdapter<PartialTile> {
@@ -33,7 +30,7 @@ public class PartialTileAdapter extends TypeAdapter<PartialTile> {
          in.nextNull();
          return null;
       } else {
-         return new TileParser(new StringReader(in.nextString()), ModBlocks.ERROR_BLOCK, true).toTile();
+         return PartialTile.parse(in.nextString(), true).orElse(PartialTile.ERROR);
       }
    }
 }

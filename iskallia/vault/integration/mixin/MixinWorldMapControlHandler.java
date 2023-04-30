@@ -1,9 +1,7 @@
 package iskallia.vault.integration.mixin;
 
-import iskallia.vault.util.MiscUtils;
+import iskallia.vault.core.vault.ClientVaults;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,8 +17,7 @@ public class MixinWorldMapControlHandler {
       remap = false
    )
    public void exitIfInVault(KeyMapping kb, boolean tickEnd, boolean isRepeat, CallbackInfo ci) {
-      LocalPlayer player = Minecraft.getInstance().player;
-      if (player != null && MiscUtils.getVault(player).isPresent()) {
+      if (ClientVaults.getActive().isPresent()) {
          ci.cancel();
       }
    }

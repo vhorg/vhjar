@@ -1,70 +1,80 @@
 package iskallia.vault.skill.ability.effect;
 
 import iskallia.vault.event.ActiveFlags;
-import iskallia.vault.skill.ability.config.NovaConfig;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.NovaParticleMessage;
 import iskallia.vault.skill.ability.effect.spi.AbstractNovaAbility;
-import iskallia.vault.skill.ability.effect.spi.core.AbilityActionResult;
-import java.awt.Color;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.base.SkillContext;
 import java.util.List;
-import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.network.PacketDistributor;
 
-public class NovaAbility<C extends NovaConfig> extends AbstractNovaAbility<C> {
-   protected AbilityActionResult doAction(C config, ServerPlayer player, boolean active) {
-      List<LivingEntity> targetEntities = this.getTargetEntities(config, player);
-      float attackDamage = this.getAttackDamage(config, player);
-      DamageSource damageSource = DamageSource.playerAttack(player);
+public class NovaAbility extends AbstractNovaAbility {
+   public NovaAbility(
+      int unlockLevel,
+      int learnPointCost,
+      int regretPointCost,
+      int cooldownTicks,
+      float manaCost,
+      float radius,
+      float percentAttackDamageDealt,
+      float knockbackStrengthMultiplier
+   ) {
+      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, radius, percentAttackDamageDealt, knockbackStrengthMultiplier);
+   }
 
-      for (LivingEntity entity : targetEntities) {
-         ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-            if (entity.hurt(damageSource, attackDamage) && !Mth.equal(config.getKnockbackStrengthMultiplier(), 0.0F)) {
-               double dx = player.getX() - entity.getX();
-               double dz = player.getZ() - entity.getZ();
-               if (dx * dx + dz * dz < 1.0E-4) {
-                  dx = (Math.random() - Math.random()) * 0.01;
-                  dz = (Math.random() - Math.random()) * 0.01;
-               }
-
-               entity.knockback(0.4F * config.getKnockbackStrengthMultiplier(), dx, dz);
-            }
-         });
-      }
-
-      return AbilityActionResult.SUCCESS_COOLDOWN;
+   public NovaAbility() {
    }
 
    @Override
-   protected void doParticles(C config, ServerPlayer player) {
-      super.doParticles(config, player);
-      float radius = config.getRadius(player);
-      int particleCount = (int)Mth.clamp(Math.pow(radius, 2.0) * (float) Math.PI * 100.0, 50.0, 400.0);
-      ((ServerLevel)player.level)
-         .sendParticles(ParticleTypes.EXPLOSION, player.getX(), player.getY(), player.getZ(), particleCount, radius * 0.5, 0.5, radius * 0.5, 0.0);
-      ((ServerLevel)player.level)
-         .sendParticles(ParticleTypes.SMOKE, player.getX(), player.getY(), player.getZ(), particleCount / 2, radius * 0.5, 0.5, radius * 0.5, 0.0);
-      AreaEffectCloud areaEffectCloud = new AreaEffectCloud(player.level, player.getX(), player.getY(), player.getZ());
-      areaEffectCloud.setOwner(player);
-      areaEffectCloud.setRadius(radius);
-      areaEffectCloud.setRadiusOnUse(-0.5F);
-      areaEffectCloud.setWaitTime(0);
-      areaEffectCloud.setDuration(4);
-      areaEffectCloud.setPotion(Potions.EMPTY);
-      areaEffectCloud.setRadiusPerTick(-areaEffectCloud.getRadius() / areaEffectCloud.getDuration());
-      areaEffectCloud.setFixedColor(Color.RED.getRGB());
-      areaEffectCloud.setParticle(ParticleTypes.FLAME);
-      player.level.addFreshEntity(areaEffectCloud);
+   protected Ability.ActionResult doAction(SkillContext context) {
+      return context.getSource().as(ServerPlayer.class).map(player -> {
+         Vec3 pos = context.getSource().getPos().orElse(player.position());
+         List<LivingEntity> targetEntities = this.getTargetEntities(player.level, player, pos);
+         float attackDamage = this.getAttackDamage(player);
+         DamageSource damageSource = DamageSource.playerAttack(player);
+
+         for (LivingEntity entity : targetEntities) {
+            ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+               if (entity.hurt(damageSource, attackDamage) && !Mth.equal(this.getKnockbackStrengthMultiplier(), 0.0F)) {
+                  double dx = pos.x - entity.getX();
+                  double dz = pos.z - entity.getZ();
+                  if (dx * dx + dz * dz < 1.0E-4) {
+                     dx = (Math.random() - Math.random()) * 0.01;
+                     dz = (Math.random() - Math.random()) * 0.01;
+                  }
+
+                  entity.knockback(0.4F * this.getKnockbackStrengthMultiplier(), dx, dz);
+               }
+            });
+         }
+
+         return Ability.ActionResult.successCooldownImmediate();
+      }).orElse(Ability.ActionResult.fail());
    }
 
-   protected void doSound(C config, ServerPlayer player) {
-      player.level.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.2F, 1.0F);
-      player.playNotifySound(SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.2F, 1.0F);
+   @Override
+   protected void doParticles(SkillContext context) {
+      context.getSource().as(ServerPlayer.class).ifPresent(player -> {
+         Vec3 pos = context.getSource().getPos().orElse(player.position());
+         float radius = this.getRadius(player);
+         ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new NovaParticleMessage(new Vec3(pos.x, pos.y + 0.15F, pos.z), radius));
+      });
+   }
+
+   @Override
+   protected void doSound(SkillContext context) {
+      context.getSource().as(ServerPlayer.class).ifPresent(player -> {
+         Vec3 pos = context.getSource().getPos().orElse(player.position());
+         player.level.playSound(player, pos.x, pos.y, pos.z, SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.2F, 1.0F);
+         player.playNotifySound(SoundEvents.GENERIC_EXPLODE, SoundSource.PLAYERS, 0.2F, 1.0F);
+      });
    }
 }

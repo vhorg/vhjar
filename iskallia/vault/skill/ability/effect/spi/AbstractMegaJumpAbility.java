@@ -1,13 +1,19 @@
 package iskallia.vault.skill.ability.effect.spi;
 
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.skill.ability.config.MegaJumpConfig;
-import iskallia.vault.skill.ability.effect.spi.core.AbstractInstantManaAbility;
+import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.TierSortingRegistry;
 
-public abstract class AbstractMegaJumpAbility<C extends MegaJumpConfig> extends AbstractInstantManaAbility<C> {
+public abstract class AbstractMegaJumpAbility extends InstantManaAbility {
+   public AbstractMegaJumpAbility(int unlockLevel, int learnPointCost, int regretPointCost, int cooldownTicks, float manaCost) {
+      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost);
+   }
+
+   protected AbstractMegaJumpAbility() {
+   }
+
    @Override
    public String getAbilityGroupName() {
       return "Mega Jump";

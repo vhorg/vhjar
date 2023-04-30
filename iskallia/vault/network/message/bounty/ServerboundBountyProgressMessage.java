@@ -29,12 +29,12 @@ public record ServerboundBountyProgressMessage() {
          List<Bounty> bounties = new ArrayList<>();
          BountyList activeList = BountyData.get().getAllActiveFor(sender.getUUID());
          if (!activeList.isEmpty()) {
-            bounties.add(activeList.get(0));
+            bounties.addAll(activeList);
          }
 
          BountyList legendaryList = BountyData.get().getAllLegendaryFor(sender.getUUID());
          if (!legendaryList.isEmpty()) {
-            bounties.add(legendaryList.get(0));
+            bounties.addAll(legendaryList);
          }
 
          if (!bounties.isEmpty()) {

@@ -19,6 +19,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 public class ModSlotIcons {
    public static final List<ResourceLocation> REGISTRY = new LinkedList<>();
    public static final ResourceLocation COINS_NO_ITEM = register("gui/slot/coins_no_item");
+   public static final ResourceLocation REGRET_ORB_NO_ITEM = register("gui/slot/regret_orb_no_item");
    public static final ResourceLocation PLATING_NO_ITEM = register("gui/slot/plating_no_item");
    public static final ResourceLocation TOOL_VISE_SLOT_0_NO_ITEM = register("gui/slot/tool_vise/0_no_item");
    public static final ResourceLocation TOOL_VISE_SLOT_1_NO_ITEM = register("gui/slot/tool_vise/1_no_item");

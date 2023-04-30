@@ -3,7 +3,7 @@ package iskallia.vault.core.data.adapter.basic;
 import com.google.gson.JsonElement;
 import io.netty.buffer.ByteBuf;
 import iskallia.vault.core.data.adapter.Adapters;
-import iskallia.vault.core.data.adapter.primitive.IntAdapter;
+import iskallia.vault.core.data.adapter.number.IntAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
 import java.io.DataInput;

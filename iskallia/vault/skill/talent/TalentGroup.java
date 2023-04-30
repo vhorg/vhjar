@@ -4,10 +4,12 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
-import iskallia.vault.skill.talent.type.AttributeTalent;
+import iskallia.vault.skill.base.TieredSkill;
 import iskallia.vault.skill.talent.type.EffectTalent;
+import iskallia.vault.skill.talent.type.GearAttributeTalent;
 import iskallia.vault.skill.talent.type.VanillaAttributeTalent;
 import iskallia.vault.util.RomanNumber;
+import java.util.Arrays;
 import java.util.function.IntFunction;
 import java.util.function.IntToDoubleFunction;
 import java.util.stream.IntStream;
@@ -15,7 +17,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 
-public class TalentGroup<T extends Talent> {
+public class TalentGroup<T extends LegacyTalent> {
    @Expose
    private final String name;
    @Expose
@@ -70,35 +72,27 @@ public class TalentGroup<T extends Talent> {
       return this.registry;
    }
 
-   public static TalentGroup<AttributeTalent> ofGearAttribute(String name, VaultGearAttribute<?> attribute, int maxLevel, IntToDoubleFunction valueFn) {
-      AttributeTalent[] talents = IntStream.range(0, maxLevel)
-         .mapToObj(i -> new AttributeTalent(i + 1, attribute, valueFn.applyAsDouble(i)))
-         .toArray(AttributeTalent[]::new);
-      return new TalentGroup<>(name, talents);
+   public static TieredSkill ofGearAttribute(String name, VaultGearAttribute<?> attribute, int maxLevel, IntToDoubleFunction valueFn) {
+      GearAttributeTalent[] talents = IntStream.range(0, maxLevel)
+         .mapToObj(i -> new GearAttributeTalent(0, i + 1, i + 1, attribute, valueFn.applyAsDouble(i)))
+         .toArray(GearAttributeTalent[]::new);
+      return new TieredSkill(0, 0, 0, Arrays.stream(talents));
    }
 
-   public static TalentGroup<EffectTalent> ofEffect(String name, MobEffect effect, int maxLevel) {
-      EffectTalent[] talents = IntStream.range(0, maxLevel).mapToObj(i -> new EffectTalent(i + 1, effect, i + 1)).toArray(EffectTalent[]::new);
-      return new TalentGroup<>(name, talents);
+   public static TieredSkill ofEffect(String name, MobEffect effect, int maxLevel) {
+      EffectTalent[] talents = IntStream.range(0, maxLevel).mapToObj(i -> new EffectTalent(0, i + 1, i + 1, effect, i + 1)).toArray(EffectTalent[]::new);
+      return new TieredSkill(0, 0, 0, Arrays.stream(talents));
    }
 
-   public static TalentGroup<VanillaAttributeTalent> ofAttribute(
-      String name, Attribute attribute, Operation operation, int maxLevel, IntToDoubleFunction amount
-   ) {
+   public static TieredSkill ofAttribute(String name, Attribute attribute, Operation operation, int maxLevel, IntToDoubleFunction amount) {
       VanillaAttributeTalent[] talents = IntStream.range(0, maxLevel)
-         .mapToObj(
-            i -> new VanillaAttributeTalent(
-               i + 1,
-               attribute,
-               new VanillaAttributeTalent.Modifier(attribute.getDescriptionId() + " " + RomanNumber.toRoman(i + 1), amount.applyAsDouble(i + 1), operation)
-            )
-         )
+         .mapToObj(i -> new VanillaAttributeTalent(0, i + 1, i + 1, attribute, operation, amount.applyAsDouble(i + 1)))
          .toArray(VanillaAttributeTalent[]::new);
-      return new TalentGroup<>(name, talents);
+      return new TieredSkill(0, 0, 0, Arrays.stream(talents));
    }
 
-   public static <T extends Talent> TalentGroup<T> of(String name, int maxLevel, IntFunction<T> supplier) {
-      Talent[] talents = IntStream.range(0, maxLevel).mapToObj(supplier).toArray(Talent[]::new);
+   public static <T extends LegacyTalent> TalentGroup<T> of(String name, int maxLevel, IntFunction<T> supplier) {
+      LegacyTalent[] talents = IntStream.range(0, maxLevel).mapToObj(supplier).toArray(LegacyTalent[]::new);
       return new TalentGroup<>(name, (T[])talents);
    }
 }

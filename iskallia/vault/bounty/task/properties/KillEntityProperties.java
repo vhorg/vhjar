@@ -32,6 +32,18 @@ public class KillEntityProperties extends TaskProperties {
    @Override
    public void deserializeNBT(CompoundTag tag) {
       super.deserializeNBT(tag);
-      this.entityId = new ResourceLocation(tag.getString("entityId"));
+      if (tag.contains("entityId")) {
+         this.entityId = new ResourceLocation(tag.getString("entityId"));
+      }
+
+      if (tag.contains("filter")) {
+         String filter = tag.getString("filter");
+         String[] split = filter.split("\"");
+         if (split.length >= 2) {
+            filter = split[1];
+         }
+
+         this.entityId = ResourceLocation.tryParse(filter);
+      }
    }
 }

@@ -24,6 +24,8 @@
     "the_vault:wooden_chest",
     "the_vault:living_chest",
     "the_vault:gilded_chest",
-    "the_vault:ornate_chest"
+    "the_vault:ornate_chest",
+    "#minecraft:shulker_boxes",
+    "supplementaries:sack"
   ]
 }

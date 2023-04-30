@@ -37,6 +37,10 @@ public final class Tooltips {
       };
    }
 
+   public static ITooltipRenderFunction empty() {
+      return (tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> true;
+   }
+
    public static ITooltipRenderFunction advanced(ITooltipRenderFunction tooltipRenderFunction, ITooltipRenderFunction advancedTooltipRenderFunction) {
       return (tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> tooltipFlag.isAdvanced()
          ? tooltipRenderFunction.onHoverTooltip(tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag)

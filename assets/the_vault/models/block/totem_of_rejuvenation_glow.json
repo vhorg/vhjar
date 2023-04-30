@@ -1,0 +1,45 @@
+{
+	"parent": "block/block",
+	"textures": {
+		"0": "the_vault:block/totem_of_rejuvenation",
+		"particle": "the_vault:block/totem_of_rejuvenation"
+	},
+	"elements": [
+		{
+			"from": [9, 9.5, 2.9],
+			"to": [11, 10.5, 2.9],
+			"shade": false,
+			"rotation": {"angle": -22.5, "axis": "y", "origin": [8, 8.5, 3]},
+			"faces": {
+				"north": {"uv": [7, 12, 8, 12.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [5, 9.5, 2.9],
+			"to": [7, 10.5, 2.9],
+			"shade": false,
+			"rotation": {"angle": 22.5, "axis": "y", "origin": [8, 8.5, 3]},
+			"faces": {
+				"north": {"uv": [9, 12, 10, 12.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [9, 9.5, 13.1],
+			"to": [11, 10.5, 13.1],
+			"shade": false,
+			"rotation": {"angle": 22.5, "axis": "y", "origin": [8, 8.5, 13]},
+			"faces": {
+				"south": {"uv": [8, 12, 7, 12.5], "texture": "#0"}
+			}
+		},
+		{
+			"from": [5, 9.5, 13.1],
+			"to": [7, 10.5, 13.1],
+			"shade": false,
+			"rotation": {"angle": -22.5, "axis": "y", "origin": [8, 8.5, 13]},
+			"faces": {
+				"south": {"uv": [10, 12, 9, 12.5], "texture": "#0"}
+			}
+		}
+	]
+}
