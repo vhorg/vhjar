@@ -40,7 +40,7 @@ public class PlayerTalentsData extends SavedData {
    }
 
    public TalentTree getTalents(UUID uuid) {
-      return this.playerMap.computeIfAbsent(uuid, uuid1 -> ModConfigs.TALENTS.get().orElse(new TalentTree()));
+      return this.playerMap.computeIfAbsent(uuid, uuid1 -> ModConfigs.TALENTS.get().orElse(new TalentTree()).copy());
    }
 
    public void setTalents(Player player, TalentTree talentTree) {

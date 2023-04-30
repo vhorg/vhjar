@@ -48,7 +48,7 @@ public class PlayerAbilitiesData extends SavedData {
    }
 
    public AbilityTree getAbilities(UUID uuid) {
-      return this.playerMap.computeIfAbsent(uuid, id -> ModConfigs.ABILITIES.get().orElse(new AbilityTree()));
+      return this.playerMap.computeIfAbsent(uuid, id -> ModConfigs.ABILITIES.get().orElse(new AbilityTree()).copy());
    }
 
    public static void setAbilityOnCooldown(ServerPlayer player, Class<?> type) {
