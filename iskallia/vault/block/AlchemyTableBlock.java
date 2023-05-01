@@ -1,7 +1,6 @@
 package iskallia.vault.block;
 
 import iskallia.vault.block.entity.AlchemyTableTileEntity;
-import iskallia.vault.block.entity.ModifierWorkbenchTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.VoxelUtils;
 import javax.annotation.Nonnull;
@@ -45,7 +44,7 @@ public class AlchemyTableBlock extends HorizontalDirectionalBlock implements Ent
    public static final VoxelShape SHAPE2 = Block.box(1.0, 0.0, 1.0, 15.0, 11.0, 15.0);
 
    public AlchemyTableBlock() {
-      super(Properties.of(Material.STONE).sound(SoundType.STONE).strength(0.5F).noDrops().noOcclusion());
+      super(Properties.of(Material.STONE).sound(SoundType.STONE).strength(0.5F).noOcclusion());
       this.registerDefaultState(
          (BlockState)((BlockState)((BlockState)this.getStateDefinition().any()).setValue(FACING, Direction.NORTH))
             .setValue(BlockStateProperties.WATERLOGGED, false)
@@ -108,7 +107,7 @@ public class AlchemyTableBlock extends HorizontalDirectionalBlock implements Ent
    }
 
    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-      if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof ModifierWorkbenchTileEntity workbench) {
+      if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof AlchemyTableTileEntity workbench) {
          Containers.dropContents(level, pos, workbench.getInventory());
          workbench.getInventory().clearContent();
          level.updateNeighbourForOutputSignal(pos, this);

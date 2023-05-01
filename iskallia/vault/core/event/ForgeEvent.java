@@ -9,14 +9,14 @@ import net.minecraftforge.eventbus.api.EventPriority;
 
 public abstract class ForgeEvent<E extends ForgeEvent<E, T>, T extends net.minecraftforge.eventbus.api.Event> extends Event<E, T> {
    protected ForgeEvent() {
-      this.register();
+      this.initialize();
    }
 
    protected ForgeEvent(E parent) {
       super(parent);
    }
 
-   protected abstract void register();
+   protected abstract void initialize();
 
    public E register(Object reference, EventPriority eventPriority, Consumer<T> listener) {
       return this.register(reference, eventPriority, false, listener, 0);

@@ -149,6 +149,10 @@ public class NovaSpeedAbility extends AbstractNovaAbility {
       abilityData.putUUID("playerUUID", playerUUID);
    }
 
+   private static boolean isAbilityDataValid(CompoundTag data) {
+      return data.contains("intervalTicks") && data.contains("remainingIntervalTicks") && data.contains("playerUUID");
+   }
+
    private static CompoundTag getAbilityData(LivingEntity livingEntity) {
       CompoundTag persistentData = livingEntity.getPersistentData();
       CompoundTag abilityData = persistentData.getCompound("the_vault:ability/Nova_Slow");
@@ -175,6 +179,10 @@ public class NovaSpeedAbility extends AbstractNovaAbility {
       if (livingEntity.getLevel() instanceof ServerLevel serverLevel && livingEntity.hasEffect(ModEffects.HYPOTHERMIA)) {
          if (decrementRemainingInterval(livingEntity)) {
             CompoundTag abilityData = getAbilityData(livingEntity);
+            if (!isAbilityDataValid(abilityData)) {
+               return;
+            }
+
             UUID playerUUID = abilityData.getUUID("playerUUID");
             ServerPlayer serverPlayer = serverLevel.getServer().getPlayerList().getPlayer(playerUUID);
             if (serverPlayer == null) {

@@ -472,10 +472,12 @@ public class VaultThrownJavelin extends AbstractArrow {
    }
 
    protected boolean canHitEntity(Entity entity) {
-      return super.canHitEntity(entity)
-         && (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()))
-         && !(entity instanceof Player)
-         && !(entity instanceof EternalEntity);
+      return !(entity instanceof LivingEntity livingEntity)
+         ? false
+         : super.canHitEntity(entity)
+            && (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()))
+            && !(entity instanceof Player)
+            && !(entity instanceof EternalEntity);
    }
 
    @Nullable
@@ -501,11 +503,11 @@ public class VaultThrownJavelin extends AbstractArrow {
             if (entity instanceof LivingEntity livingentity) {
                if (this.getPierceLevel() > 0) {
                   if (this.piercingIgnoreEntityIds == null) {
-                     this.piercingIgnoreEntityIds = new IntOpenHashSet(5);
+                     this.piercingIgnoreEntityIds = new IntOpenHashSet(30);
                   }
 
                   if (this.piercedAndKilledEntities == null) {
-                     this.piercedAndKilledEntities = Lists.newArrayListWithCapacity(5);
+                     this.piercedAndKilledEntities = Lists.newArrayListWithCapacity(30);
                   }
 
                   if (this.piercingIgnoreEntityIds.size() >= this.getPierceLevel() + 1) {

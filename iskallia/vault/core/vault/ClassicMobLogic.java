@@ -61,7 +61,7 @@ public class ClassicMobLogic extends MobLogic {
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
       CommonEvents.ENTITY_CHECK_SPAWN.register(this, event -> {
-         if (!event.isSpawner()) {
+         if (event.getEntity().level == world && !event.isSpawner()) {
             event.setResult(Result.DENY);
          }
       });
