@@ -21,6 +21,7 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -149,7 +150,7 @@ public class PlayerVaultStatsData extends SavedData {
       stats.setRegretPoints(9999);
 
       for (Skill skill : talentTree.getAll(LearnableSkill.class, Skill::isUnlocked)) {
-         while (skill.isUnlocked()) {
+         for (int count = 0; skill.isUnlocked(); count++) {
             SkillContext context = SkillContext.of(player);
             if (skill.getParent() instanceof GroupedSkill grouped) {
                grouped.select(skill.getId());
@@ -159,6 +160,11 @@ public class PlayerVaultStatsData extends SavedData {
             if (skill instanceof LearnableSkill learnable && learnable.canRegret(context)) {
                learnable.regret(context);
                talentTree.sync(context);
+            }
+
+            if (count > 50) {
+               player.displayClientMessage(new TextComponent("Stuck in loop removing abilities, try again."), false);
+               break;
             }
          }
       }

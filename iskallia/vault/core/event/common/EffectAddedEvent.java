@@ -14,7 +14,7 @@ public class EffectAddedEvent extends ForgeEvent<EffectAddedEvent, PotionAddedEv
    }
 
    @Override
-   protected void register() {
+   protected void initialize() {
       for (EventPriority priority : EventPriority.values()) {
          MinecraftForge.EVENT_BUS.addListener(priority, true, event -> this.invoke(event));
       }

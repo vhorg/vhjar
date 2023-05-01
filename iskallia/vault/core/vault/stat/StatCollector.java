@@ -24,6 +24,7 @@ import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.eventbus.api.EventPriority;
 
 public class StatCollector extends DataObject<StatCollector> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
@@ -76,7 +77,7 @@ public class StatCollector extends DataObject<StatCollector> {
             }
          }
       });
-      CommonEvents.PLAYER_MINE.register(this, event -> {
+      CommonEvents.PLAYER_MINE.register(this, EventPriority.LOW, event -> {
          if (event.getPlayer().getUUID().equals(uuid)) {
             this.get(MINED_BLOCKS).onMine(event.getState(), event.getPlayer());
          }

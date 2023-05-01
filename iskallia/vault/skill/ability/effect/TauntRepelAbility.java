@@ -283,6 +283,7 @@ public class TauntRepelAbility extends AbstractTauntAbility {
                .getAvailableGoals()
                .stream()
                .filter(wrappedGoal -> wrappedGoal.getGoal() instanceof TauntRepelAbility.FearGoal)
+               .toList()
                .forEach(wrappedGoal -> {
                   wrappedGoal.stop();
                   mob.goalSelector.removeGoal(wrappedGoal.getGoal());
