@@ -12,6 +12,8 @@ import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.tool.ToolItem;
+import iskallia.vault.item.tool.ToolMaterial;
 import iskallia.vault.util.data.BitSerializers;
 import iskallia.vault.util.data.LazyHolder;
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class AttributeGearData {
    public static final String TAG_KEY = "vaultGearData";
-   private GearDataVersion version = GearDataVersion.current();
+   protected GearDataVersion version = GearDataVersion.current();
    private final LazyHolder<UUID> identifier = new LazyHolder<>(UUID::randomUUID, BitSerializers.UUID);
    List<VaultGearAttributeInstance<?>> attributes = new ArrayList<>();
 
@@ -68,6 +70,16 @@ public class AttributeGearData {
    public static <T extends AttributeGearData> T read(ItemStack stack) {
       if (stack.getItem() == ModItems.MAGNET && MagnetItem.isLegacy(stack)) {
          return (T)(new VaultGearData());
+      } else if (stack.getItem() instanceof ToolItem) {
+         CompoundTag tag = stack.getTag();
+         if (tag != null && tag.contains("version")) {
+            tag.remove("version");
+            ToolMaterial material = ToolItem.getMaterial(stack);
+            int amount = material == ToolMaterial.ECHOING_INGOT ? -50 : (material == ToolMaterial.OMEGA_POG ? -200 : 0);
+            ToolItem.addCapacity(stack, amount);
+         }
+
+         return read(stack, (Function<BitBuffer, T>)(ToolGearData::new), (Supplier<T>)(ToolGearData::new));
       } else {
          return stack.getItem() instanceof VaultGearItem
             ? read(stack, (Function<BitBuffer, T>)(VaultGearData::new), (Supplier<T>)(VaultGearData::new))

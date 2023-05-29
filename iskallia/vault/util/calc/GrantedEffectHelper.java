@@ -83,10 +83,8 @@ public class GrantedEffectHelper {
          .map(aura -> (EffectAuraConfig)aura.getAura())
          .forEach(effectAura -> {
             EffectTalent auraTalent = effectAura.getEffect();
-            if (auraTalent != null && auraTalent.getEffect() != null) {
-               if (effectFilter.test(auraTalent.getEffect())) {
-                  grantedEffects.addAmplifier(auraTalent);
-               }
+            if (effectFilter.test(auraTalent.getEffect())) {
+               grantedEffects.addAmplifier(auraTalent);
             }
          });
       CommonEvents.GRANTED_EFFECT.invoke(grantedEffects, world, player, effectFilter);

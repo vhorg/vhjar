@@ -101,8 +101,8 @@ public class EffectOnHitTalent extends EntityFilterTalent {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.EFFECT.writeBits((IForgeRegistryEntry)this.effect, buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.amplifier), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.duration), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.amplifier), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.duration), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.probability), buffer);
    }
 
@@ -110,8 +110,8 @@ public class EffectOnHitTalent extends EntityFilterTalent {
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.effect = (MobEffect)Adapters.EFFECT.readBits(buffer).orElseThrow();
-      this.amplifier = Adapters.INT.readBits(buffer).orElseThrow();
-      this.duration = Adapters.INT.readBits(buffer).orElseThrow();
+      this.amplifier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.duration = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
       this.probability = Adapters.FLOAT.readBits(buffer).orElseThrow();
    }
 

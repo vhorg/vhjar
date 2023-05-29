@@ -157,13 +157,13 @@ public class GhostWalkAbility extends InstantManaAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.durationTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.durationTicks), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.durationTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.durationTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override

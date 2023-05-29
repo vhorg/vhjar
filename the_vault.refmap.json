@@ -296,11 +296,11 @@
       "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z": "Lnet/minecraft/world/level/GameRules;m_46207_(Lnet/minecraft/world/level/GameRules$Key;)Z",
       "tick": "Lnet/minecraft/world/food/FoodData;m_38710_(Lnet/minecraft/world/entity/player/Player;)V"
     },
-    "iskallia/vault/mixin/MixinAccessibilityOptionsScreen": {
-      "createFooter": "Lnet/minecraft/client/gui/screens/AccessibilityOptionsScreen;m_7853_()V"
-    },
     "iskallia/vault/mixin/MixinVirtualCraftingOutputSlot": {
       "mayPickup": "Lmekanism/common/inventory/container/slot/VirtualCraftingOutputSlot;m_8010_(Lnet/minecraft/world/entity/player/Player;)Z"
+    },
+    "iskallia/vault/mixin/MixinAccessibilityOptionsScreen": {
+      "createFooter": "Lnet/minecraft/client/gui/screens/AccessibilityOptionsScreen;m_7853_()V"
     },
     "iskallia/vault/mixin/MixinJigsawBlockEditScreen": {
       "init": "Lnet/minecraft/client/gui/screens/inventory/JigsawBlockEditScreen;m_7856_()V",
@@ -738,11 +738,11 @@
         "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z": "Lnet/minecraft/world/level/GameRules;m_46207_(Lnet/minecraft/world/level/GameRules$Key;)Z",
         "tick": "Lnet/minecraft/world/food/FoodData;m_38710_(Lnet/minecraft/world/entity/player/Player;)V"
       },
-      "iskallia/vault/mixin/MixinAccessibilityOptionsScreen": {
-        "createFooter": "Lnet/minecraft/client/gui/screens/AccessibilityOptionsScreen;m_7853_()V"
-      },
       "iskallia/vault/mixin/MixinVirtualCraftingOutputSlot": {
         "mayPickup": "Lmekanism/common/inventory/container/slot/VirtualCraftingOutputSlot;m_8010_(Lnet/minecraft/world/entity/player/Player;)Z"
+      },
+      "iskallia/vault/mixin/MixinAccessibilityOptionsScreen": {
+        "createFooter": "Lnet/minecraft/client/gui/screens/AccessibilityOptionsScreen;m_7853_()V"
       },
       "iskallia/vault/mixin/MixinJigsawBlockEditScreen": {
         "init": "Lnet/minecraft/client/gui/screens/inventory/JigsawBlockEditScreen;m_7856_()V",

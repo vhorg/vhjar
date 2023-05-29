@@ -1,23 +1,19 @@
 package iskallia.vault.client.particles;
 
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import iskallia.vault.util.MathUtilities;
-import iskallia.vault.util.Tween;
 import java.util.Random;
 import javax.annotation.Nonnull;
-import javax.annotation.ParametersAreNonnullByDefault;
-import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.ParticleRenderType;
+import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.client.particle.SpriteSet;
-import net.minecraft.client.particle.TextureSheetParticle;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
-public class GrowingSphereParticle extends TextureSheetParticle {
+public class GrowingSphereParticle extends SimpleAnimatedParticle {
    private static final float ROTATION_SPEED = 0.0125F;
    private float rotationSpeed;
    private final double xOrigin;
@@ -25,7 +21,6 @@ public class GrowingSphereParticle extends TextureSheetParticle {
    private final double yOffset;
    private final double zOrigin;
    private final float orbitRadius;
-   private final Tween alphaTween;
    private float orbitAngleRadians;
 
    protected GrowingSphereParticle(
@@ -38,14 +33,13 @@ public class GrowingSphereParticle extends TextureSheetParticle {
       double zOrigin,
       float orbitRadius,
       float orbitAngleRadians,
-      Tween alphaTween
+      SpriteSet spriteSet
    ) {
-      super(clientLevel, xOrigin, yOrigin, zOrigin);
+      super(clientLevel, xOrigin, yOrigin, zOrigin, spriteSet, 0.0F);
       this.xOrigin = xOrigin;
       this.yOrigin = yOrigin;
       this.zOrigin = zOrigin;
       this.orbitRadius = orbitRadius;
-      this.alphaTween = alphaTween;
       this.hasPhysics = false;
       this.orbitAngleRadians = orbitAngleRadians;
       this.yOffset = yPosition - this.yOrigin;
@@ -89,12 +83,7 @@ public class GrowingSphereParticle extends TextureSheetParticle {
       return false;
    }
 
-   @ParametersAreNonnullByDefault
-   public void render(VertexConsumer vertexConsumer, Camera camera, float partialTicks) {
-      super.render(vertexConsumer, camera, partialTicks);
-   }
-
-   protected int getLightColor(float pPartialTick) {
+   public int getLightColor(float pPartialTick) {
       return 240;
    }
 
@@ -104,14 +93,12 @@ public class GrowingSphereParticle extends TextureSheetParticle {
       private final float orbitSpeed;
       private final int durationTicks;
       private final float scale;
-      private final Tween alphaTween;
 
-      public SphereProvider(SpriteSet pSprites, float orbitSpeed, int durationTicks, float scale, Tween alphaTween) {
+      public SphereProvider(SpriteSet pSprites, float orbitSpeed, int durationTicks, float scale) {
          this.sprites = pSprites;
          this.orbitSpeed = orbitSpeed;
          this.durationTicks = durationTicks;
          this.scale = scale;
-         this.alphaTween = alphaTween;
       }
 
       @Nullable
@@ -122,7 +109,7 @@ public class GrowingSphereParticle extends TextureSheetParticle {
          float orbitRadius = (float)MathUtilities.getDistance(position.x, position.z, xOrigin, zOrigin);
          float orbitAngleRadians = (float)Math.atan2(position.x - xOrigin, position.z - zOrigin);
          GrowingSphereParticle particle = new GrowingSphereParticle(
-            level, position.x, position.y, position.z, xOrigin, yOrigin, zOrigin, orbitRadius, orbitAngleRadians, this.alphaTween
+            level, position.x, position.y, position.z, xOrigin, yOrigin, zOrigin, orbitRadius, orbitAngleRadians, this.sprites
          );
          particle.pickSprite(this.sprites);
          particle.setColor(data.color().x(), data.color().y(), data.color().z());

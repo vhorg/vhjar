@@ -59,6 +59,8 @@
     "the_vault:angel_block",
     "the_vault:skill_altar",
     "the_vault:alchemy_table",
-    "the_vault:identification_stand"
+    "the_vault:identification_stand",
+    "the_vault:vault_jewel_cutting_station",
+    "the_vault:modifier_workbench"
   ]
 }

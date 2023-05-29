@@ -22,6 +22,7 @@ import iskallia.vault.network.message.ClientboundPlayerLastDamageSourceMessage;
 import iskallia.vault.network.message.ClientboundRefreshSpiritExtractorMessage;
 import iskallia.vault.network.message.ClientboundRefreshToolViseMessage;
 import iskallia.vault.network.message.ClientboundResetCryoChamberMessage;
+import iskallia.vault.network.message.ClientboundSightParticlesFromJavelinMessage;
 import iskallia.vault.network.message.ClientboundSyncSkillAltarDataMessage;
 import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
 import iskallia.vault.network.message.ClientboundToastMessage;
@@ -40,6 +41,7 @@ import iskallia.vault.network.message.ForgeParticleMessage;
 import iskallia.vault.network.message.ForgeRecipeSyncMessage;
 import iskallia.vault.network.message.HistoricFavoritesMessage;
 import iskallia.vault.network.message.InvalidConfigsMessage;
+import iskallia.vault.network.message.JewelCuttingParticleMessage;
 import iskallia.vault.network.message.KnownExpertisesMessage;
 import iskallia.vault.network.message.KnownTalentsMessage;
 import iskallia.vault.network.message.LuckyHitDamageParticleMessage;
@@ -112,6 +114,8 @@ import iskallia.vault.network.message.VaultCharmControllerScrollMessage;
 import iskallia.vault.network.message.VaultEnchanterEnchantMessage;
 import iskallia.vault.network.message.VaultEnhancementRequestMessage;
 import iskallia.vault.network.message.VaultForgeRequestCraftMessage;
+import iskallia.vault.network.message.VaultJewelApplicationStationMessage;
+import iskallia.vault.network.message.VaultJewelCuttingRequestModificationMessage;
 import iskallia.vault.network.message.VaultLevelMessage;
 import iskallia.vault.network.message.VaultMessage;
 import iskallia.vault.network.message.VaultPlayerHistoricDataMessage;
@@ -375,6 +379,20 @@ public class ModNetwork {
          VaultArtisanRequestModificationMessage::decode,
          VaultArtisanRequestModificationMessage::handle
       );
+      CHANNEL.registerMessage(
+         nextId(),
+         VaultJewelCuttingRequestModificationMessage.class,
+         VaultJewelCuttingRequestModificationMessage::encode,
+         VaultJewelCuttingRequestModificationMessage::decode,
+         VaultJewelCuttingRequestModificationMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         VaultJewelApplicationStationMessage.class,
+         VaultJewelApplicationStationMessage::encode,
+         VaultJewelApplicationStationMessage::decode,
+         VaultJewelApplicationStationMessage::handle
+      );
       CHANNEL.registerMessage(nextId(), SelectRelicMessage.class, SelectRelicMessage::encode, SelectRelicMessage::decode, SelectRelicMessage::handle);
       CHANNEL.registerMessage(
          nextId(), RelicAssembleButtonMessage.class, RelicAssembleButtonMessage::encode, RelicAssembleButtonMessage::decode, RelicAssembleButtonMessage::handle
@@ -499,6 +517,13 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(), RecyclerParticleMessage.class, RecyclerParticleMessage::encode, RecyclerParticleMessage::decode, RecyclerParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         JewelCuttingParticleMessage.class,
+         JewelCuttingParticleMessage::encode,
+         JewelCuttingParticleMessage::decode,
+         JewelCuttingParticleMessage::handle
       );
       CHANNEL.registerMessage(nextId(), ForgeParticleMessage.class, ForgeParticleMessage::encode, ForgeParticleMessage::decode, ForgeParticleMessage::handle);
       CHANNEL.registerMessage(
@@ -786,6 +811,13 @@ public class ModNetwork {
          ClientboundHunterParticlesFromJavelinMessage::encode,
          ClientboundHunterParticlesFromJavelinMessage::decode,
          ClientboundHunterParticlesFromJavelinMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundSightParticlesFromJavelinMessage.class,
+         ClientboundSightParticlesFromJavelinMessage::encode,
+         ClientboundSightParticlesFromJavelinMessage::decode,
+         ClientboundSightParticlesFromJavelinMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),

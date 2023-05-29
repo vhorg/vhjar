@@ -22,6 +22,8 @@ import iskallia.vault.container.VaultEnchanterContainer;
 import iskallia.vault.container.VaultEndContainer;
 import iskallia.vault.container.VaultEnhancementAltarContainer;
 import iskallia.vault.container.VaultForgeContainer;
+import iskallia.vault.container.VaultJewelApplicationStationContainer;
+import iskallia.vault.container.VaultJewelCuttingStationContainer;
 import iskallia.vault.container.VaultRecyclerContainer;
 import iskallia.vault.container.WardrobeContainer;
 import iskallia.vault.container.inventory.CatalystInfusionTableContainer;
@@ -74,6 +76,8 @@ public class ModContainers {
    public static MenuType<ToolStationContainer> TOOL_STATION_CONTAINER;
    public static MenuType<InscriptionTableContainer> INSCRIPTION_TABLE_CONTAINER;
    public static MenuType<VaultArtisanStationContainer> VAULT_ARTISAN_STATION_CONTAINER;
+   public static MenuType<VaultJewelCuttingStationContainer> VAULT_JEWEL_CUTTING_STATION_CONTAINER;
+   public static MenuType<VaultJewelApplicationStationContainer> VAULT_JEWEL_APPLICATION_STATION_CONTAINER;
    public static MenuType<VaultRecyclerContainer> VAULT_RECYCLER_CONTAINER;
    public static MenuType<VaultDiffuserContainer> VAULT_DIFFUSER_CONTAINER;
    public static MenuType<VaultEndContainer> VAULT_END_CONTAINER;
@@ -182,6 +186,16 @@ public class ModContainers {
          BlockPos pos = buffer.readBlockPos();
          return new VaultArtisanStationContainer(windowId, world, pos, inventory);
       });
+      VAULT_JEWEL_CUTTING_STATION_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new VaultJewelCuttingStationContainer(windowId, world, pos, inventory);
+      });
+      VAULT_JEWEL_APPLICATION_STATION_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new VaultJewelApplicationStationContainer(windowId, world, pos, inventory);
+      });
       VAULT_RECYCLER_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          Level world = inventory.player.getCommandSenderWorld();
          BlockPos pos = buffer.readBlockPos();
@@ -270,6 +284,8 @@ public class ModContainers {
                (MenuType)TOOL_STATION_CONTAINER.setRegistryName("tool_station_container"),
                (MenuType)INSCRIPTION_TABLE_CONTAINER.setRegistryName("inscription_table_container"),
                (MenuType)VAULT_ARTISAN_STATION_CONTAINER.setRegistryName("vault_artisan_station_container"),
+               (MenuType)VAULT_JEWEL_CUTTING_STATION_CONTAINER.setRegistryName("vault_jewel_cutting_station_container"),
+               (MenuType)VAULT_JEWEL_APPLICATION_STATION_CONTAINER.setRegistryName("vault_jewel_application_station_container"),
                (MenuType)VAULT_RECYCLER_CONTAINER.setRegistryName("vault_recycler_container"),
                (MenuType)VAULT_DIFFUSER_CONTAINER.setRegistryName("vault_diffuser_container"),
                (MenuType)VAULT_END_CONTAINER.setRegistryName("vault_end_container"),

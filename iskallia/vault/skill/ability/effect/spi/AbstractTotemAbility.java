@@ -138,14 +138,14 @@ public abstract class AbstractTotemAbility<T extends TotemTileEntity> extends In
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.totemDurationTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.totemDurationTicks), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.totemEffectRadius), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.totemDurationTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.totemDurationTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
       this.totemEffectRadius = Adapters.FLOAT.readBits(buffer).orElseThrow();
    }
 

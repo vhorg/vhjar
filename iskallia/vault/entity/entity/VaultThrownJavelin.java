@@ -1,14 +1,16 @@
 package iskallia.vault.entity.entity;
 
 import com.google.common.collect.Lists;
-import com.mojang.math.Vector3f;
 import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
-import iskallia.vault.client.particles.SphericalParticleOptions;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.array.ArrayAdapter;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.init.ModParticles;
 import iskallia.vault.network.message.ClientboundHunterParticlesFromJavelinMessage;
+import iskallia.vault.network.message.ClientboundSightParticlesFromJavelinMessage;
 import iskallia.vault.skill.ability.effect.JavelinAbility;
 import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
 import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
@@ -23,13 +25,13 @@ import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
@@ -37,7 +39,6 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -74,6 +75,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.PacketDistributor;
 
 public class VaultThrownJavelin extends AbstractArrow {
    private static final EntityDataAccessor<Float> ID_DAMAGE = SynchedEntityData.defineId(VaultThrownJavelin.class, EntityDataSerializers.FLOAT);
@@ -95,6 +97,17 @@ public class VaultThrownJavelin extends AbstractArrow {
    private List<Entity> piercedAndKilledEntities;
    private LivingEntity thrower = null;
    private int bounceCount = 0;
+   private static List<TilePredicate> filters = List.of(
+      TilePredicate.of("the_vault:wooden_chest{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:gilded_strongbox{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:gilded_chest{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:ornate_strongbox{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:ornate_chest{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:coin_pile{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:living_strongbox{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:living_chest{Hidden:0b}", true).orElseThrow()
+   );
+   private static ArrayAdapter<TilePredicate> KEYS = Adapters.ofArray(TilePredicate[]::new, Adapters.TILE_PREDICATE);
 
    public VaultThrownJavelin(EntityType<? extends AbstractArrow> entityType, Level level) {
       super(entityType, level);
@@ -294,7 +307,7 @@ public class VaultThrownJavelin extends AbstractArrow {
          switch (var2) {
             case "minecraft:chest":
             case "minecraft:trapped_chest":
-            case "the_vault:coin_pile":
+            case "the_vault:coin_pile_tile":
             case "the_vault:vault_chest_tile_entity":
                return true;
             default:
@@ -303,18 +316,33 @@ public class VaultThrownJavelin extends AbstractArrow {
       }
    }
 
-   protected List<HunterAbility.HighlightPosition> selectPositions(ServerLevel world, ServerPlayer player, double radius) {
-      List<HunterAbility.HighlightPosition> result = new ArrayList<>();
-      Color c = Color.cyan;
-      this.forEachTileEntity(world, player, radius, (pos, tile) -> {
-         if (this.shouldHighlightTileEntity(tile)) {
-            if (tile instanceof HunterHiddenTileEntity hiddenTile && hiddenTile.isHidden()) {
-               return;
-            }
+   public boolean shouldHighlightTile(PartialTile tile) {
+      return filters.stream().anyMatch(filter -> filter.test(tile));
+   }
 
-            result.add(new HunterAbility.HighlightPosition(pos, c));
+   protected List<VaultThrownJavelin.HighlightPosition> selectPositions(ServerLevel world, ServerPlayer player, double radius) {
+      List<VaultThrownJavelin.HighlightPosition> result = new ArrayList<>();
+      this.forEachTile(
+         world,
+         player,
+         radius,
+         tile -> {
+            AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
+
+            for (HunterAbility ability : abilities.getAll(HunterAbility.class, serverPlayer -> true)) {
+               if (!ability.getParent().getId().equals("Hunter_Base")
+                  && ability.getFilters().stream().anyMatch(filter -> filter.test(tile))
+                  && this.shouldHighlightTile(tile)) {
+                  if (tile instanceof HunterHiddenTileEntity hiddenTile && hiddenTile.isHidden()) {
+                     return;
+                  }
+
+                  result.add(new VaultThrownJavelin.HighlightPosition(tile.getPos(), ability.getParent().getId()));
+                  break;
+               }
+            }
          }
-      });
+      );
       return result;
    }
 
@@ -340,6 +368,28 @@ public class VaultThrownJavelin extends AbstractArrow {
       }
    }
 
+   protected void forEachTile(Level world, Player player, double radius, Consumer<PartialTile> consumer) {
+      BlockPos playerOffset = player.blockPosition();
+      double radiusSq = radius * radius;
+      int iRadius = Mth.ceil(radius);
+      Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);
+      ChunkPos posMin = new ChunkPos(this.blockPosition().subtract(radVec));
+      ChunkPos posMax = new ChunkPos(this.blockPosition().offset(radVec));
+
+      for (int xx = posMin.x; xx <= posMax.x; xx++) {
+         for (int zz = posMin.z; zz <= posMax.z; zz++) {
+            LevelChunk ch = world.getChunkSource().getChunkNow(xx, zz);
+            if (ch != null) {
+               ch.getBlockEntities().forEach((pos, tile) -> {
+                  if (tile != null && pos.distSqr(this.blockPosition()) <= radiusSq) {
+                     consumer.accept(PartialTile.at(world, pos));
+                  }
+               });
+            }
+         }
+      }
+   }
+
    protected void onHit(HitResult result) {
       if (!this.level.isClientSide() && this.bounceCount < this.getBounceMax() && this.thrower != null && result.getType() == Type.BLOCK) {
          BlockPos blockPos = ((BlockHitResult)result).getBlockPos();
@@ -349,19 +399,10 @@ public class VaultThrownJavelin extends AbstractArrow {
             if (this.getJavelinType() == VaultThrownJavelin.JavelinType.SIGHT) {
                ServerPlayer player = (ServerPlayer)this.getThrower();
                float radius = this.getSightRadius();
-               player.getLevel()
-                  .sendParticles(
-                     new SphericalParticleOptions(
-                        (ParticleType<SphericalParticleOptions>)ModParticles.SIGHT_JAVELIN_RANGE.get(), radius, new Vector3f(0.0F, 1.0F, 1.0F)
-                     ),
-                     this.position().x,
-                     this.position().y,
-                     this.position().z,
-                     500,
-                     0.0,
-                     0.0,
-                     0.0,
-                     0.0
+               ModNetwork.CHANNEL
+                  .send(
+                     PacketDistributor.ALL.noArg(),
+                     new ClientboundSightParticlesFromJavelinMessage(this.position().x, this.position().y, this.position().z, this.getSightRadius(), 0.0, 0.0)
                   );
                int spacing = 5;
 
@@ -378,7 +419,9 @@ public class VaultThrownJavelin extends AbstractArrow {
                                        Vec3 v = MiscUtils.getRandomOffset(highlightPosition.blockPos(), this.level.getRandom());
                                        ModNetwork.CHANNEL
                                           .sendTo(
-                                             new ClientboundHunterParticlesFromJavelinMessage(v.x, v.y, v.z, this.getSightDuration(), 0.0, 0.0),
+                                             new ClientboundHunterParticlesFromJavelinMessage(
+                                                v.x, v.y, v.z, this.getSightDuration(), 0.0, 0.0, highlightPosition.type
+                                             ),
                                              player.connection.getConnection(),
                                              NetworkDirection.PLAY_TO_CLIENT
                                           );
@@ -478,6 +521,17 @@ public class VaultThrownJavelin extends AbstractArrow {
             && (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()))
             && !(entity instanceof Player)
             && !(entity instanceof EternalEntity);
+   }
+
+   public void onInsideBubbleColumn(boolean pDownwards) {
+      super.onInsideBubbleColumn(pDownwards);
+   }
+
+   protected void handleNetherPortal() {
+   }
+
+   public boolean canChangeDimensions() {
+      return false;
    }
 
    @Nullable
@@ -647,6 +701,9 @@ public class VaultThrownJavelin extends AbstractArrow {
 
    public boolean shouldRender(double pX, double pY, double pZ) {
       return true;
+   }
+
+   public record HighlightPosition(BlockPos blockPos, String type) {
    }
 
    public static enum JavelinType {

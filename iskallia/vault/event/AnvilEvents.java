@@ -242,7 +242,7 @@ public class AnvilEvents {
       if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == ModItems.VAULT_CATALYST_CHAOS) {
          ItemStack output = event.getLeft().copy();
          CrystalData data = CrystalData.read(output);
-         if (!data.isUnmodifiable()) {
+         if (!data.isUnmodifiable() && data.getModifiers().hasRandomModifiers()) {
             data.setUnmodifiable(true);
             data.write(output);
             VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("vault_catalyst_chaos")), output);

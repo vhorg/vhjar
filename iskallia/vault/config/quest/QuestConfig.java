@@ -301,6 +301,6 @@ public class QuestConfig extends Config {
    }
 
    public <G extends Quest> G getNextQuest(String currentId) {
-      return (G)this.getQuests().stream().filter(quest -> quest.getUnlockedBy().equals(currentId)).findFirst().orElseThrow(IllegalArgumentException::new);
+      return (G)this.getQuests().stream().filter(quest -> quest.getUnlockedBy().equals(currentId)).findFirst().orElse(null);
    }
 }

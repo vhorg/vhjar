@@ -1,6 +1,7 @@
 package iskallia.vault.init;
 
 import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
+import iskallia.vault.client.gui.overlay.BountyProgressOverlay;
 import iskallia.vault.client.gui.overlay.HarmfulPotionOverlay;
 import iskallia.vault.client.gui.overlay.PlayerArmorOverlay;
 import iskallia.vault.client.gui.overlay.PlayerDamageOverlay;
@@ -32,6 +33,8 @@ import iskallia.vault.client.gui.screen.block.VaultDiffuserScreen;
 import iskallia.vault.client.gui.screen.block.VaultEnchanterScreen;
 import iskallia.vault.client.gui.screen.block.VaultEnhancementAltarScreen;
 import iskallia.vault.client.gui.screen.block.VaultForgeScreen;
+import iskallia.vault.client.gui.screen.block.VaultJewelApplicationStationScreen;
+import iskallia.vault.client.gui.screen.block.VaultJewelCuttingStationScreen;
 import iskallia.vault.client.gui.screen.block.VaultRecyclerScreen;
 import iskallia.vault.client.gui.screen.block.WardrobeScreen;
 import iskallia.vault.client.gui.screen.bounty.BountyScreen;
@@ -73,6 +76,8 @@ public class ModScreens {
       MenuScreens.register(ModContainers.TOOL_STATION_CONTAINER, ToolStationScreen::new);
       MenuScreens.register(ModContainers.INSCRIPTION_TABLE_CONTAINER, InscriptionTableScreen::new);
       MenuScreens.register(ModContainers.VAULT_ARTISAN_STATION_CONTAINER, VaultArtisanStationScreen::new);
+      MenuScreens.register(ModContainers.VAULT_JEWEL_CUTTING_STATION_CONTAINER, VaultJewelCuttingStationScreen::new);
+      MenuScreens.register(ModContainers.VAULT_JEWEL_APPLICATION_STATION_CONTAINER, VaultJewelApplicationStationScreen::new);
       MenuScreens.register(ModContainers.VAULT_RECYCLER_CONTAINER, VaultRecyclerScreen::new);
       MenuScreens.register(ModContainers.VAULT_DIFFUSER_CONTAINER, VaultDiffuserScreen::new);
       MenuScreens.register(ModContainers.RELIC_PEDESTAL_CONTAINER, RelicPedestalScreen::new);
@@ -100,6 +105,7 @@ public class ModScreens {
       registerBottom(new AbilitiesOverlay());
       registerBottom(new VaultBarOverlay());
       registerBottom(new VaultPartyOverlay());
+      registerBottom(new BountyProgressOverlay());
    }
 
    private static void registerTop(IIngameOverlay overlay) {

@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkDirection;
 
 public class AbilityTree extends SkillTree {
@@ -95,7 +96,10 @@ public class AbilityTree extends SkillTree {
    @Override
    public void onTick(SkillContext context) {
       super.onTick(context);
-      this.sync(context);
+      if (context.getSource().as(Entity.class).filter(entity -> entity.level.getGameTime() % 20L == 0L).isPresent()) {
+         this.sync(context);
+      }
+
       if (this.selected == null) {
          for (Skill skill : this.skills) {
             if (skill instanceof SpecializedSkill specialized && specialized.isUnlocked()) {

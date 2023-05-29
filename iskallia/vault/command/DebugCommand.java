@@ -35,8 +35,10 @@ import iskallia.vault.item.gear.EtchingItem;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.InventoryUtil;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerProficiencyData;
 import iskallia.vault.world.data.PlayerStatsData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.data.VaultPlayerStats;
 import java.io.File;
@@ -130,6 +132,28 @@ public class DebugCommand extends Command {
          ((LiteralArgumentBuilder)Commands.literal("altar_level").then(Commands.literal("get").executes(this::getAltarLevel)))
             .then(Commands.literal("set").then(Commands.argument("level", IntegerArgumentType.integer()).executes(this::setAltarLevel)))
       );
+      builder.then(
+         Commands.literal("expertise")
+            .then(Commands.literal("reset_all").then(Commands.argument("player", EntityArgument.player()).executes(this::resetPlayerExpertises)))
+      );
+      builder.then(Commands.literal("expertise").then(Commands.literal("world_reset").executes(this::resetAllPlayerExpertises)));
+   }
+
+   private int resetAllPlayerExpertises(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerLevel level = ((CommandSourceStack)context.getSource()).getLevel();
+      PlayerVaultStatsData statsData = PlayerVaultStatsData.get(level);
+      statsData.resetAndReturnAllPlayerExpertisePoints(level);
+      PlayerExpertisesData.get(level).resetAllPlayerExpertiseTrees(level);
+      return 0;
+   }
+
+   private int resetPlayerExpertises(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer player = EntityArgument.getPlayer(context, "player");
+      ServerLevel level = player.getLevel();
+      PlayerVaultStatsData statsData = PlayerVaultStatsData.get(level);
+      statsData.resetAndReturnExpertisePoints(player);
+      PlayerExpertisesData.get(level).resetExpertiseTree(player);
+      return 0;
    }
 
    private int resetProficiencies(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {

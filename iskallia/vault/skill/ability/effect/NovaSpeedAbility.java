@@ -201,17 +201,17 @@ public class NovaSpeedAbility extends AbstractNovaAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.durationTicks), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.amplifier), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.damageIntervalTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.durationTicks), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.amplifier), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.damageIntervalTicks), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.durationTicks = Adapters.INT.readBits(buffer).orElseThrow();
-      this.amplifier = Adapters.INT.readBits(buffer).orElseThrow();
-      this.damageIntervalTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.durationTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
+      this.amplifier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.damageIntervalTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override

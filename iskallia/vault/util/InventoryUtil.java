@@ -4,6 +4,7 @@ import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.integration.IntegrationSB;
+import iskallia.vault.item.BasicScavengerItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -65,6 +66,18 @@ public class InventoryUtil {
       }
 
       return itemAccesses;
+   }
+
+   public static void makeScavItemsRotten(Player player) {
+      for (InventoryUtil.ItemAccess items : findAllItems(player)) {
+         ItemStack stack = items.getStack();
+         if (stack.getItem() instanceof BasicScavengerItem) {
+            CompoundTag tag = stack.getOrCreateTag();
+            tag.putBoolean("rotten", true);
+            tag.remove("VaultId");
+            items.setter.accept(stack);
+         }
+      }
    }
 
    private static void discoverContents(InventoryUtil.ItemAccess access, List<InventoryUtil.ItemAccess> out) {

@@ -86,6 +86,7 @@ import iskallia.vault.config.VaultEntitiesConfig;
 import iskallia.vault.config.VaultGeneralConfig;
 import iskallia.vault.config.VaultGuardianConfig;
 import iskallia.vault.config.VaultItemsConfig;
+import iskallia.vault.config.VaultJewelCuttingConfig;
 import iskallia.vault.config.VaultLevelsConfig;
 import iskallia.vault.config.VaultMetaChestConfig;
 import iskallia.vault.config.VaultMobGearConfig;
@@ -259,6 +260,7 @@ public class ModConfigs {
    public static BountyOresConfig BOUNTY_ORES;
    public static VaultGearCraftingConfig VAULT_GEAR_CRAFTING_CONFIG;
    public static VaultGearModificationConfig VAULT_GEAR_MODIFICATION_CONFIG;
+   public static VaultJewelCuttingConfig VAULT_JEWEL_CUTTING_CONFIG;
    public static VaultGearEnchantmentConfig VAULT_GEAR_ENCHANTMENT_CONFIG;
    public static GearRecipesConfig GEAR_RECIPES;
    public static JewelRecipesConfig JEWEL_RECIPES;
@@ -389,6 +391,7 @@ public class ModConfigs {
       VAULT_GEAR_CRAFTING_CONFIG = new VaultGearCraftingConfig().readConfig();
       VAULT_GEAR_MODIFICATION_CONFIG = new VaultGearModificationConfig().readConfig();
       VAULT_GEAR_ENCHANTMENT_CONFIG = new VaultGearEnchantmentConfig().readConfig();
+      VAULT_JEWEL_CUTTING_CONFIG = new VaultJewelCuttingConfig().readConfig();
       VAULT_ALTAR_INGREDIENTS = new VaultAltarIngredientsConfig().readConfig();
       GEAR_RECIPES = new GearRecipesConfig().readConfig();
       JEWEL_RECIPES = new JewelRecipesConfig().readConfig();

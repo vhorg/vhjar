@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.VaultGuardianEntity;
@@ -13,6 +14,7 @@ import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.calc.ResistanceHelper;
 import iskallia.vault.world.data.ServerVaults;
 import javax.annotation.Nullable;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,6 +37,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -177,13 +181,14 @@ public abstract class MixinLivingEntity extends Entity {
       }
    }
 
+   @OnlyIn(Dist.CLIENT)
    @Inject(
       method = {"handleEntityEvent"},
       at = {@At("HEAD")},
       cancellable = true
    )
    public void exitIfDamageAlreadyHandled(byte pId, CallbackInfo ci) {
-      if (pId == 2 && this.lastDamageStamp == this.level.getGameTime()) {
+      if (pId == 2 && this.lastDamageStamp == this.level.getGameTime() && !((IVaultOptions)Minecraft.getInstance().options).doVanillaPotionDamageEffects()) {
          ci.cancel();
       }
    }

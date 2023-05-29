@@ -15,6 +15,7 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.item.BottleItem;
 import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.PhoenixModifierSnapshotData;
 import iskallia.vault.world.data.ServerVaults;
@@ -113,12 +114,14 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
                                           ItemStack foundStack = itemAccess.getStack();
                                           if (foundStack.getItem() instanceof VaultGearItem
                                              && foundStack.isDamageableItem()
+                                             && !(foundStack.getItem() instanceof BottleItem)
                                              && !VaultGearData.read(foundStack).get(ModGearAttributes.SOULBOUND, VaultGearAttributeTypeMerger.anyTrue())) {
                                              foundStack.hurtAndBreak(durabilityDamage, sPlayer, pl -> pl.broadcastBreakEvent(InteractionHand.MAIN_HAND));
                                              itemAccess.setStack(foundStack);
                                           }
                                        }
                                     );
+                                 InventoryUtil.makeScavItemsRotten(sPlayer);
                               }
                            }
                         }

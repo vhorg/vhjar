@@ -17,7 +17,7 @@ public class BountyHunterExpertise extends LearnableSkill {
       super.writeBits(buffer);
       Adapters.INT.writeBits(Integer.valueOf(this.waitingPeriodReduction), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.abandonedPenaltyReduction), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.maxActive), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.maxActive), buffer);
    }
 
    @Override
@@ -25,7 +25,7 @@ public class BountyHunterExpertise extends LearnableSkill {
       super.readBits(buffer);
       this.waitingPeriodReduction = Adapters.INT.readBits(buffer).orElseThrow();
       this.abandonedPenaltyReduction = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.maxActive = Adapters.INT.readBits(buffer).orElseThrow();
+      this.maxActive = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

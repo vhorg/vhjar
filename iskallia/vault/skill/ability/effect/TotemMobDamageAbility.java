@@ -76,14 +76,14 @@ public class TotemMobDamageAbility extends AbstractTotemAbility<TotemMobDamageTi
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.totemPercentDamagePerInterval), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.totemDamageIntervalTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.totemDamageIntervalTicks), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.totemPercentDamagePerInterval = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.totemDamageIntervalTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.totemDamageIntervalTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override

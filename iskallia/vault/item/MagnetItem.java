@@ -336,19 +336,21 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
    }
 
    public static Optional<ItemStack> getMagnet(LivingEntity entity, boolean switchedOnOnly) {
-      return CuriosApi.getCuriosHelper().getCuriosHandler(entity).map(handler -> handler).flatMap(handler -> handler.getStacksHandler("belt")).map(handler -> {
-         for (int i = 0; i < handler.getSlots(); i++) {
-            ItemStack stack = handler.getStacks().getStackInSlot(i);
-            if (stack.getItem() == ModItems.MAGNET && !isLegacy(stack) && (!switchedOnOnly || isSwitchedOn(stack))) {
-               return stack;
+      return entity.isSpectator()
+         ? Optional.empty()
+         : CuriosApi.getCuriosHelper().getCuriosHandler(entity).map(handler -> handler).flatMap(handler -> handler.getStacksHandler("belt")).map(handler -> {
+            for (int i = 0; i < handler.getSlots(); i++) {
+               ItemStack stack = handler.getStacks().getStackInSlot(i);
+               if (stack.getItem() == ModItems.MAGNET && !isLegacy(stack) && (!switchedOnOnly || isSwitchedOn(stack))) {
+                  return stack;
+               }
             }
-         }
 
-         return null;
-      }).map(stack -> {
-         VaultGearData data = VaultGearData.read(stack);
-         return (ItemStack)(entity instanceof Player player && SidedHelper.getVaultLevel(player) < data.getItemLevel() ? null : stack);
-      });
+            return null;
+         }).map(stack -> {
+            VaultGearData data = VaultGearData.read(stack);
+            return (ItemStack)(entity instanceof Player player && SidedHelper.getVaultLevel(player) < data.getItemLevel() ? null : stack);
+         });
    }
 
    public static boolean isLegacy(ItemStack stack) {

@@ -77,6 +77,7 @@ public class ModTextureAtlases {
       () -> ModConfigs.TALENTS_GUI.getStyles().values().stream().map(skillStyle -> skillStyle.icon).toList()
    );
    public static final Supplier<ITextureAtlas> SCREEN = register(VaultMod.id("textures/atlas/screen.png"), VaultMod.id("textures/gui/screen"), null);
+   public static final Supplier<ITextureAtlas> SLOT = register(VaultMod.id("textures/atlas/slot.png"), VaultMod.id("textures/gui/slot"), null);
    public static final Supplier<ITextureAtlas> SCAVENGER = register(VaultMod.id("textures/atlas/scavenger.png"), VaultMod.id("textures/gui/scavenger"), null);
    public static final Supplier<ITextureAtlas> MOB_HEADS = register(VaultMod.id("textures/atlas/mob_heads.png"), VaultMod.id("textures/gui/mob_heads"), null);
    public static final Supplier<ITextureAtlas> QUESTS = register(VaultMod.id("textures/atlas/quests.png"), VaultMod.id("textures/gui/quests"), () -> {

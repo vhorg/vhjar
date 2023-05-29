@@ -20,7 +20,7 @@ public class VaultLootableWeightModifier extends VaultModifier<VaultLootableWeig
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
       CommonEvents.PLACEHOLDER_GENERATION.register(context.getUUID(), data -> {
          if (data.getVault() == vault) {
-            if (data.getParent().target == data.getTile().getState().get(PlaceholderBlock.TYPE)) {
+            if (data.getParent().target == this.properties.type) {
                data.setProbability(data.getProbability() + this.properties.getChance(context) * data.getBaseProbability());
             }
          }

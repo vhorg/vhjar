@@ -671,13 +671,19 @@
   "vault_chest_epic_open": {
     "category": "master",
     "sounds": [
-      "the_vault:chest/vault_chest_epic_open"
+      {
+        "name": "the_vault:chest/vault_chest_epic_open",
+        "volume": 0.85
+      }
     ]
   },
   "vault_chest_omega_open": {
     "category": "master",
     "sounds": [
-      "the_vault:chest/vault_chest_omega_open"
+      {
+        "name": "the_vault:chest/vault_chest_omega_open",
+        "volume": 0.8
+      }
     ]
   },
   "vault_chest_rare_open": {

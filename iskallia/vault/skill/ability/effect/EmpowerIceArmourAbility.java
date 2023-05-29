@@ -142,14 +142,14 @@ public class EmpowerIceArmourAbility extends AbstractEmpowerAbility {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.radius), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.slownessAmplifier), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.slownessAmplifier), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.radius = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.slownessAmplifier = Adapters.INT.readBits(buffer).orElseThrow();
+      this.slownessAmplifier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

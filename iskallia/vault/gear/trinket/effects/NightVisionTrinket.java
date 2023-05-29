@@ -96,7 +96,7 @@ public class NightVisionTrinket extends TrinketEffect<NightVisionTrinket.Config>
          switch (var2) {
             case "minecraft:chest":
             case "minecraft:trapped_chest":
-            case "the_vault:coin_pile":
+            case "the_vault:coin_pile_tile":
             case "the_vault:vault_chest_tile_entity":
                return true;
             default:

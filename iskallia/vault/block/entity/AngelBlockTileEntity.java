@@ -20,7 +20,7 @@ public class AngelBlockTileEntity extends BlockEntity {
 
    public void setOwner(UUID owner) {
       this.owner = owner;
-      ModBlocks.ANGEL_BLOCK.addPlayerAngelBlock(owner, this.worldPosition);
+      ModBlocks.ANGEL_BLOCK.addPlayerAngelBlock(owner, this.level.dimension(), this.worldPosition);
    }
 
    public UUID getOwner() {
@@ -49,7 +49,7 @@ public class AngelBlockTileEntity extends BlockEntity {
    public void onLoad() {
       super.onLoad();
       if (this.owner != null) {
-         ModBlocks.ANGEL_BLOCK.addPlayerAngelBlock(this.owner, this.worldPosition);
+         ModBlocks.ANGEL_BLOCK.addPlayerAngelBlock(this.owner, this.level.dimension(), this.worldPosition);
       }
    }
 

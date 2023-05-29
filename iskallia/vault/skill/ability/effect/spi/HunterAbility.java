@@ -80,6 +80,10 @@ public class HunterAbility extends InstantManaAbility {
       return this.durationTicks;
    }
 
+   public List<TilePredicate> getFilters() {
+      return this.filters;
+   }
+
    public boolean shouldHighlightTile(PartialTile tile) {
       return this.filters.stream().anyMatch(filter -> filter.test(tile));
    }
@@ -199,7 +203,7 @@ public class HunterAbility extends InstantManaAbility {
       super.writeBits(buffer);
       Adapters.DOUBLE.writeBits(Double.valueOf(this.searchRadius), buffer);
       Adapters.INT.writeBits(Integer.valueOf(this.color), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.durationTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.durationTicks), buffer);
       KEYS.writeBits(this.filters.toArray(TilePredicate[]::new), buffer);
    }
 
@@ -208,7 +212,7 @@ public class HunterAbility extends InstantManaAbility {
       super.readBits(buffer);
       this.searchRadius = Adapters.DOUBLE.readBits(buffer).orElseThrow();
       this.color = Adapters.INT.readBits(buffer).orElseThrow();
-      this.durationTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.durationTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
       this.filters = Arrays.stream(KEYS.readBits(buffer).orElseThrow()).toList();
    }
 

@@ -32,7 +32,7 @@ public class ModKeybinds {
       openAbilityTree = mapping(name("open_ability_tree"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 72));
       abilityKey = mapping(name("ability_key"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 71));
       abilityWheelKey = mapping(name("ability_wheel_key"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 342));
-      bountyStatusKey = mapping(name("bounty_status_key"), KeyConflictContext.UNIVERSAL);
+      bountyStatusKey = mapping(name("bounty_status_key"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 258));
       angelToggleKey = mapping(name("angel_toggle_key"), KeyConflictContext.IN_GAME);
       magnetToggleKey = mapping(name("magnet_toggle_key"), KeyConflictContext.IN_GAME);
       openQuestScreen = mapping(name("open_quest_screen"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 93));

@@ -23,6 +23,7 @@ import iskallia.vault.init.ModEffects;
 import iskallia.vault.item.BottleItem;
 import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.skill.PlayerVaultStats;
+import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultJoinSnapshotData;
@@ -249,5 +250,6 @@ public class Runner extends Listener {
    public void onLeave(VirtualWorld world, Vault vault) {
       super.onLeave(world, vault);
       this.ifPresent(INFLUENCES, influences -> influences.onLeave(world, vault, this));
+      this.getPlayer().ifPresent(InventoryUtil::makeScavItemsRotten);
    }
 }

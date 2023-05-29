@@ -574,4 +574,13 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
          return false;
       }
    }
+
+   public static void addCapacity(ItemStack tool, int amount) {
+      VaultGearData data = VaultGearData.read(tool);
+      if (data.has(ModGearAttributes.TOOL_MATERIAL) && data.has(ModGearAttributes.TOOL_CAPACITY)) {
+         int capacity = data.getFirstValue(ModGearAttributes.TOOL_CAPACITY).orElse(0);
+         data.updateAttribute(ModGearAttributes.TOOL_CAPACITY, Integer.valueOf(capacity + amount));
+         data.write(tool);
+      }
+   }
 }

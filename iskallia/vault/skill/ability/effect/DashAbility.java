@@ -107,13 +107,13 @@ public class DashAbility extends InstantManaAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.extraDistance), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.extraDistance), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.extraDistance = Adapters.INT.readBits(buffer).orElseThrow();
+      this.extraDistance = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

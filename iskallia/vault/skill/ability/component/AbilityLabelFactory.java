@@ -141,7 +141,7 @@ public final class AbilityLabelFactory {
          );
          this.put(
             "damageIncrease",
-            context -> AbilityLabelFactory.label("\n Damage Increased: ", AbilityLabelFactory.binding(context.config(), "damageIncrease"), "damage")
+            context -> AbilityLabelFactory.label("\n Damage Dealt: ", AbilityLabelFactory.binding(context.config(), "damageIncrease"), "damage")
          );
          this.put("piercing", context -> AbilityLabelFactory.label("\n Piercing: ", AbilityLabelFactory.binding(context.config(), "piercing"), "piercing"));
          this.put(

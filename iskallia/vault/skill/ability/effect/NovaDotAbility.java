@@ -100,13 +100,13 @@ public class NovaDotAbility extends AbstractNovaAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.durationSeconds), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.durationSeconds), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.durationSeconds = Adapters.INT.readBits(buffer).orElseThrow();
+      this.durationSeconds = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override

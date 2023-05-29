@@ -38,6 +38,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.phys.BlockHitResult;
+import net.minecraftforge.common.util.FakePlayer;
 import org.jetbrains.annotations.NotNull;
 
 public class VaultAltarBlock extends Block implements EntityBlock {
@@ -97,7 +98,7 @@ public class VaultAltarBlock extends Block implements EntityBlock {
    public InteractionResult use(
       @NotNull BlockState state, Level world, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hit
    ) {
-      if (!world.isClientSide && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer serverPlayer) {
+      if (!world.isClientSide && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer serverPlayer && !(player instanceof FakePlayer)) {
          ServerLevel serverLevel = serverPlayer.getLevel();
          ItemStack heldItem = player.getMainHandItem();
          VaultAltarTileEntity altar = this.getAltarTileEntity(world, pos);

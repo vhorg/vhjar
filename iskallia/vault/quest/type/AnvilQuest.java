@@ -35,7 +35,7 @@ public class AnvilQuest extends Quest {
          if (QuestStatesData.get().getState(player).getInProgress().contains(this.id)) {
             ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(event.getIngredientInput().getItem());
             if (itemId != null && itemId.equals(this.targetId)) {
-               this.progress(player, event.getItemResult().getCount());
+               this.progress(player, event.getIngredientInput().getCount());
             }
          }
       }

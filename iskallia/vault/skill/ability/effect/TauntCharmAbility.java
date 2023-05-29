@@ -241,14 +241,14 @@ public class TauntCharmAbility extends AbstractTauntAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.maxCharmedMobs), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.maxCharmedMobs), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.percentPlayerDamage), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.maxCharmedMobs = Adapters.INT.readBits(buffer).orElseThrow();
+      this.maxCharmedMobs = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
       this.percentPlayerDamage = Adapters.FLOAT.readBits(buffer).orElseThrow();
    }
 

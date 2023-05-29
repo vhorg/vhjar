@@ -12,6 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -63,7 +64,9 @@ public class MiningTask extends Task<MiningProperties> {
       this.properties = new MiningProperties(tag.getCompound("properties"));
    }
 
-   @SubscribeEvent
+   @SubscribeEvent(
+      priority = EventPriority.LOW
+   )
    public static void onOreBroken(BreakEvent event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
          for (Task<?> task : BountyData.get().getAllLegendaryById(player, TaskRegistry.MINING).stream().filter(taskx -> !taskx.isComplete()).toList()) {

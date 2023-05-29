@@ -5,6 +5,9 @@ import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ShardTradeMessage;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.BlackMarketExpertise;
+import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.util.MathUtilities;
 import iskallia.vault.util.NetcodeUtils;
 import java.time.LocalDateTime;
@@ -131,24 +134,30 @@ public class PlayerBlackMarketData extends SavedData {
       public BlackMarket(UUID playerUuid) {
          this.playerUuid = playerUuid;
          this.seed = rand.nextLong();
-         this.resetTrades();
-         this.setNextReset();
+         this.resetTrades(ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerUuid));
       }
 
-      public void setNextReset() {
+      public void setNextReset(ServerPlayer player) {
          this.nextReset = LocalDateTime.now(ZoneId.of("UTC"))
             .plusHours(ModConfigs.BLACK_MARKET.getResetHours())
             .plusMinutes(ModConfigs.BLACK_MARKET.getResetMinutes());
+         if (player != null) {
+            ExpertiseTree expertises = PlayerExpertisesData.get((ServerLevel)player.level).getExpertises(player);
+
+            for (BlackMarketExpertise expertise : expertises.getAll(BlackMarketExpertise.class, Skill::isUnlocked)) {
+               this.nextReset = this.nextReset.plusMinutes(-expertise.getTimeReductionInMinutes());
+            }
+         }
       }
 
-      public void resetTrades() {
+      public void resetTrades(ServerPlayer player) {
          this.trades.clear();
 
          for (int i = 0; i < 3; i++) {
             this.trades.put(i, new PlayerBlackMarketData.BlackMarket.SelectedTrade(ModConfigs.SOUL_SHARD.getRandomTrade()));
          }
 
-         this.setNextReset();
+         this.setNextReset(player);
          PlayerBlackMarketData.this.setDirty();
          this.syncToClient(ServerLifecycleHooks.getCurrentServer());
       }
@@ -171,7 +180,7 @@ public class PlayerBlackMarketData extends SavedData {
          LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
          LocalDateTime end = PlayerBlackMarketData.get(server.overworld()).getBlackMarket(player).nextReset;
          if (end.isBefore(now)) {
-            this.resetTrades();
+            this.resetTrades(player);
          }
       }
 

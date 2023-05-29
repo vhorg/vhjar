@@ -748,6 +748,8 @@
   "block.the_vault.catalyst_infusion_table": "Catalyst Infusion Table",
   "block.the_vault.vault_forge": "Vault Forge",
   "block.the_vault.vault_artisan_station": "Vault Artisan Station",
+  "block.the_vault.vault_jewel_cutting_station": "Jewel Cutting Station",
+  "block.the_vault.vault_jewel_application_station": "Jewel Applicator",
   "block.the_vault.vault_recycler": "Vault Recycler",
   "block.the_vault.vault_diffuser": "Vault Soul Diffuser",
   "block.the_vault.black_market": "Black Market",

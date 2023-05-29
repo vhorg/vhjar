@@ -242,7 +242,9 @@ public abstract class OverSizedSlotContainer extends AbstractElementContainer {
       for (; !sourceStack.isEmpty() && (reverseDirection ? i >= startIndex : i < endIndex); i += reverseDirection ? -1 : 1) {
          Slot slot = (Slot)this.slots.get(i);
          ItemStack slotStack = slot.getItem();
-         if (!slotStack.isEmpty() && slotStack.getItem() == sourceStack.getItem() && ItemStack.tagMatches(sourceStack, slotStack)) {
+         if (!slotStack.isEmpty() && slotStack.getItem() == sourceStack.getItem() && ItemStack.tagMatches(sourceStack, slotStack) && slot.mayPlace(sourceStack)
+            )
+          {
             int j = slotStack.getCount() + sourceStack.getCount();
             int maxSize = slot.getMaxStackSize(slotStack);
             if (j <= maxSize) {

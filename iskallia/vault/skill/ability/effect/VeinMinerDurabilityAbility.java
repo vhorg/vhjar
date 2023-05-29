@@ -33,13 +33,13 @@ public class VeinMinerDurabilityAbility extends VeinMinerAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.additionalUnbreakingLevel), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.additionalUnbreakingLevel), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.additionalUnbreakingLevel = Adapters.INT.readBits(buffer).orElseThrow();
+      this.additionalUnbreakingLevel = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

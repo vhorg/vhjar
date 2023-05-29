@@ -214,14 +214,14 @@ public class SpecializedSkill extends LearnableSkill {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       SPECIALIZATIONS.writeBits(this.specializations.toArray(Skill[]::new), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.index), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.index), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.specializations = Arrays.stream(SPECIALIZATIONS.readBits(buffer).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
-      this.index = Adapters.INT.readBits(buffer).orElse(0);
+      this.index = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
       this.specializations.forEach(specialization -> specialization.setParent(this));
    }
 
@@ -229,7 +229,7 @@ public class SpecializedSkill extends LearnableSkill {
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
          SPECIALIZATIONS.writeNbt(this.specializations.toArray(Skill[]::new)).ifPresent(tag -> nbt.put("specializations", tag));
-         Adapters.INT.writeNbt(Integer.valueOf(this.index)).ifPresent(tag -> nbt.put("index", tag));
+         Adapters.INT_SEGMENTED_3.writeNbt(Integer.valueOf(this.index)).ifPresent(tag -> nbt.put("index", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -238,7 +238,7 @@ public class SpecializedSkill extends LearnableSkill {
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
       this.specializations = Arrays.stream(SPECIALIZATIONS.readNbt(nbt.get("specializations")).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
-      this.index = Adapters.INT.readNbt(nbt.get("index")).orElse(0);
+      this.index = Adapters.INT_SEGMENTED_3.readNbt(nbt.get("index")).orElse(0);
       this.specializations.forEach(specialization -> specialization.setParent(this));
    }
 

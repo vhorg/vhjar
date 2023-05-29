@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class AngelBlock extends BaseEntityBlock implements EntityBlock {
    private static final int ANGEL_BLOCK_RANGE = 64;
-   private final Map<UUID, Set<BlockPos>> playerAngelBlocks = new HashMap<>();
+   private final Map<UUID, Set<AngelBlock.DimensionPos>> playerAngelBlocks = new HashMap<>();
    protected static final VoxelShape SHAPE = Block.box(4.0, 4.0, 4.0, 12.0, 12.0, 12.0);
 
    public AngelBlock() {
@@ -41,13 +42,13 @@ public class AngelBlock extends BaseEntityBlock implements EntityBlock {
       return SHAPE;
    }
 
-   public void addPlayerAngelBlock(UUID owner, BlockPos pos) {
-      this.playerAngelBlocks.computeIfAbsent(owner, uuid -> new HashSet<>()).add(pos);
+   public void addPlayerAngelBlock(UUID owner, ResourceKey<Level> dimension, BlockPos pos) {
+      this.playerAngelBlocks.computeIfAbsent(owner, uuid -> new HashSet<>()).add(new AngelBlock.DimensionPos(dimension, pos));
    }
 
    public boolean isInRange(Player player) {
-      for (BlockPos blockPos : this.playerAngelBlocks.getOrDefault(player.getUUID(), Set.of())) {
-         if (blockPos.closerThan(player.blockPosition(), 64.0)) {
+      for (AngelBlock.DimensionPos dimensionPos : this.playerAngelBlocks.getOrDefault(player.getUUID(), Set.of())) {
+         if (player.getLevel().dimension().equals(dimensionPos.dimension()) && dimensionPos.pos().closerThan(player.blockPosition(), 64.0)) {
             return true;
          }
       }
@@ -81,5 +82,8 @@ public class AngelBlock extends BaseEntityBlock implements EntityBlock {
       }
 
       super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+   }
+
+   private record DimensionPos(ResourceKey<Level> dimension, BlockPos pos) {
    }
 }

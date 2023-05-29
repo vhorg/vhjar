@@ -9,13 +9,17 @@ import iskallia.vault.bounty.task.Task;
 import iskallia.vault.bounty.task.properties.TaskProperties;
 import iskallia.vault.config.bounty.task.TaskConfig;
 import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.event.event.BountyCompleteEvent;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.bounty.ClientboundBountyProgressMessage;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.expertise.type.BountyHunterExpertise;
 import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.util.nbt.NBTHelper;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -26,12 +30,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,6 +68,7 @@ public class BountyData extends SavedData {
       } else {
          BountyList list = this.available.computeIfAbsent(playerId, id -> new BountyList());
          this.setDirty();
+         this.syncToClient(playerId);
          return list;
       }
    }
@@ -72,6 +79,7 @@ public class BountyData extends SavedData {
       } else {
          BountyList list = this.active.computeIfAbsent(playerId, id -> new BountyList());
          this.setDirty();
+         this.syncToClient(playerId);
          return list;
       }
    }
@@ -82,6 +90,7 @@ public class BountyData extends SavedData {
       } else {
          BountyList list = this.complete.computeIfAbsent(playerId, id -> new BountyList());
          this.setDirty();
+         this.syncToClient(playerId);
          return list;
       }
    }
@@ -96,6 +105,7 @@ public class BountyData extends SavedData {
       } else {
          BountyList list = this.legendary.computeIfAbsent(playerId, id -> new BountyList());
          this.setDirty();
+         this.syncToClient(playerId);
          return list;
       }
    }
@@ -146,6 +156,7 @@ public class BountyData extends SavedData {
       int amountToGenerate = totalBounties - this.getAllActiveFor(playerId).size() - this.getAllCompletedFor(playerId).size();
       this.available.put(playerId, this.generate(playerId, amountToGenerate));
       this.setDirty();
+      this.syncToClient(playerId);
    }
 
    private Bounty generateBounty(UUID playerId) {
@@ -199,6 +210,7 @@ public class BountyData extends SavedData {
             if (available.removeById(bountyId)) {
                active.add(bountyOptional.get());
                this.setDirty();
+               this.syncToClient(player.getUUID());
             }
          }
       }
@@ -210,6 +222,7 @@ public class BountyData extends SavedData {
       if (legendaryBounty.isPresent()) {
          this.getAllLegendaryFor(playerId).removeById(bountyId);
          this.setDirty();
+         this.syncToClient(playerId);
       } else {
          Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
          if (!activeBounty.isEmpty()) {
@@ -229,6 +242,7 @@ public class BountyData extends SavedData {
             this.getAllActiveFor(playerId).removeById(bountyId);
             this.getAllCompletedFor(playerId).add(active);
             this.setDirty();
+            this.syncToClient(playerId);
          }
       }
    }
@@ -240,6 +254,8 @@ public class BountyData extends SavedData {
          this.getAllLegendaryFor(playerId).removeById(bountyId);
          legendaryBounty.get().getTask().getTaskReward().apply(player);
          this.setDirty();
+         this.syncToClient(playerId);
+         MinecraftForge.EVENT_BUS.post(new BountyCompleteEvent(player, legendaryBounty.get().getTask()));
       } else {
          Optional<Bounty> activeBounty = this.getActiveFor(playerId, bountyId);
          if (!activeBounty.isEmpty()) {
@@ -258,6 +274,8 @@ public class BountyData extends SavedData {
             this.getAllCompletedFor(playerId).add(active);
             active.getTask().getTaskReward().apply(player);
             this.setDirty();
+            this.syncToClient(playerId);
+            MinecraftForge.EVENT_BUS.post(new BountyCompleteEvent(player, active.getTask()));
          }
       }
    }
@@ -269,6 +287,7 @@ public class BountyData extends SavedData {
       this.getAllCompletedFor(playerId).removeById(bountyId);
       this.getAllAvailableFor(playerId).add(this.generateBounty(playerId));
       this.setDirty();
+      this.syncToClient(playerId);
    }
 
    public void setupLegendary(UUID playerId) {
@@ -276,6 +295,7 @@ public class BountyData extends SavedData {
          BountyList list = new BountyList(List.of(this.generateLegendaryBounty(playerId)));
          this.legendary.put(playerId, list);
          this.setDirty();
+         this.syncToClient(playerId);
       }
    }
 
@@ -345,6 +365,18 @@ public class BountyData extends SavedData {
       return nbt;
    }
 
+   private void syncToClient(UUID playerId) {
+      ServerPlayer serverPlayer = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerId);
+      if (serverPlayer != null) {
+         BountyList legendary = get().getAllLegendaryFor(serverPlayer.getUUID());
+         BountyList active = get().getAllActiveFor(serverPlayer.getUUID());
+         List<Bounty> bounties = new ArrayList<>();
+         bounties.addAll(legendary);
+         bounties.addAll(active);
+         ModNetwork.CHANNEL.sendTo(new ClientboundBountyProgressMessage(bounties), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+      }
+   }
+
    @SubscribeEvent
    public static void onPlayerJoin(PlayerLoggedInEvent event) {
       if (!event.getPlayer().getLevel().isClientSide()) {
@@ -377,6 +409,7 @@ public class BountyData extends SavedData {
             if (completedBounties.removeById(bountyId)) {
                this.getAllAvailableFor(playerId).add(this.generateBounty(playerId));
                this.setDirty();
+               this.syncToClient(playerId);
             }
          }
       }
@@ -388,6 +421,7 @@ public class BountyData extends SavedData {
       this.complete.computeIfAbsent(uuid, id -> new BountyList()).clear();
       this.resetAvailableBountiesFor(uuid);
       this.setDirty();
+      this.syncToClient(uuid);
    }
 
    public static BountyData get() {

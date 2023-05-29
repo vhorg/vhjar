@@ -102,6 +102,8 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.TOTEM_PLAYER_HEALTH, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.TOTEM_MOB_DAMAGE, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.TOTEM_PLAYER_DAMAGE, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_JEWEL_APPLICATION_STATION, RenderType.cutout());
+      setRenderLayers(ModBlocks.VAULT_JEWEL_CUTTING_STATION, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_ARCHIVE, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_TABLE, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.solid(), RenderType.translucent());

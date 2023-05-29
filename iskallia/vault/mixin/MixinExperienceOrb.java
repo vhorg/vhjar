@@ -6,6 +6,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerXpEvent.PickupXp;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,7 +31,7 @@ public abstract class MixinExperienceOrb extends Entity {
    private void playerTouch(Player entity, CallbackInfo ci) {
       if (!entity.level.isClientSide && ServerVaults.get(entity.level).isPresent()) {
          entity.take(this, 1);
-         if (this.value > 0) {
+         if (this.value > 0 && !MinecraftForge.EVENT_BUS.post(new PickupXp(entity, (ExperienceOrb)this))) {
             entity.giveExperiencePoints(this.value);
          }
 
