@@ -475,6 +475,7 @@ public final class ScreenTextures {
    public static final TextureAtlasRegion SLIDER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider"));
    public static final TextureAtlasRegion SLIDER_BACKGROUND = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_background"));
    public static final TextureAtlasRegion SLIDER_HOVER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_hover"));
+   public static final TextureAtlasRegion JEWEL_NO_ITEM = TextureAtlasRegion.of(ModTextureAtlases.SLOT, VaultMod.id("gui/slot/jewel_no_item"));
    public static final ResourceLocation UI_RESOURCE = new ResourceLocation("the_vault", "textures/gui/ability_tree.png");
    public static final ResourceLocation BACKGROUNDS_RESOURCE = new ResourceLocation("the_vault", "textures/gui/ability_tree_bgs.png");
 

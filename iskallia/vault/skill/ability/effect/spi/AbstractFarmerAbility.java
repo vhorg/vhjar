@@ -122,18 +122,18 @@ public abstract class AbstractFarmerAbility extends HoldManaAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.tickDelay), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.horizontalRange), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.verticalRange), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.tickDelay), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.horizontalRange), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.verticalRange), buffer);
       Adapters.INT.writeBits(Integer.valueOf(this.tick), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.tickDelay = Adapters.INT.readBits(buffer).orElseThrow();
-      this.horizontalRange = Adapters.INT.readBits(buffer).orElseThrow();
-      this.verticalRange = Adapters.INT.readBits(buffer).orElseThrow();
+      this.tickDelay = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.horizontalRange = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.verticalRange = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
       this.tick = Adapters.INT.readBits(buffer).orElseThrow();
    }
 

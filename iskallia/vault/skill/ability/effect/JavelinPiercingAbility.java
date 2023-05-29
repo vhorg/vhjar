@@ -73,13 +73,13 @@ public class JavelinPiercingAbility extends AbstractJavelinAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.piercing), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.piercing), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.piercing = Adapters.INT.readBits(buffer).orElseThrow();
+      this.piercing = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

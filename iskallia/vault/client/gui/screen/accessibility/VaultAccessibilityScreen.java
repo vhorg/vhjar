@@ -50,7 +50,7 @@ public class VaultAccessibilityScreen extends AbstractElementScreen {
          new ToggleButtonElement(
                Spatials.positionXY(startX, startY).size(widgetWidth, widgetHeight),
                new TextComponent("Vault Potion Effects"),
-               () -> options.doVanillaPotionDamageEffects() ? "ON" : "OFF",
+               () -> options.doVanillaPotionDamageEffects() ? "OFF" : "ON",
                () -> options.setVanillaPotionDamageEffects(!options.doVanillaPotionDamageEffects())
             )
             .layout(this.translateWorldSpatial())

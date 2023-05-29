@@ -16,7 +16,6 @@ import net.minecraft.network.chat.TextComponent;
 
 public class BountyProgressScreen extends AbstractElementScreen {
    private List<Bounty> bounties;
-   private Bounty active;
 
    public BountyProgressScreen(List<Bounty> bounties) {
       super(new TextComponent(""), ScreenRenderers.getBuffered(), ScreenTooltipRenderer::create);
@@ -25,11 +24,7 @@ public class BountyProgressScreen extends AbstractElementScreen {
          this.bounties = new ArrayList<>();
       }
 
-      if (!this.bounties.isEmpty()) {
-         this.active = this.bounties.get(0);
-      }
-
-      this.setGuiSize(Spatials.size(183, 224));
+      this.setGuiSize(Spatials.size(183 * this.bounties.size(), 224));
       this.initializeElements();
    }
 
@@ -44,18 +39,16 @@ public class BountyProgressScreen extends AbstractElementScreen {
             )
          );
       } else {
-         BountyProgressElement var1 = this.addElement(
-            new BountyProgressElement(Spatials.positionXY(0, 0).size(this.getGuiSpatial().width() - 5, this.getGuiSpatial().height() - 5), this.active)
-               .layout((screen, gui, parent, world) -> world.translateXY(gui))
-         );
-      }
-   }
+         int x = 0;
+         int width = this.getGuiSpatial().width() / this.bounties.size() - 5;
 
-   private void getNextBounty() {
-      if (this.bounties.size() > 1) {
-         int index = this.bounties.indexOf(this.active);
-         int next = index + 1 >= this.bounties.size() ? 0 : index + 1;
-         this.active = this.bounties.get(next);
+         for (Bounty bounty : this.bounties) {
+            this.addElement(
+               new BountyProgressElement(Spatials.positionXY(x, 0).size(width, this.getGuiSpatial().height() - 5), bounty)
+                  .layout((screen, gui, parent, world) -> world.translateXY(gui))
+            );
+            x += width;
+         }
       }
    }
 
@@ -73,11 +66,6 @@ public class BountyProgressScreen extends AbstractElementScreen {
    }
 
    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-      if (keyCode == 257) {
-         this.getNextBounty();
-         this.initializeElements();
-      }
-
       if (keyCode == ModKeybinds.bountyStatusKey.getKey().getValue()) {
          this.onClose();
          return true;

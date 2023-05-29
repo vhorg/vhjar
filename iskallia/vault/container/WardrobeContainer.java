@@ -339,7 +339,7 @@ public abstract class WardrobeContainer extends AbstractElementContainer {
          ItemStack originalStack = ItemStack.EMPTY;
          Slot slot = (Slot)this.slots.get(index);
          if (slot != null && slot.hasItem()) {
-            ItemStack slotStack = slot.getItem().copy();
+            ItemStack slotStack = slot.getItem();
             originalStack = slotStack.copy();
             boolean didNotMoveStack = false;
             if (this.storedHotbarSlotIndexRange.contains(index)) {
@@ -360,6 +360,11 @@ public abstract class WardrobeContainer extends AbstractElementContainer {
          }
 
          return originalStack;
+      }
+
+      @Override
+      protected boolean moveItemStackTo(@NotNull ItemStack itemStack, AbstractElementContainer.SlotIndexRange slotIndexRange, boolean pReverseDirection) {
+         return super.moveItemStackTo(itemStack, slotIndexRange, pReverseDirection);
       }
    }
 

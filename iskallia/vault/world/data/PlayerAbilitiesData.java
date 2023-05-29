@@ -5,6 +5,8 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.skill.PlayerVaultStats;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.base.LearnableSkill;
+import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.AbilityTree;
 import java.util.HashMap;
@@ -43,7 +45,15 @@ public class PlayerAbilitiesData extends SavedData {
    }
 
    public void setAbilities(Player player, AbilityTree abilityTree) {
+      if (player instanceof ServerPlayer serverPlayer) {
+         this.getAbilities(serverPlayer).getAll(LearnableSkill.class, Skill::isUnlocked).forEach(skill -> skill.onRemove(SkillContext.of(serverPlayer)));
+      }
+
       this.playerMap.put(player.getUUID(), abilityTree);
+      if (player instanceof ServerPlayer serverPlayer) {
+         abilityTree.getAll(LearnableSkill.class, Skill::isUnlocked).forEach(skill -> skill.onAdd(SkillContext.of(serverPlayer)));
+      }
+
       this.setDirty();
    }
 

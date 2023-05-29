@@ -11,6 +11,7 @@ import iskallia.vault.config.adapter.TextColorAdapter;
 import iskallia.vault.config.adapter.VersionedKeyAdapter;
 import iskallia.vault.config.adapter.WeightedListAdapter;
 import iskallia.vault.config.gear.VaultGearTierConfig;
+import iskallia.vault.config.skillgate.SkillGateType;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.VersionedKey;
 import iskallia.vault.core.vault.objective.elixir.ElixirTask;
@@ -29,6 +30,7 @@ import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
 import iskallia.vault.item.crystal.time.CrystalTime;
 import iskallia.vault.quest.base.Quest;
+import iskallia.vault.skill.SkillGates;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.util.EnchantmentCost;
 import java.io.File;
@@ -78,6 +80,7 @@ public abstract class Config {
       .registerTypeAdapter(TilePredicate.class, Adapters.TILE_PREDICATE)
       .registerTypeAdapter(EntityPredicate.class, Adapters.ENTITY_PREDICATE)
       .registerTypeAdapter(ItemPredicate.class, Adapters.ITEM_PREDICATE)
+      .registerTypeAdapter(SkillGateType.class, SkillGates.GATE_TYPE)
       .excludeFieldsWithoutExposeAnnotation()
       .enableComplexMapKeySerialization()
       .setPrettyPrinting()

@@ -26,9 +26,9 @@ public class IncreasedPercentageReader<T extends Number> extends VaultGearModifi
          boolean positive = instance.getValue().doubleValue() >= 0.0;
          String incInfo;
          if (positive) {
-            incInfo = "increased";
+            incInfo = "Increased";
          } else {
-            incInfo = "reduced";
+            incInfo = "Reduced";
          }
 
          return new TextComponent(type.getAffixPrefix(positive))
@@ -56,9 +56,9 @@ public class IncreasedPercentageReader<T extends Number> extends VaultGearModifi
          boolean positive = instance.getValue().doubleValue() >= 0.0;
          String incInfo;
          if (positive) {
-            incInfo = "increased";
+            incInfo = "Increased";
          } else {
-            incInfo = "reduced";
+            incInfo = "Reduced";
          }
 
          out.add(type.getAffixPrefix(instance.getValue().doubleValue() >= 0.0));

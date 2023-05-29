@@ -100,7 +100,7 @@ public class SummonEternalAbility extends InstantManaAbility {
             if (playerEternals.getEternals().isEmpty()) {
                player.sendMessage(new TextComponent("You have no eternals to summon.").withStyle(ChatFormatting.RED), Util.NIL_UUID);
                return false;
-            } else if (ServerVaults.get(player.level).isEmpty() && this.isVaultOnly()) {
+            } else if (ServerVaults.get(player.level).isEmpty()) {
                player.sendMessage(new TextComponent("You can only summon eternals in the Vault!").withStyle(ChatFormatting.RED), Util.NIL_UUID);
                return false;
             } else {

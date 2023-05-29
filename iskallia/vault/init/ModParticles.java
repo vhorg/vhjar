@@ -173,10 +173,7 @@ public class ModParticles {
          (ParticleType)MANA_SHIELD_RETRIBUTION_EFFECT_RANGE.get(),
          sprites -> new EffectRangeParticle.SphereProvider(sprites, 0.0F, 60, 1.0F, Tween.inOut(Tween.LINEAR, Tween.EASE_OUT_CUBIC, 0.05F))
       );
-      particleManager.register(
-         (ParticleType)SIGHT_JAVELIN_RANGE.get(),
-         sprites -> new GrowingSphereParticle.SphereProvider(sprites, 2.0F, 60, 1.0F, Tween.inOut(Tween.LINEAR, Tween.EASE_OUT_CUBIC, 0.05F))
-      );
+      particleManager.register((ParticleType)SIGHT_JAVELIN_RANGE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 2.0F, 60, 1.0F));
    }
 
    private static <T extends ParticleOptions> RegistryObject<ParticleType<T>> register(

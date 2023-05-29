@@ -10,6 +10,7 @@ import iskallia.vault.core.vault.objective.ElixirObjective;
 import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import java.util.UUID;
+import net.minecraftforge.eventbus.api.EventPriority;
 
 public class OreElixirTask extends ElixirTask {
    public static final SupplierKey<ElixirTask> KEY = SupplierKey.of("ore", ElixirTask.class).with(Version.v1_12, OreElixirTask::new);
@@ -29,7 +30,7 @@ public class OreElixirTask extends ElixirTask {
    @Override
    public void initServer(VirtualWorld world, Vault vault, ElixirObjective objective, UUID listener) {
       if (this.get(ELIXIR) != 0) {
-         CommonEvents.PLAYER_MINE.register(this, data -> {
+         CommonEvents.PLAYER_MINE.register(this, EventPriority.LOW, data -> {
             if (data.getPlayer().level == world) {
                if (data.getPlayer().getUUID().equals(listener)) {
                   if (data.getState().getBlock() instanceof VaultOreBlock) {

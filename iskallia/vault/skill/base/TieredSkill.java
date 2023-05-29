@@ -176,14 +176,14 @@ public class TieredSkill extends LearnableSkill {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       TIERS.writeBits(this.tiers.toArray(Skill[]::new), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.tier), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.tier), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.tiers = Arrays.stream(TIERS.readBits(buffer).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
-      this.tier = Adapters.INT.readBits(buffer).orElse(0);
+      this.tier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
       this.tiers.forEach(tier -> tier.setParent(this));
    }
 

@@ -112,16 +112,15 @@ public class Modifiers extends DataObject<Modifiers> {
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
          if (entry.has(Modifiers.Entry.CONSUMED)) {
             entry.get(Modifiers.Entry.MODIFIER).initServer(world, vault, this.getContext(entry));
-            return;
+         } else {
+            entry.get(Modifiers.Entry.MODIFIER).onVaultAdd(world, vault, this.getContext(entry));
+            vault.ifPresent(Vault.LISTENERS, listeners -> {
+               for (Listener listener : listeners.getAll()) {
+                  entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, this.getContext(entry), listener);
+               }
+            });
+            entry.set(Modifiers.Entry.CONSUMED);
          }
-
-         entry.get(Modifiers.Entry.MODIFIER).onVaultAdd(world, vault, this.getContext(entry));
-         vault.ifPresent(Vault.LISTENERS, listeners -> {
-            for (Listener listener : listeners.getAll()) {
-               entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, this.getContext(entry), listener);
-            }
-         });
-         entry.set(Modifiers.Entry.CONSUMED);
       }
    }
 

@@ -55,6 +55,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.IItemRenderProperties;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -208,7 +209,9 @@ public class VaultDollItem extends BasicItem {
       return doll.getOrCreateTag().getInt("vaultLevel");
    }
 
-   @SubscribeEvent
+   @SubscribeEvent(
+      priority = EventPriority.LOW
+   )
    public static void onOreBroken(BreakEvent event) {
       BlockState state = event.getState();
       if (state.getBlock() instanceof VaultOreBlock && (Boolean)state.getValue(VaultOreBlock.GENERATED)) {

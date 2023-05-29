@@ -121,13 +121,13 @@ public abstract class AbstractVeinMinerAbility extends HoldAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.blockLimit), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.blockLimit), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.blockLimit = Adapters.INT.readBits(buffer).orElseThrow();
+      this.blockLimit = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override

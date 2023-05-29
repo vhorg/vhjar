@@ -119,14 +119,14 @@ public class ExecuteAbility extends InstantAbility {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.damageHealthPercentage), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.effectDurationTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.effectDurationTicks), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.damageHealthPercentage = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.effectDurationTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.effectDurationTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override

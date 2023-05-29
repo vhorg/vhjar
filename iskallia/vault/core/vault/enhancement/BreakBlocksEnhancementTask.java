@@ -18,6 +18,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.eventbus.api.EventPriority;
 
 public class BreakBlocksEnhancementTask extends IntFilterEnhancementTask<BreakBlocksEnhancementTask.Config> {
    public BreakBlocksEnhancementTask() {
@@ -29,7 +30,7 @@ public class BreakBlocksEnhancementTask extends IntFilterEnhancementTask<BreakBl
 
    @Override
    public void initServer(MinecraftServer server) {
-      CommonEvents.PLAYER_MINE.register(this, event -> {
+      CommonEvents.PLAYER_MINE.register(this, EventPriority.LOW, event -> {
          if (this.belongsTo(event.getPlayer())) {
             BlockEntity blockEntity = event.getWorld().getBlockEntity(event.getPos());
             if (this.config.isValid(event.getState(), blockEntity)) {

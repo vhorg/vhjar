@@ -22,43 +22,64 @@ import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ClipContext.Block;
+import net.minecraft.world.level.ClipContext.Fluid;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.HitResult.Type;
 
 public class VaultSpiderEntity extends CaveSpider {
    public VaultSpiderEntity(EntityType<? extends CaveSpider> entityType, Level world) {
       super(entityType, world);
    }
 
+   private Vec3 getPosition(Entity entityLivingBaseIn) {
+      double d0 = entityLivingBaseIn.getX();
+      double d1 = entityLivingBaseIn.getY() + entityLivingBaseIn.getBbHeight() / 2.0F;
+      double d2 = entityLivingBaseIn.getZ();
+      return new Vec3(d0, d1, d2);
+   }
+
    public boolean doHurtTarget(@Nonnull Entity entity) {
-      float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-      float f1 = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
-      if (entity instanceof LivingEntity) {
-         f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
-         f1 += EnchantmentHelper.getKnockbackBonus(this);
-      }
-
-      int i = EnchantmentHelper.getFireAspect(this);
-      if (i > 0) {
-         entity.setSecondsOnFire(i * 4);
-      }
-
-      boolean flag = entity.hurt(DamageSource.mobAttack(this), f);
-      if (flag) {
-         if (f1 > 0.0F && entity instanceof LivingEntity) {
-            ((LivingEntity)entity)
-               .knockback(f1 * 0.5F, Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), -Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)));
-            this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
+      Vec3 eyePos1 = this.getEyePosition(1.0F);
+      Vec3 eyePos2 = this.getPosition(entity);
+      ClipContext context = new ClipContext(eyePos1, eyePos2, Block.COLLIDER, Fluid.NONE, this);
+      BlockHitResult result = this.level.clip(context);
+      if (result.getType() != Type.MISS) {
+         return false;
+      } else {
+         float f = (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE);
+         float f1 = (float)this.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
+         if (entity instanceof LivingEntity) {
+            f += EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity)entity).getMobType());
+            f1 += EnchantmentHelper.getKnockbackBonus(this);
          }
 
-         if (entity instanceof Player player) {
-            this.maybeDisableShield(player, this.getMainHandItem(), player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY);
+         int i = EnchantmentHelper.getFireAspect(this);
+         if (i > 0) {
+            entity.setSecondsOnFire(i * 4);
          }
 
-         this.doEnchantDamageEffects(this, entity);
-         this.setLastHurtMob(entity);
-      }
+         boolean flag = entity.hurt(DamageSource.mobAttack(this), f);
+         if (flag) {
+            if (f1 > 0.0F && entity instanceof LivingEntity) {
+               ((LivingEntity)entity)
+                  .knockback(f1 * 0.5F, Mth.sin(this.getYRot() * (float) (Math.PI / 180.0)), -Mth.cos(this.getYRot() * (float) (Math.PI / 180.0)));
+               this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
+            }
 
-      return flag;
+            if (entity instanceof Player player) {
+               this.maybeDisableShield(player, this.getMainHandItem(), player.isUsingItem() ? player.getUseItem() : ItemStack.EMPTY);
+            }
+
+            this.doEnchantDamageEffects(this, entity);
+            this.setLastHurtMob(entity);
+         }
+
+         return flag;
+      }
    }
 
    private void maybeDisableShield(Player p_21425_, ItemStack p_21426_, ItemStack p_21427_) {

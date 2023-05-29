@@ -1,11 +1,16 @@
 package iskallia.vault.skill;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.config.skillgate.ConstantSkillGate;
+import iskallia.vault.config.skillgate.EitherSkillGate;
+import iskallia.vault.config.skillgate.SkillGateType;
+import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.research.type.Research;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.tree.SkillTree;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,6 +18,9 @@ import java.util.List;
 import java.util.Map;
 
 public class SkillGates {
+   public static TypeSupplierAdapter<SkillGateType> GATE_TYPE = new TypeSupplierAdapter<ConstantSkillGate>("type", false)
+      .<TypeSupplierAdapter<EitherSkillGate>>register("constant", ConstantSkillGate.class, ConstantSkillGate::new)
+      .register("either", EitherSkillGate.class, EitherSkillGate::new);
    @Expose
    private final Map<String, SkillGates.Entry> entries = new HashMap<>();
 
@@ -26,10 +34,12 @@ public class SkillGates {
       if (entry == null) {
          return abilities;
       } else {
-         entry.dependsOn.forEach(dependencyName -> {
-            Skill dependency = ModConfigs.ABILITIES.getAbilityById(dependencyName).orElseThrow();
-            abilities.add(dependency.getId());
-         });
+         for (Skill ability : ModConfigs.ABILITIES.tree.skills) {
+            if (entry.dependsOn.stream().anyMatch(l -> l.allows(ability.getId()))) {
+               abilities.add(ability.getId());
+            }
+         }
+
          return abilities;
       }
    }
@@ -40,10 +50,12 @@ public class SkillGates {
       if (entry == null) {
          return abilities;
       } else {
-         entry.lockedBy.forEach(dependencyName -> {
-            Skill dependency = ModConfigs.ABILITIES.getAbilityById(dependencyName).orElseThrow();
-            abilities.add(dependency.getId());
-         });
+         for (Skill ability : ModConfigs.ABILITIES.tree.skills) {
+            if (entry.lockedBy.stream().anyMatch(l -> l.allows(ability.getId()))) {
+               abilities.add(ability.getId());
+            }
+         }
+
          return abilities;
       }
    }
@@ -60,25 +72,43 @@ public class SkillGates {
       return abilities;
    }
 
-   public List<String> getDependencySkills(String talentName) {
-      List<String> talents = new LinkedList<>();
-      SkillGates.Entry entry = this.entries.get(talentName);
+   private List<String> getAllSkillIds() {
+      List<String> allSkillIds = new ArrayList<>();
+      ModConfigs.TALENTS.tree.skills.forEach(s -> allSkillIds.add(s.getId()));
+      ModConfigs.ABILITIES.tree.skills.forEach(s -> allSkillIds.add(s.getId()));
+      ModConfigs.EXPERTISES.getAll().skills.forEach(s -> allSkillIds.add(s.getId()));
+      return allSkillIds;
+   }
+
+   public List<String> getDependencySkills(String skillName) {
+      List<String> skills = new LinkedList<>();
+      SkillGates.Entry entry = this.entries.get(skillName);
       if (entry == null) {
-         return talents;
+         return skills;
       } else {
-         talents.addAll(entry.dependsOn);
-         return talents;
+         for (String skillId : this.getAllSkillIds()) {
+            if (entry.dependsOn.stream().anyMatch(l -> l.allows(skillId))) {
+               skills.add(skillId);
+            }
+         }
+
+         return skills;
       }
    }
 
-   public List<String> getLockedBySkills(String talentName) {
-      List<String> talents = new LinkedList<>();
-      SkillGates.Entry entry = this.entries.get(talentName);
+   public List<String> getLockedBySkills(String skillName) {
+      List<String> skills = new LinkedList<>();
+      SkillGates.Entry entry = this.entries.get(skillName);
       if (entry == null) {
-         return talents;
+         return skills;
       } else {
-         talents.addAll(entry.lockedBy);
-         return talents;
+         for (String skillId : this.getAllSkillIds()) {
+            if (entry.lockedBy.stream().anyMatch(l -> l.allows(skillId))) {
+               skills.add(skillId);
+            }
+         }
+
+         return skills;
       }
    }
 
@@ -99,10 +129,12 @@ public class SkillGates {
       if (entry == null) {
          return researches;
       } else {
-         entry.dependsOn.forEach(dependencyName -> {
-            Research dependency = ModConfigs.RESEARCHES.getByName(dependencyName);
-            researches.add(dependency);
-         });
+         for (Research research : ModConfigs.RESEARCHES.getAll()) {
+            if (entry.dependsOn.stream().anyMatch(l -> l.allows(research.getName()))) {
+               researches.add(research);
+            }
+         }
+
          return researches;
       }
    }
@@ -113,10 +145,12 @@ public class SkillGates {
       if (entry == null) {
          return researches;
       } else {
-         entry.lockedBy.forEach(dependencyName -> {
-            Research dependency = ModConfigs.RESEARCHES.getByName(dependencyName);
-            researches.add(dependency);
-         });
+         for (Research research : ModConfigs.RESEARCHES.getAll()) {
+            if (entry.lockedBy.stream().anyMatch(l -> l.allows(research.getName()))) {
+               researches.add(research);
+            }
+         }
+
          return researches;
       }
    }
@@ -124,38 +158,48 @@ public class SkillGates {
    public boolean isLocked(String researchName, ResearchTree researchTree) {
       SkillGates gates = ModConfigs.SKILL_GATES.getGates();
       List<String> researchesDone = researchTree.getResearchesDone();
-
-      for (Research dependencyResearch : gates.getDependencyResearches(researchName)) {
-         if (!researchesDone.contains(dependencyResearch.getName())) {
-            return true;
+      SkillGates.Entry gateEntries = gates.entries.get(researchName);
+      if (gateEntries == null) {
+         return false;
+      } else {
+         for (SkillGateType dependencyGate : gateEntries.dependsOn) {
+            if (researchesDone.stream().noneMatch(dependencyGate::allows)) {
+               return true;
+            }
          }
-      }
 
-      for (Research lockedByResearch : gates.getLockedByResearches(researchName)) {
-         if (researchesDone.contains(lockedByResearch.getName())) {
-            return true;
+         for (SkillGateType lockGate : gateEntries.lockedBy) {
+            if (researchesDone.stream().anyMatch(lockGate::allows)) {
+               return true;
+            }
          }
-      }
 
-      return false;
+         return false;
+      }
    }
 
    public boolean isLocked(String skill, SkillTree tree) {
       SkillGates gates = ModConfigs.SKILL_GATES.getGates();
+      SkillGates.Entry gateEntries = gates.entries.get(skill);
+      if (gateEntries == null) {
+         return false;
+      } else {
+         List<Skill> unlockedSkills = tree.skills.stream().filter(Skill::isUnlocked).toList();
 
-      for (String dependencyTalent : gates.getDependencySkills(skill)) {
-         if (!tree.getForId(dependencyTalent).map(Skill::isUnlocked).orElse(false)) {
-            return true;
+         for (SkillGateType dependencyGate : gateEntries.dependsOn) {
+            if (unlockedSkills.stream().map(Skill::getId).noneMatch(dependencyGate::allows)) {
+               return true;
+            }
          }
-      }
 
-      for (String lockedByTalent : gates.getLockedBySkills(skill)) {
-         if (tree.getForId(lockedByTalent).map(Skill::isUnlocked).orElse(false)) {
-            return true;
+         for (SkillGateType lockGate : gateEntries.lockedBy) {
+            if (unlockedSkills.stream().map(Skill::getId).anyMatch(lockGate::allows)) {
+               return true;
+            }
          }
-      }
 
-      return false;
+         return false;
+      }
    }
 
    public boolean shouldDrawArrow(String entryA, String entryB) {
@@ -163,23 +207,25 @@ public class SkillGates {
       if (entry == null) {
          return false;
       } else {
-         return !entry.dependsOn.contains(entryB) && !entry.lockedBy.contains(entryB) ? false : !entry.ignoreArrow;
+         boolean depends = entry.dependsOn.stream().anyMatch(e -> e.allows(entryB));
+         boolean locks = entry.lockedBy.stream().anyMatch(e -> e.allows(entryB));
+         return !depends && !locks ? false : !entry.ignoreArrow;
       }
    }
 
    public static class Entry {
       @Expose
-      private List<String> dependsOn = new LinkedList<>();
+      private List<SkillGateType> dependsOn = new LinkedList<>();
       @Expose
-      private List<String> lockedBy = new LinkedList<>();
+      private List<SkillGateType> lockedBy = new LinkedList<>();
       @Expose
       private boolean ignoreArrow;
 
-      public void setDependsOn(String... skills) {
+      public void setDependsOn(SkillGateType... skills) {
          this.dependsOn.addAll(Arrays.asList(skills));
       }
 
-      public void setLockedBy(String... skills) {
+      public void setLockedBy(SkillGateType... skills) {
          this.lockedBy.addAll(Arrays.asList(skills));
       }
    }

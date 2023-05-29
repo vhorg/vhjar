@@ -42,20 +42,33 @@ public class QuestState implements INBTSerializable<CompoundTag> {
    }
 
    public void initialize() {
-      if (!this.isInitialized()) {
-         if (this.getServerPlayer() == null) {
-            return;
+      if (this.getServerPlayer() != null) {
+         if (!this.isInitialized()) {
+            EntityHelper.giveItem(this.getServerPlayer(), ModItems.QUEST_BOOK.getDefaultInstance());
+            this.<QuestConfig>getConfig(this.getServerPlayer().getLevel())
+               .getQuests()
+               .stream()
+               .filter(quest -> quest.getUnlockedBy().isEmpty())
+               .forEach(this::setInProgress);
          }
 
-         EntityHelper.giveItem(this.getServerPlayer(), ModItems.QUEST_BOOK.getDefaultInstance());
-         this.<QuestConfig>getConfig(this.getServerPlayer().getLevel())
-            .getQuests()
-            .stream()
-            .filter(quest -> quest.getUnlockedBy().isEmpty())
-            .forEach(this::setInProgress);
+         this.addNewQuests(this.getServerPlayer());
+         this.syncAndPersist();
       }
+   }
 
-      this.syncAndPersist();
+   private void addNewQuests(ServerPlayer serverPlayer) {
+      QuestConfig config = this.getConfig(serverPlayer.getLevel());
+      config.getQuests()
+         .stream()
+         .filter(
+            quest -> !this.getCompleted().contains(quest.getUnlockedBy())
+               ? false
+               : !this.getCompleted().contains(quest.getId())
+                  && !this.getReadyToComplete().contains(quest.getId())
+                  && !this.getInProgress().contains(quest.getId())
+         )
+         .forEach(this::setInProgress);
    }
 
    public <C extends QuestConfig> C getConfig(ServerLevel level) {
@@ -121,7 +134,14 @@ public class QuestState implements INBTSerializable<CompoundTag> {
          if (this.readyToComplete.contains(id)) {
             this.readyToComplete.remove(id);
             this.completed.add(id);
-            this.setInProgress(this.<QuestConfig>getConfig(serverPlayer.getLevel()).getNextQuest(quest));
+            Quest nextQuest = this.<QuestConfig>getConfig(serverPlayer.getLevel()).getNextQuest(quest);
+            if (nextQuest != null
+               && !this.getInProgress().contains(nextQuest.getId())
+               && !this.getReadyToComplete().contains(nextQuest.getId())
+               && !this.getCompleted().contains(nextQuest.getId())) {
+               this.setInProgress(nextQuest);
+            }
+
             quest.getReward().apply(serverPlayer);
             this.syncAndPersist();
          }

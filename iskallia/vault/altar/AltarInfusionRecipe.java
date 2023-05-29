@@ -4,6 +4,7 @@ import iskallia.vault.init.ModConfigs;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -62,6 +63,10 @@ public class AltarInfusionRecipe implements INBTSerializable<CompoundTag> {
    @Nonnull
    public List<RequiredItems> getRequiredItems() {
       return this.requiredItems;
+   }
+
+   public List<RequiredItems> getIncompleteRequiredItems() {
+      return this.getRequiredItems().stream().filter(required -> !required.isComplete()).collect(Collectors.toList());
    }
 
    @Nonnull

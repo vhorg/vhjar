@@ -81,14 +81,14 @@ public class JavelinSightAbility extends AbstractJavelinAbility {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.radius), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.effectDuration), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.effectDuration), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.radius = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.effectDuration = Adapters.INT.readBits(buffer).orElseThrow();
+      this.effectDuration = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override

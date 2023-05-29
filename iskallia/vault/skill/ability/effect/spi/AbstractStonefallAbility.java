@@ -58,7 +58,7 @@ public abstract class AbstractStonefallAbility extends InstantManaAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.durationTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.durationTicks), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.knockbackMultiplier), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.radius), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.damageReduction), buffer);
@@ -67,7 +67,7 @@ public abstract class AbstractStonefallAbility extends InstantManaAbility {
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.durationTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.durationTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
       this.knockbackMultiplier = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.radius = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.damageReduction = Adapters.FLOAT.readBits(buffer).orElseThrow();

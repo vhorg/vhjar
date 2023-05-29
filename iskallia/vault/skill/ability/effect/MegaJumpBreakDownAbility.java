@@ -108,13 +108,13 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.radius), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.radius), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.radius = Adapters.INT.readBits(buffer).orElseThrow();
+      this.radius = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

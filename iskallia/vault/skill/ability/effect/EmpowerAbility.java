@@ -147,14 +147,14 @@ public class EmpowerAbility extends AbstractEmpowerAbility {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.speedPercentAdded), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.buffRadius), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.buffRadius), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.speedPercentAdded = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.buffRadius = Adapters.INT.readBits(buffer).orElseThrow();
+      this.buffRadius = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

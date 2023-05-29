@@ -31,12 +31,10 @@ public class EffectAuraConfig extends EternalAuraConfig.AuraConfig {
    public void onTick(Level world, ActiveAura aura) {
       super.onTick(world, aura);
       if (aura.getAuraProvider() instanceof EntityAuraProvider) {
-         if (this.getEffect() != null && this.getEffect().getEffect() != null) {
-            MobEffectInstance effect = this.getEffect().toEffect(259);
-            LivingEntity auraTarget = ((EntityAuraProvider)aura.getAuraProvider()).getSource();
-            if (!auraTarget.hasEffect(effect.getEffect()) || auraTarget.getEffect(effect.getEffect()).getDuration() < 40) {
-               auraTarget.addEffect(effect);
-            }
+         MobEffectInstance effect = this.getEffect().toEffect(259);
+         LivingEntity auraTarget = ((EntityAuraProvider)aura.getAuraProvider()).getSource();
+         if (!auraTarget.hasEffect(effect.getEffect()) || auraTarget.getEffect(effect.getEffect()).getDuration() < 40) {
+            auraTarget.addEffect(effect);
          }
       }
    }

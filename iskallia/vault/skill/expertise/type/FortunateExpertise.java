@@ -20,6 +20,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
@@ -73,7 +75,9 @@ public class FortunateExpertise extends LearnableSkill {
       if (!event.getWorld().isClientSide()
          && !(event.getPlayer() instanceof FakePlayer)
          && event.getPlayer() instanceof ServerPlayer player
-         && event.getWorld() instanceof ServerLevel level) {
+         && event.getWorld() instanceof ServerLevel level
+         && event.getPlayer().getUsedItemHand() == InteractionHand.MAIN_HAND
+         && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, event.getPlayer().getMainHandItem()) > 0) {
          ActiveFlags.IS_FORTUNE_MINING.runIfNotSet(() -> {
             if (!PlayerExpertisesData.get(level).getExpertises(player).getAll(FortunateExpertise.class, Skill::isUnlocked).isEmpty()) {
                BlockPos pos = event.getPos();

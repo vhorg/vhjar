@@ -3,6 +3,8 @@ package iskallia.vault.world.data;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.PlayerVaultStats;
+import iskallia.vault.skill.base.LearnableSkill;
+import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -44,7 +46,15 @@ public class PlayerTalentsData extends SavedData {
    }
 
    public void setTalents(Player player, TalentTree talentTree) {
+      if (player instanceof ServerPlayer serverPlayer) {
+         this.getTalents(player).getAll(LearnableSkill.class, Skill::isUnlocked).forEach(skill -> skill.onRemove(SkillContext.of(serverPlayer)));
+      }
+
       this.playerMap.put(player.getUUID(), talentTree);
+      if (player instanceof ServerPlayer serverPlayer) {
+         talentTree.getAll(LearnableSkill.class, Skill::isUnlocked).forEach(skill -> skill.onAdd(SkillContext.of(serverPlayer)));
+      }
+
       this.setDirty();
    }
 

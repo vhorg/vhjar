@@ -56,9 +56,8 @@ public class ColorOption {
    }
 
    public static enum HunterSpec {
-      CHEST,
-      BLOCK,
-      WOODEN,
+      BASE,
+      OBSERVER,
       GILDED,
       LIVING,
       ORNATE,

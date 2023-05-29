@@ -13,6 +13,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.eventbus.api.EventPriority;
 
 public class OreScavengerTask extends ScavengeTask {
    public final double probability;
@@ -32,7 +33,7 @@ public class OreScavengerTask extends ScavengeTask {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault, ScavengerObjective objective) {
-      CommonEvents.PLAYER_MINE.register(objective, data -> {
+      CommonEvents.PLAYER_MINE.register(objective, EventPriority.LOW, data -> {
          if (data.getPlayer().level == world) {
             if (data.getState().getBlock() instanceof VaultOreBlock) {
                if ((Boolean)data.getState().getValue(VaultOreBlock.GENERATED)) {

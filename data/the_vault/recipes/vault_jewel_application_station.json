@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sps",
+    "sgs",
+    "sds"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:driftwood_planks"
+    },
+    "p": {
+      "item": "the_vault:gemstone"
+    },
+    "d": {
+      "item": "minecraft:anvil"
+    },
+    "g": {
+      "item": "minecraft:crafting_table"
+    }
+  },
+  "result": {
+    "item": "the_vault:vault_jewel_application_station",
+    "count": 1
+  }
+}

@@ -43,6 +43,15 @@ public class PlayerExpertisesData extends SavedData {
       return this.playerMap.computeIfAbsent(uuid, uuid1 -> ModConfigs.EXPERTISES.getAll().copy());
    }
 
+   public void resetAllPlayerExpertiseTrees(ServerLevel level) {
+      this.playerMap.clear();
+      this.setDirty();
+
+      for (ServerPlayer player : level.players()) {
+         this.getExpertises(player).sync(SkillContext.of(player));
+      }
+   }
+
    public PlayerExpertisesData resetExpertiseTree(ServerPlayer player) {
       this.playerMap.remove(player.getUUID());
       this.setDirty();

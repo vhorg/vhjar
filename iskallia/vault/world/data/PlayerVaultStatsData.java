@@ -21,7 +21,6 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -140,56 +139,32 @@ public class PlayerVaultStatsData extends SavedData {
    }
 
    public PlayerVaultStatsData resetAbilities(ServerPlayer player) {
-      this.getVaultStats(player).resetAbilitiesTalents(player.getLevel().getServer()).sync(player.getLevel().getServer());
       PlayerVaultStatsData statsData = get(player.getLevel());
       PlayerTalentsData talentsData = PlayerTalentsData.get(player.getLevel());
       PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get(player.getLevel());
       TalentTree talentTree = talentsData.getTalents(player);
       AbilityTree abilityTree = abilitiesData.getAbilities(player);
       PlayerVaultStats stats = statsData.getVaultStats(player);
-      stats.setRegretPoints(9999);
-
-      for (Skill skill : talentTree.getAll(LearnableSkill.class, Skill::isUnlocked)) {
-         for (int count = 0; skill.isUnlocked(); count++) {
-            SkillContext context = SkillContext.of(player);
-            if (skill.getParent() instanceof GroupedSkill grouped) {
-               grouped.select(skill.getId());
-               skill = grouped;
-            }
-
-            if (skill instanceof LearnableSkill learnable && learnable.canRegret(context)) {
-               learnable.regret(context);
-               talentTree.sync(context);
-            }
-
-            if (count > 50) {
-               player.displayClientMessage(new TextComponent("Stuck in loop removing abilities, try again."), false);
-               break;
-            }
+      SkillContext context = SkillContext.empty();
+      talentTree.iterate(Skill.class, skill -> {
+         while (skill instanceof LearnableSkill learnable && skill.isUnlocked()) {
+            learnable.regret(context);
          }
-      }
 
-      for (Skill skill : abilityTree.getAll(LearnableSkill.class, Skill::isUnlocked)) {
-         while (skill.isUnlocked()) {
-            SkillContext contextx = SkillContext.of(player);
-            if (skill.getParent() instanceof GroupedSkill grouped) {
-               grouped.select(skill.getId());
-               skill = grouped;
-            }
-
-            if (skill.isUnlocked() && skill instanceof SpecializedSkill specialized) {
-               specialized.resetSpecialization(SkillContext.of(player));
-            }
-
-            if (skill instanceof LearnableSkill learnable && learnable.canRegret(contextx)) {
-               learnable.regret(contextx);
-               abilityTree.sync(contextx);
-            }
+         if (skill instanceof SpecializedSkill specialized) {
+            specialized.resetSpecialization(context);
          }
-      }
+      });
+      abilityTree.iterate(Skill.class, skill -> {
+         while (skill instanceof LearnableSkill learnable && skill.isUnlocked()) {
+            learnable.regret(context);
+         }
 
-      stats.setRegretPoints(0);
-      stats.setSkillPoints(0);
+         if (skill instanceof SpecializedSkill specialized) {
+            specialized.resetSpecialization(context);
+         }
+      });
+      stats.addSkillPoints(context.getLearnPoints());
       stats.sync(player.getLevel().getServer());
       this.setDirty();
       return this;
@@ -239,6 +214,11 @@ public class PlayerVaultStatsData extends SavedData {
       this.getVaultStats(player).resetAndReturnSkillPoints().sync(player.getLevel().getServer());
       this.setDirty();
       return this;
+   }
+
+   public void resetAndReturnAllPlayerExpertisePoints(ServerLevel level) {
+      this.playerMap.forEach((uuid, playerVaultStatsData) -> this.getVaultStats(uuid).resetAndReturnExpertisePoints().sync(level.getServer()));
+      this.setDirty();
    }
 
    public PlayerVaultStatsData resetAndReturnExpertisePoints(ServerPlayer player) {

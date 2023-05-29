@@ -186,7 +186,9 @@ public class PlayerEvents {
       }
    }
 
-   @SubscribeEvent
+   @SubscribeEvent(
+      priority = EventPriority.LOW
+   )
    public static void fillLootOnBreak(BreakEvent event) {
       if (!event.getWorld().isClientSide() && event.getWorld() instanceof ServerLevel) {
          BlockEntity tile = event.getWorld().getBlockEntity(event.getPos());

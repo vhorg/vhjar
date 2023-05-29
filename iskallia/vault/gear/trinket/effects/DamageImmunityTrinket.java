@@ -31,11 +31,25 @@ public class DamageImmunityTrinket extends TrinketEffect.Simple {
    @SubscribeEvent
    public static void onPotionEffect(PotionApplicableEvent event) {
       if (event.getEntityLiving() instanceof Player player) {
-         TrinketHelper.getTrinkets(player, DamageImmunityTrinket.class).forEach(immunityTrinket -> {
-            if (!event.getPotionEffect().getEffect().isBeneficial() && event.getPotionEffect().getEffect() != ModEffects.TIMER_ACCELERATION) {
-               event.setResult(Result.DENY);
-            }
-         });
+         TrinketHelper.getTrinkets(player, DamageImmunityTrinket.class)
+            .forEach(
+               immunityTrinket -> {
+                  if (immunityTrinket.trinket().getRegistryName() != null
+                     && immunityTrinket.trinket().getRegistryName().getPath().equals("carapace")
+                     && !event.getPotionEffect().getEffect().isBeneficial()
+                     && event.getPotionEffect().getEffect() != ModEffects.TIMER_ACCELERATION) {
+                     if (event.getPotionEffect().getEffect().getRegistryName() != null
+                        && (
+                           event.getPotionEffect().getEffect().getRegistryName().getNamespace().equals("xaeroworldmap")
+                              || event.getPotionEffect().getEffect().getRegistryName().getNamespace().equals("xaerominimap")
+                        )) {
+                        return;
+                     }
+
+                     event.setResult(Result.DENY);
+                  }
+               }
+            );
       }
    }
 

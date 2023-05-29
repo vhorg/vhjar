@@ -9,8 +9,8 @@ public enum ToolMaterial {
    VAULTERITE_INGOT("vaulterite_ingot", 35, 200, 9.0F, 4096, 3),
    VAULT_ALLOY("vault_alloy", 50, 250, 9.0F, 4096, 4),
    BLACK_CHROMATIC_STEEL_INGOT("black_chromatic_steel_ingot", 65, 300, 9.0F, 4096, 5),
-   ECHOING_INGOT("echoing_ingot", 80, 350, 9.0F, 4096, 6),
-   OMEGA_POG("omega_pog", 90, 400, 9.0F, 4096, 7);
+   ECHOING_INGOT("echoing_ingot", 80, 400, 9.0F, 4096, 6),
+   OMEGA_POG("omega_pog", 90, 600, 9.0F, 4096, 7);
 
    private final String id;
    private final String description;

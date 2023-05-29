@@ -4,7 +4,7 @@ import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.skill.ability.effect.spi.HunterAbility;
-import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.base.Skill;
 import java.awt.Color;
 import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
@@ -44,7 +44,7 @@ public record ClientboundHunterParticlesMessage(double x, double y, double z, do
       Color color = new Color((float)r, (float)g, (float)b);
       IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
       if (options.isHunterCustomColorsEnabled()) {
-         for (HunterAbility ability : ClientAbilityData.getTree().getAll(HunterAbility.class, Ability::isActive)) {
+         for (HunterAbility ability : ClientAbilityData.getTree().getAll(HunterAbility.class, Skill::isUnlocked)) {
             color = getColor(ability.getParent().getId());
          }
       }
@@ -52,19 +52,17 @@ public record ClientboundHunterParticlesMessage(double x, double y, double z, do
       Minecraft.getInstance()
          .level
          .addAlwaysVisibleParticle(
-            (ParticleOptions)ModParticles.DEPTH_FIREWORK.get(), x, y, z, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F
+            (ParticleOptions)ModParticles.DEPTH_FIREWORK.get(), true, x, y, z, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F
          );
    }
 
    private static Color getColor(String hunterSpec) {
       IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
       switch (hunterSpec) {
-         case "Hunter":
+         case "Hunter_Base":
             return options.getChestHunterSpec().getColor();
          case "Hunter_Blocks":
             return options.getBlockHunterSpec().getColor();
-         case "Hunter_Wooden":
-            return options.getWoodenHunterSpec().getColor();
          case "Hunter_Gilded":
             return options.getGildedHunterSpec().getColor();
          case "Hunter_Living":

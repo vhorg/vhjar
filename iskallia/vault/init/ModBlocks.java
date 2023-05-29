@@ -76,6 +76,8 @@ import iskallia.vault.block.VaultDiffuserBlock;
 import iskallia.vault.block.VaultEnchanterBlock;
 import iskallia.vault.block.VaultEnhancementAltar;
 import iskallia.vault.block.VaultForgeBlock;
+import iskallia.vault.block.VaultJewelApplicationStationBlock;
+import iskallia.vault.block.VaultJewelCuttingStationBlock;
 import iskallia.vault.block.VaultLogBlock;
 import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.VaultPortalBlock;
@@ -146,6 +148,8 @@ import iskallia.vault.block.entity.VaultDiffuserTileEntity;
 import iskallia.vault.block.entity.VaultEnchanterTileEntity;
 import iskallia.vault.block.entity.VaultEnhancementAltarTileEntity;
 import iskallia.vault.block.entity.VaultForgeTileEntity;
+import iskallia.vault.block.entity.VaultJewelApplicationStationTileEntity;
+import iskallia.vault.block.entity.VaultJewelCuttingStationTileEntity;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.block.entity.VaultRecyclerTileEntity;
 import iskallia.vault.block.entity.WardrobeTileEntity;
@@ -172,6 +176,8 @@ import iskallia.vault.block.render.FinalVaultFrameRenderer;
 import iskallia.vault.block.render.FloatingTextRenderer;
 import iskallia.vault.block.render.HourglassRenderer;
 import iskallia.vault.block.render.IdentificationStandRenderer;
+import iskallia.vault.block.render.JewelApplicationStationRenderer;
+import iskallia.vault.block.render.JewelCuttingStationRenderer;
 import iskallia.vault.block.render.LootStatueRenderer;
 import iskallia.vault.block.render.MagnetTableRenderer;
 import iskallia.vault.block.render.ModifierDiscoveryRenderer;
@@ -299,6 +305,8 @@ public class ModBlocks {
    public static final ToolStationBlock TOOL_STATION = new ToolStationBlock();
    public static final InscriptionTableBlock INSCRIPTION_TABLE = new InscriptionTableBlock();
    public static final VaultArtisanStationBlock VAULT_ARTISAN_STATION = new VaultArtisanStationBlock();
+   public static final VaultJewelCuttingStationBlock VAULT_JEWEL_CUTTING_STATION = new VaultJewelCuttingStationBlock();
+   public static final VaultJewelApplicationStationBlock VAULT_JEWEL_APPLICATION_STATION = new VaultJewelApplicationStationBlock();
    public static final VaultRecyclerBlock VAULT_RECYCLER = new VaultRecyclerBlock();
    public static final VaultDiffuserBlock VAULT_DIFFUSER = new VaultDiffuserBlock();
    public static final ModifierWorkbenchBlock MODIFIER_WORKBENCH = new ModifierWorkbenchBlock();
@@ -613,6 +621,14 @@ public class ModBlocks {
          VaultArtisanStationTileEntity::new, new Block[]{VAULT_ARTISAN_STATION}
       )
       .build(null);
+   public static final BlockEntityType<VaultJewelCuttingStationTileEntity> VAULT_JEWEL_CUTTING_STATION_ENTITY = Builder.of(
+         VaultJewelCuttingStationTileEntity::new, new Block[]{VAULT_JEWEL_CUTTING_STATION}
+      )
+      .build(null);
+   public static final BlockEntityType<VaultJewelApplicationStationTileEntity> VAULT_JEWEL_APPLICATION_STATION_ENTITY = Builder.of(
+         VaultJewelApplicationStationTileEntity::new, new Block[]{VAULT_JEWEL_APPLICATION_STATION}
+      )
+      .build(null);
    public static final BlockEntityType<VaultRecyclerTileEntity> VAULT_RECYCLER_ENTITY = Builder.of(VaultRecyclerTileEntity::new, new Block[]{VAULT_RECYCLER})
       .build(null);
    public static final BlockEntityType<VaultDiffuserTileEntity> VAULT_DIFFUSER_ENTITY = Builder.of(VaultDiffuserTileEntity::new, new Block[]{VAULT_DIFFUSER})
@@ -755,6 +771,8 @@ public class ModBlocks {
       registerBlock(event, TOOL_STATION, VaultMod.id("tool_station"));
       registerBlock(event, INSCRIPTION_TABLE, VaultMod.id("inscription_table"));
       registerBlock(event, VAULT_ARTISAN_STATION, VaultMod.id("vault_artisan_station"));
+      registerBlock(event, VAULT_JEWEL_CUTTING_STATION, VaultMod.id("vault_jewel_cutting_station"));
+      registerBlock(event, VAULT_JEWEL_APPLICATION_STATION, VaultMod.id("vault_jewel_application_station"));
       registerBlock(event, VAULT_RECYCLER, VaultMod.id("vault_recycler"));
       registerBlock(event, VAULT_DIFFUSER, VaultMod.id("vault_diffuser"));
       registerBlock(event, MODIFIER_WORKBENCH, VaultMod.id("modifier_workbench"));
@@ -894,6 +912,8 @@ public class ModBlocks {
       registerTileEntity(event, TOOL_STATION_TILE_ENTITY, VaultMod.id("tool_station_tile_entity"));
       registerTileEntity(event, INSCRIPTION_TABLE_TILE_ENTITY, VaultMod.id("inscription_table_tile_entity"));
       registerTileEntity(event, VAULT_ARTISAN_STATION_ENTITY, VaultMod.id("vault_artisan_station_tile_entity"));
+      registerTileEntity(event, VAULT_JEWEL_CUTTING_STATION_ENTITY, VaultMod.id("vault_jewel_cutting_station_tile_entity"));
+      registerTileEntity(event, VAULT_JEWEL_APPLICATION_STATION_ENTITY, VaultMod.id("vault_jewel_application_station_tile_entity"));
       registerTileEntity(event, VAULT_RECYCLER_ENTITY, VaultMod.id("vault_recycler_tile_entity"));
       registerTileEntity(event, VAULT_DIFFUSER_ENTITY, VaultMod.id("vault_diffuser_tile_entity"));
       registerTileEntity(event, MODIFIER_WORKBENCH_ENTITY, VaultMod.id("modifier_workbench_tile_entity"));
@@ -956,6 +976,8 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(PYLON_TILE_ENTITY, PylonRenderer::new);
       event.registerBlockEntityRenderer(CRAKE_PEDESTAL_TILE_ENTITY, CrakePedestalRenderer::new);
       event.registerBlockEntityRenderer(TOOL_STATION_TILE_ENTITY, ToolStationRenderer::new);
+      event.registerBlockEntityRenderer(VAULT_JEWEL_CUTTING_STATION_ENTITY, JewelCuttingStationRenderer::new);
+      event.registerBlockEntityRenderer(VAULT_JEWEL_APPLICATION_STATION_ENTITY, JewelApplicationStationRenderer::new);
       event.registerBlockEntityRenderer(ENHANCEMENT_ALTAR_TILE_ENTITY, EnhancementAltarRenderer::new);
       event.registerBlockEntityRenderer(MODIFIER_DISCOVERY_ENTITY, ModifierDiscoveryRenderer::new);
       event.registerBlockEntityRenderer(ALCHEMY_ARCHIVE_TILE_ENTITY, PotionModifierDiscoveryRenderer::new);
@@ -1073,6 +1095,8 @@ public class ModBlocks {
       registerBlockItem(event, TOOL_STATION);
       registerBlockItem(event, INSCRIPTION_TABLE);
       registerBlockItem(event, VAULT_ARTISAN_STATION);
+      registerBlockItem(event, VAULT_JEWEL_CUTTING_STATION);
+      registerBlockItem(event, VAULT_JEWEL_APPLICATION_STATION);
       registerBlockItem(event, VAULT_RECYCLER);
       registerBlockItem(event, VAULT_DIFFUSER);
       registerBlockItem(event, MODIFIER_WORKBENCH);

@@ -127,15 +127,15 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.amplifier), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.freezeTicks), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.amplifier), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.freezeTicks), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.amplifier = Adapters.INT.readBits(buffer).orElseThrow();
-      this.freezeTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.amplifier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.freezeTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override

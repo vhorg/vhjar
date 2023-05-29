@@ -8,6 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -27,7 +28,9 @@ public class MiningQuest extends Quest {
       super("mining", id, name, descriptionData, icon, targetId, targetProgress, unlockedBy, reward);
    }
 
-   @SubscribeEvent
+   @SubscribeEvent(
+      priority = EventPriority.LOW
+   )
    public void onBreakBlock(BreakEvent event) {
       if (event.getPlayer() instanceof ServerPlayer player) {
          if (QuestStatesData.get().getState(player).getInProgress().contains(this.id)) {

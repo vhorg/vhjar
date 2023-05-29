@@ -193,16 +193,16 @@ public class GroupedSkill extends LearnableSkill {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       SPECIALIZATIONS.writeBits(this.children.toArray(Skill[]::new), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.selected), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.maxSpentLearnPoints), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.selected), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.maxSpentLearnPoints), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.children = Arrays.stream(SPECIALIZATIONS.readBits(buffer).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
-      this.selected = Adapters.INT.readBits(buffer).orElse(0);
-      this.maxSpentLearnPoints = Adapters.INT.readBits(buffer).orElse(0);
+      this.selected = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
+      this.maxSpentLearnPoints = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
       this.children.forEach(specialization -> specialization.setParent(this));
    }
 

@@ -174,13 +174,13 @@ public class ShellQuillAbility extends ShellPorcupineAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.quillCount), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.quillCount), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.quillCount = Adapters.INT.readBits(buffer).orElseThrow();
+      this.quillCount = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

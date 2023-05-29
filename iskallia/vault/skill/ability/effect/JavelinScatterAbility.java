@@ -80,15 +80,15 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.numberOfJavelins), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.numberOfBounces), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.numberOfJavelins), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.numberOfBounces), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.numberOfJavelins = Adapters.INT.readBits(buffer).orElseThrow();
-      this.numberOfBounces = Adapters.INT.readBits(buffer).orElseThrow();
+      this.numberOfJavelins = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.numberOfBounces = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

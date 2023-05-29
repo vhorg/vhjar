@@ -13,7 +13,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkEvent.Context;
 
-public record ClientboundHunterParticlesFromJavelinMessage(double x, double y, double z, double r, double g, double b) {
+public record ClientboundHunterParticlesFromJavelinMessage(double x, double y, double z, double r, double g, double b, String type) {
    public static void encode(ClientboundHunterParticlesFromJavelinMessage pkt, FriendlyByteBuf buffer) {
       buffer.writeDouble(pkt.x);
       buffer.writeDouble(pkt.y);
@@ -21,6 +21,7 @@ public record ClientboundHunterParticlesFromJavelinMessage(double x, double y, d
       buffer.writeDouble(pkt.r);
       buffer.writeDouble(pkt.g);
       buffer.writeDouble(pkt.b);
+      buffer.writeUtf(pkt.type);
    }
 
    public static ClientboundHunterParticlesFromJavelinMessage decode(FriendlyByteBuf buffer) {
@@ -30,20 +31,21 @@ public record ClientboundHunterParticlesFromJavelinMessage(double x, double y, d
       double r = buffer.readDouble();
       double g = buffer.readDouble();
       double b = buffer.readDouble();
-      return new ClientboundHunterParticlesFromJavelinMessage(x, y, z, r, g, b);
+      String type = buffer.readUtf();
+      return new ClientboundHunterParticlesFromJavelinMessage(x, y, z, r, g, b, type);
    }
 
    public static void handle(ClientboundHunterParticlesFromJavelinMessage pkt, Supplier<Context> contextSupplier) {
-      createParticles(pkt.x, pkt.y, pkt.z, pkt.r, pkt.g, pkt.b);
+      createParticles(pkt.x, pkt.y, pkt.z, pkt.r, pkt.g, pkt.b, pkt.type);
       contextSupplier.get().setPacketHandled(true);
    }
 
    @OnlyIn(Dist.CLIENT)
-   private static void createParticles(double x, double y, double z, double r, double g, double b) {
+   private static void createParticles(double x, double y, double z, double r, double g, double b, String type) {
       Color color = Color.cyan;
       IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
       if (options.isHunterCustomColorsEnabled()) {
-         color = getColor();
+         color = getColor(type);
       }
 
       ParticleEngine pm = Minecraft.getInstance().particleEngine;
@@ -58,5 +60,26 @@ public record ClientboundHunterParticlesFromJavelinMessage(double x, double y, d
    private static Color getColor() {
       IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
       return options.getChestHunterSpec().getColor();
+   }
+
+   private static Color getColor(String hunterSpec) {
+      IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
+      switch (hunterSpec) {
+         case "Hunter":
+         case "Hunter_Wooden":
+            return options.getChestHunterSpec().getColor();
+         case "Hunter_Blocks":
+            return options.getBlockHunterSpec().getColor();
+         case "Hunter_Gilded":
+            return options.getGildedHunterSpec().getColor();
+         case "Hunter_Living":
+            return options.getLivingHunterSpec().getColor();
+         case "Hunter_Ornate":
+            return options.getOrnateHunterSpec().getColor();
+         case "Hunter_Coins":
+            return options.getCoinsHunterSpec().getColor();
+         default:
+            return Color.WHITE;
+      }
    }
 }

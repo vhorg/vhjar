@@ -24,6 +24,7 @@ import iskallia.vault.gear.model.armor.layers.ArmourVelaraArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ArmourWendarrArmorLayers;
 import iskallia.vault.gear.model.armor.layers.AtomaticArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BardArmorLayers;
+import iskallia.vault.gear.model.armor.layers.BeeKnightArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BoneDragonArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BotaniaArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BuilderArmorLayers;
@@ -79,6 +80,7 @@ import iskallia.vault.gear.model.armor.layers.RustyRaiderArmorLayers;
 import iskallia.vault.gear.model.armor.layers.RustyScavengerArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SamuraiArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ScarecrowArmorLayers;
+import iskallia.vault.gear.model.armor.layers.ScoutArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ShadowKingArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SkallibombaArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SoulEaterArmorLayers;
@@ -1055,6 +1057,24 @@ public class ModDynamicModels {
             .addSlot(EquipmentSlot.LEGS)
             .addSlot(EquipmentSlot.FEET)
       );
+      public static final ArmorModel SCOUT = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/scout"), "Scout")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new ScoutArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel BEE_KNIGHT = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/bee_knight"), "Bee Knight")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new BeeKnightArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
    }
 
    public static class Axes {
@@ -1308,6 +1328,13 @@ public class ModDynamicModels {
          new ShieldModel(VaultMod.id("gear/shield/heart_crystal"), "Crystal Heart")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
+      public static final ShieldModel HONEY_DRONE = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/honey_drone"), "Honey Drone")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel LIFEBUOY = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/lifebuoy"), "Lifebuoy").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
    }
 
    public static class Swords {
@@ -1448,6 +1475,10 @@ public class ModDynamicModels {
       );
       public static final HandHeldModel CUTLASS = REGISTRY.register(
          new HandHeldModel(VaultMod.id("gear/sword/cutlass"), "Cutlass").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final HandHeldModel HONEY_WAND = REGISTRY.register(
+         new HandHeldModel(VaultMod.id("gear/sword/honey_wand"), "Honey Wand")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }
 }

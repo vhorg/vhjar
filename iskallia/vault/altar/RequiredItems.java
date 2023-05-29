@@ -3,11 +3,14 @@ package iskallia.vault.altar;
 import iskallia.vault.util.nbt.NBTHelper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.extensions.IForgeItemStack;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public class RequiredItems implements INBTSerializable<CompoundTag> {
    private String poolId;
@@ -66,6 +69,15 @@ public class RequiredItems implements INBTSerializable<CompoundTag> {
 
    public List<ItemStack> getItems() {
       return this.items;
+   }
+
+   public boolean containsItem(ResourceLocation itemId) {
+      return this.getItems()
+         .stream()
+         .map(ItemStack::getItem)
+         .<ResourceLocation>map(ForgeRegistryEntry::getRegistryName)
+         .filter(Objects::nonNull)
+         .anyMatch(id -> id.equals(itemId));
    }
 
    public int getCurrentAmount() {

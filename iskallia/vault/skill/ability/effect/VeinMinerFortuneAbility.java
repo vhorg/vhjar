@@ -33,13 +33,13 @@ public class VeinMinerFortuneAbility extends VeinMinerAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.additionalFortuneLevel), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.additionalFortuneLevel), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.additionalFortuneLevel = Adapters.INT.readBits(buffer).orElseThrow();
+      this.additionalFortuneLevel = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

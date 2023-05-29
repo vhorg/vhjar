@@ -13,9 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinOptions implements IVaultOptions {
    public boolean doVanillaPotionDamageEffects = false;
    public boolean hunterCustomColorsEnabled = false;
-   public ColorOption chestHunterSpec = new ColorOption(ColorOption.HunterSpec.CHEST, 0.8901961F, 0.5529412F, 0.0F);
-   public ColorOption blockHunterSpec = new ColorOption(ColorOption.HunterSpec.BLOCK, 0.14509805F, 0.6745098F, 0.0F);
-   public ColorOption woodenHunterSpec = new ColorOption(ColorOption.HunterSpec.WOODEN, 0.7607843F, 0.63529414F, 0.34901962F);
+   public ColorOption chestHunterSpec = new ColorOption(ColorOption.HunterSpec.BASE, 0.8901961F, 0.5529412F, 0.0F);
+   public ColorOption blockHunterSpec = new ColorOption(ColorOption.HunterSpec.OBSERVER, 0.14509805F, 0.6745098F, 0.0F);
    public ColorOption gildedHunterSpec = new ColorOption(ColorOption.HunterSpec.GILDED, 1.0F, 1.0F, 0.0F);
    public ColorOption livingHunterSpec = new ColorOption(ColorOption.HunterSpec.LIVING, 0.0F, 1.0F, 0.0F);
    public ColorOption ornateHunterSpec = new ColorOption(ColorOption.HunterSpec.ORNATE, 0.93333334F, 0.0F, 0.0F);
@@ -29,13 +28,10 @@ public class MixinOptions implements IVaultOptions {
       this.doVanillaPotionDamageEffects = pAccessor.process("doVanillaPotionDamageEffects", this.doVanillaPotionDamageEffects);
       this.hunterCustomColorsEnabled = pAccessor.process("hunter_CustomColorsEnabled", this.hunterCustomColorsEnabled);
       this.chestHunterSpec = (ColorOption)pAccessor.process(
-         ColorOption.HunterSpec.CHEST.toString(), this.chestHunterSpec, this::readColorOption, this::writeColorOption
+         ColorOption.HunterSpec.BASE.toString(), this.chestHunterSpec, this::readColorOption, this::writeColorOption
       );
       this.blockHunterSpec = (ColorOption)pAccessor.process(
-         ColorOption.HunterSpec.BLOCK.toString(), this.blockHunterSpec, this::readColorOption, this::writeColorOption
-      );
-      this.woodenHunterSpec = (ColorOption)pAccessor.process(
-         ColorOption.HunterSpec.WOODEN.toString(), this.woodenHunterSpec, this::readColorOption, this::writeColorOption
+         ColorOption.HunterSpec.OBSERVER.toString(), this.blockHunterSpec, this::readColorOption, this::writeColorOption
       );
       this.gildedHunterSpec = (ColorOption)pAccessor.process(
          ColorOption.HunterSpec.GILDED.toString(), this.gildedHunterSpec, this::readColorOption, this::writeColorOption
@@ -101,16 +97,6 @@ public class MixinOptions implements IVaultOptions {
    }
 
    @Override
-   public ColorOption getWoodenHunterSpec() {
-      return this.woodenHunterSpec;
-   }
-
-   @Override
-   public void setWoodenHunterSpec(ColorOption option) {
-      this.woodenHunterSpec = option;
-   }
-
-   @Override
    public ColorOption getGildedHunterSpec() {
       return this.gildedHunterSpec;
    }
@@ -153,12 +139,10 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public ColorOption getBySpec(ColorOption.HunterSpec spec) {
       switch (spec) {
-         case CHEST:
+         case BASE:
             return this.chestHunterSpec;
-         case BLOCK:
+         case OBSERVER:
             return this.blockHunterSpec;
-         case WOODEN:
-            return this.woodenHunterSpec;
          case GILDED:
             return this.gildedHunterSpec;
          case LIVING:
@@ -175,15 +159,12 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public ColorOption resetColorOption(ColorOption.HunterSpec spec) {
       switch (spec) {
-         case CHEST:
-            this.chestHunterSpec = new ColorOption(ColorOption.HunterSpec.CHEST, 0.8901961F, 0.5529412F, 0.0F);
+         case BASE:
+            this.chestHunterSpec = new ColorOption(ColorOption.HunterSpec.BASE, 0.7607843F, 0.63529414F, 0.34901962F);
             return this.chestHunterSpec;
-         case BLOCK:
-            this.blockHunterSpec = new ColorOption(ColorOption.HunterSpec.BLOCK, 0.14509805F, 0.6745098F, 0.0F);
+         case OBSERVER:
+            this.blockHunterSpec = new ColorOption(ColorOption.HunterSpec.OBSERVER, 0.14509805F, 0.6745098F, 0.0F);
             return this.blockHunterSpec;
-         case WOODEN:
-            this.woodenHunterSpec = new ColorOption(ColorOption.HunterSpec.WOODEN, 0.7607843F, 0.63529414F, 0.34901962F);
-            return this.woodenHunterSpec;
          case GILDED:
             this.gildedHunterSpec = new ColorOption(ColorOption.HunterSpec.GILDED, 1.0F, 1.0F, 0.0F);
             return this.gildedHunterSpec;
@@ -204,14 +185,11 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setColorOption(ColorOption.HunterSpec spec, ColorOption option) {
       switch (spec) {
-         case CHEST:
+         case BASE:
             this.chestHunterSpec = option;
             break;
-         case BLOCK:
+         case OBSERVER:
             this.blockHunterSpec = option;
-            break;
-         case WOODEN:
-            this.woodenHunterSpec = option;
             break;
          case GILDED:
             this.gildedHunterSpec = option;

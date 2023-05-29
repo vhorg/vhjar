@@ -19,10 +19,6 @@ public interface IVaultOptions {
 
    void setBlockHunterSpec(ColorOption var1);
 
-   ColorOption getWoodenHunterSpec();
-
-   void setWoodenHunterSpec(ColorOption var1);
-
    ColorOption getGildedHunterSpec();
 
    void setGildedHunterSpec(ColorOption var1);

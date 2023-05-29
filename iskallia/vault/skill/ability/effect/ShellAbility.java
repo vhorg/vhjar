@@ -148,8 +148,8 @@ public class ShellAbility extends AbstractShellAbility {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.additionalManaPerHit), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.stunChance), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.stunDurationTicks), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.stunAmplifier), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.stunDurationTicks), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.stunAmplifier), buffer);
    }
 
    @Override
@@ -157,8 +157,8 @@ public class ShellAbility extends AbstractShellAbility {
       super.readBits(buffer);
       this.additionalManaPerHit = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.stunChance = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.stunDurationTicks = Adapters.INT.readBits(buffer).orElseThrow();
-      this.stunAmplifier = Adapters.INT.readBits(buffer).orElseThrow();
+      this.stunDurationTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
+      this.stunAmplifier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override

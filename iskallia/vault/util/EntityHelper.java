@@ -40,23 +40,25 @@ public class EntityHelper {
    }
 
    public static void knockbackIgnoreResist(LivingEntity target, LivingEntity source, float strength) {
-      double xDiff = source.getX() - target.getX();
+      if (target != null && source != null) {
+         double xDiff = source.getX() - target.getX();
 
-      double zDiff;
-      for (zDiff = source.getZ() - target.getZ(); xDiff * xDiff + zDiff * zDiff < 1.0E-4; zDiff = (Math.random() - Math.random()) * 0.01) {
-         xDiff = (Math.random() - Math.random()) * 0.01;
-      }
+         double zDiff;
+         for (zDiff = source.getZ() - target.getZ(); xDiff * xDiff + zDiff * zDiff < 1.0E-4; zDiff = (Math.random() - Math.random()) * 0.01) {
+            xDiff = (Math.random() - Math.random()) * 0.01;
+         }
 
-      target.hurtDir = (float)(Mth.atan2(zDiff, xDiff) * (180.0 / Math.PI) - target.getYRot());
-      LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(target, strength, xDiff, zDiff);
-      if (!event.isCanceled()) {
-         strength = event.getStrength();
-         xDiff = event.getRatioX();
-         zDiff = event.getRatioZ();
-         target.hasImpulse = true;
-         Vec3 vec3 = target.getDeltaMovement();
-         Vec3 vec31 = new Vec3(xDiff, 0.0, zDiff).normalize().scale(strength);
-         target.setDeltaMovement(vec3.x / 2.0 - vec31.x, target.isOnGround() ? Math.min(0.4, vec3.y / 2.0 + strength) : vec3.y, vec3.z / 2.0 - vec31.z);
+         target.hurtDir = (float)(Mth.atan2(zDiff, xDiff) * (180.0 / Math.PI) - target.getYRot());
+         LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(target, strength, xDiff, zDiff);
+         if (!event.isCanceled()) {
+            strength = event.getStrength();
+            xDiff = event.getRatioX();
+            zDiff = event.getRatioZ();
+            target.hasImpulse = true;
+            Vec3 vec3 = target.getDeltaMovement();
+            Vec3 vec31 = new Vec3(xDiff, 0.0, zDiff).normalize().scale(strength);
+            target.setDeltaMovement(vec3.x / 2.0 - vec31.x, target.isOnGround() ? Math.min(0.4, vec3.y / 2.0 + strength) : vec3.y, vec3.z / 2.0 - vec31.z);
+         }
       }
    }
 

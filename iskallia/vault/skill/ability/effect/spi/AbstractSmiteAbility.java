@@ -246,7 +246,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.radius), buffer);
-      Adapters.INT.writeBits(Integer.valueOf(this.intervalTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.intervalTicks), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.playerDamagePercent), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.additionalManaPerBolt), buffer);
       Adapters.INT.writeBits(Integer.valueOf(this.color), buffer);
@@ -256,7 +256,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.radius = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.intervalTicks = Adapters.INT.readBits(buffer).orElseThrow();
+      this.intervalTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
       this.playerDamagePercent = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.additionalManaPerBolt = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.color = Adapters.INT.readBits(buffer).orElseThrow();
