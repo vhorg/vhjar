@@ -224,14 +224,15 @@ public class StatisticsElementContainerScreenData {
    protected List<StatLabelElementBuilder<?>> getStatListProminent() {
       return List.of(
          StatLabel.ofDouble(
-            () -> "Damage", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("damage"), () -> StatUtils.getAverageDps(this.player)
+            () -> "Damage",
+            () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("damage_per_second"),
+            () -> StatUtils.getAverageDps(this.player)
          ),
-         StatLabel.ofFloat(() -> "Hearts", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("hearts"), this::getPlayerMaxHealth),
+         StatLabel.ofFloat(() -> "Health", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("health"), this::getPlayerMaxHealth),
          StatLabel.ofDoublePercent(
             () -> "Defense", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("defense"), () -> StatUtils.getDefence(this.player)
          ),
-         StatLabel.ofInteger(() -> "Mana", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("mana"), this::getPlayerMaxMana),
-         StatLabel.ofInteger(() -> "Greed", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("greed"), () -> 0)
+         StatLabel.ofInteger(() -> "Mana", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("mana"), this::getPlayerMaxMana)
       );
    }
 
@@ -251,7 +252,6 @@ public class StatisticsElementContainerScreenData {
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ARMOR, LivingEntity::getArmorValue),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_DAMAGE, player -> player.getAttributeValue(Attributes.ATTACK_DAMAGE)),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_SPEED, player -> player.getAttributeValue(Attributes.ATTACK_SPEED) - 4.0),
-            GearAttributeStatLabel.ofDouble(this.player, ModGearAttributes.ATTACK_SPEED_PERCENT),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.REACH, IForgePlayer::getReachDistance),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_RANGE, IForgePlayer::getAttackRange),
             GearAttributeStatLabel.of(
@@ -262,15 +262,13 @@ public class StatisticsElementContainerScreenData {
             GearAttributeStatLabel.of(this.player, ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE, Mana::getRegenPerSecond),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.MANA_ADDITIVE, player -> Mth.floor(Mana.getMax(player))),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.COOLDOWN_REDUCTION, AttributeLimitHelper::getCooldownReductionLimit),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.LEECH),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.RESISTANCE, AttributeLimitHelper::getResistanceLimit),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.BLOCK, AttributeLimitHelper::getBlockChanceLimit),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.CRITICAL_HIT_TAKEN_REDUCTION),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DURABILITY_WEAR_REDUCTION),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_CHANCE),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_DAMAGE),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_DAMAGE_FLAT),
             GearAttributeStatLabel.ofInteger(this.player, ModGearAttributes.ON_HIT_CHAIN),
-            GearAttributeStatLabel.ofInteger(this.player, ModGearAttributes.ON_HIT_AOE),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ON_HIT_STUN),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.SHOCKING_HIT_CHANCE),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.SWEEPING_HIT_CHANCE),

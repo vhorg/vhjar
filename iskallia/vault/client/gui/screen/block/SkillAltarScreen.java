@@ -420,7 +420,7 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
          for (int i = 0; i < sortedByNameA.size(); i++) {
             TieredSkill skillA = sortedByNameA.get(i);
             TieredSkill skillB = sortedByNameB.get(i);
-            if (skillA.getTier() != skillB.getTier()) {
+            if (!skillA.getId().equals(skillB.getId()) || skillA.getTier() != skillB.getTier()) {
                return false;
             }
          }

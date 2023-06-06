@@ -2,12 +2,16 @@ package iskallia.vault.network.message;
 
 import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.block.entity.LootStatueTileEntity;
+import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.util.RenameType;
 import java.util.function.Supplier;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent.Context;
@@ -33,25 +37,33 @@ public class RenameUIMessage {
       context.enqueueWork(() -> {
          CompoundTag data = message.payload.getCompound("Data");
          ServerPlayer sender = context.getSender();
-         switch (message.renameType) {
-            case PLAYER_STATUE:
-               BlockPos statuePos = NbtUtils.readBlockPos(data.getCompound("Pos"));
-               if (sender.getCommandSenderWorld().getBlockEntity(statuePos) instanceof LootStatueTileEntity statue) {
-                  statue.getSkin().updateSkin(data.getString("PlayerNickname"));
-                  statue.sendUpdates();
-               }
-               break;
-            case VAULT_CRYSTAL:
-               sender.getInventory().items.set(sender.getInventory().selected, ItemStack.of(data));
-               break;
-            case CRYO_CHAMBER:
-               BlockPos pos = NbtUtils.readBlockPos(data.getCompound("BlockPos"));
-               String name = data.getString("EternalName");
-               if (sender.getCommandSenderWorld().getBlockEntity(pos) instanceof EternalPedestalTileEntity chamber) {
-                  chamber.renameEternal(name);
-                  chamber.getSkinProfile().updateSkin(name);
-                  chamber.sendUpdates();
-               }
+         if (sender != null) {
+            switch (message.renameType) {
+               case PLAYER_STATUE:
+                  BlockPos statuePos = NbtUtils.readBlockPos(data.getCompound("Pos"));
+                  if (sender.getCommandSenderWorld().getBlockEntity(statuePos) instanceof LootStatueTileEntity statue) {
+                     statue.getSkin().updateSkin(data.getString("PlayerNickname"));
+                     statue.sendUpdates();
+                  }
+                  break;
+               case VAULT_CRYSTAL:
+                  ItemStack stack = ItemStack.of(data);
+                  if (!(stack.getItem() instanceof VaultCrystalItem)) {
+                     sender.sendMessage(new TextComponent("Nice try, nerd!").withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                     return;
+                  }
+
+                  sender.getInventory().items.set(sender.getInventory().selected, stack);
+                  break;
+               case CRYO_CHAMBER:
+                  BlockPos pos = NbtUtils.readBlockPos(data.getCompound("BlockPos"));
+                  String name = data.getString("EternalName");
+                  if (sender.getCommandSenderWorld().getBlockEntity(pos) instanceof EternalPedestalTileEntity chamber) {
+                     chamber.renameEternal(name);
+                     chamber.getSkinProfile().updateSkin(name);
+                     chamber.sendUpdates();
+                  }
+            }
          }
       });
       context.setPacketHandled(true);

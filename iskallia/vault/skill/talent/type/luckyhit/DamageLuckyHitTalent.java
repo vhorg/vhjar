@@ -36,6 +36,10 @@ public class DamageLuckyHitTalent extends LuckyHitTalent {
          );
    }
 
+   public float getDamageIncrease() {
+      return this.damageIncrease;
+   }
+
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);

@@ -70,6 +70,7 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
          ServerVaults.get(sPlayer.getLevel())
             .ifPresent(
                vault -> {
+                  InventoryUtil.makeScavItemsRotten(sPlayer);
                   if (vault.has(Vault.MODIFIERS)) {
                      boolean hasRestoreModifier = false;
                      PlayerInventoryRestoreModifier instantRestoreModifier = null;
@@ -121,7 +122,6 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
                                           }
                                        }
                                     );
-                                 InventoryUtil.makeScavItemsRotten(sPlayer);
                               }
                            }
                         }

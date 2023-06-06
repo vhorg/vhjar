@@ -78,7 +78,7 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
                }
 
                pressAction = button -> this.upgradeAbility();
-               int cost = target.getLearnPointCost();
+               int cost = current.getSpecialization().getLearnPointCost();
                int regretCost = existing.isUnlocked() ? existing.getRegretPointCost() : 0;
                activeState = cost <= VaultBarOverlay.unspentSkillPoints
                   && ((TieredSkill)existing.getSpecialization()).getTier() < ((TieredSkill)target.getSpecialization()).getMaxTier()

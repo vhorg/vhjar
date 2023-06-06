@@ -129,7 +129,8 @@ public class ResearchWidget extends AbstractWidget implements ConnectableWidget,
          if (this.locked) {
             List<Research> preconditions = ModConfigs.SKILL_GATES.getGates().getDependencyResearches(this.researchName);
             if (!preconditions.isEmpty()) {
-               tTip.add(FormattedCharSequence.forward("Requires:", Style.EMPTY.withColor(ChatFormatting.RED)));
+               String tTipRequirement = ModConfigs.SKILL_GATES.getGates().hasEitherSkillGate(this.getResearchName()) ? " any of" : "";
+               tTip.add(FormattedCharSequence.forward("Requires" + tTipRequirement + ":", Style.EMPTY.withColor(ChatFormatting.RED)));
                preconditions.forEach(research -> tTip.add(FormattedCharSequence.forward("- " + research.getName(), Style.EMPTY.withColor(ChatFormatting.RED))));
             }
          }
