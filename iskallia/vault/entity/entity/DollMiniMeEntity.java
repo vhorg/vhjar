@@ -3,6 +3,7 @@ package iskallia.vault.entity.entity;
 import com.mojang.authlib.GameProfile;
 import iskallia.vault.entity.IPlayerSkinHolder;
 import iskallia.vault.item.VaultDollItem;
+import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.DollLootData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.List;
@@ -101,6 +102,7 @@ public class DollMiniMeEntity extends Monster implements IPlayerSkinHolder {
          && this.level instanceof ServerLevel serverLevel) {
          DollLootData dollLootData = DollLootData.get(serverLevel, this.dollId);
          List<ItemStack> loot = dollLootData.getLoot();
+         InventoryUtil.makeScavItemsRotten(loot);
          loot.forEach(this::spawnAtLocation);
          dollLootData.clearLoot();
          PlayerVaultStatsData statsData = PlayerVaultStatsData.get(player.getLevel());

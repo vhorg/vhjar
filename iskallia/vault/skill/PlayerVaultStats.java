@@ -77,6 +77,10 @@ public class PlayerVaultStats implements INBTSerializable<CompoundTag> {
       return this.totalSpentKnowledgePoints;
    }
 
+   public int getTotalSpentExpertisePoints() {
+      return this.totalSpentExpertisePoints;
+   }
+
    public int getTotalSpentArchetypePoints() {
       return this.totalSpentArchetypePoints;
    }
@@ -284,7 +288,7 @@ public class PlayerVaultStats implements INBTSerializable<CompoundTag> {
    }
 
    public PlayerVaultStats resetAndReturnExpertisePoints() {
-      this.unspentExpertisePoints = this.unspentExpertisePoints + this.totalSpentExpertisePoints;
+      this.unspentExpertisePoints = this.getVaultLevel() / 5;
       this.totalSpentExpertisePoints = 0;
       return this;
    }

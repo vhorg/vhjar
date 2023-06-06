@@ -108,19 +108,23 @@ public class VaultCharmControllerScreen extends AbstractContainerScreen<VaultCha
 
    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
       if (this.isScrolling) {
-         int top = this.topPos + 18;
-         int bottom = top + 110;
-         this.currentScroll = ((float)mouseY - top - 7.5F) / (bottom - top - 15.0F);
-         this.currentScroll = Mth.clamp(this.currentScroll, 0.0F, 1.0F);
-         int intervals = ((VaultCharmControllerContainer)this.menu).getInventorySize() / 9 - 6;
-         float scroll = (float)Math.round(this.currentScroll * intervals) / intervals;
-         if (scroll != this.scrollDelta) {
-            ModNetwork.CHANNEL.sendToServer(new VaultCharmControllerScrollMessage(scroll));
-            ((VaultCharmControllerContainer)this.menu).scrollTo(scroll);
-            this.scrollDelta = scroll;
-         }
+         if (!this.needsScrollBars()) {
+            return false;
+         } else {
+            int top = this.topPos + 18;
+            int bottom = top + 110;
+            this.currentScroll = ((float)mouseY - top - 7.5F) / (bottom - top - 15.0F);
+            this.currentScroll = Mth.clamp(this.currentScroll, 0.0F, 1.0F);
+            int intervals = ((VaultCharmControllerContainer)this.menu).getInventorySize() / 9 - 6;
+            float scroll = (float)Math.round(this.currentScroll * intervals) / intervals;
+            if (scroll != this.scrollDelta) {
+               ModNetwork.CHANNEL.sendToServer(new VaultCharmControllerScrollMessage(scroll));
+               ((VaultCharmControllerContainer)this.menu).scrollTo(scroll);
+               this.scrollDelta = scroll;
+            }
 
-         return true;
+            return true;
+         }
       } else {
          return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
       }

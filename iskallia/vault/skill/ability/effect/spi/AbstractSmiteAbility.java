@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModEntities;
@@ -202,6 +203,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       ArrayList<LivingEntity> result = new ArrayList<>();
       EntityHelper.getEntitiesInRange(player.level, player.position(), radius, ENTITY_PREDICATE, result);
       boolean applyCooldown = false;
+      result.removeIf(entity -> entity instanceof EternalEntity);
       if (result.isEmpty()) {
          return false;
       } else {

@@ -80,6 +80,16 @@ public class InventoryUtil {
       }
    }
 
+   public static void makeScavItemsRotten(List<ItemStack> items) {
+      for (ItemStack stack : items) {
+         if (stack.getItem() instanceof BasicScavengerItem) {
+            CompoundTag tag = stack.getOrCreateTag();
+            tag.putBoolean("rotten", true);
+            tag.remove("VaultId");
+         }
+      }
+   }
+
    private static void discoverContents(InventoryUtil.ItemAccess access, List<InventoryUtil.ItemAccess> out) {
       out.add(access);
 

@@ -83,6 +83,7 @@ public class AbilityTree extends SkillTree {
             this.getSelectedAbility().ifPresent(ability -> ability.onFocus(context));
          }
       });
+      this.sync(context);
    }
 
    public void specialize(String id, SkillContext context) {

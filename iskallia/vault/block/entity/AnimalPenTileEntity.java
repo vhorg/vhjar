@@ -514,11 +514,20 @@ public class AnimalPenTileEntity extends BlockEntity implements MenuProvider {
                }
             }
 
-            if (!player.isCrouching() && !itemInPen.isEmpty() && this.animalToReference instanceof MushroomCow && level instanceof ServerLevel) {
-               this.animalToReference.mobInteract(player, hand);
-            }
-
             if (!player.isCrouching()
+               && !itemInPen.isEmpty()
+               && this.animalToReference instanceof MushroomCow mushroomCow
+               && itemInHand.is(Items.BOWL)
+               && level instanceof ServerLevel serverWorld) {
+               if (!player.isCreative()) {
+                  player.getItemInHand(hand).shrink(1);
+               }
+
+               ItemStack result = ItemUtils.createFilledResult(itemInHand, player, new ItemStack(Items.MUSHROOM_STEW), false);
+               player.setItemInHand(hand, result);
+               serverWorld.playSound(null, this.worldPosition, SoundEvents.MOOSHROOM_MILK, SoundSource.PLAYERS, 1.0F, 1.0F);
+               return true;
+            } else if (!player.isCrouching()
                && !itemInPen.isEmpty()
                && this.animalToReference instanceof Sheep sheep
                && itemInHand.getItem() instanceof DyeItem dyeItem

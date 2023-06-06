@@ -356,6 +356,7 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       this.vaultLevel = 0;
       this.playerLevel = 0;
       this.rescuedBonus = 0.0F;
+      this.recoveryCost = new SpiritExtractorTileEntity.RecoveryCost();
       this.dropPaymentInventory();
       this.setChanged();
       this.level.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);

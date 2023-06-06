@@ -202,6 +202,12 @@ public class SkillGates {
       }
    }
 
+   public boolean hasEitherSkillGate(String researchName) {
+      SkillGates gates = ModConfigs.SKILL_GATES.getGates();
+      SkillGates.Entry gateEntries = gates.entries.get(researchName);
+      return gateEntries == null ? false : gateEntries.dependsOn.stream().anyMatch(gateType -> gateType instanceof EitherSkillGate);
+   }
+
    public boolean shouldDrawArrow(String entryA, String entryB) {
       SkillGates.Entry entry = this.entries.get(entryA);
       if (entry == null) {
