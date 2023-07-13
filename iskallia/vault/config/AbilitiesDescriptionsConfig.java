@@ -270,8 +270,8 @@ public class AbilitiesDescriptionsConfig extends Config {
             "Nova",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Nova"),
-               List.of("cooldown", "manaCost", "radius", "damage", "knockback"),
-               List.of("level", "cooldown", "manaCost", "radius", "damage", "knockback")
+               List.of("cooldown", "manaCost", "radius", "ability_power", "knockback"),
+               List.of("level", "cooldown", "manaCost", "radius", "ability_power", "knockback")
             )
          );
       this.data
@@ -279,8 +279,8 @@ public class AbilitiesDescriptionsConfig extends Config {
             "Nova_Dot",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Nova_Dot"),
-               List.of("cooldown", "manaCost", "radius", "damage", "duration"),
-               List.of("level", "cooldown", "manaCost", "radius", "damage", "duration")
+               List.of("cooldown", "manaCost", "radius", "ability_power", "duration"),
+               List.of("level", "cooldown", "manaCost", "radius", "ability_power", "duration")
             )
          );
       this.data
@@ -342,6 +342,15 @@ public class AbilitiesDescriptionsConfig extends Config {
             "Empower_Ice_Armour",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Empower_Ice_Armour"),
+               List.of("cooldown", "manaCostPerSecond", "chilled", "duration", "additionalManaPerHit"),
+               List.of("level", "cooldown", "manaCostPerSecond", "chilled", "duration", "additionalManaPerHit")
+            )
+         );
+      this.data
+         .put(
+            "Empower_Slowness_Aura",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Empower_Slowness_Aura"),
                List.of("cooldown", "manaCostPerSecond", "slowness", "radius"),
                List.of("level", "cooldown", "manaCostPerSecond", "slowness", "radius")
             )
@@ -369,8 +378,8 @@ public class AbilitiesDescriptionsConfig extends Config {
             "Taunt_Charm",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Taunt_Charm"),
-               List.of("cooldown", "manaCost", "radius", "duration", "maxTargets", "damage"),
-               List.of("level", "cooldown", "manaCost", "radius", "duration", "maxTargets", "damage")
+               List.of("cooldown", "manaCost", "radius", "duration", "maxTargets", "ability_power"),
+               List.of("level", "cooldown", "manaCost", "radius", "duration", "maxTargets", "ability_power")
             )
          );
       this.data
@@ -417,8 +426,8 @@ public class AbilitiesDescriptionsConfig extends Config {
             "Stonefall_Snow",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Stonefall_Snow"),
-               List.of("cooldown", "manaCost", "duration", "damageReduction", "radius", "damage"),
-               List.of("level", "cooldown", "manaCost", "duration", "damageReduction", "radius", "damage")
+               List.of("cooldown", "manaCost", "duration", "damageReduction", "radius", "ability_power"),
+               List.of("level", "cooldown", "manaCost", "duration", "damageReduction", "radius", "ability_power")
             )
          );
       this.data
@@ -554,6 +563,89 @@ public class AbilitiesDescriptionsConfig extends Config {
                this.defaultDescription("Shell_Quill"),
                List.of("cooldown", "manaCostPerSecond", "durabilityWearReduction", "damage", "additionalManaPerHit", "quillCount"),
                List.of("level", "cooldown", "manaCostPerSecond", "durabilityWearReduction", "damage", "additionalManaPerHit", "quillCount")
+            )
+         );
+      this.data
+         .put(
+            "Fireball",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Fireball"),
+               List.of("cooldown", "manaCost", "ability_power", "radius"),
+               List.of("level", "cooldown", "manaCost", "ability_power", "radius")
+            )
+         );
+      this.data
+         .put(
+            "Fireball_Volley",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Fireball"),
+               List.of("cooldown", "manaCost", "ability_power", "radius"),
+               List.of("level", "cooldown", "manaCost", "ability_power", "radius")
+            )
+         );
+      this.data
+         .put(
+            "Fireball_Fireshot",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Fireball_Fireshot"),
+               List.of("cooldown", "manaCost", "ability_power"),
+               List.of("level", "cooldown", "manaCost", "ability_power")
+            )
+         );
+      this.data
+         .put(
+            "Storm Arrow: Thunderstorm",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Storm Arrow: Thunderstorm"),
+               List.of("cooldown", "manaCost", "ability_power", "radius", "stormInterval"),
+               List.of("level", "cooldown", "manaCost", "ability_power", "radius", "stormInterval")
+            )
+         );
+      this.data
+         .put(
+            "Storm Arrow: Blizzard",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Storm Arrow: Blizzard"),
+               List.of("cooldown", "manaCost", "ability_power", "radius", "stormInterval", "frostbiteChance", "frostbiteDuration", "slowDuration", "amplifier"),
+               List.of(
+                  "level",
+                  "cooldown",
+                  "manaCost",
+                  "ability_power",
+                  "radius",
+                  "stormInterval",
+                  "frostbiteChance",
+                  "frostbiteDuration",
+                  "slowDuration",
+                  "amplifier"
+               )
+            )
+         );
+      this.data
+         .put(
+            "Battle_Cry",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Battle_Cry"),
+               List.of("cooldown", "manaCost", "attackDamagePerStack", "radius", "stacksUsedPerHit", "maxStacks", "duration"),
+               List.of("level", "cooldown", "manaCost", "attackDamagePerStack", "radius", "stacksUsedPerHit", "maxStacks", "duration")
+            )
+         );
+      this.data
+         .put(
+            "Battle_Cry_Spectral_Strike",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Battle_Cry_Spectral_Strike"),
+               List.of("cooldown", "manaCost", "abilityPowerPerStack", "radius", "stacksUsedPerHit", "maxStacks", "duration"),
+               List.of("level", "cooldown", "manaCost", "abilityPowerPerStack", "radius", "stacksUsedPerHit", "maxStacks", "duration")
+            )
+         );
+      this.data
+         .put(
+            "Battle_Cry_Lucky_Strike",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Battle_Cry_Lucky_Strike"),
+               List.of("cooldown", "manaCost", "luckyHitPerStack", "radius", "stacksUsedPerHit", "maxStacks", "duration"),
+               List.of("level", "cooldown", "manaCost", "luckyHitPerStack", "radius", "stacksUsedPerHit", "maxStacks", "duration")
             )
          );
    }

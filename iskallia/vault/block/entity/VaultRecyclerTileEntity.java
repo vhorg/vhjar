@@ -4,6 +4,9 @@ import com.google.common.collect.Lists;
 import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.container.VaultRecyclerContainer;
 import iskallia.vault.container.base.SimpleSidedContainer;
+import iskallia.vault.gear.VaultGearRarity;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
@@ -94,10 +97,16 @@ public class VaultRecyclerTileEntity extends BlockEntity implements MenuProvider
          }
 
          ItemStack input = this.inventory.getItem(0).copy();
+         float additionalChance = 0.0F;
+         if (input.getItem() instanceof VaultGearItem) {
+            VaultGearRarity rarity = VaultGearData.read(input).getRarity();
+            additionalChance = ModConfigs.VAULT_RECYCLER.getAdditionalOutputRarityChance(rarity);
+         }
+
          this.inventory.removeItem(0, 1);
-         MiscUtils.addStackToSlot(this.inventory, 1, this.getUseRelatedOutput(input, output.generateMainOutput()));
-         MiscUtils.addStackToSlot(this.inventory, 2, this.getUseRelatedOutput(input, output.generateExtraOutput1()));
-         MiscUtils.addStackToSlot(this.inventory, 3, this.getUseRelatedOutput(input, output.generateExtraOutput2()));
+         MiscUtils.addStackToSlot(this.inventory, 1, this.getUseRelatedOutput(input, output.generateMainOutput(additionalChance)));
+         MiscUtils.addStackToSlot(this.inventory, 2, this.getUseRelatedOutput(input, output.generateExtraOutput1(additionalChance)));
+         MiscUtils.addStackToSlot(this.inventory, 3, this.getUseRelatedOutput(input, output.generateExtraOutput2(additionalChance)));
          ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new RecyclerParticleMessage(this.getBlockPos()));
       }
    }

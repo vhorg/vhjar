@@ -9,6 +9,7 @@ import iskallia.vault.event.PlayerActiveFlags;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.LuckyHitSweepingParticleMessage;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
@@ -44,7 +45,8 @@ public class SweepingLuckyHitTalent extends LuckyHitTalent {
          ActiveFlags.IS_AOE_ATTACKING
             .runIfNotSet(
                () -> {
-                  List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), this.damageRange, Mob.class);
+                  float radius = AreaOfEffectHelper.adjustAreaOfEffect(attacker, this.damageRange);
+                  List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), radius, Mob.class);
                   nearby.remove(attacked);
                   nearby.remove(attacker);
                   nearby.removeIf(mob -> mob instanceof EternalEntity);
@@ -66,7 +68,7 @@ public class SweepingLuckyHitTalent extends LuckyHitTalent {
                         PacketDistributor.ALL.noArg(),
                         new LuckyHitSweepingParticleMessage(
                            new Vec3(event.getEntity().getX(), event.getEntity().getY() + event.getEntity().getBbHeight() / 4.0F, event.getEntity().getZ()),
-                           this.damageRange
+                           radius
                         )
                      );
                }

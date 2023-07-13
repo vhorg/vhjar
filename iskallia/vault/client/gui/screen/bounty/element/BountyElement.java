@@ -36,6 +36,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -87,10 +88,12 @@ public class BountyElement extends ContainerElement<BountyElement> {
 
    private boolean hasMaxActive() {
       int maxActive = 0;
-
-      for (TieredSkill learnedTalentNode : ClientExpertiseData.getLearnedTalentNodes()) {
-         if (learnedTalentNode.getChild() instanceof BountyHunterExpertise bountyHunter) {
-            maxActive += bountyHunter.getMaxActive();
+      Player player = Minecraft.getInstance().player;
+      if (player != null) {
+         for (TieredSkill learnedTalentNode : ClientExpertiseData.getLearnedTalentNodes()) {
+            if (learnedTalentNode.getChild() instanceof BountyHunterExpertise bountyHunter) {
+               maxActive += bountyHunter.getMaxActive();
+            }
          }
       }
 

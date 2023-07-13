@@ -28,10 +28,6 @@ public class ScrollableContainer extends GuiComponent {
       this.renderer = renderer;
    }
 
-   public int getyOffset() {
-      return this.yOffset;
-   }
-
    public float scrollPercentage() {
       Rectangle scrollBounds = this.getScrollBounds();
       return (float)this.yOffset / (this.innerHeight - scrollBounds.height);

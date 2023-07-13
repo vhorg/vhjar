@@ -47,8 +47,8 @@ public class DepthNightVisionParticle extends SimpleAnimatedParticle {
       Player player = Minecraft.getInstance().player;
       if (player != null) {
          double dist = player.distanceToSqr(this.x, this.y, this.z);
-         if (dist < 100.0) {
-            this.alpha = Mth.clamp((float)Math.sqrt(dist) / 10.0F, 0.25F, 1.0F);
+         if (dist < 400.0) {
+            this.alpha = Mth.clamp((float)Math.sqrt(dist) / 20.0F, 0.0F, 1.0F);
          }
       }
 

@@ -10,6 +10,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.core.util.WeightedList;
+import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.core.world.data.PartialEntity;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePredicate;
@@ -18,6 +19,7 @@ import iskallia.vault.core.world.processor.entity.EntityProcessor;
 import iskallia.vault.core.world.processor.tile.BernoulliWeightedTileProcessor;
 import iskallia.vault.core.world.processor.tile.LeveledTileProcessor;
 import iskallia.vault.core.world.processor.tile.ReferenceTileProcessor;
+import iskallia.vault.core.world.processor.tile.SpawnerElementTileProcessor;
 import iskallia.vault.core.world.processor.tile.SpawnerTileProcessor;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
 import iskallia.vault.core.world.processor.tile.VaultLootTileProcessor;
@@ -111,6 +113,17 @@ public class ProcessorAdapter implements JsonSerializer<Processor<?>>, JsonDeser
                }
 
                return processorx;
+            case "spawner_element":
+               SpawnerElementTileProcessor processor = new SpawnerElementTileProcessor();
+               processor.target(object.get("target").getAsString());
+               EntityPredicate.of(object.get("element").getAsString(), true).ifPresent(processor::setElement);
+               JsonObject output = object.get("output").getAsJsonObject();
+               if (output == null) {
+                  return processor;
+               }
+
+               output.keySet().forEach(key -> PartialEntity.parse(key, true).ifPresent(entity -> processor.into(entity, output.get(key).getAsInt())));
+               return processor;
             default:
                return TileProcessor.ofIdentity();
          }

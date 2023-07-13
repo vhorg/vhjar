@@ -49,7 +49,7 @@ public class SkillWidget<T extends SkillTree> extends AbstractWidget implements 
       this.locked = ModConfigs.SKILL_GATES.getGates().isLocked(skill.getId(), skillTree) || VaultBarOverlay.vaultLevel < skill.getUnlockLevel();
       this.style = style;
       this.selected = false;
-      this.height = pipRowCount(skill.getTier()) * 10 - 2;
+      this.height = pipRowCount(skill.getUnmodifiedTier()) * 10 - 2;
    }
 
    public TieredSkill getSkill() {
@@ -62,14 +62,14 @@ public class SkillWidget<T extends SkillTree> extends AbstractWidget implements 
 
    public int getClickableWidth() {
       int onlyIconWidth = 34;
-      int pipLineWidth = Math.min(this.skill.getMaxTier(), 4) * 10;
+      int pipLineWidth = Math.min(this.skill.getMaxLearnableTier(), 4) * 10;
       return this.hasPips() ? Math.max(pipLineWidth, onlyIconWidth) : onlyIconWidth;
    }
 
    public int getClickableHeight() {
       int height = 34;
       if (this.hasPips()) {
-         int lines = TalentWidget.pipRowCount(this.skill.getMaxTier());
+         int lines = TalentWidget.pipRowCount(this.skill.getMaxLearnableTier());
          height += 2;
          height += lines * 8 + (lines - 1) * 2;
       }
@@ -78,7 +78,7 @@ public class SkillWidget<T extends SkillTree> extends AbstractWidget implements 
    }
 
    public boolean hasPips() {
-      return this.renderPips && this.skill.getMaxTier() > 1;
+      return this.renderPips && this.skill.getMaxLearnableTier() > 1;
    }
 
    public static int pipRowCount(int level) {
@@ -181,7 +181,7 @@ public class SkillWidget<T extends SkillTree> extends AbstractWidget implements 
             );
          }
 
-         if (this.skill.getTier() < this.skill.getMaxTier()) {
+         if (this.skill.getUnmodifiedTier() < this.skill.getMaxLearnableTier()) {
             int levelRequirement = this.skill.getUnlockLevel();
             if (VaultBarOverlay.vaultLevel < levelRequirement) {
                tTip.add(FormattedCharSequence.forward("Requires level: " + levelRequirement, Style.EMPTY.withColor(ChatFormatting.RED)));
@@ -205,7 +205,7 @@ public class SkillWidget<T extends SkillTree> extends AbstractWidget implements 
       matrixStack.pushPose();
       matrixStack.translate(-15.0, -15.0, 0.0);
       RenderSystem.setShaderTexture(0, resourceBoundary.getResource());
-      int vOffset = this.locked ? 62 : (!this.selected && !this.isMouseOver(mouseX, mouseY) ? (this.skill.getTier() >= 1 ? 31 : 0) : -31);
+      int vOffset = this.locked ? 62 : (!this.selected && !this.isMouseOver(mouseX, mouseY) ? (this.skill.isUnlocked() ? 31 : 0) : -31);
       this.blit(
          matrixStack, this.x, this.y, resourceBoundary.getU(), resourceBoundary.getV() + vOffset, resourceBoundary.getWidth(), resourceBoundary.getHeight()
       );
@@ -224,9 +224,9 @@ public class SkillWidget<T extends SkillTree> extends AbstractWidget implements 
 
    public void renderPips(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
       RenderSystem.setShaderTexture(0, SKILL_WIDGET_RESOURCE);
-      int rowCount = pipRowCount(this.skill.getMaxTier());
-      int remainingPips = this.skill.getMaxTier();
-      int remainingFilledPips = this.skill.getTier();
+      int rowCount = pipRowCount(this.skill.getMaxLearnableTier());
+      int remainingPips = this.skill.getMaxLearnableTier();
+      int remainingFilledPips = this.skill.getUnmodifiedTier();
 
       for (int r = 0; r < rowCount; r++) {
          this.renderPipLine(matrixStack, this.x, this.y + 15 + 4 + r * 10, Math.min(4, remainingPips), Math.min(4, remainingFilledPips));

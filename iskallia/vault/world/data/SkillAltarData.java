@@ -39,12 +39,12 @@ import net.minecraftforge.network.PacketDistributor;
    bus = Bus.FORGE
 )
 public class SkillAltarData extends SavedData {
-   public static final Comparator<? super TieredSkill> TIERED_SKILL_HIGHEST_LEVEL_COMPARATOR = Comparator.comparingInt(TieredSkill::getTier)
+   public static final Comparator<? super TieredSkill> TIERED_SKILL_HIGHEST_LEVEL_COMPARATOR = Comparator.comparingInt(TieredSkill::getUnmodifiedTier)
       .reversed()
       .thenComparing(Skill::getName);
    protected static final String DATA_NAME = "the_vault_SkillAltar";
    public static final Comparator<SpecializedSkill> SPECIALIZED_SKILL_HIGHEST_LEVEL_COMPARATOR = Comparator.<SpecializedSkill>comparingInt(
-         skill -> ((TieredSkill)skill.getSpecialization()).getTier()
+         skill -> ((TieredSkill)skill.getSpecialization()).getUnmodifiedTier()
       )
       .reversed()
       .thenComparing(Skill::getName);

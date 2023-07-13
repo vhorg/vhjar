@@ -39,6 +39,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -174,6 +175,7 @@ public class ClassicMobLogic extends MobLogic {
                   List<MobEffectInstance> configuredEffects = ModConfigs.VAULT_ENTITIES.getWitchAdditionalThrownEffects(level);
                   ItemStack thrown = potion.getItem();
                   List<MobEffectInstance> effects = new ArrayList<>(configuredEffects);
+                  PotionUtils.setPotion(thrown, Potions.WATER);
                   PotionUtils.setCustomEffects(thrown, effects);
                   potion.setItem(thrown);
                }

@@ -215,6 +215,35 @@ public abstract class AbstractElementScreen extends Screen implements ILayoutScr
 
    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
       super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
-      return this.getFocused() != null && this.isDragging() && button == 0 && this.getFocused().mouseDragged(mouseX, mouseY, button, dragX, dragY);
+      return this.getFocused() != null
+         && this.isDragging()
+         && (button == 0 || button == 1)
+         && this.getFocused().mouseDragged(mouseX, mouseY, button, dragX, dragY);
+   }
+
+   public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+      for (GuiEventListener guieventlistener : this.children()) {
+         if (guieventlistener.mouseClicked(pMouseX, pMouseY, pButton)) {
+            this.setFocused(guieventlistener);
+            if (pButton == 0 || pButton == 1) {
+               this.setDragging(true);
+            }
+
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
+      for (GuiEventListener guiEventListener : this.children()) {
+         if (guiEventListener.mouseReleased(pMouseX, pMouseY, pButton)) {
+            this.setDragging(false);
+            return true;
+         }
+      }
+
+      return super.mouseReleased(pMouseX, pMouseY, pButton);
    }
 }

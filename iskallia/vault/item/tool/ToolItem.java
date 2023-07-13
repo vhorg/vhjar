@@ -1,6 +1,5 @@
 package iskallia.vault.item.tool;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Multimap;
 import iskallia.vault.VaultMod;
@@ -161,30 +160,36 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    }
 
    public boolean hasAffinity(@Nonnull ItemStack stack, @Nonnull BlockState state) {
-      VaultGearData data = VaultGearData.read(stack);
-      if (data.get(ModGearAttributes.PICKING, VaultGearAttributeTypeMerger.anyTrue()) && state.is(BlockTags.MINEABLE_WITH_PICKAXE)) {
-         return true;
-      } else if (data.get(ModGearAttributes.AXING, VaultGearAttributeTypeMerger.anyTrue()) && state.is(BlockTags.MINEABLE_WITH_AXE)) {
-         return true;
-      } else if (data.get(ModGearAttributes.SHOVELLING, VaultGearAttributeTypeMerger.anyTrue()) && state.is(BlockTags.MINEABLE_WITH_SHOVEL)) {
-         return true;
-      } else if (!data.get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())
-         || !state.is(BlockTags.MINEABLE_WITH_HOE)
-            && !(Items.NETHERITE_SWORD.getDestroySpeed(stack, state) > 1.0F)
-            && !Items.NETHERITE_SWORD.isCorrectToolForDrops(stack, state)
-            && !(Items.SHEARS.getDestroySpeed(stack, state) > 1.0F)
-            && !Items.SHEARS.isCorrectToolForDrops(stack, state)) {
-         if (data.get(ModGearAttributes.WOODEN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.WOODEN_CHEST)) {
+      if (stack.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(stack)) {
+         return false;
+      } else {
+         VaultGearData data = VaultGearData.read(stack);
+         if (data.get(ModGearAttributes.PICKING, VaultGearAttributeTypeMerger.anyTrue()) && state.is(BlockTags.MINEABLE_WITH_PICKAXE)) {
             return true;
-         } else if (!data.get(ModGearAttributes.ORNATE_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
-            || !state.is(ModBlocks.ORNATE_CHEST) && !state.is(ModBlocks.ORNATE_STRONGBOX)) {
-            if (!data.get(ModGearAttributes.GILDED_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
-               || !state.is(ModBlocks.GILDED_CHEST) && !state.is(ModBlocks.GILDED_STRONGBOX)) {
-               if (!data.get(ModGearAttributes.LIVING_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
-                  || !state.is(ModBlocks.LIVING_CHEST) && !state.is(ModBlocks.LIVING_STRONGBOX)) {
-                  return data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)
-                     ? true
-                     : SPAWNER_ID.equals(state.getBlock().getRegistryName());
+         } else if (data.get(ModGearAttributes.AXING, VaultGearAttributeTypeMerger.anyTrue()) && state.is(BlockTags.MINEABLE_WITH_AXE)) {
+            return true;
+         } else if (data.get(ModGearAttributes.SHOVELLING, VaultGearAttributeTypeMerger.anyTrue()) && state.is(BlockTags.MINEABLE_WITH_SHOVEL)) {
+            return true;
+         } else if (!data.get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())
+            || !state.is(BlockTags.MINEABLE_WITH_HOE)
+               && !(Items.NETHERITE_SWORD.getDestroySpeed(stack, state) > 1.0F)
+               && !Items.NETHERITE_SWORD.isCorrectToolForDrops(stack, state)
+               && !(Items.SHEARS.getDestroySpeed(stack, state) > 1.0F)
+               && !Items.SHEARS.isCorrectToolForDrops(stack, state)) {
+            if (data.get(ModGearAttributes.WOODEN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.WOODEN_CHEST)) {
+               return true;
+            } else if (!data.get(ModGearAttributes.ORNATE_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+               || !state.is(ModBlocks.ORNATE_CHEST) && !state.is(ModBlocks.ORNATE_STRONGBOX)) {
+               if (!data.get(ModGearAttributes.GILDED_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+                  || !state.is(ModBlocks.GILDED_CHEST) && !state.is(ModBlocks.GILDED_STRONGBOX)) {
+                  if (!data.get(ModGearAttributes.LIVING_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+                     || !state.is(ModBlocks.LIVING_CHEST) && !state.is(ModBlocks.LIVING_STRONGBOX)) {
+                     return data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)
+                        ? true
+                        : SPAWNER_ID.equals(state.getBlock().getRegistryName());
+                  } else {
+                     return true;
+                  }
                } else {
                   return true;
                }
@@ -194,63 +199,69 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
          } else {
             return true;
          }
-      } else {
-         return true;
       }
    }
 
    @NotNull
    public InteractionResult useOn(@Nonnull UseOnContext context) {
       InteractionResult result = InteractionResult.PASS;
-      if (canUse(context.getItemInHand(), context.getPlayer())) {
-         VaultGearData data = VaultGearData.read(context.getItemInHand());
-         if (data.get(ModGearAttributes.PICKING, VaultGearAttributeTypeMerger.anyTrue())) {
-            result = this.getResultFit(Items.NETHERITE_PICKAXE.useOn(context), result);
+      if (context.getItemInHand().getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(context.getItemInHand())) {
+         return result;
+      } else {
+         if (canUse(context.getItemInHand(), context.getPlayer())) {
+            VaultGearData data = VaultGearData.read(context.getItemInHand());
+            if (data.get(ModGearAttributes.PICKING, VaultGearAttributeTypeMerger.anyTrue())) {
+               result = this.getResultFit(Items.NETHERITE_PICKAXE.useOn(context), result);
+            }
+
+            if (data.get(ModGearAttributes.AXING, VaultGearAttributeTypeMerger.anyTrue())) {
+               result = this.getResultFit(Items.NETHERITE_AXE.useOn(context), result);
+            }
+
+            if (data.get(ModGearAttributes.SHOVELLING, VaultGearAttributeTypeMerger.anyTrue())) {
+               result = this.getResultFit(Items.NETHERITE_SHOVEL.useOn(context), result);
+            }
+
+            if (data.get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())) {
+               result = this.getResultFit(Items.NETHERITE_HOE.useOn(context), result);
+               result = this.getResultFit(Items.NETHERITE_SWORD.useOn(context), result);
+               result = this.getResultFit(Items.SHEARS.useOn(context), result);
+            }
          }
 
-         if (data.get(ModGearAttributes.AXING, VaultGearAttributeTypeMerger.anyTrue())) {
-            result = this.getResultFit(Items.NETHERITE_AXE.useOn(context), result);
-         }
-
-         if (data.get(ModGearAttributes.SHOVELLING, VaultGearAttributeTypeMerger.anyTrue())) {
-            result = this.getResultFit(Items.NETHERITE_SHOVEL.useOn(context), result);
-         }
-
-         if (data.get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())) {
-            result = this.getResultFit(Items.NETHERITE_HOE.useOn(context), result);
-            result = this.getResultFit(Items.NETHERITE_SWORD.useOn(context), result);
-            result = this.getResultFit(Items.SHEARS.useOn(context), result);
-         }
+         return result;
       }
-
-      return result;
    }
 
    @NotNull
    public InteractionResult interactLivingEntity(@Nonnull ItemStack stack, @Nonnull Player player, @Nonnull LivingEntity target, @Nonnull InteractionHand hand) {
       InteractionResult result = InteractionResult.PASS;
-      if (canUse(stack, target)) {
-         VaultGearData data = VaultGearData.read(stack);
-         if (data.get(ModGearAttributes.PICKING, VaultGearAttributeTypeMerger.anyTrue())) {
-            result = this.getResultFit(Items.NETHERITE_PICKAXE.interactLivingEntity(stack, player, target, hand), result);
+      if (stack.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(stack)) {
+         return result;
+      } else {
+         if (canUse(stack, target)) {
+            VaultGearData data = VaultGearData.read(stack);
+            if (data.get(ModGearAttributes.PICKING, VaultGearAttributeTypeMerger.anyTrue())) {
+               result = this.getResultFit(Items.NETHERITE_PICKAXE.interactLivingEntity(stack, player, target, hand), result);
+            }
+
+            if (data.get(ModGearAttributes.AXING, VaultGearAttributeTypeMerger.anyTrue())) {
+               result = this.getResultFit(Items.NETHERITE_AXE.interactLivingEntity(stack, player, target, hand), result);
+            }
+
+            if (data.get(ModGearAttributes.SHOVELLING, VaultGearAttributeTypeMerger.anyTrue())) {
+               result = this.getResultFit(Items.NETHERITE_SHOVEL.interactLivingEntity(stack, player, target, hand), result);
+            }
+
+            if (data.get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())) {
+               result = this.getResultFit(Items.NETHERITE_HOE.interactLivingEntity(stack, player, target, hand), result);
+               result = this.getResultFit(Items.SHEARS.interactLivingEntity(stack, player, target, hand), result);
+               result = this.getResultFit(Items.NETHERITE_SWORD.interactLivingEntity(stack, player, target, hand), result);
+            }
          }
 
-         if (data.get(ModGearAttributes.AXING, VaultGearAttributeTypeMerger.anyTrue())) {
-            result = this.getResultFit(Items.NETHERITE_AXE.interactLivingEntity(stack, player, target, hand), result);
-         }
-
-         if (data.get(ModGearAttributes.SHOVELLING, VaultGearAttributeTypeMerger.anyTrue())) {
-            result = this.getResultFit(Items.NETHERITE_SHOVEL.interactLivingEntity(stack, player, target, hand), result);
-         }
-
-         if (data.get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())) {
-            result = this.getResultFit(Items.NETHERITE_HOE.interactLivingEntity(stack, player, target, hand), result);
-            result = this.getResultFit(Items.SHEARS.interactLivingEntity(stack, player, target, hand), result);
-            result = this.getResultFit(Items.NETHERITE_SWORD.interactLivingEntity(stack, player, target, hand), result);
-         }
+         return result;
       }
-
-      return result;
    }
 
    public InteractionResult getResultFit(InteractionResult... results) {
@@ -266,20 +277,24 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    }
 
    public boolean canPerformAction(ItemStack stack, ToolAction action) {
-      VaultGearData data = VaultGearData.read(stack);
-      if (data.get(ModGearAttributes.PICKING, VaultGearAttributeTypeMerger.anyTrue()) && ToolActions.DEFAULT_PICKAXE_ACTIONS.contains(action)) {
-         return true;
-      } else if (data.get(ModGearAttributes.AXING, VaultGearAttributeTypeMerger.anyTrue()) && ToolActions.DEFAULT_AXE_ACTIONS.contains(action)) {
-         return true;
+      if (stack.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(stack)) {
+         return false;
       } else {
-         return data.get(ModGearAttributes.SHOVELLING, VaultGearAttributeTypeMerger.anyTrue()) && ToolActions.DEFAULT_SHOVEL_ACTIONS.contains(action)
-            ? true
-            : data.get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())
-               && (
-                  ToolActions.DEFAULT_HOE_ACTIONS.contains(action)
-                     || ToolActions.DEFAULT_SHEARS_ACTIONS.contains(action)
-                     || ToolActions.DEFAULT_SWORD_ACTIONS.contains(action)
-               );
+         VaultGearData data = VaultGearData.read(stack);
+         if (data.get(ModGearAttributes.PICKING, VaultGearAttributeTypeMerger.anyTrue()) && ToolActions.DEFAULT_PICKAXE_ACTIONS.contains(action)) {
+            return true;
+         } else if (data.get(ModGearAttributes.AXING, VaultGearAttributeTypeMerger.anyTrue()) && ToolActions.DEFAULT_AXE_ACTIONS.contains(action)) {
+            return true;
+         } else {
+            return data.get(ModGearAttributes.SHOVELLING, VaultGearAttributeTypeMerger.anyTrue()) && ToolActions.DEFAULT_SHOVEL_ACTIONS.contains(action)
+               ? true
+               : data.get(ModGearAttributes.REAPING, VaultGearAttributeTypeMerger.anyTrue())
+                  && (
+                     ToolActions.DEFAULT_HOE_ACTIONS.contains(action)
+                        || ToolActions.DEFAULT_SHEARS_ACTIONS.contains(action)
+                        || ToolActions.DEFAULT_SWORD_ACTIONS.contains(action)
+                  );
+         }
       }
    }
 
@@ -317,22 +332,27 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    }
 
    public boolean hurt(@Nonnull ItemStack stack, @Nonnull Level world, @Nonnull LivingEntity owner, double damage) {
-      int result = (int)damage + (world.getRandom().nextFloat() < damage - (int)damage ? 1 : 0);
-      if (result <= 0) {
+      if (stack.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(stack)) {
          return false;
       } else {
-         stack.hurtAndBreak(result, owner, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
-         return true;
+         int result = (int)damage + (world.getRandom().nextFloat() < damage - (int)damage ? 1 : 0);
+         if (result <= 0) {
+            return false;
+         } else {
+            stack.hurtAndBreak(result, owner, entity -> entity.broadcastBreakEvent(EquipmentSlot.MAINHAND));
+            return true;
+         }
       }
    }
 
+   @Override
    public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<T> onBroken) {
       Level world = entity.level;
       VaultGearData data = VaultGearData.read(stack);
       return ServerVaults.get(world).isEmpty()
             && world.getRandom().nextFloat() < data.get(ModGearAttributes.IMMMORTALITY, VaultGearAttributeTypeMerger.floatSum())
          ? 0
-         : amount;
+         : VaultGearItem.super.damageItem(stack, amount, entity, onBroken);
    }
 
    @Override
@@ -341,9 +361,11 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    }
 
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot slot, ItemStack stack) {
-      return (Multimap<Attribute, AttributeModifier>)(slot == EquipmentSlot.MAINHAND
-         ? VaultGearHelper.getModifiers(VaultGearData.read(stack))
-         : ImmutableMultimap.of());
+      return VaultGearHelper.getModifiers(stack, slot);
+   }
+
+   public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+      return VaultGearHelper.shouldPlayGearReequipAnimation(oldStack, newStack, slotChanged);
    }
 
    public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {

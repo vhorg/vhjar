@@ -164,6 +164,14 @@ public class VirtualWorld extends ServerLevel {
       }
    }
 
+   public boolean isDay() {
+      return false;
+   }
+
+   public boolean isNight() {
+      return true;
+   }
+
    public static VirtualWorld create(ResourceLocation id, ThreadingMode mode) {
       MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
       Executor executor = ((AccessorMinecraftServer)server).getWorkerExecutor();

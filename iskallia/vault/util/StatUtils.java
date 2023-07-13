@@ -37,7 +37,7 @@ public class StatUtils {
       attackDamage *= 1.0F + dmgIncrease;
       float dynamicDmgMultiplier;
       if (player instanceof ServerPlayer) {
-         dynamicDmgMultiplier = PlayerDamageHelper.getDamageMultiplier(player, true);
+         dynamicDmgMultiplier = PlayerDamageHelper.getDamageMultiplier(player, true, false);
       } else {
          dynamicDmgMultiplier = ClientDamageData.getCurrentDamageMultiplier();
       }

@@ -4,6 +4,7 @@ import iskallia.vault.nbt.VMapNBT;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -86,6 +87,12 @@ public abstract class TimestampedInventorySnapshotData extends SavedData {
 
       public void addSnapshot(int timestamp, InventorySnapshotData.InventorySnapshot snapshot) {
          this.timestampedSnapshots.put(timestamp, snapshot);
+         List<Integer> timestamps = new ArrayList<>(this.timestampedSnapshots.keySet());
+         timestamps.sort(Comparator.reverseOrder());
+
+         for (int i = 10; i < timestamps.size(); i++) {
+            this.timestampedSnapshots.remove(timestamps.get(i));
+         }
       }
 
       public CompoundTag serializeNBT() {

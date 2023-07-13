@@ -2,6 +2,7 @@ package iskallia.vault.gear.trinket.effects;
 
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketHelper;
+import iskallia.vault.item.BottleItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -23,6 +24,10 @@ public class InstantItemUseTrinket extends TrinketEffect.Simple {
             ItemStack inUse = event.getItem();
             if (inUse.isEdible() || inUse.getUseAnimation() == UseAnim.EAT) {
                event.setDuration(1);
+            }
+
+            if (inUse.getItem() instanceof BottleItem && inUse.getUseAnimation() == UseAnim.DRINK) {
+               event.setDuration(event.getDuration() / 4);
             }
          }
       }

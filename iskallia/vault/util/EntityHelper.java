@@ -1,5 +1,6 @@
 package iskallia.vault.util;
 
+import com.google.common.collect.Streams;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.Vec3i;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -96,6 +98,14 @@ public class EntityHelper {
    public static <T extends Entity> List<T> getNearby(LevelAccessor world, Vec3i pos, float radius, Class<T> entityClass) {
       AABB selectBox = BOX.move(pos.getX(), pos.getY(), pos.getZ()).inflate(radius);
       return world.getEntitiesOfClass(entityClass, selectBox, entity -> entity.isAlive() && !entity.isSpectator());
+   }
+
+   public static boolean isColliding(Entity entity) {
+      return isColliding(entity.getLevel(), entity.getBoundingBox());
+   }
+
+   public static boolean isColliding(Level level, AABB boundingBox) {
+      return Streams.stream(level.getCollisions(null, boundingBox)).findAny().isPresent();
    }
 
    public static void getEntitiesInRange(LevelAccessor levelAccessor, Vec3 center, float range, Predicate<Entity> filter, List<LivingEntity> result) {

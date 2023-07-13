@@ -4,45 +4,41 @@ import iskallia.vault.bounty.task.properties.KillEntityProperties;
 import iskallia.vault.config.bounty.task.entry.GenericEntry;
 import iskallia.vault.config.bounty.task.entry.TaskEntry;
 import iskallia.vault.config.entry.IntRangeEntry;
+import iskallia.vault.core.world.data.EntityPredicate;
 import java.util.ArrayList;
 import java.util.Set;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class KillEntityTaskConfig extends TaskConfig<TaskEntry<ResourceLocation>, KillEntityProperties> {
+public class KillEntityTaskConfig extends TaskConfig<TaskEntry<EntityPredicate>, KillEntityProperties> {
    @Override
    public String getName() {
       return super.getName() + "kill_entity";
    }
 
    public KillEntityProperties getGeneratedTaskProperties(int vaultLevel) {
-      TaskEntry<ResourceLocation> taskEntry = this.getEntry(vaultLevel);
-      GenericEntry<ResourceLocation> entry = taskEntry.getRandom();
+      TaskEntry<EntityPredicate> taskEntry = this.getEntry(vaultLevel);
+      GenericEntry<EntityPredicate> entry = taskEntry.getRandom();
       KillEntityProperties killEntityProperties = new KillEntityProperties(
-         entry.getValue(), new ArrayList<>(entry.getValidDimensions()), entry.isVaultOnly(), entry.getRandomAmount()
+         EntityPredicate.of(entry.getValue().toString(), true).orElse(EntityPredicate.FALSE),
+         new ArrayList<>(entry.getValidDimensions()),
+         entry.isVaultOnly(),
+         entry.getRandomAmount()
       );
       killEntityProperties.setRewardPool(entry.getRewardPool());
       return killEntityProperties;
    }
 
    @Override
-   protected TaskEntry<ResourceLocation> generateConfigEntry() {
+   protected TaskEntry<EntityPredicate> generateConfigEntry() {
+      EntityPredicate skeleton = EntityPredicate.of(ForgeRegistries.ENTITIES.getKey(EntityType.SKELETON).toString(), true).orElse(EntityPredicate.FALSE);
+      EntityPredicate zombie = EntityPredicate.of(ForgeRegistries.ENTITIES.getKey(EntityType.ZOMBIE).toString(), true).orElse(EntityPredicate.FALSE);
+      EntityPredicate creeper = EntityPredicate.of(ForgeRegistries.ENTITIES.getKey(EntityType.CREEPER).toString(), true).orElse(EntityPredicate.FALSE);
       return new TaskEntry<>(
-            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.SKELETON), new IntRangeEntry(10, 50))
-               .setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())),
-            3
+            new GenericEntry<>(skeleton, new IntRangeEntry(10, 50)).setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())), 3
          )
-         .addEntry(
-            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.ZOMBIE), new IntRangeEntry(10, 50))
-               .setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())),
-            3
-         )
-         .addEntry(
-            new GenericEntry<>(ForgeRegistries.ENTITIES.getKey(EntityType.CREEPER), new IntRangeEntry(10, 50))
-               .setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())),
-            3
-         );
+         .addEntry(new GenericEntry<>(zombie, new IntRangeEntry(10, 50)).setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())), 3)
+         .addEntry(new GenericEntry<>(creeper, new IntRangeEntry(10, 50)).setValidDimensions(Set.of(Level.OVERWORLD.location(), Level.NETHER.location())), 3);
    }
 }

@@ -4,8 +4,11 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 public abstract class AbstractStonefallAbility extends InstantManaAbility {
    private int durationTicks;
@@ -43,8 +46,17 @@ public abstract class AbstractStonefallAbility extends InstantManaAbility {
       return this.damageReduction;
    }
 
-   public float getRadius() {
+   public float getUnmodifiedRadius() {
       return this.radius;
+   }
+
+   public float getRadius(Entity attacker) {
+      float realRadius = this.getUnmodifiedRadius();
+      if (attacker instanceof LivingEntity livingEntity) {
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+      }
+
+      return realRadius;
    }
 
    public int getDurationTicks() {

@@ -13,6 +13,8 @@ import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
+import java.util.Set;
+import java.util.function.BiFunction;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.ResourceLocation;
@@ -39,14 +41,23 @@ public class TrinketConfig extends Config {
 
    @Nullable
    public TrinketEffect<?> getRandomTrinketSet() {
+      return this.getRandomTrinketSet((trinketEffect, weight) -> weight);
+   }
+
+   @Nullable
+   public TrinketEffect<?> getRandomTrinketSet(BiFunction<TrinketEffect<?>, Integer, Integer> weightAdjustFn) {
       WeightedList<TrinketEffect<?>> list = new WeightedList<>();
       this.TRINKETS.forEach((key, config) -> {
          TrinketEffect<?> trinketEffect = TrinketEffectRegistry.getEffect(key);
          if (trinketEffect != null) {
-            list.add(trinketEffect, config.getWeight());
+            list.add(trinketEffect, weightAdjustFn.apply(trinketEffect, config.getWeight()));
          }
       });
       return list.getRandom().orElse(null);
+   }
+
+   public Set<ResourceLocation> getTrinketIds() {
+      return this.TRINKETS.keySet();
    }
 
    @Override

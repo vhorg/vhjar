@@ -11,12 +11,14 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.AbstractMegaJumpAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.Optional;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 
 public class MegaJumpAbility extends AbstractMegaJumpAbility {
    private int height;
@@ -29,37 +31,37 @@ public class MegaJumpAbility extends AbstractMegaJumpAbility {
    public MegaJumpAbility() {
    }
 
-   public int getHeight() {
+   public int getUnmodifiedHeight() {
       return this.height;
+   }
+
+   public int getHeight(Player player) {
+      int realHeight = this.getUnmodifiedHeight();
+
+      for (ConfiguredModification<IntValueConfig, MegaJumpVelocityModification> mod : SpecialAbilityModification.getModifications(
+         player, MegaJumpVelocityModification.class
+      )) {
+         realHeight = mod.modification().adjustHeightConfig(mod.config(), realHeight);
+      }
+
+      return Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, realHeight));
    }
 
    @Override
    protected Ability.ActionResult doAction(SkillContext context) {
-      return context.getSource()
-         .as(ServerPlayer.class)
-         .map(
-            player -> {
-               int height = this.getHeight();
-
-               for (ConfiguredModification<IntValueConfig, MegaJumpVelocityModification> mod : SpecialAbilityModification.getModifications(
-                  player, MegaJumpVelocityModification.class
-               )) {
-                  height = mod.modification().adjustHeightConfig(mod.config(), height);
-               }
-
-               if (height == 0) {
-                  return Ability.ActionResult.successCooldownImmediate();
-               } else {
-                  double magnitude = height * 0.15;
-                  double addY = -Math.min(0.0, player.getDeltaMovement().y());
-                  player.push(0.0, addY + magnitude, 0.0);
-                  player.startFallFlying();
-                  player.hurtMarked = true;
-                  return Ability.ActionResult.successCooldownImmediate();
-               }
-            }
-         )
-         .orElse(Ability.ActionResult.fail());
+      return context.getSource().as(ServerPlayer.class).map(player -> {
+         int height = this.getHeight(player);
+         if (height == 0) {
+            return Ability.ActionResult.successCooldownImmediate();
+         } else {
+            double magnitude = height * 0.15;
+            double addY = -Math.min(0.0, player.getDeltaMovement().y());
+            player.push(0.0, addY + magnitude, 0.0);
+            player.startFallFlying();
+            player.hurtMarked = true;
+            return Ability.ActionResult.successCooldownImmediate();
+         }
+      }).orElse(Ability.ActionResult.fail());
    }
 
    @Override

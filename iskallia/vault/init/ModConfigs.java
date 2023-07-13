@@ -12,8 +12,10 @@ import iskallia.vault.config.ArchetypeGUIConfig;
 import iskallia.vault.config.ArchetypesConfig;
 import iskallia.vault.config.ArchitectConfig;
 import iskallia.vault.config.AugmentConfig;
+import iskallia.vault.config.BestiaryConfig;
 import iskallia.vault.config.BlackMarketConfig;
 import iskallia.vault.config.CatalystInfusionTableConfig;
+import iskallia.vault.config.ChampionsConfig;
 import iskallia.vault.config.ColorsConfig;
 import iskallia.vault.config.Config;
 import iskallia.vault.config.CryoChamberConfig;
@@ -49,10 +51,12 @@ import iskallia.vault.config.MysteryBoxConfig;
 import iskallia.vault.config.MysteryEggConfig;
 import iskallia.vault.config.MysteryHostileEggConfig;
 import iskallia.vault.config.OldNotesConfig;
+import iskallia.vault.config.OmegaSoulShardConfig;
 import iskallia.vault.config.OverLevelEnchantConfig;
 import iskallia.vault.config.PandorasBoxConfig;
 import iskallia.vault.config.PaxelConfigs;
 import iskallia.vault.config.PlayerResearchTransferConfig;
+import iskallia.vault.config.PotionConfig;
 import iskallia.vault.config.ResearchConfig;
 import iskallia.vault.config.ResearchGroupConfig;
 import iskallia.vault.config.ResearchGroupStyleConfig;
@@ -174,6 +178,7 @@ public class ModConfigs {
    public static UnidentifiedRelicFragmentsConfig UNIDENTIFIED_RELIC_FRAGMENTS;
    public static VaultMobsConfig VAULT_MOBS;
    public static VaultMobGearConfig VAULT_MOBS_GEAR;
+   public static ChampionsConfig CHAMPIONS;
    public static VaultItemsConfig VAULT_ITEMS;
    public static VaultAltarConfig VAULT_ALTAR;
    public static VaultGeneralConfig VAULT_GENERAL;
@@ -206,6 +211,7 @@ public class ModConfigs {
    public static ModBoxConfig MOD_BOX;
    public static UnidentifiedTreasureKeyConfig UNIDENTIFIED_TREASURE_KEY;
    public static SoulShardConfig SOUL_SHARD;
+   public static OmegaSoulShardConfig OMEGA_SOUL_SHARD;
    public static BlackMarketConfig BLACK_MARKET;
    public static EternalAttributeConfig ETERNAL_ATTRIBUTES;
    public static EternalAuraConfig ETERNAL_AURAS;
@@ -248,6 +254,7 @@ public class ModConfigs {
    public static TileGroupsConfig TILE_GROUPS;
    public static ItemGroupsConfig ITEM_GROUPS;
    public static ArchitectConfig ARCHITECT;
+   public static BestiaryConfig BESTIARY;
    public static Map<Item, VaultGearTierConfig> VAULT_GEAR_CONFIG;
    public static Map<Item, VaultGearWorkbenchConfig> VAULT_GEAR_WORKBENCH_CONFIG;
    public static VaultAlchemyTableConfig VAULT_ALCHEMY_TABLE;
@@ -273,6 +280,7 @@ public class ModConfigs {
    public static SkyVaultQuestConfig SKY_QUESTS;
    public static TraderExclusionsConfig TRADER_EXCLUSIONS;
    public static PlayerResearchTransferConfig PLAYER_RESEARCH_TRANSFER;
+   public static PotionConfig POTION;
 
    public static void register() {
       INVALID_CONFIGS.clear();
@@ -305,6 +313,7 @@ public class ModConfigs {
       UNIDENTIFIED_RELIC_FRAGMENTS = new UnidentifiedRelicFragmentsConfig().readConfig();
       VAULT_MOBS = new VaultMobsConfig().readConfig();
       VAULT_MOBS_GEAR = new VaultMobGearConfig().readConfig();
+      CHAMPIONS = new ChampionsConfig().readConfig();
       VAULT_ITEMS = new VaultItemsConfig().readConfig();
       VAULT_ALTAR = new VaultAltarConfig().readConfig();
       VAULT_GENERAL = new VaultGeneralConfig().readConfig();
@@ -337,6 +346,7 @@ public class ModConfigs {
       MOD_BOX = new ModBoxConfig().readConfig();
       UNIDENTIFIED_TREASURE_KEY = new UnidentifiedTreasureKeyConfig().readConfig();
       SOUL_SHARD = new SoulShardConfig().readConfig();
+      OMEGA_SOUL_SHARD = new OmegaSoulShardConfig().readConfig();
       BLACK_MARKET = new BlackMarketConfig().readConfig();
       ETERNAL_ATTRIBUTES = new EternalAttributeConfig().readConfig();
       ETERNAL_AURAS = new EternalAuraConfig().readConfig();
@@ -381,6 +391,8 @@ public class ModConfigs {
       ARCHITECT = new ArchitectConfig().readConfig();
       QUESTS = new QuestConfig().readConfig();
       SKY_QUESTS = new SkyVaultQuestConfig().readConfig();
+      POTION = new PotionConfig().readConfig();
+      BESTIARY = new BestiaryConfig().readConfig();
       TOOL_PULVERIZING = new ToolPulverizingConfig().readConfig();
       VAULT_GEAR_CONFIG = VaultGearTierConfig.registerConfigs();
       VAULT_GEAR_WORKBENCH_CONFIG = VaultGearWorkbenchConfig.registerConfigs();

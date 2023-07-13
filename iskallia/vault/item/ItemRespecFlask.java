@@ -105,7 +105,7 @@ public class ItemRespecFlask extends Item {
 
             AbilityTree tree = PlayerAbilitiesData.get(((ServerPlayer)player).getLevel()).getAbilities(player);
             Skill skill = tree.getForId(abilityStr).orElse(null);
-            if (skill == null || !skill.isUnlocked() || !(skill instanceof SpecializedSkill specialized) || specialized.getIndex() == 0) {
+            if (!(skill instanceof SpecializedSkill specialized) || specialized.getIndex() == 0) {
                return InteractionResultHolder.pass(held);
             }
          }
@@ -117,7 +117,7 @@ public class ItemRespecFlask extends Item {
 
    @OnlyIn(Dist.CLIENT)
    private boolean hasAbilityClient(String abilityStr) {
-      return ClientAbilityData.getTree().getForId(abilityStr).map(Skill::isUnlocked).orElse(false);
+      return ClientAbilityData.getTree().getForId(abilityStr).isPresent();
    }
 
    public UseAnim getUseAnimation(ItemStack stack) {
@@ -137,7 +137,7 @@ public class ItemRespecFlask extends Item {
 
          PlayerAbilitiesData data = PlayerAbilitiesData.get(sWorld);
          data.getAbilities(player).getForId(abilityStr).ifPresent(skill -> {
-            if (skill.isUnlocked() && skill instanceof SpecializedSkill specialized) {
+            if (skill instanceof SpecializedSkill specialized) {
                specialized.resetSpecialization(SkillContext.of(player));
                if (!player.isCreative()) {
                   stack.shrink(1);

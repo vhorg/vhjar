@@ -33,6 +33,12 @@ public interface IElementRenderer {
 
    void renderColoredQuad(PoseStack var1, int var2, int var3, int var4, int var5, int var6, int var7);
 
+   default void renderColoredHollowRect(PoseStack poseStack, int color, ISpatial spatial) {
+      this.renderColoredHollowRect(poseStack, color, spatial.x(), spatial.y(), spatial.z(), spatial.width(), spatial.height(), 1);
+   }
+
+   void renderColoredHollowRect(PoseStack var1, int var2, int var3, int var4, int var5, int var6, int var7, int var8);
+
    void renderPlain(FormattedCharSequence var1, Font var2, PoseStack var3, int var4, int var5, int var6, int var7);
 
    void renderShadow(FormattedCharSequence var1, FormattedCharSequence var2, Font var3, PoseStack var4, int var5, int var6, int var7, int var8, int var9);

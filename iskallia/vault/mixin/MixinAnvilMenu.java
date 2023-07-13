@@ -41,6 +41,14 @@ public abstract class MixinAnvilMenu extends ItemCombinerMenu {
 
    @Inject(
       method = {"createResult"},
+      at = {@At("HEAD")}
+   )
+   protected void clearRepairResult(CallbackInfo ci) {
+      this.resultSlots.setItem(0, ItemStack.EMPTY);
+   }
+
+   @Inject(
+      method = {"createResult"},
       at = {@At(
          value = "INVOKE",
          target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getEnchantments(Lnet/minecraft/world/item/ItemStack;)Ljava/util/Map;",

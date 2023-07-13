@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "the_vault:block/placeholder_gilded_chest_guaranteed_top",
+    "bottom": "the_vault:block/placeholder_gilded_chest_guaranteed_bottom",
+    "side": "the_vault:block/placeholder_gilded_chest_guaranteed_side"
+  }
+}

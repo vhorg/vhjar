@@ -35,6 +35,13 @@ public final class GearAttributeStatLabel {
       return of(player, attribute, valueSupplier, value -> attribute.getReader().getValueDisplay(value));
    }
 
+   public static StatLabelElementBuilder<Float> ofFloat(
+      Player player, VaultGearAttribute<Float> attribute, Function<Player, Float> valueSupplier, Function<Player, Float> attributeCapSupplier
+   ) {
+      return of(player, attribute, valueSupplier, value -> attribute.getReader().getValueDisplay(value))
+         .setValueCap(() -> attributeCapSupplier.apply(player), value -> attribute.getReader().getValueDisplay(value));
+   }
+
    private static <V extends Comparable<V>> StatLabelElementBuilder<V> of(
       Player player, VaultGearAttribute<V> attribute, VaultGearAttributeTypeMerger<V, V> attributeTypeMerger
    ) {

@@ -76,7 +76,7 @@ public class StonefallAbility extends AbstractStonefallAbility {
                AbilityTree abilities = PlayerAbilitiesData.get((ServerLevel)player.level).getAbilities(player);
 
                for (StonefallAbility ability : abilities.getAll(StonefallAbility.class, Skill::isUnlocked)) {
-                  float radius = ability.getRadius() + Mth.clamp(dist / 3.75F, 0.0F, 8.0F);
+                  float radius = ability.getRadius(player) + Mth.clamp(dist / 3.75F, 0.0F, 8.0F);
                   List<LivingEntity> nearby = EntityHelper.getNearby(level, player.blockPosition(), radius, LivingEntity.class);
                   nearby.removeIf(mob -> mob instanceof EternalEntity || mob instanceof ServerPlayer);
                   nearby.forEach(mob -> {

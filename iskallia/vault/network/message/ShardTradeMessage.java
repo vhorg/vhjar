@@ -13,18 +13,23 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent.Context;
 
 public class ShardTradeMessage {
+   private final int rerollsUsed;
    private final int randomTradeCost;
    private final long seed;
    private final LocalDateTime nextReset;
    private final Map<Integer, Tuple<ItemStack, Integer>> availableTrades = new HashMap<>();
 
-   private ShardTradeMessage(int randomTradeCost, long seed, String nextReset) {
+   private ShardTradeMessage(int rerollsUsed, int randomTradeCost, long seed, String nextReset) {
+      this.rerollsUsed = rerollsUsed;
       this.randomTradeCost = randomTradeCost;
       this.seed = seed;
       this.nextReset = LocalDateTime.parse(nextReset, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
    }
 
-   public ShardTradeMessage(int randomTradeCost, long seed, Map<Integer, PlayerBlackMarketData.BlackMarket.SelectedTrade> trades, LocalDateTime nextReset) {
+   public ShardTradeMessage(
+      int rerollsUsed, int randomTradeCost, long seed, Map<Integer, PlayerBlackMarketData.BlackMarket.SelectedTrade> trades, LocalDateTime nextReset
+   ) {
+      this.rerollsUsed = rerollsUsed;
       this.randomTradeCost = randomTradeCost;
       this.seed = seed;
       trades.forEach((index, trade) -> {
@@ -32,6 +37,10 @@ public class ShardTradeMessage {
          this.availableTrades.put(index, tradeTpl);
       });
       this.nextReset = nextReset;
+   }
+
+   public int getRerollsUsed() {
+      return this.rerollsUsed;
    }
 
    public int getRandomTradeCost() {
@@ -51,6 +60,7 @@ public class ShardTradeMessage {
    }
 
    public static void encode(ShardTradeMessage message, FriendlyByteBuf buffer) {
+      buffer.writeInt(message.rerollsUsed);
       buffer.writeInt(message.randomTradeCost);
       buffer.writeLong(message.seed);
       buffer.writeUtf(message.nextReset.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -63,7 +73,7 @@ public class ShardTradeMessage {
    }
 
    public static ShardTradeMessage decode(FriendlyByteBuf buffer) {
-      ShardTradeMessage message = new ShardTradeMessage(buffer.readInt(), buffer.readLong(), buffer.readUtf());
+      ShardTradeMessage message = new ShardTradeMessage(buffer.readInt(), buffer.readInt(), buffer.readLong(), buffer.readUtf());
       int trades = buffer.readInt();
 
       for (int i = 0; i < trades; i++) {

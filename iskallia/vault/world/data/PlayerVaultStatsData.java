@@ -26,6 +26,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class PlayerVaultStatsData extends SavedData {
    protected static final String DATA_NAME = "the_vault_PlayerVaultLevels";
@@ -147,21 +148,35 @@ public class PlayerVaultStatsData extends SavedData {
       PlayerVaultStats stats = statsData.getVaultStats(player);
       SkillContext context = SkillContext.empty();
       talentTree.iterate(Skill.class, skill -> {
-         while (skill instanceof LearnableSkill learnable && skill.isUnlocked()) {
-            learnable.regret(context);
-         }
+         if (!(skill instanceof GroupedSkill)) {
+            while (skill instanceof LearnableSkill) {
+               LearnableSkill learnable = (LearnableSkill)skill;
+               if (!skill.isUnlocked()) {
+                  break;
+               }
 
-         if (skill instanceof SpecializedSkill specialized) {
-            specialized.resetSpecialization(context);
+               learnable.regret(context);
+            }
+
+            if (skill instanceof SpecializedSkill specialized) {
+               specialized.resetSpecialization(context);
+            }
          }
       });
       abilityTree.iterate(Skill.class, skill -> {
-         while (skill instanceof LearnableSkill learnable && skill.isUnlocked()) {
-            learnable.regret(context);
-         }
+         if (!(skill instanceof GroupedSkill)) {
+            while (skill instanceof LearnableSkill) {
+               LearnableSkill learnable = (LearnableSkill)skill;
+               if (!skill.isUnlocked()) {
+                  break;
+               }
 
-         if (skill instanceof SpecializedSkill specialized) {
-            specialized.resetSpecialization(context);
+               learnable.regret(context);
+            }
+
+            if (skill instanceof SpecializedSkill specialized) {
+               specialized.resetSpecialization(context);
+            }
          }
       });
       stats.addSkillPoints(context.getLearnPoints());
@@ -276,6 +291,10 @@ public class PlayerVaultStatsData extends SavedData {
 
    public boolean isDirty() {
       return true;
+   }
+
+   public static PlayerVaultStatsData getServer() {
+      return get(ServerLifecycleHooks.getCurrentServer());
    }
 
    public static PlayerVaultStatsData get(ServerLevel world) {

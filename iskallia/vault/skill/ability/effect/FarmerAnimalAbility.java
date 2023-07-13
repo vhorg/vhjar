@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.util.AABBHelper;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraft.core.particles.ParticleTypes;
@@ -43,7 +44,11 @@ public class FarmerAnimalAbility extends FarmerAbility {
    @Override
    protected void doGrow(ServerPlayer player, ServerLevel world) {
       super.doGrow(player, world);
-      AABB searchBox = AABBHelper.create(player.position(), this.getHorizontalRange(), this.getVerticalRange(), this.getHorizontalRange());
+      int horizontalRange = this.getHorizontalRange();
+      int verticalRange = this.getVerticalRange();
+      horizontalRange = Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, horizontalRange));
+      verticalRange = Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, verticalRange));
+      AABB searchBox = AABBHelper.create(player.position(), horizontalRange, verticalRange, horizontalRange);
 
       for (AgeableMob entity : world.getEntitiesOfClass(AgeableMob.class, searchBox, AGEABLE_MOB_PREDICATE)) {
          if (world.getRandom().nextFloat() < 0.4F) {

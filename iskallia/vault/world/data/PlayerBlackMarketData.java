@@ -1,9 +1,13 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.config.OmegaSoulShardConfig;
 import iskallia.vault.config.SoulShardConfig;
 import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
+import iskallia.vault.item.gear.DataInitializationItem;
+import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.network.message.ShardTradeMessage;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.expertise.type.BlackMarketExpertise;
@@ -17,6 +21,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import net.minecraft.nbt.CompoundTag;
@@ -130,19 +135,24 @@ public class PlayerBlackMarketData extends SavedData {
       private long seed;
       private UUID playerUuid;
       private final Map<Integer, PlayerBlackMarketData.BlackMarket.SelectedTrade> trades = new HashMap<>();
+      private int resetRolls;
 
       public BlackMarket(UUID playerUuid) {
          this.playerUuid = playerUuid;
          this.seed = rand.nextLong();
-         this.resetTrades(ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(playerUuid));
+         this.resetTrades(playerUuid);
       }
 
-      public void setNextReset(ServerPlayer player) {
+      public int getResetRolls() {
+         return this.resetRolls;
+      }
+
+      public void setNextReset(UUID playerUuid) {
          this.nextReset = LocalDateTime.now(ZoneId.of("UTC"))
             .plusHours(ModConfigs.BLACK_MARKET.getResetHours())
             .plusMinutes(ModConfigs.BLACK_MARKET.getResetMinutes());
-         if (player != null) {
-            ExpertiseTree expertises = PlayerExpertisesData.get((ServerLevel)player.level).getExpertises(player);
+         if (playerUuid != null) {
+            ExpertiseTree expertises = PlayerExpertisesData.getServer().getExpertises(playerUuid);
 
             for (BlackMarketExpertise expertise : expertises.getAll(BlackMarketExpertise.class, Skill::isUnlocked)) {
                this.nextReset = this.nextReset.plusMinutes(-expertise.getTimeReductionInMinutes());
@@ -150,14 +160,119 @@ public class PlayerBlackMarketData extends SavedData {
          }
       }
 
-      public void resetTrades(ServerPlayer player) {
+      public void resetTrades(UUID playerUuid) {
          this.trades.clear();
 
-         for (int i = 0; i < 3; i++) {
-            this.trades.put(i, new PlayerBlackMarketData.BlackMarket.SelectedTrade(ModConfigs.SOUL_SHARD.getRandomTrade()));
+         for (int i = 0; i < 2; i++) {
+            if (i == 1) {
+               i = 2;
+            }
+
+            int playerLevel = PlayerVaultStatsData.getServer().getVaultStats(playerUuid).getVaultLevel();
+            Set<SoulShardConfig.Trades> tradesList = ModConfigs.SOUL_SHARD.getTrades();
+            SoulShardConfig.Trades tradesUsed = null;
+
+            for (SoulShardConfig.Trades trades : tradesList) {
+               if (playerLevel >= trades.getMinLevel() && (tradesUsed == null || tradesUsed.getMinLevel() < trades.getMinLevel())) {
+                  tradesUsed = trades;
+               }
+            }
+
+            if (tradesUsed != null) {
+               PlayerBlackMarketData.BlackMarket.SelectedTrade trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(tradesUsed.getRandomTrade());
+               if (trade.stack.is(ModItems.FACETED_FOCUS)) {
+                  int cost = trade.shardCost;
+                  ItemStack newStack = DataTransferItem.doConvertStack(trade.stack);
+                  DataInitializationItem.doInitialize(trade.stack);
+                  trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
+               }
+
+               this.trades.put(i, trade);
+            }
          }
 
-         this.setNextReset(player);
+         int playerLevel = PlayerVaultStatsData.getServer().getVaultStats(playerUuid).getVaultLevel();
+         Set<OmegaSoulShardConfig.Trades> omegaTradesList = ModConfigs.OMEGA_SOUL_SHARD.getTrades();
+         OmegaSoulShardConfig.Trades tradesUsed = null;
+
+         for (OmegaSoulShardConfig.Trades tradesx : omegaTradesList) {
+            if (playerLevel >= tradesx.getMinLevel() && (tradesUsed == null || tradesUsed.getMinLevel() < tradesx.getMinLevel())) {
+               tradesUsed = tradesx;
+            }
+         }
+
+         if (tradesUsed != null) {
+            PlayerBlackMarketData.BlackMarket.SelectedTrade trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(tradesUsed.getRandomTrade());
+            if (trade.stack.is(ModItems.FACETED_FOCUS)) {
+               int cost = trade.shardCost;
+               ItemStack newStack = DataTransferItem.doConvertStack(trade.stack);
+               DataInitializationItem.doInitialize(trade.stack);
+               trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
+            }
+
+            this.trades.put(1, trade);
+         }
+
+         this.setNextReset(playerUuid);
+         this.resetRolls = 0;
+         PlayerBlackMarketData.this.setDirty();
+         this.syncToClient(ServerLifecycleHooks.getCurrentServer());
+      }
+
+      public void resetTradesWithoutTimer(ServerPlayer player) {
+         this.trades.clear();
+
+         for (int i = 0; i < 2; i++) {
+            if (i == 1) {
+               i = 2;
+            }
+
+            int playerLevel = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player).getVaultLevel();
+            Set<SoulShardConfig.Trades> tradesList = ModConfigs.SOUL_SHARD.getTrades();
+            SoulShardConfig.Trades tradesUsed = null;
+
+            for (SoulShardConfig.Trades trades : tradesList) {
+               if (playerLevel >= trades.getMinLevel() && (tradesUsed == null || tradesUsed.getMinLevel() < trades.getMinLevel())) {
+                  tradesUsed = trades;
+               }
+            }
+
+            if (tradesUsed != null) {
+               PlayerBlackMarketData.BlackMarket.SelectedTrade trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(tradesUsed.getRandomTrade());
+               if (trade.stack.is(ModItems.FACETED_FOCUS)) {
+                  int cost = trade.shardCost;
+                  ItemStack newStack = DataTransferItem.doConvertStack(trade.stack);
+                  DataInitializationItem.doInitialize(trade.stack);
+                  trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
+               }
+
+               this.trades.put(i, trade);
+            }
+         }
+
+         int playerLevel = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player).getVaultLevel();
+         Set<OmegaSoulShardConfig.Trades> omegaTradesList = ModConfigs.OMEGA_SOUL_SHARD.getTrades();
+         OmegaSoulShardConfig.Trades tradesUsed = null;
+
+         for (OmegaSoulShardConfig.Trades tradesx : omegaTradesList) {
+            if (playerLevel >= tradesx.getMinLevel() && (tradesUsed == null || tradesUsed.getMinLevel() < tradesx.getMinLevel())) {
+               tradesUsed = tradesx;
+            }
+         }
+
+         if (tradesUsed != null) {
+            PlayerBlackMarketData.BlackMarket.SelectedTrade trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(tradesUsed.getRandomTrade());
+            if (trade.stack.is(ModItems.FACETED_FOCUS)) {
+               int cost = trade.shardCost;
+               ItemStack newStack = DataTransferItem.doConvertStack(trade.stack);
+               DataInitializationItem.doInitialize(trade.stack);
+               trade = new PlayerBlackMarketData.BlackMarket.SelectedTrade(newStack, cost);
+            }
+
+            this.trades.put(1, trade);
+         }
+
+         this.resetRolls++;
          PlayerBlackMarketData.this.setDirty();
          this.syncToClient(ServerLifecycleHooks.getCurrentServer());
       }
@@ -180,7 +295,7 @@ public class PlayerBlackMarketData extends SavedData {
          LocalDateTime now = LocalDateTime.now(ZoneId.of("UTC"));
          LocalDateTime end = PlayerBlackMarketData.get(server.overworld()).getBlackMarket(player).nextReset;
          if (end.isBefore(now)) {
-            this.resetTrades(player);
+            this.resetTrades(player.getUUID());
          }
       }
 
@@ -244,12 +359,26 @@ public class PlayerBlackMarketData extends SavedData {
          NetcodeUtils.runIfPresent(
             server,
             this.playerUuid,
-            player -> ModNetwork.CHANNEL
-               .sendTo(
-                  new ShardTradeMessage(ModConfigs.SOUL_SHARD.getShardTradePrice(), this.seed, this.getTrades(), this.nextReset),
-                  player.connection.connection,
-                  NetworkDirection.PLAY_TO_CLIENT
-               )
+            player -> {
+               int playerLevel = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player).getVaultLevel();
+               Set<SoulShardConfig.Trades> tradesList = ModConfigs.SOUL_SHARD.getTrades();
+               SoulShardConfig.Trades tradesUsed = null;
+
+               for (SoulShardConfig.Trades trades : tradesList) {
+                  if (playerLevel >= trades.getMinLevel() && (tradesUsed == null || tradesUsed.getMinLevel() < trades.getMinLevel())) {
+                     tradesUsed = trades;
+                  }
+               }
+
+               if (tradesUsed != null) {
+                  ModNetwork.CHANNEL
+                     .sendTo(
+                        new ShardTradeMessage(this.resetRolls, tradesUsed.getShardTradePrice(), this.seed, this.getTrades(), this.nextReset),
+                        player.connection.connection,
+                        NetworkDirection.PLAY_TO_CLIENT
+                     );
+               }
+            }
          );
       }
 
@@ -269,6 +398,11 @@ public class PlayerBlackMarketData extends SavedData {
          private boolean isInfinite = false;
 
          public SelectedTrade(SoulShardConfig.ShardTrade trade) {
+            this.stack = trade.getItem();
+            this.shardCost = MathUtilities.getRandomInt(trade.getMinPrice(), trade.getMaxPrice() + 1);
+         }
+
+         public SelectedTrade(OmegaSoulShardConfig.ShardTrade trade) {
             this.stack = trade.getItem();
             this.shardCost = MathUtilities.getRandomInt(trade.getMinPrice(), trade.getMaxPrice() + 1);
          }

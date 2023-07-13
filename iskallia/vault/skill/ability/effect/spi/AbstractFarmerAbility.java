@@ -10,6 +10,7 @@ import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfi
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.HoldManaAbility;
 import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.util.calc.CooldownHelper;
 import java.util.ArrayList;
 import java.util.List;
@@ -81,8 +82,10 @@ public abstract class AbstractFarmerAbility extends HoldManaAbility {
 
    protected void doGrow(ServerPlayer player, ServerLevel world) {
       BlockPos playerPos = player.blockPosition();
-      int horizontalRange = this.getHorizontalRange();
-      int verticalRange = this.getVerticalRange();
+      int originalHorizontalRange = this.getHorizontalRange();
+      int originalVerticalRange = this.getVerticalRange();
+      int horizontalRange = originalHorizontalRange;
+      int verticalRange = originalVerticalRange;
 
       for (ConfiguredModification<IntValueConfig, FarmerAdditionalRangeModification> mod : SpecialAbilityModification.getModifications(
          player, FarmerAdditionalRangeModification.class
@@ -91,6 +94,8 @@ public abstract class AbstractFarmerAbility extends HoldManaAbility {
          verticalRange = mod.modification().addRange(mod.config(), verticalRange);
       }
 
+      horizontalRange = Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, horizontalRange));
+      verticalRange = Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, verticalRange));
       MutableBlockPos mutableBlockPos = new MutableBlockPos();
       List<BlockPos> candidateList = new ArrayList<>();
 
@@ -108,10 +113,14 @@ public abstract class AbstractFarmerAbility extends HoldManaAbility {
       }
 
       if (!candidateList.isEmpty()) {
-         BlockPos pos = candidateList.get(world.getRandom().nextInt(candidateList.size()));
-         BlockState state = world.getBlockState(pos);
-         Block block = world.getBlockState(pos).getBlock();
-         this.doGrowBlock(player, world, pos, block, state);
+         int executionAttempts = Math.max(1, originalHorizontalRange * originalVerticalRange / (horizontalRange * verticalRange));
+
+         for (int i = 0; i < executionAttempts; i++) {
+            BlockPos pos = candidateList.get(world.getRandom().nextInt(candidateList.size()));
+            BlockState state = world.getBlockState(pos);
+            Block block = world.getBlockState(pos).getBlock();
+            this.doGrowBlock(player, world, pos, block, state);
+         }
       }
    }
 

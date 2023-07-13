@@ -13,7 +13,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class InternalCommand extends Command {
    @Override
@@ -53,14 +52,12 @@ public class InternalCommand extends Command {
 
    private int resetBlackMarket(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ServerPlayer target = EntityArgument.getPlayer(ctx, "player");
-      PlayerBlackMarketData.get(((CommandSourceStack)ctx.getSource()).getServer()).getBlackMarket(target).resetTrades(target);
+      PlayerBlackMarketData.get(((CommandSourceStack)ctx.getSource()).getServer()).getBlackMarket(target).resetTrades(target.getUUID());
       return 0;
    }
 
    private int resetBlackMarkets(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-      PlayerBlackMarketData.get(((CommandSourceStack)ctx.getSource()).getServer())
-         .getPlayerMap()
-         .forEach((uuid, blackMarket) -> blackMarket.resetTrades(ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayer(uuid)));
+      PlayerBlackMarketData.get(((CommandSourceStack)ctx.getSource()).getServer()).getPlayerMap().forEach((uuid, blackMarket) -> blackMarket.resetTrades(uuid));
       return 0;
    }
 

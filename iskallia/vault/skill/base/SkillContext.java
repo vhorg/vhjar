@@ -54,6 +54,10 @@ public class SkillContext {
       return new SkillContext(VaultBarOverlay.vaultLevel, VaultBarOverlay.unspentExpertisePoints, 0, SkillSource.of(Minecraft.getInstance().player));
    }
 
+   public SkillContext copy() {
+      return new SkillContext(this.level, this.learnPoints, this.regretPoints, this.source.copy());
+   }
+
    public int getLevel() {
       return this.level;
    }

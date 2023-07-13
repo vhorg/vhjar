@@ -21,6 +21,7 @@ import iskallia.vault.block.CrystalClusterBlock;
 import iskallia.vault.block.CubeBlock;
 import iskallia.vault.block.CustomEntitySpawnerBlock;
 import iskallia.vault.block.DemagnetizerBlock;
+import iskallia.vault.block.DungeonDoorBlock;
 import iskallia.vault.block.EasterEggBlock;
 import iskallia.vault.block.EliteSpawnerBlock;
 import iskallia.vault.block.ErrorBlock;
@@ -38,6 +39,7 @@ import iskallia.vault.block.MVPCrownBlock;
 import iskallia.vault.block.MagnetTableBlock;
 import iskallia.vault.block.MazeBlock;
 import iskallia.vault.block.MeatBlock;
+import iskallia.vault.block.MobBarrier;
 import iskallia.vault.block.ModifierDiscoveryBlock;
 import iskallia.vault.block.ModifierWorkbenchBlock;
 import iskallia.vault.block.MonolithBlock;
@@ -103,6 +105,7 @@ import iskallia.vault.block.entity.CrystalBuddingBlockEntity;
 import iskallia.vault.block.entity.CubeTileEntity;
 import iskallia.vault.block.entity.CustomEntitySpawnerTileEntity;
 import iskallia.vault.block.entity.DemagnetizerTileEntity;
+import iskallia.vault.block.entity.DungeonDoorTileEntity;
 import iskallia.vault.block.entity.EliteSpawnerTileEntity;
 import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
 import iskallia.vault.block.entity.EternalPedestalTileEntity;
@@ -114,6 +117,7 @@ import iskallia.vault.block.entity.InscriptionTableTileEntity;
 import iskallia.vault.block.entity.LodestoneTileEntity;
 import iskallia.vault.block.entity.LootStatueTileEntity;
 import iskallia.vault.block.entity.MagnetTableTile;
+import iskallia.vault.block.entity.MobBarrierTileEntity;
 import iskallia.vault.block.entity.ModifierDiscoveryTileEntity;
 import iskallia.vault.block.entity.ModifierWorkbenchTileEntity;
 import iskallia.vault.block.entity.MonolithTileEntity;
@@ -155,6 +159,7 @@ import iskallia.vault.block.entity.VaultRecyclerTileEntity;
 import iskallia.vault.block.entity.WardrobeTileEntity;
 import iskallia.vault.block.entity.WildSpawnerTileEntity;
 import iskallia.vault.block.entity.XpAltarTileEntity;
+import iskallia.vault.block.item.DungeonDoorBlockItem;
 import iskallia.vault.block.item.EasterEggBlockItem;
 import iskallia.vault.block.item.FinalVaultFrameBlockItem;
 import iskallia.vault.block.item.HourglassBlockItem;
@@ -180,6 +185,7 @@ import iskallia.vault.block.render.JewelApplicationStationRenderer;
 import iskallia.vault.block.render.JewelCuttingStationRenderer;
 import iskallia.vault.block.render.LootStatueRenderer;
 import iskallia.vault.block.render.MagnetTableRenderer;
+import iskallia.vault.block.render.MobBarrierRenderer;
 import iskallia.vault.block.render.ModifierDiscoveryRenderer;
 import iskallia.vault.block.render.ModifierWorkbenchRenderer;
 import iskallia.vault.block.render.PotionModifierDiscoveryRenderer;
@@ -261,6 +267,7 @@ public class ModBlocks {
    public static final VaultOreBlock XENIUM_ORE = new VaultOreBlock(ModItems.XENIUM_GEM);
    public static final VaultRockBlock VAULT_ROCK_ORE = new VaultRockBlock();
    public static final TreasureDoorBlock TREASURE_DOOR = new TreasureDoorBlock();
+   public static final DungeonDoorBlock DUNGEON_DOOR = new DungeonDoorBlock();
    public static final VaultArtifactBlock VAULT_ARTIFACT = new VaultArtifactBlock();
    public static final VaultCrateBlock VAULT_CRATE = new VaultCrateBlock();
    public static final VaultCrateBlock VAULT_CRATE_CAKE = new VaultCrateBlock();
@@ -433,6 +440,7 @@ public class ModBlocks {
    public static final Block WUTODIC_SILVER_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK));
    public static final EternalPedestalBlock ETERNAL_PEDESTAL = new EternalPedestalBlock();
    public static final AngelBlock ANGEL_BLOCK = new AngelBlock();
+   public static final MobBarrier MOB_BARRIER = new MobBarrier();
    public static final Block CHROMATIC_LOG = VaultLogBlock.log(() -> ModBlocks.STRIPPED_CHROMATIC_LOG, MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
    public static final Block STRIPPED_CHROMATIC_LOG = VaultLogBlock.stripped(MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
    public static final Block CHROMATIC_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
@@ -538,6 +546,8 @@ public class ModBlocks {
       )
       .build(null);
    public static final BlockEntityType<TreasureDoorTileEntity> TREASURE_DOOR_TILE_ENTITY = Builder.of(TreasureDoorTileEntity::new, new Block[]{TREASURE_DOOR})
+      .build(null);
+   public static final BlockEntityType<DungeonDoorTileEntity> DUNGEON_DOOR_TILE_ENTITY = Builder.of(DungeonDoorTileEntity::new, new Block[]{DUNGEON_DOOR})
       .build(null);
    public static final BlockEntityType<VaultChestTileEntity> VAULT_CHEST_TILE_ENTITY = Builder.of(
          VaultChestTileEntity::new,
@@ -706,6 +716,7 @@ public class ModBlocks {
       .build(null);
    public static final BlockEntityType<AngelBlockTileEntity> ANGEL_BLOCK_TILE_ENTITY = Builder.of(AngelBlockTileEntity::new, new Block[]{ANGEL_BLOCK})
       .build(null);
+   public static final BlockEntityType<MobBarrierTileEntity> MOB_BARRIER_ENTITY = Builder.of(MobBarrierTileEntity::new, new Block[]{MOB_BARRIER}).build(null);
 
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, ERROR_BLOCK, VaultMod.id("error_block"));
@@ -733,6 +744,7 @@ public class ModBlocks {
       registerBlock(event, XENIUM_ORE, VaultMod.id("ore_xenium"));
       registerBlock(event, VAULT_ROCK_ORE, VaultMod.id("ore_vault_rock"));
       registerBlock(event, TREASURE_DOOR, VaultMod.id("treasure_door"));
+      registerBlock(event, DUNGEON_DOOR, VaultMod.id("dungeon_door"));
       registerBlock(event, VAULT_ARTIFACT, VaultMod.id("vault_artifact"));
       registerBlock(event, VAULT_CRATE, VaultMod.id("vault_crate"));
       registerBlock(event, VAULT_CRATE_CAKE, VaultMod.id("vault_crate_cake"));
@@ -855,6 +867,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_STONE_SLAB, VaultMod.id("vault_stone_slab"));
       registerBlock(event, VAULT_STONE_STAIRS, VaultMod.id("vault_stone_stairs"));
       registerBlock(event, ANGEL_BLOCK, VaultMod.id("angel_block"));
+      registerBlock(event, MOB_BARRIER, VaultMod.id("mob_barrier"));
       registerBlock(event, CHROMATIC_LOG, VaultMod.id("chromatic_log"));
       registerBlock(event, STRIPPED_CHROMATIC_LOG, VaultMod.id("stripped_chromatic_log"));
       registerBlock(event, CHROMATIC_PLANKS, VaultMod.id("chromatic_planks"));
@@ -885,6 +898,7 @@ public class ModBlocks {
       registerTileEntity(event, CRYO_CHAMBER_TILE_ENTITY, VaultMod.id("cryo_chamber_tile_entity"));
       registerTileEntity(event, ANCIENT_CRYO_CHAMBER_TILE_ENTITY, VaultMod.id("ancient_cryo_chamber_tile_entity"));
       registerTileEntity(event, TREASURE_DOOR_TILE_ENTITY, VaultMod.id("treasure_door_tile_entity"));
+      registerTileEntity(event, DUNGEON_DOOR_TILE_ENTITY, VaultMod.id("dungeon_door_tile_entity"));
       registerTileEntity(event, VAULT_CHEST_TILE_ENTITY, VaultMod.id("vault_chest_tile_entity"));
       registerTileEntity(event, XP_ALTAR_TILE_ENTITY, VaultMod.id("xp_altar_tile_entity"));
       registerTileEntity(event, BLOOD_ALTAR_TILE_ENTITY, VaultMod.id("blood_altar_tile_entity"));
@@ -940,6 +954,7 @@ public class ModBlocks {
       registerTileEntity(event, TOTEM_MANA_REGEN_TILE_ENTITY, VaultMod.id("totem_mana_regen_tile_entity"));
       registerTileEntity(event, TOTEM_PLAYER_DAMAGE_TILE_ENTITY, VaultMod.id("totem_player_damage_tile_entity"));
       registerTileEntity(event, ANGEL_BLOCK_TILE_ENTITY, VaultMod.id("angel_block_tile_entity"));
+      registerTileEntity(event, MOB_BARRIER_ENTITY, VaultMod.id("mob_barrier_entity"));
    }
 
    public static void registerTileEntityRenderers(RegisterRenderers event) {
@@ -989,6 +1004,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(TOTEM_MANA_REGEN_TILE_ENTITY, TotemManaRegenRenderer::new);
       event.registerBlockEntityRenderer(TOTEM_PLAYER_DAMAGE_TILE_ENTITY, TotemPlayerDamageRenderer::new);
       event.registerBlockEntityRenderer(ANGEL_BLOCK_TILE_ENTITY, AngelBlockRenderer::new);
+      event.registerBlockEntityRenderer(MOB_BARRIER_ENTITY, MobBarrierRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
@@ -1075,6 +1091,7 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_CHARM_CONTROLLER_BLOCK);
       registerBlockItem(event, PLACEHOLDER, new PlaceholderBlockItem());
       registerBlockItem(event, TREASURE_DOOR, new TreasureDoorBlockItem());
+      registerBlockItem(event, DUNGEON_DOOR, new DungeonDoorBlockItem());
       registerBlockItem(event, COIN_PILE);
       registerBlockItem(event, BRONZE_COIN_PILE, VAULT_BRONZE);
       registerBlockItem(event, SILVER_COIN_PILE, VAULT_SILVER);
@@ -1130,6 +1147,7 @@ public class ModBlocks {
       registerBlockItem(event, WUTODIC_SILVER_BLOCK);
       registerBlockItem(event, ETERNAL_PEDESTAL);
       registerBlockItem(event, ANGEL_BLOCK, ANGEL_BLOCK_ITEM);
+      registerBlockItem(event, MOB_BARRIER);
       registerBlockItem(event, VAULT_STONE_SLAB);
       registerBlockItem(event, VAULT_STONE_STAIRS);
       registerBlockItem(event, CHROMATIC_LOG);

@@ -6,10 +6,14 @@ import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
+import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.util.NetcodeUtils;
 import java.text.DecimalFormat;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.Random;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -77,12 +81,33 @@ public class EffectAvoidanceGearAttribute {
       return tag;
    }
 
+   public static EffectAvoidanceGearAttribute.AttributeComparator comparator() {
+      return new EffectAvoidanceGearAttribute.AttributeComparator();
+   }
+
    public static EffectAvoidanceGearAttribute.Generator generator() {
       return new EffectAvoidanceGearAttribute.Generator();
    }
 
    public static EffectAvoidanceGearAttribute.Reader reader() {
       return new EffectAvoidanceGearAttribute.Reader();
+   }
+
+   private static class AttributeComparator extends VaultGearAttributeComparator<EffectAvoidanceGearAttribute> {
+      public EffectAvoidanceGearAttribute merge(EffectAvoidanceGearAttribute thisValue, EffectAvoidanceGearAttribute thatValue) {
+         return new EffectAvoidanceGearAttribute(thisValue.getEffect(), thisValue.getChance() + thatValue.getChance());
+      }
+
+      @Deprecated
+      public Optional<EffectAvoidanceGearAttribute> difference(EffectAvoidanceGearAttribute thisValue, EffectAvoidanceGearAttribute thatValue) {
+         return Optional.empty();
+      }
+
+      @Nonnull
+      @Override
+      public Comparator<EffectAvoidanceGearAttribute> getComparator() {
+         return Comparator.comparing(EffectAvoidanceGearAttribute::getChance);
+      }
    }
 
    public static class Config {

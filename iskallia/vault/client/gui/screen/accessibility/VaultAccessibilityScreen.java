@@ -115,6 +115,26 @@ public class VaultAccessibilityScreen extends AbstractElementScreen {
             }
          )
          .label(() -> new TextComponent("Default Color"), LabelTextStyle.shadow().center());
+      y += widgetHeight + padding;
+      this.addElement(
+         new ToggleButtonElement(
+               Spatials.positionXY(startX, y).size(widgetWidth, widgetHeight),
+               new TextComponent("Ability Scrolling"),
+               () -> options.isAbilityScrollingEnabled() ? "ON" : "OFF",
+               () -> options.setAbilityScrollingEnabled(!options.isAbilityScrollingEnabled())
+            )
+            .layout(this.translateWorldSpatial())
+      );
+      x = startX + widgetWidth + padding;
+      this.addElement(
+         new ToggleButtonElement(
+               Spatials.positionXY(x, y).size(widgetWidth, widgetHeight),
+               new TextComponent("Cooldown GUI"),
+               () -> options.getCooldownGuiOption().getSerializedNameUpper(),
+               options::cycleCooldownGuiOption
+            )
+            .layout(this.translateWorldSpatial())
+      );
       this.addElement(this.colorSquareElement).layout(this.translateWorldSpatial());
       this.addElement(this.redSliderElement).layout(this.translateWorldSpatial());
       this.addElement(this.greenSliderElement).layout(this.translateWorldSpatial());

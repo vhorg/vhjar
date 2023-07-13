@@ -44,4 +44,8 @@ public class EntityGroupsConfig extends Config {
    protected void reset() {
       this.groups = new LinkedHashMap<>();
    }
+
+   public Map<ResourceLocation, Set<EntityPredicate>> getGroups() {
+      return this.groups;
+   }
 }

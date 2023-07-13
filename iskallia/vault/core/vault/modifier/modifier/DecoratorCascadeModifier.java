@@ -21,8 +21,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class DecoratorCascadeModifier extends VaultModifier<DecoratorCascadeModifier.Properties> {
    public DecoratorCascadeModifier(ResourceLocation id, DecoratorCascadeModifier.Properties properties, VaultModifier.Display display) {
@@ -39,20 +41,18 @@ public class DecoratorCascadeModifier extends VaultModifier<DecoratorCascadeModi
             BlockState state = data.getGenRegion().getBlockState(pos);
             BlockEntity entity = data.getGenRegion().getBlockEntity(pos);
             CompoundTag rawx = data.getChunk().getBlockEntityNbt(pos);
-            if (rawx != null) {
+            if (rawx != null && !rawx.getBoolean("cascade_duped")) {
                PartialTile tilex = PartialTile.of(PartialBlockState.of(state), PartialCompoundNbt.of(entity), pos);
-               if (!rawx.getBoolean("cascade_duped")) {
-                  if (this.properties.filter.test(tilex)) {
-                     tiles.add(tilex);
-                     pending.add(rawx);
-                  }
+               if (this.properties.filter.test(tilex)) {
+                  tiles.add(tilex);
+                  pending.add(rawx);
                }
             }
          });
          ChunkRandom random = ChunkRandom.any();
 
          for (int i = 0; i < tiles.size(); i++) {
-            PartialTile tile = tiles.get(i);
+            PartialTile tile = tiles.get(i).copy();
             CompoundTag raw = pending.get(i);
             if (raw.contains("cascade_seed", 4)) {
                random.setSeed(raw.getLong("cascade_seed"));
@@ -63,6 +63,13 @@ public class DecoratorCascadeModifier extends VaultModifier<DecoratorCascadeModi
             for (float p = this.properties.chance; p > 0.0F && random.nextFloat() < p; p--) {
                BlockPos result = this.getValidPosition(data.getGenRegion(), tile.getPos(), data.getChunk().getPos(), random);
                if (result != null) {
+                  BlockState current = data.getGenRegion().getBlockState(result);
+                  if (current.isAir()) {
+                     tile.getState().set(BlockStateProperties.WATERLOGGED, false);
+                  } else if (current.getBlock() instanceof LiquidBlock) {
+                     tile.getState().set(BlockStateProperties.WATERLOGGED, true);
+                  }
+
                   tile.place(data.getGenRegion(), result, 3);
                   CompoundTag rawResult = data.getChunk().getBlockEntityNbt(result);
                   if (rawResult != null) {
@@ -86,7 +93,7 @@ public class DecoratorCascadeModifier extends VaultModifier<DecoratorCascadeModi
                if (x >> 4 == chunkPos.x && z >> 4 == chunkPos.z) {
                   BlockPos pos = new BlockPos(x, y, z);
                   BlockState state = world.getBlockState(pos);
-                  if (state.isAir() && world.getBlockState(pos.below()).isFaceSturdy(world, pos, Direction.UP)) {
+                  if (world.getBlockState(pos.below()).isFaceSturdy(world, pos, Direction.UP) && (state.isAir() || state.getBlock() instanceof LiquidBlock)) {
                      if (random.nextInt(++index) == 0) {
                         result = pos;
                      }

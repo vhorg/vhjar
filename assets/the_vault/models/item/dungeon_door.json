@@ -1,0 +1,11 @@
+{
+    "parent": "the_vault:item/dungeon_door/spider",
+    "overrides": [
+      { "predicate": { "the_vault:dungeon_door_type": 0 }, "model": "the_vault:item/dungeon_door/spider" },
+      { "predicate": { "the_vault:dungeon_door_type": 1 }, "model": "the_vault:item/dungeon_door/illager" },
+      { "predicate": { "the_vault:dungeon_door_type": 2 }, "model": "the_vault:item/dungeon_door/zombie" },
+      { "predicate": { "the_vault:dungeon_door_type": 3 }, "model": "the_vault:item/dungeon_door/skeleton" },
+      { "predicate": { "the_vault:dungeon_door_type": 4 }, "model": "the_vault:item/dungeon_door/piglin" },
+      { "predicate": { "the_vault:dungeon_door_type": 6 }, "model": "the_vault:item/dungeon_door/witch" }
+    ]
+  }

@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
 
 public class ClientAbilityData {
    private static AbilityTree ABILITIES = new AbilityTree();
@@ -31,24 +33,29 @@ public class ClientAbilityData {
    public static List<TieredSkill> getLearnedAbilities() {
       List<TieredSkill> abilities = new ArrayList<>();
       ABILITIES.iterate(TieredSkill.class, ability -> {
-         if (ability.isUnlocked()) {
+         if (ability.isUnlocked() && ((SpecializedSkill)ability.getParent()).getSpecialization() == ability) {
             abilities.add(ability);
          }
       });
       return abilities;
    }
 
+   @Nullable
    public static SpecializedSkill getSelected() {
       return ABILITIES.getSelected();
    }
 
+   @Nullable
    public static Ability getSelectedAbility() {
-      return (Ability)Optional.ofNullable(getSelected())
-         .map(SpecializedSkill::getSpecialization)
-         .filter(skill -> skill instanceof TieredSkill)
-         .map(skill -> ((TieredSkill)skill).getChild())
-         .filter(skill -> skill instanceof Ability)
-         .orElse(null);
+      Player player = Minecraft.getInstance().player;
+      return player == null
+         ? null
+         : (Ability)Optional.ofNullable(getSelected())
+            .map(SpecializedSkill::getSpecialization)
+            .filter(skill -> skill instanceof TieredSkill)
+            .map(skill -> ((TieredSkill)skill).getChild())
+            .filter(skill -> skill instanceof Ability)
+            .orElse(null);
    }
 
    public static Skill getParent(Ability ability) {

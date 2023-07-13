@@ -1,5 +1,6 @@
 package iskallia.vault.skill.ability.effect;
 
+import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.skill.ability.effect.spi.AbstractSmiteAbility;
 
 public class SmiteAbility extends AbstractSmiteAbility {
@@ -27,6 +28,11 @@ public class SmiteAbility extends AbstractSmiteAbility {
          color,
          additionalManaPerBolt
       );
+   }
+
+   @Override
+   public ActiveFlags getFlag() {
+      return ActiveFlags.IS_SMITE_BASE_ATTACKING;
    }
 
    public SmiteAbility() {

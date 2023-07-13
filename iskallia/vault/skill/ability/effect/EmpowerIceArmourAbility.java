@@ -5,28 +5,21 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.mana.Mana;
 import iskallia.vault.skill.ability.effect.spi.AbstractEmpowerAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
-import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.AbilityTree;
-import iskallia.vault.util.AABBHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -36,10 +29,9 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
    bus = Bus.FORGE
 )
 public class EmpowerIceArmourAbility extends AbstractEmpowerAbility {
-   private static final Predicate<LivingEntity> MONSTER_PREDICATE = entity -> entity.getType().getCategory() == MobCategory.MONSTER;
-   private static final int SLOWNESS_TICKS_DURATION = 40;
-   private float radius;
-   private int slownessAmplifier;
+   private int chilledAmplifier;
+   private int chilledDuration;
+   private float additionalManaPerHit;
 
    public EmpowerIceArmourAbility(
       int unlockLevel,
@@ -48,31 +40,37 @@ public class EmpowerIceArmourAbility extends AbstractEmpowerAbility {
       int cooldownTicks,
       float manaCostPerSecond,
       int durationTicks,
-      float speedPercentAdded,
       float radius,
-      int slownessAmplifier
+      int chilledAmplifier,
+      int chilledDuration,
+      float additionalManaPerHit
    ) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCostPerSecond, durationTicks);
-      this.radius = radius;
-      this.slownessAmplifier = slownessAmplifier;
+      this.chilledAmplifier = chilledAmplifier;
+      this.chilledDuration = chilledDuration;
+      this.additionalManaPerHit = additionalManaPerHit;
    }
 
    public EmpowerIceArmourAbility() {
    }
 
-   public float getRadius() {
-      return this.radius;
+   public int getChilledAmplifier() {
+      return this.chilledAmplifier;
    }
 
-   public int getSlownessAmplifier() {
-      return this.slownessAmplifier;
+   public int getChilledDuration() {
+      return this.chilledDuration;
+   }
+
+   public float getAdditionalManaPerHit() {
+      return this.additionalManaPerHit;
    }
 
    @Override
    protected Ability.ActionResult doToggle(SkillContext context) {
       return context.getSource().as(ServerPlayer.class).map(player -> {
          if (this.isActive()) {
-            int amplifier = Mth.clamp(this.getSlownessAmplifier() * 100, 0, 100);
+            int amplifier = Mth.clamp(this.getChilledAmplifier() * 100, 0, 100);
             ModEffects.EMPOWER_ICE_ARMOUR.addTo(player, amplifier);
             return Ability.ActionResult.successCooldownDeferred();
          } else {
@@ -114,49 +112,44 @@ public class EmpowerIceArmourAbility extends AbstractEmpowerAbility {
    }
 
    @SubscribeEvent
-   public static void on(LivingUpdateEvent event) {
-      if (event.getEntityLiving() instanceof ServerPlayer player && player.hasEffect(ModEffects.EMPOWER_ICE_ARMOUR)) {
+   public static void onDamage(LivingAttackEvent event) {
+      if (event.getEntityLiving() instanceof ServerPlayer player) {
          AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
-
-         for (EmpowerIceArmourAbility ability : abilities.getAll(EmpowerIceArmourAbility.class, Skill::isUnlocked)) {
-            List<Mob> nearbyMobs = player.level
-               .getNearbyEntities(
-                  Mob.class,
-                  TargetingConditions.forCombat().range(ability.getRadius()).selector(MONSTER_PREDICATE),
-                  player,
-                  AABBHelper.create(player.position(), ability.getRadius())
-               );
-            nearbyMobs.forEach(
-               mob -> {
-                  if (!mob.hasEffect(MobEffects.MOVEMENT_SLOWDOWN)
-                     || mob.getEffect(MobEffects.MOVEMENT_SLOWDOWN).getAmplifier() < ability.getSlownessAmplifier()) {
-                     mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 40, ability.getSlownessAmplifier(), false, true, true));
-                  }
+         abilities.getAll(EmpowerIceArmourAbility.class, Ability::isActive).stream().findFirst().ifPresent(ability -> {
+            if (event.getSource().getEntity() instanceof LivingEntity attacker) {
+               attacker.addEffect(new MobEffectInstance(ModEffects.CHILLED, ability.getChilledDuration(), ability.getChilledAmplifier(), false, false));
+               if (Mana.decrease(player, ability.getAdditionalManaPerHit()) <= 0.0F) {
+                  player.removeEffect(ModEffects.SHELL);
+                  ability.putOnCooldown(SkillContext.of(player));
+                  ability.setActive(false);
                }
-            );
-         }
+            }
+         });
       }
    }
 
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.radius), buffer);
-      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.slownessAmplifier), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.chilledAmplifier), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.chilledDuration), buffer);
+      Adapters.FLOAT.writeBits(Float.valueOf(this.additionalManaPerHit), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.radius = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.slownessAmplifier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.chilledAmplifier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.chilledDuration = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.additionalManaPerHit = Adapters.FLOAT.readBits(buffer).orElseThrow();
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.radius)).ifPresent(tag -> nbt.put("radius", tag));
-         Adapters.INT.writeNbt(Integer.valueOf(this.slownessAmplifier)).ifPresent(tag -> nbt.put("slownessAmplifier", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.chilledAmplifier)).ifPresent(tag -> nbt.put("chilledAmplifier", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.chilledDuration)).ifPresent(tag -> nbt.put("chilledDuration", tag));
+         Adapters.FLOAT.writeNbt(Float.valueOf(this.additionalManaPerHit)).ifPresent(tag -> nbt.put("additionalManaPerHit", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -164,15 +157,17 @@ public class EmpowerIceArmourAbility extends AbstractEmpowerAbility {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.radius = Adapters.FLOAT.readNbt(nbt.get("radius")).orElse(0.0F);
-      this.slownessAmplifier = Adapters.INT.readNbt(nbt.get("slownessAmplifier")).orElse(0);
+      this.chilledAmplifier = Adapters.INT.readNbt(nbt.get("chilledAmplifier")).orElse(0);
+      this.chilledDuration = Adapters.INT.readNbt(nbt.get("chilledDuration")).orElse(0);
+      this.additionalManaPerHit = Adapters.FLOAT.readNbt(nbt.get("additionalManaPerHit")).orElse(0.0F);
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
-         Adapters.FLOAT.writeJson(Float.valueOf(this.radius)).ifPresent(element -> json.add("radius", element));
-         Adapters.INT.writeJson(Integer.valueOf(this.slownessAmplifier)).ifPresent(element -> json.add("slownessAmplifier", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.chilledAmplifier)).ifPresent(element -> json.add("chilledAmplifier", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.chilledDuration)).ifPresent(element -> json.add("chilledDuration", element));
+         Adapters.FLOAT.writeJson(Float.valueOf(this.additionalManaPerHit)).ifPresent(element -> json.add("additionalManaPerHit", element));
          return (JsonObject)json;
       });
    }
@@ -180,8 +175,9 @@ public class EmpowerIceArmourAbility extends AbstractEmpowerAbility {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.radius = Adapters.FLOAT.readJson(json.get("radius")).orElse(0.0F);
-      this.slownessAmplifier = Adapters.INT.readJson(json.get("slownessAmplifier")).orElse(0);
+      this.chilledAmplifier = Adapters.INT.readJson(json.get("chilledAmplifier")).orElse(0);
+      this.chilledDuration = Adapters.INT.readJson(json.get("chilledDuration")).orElse(0);
+      this.additionalManaPerHit = Adapters.FLOAT.readJson(json.get("additionalManaPerHit")).orElse(0.0F);
    }
 
    public static class EmpowerIceArmourEffect extends EmpowerAbility.EmpowerEffect {

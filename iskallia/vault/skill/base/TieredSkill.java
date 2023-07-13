@@ -4,6 +4,12 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.gear.attribute.ability.AbilityLevelAttribute;
+import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.snapshot.AttributeSnapshot;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
+import iskallia.vault.util.MiscUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -11,35 +17,83 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 
-public class TieredSkill extends LearnableSkill {
+public class TieredSkill extends LearnableSkill implements TickingSkill {
    private List<LearnableSkill> tiers;
+   private int maxLearnableTier;
    private int tier;
+   private int bonusTier;
    private static final ArrayAdapter<Skill> TIERS = Adapters.ofArray(Skill[]::new, Adapters.SKILL);
 
    public TieredSkill(int unlockLevel, int learnPointCost, int regretPointCost, Stream<LearnableSkill> tiers) {
       super(unlockLevel, learnPointCost, regretPointCost);
       this.tiers = tiers.toList();
+      this.maxLearnableTier = this.tiers.size();
       this.tiers.forEach(tier -> tier.setParent(this));
    }
 
    public TieredSkill() {
    }
 
-   public int getTier() {
+   public int getUnmodifiedTier() {
       return this.tier;
    }
 
-   public int getMaxTier() {
-      return this.tiers.size();
+   public int getActualTier() {
+      return this.tier + this.bonusTier;
+   }
+
+   public int getMaxLearnableTier() {
+      return this.maxLearnableTier;
    }
 
    public LearnableSkill getChild() {
-      return this.getChild(this.tier);
+      return this.getChild(this.getActualTier());
    }
 
    public LearnableSkill getChild(int tier) {
-      return tier > 0 ? this.tiers.get(tier - 1) : null;
+      return tier <= 0 ? null : MiscUtils.getListEntrySafe(this.tiers, tier - 1);
+   }
+
+   @Override
+   public void onTick(SkillContext context) {
+      context.getSource()
+         .as(ServerPlayer.class)
+         .ifPresent(player -> this.updateBonusTier(AttributeSnapshotHelper.getInstance().getSnapshot(player), context.copy()));
+   }
+
+   public void updateBonusTier(AttributeSnapshot snapshot, SkillContext context) {
+      int additional = snapshot.getAttributeValueList(ModGearAttributes.ABILITY_LEVEL).stream().filter(attribute -> {
+         if (attribute.getAbility().equals("all_abilities") && this.hasParentOfType(AbilityTree.class)) {
+            return true;
+         } else {
+            Skill current = this;
+
+            while (!attribute.getAbility().equals(current.getId())) {
+               current = current.getParent();
+               if (current == null) {
+                  return false;
+               }
+            }
+
+            return true;
+         }
+      }).mapToInt(AbilityLevelAttribute::getLevelChange).sum();
+      this.updateBonusTier(additional, context);
+   }
+
+   protected void updateBonusTier(int bonusTier, SkillContext context) {
+      if (this.bonusTier != bonusTier) {
+         if (this.tier > 0 && this.tier + this.bonusTier > 0) {
+            this.unlearnCurrentSkill(context);
+         }
+
+         this.bonusTier = bonusTier;
+         if (this.tier > 0 && this.tier + this.bonusTier > 0) {
+            this.learnCurrentSkill(context);
+         }
+      }
    }
 
    @Override
@@ -74,21 +128,22 @@ public class TieredSkill extends LearnableSkill {
 
    @Override
    public boolean isUnlocked() {
-      return this.tier > 0;
+      return this.getUnmodifiedTier() > 0;
    }
 
    @Override
    public boolean canLearn(SkillContext context) {
-      return this.tier < this.tiers.size() && this.tiers.get(this.tier).canLearn(context);
+      return this.tier < this.maxLearnableTier && this.tiers.get(this.tier).canLearn(context);
    }
 
    @Override
    public void learn(SkillContext context) {
       if (this.tier > 0) {
-         this.tiers.get(this.tier - 1).regret(SkillContext.empty());
+         this.unlearnCurrentSkill(context.copy());
       }
 
-      this.tiers.get(this.tier++).learn(context);
+      this.tier++;
+      this.learnCurrentSkill(context);
    }
 
    @Override
@@ -98,10 +153,19 @@ public class TieredSkill extends LearnableSkill {
 
    @Override
    public void regret(SkillContext context) {
-      this.tiers.get(--this.tier).regret(context);
+      this.unlearnCurrentSkill(context);
+      this.tier--;
       if (this.tier > 0) {
-         this.tiers.get(this.tier - 1).learn(SkillContext.empty());
+         this.learnCurrentSkill(context.copy());
       }
+   }
+
+   private void unlearnCurrentSkill(SkillContext context) {
+      MiscUtils.getListEntrySafe(this.tiers, this.tier + this.bonusTier - 1).regret(context);
+   }
+
+   private void learnCurrentSkill(SkillContext context) {
+      MiscUtils.getListEntrySafe(this.tiers, this.tier + this.bonusTier - 1).learn(context);
    }
 
    @Override
@@ -151,6 +215,7 @@ public class TieredSkill extends LearnableSkill {
 
          this.tier = this.tier > copy.size() ? 0 : this.tier;
          this.tiers = copy;
+         this.maxLearnableTier = tiered.getMaxLearnableTier();
          return this;
       } else {
          context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
@@ -160,7 +225,7 @@ public class TieredSkill extends LearnableSkill {
 
    @Override
    public <T extends Skill> T copy() {
-      TieredSkill copy = new TieredSkill(this.getUnlockLevel(), this.getLearnPointCost(), this.getRegretPointCost(), this.tiers.stream().map(Skill::copy));
+      TieredSkill copy = new TieredSkill(this.unlockLevel, this.learnPointCost, this.regretPointCost, this.tiers.stream().map(Skill::copy));
       copy.parent = this.parent;
       copy.id = this.id;
       copy.name = this.name;
@@ -169,6 +234,8 @@ public class TieredSkill extends LearnableSkill {
       copy.regretPointCost = this.regretPointCost;
       copy.unlockLevel = this.unlockLevel;
       copy.tier = this.tier;
+      copy.bonusTier = this.bonusTier;
+      copy.maxLearnableTier = this.maxLearnableTier;
       return (T)copy;
    }
 
@@ -176,14 +243,18 @@ public class TieredSkill extends LearnableSkill {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       TIERS.writeBits(this.tiers.toArray(Skill[]::new), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.maxLearnableTier), buffer);
       Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.tier), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.bonusTier), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.tiers = Arrays.stream(TIERS.readBits(buffer).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.maxLearnableTier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
       this.tier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
+      this.bonusTier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
       this.tiers.forEach(tier -> tier.setParent(this));
    }
 
@@ -191,7 +262,9 @@ public class TieredSkill extends LearnableSkill {
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
          TIERS.writeNbt(this.tiers.toArray(Skill[]::new)).ifPresent(tag -> nbt.put("tiers", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.maxLearnableTier)).ifPresent(tag -> nbt.put("maxLearnableTier", tag));
          Adapters.INT.writeNbt(Integer.valueOf(this.tier)).ifPresent(tag -> nbt.put("tier", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.bonusTier)).ifPresent(tag -> nbt.put("bonusTier", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -200,7 +273,9 @@ public class TieredSkill extends LearnableSkill {
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
       this.tiers = Arrays.stream(TIERS.readNbt(nbt.get("tiers")).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.maxLearnableTier = Adapters.INT.readNbt(nbt.get("maxLearnableTier")).orElse(this.tiers.size());
       this.tier = Adapters.INT.readNbt(nbt.get("tier")).orElse(0);
+      this.bonusTier = Adapters.INT.readNbt(nbt.get("bonusTier")).orElse(0);
       this.tiers.forEach(tier -> tier.setParent(this));
    }
 
@@ -208,7 +283,9 @@ public class TieredSkill extends LearnableSkill {
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
          TIERS.writeJson(this.tiers.toArray(Skill[]::new)).ifPresent(element -> json.add("tiers", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.maxLearnableTier)).ifPresent(element -> json.add("maxLearnableTier", element));
          Adapters.INT.writeJson(Integer.valueOf(this.tier)).ifPresent(element -> json.add("tier", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.bonusTier)).ifPresent(element -> json.add("bonusTier", element));
          return (JsonObject)json;
       });
    }
@@ -217,7 +294,9 @@ public class TieredSkill extends LearnableSkill {
    public void readJson(JsonObject json) {
       super.readJson(json);
       this.tiers = Arrays.stream(TIERS.readJson(json.get("tiers")).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.maxLearnableTier = Adapters.INT.readJson(json.get("maxLearnableTier")).orElse(this.tiers.size());
       this.tier = Adapters.INT.readJson(json.get("tier")).orElse(0);
+      this.bonusTier = Adapters.INT.readJson(json.get("bonusTier")).orElse(0);
       this.tiers.forEach(tier -> tier.setParent(this));
    }
 }

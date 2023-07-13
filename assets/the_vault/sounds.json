@@ -1,4 +1,36 @@
 {
+  "bonk": {
+    "category": "master",
+    "sounds": [
+      "the_vault:bonk"
+    ]
+  },
+  "bonk_charge": {
+    "category": "master",
+    "sounds": [
+      "the_vault:bonk_charge"
+    ]
+  },
+  "ability_on_cooldown": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability_on_cooldown"
+    ]
+  },
+  "ability_out_of_mana": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ability_out_of_mana"
+    ]
+  },
+  "mob_crit": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:mob_crit",
+      "the_vault:mob_crit2",
+      "the_vault:mob_crit3"
+    ]
+  },
   "smite_bolt": {
     "category": "master",
     "sounds": [

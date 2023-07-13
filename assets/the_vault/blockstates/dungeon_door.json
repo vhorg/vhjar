@@ -1,0 +1,720 @@
+{
+  "variants": {
+    "facing=east,half=lower,hinge=left,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom_open"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top_open",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top_open"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom_open",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom_open",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top_open",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom_open",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top_open",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top_open",
+      "y": 90
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom_open"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_bottom_open",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top_open"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=spider": {
+      "model": "the_vault:block/dungeon_door/spider_top_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom_open"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top_open",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top_open"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom_open",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom_open",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top_open",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom_open",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top_open",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top_open",
+      "y": 90
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom_open"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_bottom_open",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top_open"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=illager": {
+      "model": "the_vault:block/dungeon_door/illager_top_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom_open"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top_open",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top_open"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom_open",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom_open",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top_open",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom_open",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top_open",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top_open",
+      "y": 90
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom_open"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_bottom_open",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top_open"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=zombie": {
+      "model": "the_vault:block/dungeon_door/zombie_top_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom_open"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top_open",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top_open"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom_open",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom_open",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top_open",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom_open",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top_open",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top_open",
+      "y": 90
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom_open"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_bottom_open",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top_open"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=skeleton": {
+      "model": "the_vault:block/dungeon_door/skeleton_top_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom_open"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top_open",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top_open"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom_open",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom_open",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top_open",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom_open",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top_open",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top_open",
+      "y": 90
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom_open"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_bottom_open",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top_open"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=piglin": {
+      "model": "the_vault:block/dungeon_door/piglin_top",
+      "y": 270
+    },
+    "facing=east,half=lower,hinge=left,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=left,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom_open",
+      "y": 180
+    },
+    "facing=east,half=lower,hinge=right,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom",
+      "y": 90
+    },
+    "facing=east,half=lower,hinge=right,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom_open"
+    },
+    "facing=east,half=upper,hinge=left,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=left,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top_open",
+      "y": 180
+    },
+    "facing=east,half=upper,hinge=right,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top",
+      "y": 90
+    },
+    "facing=east,half=upper,hinge=right,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top_open"
+    },
+    "facing=north,half=lower,hinge=left,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom"
+    },
+    "facing=north,half=lower,hinge=left,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom_open",
+      "y": 90
+    },
+    "facing=north,half=lower,hinge=right,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom"
+    },
+    "facing=north,half=lower,hinge=right,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom_open",
+      "y": 270
+    },
+    "facing=north,half=upper,hinge=left,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top"
+    },
+    "facing=north,half=upper,hinge=left,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top_open",
+      "y": 90
+    },
+    "facing=north,half=upper,hinge=right,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top"
+    },
+    "facing=north,half=upper,hinge=right,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=left,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=left,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom_open",
+      "y": 270
+    },
+    "facing=south,half=lower,hinge=right,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom",
+      "y": 180
+    },
+    "facing=south,half=lower,hinge=right,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom_open",
+      "y": 90
+    },
+    "facing=south,half=upper,hinge=left,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=left,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top_open",
+      "y": 270
+    },
+    "facing=south,half=upper,hinge=right,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top",
+      "y": 180
+    },
+    "facing=south,half=upper,hinge=right,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top_open",
+      "y": 90
+    },
+    "facing=west,half=lower,hinge=left,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=left,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom_open"
+    },
+    "facing=west,half=lower,hinge=right,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom",
+      "y": 270
+    },
+    "facing=west,half=lower,hinge=right,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_bottom_open",
+      "y": 180
+    },
+    "facing=west,half=upper,hinge=left,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=left,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top_open"
+    },
+    "facing=west,half=upper,hinge=right,open=false,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top",
+      "y": 270
+    },
+    "facing=west,half=upper,hinge=right,open=true,type=witch": {
+      "model": "the_vault:block/dungeon_door/witch_top_open",
+      "y": 180
+    }
+  }
+}

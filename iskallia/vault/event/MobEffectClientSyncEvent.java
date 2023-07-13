@@ -22,12 +22,14 @@ public final class MobEffectClientSyncEvent {
    @SubscribeEvent
    public static void on(PotionAddedEvent event) {
       LivingEntity livingEntity = event.getEntityLiving();
-      if (!(livingEntity instanceof Player)) {
-         MobEffectInstance effectInstance = event.getPotionEffect();
-         if (ModEffects.SYNC_TO_CLIENT_ON_MOB.contains(effectInstance.getEffect())) {
-            int entityId = livingEntity.getId();
-            ModNetwork.CHANNEL
-               .send(PacketDistributor.TRACKING_ENTITY.with(event::getEntityLiving), new ClientboundMobEffectUpdateMessage(entityId, effectInstance));
+      if (!livingEntity.level.isClientSide) {
+         if (!(livingEntity instanceof Player)) {
+            MobEffectInstance effectInstance = event.getPotionEffect();
+            if (ModEffects.SYNC_TO_CLIENT_ON_MOB.contains(effectInstance.getEffect())) {
+               int entityId = livingEntity.getId();
+               ModNetwork.CHANNEL
+                  .send(PacketDistributor.TRACKING_ENTITY.with(event::getEntityLiving), new ClientboundMobEffectUpdateMessage(entityId, effectInstance));
+            }
          }
       }
    }
@@ -43,13 +45,15 @@ public final class MobEffectClientSyncEvent {
    }
 
    private static void syncRemoveEvent(LivingEntity livingEntity, MobEffectInstance effectInstance) {
-      if (!(livingEntity instanceof Player)) {
-         if (effectInstance != null && ModEffects.SYNC_TO_CLIENT_ON_MOB.contains(effectInstance.getEffect())) {
-            ModNetwork.CHANNEL
-               .send(
-                  PacketDistributor.TRACKING_ENTITY.with(() -> livingEntity),
-                  new ClientboundMobEffectRemoveMessage(livingEntity.getId(), effectInstance.getEffect())
-               );
+      if (!livingEntity.level.isClientSide) {
+         if (!(livingEntity instanceof Player)) {
+            if (effectInstance != null && ModEffects.SYNC_TO_CLIENT_ON_MOB.contains(effectInstance.getEffect())) {
+               ModNetwork.CHANNEL
+                  .send(
+                     PacketDistributor.TRACKING_ENTITY.with(() -> livingEntity),
+                     new ClientboundMobEffectRemoveMessage(livingEntity.getId(), effectInstance.getEffect())
+                  );
+            }
          }
       }
    }

@@ -38,6 +38,12 @@ public class SkillSource {
       return this;
    }
 
+   public SkillSource copy() {
+      return new SkillSource()
+         .setPos(this.pos != null ? new Vec3(this.pos.x(), this.pos.y(), this.pos.z()) : null)
+         .setMana(this.mana != null ? this.mana : null);
+   }
+
    public <E> Optional<E> as(Class<E> type) {
       return Optional.empty();
    }

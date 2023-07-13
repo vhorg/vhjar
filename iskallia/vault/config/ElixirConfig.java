@@ -78,9 +78,12 @@ public class ElixirConfig extends Config {
 
    public List<ElixirTask> generateGoals(int level, RandomSource random) {
       ElixirConfig.Entry entry = this.entries.getForLevel(level).orElse(null);
-      return (List<ElixirTask>)(entry == null
-         ? new ArrayList<>()
-         : entry.getTasks().stream().map(config -> config.generate(random)).collect(Collectors.toList()));
+      if (entry == null) {
+         return new ArrayList<>();
+      } else {
+         ElixirConfig.IntBalancingRandom balancingRandom = new ElixirConfig.IntBalancingRandom(random);
+         return entry.getTasks().stream().map(config -> config.generate(balancingRandom)).collect(Collectors.toList());
+      }
    }
 
    public static class Entry implements LevelEntryList.ILevelEntry {
@@ -108,6 +111,33 @@ public class ElixirConfig extends Config {
 
       public List<ElixirTask.Config<?>> getTasks() {
          return this.tasks;
+      }
+   }
+
+   private static class IntBalancingRandom implements RandomSource {
+      private final RandomSource delegate;
+      private double balance = 0.0;
+
+      protected IntBalancingRandom(RandomSource randomSource) {
+         this.delegate = randomSource;
+      }
+
+      @Override
+      public int nextInt(int bound) {
+         int balancedBound = bound + (int)this.balance;
+         if (balancedBound <= 0) {
+            this.balance += bound / 2.0;
+            return 0;
+         } else {
+            int randValue = this.delegate.nextInt(balancedBound);
+            this.balance += bound / 2.0 - randValue;
+            return randValue;
+         }
+      }
+
+      @Override
+      public long nextLong() {
+         return this.delegate.nextLong();
       }
    }
 }

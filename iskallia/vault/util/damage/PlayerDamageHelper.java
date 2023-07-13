@@ -47,7 +47,7 @@ public class PlayerDamageHelper {
       return apply(
          player.getServer(),
          player.getUUID(),
-         new PlayerDamageHelper.DamageMultiplier(id, player.getUUID(), value, operation, showOnClient, Integer.MAX_VALUE, onTimeout)
+         new PlayerDamageHelper.DamageMultiplier(id, player.getUUID(), value, operation, showOnClient, Integer.MAX_VALUE, onTimeout, false)
       );
    }
 
@@ -81,7 +81,7 @@ public class PlayerDamageHelper {
       return apply(
          player.getServer(),
          player.getUUID(),
-         new PlayerDamageHelper.DamageMultiplier(id, player.getUUID(), value, operation, showOnClient, tickDuration, onTimeout)
+         new PlayerDamageHelper.DamageMultiplier(id, player.getUUID(), value, operation, showOnClient, tickDuration, onTimeout, false)
       );
    }
 
@@ -160,8 +160,12 @@ public class PlayerDamageHelper {
    @SubscribeEvent
    public static void onPlayerDamage(LivingHurtEvent event) {
       Entity source = event.getSource().getEntity();
-      if (source instanceof ServerPlayer && !ActiveFlags.IS_AOE_ATTACKING.isSet()) {
-         event.setAmount(event.getAmount() * getDamageMultiplier((ServerPlayer)source, true));
+      if (source instanceof ServerPlayer && !ActiveFlags.IS_AOE_ATTACKING.isSet() && !ActiveFlags.IS_AP_ATTACKING.isSet()) {
+         event.setAmount(event.getAmount() * getDamageMultiplier((ServerPlayer)source, true, false));
+      }
+
+      if (source instanceof ServerPlayer && ActiveFlags.IS_AP_ATTACKING.isSet()) {
+         event.setAmount(event.getAmount() * getDamageMultiplier((ServerPlayer)source, true, true));
       }
    }
 
@@ -179,22 +183,22 @@ public class PlayerDamageHelper {
       }
    }
 
-   public static float getDamageMultiplier(Player player, boolean ignoreClientFlag) {
-      return getDamageMultiplier(player.getUUID(), ignoreClientFlag);
+   public static float getDamageMultiplier(Player player, boolean ignoreClientFlag, boolean isAPMult) {
+      return getDamageMultiplier(player.getUUID(), ignoreClientFlag, isAPMult);
    }
 
-   private static float getDamageMultiplier(UUID playerId, boolean ignoreClientFlag) {
+   private static float getDamageMultiplier(UUID playerId, boolean ignoreClientFlag, boolean isAPMult) {
       Collection<PlayerDamageHelper.DamageMultiplier> damageMultipliers = multipliers.getOrDefault(playerId, Collections.emptyMap()).values();
       float multiplier = 1.0F;
 
       for (PlayerDamageHelper.DamageMultiplier mult : damageMultipliers) {
-         if ((ignoreClientFlag || mult.showOnClient) && mult.operation == PlayerDamageHelper.Operation.ADDITIVE_MULTIPLY) {
+         if (mult.isAPMult == isAPMult && (ignoreClientFlag || mult.showOnClient) && mult.operation == PlayerDamageHelper.Operation.ADDITIVE_MULTIPLY) {
             multiplier += mult.value;
          }
       }
 
       for (PlayerDamageHelper.DamageMultiplier multx : damageMultipliers) {
-         if ((ignoreClientFlag || multx.showOnClient) && multx.operation == PlayerDamageHelper.Operation.STACKING_MULTIPLY) {
+         if (multx.isAPMult == isAPMult && (ignoreClientFlag || multx.showOnClient) && multx.operation == PlayerDamageHelper.Operation.STACKING_MULTIPLY) {
             multiplier *= multx.value;
          }
       }
@@ -214,11 +218,12 @@ public class PlayerDamageHelper {
    }
 
    public static void sync(ServerPlayer sPlayer) {
-      float multiplier = getDamageMultiplier(sPlayer, false);
+      float multiplier = getDamageMultiplier(sPlayer, false, false);
       ModNetwork.CHANNEL.sendTo(new PlayerDamageMultiplierMessage(multiplier), sPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
    }
 
    public static class DamageMultiplier {
+      private final boolean isAPMult;
       private final UUID id;
       private final UUID playerId;
       private final float value;
@@ -230,7 +235,14 @@ public class PlayerDamageHelper {
       private boolean removed = false;
 
       private DamageMultiplier(
-         UUID id, UUID playerId, float value, PlayerDamageHelper.Operation operation, boolean showOnClient, int tickTimeout, Consumer<ServerPlayer> onTimeout
+         UUID id,
+         UUID playerId,
+         float value,
+         PlayerDamageHelper.Operation operation,
+         boolean showOnClient,
+         int tickTimeout,
+         Consumer<ServerPlayer> onTimeout,
+         boolean isAPMult
       ) {
          this.id = id;
          this.playerId = playerId;
@@ -240,6 +252,7 @@ public class PlayerDamageHelper {
          this.originalTimeout = tickTimeout;
          this.tickTimeout = tickTimeout;
          this.onTimeout = onTimeout;
+         this.isAPMult = isAPMult;
       }
 
       public float getMultiplier() {

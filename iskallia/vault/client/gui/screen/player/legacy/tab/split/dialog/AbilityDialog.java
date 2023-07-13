@@ -25,17 +25,21 @@ import iskallia.vault.skill.base.SpecializedSkill;
 import iskallia.vault.skill.base.TieredSkill;
 import iskallia.vault.skill.tree.AbilityTree;
 import java.awt.Rectangle;
+import java.util.Objects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Button.OnPress;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.player.Player;
 
 public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScreen> {
    private final AbilityTree abilityTree;
    private MutableComponent descriptionContentComponent;
    private String selectedAbility = null;
+   private String prevSelectedAbility = null;
+   private int prevAbilityLevel = -1;
    private AbilityWidget selectedAbilityWidget = null;
 
    public AbilityDialog(AbilityTree abilityTree, AbilitiesElementContainerScreen skillTreeScreen) {
@@ -46,68 +50,81 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
    @Override
    public void update() {
       if (this.selectedAbility != null) {
-         TieredSkill ability = (TieredSkill)this.abilityTree.getForId(this.selectedAbility).orElse(null);
-         if (ability != null) {
-            SpecializedSkill existing = (SpecializedSkill)ability.getParent();
-            boolean isSpecialization = existing.getIndex() != 0;
-            this.selectedAbilityWidget = new AbilityWidget(
-               this.selectedAbility,
-               this.abilityTree,
-               0,
-               0,
-               isSpecialization ? AbilityNodeTextures.SECONDARY_NODE : AbilityNodeTextures.PRIMARY_NODE,
-               TextureAtlasRegion.of(ModTextureAtlases.ABILITIES, ModConfigs.ABILITIES_GUI.getIcon(this.selectedAbility))
-            );
-            SpecializedSkill current = this.selectedAbilityWidget.getAbilityGroup();
-            SpecializedSkill target = this.selectedAbilityWidget.makeAbilityNode();
-            OnPress pressAction;
-            String buttonText;
-            boolean activeState;
-            if (target.getIndex() != 0) {
-               buttonText = "Select Specialization";
-               pressAction = button -> this.selectSpecialization();
-               activeState = existing.getIndex() == 0 && existing.isUnlocked() && VaultBarOverlay.vaultLevel >= target.getUnlockLevel();
-               this.regretButton = null;
-            } else {
-               if (!target.isUnlocked()) {
-                  buttonText = "Learn (" + current.getLearnPointCost() + ")";
+         Player player = Minecraft.getInstance().player;
+         if (player != null) {
+            TieredSkill ability = (TieredSkill)this.abilityTree.getForId(this.selectedAbility).orElse(null);
+            if (ability != null) {
+               SpecializedSkill existing = (SpecializedSkill)ability.getParent();
+               boolean isSpecialization = existing.getIndex() != 0;
+               this.selectedAbilityWidget = new AbilityWidget(
+                  this.selectedAbility,
+                  this.abilityTree,
+                  0,
+                  0,
+                  isSpecialization ? AbilityNodeTextures.SECONDARY_NODE : AbilityNodeTextures.PRIMARY_NODE,
+                  TextureAtlasRegion.of(ModTextureAtlases.ABILITIES, ModConfigs.ABILITIES_GUI.getIcon(this.selectedAbility))
+               );
+               SpecializedSkill current = this.selectedAbilityWidget.getAbilityGroup();
+               SpecializedSkill target = this.selectedAbilityWidget.makeAbilityNode();
+               OnPress pressAction;
+               String buttonText;
+               boolean activeState;
+               if (target.getIndex() != 0) {
+                  buttonText = "Select Specialization";
+                  pressAction = button -> this.selectSpecialization();
+                  activeState = existing.getIndex() == 0
+                     && (existing.isUnlocked() || target.isUnlocked())
+                     && VaultBarOverlay.vaultLevel >= target.getUnlockLevel();
+                  this.regretButton = null;
                } else {
-                  buttonText = ((TieredSkill)existing.getSpecialization()).getTier() >= ((TieredSkill)target.getSpecialization()).getMaxTier()
-                     ? "Fully Learned"
-                     : "Upgrade (" + current.getSpecialization().getLearnPointCost() + ")";
-               }
+                  if (!target.isUnlocked()) {
+                     buttonText = "Learn (" + current.getLearnPointCost() + ")";
+                  } else {
+                     buttonText = ((TieredSkill)existing.getSpecialization()).getUnmodifiedTier()
+                           >= ((TieredSkill)target.getSpecialization()).getMaxLearnableTier()
+                        ? "Fully Learned"
+                        : "Upgrade (" + current.getSpecialization().getLearnPointCost() + ")";
+                  }
 
-               pressAction = button -> this.upgradeAbility();
-               int cost = current.getSpecialization().getLearnPointCost();
-               int regretCost = existing.isUnlocked() ? existing.getRegretPointCost() : 0;
-               activeState = cost <= VaultBarOverlay.unspentSkillPoints
-                  && ((TieredSkill)existing.getSpecialization()).getTier() < ((TieredSkill)target.getSpecialization()).getMaxTier()
-                  && ((TieredSkill)target.getSpecialization()).getTier() < ((TieredSkill)target.getSpecialization()).getMaxTier() + 1
-                  && VaultBarOverlay.vaultLevel >= current.getUnlockLevel();
-               String regretButtonText = !existing.isUnlocked() ? "Unlearn" : "Unlearn (" + regretCost + ")";
-               boolean hasDependants = false;
-               if (((TieredSkill)existing.getSpecialization()).getTier() == 1) {
-                  for (String dependent : ModConfigs.SKILL_GATES.getGates().getAbilitiesDependingOn(existing.getId())) {
-                     if (this.abilityTree.getForId(dependent).map(Skill::isUnlocked).orElse(false)) {
-                        hasDependants = true;
-                        break;
+                  pressAction = button -> this.upgradeAbility();
+                  int cost = current.getSpecialization().getLearnPointCost();
+                  int regretCost = existing.isUnlocked() ? existing.getRegretPointCost() : 0;
+                  activeState = cost <= VaultBarOverlay.unspentSkillPoints
+                     && ((TieredSkill)existing.getSpecialization()).getUnmodifiedTier() < ((TieredSkill)target.getSpecialization()).getMaxLearnableTier()
+                     && ((TieredSkill)target.getSpecialization()).getUnmodifiedTier() < ((TieredSkill)target.getSpecialization()).getMaxLearnableTier() + 1
+                     && VaultBarOverlay.vaultLevel >= current.getUnlockLevel();
+                  String regretButtonText = !existing.isUnlocked() ? "Unlearn" : "Unlearn (" + regretCost + ")";
+                  boolean hasDependants = false;
+                  if (((TieredSkill)existing.getSpecialization()).getUnmodifiedTier() == 1) {
+                     for (String dependent : ModConfigs.SKILL_GATES.getGates().getAbilitiesDependingOn(existing.getId())) {
+                        if (this.abilityTree.getForId(dependent).map(Skill::isUnlocked).orElse(false)) {
+                           hasDependants = true;
+                           break;
+                        }
                      }
                   }
+
+                  this.regretButton = new Button(0, 0, 0, 0, new TextComponent(regretButtonText), button -> this.downgradeAbility(), Button.NO_TOOLTIP);
+                  this.regretButton.active = existing.isUnlocked()
+                     && regretCost <= VaultBarOverlay.unspentRegretPoints
+                     && ((TieredSkill)existing.getSpecialization()).getUnmodifiedTier() > 0
+                     && !hasDependants;
                }
 
-               this.regretButton = new Button(0, 0, 0, 0, new TextComponent(regretButtonText), button -> this.downgradeAbility(), Button.NO_TOOLTIP);
-               this.regretButton.active = existing.isUnlocked() && regretCost <= VaultBarOverlay.unspentRegretPoints && !hasDependants;
-            }
+               int descriptionTier = ((TieredSkill)current.getSpecialization()).getActualTier();
+               if (!Objects.equals(this.selectedAbility, this.prevSelectedAbility) || this.prevAbilityLevel != descriptionTier) {
+                  int descriptionMaxTier = Math.max(((TieredSkill)current.getSpecialization()).getMaxLearnableTier(), descriptionTier);
+                  this.descriptionComponent = new ScrollableContainer(this::renderDescriptions);
+                  this.descriptionContentComponent = AbilityDescriptionFactory.create(
+                     (TieredSkill)target.getSpecialization(), descriptionTier, descriptionMaxTier, VaultBarOverlay.vaultLevel
+                  );
+                  this.prevSelectedAbility = this.selectedAbility;
+                  this.prevAbilityLevel = descriptionTier;
+               }
 
-            this.descriptionComponent = new ScrollableContainer(this::renderDescriptions);
-            this.descriptionContentComponent = AbilityDescriptionFactory.create(
-               (TieredSkill)target.getSpecialization(),
-               ((TieredSkill)current.getSpecialization()).getTier(),
-               ((TieredSkill)current.getSpecialization()).getMaxTier(),
-               VaultBarOverlay.vaultLevel
-            );
-            this.learnButton = new Button(0, 0, 0, 0, new TextComponent(buttonText), pressAction, Button.NO_TOOLTIP);
-            this.learnButton.active = activeState;
+               this.learnButton = new Button(0, 0, 0, 0, new TextComponent(buttonText), pressAction, Button.NO_TOOLTIP);
+               this.learnButton.active = activeState;
+            }
          }
       }
    }
@@ -119,7 +136,7 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
 
    private void upgradeAbility() {
       TieredSkill ability = (TieredSkill)this.abilityTree.getForId(this.selectedAbility).orElse(null);
-      if (ability.getTier() < ability.getMaxTier()) {
+      if (ability.getUnmodifiedTier() < ability.getMaxLearnableTier()) {
          Minecraft.getInstance().player.playSound(ability.isUnlocked() ? ModSounds.SKILL_TREE_UPGRADE_SFX : ModSounds.SKILL_TREE_LEARN_SFX, 1.0F, 1.0F);
          ((SpecializedSkill)ability.getParent()).learn(SkillContext.ofClient());
          this.update();
@@ -189,10 +206,18 @@ public class AbilityDialog extends AbstractDialog<AbilitiesElementContainerScree
          if (!learned) {
             subText = "Not learned yet";
          } else {
-            subText = "Level: "
-               + ((TieredSkill)currentAbilityNode.getSpecialization()).getTier()
-               + "/"
-               + ((TieredSkill)currentAbilityNode.getSpecialization()).getMaxTier();
+            TieredSkill tierSkill = (TieredSkill)currentAbilityNode.getSpecialization();
+            int currentTier = tierSkill.getUnmodifiedTier();
+            String addedLevel = "";
+            if (Minecraft.getInstance().player != null) {
+               int actualTier = tierSkill.getActualTier();
+               int diff = actualTier - currentTier;
+               if (diff != 0) {
+                  addedLevel = " " + (diff > 0 ? "+" : "") + diff;
+               }
+            }
+
+            subText = "Level: " + currentTier + "/" + tierSkill.getMaxLearnableTier() + addedLevel;
          }
       }
 

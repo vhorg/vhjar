@@ -77,7 +77,7 @@ public class VaultEnhancementAltarScreen extends AbstractElementContainerScreen<
          VaultEnhancementAltarTileEntity altarTile = ((VaultEnhancementAltarContainer)this.getMenu()).getTileEntity();
          if (altarTile.canBeUsed(player)) {
             ItemStack gearItem = altarTile.getInventory().getItem(0);
-            if (AttributeGearData.hasData(gearItem)) {
+            if (AttributeGearData.hasData(gearItem) && AttributeGearData.<AttributeGearData>read(gearItem).isModifiable()) {
                ModNetwork.CHANNEL.sendToServer(new VaultEnhancementRequestMessage(((VaultEnhancementAltarContainer)this.getMenu()).getTilePos()));
                altarTile.setUsedByPlayer(player);
             }

@@ -1,6 +1,7 @@
 package iskallia.vault.quest.type;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import net.minecraft.network.chat.MutableComponent;
@@ -16,7 +17,7 @@ public class LevelUpQuest extends Quest {
    public LevelUpQuest(
       String id,
       String name,
-      Quest.DescriptionData descriptionData,
+      DescriptionData descriptionData,
       ResourceLocation icon,
       ResourceLocation targetId,
       float targetProgress,

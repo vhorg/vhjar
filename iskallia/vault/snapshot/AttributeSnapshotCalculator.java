@@ -100,7 +100,7 @@ public class AttributeSnapshotCalculator {
             Item var10 = stack.getItem();
             if (var10 instanceof VaultGearItem) {
                VaultGearItem gearItem = (VaultGearItem)var10;
-               if (!gearItem.isIntendedForSlot(stack, slot)) {
+               if (!gearItem.isIntendedForSlot(stack, slot) || gearItem.isBroken(stack)) {
                   continue;
                }
             }

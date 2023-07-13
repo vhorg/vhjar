@@ -38,11 +38,11 @@ public class NovaDotAbility extends AbstractNovaAbility {
       int cooldownTicks,
       float manaCost,
       float radius,
-      float percentAttackDamageDealt,
+      float percentAbilityPowerDealt,
       float knockbackStrengthMultiplier,
       int durationSeconds
    ) {
-      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, radius, percentAttackDamageDealt, knockbackStrengthMultiplier);
+      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, radius, percentAbilityPowerDealt, knockbackStrengthMultiplier);
       this.durationSeconds = durationSeconds;
    }
 
@@ -58,7 +58,7 @@ public class NovaDotAbility extends AbstractNovaAbility {
       return context.getSource().as(ServerPlayer.class).map(player -> {
          Vec3 pos = context.getSource().getPos().orElse(player.position());
          List<LivingEntity> targetEntities = this.getTargetEntities(player.level, player, pos);
-         float attackDamage = this.getAttackDamage(player);
+         float attackDamage = this.getAbilityPower(player);
 
          for (LivingEntity targetEntity : targetEntities) {
             DamageOverTimeHelper.invalidateAll(targetEntity);

@@ -17,6 +17,8 @@ import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
 import iskallia.vault.skill.ability.effect.spi.core.ToggleManaAbility;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.calc.AbilityPowerHelper;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Random;
@@ -43,8 +45,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
@@ -55,7 +55,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
    private float radius;
    private int intervalTicks;
    private int color;
-   private float playerDamagePercent;
+   private float percentAbilityPowerDealt;
    private static final String TAG_ABILITY_DATA = "the_vault:ability/_Smite";
    private static final String TAG_REMAINING_INTERVAL_TICKS = "remainingIntervalTicks";
    public static final Predicate<Entity> ENTITY_PREDICATE = entity -> !(entity instanceof Player)
@@ -70,14 +70,14 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       float manaCostPerSecond,
       float radius,
       int intervalTicks,
-      float playerDamagePercent,
+      float percentAbilityPowerDealt,
       int color,
       float additionalManaPerBolt
    ) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCostPerSecond);
       this.radius = radius;
       this.intervalTicks = intervalTicks;
-      this.playerDamagePercent = playerDamagePercent;
+      this.percentAbilityPowerDealt = percentAbilityPowerDealt;
       this.color = color;
       this.additionalManaPerBolt = additionalManaPerBolt;
    }
@@ -89,16 +89,29 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
    protected AbstractSmiteAbility() {
    }
 
-   public float getRadius() {
+   public ActiveFlags getFlag() {
+      return ActiveFlags.IS_SMITE_ATTACKING;
+   }
+
+   public float getUnmodifiedRadius() {
       return this.radius;
+   }
+
+   public float getRadius(Entity attacker) {
+      float realRadius = this.getUnmodifiedRadius();
+      if (attacker instanceof LivingEntity livingEntity) {
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+      }
+
+      return realRadius;
    }
 
    public int getIntervalTicks() {
       return this.intervalTicks;
    }
 
-   public float getPlayerDamagePercent() {
-      return this.playerDamagePercent;
+   public float getAbilityPowerPercent() {
+      return this.percentAbilityPowerDealt;
    }
 
    public int getColor() {
@@ -179,6 +192,11 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       return result;
    }
 
+   private static void setPercentRemainingInterval(ServerPlayer serverPlayer, int intervalTicks) {
+      CompoundTag abilityData = getAbilityData(serverPlayer);
+      abilityData.putInt("remainingIntervalTicks", Math.min(intervalTicks, 10));
+   }
+
    private static void clearRemainingInterval(ServerPlayer serverPlayer) {
       getAbilityData(serverPlayer).putInt("remainingIntervalTicks", 0);
    }
@@ -186,25 +204,34 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
    @Override
    public Ability.TickResult doActiveTick(SkillContext context) {
       Ability.TickResult result = super.doActiveTick(context);
-      return result == Ability.TickResult.PASS ? context.getSource().as(ServerPlayer.class).map(player -> {
-         if (!player.hasEffect(this.getEffect())) {
-            return Ability.TickResult.PASS;
-         } else if (decrementRemainingInterval(player, this.getIntervalTicks()) && this.doDamage(player, this.getRadius(), this.getPlayerDamagePercent())) {
-            this.setActive(false);
-            this.doManaDepleted(context);
-            return Ability.TickResult.COOLDOWN;
-         } else {
-            return Ability.TickResult.PASS;
-         }
-      }).orElse(Ability.TickResult.PASS) : result;
+      return result == Ability.TickResult.PASS
+         ? context.getSource()
+            .as(ServerPlayer.class)
+            .map(
+               player -> {
+                  if (!player.hasEffect(this.getEffect())) {
+                     return Ability.TickResult.PASS;
+                  } else if (decrementRemainingInterval(player, this.getIntervalTicks())
+                     && this.doDamage(player, this.getRadius(player), this.getAbilityPowerPercent())) {
+                     this.setActive(false);
+                     this.doManaDepleted(context);
+                     return Ability.TickResult.COOLDOWN;
+                  } else {
+                     return Ability.TickResult.PASS;
+                  }
+               }
+            )
+            .orElse(Ability.TickResult.PASS)
+         : result;
    }
 
-   private boolean doDamage(ServerPlayer player, float radius, float playerDamagePercent) {
+   private boolean doDamage(ServerPlayer player, float radius, float percentAbilityPowerDealt) {
       ArrayList<LivingEntity> result = new ArrayList<>();
       EntityHelper.getEntitiesInRange(player.level, player.position(), radius, ENTITY_PREDICATE, result);
       boolean applyCooldown = false;
       result.removeIf(entity -> entity instanceof EternalEntity);
       if (result.isEmpty()) {
+         setPercentRemainingInterval(player, this.getIntervalTicks());
          return false;
       } else {
          LivingEntity livingEntity = result.get(player.level.random.nextInt(result.size()));
@@ -215,19 +242,16 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
             player.level.addFreshEntity(smiteBolt);
          }
 
-         AttributeInstance attributeInstance = player.getAttribute(Attributes.ATTACK_DAMAGE);
-         if (attributeInstance == null) {
-            return false;
-         } else {
-            if (!player.isCreative() && Mana.decrease(player, this.getAdditionalManaPerBolt()) <= 0.0F) {
-               player.removeEffect(this.getEffect());
-               applyCooldown = true;
-            }
+         if (!player.isCreative() && Mana.decrease(player, this.getAdditionalManaPerBolt()) <= 0.0F) {
+            player.removeEffect(this.getEffect());
+            applyCooldown = true;
+         }
 
-            ActiveFlags.IS_SMITE_ATTACKING.runIfNotSet(() -> {
-               double damage = attributeInstance.getValue() * playerDamagePercent;
-               livingEntity.hurt(DamageSource.playerAttack(player), (float)damage);
-            });
+         ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> this.getFlag().runIfNotSet(() -> {
+            double damage = AbilityPowerHelper.getAbilityPower(player) * percentAbilityPowerDealt;
+            livingEntity.hurt(DamageSource.playerAttack(player), (float)damage);
+         }));
+         if (this.getFlag() == ActiveFlags.IS_SMITE_BASE_ATTACKING) {
             player.level
                .playSound(
                   null,
@@ -239,8 +263,21 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
                   1.0F,
                   1.0F + Mth.randomBetween(livingEntity.getRandom(), -0.2F, 0.2F)
                );
-            return applyCooldown;
+         } else {
+            player.level
+               .playSound(
+                  null,
+                  livingEntity.getX(),
+                  livingEntity.getY(),
+                  livingEntity.getZ(),
+                  ModSounds.SMITE_BOLT,
+                  SoundSource.PLAYERS,
+                  0.7F,
+                  1.5F + Mth.randomBetween(livingEntity.getRandom(), -0.2F, 0.2F)
+               );
          }
+
+         return applyCooldown;
       }
    }
 
@@ -249,7 +286,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.radius), buffer);
       Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.intervalTicks), buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.playerDamagePercent), buffer);
+      Adapters.FLOAT.writeBits(Float.valueOf(this.percentAbilityPowerDealt), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.additionalManaPerBolt), buffer);
       Adapters.INT.writeBits(Integer.valueOf(this.color), buffer);
    }
@@ -259,7 +296,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       super.readBits(buffer);
       this.radius = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.intervalTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
-      this.playerDamagePercent = Adapters.FLOAT.readBits(buffer).orElseThrow();
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.additionalManaPerBolt = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.color = Adapters.INT.readBits(buffer).orElseThrow();
    }
@@ -269,7 +306,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       return super.writeNbt().map(nbt -> {
          Adapters.FLOAT.writeNbt(Float.valueOf(this.radius)).ifPresent(tag -> nbt.put("radius", tag));
          Adapters.INT.writeNbt(Integer.valueOf(this.intervalTicks)).ifPresent(tag -> nbt.put("intervalTicks", tag));
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.playerDamagePercent)).ifPresent(tag -> nbt.put("playerDamagePercent", tag));
+         Adapters.FLOAT.writeNbt(Float.valueOf(this.percentAbilityPowerDealt)).ifPresent(tag -> nbt.put("percentAbilityPowerDealt", tag));
          Adapters.FLOAT.writeNbt(Float.valueOf(this.additionalManaPerBolt)).ifPresent(tag -> nbt.put("additionalManaPerBolt", tag));
          Adapters.INT.writeNbt(Integer.valueOf(this.color)).ifPresent(tag -> nbt.put("color", tag));
          return (CompoundTag)nbt;
@@ -281,7 +318,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       super.readNbt(nbt);
       this.radius = Adapters.FLOAT.readNbt(nbt.get("radius")).orElse(0.0F);
       this.intervalTicks = Adapters.INT.readNbt(nbt.get("intervalTicks")).orElse(0);
-      this.playerDamagePercent = Adapters.FLOAT.readNbt(nbt.get("playerDamagePercent")).orElse(0.0F);
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readNbt(nbt.get("percentAbilityPowerDealt")).orElse(0.0F);
       this.additionalManaPerBolt = Adapters.FLOAT.readNbt(nbt.get("additionalManaPerBolt")).orElse(0.0F);
       this.intervalTicks = Adapters.INT.readNbt(nbt.get("color")).orElse(0);
    }
@@ -291,7 +328,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       return super.writeJson().map(json -> {
          Adapters.FLOAT.writeJson(Float.valueOf(this.radius)).ifPresent(element -> json.add("radius", element));
          Adapters.INT.writeJson(Integer.valueOf(this.intervalTicks)).ifPresent(element -> json.add("intervalTicks", element));
-         Adapters.FLOAT.writeJson(Float.valueOf(this.playerDamagePercent)).ifPresent(element -> json.add("playerDamagePercent", element));
+         Adapters.FLOAT.writeJson(Float.valueOf(this.percentAbilityPowerDealt)).ifPresent(element -> json.add("percentAbilityPowerDealt", element));
          Adapters.FLOAT.writeJson(Float.valueOf(this.additionalManaPerBolt)).ifPresent(element -> json.add("additionalManaPerBolt", element));
          Adapters.INT.writeJson(Integer.valueOf(this.color)).ifPresent(element -> json.add("color", element));
          return (JsonObject)json;
@@ -303,7 +340,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       super.readJson(json);
       this.radius = Adapters.FLOAT.readJson(json.get("radius")).orElse(0.0F);
       this.intervalTicks = Adapters.INT.readJson(json.get("intervalTicks")).orElse(0);
-      this.playerDamagePercent = Adapters.FLOAT.readJson(json.get("playerDamagePercent")).orElse(0.0F);
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readJson(json.get("percentAbilityPowerDealt")).orElse(0.0F);
       this.additionalManaPerBolt = Adapters.FLOAT.readJson(json.get("additionalManaPerBolt")).orElse(0.0F);
       this.color = Adapters.INT.readJson(json.get("color")).orElse(0);
    }

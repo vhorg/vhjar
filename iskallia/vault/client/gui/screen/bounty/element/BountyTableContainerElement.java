@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import iskallia.vault.bounty.Bounty;
 import iskallia.vault.client.gui.framework.ScreenTextures;
 import iskallia.vault.client.gui.framework.element.ButtonElement;
+import iskallia.vault.client.gui.framework.element.ColorHollowRectElement;
 import iskallia.vault.client.gui.framework.element.ContainerElement;
 import iskallia.vault.client.gui.framework.element.LabelElement;
 import iskallia.vault.client.gui.framework.element.NineSliceElement;
@@ -23,6 +24,7 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.bounty.ServerboundRerollMessage;
 import iskallia.vault.util.TextUtil;
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -30,6 +32,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.ItemStack;
@@ -41,6 +44,7 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
    private final BountyContainer container;
    BountyElement bountyElement;
    final List<Pair<ButtonElement<?>, TextureAtlasElement<?>>> buttons = new ArrayList<>();
+   final List<ColorHollowRectElement> rarityOutlines = new ArrayList<>();
 
    public BountyTableContainerElement(ISpatial spatial, BountyContainer container) {
       super(spatial);
@@ -163,6 +167,7 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
    }
 
    private void createBountySelection() {
+      this.clearOutlines();
       int buttonWidth = 18;
       int labelX = 7;
       int labelY = 23;
@@ -245,6 +250,16 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
       }
    }
 
+   private void clearOutlines() {
+      if (!this.rarityOutlines.isEmpty()) {
+         for (ColorHollowRectElement rarityOutline : this.rarityOutlines) {
+            this.removeElement(rarityOutline);
+         }
+      }
+
+      this.rarityOutlines.clear();
+   }
+
    @NotNull
    private LabelElement<?> createLabel(int labelX, int labelY, String pText) {
       return new LabelElement(
@@ -278,6 +293,16 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
                )
             );
       } else {
+         if (status != BountyElement.Status.LEGENDARY) {
+            TextColor textColor = ModConfigs.COLORS.getColor(bounty.getTask().getProperties().getRewardPool());
+            ColorHollowRectElement rarityOutline = new ColorHollowRectElement(Spatials.positionXYZ(buttonX, buttonY, 100).size(18, 18), () -> {
+               Color color = new Color(textColor.getValue());
+               return new Color(color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F, 1.0F);
+            });
+            this.rarityOutlines.add(rarityOutline);
+            this.addElement(rarityOutline);
+         }
+
          this.buttons
             .add(
                Pair.of(

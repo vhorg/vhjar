@@ -23,6 +23,11 @@ public class EntitySkillSource extends SkillSource {
    }
 
    @Override
+   public SkillSource copy() {
+      return new EntitySkillSource(this.entity);
+   }
+
+   @Override
    public <E> Optional<E> as(Class<E> type) {
       return this.entity != null && type.isAssignableFrom(this.entity.getClass()) ? Optional.of((E)this.entity) : Optional.empty();
    }

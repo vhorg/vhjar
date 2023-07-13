@@ -1,5 +1,6 @@
 package iskallia.vault.quest.type;
 
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.world.data.QuestStatesData;
 import net.minecraft.network.chat.MutableComponent;
@@ -18,7 +19,7 @@ public class MiningQuest extends Quest {
    public MiningQuest(
       String id,
       String name,
-      Quest.DescriptionData descriptionData,
+      DescriptionData descriptionData,
       ResourceLocation icon,
       ResourceLocation targetId,
       float targetProgress,

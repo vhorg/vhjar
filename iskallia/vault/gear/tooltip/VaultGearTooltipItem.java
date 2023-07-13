@@ -79,7 +79,19 @@ public interface VaultGearTooltipItem {
 
             if (maxSuffixes > 0 || !suffixes.isEmpty() || this instanceof BottleItem) {
                this.addTooltipAffixGroup(data, VaultGearModifier.AffixType.SUFFIX, stack, tooltip, flag.displayModifierDetail());
+               if (!data.isModifiable()) {
+                  tooltip.add(TextComponent.EMPTY);
+               }
             }
+         }
+
+         if (!data.isModifiable()) {
+            MutableComponent ct = new TextComponent("").append(new TextComponent("Corrupted").setStyle(Style.EMPTY.withColor(12981760)));
+            if (flag.displayModifierDetail()) {
+               ct.append(new TextComponent("  Unmodifiable Item").withStyle(ChatFormatting.GRAY));
+            }
+
+            tooltip.add(ct);
          }
 
          return tooltip;
@@ -205,7 +217,9 @@ public interface VaultGearTooltipItem {
    }
 
    default void addTooltipDurability(List<Component> tooltip, ItemStack stack) {
-      if (stack.isDamageableItem() && stack.getMaxDamage() > 0) {
+      if (VaultGearItem.<VaultGearItem>of(stack).isBroken(stack)) {
+         tooltip.add(new TextComponent("Durability: ").append(new TextComponent("BROKEN").withStyle(ChatFormatting.RED)));
+      } else if (stack.isDamageableItem() && stack.getMaxDamage() > 0) {
          tooltip.add(
             new TextComponent("Durability: ")
                .append(new TextComponent("%d/%d".formatted(stack.getMaxDamage() - stack.getDamageValue(), stack.getMaxDamage())).withStyle(ChatFormatting.GRAY))

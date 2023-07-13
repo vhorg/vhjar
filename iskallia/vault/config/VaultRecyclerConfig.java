@@ -111,8 +111,8 @@ public class VaultRecyclerConfig extends Config {
          this.extraOutput2 = extraOutput2;
       }
 
-      public ItemStack generateMainOutput() {
-         ItemStack out = DataTransferItem.doConvertStack(this.mainOutput.createItemStack(Config.rand));
+      public ItemStack generateMainOutput(float additionalChance) {
+         ItemStack out = DataTransferItem.doConvertStack(this.mainOutput.adjustChance(additionalChance).createItemStack(Config.rand));
          DataInitializationItem.doInitialize(out);
          return out;
       }
@@ -133,8 +133,8 @@ public class VaultRecyclerConfig extends Config {
          return this.mainOutput.getMatchingStack();
       }
 
-      public ItemStack generateExtraOutput1() {
-         ItemStack out = DataTransferItem.doConvertStack(this.extraOutput1.createItemStack(Config.rand));
+      public ItemStack generateExtraOutput1(float additionalChance) {
+         ItemStack out = DataTransferItem.doConvertStack(this.extraOutput1.adjustChance(additionalChance).createItemStack(Config.rand));
          DataInitializationItem.doInitialize(out);
          return out;
       }
@@ -143,8 +143,8 @@ public class VaultRecyclerConfig extends Config {
          return this.extraOutput1.getMatchingStack();
       }
 
-      public ItemStack generateExtraOutput2() {
-         ItemStack out = DataTransferItem.doConvertStack(this.extraOutput2.createItemStack(Config.rand));
+      public ItemStack generateExtraOutput2(float additionalChance) {
+         ItemStack out = DataTransferItem.doConvertStack(this.extraOutput2.adjustChance(additionalChance).createItemStack(Config.rand));
          DataInitializationItem.doInitialize(out);
          return out;
       }

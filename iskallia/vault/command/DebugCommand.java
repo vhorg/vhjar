@@ -2,6 +2,7 @@ package iskallia.vault.command;
 
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -25,14 +26,18 @@ import iskallia.vault.dump.GearModelDump;
 import iskallia.vault.dump.TranslationsDump;
 import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
+import iskallia.vault.gear.attribute.VaultGearModifier;
+import iskallia.vault.gear.attribute.ability.AbilityLevelAttribute;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.gear.EtchingItem;
 import iskallia.vault.item.gear.TrinketItem;
+import iskallia.vault.skill.base.Skill;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.PlayerExpertisesData;
@@ -114,6 +119,14 @@ public class DebugCommand extends Command {
          Commands.literal("damage_all_gear").then(Commands.argument("damageAmount", IntegerArgumentType.integer(1)).executes(this::damageInventoryGear))
       );
       builder.then(Commands.literal("vault_kick").then(Commands.argument("player", EntityArgument.player()).executes(this::kickFromVault)));
+      builder.then(Commands.literal("corrupt_gear").executes(this::corruptGear));
+      builder.then(
+         Commands.literal("add_ability_level_prefix")
+            .then(
+               Commands.argument("ability", StringArgumentType.word())
+                  .then(Commands.argument("levelChange", IntegerArgumentType.integer()).executes(this::addAbilityLevel))
+            )
+      );
       builder.then(Commands.literal("apply_etching").then(Commands.argument("etching", ResourceLocationArgument.id()).executes(this::testApplyEtching)));
       builder.then(Commands.literal("give_all_etchings").executes(this::testGiveAllEtchings));
       builder.then(Commands.literal("give_all_trinkets").executes(this::testGiveAllTrinkets));
@@ -137,6 +150,51 @@ public class DebugCommand extends Command {
             .then(Commands.literal("reset_all").then(Commands.argument("player", EntityArgument.player()).executes(this::resetPlayerExpertises)))
       );
       builder.then(Commands.literal("expertise").then(Commands.literal("world_reset").executes(this::resetAllPlayerExpertises)));
+   }
+
+   private int corruptGear(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+      if (!held.isEmpty() && held.getItem() instanceof VaultGearItem) {
+         VaultGearData data = VaultGearData.read(held);
+         if (!data.isModifiable()) {
+            player.sendMessage(new TextComponent("Item already corrupted"), Util.NIL_UUID);
+            return 0;
+         } else {
+            data.updateAttribute(ModGearAttributes.IS_CORRUPTED, Boolean.valueOf(true));
+            data.write(held);
+            return 0;
+         }
+      } else {
+         player.sendMessage(new TextComponent("Not holding VaultGear item"), Util.NIL_UUID);
+         return 0;
+      }
+   }
+
+   private int addAbilityLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+      if (!held.isEmpty() && held.getItem() instanceof VaultGearItem) {
+         String abilityKey = StringArgumentType.getString(context, "ability");
+         if (!abilityKey.equals("all_abilities")) {
+            Skill ability = ModConfigs.ABILITIES.getAbilityById(abilityKey).orElse(null);
+            if (ability == null) {
+               player.sendMessage(new TextComponent("Unknown ability: " + abilityKey), Util.NIL_UUID);
+               return 0;
+            }
+         }
+
+         int levelChange = IntegerArgumentType.getInteger(context, "levelChange");
+         VaultGearData data = VaultGearData.read(held);
+         data.addModifier(
+            VaultGearModifier.AffixType.PREFIX, new VaultGearModifier<>(ModGearAttributes.ABILITY_LEVEL, new AbilityLevelAttribute(abilityKey, levelChange))
+         );
+         data.write(held);
+         return 0;
+      } else {
+         player.sendMessage(new TextComponent("Not holding VaultGear item"), Util.NIL_UUID);
+         return 0;
+      }
    }
 
    private int resetAllPlayerExpertises(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

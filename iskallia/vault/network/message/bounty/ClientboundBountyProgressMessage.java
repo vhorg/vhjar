@@ -28,7 +28,11 @@ public record ClientboundBountyProgressMessage(List<Bounty> bounties) {
    public static void handle(ClientboundBountyProgressMessage message, Supplier<Context> contextSupplier) {
       Context context = contextSupplier.get();
       BountyList bounties = new BountyList();
-      bounties.addAll(message.bounties);
+      List<Bounty> bountiesSent = message.bounties;
+      if (bountiesSent != null && !bountiesSent.isEmpty()) {
+         bounties.addAll(bountiesSent);
+      }
+
       ClientBountyData.INSTANCE.updateBounties(bounties);
       context.setPacketHandled(true);
    }

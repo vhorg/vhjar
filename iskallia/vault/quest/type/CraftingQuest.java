@@ -1,5 +1,6 @@
 package iskallia.vault.quest.type;
 
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.world.data.QuestStatesData;
 import net.minecraft.network.chat.MutableComponent;
@@ -16,7 +17,7 @@ public class CraftingQuest extends Quest {
    public CraftingQuest(
       String id,
       String name,
-      Quest.DescriptionData descriptionData,
+      DescriptionData descriptionData,
       ResourceLocation icon,
       ResourceLocation targetId,
       float targetProgress,

@@ -4,6 +4,7 @@ import iskallia.vault.container.VaultEnhancementAltarContainer;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.vault.enhancement.EnhancementData;
 import iskallia.vault.core.vault.enhancement.EnhancementTask;
+import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.nbt.NBTHelper;
@@ -109,7 +110,13 @@ public class VaultEnhancementAltarTileEntity extends BlockEntity implements Menu
 
    public boolean canBeUsed(Player player) {
       ItemStack input = this.getInventory().getItem(0);
-      return !input.isEmpty() && input.is(ModItems.HELMET) ? !this.getUsedPlayers().contains(player.getUUID()) : false;
+      if (input.isEmpty() || !input.is(ModItems.HELMET)) {
+         return false;
+      } else {
+         return AttributeGearData.hasData(input) && AttributeGearData.<AttributeGearData>read(input).isModifiable()
+            ? !this.getUsedPlayers().contains(player.getUUID())
+            : false;
+      }
    }
 
    public boolean stillValid(Player player) {

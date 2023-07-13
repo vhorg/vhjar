@@ -3,14 +3,19 @@ package iskallia.vault.init;
 import iskallia.vault.VaultMod;
 import iskallia.vault.effect.BasicEffect;
 import iskallia.vault.effect.BottleEffect;
+import iskallia.vault.effect.ChilledEffect;
+import iskallia.vault.effect.FreezeEffect;
 import iskallia.vault.effect.GlacialShatterEffect;
 import iskallia.vault.effect.NoAiEffect;
 import iskallia.vault.effect.PoisonOverrideEffect;
+import iskallia.vault.effect.PylonEffect;
 import iskallia.vault.effect.ThresholdEffect;
 import iskallia.vault.effect.TimerAccelerationEffect;
+import iskallia.vault.effect.VulnerableEffect;
 import iskallia.vault.effect.WeaknessEffect;
 import iskallia.vault.skill.ability.effect.EmpowerAbility;
 import iskallia.vault.skill.ability.effect.EmpowerIceArmourAbility;
+import iskallia.vault.skill.ability.effect.EmpowerSlownessAuraAbility;
 import iskallia.vault.skill.ability.effect.ExecuteAbility;
 import iskallia.vault.skill.ability.effect.GhostWalkAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldAbility;
@@ -32,6 +37,7 @@ import iskallia.vault.skill.ability.effect.TotemAbility;
 import iskallia.vault.skill.ability.effect.TotemManaRegenAbility;
 import iskallia.vault.skill.ability.effect.TotemMobDamageAbility;
 import iskallia.vault.skill.ability.effect.TotemPlayerDamageAbility;
+import iskallia.vault.skill.ability.effect.spi.AbstractBonkAbility;
 import iskallia.vault.skill.ability.effect.spi.AbstractSmiteAbility;
 import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
 import iskallia.vault.skill.expertise.type.AngelExpertise;
@@ -64,6 +70,7 @@ public class ModEffects {
    public static final MobEffect STONEFALL_SHOCKWAVE = new StonefallSnowAbility.StonefallShockwaveEffect(
       Color.CYAN.getRGB(), VaultMod.id("stonefall_shockwave")
    );
+   public static final MobEffect FREEZE = new FreezeEffect(VaultMod.id("freeze"));
    public static final NovaSpeedAbility.HypothermiaEffect HYPOTHERMIA = new NovaSpeedAbility.HypothermiaEffect(5926017, VaultMod.id("hypothermia"));
    public static final MobEffect NOVA_DOT = new NovaDotAbility.NovaDotEffect(Color.GREEN.getRGB(), VaultMod.id("nova_dot"));
    public static final TotemAbility.TotemPlayerHealthEffect TOTEM_PLAYER_HEALTH = new TotemAbility.TotemPlayerHealthEffect(
@@ -86,6 +93,9 @@ public class ModEffects {
    public static final ToggleAbilityEffect EMPOWER_ICE_ARMOUR = new EmpowerIceArmourAbility.EmpowerIceArmourEffect(
       Color.WHITE.getRGB(), VaultMod.id("empower_ice_armour")
    );
+   public static final ToggleAbilityEffect EMPOWER_SLOWNESS_AURA = new EmpowerSlownessAuraAbility.EmpowerSlownessAuraEffect(
+      Color.WHITE.getRGB(), VaultMod.id("empower_slowness_aura")
+   );
    public static final ToggleAbilityEffect SHELL = new ShellAbility.ShellEffect(Color.WHITE.getRGB(), VaultMod.id("shell"));
    public static final ToggleAbilityEffect SHELL_PORCUPINE = new ShellPorcupineAbility.ShellPorcupineEffect(
       Color.WHITE.getRGB(), VaultMod.id("shell_porcupine")
@@ -99,6 +109,20 @@ public class ModEffects {
    public static final ToggleAbilityEffect SMITE = new AbstractSmiteAbility.SmiteEffect(Color.RED.getRGB(), VaultMod.id("smite"));
    public static final ToggleAbilityEffect SMITE_ARCHON = new AbstractSmiteAbility.SmiteEffect(Color.RED.getRGB(), VaultMod.id("smite_archon"));
    public static final ToggleAbilityEffect SMITE_THUNDERSTORM = new AbstractSmiteAbility.SmiteEffect(Color.RED.getRGB(), VaultMod.id("smite_thunderstorm"));
+   public static final MobEffect VULNERABLE = new VulnerableEffect(MobEffectCategory.HARMFUL, Color.RED.getRGB(), VaultMod.id("vulnerable"));
+   public static final MobEffect CHILLED = new ChilledEffect(MobEffectCategory.HARMFUL, Color.BLUE.getRGB(), VaultMod.id("chilled"))
+      .addAttributeModifier(Attributes.MOVEMENT_SPEED, "7107DE5E-7CE8-4030-940E-514C1F160890", -0.15F, Operation.MULTIPLY_TOTAL);
+   public static final PylonEffect PYLON = new PylonEffect(MobEffectCategory.BENEFICIAL, Color.GREEN.getRGB(), VaultMod.id("pylon"));
+   public static final PylonEffect PYLON_OVERFLOW = new PylonEffect(MobEffectCategory.BENEFICIAL, Color.GREEN.getRGB(), VaultMod.id("pylon_overflow"));
+   public static final MobEffect BATTLE_CRY = new AbstractBonkAbility.BattleCryEffect(
+      MobEffectCategory.BENEFICIAL, Color.RED.getRGB(), VaultMod.id("battle_cry")
+   );
+   public static final MobEffect BATTLE_CRY_SPECTRAL_STRIKE = new AbstractBonkAbility.BattleCryEffect(
+      MobEffectCategory.BENEFICIAL, Color.CYAN.getRGB(), VaultMod.id("battle_cry_spectral_strike")
+   );
+   public static final MobEffect BATTLE_CRY_LUCKY_STRIKE = new AbstractBonkAbility.BattleCryEffect(
+      MobEffectCategory.BENEFICIAL, Color.GREEN.getRGB(), VaultMod.id("battle_cry_lucky_strike")
+   );
    public static final ThresholdEffect SORCERY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("sorcery"));
    public static final ThresholdEffect STONESKIN = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("stoneskin"));
    public static final ThresholdEffect WITCHERY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("witchery"));
@@ -118,7 +142,9 @@ public class ModEffects {
    public static final Set<MobEffect> PREVENT_DURATION_FLASH = Set.of(
       TOTEM_PLAYER_HEALTH, TOTEM_MANA_REGEN, TOTEM_PLAYER_DAMAGE, SORCERY, STONESKIN, WITCHERY, METHODICAL, DEPLETED, LAST_STAND, BERSERKING
    );
-   public static final Set<MobEffect> SYNC_TO_CLIENT_ON_MOB = Set.of(TAUNT_CHARM, TAUNT_REPEL_MOB, GLACIAL_SHATTER);
+   public static final Set<MobEffect> SYNC_TO_CLIENT_ON_MOB = Set.of(
+      TAUNT_CHARM, TAUNT_REPEL_MOB, GLACIAL_SHATTER, CHILLED, VULNERABLE, MobEffects.DAMAGE_RESISTANCE, MobEffects.MOVEMENT_SPEED, MobEffects.DAMAGE_BOOST
+   );
 
    public static void register(Register<MobEffect> event) {
       event.getRegistry()
@@ -132,6 +158,7 @@ public class ModEffects {
                EMPOWER,
                EMPOWER_COOP,
                EMPOWER_ICE_ARMOUR,
+               EMPOWER_SLOWNESS_AURA,
                SHELL,
                SHELL_PORCUPINE,
                SHELL_QUILL,
@@ -154,6 +181,7 @@ public class ModEffects {
                STONEFALL,
                STONEFALL_COLD,
                STONEFALL_SHOCKWAVE,
+               FREEZE,
                NOVA_DOT,
                HYPOTHERMIA,
                TOTEM_PLAYER_HEALTH,
@@ -170,7 +198,14 @@ public class ModEffects {
                METHODICAL,
                DEPLETED,
                BERSERKING,
-               LAST_STAND
+               LAST_STAND,
+               VULNERABLE,
+               CHILLED,
+               BATTLE_CRY,
+               BATTLE_CRY_SPECTRAL_STRIKE,
+               BATTLE_CRY_LUCKY_STRIKE,
+               PYLON,
+               PYLON_OVERFLOW
             }
          );
       MobEffects.POISON = POISON_OVERRIDE;

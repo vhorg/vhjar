@@ -3,6 +3,7 @@ package iskallia.vault.core.world.data;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.init.ModConfigs;
+import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
@@ -97,7 +98,28 @@ public class PartialEntityGroup implements EntityPlacement<PartialEntityGroup> {
       }
    }
 
+   public ResourceLocation getId() {
+      return this.id;
+   }
+
    protected static boolean isCharValid(char c) {
       return c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c == '_' || c == ':' || c == '/' || c == '.' || c == '-';
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      } else if (o != null && this.getClass() == o.getClass()) {
+         PartialEntityGroup that = (PartialEntityGroup)o;
+         return Objects.equals(this.id, that.id);
+      } else {
+         return false;
+      }
+   }
+
+   @Override
+   public int hashCode() {
+      return this.id != null ? this.id.hashCode() : 0;
    }
 }

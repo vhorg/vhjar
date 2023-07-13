@@ -98,7 +98,7 @@ public class EtchingItem extends BasicItem implements DataTransferItem, Identifi
    }
 
    @Override
-   public void tickRoll(ItemStack stack) {
+   public void tickRoll(ItemStack stack, Player player) {
       AttributeGearData data = AttributeGearData.read(stack);
       EtchingSet<?> etchingSet = ModConfigs.ETCHING.getRandomEtchingSet();
       if (etchingSet != null) {

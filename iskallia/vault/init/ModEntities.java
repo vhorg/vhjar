@@ -2,6 +2,7 @@ package iskallia.vault.init;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.entity.IPlayerSkinHolder;
+import iskallia.vault.entity.ai.ChampionGoal;
 import iskallia.vault.entity.entity.AggressiveCowBossEntity;
 import iskallia.vault.entity.entity.AggressiveCowEntity;
 import iskallia.vault.entity.entity.ArenaBossEntity;
@@ -22,14 +23,18 @@ import iskallia.vault.entity.entity.RobotEntity;
 import iskallia.vault.entity.entity.ShiverEntity;
 import iskallia.vault.entity.entity.SpiritEntity;
 import iskallia.vault.entity.entity.TreasureGoblinEntity;
+import iskallia.vault.entity.entity.VaultBlizzardShard;
 import iskallia.vault.entity.entity.VaultDoodEntity;
 import iskallia.vault.entity.entity.VaultFighterEntity;
+import iskallia.vault.entity.entity.VaultFireball;
 import iskallia.vault.entity.entity.VaultGuardianEntity;
 import iskallia.vault.entity.entity.VaultGummySoldier;
 import iskallia.vault.entity.entity.VaultHorseEntity;
 import iskallia.vault.entity.entity.VaultSandEntity;
 import iskallia.vault.entity.entity.VaultSpiderBabyEntity;
 import iskallia.vault.entity.entity.VaultSpiderEntity;
+import iskallia.vault.entity.entity.VaultStormArrow;
+import iskallia.vault.entity.entity.VaultStormEntity;
 import iskallia.vault.entity.entity.VaultThrownJavelin;
 import iskallia.vault.entity.entity.WinterWolfEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkHorrorEntity;
@@ -37,6 +42,14 @@ import iskallia.vault.entity.entity.deepdark.DeepDarkPiglinEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkSilverfishEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkSkeletonEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkZombieEntity;
+import iskallia.vault.entity.entity.dungeon.DungeonBlackWidowSpiderEntity;
+import iskallia.vault.entity.entity.dungeon.DungeonPiglinBruteEntity;
+import iskallia.vault.entity.entity.dungeon.DungeonPiglinEntity;
+import iskallia.vault.entity.entity.dungeon.DungeonPillagerEntity;
+import iskallia.vault.entity.entity.dungeon.DungeonSkeletonEntity;
+import iskallia.vault.entity.entity.dungeon.DungeonSpiderEntity;
+import iskallia.vault.entity.entity.dungeon.DungeonVindicatorEntity;
+import iskallia.vault.entity.entity.dungeon.DungeonWitchEntity;
 import iskallia.vault.entity.entity.elite.EliteDrownedEntity;
 import iskallia.vault.entity.entity.elite.EliteHuskEntity;
 import iskallia.vault.entity.entity.elite.EliteSpiderEntity;
@@ -201,12 +214,15 @@ import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.monster.Skeleton;
 import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.Vindicator;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.monster.piglin.Piglin;
+import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions;
@@ -322,6 +338,14 @@ public class ModEntities {
    public static EntityType<Tier3StrayEntity> T3_STRAY;
    public static EntityType<Tier3WitherSkeletonEntity> T3_WITHER_SKELETON;
    public static EntityType<Tier3ZombieEntity> T3_ZOMBIE;
+   public static EntityType<DungeonBlackWidowSpiderEntity> DUNGEON_BLACK_WIDOW_SPIDER;
+   public static EntityType<DungeonSpiderEntity> DUNGEON_SPIDER;
+   public static EntityType<DungeonSkeletonEntity> DUNGEON_SKELETON;
+   public static EntityType<DungeonPillagerEntity> DUNGEON_PILLAGER;
+   public static EntityType<DungeonVindicatorEntity> DUNGEON_VINDICATOR;
+   public static EntityType<DungeonPiglinEntity> DUNGEON_PIGLIN;
+   public static EntityType<DungeonPiglinBruteEntity> DUNGEON_PIGLIN_BRUTE;
+   public static EntityType<DungeonWitchEntity> DUNGEON_WITCH;
    public static EntityType<DrillArrowEntity> DRILL_ARROW;
    public static EntityType<EffectCloudEntity> EFFECT_CLOUD;
    public static EntityType<VaultSandEntity> VAULT_SAND;
@@ -334,8 +358,14 @@ public class ModEntities {
    public static EntityType<SpiritEntity> SPIRIT;
    public static EntityType<EternalSpiritEntity> ETERNAL_SPIRIT;
    public static EntityType<FighterEntity.ThrowableBrick> BRICK;
+   public static EntityType<ChampionGoal.ThrowableSpear> SPEAR;
    public static EntityType<VaultThrownJavelin> THROWN_JAVELIN;
    public static EntityType<DashWarpAbility.WarpArrow> WARP_ARROW;
+   public static EntityType<VaultFireball> FIREBALL;
+   public static EntityType<VaultStormArrow> STORM_ARROW;
+   public static EntityType<VaultStormEntity> STORM;
+   public static EntityType<VaultStormEntity.SmiteBolt> THUNDERSTORM_BOLT;
+   public static EntityType<VaultBlizzardShard> BLIZZARD_SHARD;
    private static final Map<EntityType<? extends LivingEntity>, Supplier<net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder>> ATTRIBUTE_BUILDERS = new HashMap<>();
 
    public static void register(Register<EntityType<?>> event) {
@@ -961,6 +991,56 @@ public class ModEntities {
          Zombie::createAttributes,
          event
       );
+      DUNGEON_SPIDER = registerLiving(
+         "dungeon_spider", Builder.of(DungeonSpiderEntity::new, MobCategory.MONSTER).sized(0.7F, 0.5F), Spider::createAttributes, event
+      );
+      DUNGEON_BLACK_WIDOW_SPIDER = registerLiving(
+         "dungeon_black_widow_spider", Builder.of(DungeonBlackWidowSpiderEntity::new, MobCategory.MONSTER).sized(0.7F, 0.5F), Spider::createAttributes, event
+      );
+      DUNGEON_SKELETON = registerLiving(
+         "dungeon_skeleton",
+         Builder.of(DungeonSkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      DUNGEON_PILLAGER = registerLiving(
+         "dungeon_pillager",
+         Builder.of(DungeonPillagerEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.PILLAGER.getWidth(), EntityType.PILLAGER.getHeight())
+            .clientTrackingRange(8),
+         Pillager::createAttributes,
+         event
+      );
+      DUNGEON_VINDICATOR = registerLiving(
+         "dungeon_vindicator",
+         Builder.of(DungeonVindicatorEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.VINDICATOR.getWidth(), EntityType.VINDICATOR.getHeight())
+            .clientTrackingRange(8),
+         Vindicator::createAttributes,
+         event
+      );
+      DUNGEON_PIGLIN = registerLiving(
+         "dungeon_piglin",
+         Builder.of(DungeonPiglinEntity::new, MobCategory.MONSTER).sized(EntityType.PIGLIN.getWidth(), EntityType.PIGLIN.getHeight()).clientTrackingRange(8),
+         Piglin::createAttributes,
+         event
+      );
+      DUNGEON_PIGLIN_BRUTE = registerLiving(
+         "dungeon_piglin_brute",
+         Builder.of(DungeonPiglinBruteEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.PIGLIN_BRUTE.getWidth(), EntityType.PIGLIN_BRUTE.getHeight())
+            .clientTrackingRange(8),
+         PiglinBrute::createAttributes,
+         event
+      );
+      DUNGEON_WITCH = registerLiving(
+         "dungeon_witch",
+         Builder.of(DungeonWitchEntity::new, MobCategory.MONSTER).sized(EntityType.WITCH.getWidth(), EntityType.WITCH.getHeight()).clientTrackingRange(8),
+         Witch::createAttributes,
+         event
+      );
       DRILL_ARROW = register("drill_arrow", Builder.of(DrillArrowEntity::new, MobCategory.MISC), event);
       EFFECT_CLOUD = register("effect_cloud", Builder.of(EffectCloudEntity::new, MobCategory.MISC), event);
       VAULT_SAND = register("vault_sand", Builder.of(VaultSandEntity::new, MobCategory.MISC), event);
@@ -990,6 +1070,20 @@ public class ModEntities {
       );
       WARP_ARROW = register(
          "warp_arrow", Builder.of(DashWarpAbility.WarpArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(20), event
+      );
+      FIREBALL = register("fireball", Builder.of(VaultFireball::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(5), event);
+      STORM_ARROW = register(
+         "storm_arrow", Builder.of(VaultStormArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(5), event
+      );
+      STORM = register("storm", Builder.of(VaultStormEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(5), event);
+      THUNDERSTORM_BOLT = register(
+         "thunderstorm_bolt", Builder.of((entityType, level) -> new VaultStormEntity.SmiteBolt(entityType, level, false, -1864448), MobCategory.MISC), event
+      );
+      BLIZZARD_SHARD = register(
+         "blizzard_shard", Builder.of(VaultBlizzardShard::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(5), event
+      );
+      SPEAR = register(
+         "spear", Builder.of(ChampionGoal.ThrowableSpear::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10), event
       );
    }
 

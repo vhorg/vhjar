@@ -32,6 +32,8 @@ public class ModGameRules {
    public static Key<VaultMode.GameRuleValue> MODE;
    public static Key<VaultLoot.GameRuleValue> LOOT;
    public static Key<VaultCrystalMode.GameRuleValue> CRYSTAL_MODE;
+   public static Key<BooleanValue> PRINT_SAVE_DATA_TIMING;
+   public static Key<BooleanValue> BOOST_PENALTY;
 
    public static void initialize() {
       FINAL_VAULT_ALLOW_PARTY = register("finalVaultAllowParty", Category.MISC, booleanRule(true));
@@ -48,6 +50,8 @@ public class ModGameRules {
       MODE = register("vaultMode", Category.MISC, VaultMode.GameRuleValue.create(VaultMode.NORMAL));
       LOOT = register("vaultLoot", Category.MISC, VaultLoot.GameRuleValue.create(VaultLoot.NORMAL));
       CRYSTAL_MODE = register("vaultCrystalMode", Category.MISC, VaultCrystalMode.GameRuleValue.create(VaultCrystalMode.NORMAL));
+      PRINT_SAVE_DATA_TIMING = register("vaultPrintSaveDataTiming", Category.MISC, booleanRule(false));
+      BOOST_PENALTY = register("vaultBoostPenalty", Category.MISC, booleanRule(true));
    }
 
    public static <T extends Value<T>> Key<T> register(String name, Category category, Type<T> type) {

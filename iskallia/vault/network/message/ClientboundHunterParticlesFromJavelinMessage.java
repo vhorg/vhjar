@@ -42,12 +42,7 @@ public record ClientboundHunterParticlesFromJavelinMessage(double x, double y, d
 
    @OnlyIn(Dist.CLIENT)
    private static void createParticles(double x, double y, double z, double r, double g, double b, String type) {
-      Color color = Color.cyan;
-      IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
-      if (options.isHunterCustomColorsEnabled()) {
-         color = getColor(type);
-      }
-
+      Color color = getColor(type);
       ParticleEngine pm = Minecraft.getInstance().particleEngine;
       Particle particle = pm.createParticle(
          (ParticleOptions)ModParticles.DEPTH_FIREWORK.get(), x, y, z, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F
@@ -55,11 +50,6 @@ public record ClientboundHunterParticlesFromJavelinMessage(double x, double y, d
       if (particle != null) {
          particle.setLifetime((int)r);
       }
-   }
-
-   private static Color getColor() {
-      IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
-      return options.getChestHunterSpec().getColor();
    }
 
    private static Color getColor(String hunterSpec) {

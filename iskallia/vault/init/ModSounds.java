@@ -98,6 +98,11 @@ public class ModSounds {
    public static SoundEvent TOTEM;
    public static SoundEvent SMITE_BOLT;
    public static SoundEvent SMITE;
+   public static SoundEvent MOB_CRIT;
+   public static SoundEvent ABILITY_OUT_OF_MANA;
+   public static SoundEvent ABILITY_ON_COOLDOWN;
+   public static SoundEvent BONK_CHARGE;
+   public static SoundEvent BONK;
    public static ForgeSoundType VAULT_GET_SOUND_TYPE = new ForgeSoundType(
       0.25F, 1.0F, () -> VAULT_GEM_BREAK, SoundType.STONE::getStepSound, SoundType.STONE::getPlaceSound, () -> VAULT_GEM_HIT, SoundType.STONE::getFallSound
    );
@@ -199,6 +204,11 @@ public class ModSounds {
       TOTEM = registerSound(event, "totem");
       SMITE_BOLT = registerSound(event, "smite_bolt");
       SMITE = registerSound(event, "smite");
+      MOB_CRIT = registerSound(event, "mob_crit");
+      ABILITY_OUT_OF_MANA = registerSound(event, "ability_out_of_mana");
+      ABILITY_ON_COOLDOWN = registerSound(event, "ability_on_cooldown");
+      BONK_CHARGE = registerSound(event, "bonk_charge");
+      BONK = registerSound(event, "bonk");
    }
 
    private static SoundEvent registerSound(Register<SoundEvent> event, String soundName) {

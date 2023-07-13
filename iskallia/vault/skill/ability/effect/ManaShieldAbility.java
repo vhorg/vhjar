@@ -89,8 +89,8 @@ public class ManaShieldAbility extends ToggleManaAbility {
    protected void doToggleSound(SkillContext context) {
       context.getSource().as(ServerPlayer.class).ifPresent(player -> {
          if (this.isActive()) {
-            player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD, SoundSource.MASTER, 0.4F, 1.0F);
-            player.playNotifySound(ModSounds.MANA_SHIELD, SoundSource.MASTER, 0.4F, 1.0F);
+            player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD, SoundSource.MASTER, 0.2F, 1.0F);
+            player.playNotifySound(ModSounds.MANA_SHIELD, SoundSource.MASTER, 0.2F, 1.0F);
          }
       });
    }
@@ -150,8 +150,7 @@ public class ManaShieldAbility extends ToggleManaAbility {
                float mana = Mana.decrease(player, manaUsed);
                ability.onDamageAbsorbed(player, damageAbsorbed);
                float pitch = 1.25F + -0.5F * (mana / Mana.getMax(player));
-               player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD_HIT, SoundSource.MASTER, 0.2F, pitch);
-               player.playNotifySound(ModSounds.MANA_SHIELD_HIT, SoundSource.MASTER, 0.2F, pitch);
+               player.level.playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.MANA_SHIELD_HIT, SoundSource.PLAYERS, 0.03F, pitch);
             }
          }
       }

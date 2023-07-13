@@ -48,7 +48,7 @@ public abstract class SkillDialog<T extends SkillTree, S extends LegacySkillTree
          int cost = this.skillGroup.getLearnPointCost();
          String levelUpText = !this.skillGroup.isUnlocked()
             ? "Learn (" + this.skillGroup.getLearnPointCost() + ")"
-            : (this.skillGroup.getTier() >= this.skillGroup.getMaxTier() ? "Learned" : "Upgrade (" + cost + ")");
+            : (this.skillGroup.getUnmodifiedTier() >= this.skillGroup.getMaxLearnableTier() ? "Learned" : "Upgrade (" + cost + ")");
          this.learnButton = new Button(0, 0, 0, 0, new TextComponent(levelUpText), button -> this.upgradeSkill(), Button.NO_TOOLTIP);
          this.descriptionComponent = new ScrollableContainer(this::renderDescriptions);
          boolean isLocked = this.isSkillLocked();
@@ -61,7 +61,7 @@ public abstract class SkillDialog<T extends SkillTree, S extends LegacySkillTree
          this.learnButton.active = cost <= this.getUnspentSkillPoints()
             && fulfillsRequirements
             && !isLocked
-            && this.skillGroup.getTier() < this.skillGroup.getMaxTier();
+            && this.skillGroup.getUnmodifiedTier() < this.skillGroup.getMaxLearnableTier();
          this.updateRegretButton();
       }
    }
@@ -77,7 +77,7 @@ public abstract class SkillDialog<T extends SkillTree, S extends LegacySkillTree
    protected abstract HashMap<String, SkillStyle> getStyles();
 
    private void upgradeSkill() {
-      if (this.skillGroup.getTier() < this.skillGroup.getMaxTier()) {
+      if (this.skillGroup.getUnmodifiedTier() < this.skillGroup.getMaxLearnableTier()) {
          if (VaultBarOverlay.vaultLevel >= this.skillGroup.getUnlockLevel()) {
             Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.player != null) {
@@ -116,7 +116,7 @@ public abstract class SkillDialog<T extends SkillTree, S extends LegacySkillTree
       Component lvlReqArrowTxt = new TextComponent(" " + arrow + " ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(4737095)));
       MutableComponent txt = new TextComponent("Cost: ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(4737095)));
 
-      for (int lvl = 1; lvl <= skillGroup.getMaxTier(); lvl++) {
+      for (int lvl = 1; lvl <= skillGroup.getMaxLearnableTier(); lvl++) {
          if (lvl > 1) {
             txt.append(costArrowTxt);
          }
@@ -128,7 +128,7 @@ public abstract class SkillDialog<T extends SkillTree, S extends LegacySkillTree
       boolean displayRequirements = false;
       TextComponent lvlReq = new TextComponent("\n\nLevel requirement: ");
 
-      for (int lvl = 1; lvl <= skillGroup.getMaxTier(); lvl++) {
+      for (int lvl = 1; lvl <= skillGroup.getMaxLearnableTier(); lvl++) {
          if (lvl > 1) {
             lvlReq.append(lvlReqArrowTxt);
          }
@@ -179,7 +179,9 @@ public abstract class SkillDialog<T extends SkillTree, S extends LegacySkillTree
       Rectangle widgetBounds = this.skillWidget.getClickableBounds();
       UIHelper.renderContainerBorder(this, matrixStack, this.getHeadingBounds(), 14, 44, 2, 2, 2, 2, -7631989);
       String abilityName = this.skillGroup.getName();
-      String subText = this.skillGroup.getTier() == 0 ? "Not Learned Yet" : "Level: " + this.skillGroup.getTier() + "/" + this.skillGroup.getMaxTier();
+      String subText = !this.skillGroup.isUnlocked()
+         ? "Not Learned Yet"
+         : "Level: " + this.skillGroup.getUnmodifiedTier() + "/" + this.skillGroup.getMaxLearnableTier();
       int gap = 5;
       matrixStack.pushPose();
       matrixStack.translate(10.0, 0.0, 0.0);
@@ -188,16 +190,16 @@ public abstract class SkillDialog<T extends SkillTree, S extends LegacySkillTree
          abilityName,
          (float)(widgetBounds.width + gap),
          13.0F,
-         this.skillGroup.getTier() == 0 ? -1 : -1849,
-         this.skillGroup.getTier() == 0 ? -16777216 : -12897536
+         !this.skillGroup.isUnlocked() ? -1 : -1849,
+         !this.skillGroup.isUnlocked() ? -16777216 : -12897536
       );
       FontHelper.drawStringWithBorder(
          matrixStack,
          subText,
          (float)(widgetBounds.width + gap),
          23.0F,
-         this.skillGroup.getTier() == 0 ? -1 : -1849,
-         this.skillGroup.getTier() == 0 ? -16777216 : -12897536
+         !this.skillGroup.isUnlocked() ? -1 : -1849,
+         !this.skillGroup.isUnlocked() ? -16777216 : -12897536
       );
       matrixStack.translate(-style.x, -style.y, 0.0);
       matrixStack.translate(widgetBounds.getWidth() / 2.0, 0.0, 0.0);

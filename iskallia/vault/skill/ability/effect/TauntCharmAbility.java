@@ -15,6 +15,7 @@ import iskallia.vault.skill.ability.effect.spi.AbstractTauntAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
+import iskallia.vault.util.calc.AbilityPowerHelper;
 import iskallia.vault.world.entity.ai.goal.GoalSelectorStack;
 import java.util.Collections;
 import java.util.List;
@@ -64,10 +65,10 @@ public class TauntCharmAbility extends AbstractTauntAbility {
       && !entity.hasEffect(ModEffects.TAUNT_REPEL_MOB);
    public static final Predicate<LivingEntity> LIVING_ENTITY_PREDICATE = entity -> !entity.hasEffect(ModEffects.TAUNT_CHARM) && !(entity instanceof Player);
    private int maxCharmedMobs;
-   private float percentPlayerDamage;
+   private float percentAbilityPowerDealt;
    public static final String TAG_ABILITY_DATA = "the_vault:Taunt_Charm";
    public static final String TAG_PLAYER_UUID = "playerUUID";
-   public static final String TAG_PERCENT_PLAYER_DAMAGE = "percentPlayerDamage";
+   public static final String TAG_PERCENT_PLAYER_DAMAGE = "percentAbilityPowerDealt";
    private static final UUID MOVEMENT_SPEED_MODIFIER_UUID = UUID.fromString("46489b0a-0cfd-4e51-87ab-d656b8a13db2");
 
    public TauntCharmAbility(
@@ -79,11 +80,11 @@ public class TauntCharmAbility extends AbstractTauntAbility {
       float radius,
       int durationTicks,
       int maxCharmedMobs,
-      float percentPlayerDamage
+      float percentAbilityPowerDealt
    ) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, radius, durationTicks);
       this.maxCharmedMobs = maxCharmedMobs;
-      this.percentPlayerDamage = percentPlayerDamage;
+      this.percentAbilityPowerDealt = percentAbilityPowerDealt;
    }
 
    public TauntCharmAbility() {
@@ -94,7 +95,7 @@ public class TauntCharmAbility extends AbstractTauntAbility {
    }
 
    public float getPercentPlayerDamage() {
-      return this.percentPlayerDamage;
+      return this.percentAbilityPowerDealt;
    }
 
    @Override
@@ -172,11 +173,11 @@ public class TauntCharmAbility extends AbstractTauntAbility {
       });
    }
 
-   public static void setAbilityData(Mob mob, UUID playerUUID, float percentPlayerDamage) {
+   public static void setAbilityData(Mob mob, UUID playerUUID, float percentAbilityPowerDealt) {
       CompoundTag persistentData = mob.getPersistentData();
       CompoundTag abilityData = new CompoundTag();
       abilityData.putUUID("playerUUID", playerUUID);
-      abilityData.putFloat("percentPlayerDamage", percentPlayerDamage);
+      abilityData.putFloat("percentAbilityPowerDealt", percentAbilityPowerDealt);
       persistentData.put("the_vault:Taunt_Charm", abilityData);
    }
 
@@ -191,7 +192,7 @@ public class TauntCharmAbility extends AbstractTauntAbility {
          return null;
       } else {
          CompoundTag abilityData = persistentData.getCompound("the_vault:Taunt_Charm");
-         return abilityData.contains("playerUUID", 11) && abilityData.contains("percentPlayerDamage", 5) ? abilityData : null;
+         return abilityData.contains("playerUUID", 11) && abilityData.contains("percentAbilityPowerDealt", 5) ? abilityData : null;
       }
    }
 
@@ -223,13 +224,13 @@ public class TauntCharmAbility extends AbstractTauntAbility {
                   AttributeInstance attributeInstance = player.getAttribute(Attributes.ATTACK_DAMAGE);
                   if (attributeInstance != null) {
                      LivingEntity targetEntity = event.getEntityLiving();
-                     ActiveFlags.IS_CHARMED_ATTACKING.runIfNotSet(() -> {
-                        float percentPlayerDamage = abilityData.getFloat("percentPlayerDamage");
-                        float damage = (float)(attributeInstance.getValue() * percentPlayerDamage);
+                     ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_CHARMED_ATTACKING.runIfNotSet(() -> {
+                        float percentAbilityPowerDealt = abilityData.getFloat("percentAbilityPowerDealt");
+                        float damage = AbilityPowerHelper.getAbilityPower((ServerPlayer)player) * percentAbilityPowerDealt;
                         Vec3 movement = targetEntity.getDeltaMovement();
                         targetEntity.hurt(DamageSource.playerAttack(player), damage);
                         targetEntity.setDeltaMovement(new Vec3(movement.x, Math.min(movement.y + 0.2, 0.2), movement.z));
-                     });
+                     }));
                      event.setCanceled(true);
                   }
                }
@@ -242,21 +243,21 @@ public class TauntCharmAbility extends AbstractTauntAbility {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.maxCharmedMobs), buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.percentPlayerDamage), buffer);
+      Adapters.FLOAT.writeBits(Float.valueOf(this.percentAbilityPowerDealt), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.maxCharmedMobs = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
-      this.percentPlayerDamage = Adapters.FLOAT.readBits(buffer).orElseThrow();
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readBits(buffer).orElseThrow();
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
          Adapters.INT.writeNbt(Integer.valueOf(this.maxCharmedMobs)).ifPresent(tag -> nbt.put("maxCharmedMobs", tag));
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.percentPlayerDamage)).ifPresent(tag -> nbt.put("percentPlayerDamage", tag));
+         Adapters.FLOAT.writeNbt(Float.valueOf(this.percentAbilityPowerDealt)).ifPresent(tag -> nbt.put("percentAbilityPowerDealt", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -265,14 +266,14 @@ public class TauntCharmAbility extends AbstractTauntAbility {
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
       this.maxCharmedMobs = Adapters.INT.readNbt(nbt.get("maxCharmedMobs")).orElse(0);
-      this.percentPlayerDamage = Adapters.FLOAT.readNbt(nbt.get("percentPlayerDamage")).orElse(0.0F);
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readNbt(nbt.get("percentAbilityPowerDealt")).orElse(0.0F);
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
          Adapters.INT.writeJson(Integer.valueOf(this.maxCharmedMobs)).ifPresent(element -> json.add("maxCharmedMobs", element));
-         Adapters.FLOAT.writeJson(Float.valueOf(this.percentPlayerDamage)).ifPresent(element -> json.add("percentPlayerDamage", element));
+         Adapters.FLOAT.writeJson(Float.valueOf(this.percentAbilityPowerDealt)).ifPresent(element -> json.add("percentAbilityPowerDealt", element));
          return (JsonObject)json;
       });
    }
@@ -281,7 +282,7 @@ public class TauntCharmAbility extends AbstractTauntAbility {
    public void readJson(JsonObject json) {
       super.readJson(json);
       this.maxCharmedMobs = Adapters.INT.readJson(json.get("maxCharmedMobs")).orElse(0);
-      this.percentPlayerDamage = Adapters.FLOAT.readJson(json.get("percentPlayerDamage")).orElse(0.0F);
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readJson(json.get("percentAbilityPowerDealt")).orElse(0.0F);
    }
 
    static {

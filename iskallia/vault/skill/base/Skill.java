@@ -6,16 +6,23 @@ import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
 import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
+import iskallia.vault.skill.ability.effect.BonkAbility;
+import iskallia.vault.skill.ability.effect.BonkLuckyStrikeAbility;
+import iskallia.vault.skill.ability.effect.BonkSpectralStrikeAbility;
+import iskallia.vault.skill.ability.effect.BouncingFireballAbility;
 import iskallia.vault.skill.ability.effect.DashAbility;
 import iskallia.vault.skill.ability.effect.DashDamageAbility;
 import iskallia.vault.skill.ability.effect.DashWarpAbility;
 import iskallia.vault.skill.ability.effect.EmpowerAbility;
 import iskallia.vault.skill.ability.effect.EmpowerIceArmourAbility;
+import iskallia.vault.skill.ability.effect.EmpowerSlownessAuraAbility;
 import iskallia.vault.skill.ability.effect.ExecuteAbility;
 import iskallia.vault.skill.ability.effect.FarmerAbility;
 import iskallia.vault.skill.ability.effect.FarmerAnimalAbility;
 import iskallia.vault.skill.ability.effect.FarmerCactusAbility;
 import iskallia.vault.skill.ability.effect.FarmerMelonAbility;
+import iskallia.vault.skill.ability.effect.FireballAbility;
+import iskallia.vault.skill.ability.effect.FireballFireshotAbility;
 import iskallia.vault.skill.ability.effect.GhostWalkAbility;
 import iskallia.vault.skill.ability.effect.GhostWalkSpiritAbility;
 import iskallia.vault.skill.ability.effect.HealAbility;
@@ -45,6 +52,8 @@ import iskallia.vault.skill.ability.effect.SmiteThunderstormAbility;
 import iskallia.vault.skill.ability.effect.StonefallAbility;
 import iskallia.vault.skill.ability.effect.StonefallColdAbility;
 import iskallia.vault.skill.ability.effect.StonefallSnowAbility;
+import iskallia.vault.skill.ability.effect.StormArrowAbility;
+import iskallia.vault.skill.ability.effect.StormArrowBlizzardAbility;
 import iskallia.vault.skill.ability.effect.SummonEternalAbility;
 import iskallia.vault.skill.ability.effect.TauntAbility;
 import iskallia.vault.skill.ability.effect.TauntCharmAbility;
@@ -68,6 +77,7 @@ import iskallia.vault.skill.expertise.type.ExperiencedExpertise;
 import iskallia.vault.skill.expertise.type.FortunateExpertise;
 import iskallia.vault.skill.expertise.type.InfuserExpertise;
 import iskallia.vault.skill.expertise.type.JewelExpertise;
+import iskallia.vault.skill.expertise.type.LegendaryExpertise;
 import iskallia.vault.skill.expertise.type.LuckyAltarExpertise;
 import iskallia.vault.skill.expertise.type.MysticExpertise;
 import iskallia.vault.skill.expertise.type.TrinketerExpertise;
@@ -160,6 +170,19 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
 
    public Optional<Skill> getForId(String id) {
       return Objects.equals(this.getId(), id) ? Optional.of(this) : Optional.empty();
+   }
+
+   public <T extends Skill> boolean hasParentOfType(Class<T> type) {
+      Skill skill = this;
+
+      while (!type.isAssignableFrom(skill.getClass())) {
+         skill = skill.getParent();
+         if (skill == null) {
+            return false;
+         }
+      }
+
+      return true;
    }
 
    public <T> void iterate(Class<T> type, Consumer<T> action) {
@@ -283,8 +306,10 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("alchemist", AlchemistTalent.class, AlchemistTalent::new);
          this.register("jeweler", JewelExpertise.class, JewelExpertise::new);
          this.register("marketer", BlackMarketExpertise.class, BlackMarketExpertise::new);
+         this.register("fortuitous_finesse", LegendaryExpertise.class, LegendaryExpertise::new);
          this.register("empower_speed", EmpowerAbility.class, EmpowerAbility::new);
          this.register("empower_ice_armor", EmpowerIceArmourAbility.class, EmpowerIceArmourAbility::new);
+         this.register("empower_slowness_aura", EmpowerSlownessAuraAbility.class, EmpowerSlownessAuraAbility::new);
          this.register("mana_shield", ManaShieldAbility.class, ManaShieldAbility::new);
          this.register("mana_shield_retribution", ManaShieldRetributionAbility.class, ManaShieldRetributionAbility::new);
          this.register("rampage_damage", RampageAbility.class, RampageAbility::new);
@@ -335,6 +360,14 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("shell", ShellAbility.class, ShellAbility::new);
          this.register("shell_porcupine", ShellPorcupineAbility.class, ShellPorcupineAbility::new);
          this.register("shell_quill", ShellQuillAbility.class, ShellQuillAbility::new);
+         this.register("fireball", FireballAbility.class, FireballAbility::new);
+         this.register("fireball_volley", BouncingFireballAbility.class, BouncingFireballAbility::new);
+         this.register("fireball_fireshot", FireballFireshotAbility.class, FireballFireshotAbility::new);
+         this.register("storm_arrow_thunderstorm", StormArrowAbility.class, StormArrowAbility::new);
+         this.register("storm_arrow_blizzard", StormArrowBlizzardAbility.class, StormArrowBlizzardAbility::new);
+         this.register("battle_cry", BonkAbility.class, BonkAbility::new);
+         this.register("battle_cry_spectral_strike", BonkSpectralStrikeAbility.class, BonkSpectralStrikeAbility::new);
+         this.register("battle_cry_lucky_strike", BonkLuckyStrikeAbility.class, BonkLuckyStrikeAbility::new);
          this.register("empower_porcupine", RemovedSkill.class, () -> new RemovedSkill("empower_porcupine"));
       }
 

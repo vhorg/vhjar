@@ -7,12 +7,14 @@ import iskallia.vault.client.gui.framework.element.ContainerElement;
 import iskallia.vault.client.gui.framework.element.LabelElement;
 import iskallia.vault.client.gui.framework.element.NineSliceElement;
 import iskallia.vault.client.gui.framework.element.TextureAtlasElement;
+import iskallia.vault.client.gui.framework.element.spi.ILayoutStrategy;
 import iskallia.vault.client.gui.framework.render.spi.IElementRenderer;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
+import iskallia.vault.client.gui.framework.text.TextAlign;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,25 +23,36 @@ public class HeaderElement extends ContainerElement<HeaderElement> {
    private final LabelElement<?> titleText;
    private NineSliceElement<?> iconBackground;
    private TextureAtlasElement<?> iconElement;
-   private MutableComponent title;
-   private MutableComponent lastTitle;
+   private Component title;
+   private Component lastTitle;
 
-   public HeaderElement(ISpatial spatial, TextComponent title, boolean contentBackgroundVisible) {
-      this(spatial, title, null, contentBackgroundVisible);
+   public HeaderElement(ISpatial spatial, Component title, boolean contentBackgroundVisible) {
+      this(spatial, title, null, contentBackgroundVisible, LabelTextStyle.shadow());
    }
 
-   public HeaderElement(ISpatial spatial, TextComponent title) {
-      this(spatial, title, null, false);
+   public HeaderElement(ISpatial spatial, Component title, TextureAtlasRegion icon, boolean contentBackgroundVisible) {
+      this(spatial, title, icon, contentBackgroundVisible, LabelTextStyle.shadow());
    }
 
-   public HeaderElement(ISpatial spatial, TextComponent title, @Nullable TextureAtlasRegion icon, boolean contentBackgroundVisible) {
+   public HeaderElement(ISpatial spatial, Component title, LabelTextStyle.Builder labelTextStyle) {
+      this(spatial, title, null, false, labelTextStyle);
+   }
+
+   public HeaderElement(ISpatial spatial, Component title) {
+      this(spatial, title, null, false, LabelTextStyle.shadow());
+   }
+
+   public HeaderElement(
+      ISpatial spatial, Component title, @Nullable TextureAtlasRegion icon, boolean contentBackgroundVisible, LabelTextStyle.Builder labelTextStyle
+   ) {
       super(spatial);
       this.title = title;
       this.titleBackground = this.addElement(
          new NineSliceElement(Spatials.positionXYZ(0, 0, 10).size(spatial.width(), 20), ScreenTextures.VAULT_EXIT_ELEMENT_TITLE)
       );
+      int x = labelTextStyle.build().textAlign() == TextAlign.CENTER ? 0 : 3;
       this.titleText = this.addElement(
-         new LabelElement(Spatials.positionXYZ(icon == null ? 3 : 32, 6, 11).size(spatial.width(), 9), title, LabelTextStyle.shadow())
+         new LabelElement(Spatials.positionXYZ(icon == null ? x : 32, 6, 11).size(spatial.width(), 9), title, labelTextStyle).layout(this.adjustLabelLayout())
       );
       if (icon != null) {
          this.iconBackground = this.addElement(new NineSliceElement(Spatials.positionXYZ(5, -2, 15).size(24, 24), ScreenTextures.VAULT_EXIT_ELEMENT_ICON));
@@ -47,7 +60,7 @@ public class HeaderElement extends ContainerElement<HeaderElement> {
       }
 
       if (contentBackgroundVisible) {
-         NineSliceElement var5 = this.addElement(
+         NineSliceElement var7 = this.addElement(
             new NineSliceElement(
                Spatials.positionXYZ(2, this.titleBackground.bottom() - 2, 0).size(spatial.width() - 4, spatial.height() + 8),
                ScreenTextures.VAULT_EXIT_ELEMENT_BG
@@ -77,5 +90,10 @@ public class HeaderElement extends ContainerElement<HeaderElement> {
       }
 
       super.render(renderer, poseStack, mouseX, mouseY, partialTick);
+   }
+
+   @NotNull
+   public ILayoutStrategy adjustLabelLayout() {
+      return (screen, gui, parent, world) -> world.size(this.width(), this.height());
    }
 }

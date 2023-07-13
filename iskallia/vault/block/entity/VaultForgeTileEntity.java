@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class VaultForgeTileEntity extends ForgeRecipeTileEntity implements MenuProvider {
    public VaultForgeTileEntity(BlockPos pWorldPosition, BlockState pBlockState) {
-      super(ModBlocks.VAULT_FORGE_TILE_ENTITY, pWorldPosition, pBlockState, 6, ForgeRecipeType.GEAR, ForgeRecipeType.TRINKET);
+      super(ModBlocks.VAULT_FORGE_TILE_ENTITY, pWorldPosition, pBlockState, 9, ForgeRecipeType.GEAR, ForgeRecipeType.TRINKET);
    }
 
    @Override

@@ -13,6 +13,7 @@ import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.HoldAbility;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.BlockBreakHandler;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -74,7 +75,7 @@ public abstract class AbstractVeinMinerAbility extends HoldAbility {
          blocks = mod.modification().adjustBlockCount(mod.config(), blocks);
       }
 
-      return blocks;
+      return Math.round(AreaOfEffectHelper.adjustAreaOfEffect(player, blocks));
    }
 
    @Override
@@ -94,7 +95,7 @@ public abstract class AbstractVeinMinerAbility extends HoldAbility {
 
          for (AbstractVeinMinerAbility ability : abilities.getAll(AbstractVeinMinerAbility.class, Ability::isActive)) {
             if (!ability.isItemDenied(player.getItemInHand(InteractionHand.MAIN_HAND))) {
-               abilities.getSelectedAbility().ifPresent(selected -> {
+               abilities.getSelectedAbility(player).ifPresent(selected -> {
                   if (selected.getClass() == ability.getClass()) {
                      ActiveFlags.IS_AOE_MINING.runIfNotSet(() -> {
                         BlockPos pos = event.getPos();

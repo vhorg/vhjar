@@ -5,14 +5,15 @@ import java.util.Comparator;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
+import org.apache.commons.lang3.Range;
 
 public enum VaultDifficulty {
-   EASY(0, 1, "easy", 0.5, 0.5, false),
-   NORMAL(1, 2, "normal", 0.75, 0.75, false),
-   HARD(2, 3, "hard", 1.0, 1.0, true),
-   IMPOSSIBLE(3, 4, "impossible", 2.0, 2.0, true),
-   FRAGGED(4, 5, "fragged", 4.0, 2.0, true),
-   PIECE_OF_CAKE(5, 0, "piece_of_cake", 0.25, 0.25, false);
+   EASY(0, 1, "easy", 0.5, 0.5, false, Range.is(1)),
+   NORMAL(1, 2, "normal", 0.75, 0.75, false, Range.between(1, 2)),
+   HARD(2, 3, "hard", 1.0, 1.0, true, Range.between(1, 3)),
+   IMPOSSIBLE(3, 4, "impossible", 2.0, 2.0, true, Range.between(2, 3)),
+   FRAGGED(4, 5, "fragged", 4.0, 2.0, true, Range.is(3)),
+   PIECE_OF_CAKE(5, 0, "piece_of_cake", 0.25, 0.25, false, Range.is(0));
 
    private static final VaultDifficulty[] BY_ID = Arrays.stream(values())
       .sorted(Comparator.comparingInt(VaultDifficulty::getId))
@@ -23,17 +24,21 @@ public enum VaultDifficulty {
    private final double damageMultiplier;
    private final double heathMultiplier;
    private final boolean antiNerdPoleAi;
+   private final Range<Integer> championAffixCount;
    private static final VaultDifficulty[] ORDERED_DIFFICULTIES = Arrays.stream(values())
       .sorted(Comparator.comparingInt(VaultDifficulty::getDisplayOrder))
       .toArray(VaultDifficulty[]::new);
 
-   private VaultDifficulty(int id, int displayOrder, String key, double damageMultiplier, double heathMultiplier, boolean antiNerdPoleAi) {
+   private VaultDifficulty(
+      int id, int displayOrder, String key, double damageMultiplier, double heathMultiplier, boolean antiNerdPoleAi, Range<Integer> championAffixCount
+   ) {
       this.id = id;
       this.displayOrder = displayOrder;
       this.key = key;
       this.damageMultiplier = damageMultiplier;
       this.heathMultiplier = heathMultiplier;
       this.antiNerdPoleAi = antiNerdPoleAi;
+      this.championAffixCount = championAffixCount;
    }
 
    public int getId() {
@@ -54,6 +59,10 @@ public enum VaultDifficulty {
 
    private int getDisplayOrder() {
       return this.displayOrder;
+   }
+
+   public Range<Integer> getChampionAffixCount() {
+      return this.championAffixCount;
    }
 
    @Nullable

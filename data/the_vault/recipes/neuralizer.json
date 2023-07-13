@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " o ",
-    "oro",
-    " o "
+    "rpr",
+    "ror",
+    "rsr"
   ],
   "key": {
     "r": {
@@ -11,6 +11,12 @@
     },
     "o": {
       "item": "the_vault:omega_pog"
+    },
+    "p": {
+      "item": "the_vault:opportunistic_focus"
+    },
+    "s": {
+      "item": "the_vault:resilient_focus"
     }
   },
   "result": {

@@ -5,8 +5,8 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import com.google.gson.annotations.Expose;
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
@@ -44,7 +44,7 @@ public abstract class Quest implements Comparable<Quest> {
    @Expose
    protected final String name;
    @Expose
-   protected final Quest.DescriptionData descriptionData;
+   protected final DescriptionData descriptionData;
    @Expose
    protected final ResourceLocation icon;
    @Expose
@@ -60,7 +60,7 @@ public abstract class Quest implements Comparable<Quest> {
       String type,
       String id,
       String name,
-      Quest.DescriptionData descriptionData,
+      DescriptionData descriptionData,
       ResourceLocation icon,
       ResourceLocation targetId,
       float targetProgress,
@@ -162,7 +162,7 @@ public abstract class Quest implements Comparable<Quest> {
          String type = object.get("type").getAsString();
          String id = object.get("id").getAsString();
          String name = object.get("name").getAsString();
-         Quest.DescriptionData descriptionData = (Quest.DescriptionData)context.deserialize(object.get("descriptionData"), Quest.DescriptionData.class);
+         DescriptionData descriptionData = (DescriptionData)context.deserialize(object.get("descriptionData"), DescriptionData.class);
          ResourceLocation icon = new ResourceLocation(object.get("icon").getAsString());
          ResourceLocation targetId = new ResourceLocation(object.get("targetId").getAsString());
          float targetProgress = object.get("targetProgress").getAsFloat();
@@ -185,7 +185,7 @@ public abstract class Quest implements Comparable<Quest> {
       private String type;
       private String id;
       private String name;
-      private Quest.DescriptionData descriptionData;
+      private DescriptionData descriptionData;
       private ResourceLocation icon;
       private ResourceLocation targetId;
       private float targetProgress;
@@ -211,7 +211,7 @@ public abstract class Quest implements Comparable<Quest> {
          return this;
       }
 
-      public Quest.Builder descriptionData(Quest.DescriptionData descriptionData) {
+      public Quest.Builder descriptionData(DescriptionData descriptionData) {
          this.descriptionData = descriptionData;
          return this;
       }
@@ -307,29 +307,6 @@ public abstract class Quest implements Comparable<Quest> {
                   return null;
             }
          }
-      }
-   }
-
-   public static class DescriptionData {
-      @Expose
-      private final JsonElement description;
-
-      public DescriptionData(JsonElement description) {
-         this.description = description;
-      }
-
-      public JsonElement getDescription() {
-         return this.description;
-      }
-
-      public static Quest.DescriptionData getDefault(String name) {
-         return new Quest.DescriptionData(
-            JsonParser.parseString(
-               "[{text:'Default config description for ', color:'$text'},{text: '"
-                  + name
-                  + "', color: '$name'},{text: ' - please configure me!', color: '$text'}]"
-            )
-         );
       }
    }
 

@@ -35,6 +35,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
@@ -253,8 +254,11 @@ public class DashWarpAbility extends InstantManaAbility {
                   this.teleport(serverPlayer, playerTarget.get());
                   this.playTeleportSound(serverLevel, serverPlayer, playerTarget.get());
                   this.sendTeleportParticles(serverLevel, origin);
-                  this.teleport(entity, entityTarget.get());
-                  this.playTeleportSound(serverLevel, serverPlayer, entityTarget.get());
+                  if (this.canEntityBeTeleported(entity)) {
+                     this.teleport(entity, entityTarget.get());
+                     this.playTeleportSound(serverLevel, serverPlayer, entityTarget.get());
+                  }
+
                   this.sendTeleportParticles(serverLevel, target);
                }
 
@@ -263,6 +267,10 @@ public class DashWarpAbility extends InstantManaAbility {
                this.discard();
             }
          }
+      }
+
+      private boolean canEntityBeTeleported(Entity target) {
+         return target.isAlive() && target instanceof LivingEntity;
       }
 
       private void teleport(Entity entity, Vec3 target) {

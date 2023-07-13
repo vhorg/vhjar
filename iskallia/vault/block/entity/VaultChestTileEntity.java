@@ -47,6 +47,8 @@ import org.jetbrains.annotations.NotNull;
 public class VaultChestTileEntity extends ChestBlockEntity implements HunterHiddenTileEntity {
    private VaultRarity rarity;
    private boolean generated;
+   private float itemQuantity;
+   private float itemRarity;
    private int generatedStacksCount;
    private int size;
    private boolean hidden;
@@ -125,7 +127,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
          double z = this.worldPosition.getZ() + 0.5;
          switch (this.rarity) {
             case RARE:
-               this.level.playSound(null, x, y, z, ModSounds.VAULT_CHEST_RARE_OPEN, SoundSource.BLOCKS, 0.2F, this.level.random.nextFloat() * 0.1F + 0.9F);
+               this.level.playSound(null, x, y, z, ModSounds.VAULT_CHEST_RARE_OPEN, SoundSource.BLOCKS, 0.3F, this.level.random.nextFloat() * 0.1F + 0.9F);
                break;
             case EPIC:
                this.level.playSound(null, x, y, z, ModSounds.VAULT_CHEST_EPIC_OPEN, SoundSource.BLOCKS, 0.2F, this.level.random.nextFloat() * 0.1F + 0.9F);
@@ -214,8 +216,8 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
    }
 
    private void generateLootTable(Version version, @Nullable Player player, List<ItemStack> loot, RandomSource random) {
-      float quantity = ItemQuantityHelper.getItemQuantity(player);
-      float rarity = ItemRarityHelper.getItemRarity(player);
+      float quantity = ItemQuantityHelper.getItemQuantity(player) + this.itemQuantity;
+      float rarity = ItemRarityHelper.getItemRarity(player) + this.itemRarity;
       LootTableKey key = VaultRegistry.LOOT_TABLE.getKey(this.lootTable);
       if (key != null) {
          if (this.getBlockState().is(ModBlocks.TREASURE_CHEST)) {
@@ -360,6 +362,8 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
          this.rarity = VaultRarity.values()[nbt.getInt("Rarity")];
       }
 
+      this.itemQuantity = nbt.getFloat("ItemQuantity");
+      this.itemRarity = nbt.getFloat("ItemRarity");
       this.generated = nbt.getBoolean("Generated");
       this.generatedStacksCount = nbt.getInt("GeneratedStacksCount");
       this.hidden = nbt.getBoolean("Hidden");
@@ -371,6 +375,8 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
          nbt.putInt("Rarity", this.rarity.ordinal());
       }
 
+      nbt.putFloat("ItemQuantity", this.itemQuantity);
+      nbt.putFloat("ItemRarity", this.itemRarity);
       nbt.putBoolean("Generated", this.generated);
       nbt.putInt("GeneratedStacksCount", this.generatedStacksCount);
       nbt.putBoolean("Hidden", this.hidden);

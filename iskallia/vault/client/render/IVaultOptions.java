@@ -1,8 +1,13 @@
 package iskallia.vault.client.render;
 
 import iskallia.vault.util.ColorOption;
+import iskallia.vault.util.CooldownGuiOption;
 
 public interface IVaultOptions {
+   CooldownGuiOption getCooldownGuiOption();
+
+   void cycleCooldownGuiOption();
+
    boolean doVanillaPotionDamageEffects();
 
    void setVanillaPotionDamageEffects(boolean var1);
@@ -10,6 +15,10 @@ public interface IVaultOptions {
    boolean isHunterCustomColorsEnabled();
 
    void setHunterCustomColorsEnabled(boolean var1);
+
+   boolean isAbilityScrollingEnabled();
+
+   void setAbilityScrollingEnabled(boolean var1);
 
    ColorOption getChestHunterSpec();
 

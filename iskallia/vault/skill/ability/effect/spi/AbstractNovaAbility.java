@@ -10,6 +10,8 @@ import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueCon
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
+import iskallia.vault.util.calc.AbilityPowerHelper;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.List;
 import java.util.Optional;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,7 +21,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -28,7 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractNovaAbility extends InstantManaAbility {
    private float radius;
-   private float percentAttackDamageDealt;
+   private float percentAbilityPowerDealt;
    private float knockbackStrengthMultiplier;
 
    public AbstractNovaAbility(
@@ -38,12 +39,12 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
       int cooldownTicks,
       float manaCost,
       float radius,
-      float percentAttackDamageDealt,
+      float percentAbilityPowerDealt,
       float knockbackStrengthMultiplier
    ) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost);
       this.radius = radius;
-      this.percentAttackDamageDealt = percentAttackDamageDealt;
+      this.percentAbilityPowerDealt = percentAbilityPowerDealt;
       this.knockbackStrengthMultiplier = knockbackStrengthMultiplier;
    }
 
@@ -69,11 +70,15 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
          }
       }
 
+      if (attacker instanceof LivingEntity livingEntity) {
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+      }
+
       return realRadius;
    }
 
-   public float getPercentAttackDamageDealt() {
-      return this.percentAttackDamageDealt;
+   public float getPercentAbilityPowerDealt() {
+      return this.percentAbilityPowerDealt;
    }
 
    public float getKnockbackStrengthMultiplier() {
@@ -91,8 +96,8 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
       );
    }
 
-   protected float getAttackDamage(ServerPlayer player) {
-      return (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * this.getPercentAttackDamageDealt();
+   protected float getAbilityPower(ServerPlayer player) {
+      return AbilityPowerHelper.getAbilityPower(player) * this.getPercentAbilityPowerDealt();
    }
 
    @Override
@@ -113,7 +118,7 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.radius), buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.percentAttackDamageDealt), buffer);
+      Adapters.FLOAT.writeBits(Float.valueOf(this.percentAbilityPowerDealt), buffer);
       Adapters.FLOAT.writeBits(Float.valueOf(this.knockbackStrengthMultiplier), buffer);
    }
 
@@ -121,7 +126,7 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.radius = Adapters.FLOAT.readBits(buffer).orElseThrow();
-      this.percentAttackDamageDealt = Adapters.FLOAT.readBits(buffer).orElseThrow();
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readBits(buffer).orElseThrow();
       this.knockbackStrengthMultiplier = Adapters.FLOAT.readBits(buffer).orElseThrow();
    }
 
@@ -129,7 +134,7 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
          Adapters.FLOAT.writeNbt(Float.valueOf(this.radius)).ifPresent(tag -> nbt.put("radius", tag));
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.percentAttackDamageDealt)).ifPresent(tag -> nbt.put("percentAttackDamageDealt", tag));
+         Adapters.FLOAT.writeNbt(Float.valueOf(this.percentAbilityPowerDealt)).ifPresent(tag -> nbt.put("percentAbilityPowerDealt", tag));
          Adapters.FLOAT.writeNbt(Float.valueOf(this.knockbackStrengthMultiplier)).ifPresent(tag -> nbt.put("knockbackStrengthMultiplier", tag));
          return (CompoundTag)nbt;
       });
@@ -139,7 +144,7 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
       this.radius = Adapters.FLOAT.readNbt(nbt.get("radius")).orElse(0.0F);
-      this.percentAttackDamageDealt = Adapters.FLOAT.readNbt(nbt.get("percentAttackDamageDealt")).orElse(0.0F);
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readNbt(nbt.get("percentAbilityPowerDealt")).orElse(0.0F);
       this.knockbackStrengthMultiplier = Adapters.FLOAT.readNbt(nbt.get("knockbackStrengthMultiplier")).orElse(0.0F);
    }
 
@@ -147,7 +152,7 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
          Adapters.FLOAT.writeJson(Float.valueOf(this.radius)).ifPresent(element -> json.add("radius", element));
-         Adapters.FLOAT.writeJson(Float.valueOf(this.percentAttackDamageDealt)).ifPresent(element -> json.add("percentAttackDamageDealt", element));
+         Adapters.FLOAT.writeJson(Float.valueOf(this.percentAbilityPowerDealt)).ifPresent(element -> json.add("percentAbilityPowerDealt", element));
          Adapters.FLOAT.writeJson(Float.valueOf(this.knockbackStrengthMultiplier)).ifPresent(element -> json.add("knockbackStrengthMultiplier", element));
          return (JsonObject)json;
       });
@@ -157,7 +162,7 @@ public abstract class AbstractNovaAbility extends InstantManaAbility {
    public void readJson(JsonObject json) {
       super.readJson(json);
       this.radius = Adapters.FLOAT.readJson(json.get("radius")).orElse(0.0F);
-      this.percentAttackDamageDealt = Adapters.FLOAT.readJson(json.get("percentAttackDamageDealt")).orElse(0.0F);
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readJson(json.get("percentAbilityPowerDealt")).orElse(0.0F);
       this.knockbackStrengthMultiplier = Adapters.FLOAT.readJson(json.get("knockbackStrengthMultiplier")).orElse(0.0F);
    }
 }

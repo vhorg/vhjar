@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.util.ColorOption;
+import iskallia.vault.util.CooldownGuiOption;
 import net.minecraft.client.Options;
 import net.minecraft.client.Options.FieldAccess;
 import org.spongepowered.asm.mixin.Mixin;
@@ -11,8 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin({Options.class})
 public class MixinOptions implements IVaultOptions {
+   public CooldownGuiOption cooldownGuiOption = CooldownGuiOption.OFF;
    public boolean doVanillaPotionDamageEffects = false;
    public boolean hunterCustomColorsEnabled = false;
+   public boolean abilityScrollingEnabled = true;
    public ColorOption chestHunterSpec = new ColorOption(ColorOption.HunterSpec.BASE, 0.8901961F, 0.5529412F, 0.0F);
    public ColorOption blockHunterSpec = new ColorOption(ColorOption.HunterSpec.OBSERVER, 0.14509805F, 0.6745098F, 0.0F);
    public ColorOption gildedHunterSpec = new ColorOption(ColorOption.HunterSpec.GILDED, 1.0F, 1.0F, 0.0F);
@@ -27,6 +30,10 @@ public class MixinOptions implements IVaultOptions {
    private void processVaultOptions(FieldAccess pAccessor, CallbackInfo ci) {
       this.doVanillaPotionDamageEffects = pAccessor.process("doVanillaPotionDamageEffects", this.doVanillaPotionDamageEffects);
       this.hunterCustomColorsEnabled = pAccessor.process("hunter_CustomColorsEnabled", this.hunterCustomColorsEnabled);
+      this.abilityScrollingEnabled = pAccessor.process("abilityScrollingEnabled", this.abilityScrollingEnabled);
+      this.cooldownGuiOption = (CooldownGuiOption)pAccessor.process(
+         CooldownGuiOption.OFF.getSerializedName(), this.cooldownGuiOption, CooldownGuiOption::fromString, CooldownGuiOption::getSerializedName
+      );
       this.chestHunterSpec = (ColorOption)pAccessor.process(
          ColorOption.HunterSpec.BASE.toString(), this.chestHunterSpec, this::readColorOption, this::writeColorOption
       );
@@ -57,6 +64,16 @@ public class MixinOptions implements IVaultOptions {
    }
 
    @Override
+   public CooldownGuiOption getCooldownGuiOption() {
+      return this.cooldownGuiOption;
+   }
+
+   @Override
+   public void cycleCooldownGuiOption() {
+      this.cooldownGuiOption = this.cooldownGuiOption.cycle();
+   }
+
+   @Override
    public boolean doVanillaPotionDamageEffects() {
       return this.doVanillaPotionDamageEffects;
    }
@@ -74,6 +91,16 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setHunterCustomColorsEnabled(boolean hunterCustomColorsEnabled) {
       this.hunterCustomColorsEnabled = hunterCustomColorsEnabled;
+   }
+
+   @Override
+   public boolean isAbilityScrollingEnabled() {
+      return this.abilityScrollingEnabled;
+   }
+
+   @Override
+   public void setAbilityScrollingEnabled(boolean abilityScrollingEnabled) {
+      this.abilityScrollingEnabled = abilityScrollingEnabled;
    }
 
    @Override

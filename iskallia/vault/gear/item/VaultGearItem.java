@@ -14,6 +14,7 @@ import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.tooltip.VaultGearTooltipItem;
 import iskallia.vault.init.ModConfigs;
@@ -33,6 +34,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -40,11 +42,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.extensions.IForgeItem;
+import org.apache.commons.lang3.ObjectUtils;
 
 public interface VaultGearItem
    extends IForgeItem,
@@ -97,8 +101,9 @@ public interface VaultGearItem
    @Nullable
    @Override
    default Optional<ResourceLocation> getDynamicModelId(ItemStack itemStack) {
-      VaultGearData gearData = VaultGearData.read(itemStack);
-      return gearData.getState() == VaultGearState.UNIDENTIFIED ? Optional.empty() : gearData.getFirstValue(ModGearAttributes.GEAR_MODEL);
+      GearDataCache cache = GearDataCache.of(itemStack);
+      VaultGearState state = (VaultGearState)ObjectUtils.firstNonNull(new VaultGearState[]{cache.getState(), VaultGearState.UNIDENTIFIED});
+      return state == VaultGearState.UNIDENTIFIED ? Optional.empty() : cache.getGearModel();
    }
 
    default Optional<? extends DynamicModel<?>> resolveDynamicModel(ItemStack stack, ResourceLocation key) {
@@ -211,13 +216,23 @@ public interface VaultGearItem
       return this.getIntendedSlot(stack) == slotType;
    }
 
+   default <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<T> onBroken) {
+      return stack.getDamageValue() + amount >= stack.getMaxDamage()
+         ? stack.getMaxDamage() - 1 - stack.getDamageValue()
+         : super.damageItem(stack, amount, entity, onBroken);
+   }
+
+   default boolean isBroken(ItemStack stack) {
+      return stack.getDamageValue() >= stack.getMaxDamage() - 1;
+   }
+
    default void vaultGearTick(ItemStack stack, ServerPlayer player) {
       VaultGearHelper.initializeGearRollType(stack, player);
       this.inventoryIdentificationTick(player, stack);
    }
 
    @Override
-   default void tickRoll(ItemStack stack) {
+   default void tickRoll(ItemStack stack, Player player) {
       GearRollHelper.tickGearRoll(stack);
    }
 

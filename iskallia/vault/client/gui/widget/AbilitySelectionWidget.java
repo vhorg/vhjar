@@ -6,6 +6,8 @@ import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.atlas.ITextureAtlas;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModTextureAtlases;
+import iskallia.vault.skill.ability.cooldown.AbilityCooldownManager;
+import iskallia.vault.skill.ability.cooldown.CooldownInstance;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SpecializedSkill;
 import iskallia.vault.skill.base.TieredSkill;
@@ -18,6 +20,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
 public class AbilitySelectionWidget extends AbstractWidget {
@@ -36,12 +39,15 @@ public class AbilitySelectionWidget extends AbstractWidget {
    }
 
    public Ability getSelectedAbility() {
-      return (Ability)Optional.of(this.ability)
-         .map(SpecializedSkill::getSpecialization)
-         .filter(skill -> skill instanceof TieredSkill)
-         .map(skill -> ((TieredSkill)skill).getChild())
-         .filter(skill -> skill instanceof Ability)
-         .orElse(null);
+      Player player = Minecraft.getInstance().player;
+      return player == null
+         ? null
+         : (Ability)Optional.of(this.ability)
+            .map(SpecializedSkill::getSpecialization)
+            .filter(skill -> skill instanceof TieredSkill)
+            .map(skill -> ((TieredSkill)skill).getChild())
+            .filter(skill -> skill instanceof Ability)
+            .orElse(null);
    }
 
    public Rectangle getBounds() {
@@ -60,37 +66,41 @@ public class AbilitySelectionWidget extends AbstractWidget {
    }
 
    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-      Rectangle bounds = this.getBounds();
-      String styleKey = this.ability.getSpecialization().getId();
-      int cooldown = this.getSelectedAbility().getRemainingCooldown();
-      int maxCooldown = this.getSelectedAbility().getTotalCooldown();
-      if (ClientAbilityData.isSelectedAbility(this.ability)) {
-         RenderSystem.setShaderColor(0.7F, 0.7F, 0.7F, 0.3F);
-      } else {
-         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-      }
+      Player player = Minecraft.getInstance().player;
+      if (player != null) {
+         Rectangle bounds = this.getBounds();
+         String styleKey = this.ability.getSpecialization().getId();
+         Ability ability = this.getSelectedAbility();
+         String abilityKey = ability != null ? ability.getAbilityGroupName() : styleKey;
+         CooldownInstance cooldown = AbilityCooldownManager.getCooldown(player, abilityKey);
+         if (ClientAbilityData.isSelectedAbility(this.ability)) {
+            RenderSystem.setShaderColor(0.7F, 0.7F, 0.7F, 0.3F);
+         } else {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+         }
 
-      RenderSystem.enableBlend();
-      RenderSystem.setShaderTexture(0, HUD_RESOURCE);
-      this.blit(matrixStack, bounds.x + 1, bounds.y + 1, 28, 36, 22, 22);
-      ITextureAtlas atlas = ModTextureAtlases.ABILITIES.get();
-      RenderSystem.setShaderTexture(0, atlas.getAtlasResourceLocation());
-      GuiComponent.blit(matrixStack, bounds.x + 4, bounds.y + 4, 0, 16, 16, atlas.getSprite(ModConfigs.ABILITIES_GUI.getIcon(styleKey)));
-      if (cooldown > 0) {
-         RenderSystem.setShaderColor(0.7F, 0.7F, 0.7F, 0.5F);
-         float cooldownPercent = (float)cooldown / maxCooldown;
-         int cooldownHeight = (int)(16.0F * cooldownPercent);
-         GuiComponent.fill(matrixStack, bounds.x + 4, bounds.y + 4 + (16 - cooldownHeight), bounds.x + 4 + 16, bounds.y + 4 + 16, -1711276033);
          RenderSystem.enableBlend();
-      }
+         RenderSystem.setShaderTexture(0, HUD_RESOURCE);
+         this.blit(matrixStack, bounds.x + 1, bounds.y + 1, 28, 36, 22, 22);
+         ITextureAtlas atlas = ModTextureAtlases.ABILITIES.get();
+         RenderSystem.setShaderTexture(0, atlas.getAtlasResourceLocation());
+         GuiComponent.blit(matrixStack, bounds.x + 4, bounds.y + 4, 0, 16, 16, atlas.getSprite(ModConfigs.ABILITIES_GUI.getIcon(styleKey)));
+         if (cooldown.getRemainingTicks() > 0) {
+            RenderSystem.setShaderColor(0.7F, 0.7F, 0.7F, 0.5F);
+            float cooldownPercent = (float)cooldown.getRemainingTicks() / cooldown.getOriginalTicks();
+            int cooldownHeight = (int)(16.0F * cooldownPercent);
+            GuiComponent.fill(matrixStack, bounds.x + 4, bounds.y + 4 + (16 - cooldownHeight), bounds.x + 4 + 16, bounds.y + 4 + 16, -1711276033);
+            RenderSystem.enableBlend();
+         }
 
-      if (ClientAbilityData.isSelectedAbility(this.ability)) {
-         RenderSystem.setShaderTexture(0, HUD_RESOURCE);
-         this.blit(matrixStack, bounds.x, bounds.y, 89, 13, 24, 24);
-      } else if (this.isMouseOver(mouseX, mouseY)) {
-         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-         RenderSystem.setShaderTexture(0, HUD_RESOURCE);
-         this.blit(matrixStack, bounds.x, bounds.y, 64 + (cooldown > 0 ? 50 : 0), 13, 24, 24);
+         if (ClientAbilityData.isSelectedAbility(this.ability)) {
+            RenderSystem.setShaderTexture(0, HUD_RESOURCE);
+            this.blit(matrixStack, bounds.x, bounds.y, 89, 13, 24, 24);
+         } else if (this.isMouseOver(mouseX, mouseY)) {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            RenderSystem.setShaderTexture(0, HUD_RESOURCE);
+            this.blit(matrixStack, bounds.x, bounds.y, 64 + (cooldown.getRemainingTicks() > 0 ? 50 : 0), 13, 24, 24);
+         }
       }
    }
 

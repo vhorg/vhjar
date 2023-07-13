@@ -8,6 +8,7 @@ import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification
 import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
 import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
@@ -47,7 +48,7 @@ public abstract class AbstractTauntAbility extends InstantManaAbility {
          realRadius = mod.modification().adjustRadius(mod.config(), realRadius);
       }
 
-      return realRadius;
+      return AreaOfEffectHelper.adjustAreaOfEffect(player, realRadius);
    }
 
    @Override

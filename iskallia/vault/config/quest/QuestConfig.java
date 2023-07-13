@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.Config;
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.core.SkyVaultsChunkGenerator;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
@@ -49,63 +50,63 @@ public class QuestConfig extends Config {
 
    protected void collection(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       CollectionQuest quest = new CollectionQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }
 
    protected void crafting(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       CraftingQuest quest = new CraftingQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }
 
    protected void survive(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       SurviveQuest quest = new SurviveQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }
 
    protected void enterVault(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       EnterVaultQuest quest = new EnterVaultQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }
 
    protected void anvil(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       AnvilQuest quest = new AnvilQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }
 
    protected void mining(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       MiningQuest quest = new MiningQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }
 
    protected void bounty(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       BountyCompleteQuest quest = new BountyCompleteQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }
 
    protected void levelUp(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       LevelUpQuest quest = new LevelUpQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }
 
    protected void blockInteract(String id, String name, ResourceLocation targetId, float targetProgress, String unlockedBy, Quest.QuestReward questReward) {
       BlockInteractionQuest quest = new BlockInteractionQuest(
-         id, name, Quest.DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
+         id, name, DescriptionData.getDefault(id), VaultMod.id("gui/quests/" + id), targetId, targetProgress, unlockedBy, questReward
       );
       this.quests.add(quest);
    }

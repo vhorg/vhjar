@@ -5,6 +5,7 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.basic.SerializableAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
+import iskallia.vault.skill.ability.cooldown.AbilityCooldownManager;
 import iskallia.vault.skill.base.LearnableSkill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.base.TickingSkill;
@@ -16,13 +17,13 @@ import net.minecraft.server.level.ServerPlayer;
 public abstract class Ability extends LearnableSkill implements TickingSkill {
    public static final SerializableAdapter<Ability.Cooldown, CompoundTag, JsonObject> COOLDOWN = new SerializableAdapter<>(Ability.Cooldown::new, true);
    private int cooldownTicks;
-   private Ability.Cooldown cooldown;
+   @Deprecated
+   private Ability.Cooldown cooldown = null;
    private boolean active;
 
    public Ability(int unlockLevel, int learnPointCost, int regretPointCost, int cooldownTicks) {
       super(unlockLevel, learnPointCost, regretPointCost);
       this.cooldownTicks = cooldownTicks;
-      this.cooldown = null;
       this.active = false;
    }
 
@@ -37,16 +38,9 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
       return this.cooldownTicks;
    }
 
+   @Deprecated
    public Ability.Cooldown getCooldown() {
       return this.cooldown;
-   }
-
-   public int getRemainingCooldown() {
-      return this.cooldown != null ? this.cooldown.remainingCooldownTicks : 0;
-   }
-
-   public int getTotalCooldown() {
-      return this.cooldown != null ? this.cooldown.maxCooldownTicks : 0;
    }
 
    public void setActive(boolean active) {
@@ -58,10 +52,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    @Override
    public void onTick(SkillContext context) {
       if (this.cooldown != null) {
-         this.cooldown.decrement();
-         if (this.cooldown.remainingCooldownTicks <= 0) {
-            this.cooldown = null;
-         }
+         this.cooldown = null;
       }
 
       if (!this.isUnlocked()) {
@@ -104,10 +95,6 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public void onBlur(SkillContext context) {
    }
 
-   public boolean isOnCooldown() {
-      return this.cooldown != null && this.cooldown.remainingCooldownTicks > 0;
-   }
-
    public void putOnCooldown(SkillContext context) {
       this.putOnCooldown(0, context);
    }
@@ -115,18 +102,11 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public void putOnCooldown(int cooldownDelayTicks, SkillContext context) {
       context.getSource()
          .as(ServerPlayer.class)
-         .ifPresentOrElse(
-            player -> this.putOnCooldown(CooldownHelper.adjustCooldown(player, this.getId(), this.cooldownTicks), cooldownDelayTicks, context),
-            () -> this.putOnCooldown(this.cooldownTicks, cooldownDelayTicks, context)
+         .ifPresent(
+            player -> AbilityCooldownManager.putOnCooldown(
+               player, this.getAbilityGroupName(), CooldownHelper.adjustCooldown(player, this.getAbilityGroupName(), this.cooldownTicks), cooldownDelayTicks
+            )
          );
-   }
-
-   public void putOnCooldown(int cooldownTicks, int cooldownDelayTicks, SkillContext context) {
-      this.putOnCooldown(cooldownTicks, cooldownTicks, cooldownDelayTicks, context);
-   }
-
-   public void putOnCooldown(int cooldownTicks, int maxCooldownTicks, int cooldownDelayTicks, SkillContext context) {
-      this.cooldown = new Ability.Cooldown(cooldownTicks, maxCooldownTicks, cooldownDelayTicks);
    }
 
    @Override
@@ -235,6 +215,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
       ACTIVATE_ABILITY;
    }
 
+   @Deprecated
    public static class Cooldown implements ISerializable<CompoundTag, JsonObject> {
       public int maxCooldownTicks;
       public int remainingCooldownTicks;
@@ -246,17 +227,15 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
          this.remainingCooldownDelayTicks = remainingCooldownDelayTicks;
       }
 
-      public Cooldown() {
+      private Cooldown() {
       }
 
-      public Ability.Cooldown decrement() {
+      private void decrement() {
          if (this.remainingCooldownDelayTicks > 0) {
             this.remainingCooldownDelayTicks--;
          } else {
             this.remainingCooldownTicks--;
          }
-
-         return this;
       }
 
       @Override

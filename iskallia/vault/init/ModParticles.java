@@ -11,12 +11,15 @@ import iskallia.vault.client.particles.DiffuserCompleteParticle;
 import iskallia.vault.client.particles.DiffuserParticle;
 import iskallia.vault.client.particles.EffectRangeParticle;
 import iskallia.vault.client.particles.EnderAnchorParticle;
+import iskallia.vault.client.particles.EntityLockedParticle;
+import iskallia.vault.client.particles.FireballParticle;
 import iskallia.vault.client.particles.FloatingAltarItemParticle;
 import iskallia.vault.client.particles.GrowingSphereParticle;
 import iskallia.vault.client.particles.HealParticle;
 import iskallia.vault.client.particles.LuckyHitDrainParticle;
 import iskallia.vault.client.particles.LuckyHitParticle;
 import iskallia.vault.client.particles.LuckyHitSweepingParticle;
+import iskallia.vault.client.particles.LuckyHitVortexParticle;
 import iskallia.vault.client.particles.NovaDotParticle;
 import iskallia.vault.client.particles.NovaExplosionCloudParticle;
 import iskallia.vault.client.particles.NovaExplosionParticle;
@@ -30,8 +33,11 @@ import iskallia.vault.client.particles.ShockedParticle;
 import iskallia.vault.client.particles.SphericalParticleOptions;
 import iskallia.vault.client.particles.StabilizerCubeParticle;
 import iskallia.vault.client.particles.StonefallFrostWaveParticle;
+import iskallia.vault.client.particles.StormCloudParticle;
 import iskallia.vault.client.particles.StunnedParticle;
 import iskallia.vault.client.particles.TotemFountainParticle;
+import iskallia.vault.client.particles.UberPylonFountainParticle;
+import iskallia.vault.client.particles.UberPylonParticle;
 import iskallia.vault.util.Tween;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
@@ -91,8 +97,15 @@ public class ModParticles {
    public static final RegistryObject<SimpleParticleType> LUCKY_HIT_MANA = REGISTRY.register("lucky_hit_mana", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> LUCKY_HIT_LEECH = REGISTRY.register("lucky_hit_leech", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> LUCKY_HIT_DAMAGE = REGISTRY.register("lucky_hit_damage", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> LUCKY_HIT_VORTEX = REGISTRY.register("lucky_hit_vortex", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> ENDER_ANCHOR = REGISTRY.register("ender_anchor", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> DEPTH_NIGHT_VISION = REGISTRY.register("depth_night_vision", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> UBER_PYLON = REGISTRY.register("uber_pylon", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> UBER_PYLON_FOUNTAIN = REGISTRY.register("uber_pylon_fountain", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> FIREBALL_CLOUD = REGISTRY.register("fireball_cloud", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> STORM_CLOUD = REGISTRY.register("storm_cloud", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> ENTITY_LOCKED = REGISTRY.register("entity_locked", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> BONK = REGISTRY.register("bonk", () -> new SimpleParticleType(true));
    public static final RegistryObject<ParticleType<SphericalParticleOptions>> TAUNT_CHARM_EFFECT_RANGE = register(
       REGISTRY, "taunt_charm_effect_range", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
    );
@@ -154,6 +167,13 @@ public class ModParticles {
       particleManager.register((ParticleType)LUCKY_HIT_DAMAGE.get(), ShockedParticle.Provider::new);
       particleManager.register((ParticleType)ENDER_ANCHOR.get(), EnderAnchorParticle.Provider::new);
       particleManager.register((ParticleType)DEPTH_NIGHT_VISION.get(), DepthNightVisionParticle.Factory::new);
+      particleManager.register((ParticleType)LUCKY_HIT_VORTEX.get(), LuckyHitVortexParticle.Provider::new);
+      particleManager.register((ParticleType)UBER_PYLON.get(), UberPylonParticle.Provider::new);
+      particleManager.register((ParticleType)UBER_PYLON_FOUNTAIN.get(), UberPylonFountainParticle.Provider::new);
+      particleManager.register((ParticleType)FIREBALL_CLOUD.get(), FireballParticle.Provider::new);
+      particleManager.register((ParticleType)STORM_CLOUD.get(), StormCloudParticle.Provider::new);
+      particleManager.register((ParticleType)ENTITY_LOCKED.get(), EntityLockedParticle.Provider::new);
+      particleManager.register((ParticleType)BONK.get(), LuckyHitDrainParticle.Provider::new);
       particleManager.register(
          (ParticleType)TOTEM_EFFECT_RANGE.get(), sprites -> new EffectRangeParticle.SphereProvider(sprites, 1.0F, 40, 0.5F, Tween.PARABOLIC)
       );

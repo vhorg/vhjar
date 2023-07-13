@@ -53,79 +53,81 @@ public class ModifierWorkbenchCraftMessage {
          if (tile instanceof ModifierWorkbenchTileEntity workbenchTile) {
             ItemStack input = workbenchTile.getInventory().getItem(0);
             if (!input.isEmpty() && input.getItem() instanceof VaultGearItem && AttributeGearData.hasData(input)) {
-               VaultGearWorkbenchConfig.getConfig(input.getItem()).ifPresent(cfg -> {
-                  ItemStack inputCopy = input.copy();
-                  VaultGearModifier.AffixType targetAffix = null;
-                  VaultGearModifier<?> createdModifier = null;
-                  List<ItemStack> cost = new ArrayList<>();
-                  if (message.craftModifierIdentifier == null) {
-                     if (!ModifierWorkbenchHelper.hasCraftedModifier(inputCopy)) {
-                        return;
-                     }
-
-                     cost.addAll(cfg.getCostRemoveCraftedModifiers());
-                  } else {
-                     VaultGearWorkbenchConfig.CraftableModifierConfig modifierConfig = cfg.getConfig(message.craftModifierIdentifier);
-                     if (modifierConfig == null) {
-                        return;
-                     }
-
-                     if (!modifierConfig.hasPrerequisites(player)) {
-                        return;
-                     }
-
-                     boolean hadCraftedModifiers = ModifierWorkbenchHelper.hasCraftedModifier(inputCopy);
-                     ModifierWorkbenchHelper.removeCraftedModifiers(inputCopy);
-                     VaultGearData data = VaultGearData.read(inputCopy);
-                     if (data.getItemLevel() < modifierConfig.getMinLevel()) {
-                        return;
-                     }
-
-                     targetAffix = modifierConfig.getAffixGroup().getTargetAffixType();
-                     if (targetAffix == VaultGearModifier.AffixType.PREFIX) {
-                        if (!VaultGearModifierHelper.hasOpenPrefix(inputCopy)) {
+               if (VaultGearData.read(input).isModifiable()) {
+                  VaultGearWorkbenchConfig.getConfig(input.getItem()).ifPresent(cfg -> {
+                     ItemStack inputCopy = input.copy();
+                     VaultGearModifier.AffixType targetAffix = null;
+                     VaultGearModifier<?> createdModifier = null;
+                     List<ItemStack> cost = new ArrayList<>();
+                     if (message.craftModifierIdentifier == null) {
+                        if (!ModifierWorkbenchHelper.hasCraftedModifier(inputCopy)) {
                            return;
                         }
-                     } else if (!VaultGearModifierHelper.hasOpenSuffix(inputCopy)) {
-                        return;
-                     }
 
-                     createdModifier = modifierConfig.createModifier().orElse(null);
-                     if (createdModifier == null) {
-                        return;
-                     }
-
-                     Set<String> existingModGroups = data.getExistingModifierGroups(VaultGearData.Type.EXPLICIT_MODIFIERS);
-                     if (existingModGroups.contains(createdModifier.getModifierGroup())) {
-                        return;
-                     }
-
-                     cost.addAll(modifierConfig.createCraftingCost(inputCopy));
-                     if (hadCraftedModifiers) {
                         cost.addAll(cfg.getCostRemoveCraftedModifiers());
-                     }
-                  }
+                     } else {
+                        VaultGearWorkbenchConfig.CraftableModifierConfig modifierConfig = cfg.getConfig(message.craftModifierIdentifier);
+                        if (modifierConfig == null) {
+                           return;
+                        }
 
-                  List<ItemStack> missing = InventoryUtil.getMissingInputs(cost, player.getInventory());
-                  if (missing.isEmpty()) {
-                     if (InventoryUtil.consumeInputs(cost, player.getInventory(), true)) {
-                        if (InventoryUtil.consumeInputs(cost, player.getInventory(), false)) {
-                           if (createdModifier == null) {
-                              ModifierWorkbenchHelper.removeCraftedModifiers(input);
-                           } else {
-                              createdModifier.setCategory(VaultGearModifier.AffixCategory.CRAFTED);
-                              createdModifier.setGameTimeAdded(player.getLevel().getGameTime());
-                              ModifierWorkbenchHelper.removeCraftedModifiers(input);
-                              VaultGearData datax = VaultGearData.read(input);
-                              datax.addModifier(targetAffix, createdModifier);
-                              datax.write(input);
+                        if (!modifierConfig.hasPrerequisites(player)) {
+                           return;
+                        }
+
+                        boolean hadCraftedModifiers = ModifierWorkbenchHelper.hasCraftedModifier(inputCopy);
+                        ModifierWorkbenchHelper.removeCraftedModifiers(inputCopy);
+                        VaultGearData data = VaultGearData.read(inputCopy);
+                        if (data.getItemLevel() < modifierConfig.getMinLevel()) {
+                           return;
+                        }
+
+                        targetAffix = modifierConfig.getAffixGroup().getTargetAffixType();
+                        if (targetAffix == VaultGearModifier.AffixType.PREFIX) {
+                           if (!VaultGearModifierHelper.hasOpenPrefix(inputCopy)) {
+                              return;
                            }
+                        } else if (!VaultGearModifierHelper.hasOpenSuffix(inputCopy)) {
+                           return;
+                        }
 
-                           player.getLevel().levelEvent(1030, tile.getBlockPos(), 0);
+                        createdModifier = modifierConfig.createModifier().orElse(null);
+                        if (createdModifier == null) {
+                           return;
+                        }
+
+                        Set<String> existingModGroups = data.getExistingModifierGroups(VaultGearData.Type.EXPLICIT_MODIFIERS);
+                        if (existingModGroups.contains(createdModifier.getModifierGroup())) {
+                           return;
+                        }
+
+                        cost.addAll(modifierConfig.createCraftingCost(inputCopy));
+                        if (hadCraftedModifiers) {
+                           cost.addAll(cfg.getCostRemoveCraftedModifiers());
                         }
                      }
-                  }
-               });
+
+                     List<ItemStack> missing = InventoryUtil.getMissingInputs(cost, player.getInventory());
+                     if (missing.isEmpty()) {
+                        if (InventoryUtil.consumeInputs(cost, player.getInventory(), true)) {
+                           if (InventoryUtil.consumeInputs(cost, player.getInventory(), false)) {
+                              if (createdModifier == null) {
+                                 ModifierWorkbenchHelper.removeCraftedModifiers(input);
+                              } else {
+                                 createdModifier.setCategory(VaultGearModifier.AffixCategory.CRAFTED);
+                                 createdModifier.setGameTimeAdded(player.getLevel().getGameTime());
+                                 ModifierWorkbenchHelper.removeCraftedModifiers(input);
+                                 VaultGearData datax = VaultGearData.read(input);
+                                 datax.addModifier(targetAffix, createdModifier);
+                                 datax.write(input);
+                              }
+
+                              player.getLevel().levelEvent(1030, tile.getBlockPos(), 0);
+                           }
+                        }
+                     }
+                  });
+               }
             }
          }
       });

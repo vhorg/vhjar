@@ -50,7 +50,7 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility {
          .as(ServerPlayer.class)
          .map(
             player -> {
-               int height = this.getHeight();
+               int height = this.getHeight(player);
 
                for (ConfiguredModification<IntValueConfig, MegaJumpVelocityModification> mod : SpecialAbilityModification.getModifications(
                   player, MegaJumpVelocityModification.class
@@ -78,7 +78,7 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility {
    private void breakBlocks(int height, ServerPlayer player) {
       ServerLevel sWorld = (ServerLevel)player.getCommandSenderWorld();
       AbilityTree abilityTree = PlayerAbilitiesData.get(sWorld).getAbilities(player);
-      Ability focusedAbilityNode = abilityTree.getSelectedAbility().orElse(null);
+      Ability focusedAbilityNode = abilityTree.getSelectedAbility(player).orElse(null);
       if (focusedAbilityNode != null && focusedAbilityNode.getClass() == this.getClass()) {
          int radius = Math.max(this.getRadius(), 1);
          int depth = Math.max(height, 1) + 1;

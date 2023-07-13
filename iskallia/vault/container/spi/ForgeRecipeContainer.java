@@ -7,6 +7,7 @@ import iskallia.vault.container.slot.TabSlot;
 import java.awt.Point;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -36,8 +37,12 @@ public abstract class ForgeRecipeContainer<T extends ForgeRecipeTileEntity> exte
 
    public abstract Point getOffset();
 
+   public Point getPlayerInventoryOffset() {
+      return this.getOffset();
+   }
+
    public final Slot getResultSlot() {
-      return this.getSlot(42);
+      return this.getSlot(this.slots.size() - 1);
    }
 
    public BlockPos getTilePos() {
@@ -50,20 +55,23 @@ public abstract class ForgeRecipeContainer<T extends ForgeRecipeTileEntity> exte
    }
 
    private void initSlots(Inventory playerInventory) {
-      Point offset = this.getOffset();
-      int xOffset = offset.x;
-      int yOffset = offset.y;
+      Point inventoryOffset = this.getPlayerInventoryOffset();
+      int invXOffset = inventoryOffset.x;
+      int invYOffset = inventoryOffset.y;
 
       for (int row = 0; row < 3; row++) {
          for (int column = 0; column < 9; column++) {
-            this.addSlot(new TabSlot(playerInventory, column + row * 9 + 9, xOffset + column * 18, 68 + yOffset + row * 18));
+            this.addSlot(new TabSlot(playerInventory, column + row * 9 + 9, invXOffset + column * 18, 68 + invYOffset + row * 18));
          }
       }
 
       for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
-         this.addSlot(new TabSlot(playerInventory, hotbarSlot, xOffset + hotbarSlot * 18, 126 + yOffset));
+         this.addSlot(new TabSlot(playerInventory, hotbarSlot, invXOffset + hotbarSlot * 18, 126 + invYOffset));
       }
 
+      Point containerOffset = this.getOffset();
+      int xOffset = containerOffset.x;
+      int yOffset = containerOffset.y;
       final Container invContainer = this.tile.getInventory();
 
       for (int invSlot = 0; invSlot < invContainer.getContainerSize(); invSlot++) {
@@ -76,7 +84,8 @@ public abstract class ForgeRecipeContainer<T extends ForgeRecipeTileEntity> exte
          });
       }
 
-      this.addSlot(new RecipeOutputSlot(this.tile.getResultContainer(), 0, 148, 18 + yOffset));
+      int slotWidth = Mth.ceil(invContainer.getContainerSize() / 3.0F);
+      this.addSlot(new RecipeOutputSlot(this.tile.getResultContainer(), 0, xOffset + slotWidth * 18 + 104, 18 + yOffset));
    }
 
    public ItemStack quickMoveStack(Player playerIn, int index) {
@@ -85,7 +94,7 @@ public abstract class ForgeRecipeContainer<T extends ForgeRecipeTileEntity> exte
       if (slot != null && slot.hasItem()) {
          ItemStack slotStack = slot.getItem();
          itemstack = slotStack.copy();
-         if (index >= 0 && index < 36 && this.moveOverSizedItemStackTo(slotStack, slot, 36, 42, false)) {
+         if (index >= 0 && index < 36 && this.moveOverSizedItemStackTo(slotStack, slot, 36, this.slots.size() - 1, false)) {
             return itemstack;
          }
 

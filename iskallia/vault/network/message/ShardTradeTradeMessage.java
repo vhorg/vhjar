@@ -1,5 +1,6 @@
 package iskallia.vault.network.message;
 
+import iskallia.vault.config.SoulShardConfig;
 import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -12,6 +13,8 @@ import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.world.data.PlayerBlackMarketData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.core.Direction;
@@ -54,19 +57,33 @@ public class ShardTradeTradeMessage {
          () -> {
             ServerPlayer sender = context.getSender();
             if (sender != null && sender.containerMenu instanceof ShardTradeContainer tradeContainer) {
-               PlayerBlackMarketData var10 = PlayerBlackMarketData.get(sender.getLevel());
+               PlayerBlackMarketData var13 = PlayerBlackMarketData.get(sender.getLevel());
                int shardCount = ItemShardPouch.getShardCount(sender.getInventory());
+               ItemStack resultStack = null;
                int shardCost;
-               ItemStack resultStack;
                if (message.isRandom()) {
-                  if (shardCount < ModConfigs.SOUL_SHARD.getShardTradePrice()) {
-                     return;
+                  int playerLevel = PlayerVaultStatsData.get(sender.getLevel()).getVaultStats(sender).getVaultLevel();
+                  Set<SoulShardConfig.Trades> tradesList = ModConfigs.SOUL_SHARD.getTrades();
+                  SoulShardConfig.Trades tradesUsed = null;
+
+                  for (SoulShardConfig.Trades trades : tradesList) {
+                     if (playerLevel >= trades.getMinLevel() && (tradesUsed == null || tradesUsed.getMinLevel() < trades.getMinLevel())) {
+                        tradesUsed = trades;
+                     }
                   }
 
-                  shardCost = ModConfigs.SOUL_SHARD.getShardTradePrice();
-                  resultStack = ModConfigs.SOUL_SHARD.getRandomTrade().getItem().copy();
+                  if (tradesUsed != null) {
+                     if (shardCount < tradesUsed.getShardTradePrice()) {
+                        return;
+                     }
+
+                     shardCost = tradesUsed.getShardTradePrice();
+                     resultStack = tradesUsed.getRandomTrade().getItem().copy();
+                  } else {
+                     shardCost = 1000;
+                  }
                } else {
-                  PlayerBlackMarketData.BlackMarket.SelectedTrade trade = var10.getBlackMarket(message.uuid).getTrades().get(message.tradeIndex);
+                  PlayerBlackMarketData.BlackMarket.SelectedTrade trade = var13.getBlackMarket(message.uuid).getTrades().get(message.tradeIndex);
                   if (trade == null || shardCount < trade.getShardCost()) {
                      return;
                   }
@@ -75,7 +92,7 @@ public class ShardTradeTradeMessage {
                   resultStack = trade.getStack().copy();
                }
 
-               if (!resultStack.isEmpty()) {
+               if (resultStack != null && !resultStack.isEmpty()) {
                   resultStack = DataTransferItem.doConvertStack(resultStack);
                   if (resultStack.getItem() instanceof VaultGearItem gearItem) {
                      gearItem.setItemLevel(resultStack, sender);
@@ -97,7 +114,7 @@ public class ShardTradeTradeMessage {
 
                      if (ItemShardPouch.reduceShardAmount(sender.getInventory(), shardCost, false)) {
                         if (!message.isRandom()) {
-                           var10.getBlackMarket(message.uuid).useTrade(message.tradeIndex);
+                           var13.getBlackMarket(message.uuid).useTrade(message.tradeIndex);
                         }
 
                         if (message.shift) {
@@ -118,7 +135,7 @@ public class ShardTradeTradeMessage {
                      }
 
                      sender.level.playSound(null, sender.blockPosition(), ModSounds.VAULT_CHEST_RARE_OPEN, SoundSource.PLAYERS, 1.0F, 0.5F);
-                     var10.getBlackMarket(sender).syncToClient(sender.server);
+                     var13.getBlackMarket(sender).syncToClient(sender.server);
                   }
                }
             }

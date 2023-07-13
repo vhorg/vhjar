@@ -10,6 +10,7 @@ public enum VaultGearClassification {
    IDOL(VaultGearRarity::getIdolModifierCount),
    JEWEL(VaultGearRarity::getJewelModifierCount),
    MAGNET(VaultGearRarity::getMagnetModifierCount),
+   WAND(VaultGearRarity::getWandModifierCount),
    TOOL(rarity -> 0),
    DRINK(rarity -> 0);
 

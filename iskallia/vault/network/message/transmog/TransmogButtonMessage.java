@@ -1,5 +1,6 @@
 package iskallia.vault.network.message.transmog;
 
+import iskallia.vault.block.TransmogTableBlock;
 import iskallia.vault.container.TransmogTableContainer;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModGearAttributes;
@@ -41,7 +42,7 @@ public record TransmogButtonMessage() {
                int copperCost = container.copperCost();
                DiscoveredModelsData discoveredModelsData = DiscoveredModelsData.get((ServerLevel)sender.level);
                Set<ResourceLocation> discoveredModels = discoveredModelsData.getDiscoveredModels(sender.getUUID());
-               if (!discoveredModels.contains(container.getSelectedModelId())) {
+               if (!TransmogTableBlock.canTransmogModel(sender, discoveredModels, container.getSelectedModelId())) {
                   return;
                }
 

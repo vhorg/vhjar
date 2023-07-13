@@ -1,5 +1,6 @@
 package iskallia.vault.core.vault;
 
+import iskallia.vault.world.data.ServerVaults;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import net.minecraft.server.MinecraftServer;
@@ -59,5 +60,9 @@ public class VaultUtils {
             }
          }
       );
+   }
+
+   public static boolean isVaultLevel(Level level) {
+      return level.isClientSide ? ClientVaults.getActive().isPresent() : ServerVaults.get(level).isPresent();
    }
 }

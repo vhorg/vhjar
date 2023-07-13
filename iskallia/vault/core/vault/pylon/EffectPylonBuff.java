@@ -39,6 +39,11 @@ public class EffectPylonBuff extends TickingPylonBuff<EffectPylonBuff.Config> {
       private int amplifier;
       private int duration;
 
+      @Override
+      public int getDuration() {
+         return this.duration;
+      }
+
       public EffectPylonBuff build() {
          return new EffectPylonBuff(this);
       }

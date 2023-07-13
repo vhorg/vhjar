@@ -33,16 +33,22 @@ public class NovaSpeedParticle extends TextureSheetParticle {
       this.scale(0.5F);
    }
 
+   protected int getLightColor(float pPartialTick) {
+      return this.level == null ? 15728880 : super.getLightColor(pPartialTick);
+   }
+
    @Nonnull
    public ParticleRenderType getRenderType() {
       return ParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
    }
 
    public void tick() {
-      super.tick();
-      this.setSpriteFromAge(this.sprites);
-      float alpha = Mth.clamp(1.0F - (float)this.age / this.lifetime, 0.0F, 1.0F);
-      this.alpha = alpha * alpha * alpha;
+      if (this.level != null) {
+         super.tick();
+         this.setSpriteFromAge(this.sprites);
+         float alpha = Mth.clamp(1.0F - (float)this.age / this.lifetime, 0.0F, 1.0F);
+         this.alpha = alpha * alpha * alpha;
+      }
    }
 
    @OnlyIn(Dist.CLIENT)

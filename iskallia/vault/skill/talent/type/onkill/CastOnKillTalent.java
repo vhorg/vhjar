@@ -17,6 +17,7 @@ import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 
 public class CastOnKillTalent extends OnKillTalent {
@@ -41,7 +42,7 @@ public class CastOnKillTalent extends OnKillTalent {
             }
 
             AbilityTree tree = PlayerAbilitiesData.get((ServerLevel)player.level).getAbilities(player);
-            this.resolve(tree)
+            this.resolve(tree, player)
                .ifPresent(
                   ability -> ability.onAction(
                      SkillContext.of(player, SkillSource.of(player).setPos(event.getEntity().position()).setMana(FullManaPlayer.INSTANCE))
@@ -51,11 +52,11 @@ public class CastOnKillTalent extends OnKillTalent {
       }
    }
 
-   public Optional<InstantAbility> resolve(AbilityTree tree) {
+   public Optional<InstantAbility> resolve(AbilityTree tree, Player player) {
       return tree.getForId(this.ability).map(skill -> {
-         Skill var2 = skill instanceof SpecializedSkill specialized ? specialized.getSpecialization() : skill;
-         var2 = var2 instanceof TieredSkill tiered ? tiered.getChild() : var2;
-         return (InstantAbility)(var2 instanceof InstantAbility ? var2 : null);
+         Skill var2x = skill instanceof SpecializedSkill specialized ? specialized.getSpecialization() : skill;
+         var2x = var2x instanceof TieredSkill tiered ? tiered.getChild() : var2x;
+         return (InstantAbility)(var2x instanceof InstantAbility ? var2x : null);
       });
    }
 
