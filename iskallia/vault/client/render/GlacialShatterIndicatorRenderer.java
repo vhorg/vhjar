@@ -70,27 +70,35 @@ public class GlacialShatterIndicatorRenderer {
 
    @SubscribeEvent
    public static void onTick(LivingUpdateEvent event) {
-      if (event.getEntity() instanceof LivingEntity livingEntity && livingEntity.hasEffect(ModEffects.GLACIAL_SHATTER)) {
-         if (!livingEntity.isDeadOrDying()) {
-            if (livingEntity.level.random.nextInt(2) == 0) {
-               ParticleEngine pm = Minecraft.getInstance().particleEngine;
-               Particle particle = pm.createParticle(
-                  (ParticleOptions)ModParticles.NOVA_SPEED.get(),
-                  livingEntity.position().x
-                     - (livingEntity.getBbWidth() / 2.0F - 0.5F)
-                     + (livingEntity.getBbWidth() * livingEntity.level.random.nextFloat() + 1.0F),
-                  livingEntity.position().y + (livingEntity.getBbHeight() + 1.0F) * livingEntity.level.random.nextFloat(),
-                  livingEntity.position().z
-                     - (livingEntity.getBbWidth() / 2.0F - 0.5F)
-                     + (livingEntity.getBbWidth() * livingEntity.level.random.nextFloat() + 1.0F),
-                  0.0,
-                  0.0,
-                  0.0
-               );
-               if (particle != null) {
-                  particle.setParticleSpeed((Math.random() - 0.5) * 0.1F, -0.1, (Math.random() - 0.5) * 0.1F);
-               }
+      if (event.getEntity() instanceof LivingEntity livingEntity && livingEntity.level.isClientSide) {
+         if (livingEntity.hasEffect(ModEffects.GLACIAL_SHATTER) && !livingEntity.isDeadOrDying() && livingEntity.level.random.nextInt(2) == 0) {
+            ParticleEngine pm = Minecraft.getInstance().particleEngine;
+            Particle particle = pm.createParticle(
+               (ParticleOptions)ModParticles.NOVA_SPEED.get(),
+               livingEntity.position().x
+                  - (livingEntity.getBbWidth() + 0.5F) / 2.0F
+                  + (livingEntity.getBbWidth() + 1.0F) * livingEntity.level.random.nextFloat(),
+               livingEntity.position().y + (livingEntity.getBbHeight() + 1.0F) * livingEntity.level.random.nextFloat(),
+               livingEntity.position().z
+                  - (livingEntity.getBbWidth() + 0.5F) / 2.0F
+                  + (livingEntity.getBbWidth() + 1.0F) * livingEntity.level.random.nextFloat(),
+               0.0,
+               0.0,
+               0.0
+            );
+            if (particle != null) {
+               particle.setParticleSpeed((Math.random() - 0.5) * 0.1F, -0.1, (Math.random() - 0.5) * 0.1F);
             }
+         }
+
+         if (livingEntity.hasEffect(ModEffects.CHILLED) && !livingEntity.isDeadOrDying()) {
+            float angle = (float) Math.PI + livingEntity.tickCount / 2.0F;
+            float radius = livingEntity.getBbWidth() / 2.0F;
+            float x = (float)(livingEntity.position().x() + radius * Math.cos(angle));
+            float y = (float)(livingEntity.position().y() + 0.2F * livingEntity.getRandom().nextFloat());
+            float z = (float)(livingEntity.position().z() + radius * Math.sin(angle));
+            livingEntity.level
+               .addParticle((ParticleOptions)ModParticles.NOVA_SPEED.get(), x, y, z, (Math.random() - 0.5) * 0.01F, 0.0, (Math.random() - 0.5) * 0.01F);
          }
       }
    }

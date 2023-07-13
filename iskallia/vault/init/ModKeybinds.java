@@ -26,6 +26,7 @@ public class ModKeybinds {
    public static KeyMapping angelToggleKey;
    public static KeyMapping magnetToggleKey;
    public static KeyMapping openQuestScreen;
+   public static KeyMapping openBestiary;
    public static Map<String, KeyMapping> abilityQuickfireKey = new HashMap<>();
 
    public static void register(FMLClientSetupEvent event) {
@@ -36,6 +37,7 @@ public class ModKeybinds {
       angelToggleKey = mapping(name("angel_toggle_key"), KeyConflictContext.IN_GAME);
       magnetToggleKey = mapping(name("magnet_toggle_key"), KeyConflictContext.IN_GAME);
       openQuestScreen = mapping(name("open_quest_screen"), KeyConflictContext.IN_GAME, key(Type.KEYSYM, 93));
+      openBestiary = mapping(name("open_bestiary"), KeyConflictContext.IN_GAME);
       ModConfigs.ABILITIES.get().ifPresent(tree -> tree.iterate(SpecializedSkill.class, skill -> {
          String name = "quickselect." + skill.getId().toLowerCase().replace(' ', '_');
          abilityQuickfireKey.put(skill.getId(), mapping(name(name), KeyConflictContext.IN_GAME));

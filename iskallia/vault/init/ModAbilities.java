@@ -22,6 +22,7 @@ public class ModAbilities {
    public static final String SUMMON_ETERNAL = "Summon Eternal";
    public static final String EMPOWER = "Empower";
    public static final String EMPOWER_ICE_ARMOUR = "Empower_Ice_Armour";
+   public static final String EMPOWER_SLOWNESS_AURA = "Empower_Slowness_Aura";
    public static final String SHELL_PORCUPINE = "Shell_Porcupine";
    public static final String VEIN_MINER = "Vein Miner";
    public static final String VEIN_MINER_FORTUNE = "Vein Miner_Fortune";
@@ -59,6 +60,14 @@ public class ModAbilities {
    public static final String SMITE_THUNDERSTORM = "Smite_Thunderstorm";
    public static final String SHELL = "Shell";
    public static final String SHELL_QUILL = "Shell_Quill";
+   public static final String FIREBALL = "Fireball";
+   public static final String FIREBALL_VOLLEY = "Fireball_Volley";
+   public static final String FIREBALL_FIRESHOT = "Fireball_Fireshot";
+   public static final String STORM_ARROW_THUNDERSTORM = "Storm Arrow: Thunderstorm";
+   public static final String STORM_ARROW_BLIZZARD = "Storm Arrow: Blizzard";
+   public static final String BATTLE_CRY = "Battle_Cry";
+   public static final String BATTLE_CRY_SPECTRAL_STRIKE = "Battle_Cry_Spectral_Strike";
+   public static final String BATTLE_CRY_LUCKY_STRIKE = "Battle_Cry_Lucky_Strike";
 
    public static void init() {
    }

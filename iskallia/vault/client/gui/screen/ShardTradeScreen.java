@@ -1,6 +1,7 @@
 package iskallia.vault.client.gui.screen;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.client.ClientExpertiseData;
 import iskallia.vault.client.ClientShardTradeData;
 import iskallia.vault.client.gui.framework.ScreenRenderers;
 import iskallia.vault.client.gui.framework.ScreenTextures;
@@ -26,8 +27,13 @@ import iskallia.vault.container.inventory.ShardTradeContainer;
 import iskallia.vault.event.InputEvents;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
+import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.ItemShardPouch;
+import iskallia.vault.network.message.ServerboundResetBlackMarketTradesMessage;
 import iskallia.vault.network.message.ShardTradeTradeMessage;
+import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.expertise.type.BlackMarketExpertise;
+import iskallia.vault.util.ScreenParticle;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -41,18 +47,39 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeContainer> {
+   protected ScreenParticle screenParticleLeft = new ScreenParticle()
+      .angleRange(150.0F, 210.0F)
+      .quantityRange(1, 2)
+      .delayRange(0, 10)
+      .lifespanRange(10, 50)
+      .sizeRange(1, 4)
+      .speedRange(0.05F, 0.45F)
+      .spawnedPosition(this.leftPos + 76, this.topPos + 43)
+      .spawnedWidthHeight(0, 28);
+   protected ScreenParticle screenParticleRight = new ScreenParticle()
+      .angleRange(-30.0F, 30.0F)
+      .quantityRange(1, 2)
+      .delayRange(0, 10)
+      .lifespanRange(10, 50)
+      .sizeRange(1, 4)
+      .speedRange(0.05F, 0.45F)
+      .spawnedPosition(this.leftPos + 77 + 90, this.topPos + 43)
+      .spawnedWidthHeight(0, 28);
    private final LabelElement<?> labelRandomTrade;
    private final LabelElement<?>[] labelShopTrades = new LabelElement[3];
+   private ButtonElement<?> omegaButton;
+   private float dt;
 
    public ShardTradeScreen(ShardTradeContainer container, Inventory inventory, Component title) {
       super(container, inventory, title, ScreenRenderers.getImmediate(), ScreenTooltipRenderer::create);
-      this.setGuiSize(Spatials.size(176, 184));
+      this.setGuiSize(Spatials.size(176, 194));
       this.addElement(
          (NineSliceElement)new NineSliceElement(this.getGuiSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
@@ -67,16 +94,16 @@ public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeC
       MutableComponent inventoryName = inventory.getDisplayName().copy();
       inventoryName.withStyle(Style.EMPTY.withColor(-12632257));
       this.addElement(
-         (LabelElement)new LabelElement(Spatials.positionXY(8, 90), inventoryName, LabelTextStyle.defaultStyle())
+         (LabelElement)new LabelElement(Spatials.positionXY(8, 100), inventoryName, LabelTextStyle.defaultStyle())
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
       this.addElement(
-         (TextureAtlasElement)new TextureAtlasElement(Spatials.positionXY(13, 28), ScreenTextures.SOUL_SHARD_TRADE_ORNAMENT)
+         (TextureAtlasElement)new TextureAtlasElement(Spatials.positionXY(13, 33), ScreenTextures.SOUL_SHARD_TRADE_ORNAMENT)
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
       ((FakeItemSlotElement)this.addElement(
             (FakeItemSlotElement)new FakeItemSlotElement(
-                  Spatials.positionXY(29, 44), () -> new ItemStack(ModItems.UNKNOWN_ITEM), () -> !this.canBuyRandomTrade()
+                  Spatials.positionXY(29, 49), () -> new ItemStack(ModItems.UNKNOWN_ITEM), () -> !this.canBuyRandomTrade()
                )
                .layout((screen, gui, parent, world) -> world.translateXY(gui))
          ))
@@ -86,28 +113,36 @@ public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeC
             return true;
          });
       this.addElement(
-         (ItemStackDisplayElement)new ItemStackDisplayElement(Spatials.positionXY(29, 64), new ItemStack(ModItems.SOUL_SHARD))
+         (ItemStackDisplayElement)new ItemStackDisplayElement(Spatials.positionXY(29, 69), new ItemStack(ModItems.SOUL_SHARD))
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
       this.labelRandomTrade = this.addElement(
-         new LabelElement(Spatials.positionXYZ(37, 74, 200), TextComponent.EMPTY, LabelTextStyle.border8().center())
+         new LabelElement(Spatials.positionXYZ(37, 79, 200), TextComponent.EMPTY, LabelTextStyle.border8().center())
             .layout((screen, gui, parent, world) -> world.translateXYZ(gui))
       );
       this.addElement(
          (TextureAtlasElement)new TextureAtlasElement(Spatials.positionXY(74, 6), ScreenTextures.BLACK_MARKET_ORNAMENT)
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
+      this.addElement(
+         (TextureAtlasElement)new TextureAtlasElement(Spatials.positionXY(72, 37), ScreenTextures.OMEGA_BLACK_MARKET_ORNAMENT)
+            .layout((screen, gui, parent, world) -> world.translateXY(gui))
+      );
 
-      for (int i = 0; i < 3; i++) {
+      for (int i = 0; i < 2; i++) {
+         if (i == 1) {
+            i = 2;
+         }
+
          int tradeIndex = i;
-         int yOffsetTrade = 10 + i * 28;
+         int yOffsetTrade = 10 + i * 33;
          this.addElement(
                ((ButtonElement)new ButtonElement(Spatials.positionXY(78, yOffsetTrade), ScreenTextures.BUTTON_TRADE_WIDE_TEXTURES, () -> {})
                      .layout((screen, gui, parent, world) -> world.translateXY(gui)))
                   .setDisabled(() -> !this.canBuyTrade(tradeIndex))
             )
             .setEnabled(false);
-         int yOffset = 14 + i * 28;
+         int yOffset = 14 + i * 33;
          ((FakeItemSlotElement)this.addElement((FakeItemSlotElement)new FakeItemSlotElement(Spatials.positionXY(141, yOffset), () -> {
                Tuple<ItemStack, Integer> trade = ClientShardTradeData.getTradeInfo(tradeIndex);
                return trade == null ? ItemStack.EMPTY : ((ItemStack)trade.getA()).copy();
@@ -131,13 +166,47 @@ public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeC
          );
       }
 
+      int tradeIndex = 1;
+      int yOffsetTrade = 43;
+      this.addElement(
+            this.omegaButton = ((ButtonElement)new ButtonElement(
+                     Spatials.positionXY(77, yOffsetTrade - 1), ScreenTextures.OMEGA_BUTTON_TRADE_WIDE_TEXTURES, () -> {}
+                  )
+                  .layout((screen, gui, parent, world) -> world.translateXY(gui)))
+               .setDisabled(() -> !this.canBuyTrade(tradeIndex))
+         )
+         .setEnabled(false);
+      int yOffset = 47;
+      ((FakeItemSlotElement)this.addElement((FakeItemSlotElement)new FakeItemSlotElement(Spatials.positionXY(141, yOffset), () -> {
+         Tuple<ItemStack, Integer> trade = ClientShardTradeData.getTradeInfo(tradeIndex);
+         return trade == null ? ItemStack.EMPTY : ((ItemStack)trade.getA()).copy();
+      }, () -> !this.canBuyTrade(tradeIndex)).setLabelStackCount().layout((screen, gui, parent, world) -> world.translateXY(gui)))).whenClicked(() -> {
+         this.buyTrade(tradeIndex);
+         this.screenParticleLeft.pop(4.0F, 20.0F);
+         this.screenParticleRight.pop(4.0F, 20.0F);
+      }).tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+         Tuple<ItemStack, Integer> trade = ClientShardTradeData.getTradeInfo(tradeIndex);
+         if (trade != null && !((ItemStack)trade.getA()).isEmpty()) {
+            tooltipRenderer.renderTooltip(poseStack, (ItemStack)trade.getA(), mouseX, mouseY, TooltipDirection.RIGHT);
+         }
+
+         return true;
+      });
+      this.addElement(
+         (ItemStackDisplayElement)new ItemStackDisplayElement(Spatials.positionXY(89, yOffset), new ItemStack(ModItems.SOUL_SHARD))
+            .layout((screen, gui, parent, world) -> world.translateXY(gui))
+      );
+      this.labelShopTrades[1] = this.addElement(
+         new LabelElement(Spatials.positionXYZ(97, yOffset + 10, 200), TextComponent.EMPTY, LabelTextStyle.border8().center())
+            .layout((screen, gui, parent, world) -> world.translateXYZ(gui))
+      );
       LocalDateTime endTime = ClientShardTradeData.getNextReset();
       LocalDateTime nowTime = LocalDateTime.now(ZoneId.of("UTC")).withNano(0);
       LocalTime diff = LocalTime.MIN.plusSeconds(ChronoUnit.SECONDS.between(nowTime, endTime));
       Component component = new TextComponent(diff.format(DateTimeFormatter.ISO_LOCAL_TIME));
       this.addElement(
          new ShardTradeScreen.CountDownElement(
-               Spatials.positionXYZ(this.getGuiSpatial().width() / 2 - TextBorder.DEFAULT_FONT.get().width(component) / 2 - 1, -10, 200),
+               Spatials.positionXYZ(this.getGuiSpatial().width() / 2 - TextBorder.DEFAULT_FONT.get().width(component) / 2 - 11, -10, 200),
                Spatials.size(TextBorder.DEFAULT_FONT.get().width(component), 9),
                (Supplier<Component>)(() -> component),
                LabelTextStyle.shadow()
@@ -147,14 +216,98 @@ public class ShardTradeScreen extends AbstractElementContainerScreen<ShardTradeC
       this.addElement(
          (TextureAtlasElement)((TextureAtlasElement)new TextureAtlasElement(
                   Spatials.positionXY(
-                     this.getGuiSpatial().width() / 2 - ScreenTextures.TAB_COUNTDOWN_BACKGROUND.width() / 2, -ScreenTextures.TAB_COUNTDOWN_BACKGROUND.height()
+                     this.getGuiSpatial().width() / 2 - ScreenTextures.TAB_COUNTDOWN_BACKGROUND.width() / 2 - 10,
+                     -ScreenTextures.TAB_COUNTDOWN_BACKGROUND.height()
                   ),
                   ScreenTextures.TAB_COUNTDOWN_BACKGROUND
                )
                .layout((screen, gui, parent, world) -> world.translateXY(gui)))
             .tooltip(Tooltips.multi(() -> List.of(new TextComponent("Shop resets in"))))
       );
+      this.addElement(
+         (ButtonElement)((ButtonElement)new ButtonElement(
+                  Spatials.positionXY(
+                     this.getGuiSpatial().width() / 2 - ScreenTextures.TAB_COUNTDOWN_BACKGROUND.width() / 2 + 50,
+                     -ScreenTextures.TAB_COUNTDOWN_BACKGROUND.height()
+                  ),
+                  ScreenTextures.BUTTON_RESET_TRADES_TEXTURES,
+                  () -> {
+                     ModNetwork.CHANNEL.sendToServer(ServerboundResetBlackMarketTradesMessage.INSTANCE);
+                     ((ShardTradeContainer)this.getMenu())
+                        .getPlayer()
+                        .level
+                        .playSound(
+                           ((ShardTradeContainer)this.getMenu()).getPlayer(),
+                           ((ShardTradeContainer)this.getMenu()).getPlayer().getX(),
+                           ((ShardTradeContainer)this.getMenu()).getPlayer().getY(),
+                           ((ShardTradeContainer)this.getMenu()).getPlayer().getZ(),
+                           ModSounds.SKILL_TREE_LEARN_SFX,
+                           SoundSource.BLOCKS,
+                           0.75F,
+                           1.0F
+                        );
+                  }
+               )
+               .layout((screen, gui, parent, world) -> world.translateXY(gui)))
+            .setDisabled(() -> {
+               for (TieredSkill learnedTalentNode : ClientExpertiseData.getLearnedTalentNodes()) {
+                  if (learnedTalentNode.getChild() instanceof BlackMarketExpertise blackMarketExpertise) {
+                     return blackMarketExpertise.getNumberOfRolls() <= ClientShardTradeData.getRerollsUsed();
+                  }
+               }
+
+               return true;
+            })
+            .tooltip(
+               Tooltips.multi(
+                  () -> {
+                     int numOfRollsLeft = 0;
+                     boolean hasExpertise = false;
+
+                     for (TieredSkill learnedTalentNode : ClientExpertiseData.getLearnedTalentNodes()) {
+                        if (learnedTalentNode.getChild() instanceof BlackMarketExpertise blackMarketExpertise) {
+                           numOfRollsLeft = blackMarketExpertise.getNumberOfRolls() - ClientShardTradeData.getRerollsUsed();
+                           hasExpertise = true;
+                        }
+                     }
+
+                     return hasExpertise
+                        ? List.of(new TextComponent("Rolls Left: " + numOfRollsLeft))
+                        : List.of(new TextComponent("Unlock Marketer Expertise to Re-roll"));
+                  }
+               )
+            )
+      );
       this.updateTradeLabels();
+   }
+
+   @Override
+   public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+      this.dt += partialTick;
+      this.screenParticleLeft.spawnedPosition(this.leftPos + 77, this.topPos + 43).spawnedWidthHeight(0, 29);
+      this.screenParticleRight.spawnedPosition(this.leftPos + 77 + 90, this.topPos + 43).spawnedWidthHeight(0, 29);
+
+      for (; this.dt >= 0.5F; this.dt -= 0.5F) {
+         this.screenParticleLeft.tick();
+         this.screenParticleRight.tick();
+         if (ClientShardTradeData.getAvailableTrades().containsKey(1)) {
+            this.screenParticleLeft.pop();
+            this.screenParticleRight.pop();
+         }
+      }
+
+      if (this.needsLayout) {
+         this.layout(Spatials.zero());
+         this.needsLayout = false;
+      }
+
+      this.renderBackgroundFill(poseStack);
+      this.renderElements(poseStack, mouseX, mouseY, partialTick);
+      this.renderSlotItems(poseStack, mouseX, mouseY, partialTick);
+      this.renderDebug(poseStack);
+      this.screenParticleLeft.render(poseStack, partialTick);
+      this.screenParticleRight.render(poseStack, partialTick);
+      this.renderTooltips(poseStack, mouseX, mouseY);
    }
 
    protected void containerTick() {

@@ -30,6 +30,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -87,7 +89,22 @@ public class TransmogTableScreen extends AbstractElementContainerScreen<Transmog
          new ButtonElement<ButtonElement<ButtonElement<?>>>(
                Spatials.positionXY(117, 60).width(18).height(18),
                ScreenTextures.BUTTON_TRANSMOG_TEXTURES,
-               () -> ModNetwork.CHANNEL.sendToServer(new TransmogButtonMessage())
+               () -> {
+                  ModNetwork.CHANNEL.sendToServer(new TransmogButtonMessage());
+                  ((TransmogTableContainer)this.getMenu())
+                     .getPlayer()
+                     .level
+                     .playSound(
+                        ((TransmogTableContainer)this.getMenu()).getPlayer(),
+                        ((TransmogTableContainer)this.getMenu()).getPlayer().getX(),
+                        ((TransmogTableContainer)this.getMenu()).getPlayer().getY(),
+                        ((TransmogTableContainer)this.getMenu()).getPlayer().getZ(),
+                        SoundEvents.AMETHYST_BLOCK_HIT,
+                        SoundSource.BLOCKS,
+                        1.5F,
+                        0.75F
+                     );
+               }
             )
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
             .tooltip(

@@ -96,10 +96,29 @@ public class SpecializedSkill extends LearnableSkill {
    public void specialize(int index, SkillContext context) {
       if (this.index != index) {
          LearnableSkill current = this.specializations.get(this.index);
+         if (current instanceof TieredSkill tiered) {
+            int tier = tiered.getUnmodifiedTier();
 
-         while (current.isUnlocked()) {
-            current.regret(context);
-            this.specializations.get(index).learn(context);
+            for (int i = 0; i < tier; i++) {
+               current.regret(context);
+            }
+
+            for (int i = 0; i < tier; i++) {
+               if (this.specializations.get(index).canLearn(context)) {
+                  this.specializations.get(index).learn(context);
+               }
+            }
+         } else {
+            int tier;
+            for (tier = 0; current.isUnlocked(); tier++) {
+               current.regret(context);
+            }
+
+            for (int ix = 0; ix < tier; ix++) {
+               if (this.specializations.get(index).canLearn(context)) {
+                  this.specializations.get(index).learn(context);
+               }
+            }
          }
       }
 
@@ -196,9 +215,7 @@ public class SpecializedSkill extends LearnableSkill {
 
    @Override
    public <T extends Skill> T copy() {
-      SpecializedSkill copy = new SpecializedSkill(
-         this.getUnlockLevel(), this.getLearnPointCost(), this.getRegretPointCost(), this.specializations.stream().map(Skill::copy)
-      );
+      SpecializedSkill copy = new SpecializedSkill(this.unlockLevel, this.learnPointCost, this.regretPointCost, this.specializations.stream().map(Skill::copy));
       copy.parent = this.parent;
       copy.id = this.id;
       copy.name = this.name;

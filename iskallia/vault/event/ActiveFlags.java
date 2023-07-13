@@ -12,8 +12,10 @@ public enum ActiveFlags {
    IS_EFFECT_ATTACKING,
    IS_JAVELIN_ATTACKING,
    IS_SMITE_ATTACKING,
+   IS_SMITE_BASE_ATTACKING,
    IS_CHAINING_ATTACKING,
-   IS_THORNS_REFLECTING;
+   IS_THORNS_REFLECTING,
+   IS_AP_ATTACKING;
 
    private final ThreadLocal<Integer> activeReferences = ThreadLocal.withInitial(() -> 0);
 

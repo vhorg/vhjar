@@ -30,7 +30,7 @@ public class TalentDialog extends SkillDialog<TalentTree, TalentsElementContaine
    protected void updateRegretButton() {
       int regretCost = this.skillGroup.getRegretPointCost();
       boolean hasDependants = false;
-      if (this.skillGroup.getTier() == 1) {
+      if (this.skillGroup.getUnmodifiedTier() == 1) {
          for (String dependent : ModConfigs.SKILL_GATES.getGates().getSkillsDependingOn(this.skillGroup.getId(), this.skilTree)) {
             if (this.skilTree.getForId(dependent).map(Skill::isUnlocked).orElse(false)) {
                hasDependants = true;

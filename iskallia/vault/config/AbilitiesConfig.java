@@ -7,6 +7,7 @@ import iskallia.vault.skill.ability.effect.DashDamageAbility;
 import iskallia.vault.skill.ability.effect.DashWarpAbility;
 import iskallia.vault.skill.ability.effect.EmpowerAbility;
 import iskallia.vault.skill.ability.effect.EmpowerIceArmourAbility;
+import iskallia.vault.skill.ability.effect.EmpowerSlownessAuraAbility;
 import iskallia.vault.skill.ability.effect.ExecuteAbility;
 import iskallia.vault.skill.ability.effect.FarmerAbility;
 import iskallia.vault.skill.ability.effect.FarmerAnimalAbility;
@@ -106,7 +107,8 @@ public class AbilitiesConfig extends Config {
                "Empower",
                "Empower",
                tier("Empower_Base", "Empower", quintuple(new EmpowerAbility(0, 1, 1, 10, 1.0F, 200, 0.5F))),
-               tier("Empower_Ice_Armor", "Empower: Ice Armor", quintuple(new EmpowerIceArmourAbility(0, 1, 1, 10, 1.0F, 200, 0.5F, 10.0F, 0)))
+               tier("Empower_Ice_Armor", "Empower: Ice Armor", quintuple(new EmpowerIceArmourAbility(0, 1, 1, 10, 1.0F, 200, 10.0F, 0, 20, 1.0F))),
+               tier("Empower_Slowness_Aura", "Empower: Slowness Aura", quintuple(new EmpowerSlownessAuraAbility(0, 1, 1, 10, 1.0F, 200, 10.0F, 0)))
             )
          );
       this.tree.skills.add(spec("Execute", "Execute", tier("Execute_Base", "Execute", quintuple(new ExecuteAbility(0, 1, 1, 10, 0.5F, 200)))));
@@ -218,7 +220,7 @@ public class AbilitiesConfig extends Config {
                "Javelin",
                tier("Javelin_Base", "Javelin", quintuple(new JavelinAbility(0, 1, 1, 10, 1.0F, 0.5F, 1.0F, 1.0F))),
                tier("Javelin_Piercing", "Javelin: Piercing", quintuple(new JavelinPiercingAbility(0, 1, 1, 10, 1.0F, 0.5F, 1.0F, 1))),
-               tier("Javelin_Scatter", "Javelin: Scatter", quintuple(new JavelinScatterAbility(0, 1, 1, 10, 1.0F, 0.5F, 1.0F, 1, 1))),
+               tier("Javelin_Scatter", "Javelin: Scatter", quintuple(new JavelinScatterAbility(0, 1, 1, 10, 1.0F, 0.5F, 1.0F, 1, 1, 1))),
                tier("Javelin_Sight", "Javelin: Sight", quintuple(new JavelinSightAbility(0, 1, 1, 10, 1.0F, 0.5F, 1.0F, 10.0F, 1)))
             )
          );
@@ -306,7 +308,7 @@ public class AbilitiesConfig extends Config {
             spec(
                "Taunt",
                "Taunt",
-               tier("Taunt_Base", "Taunt", quintuple(new TauntAbility(0, 1, 1, 10, 1.0F, 10.0F, 200, 0.5F))),
+               tier("Taunt_Base", "Taunt", quintuple(new TauntAbility(0, 1, 1, 10, 1.0F, 10.0F, 200, 1))),
                tier("Taunt_Repel", "Taunt: Fear", quintuple(new TauntRepelAbility(0, 1, 1, 10, 1.0F, 10.0F, 200, 10.0F))),
                tier("Taunt_Charm", "Taunt: Charm", quintuple(new TauntCharmAbility(0, 1, 1, 10, 1.0F, 10.0F, 200, 3, 0.5F)))
             )
@@ -342,7 +344,7 @@ public class AbilitiesConfig extends Config {
                "Smite",
                "Smite",
                tier("Smite_Base", "Smite", quintuple(new SmiteAbility(0, 1, 1, 10, 1.0F, 0.5F, 10, 20.0F, -1864448, 5.0F))),
-               tier("Smite_Archon", "Smite: Archon", quintuple(new SmiteArchonAbility(0, 1, 1, 10, 1.0F, 0.5F, 10, 20.0F, -1864448, 5.0F))),
+               tier("Smite_Archon", "Smite: Archon", quintuple(new SmiteArchonAbility(0, 1, 1, 10, 1.0F, 0.5F, 10, 20.0F, -1864448, 5.0F, 0.0F))),
                tier("Smite_Thunderstorm", "Smite: Thunderstorm", quintuple(new SmiteThunderstormAbility(0, 1, 1, 10, 1.0F, 0.5F, 10, 20.0F, -1864448, 5.0F)))
             )
          );

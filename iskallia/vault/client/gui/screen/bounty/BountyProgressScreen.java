@@ -60,6 +60,7 @@ public class BountyProgressScreen extends AbstractElementScreen {
       return false;
    }
 
+   @Override
    public boolean mouseReleased(double mouseX, double mouseY, int button) {
       this.onClose();
       return super.mouseReleased(mouseX, mouseY, button);

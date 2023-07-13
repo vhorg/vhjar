@@ -75,7 +75,7 @@ public class PlayerSnapshotDump {
       snapshot.cooldownReduction = CooldownHelper.getCooldownMultiplier(sPlayer);
       snapshot.fatalStrikeChance = FatalStrikeHelper.getFatalStrikeChance(sPlayer);
       snapshot.fatalStrikeDamage = FatalStrikeHelper.getFatalStrikeDamage(sPlayer);
-      snapshot.thornsChance = ThornsHelper.getThornsChance(sPlayer);
+      snapshot.thornsChance = 1.0F;
       snapshot.thornsDamage = ThornsHelper.getThornsDamageMultiplier(sPlayer);
       Arrays.stream(EquipmentSlot.values()).forEach(slotType -> {
          ItemStack stack = sPlayer.getItemBySlot(slotType);
@@ -86,13 +86,13 @@ public class PlayerSnapshotDump {
       AbilityTree abilities = PlayerAbilitiesData.get(sWorld).getAbilities(sPlayer);
       abilities.iterate(Skill.class, skill -> {
          if (skill.isUnlocked() && skill instanceof TieredSkill tiered && skill.getId() != null) {
-            snapshot.abilities.put(tiered.getId(), tiered.getTier());
+            snapshot.abilities.put(tiered.getId(), tiered.getUnmodifiedTier());
          }
       });
       TalentTree talents = PlayerTalentsData.get(sWorld).getTalents(sPlayer);
       talents.iterate(Skill.class, skill -> {
          if (skill.isUnlocked() && skill instanceof TieredSkill tiered && skill.getId() != null) {
-            snapshot.talents.put(skill.getId(), tiered.getTier());
+            snapshot.talents.put(skill.getId(), tiered.getUnmodifiedTier());
          }
       });
       ResearchTree researches = PlayerResearchesData.get(sWorld).getResearches(sPlayer);

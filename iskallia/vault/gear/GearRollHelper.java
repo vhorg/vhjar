@@ -6,11 +6,17 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.expertise.type.LegendaryExpertise;
+import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.world.data.DiscoveredModelsData;
+import iskallia.vault.world.data.PlayerExpertisesData;
 import java.util.Random;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +46,7 @@ public class GearRollHelper {
    }
 
    public static void initializeAndDiscoverGear(ItemStack stack, Player player) {
-      initializeGear(stack);
+      initializeGear(stack, player);
       if (player instanceof ServerPlayer sPlayer) {
          DiscoveredModelsData worldData = DiscoveredModelsData.get(sPlayer.getLevel().getServer());
          worldData.discoverModelAndBroadcast(stack, sPlayer);
@@ -48,6 +54,10 @@ public class GearRollHelper {
    }
 
    public static void initializeGear(ItemStack stack) {
+      initializeGear(stack, null);
+   }
+
+   public static void initializeGear(ItemStack stack, Player player) {
       VaultGearData data = VaultGearData.read(stack);
       data.setState(VaultGearState.IDENTIFIED);
       data.write(stack);
@@ -56,12 +66,22 @@ public class GearRollHelper {
       VaultGearModifierHelper.generateAffixSlots(stack, rand);
       VaultGearModifierHelper.generateImplicits(stack, rand);
       VaultGearModifierHelper.generateModifiers(stack, rand);
-      if (data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false) && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance()) {
+      float extraLegendaryChance = 0.0F;
+      if (player instanceof ServerPlayer && player.level instanceof ServerLevel sLevel) {
+         ExpertiseTree expertises = PlayerExpertisesData.get(sLevel).getExpertises(player);
+
+         for (LegendaryExpertise expertise : expertises.getAll(LegendaryExpertise.class, Skill::isUnlocked)) {
+            extraLegendaryChance += expertise.getExtraLegendaryChance();
+         }
+      }
+
+      if (data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false)
+         && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance() + extraLegendaryChance) {
          VaultGearModifierHelper.generateLegendaryModifier(stack, rand);
       }
    }
 
-   public static void tickToll(ItemStack stack, Player player, Consumer<ItemStack> onRollTick, Consumer<ItemStack> onFinish) {
+   public static void tickToll(ItemStack stack, Player player, BiConsumer<ItemStack, Player> onRollTick, Consumer<ItemStack> onFinish) {
       Level world = player.getLevel();
       CompoundTag rollTag = stack.getOrCreateTagElement("RollHelper");
       int ticks = rollTag.getInt("RollTicks");
@@ -73,7 +93,7 @@ public class GearRollHelper {
          world.playSound(null, player.blockPosition(), ModSounds.IDENTIFICATION_SFX, SoundSource.PLAYERS, 0.3F, 1.0F);
       } else {
          if ((int)displacement != lastHit || ticks == 0) {
-            onRollTick.accept(stack);
+            onRollTick.accept(stack, player);
             rollTag.putInt("LastHit", (int)displacement);
             world.playSound(null, player.blockPosition(), ModSounds.RAFFLE_SFX, SoundSource.PLAYERS, 0.4F, 1.0F);
          }

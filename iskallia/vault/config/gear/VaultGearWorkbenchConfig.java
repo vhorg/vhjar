@@ -52,7 +52,8 @@ public class VaultGearWorkbenchConfig extends Config {
          ModItems.IDOL_BENEVOLENT,
          ModItems.IDOL_MALEVOLENCE,
          ModItems.IDOL_OMNISCIENT,
-         ModItems.IDOL_TIMEKEEPER
+         ModItems.IDOL_TIMEKEEPER,
+         ModItems.WAND
       )) {
          gearConfig.put(item, new VaultGearWorkbenchConfig(item).readConfig());
       }

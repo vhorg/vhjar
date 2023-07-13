@@ -47,12 +47,12 @@ public interface IdentifiableItem {
 
    default void instantIdentify(Player player, ItemStack stack) {
       if (this.getState(stack) == VaultGearState.UNIDENTIFIED) {
-         this.tickRoll(stack);
+         this.tickRoll(stack, player);
          this.tickFinishRoll(stack, player);
       }
    }
 
-   void tickRoll(ItemStack var1);
+   void tickRoll(ItemStack var1, Player var2);
 
    void tickFinishRoll(ItemStack var1, Player var2);
 }

@@ -4,12 +4,14 @@ import com.google.common.base.Functions;
 import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.gear.VaultGearClassification;
+import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.tool.BottleItemRenderer;
@@ -89,7 +91,7 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
    }
 
    public int getMaxDamage(ItemStack stack) {
-      return getType(stack).map(BottleItem.Type::getMaxCharges).orElse(0);
+      return ModConfigs.POTION.getPotion(getType(stack).orElse(BottleItem.Type.VIAL)).getCharges();
    }
 
    public int getDamage(ItemStack stack) {
@@ -104,7 +106,7 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
             CriteriaTriggers.CONSUME_ITEM.trigger(player, stack);
             VaultGearData data = VaultGearData.read(stack);
             getEffect(stack, player).ifPresent(entity::addEffect);
-            getType(stack).map(BottleItem.Type::getHealing).ifPresent(entity::heal);
+            getType(stack).ifPresent(type -> entity.heal(ModConfigs.POTION.getPotion(type).getHealing()));
             consumeCharge(stack, player);
             world.gameEvent(entity, GameEvent.DRINKING_FINISH, entity.eyeBlockPosition());
             AttributeSnapshotHelper.getInstance().refreshSnapshotDelayed(player);
@@ -118,7 +120,7 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
 
    public static Optional<MobEffectInstance> getEffect(ItemStack stack, ServerPlayer player) {
       return getType(stack).map(type -> {
-         int duration = type.getEffectDuration();
+         int duration = ModConfigs.POTION.getPotion(type).getEffectDuration();
          float increase = 0.0F;
          TalentTree talents = PlayerTalentsData.get((ServerLevel)player.level).getTalents(player);
 
@@ -183,34 +185,43 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(@NotNull ItemStack stack, Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
       super.appendHoverText(stack, world, tooltip, flag);
-      getType(stack)
-         .ifPresent(
-            type -> {
-               tooltip.add(
-                  new TextComponent("Heals ")
-                     .append(new TextComponent(String.valueOf(type.getHealing())).setStyle(Style.EMPTY.withColor(8254855)))
-                     .append(new TextComponent(" hitpoints"))
-               );
-               getRecharge(stack)
-                  .ifPresent(
-                     recharge -> {
-                        switch (recharge) {
-                           case TIME:
-                              tooltip.add(
-                                 new TextComponent("Recharges every ")
-                                    .append(new TextComponent(type.getTimeRecharge() / 1200 + " minutes").setStyle(Style.EMPTY.withColor(getColor(stack))))
-                              );
-                              break;
-                           case MOBS:
-                              tooltip.add(
-                                 new TextComponent("Recharges every ")
-                                    .append(new TextComponent(type.getMobRecharge() + " mob kills").setStyle(Style.EMPTY.withColor(getColor(stack))))
-                              );
-                        }
-                     }
+      if (ModConfigs.POTION != null) {
+         getType(stack)
+            .ifPresent(
+               type -> {
+                  tooltip.add(
+                     new TextComponent("Heals ")
+                        .append(new TextComponent(String.valueOf(ModConfigs.POTION.getPotion(type).getHealing())).setStyle(Style.EMPTY.withColor(8254855)))
+                        .append(new TextComponent(" hitpoints"))
                   );
-            }
-         );
+                  getRecharge(stack)
+                     .ifPresent(
+                        recharge -> {
+                           switch (recharge) {
+                              case TIME:
+                                 tooltip.add(
+                                    new TextComponent("Recharges every ")
+                                       .append(
+                                          new TextComponent(ModConfigs.POTION.getPotion(type).getTimeRecharge() / 1200 + " minutes")
+                                             .setStyle(Style.EMPTY.withColor(getColor(stack)))
+                                       )
+                                 );
+                                 break;
+                              case MOBS:
+                                 tooltip.add(
+                                    new TextComponent("Recharges every ")
+                                       .append(
+                                          new TextComponent(ModConfigs.POTION.getPotion(type).getMobRecharge() + " mob kills")
+                                             .setStyle(Style.EMPTY.withColor(getColor(stack)))
+                                       )
+                                 );
+                           }
+                        }
+                     );
+               }
+            );
+      }
+
       tooltip.addAll(this.createTooltip(stack, GearTooltip.itemTooltip()));
    }
 
@@ -248,14 +259,14 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
             Vault vault = ServerVaults.get(UUID.fromString(stack.getOrCreateTag().getString("vault"))).orElse(null);
             if (vault == null || !vault.get(Vault.LISTENERS).contains(entity.getUUID())) {
                stack.getOrCreateTag().remove("vault");
-               getType(stack).ifPresent(type -> stack.getOrCreateTag().putInt("charges", type.getMaxCharges()));
+               getType(stack).ifPresent(type -> stack.getOrCreateTag().putInt("charges", ModConfigs.POTION.getPotion(type).getCharges()));
             }
          }
       }
    }
 
    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-      return oldStack.getItem() != newStack.getItem();
+      return VaultGearHelper.shouldPlayGearReequipAnimation(oldStack, newStack, slotChanged);
    }
 
    @Override
@@ -319,7 +330,7 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
       data.setState(VaultGearState.IDENTIFIED);
       if (type != null) {
          stack.getOrCreateTag().putString("type", type.getName());
-         stack.getOrCreateTag().putInt("charges", type.getMaxCharges());
+         stack.getOrCreateTag().putInt("charges", 6);
       }
 
       if (recharge != null) {
@@ -353,7 +364,7 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
    }
 
    public static int getEmptyModifierSlots(ItemStack stack) {
-      return getType(stack).map(type -> type.getModifiers() - getCraftedModifierSlots(stack)).orElse(0);
+      return getType(stack).map(type -> ModConfigs.POTION.getPotion(type).getModifiers() - getCraftedModifierSlots(stack)).orElse(0);
    }
 
    public static int getCraftedModifierSlots(ItemStack stack) {
@@ -418,7 +429,7 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
          CompoundTag nbt = stack.getOrCreateTag();
          int value = nbt.getInt("progress") + 1;
          nbt.putInt("progress", value);
-         if (value % type.getMobRecharge() == 0 && nbt.getInt("charges") < type.getMaxCharges()) {
+         if (value % ModConfigs.POTION.getPotion(type).getMobRecharge() == 0 && nbt.getInt("charges") < ModConfigs.POTION.getPotion(type).getCharges()) {
             nbt.putInt("charges", nbt.getInt("charges") + 1);
          }
       }
@@ -431,7 +442,7 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
          CompoundTag nbt = stack.getOrCreateTag();
          int value = nbt.getInt("progress") + 1;
          nbt.putInt("progress", value);
-         if (value % type.getTimeRecharge() == 0 && nbt.getInt("charges") < type.getMaxCharges()) {
+         if (value % ModConfigs.POTION.getPotion(type).getTimeRecharge() == 0 && nbt.getInt("charges") < ModConfigs.POTION.getPotion(type).getCharges()) {
             nbt.putInt("charges", nbt.getInt("charges") + 1);
          }
       }
@@ -504,30 +515,6 @@ public class BottleItem extends Item implements VaultGearItem, IManualModelLoadi
          this.mobRecharge = mobRecharge;
          this.effectDuration = effectDuration;
          this.healing = healing;
-      }
-
-      public int getMaxCharges() {
-         return this.charges;
-      }
-
-      public int getModifiers() {
-         return this.modifiers;
-      }
-
-      public int getTimeRecharge() {
-         return this.timeRecharge;
-      }
-
-      public int getMobRecharge() {
-         return this.mobRecharge;
-      }
-
-      public int getEffectDuration() {
-         return this.effectDuration;
-      }
-
-      public int getHealing() {
-         return this.healing;
       }
 
       public String getName() {

@@ -5,7 +5,9 @@ import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.platform.InputConstants.Type;
 import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.gui.screen.AbilitySelectionScreen;
+import iskallia.vault.client.gui.screen.bestiary.BestiaryScreen;
 import iskallia.vault.client.gui.screen.quest.QuestOverviewElementScreen;
+import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.init.ModKeybinds;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
@@ -33,6 +35,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 @OnlyIn(Dist.CLIENT)
 public class InputEvents {
    private static boolean isShiftDown;
+   private static boolean scrollingAbilities = false;
    private static final Set<Key> KEY_DOWN_SET = new HashSet<>();
 
    public static boolean isShiftDown() {
@@ -78,6 +81,7 @@ public class InputEvents {
          if (minecraft.screen != null) {
             if (action == 0) {
                checkAndReleaseHoldAbility(key);
+               scrollingAbilities = false;
             }
          } else if (action != 0) {
             if (action == 1) {
@@ -128,6 +132,8 @@ public class InputEvents {
                      ModNetwork.CHANNEL.sendToServer(ServerboundMagnetToggleMessage.INSTANCE);
                   } else if (ModKeybinds.openQuestScreen.isActiveAndMatches(key)) {
                      Minecraft.getInstance().setScreen(new QuestOverviewElementScreen());
+                  } else if (ModKeybinds.openBestiary.isActiveAndMatches(key)) {
+                     Minecraft.getInstance().setScreen(new BestiaryScreen());
                   }
                }
             }
@@ -141,7 +147,11 @@ public class InputEvents {
                }
             }
          } else {
-            ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
+            if (!scrollingAbilities) {
+               ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.KeyUp);
+            } else {
+               scrollingAbilities = false;
+            }
          }
       }
    }
@@ -168,17 +178,21 @@ public class InputEvents {
    public static void onMouseScroll(MouseScrollEvent event) {
       Minecraft minecraft = Minecraft.getInstance();
       if (minecraft.level != null) {
-         double scrollDelta = event.getScrollDelta();
-         if (ModKeybinds.abilityKey.isDown()) {
-            if (minecraft.screen == null) {
-               if (scrollDelta < 0.0) {
-                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.ScrollDown);
-               } else {
-                  ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.ScrollUp);
+         IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
+         if (options.isAbilityScrollingEnabled()) {
+            double scrollDelta = event.getScrollDelta();
+            if (ModKeybinds.abilityKey.isDown()) {
+               if (minecraft.screen == null) {
+                  scrollingAbilities = true;
+                  if (scrollDelta < 0.0) {
+                     ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.ScrollDown);
+                  } else {
+                     ServerboundAbilityKeyMessage.send(ServerboundAbilityKeyMessage.Opcode.ScrollUp);
+                  }
                }
-            }
 
-            event.setCanceled(true);
+               event.setCanceled(true);
+            }
          }
       }
    }

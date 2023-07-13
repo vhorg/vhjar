@@ -99,6 +99,10 @@ public class VaultSwordItem extends SwordItem implements VaultGearItem, DyeableL
       return VaultGearHelper.getModifiers(stack, slot);
    }
 
+   public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+      return VaultGearHelper.shouldPlayGearReequipAnimation(oldStack, newStack, slotChanged);
+   }
+
    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
       if (this.allowdedIn(group)) {
          items.add(this.defaultItem());

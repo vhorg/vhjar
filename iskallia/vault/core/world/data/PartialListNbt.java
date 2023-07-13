@@ -33,20 +33,29 @@ public class PartialListNbt implements TilePlacement<PartialListNbt>, EntityPlac
          return true;
       } else if (other.nbt != null && this.nbt.size() <= other.nbt.size()) {
          for (Tag e1 : this.nbt) {
+            boolean matched = false;
+
             for (Tag e2 : other.nbt) {
                if (e1.getType() == e2.getType()) {
                   if (e1.getId() == 10) {
-                     if (!PartialCompoundNbt.of((CompoundTag)e1).isSubsetOf(PartialCompoundNbt.of((CompoundTag)e2))) {
-                        return false;
+                     if (PartialCompoundNbt.of((CompoundTag)e1).isSubsetOf(PartialCompoundNbt.of((CompoundTag)e2))) {
+                        matched = true;
+                        break;
                      }
                   } else if (e1 instanceof CollectionTag) {
-                     if (!of((CollectionTag<?>)e1).isSubsetOf(of((CollectionTag<?>)e2))) {
-                        return false;
+                     if (of((CollectionTag<?>)e1).isSubsetOf(of((CollectionTag<?>)e2))) {
+                        matched = true;
+                        break;
                      }
-                  } else if (!e1.equals(e2)) {
-                     return false;
+                  } else if (e1.equals(e2)) {
+                     matched = true;
+                     break;
                   }
                }
+            }
+
+            if (!matched) {
+               return false;
             }
          }
 

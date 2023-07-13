@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicates;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.CryoChamberBlock;
+import iskallia.vault.block.DungeonDoorBlock;
 import iskallia.vault.block.EasterEggBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.block.TreasureDoorBlock;
@@ -18,6 +19,7 @@ import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
 import iskallia.vault.core.event.ClientEvents;
 import iskallia.vault.core.vault.influence.VaultGod;
+import iskallia.vault.entity.model.FireballModel;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.PiercingJavelinModel;
 import iskallia.vault.entity.model.ScatterJavelinModel;
@@ -28,10 +30,11 @@ import iskallia.vault.etching.EtchingSet;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.AttributeGearData;
-import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.item.AugmentItem;
+import iskallia.vault.item.CompassItem;
 import iskallia.vault.item.ItemDrillArrow;
 import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.tool.JewelItem;
@@ -39,6 +42,7 @@ import iskallia.vault.research.StageManager;
 import iskallia.vault.research.type.Research;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import java.util.Arrays;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.client.color.item.ItemColors;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -78,6 +82,7 @@ public class ModModels {
    public static void setupRenderLayers() {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_PORTAL, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.TREASURE_DOOR, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.DUNGEON_DOOR, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_ALTAR, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_ARTIFACT, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.MVP_CROWN, RenderType.cutout());
@@ -121,9 +126,9 @@ public class ModModels {
       colors.register(
          (stack, tintLayer) -> {
             if (tintLayer > 0) {
-               VaultGearData data = VaultGearData.read(stack);
-               if (data.getState() == VaultGearState.UNIDENTIFIED) {
-                  VaultGearTypeConfig.RollType type = data.getFirstValue(ModGearAttributes.GEAR_ROLL_TYPE)
+               GearDataCache clientCache = GearDataCache.of(stack);
+               if (clientCache.getState() == VaultGearState.UNIDENTIFIED) {
+                  VaultGearTypeConfig.RollType type = Optional.ofNullable(clientCache.getGearRollType())
                      .flatMap(ModConfigs.VAULT_GEAR_TYPE_CONFIG::getRollPool)
                      .orElse(null);
                   if (type != null) {
@@ -148,7 +153,8 @@ public class ModModels {
             ModItems.IDOL_OMNISCIENT,
             ModItems.IDOL_TIMEKEEPER,
             ModItems.IDOL_MALEVOLENCE,
-            ModItems.MAGNET
+            ModItems.MAGNET,
+            ModItems.WAND
          }
       );
       colors.register((stack, tintIndex) -> tintIndex == 0 ? JewelItem.getColor(stack) : -1, new ItemLike[]{ModItems.JEWEL});
@@ -163,6 +169,7 @@ public class ModModels {
       event.registerLayerDefinition(SightJavelinModel.MODEL_LOCATION, SightJavelinModel::createBodyLayer);
       event.registerLayerDefinition(ScatterJavelinModel.MODEL_LOCATION, ScatterJavelinModel::createBodyLayer);
       event.registerLayerDefinition(PiercingJavelinModel.MODEL_LOCATION, PiercingJavelinModel::createBodyLayer);
+      event.registerLayerDefinition(FireballModel.MODEL_LOCATION, FireballModel::createBodyLayer);
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_EYE, AngelBlockRenderer::createEyeLayer);
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_WIND, AngelBlockRenderer::createWindLayer);
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_CAGE, AngelBlockRenderer::createCageLayer);
@@ -231,6 +238,15 @@ public class ModModels {
             return type == null ? -1.0F : type.ordinal();
          }
       };
+      public static ItemPropertyFunction DUNGEON_DOOR_TYPE = (stack, world, entity, seed) -> {
+         CompoundTag nbt = stack.getTag();
+         if (nbt == null) {
+            return -1.0F;
+         } else {
+            DungeonDoorBlock.Type type = DungeonDoorBlock.Type.fromString(nbt.getString("type"));
+            return type == null ? -1.0F : type.ordinal();
+         }
+      };
       public static ItemPropertyFunction GOD_BLESSING_TYPE = (stack, world, entity, seed) -> {
          CompoundTag nbt = stack.getTag();
          VaultGod type;
@@ -262,6 +278,7 @@ public class ModModels {
          ItemProperties.register(ModItems.VAULT_COMPASS, new ResourceLocation("angle"), new ModModels.ItemProperty.CompassPropertyFunction());
          registerItemProperty(ModBlocks.PLACEHOLDER.asItem(), "placeholder_type", PLACEHOLDER_TYPE);
          registerItemProperty(ModBlocks.TREASURE_DOOR.asItem(), "treasure_door_type", TREASURE_DOOR_TYPE);
+         registerItemProperty(ModBlocks.DUNGEON_DOOR.asItem(), "dungeon_door_type", DUNGEON_DOOR_TYPE);
          registerItemProperty(ModItems.MAGNET, "magnet_perk", (stack, world, entity, seed) -> LegacyMagnetItem.getPerk(stack).ordinal());
          ItemProperties.registerGeneric(VaultMod.id("count"), (s, w, e, l) -> s.getCount());
 
@@ -304,7 +321,8 @@ public class ModModels {
                   level = clientLevel;
                }
 
-               BlockPos target = ClientEvents.COMPASS_PROPERTY.invoke(level, livingEntity, compass, seed, null).getTarget();
+               BlockPos target = CompassItem.getTarget(compass)
+                  .orElse(ClientEvents.COMPASS_PROPERTY.invoke(level, livingEntity, compass, seed, null).getTarget());
                long gameTime = level.getGameTime();
                Research vaultCompass = ModConfigs.RESEARCHES.getByName("Vault Compass");
                boolean researched = vaultCompass != null && StageManager.getResearchTree(player).isResearched(vaultCompass);

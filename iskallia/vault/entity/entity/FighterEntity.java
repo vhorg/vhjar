@@ -310,6 +310,11 @@ public class FighterEntity extends Zombie {
       protected void onHitEntity(EntityHitResult result) {
          if (!this.level.isClientSide()) {
             if (result.getEntity() instanceof LivingEntity livingEntity) {
+               if (this.thrower == null) {
+                  this.discard();
+                  return;
+               }
+
                double xRatio = this.thrower.getX() - livingEntity.getX();
 
                double zRatio;

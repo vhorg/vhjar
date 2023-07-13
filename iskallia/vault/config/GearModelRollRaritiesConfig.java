@@ -12,15 +12,19 @@ import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.item.gear.VaultAxeItem;
 import iskallia.vault.item.gear.VaultShieldItem;
 import iskallia.vault.item.gear.VaultSwordItem;
+import iskallia.vault.item.gear.WandItem;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.common.extensions.IForgeItem;
 
 public class GearModelRollRaritiesConfig extends Config {
    @Expose
@@ -31,6 +35,8 @@ public class GearModelRollRaritiesConfig extends Config {
    Map<VaultGearRarity, List<String>> AXE_MODEL_ROLLS;
    @Expose
    Map<VaultGearRarity, List<String>> SHIELD_MODEL_ROLLS;
+   @Expose
+   Map<VaultGearRarity, List<String>> WAND_MODEL_ROLLS;
 
    public Map<VaultGearRarity, List<String>> getRolls(VaultGearItem gear) {
       if (gear instanceof VaultArmorItem) {
@@ -39,8 +45,10 @@ public class GearModelRollRaritiesConfig extends Config {
          return this.SWORD_MODEL_ROLLS;
       } else if (gear instanceof VaultAxeItem) {
          return this.AXE_MODEL_ROLLS;
+      } else if (gear instanceof VaultShieldItem) {
+         return this.SHIELD_MODEL_ROLLS;
       } else {
-         return gear instanceof VaultShieldItem ? this.SHIELD_MODEL_ROLLS : Collections.emptyMap();
+         return gear instanceof WandItem ? this.WAND_MODEL_ROLLS : Collections.emptyMap();
       }
    }
 
@@ -50,6 +58,12 @@ public class GearModelRollRaritiesConfig extends Config {
    }
 
    public <G extends Item & VaultGearItem> Set<ResourceLocation> getPossibleRolls(G gearItem, VaultGearRarity rarity, EquipmentSlot slot) {
+      Set<ResourceLocation> rolls = this.getUnfilteredRolls(gearItem, rarity, slot);
+      rolls.removeIf(modelId -> this.getForcedTierRarity(gearItem, modelId) != null);
+      return rolls;
+   }
+
+   private <G extends Item & VaultGearItem> Set<ResourceLocation> getUnfilteredRolls(G gearItem, VaultGearRarity rarity, EquipmentSlot slot) {
       List<String> modelIds = this.getRolls(gearItem).get(rarity);
       return modelIds == null
          ? ModDynamicModels.REGISTRIES.getAssociatedRegistry(gearItem).map(DynamicModelRegistry::getIds).orElseGet(Collections::emptySet)
@@ -65,20 +79,48 @@ public class GearModelRollRaritiesConfig extends Config {
       if (rolls == null) {
          return VaultGearRarity.SCRAPPY;
       } else {
-         if (gearItem instanceof VaultArmorItem) {
-            modelId = ModDynamicModels.Armor.PIECE_REGISTRY.get(modelId).map(ArmorPieceModel::getArmorModel).map(DynamicModel::getId).orElse(modelId);
+         VaultGearRarity predefined = this.getForcedTierRarity(gearItem, modelId);
+         if (predefined != null) {
+            return predefined;
+         } else {
+            if (gearItem instanceof VaultArmorItem) {
+               modelId = ModDynamicModels.Armor.PIECE_REGISTRY.get(modelId).map(ArmorPieceModel::getArmorModel).map(DynamicModel::getId).orElse(modelId);
+            }
+
+            for (int i = VaultGearRarity.values().length - 1; i >= 0; i--) {
+               VaultGearRarity rarity = VaultGearRarity.values()[i];
+               List<String> modelIds = rolls.get(rarity);
+               if (modelIds != null && modelIds.contains(modelId.toString())) {
+                  return rarity;
+               }
+            }
+
+            return VaultGearRarity.SCRAPPY;
+         }
+      }
+   }
+
+   public boolean canAppearNormally(IForgeItem item, ResourceLocation modelId) {
+      return this.getForcedTierRarity(item, modelId) == null;
+   }
+
+   @Nullable
+   private VaultGearRarity getForcedTierRarity(IForgeItem item, ResourceLocation modelId) {
+      if (item instanceof VaultArmorItem) {
+         Optional<ArmorModel> modelOpt = ModDynamicModels.Armor.MODEL_REGISTRY.get(modelId);
+         if (modelOpt.isEmpty()) {
+            modelOpt = ModDynamicModels.Armor.PIECE_REGISTRY.get(modelId).map(ArmorPieceModel::getArmorModel);
          }
 
-         for (int i = VaultGearRarity.values().length - 1; i >= 0; i--) {
-            VaultGearRarity rarity = VaultGearRarity.values()[i];
-            List<String> modelIds = rolls.get(rarity);
-            if (modelIds != null && modelIds.contains(modelId.toString())) {
-               return rarity;
+         if (modelOpt.isPresent()) {
+            ArmorModel armorModel = modelOpt.get();
+            if (armorModel.equals(ModDynamicModels.Armor.GOBLIN) || armorModel.equals(ModDynamicModels.Armor.CHAMPION)) {
+               return VaultGearRarity.UNIQUE;
             }
          }
-
-         return VaultGearRarity.SCRAPPY;
       }
+
+      return null;
    }
 
    @Override
@@ -103,5 +145,8 @@ public class GearModelRollRaritiesConfig extends Config {
       this.SHIELD_MODEL_ROLLS = new HashMap<>();
       this.SHIELD_MODEL_ROLLS
          .put(VaultGearRarity.SCRAPPY, ModDynamicModels.Shields.REGISTRY.getIds().stream().<String>map(ResourceLocation::toString).collect(Collectors.toList()));
+      this.WAND_MODEL_ROLLS = new HashMap<>();
+      this.SHIELD_MODEL_ROLLS
+         .put(VaultGearRarity.SCRAPPY, ModDynamicModels.Wands.REGISTRY.getIds().stream().<String>map(ResourceLocation::toString).collect(Collectors.toList()));
    }
 }

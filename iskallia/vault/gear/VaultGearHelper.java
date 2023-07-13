@@ -7,9 +7,9 @@ import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
-import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModAttributes;
@@ -85,28 +85,19 @@ public class VaultGearHelper {
       if (!ModConfigs.isInitialized()) {
          return defaultName;
       } else {
-         VaultGearData data = VaultGearData.read(stack);
-         VaultGearState state = data.getState();
-         if (state == VaultGearState.UNIDENTIFIED) {
-            Style style = data.getFirstValue(ModGearAttributes.GEAR_ROLL_TYPE)
+         GearDataCache clientCache = GearDataCache.of(stack);
+         if (clientCache.getState() == VaultGearState.UNIDENTIFIED) {
+            Style style = Optional.ofNullable(clientCache.getGearRollType())
                .flatMap(ModConfigs.VAULT_GEAR_TYPE_CONFIG::getRollPool)
                .map(pool -> defaultName.getStyle().withColor(TextColor.fromRgb(pool.getColor())))
                .orElse(defaultName.getStyle());
             return new TextComponent("Unidentified ").setStyle(style).append(defaultName.copy().setStyle(style));
          } else {
             ColorBlender colorBlender = new ColorBlender(1.0F);
-            colorBlender.add(data.getRarity().getColor().getValue(), 60.0F);
-
-            for (VaultGearAttributeInstance<?> attributeInstance : data.getAllAttributes()) {
-               if (attributeInstance instanceof VaultGearModifier<?> modifier && modifier.getCategory() == VaultGearModifier.AffixCategory.LEGENDARY) {
-                  colorBlender.add(15853364, 60.0F);
-                  break;
-               }
-            }
-
+            Optional.ofNullable(clientCache.getGearColorComponents()).ifPresent(colors -> colors.forEach(colorx -> colorBlender.add(colorx, 60.0F)));
             float time = (float)ClientScheduler.INSTANCE.getTickCount();
             int color = colorBlender.getColor(time);
-            Optional<String> customName = data.getFirstValue(ModGearAttributes.GEAR_NAME);
+            Optional<String> customName = Optional.ofNullable(clientCache.getGearName());
             return (Component)customName.<MutableComponent>map(s -> new TextComponent(s).setStyle(Style.EMPTY.withColor(color)))
                .orElseGet(() -> defaultName.copy().setStyle(defaultName.getStyle().withColor(color)));
          }
@@ -114,21 +105,30 @@ public class VaultGearHelper {
    }
 
    public static int getGearColor(ItemStack stack) {
-      AttributeGearData data = AttributeGearData.read(stack);
-      if (data instanceof VaultGearData gearData && gearData.getState() == VaultGearState.UNIDENTIFIED) {
+      GearDataCache clientCache = GearDataCache.of(stack);
+      if (clientCache.getState() == VaultGearState.UNIDENTIFIED) {
          return -1;
       } else {
          CompoundTag displayTag = stack.getTagElement("display");
-         return displayTag != null && displayTag.contains("color", 3)
-            ? displayTag.getInt("color")
-            : data.getFirstValue(ModGearAttributes.GEAR_COLOR).orElse(-1);
+         return displayTag != null && displayTag.contains("color", 3) ? displayTag.getInt("color") : clientCache.getGearColor(-1);
       }
    }
 
+   public static boolean shouldPlayGearReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+      return !slotChanged && ItemStack.isSame(oldStack, newStack)
+         ? AttributeGearData.readUUID(oldStack)
+            .map(oldUuid -> AttributeGearData.readUUID(newStack).map(newUuid -> !oldUuid.equals(newUuid)).orElse(true))
+            .orElse(true)
+         : true;
+   }
+
    public static Multimap<Attribute, AttributeModifier> getModifiers(ItemStack stack, EquipmentSlot slot) {
-      return (Multimap<Attribute, AttributeModifier>)(!VaultGearItem.<VaultGearItem>of(stack).isIntendedForSlot(stack, slot)
-         ? ImmutableMultimap.of()
-         : getModifiers(VaultGearData.read(stack)));
+      VaultGearItem gearItem = VaultGearItem.of(stack);
+      if (!gearItem.isIntendedForSlot(stack, slot)) {
+         return ImmutableMultimap.of();
+      } else {
+         return (Multimap<Attribute, AttributeModifier>)(gearItem.isBroken(stack) ? ImmutableMultimap.of() : getModifiers(VaultGearData.read(stack)));
+      }
    }
 
    public static Multimap<Attribute, AttributeModifier> getModifiers(UUID uuid, Stream<VaultGearAttributeInstance<?>> instances) {
@@ -204,6 +204,11 @@ public class VaultGearHelper {
       if (data.has(ModGearAttributes.HEALING_EFFECTIVENESS)) {
          float healingPercent = data.get(ModGearAttributes.HEALING_EFFECTIVENESS, VaultGearAttributeTypeMerger.floatSum());
          addAttribute(builder, ModAttributes.HEALING_MAX, healingPercent, identifier, Operation.MULTIPLY_BASE);
+      }
+
+      if (data.has(ModGearAttributes.MOVEMENT_SPEED)) {
+         float movementSpeed = data.get(ModGearAttributes.MOVEMENT_SPEED, VaultGearAttributeTypeMerger.floatSum());
+         addAttribute(builder, Attributes.MOVEMENT_SPEED, movementSpeed, identifier, Operation.MULTIPLY_BASE);
       }
 
       return builder.build();

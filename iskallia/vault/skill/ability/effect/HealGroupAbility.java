@@ -11,6 +11,7 @@ import iskallia.vault.skill.ability.effect.spi.AbstractHealAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.Optional;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -18,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.player.Player;
@@ -34,8 +36,17 @@ public class HealGroupAbility extends AbstractHealAbility {
    public HealGroupAbility() {
    }
 
-   public float getRadius() {
+   public float getUnmodifiedRadius() {
       return this.radius;
+   }
+
+   public float getRadius(Entity attacker) {
+      float realRadius = this.getUnmodifiedRadius();
+      if (attacker instanceof LivingEntity livingEntity) {
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+      }
+
+      return realRadius;
    }
 
    @Override
@@ -68,17 +79,16 @@ public class HealGroupAbility extends AbstractHealAbility {
          .ifPresent(
             player -> {
                if (player.level instanceof ServerLevel serverLevel) {
-                  Vec3 var4 = player.position();
-                  serverLevel.sendParticles(
-                     (SimpleParticleType)ModParticles.HEAL.get(), var4.x, var4.y, var4.z, 25, this.getRadius() * 0.5, 0.5, this.getRadius() * 0.5, 0.0
-                  );
+                  Vec3 var5 = player.position();
+                  float radius = this.getRadius(player);
+                  serverLevel.sendParticles((SimpleParticleType)ModParticles.HEAL.get(), var5.x, var5.y, var5.z, 25, radius * 0.5, 0.5, radius * 0.5, 0.0);
                   serverLevel.sendParticles(
                      new SphericalParticleOptions(
-                        (ParticleType<SphericalParticleOptions>)ModParticles.HEAL_GROUP_EFFECT_RANGE.get(), this.getRadius(), new Vector3f(1.0F, 1.0F, 1.0F)
+                        (ParticleType<SphericalParticleOptions>)ModParticles.HEAL_GROUP_EFFECT_RANGE.get(), radius, new Vector3f(1.0F, 1.0F, 1.0F)
                      ),
-                     var4.x,
-                     var4.y,
-                     var4.z,
+                     var5.x,
+                     var5.y,
+                     var5.z,
                      200,
                      0.0,
                      0.0,
@@ -87,11 +97,11 @@ public class HealGroupAbility extends AbstractHealAbility {
                   );
                   serverLevel.sendParticles(
                      new SphericalParticleOptions(
-                        (ParticleType<SphericalParticleOptions>)ModParticles.HEAL_GROUP_EFFECT_RING.get(), this.getRadius(), new Vector3f(1.0F, 1.0F, 1.0F)
+                        (ParticleType<SphericalParticleOptions>)ModParticles.HEAL_GROUP_EFFECT_RING.get(), radius, new Vector3f(1.0F, 1.0F, 1.0F)
                      ),
-                     var4.x,
-                     var4.y,
-                     var4.z,
+                     var5.x,
+                     var5.y,
+                     var5.z,
                      200,
                      0.0,
                      1.0,

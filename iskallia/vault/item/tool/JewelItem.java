@@ -6,10 +6,11 @@ import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.gear.GearRollHelper;
 import iskallia.vault.gear.VaultGearClassification;
+import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
-import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.crafting.ProficiencyType;
+import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.tooltip.GearTooltip;
@@ -20,6 +21,7 @@ import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
@@ -40,6 +42,7 @@ import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
 public class JewelItem extends Item implements VaultGearItem, DataInitializationItem, DataTransferItem {
@@ -50,11 +53,12 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
 
    public Component getName(@NotNull ItemStack stack) {
       int color = getColor(stack);
-      VaultGearData data = VaultGearData.read(stack);
-      if (data.getRarity() == VaultGearRarity.SCRAPPY) {
+      GearDataCache cache = GearDataCache.of(stack);
+      VaultGearRarity rarity = (VaultGearRarity)ObjectUtils.firstNonNull(new VaultGearRarity[]{cache.getRarity(), VaultGearRarity.SCRAPPY});
+      if (rarity == VaultGearRarity.SCRAPPY) {
          return super.getName(stack).copy().setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
       } else {
-         String prefix = this.getDescriptionId() + "." + data.getRarity().name().toLowerCase(Locale.ROOT);
+         String prefix = this.getDescriptionId() + "." + rarity.name().toLowerCase(Locale.ROOT);
          return new TranslatableComponent(prefix)
             .append(new TextComponent(" "))
             .append(super.getName(stack))
@@ -69,6 +73,10 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
    }
 
    @Override
+   public void addTooltipDurability(List<Component> tooltip, ItemStack stack) {
+   }
+
+   @Override
    public void addRepairTooltip(List<Component> tooltip, int usedRepairs, int totalRepairs) {
    }
 
@@ -78,6 +86,10 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
 
    @Override
    public void addTooltipCraftingPotential(VaultGearData data, ItemStack stack, List<Component> tooltip, VaultGearState state) {
+   }
+
+   public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+      return VaultGearHelper.shouldPlayGearReequipAnimation(oldStack, newStack, slotChanged);
    }
 
    public void inventoryTick(ItemStack stack, Level world, Entity entity, int itemSlot, boolean isSelected) {
@@ -135,13 +147,9 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
    }
 
    public static int getColor(ItemStack stack) {
-      VaultGearData data = VaultGearData.read(stack);
+      GearDataCache clientCache = GearDataCache.of(stack);
       ColorBlender blender = new ColorBlender(1.0F);
-
-      for (VaultGearModifier<?> modifier : data.getAllModifierAffixes()) {
-         blender.add(modifier.getAttribute().getReader().getRgbColor(), 60.0F);
-      }
-
+      Optional.ofNullable(clientCache.getJewelColorComponents()).ifPresent(colors -> colors.forEach(color -> blender.add(color, 60.0F)));
       float time = (float)ClientScheduler.INSTANCE.getTickCount();
       return blender.getColor(time);
    }

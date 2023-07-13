@@ -25,6 +25,7 @@ import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.Entropy;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.ChainHelper;
 import iskallia.vault.util.calc.FatalStrikeHelper;
@@ -144,70 +145,80 @@ public class GearAttributeEvents {
    public static void triggerChainAttack(LivingHurtEvent event) {
       if (event.getSource().getEntity() instanceof LivingEntity attacker) {
          if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
-            boolean hasConduct = false;
-            if (ActiveFlags.IS_JAVELIN_ATTACKING.isSet()) {
-               if (attacker instanceof ServerPlayer sPlayer) {
-                  TalentTree talents = PlayerTalentsData.get(sPlayer.getLevel()).getTalents(sPlayer);
+            if (!ActiveFlags.IS_AOE_ATTACKING.isSet()) {
+               if (!ActiveFlags.IS_SMITE_ATTACKING.isSet()) {
+                  if (!ActiveFlags.IS_THORNS_REFLECTING.isSet()) {
+                     if (!ActiveFlags.IS_EFFECT_ATTACKING.isSet()) {
+                        if (!ActiveFlags.IS_DOT_ATTACKING.isSet()) {
+                           boolean hasConduct = false;
+                           if (ActiveFlags.IS_JAVELIN_ATTACKING.isSet()) {
+                              if (attacker instanceof ServerPlayer sPlayer) {
+                                 TalentTree talents = PlayerTalentsData.get(sPlayer.getLevel()).getTalents(sPlayer);
 
-                  for (JavelinConductTalent talent : talents.getAll(JavelinConductTalent.class, Skill::isUnlocked)) {
-                     hasConduct = true;
-                  }
-               }
+                                 for (JavelinConductTalent talent : talents.getAll(JavelinConductTalent.class, Skill::isUnlocked)) {
+                                    hasConduct = true;
+                                 }
+                              }
 
-               if (!hasConduct) {
-                  return;
-               }
-            }
+                              if (!hasConduct) {
+                                 return;
+                              }
+                           }
 
-            if (!hasConduct && attacker instanceof Player player) {
-               if (CritHelper.getCrit(player)) {
-                  return;
-               }
+                           if (!hasConduct && attacker instanceof Player player) {
+                              if (!ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
+                                 if (CritHelper.getCrit(player)) {
+                                    return;
+                                 }
 
-               if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.CHAINING_AOE)) {
-                  return;
-               }
+                                 if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
+                                    return;
+                                 }
+                              }
 
-               if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
-                  return;
-               }
-            }
+                              if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.CHAINING_AOE)) {
+                                 return;
+                              }
+                           }
 
-            LivingEntity attacked = event.getEntityLiving();
-            Level world = attacker.getLevel();
-            int chainCount = ChainHelper.getChainCount(attacker);
-            if (chainCount > 0) {
-               ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-                  ActiveFlags.IS_CHAINING_ATTACKING.push();
-                  List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), 5.0F, Mob.class);
-                  List<Vec3> nearbyPos = new ArrayList<>();
-                  nearby.remove(attacked);
-                  nearby.remove(attacker);
-                  nearby.removeIf(mobx -> (attacker instanceof EternalEntity || attacker instanceof Player) && mobx instanceof EternalEntity);
-                  if (!nearby.isEmpty()) {
-                     nearby.sort(Comparator.comparing(e -> e.distanceTo(attacked)));
-                     nearby = nearby.subList(0, Math.min(chainCount, nearby.size()));
-                     float multiplier = 0.5F;
-                     nearbyPos.add(attacked.position().add(0.0, attacked.getBbHeight() / 3.0F, 0.0));
+                           LivingEntity attacked = event.getEntityLiving();
+                           Level world = attacker.getLevel();
+                           int chainCount = ChainHelper.getChainCount(attacker);
+                           if (chainCount > 0) {
+                              float chainRange = AreaOfEffectHelper.adjustAreaOfEffect(attacker, 5.0F);
+                              ActiveFlags.IS_CHAINING_ATTACKING.runIfNotSet(() -> {
+                                 List<Mob> nearby = EntityHelper.getNearby(world, attacked.blockPosition(), chainRange, Mob.class);
+                                 List<Vec3> nearbyPos = new ArrayList<>();
+                                 nearby.remove(attacked);
+                                 nearby.remove(attacker);
+                                 nearby.removeIf(mobx -> (attacker instanceof EternalEntity || attacker instanceof Player) && mobx instanceof EternalEntity);
+                                 if (!nearby.isEmpty()) {
+                                    nearby.sort(Comparator.comparing(e -> e.distanceTo(attacked)));
+                                    nearby = nearby.subList(0, Math.min(chainCount, nearby.size()));
+                                    float multiplier = 0.5F;
+                                    nearbyPos.add(attacked.position().add(0.0, attacked.getBbHeight() / 3.0F, 0.0));
 
-                     for (Mob mob : nearby) {
-                        Vec3 movement = mob.getDeltaMovement();
-                        nearbyPos.add(mob.position().add(0.0, mob.getBbHeight() / 3.0F, 0.0));
-                        mob.hurt(event.getSource(), event.getAmount() * multiplier);
-                        mob.setDeltaMovement(movement);
-                        multiplier *= 0.5F;
+                                    for (Mob mob : nearby) {
+                                       Vec3 movement = mob.getDeltaMovement();
+                                       nearbyPos.add(mob.position().add(0.0, mob.getBbHeight() / 3.0F, 0.0));
+                                       mob.hurt(event.getSource(), event.getAmount() * multiplier);
+                                       mob.setDeltaMovement(movement);
+                                       multiplier *= 0.5F;
+                                    }
+
+                                    CommonEvents.ENTITY_CHAIN_ATTACKED.invoke(new EntityChainAttackedEvent.Data(attacker, nearby));
+                                 }
+
+                                 ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ChainingParticleMessage(nearbyPos));
+                                 if (attacker instanceof Player player) {
+                                    PlayerActiveFlags.set(player, PlayerActiveFlags.Flag.CHAINING_AOE, 2);
+                                 }
+                              });
+                           }
+                        }
                      }
-
-                     CommonEvents.ENTITY_CHAIN_ATTACKED.invoke(new EntityChainAttackedEvent.Data(attacker, nearby));
                   }
-
-                  ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ChainingParticleMessage(nearbyPos));
-                  if (attacker instanceof Player player) {
-                     PlayerActiveFlags.set(player, PlayerActiveFlags.Flag.CHAINING_AOE, 2);
-                  }
-
-                  ActiveFlags.IS_CHAINING_ATTACKING.pop();
-               });
+               }
             }
          }
       }
@@ -233,15 +244,17 @@ public class GearAttributeEvents {
 
          if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
             if (!hasConduct && attacker instanceof Player player) {
-               if (CritHelper.getCrit(player)) {
-                  return;
+               if (!ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
+                  if (CritHelper.getCrit(player)) {
+                     return;
+                  }
+
+                  if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
+                     return;
+                  }
                }
 
                if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE)) {
-                  return;
-               }
-
-               if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
                   return;
                }
 
@@ -289,58 +302,70 @@ public class GearAttributeEvents {
    public static void triggerStunAttack(LivingHurtEvent event) {
       if (event.getSource().getEntity() instanceof LivingEntity attacker) {
          if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
-            boolean hasConduct = false;
-            if (ActiveFlags.IS_JAVELIN_ATTACKING.isSet()) {
-               if (attacker instanceof ServerPlayer sPlayer) {
-                  TalentTree talents = PlayerTalentsData.get(sPlayer.getLevel()).getTalents(sPlayer);
+            if (!ActiveFlags.IS_AOE_ATTACKING.isSet()) {
+               if (!ActiveFlags.IS_SMITE_ATTACKING.isSet()) {
+                  if (!ActiveFlags.IS_THORNS_REFLECTING.isSet()) {
+                     if (!ActiveFlags.IS_EFFECT_ATTACKING.isSet()) {
+                        if (!ActiveFlags.IS_DOT_ATTACKING.isSet()) {
+                           boolean hasConduct = false;
+                           if (ActiveFlags.IS_JAVELIN_ATTACKING.isSet()) {
+                              if (attacker instanceof ServerPlayer sPlayer) {
+                                 TalentTree talents = PlayerTalentsData.get(sPlayer.getLevel()).getTalents(sPlayer);
 
-                  for (JavelinConductTalent talent : talents.getAll(JavelinConductTalent.class, Skill::isUnlocked)) {
-                     hasConduct = true;
-                  }
-               }
+                                 for (JavelinConductTalent talent : talents.getAll(JavelinConductTalent.class, Skill::isUnlocked)) {
+                                    hasConduct = true;
+                                 }
+                              }
 
-               if (!hasConduct) {
-                  return;
-               }
-            }
+                              if (!hasConduct) {
+                                 return;
+                              }
+                           }
 
-            if (!hasConduct && attacker instanceof Player player) {
-               if (CritHelper.getCrit(player)) {
-                  return;
-               }
+                           if (!hasConduct && attacker instanceof Player player) {
+                              if (!ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
+                                 if (CritHelper.getCrit(player)) {
+                                    return;
+                                 }
 
-               if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE)) {
-                  return;
-               }
+                                 if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
+                                    return;
+                                 }
+                              }
 
-               if (AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
-                  return;
-               }
-            }
+                              if (PlayerActiveFlags.isSet(player, PlayerActiveFlags.Flag.ATTACK_AOE)) {
+                                 return;
+                              }
+                           }
 
-            AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
-            float stunChance = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_STUN, VaultGearAttributeTypeMerger.floatSum());
-            if (Entropy.canExecute(attacker, Entropy.Stat.STUN_ATTACK_CHANCE, stunChance)) {
-               LivingEntity attacked = event.getEntityLiving();
-               attacked.addEffect(
-                  new MobEffectInstance(ModEffects.NO_AI, 30, 1, false, false) {
-                     public boolean tick(LivingEntity livingEntity, Runnable p_19554_) {
-                        if (!livingEntity.isDeadOrDying()) {
-                           ModNetwork.CHANNEL
-                              .send(
-                                 PacketDistributor.ALL.noArg(),
-                                 new StunnedParticleMessage(
-                                    new Vec3(livingEntity.getX(), livingEntity.getY() + livingEntity.getBbHeight(), livingEntity.getZ()),
-                                    livingEntity.getBbWidth()
-                                 )
+                           AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
+                           float stunChance = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_STUN, VaultGearAttributeTypeMerger.floatSum());
+                           if (Entropy.canExecute(attacker, Entropy.Stat.STUN_ATTACK_CHANCE, stunChance)) {
+                              LivingEntity attacked = event.getEntityLiving();
+                              attacked.addEffect(
+                                 new MobEffectInstance(ModEffects.NO_AI, 30, 1, false, false) {
+                                    public boolean tick(LivingEntity livingEntity, Runnable p_19554_) {
+                                       if (!livingEntity.isDeadOrDying()) {
+                                          ModNetwork.CHANNEL
+                                             .send(
+                                                PacketDistributor.ALL.noArg(),
+                                                new StunnedParticleMessage(
+                                                   new Vec3(livingEntity.getX(), livingEntity.getY() + livingEntity.getBbHeight(), livingEntity.getZ()),
+                                                   livingEntity.getBbWidth()
+                                                )
+                                             );
+                                       }
+
+                                       return super.tick(livingEntity, p_19554_);
+                                    }
+                                 }
                               );
+                              CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(attacker, attacked));
+                           }
                         }
-
-                        return super.tick(livingEntity, p_19554_);
                      }
                   }
-               );
-               CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(attacker, attacked));
+               }
             }
          }
       }
@@ -391,7 +416,10 @@ public class GearAttributeEvents {
             MobType type = attacked.getMobType();
             AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
             float increasedDamage = 0.0F;
-            increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_INCREASE, VaultGearAttributeTypeMerger.floatSum());
+            if (!ActiveFlags.IS_AP_ATTACKING.isSet()) {
+               increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_INCREASE, VaultGearAttributeTypeMerger.floatSum());
+            }
+
             if (type == MobType.UNDEAD) {
                increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_UNDEAD, VaultGearAttributeTypeMerger.floatSum());
             }
@@ -432,7 +460,7 @@ public class GearAttributeEvents {
                }
             }
 
-            if (!hasConduct) {
+            if (!hasConduct && !ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
                if (attacker instanceof Player player && AttackScaleHelper.getLastAttackScale(player) < 1.0F) {
                   return;
                }
@@ -442,11 +470,11 @@ public class GearAttributeEvents {
                }
             }
 
-            boolean doEffectClouds = (
-                  !ActiveFlags.IS_AOE_ATTACKING.isSet() || ActiveFlags.IS_AOE_ATTACKING.isSet() && ActiveFlags.IS_CHAINING_ATTACKING.isSet()
-               )
+            boolean doEffectClouds = (!ActiveFlags.IS_AOE_ATTACKING.isSet() || ActiveFlags.IS_CHAINING_ATTACKING.isSet())
                && !ActiveFlags.IS_DOT_ATTACKING.isSet()
-               && !ActiveFlags.IS_REFLECT_ATTACKING.isSet();
+               && !ActiveFlags.IS_REFLECT_ATTACKING.isSet()
+               && !ActiveFlags.IS_SMITE_ATTACKING.isSet()
+               && !ActiveFlags.IS_THORNS_REFLECTING.isSet();
             if (doEffectClouds) {
                LivingEntity attacked = event.getEntityLiving();
                AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
@@ -456,6 +484,7 @@ public class GearAttributeEvents {
                      if (Entropy.canExecute(attacker, Entropy.Stat.effectCloud(effect), cloud.getTriggerChance())) {
                         EffectCloudEntity cloudEntity = new EffectCloudEntity(attacker.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
                         cloud.apply(cloudEntity);
+                        cloudEntity.setRadius(AreaOfEffectHelper.adjustAreaOfEffect(attacker, cloudEntity.getRadius()));
                         cloudEntity.setOwner(attacker);
                         attacker.getLevel().addFreshEntity(cloudEntity);
                      }
@@ -484,6 +513,7 @@ public class GearAttributeEvents {
                            if (Entropy.canExecute(attacked, Entropy.Stat.effectCloudWhenHit(effect), cloud.getTriggerChance())) {
                               EffectCloudEntity cloudEntity = new EffectCloudEntity(attacked.getLevel(), attacked.getX(), attacked.getY(), attacked.getZ());
                               cloud.apply(cloudEntity);
+                              cloudEntity.setRadius(AreaOfEffectHelper.adjustAreaOfEffect(attacked, cloudEntity.getRadius()));
                               cloudEntity.setOwner(attacked);
                               attacked.getLevel().addFreshEntity(cloudEntity);
                            }
@@ -545,19 +575,18 @@ public class GearAttributeEvents {
       if (!(event.getSource() instanceof ThornsReflectDamageSource) && !ActiveFlags.IS_THORNS_REFLECTING.isSet()) {
          if (event.getSource().getEntity() instanceof LivingEntity attacker) {
             withSnapshot(event, true, (attacked, snapshot) -> {
-               float thornsChance = ThornsHelper.getThornsChance(attacked);
-               if (Entropy.canExecute(attacked, Entropy.Stat.THORNS, thornsChance)) {
-                  ActiveFlags.IS_THORNS_REFLECTING.push();
-                  float reflectedDamage = 0.0F;
-                  DamageSource src = ThornsReflectDamageSource.of(attacked);
-                  float dmg = (float)attacked.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                  float thornsMultiplier = ThornsHelper.getThornsDamageMultiplier(attacked);
-                  if (thornsMultiplier > 0.0F) {
-                     reflectedDamage += dmg * thornsMultiplier;
-                  }
+               ActiveFlags.IS_THORNS_REFLECTING.push();
+               float reflectedDamage = 0.0F;
+               DamageSource src = ThornsReflectDamageSource.of(attacked);
+               float dmg = (float)attacked.getAttributeValue(Attributes.ATTACK_DAMAGE);
+               float thornsMultiplier = ThornsHelper.getThornsDamageMultiplier(attacked);
+               if (thornsMultiplier > 0.0F) {
+                  reflectedDamage += dmg * thornsMultiplier;
+               }
 
-                  float additionalThornsDamage = ThornsHelper.getAdditionalThornsFlatDamage(attacked);
-                  reflectedDamage += additionalThornsDamage;
+               float additionalThornsDamage = ThornsHelper.getAdditionalThornsFlatDamage(attacked);
+               reflectedDamage += additionalThornsDamage;
+               if (reflectedDamage > 0.0F) {
                   attacker.hurt(src, reflectedDamage);
                }
             });

@@ -33,10 +33,10 @@ public class AbilityWidget extends AbstractWidget {
    public SpecializedSkill makeAbilityNode() {
       SpecializedSkill group = this.getAbilityGroup();
       TieredSkill node = (TieredSkill)group.getSpecialization();
-      int level = node.getTier();
+      int level = node.getUnmodifiedTier();
       SpecializedSkill result = group.copy();
       result.specialize(this.abilityName, SkillContext.ofClient());
-      if (node.isUnlocked() && !this.isSpecialization() && level < node.getMaxTier()) {
+      if (node.isUnlocked() && !this.isSpecialization() && level < node.getMaxLearnableTier()) {
          result.learn(SkillContext.ofClient());
       }
 

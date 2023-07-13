@@ -6,6 +6,7 @@ import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -57,8 +58,12 @@ public class DashDamageAbility extends DashAbility {
          .ifPresent(
             player -> {
                if (this.data != null) {
+                  float range = 2.0F;
+                  range = AreaOfEffectHelper.adjustAreaOfEffect(player, range);
+                  TargetingConditions conditions = TargetingConditions.forCombat().range(range).selector(entity -> !(entity instanceof Player));
+
                   for (LivingEntity nearbyEntity : player.level
-                     .getNearbyEntities(LivingEntity.class, TARGETING_CONDITIONS, player, AABBHelper.create(player.position(), 2.0F))) {
+                     .getNearbyEntities(LivingEntity.class, conditions, player, AABBHelper.create(player.position(), range))) {
                      UUID nearbyEntityUUID = nearbyEntity.getUUID();
                      if (!this.data.hitEntityIdSet.contains(nearbyEntityUUID)) {
                         float playerAttackDamage = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE);

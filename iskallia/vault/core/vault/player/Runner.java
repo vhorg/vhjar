@@ -20,6 +20,7 @@ import iskallia.vault.gear.trinket.TrinketHelper;
 import iskallia.vault.gear.trinket.effects.VaultExperienceTrinket;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
+import iskallia.vault.init.ModGameRules;
 import iskallia.vault.item.BottleItem;
 import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.skill.PlayerVaultStats;
@@ -147,6 +148,10 @@ public class Runner extends Listener {
 
             int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
             int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
+            if (!player.getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY)) {
+               diff = 0;
+            }
+
             if (diff <= 0) {
                return;
             }
@@ -160,6 +165,10 @@ public class Runner extends Listener {
             if (data.getKiller().getUUID().equals(this.get(ID))) {
                int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
                int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
+               if (!data.getKiller().getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY)) {
+                  diff = 0;
+               }
+
                if (diff > 0) {
                   data.setChance(data.getChance() - diff * 0.05F);
                }
@@ -172,6 +181,10 @@ public class Runner extends Listener {
                if (player.getUUID().equals(this.get(ID))) {
                   int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
                   int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
+                  if (!player.getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY)) {
+                     diff = 0;
+                  }
+
                   if (diff > 0) {
                      float reduction = Math.min(0.25F + diff * 0.05F, 1.0F);
                      data.setValue(data.getValue() + reduction);
@@ -230,7 +243,7 @@ public class Runner extends Listener {
          PlayerVaultStats playerStats = PlayerVaultStatsData.get(world).getVaultStats(player);
          int vaultLevel = vault.get(Vault.LEVEL).get();
          int playerLevel = playerStats.getVaultLevel();
-         int diff = playerLevel - vaultLevel - 3;
+         int diff = !player.getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY) ? 0 : playerLevel - vaultLevel - 3;
          if (diff > 0) {
             vault.getOptional(Vault.STATS).map(s -> s.get(player.getUUID())).ifPresent(stats -> {
                stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> Math.max(0.0F, m - 0.1F * diff));
@@ -251,5 +264,6 @@ public class Runner extends Listener {
       super.onLeave(world, vault);
       this.ifPresent(INFLUENCES, influences -> influences.onLeave(world, vault, this));
       this.getPlayer().ifPresent(InventoryUtil::makeScavItemsRotten);
+      this.getPlayer().ifPresent(InventoryUtil::resetCompassTarget);
    }
 }

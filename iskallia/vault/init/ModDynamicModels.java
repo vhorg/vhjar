@@ -31,6 +31,7 @@ import iskallia.vault.gear.model.armor.layers.BuilderArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BumboCactoniArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BunnyGuardianArmorLayers;
 import iskallia.vault.gear.model.armor.layers.CakeArmorLayers;
+import iskallia.vault.gear.model.armor.layers.ChampionArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ClericArmorLayers;
 import iskallia.vault.gear.model.armor.layers.CrayonArmorLayers;
 import iskallia.vault.gear.model.armor.layers.CreateArmorLayers;
@@ -46,6 +47,7 @@ import iskallia.vault.gear.model.armor.layers.FluxArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FurnaceArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GladiatorArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GoatArmorLayers;
+import iskallia.vault.gear.model.armor.layers.GoblinArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GrizzlyArmorLayers;
 import iskallia.vault.gear.model.armor.layers.HellCowArmorLayers;
 import iskallia.vault.gear.model.armor.layers.HellDuckArmorLayers;
@@ -146,7 +148,8 @@ public class ModDynamicModels {
          .associate(ModItems.SHIELD, ModDynamicModels.Shields.REGISTRY)
          .associate(ModItems.RELIC, ModDynamicModels.Relics.RELIC_REGISTRY)
          .associate(ModItems.RELIC_FRAGMENT, ModDynamicModels.Relics.FRAGMENT_REGISTRY)
-         .associate(ModItems.MAGNET, ModDynamicModels.Magnets.REGISTRY_MAGNETS);
+         .associate(ModItems.MAGNET, ModDynamicModels.Magnets.REGISTRY_MAGNETS)
+         .associate(ModItems.WAND, ModDynamicModels.Wands.REGISTRY);
    }
 
    public static void initCauldronWashables() {
@@ -1075,6 +1078,24 @@ public class ModDynamicModels {
             .addSlot(EquipmentSlot.LEGS)
             .addSlot(EquipmentSlot.FEET)
       );
+      public static final ArmorModel GOBLIN = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/goblin"), "Goblin")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new GoblinArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel CHAMPION = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/champion"), "Champion")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new ChampionArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
    }
 
    public static class Axes {
@@ -1479,6 +1500,36 @@ public class ModDynamicModels {
       public static final HandHeldModel HONEY_WAND = REGISTRY.register(
          new HandHeldModel(VaultMod.id("gear/sword/honey_wand"), "Honey Wand")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+   }
+
+   public static class Wands {
+      public static final DynamicModelRegistry<PlainItemModel> REGISTRY = new DynamicModelRegistry<>();
+      public static final PlainItemModel WOODEN = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/wooden"), "Wooden Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel ENDER = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/ender"), "Ender Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel ARCHMAGE = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/archmage"), "Archmage Wand")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel MAGE = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/mage"), "Mage Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel MASTER = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/master"), "Master Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel TWIG = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/twig"), "Twig").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel STARLIGHT = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/starlight"), "Starlight Wand")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel DRUID = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/druid"), "Druid Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }
 }

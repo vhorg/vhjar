@@ -1,6 +1,7 @@
 package iskallia.vault.quest.type;
 
 import iskallia.vault.block.base.FillableAltarTileEntity;
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.world.data.QuestStatesData;
 import net.minecraft.network.chat.MutableComponent;
@@ -19,7 +20,7 @@ public class BlockInteractionQuest extends Quest {
    public BlockInteractionQuest(
       String id,
       String name,
-      Quest.DescriptionData descriptionData,
+      DescriptionData descriptionData,
       ResourceLocation icon,
       ResourceLocation targetId,
       float targetProgress,

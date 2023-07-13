@@ -1,6 +1,8 @@
 package iskallia.vault.block;
 
+import iskallia.vault.block.entity.BlackMarketTileEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.util.BlockHelper;
 import iskallia.vault.world.data.PlayerBlackMarketData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +22,8 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
@@ -113,5 +117,10 @@ public class BlackMarketBlock extends HorizontalDirectionalBlock implements Enti
 
    public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
       return false;
+   }
+
+   @Nullable
+   public <A extends BlockEntity> BlockEntityTicker<A> getTicker(Level p_153212_, BlockState state, BlockEntityType<A> tBlockEntityType) {
+      return BlockHelper.getTicker(tBlockEntityType, ModBlocks.BLACK_MARKET_TILE_ENTITY, BlackMarketTileEntity::tick);
    }
 }

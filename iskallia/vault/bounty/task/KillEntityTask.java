@@ -3,16 +3,13 @@ package iskallia.vault.bounty.task;
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.bounty.TaskReward;
 import iskallia.vault.bounty.task.properties.KillEntityProperties;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.data.BountyData;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.registries.ForgeRegistries;
 
 @EventBusSubscriber
 public class KillEntityTask extends Task<KillEntityProperties> {
@@ -26,18 +23,7 @@ public class KillEntityTask extends Task<KillEntityProperties> {
 
    @Override
    protected <E> boolean doValidate(ServerPlayer player, E event) {
-      if (event instanceof LivingDeathEvent e) {
-         ResourceLocation entityId = ForgeRegistries.ENTITIES.getKey(e.getEntity().getType());
-         if (entityId == null) {
-            return false;
-         } else {
-            return entityId.equals(this.getProperties().getEntityId())
-               ? true
-               : ModConfigs.BOUNTY_ENTITIES.getValidEntities(this.getProperties().getEntityId()).contains(entityId);
-         }
-      } else {
-         return false;
-      }
+      return event instanceof LivingDeathEvent e ? this.getProperties().getFilter().test(e.getEntity()) : false;
    }
 
    @Override

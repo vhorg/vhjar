@@ -8,6 +8,7 @@ import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
+import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.item.VaultGearToolTier;
@@ -106,6 +107,10 @@ public class VaultAxeItem extends AxeItem implements VaultGearItem {
       return VaultGearHelper.getModifiers(stack, slot);
    }
 
+   public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+      return VaultGearHelper.shouldPlayGearReequipAnimation(oldStack, newStack, slotChanged);
+   }
+
    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
       if (this.allowdedIn(group)) {
          items.add(this.defaultItem());
@@ -121,7 +126,7 @@ public class VaultAxeItem extends AxeItem implements VaultGearItem {
    }
 
    public boolean isDamageable(ItemStack stack) {
-      return VaultGearData.read(stack).getState() == VaultGearState.IDENTIFIED;
+      return GearDataCache.of(stack).getState() == VaultGearState.IDENTIFIED;
    }
 
    public int getMaxDamage(ItemStack stack) {

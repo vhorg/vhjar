@@ -25,6 +25,7 @@ import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 @EventBusSubscriber(
    bus = Bus.FORGE
@@ -131,6 +132,10 @@ public class PlayerExpertisesData extends SavedData {
       nbt.put("Players", playerList);
       nbt.put("Expertises", talentList);
       return nbt;
+   }
+
+   public static PlayerExpertisesData getServer() {
+      return get(ServerLifecycleHooks.getCurrentServer());
    }
 
    public static PlayerExpertisesData get(ServerLevel world) {

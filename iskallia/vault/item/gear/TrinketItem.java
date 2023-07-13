@@ -265,9 +265,21 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    }
 
    @Override
-   public void tickRoll(ItemStack stack) {
+   public void tickRoll(ItemStack stack, Player player) {
       AttributeGearData data = AttributeGearData.read(stack);
-      TrinketEffect<?> randomTrinket = ModConfigs.TRINKET.getRandomTrinketSet();
+      TrinketEffect<?> randomTrinket;
+      if (player instanceof ServerPlayer sPlayer) {
+         DiscoveredTrinketsData trinketData = DiscoveredTrinketsData.get(sPlayer.getLevel().getServer());
+         if (trinketData.discoveredAllTrinkets(sPlayer)) {
+            randomTrinket = ModConfigs.TRINKET.getRandomTrinketSet();
+         } else {
+            randomTrinket = ModConfigs.TRINKET
+               .getRandomTrinketSet((trinket, weight) -> trinketData.hasDiscovered(sPlayer, trinket) ? Mth.ceil(weight.intValue() * 0.16666667F) : weight);
+         }
+      } else {
+         randomTrinket = ModConfigs.TRINKET.getRandomTrinketSet();
+      }
+
       if (randomTrinket != null) {
          data.updateAttribute(ModGearAttributes.TRINKET_EFFECT, randomTrinket);
       }

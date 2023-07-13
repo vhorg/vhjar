@@ -9,6 +9,7 @@ import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.skill.ability.effect.TotemMobDamageAbility;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.calc.AbilityPowerHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -22,11 +23,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -86,17 +86,14 @@ public class TotemMobDamageTileEntity extends TotemTileEntity {
    }
 
    private void hurtEntities(List<LivingEntity> entityList, Player player, float damagePercent) {
-      AttributeInstance attributeInstance = player.getAttribute(Attributes.ATTACK_DAMAGE);
-      if (attributeInstance != null) {
-         float damage = (float)(attributeInstance.getValue() * damagePercent);
-         ActiveFlags.IS_TOTEM_ATTACKING.runIfNotSet(() -> {
-            for (LivingEntity livingEntity : entityList) {
-               Vec3 movement = livingEntity.getDeltaMovement();
-               livingEntity.hurt(DamageSource.playerAttack(player), damage);
-               livingEntity.setDeltaMovement(movement);
-            }
-         });
-      }
+      float damage = AbilityPowerHelper.getAbilityPower((ServerPlayer)player) * damagePercent;
+      ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_TOTEM_ATTACKING.runIfNotSet(() -> {
+         for (LivingEntity livingEntity : entityList) {
+            Vec3 movement = livingEntity.getDeltaMovement();
+            livingEntity.hurt(DamageSource.playerAttack(player), damage);
+            livingEntity.setDeltaMovement(movement);
+         }
+      }));
    }
 
    private void updateEffects(List<LivingEntity> entityList, int damageIntervalTicks) {

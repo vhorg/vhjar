@@ -1,7 +1,9 @@
 package iskallia.vault.init;
 
+import iskallia.vault.entity.entity.VaultStormEntity;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.renderer.AggressiveCowBossRenderer;
+import iskallia.vault.entity.renderer.BlizzardShardRenderer;
 import iskallia.vault.entity.renderer.BlueBlazeRenderer;
 import iskallia.vault.entity.renderer.BoogiemanRenderer;
 import iskallia.vault.entity.renderer.DollMiniMeRenderer;
@@ -11,10 +13,13 @@ import iskallia.vault.entity.renderer.EtchingVendorRenderer;
 import iskallia.vault.entity.renderer.EternalRenderer;
 import iskallia.vault.entity.renderer.EternalSpiritRenderer;
 import iskallia.vault.entity.renderer.FighterRenderer;
+import iskallia.vault.entity.renderer.FireballRenderer;
 import iskallia.vault.entity.renderer.MonsterEyeRenderer;
 import iskallia.vault.entity.renderer.RobotRenderer;
 import iskallia.vault.entity.renderer.ShiverRenderer;
 import iskallia.vault.entity.renderer.SpiritRenderer;
+import iskallia.vault.entity.renderer.StormArrowRenderer;
+import iskallia.vault.entity.renderer.StormRenderer;
 import iskallia.vault.entity.renderer.ThrownJavelinRenderer;
 import iskallia.vault.entity.renderer.TreasureGoblinRenderer;
 import iskallia.vault.entity.renderer.VaultDoodRenderer;
@@ -29,6 +34,13 @@ import iskallia.vault.entity.renderer.deep_dark.DeepDarkPiglinRenderer;
 import iskallia.vault.entity.renderer.deep_dark.DeepDarkSilverfishRenderer;
 import iskallia.vault.entity.renderer.deep_dark.DeepDarkSkeletonRenderer;
 import iskallia.vault.entity.renderer.deep_dark.DeepDarkZombieRenderer;
+import iskallia.vault.entity.renderer.dungeon.DungeonBlackWidowSpiderRenderer;
+import iskallia.vault.entity.renderer.dungeon.DungeonPiglinRenderer;
+import iskallia.vault.entity.renderer.dungeon.DungeonPillagerRenderer;
+import iskallia.vault.entity.renderer.dungeon.DungeonSkeletonRenderer;
+import iskallia.vault.entity.renderer.dungeon.DungeonSpiderRenderer;
+import iskallia.vault.entity.renderer.dungeon.DungeonVindicatorRenderer;
+import iskallia.vault.entity.renderer.dungeon.DungeonWitchRenderer;
 import iskallia.vault.entity.renderer.elite.EliteDrownedRenderer;
 import iskallia.vault.entity.renderer.elite.EliteEndermanRenderer;
 import iskallia.vault.entity.renderer.elite.EliteHuskRenderer;
@@ -105,6 +117,7 @@ import iskallia.vault.entity.renderer.winterwalker.Tier5WinterwalkerRenderer;
 import iskallia.vault.skill.ability.effect.DashWarpAbility;
 import iskallia.vault.skill.ability.effect.spi.AbstractSmiteAbility;
 import java.util.concurrent.atomic.AtomicInteger;
+import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.CowRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 import net.minecraft.client.renderer.entity.ItemEntityRenderer;
@@ -261,12 +274,34 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.T3_WITHER_SKELETON, Tier3WitherSkeletonRenderer::new);
       EntityRenderers.register(ModEntities.T3_PIGLIN, Tier3PiglinRenderer::new);
       EntityRenderers.register(ModEntities.T3_ZOMBIE, Tier3ZombieRenderer::new);
+      EntityRenderers.register(ModEntities.DUNGEON_SPIDER, DungeonSpiderRenderer::new);
+      EntityRenderers.register(ModEntities.DUNGEON_BLACK_WIDOW_SPIDER, DungeonBlackWidowSpiderRenderer::new);
+      EntityRenderers.register(ModEntities.DUNGEON_SKELETON, DungeonSkeletonRenderer::new);
+      EntityRenderers.register(ModEntities.DUNGEON_PILLAGER, DungeonPillagerRenderer::new);
+      EntityRenderers.register(ModEntities.DUNGEON_VINDICATOR, DungeonVindicatorRenderer::new);
+      EntityRenderers.register(
+         ModEntities.DUNGEON_PIGLIN,
+         p_174070_ -> new DungeonPiglinRenderer(p_174070_, ModelLayers.PIGLIN, ModelLayers.PIGLIN_INNER_ARMOR, ModelLayers.PIGLIN_OUTER_ARMOR, false)
+      );
+      EntityRenderers.register(
+         ModEntities.DUNGEON_PIGLIN_BRUTE,
+         p_174070_ -> new DungeonPiglinRenderer(
+            p_174070_, ModelLayers.PIGLIN_BRUTE, ModelLayers.PIGLIN_BRUTE_INNER_ARMOR, ModelLayers.PIGLIN_BRUTE_OUTER_ARMOR, false
+         )
+      );
+      EntityRenderers.register(ModEntities.DUNGEON_WITCH, DungeonWitchRenderer::new);
       EntityRenderers.register(ModEntities.SPIRIT, SpiritRenderer::new);
       EntityRenderers.register(ModEntities.ETERNAL_SPIRIT, EternalSpiritRenderer::new);
       EntityRenderers.register(ModEntities.BRICK, ThrownItemRenderer::new);
+      EntityRenderers.register(ModEntities.SPEAR, ThrownItemRenderer::new);
       EntityRenderers.register(ModEntities.THROWN_JAVELIN, ThrownJavelinRenderer::new);
       EntityRenderers.register(ModEntities.ELIXIR_ORB, ElixirOrbRenderer::new);
       EntityRenderers.register(ModEntities.SMITE_ABILITY_BOLT, AbstractSmiteAbility.SmiteBoltRenderer::new);
       EntityRenderers.register(ModEntities.WARP_ARROW, DashWarpAbility.WarpArrowRenderer::new);
+      EntityRenderers.register(ModEntities.FIREBALL, FireballRenderer::new);
+      EntityRenderers.register(ModEntities.STORM_ARROW, StormArrowRenderer::new);
+      EntityRenderers.register(ModEntities.STORM, StormRenderer::new);
+      EntityRenderers.register(ModEntities.THUNDERSTORM_BOLT, VaultStormEntity.SmiteBoltRenderer::new);
+      EntityRenderers.register(ModEntities.BLIZZARD_SHARD, BlizzardShardRenderer::new);
    }
 }

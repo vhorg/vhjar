@@ -9,6 +9,7 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.AbstractHealAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 
 public class HealEffectAbility extends AbstractHealAbility {
    private List<MobEffect> removeEffects;
@@ -135,7 +137,7 @@ public class HealEffectAbility extends AbstractHealAbility {
    public static enum RemovalStrategy implements HealEffectAbility.IRemovalStrategy {
       DEFINED_ONLY((player, config) -> config.getRemoveEffects().forEach(player::removeEffect)),
       ALL_HARMFUL(
-         (player, config) -> player.getActiveEffects()
+         (player, config) -> new ArrayList<MobEffectInstance>(player.getActiveEffects())
             .stream()
             .filter(instance -> instance.getEffect().getCategory() == MobEffectCategory.HARMFUL)
             .forEach(instance -> player.removeEffect(instance.getEffect()))

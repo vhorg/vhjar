@@ -292,7 +292,7 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
    ) {
       List<Component> tooltip = new ArrayList<>();
       List<Component> abilityDifferencesTooltip = this.getSkillDifferencesTooltip(
-         abilitiesA, abilitiesB, Skill::getName, TieredSkill::getTier, Style.EMPTY.withColor(-9916953)
+         abilitiesA, abilitiesB, Skill::getName, TieredSkill::getUnmodifiedTier, Style.EMPTY.withColor(-9916953)
       );
       if (!abilityDifferencesTooltip.isEmpty()) {
          tooltip.add(TextComponent.EMPTY);
@@ -301,7 +301,7 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
       }
 
       List<Component> talentDifferencesTooltip = this.getSkillDifferencesTooltip(
-         talentsA, talentsB, Skill::getName, TieredSkill::getTier, Style.EMPTY.withColor(-6981964)
+         talentsA, talentsB, Skill::getName, TieredSkill::getUnmodifiedTier, Style.EMPTY.withColor(-6981964)
       );
       if (!talentDifferencesTooltip.isEmpty()) {
          tooltip.add(TextComponent.EMPTY);
@@ -420,7 +420,7 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
          for (int i = 0; i < sortedByNameA.size(); i++) {
             TieredSkill skillA = sortedByNameA.get(i);
             TieredSkill skillB = sortedByNameB.get(i);
-            if (!skillA.getId().equals(skillB.getId()) || skillA.getTier() != skillB.getTier()) {
+            if (!skillA.getId().equals(skillB.getId()) || skillA.getUnmodifiedTier() != skillB.getUnmodifiedTier()) {
                return false;
             }
          }
@@ -532,7 +532,7 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
                   this.addElement(
                      new SkillAltarScreen.AbilityElement(
                         Spatials.positionXY(abilityX, abilityY).size(32, 22),
-                        ((TieredSkill)ability.getSpecialization()).getTier(),
+                        ((TieredSkill)ability.getSpecialization()).getUnmodifiedTier(),
                         AbilityNodeTextures.SECONDARY_NODE,
                         TextureAtlasRegion.of(ModTextureAtlases.ABILITIES, ModConfigs.ABILITIES_GUI.getIcon(ability.getSpecialization().getId()))
                      ) {
@@ -557,7 +557,9 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
             for (final TieredSkill talent : templateTalents) {
                if (ModConfigs.TALENTS_GUI.getStyles().containsKey(talent.getId())) {
                   this.addElement(
-                     new SkillAltarScreen.TalentElement(Spatials.positionXY(79 + i % 2 * 36, i / 2 * 24).size(45, 22), talent.getId(), talent.getTier()) {
+                     new SkillAltarScreen.TalentElement(
+                        Spatials.positionXY(79 + i % 2 * 36, i / 2 * 24).size(45, 22), talent.getId(), talent.getUnmodifiedTier()
+                     ) {
                         @Override
                         public boolean onMouseClicked(double mouseX, double mouseY, int buttonIndex) {
                            onIconClicked.accept(new SkillAltarData.SkillIcon(talent.getId(), true));

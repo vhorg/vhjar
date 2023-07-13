@@ -6,6 +6,7 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.entity.entity.SpiritEntity;
+import iskallia.vault.util.EntityHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -17,11 +18,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
-public class EntityState extends DataObject<EntityState> implements INBTSerializable<CompoundTag> {
+public final class EntityState extends DataObject<EntityState> implements INBTSerializable<CompoundTag> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
    public static final FieldKey<Double> POS_X = FieldKey.of("pos_x", Double.class).with(Version.v1_0, Adapters.DOUBLE, DISK.all()).register(FIELDS);
    public static final FieldKey<Double> POS_Y = FieldKey.of("pos_y", Double.class).with(Version.v1_0, Adapters.DOUBLE, DISK.all()).register(FIELDS);
@@ -87,10 +89,43 @@ public class EntityState extends DataObject<EntityState> implements INBTSerializ
       this.set(WORLD, ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(nbt.getString("World"))));
    }
 
+   public Vec3 getPos() {
+      return new Vec3(this.get(POS_X), this.get(POS_Y), this.get(POS_Z));
+   }
+
+   public BlockPos getBlockPos() {
+      return new BlockPos(this.getPos());
+   }
+
    public boolean isLoaded() {
       ServerLevel target = ServerLifecycleHooks.getCurrentServer().getLevel(this.get(WORLD));
       BlockPos pos = new BlockPos(this.get(POS_X), this.get(POS_Y), this.get(POS_Z));
       return target != null && target.isLoaded(pos);
+   }
+
+   public boolean isColliding(AABB entityCollisionBox) {
+      ServerLevel target = ServerLifecycleHooks.getCurrentServer().getLevel(this.get(WORLD));
+      BlockPos pos = new BlockPos(this.get(POS_X), this.get(POS_Y), this.get(POS_Z));
+      AABB targetBox = entityCollisionBox.move(pos);
+      return target != null && EntityHelper.isColliding(target, targetBox);
+   }
+
+   public EntityState move(double x, double y, double z) {
+      EntityState movedState = this.copy();
+      movedState.set(POS_X, Double.valueOf(this.get(POS_X) + x));
+      movedState.set(POS_Y, Double.valueOf(this.get(POS_Y) + y));
+      movedState.set(POS_Z, Double.valueOf(this.get(POS_Z) + z));
+      return movedState;
+   }
+
+   private EntityState copy() {
+      EntityState newState = new EntityState();
+
+      for (FieldKey key : this.getFields().getKeys()) {
+         this.<Object>getOptional(key).ifPresent(value -> newState.set(key, value));
+      }
+
+      return newState;
    }
 
    public void teleport(Entity entity) {

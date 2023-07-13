@@ -1,5 +1,6 @@
 package iskallia.vault.quest.base;
 
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.core.vault.QuestManager;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.world.storage.VirtualWorld;
@@ -10,7 +11,7 @@ public abstract class InVaultQuest extends Quest {
       String type,
       String id,
       String name,
-      Quest.DescriptionData descriptionData,
+      DescriptionData descriptionData,
       ResourceLocation icon,
       ResourceLocation targetId,
       float targetProgress,

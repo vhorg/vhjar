@@ -86,7 +86,7 @@ public class SkillAltarContainer extends OverSizedSlotContainer {
    }
 
    public int getNumberOfRegretOrbsRequired() {
-      return this.template == null ? Integer.MAX_VALUE : Math.max(1, (int)(ModConfigs.SKILL_ALTAR.getPerLevelCost() * SidedHelper.getVaultLevel(this.player)));
+      return this.isEmptyTemplate() ? Integer.MAX_VALUE : Math.max(1, (int)(ModConfigs.SKILL_ALTAR.getPerLevelCost() * SidedHelper.getVaultLevel(this.player)));
    }
 
    public int getNumberOfMissingRegretOrbs(int unspentRegretPoints) {

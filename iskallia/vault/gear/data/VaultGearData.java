@@ -24,7 +24,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.ItemStack;
@@ -142,49 +141,50 @@ public class VaultGearData extends AttributeGearData {
       return this.removeModifier(modifier, VaultGearData.Type.ALL);
    }
 
-   public boolean removeModifier(VaultGearModifier<?> modifier, VaultGearData.Type type) {
-      Iterator<? extends VaultGearAttributeInstance<?>> iterator = type.getAttributeSource(this).iterator();
+   protected boolean removeModifier(VaultGearModifier<?> modifier, VaultGearData.Type type) {
+      if (!this.isModifiable()) {
+         return false;
+      } else {
+         Iterator<? extends VaultGearAttributeInstance<?>> iterator = type.getAttributeSource(this).iterator();
 
-      while (iterator.hasNext()) {
-         VaultGearAttributeInstance<?> instance = (VaultGearAttributeInstance<?>)iterator.next();
-         if (instance == modifier) {
-            iterator.remove();
-            return true;
+         while (iterator.hasNext()) {
+            VaultGearAttributeInstance<?> instance = (VaultGearAttributeInstance<?>)iterator.next();
+            if (instance == modifier) {
+               iterator.remove();
+               return true;
+            }
          }
-      }
 
-      return false;
+         return false;
+      }
    }
 
-   @Nullable
-   public <T> T updateModifier(VaultGearModifier<T> modifier, T value) {
-      for (VaultGearAttributeInstance instance : VaultGearData.Type.ALL_MODIFIERS.getAttributeSource(this)) {
-         if (instance == modifier) {
-            return (T)instance.setValue(value);
+   public boolean addModifierFirst(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier) {
+      return this.addModifier(type, modifier, Deque::addFirst);
+   }
+
+   public boolean addModifier(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier) {
+      return this.addModifier(type, modifier, Deque::addLast);
+   }
+
+   protected boolean addModifier(
+      VaultGearModifier.AffixType type, VaultGearModifier<?> modifier, BiConsumer<Deque<VaultGearModifier<?>>, VaultGearModifier<?>> addFn
+   ) {
+      if (!this.isModifiable()) {
+         return false;
+      } else {
+         switch (type) {
+            case IMPLICIT:
+               addFn.accept(this.baseModifiers, modifier);
+               break;
+            case PREFIX:
+               addFn.accept(this.prefixes, modifier);
+               break;
+            case SUFFIX:
+               addFn.accept(this.suffixes, modifier);
          }
-      }
 
-      return null;
-   }
-
-   public void addModifierFirst(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier) {
-      this.addModifier(type, modifier, Deque::addFirst);
-   }
-
-   public void addModifier(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier) {
-      this.addModifier(type, modifier, Deque::addLast);
-   }
-
-   public void addModifier(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier, BiConsumer<Deque<VaultGearModifier<?>>, VaultGearModifier<?>> addFn) {
-      switch (type) {
-         case IMPLICIT:
-            addFn.accept(this.baseModifiers, modifier);
-            break;
-         case PREFIX:
-            addFn.accept(this.prefixes, modifier);
-            break;
-         case SUFFIX:
-            addFn.accept(this.suffixes, modifier);
+         return true;
       }
    }
 

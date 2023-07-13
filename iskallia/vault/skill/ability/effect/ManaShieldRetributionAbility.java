@@ -13,6 +13,7 @@ import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.AABBHelper;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.util.damage.ThornsReflectDamageSource;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.ArrayList;
@@ -69,8 +70,17 @@ public class ManaShieldRetributionAbility extends ManaShieldAbility {
    public ManaShieldRetributionAbility() {
    }
 
-   public float getDamageRadius() {
+   public float getUnmodifiedDamageRadius() {
       return this.damageRadius;
+   }
+
+   public float getRadius(Entity attacker) {
+      float realRadius = this.getUnmodifiedDamageRadius();
+      if (attacker instanceof LivingEntity livingEntity) {
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+      }
+
+      return realRadius;
    }
 
    public float getPercentageDamageDealt() {
@@ -111,7 +121,7 @@ public class ManaShieldRetributionAbility extends ManaShieldAbility {
 
             for (ManaShieldRetributionAbility ability : abilities.getAll(ManaShieldRetributionAbility.class, Skill::isUnlocked)) {
                Vec3 origin = event.getEntity().position();
-               float damageRadius = ability.getDamageRadius();
+               float damageRadius = ability.getRadius(serverPlayer);
                AABB bounds = AABBHelper.create(origin, damageRadius);
                ArrayList<LivingEntity> result = new ArrayList<>();
                EntityHelper.getEntitiesInRange(serverPlayer.level, bounds, origin, damageRadius, ENTITY_SELECTION_FILTER, result);

@@ -16,12 +16,12 @@ public class ShardTradeContainer extends AbstractElementContainer {
    private void initSlots(Inventory playerInventory) {
       for (int row = 0; row < 3; row++) {
          for (int column = 0; column < 9; column++) {
-            this.addSlot(new Slot(playerInventory, column + row * 9 + 9, 8 + column * 18, 102 + row * 18));
+            this.addSlot(new Slot(playerInventory, column + row * 9 + 9, 8 + column * 18, 112 + row * 18));
          }
       }
 
       for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
-         this.addSlot(new Slot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 160));
+         this.addSlot(new Slot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 170));
       }
    }
 

@@ -1,6 +1,7 @@
 package iskallia.vault.init;
 
 import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
+import iskallia.vault.client.gui.overlay.BonkOverlay;
 import iskallia.vault.client.gui.overlay.BountyProgressOverlay;
 import iskallia.vault.client.gui.overlay.HarmfulPotionOverlay;
 import iskallia.vault.client.gui.overlay.PlayerArmorOverlay;
@@ -103,6 +104,7 @@ public class ModScreens {
       registerAbove(new PlayerArmorOverlay(), ForgeIngameGui.ARMOR_LEVEL_ELEMENT);
       OverlayRegistry.enableOverlay(ForgeIngameGui.ARMOR_LEVEL_ELEMENT, false);
       registerBottom(new AbilitiesOverlay());
+      registerBottom(new BonkOverlay());
       registerBottom(new VaultBarOverlay());
       registerBottom(new VaultPartyOverlay());
       registerBottom(new BountyProgressOverlay());

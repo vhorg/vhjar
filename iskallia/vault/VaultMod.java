@@ -154,6 +154,7 @@ public class VaultMod {
       DiscoveredAlchemyModifiersData.get(serverWorld).syncTo(player);
       SkillAltarData.get(serverWorld).syncTo(player);
       ModConfigs.SOUL_SHARD.syncTo(ModConfigs.SOUL_SHARD, player);
+      ModConfigs.OMEGA_SOUL_SHARD.syncTo(ModConfigs.OMEGA_SOUL_SHARD, player);
       ModConfigs.GEAR_RECIPES.syncTo(ModConfigs.GEAR_RECIPES, player);
       ModConfigs.JEWEL_RECIPES.syncTo(ModConfigs.JEWEL_RECIPES, player);
       ModConfigs.TRINKET_RECIPES.syncTo(ModConfigs.TRINKET_RECIPES, player);

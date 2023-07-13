@@ -11,12 +11,15 @@ import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.talent.type.JavelinFrugalTalent;
 import iskallia.vault.skill.tree.TalentTree;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.world.data.PlayerTalentsData;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 
@@ -43,8 +46,17 @@ public class JavelinSightAbility extends AbstractJavelinAbility {
    public JavelinSightAbility() {
    }
 
-   public float getRadius() {
+   public float getUnmodifiedRadius() {
       return this.radius;
+   }
+
+   public float getRadius(Entity attacker) {
+      float realRadius = this.getUnmodifiedRadius();
+      if (attacker instanceof LivingEntity livingEntity) {
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, realRadius);
+      }
+
+      return realRadius;
    }
 
    public int getEffectDuration() {

@@ -4,6 +4,9 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.entity.entity.SpiritEntity;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.gear.trinket.TrinketHelper;
+import iskallia.vault.gear.trinket.effects.WingsTrinket;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.snapshot.AttributeSnapshot;
@@ -13,6 +16,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -20,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -71,6 +78,24 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
    }
 
    @Inject(
+      method = {"tryToStartFallFlying"},
+      at = {@At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/entity/player/Player;getItemBySlot(Lnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/world/item/ItemStack;"
+      )},
+      cancellable = true
+   )
+   protected void tryToStartFallFlying(CallbackInfoReturnable<Boolean> cir) {
+      Player player = (Player)this;
+      TrinketHelper.getTrinkets(player, WingsTrinket.class).forEach(wings -> {
+         if (wings.isUsable(player)) {
+            player.startFallFlying();
+            cir.setReturnValue(true);
+         }
+      });
+   }
+
+   @Inject(
       method = {"tick"},
       at = {@At("HEAD")}
    )
@@ -118,6 +143,18 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
       ActiveFlags.IS_AOE_ATTACKING.pop();
    }
 
+   @Inject(
+      method = {"attack"},
+      at = {@At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/server/level/ServerLevel;sendParticles(Lnet/minecraft/core/particles/ParticleOptions;DDDIDDDD)I"
+      )},
+      cancellable = true
+   )
+   private void preventDamageIndicatorHearts(Entity entity, CallbackInfo ci) {
+      ci.cancel();
+   }
+
    @Override
    public void setForceBlocking() {
       this.shieldActiveTimeout = 20;
@@ -160,5 +197,26 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
    private void adjustBreakSpeed(BlockState state, BlockPos pos, CallbackInfoReturnable<Float> cir) {
       Player thisPlayer = (Player)this;
       cir.setReturnValue(CommonEvents.BLOCK_BREAK_SPEED.invoke(thisPlayer, pos, state, cir.getReturnValueF()).getSpeed());
+   }
+
+   @Redirect(
+      method = {"attack"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
+      )
+   )
+   private void playNoDamageSoundWhenBroken(
+      Level instance, Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch
+   ) {
+      Player thisPlayer = (Player)this;
+      ItemStack mainHandItem = thisPlayer.getMainHandItem();
+      if (mainHandItem.getItem() instanceof VaultGearItem gearItem) {
+         if (gearItem.isBroken(mainHandItem)) {
+            instance.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_NODAMAGE, soundSource, 1.0F, 1.0F);
+         } else {
+            instance.playSound(null, x, y, z, soundEvent, soundSource, volume, pitch);
+         }
+      }
    }
 }

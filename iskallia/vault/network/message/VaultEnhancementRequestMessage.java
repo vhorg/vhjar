@@ -41,7 +41,7 @@ public class VaultEnhancementRequestMessage {
             if (player.getLevel().getBlockEntity(pos) instanceof VaultEnhancementAltarTileEntity altarTile) {
                if (altarTile.canBeUsed(player)) {
                   ItemStack gearItem = altarTile.getInventory().getItem(0);
-                  if (AttributeGearData.hasData(gearItem)) {
+                  if (AttributeGearData.hasData(gearItem) && AttributeGearData.<AttributeGearData>read(gearItem).isModifiable()) {
                      Vault vault = ServerVaults.get(player.getLevel()).orElse(null);
                      if (vault != null) {
                         EnhancementTask<?> task = EnhancementData.getForAltar(altarTile.getUUID()).get(player.getUUID());

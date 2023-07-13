@@ -18,14 +18,18 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModModelDiscoveryGoals;
 import iskallia.vault.item.BottleItem;
+import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.world.data.DiscoveredAlchemyModifiersData;
 import iskallia.vault.world.data.DiscoveredWorkbenchModifiersData;
 import iskallia.vault.world.data.DiscoveryGoalStatesData;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -77,6 +81,7 @@ public class DiscoveryGoalsManager extends DataObject<DiscoveryGoalsManager> {
                         if (discoveryTile.canBeUsed(player)) {
                            int vaultLevel = vault.has(Vault.LEVEL) ? vault.get(Vault.LEVEL).get() : 0;
                            List<Tuple<Item, ResourceLocation>> itemConfigs = new ArrayList<>();
+                           Set<ResourceLocation> availableIdolCraftIds = new HashSet<>();
                            DiscoveredWorkbenchModifiersData discoveredModifiers = DiscoveredWorkbenchModifiersData.get(world);
 
                            for (VaultGearWorkbenchConfig config : ModConfigs.VAULT_GEAR_WORKBENCH_CONFIG.values()) {
@@ -86,10 +91,18 @@ public class DiscoveryGoalsManager extends DataObject<DiscoveryGoalsManager> {
                                  if (cfg.getUnlockCategory() == VaultGearWorkbenchConfig.UnlockCategory.VAULT_DISCOVERY) {
                                     ResourceLocation key = cfg.getWorkbenchCraftIdentifier();
                                     if (!discoveredModifiers.hasDiscoveredCraft(player, item, key) && cfg.getMinLevel() <= vaultLevel) {
-                                       itemConfigs.add(new Tuple(item, key));
+                                       if (item instanceof IdolItem) {
+                                          availableIdolCraftIds.add(key);
+                                       } else {
+                                          itemConfigs.add(new Tuple(item, key));
+                                       }
                                     }
                                  }
                               }
+                           }
+
+                           if (!availableIdolCraftIds.isEmpty()) {
+                              availableIdolCraftIds.forEach(keyx -> new Tuple(ModItems.IDOL_BENEVOLENT, keyx));
                            }
 
                            Tuple<Item, ResourceLocation> tpl = MiscUtils.getRandomEntry(itemConfigs);

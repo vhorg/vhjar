@@ -1,10 +1,13 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.gear.trinket.TrinketHelper;
+import iskallia.vault.gear.trinket.effects.WingsTrinket;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,5 +27,12 @@ public abstract class MixinElytraLayer<T extends LivingEntity, M extends EntityM
       remap = false
    )
    public void shouldRender(ItemStack stack, T entity, CallbackInfoReturnable<Boolean> ci) {
+      if (entity instanceof Player player) {
+         TrinketHelper.getTrinkets(player, WingsTrinket.class).forEach(wings -> {
+            if (wings.isUsable(player)) {
+               ci.setReturnValue(true);
+            }
+         });
+      }
    }
 }

@@ -1,6 +1,9 @@
 package iskallia.vault.client.gui.framework.element.spi;
 
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.sounds.SoundEvents;
 
 public interface IGuiEventElement extends IElement, GuiEventListener {
    default void onMouseMoved(double mouseX, double mouseY) {
@@ -82,5 +85,9 @@ public interface IGuiEventElement extends IElement, GuiEventListener {
 
    default boolean containsMouse(double x, double y) {
       return this instanceof ISpatialElement spatialElement ? spatialElement.contains(x, y) : false;
+   }
+
+   default void playDownSound(SoundManager soundManager) {
+      soundManager.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
    }
 }

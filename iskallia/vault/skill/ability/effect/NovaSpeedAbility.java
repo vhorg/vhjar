@@ -27,7 +27,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
@@ -102,7 +101,7 @@ public class NovaSpeedAbility extends AbstractNovaAbility {
                      player,
                      AABBHelper.create(pos, radius)
                   )) {
-                  nearbyEntity.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, this.getDurationTicks(), this.getAmplifier()));
+                  nearbyEntity.addEffect(new MobEffectInstance(ModEffects.CHILLED, this.getDurationTicks(), this.getAmplifier(), false, false, false));
                   CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(player, nearbyEntity));
                   if (!nearbyEntity.hasEffect(ModEffects.HYPOTHERMIA)) {
                      ScheduledEffectHelper.invalidateAll(nearbyEntity, ModEffects.HYPOTHERMIA);
@@ -123,7 +122,6 @@ public class NovaSpeedAbility extends AbstractNovaAbility {
          .as(ServerPlayer.class)
          .ifPresent(
             player -> {
-               super.doParticles(context);
                float radius = this.getRadius(player);
                Vec3 pos = context.getSource().getPos().orElse(player.position());
                int particleCount = (int)Mth.clamp(Math.pow(radius, 2.0) * (float) Math.PI * 100.0, 50.0, 400.0);

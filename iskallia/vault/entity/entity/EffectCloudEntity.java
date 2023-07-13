@@ -86,6 +86,10 @@ public class EffectCloudEntity extends Entity {
       this.getEntityData().define(PARTICLE, (ParticleOptions)ModParticles.CLOUD_EFFECT.get());
    }
 
+   public float getRadius() {
+      return (Float)this.getEntityData().get(RADIUS);
+   }
+
    public void setRadius(float radiusIn) {
       if (!this.level.isClientSide) {
          this.getEntityData().set(RADIUS, radiusIn);
@@ -98,10 +102,6 @@ public class EffectCloudEntity extends Entity {
       double d2 = this.getZ();
       super.refreshDimensions();
       this.setPos(d0, d1, d2);
-   }
-
-   public float getRadius() {
-      return (Float)this.getEntityData().get(RADIUS);
    }
 
    public void setPotion(Potion potionIn) {

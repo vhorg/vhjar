@@ -9,6 +9,7 @@ import iskallia.vault.item.BasicItem;
 import iskallia.vault.item.BasicMobEggItem;
 import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.item.BottleItem;
+import iskallia.vault.item.CompassItem;
 import iskallia.vault.item.GatedLootableItem;
 import iskallia.vault.item.GodBlessingItem;
 import iskallia.vault.item.InfiniteWaterBucketItem;
@@ -22,6 +23,7 @@ import iskallia.vault.item.ItemRespecFlask;
 import iskallia.vault.item.ItemShardPouch;
 import iskallia.vault.item.ItemSkillOrb;
 import iskallia.vault.item.ItemUnidentifiedArtifact;
+import iskallia.vault.item.ItemUnidentifiedVaultKey;
 import iskallia.vault.item.ItemVaultCrystalSeal;
 import iskallia.vault.item.ItemVaultFruit;
 import iskallia.vault.item.ItemVaultKey;
@@ -52,6 +54,7 @@ import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.item.gear.VaultAxeItem;
 import iskallia.vault.item.gear.VaultShieldItem;
 import iskallia.vault.item.gear.VaultSwordItem;
+import iskallia.vault.item.gear.WandItem;
 import iskallia.vault.item.modification.GearModificationItem;
 import iskallia.vault.item.modification.ReforgeTagModificationFocus;
 import iskallia.vault.item.tool.GemstoneItem;
@@ -337,7 +340,7 @@ public class ModItems {
       () -> ModConfigs.UNIDENTIFIED_RELIC_FRAGMENTS.getRandomFragment(new Random())
    );
    public static GatedLootableItem MOD_BOX = new GatedLootableItem(VaultMod.id("mod_box"), new Properties().tab(VAULT_MOD_GROUP));
-   public static LootableItem UNIDENTIFIED_TREASURE_KEY = new LootableItem(
+   public static ItemUnidentifiedVaultKey UNIDENTIFIED_TREASURE_KEY = new ItemUnidentifiedVaultKey(
       VaultMod.id("unidentified_treasure_key"), new Properties().tab(VAULT_MOD_GROUP), () -> ModConfigs.UNIDENTIFIED_TREASURE_KEY.getRandomKey(new Random())
    );
    public static ItemUnidentifiedArtifact UNIDENTIFIED_ARTIFACT = new ItemUnidentifiedArtifact(VAULT_MOD_GROUP, VaultMod.id("unidentified_artifact"));
@@ -376,6 +379,7 @@ public class ModItems {
    public static JewelItem JEWEL = new JewelItem(VaultMod.id("jewel"), new Properties().tab(GEAR_GROUP).stacksTo(1));
    public static GemstoneItem GEMSTONE = new GemstoneItem(VaultMod.id("gemstone"), new Properties().tab(GEAR_GROUP));
    public static BottleItem BOTTLE = new BottleItem(VaultMod.id("bottle"), new Properties().stacksTo(1).tab(GEAR_GROUP));
+   public static WandItem WAND = new WandItem(VaultMod.id("wand"), new Properties().stacksTo(1).tab(GEAR_GROUP));
    public static BasicItem VAULT_PLATING = new BasicItem(VaultMod.id("vault_plating"));
    public static BasicItem REPAIR_CORE = new BasicItem(VaultMod.id("repair_core"));
    public static BasicItem VAULT_ALLOY = new BasicItem(VaultMod.id("vault_alloy"));
@@ -423,7 +427,7 @@ public class ModItems {
    public static BasicItem ACCELERATION_CHIP = new BasicItem(VaultMod.id("acceleration_chip"));
    public static BasicItem IDENTIFICATION_TOME = new BasicItem(VaultMod.id("identification_tome"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static VaultDollItem VAULT_DOLL = new VaultDollItem(VaultMod.id("vault_doll"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
-   public static BasicItem VAULT_COMPASS = new BasicItem(VaultMod.id("vault_compass"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
+   public static BasicItem VAULT_COMPASS = new CompassItem();
    public static BucketItem VOID_LIQUID_BUCKET = (BucketItem)new BucketItem(
          ModFluids.VOID_LIQUID, new Properties().craftRemainder(Items.BUCKET).stacksTo(1).tab(VAULT_MOD_GROUP)
       )
@@ -1066,6 +1070,7 @@ public class ModItems {
       registry.register(JEWEL);
       registry.register(GEMSTONE);
       registry.register(BOTTLE);
+      registry.register(WAND);
       registry.register(INFUSED_ETERNAL_SOUL);
       registry.register(UNKNOWN_EGG);
       registry.register(VAULT_APPLE);

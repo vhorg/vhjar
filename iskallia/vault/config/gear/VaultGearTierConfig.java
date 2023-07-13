@@ -1,5 +1,6 @@
 package iskallia.vault.config.gear;
 
+import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -66,6 +67,7 @@ import net.minecraft.world.item.alchemy.Potions;
 import org.apache.commons.lang3.ObjectUtils;
 
 public class VaultGearTierConfig extends Config {
+   public static final String NO_LEGENDARY_TAG = "noLegendary";
    private Item gearItem;
    @Expose
    private final Map<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.AttributeGroup> modifierGroup = new LinkedHashMap<>();
@@ -87,7 +89,8 @@ public class VaultGearTierConfig extends Config {
          ModItems.IDOL_TIMEKEEPER,
          ModItems.JEWEL,
          ModItems.MAGNET,
-         ModItems.BOTTLE
+         ModItems.BOTTLE,
+         ModItems.WAND
       )) {
          gearConfig.put(item, new VaultGearTierConfig(item).readConfig());
       }
@@ -124,6 +127,16 @@ public class VaultGearTierConfig extends Config {
       Object currentTierCfg = null;
       VaultGearTierConfig.ModifierTier<?> min = null;
       VaultGearTierConfig.ModifierTier<?> max = null;
+      if (modifier.getCategory() == VaultGearModifier.AffixCategory.LEGENDARY) {
+         VaultGearTierConfig.ModifierTierGroup tierGroup = this.getTierGroup(modifier.getModifierIdentifier());
+         if (tierGroup != null) {
+            VaultGearTierConfig.ModifierTier<?> tier = tierGroup.getModifierForTier(modifier.getRolledTier());
+            if (tier != null) {
+               Object configObject = tier.getModifierConfiguration();
+               return new VaultGearTierConfig.ModifierConfigRange(configObject, configObject, configObject);
+            }
+         }
+      }
 
       for (VaultGearTierConfig.ModifierTier<?> modTier : this.getAllTiers(modifier.getModifierIdentifier())) {
          if (modTier.getMinLevel() <= level && (modTier.getMaxLevel() == -1 || modTier.getMaxLevel() >= level)) {
@@ -211,7 +224,7 @@ public class VaultGearTierConfig extends Config {
    }
 
    @Nullable
-   private VaultGearTierConfig.ModifierTierGroup getTierGroup(@Nullable ResourceLocation identifier) {
+   public VaultGearTierConfig.ModifierTierGroup getTierGroup(@Nullable ResourceLocation identifier) {
       for (VaultGearTierConfig.AttributeGroup attributePool : this.modifierGroup.values()) {
          for (VaultGearTierConfig.ModifierTierGroup group : attributePool) {
             if (group.identifier.equals(identifier)) {
@@ -226,15 +239,19 @@ public class VaultGearTierConfig extends Config {
    public List<VaultGearModifier<?>> generateImplicits(int level, Random random) {
       VaultGearTierConfig.AttributeGroup attributePool = this.modifierGroup.get(VaultGearTierConfig.ModifierAffixTagGroup.IMPLICIT);
       if (attributePool != null && !attributePool.isEmpty()) {
-         List<VaultGearModifier<?>> modifiers = new ArrayList<>();
+         Map<String, WeightedList<VaultGearTierConfig.ModifierOutcome<?>>> groupOutcomes = new HashMap<>();
          attributePool.forEach(
             group -> {
-               WeightedList<VaultGearTierConfig.ModifierOutcome<?>> outcomes = new WeightedList<>();
+               String modGrp = Strings.isNullOrEmpty(group.getModifierGroup()) ? group.getIdentifier().toString() : group.getModifierGroup();
                group.getModifiersForLevel(level)
-                  .forEach(tier -> outcomes.add(new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight()));
-               outcomes.getRandom(random).map(outcome -> outcome.makeModifier(random)).ifPresent(modifiers::add);
+                  .forEach(
+                     tier -> groupOutcomes.computeIfAbsent(modGrp, s -> new WeightedList<>())
+                        .add(new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight())
+                  );
             }
          );
+         List<VaultGearModifier<?>> modifiers = new ArrayList<>();
+         groupOutcomes.values().forEach(outcomes -> outcomes.getRandom(random).map(outcome -> outcome.makeModifier(random)).ifPresent(modifiers::add));
          return modifiers;
       } else {
          return Collections.emptyList();
@@ -709,7 +726,7 @@ public class VaultGearTierConfig extends Config {
    }
 
    public record ModifierOutcome<C>(VaultGearTierConfig.ModifierTier<C> tier, VaultGearTierConfig.ModifierTierGroup tierGroup) {
-      private <T> VaultGearModifier<T> makeModifier(Random random) {
+      public <T> VaultGearModifier<T> makeModifier(Random random) {
          return this.tier().makeModifier(this.tierGroup(), random);
       }
    }
@@ -802,6 +819,17 @@ public class VaultGearTierConfig extends Config {
          }
 
          return highest;
+      }
+
+      @Nullable
+      public VaultGearTierConfig.ModifierTier<?> getModifierForTier(int tier) {
+         for (VaultGearTierConfig.ModifierTier<?> modifierTier : this) {
+            if (modifierTier.modifierTier == tier) {
+               return modifierTier;
+            }
+         }
+
+         return null;
       }
 
       public ResourceLocation getAttribute() {

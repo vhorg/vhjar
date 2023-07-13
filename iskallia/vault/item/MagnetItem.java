@@ -9,6 +9,7 @@ import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
+import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.CuriosGearItem;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -92,7 +93,7 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
    }
 
    public boolean isDamageable(ItemStack stack) {
-      return VaultGearData.read(stack).getState() == VaultGearState.IDENTIFIED;
+      return GearDataCache.of(stack).getState() == VaultGearState.IDENTIFIED;
    }
 
    public int getMaxDamage(ItemStack stack) {
@@ -115,6 +116,10 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
             ? VaultGearHelper.getModifiers(VaultGearData.read(stack))
             : ImmutableMultimap.of());
       }
+   }
+
+   public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
+      return VaultGearHelper.shouldPlayGearReequipAnimation(oldStack, newStack, slotChanged);
    }
 
    public int getDefaultTooltipHideFlags(@NotNull ItemStack stack) {
@@ -179,28 +184,30 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
             getMagnet(event.player)
                .ifPresent(
                   stack -> {
-                     if (!DemagnetizerTileEntity.hasDemagnetizerAround(event.player)) {
-                        VaultGearData data = VaultGearData.read(stack);
-                        float range = data.get(ModGearAttributes.RANGE, VaultGearAttributeTypeMerger.floatSum());
-                        float speed = data.get(ModGearAttributes.VELOCITY, VaultGearAttributeTypeMerger.floatSum());
-                        List<ItemEntity> items = world.getEntitiesOfClass(
-                           ItemEntity.class,
-                           player.getBoundingBox().inflate(range),
-                           entity -> entity.distanceToSqr(player) <= range * range && !entity.getTags().contains("PreventMagnetMovement")
-                        );
-                        List<ExperienceOrb> orbs = world.getEntitiesOfClass(
-                           ExperienceOrb.class,
-                           player.getBoundingBox().inflate(range),
-                           entity -> entity.distanceToSqr(player) <= range * range && !entity.getTags().contains("PreventMagnetMovement")
-                        );
-                        TrinketHelper.getTrinkets(player, EnderAnchorTrinket.class).forEach(enderTrinket -> {
-                           if (enderTrinket.isUsable(player)) {
-                              teleportToPlayer(player, items);
-                              teleportToPlayer(player, orbs);
-                           }
-                        });
-                        moveToPlayer(player, items, speed);
-                        moveToPlayer(player, orbs, speed);
+                     if (!(stack.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(stack))) {
+                        if (!DemagnetizerTileEntity.hasDemagnetizerAround(event.player)) {
+                           VaultGearData data = VaultGearData.read(stack);
+                           float range = data.get(ModGearAttributes.RANGE, VaultGearAttributeTypeMerger.floatSum());
+                           float speed = data.get(ModGearAttributes.VELOCITY, VaultGearAttributeTypeMerger.floatSum());
+                           List<ItemEntity> items = world.getEntitiesOfClass(
+                              ItemEntity.class,
+                              player.getBoundingBox().inflate(range),
+                              entity -> entity.distanceToSqr(player) <= range * range && !entity.getTags().contains("PreventMagnetMovement")
+                           );
+                           List<ExperienceOrb> orbs = world.getEntitiesOfClass(
+                              ExperienceOrb.class,
+                              player.getBoundingBox().inflate(range),
+                              entity -> entity.distanceToSqr(player) <= range * range && !entity.getTags().contains("PreventMagnetMovement")
+                           );
+                           TrinketHelper.getTrinkets(player, EnderAnchorTrinket.class).forEach(enderTrinket -> {
+                              if (enderTrinket.isUsable(player)) {
+                                 teleportToPlayer(player, items);
+                                 teleportToPlayer(player, orbs);
+                              }
+                           });
+                           moveToPlayer(player, items, speed);
+                           moveToPlayer(player, orbs, speed);
+                        }
                      }
                   }
                );

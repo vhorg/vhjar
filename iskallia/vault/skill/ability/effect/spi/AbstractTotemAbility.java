@@ -9,6 +9,7 @@ import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.MathUtilities;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.util.calc.TotemDurationHelper;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -22,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,8 +48,13 @@ public abstract class AbstractTotemAbility<T extends TotemTileEntity> extends In
       return this.totemDurationTicks;
    }
 
-   public float getTotemEffectRadius() {
+   public float getUnmodifiedTotemEffectRadius() {
       return this.totemEffectRadius;
+   }
+
+   public float getTotemEffectRadius(Player player) {
+      float realRadius = this.getUnmodifiedTotemEffectRadius();
+      return AreaOfEffectHelper.adjustAreaOfEffect(player, realRadius);
    }
 
    @Override

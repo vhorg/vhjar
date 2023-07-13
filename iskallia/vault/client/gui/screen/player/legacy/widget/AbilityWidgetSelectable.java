@@ -32,6 +32,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.world.entity.player.Player;
 
 public class AbilityWidgetSelectable extends AbilityWidget implements ComponentWidget {
    private boolean selected = false;
@@ -113,92 +114,101 @@ public class AbilityWidgetSelectable extends AbilityWidget implements ComponentW
 
    @Override
    public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-      RenderSystem.enableBlend();
-      SpecializedSkill abilityNode = this.getAbilityGroup();
-      int abilityLevel = ((TieredSkill)abilityNode.getSpecialization()).getTier();
-      int abilityLevelMax = ((TieredSkill)abilityNode.getSpecialization()).getMaxTier();
-      boolean isSpecialization = this.isSpecialization();
-      NodeState state;
-      if (isSpecialization && abilityNode.isUnlocked() && this.abilityName.equals(abilityNode.getSpecialization().getId())) {
-         state = NodeState.SELECTED;
-      } else if (!this.isLocked() || !isSpecialization && abilityNode.isUnlocked()) {
-         if (this.selected || this.getClickableBounds().contains(mouseX, mouseY)) {
-            state = NodeState.HOVERED;
-         } else if (isSpecialization) {
-            if (this.abilityName.equals(abilityNode.getSpecialization().getId())) {
+      Player player = Minecraft.getInstance().player;
+      if (player != null) {
+         RenderSystem.enableBlend();
+         SpecializedSkill abilityNode = this.getAbilityGroup();
+         int abilityLevel = ((TieredSkill)abilityNode.getSpecialization()).getUnmodifiedTier();
+         int actualAbilityLevel = ((TieredSkill)abilityNode.getSpecialization()).getActualTier();
+         int addedLevelDiff = actualAbilityLevel - abilityLevel;
+         int abilityLevelMax = ((TieredSkill)abilityNode.getSpecialization()).getMaxLearnableTier();
+         boolean isSpecialization = this.isSpecialization();
+         NodeState state;
+         if (isSpecialization && abilityNode.isUnlocked() && this.abilityName.equals(abilityNode.getSpecialization().getId())) {
+            state = NodeState.SELECTED;
+         } else if (!this.isLocked() || !isSpecialization && abilityNode.isUnlocked()) {
+            if (this.selected || this.getClickableBounds().contains(mouseX, mouseY)) {
+               state = NodeState.HOVERED;
+            } else if (isSpecialization) {
+               if (this.abilityName.equals(abilityNode.getSpecialization().getId())) {
+                  state = NodeState.SELECTED;
+               } else {
+                  state = NodeState.DEFAULT;
+               }
+            } else if (abilityLevel >= 1) {
                state = NodeState.SELECTED;
             } else {
                state = NodeState.DEFAULT;
             }
-         } else if (abilityLevel >= 1) {
-            state = NodeState.SELECTED;
          } else {
-            state = NodeState.DEFAULT;
+            state = NodeState.DISABLED;
          }
-      } else {
-         state = NodeState.DISABLED;
-      }
 
-      matrixStack.pushPose();
-      matrixStack.translate(0.0, 0.0, 1.0);
-      if (!isSpecialization) {
-         AbilitiesGUIConfig.AbilityStyle abilityStyle = ModConfigs.ABILITIES_GUI.getStyles().get(this.getAbilityGroup().getId());
-         if (abilityStyle != null) {
-            int specializationCount = abilityStyle.getSpecializationStyles().size() - 1;
-            boolean hasSpecialization = this.getAbilityGroup().getIndex() != 0;
-            if (specializationCount > 0) {
-               RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-               matrixStack.pushPose();
-               BufferBuilder builder = Tesselator.getInstance().getBuilder();
-               builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-               matrixStack.translate(0.0, 0.0, -1.0);
-               int secondaryNodeHeight = AbilityNodeTextures.SECONDARY_NODE.get(NodeState.DEFAULT).height();
-               float lineY1 = this.y + this.height / 2.0F + 3.0F + secondaryNodeHeight / 2.0F + secondaryNodeHeight * (specializationCount - 1);
-               LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 5.0, -16777216);
-               if (hasSpecialization) {
-                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -3755746);
-                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 3.0, -7130);
-                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 2.0, -5016);
-               } else {
-                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -11184811);
+         matrixStack.pushPose();
+         matrixStack.translate(0.0, 0.0, 1.0);
+         if (!isSpecialization) {
+            AbilitiesGUIConfig.AbilityStyle abilityStyle = ModConfigs.ABILITIES_GUI.getStyles().get(this.getAbilityGroup().getId());
+            if (abilityStyle != null) {
+               int specializationCount = abilityStyle.getSpecializationStyles().size() - 1;
+               boolean hasSpecialization = this.getAbilityGroup().getIndex() != 0;
+               if (specializationCount > 0) {
+                  RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                  matrixStack.pushPose();
+                  BufferBuilder builder = Tesselator.getInstance().getBuilder();
+                  builder.begin(Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                  matrixStack.translate(0.0, 0.0, -1.0);
+                  int secondaryNodeHeight = AbilityNodeTextures.SECONDARY_NODE.get(NodeState.DEFAULT).height();
+                  float lineY1 = this.y + this.height / 2.0F + 3.0F + secondaryNodeHeight / 2.0F + secondaryNodeHeight * (specializationCount - 1);
+                  LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 5.0, -16777216);
+                  if (hasSpecialization) {
+                     LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -3755746);
+                     LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 3.0, -7130);
+                     LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 2.0, -5016);
+                  } else {
+                     LineRenderUtil.getInstance().drawLine(builder, matrixStack, this.x, this.y, this.x, lineY1, 4.0, -11184811);
+                  }
+
+                  builder.end();
+                  RenderSystem.setShader(GameRenderer::getPositionColorShader);
+                  BufferUploader.end(builder);
+                  matrixStack.popPose();
                }
-
-               builder.end();
-               RenderSystem.setShader(GameRenderer::getPositionColorShader);
-               BufferUploader.end(builder);
-               matrixStack.popPose();
             }
          }
-      }
 
-      if (!isSpecialization && this.getAbilityGroup().isUnlocked()) {
+         if (!isSpecialization && this.getAbilityGroup().isUnlocked()) {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+            matrixStack.pushPose();
+            TextureAtlasRegion region = AbilityNodeTextures.NODE_BACKGROUND_LEVEL;
+            matrixStack.translate(-region.width() / 2.0F, -this.height / 2.0F + (2 - region.height()), 0.0);
+            region.blit(matrixStack, this.x, this.y);
+            Font font = Minecraft.getInstance().font;
+            String text = String.valueOf(abilityLevel);
+            if (addedLevelDiff != 0) {
+               text = text + (addedLevelDiff > 0 ? "+" : "") + addedLevelDiff;
+            }
+
+            font.draw(matrixStack, text, this.x + region.width() / 2.0F - font.width(text) / 2.0F, this.y + 2, abilityLevel >= abilityLevelMax ? -16711936 : -1);
+            RenderSystem.enableDepthTest();
+            matrixStack.popPose();
+         }
+
          RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
          matrixStack.pushPose();
-         TextureAtlasRegion region = AbilityNodeTextures.NODE_BACKGROUND_LEVEL;
-         matrixStack.translate(-region.width() / 2.0F, -this.height / 2.0F + (2 - region.height()), 0.0);
-         region.blit(matrixStack, this.x, this.y);
-         Font font = Minecraft.getInstance().font;
-         String text = String.valueOf(abilityLevel);
-         font.draw(matrixStack, text, this.x + region.width() / 2.0F - font.width(text) / 2.0F, this.y + 2, abilityLevel == abilityLevelMax ? -16711936 : -1);
-         RenderSystem.enableDepthTest();
+         matrixStack.translate(-this.width / 2.0F, -this.height / 2.0F, 0.0);
+         this.background.get(state).blit(matrixStack, this.x, this.y);
          matrixStack.popPose();
-      }
+         if (state == NodeState.DISABLED) {
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
+         }
 
-      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-      matrixStack.pushPose();
-      matrixStack.translate(-this.width / 2.0F, -this.height / 2.0F, 0.0);
-      this.background.get(state).blit(matrixStack, this.x, this.y);
-      matrixStack.popPose();
-      if (state == NodeState.DISABLED) {
-         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
+         matrixStack.pushPose();
+         matrixStack.translate(-8.0, -8.0, 0.0);
+         this.icon.blit(matrixStack, this.x, this.y);
+         matrixStack.popPose();
+         matrixStack.popPose();
+         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
       }
-
-      matrixStack.pushPose();
-      matrixStack.translate(-8.0, -8.0, 0.0);
-      this.icon.blit(matrixStack, this.x, this.y);
-      matrixStack.popPose();
-      matrixStack.popPose();
-      RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
    }
 
    private void renderHover(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {

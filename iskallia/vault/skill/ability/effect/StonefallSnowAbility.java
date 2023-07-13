@@ -14,6 +14,7 @@ import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.EntityHelper;
+import iskallia.vault.util.calc.AbilityPowerHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,6 @@ import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
@@ -44,7 +44,7 @@ import net.minecraftforge.network.PacketDistributor;
    bus = Bus.FORGE
 )
 public class StonefallSnowAbility extends AbstractStonefallAbility {
-   private float damageMultiplier;
+   private float percentAbilityPowerDealt;
 
    public StonefallSnowAbility(
       int unlockLevel,
@@ -56,17 +56,17 @@ public class StonefallSnowAbility extends AbstractStonefallAbility {
       float knockbackMultiplier,
       float radius,
       float damageReduction,
-      float damageMultiplier
+      float percentAbilityPowerDealt
    ) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, durationTicks, knockbackMultiplier, radius, damageReduction);
-      this.damageMultiplier = damageMultiplier;
+      this.percentAbilityPowerDealt = percentAbilityPowerDealt;
    }
 
    public StonefallSnowAbility() {
    }
 
    public float getDamageMultiplier() {
-      return this.damageMultiplier;
+      return this.percentAbilityPowerDealt;
    }
 
    @Override
@@ -93,18 +93,18 @@ public class StonefallSnowAbility extends AbstractStonefallAbility {
          if (effectInstance != null) {
             AbilityTree abilities = PlayerAbilitiesData.get((ServerLevel)player.level).getAbilities(player);
             float dist = event.getDistance();
-            float damageMultiplier = event.getDamageMultiplier();
+            float percentAbilityPowerDealt = event.getDamageMultiplier();
             Level level = player.level;
             if (!(dist < 3.0F)) {
                for (StonefallSnowAbility ability : abilities.getAll(StonefallSnowAbility.class, Skill::isUnlocked)) {
-                  float radius = ability.getRadius() + Mth.clamp(dist / 3.75F, 0.0F, 8.0F);
+                  float radius = ability.getRadius(player) + Mth.clamp(dist / 3.75F, 0.0F, 8.0F);
                   List<LivingEntity> nearby = EntityHelper.getNearby(level, player.blockPosition(), radius, LivingEntity.class);
                   nearby.removeIf(mob -> mob instanceof EternalEntity || mob instanceof ServerPlayer);
-                  float damage = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) * ability.getDamageMultiplier();
-                  nearby.forEach(mob -> ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                  float damage = AbilityPowerHelper.getAbilityPower(player) * ability.getDamageMultiplier();
+                  nearby.forEach(mob -> ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
                      EntityHelper.knockbackWithStrength(mob, player, 0.2F);
                      mob.hurt(DamageSource.playerAttack(player), damage);
-                  }));
+                  })));
                   event.setDamageMultiplier(Mth.clamp(1.0F - ability.getDamageReduction(), 0.0F, 1.0F));
                   ModNetwork.CHANNEL
                      .send(PacketDistributor.ALL.noArg(), new NovaParticleMessage(new Vec3(player.getX(), player.getY() + 0.15F, player.getZ()), radius));
@@ -133,19 +133,19 @@ public class StonefallSnowAbility extends AbstractStonefallAbility {
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.damageMultiplier), buffer);
+      Adapters.FLOAT.writeBits(Float.valueOf(this.percentAbilityPowerDealt), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.damageMultiplier = Adapters.FLOAT.readBits(buffer).orElseThrow();
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readBits(buffer).orElseThrow();
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.damageMultiplier)).ifPresent(tag -> nbt.put("damageMultiplier", tag));
+         Adapters.FLOAT.writeNbt(Float.valueOf(this.percentAbilityPowerDealt)).ifPresent(tag -> nbt.put("percentAbilityPowerDealt", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -153,13 +153,13 @@ public class StonefallSnowAbility extends AbstractStonefallAbility {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.damageMultiplier = Adapters.FLOAT.readNbt(nbt.get("damageMultiplier")).orElse(0.0F);
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readNbt(nbt.get("percentAbilityPowerDealt")).orElse(0.0F);
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
-         Adapters.FLOAT.writeJson(Float.valueOf(this.damageMultiplier)).ifPresent(element -> json.add("damageMultiplier", element));
+         Adapters.FLOAT.writeJson(Float.valueOf(this.percentAbilityPowerDealt)).ifPresent(element -> json.add("percentAbilityPowerDealt", element));
          return (JsonObject)json;
       });
    }
@@ -167,7 +167,7 @@ public class StonefallSnowAbility extends AbstractStonefallAbility {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.damageMultiplier = Adapters.FLOAT.readJson(json.get("damageMultiplier")).orElse(0.0F);
+      this.percentAbilityPowerDealt = Adapters.FLOAT.readJson(json.get("percentAbilityPowerDealt")).orElse(0.0F);
    }
 
    public static class StonefallShockwaveEffect extends MobEffect {

@@ -37,6 +37,11 @@ public class StatPylonBuff extends TickingPylonBuff<StatPylonBuff.Config> {
       private float addend;
       private int duration;
 
+      @Override
+      public int getDuration() {
+         return this.duration;
+      }
+
       public StatPylonBuff build() {
          return new StatPylonBuff(this);
       }

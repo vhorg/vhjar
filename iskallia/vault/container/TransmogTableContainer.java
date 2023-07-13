@@ -76,7 +76,9 @@ public class TransmogTableContainer extends OverSizedSlotContainer {
       this.addSlot(new VaultGearSlot(this.internalInventory, 0, 63, 61) {
          public void setChanged() {
             super.setChanged();
-            TransmogTableContainer.this.selectModelId(null);
+            if (this.getItem().isEmpty()) {
+               TransmogTableContainer.this.selectModelId(null);
+            }
          }
       });
       containerSlotIndex++;

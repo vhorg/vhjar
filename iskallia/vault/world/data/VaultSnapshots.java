@@ -1,9 +1,12 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.VaultMod;
 import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.stat.VaultSnapshot;
+import iskallia.vault.init.ModGameRules;
 import iskallia.vault.nbt.VListNBT;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -77,6 +80,17 @@ public class VaultSnapshots extends SavedData {
 
    public void load(CompoundTag nbt) {
       this.snapshots.deserializeNBT(nbt.getList("snapshots", 12));
+   }
+
+   public void save(File file) {
+      long timeMs = System.currentTimeMillis();
+      super.save(file);
+      if (System.currentTimeMillis() - timeMs > 50L) {
+         MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+         if (srv != null && srv.getGameRules().getBoolean(ModGameRules.PRINT_SAVE_DATA_TIMING)) {
+            VaultMod.LOGGER.info("VaultSnapshots saving took %s ms".formatted(System.currentTimeMillis() - timeMs));
+         }
+      }
    }
 
    public static VaultSnapshots get(MinecraftServer server) {

@@ -8,6 +8,7 @@ import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.BlockHelper;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class MegaJumpBreakUpAbility extends MegaJumpAbility {
          Player player = event.player;
          ServerLevel world = (ServerLevel)player.getCommandSenderWorld();
          AbilityTree abilities = PlayerAbilitiesData.get(world).getAbilities(player);
-         Ability focusedAbilityNode = abilities.getSelectedAbility().orElse(null);
+         Ability focusedAbilityNode = abilities.getSelectedAbility(player).orElse(null);
 
          for (MegaJumpBreakUpAbility ability : abilities.getAll(MegaJumpBreakUpAbility.class, Skill::isUnlocked)) {
             if (ability.ticks > 0) {
@@ -71,7 +72,9 @@ public class MegaJumpBreakUpAbility extends MegaJumpAbility {
                } else {
                   ability.ticks = ticks;
                   if (focusedAbilityNode != null && focusedAbilityNode.getClass() == ability.getClass()) {
-                     BlockHelper.withEllipsoidPositions(player.blockPosition().above(3), 4.0F, 6.0F, 4.0F, offset -> {
+                     float radius = AreaOfEffectHelper.adjustAreaOfEffect(player, 4.0F);
+                     float yRadius = AreaOfEffectHelper.adjustAreaOfEffect(player, 6.0F);
+                     BlockHelper.withEllipsoidPositions(player.blockPosition().above(3), radius, yRadius, radius, offset -> {
                         BlockState state = world.getBlockState(offset);
                         if (ability.canBreakBlock(state)) {
                            float hardness = state.getDestroySpeed(world, offset);

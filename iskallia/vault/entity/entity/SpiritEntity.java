@@ -115,6 +115,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    public static void onPlayerDrops(LivingDropsEvent event) {
       if (event.getEntity() instanceof ServerPlayer player) {
          ServerLevel serverLevel = player.getLevel();
+         MinecraftServer server = serverLevel.getServer();
          ServerVaults.get(serverLevel)
             .ifPresent(
                vault -> {
@@ -123,15 +124,22 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                      int vaultLevel = vault.get(Vault.LEVEL).get();
                      PlayerSpiritRecoveryData data = PlayerSpiritRecoveryData.get(serverLevel);
                      if (serverLevel.players().size() > 1) {
-                        data.putVaultSpiritData(initSpiritData(event, vault, player, vaultLevel));
-                        if (ModEntities.SPIRIT.spawn(serverLevel, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
+                        server.tell(
+                           new TickTask(
+                              server.getTickCount() + 10,
+                              () -> {
+                                 data.putVaultSpiritData(initSpiritData(event, vault, player, vaultLevel));
+                                 if (ModEntities.SPIRIT.spawn(serverLevel, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
+                                    )
+                                  {
+                                    EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
+                                    spirit.transferSpiritData(player, event.getDrops(), joinState, vaultLevel);
+                                 }
+                              }
                            )
-                         {
-                           EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
-                           spirit.transferSpiritData(player, event.getDrops(), joinState, vaultLevel);
-                        }
+                        );
                      } else {
-                        data.putVaultSpiritData(initSpiritData(event, vault, player, vaultLevel));
+                        server.tell(new TickTask(server.getTickCount() + 10, () -> data.putVaultSpiritData(initSpiritData(event, vault, player, vaultLevel))));
                      }
                   }
                }

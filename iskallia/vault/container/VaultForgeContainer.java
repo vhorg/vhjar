@@ -20,6 +20,11 @@ public class VaultForgeContainer extends ForgeRecipeContainer<VaultForgeTileEnti
 
    @Override
    public Point getOffset() {
-      return new Point(8, 56);
+      return new Point(14, 56);
+   }
+
+   @Override
+   public Point getPlayerInventoryOffset() {
+      return new Point(23, 56);
    }
 }

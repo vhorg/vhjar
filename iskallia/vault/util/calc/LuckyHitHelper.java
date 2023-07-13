@@ -12,6 +12,7 @@ public class LuckyHitHelper {
       float chance = 0.0F;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
       chance += snapshot.getAttributeValue(ModGearAttributes.LUCKY_HIT_CHANCE, VaultGearAttributeTypeMerger.floatSum());
+      chance += snapshot.getAttributeValue(ModGearAttributes.LUCKY_HIT_CHANCE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum()) * chance;
       return CommonEvents.PLAYER_STAT.invoke(PlayerStat.LUCKY_HIT_CHANCE, entity, chance).getValue();
    }
 }

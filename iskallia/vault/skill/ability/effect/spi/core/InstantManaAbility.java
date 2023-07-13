@@ -3,11 +3,14 @@ package iskallia.vault.skill.ability.effect.spi.core;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.calc.ManaCostHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 
 public abstract class InstantManaAbility extends InstantAbility implements IInstantManaAbility {
    private float manaCost;
@@ -35,6 +38,9 @@ public abstract class InstantManaAbility extends InstantAbility implements IInst
             }
 
             cost = ManaCostHelper.adjustManaCost(player, this.getAbilityGroupName(), cost);
+            if (mana.getMana() < cost) {
+               player.level.playSound((Player)null, player, ModSounds.ABILITY_OUT_OF_MANA, SoundSource.PLAYERS, 1.0F, 1.0F);
+            }
          }
 
          return mana.getMana() >= cost;

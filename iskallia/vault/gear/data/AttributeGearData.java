@@ -10,6 +10,7 @@ import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.MagnetItem;
 import iskallia.vault.item.tool.ToolItem;
@@ -103,13 +104,17 @@ public class AttributeGearData {
    }
 
    public void write(ItemStack stack) {
-      this.markChanged();
+      this.markChanged(stack);
       ArrayBitBuffer buffer = ArrayBitBuffer.empty();
       this.write(buffer);
       stack.getOrCreateTag().putLongArray("vaultGearData", buffer.toLongArray());
+      if (!stack.isEmpty()) {
+         GearDataCache.removeCache(stack);
+         GearDataCache.createCache(stack);
+      }
    }
 
-   protected void markChanged() {
+   protected void markChanged(ItemStack stack) {
       this.identifier.refresh();
    }
 
@@ -150,14 +155,22 @@ public class AttributeGearData {
 
    @Nullable
    public <T> T updateAttribute(VaultGearAttribute<T> attribute, T value) {
-      for (VaultGearAttributeInstance instance : this.attributes) {
-         if (instance.getAttribute().equals(attribute)) {
-            return (T)instance.setValue(value);
+      if (!this.isModifiable()) {
+         return null;
+      } else {
+         for (VaultGearAttributeInstance instance : this.attributes) {
+            if (instance.getAttribute().equals(attribute)) {
+               return (T)instance.setValue(value);
+            }
          }
-      }
 
-      this.attributes.add(new VaultGearAttributeInstance<>(attribute, value));
-      return null;
+         this.attributes.add(new VaultGearAttributeInstance<>(attribute, value));
+         return null;
+      }
+   }
+
+   public boolean isModifiable() {
+      return !this.get(ModGearAttributes.IS_CORRUPTED, VaultGearAttributeTypeMerger.anyTrue());
    }
 
    public void clear() {
@@ -198,7 +211,7 @@ public class AttributeGearData {
          }
       }
 
-      this.markChanged();
+      this.markChanged(ItemStack.EMPTY);
    }
 
    public JsonObject serialize() {

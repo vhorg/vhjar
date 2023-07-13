@@ -6,6 +6,7 @@ import iskallia.vault.core.event.common.BlockBreakSpeedEvent;
 import iskallia.vault.core.event.common.BlockSetEvent;
 import iskallia.vault.core.event.common.BlockUseEvent;
 import iskallia.vault.core.event.common.CarversGenerationEvent;
+import iskallia.vault.core.event.common.ChampionPromoteEvent;
 import iskallia.vault.core.event.common.ChestCatalystGenerationEvent;
 import iskallia.vault.core.event.common.ChestGenerationEvent;
 import iskallia.vault.core.event.common.ChestTrapGenerationEvent;
@@ -78,6 +79,7 @@ public class CommonEvents {
    public static final ChestCatalystGenerationEvent CHEST_CATALYST_GENERATION = register(new ChestCatalystGenerationEvent());
    public static final CoinStacksGenerationEvent COIN_STACK_LOOT_GENERATION = register(new CoinStacksGenerationEvent());
    public static final LootableBlockGenerationEvent LOOTABLE_BLOCK_GENERATION_EVENT = register(new LootableBlockGenerationEvent());
+   public static final ChampionPromoteEvent CHAMPION_PROMOTE = register(new ChampionPromoteEvent());
    public static final CrateAwardEvent CRATE_AWARD_EVENT = register(new CrateAwardEvent());
    public static final BlockUseEvent BLOCK_USE = register(new BlockUseEvent());
    public static final BlockSetEvent BLOCK_SET = register(new BlockSetEvent());

@@ -1,5 +1,6 @@
 package iskallia.vault.quest.type;
 
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.event.event.CraftCrystalEvent;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.world.data.QuestStatesData;
@@ -16,7 +17,7 @@ public class CraftCrystalQuest extends Quest {
    public CraftCrystalQuest(
       String id,
       String name,
-      Quest.DescriptionData descriptionData,
+      DescriptionData descriptionData,
       ResourceLocation icon,
       ResourceLocation targetId,
       float targetProgress,

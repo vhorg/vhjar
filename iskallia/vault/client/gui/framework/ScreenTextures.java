@@ -41,6 +41,10 @@ public final class ScreenTextures {
    public static final TextureAtlasRegion BLACK_MARKET_ORNAMENT = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/black_market_ornament")
    );
+   public static final TextureAtlasRegion OMEGA_BLACK_MARKET_ORNAMENT = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/omega_black_market_ornament")
+   );
+   public static final TextureAtlasRegion VAULT_FORGE_BACKGROUND = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/vault_forge"));
    public static final TextureAtlasRegion INSET_ITEM_SLOT_BACKGROUND = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/inset_item_slot_background")
    );
@@ -147,6 +151,18 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_TRADE_WIDE_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_TRADE_WIDE, BUTTON_TRADE_WIDE_HOVER, BUTTON_TRADE_WIDE_HOVER, BUTTON_TRADE_WIDE_DISABLED
    );
+   public static final TextureAtlasRegion OMEGA_BUTTON_TRADE_WIDE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/omega_button_trade_wide")
+   );
+   public static final TextureAtlasRegion OMEGA_BUTTON_TRADE_WIDE_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/omega_button_trade_wide_disabled")
+   );
+   public static final TextureAtlasRegion OMEGA_BUTTON_TRADE_WIDE_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/omega_button_trade_wide_hover")
+   );
+   public static final ButtonElement.ButtonTextures OMEGA_BUTTON_TRADE_WIDE_TEXTURES = new ButtonElement.ButtonTextures(
+      OMEGA_BUTTON_TRADE_WIDE, OMEGA_BUTTON_TRADE_WIDE_HOVER, OMEGA_BUTTON_TRADE_WIDE_HOVER, OMEGA_BUTTON_TRADE_WIDE_DISABLED
+   );
    public static final TextureAtlasRegion BUTTON_PAY = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_pay"));
    public static final TextureAtlasRegion BUTTON_PAY_DISABLED = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_pay_disabled")
@@ -173,6 +189,21 @@ public final class ScreenTextures {
    );
    public static final ButtonElement.ButtonTextures BUTTON_TOGGLE_OFF_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_TOGGLE_OFF, BUTTON_TOGGLE_OFF_HOVER, BUTTON_TOGGLE_OFF, BUTTON_TOGGLE_OFF
+   );
+   public static final TextureAtlasRegion BUTTON_RESET_TRADES = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_reset_trades")
+   );
+   public static final TextureAtlasRegion BUTTON_RESET_TRADES_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_reset_trades_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_RESET_TRADES_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_reset_trades_disabled")
+   );
+   public static final TextureAtlasRegion BUTTON_RESET_TRADES_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_reset_trades_pressed")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_RESET_TRADES_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_RESET_TRADES, BUTTON_RESET_TRADES_HOVER, BUTTON_RESET_TRADES_PRESSED, BUTTON_RESET_TRADES_DISABLED
    );
    public static final TextureAtlasRegion PROGRESS_ARROW_BACKGROUND = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/progress/arrow_right_background")

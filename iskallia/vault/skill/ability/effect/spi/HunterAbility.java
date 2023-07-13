@@ -19,6 +19,7 @@ import iskallia.vault.skill.ability.effect.spi.core.InstantManaAbility;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.ServerScheduler;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.world.data.ServerVaults;
 import java.awt.Color;
 import java.util.ArrayList;
@@ -33,6 +34,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -68,8 +71,25 @@ public class HunterAbility extends InstantManaAbility {
    public HunterAbility() {
    }
 
-   public double getSearchRadius() {
+   public double getUnmodifiedSearchRadius() {
       return this.searchRadius;
+   }
+
+   public double getRadius(Entity attacker) {
+      double realRadius = this.getUnmodifiedSearchRadius();
+      if (attacker instanceof Player player) {
+         for (ConfiguredModification<FloatValueConfig, HunterRangeModification> mod : SpecialAbilityModification.getModifications(
+            player, HunterRangeModification.class
+         )) {
+            realRadius = mod.modification().adjustRange(mod.config(), realRadius);
+         }
+      }
+
+      if (attacker instanceof LivingEntity livingEntity) {
+         realRadius = AreaOfEffectHelper.adjustAreaOfEffect(livingEntity, (float)realRadius);
+      }
+
+      return realRadius;
    }
 
    public int getColor() {
@@ -170,14 +190,7 @@ public class HunterAbility extends InstantManaAbility {
 
    protected void forEachTile(Level world, Player player, Consumer<PartialTile> consumer) {
       BlockPos playerOffset = player.blockPosition();
-      double radius = this.getSearchRadius();
-
-      for (ConfiguredModification<FloatValueConfig, HunterRangeModification> mod : SpecialAbilityModification.getModifications(
-         player, HunterRangeModification.class
-      )) {
-         radius = mod.modification().adjustRange(mod.config(), radius);
-      }
-
+      double radius = this.getRadius(player);
       double radiusSq = radius * radius;
       int iRadius = Mth.ceil(radius);
       Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);

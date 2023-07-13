@@ -19,7 +19,7 @@ public class Tier5MinerZombieEntity extends MinerZombieEntity {
          return false;
       } else {
          if (target instanceof LivingEntity livingTarget) {
-            livingTarget.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 300, 1, true, true));
+            livingTarget.addEffect(new MobEffectInstance(MobEffects.DIG_SLOWDOWN, 40, 1, true, true));
          }
 
          return true;

@@ -3,7 +3,8 @@ package iskallia.vault.client.gui.screen.bounty.element.task;
 import iskallia.vault.bounty.task.KillEntityTask;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
-import iskallia.vault.util.TextUtil;
+import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.util.EntityGroupsUtils;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -11,10 +12,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class KillEntityTaskElement extends AbstractTaskElement<KillEntityTask> {
+   private List<Component> extendedDisplay = new ArrayList<>();
+
    protected KillEntityTaskElement(ISpatial spatial, KillEntityTask task, BountyElement.Status status) {
       super(spatial, task, status);
    }
@@ -36,28 +37,21 @@ public class KillEntityTaskElement extends AbstractTaskElement<KillEntityTask> {
 
    @Override
    public List<MutableComponent> getDescription() {
-      TextComponent entityName = TextUtil.formatLocationPathAsProperNoun(this.getTask().getProperties().getEntityId());
       List<MutableComponent> description = new ArrayList<>();
-      description.add(new TextComponent("Kill ").append(entityName).append("s in:").withStyle(Style.EMPTY.withColor(ChatFormatting.BLACK)));
+      EntityPredicate filter = this.getTask().getProperties().getFilter();
+      Component entityText = EntityGroupsUtils.getName(filter);
+      description.add(new TextComponent("Kill ").append(entityText).append(" Mobs in:").withStyle(Style.EMPTY.withColor(ChatFormatting.BLACK)));
       description.addAll(this.getDimensionsForDescription());
       return description;
    }
 
    @Override
    protected MutableComponent getTargetDisplayName() {
-      EntityType<?> entity = (EntityType<?>)ForgeRegistries.ENTITIES.getValue(this.getTask().getProperties().getEntityId());
-      return (MutableComponent)(entity == null
-         ? TextUtil.formatLocationPathAsProperNoun(this.getTask().getProperties().getEntityId())
-         : (MutableComponent)entity.getDescription());
+      return new TextComponent("Click to view in Bestiary.");
    }
 
    @Override
    protected List<Component> getExtendedDisplay() {
-      EntityType<?> entity = (EntityType<?>)ForgeRegistries.ENTITIES.getValue(this.getTask().getProperties().getEntityId());
-      return List.of(
-         (Component)(entity == null
-            ? TextUtil.formatLocationPathAsProperNoun(this.getTask().getProperties().getEntityId())
-            : (MutableComponent)entity.getDescription())
-      );
+      return List.of(this.getTargetDisplayName());
    }
 }

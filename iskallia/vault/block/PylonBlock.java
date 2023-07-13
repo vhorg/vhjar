@@ -1,7 +1,10 @@
 package iskallia.vault.block;
 
 import iskallia.vault.block.entity.PylonTileEntity;
+import iskallia.vault.core.vault.pylon.PylonBuff;
+import iskallia.vault.effect.PylonEffect;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.PylonConsumeParticleMessage;
 import iskallia.vault.util.BlockHelper;
@@ -14,6 +17,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -80,6 +84,20 @@ public class PylonBlock extends Block implements EntityBlock {
                   PacketDistributor.ALL.noArg(),
                   new PylonConsumeParticleMessage(new Vec3(pos.getX(), pos.getY(), pos.getZ()), player.getId(), pylon.config.getColor())
                );
+            PylonEffect effect;
+            if (player.hasEffect(ModEffects.PYLON)) {
+               effect = ModEffects.PYLON_OVERFLOW;
+            } else {
+               effect = ModEffects.PYLON;
+            }
+
+            effect.setDescription(pylon.config.getDescription());
+            PylonBuff<?> buff = pylon.config.build();
+            PylonBuff.Config<?> buffConfig = buff.getConfig();
+            int duration = buffConfig.getDuration();
+            if (duration > 0) {
+               player.addEffect(new MobEffectInstance(effect, duration, 60, false, false, true));
+            }
          }
 
          return InteractionResult.SUCCESS;

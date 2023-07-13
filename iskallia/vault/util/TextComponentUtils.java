@@ -1,6 +1,8 @@
 package iskallia.vault.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import iskallia.vault.client.gui.framework.text.TextBorder;
+import java.util.Comparator;
 import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSource;
@@ -142,5 +144,16 @@ public class TextComponentUtils {
          return Optional.empty();
       }, Style.EMPTY);
       return result;
+   }
+
+   public static Comparator<Component> componentComparator() {
+      return (o1, o2) -> {
+         Comparator<String> stringComparator = Comparator.naturalOrder();
+         return stringComparator.compare(o1.getString(), o2.getString());
+      };
+   }
+
+   public static int getWidth(Component component) {
+      return TextBorder.DEFAULT_FONT.get().width(component.getVisualOrderText());
    }
 }

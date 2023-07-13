@@ -17,6 +17,10 @@ public class ChanceItemStackEntry extends ItemStackEntry {
       return this.chance;
    }
 
+   public ChanceItemStackEntry adjustChance(float chance) {
+      return new ChanceItemStackEntry(this.getMatchingStack(), this.getMinCount(), this.getMaxCount(), this.getChance() + chance);
+   }
+
    @Override
    public ItemStack createItemStack(Random rand) {
       return rand.nextFloat() >= this.getChance() ? ItemStack.EMPTY : super.createItemStack(rand);

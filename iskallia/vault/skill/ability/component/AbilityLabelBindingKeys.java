@@ -3,6 +3,7 @@ package iskallia.vault.skill.ability.component;
 public final class AbilityLabelBindingKeys {
    public static final String COOLDOWN = "cooldown";
    public static final String DAMAGE = "damage";
+   public static final String ABILITY_POWER = "ability_power";
    public static final String DISTANCE = "distance";
    public static final String MANA_COST = "manaCost";
    public static final String LEVEL = "level";
@@ -18,6 +19,7 @@ public final class AbilityLabelBindingKeys {
    public static final String MANA_PER_DAMAGE = "manaPerDamage";
    public static final String KNOCKBACK = "knockback";
    public static final String SLOWNESS = "slowness";
+   public static final String CHILLED = "chilled";
    public static final String CHAINS = "chains";
    public static final String LEECH = "leech";
    public static final String ETERNALS = "eternals";
@@ -45,6 +47,16 @@ public final class AbilityLabelBindingKeys {
    public static final String STUN_DURATION = "stunDuration";
    public static final String STUN_AMPLIFIER = "stunAmplifier";
    public static final String QUILL_COUNT = "quillCount";
+   public static final String STORM_INTERVAL = "stormInterval";
+   public static final String SLOW_DURATION = "slowDuration";
+   public static final String FROSTBITE_DURATION = "frostbiteDuration";
+   public static final String FROSTBITE_CHANCE = "frostbiteChance";
+   public static final String VULNERABLE = "vulnerable";
+   public static final String STACKS_USED_PER_HIT = "stacksUsedPerHit";
+   public static final String MAX_STACKS = "maxStacks";
+   public static final String ATTACK_DAMAGE_PER_STACK = "attackDamagePerStack";
+   public static final String ABILITY_POWER_PER_STACK = "abilityPowerPerStack";
+   public static final String LUCKY_HIT_PER_STACK = "luckyHitPerStack";
 
    private AbilityLabelBindingKeys() {
    }

@@ -10,6 +10,7 @@ import iskallia.vault.bounty.task.KillEntityTask;
 import iskallia.vault.bounty.task.MiningTask;
 import iskallia.vault.bounty.task.Task;
 import iskallia.vault.client.gui.framework.ScreenTextures;
+import iskallia.vault.client.gui.framework.element.ClickableLabelElement;
 import iskallia.vault.client.gui.framework.element.DynamicProgressElement;
 import iskallia.vault.client.gui.framework.element.ElasticContainerElement;
 import iskallia.vault.client.gui.framework.element.FakeOversizedItemSlotElement;
@@ -19,9 +20,11 @@ import iskallia.vault.client.gui.framework.render.Tooltips;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
+import iskallia.vault.client.gui.screen.bestiary.BestiaryScreen;
 import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.TextUtil;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -30,6 +33,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.TooltipFlag.Default;
@@ -52,15 +57,28 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
       LabelElement<?> descriptionLabel = new LabelElement(
          Spatials.positionXY(2, 20), new TextComponent("Description:").withStyle(ChatFormatting.BLACK), LabelTextStyle.defaultStyle()
       );
-      this.description = this.addElement(
-            new LabelElement<LabelElement<LabelElement<?>>>(
-                  Spatials.positionXY(2, descriptionLabel.bottom() + 1).width(this.getWorldSpatial().width() - 4),
-                  TextUtil.listToComponent((List<T>)this.getDescription()),
-                  LabelTextStyle.wrap()
-               )
-               .tooltip(Tooltips.shift(Tooltips.single(this::getTargetDisplayName), Tooltips.multi(this::getExtendedDisplay)))
+      LabelElement<?> descriptionElement = new LabelElement(
+            Spatials.positionXY(2, descriptionLabel.bottom() + 1).width(this.getWorldSpatial().width() - 4),
+            TextUtil.listToComponent((List<T>)this.getDescription()),
+            LabelTextStyle.wrap()
          )
-         .layout((screen, gui, parent, world) -> world.width(this.width() - 4));
+         .tooltip(Tooltips.shift(Tooltips.single(this::getTargetDisplayName), Tooltips.multi(this::getExtendedDisplay)));
+      if (task instanceof KillEntityTask killEntityTask) {
+         this.addElement(
+               new ClickableLabelElement(
+                  Spatials.positionXYZ(2, descriptionLabel.bottom() + 1, 1).width(this.getWorldSpatial().width() - 4).height(20),
+                  Component.nullToEmpty(""),
+                  LabelTextStyle.defaultStyle(),
+                  () -> Minecraft.getInstance().setScreen(new BestiaryScreen(killEntityTask.getProperties().getFilter()))
+               )
+            )
+            .layout((screen, gui, parent, world) -> {
+               world.width(this.width() - 4);
+               world.height(20);
+            });
+      }
+
+      this.description = this.addElement(descriptionElement).layout((screen, gui, parent, world) -> world.width(this.width() - 4));
       int descriptionHeight = this.description.getTextStyle().getLabelHeight(this.description.getComponent(), this.description.width() - 2 / 2);
       LabelElement<?> progressLabel = new LabelElement(
          Spatials.positionXY(2, descriptionHeight + 18 + 15), new TextComponent("Progress:").withStyle(ChatFormatting.BLACK), LabelTextStyle.defaultStyle()
@@ -77,9 +95,14 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
             LabelTextStyle.center().shadow()
          )
          .layout((screen, gui, parent, world) -> world.width(this.getWorldSpatial().width() - 2));
+      String rewardPool = task.getProperties().getRewardPool();
+      TextColor textColor = ModConfigs.COLORS.getColor(rewardPool);
       LabelElement<?> rewardText = new LabelElement(
          Spatials.positionXY(2, progressText.y() + progressText.height() + 7),
-         new TextComponent("Rewards:").withStyle(ChatFormatting.BLACK),
+         new TextComponent("Rewards: (")
+            .withStyle(ChatFormatting.BLACK)
+            .append(new TextComponent(rewardPool).withStyle(Style.EMPTY.withColor(textColor)))
+            .append(new TextComponent(")").withStyle(ChatFormatting.BLACK)),
          LabelTextStyle.defaultStyle()
       );
       LabelElement<?> vaultExpLabel = new LabelElement(

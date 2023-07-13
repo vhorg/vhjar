@@ -204,11 +204,11 @@ public class PlayerEvents {
             Random rand = event.getWorld().getRandom();
             VaultRarity rarity = ((VaultChestTileEntity)tile).getRarity();
             if (rarity == VaultRarity.EPIC) {
-               event.getWorld().playSound(null, event.getPos(), ModSounds.VAULT_CHEST_EPIC_OPEN, SoundSource.BLOCKS, 0.5F, rand.nextFloat() * 0.1F + 0.9F);
+               event.getWorld().playSound(null, event.getPos(), ModSounds.VAULT_CHEST_EPIC_OPEN, SoundSource.BLOCKS, 0.2F, rand.nextFloat() * 0.1F + 0.9F);
             } else if (rarity == VaultRarity.OMEGA) {
-               event.getWorld().playSound(null, event.getPos(), ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.5F, rand.nextFloat() * 0.1F + 0.9F);
+               event.getWorld().playSound(null, event.getPos(), ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.2F, rand.nextFloat() * 0.1F + 0.9F);
             } else if (rarity == VaultRarity.RARE) {
-               event.getWorld().playSound(null, event.getPos(), ModSounds.VAULT_CHEST_RARE_OPEN, SoundSource.BLOCKS, 0.5F, rand.nextFloat() * 0.1F + 0.9F);
+               event.getWorld().playSound(null, event.getPos(), ModSounds.VAULT_CHEST_RARE_OPEN, SoundSource.BLOCKS, 0.3F, rand.nextFloat() * 0.1F + 0.9F);
             }
          }
       }

@@ -50,9 +50,12 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
    private VaultForgeRecipe selectedRecipe = null;
 
    public ForgeRecipeContainerScreen(T container, Inventory inventory, Component title, int height) {
+      this(container, inventory, title, height, 176);
+   }
+
+   public ForgeRecipeContainerScreen(T container, Inventory inventory, Component title, int height, int width) {
       super(container, inventory, title, ScreenRenderers.getImmediate(), ScreenTooltipRenderer::create);
       this.playerInventory = inventory;
-      int width = 176;
       this.setGuiSize(Spatials.size(width, height));
       V tile = (V)((ForgeRecipeContainer)this.getMenu()).getTile();
       if (tile == null) {
@@ -60,10 +63,7 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
          this.craftingSelectorElement = null;
          this.levelInput = null;
       } else {
-         this.addElement(
-            (NineSliceElement)new NineSliceElement(this.getGuiSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)
-               .layout((screen, gui, parent, world) -> world.translateXY(gui).size(Spatials.copy(gui)))
-         );
+         this.addBackgroundElement();
          this.addElement(
             (LabelElement)new LabelElement(
                   Spatials.positionXY(8, 7), tile.getDisplayName().copy().withStyle(Style.EMPTY.withColor(-12632257)), LabelTextStyle.defaultStyle()
@@ -73,7 +73,11 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
          MutableComponent inventoryName = inventory.getDisplayName().copy();
          inventoryName.withStyle(Style.EMPTY.withColor(-12632257));
          this.addElement(
-            (LabelElement)new LabelElement(Spatials.positionXY(8, height - 93), inventoryName, LabelTextStyle.defaultStyle())
+            (LabelElement)new LabelElement(
+                  Spatials.positionXY(((ForgeRecipeContainer)this.getMenu()).getPlayerInventoryOffset().x, height - 93),
+                  inventoryName,
+                  LabelTextStyle.defaultStyle()
+               )
                .layout((screen, gui, parent, world) -> world.translateXY(gui))
          );
          List<Slot> normalSlots = ((ForgeRecipeContainer)this.getMenu()).slots;
@@ -87,15 +91,16 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
                )
                .layout((screen, gui, parent, world) -> world.positionXY(gui))
          );
+         this.craftingSelectorElement = this.addElement(this.createCraftingSelector());
+         int offsetX = ((ForgeRecipeContainer)this.getMenu()).getOffset().x;
+         int offsetY = ((ForgeRecipeContainer)this.getMenu()).getOffset().y;
          this.addElement(
             this.craftButton = new ButtonElement(
-                  Spatials.positionXY(this.imageWidth - 54, this.imageHeight - 133), ScreenTextures.BUTTON_CRAFT_TEXTURES, this::onCraftClick
+                  Spatials.positionXY(this.craftingSelectorElement.right() + 3, height - 133), ScreenTextures.BUTTON_CRAFT_TEXTURES, this::onCraftClick
                )
                .layout((screen, gui, parent, world) -> world.translateXY(gui))
          );
          this.craftButton.setDisabled(true);
-         this.craftingSelectorElement = this.addElement(this.createCraftingSelector());
-         int offsetY = ((ForgeRecipeContainer)this.getMenu()).getOffset().y;
          this.levelInput = ((TextInputElement)this.addElement(
                (TextInputElement)new TextInputElement(Spatials.positionXY(143, offsetY - 1).size(26, 12), Minecraft.getInstance().font)
                   .layout((screen, gui, parent, world) -> world.translateXY(gui))
@@ -129,6 +134,13 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
             }
          });
       }
+   }
+
+   protected void addBackgroundElement() {
+      this.addElement(
+         (NineSliceElement)new NineSliceElement(this.getGuiSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)
+            .layout((screen, gui, parent, world) -> world.translateXY(gui).size(Spatials.copy(gui)))
+      );
    }
 
    @Nonnull
@@ -178,14 +190,22 @@ public abstract class ForgeRecipeContainerScreen<V extends ForgeRecipeTileEntity
       if (this.craftingSelectorElement != null) {
          return this.craftingSelectorElement;
       } else {
+         int slotWidth = 0;
          List<VaultForgeRecipe> recipes = Collections.emptyList();
          V tile = (V)((ForgeRecipeContainer)this.getMenu()).getTile();
          if (tile != null) {
             recipes = ClientForgeRecipesData.getRecipes(tile.getSupportedRecipeTypes());
+            slotWidth = Mth.ceil(tile.getInventory().getContainerSize() / 3.0F);
          }
 
+         int offsetX = ((ForgeRecipeContainer)this.getMenu()).getOffset().x;
          return new CraftingSelectorElement(
-               Spatials.positionXY(47, this.imageHeight - 151).height(54), 3, recipes, discoveredRecipes, this::onRecipeSelect, this::getMissingRecipeInputs
+               Spatials.positionXY(offsetX + slotWidth * 18 + 3, this.imageHeight - 151).height(54),
+               3,
+               recipes,
+               discoveredRecipes,
+               this::onRecipeSelect,
+               this::getMissingRecipeInputs
             )
             .layout((screen, gui, parent, world) -> world.translateXY(gui));
       }

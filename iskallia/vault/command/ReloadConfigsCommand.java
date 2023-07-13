@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.InvalidConfigsMessage;
+import iskallia.vault.network.message.OmegaShardGlobalTradeMessage;
 import iskallia.vault.network.message.ShardGlobalTradeMessage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -51,7 +52,8 @@ public class ReloadConfigsCommand extends Command {
       }
 
       if (!ModConfigs.INVALID_CONFIGS.isEmpty()) {
-         ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ShardGlobalTradeMessage(ModConfigs.SOUL_SHARD.getShardTrades()));
+         ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ShardGlobalTradeMessage(ModConfigs.SOUL_SHARD.getTrades()));
+         ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new OmegaShardGlobalTradeMessage(ModConfigs.OMEGA_SOUL_SHARD.getTrades()));
          ((CommandSourceStack)context.getSource()).sendSuccess(new TextComponent("Configs reloaded, with errors!").withStyle(ChatFormatting.RED), true);
 
          try {
@@ -66,7 +68,8 @@ public class ReloadConfigsCommand extends Command {
             throw var3;
          }
       } else {
-         ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ShardGlobalTradeMessage(ModConfigs.SOUL_SHARD.getShardTrades()));
+         ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ShardGlobalTradeMessage(ModConfigs.SOUL_SHARD.getTrades()));
+         ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new OmegaShardGlobalTradeMessage(ModConfigs.OMEGA_SOUL_SHARD.getTrades()));
          ((CommandSourceStack)context.getSource()).sendSuccess(new TextComponent("Configs reloaded!").withStyle(ChatFormatting.GREEN), true);
       }
 

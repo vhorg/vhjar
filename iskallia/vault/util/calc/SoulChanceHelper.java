@@ -12,6 +12,7 @@ public class SoulChanceHelper {
       float soulChance = 0.0F;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
       soulChance += snapshot.getAttributeValue(ModGearAttributes.SOUL_CHANCE, VaultGearAttributeTypeMerger.floatSum());
+      soulChance += snapshot.getAttributeValue(ModGearAttributes.SOUL_CHANCE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum()) * soulChance;
       return CommonEvents.PLAYER_STAT.invoke(PlayerStat.SOUL_CHANCE, entity, soulChance).getValue();
    }
 }

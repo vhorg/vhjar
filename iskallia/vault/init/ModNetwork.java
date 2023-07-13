@@ -2,6 +2,7 @@ package iskallia.vault.init;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.network.message.AbilityActivityMessage;
+import iskallia.vault.network.message.AbilityCooldownMessage;
 import iskallia.vault.network.message.AbilityFocusMessage;
 import iskallia.vault.network.message.AbilityKnownOnesMessage;
 import iskallia.vault.network.message.AbilityLevelMessage;
@@ -10,9 +11,12 @@ import iskallia.vault.network.message.AbilitySelectSpecializationMessage;
 import iskallia.vault.network.message.ActiveEternalMessage;
 import iskallia.vault.network.message.AngelToggleMessage;
 import iskallia.vault.network.message.AnimalPenParticleMessage;
+import iskallia.vault.network.message.BonkParticleMessage;
 import iskallia.vault.network.message.ChainingParticleMessage;
 import iskallia.vault.network.message.ClientboundArchetypeMessage;
+import iskallia.vault.network.message.ClientboundChampionMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
+import iskallia.vault.network.message.ClientboundFireballExplosionMessage;
 import iskallia.vault.network.message.ClientboundHunterParticlesFromJavelinMessage;
 import iskallia.vault.network.message.ClientboundHunterParticlesMessage;
 import iskallia.vault.network.message.ClientboundMobEffectRemoveMessage;
@@ -49,10 +53,13 @@ import iskallia.vault.network.message.LuckyHitLeechParticleMessage;
 import iskallia.vault.network.message.LuckyHitManaParticleMessage;
 import iskallia.vault.network.message.LuckyHitParticleMessage;
 import iskallia.vault.network.message.LuckyHitSweepingParticleMessage;
+import iskallia.vault.network.message.LuckyHitVortexParticleMessage;
+import iskallia.vault.network.message.MobCritParticleMessage;
 import iskallia.vault.network.message.ModifierAlchemyCraftMessage;
 import iskallia.vault.network.message.ModifierWorkbenchCraftMessage;
 import iskallia.vault.network.message.MonolithIgniteMessage;
 import iskallia.vault.network.message.NovaParticleMessage;
+import iskallia.vault.network.message.OmegaShardGlobalTradeMessage;
 import iskallia.vault.network.message.OmegaStatueUIMessage;
 import iskallia.vault.network.message.OpenVaultSnapshotMessage;
 import iskallia.vault.network.message.PartyMembersMessage;
@@ -85,6 +92,7 @@ import iskallia.vault.network.message.ServerboundOpenTalentsMessage;
 import iskallia.vault.network.message.ServerboundOpenVaultExitMessage;
 import iskallia.vault.network.message.ServerboundPickaxeOffsetKeyMessage;
 import iskallia.vault.network.message.ServerboundRenameEternalMessage;
+import iskallia.vault.network.message.ServerboundResetBlackMarketTradesMessage;
 import iskallia.vault.network.message.ServerboundSelectArchetypeMessage;
 import iskallia.vault.network.message.ServerboundSendSnapshotLinkMessage;
 import iskallia.vault.network.message.ServerboundSkillAltarActionMessage;
@@ -238,6 +246,9 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(nextId(), AbilityFocusMessage.class, AbilityFocusMessage::encode, AbilityFocusMessage::decode, AbilityFocusMessage::handle);
       CHANNEL.registerMessage(
+         nextId(), AbilityCooldownMessage.class, AbilityCooldownMessage::encode, AbilityCooldownMessage::decode, AbilityCooldownMessage::handle
+      );
+      CHANNEL.registerMessage(
          nextId(), AbilityActivityMessage.class, AbilityActivityMessage::encode, AbilityActivityMessage::decode, AbilityActivityMessage::handle
       );
       CHANNEL.registerMessage(nextId(), FighterSizeMessage.class, FighterSizeMessage::encode, FighterSizeMessage::decode, FighterSizeMessage::handle);
@@ -295,6 +306,13 @@ public class ModNetwork {
       CHANNEL.registerMessage(nextId(), EternalSyncMessage.class, EternalSyncMessage::encode, EternalSyncMessage::decode, EternalSyncMessage::handle);
       CHANNEL.registerMessage(
          nextId(), ShardGlobalTradeMessage.class, ShardGlobalTradeMessage::encode, ShardGlobalTradeMessage::decode, ShardGlobalTradeMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         OmegaShardGlobalTradeMessage.class,
+         OmegaShardGlobalTradeMessage::encode,
+         OmegaShardGlobalTradeMessage::decode,
+         OmegaShardGlobalTradeMessage::handle
       );
       CHANNEL.registerMessage(nextId(), ActiveEternalMessage.class, ActiveEternalMessage::encode, ActiveEternalMessage::decode, ActiveEternalMessage::handle);
       CHANNEL.registerMessage(
@@ -357,6 +375,13 @@ public class ModNetwork {
          ServerboundRenameEternalMessage::encode,
          ServerboundRenameEternalMessage::decode,
          ServerboundRenameEternalMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundResetBlackMarketTradesMessage.class,
+         ServerboundResetBlackMarketTradesMessage::encode,
+         ServerboundResetBlackMarketTradesMessage::decode,
+         ServerboundResetBlackMarketTradesMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),
@@ -637,6 +662,9 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(nextId(), TauntParticleMessage.class, TauntParticleMessage::encode, TauntParticleMessage::decode, TauntParticleMessage::handle);
       CHANNEL.registerMessage(
+         nextId(), MobCritParticleMessage.class, MobCritParticleMessage::encode, MobCritParticleMessage::decode, MobCritParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
          nextId(), LuckyHitParticleMessage.class, LuckyHitParticleMessage::encode, LuckyHitParticleMessage::decode, LuckyHitParticleMessage::handle
       );
       CHANNEL.registerMessage(
@@ -667,6 +695,14 @@ public class ModNetwork {
          LuckyHitDamageParticleMessage::decode,
          LuckyHitDamageParticleMessage::handle
       );
+      CHANNEL.registerMessage(
+         nextId(),
+         LuckyHitVortexParticleMessage.class,
+         LuckyHitVortexParticleMessage::encode,
+         LuckyHitVortexParticleMessage::decode,
+         LuckyHitVortexParticleMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), BonkParticleMessage.class, BonkParticleMessage::encode, BonkParticleMessage::decode, BonkParticleMessage::handle);
       CHANNEL.registerMessage(
          nextId(),
          ClientboundRefreshToolViseMessage.class,
@@ -821,10 +857,20 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(),
+         ClientboundFireballExplosionMessage.class,
+         ClientboundFireballExplosionMessage::encode,
+         ClientboundFireballExplosionMessage::decode,
+         ClientboundFireballExplosionMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
          ClientboundNightVisionGogglesParticlesMessage.class,
          ClientboundNightVisionGogglesParticlesMessage::encode,
          ClientboundNightVisionGogglesParticlesMessage::decode,
          ClientboundNightVisionGogglesParticlesMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), ClientboundChampionMessage.class, ClientboundChampionMessage::encode, ClientboundChampionMessage::decode, ClientboundChampionMessage::handle
       );
    }
 

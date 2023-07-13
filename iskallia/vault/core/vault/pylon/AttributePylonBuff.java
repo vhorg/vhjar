@@ -48,6 +48,11 @@ public class AttributePylonBuff extends TickingPylonBuff<AttributePylonBuff.Conf
       private Operation operation;
       private int duration;
 
+      @Override
+      public int getDuration() {
+         return this.duration;
+      }
+
       public AttributePylonBuff build() {
          return new AttributePylonBuff(this);
       }

@@ -26,6 +26,7 @@ public class ColorsConfig extends Config {
    public static final String MANA_COST = "manaCost";
    public static final String DISTANCE = "distance";
    public static final String DAMAGE = "damage";
+   public static final String ABILITY_POWER = "ability_power";
    public static final String DAMAGE_REDUCTION = "damageReduction";
    public static final String LEVEL_HI = "levelHi";
    public static final String LEVEL_LO = "levelLo";
@@ -39,6 +40,7 @@ public class ColorsConfig extends Config {
    public static final String MANA_PER_DAMAGE = "manaPerDamage";
    public static final String KNOCKBACK = "knockback";
    public static final String SLOWNESS = "slowness";
+   public static final String CHILLED = "chilled";
    public static final String CHAINS = "chains";
    public static final String LEECH = "leech";
    public static final String ETERNALS = "eternals";
@@ -58,6 +60,10 @@ public class ColorsConfig extends Config {
    public static final String AMPLIFIER = "amplifier";
    public static final String MANA_PER_BOLT = "additionalManaPerBolt";
    public static final String FORCE = "force";
+   public static final String STORM_INTERVAL = "stormInterval";
+   public static final String STACKS_USED_PER_HIT = "stacksUsedPerHit";
+   public static final String MAX_STACKS = "maxStacks";
+   public static final String LUCKY_HIT = "luckyHit";
    @Expose
    private final ColorsConfig.Colors colors = new ColorsConfig.Colors();
 
@@ -75,6 +81,7 @@ public class ColorsConfig extends Config {
       this.colors.builtin.put("cooldown", TextColor.fromRgb(255));
       this.colors.builtin.put("manaCost", TextColor.fromRgb(65535));
       this.colors.builtin.put("distance", TextColor.fromRgb(15918725));
+      this.colors.builtin.put("ability_power", TextColor.fromRgb(16711883));
       this.colors.builtin.put("damage", TextColor.fromRgb(12727847));
       this.colors.builtin.put("damageReduction", TextColor.fromRgb(12727847));
       this.colors.builtin.put("levelHi", TextColor.fromRgb(65280));
@@ -89,6 +96,7 @@ public class ColorsConfig extends Config {
       this.colors.builtin.put("manaPerDamage", TextColor.fromRgb(65535));
       this.colors.builtin.put("knockback", TextColor.fromRgb(10033226));
       this.colors.builtin.put("slowness", TextColor.fromRgb(2837801));
+      this.colors.builtin.put("chilled", TextColor.fromRgb(5286063));
       this.colors.builtin.put("chains", TextColor.fromRgb(2837801));
       this.colors.builtin.put("leech", TextColor.fromRgb(16739950));
       this.colors.builtin.put("eternals", TextColor.fromRgb(13107175));
@@ -108,6 +116,10 @@ public class ColorsConfig extends Config {
       this.colors.builtin.put("amplifier", TextColor.fromRgb(16777118));
       this.colors.builtin.put("additionalManaPerBolt", TextColor.fromRgb(65535));
       this.colors.builtin.put("force", TextColor.fromRgb(15918725));
+      this.colors.builtin.put("stormInterval", TextColor.fromRgb(15910513));
+      this.colors.builtin.put("maxStacks", TextColor.fromRgb(52084));
+      this.colors.builtin.put("stacksUsedPerHit", TextColor.fromRgb(13748480));
+      this.colors.builtin.put("luckyHit", TextColor.fromRgb(1308067));
    }
 
    public TextColor getColor(String key) {

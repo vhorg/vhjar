@@ -39,6 +39,48 @@ public final class ModRenderTypes extends RenderType {
          .setLightmapState(RenderStateShard.LIGHTMAP)
          .createCompositeState(false)
    );
+   public static final RenderType VULNERABLE_INDICATOR = RenderType.create(
+      "vulnerable_indicator",
+      DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+      Mode.QUADS,
+      256,
+      true,
+      true,
+      CompositeState.builder()
+         .setShaderState(RenderStateShard.POSITION_COLOR_TEX_LIGHTMAP_SHADER)
+         .setTextureState(new TextureStateShard(VaultMod.id("textures/mob_effect/vulnerable.png"), false, false))
+         .setCullState(RenderStateShard.NO_CULL)
+         .setLightmapState(RenderStateShard.LIGHTMAP)
+         .createCompositeState(false)
+   );
+   public static final RenderType CHAMPION_BUFF_FG_INDICATOR = RenderType.create(
+      "champion_buff_fg_indicator",
+      DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+      Mode.QUADS,
+      256,
+      true,
+      true,
+      CompositeState.builder()
+         .setShaderState(RenderStateShard.POSITION_COLOR_TEX_LIGHTMAP_SHADER)
+         .setTextureState(new TextureStateShard(VaultMod.id("textures/mob_effect/champion_buff_fg.png"), false, false))
+         .setCullState(RenderStateShard.NO_CULL)
+         .setLightmapState(RenderStateShard.LIGHTMAP)
+         .createCompositeState(false)
+   );
+   public static final RenderType CHAMPION_BUFF_BG_INDICATOR = RenderType.create(
+      "champion_buff_bg_indicator",
+      DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+      Mode.QUADS,
+      256,
+      true,
+      true,
+      CompositeState.builder()
+         .setShaderState(RenderStateShard.POSITION_COLOR_TEX_LIGHTMAP_SHADER)
+         .setTextureState(new TextureStateShard(VaultMod.id("textures/mob_effect/champion_buff_bg.png"), false, false))
+         .setCullState(RenderStateShard.NO_CULL)
+         .setLightmapState(RenderStateShard.LIGHTMAP)
+         .createCompositeState(false)
+   );
    public static final RenderType GLACIAL_SHATTER_INDICATOR = RenderType.create(
       "glacial_shatter_indicator",
       DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
@@ -49,6 +91,20 @@ public final class ModRenderTypes extends RenderType {
       CompositeState.builder()
          .setShaderState(RenderStateShard.POSITION_COLOR_TEX_LIGHTMAP_SHADER)
          .setTextureState(new TextureStateShard(VaultMod.id("textures/mob_effect/glacial_shatter.png"), false, false))
+         .setCullState(RenderStateShard.NO_CULL)
+         .setLightmapState(RenderStateShard.LIGHTMAP)
+         .createCompositeState(false)
+   );
+   public static final RenderType CHAMPION_INDICATOR = RenderType.create(
+      "champion_indicator",
+      DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+      Mode.QUADS,
+      256,
+      true,
+      true,
+      CompositeState.builder()
+         .setShaderState(RenderStateShard.POSITION_COLOR_TEX_LIGHTMAP_SHADER)
+         .setTextureState(new TextureStateShard(VaultMod.id("textures/entity/champion_indicator.png"), false, false))
          .setCullState(RenderStateShard.NO_CULL)
          .setLightmapState(RenderStateShard.LIGHTMAP)
          .createCompositeState(false)

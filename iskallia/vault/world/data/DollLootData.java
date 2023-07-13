@@ -1,5 +1,6 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.util.MiscUtils;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import net.minecraft.world.level.saveddata.SavedData;
 public class DollLootData extends SavedData {
    private static final String DATA_NAME_PREFIX = "vaultdolls/";
    private static final String LOOT_STACKS_TAG = "lootStacks";
-   private final List<ItemStack> lootStacks = new ArrayList<>();
+   private List<ItemStack> lootStacks = new ArrayList<>();
 
    public static DollLootData get(ServerLevel level, UUID dollId) {
       return (DollLootData)level.getServer()
@@ -24,7 +25,7 @@ public class DollLootData extends SavedData {
    }
 
    public void addLoot(ItemStack lootStack) {
-      this.lootStacks.add(lootStack);
+      MiscUtils.mergeItemStack(this.lootStacks, lootStack);
       this.setDirty();
    }
 
@@ -63,7 +64,6 @@ public class DollLootData extends SavedData {
 
    private void deserializeStacks(ListTag itemsNbt) {
       this.lootStacks.clear();
-      new ArrayList();
       itemsNbt.forEach(nbt -> {
          CompoundTag itemNbt = (CompoundTag)nbt;
          this.lootStacks.add(ItemStack.of(itemNbt));

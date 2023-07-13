@@ -3,6 +3,7 @@ package iskallia.vault.core.vault.modifier.registry;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.vault.modifier.modifier.ChanceArtifactModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceCatalystModifier;
+import iskallia.vault.core.vault.modifier.modifier.ChanceChampionModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceChestTrapModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceSoulShardModifier;
 import iskallia.vault.core.vault.modifier.modifier.DecoratorAddModifier;
@@ -53,6 +54,10 @@ public final class VaultModifierTypeRegistry {
          this.put(
             VaultMod.id("modifier_type/chance_soul_shard"),
             VaultModifierType.of(ChanceSoulShardModifier.class, AbstractChanceModifier.Properties.class, ChanceSoulShardModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/chance_champion"),
+            VaultModifierType.of(ChanceChampionModifier.class, AbstractChanceModifier.Properties.class, ChanceChampionModifier::new)
          );
          this.put(
             VaultMod.id("modifier_type/decorator_add"),

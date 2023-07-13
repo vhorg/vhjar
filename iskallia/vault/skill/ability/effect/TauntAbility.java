@@ -5,16 +5,11 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.init.ModEffects;
-import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
-import iskallia.vault.network.message.TauntParticleMessage;
 import iskallia.vault.skill.ability.effect.spi.AbstractTauntAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
-import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
-import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.AABBHelper;
-import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -54,7 +49,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import net.minecraftforge.network.PacketDistributor;
 
 @EventBusSubscriber(
    modid = "the_vault",
@@ -62,20 +56,20 @@ import net.minecraftforge.network.PacketDistributor;
 )
 public class TauntAbility extends AbstractTauntAbility {
    protected static final Predicate<LivingEntity> MONSTER_PREDICATE = entity -> entity.getType().getCategory() == MobCategory.MONSTER;
-   private float damageModifier;
+   private int amplifier;
 
    public TauntAbility(
-      int unlockLevel, int learnPointCost, int regretPointCost, int cooldownTicks, float manaCost, float radius, int durationTicks, float damageModifier
+      int unlockLevel, int learnPointCost, int regretPointCost, int cooldownTicks, float manaCost, float radius, int durationTicks, int amplifier
    ) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, radius, durationTicks);
-      this.damageModifier = damageModifier;
+      this.amplifier = amplifier;
    }
 
    public TauntAbility() {
    }
 
-   public float getDamageModifier() {
-      return this.damageModifier;
+   public int getAmplifier() {
+      return this.amplifier;
    }
 
    @Override
@@ -102,28 +96,8 @@ public class TauntAbility extends AbstractTauntAbility {
                         overrideEffect.setTauntingPlayer(player);
                      }
 
-                     mob.addEffect(
-                        new MobEffectInstance(effect, this.getDurationTicks(), 0, false, false) {
-                           public boolean tick(LivingEntity livingEntity, Runnable p_19554_) {
-                              if (!livingEntity.isDeadOrDying() && livingEntity.tickCount % 4 == 0) {
-                                 ModNetwork.CHANNEL
-                                    .send(
-                                       PacketDistributor.ALL.noArg(),
-                                       new TauntParticleMessage(
-                                          new Vec3(
-                                             livingEntity.getX(),
-                                             livingEntity.getY() + livingEntity.getBbHeight() - livingEntity.getBbHeight() / 8.0F,
-                                             livingEntity.getZ()
-                                          ),
-                                          livingEntity.getBbWidth()
-                                       )
-                                    );
-                              }
-
-                              return super.tick(livingEntity, p_19554_);
-                           }
-                        }
-                     );
+                     mob.addEffect(new MobEffectInstance(effect, this.getDurationTicks(), 0, false, false));
+                     mob.addEffect(new MobEffectInstance(ModEffects.VULNERABLE, this.getDurationTicks(), this.getAmplifier(), false, false) {});
                      mob.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);
                      mob.getNavigation().stop();
                      this.sortByShortestDistanceTo(candidateTeleportPositionList, player.blockPosition(), mob.getOnPos());
@@ -245,38 +219,24 @@ public class TauntAbility extends AbstractTauntAbility {
       priority = EventPriority.LOWEST
    )
    public static void on(LivingHurtEvent event) {
-      if (event.getEntity() instanceof Mob mob) {
-         MobEffectInstance effectInstance = mob.getEffect(ModEffects.TARGET_OVERRIDE);
-         if (effectInstance != null) {
-            if (effectInstance.getEffect() instanceof TauntAbility.TargetOverrideEffect overrideEffect
-               && overrideEffect.tauntingPlayer instanceof ServerPlayer player) {
-               AbilityTree abilities = PlayerAbilitiesData.get((ServerLevel)player.level).getAbilities(player);
-
-               for (TauntAbility ability : abilities.getAll(TauntAbility.class, Skill::isUnlocked)) {
-                  float damage = event.getAmount();
-                  event.setAmount(damage * ability.getDamageModifier());
-               }
-            }
-         }
-      }
    }
 
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.damageModifier), buffer);
+      Adapters.INT.writeBits(Integer.valueOf(this.amplifier), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.damageModifier = Adapters.FLOAT.readBits(buffer).orElseThrow();
+      this.amplifier = Adapters.INT.readBits(buffer).orElseThrow();
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.damageModifier)).ifPresent(tag -> nbt.put("damageModifier", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.amplifier)).ifPresent(tag -> nbt.put("amplifier", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -284,13 +244,13 @@ public class TauntAbility extends AbstractTauntAbility {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.damageModifier = Adapters.FLOAT.readNbt(nbt.get("damageModifier")).orElse(0.0F);
+      this.amplifier = Adapters.INT.readNbt(nbt.get("amplifier")).orElse(0);
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
-         Adapters.FLOAT.writeJson(Float.valueOf(this.damageModifier)).ifPresent(element -> json.add("damageModifier", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.amplifier)).ifPresent(element -> json.add("amplifier", element));
          return (JsonObject)json;
       });
    }
@@ -298,7 +258,7 @@ public class TauntAbility extends AbstractTauntAbility {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.damageModifier = Adapters.FLOAT.readJson(json.get("damageModifier")).orElse(0.0F);
+      this.amplifier = Adapters.INT.readJson(json.get("amplifier")).orElse(0);
    }
 
    public static class TargetOverrideEffect extends MobEffect {

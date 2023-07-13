@@ -5,6 +5,7 @@ import iskallia.vault.client.ClientDiscoveredEntriesData;
 import iskallia.vault.client.gui.framework.ScreenTextures;
 import iskallia.vault.client.gui.framework.element.CraftingSelectorElement;
 import iskallia.vault.client.gui.framework.element.ProficiencyDisplayElement;
+import iskallia.vault.client.gui.framework.element.TextureAtlasElement;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.screen.block.base.ForgeRecipeContainerScreen;
 import iskallia.vault.container.VaultForgeContainer;
@@ -16,8 +17,8 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class VaultForgeScreen extends ForgeRecipeContainerScreen<VaultForgeTileEntity, VaultForgeContainer> {
    public VaultForgeScreen(VaultForgeContainer container, Inventory inventory, Component title) {
-      super(container, inventory, title, 206);
-      int xPadding = 8;
+      super(container, inventory, title, 206, 206);
+      int xPadding = 4;
       int availableWidth = this.imageWidth - xPadding * 2;
       int elementWidth = ScreenTextures.PROFICIENCY_DISPLAY_FRAME.width() + 2;
       List<ProficiencyType> displayTypes = ProficiencyType.getCraftableTypes();
@@ -32,6 +33,14 @@ public class VaultForgeScreen extends ForgeRecipeContainerScreen<VaultForgeTileE
                .layout((screen, gui, parent, world) -> world.positionXY(gui).translateXY(xPadding + xOffset, 18))
          );
       }
+   }
+
+   @Override
+   protected void addBackgroundElement() {
+      this.addElement(
+         (TextureAtlasElement)new TextureAtlasElement(this.getGuiSpatial(), ScreenTextures.VAULT_FORGE_BACKGROUND)
+            .layout((screen, gui, parent, world) -> world.translateXY(gui).size(Spatials.copy(gui)))
+      );
    }
 
    @Nonnull

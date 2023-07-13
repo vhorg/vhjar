@@ -9,10 +9,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -38,10 +38,20 @@ public class DiscoveredWorkbenchModifiersData extends SavedData {
    }
 
    public boolean compoundDiscoverWorkbenchCraft(ServerPlayer player, Item gearItem, ResourceLocation key) {
-      return gearItem instanceof IdolItem
-         ? Stream.of(ModItems.IDOL_TIMEKEEPER, ModItems.IDOL_BENEVOLENT, ModItems.IDOL_MALEVOLENCE, ModItems.IDOL_OMNISCIENT)
-            .anyMatch(item -> this.discoverWorkbenchCraft(player, gearItem, key))
-         : this.discoverWorkbenchCraft(player, gearItem, key);
+      if (gearItem instanceof IdolItem) {
+         List<IdolItem> idols = List.of(ModItems.IDOL_TIMEKEEPER, ModItems.IDOL_BENEVOLENT, ModItems.IDOL_MALEVOLENCE, ModItems.IDOL_OMNISCIENT);
+         boolean discovered = false;
+
+         for (IdolItem idol : idols) {
+            if (this.discoverWorkbenchCraft(player, idol, key)) {
+               discovered = true;
+            }
+         }
+
+         return discovered;
+      } else {
+         return this.discoverWorkbenchCraft(player, gearItem, key);
+      }
    }
 
    private boolean discoverWorkbenchCraft(ServerPlayer player, Item gearItem, ResourceLocation key) {
@@ -98,6 +108,7 @@ public class DiscoveredWorkbenchModifiersData extends SavedData {
          CompoundTag playerTag = playerTrinkets.getCompound(i);
          UUID playerId = playerTag.getUUID("player");
          CompoundTag craftsTag = playerTag.getCompound("itemCrafts");
+         Set<ResourceLocation> idolCrafts = new HashSet<>();
          Map<Item, Set<ResourceLocation>> itemCrafts = new LinkedHashMap<>();
 
          for (String itemKey : craftsTag.getAllKeys()) {
@@ -107,8 +118,18 @@ public class DiscoveredWorkbenchModifiersData extends SavedData {
                if (item != null) {
                   Set<ResourceLocation> crafts = NBTHelper.readSet(craftsTag, itemKey, StringTag.class, strTag -> new ResourceLocation(strTag.getAsString()));
                   itemCrafts.put(item, crafts);
+                  if (item instanceof IdolItem) {
+                     idolCrafts.addAll(crafts);
+                  }
                }
             }
+         }
+
+         if (!idolCrafts.isEmpty()) {
+            itemCrafts.put(ModItems.IDOL_TIMEKEEPER, idolCrafts);
+            itemCrafts.put(ModItems.IDOL_BENEVOLENT, idolCrafts);
+            itemCrafts.put(ModItems.IDOL_MALEVOLENCE, idolCrafts);
+            itemCrafts.put(ModItems.IDOL_OMNISCIENT, idolCrafts);
          }
 
          this.discoveredCrafts.put(playerId, itemCrafts);

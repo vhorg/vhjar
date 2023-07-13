@@ -24,10 +24,10 @@ public class NovaAbility extends AbstractNovaAbility {
       int cooldownTicks,
       float manaCost,
       float radius,
-      float percentAttackDamageDealt,
+      float percentAbilityPowerDealt,
       float knockbackStrengthMultiplier
    ) {
-      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, radius, percentAttackDamageDealt, knockbackStrengthMultiplier);
+      super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, radius, percentAbilityPowerDealt, knockbackStrengthMultiplier);
    }
 
    public NovaAbility() {
@@ -38,12 +38,13 @@ public class NovaAbility extends AbstractNovaAbility {
       return context.getSource().as(ServerPlayer.class).map(player -> {
          Vec3 pos = context.getSource().getPos().orElse(player.position());
          List<LivingEntity> targetEntities = this.getTargetEntities(player.level, player, pos);
-         float attackDamage = this.getAttackDamage(player);
+         float attackDamage = this.getAbilityPower(player);
          DamageSource damageSource = DamageSource.playerAttack(player);
 
          for (LivingEntity entity : targetEntities) {
-            ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-               if (entity.hurt(damageSource, attackDamage) && !Mth.equal(this.getKnockbackStrengthMultiplier(), 0.0F)) {
+            float damageModifier = this.getDamageModifier(this.getRadius(player), player.distanceTo(entity));
+            ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+               if (entity.hurt(damageSource, attackDamage * damageModifier) && !Mth.equal(this.getKnockbackStrengthMultiplier(), 0.0F)) {
                   double dx = pos.x - entity.getX();
                   double dz = pos.z - entity.getZ();
                   if (dx * dx + dz * dz < 1.0E-4) {
@@ -53,11 +54,25 @@ public class NovaAbility extends AbstractNovaAbility {
 
                   entity.knockback(0.4F * this.getKnockbackStrengthMultiplier(), dx, dz);
                }
-            });
+            }));
          }
 
          return Ability.ActionResult.successCooldownImmediate();
       }).orElse(Ability.ActionResult.fail());
+   }
+
+   protected float getDamageModifier(float radius, float dist) {
+      if (dist >= 0.0F && dist < radius / 5.0F * 1.0F) {
+         return 1.0F;
+      } else if (dist >= radius / 5.0F * 1.0F && dist < radius / 5.0F * 2.0F) {
+         return 0.8F;
+      } else if (dist >= radius / 5.0F * 2.0F && dist < radius / 5.0F * 3.0F) {
+         return 0.6F;
+      } else if (dist >= radius / 5.0F * 3.0F && dist < radius / 5.0F * 4.0F) {
+         return 0.4F;
+      } else {
+         return dist >= radius / 5.0F * 4.0F ? 0.2F : 0.2F;
+      }
    }
 
    @Override

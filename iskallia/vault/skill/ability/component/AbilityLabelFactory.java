@@ -16,6 +16,7 @@ public final class AbilityLabelFactory {
    public static final String LEVEL = "level";
    public static final String DISTANCE = "distance";
    public static final String DAMAGE = "damage";
+   public static final String ABILITY_POWER = "ability_power";
    public static final String DURATION = "duration";
    public static final String DELAY = "delay";
    public static final String RANGE_HORIZONTAL = "rangeHorizontal";
@@ -27,6 +28,7 @@ public final class AbilityLabelFactory {
    public static final String MANA_PER_DAMAGE = "manaPerDamage";
    public static final String KNOCKBACK = "knockback";
    public static final String SLOWNESS = "slowness";
+   public static final String CHILLED = "chilled";
    public static final String CHAINS = "chains";
    public static final String LEECH = "leech";
    public static final String ETERNALS = "eternals";
@@ -57,6 +59,16 @@ public final class AbilityLabelFactory {
    public static final String STUN_DURATION = "stunDuration";
    public static final String STUN_AMPLIFIER = "stunAmplifier";
    public static final String QUILL_COUNT = "quillCount";
+   public static final String STORM_INTERVAL = "stormInterval";
+   public static final String SLOW_DURATION = "slowDuration";
+   public static final String FROSTBITE_DURATION = "frostbiteDuration";
+   public static final String FROSTBITE_CHANCE = "frostbiteChance";
+   public static final String VULNERABLE = "vulnerable";
+   public static final String STACKS_USED_PER_HIT = "stacksUsedPerHit";
+   public static final String MAX_STACKS = "maxStacks";
+   public static final String ATTACK_DAMAGE_PER_STACK = "attackDamagePerStack";
+   public static final String ABILITY_POWER_PER_STACK = "abilityPowerPerStack";
+   public static final String LUCKY_HIT_PER_STACK = "luckyHitPerStack";
    private static final Map<String, AbilityLabelFactory.IAbilityComponentFactory> FACTORY_MAP = new HashMap<String, AbilityLabelFactory.IAbilityComponentFactory>() {
       {
          this.put("cooldown", context -> AbilityLabelFactory.label("\n Cooldown: ", AbilityLabelFactory.binding(context.config(), "cooldown"), "cooldown"));
@@ -76,6 +88,10 @@ public final class AbilityLabelFactory {
          });
          this.put("distance", context -> AbilityLabelFactory.label("\n Distance: ", AbilityLabelFactory.binding(context.config(), "distance"), "distance"));
          this.put("damage", context -> AbilityLabelFactory.label("\n Damage: ", AbilityLabelFactory.binding(context.config(), "damage"), "damage"));
+         this.put(
+            "ability_power",
+            context -> AbilityLabelFactory.label("\n Ability Power: ", AbilityLabelFactory.binding(context.config(), "ability_power"), "ability_power")
+         );
          this.put("duration", context -> AbilityLabelFactory.label("\n Duration: ", AbilityLabelFactory.binding(context.config(), "duration"), "duration"));
          this.put("delay", context -> AbilityLabelFactory.label("\n Delay: ", AbilityLabelFactory.binding(context.config(), "delay"), "delay"));
          this.put(
@@ -94,6 +110,7 @@ public final class AbilityLabelFactory {
          );
          this.put("knockback", context -> AbilityLabelFactory.label("\n Knockback: ", AbilityLabelFactory.binding(context.config(), "knockback"), "knockback"));
          this.put("slowness", context -> AbilityLabelFactory.label("\n Slowness: ", AbilityLabelFactory.binding(context.config(), "slowness"), "slowness"));
+         this.put("chilled", context -> AbilityLabelFactory.label("\n Chilled: ", AbilityLabelFactory.binding(context.config(), "chilled"), "chilled"));
          this.put("chains", context -> AbilityLabelFactory.label("\n Chains: ", AbilityLabelFactory.binding(context.config(), "chains"), "chains"));
          this.put("leech", context -> AbilityLabelFactory.label("\n Leech: ", AbilityLabelFactory.binding(context.config(), "leech"), "leech"));
          this.put("eternals", context -> AbilityLabelFactory.label("\n Eternals: ", AbilityLabelFactory.binding(context.config(), "eternals"), "eternals"));
@@ -175,6 +192,51 @@ public final class AbilityLabelFactory {
             context -> AbilityLabelFactory.label("\n Stun Amplifier: ", AbilityLabelFactory.binding(context.config(), "stunAmplifier"), "amplifier")
          );
          this.put("quillCount", context -> AbilityLabelFactory.label("\n Quill count: ", AbilityLabelFactory.binding(context.config(), "quillCount"), "chains"));
+         this.put(
+            "stormInterval",
+            context -> AbilityLabelFactory.label("\n Storm Interval: ", AbilityLabelFactory.binding(context.config(), "stormInterval"), "damageInterval")
+         );
+         this.put(
+            "slowDuration",
+            context -> AbilityLabelFactory.label("\n Slow Duration: ", AbilityLabelFactory.binding(context.config(), "slowDuration"), "freezeDuration")
+         );
+         this.put(
+            "frostbiteDuration",
+            context -> AbilityLabelFactory.label(
+               "\n Frostbite Duration: ", AbilityLabelFactory.binding(context.config(), "frostbiteDuration"), "freezeDuration"
+            )
+         );
+         this.put(
+            "frostbiteChance",
+            context -> AbilityLabelFactory.label("\n Frostbite Chance: ", AbilityLabelFactory.binding(context.config(), "frostbiteChance"), "chance")
+         );
+         this.put(
+            "vulnerable",
+            context -> AbilityLabelFactory.label("\n Vulnerability Levels: ", AbilityLabelFactory.binding(context.config(), "vulnerable"), "amplifier")
+         );
+         this.put("maxStacks", context -> AbilityLabelFactory.label("\n Max Stacks: ", AbilityLabelFactory.binding(context.config(), "maxStacks"), "maxStacks"));
+         this.put(
+            "stacksUsedPerHit",
+            context -> AbilityLabelFactory.label(
+               "\n Stacks Used Per Hit: ", AbilityLabelFactory.binding(context.config(), "stacksUsedPerHit"), "stacksUsedPerHit"
+            )
+         );
+         this.put(
+            "attackDamagePerStack",
+            context -> AbilityLabelFactory.label(
+               "\n Attack Damage Per Stack: ", AbilityLabelFactory.binding(context.config(), "attackDamagePerStack"), "damage"
+            )
+         );
+         this.put(
+            "abilityPowerPerStack",
+            context -> AbilityLabelFactory.label(
+               "\n Ability Power Per Stack: ", AbilityLabelFactory.binding(context.config(), "abilityPowerPerStack"), "ability_power"
+            )
+         );
+         this.put(
+            "luckyHitPerStack",
+            context -> AbilityLabelFactory.label("\n Lucky Hit Per Stack: ", AbilityLabelFactory.binding(context.config(), "luckyHitPerStack"), "luckyHit")
+         );
       }
    };
 

@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends AbstractSpatialElement<E> implements IRenderedElement, IGuiEventElement {
    private final NineSliceButtonElement.NineSliceButtonTextures textures;
    private final Runnable onClick;
-   protected boolean visible;
+   protected Supplier<Boolean> visible;
    protected Supplier<Boolean> disabled;
    protected Supplier<Component> component;
    protected LabelTextStyle labelTextStyle;
@@ -38,6 +38,10 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
       this.renderButtonHeld = () -> false;
    }
 
+   public <T extends NineSliceButtonElement<E>> T label(Supplier<Component> component) {
+      return this.label(component, LabelTextStyle.shadow().center());
+   }
+
    public <T extends NineSliceButtonElement<E>> T label(Supplier<Component> component, LabelTextStyle.Builder labelTextStyle) {
       this.component = component;
       this.labelTextStyle = labelTextStyle.build();
@@ -47,12 +51,16 @@ public class NineSliceButtonElement<E extends NineSliceButtonElement<E>> extends
 
    @Override
    public void setVisible(boolean visible) {
+      this.visible = () -> visible;
+   }
+
+   public void setVisible(Supplier<Boolean> visible) {
       this.visible = visible;
    }
 
    @Override
    public boolean isVisible() {
-      return this.visible;
+      return this.visible.get();
    }
 
    public <T extends NineSliceButtonElement<E>> T setDisabled(boolean disabled) {

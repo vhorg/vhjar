@@ -80,6 +80,30 @@ public final class ElementRenderers {
          }
 
          @Override
+         public void renderColoredHollowRect(PoseStack poseStack, int color, int x, int y, int z, int width, int height, int thickness) {
+            ScreenDrawHelper.draw(
+               Mode.QUADS,
+               DefaultVertexFormat.POSITION_COLOR,
+               buf -> ScreenDrawHelper.rect(buf, poseStack).at(x, y).zLevel(z).dim(width, thickness).color(color).drawColored()
+            );
+            ScreenDrawHelper.draw(
+               Mode.QUADS,
+               DefaultVertexFormat.POSITION_COLOR,
+               buf -> ScreenDrawHelper.rect(buf, poseStack).at(x + width - 1, y).zLevel(z).dim(thickness, height).color(color).drawColored()
+            );
+            ScreenDrawHelper.draw(
+               Mode.QUADS,
+               DefaultVertexFormat.POSITION_COLOR,
+               buf -> ScreenDrawHelper.rect(buf, poseStack).at(x, y + height - 1).zLevel(z).dim(width, thickness).color(color).drawColored()
+            );
+            ScreenDrawHelper.draw(
+               Mode.QUADS,
+               DefaultVertexFormat.POSITION_COLOR,
+               buf -> ScreenDrawHelper.rect(buf, poseStack).at(x, y).zLevel(z).dim(thickness, height - 1).color(color).drawColored()
+            );
+         }
+
+         @Override
          public void renderPlain(FormattedCharSequence text, Font font, PoseStack poseStack, int x, int y, int z, int color) {
             poseStack.pushPose();
             poseStack.translate(x, y, z);
@@ -219,6 +243,11 @@ public final class ElementRenderers {
          @Override
          public void renderColoredQuad(PoseStack poseStack, int color, int x, int y, int z, int width, int height) {
             throw new UnsupportedOperationException("Colored quads are not supported by buffered drawing (yet).");
+         }
+
+         @Override
+         public void renderColoredHollowRect(PoseStack poseStack, int color, int x, int y, int z, int width, int height, int thickness) {
+            throw new UnsupportedOperationException("Colored hollow rectangles are not supported by buffered drawing (yet).");
          }
 
          @Override

@@ -3,16 +3,23 @@ package iskallia.vault.init;
 import iskallia.vault.skill.ability.component.AbilityLabelBindingRegistry;
 import iskallia.vault.skill.ability.component.AbilityLabelFormatters;
 import iskallia.vault.skill.ability.component.IAbilityLabelBinding;
+import iskallia.vault.skill.ability.effect.BonkAbility;
+import iskallia.vault.skill.ability.effect.BonkLuckyStrikeAbility;
+import iskallia.vault.skill.ability.effect.BonkSpectralStrikeAbility;
+import iskallia.vault.skill.ability.effect.BouncingFireballAbility;
 import iskallia.vault.skill.ability.effect.DashAbility;
 import iskallia.vault.skill.ability.effect.DashDamageAbility;
 import iskallia.vault.skill.ability.effect.DashWarpAbility;
 import iskallia.vault.skill.ability.effect.EmpowerAbility;
 import iskallia.vault.skill.ability.effect.EmpowerIceArmourAbility;
+import iskallia.vault.skill.ability.effect.EmpowerSlownessAuraAbility;
 import iskallia.vault.skill.ability.effect.ExecuteAbility;
 import iskallia.vault.skill.ability.effect.FarmerAbility;
 import iskallia.vault.skill.ability.effect.FarmerAnimalAbility;
 import iskallia.vault.skill.ability.effect.FarmerCactusAbility;
 import iskallia.vault.skill.ability.effect.FarmerMelonAbility;
+import iskallia.vault.skill.ability.effect.FireballAbility;
+import iskallia.vault.skill.ability.effect.FireballFireshotAbility;
 import iskallia.vault.skill.ability.effect.GhostWalkAbility;
 import iskallia.vault.skill.ability.effect.GhostWalkSpiritAbility;
 import iskallia.vault.skill.ability.effect.HealAbility;
@@ -42,6 +49,8 @@ import iskallia.vault.skill.ability.effect.SmiteThunderstormAbility;
 import iskallia.vault.skill.ability.effect.StonefallAbility;
 import iskallia.vault.skill.ability.effect.StonefallColdAbility;
 import iskallia.vault.skill.ability.effect.StonefallSnowAbility;
+import iskallia.vault.skill.ability.effect.StormArrowAbility;
+import iskallia.vault.skill.ability.effect.StormArrowBlizzardAbility;
 import iskallia.vault.skill.ability.effect.SummonEternalAbility;
 import iskallia.vault.skill.ability.effect.TauntAbility;
 import iskallia.vault.skill.ability.effect.TauntCharmAbility;
@@ -143,14 +152,14 @@ public class ModAbilityLabelBindings {
             "heal",
             ability -> AbilityLabelFormatters.decimal(ability.getFlatLifeHealed()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getRadius())
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius())
          )
       );
       register(
          HunterAbility.class,
          Map.of(
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getSearchRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedSearchRadius()),
             "duration",
             ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks())
          )
@@ -172,18 +181,18 @@ public class ModAbilityLabelBindings {
             "manaPerDamage",
             ability -> AbilityLabelFormatters.decimal(ability.getManaPerDamageScalar()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getDamageRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedDamageRadius()),
             "damage",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPercentageDamageDealt())
          )
       );
-      register(MegaJumpAbility.class, Map.of("rangeVertical", ability -> AbilityLabelFormatters.integer(ability.getHeight())));
-      register(MegaJumpBreakUpAbility.class, Map.of("rangeVertical", ability -> AbilityLabelFormatters.integer(ability.getHeight())));
+      register(MegaJumpAbility.class, Map.of("rangeVertical", ability -> AbilityLabelFormatters.integer(ability.getUnmodifiedHeight())));
+      register(MegaJumpBreakUpAbility.class, Map.of("rangeVertical", ability -> AbilityLabelFormatters.integer(ability.getUnmodifiedHeight())));
       register(
          MegaJumpBreakDownAbility.class,
          Map.of(
             "rangeVertical",
-            ability -> AbilityLabelFormatters.integer(ability.getHeight()),
+            ability -> AbilityLabelFormatters.integer(ability.getUnmodifiedHeight()),
             "radius",
             ability -> AbilityLabelFormatters.integer(ability.getRadius())
          )
@@ -193,8 +202,8 @@ public class ModAbilityLabelBindings {
          Map.of(
             "radius",
             ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
-            "damage",
-            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAttackDamageDealt()),
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAbilityPowerDealt()),
             "knockback",
             ability -> AbilityLabelFormatters.percentRounded(ability.getKnockbackStrengthMultiplier())
          )
@@ -204,8 +213,8 @@ public class ModAbilityLabelBindings {
          Map.of(
             "radius",
             ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
-            "damage",
-            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAttackDamageDealt()),
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAbilityPowerDealt()),
             "duration",
             ability -> AbilityLabelFormatters.seconds(ability.getDurationSeconds())
          )
@@ -232,7 +241,7 @@ public class ModAbilityLabelBindings {
             "knockback",
             ability -> AbilityLabelFormatters.decimal(ability.getKnockbackMultiplier()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "damageReduction",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getDamageReduction())
          )
@@ -243,10 +252,10 @@ public class ModAbilityLabelBindings {
             "duration",
             ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "damageReduction",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getDamageReduction()),
-            "damage",
+            "ability_power",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getDamageMultiplier())
          )
       );
@@ -256,7 +265,7 @@ public class ModAbilityLabelBindings {
             "duration",
             ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "damageReduction",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getDamageReduction()),
             "freezeDuration",
@@ -290,10 +299,21 @@ public class ModAbilityLabelBindings {
       register(
          EmpowerIceArmourAbility.class,
          Map.of(
+            "chilled",
+            ability -> AbilityLabelFormatters.integer(ability.getChilledAmplifier()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getChilledDuration()),
+            "additionalManaPerHit",
+            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerHit())
+         )
+      );
+      register(
+         EmpowerSlownessAuraAbility.class,
+         Map.of(
             "slowness",
             ability -> AbilityLabelFormatters.integer(ability.getSlownessAmplifier()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getRadius())
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius())
          )
       );
       register(
@@ -303,8 +323,8 @@ public class ModAbilityLabelBindings {
             ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "duration",
             ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
-            "damageIncrease",
-            ability -> AbilityLabelFormatters.percentRounded(ability.getDamageModifier())
+            "vulnerable",
+            ability -> AbilityLabelFormatters.integer(ability.getAmplifier())
          )
       );
       register(
@@ -327,7 +347,7 @@ public class ModAbilityLabelBindings {
             ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
             "maxTargets",
             ability -> AbilityLabelFormatters.integer(ability.getMaxCharmedMobs()),
-            "damage",
+            "ability_power",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPercentPlayerDamage())
          )
       );
@@ -357,7 +377,7 @@ public class ModAbilityLabelBindings {
             "duration",
             ability -> AbilityLabelFormatters.ticks(ability.getTotemDurationTicks()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getTotemEffectRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedTotemEffectRadius()),
             "heal",
             ability -> AbilityLabelFormatters.decimal(ability.getTotemHealthPerSecond())
          )
@@ -368,8 +388,8 @@ public class ModAbilityLabelBindings {
             "duration",
             ability -> AbilityLabelFormatters.ticks(ability.getTotemDurationTicks()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getTotemEffectRadius()),
-            "damage",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedTotemEffectRadius()),
+            "ability_power",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getTotemPercentDamagePerInterval()),
             "delay",
             ability -> AbilityLabelFormatters.ticks(ability.getTotemDamageIntervalTicks())
@@ -381,7 +401,7 @@ public class ModAbilityLabelBindings {
             "duration",
             ability -> AbilityLabelFormatters.ticks(ability.getTotemDurationTicks()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getTotemEffectRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedTotemEffectRadius()),
             "manaRegen",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getTotemManaRegenPercent())
          )
@@ -392,7 +412,7 @@ public class ModAbilityLabelBindings {
             "duration",
             ability -> AbilityLabelFormatters.ticks(ability.getTotemDurationTicks()),
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getTotemEffectRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedTotemEffectRadius()),
             "damage",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getTotemPlayerDamagePercent())
          )
@@ -438,7 +458,7 @@ public class ModAbilityLabelBindings {
             "damage",
             config -> AbilityLabelFormatters.percentTwoDecimalPlaces(config.getPercentAttackDamageDealt()),
             "radius",
-            config -> AbilityLabelFormatters.decimal(config.getRadius()),
+            config -> AbilityLabelFormatters.decimal(config.getUnmodifiedRadius()),
             "duration",
             config -> AbilityLabelFormatters.integer(config.getEffectDuration()),
             "throwPower",
@@ -449,11 +469,11 @@ public class ModAbilityLabelBindings {
          SmiteAbility.class,
          Map.of(
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "damageInterval",
             ability -> AbilityLabelFormatters.ticks(ability.getIntervalTicks()),
-            "damage",
-            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPlayerDamagePercent()),
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getAbilityPowerPercent()),
             "additionalManaPerBolt",
             ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerBolt())
          )
@@ -462,24 +482,26 @@ public class ModAbilityLabelBindings {
          SmiteArchonAbility.class,
          Map.of(
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "damageInterval",
             ability -> AbilityLabelFormatters.ticks(ability.getIntervalTicks()),
-            "damage",
-            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPlayerDamagePercent()),
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getAbilityPowerPercent()),
             "additionalManaPerBolt",
-            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerBolt())
+            ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerBolt()),
+            "durabilityWearReduction",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAdditionalDurabilityWearReduction())
          )
       );
       register(
          SmiteThunderstormAbility.class,
          Map.of(
             "radius",
-            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
             "damageInterval",
             ability -> AbilityLabelFormatters.ticks(ability.getIntervalTicks()),
-            "damage",
-            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPlayerDamagePercent()),
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getAbilityPowerPercent()),
             "additionalManaPerBolt",
             ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerBolt())
          )
@@ -519,6 +541,106 @@ public class ModAbilityLabelBindings {
             ability -> AbilityLabelFormatters.decimal(ability.getAdditionalManaPerHit()),
             "quillCount",
             ability -> AbilityLabelFormatters.integer(ability.getQuillCount())
+         )
+      );
+      register(
+         FireballAbility.class,
+         Map.of(
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAbilityPowerDealt()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius())
+         )
+      );
+      register(
+         BouncingFireballAbility.class,
+         Map.of(
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAbilityPowerDealt()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getRadius()),
+            "duration",
+            ability -> AbilityLabelFormatters.seconds(ability.getDuration())
+         )
+      );
+      register(FireballFireshotAbility.class, Map.of("ability_power", ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAbilityPowerDealt())));
+      register(
+         StormArrowAbility.class,
+         Map.of(
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAbilityPowerDealt()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getDuration()),
+            "stormInterval",
+            ability -> AbilityLabelFormatters.ticks(ability.getIntervalTicks())
+         )
+      );
+      register(
+         StormArrowBlizzardAbility.class,
+         Map.of(
+            "ability_power",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentAbilityPowerDealt()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getDuration()),
+            "stormInterval",
+            ability -> AbilityLabelFormatters.ticks(ability.getIntervalTicks()),
+            "frostbiteChance",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getFrostbiteChance()),
+            "slowDuration",
+            ability -> AbilityLabelFormatters.ticks(ability.getSlowDuration()),
+            "frostbiteDuration",
+            ability -> AbilityLabelFormatters.ticks(ability.getFrostbiteDuration()),
+            "amplifier",
+            ability -> AbilityLabelFormatters.integer(ability.getAmplifier())
+         )
+      );
+      register(
+         BonkAbility.class,
+         Map.of(
+            "attackDamagePerStack",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAttackDamagePerStack()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getStackDuration()),
+            "stacksUsedPerHit",
+            ability -> AbilityLabelFormatters.integer(ability.getMaxStacksUsedPerHit()),
+            "maxStacks",
+            ability -> AbilityLabelFormatters.integer(ability.getMaxStacksTotal())
+         )
+      );
+      register(
+         BonkSpectralStrikeAbility.class,
+         Map.of(
+            "abilityPowerPerStack",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getAbilityPowerPerStack()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getStackDuration()),
+            "stacksUsedPerHit",
+            ability -> AbilityLabelFormatters.integer(ability.getMaxStacksUsedPerHit()),
+            "maxStacks",
+            ability -> AbilityLabelFormatters.integer(ability.getMaxStacksTotal())
+         )
+      );
+      register(
+         BonkLuckyStrikeAbility.class,
+         Map.of(
+            "luckyHitPerStack",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getLuckyHitChancePerStack()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getStackDuration()),
+            "stacksUsedPerHit",
+            ability -> AbilityLabelFormatters.integer(ability.getMaxStacksUsedPerHit()),
+            "maxStacks",
+            ability -> AbilityLabelFormatters.integer(ability.getMaxStacksTotal())
          )
       );
    }

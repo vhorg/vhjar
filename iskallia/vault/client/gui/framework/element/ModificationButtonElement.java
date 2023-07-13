@@ -22,6 +22,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
@@ -44,62 +45,65 @@ public class ModificationButtonElement<E extends ModificationButtonElement<E>> e
                   }
 
                   ItemStack gearStack = container.getGearInputSlot().getItem();
-                  int potential = AttributeGearData.<AttributeGearData>read(gearStack)
-                     .getFirstValue(ModGearAttributes.CRAFTING_POTENTIAL)
-                     .orElse(Integer.MIN_VALUE);
+                  AttributeGearData itemData = AttributeGearData.read(gearStack);
+                  int potential = itemData.getFirstValue(ModGearAttributes.CRAFTING_POTENTIAL).orElse(Integer.MIN_VALUE);
                   boolean hasInput = !gearStack.isEmpty() && potential != Integer.MIN_VALUE;
                   boolean failedModification = false;
                   List<Component> tooltip = new ArrayList<>(modification.getDescription(inputItem));
-                  if (hasInput && !inputItem.isEmpty() && !action.modification().canApply(gearStack, inputItem, container.getPlayer(), rand)) {
-                     tooltip.add(action.modification().getInvalidDescription(inputItem));
-                     failedModification = true;
-                  }
-
-                  if (!failedModification && hasInput) {
-                     MutableComponent focusCmp;
-                     if (!inputItem.isEmpty()) {
-                        focusCmp = new TextComponent("- ")
-                           .append(modification.getDisplayStack().getHoverName())
-                           .append(" x1")
-                           .append(" [%s]".formatted(inputItem.getCount()));
-                     } else {
-                        focusCmp = new TextComponent("Requires ").append(modification.getDisplayStack().getHoverName());
+                  if (hasInput && !itemData.isModifiable()) {
+                     return List.of(new TranslatableComponent("the_vault.gear_modification.unmodifiable").withStyle(ChatFormatting.RED));
+                  } else {
+                     if (hasInput && !inputItem.isEmpty() && !action.modification().canApply(gearStack, inputItem, container.getPlayer(), rand)) {
+                        tooltip.add(action.modification().getInvalidDescription(inputItem));
+                        failedModification = true;
                      }
 
-                     focusCmp.withStyle(inputItem.isEmpty() ? ChatFormatting.RED : ChatFormatting.GREEN);
-                     tooltip.add(focusCmp);
-                  }
+                     if (!failedModification && hasInput) {
+                        MutableComponent focusCmp;
+                        if (!inputItem.isEmpty()) {
+                           focusCmp = new TextComponent("- ")
+                              .append(modification.getDisplayStack().getHoverName())
+                              .append(" x1")
+                              .append(" [%s]".formatted(inputItem.getCount()));
+                        } else {
+                           focusCmp = new TextComponent("Requires ").append(modification.getDisplayStack().getHoverName());
+                        }
 
-                  if (hasInput) {
-                     if (!failedModification && !inputItem.isEmpty()) {
-                        VaultGearData data = VaultGearData.read(gearStack);
-                        GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), data.getItemLevel(), potential, modification);
-                        ItemStack plating = container.getPlatingSlot().getItem();
-                        ItemStack bronze = container.getBronzeSlot().getItem();
-                        tooltip.add(
-                           new TextComponent("- ")
-                              .append(new ItemStack(ModItems.VAULT_PLATING).getHoverName())
-                              .append(" x" + cost.costPlating())
-                              .append(" [%s]".formatted(plating.getCount()))
-                              .withStyle(cost.costPlating() > plating.getCount() ? ChatFormatting.RED : ChatFormatting.GREEN)
-                        );
-                        tooltip.add(
-                           new TextComponent("- ")
-                              .append(new ItemStack(ModBlocks.VAULT_BRONZE).getHoverName())
-                              .append(" x" + cost.costBronze())
-                              .append(" [%s]".formatted(bronze.getCount()))
-                              .withStyle(cost.costBronze() > bronze.getCount() ? ChatFormatting.RED : ChatFormatting.GREEN)
-                        );
+                        focusCmp.withStyle(inputItem.isEmpty() ? ChatFormatting.RED : ChatFormatting.GREEN);
+                        tooltip.add(focusCmp);
                      }
 
-                     tooltip.add(TextComponent.EMPTY);
-                     tooltip.add(gearStack.getHoverName());
-                     if (gearStack.getItem() instanceof VaultGearTooltipItem gearTooltipItem) {
-                        tooltip.addAll(gearTooltipItem.createTooltip(gearStack, GearTooltip.craftingView()));
-                     }
-                  }
+                     if (hasInput) {
+                        if (!failedModification && !inputItem.isEmpty()) {
+                           VaultGearData data = VaultGearData.read(gearStack);
+                           GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), data.getItemLevel(), potential, modification);
+                           ItemStack plating = container.getPlatingSlot().getItem();
+                           ItemStack bronze = container.getBronzeSlot().getItem();
+                           tooltip.add(
+                              new TextComponent("- ")
+                                 .append(new ItemStack(ModItems.VAULT_PLATING).getHoverName())
+                                 .append(" x" + cost.costPlating())
+                                 .append(" [%s]".formatted(plating.getCount()))
+                                 .withStyle(cost.costPlating() > plating.getCount() ? ChatFormatting.RED : ChatFormatting.GREEN)
+                           );
+                           tooltip.add(
+                              new TextComponent("- ")
+                                 .append(new ItemStack(ModBlocks.VAULT_BRONZE).getHoverName())
+                                 .append(" x" + cost.costBronze())
+                                 .append(" [%s]".formatted(bronze.getCount()))
+                                 .withStyle(cost.costBronze() > bronze.getCount() ? ChatFormatting.RED : ChatFormatting.GREEN)
+                           );
+                        }
 
-                  return tooltip;
+                        tooltip.add(TextComponent.EMPTY);
+                        tooltip.add(gearStack.getHoverName());
+                        if (gearStack.getItem() instanceof VaultGearTooltipItem gearTooltipItem) {
+                           tooltip.addAll(gearTooltipItem.createTooltip(gearStack, GearTooltip.craftingView()));
+                        }
+                     }
+
+                     return tooltip;
+                  }
                }
             }
          )

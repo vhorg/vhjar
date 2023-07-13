@@ -4,22 +4,30 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.core.vault.ClientVaults;
+import iskallia.vault.entity.champion.ChampionLogic;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.VaultGuardianEntity;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.gear.trinket.TrinketHelper;
+import iskallia.vault.gear.trinket.effects.WingsTrinket;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.calc.ResistanceHelper;
 import iskallia.vault.world.data.ServerVaults;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -32,6 +40,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -50,17 +59,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({LivingEntity.class})
-public abstract class MixinLivingEntity extends Entity {
+public abstract class MixinLivingEntity extends Entity implements ChampionLogic.IChampionLogicHolder {
    private float prevSize = -1.0F;
+   @Nullable
+   private ChampionLogic championLogic = new ChampionLogic();
    @Shadow
    protected ItemStack useItem;
    @Shadow
    public long lastDamageStamp;
    @Shadow
+   protected int fallFlyTicks;
+   @Shadow
    @Final
    private AttributeMap attributes;
    private float rawHealth;
    private boolean useRawHealth;
+
+   @Override
+   public ChampionLogic getChampionLogic() {
+      return this.championLogic;
+   }
 
    public MixinLivingEntity(EntityType<?> entityType, Level world) {
       super(entityType, world);
@@ -239,6 +257,8 @@ public abstract class MixinLivingEntity extends Entity {
             this.dimensions = this.getDimensions(Pose.STANDING).scale(this.prevSize);
             this.refreshDimensions();
          }
+
+         this.championLogic.tick(this);
       }
    }
 
@@ -287,6 +307,14 @@ public abstract class MixinLivingEntity extends Entity {
    }
 
    @Inject(
+      method = {"Lnet/minecraft/world/entity/LivingEntity;addAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V"},
+      at = {@At("HEAD")}
+   )
+   private void addAdditionalSaveData(CompoundTag nbt, CallbackInfo ci) {
+      this.championLogic.serialize().ifPresent(championNbt -> nbt.put("championLogic", championNbt));
+   }
+
+   @Inject(
       method = {"readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V"},
       at = {@At("HEAD")}
    )
@@ -297,6 +325,53 @@ public abstract class MixinLivingEntity extends Entity {
             this.rawHealth = health;
             this.useRawHealth = true;
          }
+
+         if (nbt.contains("championLogic", 10)) {
+            this.championLogic = ChampionLogic.deserialize(nbt.getCompound("championLogic"));
+         }
+
+         if (nbt.contains("Modifiers", 10)) {
+            CompoundTag modifiers = nbt.getCompound("Modifiers");
+
+            for (String key : modifiers.getAllKeys()) {
+               Registry.ATTRIBUTE.getOptional(ResourceLocation.tryParse(key)).ifPresent(attribute -> {
+                  AttributeInstance instance = this.getAttribute(attribute);
+                  if (instance != null) {
+                     CompoundTag entry = modifiers.getCompound(key);
+                     double amount = entry.getDouble("Value");
+                     Operation operation = Operation.fromValue(entry.getInt("Operation"));
+                     instance.addPermanentModifier(new AttributeModifier(UUID.randomUUID(), "Unspecified", amount, operation));
+                  }
+               });
+            }
+         }
       }
+   }
+
+   @Inject(
+      method = {"updateFallFlying"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   private void getFlag(CallbackInfo ci) {
+      LivingEntity livingEntity = (LivingEntity)this;
+      AtomicBoolean flag = new AtomicBoolean(this.getSharedFlag(7));
+      if (flag.get() && !this.onGround && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)) {
+         ItemStack itemstack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
+         flag.set(itemstack.canElytraFly(livingEntity) && itemstack.elytraFlightTick(livingEntity, this.fallFlyTicks));
+         if (livingEntity instanceof Player player) {
+            TrinketHelper.getTrinkets(player, WingsTrinket.class).forEach(wings -> {
+               if (wings.isUsable(player)) {
+                  flag.set(true);
+               }
+            });
+         }
+      }
+
+      if (!this.level.isClientSide) {
+         this.setSharedFlag(7, flag.get());
+      }
+
+      ci.cancel();
    }
 }

@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
@@ -38,6 +39,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.Component.Serializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -56,6 +58,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(
@@ -95,6 +98,8 @@ public abstract class MixinItemStack {
       if (!this.isDamageableItem()) {
          return false;
       } else if (this.item == Items.ELYTRA && new Random().nextInt(5) != 0) {
+         return false;
+      } else if (this.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken((ItemStack)this)) {
          return false;
       } else {
          if (damage > 0) {
@@ -139,6 +144,16 @@ public abstract class MixinItemStack {
          int absDamage = this.getDamageValue() + damage;
          this.setDamageValue(absDamage);
          return absDamage >= this.getMaxDamage();
+      }
+   }
+
+   @Inject(
+      method = {"hurtAndBreak"},
+      at = {@At("RETURN")}
+   )
+   public <T extends LivingEntity> void addSoundWhenBroken(int pAmount, T pEntity, Consumer<T> pOnBroken, CallbackInfo ci) {
+      if (pAmount > 0 && this.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken((ItemStack)this)) {
+         pEntity.level.playSound(null, pEntity.getOnPos(), SoundEvents.ITEM_BREAK, SoundSource.PLAYERS, 1.0F, 1.0F);
       }
    }
 

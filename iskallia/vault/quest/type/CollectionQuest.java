@@ -1,5 +1,6 @@
 package iskallia.vault.quest.type;
 
+import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.QuestStatesData;
@@ -21,7 +22,7 @@ public class CollectionQuest extends Quest {
    public CollectionQuest(
       String id,
       String name,
-      Quest.DescriptionData descriptionData,
+      DescriptionData descriptionData,
       ResourceLocation icon,
       ResourceLocation targetId,
       float targetProgress,

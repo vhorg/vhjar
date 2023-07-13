@@ -3,6 +3,7 @@ package iskallia.vault.entity;
 import iskallia.vault.config.VaultMobGearConfig;
 import iskallia.vault.config.VaultMobsConfig;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.entity.champion.ChampionPromoter;
 import iskallia.vault.entity.entity.EternalEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,6 +27,7 @@ public class EntityScaler {
             vault.ifPresent(Vault.LEVEL, level -> {
                VaultMobsConfig.scale(vault.get(Vault.OWNER), entity, level.get());
                VaultMobGearConfig.applyEquipment(entity, level.get());
+               ChampionPromoter.applyRandomChampion(entity);
             });
             setScaled(entity);
             if (entity instanceof Mob mob) {

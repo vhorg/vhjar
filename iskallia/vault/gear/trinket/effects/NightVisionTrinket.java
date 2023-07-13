@@ -3,6 +3,8 @@ package iskallia.vault.gear.trinket.effects;
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
+import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
 import iskallia.vault.gear.trinket.GearAttributeTrinket;
@@ -12,12 +14,14 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.network.message.ClientboundNightVisionGogglesParticlesMessage;
 import iskallia.vault.skill.ability.effect.spi.HunterAbility;
+import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.ServerVaults;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
@@ -30,7 +34,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -39,6 +42,16 @@ public class NightVisionTrinket extends TrinketEffect<NightVisionTrinket.Config>
    private final MobEffect effect;
    private final int addedAmplifier;
    private final float radius;
+   private static final List<TilePredicate> filters = List.of(
+      TilePredicate.of("the_vault:wooden_chest{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:gilded_strongbox{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:gilded_chest{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:ornate_strongbox{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:ornate_chest{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:coin_pile{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:living_strongbox{Hidden:0b}", true).orElseThrow(),
+      TilePredicate.of("the_vault:living_chest{Hidden:0b}", true).orElseThrow()
+   );
 
    public NightVisionTrinket(ResourceLocation name, MobEffect effect, int addedAmplifier, float radius) {
       super(name);
@@ -59,28 +72,29 @@ public class NightVisionTrinket extends TrinketEffect<NightVisionTrinket.Config>
    @Override
    public List<VaultGearAttributeInstance<?>> getAttributes() {
       NightVisionTrinket.Config cfg = this.getConfig();
-      return Lists.newArrayList(
-         new VaultGearAttributeInstance[]{
-            new VaultGearAttributeInstance<>(ModGearAttributes.EFFECT, new EffectGearAttribute(cfg.getEffect(), cfg.getAddedAmplifier()))
-         }
-      );
+      return (List<VaultGearAttributeInstance<?>>)(cfg.getEffect() == null
+         ? List.of()
+         : Lists.newArrayList(
+            new VaultGearAttributeInstance[]{
+               new VaultGearAttributeInstance<>(ModGearAttributes.EFFECT, new EffectGearAttribute(cfg.getEffect(), cfg.getAddedAmplifier()))
+            }
+         ));
    }
 
-   protected void forEachTileEntity(Level world, Player player, double radius, BiConsumer<BlockPos, BlockEntity> consumer) {
-      BlockPos playerOffset = player.blockPosition();
+   protected void forEachTile(Level world, Player player, double radius, Consumer<PartialTile> consumer) {
       double radiusSq = radius * radius;
       int iRadius = Mth.ceil(radius);
       Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);
-      ChunkPos posMin = new ChunkPos(playerOffset.subtract(radVec));
-      ChunkPos posMax = new ChunkPos(playerOffset.offset(radVec));
+      ChunkPos posMin = new ChunkPos(player.blockPosition().subtract(radVec));
+      ChunkPos posMax = new ChunkPos(player.blockPosition().offset(radVec));
 
       for (int xx = posMin.x; xx <= posMax.x; xx++) {
          for (int zz = posMin.z; zz <= posMax.z; zz++) {
             LevelChunk ch = world.getChunkSource().getChunkNow(xx, zz);
             if (ch != null) {
                ch.getBlockEntities().forEach((pos, tile) -> {
-                  if (tile != null && pos.distSqr(playerOffset) <= radiusSq) {
-                     consumer.accept(pos, tile);
+                  if (tile != null && pos.distSqr(player.blockPosition()) <= radiusSq) {
+                     consumer.accept(PartialTile.at(world, pos));
                   }
                });
             }
@@ -88,35 +102,33 @@ public class NightVisionTrinket extends TrinketEffect<NightVisionTrinket.Config>
       }
    }
 
-   public boolean shouldHighlightTileEntity(BlockEntity tile) {
-      if (tile.getType().getRegistryName() == null) {
-         return false;
-      } else {
-         String var2 = tile.getType().getRegistryName().toString();
-         switch (var2) {
-            case "minecraft:chest":
-            case "minecraft:trapped_chest":
-            case "the_vault:coin_pile_tile":
-            case "the_vault:vault_chest_tile_entity":
-               return true;
-            default:
-               return false;
-         }
-      }
+   public boolean shouldHighlightTile(PartialTile tile) {
+      return filters.stream().anyMatch(filter -> filter.test(tile));
    }
 
-   protected List<HunterAbility.HighlightPosition> selectPositions(ServerLevel world, ServerPlayer player, double radius) {
-      List<HunterAbility.HighlightPosition> result = new ArrayList<>();
-      Color c = Color.cyan;
-      this.forEachTileEntity(world, player, radius, (pos, tile) -> {
-         if (this.shouldHighlightTileEntity(tile)) {
-            if (tile instanceof HunterHiddenTileEntity hiddenTile && hiddenTile.isHidden()) {
-               return;
-            }
+   protected List<NightVisionTrinket.HighlightPosition> selectPositions(ServerLevel world, ServerPlayer player, double radius) {
+      List<NightVisionTrinket.HighlightPosition> result = new ArrayList<>();
+      this.forEachTile(
+         world,
+         player,
+         radius,
+         tile -> {
+            AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
 
-            result.add(new HunterAbility.HighlightPosition(pos, c));
+            for (HunterAbility ability : abilities.getAll(HunterAbility.class, serverPlayer -> true)) {
+               if (!ability.getParent().getId().equals("Hunter_Base")
+                  && ability.getFilters().stream().anyMatch(filter -> filter.test(tile))
+                  && this.shouldHighlightTile(tile)) {
+                  if (tile instanceof HunterHiddenTileEntity hiddenTile && hiddenTile.isHidden()) {
+                     return;
+                  }
+
+                  result.add(new NightVisionTrinket.HighlightPosition(tile.getPos(), ability.getParent().getId()));
+                  break;
+               }
+            }
          }
-      });
+      );
       return result;
    }
 
@@ -135,12 +147,19 @@ public class NightVisionTrinket extends TrinketEffect<NightVisionTrinket.Config>
             }
 
             NightVisionTrinket.Config cfg = this.getConfig();
-            this.selectPositions((ServerLevel)player.level, player, cfg.radius)
+            float radius = AreaOfEffectHelper.adjustAreaOfEffect(player, cfg.radius);
+            this.selectPositions((ServerLevel)player.level, player, radius)
                .forEach(
                   highlightPosition -> ModNetwork.CHANNEL
                      .sendTo(
                         new ClientboundNightVisionGogglesParticlesMessage(
-                           highlightPosition.blockPos().getX(), highlightPosition.blockPos().getY(), highlightPosition.blockPos().getZ(), 30.0, 0.0, 0.0
+                           highlightPosition.blockPos().getX(),
+                           highlightPosition.blockPos().getY(),
+                           highlightPosition.blockPos().getZ(),
+                           30.0,
+                           0.0,
+                           0.0,
+                           highlightPosition.type
                         ),
                         player.connection.getConnection(),
                         NetworkDirection.PLAY_TO_CLIENT
@@ -175,5 +194,8 @@ public class NightVisionTrinket extends TrinketEffect<NightVisionTrinket.Config>
       public float getRadius() {
          return this.radius;
       }
+   }
+
+   public record HighlightPosition(BlockPos blockPos, String type) {
    }
 }

@@ -1,6 +1,7 @@
 package iskallia.vault.client.gui.framework.element;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.block.TransmogTableBlock;
 import iskallia.vault.client.gui.framework.render.TooltipDirection;
 import iskallia.vault.client.gui.framework.render.spi.IElementRenderer;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
@@ -22,10 +23,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -82,42 +85,55 @@ public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement
       public List<DiscoveredModelSelectElement.TransmogModelEntry> getEntries() {
          Item item = this.usedItem.get();
          if (item instanceof VaultGearItem vaultGearItem) {
-            Set discoveredIds = this.discoveredModelIds.get();
-            return ModDynamicModels.REGISTRIES
-               .getAssociatedRegistry(item)
-               .map(
-                  modelRegistry -> {
-                     List<ResourceLocation> modelIds = new ArrayList<>(modelRegistry.getIds());
-                     modelIds.sort((id1, id2) -> {
-                        boolean discovered1 = discoveredIds.contains(id1);
-                        boolean discovered2 = discoveredIds.contains(id2);
-                        if (discovered1 != discovered2) {
-                           return discovered1 ? -1 : 1;
-                        } else {
-                           VaultGearRarity rarity1 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, id1);
-                           VaultGearRarity rarity2 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, id2);
-                           if (rarity1 != rarity2) {
-                              return Integer.compare(rarity1.ordinal(), rarity2.ordinal());
+            Player player = Minecraft.getInstance().player;
+            if (player == null) {
+               return Collections.emptyList();
+            } else {
+               Set<ResourceLocation> discoveredIds = this.discoveredModelIds.get();
+               return ModDynamicModels.REGISTRIES
+                  .getAssociatedRegistry(item)
+                  .map(
+                     modelRegistry -> {
+                        List<ResourceLocation> modelIds = new ArrayList<>(modelRegistry.getIds());
+                        modelIds.sort((id1, id2) -> {
+                           boolean discovered1 = discoveredIds.contains(id1);
+                           boolean discovered2 = discoveredIds.contains(id2);
+                           if (discovered1 != discovered2) {
+                              return discovered1 ? -1 : 1;
                            } else {
-                              String name1 = modelRegistry.get(id1).map(DynamicModel::getDisplayName).orElse("");
-                              String name2 = modelRegistry.get(id2).map(DynamicModel::getDisplayName).orElse("");
-                              return name1.compareTo(name2);
+                              boolean special1 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(vaultGearItem, id1);
+                              boolean special2 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(vaultGearItem, id2);
+                              if (special1 != special2) {
+                                 return special1 ? -1 : 1;
+                              } else {
+                                 VaultGearRarity rarity1 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, id1);
+                                 VaultGearRarity rarity2 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, id2);
+                                 if (rarity1 != rarity2) {
+                                    return Integer.compare(rarity1.ordinal(), rarity2.ordinal());
+                                 } else {
+                                    String name1 = modelRegistry.get(id1).map(DynamicModel::getDisplayName).orElse("");
+                                    String name2 = modelRegistry.get(id2).map(DynamicModel::getDisplayName).orElse("");
+                                    return name1.compareTo(name2);
+                                 }
+                              }
                            }
-                        }
-                     });
-                     return modelIds.stream()
-                        .map(modelRegistry::get)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .map(
-                           model -> new DiscoveredModelSelectElement.TransmogModelEntry(
-                              this.makeModelItem(vaultGearItem, model.getId()), !discoveredIds.contains(model.getId()), model
+                        });
+                        return modelIds.stream()
+                           .map(modelRegistry::get)
+                           .filter(Optional::isPresent)
+                           .map(Optional::get)
+                           .map(
+                              model -> new DiscoveredModelSelectElement.TransmogModelEntry(
+                                 this.makeModelItem(vaultGearItem, model.getId()),
+                                 !TransmogTableBlock.canTransmogModel(player, discoveredIds, model.getId()),
+                                 model
+                              )
                            )
-                        )
-                        .toList();
-                  }
-               )
-               .orElse(Collections.emptyList());
+                           .toList();
+                     }
+                  )
+                  .orElse(Collections.emptyList());
+            }
          } else {
             return Collections.emptyList();
          }

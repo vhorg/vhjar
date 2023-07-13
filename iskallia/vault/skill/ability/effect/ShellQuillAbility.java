@@ -11,7 +11,6 @@ import iskallia.vault.mana.Mana;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.EntityHelper;
-import iskallia.vault.util.Entropy;
 import iskallia.vault.util.calc.ThornsHelper;
 import iskallia.vault.util.damage.ThornsReflectDamageSource;
 import iskallia.vault.world.data.PlayerAbilitiesData;
@@ -127,29 +126,24 @@ public class ShellQuillAbility extends ShellPorcupineAbility {
                .getAll(ShellQuillAbility.class, Ability::isActive)
                .stream()
                .findFirst()
-               .ifPresent(ability -> {
-                  float thornsChance = ThornsHelper.getThornsChance(player);
-                  if (Entropy.canExecute(player, Entropy.Stat.THORNS, thornsChance)) {
-                     ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-                        ActiveFlags.IS_THORNS_REFLECTING.push();
-                        float reflectedDamage = 0.0F;
-                        float dmg = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                        float thornsMultiplier = ThornsHelper.getThornsDamageMultiplier(player);
-                        if (thornsMultiplier > 0.0F) {
-                           reflectedDamage += dmg * thornsMultiplier;
-                        }
-
-                        float additionalThornsDamage = ThornsHelper.getAdditionalThornsFlatDamage(player);
-                        reflectedDamage += additionalThornsDamage;
-                        doQuill(player, reflectedDamage, ability.getQuillCount());
-                        if (Mana.decrease(player, ability.getAdditionalManaPerHit()) <= 0.0F) {
-                           player.removeEffect(ModEffects.SHELL_QUILL);
-                           ability.putOnCooldown(SkillContext.of(player));
-                           ability.setActive(false);
-                        }
-                     });
+               .ifPresent(ability -> ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                  ActiveFlags.IS_THORNS_REFLECTING.push();
+                  float reflectedDamage = 0.0F;
+                  float dmg = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE);
+                  float thornsMultiplier = ThornsHelper.getThornsDamageMultiplier(player);
+                  if (thornsMultiplier > 0.0F) {
+                     reflectedDamage += dmg * thornsMultiplier;
                   }
-               });
+
+                  float additionalThornsDamage = ThornsHelper.getAdditionalThornsFlatDamage(player);
+                  reflectedDamage += additionalThornsDamage;
+                  doQuill(player, reflectedDamage, ability.getQuillCount());
+                  if (Mana.decrease(player, ability.getAdditionalManaPerHit()) <= 0.0F) {
+                     player.removeEffect(ModEffects.SHELL_QUILL);
+                     ability.putOnCooldown(SkillContext.of(player));
+                     ability.setActive(false);
+                  }
+               }));
          }
       }
    }

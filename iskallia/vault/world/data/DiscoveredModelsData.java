@@ -1,5 +1,6 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.VaultMod;
 import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.dynamodel.model.armor.ArmorModel;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
@@ -13,6 +14,7 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.network.message.transmog.DiscoveredEntriesMessage;
 import iskallia.vault.research.ResearchTree;
+import iskallia.vault.research.type.Research;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.PlayerReference;
 import java.util.Collections;
@@ -147,11 +149,19 @@ public class DiscoveredModelsData extends SavedData {
       PlayerResearchesData researchesData = PlayerResearchesData.get(player.getLevel());
       ResearchTree researches = researchesData.getResearches(player);
 
+      for (String research : researches.getResearchesDone()) {
+         Research byName = ModConfigs.RESEARCHES.getByName(research);
+         if (byName == null) {
+            VaultMod.LOGGER.error("Attempted to get research and resulting in NPE: {}", research);
+         }
+      }
+
       for (ResourceLocation modelId : researches.getResearchesDone()
          .stream()
          .map(ModConfigs.RESEARCHES::getByName)
-         .filter(research -> research.getDiscoversModels() != null)
-         .flatMap(research -> research.getDiscoversModels().stream())
+         .filter(Objects::nonNull)
+         .filter(researchx -> researchx.getDiscoversModels() != null)
+         .flatMap(researchx -> researchx.getDiscoversModels().stream())
          .<ResourceLocation>map(ResourceLocation::tryParse)
          .filter(Objects::nonNull)
          .toList()) {

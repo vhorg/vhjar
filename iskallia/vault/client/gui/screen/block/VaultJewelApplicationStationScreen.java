@@ -125,8 +125,12 @@ public class VaultJewelApplicationStationScreen extends AbstractElementContainer
             return true;
          } else if (container.getTileEntity().getToolItem().getItem() instanceof ToolItem) {
             VaultGearData toolData = VaultGearData.read(container.getTileEntity().getToolItem());
-            int capacity = toolData.getFirstValue(ModGearAttributes.TOOL_CAPACITY).orElse(0);
-            return capacity < container.getTileEntity().getTotalSizeInJewels();
+            if (!toolData.isModifiable()) {
+               return true;
+            } else {
+               int capacity = toolData.getFirstValue(ModGearAttributes.TOOL_CAPACITY).orElse(0);
+               return capacity < container.getTileEntity().getTotalSizeInJewels();
+            }
          } else {
             return true;
          }

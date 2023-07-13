@@ -2,6 +2,7 @@ package iskallia.vault.world.data;
 
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.trinket.TrinketEffect;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.gear.TrinketItem;
@@ -87,6 +88,30 @@ public class DiscoveredTrinketsData extends SavedData {
 
    public boolean hasDiscovered(UUID playerId, ResourceLocation trinket) {
       return this.collectedTrinkets.getOrDefault(playerId, Collections.emptySet()).contains(trinket);
+   }
+
+   public Set<ResourceLocation> getDiscoveredTrinkets(Player player) {
+      return this.getDiscoveredTrinkets(player.getUUID());
+   }
+
+   public Set<ResourceLocation> getDiscoveredTrinkets(UUID playerId) {
+      return this.collectedTrinkets.getOrDefault(playerId, Collections.emptySet());
+   }
+
+   public boolean discoveredAllTrinkets(Player player) {
+      return this.discoveredAllTrinkets(player.getUUID());
+   }
+
+   public boolean discoveredAllTrinkets(UUID playerId) {
+      Set<ResourceLocation> discovered = this.getDiscoveredTrinkets(playerId);
+
+      for (ResourceLocation existing : ModConfigs.TRINKET.getTrinketIds()) {
+         if (!discovered.contains(existing)) {
+            return false;
+         }
+      }
+
+      return true;
    }
 
    public void setDirty(boolean dirty) {

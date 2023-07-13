@@ -15,7 +15,11 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.mana.Mana;
 import iskallia.vault.util.StatUtils;
+import iskallia.vault.util.calc.AbilityPowerHelper;
 import iskallia.vault.util.calc.AttributeLimitHelper;
+import iskallia.vault.util.calc.CooldownHelper;
+import iskallia.vault.util.calc.LuckyHitHelper;
+import iskallia.vault.util.calc.SoulChanceHelper;
 import iskallia.vault.util.function.Memo;
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -232,7 +236,8 @@ public class StatisticsElementContainerScreenData {
          StatLabel.ofDoublePercent(
             () -> "Defense", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("defense"), () -> StatUtils.getDefence(this.player)
          ),
-         StatLabel.ofInteger(() -> "Mana", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("mana"), this::getPlayerMaxMana)
+         StatLabel.ofInteger(() -> "Mana", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("mana"), this::getPlayerMaxMana),
+         StatLabel.ofInteger(() -> "Greed", () -> ModConfigs.MENU_PLAYER_STAT_DESCRIPTIONS.getProminentStatDescriptionFor("greed"), () -> 0)
       );
    }
 
@@ -251,6 +256,7 @@ public class StatisticsElementContainerScreenData {
          List.of(
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ARMOR, LivingEntity::getArmorValue),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_DAMAGE, player -> player.getAttributeValue(Attributes.ATTACK_DAMAGE)),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.ABILITY_POWER, AbilityPowerHelper::getAbilityPower),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_SPEED, player -> player.getAttributeValue(Attributes.ATTACK_SPEED) - 4.0),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.REACH, IForgePlayer::getReachDistance),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.ATTACK_RANGE, IForgePlayer::getAttackRange),
@@ -261,12 +267,16 @@ public class StatisticsElementContainerScreenData {
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.HEALING_EFFECTIVENESS),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.MANA_REGEN_ADDITIVE_PERCENTILE, Mana::getRegenPerSecond),
             GearAttributeStatLabel.of(this.player, ModGearAttributes.MANA_ADDITIVE, player -> Mth.floor(Mana.getMax(player))),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.COOLDOWN_REDUCTION, AttributeLimitHelper::getCooldownReductionLimit),
+            GearAttributeStatLabel.ofFloat(
+               this.player,
+               ModGearAttributes.COOLDOWN_REDUCTION,
+               CooldownHelper::getCooldownMultiplierUnlimited,
+               AttributeLimitHelper::getCooldownReductionLimit
+            ),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.RESISTANCE, AttributeLimitHelper::getResistanceLimit),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.BLOCK, AttributeLimitHelper::getBlockChanceLimit),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.CRITICAL_HIT_TAKEN_REDUCTION),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DURABILITY_WEAR_REDUCTION),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_CHANCE),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_DAMAGE_FLAT),
             GearAttributeStatLabel.ofInteger(this.player, ModGearAttributes.ON_HIT_CHAIN),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ON_HIT_STUN),
@@ -275,8 +285,8 @@ public class StatisticsElementContainerScreenData {
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_QUANTITY),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.ITEM_RARITY),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.TRAP_DISARMING),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.SOUL_CHANCE),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.LUCKY_HIT_CHANCE),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.SOUL_CHANCE, SoulChanceHelper::getSoulChance),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.LUCKY_HIT_CHANCE, LuckyHitHelper::getLuckyHitChance),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.COPIOUSLY),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.MINING_SPEED),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_INCREASE),

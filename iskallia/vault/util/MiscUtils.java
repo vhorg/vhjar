@@ -44,6 +44,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
@@ -164,6 +165,24 @@ public class MiscUtils {
       return out;
    }
 
+   public static void mergeItemStack(List<ItemStack> stacks, ItemStack stackToMerge) {
+      if (!stackToMerge.isEmpty()) {
+         for (ItemStack existing : stacks) {
+            if (existing.getCount() < existing.getMaxStackSize() && ItemStack.isSameItemSameTags(existing, stackToMerge)) {
+               int toInsert = Math.min(existing.getMaxStackSize() - existing.getCount(), stackToMerge.getCount());
+               existing.setCount(existing.getCount() + toInsert);
+               if (toInsert == stackToMerge.getCount()) {
+                  return;
+               }
+
+               stackToMerge = ItemHandlerHelper.copyStackWithSize(stackToMerge, stackToMerge.getCount() - toInsert);
+            }
+         }
+
+         stacks.add(stackToMerge);
+      }
+   }
+
    public static List<ItemStack> splitAndLimitStackSize(List<ItemStack> stacks) {
       List<ItemStack> out = new ArrayList<>();
 
@@ -249,6 +268,10 @@ public class MiscUtils {
       }
 
       return false;
+   }
+
+   public static <T> T getListEntrySafe(List<T> list, int index) {
+      return list.get(Mth.clamp(index, 0, list.size() - 1));
    }
 
    public static <T extends Enum<T>> T getEnumEntry(Class<T> enumClass, int index) {

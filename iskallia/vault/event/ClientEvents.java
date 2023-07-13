@@ -16,12 +16,15 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.Post;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -39,6 +42,18 @@ public class ClientEvents {
    public static void onDisconnect(LoggedOutEvent event) {
       ClientActiveEternalData.clearClientCache();
       ClientDamageData.clearClientCache();
+   }
+
+   @SubscribeEvent
+   public static void onDeathReset(LivingUpdateEvent event) {
+      LivingEntity entity = event.getEntityLiving();
+      if (entity.level.isClientSide) {
+         if (!(entity instanceof Player)) {
+            if (!entity.isDeadOrDying()) {
+               entity.deathTime = 0;
+            }
+         }
+      }
    }
 
    @SubscribeEvent

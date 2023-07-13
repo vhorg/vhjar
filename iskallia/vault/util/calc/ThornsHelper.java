@@ -8,11 +8,13 @@ import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import net.minecraft.world.entity.LivingEntity;
 
 public class ThornsHelper {
+   @Deprecated
    public static float getThornsChance(LivingEntity entity) {
       float chance = 0.0F;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
       chance += snapshot.getAttributeValue(ModGearAttributes.THORNS_CHANCE, VaultGearAttributeTypeMerger.floatSum());
-      return CommonEvents.PLAYER_STAT.invoke(PlayerStat.THORNS_CHANCE, entity, chance).getValue();
+      chance = CommonEvents.PLAYER_STAT.invoke(PlayerStat.THORNS_CHANCE, entity, chance).getValue();
+      return 1.0F;
    }
 
    public static float getThornsDamageMultiplier(LivingEntity entity) {

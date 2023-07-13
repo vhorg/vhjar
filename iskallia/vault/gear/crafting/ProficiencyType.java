@@ -19,6 +19,7 @@ public enum ProficiencyType {
    SWORD(() -> ModItems.SWORD.defaultItem()),
    SHIELD(() -> ModItems.SHIELD.defaultItem()),
    IDOL(() -> ModItems.IDOL_BENEVOLENT.defaultItem()),
+   WAND(() -> ModItems.WAND.defaultItem()),
    MAGNET(() -> ModItems.MAGNET.defaultItem()),
    UNKNOWN(() -> ItemStack.EMPTY);
 

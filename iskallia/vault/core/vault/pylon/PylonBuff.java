@@ -31,6 +31,10 @@ public abstract class PylonBuff<C extends PylonBuff.Config<?>> implements INBTSe
       this.config = config;
    }
 
+   public C getConfig() {
+      return this.config;
+   }
+
    public void setPlayer(Player player) {
       this.playerUuid = player.getUUID();
    }
@@ -97,11 +101,25 @@ public abstract class PylonBuff<C extends PylonBuff.Config<?>> implements INBTSe
    }
 
    public abstract static class Config<B extends PylonBuff<?>> implements INBTSerializable<CompoundTag> {
+      protected boolean uber;
       protected int color;
+      protected int uberColor;
       protected String description;
+
+      public int getDuration() {
+         return 0;
+      }
 
       public int getColor() {
          return this.color;
+      }
+
+      public int getUberColor() {
+         return this.uberColor;
+      }
+
+      public boolean getUber() {
+         return this.uber;
       }
 
       public String getDescription() {
@@ -126,28 +144,46 @@ public abstract class PylonBuff<C extends PylonBuff.Config<?>> implements INBTSe
 
       public final JsonObject serializeJson() {
          JsonObject json = new JsonObject();
+         json.addProperty("uber", this.uber);
          json.addProperty("color", this.color);
+         json.addProperty("uberColor", this.color);
          json.addProperty("description", this.description);
          this.write(json);
          return json;
       }
 
       public final void deserializeJson(JsonObject json) {
+         this.uber = json.get("uber").getAsBoolean();
          this.color = json.get("color").getAsInt();
+         if (json.has("uberColor")) {
+            this.uberColor = json.get("uberColor").getAsInt();
+         } else {
+            this.uberColor = this.color;
+         }
+
          this.description = json.get("description").getAsString();
          this.read(json);
       }
 
       public final CompoundTag serializeNBT() {
          CompoundTag nbt = new CompoundTag();
+         nbt.putBoolean("uber", this.uber);
          nbt.putString("color", Long.toHexString(Integer.toUnsignedLong(this.color)));
+         nbt.putString("uberColor", Long.toHexString(Integer.toUnsignedLong(this.uberColor)));
          nbt.putString("description", this.description);
          this.write(nbt);
          return nbt;
       }
 
       public final void deserializeNBT(CompoundTag nbt) {
+         this.uber = nbt.getBoolean("uber");
          this.color = (int)Long.parseLong(nbt.getString("color"), 16);
+         if (nbt.contains("uberColor")) {
+            this.uberColor = (int)Long.parseLong(nbt.getString("uberColor"), 16);
+         } else {
+            this.uberColor = this.color;
+         }
+
          this.description = nbt.getString("description");
          this.read(nbt);
       }

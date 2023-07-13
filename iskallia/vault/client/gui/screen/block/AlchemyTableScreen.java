@@ -19,6 +19,7 @@ import iskallia.vault.config.gear.VaultAlchemyTableConfig;
 import iskallia.vault.container.AlchemyTableContainer;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.crafting.AlchemyTableHelper;
+import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.tooltip.GearTooltip;
 import iskallia.vault.gear.tooltip.VaultGearTooltipItem;
@@ -93,6 +94,10 @@ public class AlchemyTableScreen extends AbstractElementContainerScreen<AlchemyTa
             ItemStack gear = ((AlchemyTableContainer)this.getMenu()).getInput();
             if (gear.isEmpty()) {
                return false;
+            } else if (AttributeGearData.hasData(gear) && !AttributeGearData.<AttributeGearData>read(gear).isModifiable()) {
+               Component cmp = new TranslatableComponent("the_vault.gear_modification.unmodifiable").withStyle(ChatFormatting.RED);
+               tooltipRenderer.renderTooltip(poseStack, cmp, mouseX, mouseY, TooltipDirection.RIGHT);
+               return true;
             } else {
                List<ItemStack> inputs = this.selectedOption.getCraftingCost(gear);
                List<ItemStack> missing = InventoryUtil.getMissingInputs(inputs, this.playerInventory);

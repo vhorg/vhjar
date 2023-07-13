@@ -12,7 +12,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class ListenersLogic extends DataObject<ListenersLogic> implements ISupplierKey<ListenersLogic> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
@@ -39,7 +43,7 @@ public abstract class ListenersLogic extends DataObject<ListenersLogic> implemen
                if (manager.get(WorldManager.PORTAL_LOGIC) instanceof ClassicPortalLogic logic) {
                   logic.getPlayerStart(world, vault).ifPresent(state -> {
                      if (state.isLoaded()) {
-                        state.teleport(player);
+                        this.teleportSafe(state, manager.get(WorldManager.FACING), player);
                         this.onTeleport(world, vault, player);
                      }
                   });
@@ -47,6 +51,27 @@ public abstract class ListenersLogic extends DataObject<ListenersLogic> implemen
             });
          }
       }));
+   }
+
+   private void teleportSafe(EntityState state, Direction directionHint, ServerPlayer player) {
+      AABB box = player.dimensions.makeBoundingBox(Vec3.ZERO);
+      BlockPos startPos = state.getBlockPos();
+      if (!state.isColliding(box)) {
+         state.teleport(player);
+      } else {
+         int moveLimit = startPos.get(directionHint.getAxis());
+
+         for (BlockPos offset : BlockPos.spiralAround(startPos, 5, directionHint, directionHint.getClockWise())) {
+            int moveOffset = offset.get(directionHint.getAxis());
+            int diff = (moveLimit - moveOffset) * directionHint.getNormal().get(directionHint.getAxis());
+            if (diff <= 0 && !state.isColliding(box)) {
+               state.teleport(player);
+               return;
+            }
+         }
+
+         state.teleport(player);
+      }
    }
 
    protected void onTeleport(VirtualWorld world, Vault vault, ServerPlayer player) {

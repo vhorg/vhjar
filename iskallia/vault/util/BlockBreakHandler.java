@@ -1,5 +1,6 @@
 package iskallia.vault.util;
 
+import iskallia.vault.gear.item.VaultGearItem;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -80,7 +81,7 @@ public abstract class BlockBreakHandler {
                      BlockState blockState = level.getBlockState(offset);
                      if (!blockState.isAir() && blockState.getBlock() == targetBlock) {
                         this.destroyBlock(level, player, heldItem, damageHandler, offset, this.shouldVoid(level, player, blockState), !offset.equals(pos));
-                        if (heldItem.isEmpty() && !heldItemStartedEmpty) {
+                        if (heldItem.isEmpty() && !heldItemStartedEmpty || heldItem.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(heldItem)) {
                            positionQueue.clear();
                            break;
                         }

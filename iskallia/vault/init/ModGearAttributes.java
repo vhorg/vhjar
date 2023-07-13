@@ -10,6 +10,7 @@ import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.ability.AbilityCooldownFlatAttribute;
 import iskallia.vault.gear.attribute.ability.AbilityCooldownPercentAttribute;
+import iskallia.vault.gear.attribute.ability.AbilityLevelAttribute;
 import iskallia.vault.gear.attribute.ability.AbilityManaCostFlatAttribute;
 import iskallia.vault.gear.attribute.ability.AbilityManaCostPercentAttribute;
 import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityGearAttribute;
@@ -137,11 +138,46 @@ public class ModGearAttributes {
       ModGearAttributeReaders.addedIntReader("Durability", 14668030),
       VaultGearAttributeComparator.intComparator()
    );
+   public static final VaultGearAttribute<Float> ABILITY_POWER = attr(
+      "ability_power",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.addedDecimalReader("Ability Power", 16711883),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> ABILITY_POWER_PERCENTILE = attr(
+      "ability_power_percentile",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.addedDecimalReader("Ability Power Percentile", 16711883),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> ABILITY_POWER_PERCENT = attr(
+      "ability_power_percent",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.increasedReader("Ability Power", 15622139),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> MOVEMENT_SPEED = attr(
+      "movement_speed",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Movement Speed", 16769128),
+      VaultGearAttributeComparator.floatComparator()
+   );
    public static final VaultGearAttribute<Float> COOLDOWN_REDUCTION = attr(
       "cooldown_reduction",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
       ModGearAttributeReaders.percentageReader("Cooldown Reduction", 63668),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> COOLDOWN_REDUCTION_PERCENTILE = attr(
+      "cooldown_reduction_percentile",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Cooldown Reduction Percentile", 63668),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> LEECH = attr(
@@ -179,7 +215,11 @@ public class ModGearAttributes {
       "effect_immunity", VaultGearAttributeType.registryType(ForgeRegistries.MOB_EFFECTS), new EffectImmunityGenerator(), new EffectImmunityModifierReader()
    );
    public static final VaultGearAttribute<EffectAvoidanceGearAttribute> EFFECT_AVOIDANCE = attr(
-      "effect_avoidance", EffectAvoidanceGearAttribute.type(), EffectAvoidanceGearAttribute.generator(), EffectAvoidanceGearAttribute.reader()
+      "effect_avoidance",
+      EffectAvoidanceGearAttribute.type(),
+      EffectAvoidanceGearAttribute.generator(),
+      EffectAvoidanceGearAttribute.reader(),
+      EffectAvoidanceGearAttribute.comparator()
    );
    public static final VaultGearAttribute<EffectCloudAttribute> EFFECT_CLOUD = attr(
       "effect_cloud", EffectCloudAttribute.type(), EffectCloudAttribute.generator(), EffectCloudAttribute.reader(false)
@@ -234,6 +274,13 @@ public class ModGearAttributes {
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
       ModGearAttributeReaders.percentageReader("Lucky Hit Chance", 7206307),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> LUCKY_HIT_CHANCE_PERCENTILE = attr(
+      "lucky_hit_chance_percentile",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Lucky Hit Chance Percent Of Base", 7206307),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> THORNS_CHANCE = attr(
@@ -320,11 +367,25 @@ public class ModGearAttributes {
       ModGearAttributeReaders.percentageReader("Soul Chance", 4718847),
       VaultGearAttributeComparator.floatComparator()
    );
+   public static final VaultGearAttribute<Float> SOUL_CHANCE_PERCENTILE = attr(
+      "soul_chance_percentile",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Soul Chance Percentile", 4718847),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> AREA_OF_EFFECT = attr(
+      "area_of_effect",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.increasedReader("Area of Effect", 15319925),
+      VaultGearAttributeComparator.floatComparator()
+   );
    public static final VaultGearAttribute<Float> DAMAGE_INCREASE = attr(
       "damage_increase",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
-      ModGearAttributeReaders.increasedReader("Damage", 16739072),
+      ModGearAttributeReaders.increasedReader("Attack Damage", 16739072),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> DAMAGE_ILLAGERS = attr(
@@ -547,6 +608,9 @@ public class ModGearAttributes {
       ModGearAttributeReaders.addedRoundedDecimalReader("Velocity", 14608287, 100.0F),
       VaultGearAttributeComparator.floatComparator()
    );
+   public static final VaultGearAttribute<AbilityLevelAttribute> ABILITY_LEVEL = attr(
+      "added_ability_level", AbilityLevelAttribute.type(), AbilityLevelAttribute.generator(), AbilityLevelAttribute.reader()
+   );
    public static final VaultGearAttribute<AbilityCooldownFlatAttribute> ABILITY_COOLDOWN_FLAT = attr(
       "ability_cooldown_flat", AbilityCooldownFlatAttribute.type(), AbilityCooldownFlatAttribute.generator(), AbilityCooldownFlatAttribute.reader()
    );
@@ -592,6 +656,9 @@ public class ModGearAttributes {
    public static final VaultGearAttribute<Boolean> IS_ABYSSAL = attr(
       "is_abyssal", VaultGearAttributeType.booleanType(), ModGearAttributeGenerators.booleanFlag(), ModGearAttributeReaders.none()
    );
+   public static final VaultGearAttribute<Boolean> IS_CORRUPTED = attr(
+      "is_corrupted", VaultGearAttributeType.booleanType(), ModGearAttributeGenerators.booleanFlag(), ModGearAttributeReaders.none()
+   );
    public static final VaultGearAttribute<Integer> PREFIXES = attr(
       "prefixes", VaultGearAttributeType.intType(), ModGearAttributeGenerators.intRange(), ModGearAttributeReaders.none()
    );
@@ -634,8 +701,13 @@ public class ModGearAttributes {
       registry.register(MANA_ADDITIVE);
       registry.register(MANA_ADDITIVE_PERCENTILE);
       registry.register(HEALING_EFFECTIVENESS);
+      registry.register(MOVEMENT_SPEED);
+      registry.register(ABILITY_POWER);
+      registry.register(ABILITY_POWER_PERCENTILE);
+      registry.register(ABILITY_POWER_PERCENT);
       registry.register(DURABILITY);
       registry.register(COOLDOWN_REDUCTION);
+      registry.register(COOLDOWN_REDUCTION_PERCENTILE);
       registry.register(LEECH);
       registry.register(RESISTANCE);
       registry.register(BLOCK);
@@ -652,6 +724,7 @@ public class ModGearAttributes {
       registry.register(FATAL_STRIKE_CHANCE);
       registry.register(FATAL_STRIKE_DAMAGE);
       registry.register(LUCKY_HIT_CHANCE);
+      registry.register(LUCKY_HIT_CHANCE_PERCENTILE);
       registry.register(THORNS_CHANCE);
       registry.register(THORNS_DAMAGE);
       registry.register(THORNS_DAMAGE_FLAT);
@@ -664,6 +737,8 @@ public class ModGearAttributes {
       registry.register(ITEM_RARITY);
       registry.register(TRAP_DISARMING);
       registry.register(SOUL_CHANCE);
+      registry.register(SOUL_CHANCE_PERCENTILE);
+      registry.register(AREA_OF_EFFECT);
       registry.register(DAMAGE_INCREASE);
       registry.register(DAMAGE_ILLAGERS);
       registry.register(DAMAGE_SPIDERS);
@@ -697,6 +772,7 @@ public class ModGearAttributes {
       registry.register(REAPING);
       registry.register(RANGE);
       registry.register(VELOCITY);
+      registry.register(ABILITY_LEVEL);
       registry.register(ABILITY_COOLDOWN_FLAT);
       registry.register(ABILITY_COOLDOWN_PERCENT);
       registry.register(ABILITY_MANACOST_FLAT);
@@ -710,6 +786,7 @@ public class ModGearAttributes {
       registry.register(GEAR_ROLL_TYPE);
       registry.register(IS_LOOT);
       registry.register(IS_ABYSSAL);
+      registry.register(IS_CORRUPTED);
       registry.register(PREFIXES);
       registry.register(SUFFIXES);
       registry.register(ETCHING);
@@ -732,6 +809,7 @@ public class ModGearAttributes {
       VANILLA_ATTRIBUTES.put(ModAttributes.MANA_REGEN, Operation.MULTIPLY_BASE, MANA_REGEN_ADDITIVE_PERCENTILE);
       VANILLA_ATTRIBUTES.put(ModAttributes.MANA_MAX, Operation.ADDITION, MANA_ADDITIVE);
       VANILLA_ATTRIBUTES.put(ModAttributes.MANA_MAX, Operation.MULTIPLY_BASE, MANA_ADDITIVE_PERCENTILE);
+      VANILLA_ATTRIBUTES.put(Attributes.MOVEMENT_SPEED, Operation.MULTIPLY_BASE, MOVEMENT_SPEED);
    }
 
    private static <T> VaultGearAttribute<T> attr(

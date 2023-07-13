@@ -10,7 +10,9 @@ import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.item.gear.VaultShieldItem;
+import iskallia.vault.item.gear.WandItem;
 import iskallia.vault.network.message.ClientboundPlayerLastDamageSourceMessage;
+import iskallia.vault.network.message.MobCritParticleMessage;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.PlayerStat;
@@ -40,6 +42,7 @@ import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.TippedArrowItem;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
@@ -52,6 +55,7 @@ import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.PacketDistributor;
 
 @EventBusSubscriber(
    bus = Bus.FORGE
@@ -105,7 +109,7 @@ public class EntityEvents {
             if (!event.getSource().isBypassArmor()) {
                ItemStack offHand = event.getEntityLiving().getOffhandItem();
                if (!ServerVaults.get(world).isEmpty() || !(offHand.getItem() instanceof VaultGearItem)) {
-                  if (offHand.getItem() instanceof IdolItem || offHand.getItem() instanceof VaultShieldItem) {
+                  if (offHand.getItem() instanceof IdolItem || offHand.getItem() instanceof VaultShieldItem || offHand.getItem() instanceof WandItem) {
                      int damage = (int)CommonEvents.PLAYER_STAT
                         .invoke(PlayerStat.DURABILITY_DAMAGE, player, Math.max(1.0F, event.getAmount() / 6.0F))
                         .getValue();
@@ -156,9 +160,23 @@ public class EntityEvents {
                         multiplier = multiplierPart + 1.0F;
                      }
 
+                     ModNetwork.CHANNEL
+                        .send(
+                           PacketDistributor.ALL.noArg(),
+                           new MobCritParticleMessage(
+                              new Vec3(event.getEntity().getX(), event.getEntity().getY() + event.getEntity().getBbHeight(), event.getEntity().getZ())
+                           )
+                        );
                      attacker.level
                         .playSound(
-                           null, attacker.getX(), attacker.getY(), attacker.getZ(), SoundEvents.PLAYER_ATTACK_CRIT, attacker.getSoundSource(), 1.0F, 1.0F
+                           null,
+                           attacker.getX(),
+                           attacker.getY(),
+                           attacker.getZ(),
+                           ModSounds.MOB_CRIT,
+                           attacker.getSoundSource(),
+                           1.2F,
+                           new Random().nextFloat() * 0.5F + 0.5F
                         );
                      event.setAmount(event.getAmount() * multiplier);
                   }

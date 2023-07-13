@@ -5,6 +5,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.ItemShardPouch;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.InventorySnapshotData;
 import iskallia.vault.world.data.ServerVaults;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -42,17 +44,22 @@ public abstract class MixinPlayerInventory implements InventorySnapshotData.Inve
       )
    )
    public void hurtItemStack(ItemStack stack, int amount, LivingEntity entity, Consumer<LivingEntity> onBroken) {
-      if (ServerVaults.get(this.player.level).isPresent()) {
-         amount = Math.min(amount, 5);
-      } else if (stack.getItem() instanceof VaultGearItem) {
-         return;
-      }
+      if (!(stack.getItem() instanceof VaultGearItem gear && gear.isBroken(stack))) {
+         if (ServerVaults.get(this.player.level).isPresent()) {
+            amount = Math.min(amount, 5);
+         } else if (stack.getItem() instanceof VaultGearItem) {
+            return;
+         }
 
-      if (this.player.getCommandSenderWorld() instanceof ServerLevel) {
-         amount = (int)CommonEvents.PLAYER_STAT.invoke(PlayerStat.DURABILITY_DAMAGE, this.player, amount).getValue();
-      }
+         if (this.player.getCommandSenderWorld() instanceof ServerLevel) {
+            amount = (int)CommonEvents.PLAYER_STAT.invoke(PlayerStat.DURABILITY_DAMAGE, this.player, amount).getValue();
+         }
 
-      stack.hurtAndBreak(amount, entity, onBroken);
+         stack.hurtAndBreak(amount, entity, onBroken);
+         if (stack.getItem() instanceof VaultGearItem gearx && gearx.isBroken(stack) && this.player instanceof ServerPlayer serverPlayer) {
+            AttributeSnapshotHelper.getInstance().refreshSnapshot(serverPlayer);
+         }
+      }
    }
 
    @Inject(

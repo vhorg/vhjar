@@ -23,6 +23,7 @@ import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 public class JavelinScatterAbility extends AbstractJavelinAbility {
    private int numberOfJavelins;
    private int numberOfBounces;
+   private int piercing;
 
    public JavelinScatterAbility(
       int unlockLevel,
@@ -33,11 +34,13 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
       float percentAttackDamageDealt,
       float throwPower,
       int numberOfJavelins,
-      int numberOfBounces
+      int numberOfBounces,
+      int piercing
    ) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, percentAttackDamageDealt, throwPower);
       this.numberOfJavelins = numberOfJavelins;
       this.numberOfBounces = numberOfBounces;
+      this.piercing = piercing;
    }
 
    public JavelinScatterAbility() {
@@ -49,6 +52,10 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
 
    public int getNumberOfBounces() {
       return this.numberOfBounces;
+   }
+
+   public int getPiercing() {
+      return this.piercing;
    }
 
    @Override
@@ -82,6 +89,7 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
       super.writeBits(buffer);
       Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.numberOfJavelins), buffer);
       Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.numberOfBounces), buffer);
+      Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.piercing), buffer);
    }
 
    @Override
@@ -89,6 +97,7 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
       super.readBits(buffer);
       this.numberOfJavelins = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
       this.numberOfBounces = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+      this.piercing = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
    }
 
    @Override
@@ -96,6 +105,7 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
       return super.writeNbt().map(nbt -> {
          Adapters.INT.writeNbt(Integer.valueOf(this.numberOfJavelins)).ifPresent(tag -> nbt.put("numberOfJavelins", tag));
          Adapters.INT.writeNbt(Integer.valueOf(this.numberOfBounces)).ifPresent(tag -> nbt.put("numberOfBounces", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.piercing)).ifPresent(tag -> nbt.put("piercing", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -105,6 +115,7 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
       super.readNbt(nbt);
       this.numberOfJavelins = Adapters.INT.readNbt(nbt.get("numberOfJavelins")).orElse(0);
       this.numberOfBounces = Adapters.INT.readNbt(nbt.get("numberOfBounces")).orElse(0);
+      this.piercing = Adapters.INT.readNbt(nbt.get("piercing")).orElse(0);
    }
 
    @Override
@@ -112,6 +123,7 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
       return super.writeJson().map(json -> {
          Adapters.INT.writeJson(Integer.valueOf(this.numberOfJavelins)).ifPresent(element -> json.add("numberOfJavelins", element));
          Adapters.INT.writeJson(Integer.valueOf(this.numberOfBounces)).ifPresent(element -> json.add("numberOfBounces", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.piercing)).ifPresent(element -> json.add("piercing", element));
          return (JsonObject)json;
       });
    }
@@ -121,5 +133,6 @@ public class JavelinScatterAbility extends AbstractJavelinAbility {
       super.readJson(json);
       this.numberOfJavelins = Adapters.INT.readJson(json.get("numberOfJavelins")).orElse(0);
       this.numberOfBounces = Adapters.INT.readJson(json.get("numberOfBounces")).orElse(0);
+      this.piercing = Adapters.INT.readJson(json.get("piercing")).orElse(0);
    }
 }
