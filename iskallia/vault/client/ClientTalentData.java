@@ -12,6 +12,10 @@ import javax.annotation.Nullable;
 public class ClientTalentData {
    private static TalentTree TALENTS = new TalentTree();
 
+   public static TalentTree getTree() {
+      return TALENTS;
+   }
+
    @Nonnull
    public static List<TieredSkill> getLearnedTalentNodes() {
       List<TieredSkill> talents = new ArrayList<>();

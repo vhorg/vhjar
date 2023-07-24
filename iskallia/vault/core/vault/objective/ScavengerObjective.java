@@ -1,9 +1,11 @@
 package iskallia.vault.core.vault.objective;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.block.PlaceholderBlock;
+import iskallia.vault.client.gui.helper.FontHelper;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.core.Version;
@@ -35,7 +37,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
+import net.minecraft.client.renderer.block.model.ItemTransforms.TransformType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -163,8 +169,9 @@ public class ScavengerObjective extends Objective {
       if (goals == null) {
          return true;
       } else {
+         Minecraft mc = Minecraft.getInstance();
+         int tabListOffset = mc.gui.getTabList().visible ? mc.player.connection.getOnlinePlayers().size() * 9 + 10 : 0;
          int totalX = 0;
-         int totalY = 0;
          int midX = window.getGuiScaledWidth() / 2;
          int gapWidth = 7;
          int itemBoxWidth = 32;
@@ -180,7 +187,7 @@ public class ScavengerObjective extends Objective {
          matrixStack.pushPose();
          matrixStack.translate(midX + shiftX, itemBoxWidth * 0.75F, 0.0);
          totalX += midX + shiftX;
-         totalY = (int)(totalY + itemBoxWidth * 0.75);
+         int totalY = (int)(tabListOffset + itemBoxWidth * 0.75);
 
          for (ScavengerGoal goal : filteredGoals) {
             int reqYOffset = renderItemRequirement(matrixStack, goal, itemBoxWidth, totalX, totalY);
@@ -241,6 +248,50 @@ public class ScavengerObjective extends Objective {
       ir.renderAndDecorateItem(item, totalX - 8, totalY - 8);
       ir.renderGuiItemDecorations(fr, item, totalX - 8, totalY - 8, null);
       ir.blitOffset = 0.0F;
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   @Override
+   public void renderPartyInfo(PoseStack matrixStack, UUID playerUUID) {
+      super.renderPartyInfo(matrixStack, playerUUID);
+      List<ItemStack> scavItems = new ArrayList<>();
+      ScavengerGoal.ObjList scavengerGoals = this.get(GOALS).get(playerUUID);
+      if (scavengerGoals != null) {
+         List<ScavengerGoal> filteredGoals = new ArrayList<>(scavengerGoals);
+         filteredGoals.removeIf(ScavengerGoal::isCompleted);
+         filteredGoals.forEach(
+            goal -> scavItems.add(new ItemStack((ItemLike)goal.get(ScavengerGoal.ITEM), goal.get(ScavengerGoal.TOTAL) - goal.get(ScavengerGoal.CURRENT)))
+         );
+         if (!scavItems.isEmpty()) {
+            matrixStack.translate(-10.0 - (scavItems.size() + 1) * 18.0, 3.0, 100.0);
+
+            for (ItemStack stack : scavItems) {
+               matrixStack.pushPose();
+               matrixStack.scale(1.0F, -1.0F, 1.0F);
+               matrixStack.scale(16.0F, 16.0F, 16.0F);
+               Minecraft minecraft = Minecraft.getInstance();
+               ItemRenderer itemRenderer = minecraft.getItemRenderer();
+               BakedModel bakedModel = itemRenderer.getModel(stack, null, null, 0);
+               if (!bakedModel.usesBlockLight()) {
+                  Lighting.setupForFlatItems();
+               }
+
+               BufferSource bufferSource = minecraft.renderBuffers().bufferSource();
+               itemRenderer.render(stack, TransformType.GUI, false, matrixStack, bufferSource, 15728880, OverlayTexture.NO_OVERLAY, bakedModel);
+               bufferSource.endBatch();
+               if (!bakedModel.usesBlockLight()) {
+                  Lighting.setupFor3DItems();
+               }
+
+               matrixStack.popPose();
+               matrixStack.pushPose();
+               matrixStack.translate(9.0, 0.0, 200.0);
+               FontHelper.drawTextComponent(matrixStack, new TextComponent(String.valueOf(stack.getCount())), true);
+               matrixStack.popPose();
+               matrixStack.translate(18.0, 0.0, 0.0);
+            }
+         }
+      }
    }
 
    @Override

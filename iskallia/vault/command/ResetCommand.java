@@ -56,7 +56,7 @@ public class ResetCommand extends Command {
 
    private int resetAbilitiesAndTalents(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       CommandSourceStack source = (CommandSourceStack)context.getSource();
-      PlayerVaultStatsData.get(source.getLevel()).resetAbilities(source.getPlayerOrException());
+      PlayerVaultStatsData.get(source.getLevel()).resetSkills(source.getPlayerOrException());
       return 0;
    }
 

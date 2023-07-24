@@ -39,19 +39,19 @@ public class ServerboundAbilityKeyMessage {
             SkillContext context = SkillContext.of(sender);
             switch (message.opcode) {
                case KeyUp:
-                  abilityTree.onKeyUp(context, sender);
+                  abilityTree.onKeyUp(context);
                   break;
                case KeyDown:
-                  abilityTree.onKeyDown(context, sender);
+                  abilityTree.onKeyDown(context);
                   break;
                case ScrollUp:
-                  abilityTree.onScrollUp(context, sender);
+                  abilityTree.onScroll(1, context);
                   break;
                case ScrollDown:
-                  abilityTree.onScrollDown(context, sender);
+                  abilityTree.onScroll(-1, context);
                   break;
                case CancelKeyDown:
-                  abilityTree.onCancelKeyDown(context, sender);
+                  abilityTree.onCancelKeyDown(context);
             }
          }
       });

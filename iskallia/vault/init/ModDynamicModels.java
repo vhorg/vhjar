@@ -1531,5 +1531,16 @@ public class ModDynamicModels {
       public static final PlainItemModel DRUID = REGISTRY.register(
          new PlainItemModel(VaultMod.id("gear/wand/druid"), "Druid Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
+      public static final PlainItemModel ISKALLIUM = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/iskallium"), "Iskallium Tech Wand")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel GORGEOUS = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/gorgeous"), "Gorgeous Wand")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel LUNAR = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/lunar"), "Lunar Staff").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
    }
 }

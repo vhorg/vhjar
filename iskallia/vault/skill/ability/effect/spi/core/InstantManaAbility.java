@@ -10,7 +10,6 @@ import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.player.Player;
 
 public abstract class InstantManaAbility extends InstantAbility implements IInstantManaAbility {
    private float manaCost;
@@ -39,7 +38,7 @@ public abstract class InstantManaAbility extends InstantAbility implements IInst
 
             cost = ManaCostHelper.adjustManaCost(player, this.getAbilityGroupName(), cost);
             if (mana.getMana() < cost) {
-               player.level.playSound((Player)null, player, ModSounds.ABILITY_OUT_OF_MANA, SoundSource.PLAYERS, 1.0F, 1.0F);
+               player.level.playSound(null, player, ModSounds.ABILITY_OUT_OF_MANA, SoundSource.PLAYERS, 1.0F, 1.0F);
             }
          }
 

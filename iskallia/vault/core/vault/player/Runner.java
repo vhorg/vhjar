@@ -264,6 +264,5 @@ public class Runner extends Listener {
       super.onLeave(world, vault);
       this.ifPresent(INFLUENCES, influences -> influences.onLeave(world, vault, this));
       this.getPlayer().ifPresent(InventoryUtil::makeScavItemsRotten);
-      this.getPlayer().ifPresent(InventoryUtil::resetCompassTarget);
    }
 }

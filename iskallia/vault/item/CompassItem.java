@@ -1,11 +1,13 @@
 package iskallia.vault.item;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultUtils;
+import iskallia.vault.core.vault.player.Listener;
+import iskallia.vault.core.vault.player.Listeners;
 import iskallia.vault.init.ModItems;
-import java.util.Optional;
+import iskallia.vault.world.data.ServerVaults;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionResult;
@@ -21,7 +23,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult.Type;
 
 public class CompassItem extends BasicItem {
-   private static final String TARGET_TAG = "target";
    private static final int TARGET_SET_DURATION = 40;
 
    public CompassItem() {
@@ -60,7 +61,7 @@ public class CompassItem extends BasicItem {
          } else {
             BlockHitResult blockHitResult = getPlayerPOVHitResult(level, player, Fluid.ANY);
             if (blockHitResult.getType() == Type.BLOCK) {
-               this.setTarget(stack, blockHitResult.getBlockPos());
+               this.setTarget(player, level, blockHitResult.getBlockPos());
             }
 
             player.getCooldowns().addCooldown(stack.getItem(), 10);
@@ -72,16 +73,12 @@ public class CompassItem extends BasicItem {
       }
    }
 
-   private void setTarget(ItemStack compass, BlockPos pos) {
-      CompoundTag tag = compass.getOrCreateTag();
-      tag.putLong("target", pos.asLong());
-   }
-
-   public static Optional<BlockPos> getTarget(ItemStack compass) {
-      return compass.hasTag() && compass.getTag().contains("target") ? Optional.of(BlockPos.of(compass.getTag().getLong("target"))) : Optional.empty();
-   }
-
-   public static void resetTarget(ItemStack compass) {
-      compass.removeTagKey("target");
+   private void setTarget(Player player, Level level, BlockPos pos) {
+      ServerVaults.get(level).ifPresent(vault -> {
+         Listeners listeners = vault.get(Vault.LISTENERS);
+         if (listeners.contains(player.getUUID())) {
+            listeners.get(player.getUUID()).set(Listener.COMPASS_TARGET, pos);
+         }
+      });
    }
 }

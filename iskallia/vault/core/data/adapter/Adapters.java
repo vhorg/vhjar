@@ -41,6 +41,7 @@ import iskallia.vault.core.data.adapter.number.LongAdapter;
 import iskallia.vault.core.data.adapter.number.NumericAdapter;
 import iskallia.vault.core.data.adapter.number.SegmentedIntAdapter;
 import iskallia.vault.core.data.adapter.number.ShortAdapter;
+import iskallia.vault.core.data.adapter.util.BlockPosAdapter;
 import iskallia.vault.core.data.adapter.util.ForgeRegistryAdapter;
 import iskallia.vault.core.data.adapter.util.IdentifierAdapter;
 import iskallia.vault.core.data.adapter.util.ItemStackAdapter;
@@ -142,6 +143,7 @@ public class Adapters {
    public static final ForgeRegistryAdapter<VaultGearAttribute<?>> GEAR_ATTRIBUTE = new ForgeRegistryAdapter(VaultGearAttributeRegistry::getRegistry, false);
    public static final SerializableAdapter<CrystalData, CompoundTag, JsonObject> CRYSTAL = new SerializableAdapter<>(CrystalData::empty, true);
    public static final Skill.Adapter SKILL = new Skill.Adapter();
+   public static final BlockPosAdapter BLOCK_POS = new BlockPosAdapter(false);
    public static TypeSupplierAdapter<EnhancementTask<?>> ENHANCEMENT_TASK = new TypeSupplierAdapter<BreakBlocksEnhancementTask>("type", true)
       .<TypeSupplierAdapter<KillMobsEnhancementTask>>register("break_blocks", BreakBlocksEnhancementTask.class, BreakBlocksEnhancementTask::new)
       .<TypeSupplierAdapter<LootChestsEnhancementTask>>register("kill_mobs", KillMobsEnhancementTask.class, KillMobsEnhancementTask::new)

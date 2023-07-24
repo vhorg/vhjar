@@ -17,6 +17,7 @@ import iskallia.vault.mana.Mana;
 import iskallia.vault.util.StatUtils;
 import iskallia.vault.util.calc.AbilityPowerHelper;
 import iskallia.vault.util.calc.AttributeLimitHelper;
+import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.CooldownHelper;
 import iskallia.vault.util.calc.LuckyHitHelper;
 import iskallia.vault.util.calc.SoulChanceHelper;
@@ -274,7 +275,9 @@ public class StatisticsElementContainerScreenData {
                AttributeLimitHelper::getCooldownReductionLimit
             ),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.RESISTANCE, AttributeLimitHelper::getResistanceLimit),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.BLOCK, AttributeLimitHelper::getBlockChanceLimit),
+            GearAttributeStatLabel.ofFloat(
+               this.player, ModGearAttributes.BLOCK, BlockChanceHelper::getBlockChanceUnlimited, AttributeLimitHelper::getBlockChanceLimit
+            ),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.CRITICAL_HIT_TAKEN_REDUCTION),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DURABILITY_WEAR_REDUCTION),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.THORNS_DAMAGE_FLAT),

@@ -143,8 +143,9 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
          .setDisabled(
             () -> ((SkillAltarContainer)this.getMenu()).isEmptyTemplate()
                || this.abilitiesTalentsEqual
-               || ((SkillAltarContainer)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints) > 0
                || ((SkillAltarContainer)this.getMenu()).isOpenedByNonOwner()
+               || ((SkillAltarContainer)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints) > 0
+               || ((SkillAltarContainer)this.getMenu()).getMissingSkillPointsClient() > 0
          );
       this.loadButton.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
          tooltipRenderer.renderComponentTooltip(poseStack, this.getLoadButtonTooltip(), mouseX, mouseY, TooltipDirection.RIGHT);
@@ -262,6 +263,15 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
                      new TranslatableComponent(
                            "screen.the_vault.skill_altar.tooltip.load.missing_orbs",
                            new Object[]{((SkillAltarContainer)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints)}
+                        )
+                        .withStyle(ChatFormatting.RED)
+                  );
+            } else if (((SkillAltarContainer)this.getMenu()).getMissingSkillPointsClient() > 0) {
+               this.loadTooltip
+                  .add(
+                     new TranslatableComponent(
+                           "screen.the_vault.skill_altar.tooltip.load.missing_skill_points",
+                           new Object[]{((SkillAltarContainer)this.getMenu()).getMissingSkillPointsClient()}
                         )
                         .withStyle(ChatFormatting.RED)
                   );

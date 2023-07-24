@@ -6,9 +6,8 @@ import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.atlas.ITextureAtlas;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModTextureAtlases;
-import iskallia.vault.skill.ability.cooldown.AbilityCooldownManager;
-import iskallia.vault.skill.ability.cooldown.CooldownInstance;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.ability.effect.spi.core.Cooldown;
 import iskallia.vault.skill.base.SpecializedSkill;
 import iskallia.vault.skill.base.TieredSkill;
 import iskallia.vault.util.MathUtilities;
@@ -71,8 +70,7 @@ public class AbilitySelectionWidget extends AbstractWidget {
          Rectangle bounds = this.getBounds();
          String styleKey = this.ability.getSpecialization().getId();
          Ability ability = this.getSelectedAbility();
-         String abilityKey = ability != null ? ability.getAbilityGroupName() : styleKey;
-         CooldownInstance cooldown = AbilityCooldownManager.getCooldown(player, abilityKey);
+         Cooldown cooldown = ability == null ? null : ability.getTreeCooldown().orElse(null);
          if (ClientAbilityData.isSelectedAbility(this.ability)) {
             RenderSystem.setShaderColor(0.7F, 0.7F, 0.7F, 0.3F);
          } else {
@@ -85,9 +83,9 @@ public class AbilitySelectionWidget extends AbstractWidget {
          ITextureAtlas atlas = ModTextureAtlases.ABILITIES.get();
          RenderSystem.setShaderTexture(0, atlas.getAtlasResourceLocation());
          GuiComponent.blit(matrixStack, bounds.x + 4, bounds.y + 4, 0, 16, 16, atlas.getSprite(ModConfigs.ABILITIES_GUI.getIcon(styleKey)));
-         if (cooldown.getRemainingTicks() > 0) {
+         if (cooldown != null && cooldown.getRemainingTicks() > 0) {
             RenderSystem.setShaderColor(0.7F, 0.7F, 0.7F, 0.5F);
-            float cooldownPercent = (float)cooldown.getRemainingTicks() / cooldown.getOriginalTicks();
+            float cooldownPercent = (float)cooldown.getRemainingTicks() / cooldown.getMaxTicks();
             int cooldownHeight = (int)(16.0F * cooldownPercent);
             GuiComponent.fill(matrixStack, bounds.x + 4, bounds.y + 4 + (16 - cooldownHeight), bounds.x + 4 + 16, bounds.y + 4 + 16, -1711276033);
             RenderSystem.enableBlend();
@@ -99,7 +97,7 @@ public class AbilitySelectionWidget extends AbstractWidget {
          } else if (this.isMouseOver(mouseX, mouseY)) {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
             RenderSystem.setShaderTexture(0, HUD_RESOURCE);
-            this.blit(matrixStack, bounds.x, bounds.y, 64 + (cooldown.getRemainingTicks() > 0 ? 50 : 0), 13, 24, 24);
+            this.blit(matrixStack, bounds.x, bounds.y, 64 + (cooldown != null && cooldown.getRemainingTicks() > 0 ? 50 : 0), 13, 24, 24);
          }
       }
    }

@@ -271,7 +271,9 @@ public class ModAbilityLabelBindings {
             "freezeDuration",
             ability -> AbilityLabelFormatters.ticks(ability.getFreezeTicks()),
             "amplifier",
-            ability -> AbilityLabelFormatters.integer(ability.getAmplifier())
+            ability -> AbilityLabelFormatters.integer(ability.getAmplifier()),
+            "maxGlacialPrison",
+            ability -> AbilityLabelFormatters.integer(ability.getMaxGlacialPrison())
          )
       );
       register(

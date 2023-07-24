@@ -69,6 +69,7 @@ public final class AbilityLabelFactory {
    public static final String ATTACK_DAMAGE_PER_STACK = "attackDamagePerStack";
    public static final String ABILITY_POWER_PER_STACK = "abilityPowerPerStack";
    public static final String LUCKY_HIT_PER_STACK = "luckyHitPerStack";
+   public static final String MAX_GLACIAL_PRISON = "maxGlacialPrison";
    private static final Map<String, AbilityLabelFactory.IAbilityComponentFactory> FACTORY_MAP = new HashMap<String, AbilityLabelFactory.IAbilityComponentFactory>() {
       {
          this.put("cooldown", context -> AbilityLabelFactory.label("\n Cooldown: ", AbilityLabelFactory.binding(context.config(), "cooldown"), "cooldown"));
@@ -236,6 +237,12 @@ public final class AbilityLabelFactory {
          this.put(
             "luckyHitPerStack",
             context -> AbilityLabelFactory.label("\n Lucky Hit Per Stack: ", AbilityLabelFactory.binding(context.config(), "luckyHitPerStack"), "luckyHit")
+         );
+         this.put(
+            "maxGlacialPrison",
+            context -> AbilityLabelFactory.label(
+               "\n Max Glacial Prison: ", AbilityLabelFactory.binding(context.config(), "maxGlacialPrison"), "maxGlacialPrison"
+            )
          );
       }
    };

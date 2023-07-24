@@ -95,7 +95,7 @@ public abstract class AbstractVeinMinerAbility extends HoldAbility {
 
          for (AbstractVeinMinerAbility ability : abilities.getAll(AbstractVeinMinerAbility.class, Ability::isActive)) {
             if (!ability.isItemDenied(player.getItemInHand(InteractionHand.MAIN_HAND))) {
-               abilities.getSelectedAbility(player).ifPresent(selected -> {
+               abilities.getSelectedAbility().ifPresent(selected -> {
                   if (selected.getClass() == ability.getClass()) {
                      ActiveFlags.IS_AOE_MINING.runIfNotSet(() -> {
                         BlockPos pos = event.getPos();

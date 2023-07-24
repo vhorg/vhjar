@@ -56,11 +56,6 @@ public abstract class LearnableSkill extends Skill {
    }
 
    @Override
-   public Skill mergeFrom(Skill other, SkillContext context) {
-      return super.mergeFrom(other, context);
-   }
-
-   @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.unlockLevel), buffer);

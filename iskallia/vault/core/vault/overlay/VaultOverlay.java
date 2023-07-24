@@ -57,7 +57,14 @@ public class VaultOverlay extends DataObject<VaultOverlay> {
       if (player != null) {
          Listener listener = vault.getOptional(Vault.LISTENERS).map(listeners -> listeners.get(player.getUUID())).orElse(null);
          if (listener != null) {
+            matrixStack.pushPose();
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.gui.getTabList().visible) {
+               matrixStack.translate(0.0, mc.player.connection.getOnlinePlayers().size() * 9 + 10, 0.0);
+            }
+
             listener.renderObjectives(vault, matrixStack, window, partialTicks, player);
+            matrixStack.popPose();
          }
 
          vault.ifPresent(Vault.CLOCK, clock -> {

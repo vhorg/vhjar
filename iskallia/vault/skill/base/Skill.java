@@ -204,6 +204,7 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
    public Skill mergeFrom(Skill other, SkillContext context) {
       Skill result = other.copy();
       result.present = this.present;
+      this.name = result.name;
       return result;
    }
 

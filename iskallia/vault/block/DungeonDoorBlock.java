@@ -3,7 +3,6 @@ package iskallia.vault.block;
 import com.google.common.base.Functions;
 import iskallia.vault.block.entity.DungeonDoorTileEntity;
 import iskallia.vault.block.item.DungeonDoorBlockItem;
-import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.BlockHelper;
 import java.util.Arrays;
@@ -100,7 +99,6 @@ public class DungeonDoorBlock extends DoorBlock implements EntityBlock {
       Boolean isOpen = (Boolean)state.getValue(OPEN);
       if (!isOpen) {
          this.setOpen(player, world, state, pos, true);
-         CommonEvents.TREASURE_ROOM_OPEN.invoke(world, player, pos);
          if (world instanceof ServerLevel) {
             BlockEntity te = state.getValue(HALF) == DoubleBlockHalf.LOWER ? world.getBlockEntity(pos) : world.getBlockEntity(pos.below());
             this.announceDungeon((ServerLevel)world, (DungeonDoorTileEntity)te);

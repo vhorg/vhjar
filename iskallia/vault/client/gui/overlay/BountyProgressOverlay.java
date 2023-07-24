@@ -187,7 +187,7 @@ public class BountyProgressOverlay implements IIngameOverlay {
       gui.blit(poseStack, x + 7, startY + 5, iconX, iconY, iconWidth, iconHeight);
       gui.blit(poseStack, x + 5, startY + 28, 0, 0, 120, 7);
       float progress = (float)(task.getAmountObtained() / task.getProperties().getAmount());
-      gui.blit(poseStack, x + 5, startY + 28, 0, 7, (int)(100.0F * progress), 7);
+      gui.blit(poseStack, x + 5, startY + 28, 0, 7, (int)(120.0F * progress), 7);
       DecimalFormat df = new DecimalFormat("0");
       TextComponent progressComponent = new TextComponent(df.format(task.getAmountObtained()) + "/" + df.format(task.getProperties().getAmount()));
       int progressX = x + width / 2 - Minecraft.getInstance().font.width(progressComponent) / 2;

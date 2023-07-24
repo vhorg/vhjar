@@ -72,7 +72,7 @@ public class GroupedSkill extends LearnableSkill {
    @Override
    public boolean canLearn(SkillContext context) {
       int previous = context.getLearnPoints();
-      context.setLearnPoints(this.maxSpentLearnPoints - this.getSpentLearnPoints());
+      context.setLearnPoints(Math.min(previous, this.maxSpentLearnPoints - this.getSpentLearnPoints()));
       boolean result = this.children.get(this.selected).canLearn(context);
       context.setLearnPoints(previous);
       return result;

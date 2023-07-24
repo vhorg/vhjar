@@ -1148,6 +1148,7 @@
   "screen.the_vault.skill_altar.tooltip.load.not_owner": "Only the owner can load",
   "screen.the_vault.skill_altar.tooltip.load.same_abilities_talents": "Same abilities and talents",
   "screen.the_vault.skill_altar.tooltip.load.missing_orbs": "Missing %s Regret Orbs",
+  "screen.the_vault.skill_altar.tooltip.load.missing_skill_points": "Missing %s Skill Points",
   "screen.the_vault.skill_altar.tooltip.load": "Load abilities and talents",
   "screen.the_vault.skill_altar.tooltip.load.cost": "Costs %s Regret Orbs",
   "screen.the_vault.skill_altar.tooltip.save.no_abilities_talents": "No abilities and talents to save",

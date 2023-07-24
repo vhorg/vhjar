@@ -11,13 +11,17 @@ public abstract class ToggleAbility extends Ability {
    }
 
    @Override
-   public void onKeyUp(SkillContext context) {
-      if (this.isUnlocked()) {
+   public boolean onKeyUp(SkillContext context) {
+      if (!super.onKeyUp(context)) {
+         return false;
+      } else {
          this.setActive(!this.isActive());
          Ability.ActionResult result = this.onAction(context);
          if (result.startCooldown()) {
             this.putOnCooldown(result.getCooldownDelayTicks(), context);
          }
+
+         return true;
       }
    }
 

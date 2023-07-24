@@ -17,6 +17,7 @@ import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import java.util.ArrayList;
+import java.util.UUID;
 import java.util.function.Supplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
@@ -59,6 +60,10 @@ public abstract class Objective extends DataObject<Objective> implements ISuppli
 
    @OnlyIn(Dist.CLIENT)
    public abstract boolean render(Vault var1, PoseStack var2, Window var3, float var4, Player var5);
+
+   @OnlyIn(Dist.CLIENT)
+   public void renderPartyInfo(PoseStack matrixStack, UUID playerUUID) {
+   }
 
    public Objective add(Objective child) {
       this.get(CHILDREN).add(child);

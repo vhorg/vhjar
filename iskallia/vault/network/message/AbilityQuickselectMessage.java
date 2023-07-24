@@ -1,6 +1,5 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.skill.ability.cooldown.AbilityCooldownManager;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.HoldAbility;
 import iskallia.vault.skill.ability.effect.spi.core.InstantAbility;
@@ -46,19 +45,19 @@ public class AbilityQuickselectMessage {
             SpecializedSkill skill = (SpecializedSkill)abilityTree.getForId(pkt.abilityName).orElse(null);
             if (skill != null && skill.isUnlocked()) {
                SkillContext ctx = SkillContext.of(sender);
-               abilityTree.onQuickSelect(pkt.abilityName, ctx, sender);
+               abilityTree.onQuickSelect(pkt.abilityName, ctx);
                Ability ability = (Ability)((TieredSkill)skill.getSpecialization()).getChild();
-               if (skill.getId().equals(abilityTree.getSelected().getId()) && !AbilityCooldownManager.isOnCooldown(sender, ability)) {
+               if (skill.getId().equals(abilityTree.getSelected().getId())) {
                   if (!(ability instanceof InstantAbility) && !(ability instanceof ToggleAbility)) {
                      if (ability instanceof HoldAbility) {
                         if (pkt.action == 1) {
-                           abilityTree.onKeyDown(ctx, sender);
+                           abilityTree.onKeyDown(ctx);
                         } else if (pkt.action == 0) {
-                           abilityTree.onKeyUp(ctx, sender);
+                           abilityTree.onKeyUp(ctx);
                         }
                      }
                   } else if (pkt.action == 1) {
-                     abilityTree.onKeyUp(ctx, sender);
+                     abilityTree.onKeyUp(ctx);
                   }
                }
             }

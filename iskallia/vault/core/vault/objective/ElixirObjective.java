@@ -199,6 +199,29 @@ public class ElixirObjective extends Objective {
       }
    }
 
+   @OnlyIn(Dist.CLIENT)
+   @Override
+   public void renderPartyInfo(PoseStack matrixStack, UUID playerUUID) {
+      super.renderPartyInfo(matrixStack, playerUUID);
+      ElixirGoal goal = this.get(GOALS).get(playerUUID);
+      if (goal != null) {
+         int current = goal.get(ElixirGoal.CURRENT);
+         int total = goal.get(ElixirGoal.TARGET);
+         matrixStack.pushPose();
+         RenderSystem.setShader(GameRenderer::getPositionTexShader);
+         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+         int previousTexture = RenderSystem.getShaderTexture(0);
+         RenderSystem.setShaderTexture(0, HUD);
+         float progress = (float)current / total;
+         matrixStack.translate(-120.0, -2.0, 0.0);
+         matrixStack.scale(0.5F, 0.5F, 0.5F);
+         GuiComponent.blit(matrixStack, 0, 0, 0.0F, 0.0F, 200, 26, 200, 50);
+         GuiComponent.blit(matrixStack, 0, 8, 0.0F, 28.0F, 15 + (int)(130.0F * progress), 10, 200, 50);
+         RenderSystem.setShaderTexture(0, previousTexture);
+         matrixStack.popPose();
+      }
+   }
+
    @Override
    public boolean isActive(Vault vault, Objective objective) {
       if (!this.get(GOALS).areAllCompleted(vault)) {

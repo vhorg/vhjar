@@ -17,8 +17,10 @@ import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.world.data.PlayerAbilitiesData;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -28,7 +30,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -45,6 +46,7 @@ import net.minecraftforge.network.PacketDistributor;
 public class StonefallColdAbility extends AbstractStonefallAbility {
    private int amplifier;
    private int freezeTicks;
+   private int maxGlacialPrison;
 
    public StonefallColdAbility(
       int unlockLevel,
@@ -57,14 +59,20 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
       float radius,
       float damageReduction,
       int amplifier,
-      int freezeTicks
+      int freezeTicks,
+      int maxGlacialPrison
    ) {
       super(unlockLevel, learnPointCost, regretPointCost, cooldownTicks, manaCost, durationTicks, knockbackMultiplier, radius, damageReduction);
       this.amplifier = amplifier;
       this.freezeTicks = freezeTicks;
+      this.maxGlacialPrison = maxGlacialPrison;
    }
 
    public StonefallColdAbility() {
+   }
+
+   public int getMaxGlacialPrison() {
+      return this.maxGlacialPrison;
    }
 
    public int getAmplifier() {
@@ -104,11 +112,23 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
 
                for (StonefallColdAbility ability : abilities.getAll(StonefallColdAbility.class, Skill::isUnlocked)) {
                   float radius = ability.getRadius(player) + Mth.clamp(dist / 3.75F, 0.0F, 8.0F);
+                  int numberOfGlacialPrison = (int)Mth.clamp(dist / 3.75F, 0.0F, ability.getMaxGlacialPrison());
+                  AtomicInteger mobsGlacialPrisoned = new AtomicInteger(0);
                   List<LivingEntity> nearby = EntityHelper.getNearby(level, player.blockPosition(), radius, LivingEntity.class);
                   nearby.removeIf(mob -> mob instanceof EternalEntity || mob instanceof ServerPlayer);
+                  nearby.sort(Comparator.comparing(e -> e.distanceTo(player)));
                   nearby.forEach(mob -> {
+                     if (mobsGlacialPrisoned.get() < numberOfGlacialPrison) {
+                        mobsGlacialPrisoned.incrementAndGet();
+                        if (mob.hasEffect(ModEffects.GLACIAL_SHATTER)) {
+                           mob.removeEffect(ModEffects.GLACIAL_SHATTER);
+                        }
+
+                        mob.addEffect(new MobEffectInstance(ModEffects.GLACIAL_SHATTER, 30, ability.getAmplifier()));
+                     }
+
                      EntityHelper.knockbackWithStrength(mob, player, 0.2F);
-                     mob.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, ability.getFreezeTicks(), ability.getAmplifier()));
+                     mob.addEffect(new MobEffectInstance(ModEffects.CHILLED, ability.getFreezeTicks(), ability.getAmplifier()));
                      CommonEvents.ENTITY_STUNNED.invoke(new EntityStunnedEvent.Data(player, mob));
                   });
                   event.setDamageMultiplier(Mth.clamp(1.0F - ability.getDamageReduction(), 0.0F, 1.0F));
@@ -129,6 +149,7 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
       super.writeBits(buffer);
       Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(this.amplifier), buffer);
       Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.freezeTicks), buffer);
+      Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.maxGlacialPrison), buffer);
    }
 
    @Override
@@ -136,6 +157,7 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
       super.readBits(buffer);
       this.amplifier = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
       this.freezeTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
+      this.maxGlacialPrison = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
    }
 
    @Override
@@ -143,6 +165,7 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
       return super.writeNbt().map(nbt -> {
          Adapters.INT.writeNbt(Integer.valueOf(this.amplifier)).ifPresent(tag -> nbt.put("amplifier", tag));
          Adapters.INT.writeNbt(Integer.valueOf(this.freezeTicks)).ifPresent(tag -> nbt.put("freezeTicks", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.maxGlacialPrison)).ifPresent(tag -> nbt.put("maxGlacialPrison", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -152,6 +175,7 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
       super.readNbt(nbt);
       this.amplifier = Adapters.INT.readNbt(nbt.get("amplifier")).orElse(0);
       this.freezeTicks = Adapters.INT.readNbt(nbt.get("freezeTicks")).orElse(0);
+      this.maxGlacialPrison = Adapters.INT.readNbt(nbt.get("maxGlacialPrison")).orElse(0);
    }
 
    @Override
@@ -159,6 +183,7 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
       return super.writeJson().map(json -> {
          Adapters.INT.writeJson(Integer.valueOf(this.amplifier)).ifPresent(element -> json.add("amplifier", element));
          Adapters.INT.writeJson(Integer.valueOf(this.freezeTicks)).ifPresent(element -> json.add("freezeTicks", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.maxGlacialPrison)).ifPresent(element -> json.add("maxGlacialPrison", element));
          return (JsonObject)json;
       });
    }
@@ -168,6 +193,7 @@ public class StonefallColdAbility extends AbstractStonefallAbility {
       super.readJson(json);
       this.amplifier = Adapters.INT.readJson(json.get("amplifier")).orElse(0);
       this.freezeTicks = Adapters.INT.readJson(json.get("freezeTicks")).orElse(0);
+      this.maxGlacialPrison = Adapters.INT.readJson(json.get("maxGlacialPrison")).orElse(0);
    }
 
    public static class StonefallColdEffect extends MobEffect {

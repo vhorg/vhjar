@@ -2,12 +2,14 @@ package iskallia.vault.item;
 
 import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.skill.PlayerVaultStats;
 import iskallia.vault.skill.ability.LegacyAbilityMapper;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.base.SpecializedSkill;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.world.data.PlayerAbilitiesData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
@@ -138,7 +140,10 @@ public class ItemRespecFlask extends Item {
          PlayerAbilitiesData data = PlayerAbilitiesData.get(sWorld);
          data.getAbilities(player).getForId(abilityStr).ifPresent(skill -> {
             if (skill instanceof SpecializedSkill specialized) {
-               specialized.resetSpecialization(SkillContext.of(player));
+               SkillContext context = SkillContext.of(player);
+               specialized.resetSpecialization(context);
+               PlayerVaultStats stats = PlayerVaultStatsData.get(sWorld).getVaultStats(player);
+               stats.setSkillPoints(context.getLearnPoints());
                if (!player.isCreative()) {
                   stack.shrink(1);
                }

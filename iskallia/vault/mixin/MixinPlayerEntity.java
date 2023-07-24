@@ -18,7 +18,6 @@ import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -35,12 +34,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({Player.class})
+@Mixin(
+   value = {Player.class},
+   priority = 1111
+)
 public abstract class MixinPlayerEntity extends LivingEntity implements BlockChanceHelper.PlayerBlockAnimationAccess {
    private boolean actualOnGround;
    @Shadow
@@ -199,24 +202,17 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
       cir.setReturnValue(CommonEvents.BLOCK_BREAK_SPEED.invoke(thisPlayer, pos, state, cir.getReturnValueF()).getSpeed());
    }
 
-   @Redirect(
+   @ModifyArg(
       method = {"attack"},
+      index = 4,
       at = @At(
          value = "INVOKE",
          target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;DDDLnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;FF)V"
       )
    )
-   private void playNoDamageSoundWhenBroken(
-      Level instance, Player player, double x, double y, double z, SoundEvent soundEvent, SoundSource soundSource, float volume, float pitch
-   ) {
+   private SoundEvent playNoDamageSoundWhenBroken(SoundEvent sound) {
       Player thisPlayer = (Player)this;
       ItemStack mainHandItem = thisPlayer.getMainHandItem();
-      if (mainHandItem.getItem() instanceof VaultGearItem gearItem) {
-         if (gearItem.isBroken(mainHandItem)) {
-            instance.playSound(null, x, y, z, SoundEvents.PLAYER_ATTACK_NODAMAGE, soundSource, 1.0F, 1.0F);
-         } else {
-            instance.playSound(null, x, y, z, soundEvent, soundSource, volume, pitch);
-         }
-      }
+      return mainHandItem.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(mainHandItem) ? SoundEvents.PLAYER_ATTACK_NODAMAGE : sound;
    }
 }
