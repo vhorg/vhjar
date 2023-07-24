@@ -341,6 +341,9 @@
       "Lnet/minecraft/world/level/border/WorldBorder;applySettings(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V": "Lnet/minecraft/world/level/border/WorldBorder;m_61931_(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V",
       "tickServer": "Lnet/minecraft/server/MinecraftServer;m_5705_(Ljava/util/function/BooleanSupplier;)V"
     },
+    "iskallia/vault/mixin/MixinShieldItem": {
+      "use": "Lnet/minecraft/world/item/ShieldItem;m_7203_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResultHolder;"
+    },
     "iskallia/vault/mixin/AccessorCommandSuggestions": {
       "input": "f_93853_:Lnet/minecraft/client/gui/components/EditBox;",
       "screen": "f_93852_:Lnet/minecraft/client/gui/screens/Screen;",
@@ -803,6 +806,9 @@
         "tickChildren": "Lnet/minecraft/server/MinecraftServer;m_5703_(Ljava/util/function/BooleanSupplier;)V",
         "Lnet/minecraft/world/level/border/WorldBorder;applySettings(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V": "Lnet/minecraft/world/level/border/WorldBorder;m_61931_(Lnet/minecraft/world/level/border/WorldBorder$Settings;)V",
         "tickServer": "Lnet/minecraft/server/MinecraftServer;m_5705_(Ljava/util/function/BooleanSupplier;)V"
+      },
+      "iskallia/vault/mixin/MixinShieldItem": {
+        "use": "Lnet/minecraft/world/item/ShieldItem;m_7203_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResultHolder;"
       },
       "iskallia/vault/mixin/AccessorCommandSuggestions": {
         "input": "f_93853_:Lnet/minecraft/client/gui/components/EditBox;",

@@ -166,7 +166,7 @@ public class GearAttributeEvents {
                            }
 
                            if (!hasConduct && attacker instanceof Player player) {
-                              if (!ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
+                              if (ActiveFlagsCheck.checkIfFullSwingAttack()) {
                                  if (CritHelper.getCrit(player)) {
                                     return;
                                  }
@@ -244,7 +244,7 @@ public class GearAttributeEvents {
 
          if (!attacker.getLevel().isClientSide() && AttributeSnapshotHelper.canHaveSnapshot(attacker)) {
             if (!hasConduct && attacker instanceof Player player) {
-               if (!ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
+               if (ActiveFlagsCheck.checkIfFullSwingAttack()) {
                   if (CritHelper.getCrit(player)) {
                      return;
                   }
@@ -323,7 +323,7 @@ public class GearAttributeEvents {
                            }
 
                            if (!hasConduct && attacker instanceof Player player) {
-                              if (!ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
+                              if (ActiveFlagsCheck.checkIfFullSwingAttack()) {
                                  if (CritHelper.getCrit(player)) {
                                     return;
                                  }
@@ -472,6 +472,7 @@ public class GearAttributeEvents {
 
             boolean doEffectClouds = (!ActiveFlags.IS_AOE_ATTACKING.isSet() || ActiveFlags.IS_CHAINING_ATTACKING.isSet())
                && !ActiveFlags.IS_DOT_ATTACKING.isSet()
+               && !ActiveFlags.IS_GLACIAL_SHATTER_ATTACKING.isSet()
                && !ActiveFlags.IS_REFLECT_ATTACKING.isSet()
                && !ActiveFlags.IS_SMITE_ATTACKING.isSet()
                && !ActiveFlags.IS_THORNS_REFLECTING.isSet();

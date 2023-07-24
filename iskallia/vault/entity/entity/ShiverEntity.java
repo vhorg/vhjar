@@ -48,7 +48,10 @@ public class ShiverEntity extends Zombie {
          player.wasInPowderSnow = true;
          player.isInPowderSnow = true;
          player.setTicksFrozen(Math.min(this.getTicksRequiredToFreeze(), this.getTicksFrozen() + 1));
-         player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 3, true, true));
+         if (!this.level.isClientSide()) {
+            player.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 10, 3, true, true));
+         }
+
          if (this.level.isClientSide() || this.tickCount % 10 >= 5) {
             int particleCount = 15;
             float stepAngle = (float) (Math.PI * 2) / particleCount;

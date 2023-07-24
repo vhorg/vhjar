@@ -177,7 +177,11 @@ public abstract class NumberAdapter<N extends Number> implements ISimpleAdapter<
       } else if (number instanceof BigInteger integer) {
          return integer.bitLength() <= 63 ? reduce(integer.longValueExact()) : number;
       } else if (number instanceof BigDecimal decimal) {
-         return decimal.stripTrailingZeros().scale() <= 0 ? reduce(decimal.toBigIntegerExact()) : number;
+         if (decimal.stripTrailingZeros().scale() <= 0) {
+            return reduce(decimal.toBigIntegerExact());
+         } else {
+            return BigDecimal.valueOf(decimal.doubleValue()).compareTo(decimal) == 0 ? reduce(decimal.doubleValue()) : number;
+         }
       } else {
          return number;
       }

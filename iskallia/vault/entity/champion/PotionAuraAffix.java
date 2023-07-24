@@ -44,11 +44,8 @@ public class PotionAuraAffix extends ChampionAffixBase implements IChampionTicka
 
    @Override
    public void tick(LivingEntity entity) {
-      if (this.mobEffect != null) {
-         if (this.cooldownTime <= entity.getLevel().getGameTime()) {
-            this.cooldownTime = entity.getLevel().getGameTime() + 5L;
-         }
-
+      if (this.mobEffect != null && !entity.getLevel().isClientSide() && this.cooldownTime <= entity.getLevel().getGameTime()) {
+         this.cooldownTime = entity.getLevel().getGameTime() + 5L;
          if (this.target == PotionAuraAffix.Target.PLAYER) {
             entity.getLevel()
                .getNearbyPlayers(TARGETING_CONDITIONS, entity, entity.getBoundingBox().inflate(this.range))

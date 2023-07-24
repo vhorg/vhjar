@@ -62,7 +62,7 @@ public class MegaJumpBreakUpAbility extends MegaJumpAbility {
          Player player = event.player;
          ServerLevel world = (ServerLevel)player.getCommandSenderWorld();
          AbilityTree abilities = PlayerAbilitiesData.get(world).getAbilities(player);
-         Ability focusedAbilityNode = abilities.getSelectedAbility(player).orElse(null);
+         Ability focusedAbilityNode = abilities.getSelectedAbility().orElse(null);
 
          for (MegaJumpBreakUpAbility ability : abilities.getAll(MegaJumpBreakUpAbility.class, Skill::isUnlocked)) {
             if (ability.ticks > 0) {

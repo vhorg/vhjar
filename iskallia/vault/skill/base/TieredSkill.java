@@ -6,6 +6,8 @@ import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.gear.attribute.ability.AbilityLevelAttribute;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.skill.ability.effect.spi.core.Cooldown;
+import iskallia.vault.skill.ability.effect.spi.core.CooldownSkill;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -19,7 +21,7 @@ import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 
-public class TieredSkill extends LearnableSkill implements TickingSkill {
+public class TieredSkill extends LearnableSkill implements TickingSkill, CooldownSkill {
    private List<LearnableSkill> tiers;
    private int maxLearnableTier;
    private int tier;
@@ -86,12 +88,12 @@ public class TieredSkill extends LearnableSkill implements TickingSkill {
    protected void updateBonusTier(int bonusTier, SkillContext context) {
       if (this.bonusTier != bonusTier) {
          if (this.tier > 0 && this.tier + this.bonusTier > 0) {
-            this.unlearnCurrentSkill(context);
+            this.regretCurrentTier(context);
          }
 
          this.bonusTier = bonusTier;
          if (this.tier > 0 && this.tier + this.bonusTier > 0) {
-            this.learnCurrentSkill(context);
+            this.learnCurrentTier(context);
          }
       }
    }
@@ -139,11 +141,15 @@ public class TieredSkill extends LearnableSkill implements TickingSkill {
    @Override
    public void learn(SkillContext context) {
       if (this.tier > 0) {
-         this.unlearnCurrentSkill(context.copy());
+         this.regretCurrentTier(context.copy());
       }
 
-      this.tier++;
-      this.learnCurrentSkill(context);
+      if (this.tier >= this.maxLearnableTier) {
+         throw new IllegalStateException();
+      } else {
+         this.tier++;
+         this.learnCurrentTier(context);
+      }
    }
 
    @Override
@@ -153,18 +159,22 @@ public class TieredSkill extends LearnableSkill implements TickingSkill {
 
    @Override
    public void regret(SkillContext context) {
-      this.unlearnCurrentSkill(context);
-      this.tier--;
-      if (this.tier > 0) {
-         this.learnCurrentSkill(context.copy());
+      this.regretCurrentTier(context);
+      if (this.tier <= 0) {
+         throw new IllegalStateException();
+      } else {
+         this.tier--;
+         if (this.tier > 0) {
+            this.learnCurrentTier(context.copy());
+         }
       }
    }
 
-   private void unlearnCurrentSkill(SkillContext context) {
+   private void regretCurrentTier(SkillContext context) {
       MiscUtils.getListEntrySafe(this.tiers, this.tier + this.bonusTier - 1).regret(context);
    }
 
-   private void learnCurrentSkill(SkillContext context) {
+   private void learnCurrentTier(SkillContext context) {
       MiscUtils.getListEntrySafe(this.tiers, this.tier + this.bonusTier - 1).learn(context);
    }
 
@@ -194,32 +204,68 @@ public class TieredSkill extends LearnableSkill implements TickingSkill {
    @Override
    public Skill mergeFrom(Skill other, SkillContext context) {
       other = super.mergeFrom(other, context);
-      if (other instanceof TieredSkill tiered && this.getSpentLearnPoints() - tiered.getSpentLearnPoints(this.tier) >= 0) {
-         context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints() - tiered.getSpentLearnPoints(this.tier));
-         List<LearnableSkill> copy = new ArrayList<>();
+      if (!(other instanceof TieredSkill tiered)) {
+         context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
+         return other;
+      } else {
+         int currentCost = this.getSpentLearnPoints();
+         int newCost = tiered.getSpentLearnPoints(this.tier);
+         if (currentCost < newCost) {
+            context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
+            return other;
+         } else {
+            context.setLearnPoints(context.getLearnPoints() + currentCost - newCost);
+            List<LearnableSkill> copy = new ArrayList<>();
 
-         for (int i = 0; i < tiered.tiers.size(); i++) {
-            Skill merging = i >= this.tiers.size() ? null : this.tiers.get(i);
-            Skill merged;
-            if (merging != null) {
-               merged = merging.mergeFrom(tiered.tiers.get(i), context);
-            } else {
-               merged = tiered.tiers.get(i).copy();
+            for (int i = 0; i < tiered.tiers.size(); i++) {
+               Skill merging = i >= this.tiers.size() ? null : this.tiers.get(i);
+               Skill merged;
+               if (merging != null) {
+                  merged = merging.mergeFrom(tiered.tiers.get(i), context);
+               } else {
+                  merged = tiered.tiers.get(i).copy();
+               }
+
+               if (merged instanceof LearnableSkill) {
+                  merged.setParent(this);
+                  copy.add((LearnableSkill)merged);
+               }
             }
 
-            if (merged instanceof LearnableSkill) {
-               merged.setParent(this);
-               copy.add((LearnableSkill)merged);
+            this.tier = this.tier > copy.size() ? 0 : this.tier;
+            this.tiers = copy;
+            this.maxLearnableTier = tiered.getMaxLearnableTier();
+
+            while (this.tier > this.maxLearnableTier) {
+               this.regret(context);
+            }
+
+            return this;
+         }
+      }
+   }
+
+   @Override
+   public Optional<Cooldown> getCooldown() {
+      Cooldown max = null;
+
+      for (LearnableSkill child : this.tiers) {
+         if (child instanceof CooldownSkill) {
+            Cooldown cooldown = ((CooldownSkill)child).getCooldown().orElse(null);
+            if (cooldown != null && (max == null || cooldown.isLargerThan(max))) {
+               max = cooldown;
             }
          }
+      }
 
-         this.tier = this.tier > copy.size() ? 0 : this.tier;
-         this.tiers = copy;
-         this.maxLearnableTier = tiered.getMaxLearnableTier();
-         return this;
-      } else {
-         context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
-         return other.copy();
+      return Optional.ofNullable(max);
+   }
+
+   @Override
+   public void putOnCooldown(int cooldownDelayTicks, SkillContext context) {
+      LearnableSkill child = this.getChild();
+      if (child instanceof CooldownSkill) {
+         ((CooldownSkill)child).putOnCooldown(cooldownDelayTicks, context);
       }
    }
 

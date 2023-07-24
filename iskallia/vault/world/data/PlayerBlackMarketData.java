@@ -337,6 +337,7 @@ public class PlayerBlackMarketData extends SavedData {
 
          this.nextReset = LocalDateTime.parse(tag.getString("nextReset"), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
          this.playerUuid = tag.getUUID("uuid");
+         this.resetRolls = tag.getInt("resetRolls");
       }
 
       public CompoundTag serializeNBT() {
@@ -352,6 +353,7 @@ public class PlayerBlackMarketData extends SavedData {
          tag.putUUID("uuid", this.playerUuid);
          tag.putLong("seed", this.seed);
          tag.putString("nextReset", this.nextReset.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+         tag.putInt("resetRolls", this.resetRolls);
          return tag;
       }
 

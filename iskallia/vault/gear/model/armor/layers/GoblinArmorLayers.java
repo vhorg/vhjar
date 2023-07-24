@@ -20,12 +20,12 @@ import net.minecraft.client.model.geom.builders.CubeListBuilder;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.GlowParticle;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -53,7 +53,7 @@ public class GoblinArmorLayers extends ArmorLayers {
    public static void shiningParticles(LivingUpdateEvent event) {
       LivingEntity entity = event.getEntityLiving();
       if (entity.level.isClientSide()) {
-         ClientLevel world = (ClientLevel)entity.level;
+         Level world = entity.level;
          Minecraft minecraft = Minecraft.getInstance();
          if (entity != minecraft.player || minecraft.options.getCameraType() != CameraType.FIRST_PERSON) {
             Set<EquipmentSlot> slots = StreamSupport.<ItemStack>stream(entity.getArmorSlots().spliterator(), false)
@@ -86,7 +86,7 @@ public class GoblinArmorLayers extends ArmorLayers {
    }
 
    @OnlyIn(Dist.CLIENT)
-   private static void addShiningParticle(LivingEntity entity, ClientLevel world, float yOffset) {
+   private static void addShiningParticle(LivingEntity entity, Level world, float yOffset) {
       Minecraft minecraft = Minecraft.getInstance();
       if (entity.tickCount % 4 == 0 && world.random.nextBoolean()) {
          GlowParticle particle = (GlowParticle)minecraft.particleEngine

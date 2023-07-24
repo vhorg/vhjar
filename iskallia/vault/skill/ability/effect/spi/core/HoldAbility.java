@@ -11,8 +11,10 @@ public abstract class HoldAbility extends Ability {
    }
 
    @Override
-   public void onKeyDown(SkillContext context) {
-      if (this.isUnlocked()) {
+   public boolean onKeyDown(SkillContext context) {
+      if (!super.onKeyDown(context)) {
+         return false;
+      } else {
          Ability.ActionResult result = this.onActionBegin(context);
          if (result.startCooldown()) {
             this.setActive(false);
@@ -20,12 +22,16 @@ public abstract class HoldAbility extends Ability {
          } else if (result.isSuccess()) {
             this.setActive(true);
          }
+
+         return true;
       }
    }
 
    @Override
-   public void onKeyUp(SkillContext context) {
-      if (this.isUnlocked()) {
+   public boolean onKeyUp(SkillContext context) {
+      if (!super.onKeyUp(context)) {
+         return false;
+      } else {
          if (this.isActive()) {
             this.setActive(false);
             Ability.ActionResult result = this.onActionEnd(context);
@@ -33,14 +39,25 @@ public abstract class HoldAbility extends Ability {
                this.putOnCooldown(result.getCooldownDelayTicks(), context);
             }
          }
+
+         return true;
       }
    }
 
    @Override
-   public void onCancelKeyDown(SkillContext context) {
-      if (this.isUnlocked()) {
+   public boolean onCancelKeyDown(SkillContext context) {
+      if (!super.onCancelKeyDown(context)) {
+         return false;
+      } else {
          this.setActive(false);
+         return true;
       }
+   }
+
+   @Override
+   public void onBlur(SkillContext context) {
+      super.onBlur(context);
+      this.setActive(false);
    }
 
    public Ability.ActionResult onActionBegin(SkillContext context) {

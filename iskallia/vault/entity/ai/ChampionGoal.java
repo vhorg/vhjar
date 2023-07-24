@@ -31,40 +31,42 @@ public class ChampionGoal {
    public static void registerProjectileGoal(Vault vault, final Mob mob) {
       VaultDifficulty vaultDifficulty = WorldSettings.get(mob.level).getPlayerDifficulty(vault.get(Vault.OWNER));
       if (vaultDifficulty.shouldAddAntiNerdPoleAi()) {
-         mob.goalSelector.addGoal(3, new ChampionGoal.ThrowSpearGoal<Mob>(mob, ModConfigs.FIGHTER.chancerPerTick / 2, 1, ChampionGoal.ThrowableSpear::new) {
-            @Override
-            public boolean canUse() {
-               return super.canUse() && this.targetOutOfReachAbove();
-            }
-
-            @Override
-            public boolean canContinueToUse() {
-               return super.canContinueToUse() && this.targetOutOfReachAbove();
-            }
-
-            private boolean targetOutOfReachAbove() {
-               LivingEntity target = mob.getTarget();
-               if (target == null) {
-                  return false;
-               } else {
-                  double targetDistance = mob.distanceToSqr(target);
-                  double attackReach = this.getAttackReachSqr(target);
-                  double yDiff = target.getY() - mob.getY();
-                  boolean navDone = mob.getNavigation().isDone();
-                  Path path = mob.getNavigation().getPath();
-                  boolean stuck = mob.getNavigation().isStuck();
-                  if (path == null || path.canReach() || stuck) {
-                     navDone = true;
+         mob.goalSelector
+            .addGoal(
+               3,
+               new ChampionGoal.ThrowSpearGoal<Mob>(mob, ModConfigs.FIGHTER.chancerPerTick / 2, 1, ChampionGoal.ThrowableSpear::new) {
+                  @Override
+                  public boolean canUse() {
+                     return super.canUse() && this.targetOutOfReachAbove();
                   }
 
-                  return targetDistance > attackReach && targetDistance < attackReach * 16.0 && (yDiff >= 2.0 && yDiff <= 4.0 || navDone && mob.tickCount > 20);
-               }
-            }
+                  @Override
+                  public boolean canContinueToUse() {
+                     return super.canContinueToUse() && this.targetOutOfReachAbove();
+                  }
 
-            private double getAttackReachSqr(LivingEntity pAttackTarget) {
-               return mob.getBbWidth() * 2.0F * mob.getBbWidth() * 2.0F + pAttackTarget.getBbWidth();
-            }
-         });
+                  private boolean targetOutOfReachAbove() {
+                     LivingEntity target = mob.getTarget();
+                     if (target == null) {
+                        return false;
+                     } else {
+                        double targetDistance = mob.distanceToSqr(target);
+                        double attackReach = this.getAttackReachSqr(target);
+                        double yDiff = target.getY() - mob.getY();
+                        Path path = mob.getNavigation().getPath();
+                        boolean stuck = mob.getNavigation().isStuck();
+                        boolean canNotReach = path == null || !path.canReach() || stuck;
+                        return targetDistance > attackReach
+                           && targetDistance < attackReach * 16.0
+                           && (yDiff >= 2.0 && yDiff <= 4.0 || canNotReach && mob.tickCount > 20);
+                     }
+                  }
+
+                  private double getAttackReachSqr(LivingEntity pAttackTarget) {
+                     return mob.getBbWidth() * 2.0F * mob.getBbWidth() * 2.0F + pAttackTarget.getBbWidth();
+                  }
+               }
+            );
       }
    }
 

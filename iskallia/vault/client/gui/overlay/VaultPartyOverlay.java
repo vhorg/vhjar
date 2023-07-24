@@ -6,6 +6,9 @@ import iskallia.vault.client.ClientActiveEternalData;
 import iskallia.vault.client.ClientPartyData;
 import iskallia.vault.client.gui.helper.FontHelper;
 import iskallia.vault.config.EternalAuraConfig;
+import iskallia.vault.core.vault.ClientVaults;
+import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.objective.Objective;
 import iskallia.vault.entity.eternal.ActiveEternalData;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModShaders;
@@ -161,10 +164,10 @@ public class VaultPartyOverlay implements IIngameOverlay {
       matrixStack.translate(-headSize, 0.0, 0.0);
       render2DHead(matrixStack, skin, headSize, offline);
       matrixStack.translate(-gap, (headSize - textSize) / 2.0F, 0.0);
+      int heartSize = 9;
       if (offline) {
          txt.append(new TextComponent(prefix + "OFFLINE").withStyle(ChatFormatting.GRAY));
       } else {
-         int heartSize = 9;
          int heartU = 86;
          int heartV = 2;
          matrixStack.translate(-heartSize, 0.0, 0.0);
@@ -178,8 +181,27 @@ public class VaultPartyOverlay implements IIngameOverlay {
       }
 
       FontHelper.drawTextComponent(matrixStack, txt, true);
+      if (Minecraft.getInstance().gui.getTabList().visible) {
+         if (offline) {
+            matrixStack.translate(-heartSize - gap, 0.0, 0.0);
+         }
+
+         renderObjectives(matrixStack, playerUUID);
+      }
+
       matrixStack.popPose();
       return headSize;
+   }
+
+   private static void renderObjectives(PoseStack matrixStack, UUID playerUUID) {
+      ClientVaults.getActive().ifPresent(vault -> {
+         if (vault.get(Vault.LISTENERS).contains(playerUUID)) {
+            vault.get(Vault.OBJECTIVES).forEach(Objective.class, objective -> {
+               objective.renderPartyInfo(matrixStack, playerUUID);
+               return true;
+            });
+         }
+      });
    }
 
    private static int getPartyPlayerStatusOffset(ClientPartyData.PartyMember.Status status) {

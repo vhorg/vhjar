@@ -1,5 +1,6 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.VaultMod;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
@@ -14,9 +15,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -37,8 +42,10 @@ public class PlayerAbilitiesData extends SavedData {
    protected static final String DATA_NAME = "the_vault_PlayerAbilities";
    private final Map<UUID, AbilityTree> playerMap = new HashMap<>();
    private final Set<UUID> scheduledMerge = new HashSet<>();
-   private final Set<UUID> scheduledRefund = new HashSet<>();
    private AbilityTree previous;
+   private final Set<UUID> scheduledRefund = new HashSet<>();
+   private final Set<UUID> scheduledCorruptionCheck = new HashSet<>();
+   private int version;
 
    public AbilityTree getAbilities(Player player) {
       return this.getAbilities(player.getUUID());
@@ -102,9 +109,9 @@ public class PlayerAbilitiesData extends SavedData {
                ModConfigs.ABILITIES.get().ifPresent(tree -> {
                   SkillContext context = SkillContext.of(player);
                   data.playerMap.get(player.getUUID()).mergeFrom(tree.copy(), context);
-                  PlayerVaultStats statsx = PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player);
-                  statsx.setSkillPoints(context.getLearnPoints());
-                  statsx.setRegretPoints(context.getRegretPoints());
+                  PlayerVaultStats stats = PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player);
+                  stats.setSkillPoints(context.getLearnPoints());
+                  stats.setRegretPoints(context.getRegretPoints());
                });
             }
 
@@ -121,6 +128,37 @@ public class PlayerAbilitiesData extends SavedData {
                drops.addDrop(player, new ItemStack(ModItems.BLACK_OPAL_GEM, skillOrbs * 4));
                drops.addDrop(player, new ItemStack(ModItems.VAULT_ESSENCE, skillOrbs * 4));
             }
+
+            if (data.scheduledCorruptionCheck.remove(player.getUUID())) {
+               PlayerVaultStats vaultStats = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player);
+               int valid = vaultStats.getVaultLevel();
+               if (QuestStatesData.get().getState(player).getCompleted().contains("learning_skills")) {
+                  valid++;
+               }
+
+               int current = vaultStats.getUnspentSkillPoints() + data.playerMap.get(player.getUUID()).getSpentLearnPoints();
+               current += PlayerTalentsData.get(player.getLevel()).getTalents(player).getSpentLearnPoints();
+               if (current != valid) {
+                  PlayerVaultStatsData.get(player.getLevel()).resetSkills(player, false);
+                  vaultStats.setSkillPoints(valid);
+                  PlayerVaultStatsData.get(player.getLevel()).setDirty();
+                  MutableComponent message = TextComponent.EMPTY
+                     .copy()
+                     .append(
+                        new TextComponent("Your abilities and talents have been reset due to a data corruption issue. You now have")
+                           .withStyle(ChatFormatting.GRAY)
+                     )
+                     .append(new TextComponent(" " + valid + " ").withStyle(ChatFormatting.GREEN))
+                     .append(new TextComponent("skill points available instead of").withStyle(ChatFormatting.GRAY))
+                     .append(new TextComponent(" " + current).withStyle(ChatFormatting.RED))
+                     .append(
+                        new TextComponent(". This amount equals your level with an additional point if you completed the skill quest.")
+                           .withStyle(ChatFormatting.GRAY)
+                     );
+                  player.sendMessage(message, Util.NIL_UUID);
+                  VaultMod.LOGGER.warn("[" + player.getDisplayName().getString() + "] " + message.getString());
+               }
+            }
          }
       }
    }
@@ -129,18 +167,22 @@ public class PlayerAbilitiesData extends SavedData {
       this.playerMap.clear();
       this.scheduledMerge.clear();
       this.scheduledRefund.clear();
+      this.scheduledCorruptionCheck.clear();
+      this.version = nbt.getInt("Version");
       if (nbt.contains("PlayerEntries", 9)) {
-         ListTag playerList = nbt.getList("PlayerEntries", 8);
-
-         for (int i = 0; i < playerList.size(); i++) {
-            this.scheduledRefund.add(UUID.fromString(playerList.getString(i)));
-         }
+         this.version = -1;
       } else {
          ListTag scheduledRefund = nbt.getList("ScheduledRefund", 8);
 
          for (int i = 0; i < scheduledRefund.size(); i++) {
             this.scheduledRefund.add(UUID.fromString(scheduledRefund.getString(i)));
          }
+      }
+
+      ListTag scheduledCorruptionCheck = nbt.getList("ScheduledCorruptionCheck", 8);
+
+      for (int i = 0; i < scheduledCorruptionCheck.size(); i++) {
+         this.scheduledCorruptionCheck.add(UUID.fromString(scheduledCorruptionCheck.getString(i)));
       }
 
       ListTag playerList = nbt.getList("Players", 8);
@@ -155,6 +197,8 @@ public class PlayerAbilitiesData extends SavedData {
                this.scheduledMerge.add(playerUUID);
             });
          }
+
+         this.migrate(nbt);
       }
    }
 
@@ -162,15 +206,36 @@ public class PlayerAbilitiesData extends SavedData {
       ListTag playerList = new ListTag();
       ListTag abilitiesList = new ListTag();
       ListTag scheduledRefund = new ListTag();
+      ListTag scheduledCorruptionCheck = new ListTag();
       this.playerMap.forEach((uuid, researchTree) -> Adapters.SKILL.writeNbt(researchTree).ifPresent(tag -> {
          playerList.add(StringTag.valueOf(uuid.toString()));
          abilitiesList.add(tag);
       }));
       this.scheduledRefund.forEach(uuid -> scheduledRefund.add(StringTag.valueOf(uuid.toString())));
+      this.scheduledCorruptionCheck.forEach(uuid -> scheduledCorruptionCheck.add(StringTag.valueOf(uuid.toString())));
+      nbt.putInt("Version", this.version);
       nbt.put("Players", playerList);
       nbt.put("Abilities", abilitiesList);
       nbt.put("ScheduledRefund", scheduledRefund);
+      nbt.put("ScheduledCorruptionCheck", scheduledCorruptionCheck);
       return nbt;
+   }
+
+   private void migrate(CompoundTag nbt) {
+      if (this.version == -1) {
+         ListTag playerList = nbt.getList("PlayerEntries", 8);
+
+         for (int i = 0; i < playerList.size(); i++) {
+            this.scheduledRefund.add(UUID.fromString(playerList.getString(i)));
+         }
+
+         this.version++;
+      }
+
+      if (this.version == 0) {
+         this.playerMap.forEach((uuid, tree) -> this.scheduledCorruptionCheck.add(uuid));
+         this.version++;
+      }
    }
 
    private static PlayerAbilitiesData create(CompoundTag tag) {

@@ -469,7 +469,7 @@ public class VaultGearModifierHelper {
          } else {
             int prefixCount = data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
             int suffixCount = data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
-            int possibleGenerated = getGeneratedModifierCount(maxPrefixes + maxSuffixes, random);
+            int possibleGenerated = getGeneratedModifierCount(maxPrefixes + maxSuffixes, itemLevel, random);
             int toGenerate = possibleGenerated - Math.min(prefixCount, maxPrefixes) - Math.min(suffixCount, maxSuffixes);
             if (affixType == VaultGearModifier.AffixType.PREFIX) {
                toGenerate = Math.min(toGenerate, maxPrefixes - prefixCount);
@@ -507,7 +507,7 @@ public class VaultGearModifierHelper {
          int itemLevel = data.getItemLevel();
          int maxPrefixes = data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0) - data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
          int maxSuffixes = data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0) - data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
-         int generatedModifiers = getGeneratedModifierCount(maxPrefixes + maxSuffixes, random);
+         int generatedModifiers = getGeneratedModifierCount(maxPrefixes + maxSuffixes, itemLevel, random);
          int rolledPrefixes = 0;
          int rolledSuffixes = 0;
          if (stack.getItem() == ModItems.JEWEL) {
@@ -545,8 +545,8 @@ public class VaultGearModifierHelper {
       }
    }
 
-   private static int getGeneratedModifierCount(int modifierCount, Random random) {
-      return Math.round(modifierCount * 0.6F + modifierCount * 0.4F * random.nextFloat());
+   private static int getGeneratedModifierCount(int modifierCount, int itemLevel, Random random) {
+      return itemLevel <= 20 ? modifierCount : Math.round(modifierCount * 0.6F + modifierCount * 0.4F * random.nextFloat());
    }
 
    public record TierGroupOutcome(VaultGearModifier.AffixType type, VaultGearTierConfig.ModifierTierGroup tierGroup, VaultGearTierConfig.ModifierTier<?> tier) {

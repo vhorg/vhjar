@@ -446,7 +446,7 @@ public class VaultFireball extends AbstractArrow {
                if (this.getOwner() != null && this.getOwner() instanceof ServerPlayer player) {
                   float attackDamage = this.getDamage();
                   DamageSource damageSource = DamageSource.playerAttack(player);
-                  ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> living.hurt(damageSource, attackDamage));
+                  ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_FIRESHOT_ATTACKING.runIfNotSet(() -> living.hurt(damageSource, attackDamage)));
                   player.level
                      .playSound(
                         null,

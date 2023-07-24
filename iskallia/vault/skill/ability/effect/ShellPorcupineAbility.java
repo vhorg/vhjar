@@ -184,16 +184,14 @@ public class ShellPorcupineAbility extends AbstractShellAbility {
             ShellPorcupineAbility.class,
             data -> getAll(data.getEntity()).forEach(skill -> data.setValue(data.getValue() + skill.getAdditionalDurabilityWearReduction()))
          );
-      CommonEvents.PLAYER_STAT
-         .of(PlayerStat.THORNS_DAMAGE_MULTIPLIER)
-         .register(ShellPorcupineAbility.class, data -> getAll(data.getEntity()).forEach(skill -> {
-            data.setValue(data.getValue() + skill.getAdditionalThornsDamagePercent());
-            if (data.getEntity() instanceof ServerPlayer player && Mana.decrease(player, skill.getAdditionalManaPerHit()) <= 0.0F) {
-               player.removeEffect(ModEffects.SHELL_PORCUPINE);
-               skill.putOnCooldown(SkillContext.of(player));
-               skill.setActive(false);
-            }
-         }));
+      CommonEvents.PLAYER_STAT.of(PlayerStat.THORNS_DAMAGE_FLAT).register(ShellPorcupineAbility.class, data -> getAll(data.getEntity()).forEach(skill -> {
+         data.setValue(data.getValue() + data.getValue() * skill.getAdditionalThornsDamagePercent());
+         if (data.getEntity() instanceof ServerPlayer player && Mana.decrease(player, skill.getAdditionalManaPerHit()) <= 0.0F) {
+            player.removeEffect(ModEffects.SHELL_PORCUPINE);
+            skill.putOnCooldown(SkillContext.of(player));
+            skill.setActive(false);
+         }
+      }));
    }
 
    public static class ShellPorcupineEffect extends ToggleAbilityEffect {

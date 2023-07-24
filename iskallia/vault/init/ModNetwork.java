@@ -2,7 +2,6 @@ package iskallia.vault.init;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.network.message.AbilityActivityMessage;
-import iskallia.vault.network.message.AbilityCooldownMessage;
 import iskallia.vault.network.message.AbilityFocusMessage;
 import iskallia.vault.network.message.AbilityKnownOnesMessage;
 import iskallia.vault.network.message.AbilityLevelMessage;
@@ -129,6 +128,7 @@ import iskallia.vault.network.message.VaultMessage;
 import iskallia.vault.network.message.VaultPlayerHistoricDataMessage;
 import iskallia.vault.network.message.VaultPlayerStatsMessage;
 import iskallia.vault.network.message.WorldListUpdateMessage;
+import iskallia.vault.network.message.bounty.ClientboundBountyAvailableMessage;
 import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
 import iskallia.vault.network.message.bounty.ClientboundBountyProgressMessage;
 import iskallia.vault.network.message.bounty.ClientboundRefreshBountiesMessage;
@@ -245,9 +245,6 @@ public class ModNetwork {
          nextId(), AbilityKnownOnesMessage.class, AbilityKnownOnesMessage::encode, AbilityKnownOnesMessage::decode, AbilityKnownOnesMessage::handle
       );
       CHANNEL.registerMessage(nextId(), AbilityFocusMessage.class, AbilityFocusMessage::encode, AbilityFocusMessage::decode, AbilityFocusMessage::handle);
-      CHANNEL.registerMessage(
-         nextId(), AbilityCooldownMessage.class, AbilityCooldownMessage::encode, AbilityCooldownMessage::decode, AbilityCooldownMessage::handle
-      );
       CHANNEL.registerMessage(
          nextId(), AbilityActivityMessage.class, AbilityActivityMessage::encode, AbilityActivityMessage::decode, AbilityActivityMessage::handle
       );
@@ -518,6 +515,13 @@ public class ModNetwork {
          ClientboundBountyProgressMessage::encode,
          ClientboundBountyProgressMessage::decode,
          ClientboundBountyProgressMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundBountyAvailableMessage.class,
+         ClientboundBountyAvailableMessage::encode,
+         ClientboundBountyAvailableMessage::decode,
+         ClientboundBountyAvailableMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),

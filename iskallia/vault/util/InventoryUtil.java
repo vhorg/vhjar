@@ -2,11 +2,9 @@ package iskallia.vault.util;
 
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.container.oversized.OverSizedItemStack;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.integration.IntegrationSB;
 import iskallia.vault.item.BasicScavengerItem;
-import iskallia.vault.item.CompassItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -98,16 +96,6 @@ public class InventoryUtil {
       for (Function<InventoryUtil.ItemAccess, List<InventoryUtil.ItemAccess>> containerAccess : CONTENT_ACCESSORS) {
          containerAccess.apply(access).forEach(containedAccess -> discoverContents(containedAccess, out));
       }
-   }
-
-   public static void resetCompassTarget(Player player) {
-      findAllItems(player).forEach(itemAccess -> {
-         ItemStack stack = itemAccess.getStack();
-         if (stack.getItem() == ModItems.VAULT_COMPASS) {
-            CompassItem.resetTarget(stack);
-            itemAccess.setStack(stack);
-         }
-      });
    }
 
    public static List<ItemStack> findAllItems(List<ItemStack> items) {

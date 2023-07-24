@@ -74,8 +74,12 @@ public abstract class AbstractFarmerAbility extends HoldManaAbility {
             return super.doActiveTick(context);
          } else {
             this.tick = CooldownHelper.adjustCooldown(player, "Farmer", this.getTickDelay());
-            this.doGrow(player, (ServerLevel)player.level);
-            return super.doActiveTick(context);
+            Ability.TickResult result = super.doActiveTick(context);
+            if (result != Ability.TickResult.COOLDOWN) {
+               this.doGrow(player, (ServerLevel)player.level);
+            }
+
+            return result;
          }
       }).orElse(Ability.TickResult.PASS);
    }

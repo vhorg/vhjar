@@ -27,6 +27,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -43,6 +44,9 @@ public abstract class Listener extends DataObject<Listener> implements ISupplier
       .register(FIELDS);
    public static final FieldKey<Objective.IdList> OBJECTIVES = FieldKey.of("objectives", Objective.IdList.class)
       .with(Version.v1_0, CompoundAdapter.of(Objective.IdList::new), DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
+   public static final FieldKey<BlockPos> COMPASS_TARGET = FieldKey.of("compass_target", BlockPos.class)
+      .with(Version.v1_18, Adapters.BLOCK_POS.asNullable(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
 
    public Listener() {

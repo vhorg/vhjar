@@ -11,16 +11,16 @@ public abstract class InstantAbility extends Ability {
    }
 
    @Override
-   public void onKeyDown(SkillContext context) {
-   }
-
-   @Override
-   public void onKeyUp(SkillContext context) {
-      if (this.isUnlocked()) {
+   public boolean onKeyUp(SkillContext context) {
+      if (!super.onKeyUp(context)) {
+         return false;
+      } else {
          Ability.ActionResult result = this.onAction(context);
          if (result.startCooldown()) {
             this.putOnCooldown(result.getCooldownDelayTicks(), context);
          }
+
+         return true;
       }
    }
 

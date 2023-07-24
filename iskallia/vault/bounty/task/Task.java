@@ -50,6 +50,7 @@ public abstract class Task<P extends TaskProperties> implements INBTSerializable
 
    protected void complete(ServerPlayer player) {
       ModNetwork.CHANNEL.sendTo(new ClientboundBountyCompleteMessage(this.taskType), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+      BountyData.syncBounties(player);
    }
 
    public UUID getBountyId() {

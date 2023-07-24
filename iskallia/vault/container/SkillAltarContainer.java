@@ -2,6 +2,9 @@ package iskallia.vault.container;
 
 import iskallia.vault.block.SkillAltarBlock;
 import iskallia.vault.block.entity.SkillAltarTileEntity;
+import iskallia.vault.client.ClientAbilityData;
+import iskallia.vault.client.ClientTalentData;
+import iskallia.vault.client.gui.overlay.VaultBarOverlay;
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
@@ -27,6 +30,7 @@ import iskallia.vault.world.data.SkillAltarData;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
@@ -35,6 +39,8 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class SkillAltarContainer extends OverSizedSlotContainer {
    private static final int PLAYER_INVENTORY_TOP_Y = 132;
@@ -149,8 +155,45 @@ public class SkillAltarContainer extends OverSizedSlotContainer {
       }
    }
 
+   public int getMissingSkillPoints(int unspentSkillPoints, int spentSkillPoints) {
+      if (this.template == null) {
+         return 0;
+      } else {
+         int cost = this.template.getAbilities().getSpentLearnPoints() + this.template.getTalents().getSpentLearnPoints();
+         return cost - (unspentSkillPoints + spentSkillPoints);
+      }
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   public int getMissingSkillPointsClient() {
+      if (ClientAbilityData.getTree() != null && ClientTalentData.getTree() != null) {
+         int spent = ClientAbilityData.getTree().getSpentLearnPoints() + ClientTalentData.getTree().getSpentLearnPoints();
+         return this.getMissingSkillPoints(VaultBarOverlay.unspentSkillPoints, spent);
+      } else {
+         return 0;
+      }
+   }
+
+   public int getMissingSkillPointsServer() {
+      if (this.template == null) {
+         return 0;
+      } else {
+         int spent = PlayerAbilitiesData.get((ServerLevel)this.player.level).getAbilities(this.player).getSpentLearnPoints()
+            + PlayerTalentsData.get((ServerLevel)this.player.level).getTalents(this.player).getSpentLearnPoints();
+         return this.getMissingSkillPoints(PlayerVaultStatsData.get((ServerLevel)this.player.level).getVaultStats(this.player).getUnspentSkillPoints(), spent);
+      }
+   }
+
    public void setPlayerAbilitiesAndTalentsFromTemplate(int unspentRegretPoints) {
       if (this.template != null && this.player.getUUID().equals(this.tileEntity.getOwnerId()) && this.getNumberOfMissingRegretOrbs(unspentRegretPoints) <= 0) {
+         if (this.player.getLevel().isClientSide()) {
+            if (this.getMissingSkillPointsClient() > 0) {
+               return;
+            }
+         } else if (this.getMissingSkillPointsServer() > 0) {
+            return;
+         }
+
          if (this.player.getLevel().isClientSide()) {
             this.player.playSound(ModSounds.SKILL_TREE_LEARN_SFX, 1.0F, 1.0F);
             ModNetwork.CHANNEL
@@ -158,14 +201,14 @@ public class SkillAltarContainer extends OverSizedSlotContainer {
          } else {
             if (this.player instanceof ServerPlayer serverPlayer) {
                this.consumeRequiredRegretPointsOrOrbs(serverPlayer, unspentRegretPoints);
-               int skillPointsBefore = PlayerAbilitiesData.get(serverPlayer.getLevel()).getAbilities(serverPlayer).getSpentLearntPoints();
-               skillPointsBefore += PlayerTalentsData.get(serverPlayer.getLevel()).getTalents(serverPlayer).getSpentLearntPoints();
+               int skillPointsBefore = PlayerAbilitiesData.get(serverPlayer.getLevel()).getAbilities(serverPlayer).getSpentLearnPoints();
+               skillPointsBefore += PlayerTalentsData.get(serverPlayer.getLevel()).getTalents(serverPlayer).getSpentLearnPoints();
                PlayerVaultStatsData statsData = PlayerVaultStatsData.get(serverPlayer.getLevel());
                statsData.addSkillPoints(serverPlayer, skillPointsBefore);
                this.setAbilitiesFromTemplate(serverPlayer);
                this.setTalentsFromTemplate(serverPlayer);
-               int skillPointsAfter = PlayerAbilitiesData.get(serverPlayer.getLevel()).getAbilities(serverPlayer).getSpentLearntPoints();
-               skillPointsAfter += PlayerTalentsData.get(serverPlayer.getLevel()).getTalents(serverPlayer).getSpentLearntPoints();
+               int skillPointsAfter = PlayerAbilitiesData.get(serverPlayer.getLevel()).getAbilities(serverPlayer).getSpentLearnPoints();
+               skillPointsAfter += PlayerTalentsData.get(serverPlayer.getLevel()).getTalents(serverPlayer).getSpentLearnPoints();
                statsData.spendSkillPoints(serverPlayer, skillPointsAfter);
                SkillAltarBlock.openGui(this.pos, serverPlayer, this.templateIndex);
             }

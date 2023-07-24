@@ -16,9 +16,9 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModShaders;
 import iskallia.vault.init.ModTextureAtlases;
 import iskallia.vault.mana.Mana;
-import iskallia.vault.skill.ability.cooldown.AbilityCooldownManager;
-import iskallia.vault.skill.ability.cooldown.CooldownInstance;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
+import iskallia.vault.skill.ability.effect.spi.core.Cooldown;
+import iskallia.vault.skill.ability.effect.spi.core.CooldownSkill;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.TieredSkill;
 import iskallia.vault.util.CooldownGuiOption;
@@ -161,19 +161,10 @@ public class AbilitiesOverlay implements IIngameOverlay {
       TextureAtlasSprite spriteAbilityFocused = getAbilityNodeSprite(abilityData.selectAbilityNode.getParent(), atlas);
       TextureAtlasSprite spriteAbilityPrevious = getAbilityNodeSprite(abilityData.previousAbilityNode.getParent(), atlas);
       TextureAtlasSprite spriteAbilityNext = getAbilityNodeSprite(abilityData.nextAbilityNode.getParent(), atlas);
-      CooldownInstance selectedCooldown = AbilityCooldownManager.getCooldown(player, abilityData.selectAbilityNode.getAbilityGroupName());
-      CooldownInstance previousCooldown = AbilityCooldownManager.getCooldown(player, abilityData.previousAbilityNode.getAbilityGroupName());
-      CooldownInstance nextCooldown = AbilityCooldownManager.getCooldown(player, abilityData.nextAbilityNode.getAbilityGroupName());
-      renderAbilityCooldowns(
-         matrix,
-         abilityData.selectAbilityNode,
-         abilityData.previousAbilityNode,
-         abilityData.nextAbilityNode,
-         spriteTrayCooldown,
-         selectedCooldown,
-         previousCooldown,
-         nextCooldown
-      );
+      Cooldown selectedCooldown = abilityData.selectAbilityNode.getTreeCooldown().orElse(null);
+      Cooldown previousCooldown = abilityData.previousAbilityNode.getTreeCooldown().orElse(null);
+      Cooldown nextCooldown = abilityData.nextAbilityNode.getTreeCooldown().orElse(null);
+      renderAbilityCooldowns(matrix, spriteTrayCooldown, selectedCooldown, previousCooldown, nextCooldown);
       renderAbilityIcons(matrix, spriteAbilityFocused, spriteAbilityPrevious, spriteAbilityNext, selectedCooldown, previousCooldown, nextCooldown);
       renderAbilitySelection(matrix, spriteTraySelected, spriteTraySelectedActive, spriteTraySelectedCooldown, selectedCooldown);
    }
@@ -208,9 +199,8 @@ public class AbilitiesOverlay implements IIngameOverlay {
                y -= healthRows * 10;
 
                for (TieredSkill skill : abilities) {
-                  Ability ability = (Ability)skill.getChild();
-                  CooldownInstance cooldown = AbilityCooldownManager.getCooldown(player, ability.getAbilityGroupName());
-                  if (cooldown.getRemainingTicks() > 0) {
+                  Cooldown cooldown = ((CooldownSkill)skill.getParent()).getCooldown().orElse(null);
+                  if (cooldown != null && cooldown.getRemainingTicks() > 0) {
                      x -= 9;
                   }
                }
@@ -219,12 +209,12 @@ public class AbilitiesOverlay implements IIngameOverlay {
             for (TieredSkill skillx : abilities) {
                Ability ability = (Ability)skillx.getChild();
                TextureAtlasSprite spriteAbilityFocused = getAbilityNodeSprite(ability.getParent(), atlas);
-               CooldownInstance cooldown = AbilityCooldownManager.getCooldown(player, ability.getAbilityGroupName());
-               if (cooldown.getRemainingTicks() > 0) {
-                  int cooldownHeight = getCooldownHeight(cooldown.getRemainingTicks(), cooldown.getOriginalTicks());
+               Cooldown cooldown = skillx.getTreeCooldown().orElse(null);
+               if (cooldown != null && cooldown.getRemainingTicks() > 0) {
+                  int cooldownHeight = getCooldownHeight(cooldown.getRemainingTicks(), cooldown.getMaxTicks());
                   BUFFER.add(matrix, 3 + x, -20 + y + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
                   RenderSystem.setShaderTexture(0, atlas.getAtlasResourceLocation());
-                  renderAbilityIcon(matrix, spriteAbilityFocused, cooldown.getRemainingTicks(), 3 + x, -20 + y, 2);
+                  renderAbilityIcon(matrix, spriteAbilityFocused, cooldown.getRemainingTicks() > 0, 3 + x, -20 + y, 2);
                   x += 18;
                   if (!centered) {
                      if (++count % 4 == 0) {
@@ -243,9 +233,9 @@ public class AbilitiesOverlay implements IIngameOverlay {
       TextureAtlasSprite spriteTraySelected,
       TextureAtlasSprite spriteTraySelectedActive,
       TextureAtlasSprite spriteTraySelectedCooldown,
-      CooldownInstance selectedCooldown
+      Cooldown selectedCooldown
    ) {
-      if (selectedCooldown.getRemainingTicks() > 0) {
+      if (selectedCooldown != null && selectedCooldown.getRemainingTicks() > 0) {
          BUFFER.add(matrix, 19, 13, 10, spriteTraySelectedCooldown);
       } else {
          Ability selected = ClientAbilityData.getSelectedAbility();
@@ -262,19 +252,19 @@ public class AbilitiesOverlay implements IIngameOverlay {
       TextureAtlasSprite spriteAbilityFocused,
       TextureAtlasSprite spriteAbilityPrevious,
       TextureAtlasSprite spriteAbilityNext,
-      CooldownInstance selectedCooldown,
-      CooldownInstance previousCooldown,
-      CooldownInstance nextCooldown
+      Cooldown selectedCooldown,
+      Cooldown previousCooldown,
+      Cooldown nextCooldown
    ) {
       ITextureAtlas atlas = ModTextureAtlases.ABILITIES.get();
       RenderSystem.setShaderTexture(0, atlas.getAtlasResourceLocation());
-      renderAbilityIcon(matrix, spriteAbilityFocused, selectedCooldown.getRemainingTicks(), 23, 17, 2);
-      renderAbilityIcon(matrix, spriteAbilityPrevious, previousCooldown.getRemainingTicks(), 43, 17, 2);
-      renderAbilityIcon(matrix, spriteAbilityNext, nextCooldown.getRemainingTicks(), 3, 17, 2);
+      renderAbilityIcon(matrix, spriteAbilityFocused, selectedCooldown != null && selectedCooldown.getRemainingTicks() > 0, 23, 17, 2);
+      renderAbilityIcon(matrix, spriteAbilityPrevious, previousCooldown != null && previousCooldown.getRemainingTicks() > 0, 43, 17, 2);
+      renderAbilityIcon(matrix, spriteAbilityNext, nextCooldown != null && nextCooldown.getRemainingTicks() > 0, 3, 17, 2);
    }
 
-   private static void renderAbilityIcon(Matrix4f matrix, TextureAtlasSprite sprite, int cooldown, int x, int y, int z) {
-      if (cooldown > 0) {
+   private static void renderAbilityIcon(Matrix4f matrix, TextureAtlasSprite sprite, boolean grayscaled, int x, int y, int z) {
+      if (grayscaled) {
          RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.5F);
          ModShaders.getGrayscalePositionTexShader().withGrayscale(1.0F).withBrightness(0.5F).enable();
       } else {
@@ -291,27 +281,20 @@ public class AbilitiesOverlay implements IIngameOverlay {
    }
 
    private static void renderAbilityCooldowns(
-      Matrix4f matrix,
-      Ability selectedAbilityGroup,
-      Ability previousAbilityNode,
-      Ability nextAbilityNode,
-      TextureAtlasSprite spriteTrayCooldown,
-      CooldownInstance selectedCooldown,
-      CooldownInstance previousCooldown,
-      CooldownInstance nextCooldown
+      Matrix4f matrix, TextureAtlasSprite spriteTrayCooldown, Cooldown selectedCooldown, Cooldown previousCooldown, Cooldown nextCooldown
    ) {
-      if (selectedCooldown.getRemainingTicks() > 0) {
-         int cooldownHeight = getCooldownHeight(selectedCooldown.getRemainingTicks(), selectedCooldown.getOriginalTicks());
+      if (selectedCooldown != null && selectedCooldown.getRemainingTicks() > 0) {
+         int cooldownHeight = getCooldownHeight(selectedCooldown.getRemainingTicks(), selectedCooldown.getMaxTicks());
          BUFFER.add(matrix, 23, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
       }
 
-      if (previousCooldown.getRemainingTicks() > 0) {
-         int cooldownHeight = getCooldownHeight(previousCooldown.getRemainingTicks(), previousCooldown.getOriginalTicks());
+      if (previousCooldown != null && previousCooldown.getRemainingTicks() > 0) {
+         int cooldownHeight = getCooldownHeight(previousCooldown.getRemainingTicks(), previousCooldown.getMaxTicks());
          BUFFER.add(matrix, 43, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
       }
 
-      if (nextCooldown.getRemainingTicks() > 0) {
-         int cooldownHeight = getCooldownHeight(nextCooldown.getRemainingTicks(), nextCooldown.getOriginalTicks());
+      if (nextCooldown != null && nextCooldown.getRemainingTicks() > 0) {
+         int cooldownHeight = getCooldownHeight(nextCooldown.getRemainingTicks(), nextCooldown.getMaxTicks());
          BUFFER.add(matrix, 3, 17 + cooldownHeight, 1, 16, 16 - cooldownHeight, 1.0F, 1.0F, 1.0F, 0.3F, spriteTrayCooldown);
       }
    }

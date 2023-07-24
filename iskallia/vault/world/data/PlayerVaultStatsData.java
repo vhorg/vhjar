@@ -133,20 +133,24 @@ public class PlayerVaultStatsData extends SavedData {
 
    public PlayerVaultStatsData resetLevelAbilitiesAndExpertise(ServerPlayer player) {
       this.resetLevel(player);
-      this.resetAbilities(player);
+      this.resetSkills(player);
       this.resetExpertises(player);
       this.setDirty();
       return this;
    }
 
-   public PlayerVaultStatsData resetAbilities(ServerPlayer player) {
+   public PlayerVaultStatsData resetSkills(ServerPlayer player) {
+      return this.resetSkills(player, true);
+   }
+
+   public PlayerVaultStatsData resetSkills(ServerPlayer player, boolean resetPoints) {
       PlayerVaultStatsData statsData = get(player.getLevel());
       PlayerTalentsData talentsData = PlayerTalentsData.get(player.getLevel());
       PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get(player.getLevel());
       TalentTree talentTree = talentsData.getTalents(player);
       AbilityTree abilityTree = abilitiesData.getAbilities(player);
       PlayerVaultStats stats = statsData.getVaultStats(player);
-      SkillContext context = SkillContext.empty();
+      SkillContext context = SkillContext.empty(0, 0, 0);
       talentTree.iterate(Skill.class, skill -> {
          if (!(skill instanceof GroupedSkill)) {
             while (skill instanceof LearnableSkill) {
@@ -179,7 +183,10 @@ public class PlayerVaultStatsData extends SavedData {
             }
          }
       });
-      stats.addSkillPoints(context.getLearnPoints());
+      if (resetPoints) {
+         stats.addSkillPoints(context.getLearnPoints());
+      }
+
       stats.sync(player.getLevel().getServer());
       this.setDirty();
       return this;

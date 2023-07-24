@@ -2,10 +2,8 @@ package iskallia.vault.skill.ability.effect.spi.core;
 
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
-import iskallia.vault.core.data.adapter.basic.SerializableAdapter;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.item.crystal.data.serializable.ISerializable;
-import iskallia.vault.skill.ability.cooldown.AbilityCooldownManager;
+import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.base.LearnableSkill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.base.TickingSkill;
@@ -13,17 +11,18 @@ import iskallia.vault.util.calc.CooldownHelper;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
 
-public abstract class Ability extends LearnableSkill implements TickingSkill {
-   public static final SerializableAdapter<Ability.Cooldown, CompoundTag, JsonObject> COOLDOWN = new SerializableAdapter<>(Ability.Cooldown::new, true);
+public abstract class Ability extends LearnableSkill implements TickingSkill, CooldownSkill {
    private int cooldownTicks;
-   @Deprecated
-   private Ability.Cooldown cooldown = null;
+   private Cooldown cooldown;
    private boolean active;
 
    public Ability(int unlockLevel, int learnPointCost, int regretPointCost, int cooldownTicks) {
       super(unlockLevel, learnPointCost, regretPointCost);
       this.cooldownTicks = cooldownTicks;
+      this.cooldown = null;
       this.active = false;
    }
 
@@ -38,21 +37,29 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
       return this.cooldownTicks;
    }
 
-   @Deprecated
-   public Ability.Cooldown getCooldown() {
-      return this.cooldown;
+   @Override
+   public Optional<Cooldown> getCooldown() {
+      return Optional.ofNullable(this.cooldown);
+   }
+
+   protected void setCooldown(int cooldownTicks, int cooldownDelayTicks) {
+      this.cooldown = new Cooldown(cooldownTicks, cooldownTicks, cooldownDelayTicks);
    }
 
    public void setActive(boolean active) {
       this.active = active;
    }
 
+   @Deprecated
    public abstract String getAbilityGroupName();
 
    @Override
    public void onTick(SkillContext context) {
       if (this.cooldown != null) {
-         this.cooldown = null;
+         this.cooldown.decrement();
+         if (this.cooldown.remainingTicks <= 0) {
+            this.cooldown = null;
+         }
       }
 
       if (!this.isUnlocked()) {
@@ -80,13 +87,23 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
       return Ability.TickResult.PASS;
    }
 
-   public void onKeyDown(SkillContext context) {
+   public boolean onKeyDown(SkillContext context) {
+      return this.isUnlocked() && !this.isTreeOnCooldown();
    }
 
-   public void onKeyUp(SkillContext context) {
+   public boolean onKeyUp(SkillContext context) {
+      if (this.isUnlocked() && !this.isTreeOnCooldown()) {
+         return true;
+      } else {
+         context.getSource()
+            .as(Entity.class)
+            .ifPresent(entity -> entity.level.playSound(null, entity, ModSounds.ABILITY_ON_COOLDOWN, SoundSource.PLAYERS, 1.0F, 1.0F));
+         return false;
+      }
    }
 
-   public void onCancelKeyDown(SkillContext context) {
+   public boolean onCancelKeyDown(SkillContext context) {
+      return this.isUnlocked() && !this.isTreeOnCooldown();
    }
 
    public void onFocus(SkillContext context) {
@@ -95,17 +112,18 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public void onBlur(SkillContext context) {
    }
 
-   public void putOnCooldown(SkillContext context) {
-      this.putOnCooldown(0, context);
+   @Override
+   public boolean isOnCooldown() {
+      return this.cooldown != null && this.cooldown.remainingTicks > 0;
    }
 
+   @Override
    public void putOnCooldown(int cooldownDelayTicks, SkillContext context) {
       context.getSource()
          .as(ServerPlayer.class)
-         .ifPresent(
-            player -> AbilityCooldownManager.putOnCooldown(
-               player, this.getAbilityGroupName(), CooldownHelper.adjustCooldown(player, this.getAbilityGroupName(), this.cooldownTicks), cooldownDelayTicks
-            )
+         .ifPresentOrElse(
+            player -> this.setCooldown(CooldownHelper.adjustCooldown(player, this.getId(), this.cooldownTicks), cooldownDelayTicks),
+            () -> this.setCooldown(this.cooldownTicks, cooldownDelayTicks)
          );
    }
 
@@ -113,7 +131,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.INT.writeBits(Integer.valueOf(this.cooldownTicks), buffer);
-      COOLDOWN.writeBits(this.cooldown, buffer);
+      Cooldown.ADAPTER.writeBits(this.cooldown, buffer);
       Adapters.BOOLEAN.writeBits(this.active, buffer);
    }
 
@@ -121,7 +139,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.cooldownTicks = Adapters.INT.readBits(buffer).orElse(0);
-      this.cooldown = COOLDOWN.readBits(buffer).orElse(null);
+      this.cooldown = Cooldown.ADAPTER.readBits(buffer).orElse(null);
       this.active = Adapters.BOOLEAN.readBits(buffer).orElseThrow();
    }
 
@@ -129,7 +147,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
          Adapters.INT.writeNbt(Integer.valueOf(this.cooldownTicks)).ifPresent(tag -> nbt.put("cooldownTicks", tag));
-         COOLDOWN.writeNbt(this.cooldown).ifPresent(tag -> nbt.put("cooldown", tag));
+         Cooldown.ADAPTER.writeNbt(this.cooldown).ifPresent(tag -> nbt.put("cooldown", tag));
          Adapters.BOOLEAN.writeNbt(this.active).ifPresent(tag -> nbt.put("active", tag));
          return (CompoundTag)nbt;
       });
@@ -139,7 +157,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
       this.cooldownTicks = Adapters.INT.readNbt(nbt.get("cooldownTicks")).orElse(0);
-      this.cooldown = COOLDOWN.readNbt((CompoundTag)nbt.get("cooldown")).orElse(null);
+      this.cooldown = Cooldown.ADAPTER.readNbt((CompoundTag)nbt.get("cooldown")).orElse(null);
       this.active = Adapters.BOOLEAN.readNbt(nbt.get("active")).orElse(false);
    }
 
@@ -147,7 +165,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
          Adapters.INT.writeJson(Integer.valueOf(this.cooldownTicks)).ifPresent(element -> json.add("cooldownTicks", element));
-         COOLDOWN.writeJson(this.cooldown).ifPresent(element -> json.add("cooldown", element));
+         Cooldown.ADAPTER.writeJson(this.cooldown).ifPresent(element -> json.add("cooldown", element));
          Adapters.BOOLEAN.writeJson(this.active).ifPresent(element -> json.add("active", element));
          return (JsonObject)json;
       });
@@ -157,7 +175,7 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
    public void readJson(JsonObject json) {
       super.readJson(json);
       this.cooldownTicks = Adapters.INT.readJson(json.get("cooldownTicks")).orElse(0);
-      this.cooldown = COOLDOWN.readJson((JsonObject)json.get("cooldown")).orElse(null);
+      this.cooldown = Cooldown.ADAPTER.readJson((JsonObject)json.get("cooldown")).orElse(null);
       this.active = Adapters.BOOLEAN.readJson(json.get("active")).orElse(false);
    }
 
@@ -213,74 +231,6 @@ public abstract class Ability extends LearnableSkill implements TickingSkill {
       NO_OP,
       DEACTIVATE_ABILITY,
       ACTIVATE_ABILITY;
-   }
-
-   @Deprecated
-   public static class Cooldown implements ISerializable<CompoundTag, JsonObject> {
-      public int maxCooldownTicks;
-      public int remainingCooldownTicks;
-      public int remainingCooldownDelayTicks;
-
-      public Cooldown(int maxCooldownTicks, int remainingCooldownTicks, int remainingCooldownDelayTicks) {
-         this.maxCooldownTicks = maxCooldownTicks;
-         this.remainingCooldownTicks = remainingCooldownTicks;
-         this.remainingCooldownDelayTicks = remainingCooldownDelayTicks;
-      }
-
-      private Cooldown() {
-      }
-
-      private void decrement() {
-         if (this.remainingCooldownDelayTicks > 0) {
-            this.remainingCooldownDelayTicks--;
-         } else {
-            this.remainingCooldownTicks--;
-         }
-      }
-
-      @Override
-      public void writeBits(BitBuffer buffer) {
-         Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.maxCooldownTicks), buffer);
-         Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.remainingCooldownTicks), buffer);
-         Adapters.INT_SEGMENTED_7.writeBits(Integer.valueOf(this.remainingCooldownDelayTicks), buffer);
-      }
-
-      @Override
-      public void readBits(BitBuffer buffer) {
-         this.maxCooldownTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
-         this.remainingCooldownTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
-         this.remainingCooldownDelayTicks = Adapters.INT_SEGMENTED_7.readBits(buffer).orElseThrow();
-      }
-
-      @Override
-      public Optional<CompoundTag> writeNbt() {
-         CompoundTag nbt = new CompoundTag();
-         Adapters.INT.writeNbt(Integer.valueOf(this.maxCooldownTicks)).ifPresent(tag -> nbt.put("maxCooldownTicks", tag));
-         Adapters.INT.writeNbt(Integer.valueOf(this.remainingCooldownTicks)).ifPresent(tag -> nbt.put("remainingCooldownTicks", tag));
-         Adapters.INT.writeNbt(Integer.valueOf(this.remainingCooldownDelayTicks)).ifPresent(tag -> nbt.put("remainingCooldownDelayTicks", tag));
-         return Optional.of(nbt);
-      }
-
-      public void readNbt(CompoundTag nbt) {
-         this.maxCooldownTicks = Adapters.INT.readNbt(nbt.get("maxCooldownTicks")).orElse(0);
-         this.remainingCooldownTicks = Adapters.INT.readNbt(nbt.get("remainingCooldownTicks")).orElse(0);
-         this.remainingCooldownDelayTicks = Adapters.INT.readNbt(nbt.get("remainingCooldownDelayTicks")).orElse(0);
-      }
-
-      @Override
-      public Optional<JsonObject> writeJson() {
-         JsonObject json = new JsonObject();
-         Adapters.INT.writeJson(Integer.valueOf(this.maxCooldownTicks)).ifPresent(element -> json.add("maxCooldownTicks", element));
-         Adapters.INT.writeJson(Integer.valueOf(this.remainingCooldownTicks)).ifPresent(element -> json.add("remainingCooldownTicks", element));
-         Adapters.INT.writeJson(Integer.valueOf(this.remainingCooldownDelayTicks)).ifPresent(element -> json.add("remainingCooldownDelayTicks", element));
-         return Optional.of(json);
-      }
-
-      public void readJson(JsonObject json) {
-         this.maxCooldownTicks = Adapters.INT.readJson(json.get("maxCooldownTicks")).orElse(0);
-         this.remainingCooldownTicks = Adapters.INT.readJson(json.get("remainingCooldownTicks")).orElse(0);
-         this.remainingCooldownDelayTicks = Adapters.INT.readJson(json.get("remainingCooldownDelayTicks")).orElse(0);
-      }
    }
 
    public static enum TickResult {

@@ -12,6 +12,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.event.event.BountyCompleteEvent;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.bounty.ClientboundBountyAvailableMessage;
 import iskallia.vault.network.message.bounty.ClientboundBountyProgressMessage;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.expertise.type.BountyHunterExpertise;
@@ -370,20 +371,49 @@ public class BountyData extends SavedData {
       if (serverPlayer != null) {
          BountyList legendary = get().getAllLegendaryFor(serverPlayer.getUUID());
          BountyList active = get().getAllActiveFor(serverPlayer.getUUID());
+         List<Bounty> available = get().getAllAvailableFor(serverPlayer.getUUID());
          List<Bounty> bounties = new ArrayList<>();
          bounties.addAll(legendary);
          bounties.addAll(active);
          ModNetwork.CHANNEL.sendTo(new ClientboundBountyProgressMessage(bounties), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+         ModNetwork.CHANNEL.sendTo(new ClientboundBountyAvailableMessage(available), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
       }
    }
 
    @SubscribeEvent
    public static void onPlayerJoin(PlayerLoggedInEvent event) {
-      if (!event.getPlayer().getLevel().isClientSide()) {
+      if (event.getPlayer() instanceof ServerPlayer serverPlayer) {
+         syncBounties(serverPlayer);
          if (!get().playerExists(event.getPlayer().getUUID())) {
             get().resetAvailableBountiesFor(event.getPlayer().getUUID());
          }
       }
+   }
+
+   public static void syncBounties(ServerPlayer serverPlayer) {
+      List<Bounty> bounties = new ArrayList<>();
+      BountyList activeList = get().getAllActiveFor(serverPlayer.getUUID());
+      if (!activeList.isEmpty()) {
+         bounties.addAll(activeList);
+      }
+
+      BountyList legendaryList = get().getAllLegendaryFor(serverPlayer.getUUID());
+      if (!legendaryList.isEmpty()) {
+         bounties.addAll(legendaryList);
+      }
+
+      if (!bounties.isEmpty()) {
+         ModNetwork.CHANNEL.sendTo(new ClientboundBountyProgressMessage(bounties), serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+      } else {
+         ModNetwork.CHANNEL.sendTo(new ClientboundBountyProgressMessage(null), serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+      }
+
+      ModNetwork.CHANNEL
+         .sendTo(
+            new ClientboundBountyAvailableMessage(get().getAllAvailableFor(serverPlayer.getUUID())),
+            serverPlayer.connection.getConnection(),
+            NetworkDirection.PLAY_TO_CLIENT
+         );
    }
 
    @SubscribeEvent

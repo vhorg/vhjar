@@ -36,7 +36,7 @@ public class ServerboundAbilitySelectMessage {
          if (sender != null) {
             PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
             AbilityTree abilityTree = abilitiesData.getAbilities(sender);
-            abilityTree.onQuickSelect(message.selectedAbility, SkillContext.of(sender), sender);
+            abilityTree.onQuickSelect(message.selectedAbility, SkillContext.of(sender));
          }
       });
       context.setPacketHandled(true);

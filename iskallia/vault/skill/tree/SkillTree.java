@@ -16,9 +16,22 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import net.minecraft.nbt.CompoundTag;
 
-public class SkillTree extends Skill implements TickingSkill {
+public class SkillTree extends LearnableSkill implements TickingSkill {
    public List<Skill> skills = new ArrayList<>();
    private static final ArrayAdapter<Skill> SKILLS = Adapters.ofArray(Skill[]::new, Adapters.SKILL);
+
+   @Override
+   public int getSpentLearnPoints() {
+      int points = 0;
+
+      for (Skill skill : this.skills) {
+         if (skill instanceof LearnableSkill) {
+            points += ((LearnableSkill)skill).getSpentLearnPoints();
+         }
+      }
+
+      return points;
+   }
 
    @Override
    public Optional<Skill> getForId(String id) {
@@ -125,9 +138,5 @@ public class SkillTree extends Skill implements TickingSkill {
       super.readJson(json);
       this.skills = Arrays.stream(SKILLS.readJson(json.get("skills")).orElseThrow()).toList();
       this.skills.forEach(skill -> skill.setParent(this));
-   }
-
-   public int getSpentLearntPoints() {
-      return this.skills.stream().filter(skill -> skill instanceof LearnableSkill).mapToInt(skill -> ((LearnableSkill)skill).getSpentLearnPoints()).sum();
    }
 }

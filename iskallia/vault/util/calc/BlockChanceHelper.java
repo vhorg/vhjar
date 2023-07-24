@@ -6,8 +6,10 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Items;
 
 public class BlockChanceHelper {
    public static void setPlayerBlocking(Player player) {
@@ -26,6 +28,10 @@ public class BlockChanceHelper {
 
    public static float getBlockChanceUnlimited(LivingEntity entity) {
       float chance = 0.0F;
+      if (entity.getItemBySlot(EquipmentSlot.OFFHAND).is(Items.SHIELD)) {
+         chance += 0.05F;
+      }
+
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
       chance += snapshot.getAttributeValue(ModGearAttributes.BLOCK, VaultGearAttributeTypeMerger.floatSum());
       return CommonEvents.PLAYER_STAT.invoke(PlayerStat.BLOCK_CHANCE, entity, chance).getValue();

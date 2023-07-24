@@ -5,7 +5,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.entity.champion.ChampionLogic;
-import iskallia.vault.event.ActiveFlags;
+import iskallia.vault.event.ActiveFlagsCheck;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModNetwork;
@@ -147,78 +147,55 @@ public class BonkSpectralStrikeAbility extends AbstractBonkAbility {
 
    @SubscribeEvent
    public static void on(LivingHurtEvent event) {
-      if (!ActiveFlags.IS_CHAINING_ATTACKING.isSet()) {
-         if (!ActiveFlags.IS_AOE_ATTACKING.isSet()) {
-            if (!ActiveFlags.IS_TOTEM_ATTACKING.isSet()) {
-               if (!ActiveFlags.IS_CHARMED_ATTACKING.isSet()) {
-                  if (!ActiveFlags.IS_DOT_ATTACKING.isSet()) {
-                     if (!ActiveFlags.IS_REFLECT_ATTACKING.isSet()) {
-                        if (!ActiveFlags.IS_EFFECT_ATTACKING.isSet()) {
-                           if (!ActiveFlags.IS_JAVELIN_ATTACKING.isSet()) {
-                              if (!ActiveFlags.IS_SMITE_ATTACKING.isSet() && !ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
-                                 if (!(event.getSource() instanceof ThornsReflectDamageSource)) {
-                                    if (event.getSource().getEntity() instanceof ServerPlayer attacker) {
-                                       if (attacker.hasEffect(ModEffects.BATTLE_CRY_SPECTRAL_STRIKE)) {
-                                          if (!CritHelper.getCrit(attacker)) {
-                                             if (!(AttackScaleHelper.getLastAttackScale(attacker) < 1.0F)) {
-                                                MobEffectInstance battleCry = attacker.getEffect(ModEffects.BATTLE_CRY_SPECTRAL_STRIKE);
-                                                if (battleCry != null) {
-                                                   AbilityTree abilities = PlayerAbilitiesData.get((ServerLevel)attacker.level).getAbilities(attacker);
+      if (!ActiveFlagsCheck.isAnyFlagActiveLuckyHit()) {
+         if (!(event.getSource() instanceof ThornsReflectDamageSource)) {
+            if (event.getSource().getEntity() instanceof ServerPlayer attacker) {
+               if (attacker.hasEffect(ModEffects.BATTLE_CRY_SPECTRAL_STRIKE)) {
+                  if (!CritHelper.getCrit(attacker)) {
+                     if (!(AttackScaleHelper.getLastAttackScale(attacker) < 1.0F)) {
+                        MobEffectInstance battleCry = attacker.getEffect(ModEffects.BATTLE_CRY_SPECTRAL_STRIKE);
+                        if (battleCry != null) {
+                           AbilityTree abilities = PlayerAbilitiesData.get((ServerLevel)attacker.level).getAbilities(attacker);
 
-                                                   for (BonkSpectralStrikeAbility ability : abilities.getAll(BonkSpectralStrikeAbility.class, Skill::isUnlocked)) {
-                                                      int stacksUsed = ability.getMaxStacksUsedPerHit();
-                                                      MobEffectInstance newBattleCry = null;
-                                                      if (battleCry.getAmplifier() - stacksUsed >= 0) {
-                                                         newBattleCry = new MobEffectInstance(
-                                                            battleCry.getEffect(),
-                                                            battleCry.getDuration(),
-                                                            battleCry.getAmplifier() - stacksUsed,
-                                                            false,
-                                                            false,
-                                                            true
-                                                         );
-                                                      } else {
-                                                         stacksUsed = battleCry.getAmplifier() + 1;
-                                                      }
+                           for (BonkSpectralStrikeAbility ability : abilities.getAll(BonkSpectralStrikeAbility.class, Skill::isUnlocked)) {
+                              int stacksUsed = ability.getMaxStacksUsedPerHit();
+                              MobEffectInstance newBattleCry = null;
+                              if (battleCry.getAmplifier() - stacksUsed >= 0) {
+                                 newBattleCry = new MobEffectInstance(
+                                    battleCry.getEffect(), battleCry.getDuration(), battleCry.getAmplifier() - stacksUsed, false, false, true
+                                 );
+                              } else {
+                                 stacksUsed = battleCry.getAmplifier() + 1;
+                              }
 
-                                                      float damage = event.getAmount();
-                                                      event.setAmount(
-                                                         damage + AbilityPowerHelper.getAbilityPower(attacker) * ability.getAbilityPowerPerStack() * stacksUsed
-                                                      );
-                                                      attacker.level
-                                                         .playSound(
-                                                            attacker,
-                                                            attacker.position().x,
-                                                            attacker.position().y,
-                                                            attacker.position().z,
-                                                            ModSounds.BONK,
-                                                            SoundSource.PLAYERS,
-                                                            1.0F,
-                                                            0.7F
-                                                         );
-                                                      attacker.playNotifySound(ModSounds.BONK, SoundSource.PLAYERS, 1.0F, 0.7F);
-                                                      ModNetwork.CHANNEL
-                                                         .send(
-                                                            PacketDistributor.ALL.noArg(),
-                                                            new BonkParticleMessage(
-                                                               new Vec3(attacker.getX(), attacker.getY() + attacker.getBbHeight() / 3.0F, attacker.getZ()),
-                                                               event.getEntity().getId(),
-                                                               38860,
-                                                               5 * stacksUsed,
-                                                               5 + (int)(new Random().nextFloat() * 10.0F)
-                                                            )
-                                                         );
-                                                      attacker.removeEffect(ModEffects.BATTLE_CRY_SPECTRAL_STRIKE);
-                                                      if (newBattleCry != null) {
-                                                         attacker.addEffect(newBattleCry);
-                                                      }
-                                                   }
-                                                }
-                                             }
-                                          }
-                                       }
-                                    }
-                                 }
+                              float damage = event.getAmount();
+                              event.setAmount(damage + AbilityPowerHelper.getAbilityPower(attacker) * ability.getAbilityPowerPerStack() * stacksUsed);
+                              attacker.level
+                                 .playSound(
+                                    attacker,
+                                    attacker.position().x,
+                                    attacker.position().y,
+                                    attacker.position().z,
+                                    ModSounds.BONK,
+                                    SoundSource.PLAYERS,
+                                    1.0F,
+                                    0.7F
+                                 );
+                              attacker.playNotifySound(ModSounds.BONK, SoundSource.PLAYERS, 1.0F, 0.7F);
+                              ModNetwork.CHANNEL
+                                 .send(
+                                    PacketDistributor.ALL.noArg(),
+                                    new BonkParticleMessage(
+                                       new Vec3(attacker.getX(), attacker.getY() + attacker.getBbHeight() / 3.0F, attacker.getZ()),
+                                       event.getEntity().getId(),
+                                       38860,
+                                       5 * stacksUsed,
+                                       5 + (int)(new Random().nextFloat() * 10.0F)
+                                    )
+                                 );
+                              attacker.removeEffect(ModEffects.BATTLE_CRY_SPECTRAL_STRIKE);
+                              if (newBattleCry != null) {
+                                 attacker.addEffect(newBattleCry);
                               }
                            }
                         }

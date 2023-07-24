@@ -290,7 +290,7 @@ public class AbilitiesConfig extends Config {
                "Stonefall",
                tier("Stonefall_Base", "Stonefall", quintuple(new StonefallAbility(0, 1, 1, 10, 1.0F, 200, 0.5F, 10.0F, 0.5F))),
                tier("Stonefall_Snow", "Stonefall: Surefoot", quintuple(new StonefallSnowAbility(0, 1, 1, 10, 1.0F, 200, 0.5F, 10.0F, 0.5F, 0.5F))),
-               tier("Stonefall_Cold", "Stonefall: Coldsnap", quintuple(new StonefallColdAbility(0, 1, 1, 10, 1.0F, 200, 0.5F, 10.0F, 0.5F, 0, 200)))
+               tier("Stonefall_Cold", "Stonefall: Coldsnap", quintuple(new StonefallColdAbility(0, 1, 1, 10, 1.0F, 200, 0.5F, 10.0F, 0.5F, 0, 200, 4)))
             )
          );
       this.tree

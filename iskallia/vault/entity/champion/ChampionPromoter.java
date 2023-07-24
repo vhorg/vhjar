@@ -15,10 +15,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -84,10 +82,6 @@ public class ChampionPromoter {
       entity.playSound(SoundEvents.ILLUSIONER_CAST_SPELL, 1.0F, 1.0F);
       if (entity instanceof Mob mob) {
          ServerVaults.get(mob.level).ifPresent(vault -> ChampionGoal.registerProjectileGoal(vault, mob));
-      }
-
-      for (MobEffectInstance mobeffectinstance : entity.getActiveEffects()) {
-         PacketDistributor.DIMENSION.with(() -> entity.level.dimension()).send(new ClientboundUpdateMobEffectPacket(entity.getId(), mobeffectinstance));
       }
 
       Set<String> appliedOverrides = new HashSet<>();

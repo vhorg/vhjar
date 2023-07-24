@@ -120,11 +120,9 @@ public class SkillAltarData extends SavedData {
          if (event.side.isServer() && event.player instanceof ServerPlayer player) {
             SkillAltarData data = get(player.getLevel());
             if (data.scheduledMerge.remove(player.getUUID())) {
-               SkillContext context = SkillContext.of(player);
-
                for (SkillAltarData.SkillTemplate template : data.playerSkillTemplates.get(player.getUUID()).values()) {
-                  ModConfigs.ABILITIES.get().ifPresent(tree -> template.abilities.mergeFrom(tree.copy(), context));
-                  ModConfigs.TALENTS.get().ifPresent(tree -> template.talents.mergeFrom(tree.copy(), context));
+                  ModConfigs.ABILITIES.get().ifPresent(tree -> template.abilities.mergeFrom(tree.copy(), SkillContext.empty(0, 0, 0)));
+                  ModConfigs.TALENTS.get().ifPresent(tree -> template.talents.mergeFrom(tree.copy(), SkillContext.empty(0, 0, 0)));
                }
             }
          }

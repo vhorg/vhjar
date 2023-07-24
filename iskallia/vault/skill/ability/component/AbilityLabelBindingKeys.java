@@ -57,6 +57,7 @@ public final class AbilityLabelBindingKeys {
    public static final String ATTACK_DAMAGE_PER_STACK = "attackDamagePerStack";
    public static final String ABILITY_POWER_PER_STACK = "abilityPowerPerStack";
    public static final String LUCKY_HIT_PER_STACK = "luckyHitPerStack";
+   public static final String MAX_GLACIAL_PRISON = "maxGlacialPrison";
 
    private AbilityLabelBindingKeys() {
    }

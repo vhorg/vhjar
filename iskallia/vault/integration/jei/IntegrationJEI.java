@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.RecipeType;
@@ -64,6 +65,11 @@ public class IntegrationJEI implements IModPlugin {
             ModBlocks.XENIUM_ORE.asItem(),
             ModBlocks.PLACEHOLDER.asItem()
          }
+      );
+      registration.registerSubtypeInterpreter(
+         VanillaTypes.ITEM_STACK,
+         ModItems.BOTTLE,
+         (stack, context) -> stack.getOrCreateTag().getString("type") + "_" + stack.getOrCreateTag().getInt("charges")
       );
       Item item = (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation("ispawner", "spawn_egg"));
       if (item != null) {

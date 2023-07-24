@@ -23,7 +23,7 @@ public class SkillContext {
       this.source = source;
    }
 
-   public static SkillContext empty() {
+   public static SkillContext empty(int level, int learnPoints, int regretPoints) {
       return new SkillContext(0, 0, 0, SkillSource.empty());
    }
 

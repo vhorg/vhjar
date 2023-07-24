@@ -2,6 +2,7 @@ package iskallia.vault.effect;
 
 import iskallia.vault.entity.champion.ChampionLogic;
 import iskallia.vault.event.ActiveFlags;
+import iskallia.vault.event.ActiveFlagsCheck;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.damage.AttackScaleHelper;
@@ -65,7 +66,7 @@ public class GlacialShatterEffect extends MobEffect {
                      if (!ActiveFlags.IS_REFLECT_ATTACKING.isSet()) {
                         if (!ActiveFlags.IS_EFFECT_ATTACKING.isSet()) {
                            if (event.getSource().getEntity() instanceof ServerPlayer player) {
-                              if (!ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet() && !ActiveFlags.IS_CHAINING_ATTACKING.isSet()) {
+                              if (ActiveFlagsCheck.checkIfFullSwingAttack() && !ActiveFlags.IS_CHAINING_ATTACKING.isSet()) {
                                  if (CritHelper.getCrit(player)) {
                                     return;
                                  }
@@ -100,12 +101,20 @@ public class GlacialShatterEffect extends MobEffect {
                                                 .getLevel()
                                                 .playSound(null, event.getEntity(), SoundEvents.GLASS_BREAK, SoundSource.BLOCKS, 1.0F, 0.75F);
                                              if (ChampionLogic.isChampion(event.getEntity())) {
-                                                event.getEntity().hurt(DamageSource.playerAttack(player), ((Mob)event.getEntity()).getMaxHealth() * 0.25F);
+                                                ActiveFlags.IS_GLACIAL_SHATTER_ATTACKING
+                                                   .runIfNotSet(
+                                                      () -> event.getEntity()
+                                                         .hurt(DamageSource.playerAttack(player), ((Mob)event.getEntity()).getMaxHealth() * 0.25F)
+                                                   );
                                                 if (event.getEntity().isAlive()) {
                                                    event.getEntityLiving().removeEffect(ModEffects.GLACIAL_SHATTER);
                                                 }
                                              } else {
-                                                event.getEntity().hurt(DamageSource.playerAttack(player), ((Mob)event.getEntity()).getMaxHealth() * 1.5F);
+                                                ActiveFlags.IS_GLACIAL_SHATTER_ATTACKING
+                                                   .runIfNotSet(
+                                                      () -> event.getEntity()
+                                                         .hurt(DamageSource.playerAttack(player), ((Mob)event.getEntity()).getMaxHealth() * 1.5F)
+                                                   );
                                              }
                                           }
                                        }

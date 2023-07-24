@@ -172,6 +172,7 @@ import iskallia.vault.block.item.VaultOreBlockItem;
 import iskallia.vault.block.render.AngelBlockRenderer;
 import iskallia.vault.block.render.AnimalPenRenderer;
 import iskallia.vault.block.render.BlackMarketRenderer;
+import iskallia.vault.block.render.BountyTableRenderer;
 import iskallia.vault.block.render.CrakePedestalRenderer;
 import iskallia.vault.block.render.CryoChamberRenderer;
 import iskallia.vault.block.render.EnhancementAltarRenderer;
@@ -1005,6 +1006,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(TOTEM_PLAYER_DAMAGE_TILE_ENTITY, TotemPlayerDamageRenderer::new);
       event.registerBlockEntityRenderer(ANGEL_BLOCK_TILE_ENTITY, AngelBlockRenderer::new);
       event.registerBlockEntityRenderer(MOB_BARRIER_ENTITY, MobBarrierRenderer::new);
+      event.registerBlockEntityRenderer(BOUNTY_TABLE_TILE_ENTITY, BountyTableRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {

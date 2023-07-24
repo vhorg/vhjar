@@ -4,6 +4,8 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.skill.ability.effect.spi.core.Cooldown;
+import iskallia.vault.skill.ability.effect.spi.core.CooldownSkill;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -14,7 +16,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 
-public class SpecializedSkill extends LearnableSkill {
+public class SpecializedSkill extends LearnableSkill implements CooldownSkill {
    private List<LearnableSkill> specializations;
    private int index;
    private static final ArrayAdapter<Skill> SPECIALIZATIONS = Adapters.ofArray(Skill[]::new, Adapters.SKILL);
@@ -173,10 +175,10 @@ public class SpecializedSkill extends LearnableSkill {
 
    @Override
    public Skill mergeFrom(Skill other, SkillContext context) {
-      super.mergeFrom(other, context);
+      other = super.mergeFrom(other, context);
       if (!(other instanceof SpecializedSkill specialized)) {
          context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
-         return other.copy();
+         return other;
       } else {
          ArrayList copy = new ArrayList();
          HashSet removed = new HashSet<>(this.specializations.stream().map(Skill::getId).filter(Objects::nonNull).toList());
@@ -210,6 +212,30 @@ public class SpecializedSkill extends LearnableSkill {
          }
 
          return this;
+      }
+   }
+
+   @Override
+   public Optional<Cooldown> getCooldown() {
+      Cooldown max = null;
+
+      for (LearnableSkill child : this.specializations) {
+         if (child instanceof CooldownSkill) {
+            Cooldown cooldown = ((CooldownSkill)child).getCooldown().orElse(null);
+            if (cooldown != null && (max == null || cooldown.isLargerThan(max))) {
+               max = cooldown;
+            }
+         }
+      }
+
+      return Optional.ofNullable(max);
+   }
+
+   @Override
+   public void putOnCooldown(int cooldownDelayTicks, SkillContext context) {
+      LearnableSkill child = this.getSpecialization();
+      if (child instanceof CooldownSkill) {
+         ((CooldownSkill)child).putOnCooldown(cooldownDelayTicks, context);
       }
    }
 

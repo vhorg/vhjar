@@ -9,6 +9,8 @@ import iskallia.vault.block.EasterEggBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.block.TreasureDoorBlock;
 import iskallia.vault.block.VaultOreBlock;
+import iskallia.vault.block.model.BountyBlockExclamationModel;
+import iskallia.vault.block.model.BountyBlockQuestionModel;
 import iskallia.vault.block.model.PylonCrystalModel;
 import iskallia.vault.block.render.AngelBlockRenderer;
 import iskallia.vault.block.render.IdentificationStandRenderer;
@@ -18,7 +20,11 @@ import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
 import iskallia.vault.core.event.ClientEvents;
+import iskallia.vault.core.vault.ClientVaults;
+import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.influence.VaultGod;
+import iskallia.vault.core.vault.player.Listener;
+import iskallia.vault.core.vault.player.Listeners;
 import iskallia.vault.entity.model.FireballModel;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.PiercingJavelinModel;
@@ -34,7 +40,6 @@ import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.item.AugmentItem;
-import iskallia.vault.item.CompassItem;
 import iskallia.vault.item.ItemDrillArrow;
 import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.tool.JewelItem;
@@ -173,6 +178,8 @@ public class ModModels {
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_EYE, AngelBlockRenderer::createEyeLayer);
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_WIND, AngelBlockRenderer::createWindLayer);
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_CAGE, AngelBlockRenderer::createCageLayer);
+      event.registerLayerDefinition(BountyBlockExclamationModel.LAYER_LOCATION, BountyBlockExclamationModel::createBodyLayer);
+      event.registerLayerDefinition(BountyBlockQuestionModel.LAYER_LOCATION, BountyBlockQuestionModel::createBodyLayer);
    }
 
    @SubscribeEvent
@@ -188,6 +195,8 @@ public class ModModels {
          event.addSprite(AngelBlockRenderer.ANGEL_CENTER.texture());
          event.addSprite(AngelBlockRenderer.ANGEL_WIND.texture());
          event.addSprite(AngelBlockRenderer.ANGEL_WIND_VERTICAL.texture());
+         event.addSprite(BountyBlockExclamationModel.TEXTURE_LOCATION);
+         event.addSprite(BountyBlockQuestionModel.TEXTURE_LOCATION);
       }
    }
 
@@ -321,8 +330,7 @@ public class ModModels {
                   level = clientLevel;
                }
 
-               BlockPos target = CompassItem.getTarget(compass)
-                  .orElse(ClientEvents.COMPASS_PROPERTY.invoke(level, livingEntity, compass, seed, null).getTarget());
+               BlockPos target = this.getCompassTarget(player, level, compass, seed);
                long gameTime = level.getGameTime();
                Research vaultCompass = ModConfigs.RESEARCHES.getByName("Vault Compass");
                boolean researched = vaultCompass != null && StageManager.getResearchTree(player).isResearched(vaultCompass);
@@ -347,6 +355,14 @@ public class ModModels {
             } else {
                return 0.0F;
             }
+         }
+
+         @Nullable
+         private BlockPos getCompassTarget(Player player, ClientLevel level, ItemStack compass, int seed) {
+            return ClientVaults.getActive().flatMap(vault -> {
+               Listeners listeners = vault.get(Vault.LISTENERS);
+               return listeners.contains(player.getUUID()) ? listeners.get(player.getUUID()).getOptional(Listener.COMPASS_TARGET) : Optional.empty();
+            }).orElse(ClientEvents.COMPASS_PROPERTY.invoke(level, player, compass, seed, null).getTarget());
          }
 
          private int hash(int seed) {

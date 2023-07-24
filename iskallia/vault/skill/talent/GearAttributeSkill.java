@@ -26,27 +26,31 @@ public interface GearAttributeSkill {
    default void onAddModifiers(SkillContext context) {
       context.getSource()
          .as(LivingEntity.class)
-         .ifPresent(entity -> VaultGearHelper.getModifiers(this.getUuid(), this.getGearAttributes(SkillContext.empty())).forEach((attribute, modifier) -> {
-            AttributeInstance present = entity.getAttribute(attribute);
-            if (present != null) {
-               AttributeModifier current = present.getModifier(modifier.getId());
-               if (current == null || current.getAmount() != modifier.getAmount() || current.getOperation() != modifier.getOperation()) {
-                  present.removeModifier(modifier.getId());
-                  present.addTransientModifier(modifier);
+         .ifPresent(
+            entity -> VaultGearHelper.getModifiers(this.getUuid(), this.getGearAttributes(SkillContext.empty(0, 0, 0))).forEach((attribute, modifier) -> {
+               AttributeInstance present = entity.getAttribute(attribute);
+               if (present != null) {
+                  AttributeModifier current = present.getModifier(modifier.getId());
+                  if (current == null || current.getAmount() != modifier.getAmount() || current.getOperation() != modifier.getOperation()) {
+                     present.removeModifier(modifier.getId());
+                     present.addTransientModifier(modifier);
+                  }
                }
-            }
-         }));
+            })
+         );
    }
 
    default void onRemoveModifiers(SkillContext context) {
       context.getSource()
          .as(LivingEntity.class)
-         .ifPresent(entity -> VaultGearHelper.getModifiers(this.getUuid(), this.getGearAttributes(SkillContext.empty())).forEach((attribute, modifier) -> {
-            AttributeInstance present = entity.getAttribute(attribute);
-            if (present != null) {
-               present.removeModifier(modifier.getId());
-            }
-         }));
+         .ifPresent(
+            entity -> VaultGearHelper.getModifiers(this.getUuid(), this.getGearAttributes(SkillContext.empty(0, 0, 0))).forEach((attribute, modifier) -> {
+               AttributeInstance present = entity.getAttribute(attribute);
+               if (present != null) {
+                  present.removeModifier(modifier.getId());
+               }
+            })
+         );
    }
 
    default void refreshSnapshot(ServerPlayer player) {

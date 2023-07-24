@@ -1,6 +1,6 @@
 package iskallia.vault.skill.talent.type.luckyhit;
 
-import iskallia.vault.event.ActiveFlags;
+import iskallia.vault.event.ActiveFlagsCheck;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
@@ -50,116 +50,82 @@ public abstract class LuckyHitTalent extends LearnableSkill {
       priority = EventPriority.LOWEST
    )
    public static void doLuckyHit(LivingHurtEvent event) {
-      if (!ActiveFlags.IS_CHAINING_ATTACKING.isSet()) {
-         if (!ActiveFlags.IS_AOE_ATTACKING.isSet()) {
-            if (!ActiveFlags.IS_TOTEM_ATTACKING.isSet()) {
-               if (!ActiveFlags.IS_CHARMED_ATTACKING.isSet()) {
-                  if (!ActiveFlags.IS_DOT_ATTACKING.isSet()) {
-                     if (!ActiveFlags.IS_REFLECT_ATTACKING.isSet()) {
-                        if (!ActiveFlags.IS_EFFECT_ATTACKING.isSet()) {
-                           if (!ActiveFlags.IS_JAVELIN_ATTACKING.isSet()) {
-                              if (!ActiveFlags.IS_SMITE_ATTACKING.isSet() && !ActiveFlags.IS_SMITE_BASE_ATTACKING.isSet()) {
-                                 if (!(event.getSource() instanceof ThornsReflectDamageSource)) {
-                                    if (event.getSource().getEntity() instanceof ServerPlayer attacker) {
-                                       if (!CritHelper.getCrit(attacker)) {
-                                          if (!(AttackScaleHelper.getLastAttackScale(attacker) < 1.0F)) {
-                                             float probability = LuckyHitHelper.getLuckyHitChance(attacker);
-                                             MobEffectInstance battleCry = attacker.getEffect(ModEffects.BATTLE_CRY_LUCKY_STRIKE);
-                                             if (battleCry != null) {
-                                                AbilityTree abilities = PlayerAbilitiesData.get((ServerLevel)attacker.level).getAbilities(attacker);
+      if (!ActiveFlagsCheck.isAnyFlagActiveLuckyHit()) {
+         if (!(event.getSource() instanceof ThornsReflectDamageSource)) {
+            if (event.getSource().getEntity() instanceof ServerPlayer attacker) {
+               if (!CritHelper.getCrit(attacker)) {
+                  if (!(AttackScaleHelper.getLastAttackScale(attacker) < 1.0F)) {
+                     float probability = LuckyHitHelper.getLuckyHitChance(attacker);
+                     MobEffectInstance battleCry = attacker.getEffect(ModEffects.BATTLE_CRY_LUCKY_STRIKE);
+                     if (battleCry != null) {
+                        AbilityTree abilities = PlayerAbilitiesData.get((ServerLevel)attacker.level).getAbilities(attacker);
 
-                                                for (BonkLuckyStrikeAbility ability : abilities.getAll(BonkLuckyStrikeAbility.class, Skill::isUnlocked)) {
-                                                   int stacksUsed = ability.getMaxStacksUsedPerHit();
-                                                   MobEffectInstance newBattleCry = null;
-                                                   if (battleCry.getAmplifier() - stacksUsed >= 0) {
-                                                      newBattleCry = new MobEffectInstance(
-                                                         battleCry.getEffect(),
-                                                         battleCry.getDuration(),
-                                                         battleCry.getAmplifier() - stacksUsed,
-                                                         false,
-                                                         false,
-                                                         true
-                                                      );
-                                                   } else {
-                                                      stacksUsed = battleCry.getAmplifier() + 1;
-                                                   }
+                        for (BonkLuckyStrikeAbility ability : abilities.getAll(BonkLuckyStrikeAbility.class, Skill::isUnlocked)) {
+                           int stacksUsed = ability.getMaxStacksUsedPerHit();
+                           MobEffectInstance newBattleCry = null;
+                           if (battleCry.getAmplifier() - stacksUsed >= 0) {
+                              newBattleCry = new MobEffectInstance(
+                                 battleCry.getEffect(), battleCry.getDuration(), battleCry.getAmplifier() - stacksUsed, false, false, true
+                              );
+                           } else {
+                              stacksUsed = battleCry.getAmplifier() + 1;
+                           }
 
-                                                   probability += ability.getLuckyHitChancePerStack() * stacksUsed;
-                                                   attacker.level
-                                                      .playSound(
-                                                         attacker,
-                                                         attacker.position().x,
-                                                         attacker.position().y,
-                                                         attacker.position().z,
-                                                         ModSounds.BONK,
-                                                         SoundSource.PLAYERS,
-                                                         1.0F,
-                                                         0.7F
-                                                      );
-                                                   attacker.playNotifySound(ModSounds.BONK, SoundSource.PLAYERS, 1.0F, 0.7F);
-                                                   ModNetwork.CHANNEL
-                                                      .send(
-                                                         PacketDistributor.ALL.noArg(),
-                                                         new BonkParticleMessage(
-                                                            new Vec3(attacker.getX(), attacker.getY() + attacker.getBbHeight() / 3.0F, attacker.getZ()),
-                                                            event.getEntity().getId(),
-                                                            7206307,
-                                                            5 * stacksUsed,
-                                                            5 + (int)(new Random().nextFloat() * 10.0F)
-                                                         )
-                                                      );
-                                                   attacker.removeEffect(ModEffects.BATTLE_CRY_LUCKY_STRIKE);
-                                                   if (newBattleCry != null) {
-                                                      attacker.addEffect(newBattleCry);
-                                                   }
-                                                }
-                                             }
-
-                                             if (!(attacker.getLevel().getRandom().nextFloat() >= probability)) {
-                                                TalentTree tree = PlayerTalentsData.get((ServerLevel)attacker.level).getTalents(attacker);
-                                                boolean hasLuckyHit = false;
-                                                List<LuckyHitTalent> luckyHitTalents = tree.getAll(LuckyHitTalent.class, Skill::isUnlocked);
-
-                                                for (LuckyHitTalent talent : luckyHitTalents) {
-                                                   if (talent instanceof SweepingLuckyHitTalent cleave) {
-                                                      talent.onLuckyHit(event);
-                                                      hasLuckyHit = true;
-                                                   }
-                                                }
-
-                                                for (LuckyHitTalent talentx : luckyHitTalents) {
-                                                   if (!(talentx instanceof SweepingLuckyHitTalent cleave)) {
-                                                      talentx.onLuckyHit(event);
-                                                      hasLuckyHit = true;
-                                                   }
-                                                }
-
-                                                if (!hasLuckyHit) {
-                                                   event.setAmount(event.getAmount() * 1.1F);
-                                                }
-
-                                                event.getEntity()
-                                                   .getLevel()
-                                                   .playSound(null, event.getEntity(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.BLOCKS, 1.0F, 1.75F);
-                                                ModNetwork.CHANNEL
-                                                   .send(
-                                                      PacketDistributor.ALL.noArg(),
-                                                      new LuckyHitParticleMessage(
-                                                         new Vec3(
-                                                            event.getEntity().getX(),
-                                                            event.getEntity().getY() + event.getEntity().getBbHeight(),
-                                                            event.getEntity().getZ()
-                                                         )
-                                                      )
-                                                   );
-                                             }
-                                          }
-                                       }
-                                    }
-                                 }
-                              }
+                           probability += ability.getLuckyHitChancePerStack() * stacksUsed;
+                           attacker.level
+                              .playSound(
+                                 attacker, attacker.position().x, attacker.position().y, attacker.position().z, ModSounds.BONK, SoundSource.PLAYERS, 1.0F, 0.7F
+                              );
+                           attacker.playNotifySound(ModSounds.BONK, SoundSource.PLAYERS, 1.0F, 0.7F);
+                           ModNetwork.CHANNEL
+                              .send(
+                                 PacketDistributor.ALL.noArg(),
+                                 new BonkParticleMessage(
+                                    new Vec3(attacker.getX(), attacker.getY() + attacker.getBbHeight() / 3.0F, attacker.getZ()),
+                                    event.getEntity().getId(),
+                                    7206307,
+                                    5 * stacksUsed,
+                                    5 + (int)(new Random().nextFloat() * 10.0F)
+                                 )
+                              );
+                           attacker.removeEffect(ModEffects.BATTLE_CRY_LUCKY_STRIKE);
+                           if (newBattleCry != null) {
+                              attacker.addEffect(newBattleCry);
                            }
                         }
+                     }
+
+                     if (!(attacker.getLevel().getRandom().nextFloat() >= probability)) {
+                        TalentTree tree = PlayerTalentsData.get((ServerLevel)attacker.level).getTalents(attacker);
+                        boolean hasLuckyHit = false;
+                        List<LuckyHitTalent> luckyHitTalents = tree.getAll(LuckyHitTalent.class, Skill::isUnlocked);
+
+                        for (LuckyHitTalent talent : luckyHitTalents) {
+                           if (talent instanceof SweepingLuckyHitTalent cleave) {
+                              talent.onLuckyHit(event);
+                              hasLuckyHit = true;
+                           }
+                        }
+
+                        for (LuckyHitTalent talentx : luckyHitTalents) {
+                           if (!(talentx instanceof SweepingLuckyHitTalent cleave)) {
+                              talentx.onLuckyHit(event);
+                              hasLuckyHit = true;
+                           }
+                        }
+
+                        if (!hasLuckyHit) {
+                           event.setAmount(event.getAmount() * 1.1F);
+                        }
+
+                        event.getEntity().getLevel().playSound(null, event.getEntity(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.BLOCKS, 1.0F, 1.75F);
+                        ModNetwork.CHANNEL
+                           .send(
+                              PacketDistributor.ALL.noArg(),
+                              new LuckyHitParticleMessage(
+                                 new Vec3(event.getEntity().getX(), event.getEntity().getY() + event.getEntity().getBbHeight(), event.getEntity().getZ())
+                              )
+                           );
                      }
                   }
                }
