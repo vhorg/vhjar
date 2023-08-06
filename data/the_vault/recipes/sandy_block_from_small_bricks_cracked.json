@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:sandy_small_bricks_cracked"
+  },
+  "result": "the_vault:sandy_block",
+  "count": 1
+}

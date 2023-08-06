@@ -1,19 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " s ",
-    "lel",
+    "ccc",
+    "beb",
     "ccc"
   ],
   "key": {
-    "s": {
-      "item": "the_vault:eternal_soul"
-    },
-    "l": {
-      "item": "the_vault:gem_larimar"
+    "b": {
+      "item": "the_vault:black_chromatic_steel_ingot"
     },
     "e": {
-      "item": "the_vault:hunter_eye"
+      "item": "minecraft:ender_eye"
     },
     "c": {
       "item": "the_vault:chromatic_steel_ingot"

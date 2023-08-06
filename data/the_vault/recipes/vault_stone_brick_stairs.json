@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "wooden_stairs",
+  "pattern": [
+    "#  ",
+    "## ",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "the_vault:vault_stone_bricks"
+    }
+  },
+  "result": {
+    "item": "the_vault:vault_stone_brick_stairs",
+    "count": 4
+  }
+}

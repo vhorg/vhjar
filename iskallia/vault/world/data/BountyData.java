@@ -383,8 +383,9 @@ public class BountyData extends SavedData {
    @SubscribeEvent
    public static void onPlayerJoin(PlayerLoggedInEvent event) {
       if (event.getPlayer() instanceof ServerPlayer serverPlayer) {
-         syncBounties(serverPlayer);
-         if (!get().playerExists(event.getPlayer().getUUID())) {
+         if (get().playerExists(event.getPlayer().getUUID())) {
+            syncBounties(serverPlayer);
+         } else {
             get().resetAvailableBountiesFor(event.getPlayer().getUUID());
          }
       }

@@ -68,14 +68,19 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
    private int getSize(BlockState state) {
       if (state.getBlock() == ModBlocks.TREASURE_CHEST || state.getBlock() == ModBlocks.TREASURE_CHEST_PLACEABLE) {
          return 54;
-      } else if (state.getBlock() == ModBlocks.ORNATE_CHEST_PLACEABLE
+      } else if (state.getBlock() == ModBlocks.FLESH_CHEST_PLACEABLE
+         || state.getBlock() == ModBlocks.ORNATE_CHEST_PLACEABLE
          || state.getBlock() == ModBlocks.GILDED_CHEST_PLACEABLE
          || state.getBlock() == ModBlocks.ORNATE_STRONGBOX
          || state.getBlock() == ModBlocks.GILDED_STRONGBOX
          || state.getBlock() == ModBlocks.LIVING_STRONGBOX) {
          return 36;
       } else {
-         return state.getBlock() != ModBlocks.LIVING_CHEST_PLACEABLE && state.getBlock() != ModBlocks.ALTAR_CHEST_PLACEABLE ? 27 : 45;
+         return state.getBlock() != ModBlocks.LIVING_CHEST_PLACEABLE
+               && state.getBlock() != ModBlocks.ALTAR_CHEST_PLACEABLE
+               && state.getBlock() != ModBlocks.ENIGMA_CHEST_PLACEABLE
+            ? 27
+            : 45;
       }
    }
 
@@ -408,6 +413,18 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
 
          if (state.getBlock() == ModBlocks.ALTAR_CHEST || state.getBlock() == ModBlocks.ALTAR_CHEST_PLACEABLE) {
             return new TextComponent(rarity + " Altar Chest");
+         }
+
+         if (state.getBlock() == ModBlocks.HARDENED_CHEST || state.getBlock() == ModBlocks.HARDENED_CHEST_PLACEABLE) {
+            return new TextComponent(rarity + " Hardened Chest");
+         }
+
+         if (state.getBlock() == ModBlocks.ENIGMA_CHEST || state.getBlock() == ModBlocks.ENIGMA_CHEST_PLACEABLE) {
+            return new TextComponent(rarity + " Enigma Chest");
+         }
+
+         if (state.getBlock() == ModBlocks.FLESH_CHEST || state.getBlock() == ModBlocks.FLESH_CHEST_PLACEABLE) {
+            return new TextComponent(rarity + " Flesh Chest");
          }
 
          if (state.getBlock() == ModBlocks.ORNATE_STRONGBOX) {

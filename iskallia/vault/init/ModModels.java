@@ -16,6 +16,7 @@ import iskallia.vault.block.render.AngelBlockRenderer;
 import iskallia.vault.block.render.IdentificationStandRenderer;
 import iskallia.vault.block.render.PotionModifierDiscoveryRenderer;
 import iskallia.vault.block.render.VaultEnchanterRenderer;
+import iskallia.vault.block.render.VelvetBedRenderer;
 import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
@@ -97,6 +98,7 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.SOUL_ALTAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_GLASS, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.SKILL_ALTAR, RenderType.translucent());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.MOB_BARRIER, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.FINAL_VAULT_FRAME, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ELITE_SPAWNER, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.SUGAR_PLUM_FAIRY_FLOWER, RenderType.cutout());
@@ -113,6 +115,8 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.TOTEM_MOB_DAMAGE, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.TOTEM_PLAYER_DAMAGE, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_JEWEL_APPLICATION_STATION, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.GILDED_SCONCE, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.GILDED_SCONCE_WALL, RenderType.cutout());
       setRenderLayers(ModBlocks.VAULT_JEWEL_CUTTING_STATION, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_ARCHIVE, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_TABLE, RenderType.solid(), RenderType.translucent());
@@ -180,6 +184,8 @@ public class ModModels {
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_CAGE, AngelBlockRenderer::createCageLayer);
       event.registerLayerDefinition(BountyBlockExclamationModel.LAYER_LOCATION, BountyBlockExclamationModel::createBodyLayer);
       event.registerLayerDefinition(BountyBlockQuestionModel.LAYER_LOCATION, BountyBlockQuestionModel::createBodyLayer);
+      event.registerLayerDefinition(VelvetBedRenderer.HEAD_LAYER_LOCATION, VelvetBedRenderer::createHeadLayer);
+      event.registerLayerDefinition(VelvetBedRenderer.FOOT_LAYER_LOCATION, VelvetBedRenderer::createFootLayer);
    }
 
    @SubscribeEvent
@@ -197,6 +203,7 @@ public class ModModels {
          event.addSprite(AngelBlockRenderer.ANGEL_WIND_VERTICAL.texture());
          event.addSprite(BountyBlockExclamationModel.TEXTURE_LOCATION);
          event.addSprite(BountyBlockQuestionModel.TEXTURE_LOCATION);
+         event.addSprite(VelvetBedRenderer.TEXTURE_LOCATION);
       }
    }
 

@@ -172,6 +172,8 @@ public class VaultGearData extends AttributeGearData {
    ) {
       if (!this.isModifiable()) {
          return false;
+      } else if (!modifier.isValid()) {
+         return false;
       } else {
          switch (type) {
             case IMPLICIT:
@@ -253,8 +255,11 @@ public class VaultGearData extends AttributeGearData {
       this.repairSlots = buf.readInt();
       this.usedRepairSlots = buf.readInt();
       this.baseModifiers = buf.readCollection(i -> new LinkedList<>(), this.versioned(VaultGearAttributeRegistry::readModifier));
+      this.baseModifiers.removeIf(Objects::isNull);
       this.prefixes = buf.readCollection(i -> new LinkedList<>(), this.versioned(VaultGearAttributeRegistry::readModifier));
+      this.prefixes.removeIf(Objects::isNull);
       this.suffixes = buf.readCollection(i -> new LinkedList<>(), this.versioned(VaultGearAttributeRegistry::readModifier));
+      this.suffixes.removeIf(Objects::isNull);
    }
 
    @Override

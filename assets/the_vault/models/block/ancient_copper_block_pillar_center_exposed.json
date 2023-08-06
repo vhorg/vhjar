@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "the_vault:block/ancient_copper_pillar_top_exposed",
+    "side": "the_vault:block/ancient_copper_pillar_center_exposed"
+  }
+}

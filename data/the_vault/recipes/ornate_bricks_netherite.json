@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "www",
+    "wiw",
+    "www"
+  ],
+  "key": {
+    "w": {
+      "item": "the_vault:ornate_block"
+    },
+    "i": {
+      "item": "minecraft:netherite_ingot"
+    }
+  },
+  "result": {
+    "item": "the_vault:ornate_bricks_netherite",
+    "count": 8
+  }
+}

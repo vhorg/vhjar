@@ -5,10 +5,13 @@ import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ClientboundSyncSkillAltarDataMessage;
+import iskallia.vault.skill.base.GroupedSkill;
+import iskallia.vault.skill.base.LearnableSkill;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.base.SpecializedSkill;
 import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.source.SkillSource;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.util.nbt.NBTHelper;
@@ -20,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -81,6 +85,12 @@ public class SkillAltarData extends SavedData {
       this.playerSkillTemplates
          .computeIfAbsent(playerId, uuid -> new HashMap<>())
          .put(templateIndex, new SkillAltarData.SkillTemplate(abilities, talents, icon));
+      this.syncPlayerIconKeys(playerId);
+      this.setDirty();
+   }
+
+   public void saveSkillTemplate(UUID playerId, int templateIndex, SkillAltarData.SkillTemplate template) {
+      this.playerSkillTemplates.computeIfAbsent(playerId, uuid -> new HashMap<>()).put(templateIndex, template);
       this.syncPlayerIconKeys(playerId);
       this.setDirty();
    }
@@ -189,6 +199,16 @@ public class SkillAltarData extends SavedData {
       return list;
    }
 
+   public record DeserializationResult<T>(boolean valid, String message, T deserializedValue) {
+      public static <T> SkillAltarData.DeserializationResult<T> valid(T value) {
+         return new SkillAltarData.DeserializationResult<>(true, "", value);
+      }
+
+      public static <T> SkillAltarData.DeserializationResult<T> invalid(String message) {
+         return new SkillAltarData.DeserializationResult<>(false, message, null);
+      }
+   }
+
    public record SkillIcon(String key, boolean isTalent) {
       public CompoundTag serializeNBT() {
          CompoundTag nbt = new CompoundTag();
@@ -279,6 +299,91 @@ public class SkillAltarData extends SavedData {
 
       public void setIcon(SkillAltarData.SkillIcon icon) {
          this.icon = icon;
+      }
+
+      public String exportToString() {
+         StringJoiner abilitiesJoiner = new StringJoiner("|");
+         this.abilities.iterate(SpecializedSkill.class, skill -> addSkillIfSpeccedInto(abilitiesJoiner, skill.getSpecialization()));
+         StringJoiner talentsJoiner = new StringJoiner("|");
+         this.talents.iterate(LearnableSkill.class, learnableSkill -> {
+            if (!(learnableSkill instanceof GroupedSkill)) {
+               addSkillIfSpeccedInto(talentsJoiner, learnableSkill);
+            }
+         });
+         return abilitiesJoiner + ";" + talentsJoiner + ";" + this.icon.key() + "|" + (this.icon.isTalent() ? 1 : 0);
+      }
+
+      private static void addSkillIfSpeccedInto(StringJoiner abilitiesJoiner, LearnableSkill learnableSkill) {
+         if (learnableSkill instanceof TieredSkill tieredSkill) {
+            int tier = tieredSkill.getUnmodifiedTier();
+            if (tier > 0) {
+               abilitiesJoiner.add(learnableSkill.getId() + ":" + tier);
+            }
+         }
+      }
+
+      public static SkillAltarData.DeserializationResult<SkillAltarData.SkillTemplate> fromString(String data) {
+         String[] split = data.trim().split(";");
+         if (split.length != 3) {
+            return SkillAltarData.DeserializationResult.invalid("Template data must include abilities, talents and icon divided with ';'");
+         } else {
+            String[] abilitiesString = split[0].split("\\|");
+            String[] talentsString = split[1].split("\\|");
+            String[] iconString = split[2].split("\\|");
+            SkillContext context = new SkillContext(100, 1000, 1000, SkillSource.empty());
+            AbilityTree abilities = new AbilityTree();
+            abilities.mergeFrom(ModConfigs.ABILITIES.get().orElse(null), context);
+
+            for (String abilityString : abilitiesString) {
+               String[] abilitySplit = abilityString.split(":");
+               if (abilitySplit.length != 2) {
+                  return SkillAltarData.DeserializationResult.invalid("Invalid ability '" + abilityString + "' must include name and tier divided with ':'");
+               }
+
+               if (ModConfigs.ABILITIES.get().flatMap(allAbilities -> allAbilities.getForId(abilitySplit[0])).isEmpty()) {
+                  return SkillAltarData.DeserializationResult.invalid("Invalid ability '" + abilitySplit[0] + "' no such ability exists");
+               }
+
+               String specializationId = abilitySplit[0];
+               int tier = Integer.parseInt(abilitySplit[1]);
+
+               for (int i = 0; i < tier; i++) {
+                  abilities.learn(specializationId, context);
+               }
+
+               abilities.specialize(specializationId, context);
+            }
+
+            TalentTree talents = new TalentTree();
+            talents.mergeFrom(ModConfigs.TALENTS.get().orElse(null), context);
+
+            for (String talentString : talentsString) {
+               String[] talentSplit = talentString.split(":");
+               if (talentSplit.length != 2) {
+                  return SkillAltarData.DeserializationResult.invalid("Invalid talent '" + talentString + "' must include name and tier divided with ':'");
+               }
+
+               if (ModConfigs.TALENTS.get().flatMap(allTalents -> allTalents.getForId(talentSplit[0])).isEmpty()) {
+                  return SkillAltarData.DeserializationResult.invalid("Invalid talent '" + talentSplit[0] + "' no such talent exists");
+               }
+
+               String talentId = talentSplit[0];
+               int tier = Integer.parseInt(talentSplit[1]);
+
+               for (int i = 0; i < tier; i++) {
+                  talents.learn(talentId, context);
+               }
+            }
+
+            SkillAltarData.SkillIcon icon;
+            if (iconString.length == 2) {
+               icon = new SkillAltarData.SkillIcon(iconString[0], iconString[1].equals("1"));
+            } else {
+               icon = new SkillAltarData.SkillIcon("", false);
+            }
+
+            return SkillAltarData.DeserializationResult.valid(new SkillAltarData.SkillTemplate(abilities, talents, icon));
+         }
       }
    }
 }

@@ -42,11 +42,17 @@ public final class LootInfoGroupDefinitionRegistry {
       register("living_chest", () -> new ItemStack(ModBlocks.LIVING_CHEST));
       register("gilded_chest", () -> new ItemStack(ModBlocks.GILDED_CHEST));
       register("ornate_chest", () -> new ItemStack(ModBlocks.ORNATE_CHEST));
+      register("hardened_chest", () -> new ItemStack(ModBlocks.HARDENED_CHEST));
+      register("flesh_chest", () -> new ItemStack(ModBlocks.FLESH_CHEST));
+      register("enigma_chest", () -> new ItemStack(ModBlocks.ENIGMA_CHEST));
       register("coin_pile", () -> new ItemStack(ModBlocks.COIN_PILE));
       register("cube_block", () -> new ItemStack(ModBlocks.CUBE_BLOCK));
       register("treasure_sand", () -> new ItemStack(ModBlocks.TREASURE_SAND));
       register("treasure_chest", () -> new ItemStack(ModBlocks.TREASURE_CHEST));
-      register("completion_crate", () -> new ItemStack(ModBlocks.VAULT_CRATE));
+      register("completion_crate_mono", () -> new ItemStack(ModBlocks.VAULT_CRATE_MONOLITH));
+      register("completion_crate_kill", () -> new ItemStack(ModBlocks.VAULT_CRATE));
+      register("completion_crate_elixir", () -> new ItemStack(ModBlocks.VAULT_CRATE_ELIXIR));
+      register("completion_crate_scavenger", () -> new ItemStack(ModBlocks.VAULT_CRATE_SCAVENGER));
       register("altar_chest", () -> new ItemStack(ModBlocks.ALTAR_CHEST));
       register("living_strongbox", () -> new ItemStack(ModBlocks.LIVING_STRONGBOX));
       register("gilded_strongbox", () -> new ItemStack(ModBlocks.GILDED_STRONGBOX));

@@ -1,6 +1,10 @@
 {
     "replace": false,
     "values": [
+        "the_vault:wooden_log",
+        "the_vault:stripped_wooden_log",
+        "the_vault:overgrown_wooden_log",
+        "the_vault:stripped_overgrown_wooden_log",
         "the_vault:chromatic_log",
         "the_vault:stripped_chromatic_log",
         "the_vault:driftwood_log",

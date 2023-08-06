@@ -4,8 +4,8 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.ClassicPortalLogic;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.objective.BailObjective;
 import iskallia.vault.core.vault.objective.DeathObjective;
-import iskallia.vault.core.vault.objective.FindExitObjective;
 import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.item.crystal.CrystalData;
 import java.util.List;
@@ -20,7 +20,7 @@ public class EmptyCrystalObjective extends CrystalObjective {
    @Override
    public void configure(Vault vault, RandomSource random) {
       vault.ifPresent(Vault.OBJECTIVES, objectives -> {
-         objectives.add(FindExitObjective.create(ClassicPortalLogic.EXIT));
+         objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
          objectives.add(DeathObjective.create(true));
          objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
       });

@@ -49,8 +49,8 @@ public class MobBarrier extends Block implements EntityBlock {
       return super.getCollisionShape(pState, pLevel, pPos, pContext);
    }
 
-   public boolean skipRendering(BlockState pState, BlockState pAdjacentBlockState, Direction pDirection) {
-      return true;
+   public boolean skipRendering(BlockState pState, BlockState pAdjacentBlockState, Direction pSide) {
+      return pAdjacentBlockState.is(this) ? true : super.skipRendering(pState, pAdjacentBlockState, pSide);
    }
 
    @Nullable

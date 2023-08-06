@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:ornate_chain_rusty"
+  },
+  "result": "the_vault:ornate_chain",
+  "count": 1
+}

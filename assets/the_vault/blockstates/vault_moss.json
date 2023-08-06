@@ -1,0 +1,116 @@
+{
+  "variants": {
+    "layers=1": [
+      {
+        "model": "the_vault:block/vault_moss_1",
+        "weight": 35
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower_1",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower2_1",
+        "weight": 1
+      }
+    ],
+    "layers=2": [
+      {
+        "model": "the_vault:block/vault_moss_2",
+        "weight": 35
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower_2",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower2_2",
+        "weight": 1
+      }
+    ],
+    "layers=3": [
+      {
+        "model": "the_vault:block/vault_moss_3",
+        "weight": 35
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower_3",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower2_3",
+        "weight": 1
+      }
+    ],
+    "layers=4": [
+      {
+        "model": "the_vault:block/vault_moss_4",
+        "weight": 35
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower_4",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower2_4",
+        "weight": 1
+      }
+    ],
+    "layers=5": [
+      {
+        "model": "the_vault:block/vault_moss_5",
+        "weight": 35
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower_5",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower2_5",
+        "weight": 1
+      }
+    ],
+    "layers=6": [
+      {
+        "model": "the_vault:block/vault_moss_6",
+        "weight": 35
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower_6",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower2_6",
+        "weight": 1
+      }
+    ],
+    "layers=7": [
+      {
+        "model": "the_vault:block/vault_moss_7",
+        "weight": 35
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower_7",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower2_7",
+        "weight": 1
+      }
+    ],
+    "layers=8": [
+      {
+        "model": "the_vault:block/vault_moss_8",
+        "weight": 35
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower_8",
+        "weight": 1
+      },
+      {
+        "model": "the_vault:block/vault_moss_flower2_8",
+        "weight": 1
+      }
+    ]
+  }
+}

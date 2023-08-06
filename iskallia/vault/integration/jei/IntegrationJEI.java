@@ -1,6 +1,7 @@
 package iskallia.vault.integration.jei;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.client.gui.screen.block.SkillAltarScreen;
 import iskallia.vault.client.gui.screen.player.AbstractSkillTabElementContainerScreen;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
@@ -18,6 +19,7 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IJeiHelpers;
 import mezz.jei.api.recipe.RecipeType;
@@ -29,6 +31,8 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -120,6 +124,16 @@ public class IntegrationJEI implements IModPlugin {
 
    public void registerGuiHandlers(IGuiHandlerRegistration registration) {
       registration.addGenericGuiContainerHandler(AbstractSkillTabElementContainerScreen.class, new RemoveJEIContainerHandler());
+      registration.addGenericGuiContainerHandler(SkillAltarScreen.Default.class, new IGuiContainerHandler<AbstractContainerScreen<?>>() {
+         public List<Rect2i> getGuiExtraAreas(AbstractContainerScreen<?> containerScreen) {
+            return List.of(new Rect2i(containerScreen.getGuiLeft() + containerScreen.getXSize(), containerScreen.getGuiTop() + 7, 18, 62));
+         }
+      });
+      registration.addGenericGuiContainerHandler(SkillAltarScreen.Import.class, new IGuiContainerHandler<AbstractContainerScreen<?>>() {
+         public List<Rect2i> getGuiExtraAreas(AbstractContainerScreen<?> containerScreen) {
+            return List.of(new Rect2i(containerScreen.getGuiLeft() + containerScreen.getXSize(), containerScreen.getGuiTop() + 44, 18, 18));
+         }
+      });
    }
 
    @Nonnull

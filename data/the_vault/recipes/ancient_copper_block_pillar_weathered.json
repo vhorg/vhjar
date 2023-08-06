@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:ancient_copper_block_weathered"
+  },
+  "result": "the_vault:ancient_copper_block_pillar_weathered",
+  "count": 1
+}

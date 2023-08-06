@@ -1,5 +1,6 @@
 package iskallia.vault.client.gui.framework.element;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.client.gui.framework.element.spi.AbstractSpatialElement;
 import iskallia.vault.client.gui.framework.element.spi.IGuiEventElement;
@@ -26,6 +27,10 @@ public class TextInputElement<E extends TextInputElement<E>> extends AbstractSpa
    public <T extends TextInputElement<E>> T adjustEditBox(Consumer<EditBox> fn) {
       fn.accept(this.editBox);
       return (T)this;
+   }
+
+   public void setMaxLength(int length) {
+      this.editBox.setMaxLength(length);
    }
 
    @Override
@@ -93,6 +98,10 @@ public class TextInputElement<E extends TextInputElement<E>> extends AbstractSpa
 
    @Override
    public void render(IElementRenderer renderer, @NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+      poseStack.pushPose();
+      poseStack.translate(0.0, 0.0, 10.0);
       this.editBox.renderButton(poseStack, mouseX, mouseY, partialTick);
+      poseStack.popPose();
+      RenderSystem.enableDepthTest();
    }
 }

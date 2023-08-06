@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "axis=x,above=true,below=true": {
+      "model": "the_vault:block/ancient_copper_block_pillar_center_oxidized",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,above=true,below=false": {
+      "model": "the_vault:block/ancient_copper_block_pillar_bottom_oxidized",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,above=false,below=true": {
+      "model": "the_vault:block/ancient_copper_block_pillar_top_oxidized",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,above=false,below=false": {
+      "model": "the_vault:block/ancient_copper_block_pillar_oxidized",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y,above=true,below=true": {
+      "model": "the_vault:block/ancient_copper_block_pillar_center_oxidized"
+    },
+    "axis=y,above=true,below=false": {
+      "model": "the_vault:block/ancient_copper_block_pillar_bottom_oxidized"
+    },
+    "axis=y,above=false,below=true": {
+      "model": "the_vault:block/ancient_copper_block_pillar_top_oxidized"
+    },
+    "axis=y,above=false,below=false": {
+      "model": "the_vault:block/ancient_copper_block_pillar_oxidized"
+    },
+    "axis=z,above=true,below=true": {
+      "model": "the_vault:block/ancient_copper_block_pillar_center_oxidized",
+      "x": 90
+    },
+    "axis=z,above=true,below=false": {
+      "model": "the_vault:block/ancient_copper_block_pillar_bottom_oxidized",
+      "x": 90
+    },
+    "axis=z,above=false,below=true": {
+      "model": "the_vault:block/ancient_copper_block_pillar_top_oxidized",
+      "x": 90
+    },
+    "axis=z,above=false,below=false": {
+      "model": "the_vault:block/ancient_copper_block_pillar_oxidized",
+      "x": 90
+    }
+  }
+}

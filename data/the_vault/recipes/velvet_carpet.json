@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "vv"
+  ],
+  "key": {
+    "v": {
+      "item": "the_vault:velvet_block"
+    }
+  },
+  "result": {
+    "item": "the_vault:velvet_carpet",
+    "count": 3
+  }
+}

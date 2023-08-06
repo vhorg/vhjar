@@ -121,7 +121,10 @@ public class TransmogTableBlock extends Block implements EntityBlock {
          -3748192976979668763L,
          -2382237795783901803L,
          -2012603671192041240L,
-         5396100273386976522L
+         5396100273386976522L,
+         -2466766800723093866L,
+         3042724202892870281L,
+         -4258886699357928933L
       }
    );
    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;

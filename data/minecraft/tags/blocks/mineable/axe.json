@@ -13,6 +13,16 @@
         "the_vault:stripped_driftwood_log",
         "the_vault:driftwood_planks",
         "the_vault:driftwood_slab",
-        "the_vault:driftwood_stairs"
+        "the_vault:driftwood_stairs",
+        "the_vault:wooden_log",
+        "the_vault:stripped_wooden_log",
+        "the_vault:wooden_planks",
+        "the_vault:wooden_slab",
+        "the_vault:wooden_stairs",
+        "the_vault:overgrown_wooden_log",
+        "the_vault:stripped_overgrown_wooden_log",
+        "the_vault:overgrown_wooden_planks",
+        "the_vault:overgrown_wooden_slab",
+        "the_vault:overgrown_wooden_stairs"
     ]
 }

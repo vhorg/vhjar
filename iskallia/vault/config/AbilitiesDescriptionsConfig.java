@@ -240,6 +240,15 @@ public class AbilitiesDescriptionsConfig extends Config {
          );
       this.data
          .put(
+            "Mana_Shield_Implode",
+            new AbilitiesDescriptionsConfig.DescriptionData(
+               this.defaultDescription("Mana_Shield_Implode"),
+               List.of("cooldown", "manaCost", "radius", "damage"),
+               List.of("level", "cooldown", "manaCost", "radius", "damage")
+            )
+         );
+      this.data
+         .put(
             "Mega Jump",
             new AbilitiesDescriptionsConfig.DescriptionData(
                this.defaultDescription("Mega Jump"),

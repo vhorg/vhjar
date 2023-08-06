@@ -18,7 +18,9 @@ import iskallia.vault.item.tool.ToolMaterial;
 import iskallia.vault.util.data.BitSerializers;
 import iskallia.vault.util.data.LazyHolder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.BiFunction;
@@ -158,13 +160,25 @@ public class AttributeGearData {
       if (!this.isModifiable()) {
          return null;
       } else {
-         for (VaultGearAttributeInstance instance : this.attributes) {
+         Iterator<VaultGearAttributeInstance<?>> iterator = this.attributes.iterator();
+
+         while (iterator.hasNext()) {
+            VaultGearAttributeInstance instance = iterator.next();
             if (instance.getAttribute().equals(attribute)) {
-               return (T)instance.setValue(value);
+               T prevValue = (T)instance.setValue(value);
+               if (!instance.isValid()) {
+                  iterator.remove();
+                  return prevValue;
+               }
+
+               return prevValue;
             }
          }
 
-         this.attributes.add(new VaultGearAttributeInstance<>(attribute, value));
+         if (attribute.getType().isValid(value)) {
+            this.attributes.add(new VaultGearAttributeInstance<>(attribute, value));
+         }
+
          return null;
       }
    }
@@ -187,6 +201,7 @@ public class AttributeGearData {
       this.version = buf.readEnum(GearDataVersion.class);
       this.identifier.read(buf);
       this.attributes = buf.readCollection(ArrayList::new, this.versioned(VaultGearAttributeRegistry::readAttributeInstance));
+      this.attributes.removeIf(Objects::isNull);
    }
 
    public CompoundTag toNbt() {

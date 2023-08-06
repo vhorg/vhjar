@@ -254,6 +254,10 @@ public class VaultGearWorkbenchConfig extends Config {
          return this.workbenchCraftIdentifier;
       }
 
+      public ResourceLocation getModifierIdentifier() {
+         return this.modifierIdentifier;
+      }
+
       public Optional<VaultGearModifier<?>> createModifier() {
          return VaultGearTierConfig.getConfig(this.gearItem)
             .flatMap(cfg -> cfg.createModifier(this.affixGroup, this.modifierIdentifier, this.modifierTier, Config.rand));

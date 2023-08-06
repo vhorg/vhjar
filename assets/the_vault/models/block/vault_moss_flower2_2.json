@@ -1,0 +1,22 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/thin_block",
+	"textures": {
+		"particle": "the_vault:block/vault_moss_flower2",
+		"vault_moss": "the_vault:block/vault_moss_flower2"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 4, 16],
+			"faces": {
+				"north": {"uv": [0, 12, 16, 16], "texture": "#vault_moss", "cullface": "north"},
+				"east": {"uv": [0, 12, 16, 16], "texture": "#vault_moss", "cullface": "east"},
+				"south": {"uv": [0, 12, 16, 16], "texture": "#vault_moss", "cullface": "south"},
+				"west": {"uv": [0, 12, 16, 16], "texture": "#vault_moss", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#vault_moss"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#vault_moss", "cullface": "down"}
+			}
+		}
+	]
+}

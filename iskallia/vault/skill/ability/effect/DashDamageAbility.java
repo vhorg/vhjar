@@ -3,6 +3,7 @@ package iskallia.vault.skill.ability.effect;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.AABBHelper;
@@ -68,7 +69,7 @@ public class DashDamageAbility extends DashAbility {
                      if (!this.data.hitEntityIdSet.contains(nearbyEntityUUID)) {
                         float playerAttackDamage = (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE);
                         float playerDashDamage = playerAttackDamage * this.getAttackDamagePercentPerDash();
-                        nearbyEntity.hurt(DamageSource.playerAttack(player), playerDashDamage);
+                        ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> nearbyEntity.hurt(DamageSource.playerAttack(player), playerDashDamage));
                         this.data.hitEntityIdSet.add(nearbyEntityUUID);
                      }
                   }

@@ -5,12 +5,22 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.world.data.EntityPredicate;
 import iskallia.vault.event.ActiveFlags;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.init.ModEffects;
+import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
+import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
+import iskallia.vault.skill.ability.effect.spi.AbstractJavelinAbility;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.talent.type.EntityFilterTalent;
 import iskallia.vault.skill.talent.type.JavelinConductTalent;
+import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.skill.tree.TalentTree;
+import iskallia.vault.snapshot.AttributeSnapshot;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.damage.AttackScaleHelper;
 import iskallia.vault.util.damage.CritHelper;
+import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
@@ -76,10 +86,34 @@ public class EffectOnHitTalent extends EntityFilterTalent {
                         if (event.getSource().getEntity() instanceof ServerPlayer player) {
                            if (hasConduct || !CritHelper.getCrit(player)) {
                               TalentTree talents = PlayerTalentsData.get(player.getLevel()).getTalents(player);
+                              AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
                               if (hasConduct || !(AttackScaleHelper.getLastAttackScale(player) < 1.0F)) {
                                  for (EffectOnHitTalent talent : talents.getAll(EffectOnHitTalent.class, Skill::isUnlocked)) {
                                     if (talent.isValid(event.getEntity())) {
-                                       if (player.getLevel().getRandom().nextFloat() >= talent.probability) {
+                                       int chances = 1;
+                                       if (hasConduct && talent.toEffect().getEffect() == ModEffects.GLACIAL_SHATTER) {
+                                          for (AbstractJavelinAbility javelinAbility : abilities.getAll(AbstractJavelinAbility.class, Skill::isUnlocked)) {
+                                             if (javelinAbility instanceof JavelinScatterAbility scatterAbility) {
+                                                chances = scatterAbility.getPiercing() * scatterAbility.getNumberOfJavelins();
+                                             }
+
+                                             if (javelinAbility instanceof JavelinPiercingAbility piercingAbility) {
+                                                chances = piercingAbility.getPiercing();
+                                             }
+                                          }
+                                       }
+
+                                       if (ActiveFlags.IS_CHAINING_ATTACKING.isSet()) {
+                                          AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(player);
+                                          chances = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_CHAIN, VaultGearAttributeTypeMerger.intSum());
+                                          if (player.getLevel().getRandom().nextFloat() >= talent.probability / Math.max(1.0F, chances / 2.0F)) {
+                                             return;
+                                          }
+
+                                          event.getEntityLiving().addEffect(talent.toEffect());
+                                       }
+
+                                       if (player.getLevel().getRandom().nextFloat() >= talent.probability / Math.max(1, chances / 2)) {
                                           return;
                                        }
 

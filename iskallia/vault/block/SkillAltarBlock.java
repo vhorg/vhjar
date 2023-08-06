@@ -103,16 +103,16 @@ public class SkillAltarBlock extends Block implements EntityBlock {
    }
 
    private static void openGui(BlockPos pos, ServerPlayer player) {
-      openGui(pos, player, 0);
+      openGui(pos, player, 0, true);
    }
 
-   public static void openGui(BlockPos pos, ServerPlayer player, int templateIndex) {
+   public static void openGui(BlockPos pos, ServerPlayer player, int templateIndex, boolean defaultGui) {
       player.getLevel()
          .getBlockEntity(pos, ModBlocks.SKILL_ALTAR_TILE_ENTITY)
-         .ifPresent(skillAltar -> openGui(pos, player, templateIndex, skillAltar.getOwnerId()));
+         .ifPresent(skillAltar -> openGui(pos, player, templateIndex, skillAltar.getOwnerId(), defaultGui));
    }
 
-   private static void openGui(BlockPos pos, ServerPlayer player, int templateIndex, UUID ownerId) {
+   private static void openGui(BlockPos pos, ServerPlayer player, int templateIndex, UUID ownerId, boolean defaultGui) {
       SkillAltarData skillAltarData = SkillAltarData.get((ServerLevel)player.level);
       List<SkillAltarData.SkillIcon> skillIcons = skillAltarData.getSkillTemplates(ownerId)
          .values()
@@ -120,7 +120,7 @@ public class SkillAltarBlock extends Block implements EntityBlock {
          .map(SkillAltarData.SkillTemplate::getIcon)
          .toList();
       SkillAltarData.SkillTemplate template = skillAltarData.getSkillTemplate(ownerId, templateIndex);
-      networkOpenGui(pos, player, templateIndex, skillIcons, template);
+      networkOpenGui(pos, player, templateIndex, skillIcons, template, defaultGui);
    }
 
    private static void networkOpenGui(
@@ -128,21 +128,28 @@ public class SkillAltarBlock extends Block implements EntityBlock {
       ServerPlayer player,
       final int templateIndex,
       final List<SkillAltarData.SkillIcon> skillIcons,
-      final SkillAltarData.SkillTemplate template
+      final SkillAltarData.SkillTemplate template,
+      final boolean defaultGui
    ) {
-      NetworkHooks.openGui(player, new MenuProvider() {
-         public Component getDisplayName() {
-            return ModBlocks.SKILL_ALTAR.getName();
-         }
+      NetworkHooks.openGui(
+         player,
+         new MenuProvider() {
+            public Component getDisplayName() {
+               return ModBlocks.SKILL_ALTAR.getName();
+            }
 
-         public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player playerx) {
-            return new SkillAltarContainer(windowId, inventory, pos, template, templateIndex, skillIcons);
+            public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player playerx) {
+               return (AbstractContainerMenu)(defaultGui
+                  ? new SkillAltarContainer.Default(windowId, inventory, pos, template, templateIndex, skillIcons)
+                  : new SkillAltarContainer.Import(windowId, inventory, pos, template, templateIndex, skillIcons));
+            }
+         },
+         buffer -> {
+            buffer.writeBlockPos(pos);
+            SkillAltarData.SkillTemplate.writeTo(template, buffer);
+            buffer.writeInt(templateIndex);
+            buffer.writeCollection(skillIcons, (b, icon) -> icon.writeTo(b));
          }
-      }, buffer -> {
-         buffer.writeBlockPos(pos);
-         SkillAltarData.SkillTemplate.writeTo(template, buffer);
-         buffer.writeInt(templateIndex);
-         buffer.writeCollection(skillIcons, (b, icon) -> icon.writeTo(b));
-      });
+      );
    }
 }

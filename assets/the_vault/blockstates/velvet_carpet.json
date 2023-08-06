@@ -1,0 +1,1581 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "AND": [
+          {
+            "north": "!north",
+            "south": "!south",
+            "east": "false",
+            "west": "false"
+          },
+          {
+            "north": "!north_and_north_west",
+            "south": "!south_and_south_west",
+            "east": "false",
+            "west": "false"
+          },
+          {
+            "north": "!north_and_north_east",
+            "south": "!south_and_south_east",
+            "east": "false",
+            "west": "false"
+          },
+          {
+            "north": "!all",
+            "south": "!all",
+            "east": "false",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet0"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "AND": [
+              {
+                "north": "north",
+                "south": "!south",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north",
+                "south": "!south_and_south_west",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north",
+                "south": "!south_and_south_east",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north",
+                "south": "!all",
+                "east": "false",
+                "west": "false"
+              }
+            ]
+          },{
+            "AND": [
+              {
+                "north": "north_and_north_east",
+                "south": "!south",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north_and_north_east",
+                "south": "!south_and_south_west",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north_and_north_east",
+                "south": "!south_and_south_east",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north_and_north_east",
+                "south": "!all",
+                "east": "false",
+                "west": "false"
+              }
+            ]
+          },{
+            "AND": [
+              {
+                "north": "north_and_north_west",
+                "south": "!south",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north_and_north_west",
+                "south": "!south_and_south_west",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north_and_north_west",
+                "south": "!south_and_south_east",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "north_and_north_west",
+                "south": "!all",
+                "east": "false",
+                "west": "false"
+              }
+            ]
+          },{
+            "AND": [
+              {
+                "north": "all",
+                "south": "!south",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "all",
+                "south": "!south_and_south_west",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "all",
+                "south": "!south_and_south_east",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "all",
+                "south": "!all",
+                "east": "false",
+                "west": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet1"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "AND": [
+              {
+                "north": "!north",
+                "south": "south",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!north_and_north_west",
+                "south": "south",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!north_and_north_east",
+                "south": "south",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!all",
+                "south": "south",
+                "east": "false",
+                "west": "false"
+              }
+            ]
+          },
+          {
+            "AND": [
+              {
+                "north": "!north",
+                "south": "south_and_south_east",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!north_and_north_west",
+                "south": "south_and_south_east",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!north_and_north_east",
+                "south": "south_and_south_east",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!all",
+                "south": "south_and_south_east",
+                "east": "false",
+                "west": "false"
+              }
+            ]
+          },
+          {
+            "AND": [
+              {
+                "north": "!north",
+                "south": "south_and_south_west",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!north_and_north_west",
+                "south": "south_and_south_west",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!north_and_north_east",
+                "south": "south_and_south_west",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!all",
+                "south": "south_and_south_west",
+                "east": "false",
+                "west": "false"
+              }
+            ]
+          },
+          {
+            "AND": [
+              {
+                "north": "!north",
+                "south": "all",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!north_and_north_west",
+                "south": "all",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!north_and_north_east",
+                "south": "all",
+                "east": "false",
+                "west": "false"
+              },
+              {
+                "north": "!all",
+                "south": "all",
+                "east": "false",
+                "west": "false"
+              }
+            ]
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet2"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "north": "!north_east_and_north_west",
+            "south": "!south_east_and_south_west",
+            "east": "false",
+            "west": "false"
+          },
+          {
+            "north": "!north_east",
+            "south": "!south_east",
+            "east": "false",
+            "west": "false"
+          },
+          {
+            "north": "!north_west",
+            "south": "!south_west",
+            "east": "false",
+            "west": "false"
+          },
+          {
+            "north": "!none",
+            "south": "!none",
+            "east": "false",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet3"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "none",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "none",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "none",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "none",
+            "south": "south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "none",
+            "south": "south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "south_east",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet4"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "north",
+            "south": "none",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "none",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north",
+            "south": "south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north",
+            "south": "south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north",
+            "south": "south_east_and_south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_east_and_south_west",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet5"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "south",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "none",
+            "south": "south_and_south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "south",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "south_and_south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "south",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "south_and_south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east_and_north_west",
+            "south": "south",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east_and_north_west",
+            "south": "south_and_south_east",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet6"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "north",
+            "south": "south",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north",
+            "south": "south_and_south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_and_south_east",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet7"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "all",
+            "south": "none",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "none",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "all",
+            "south": "south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "all",
+            "south": "south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_east",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet8"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "all",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "none",
+            "south": "south_and_south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "all",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "south_and_south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "all",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "south_and_south_west",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet9"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "none",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east",
+            "south": "none",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_west",
+            "south": "none",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "none",
+            "south": "south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "none",
+            "south": "south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east",
+            "south": "south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_west",
+            "south": "south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_west",
+            "south": "south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east",
+            "south": "south_west",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet10"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "north",
+            "south": "none",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "none",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north",
+            "south": "south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north",
+            "south": "south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north",
+            "south": "south_east_and_south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_east_and_south_west",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet11"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "south",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "none",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east",
+            "south": "south",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_west",
+            "south": "south",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_west",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east_and_north_west",
+            "south": "south",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east_and_north_west",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet12"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "north",
+            "south": "south",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet13"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "all",
+            "south": "none",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "none",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "all",
+            "south": "south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "all",
+            "south": "south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_west",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet14"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "all",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "none",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east",
+            "south": "all",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_east",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_west",
+            "south": "all",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_west",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet15"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "north": "!north_and_north_west",
+            "south": "!south_and_south_west",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "!north_and_north_east",
+            "south": "!south_and_south_east",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "!north",
+            "south": "!south",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "!all",
+            "south": "!all",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet16"
+      }
+    },
+    {
+      "when": {
+        "AND": [
+          {
+            "north": "north",
+            "south": "!south",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north",
+            "south": "!south_and_south_west",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north",
+            "south": "!south_and_south_east",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north",
+            "south": "!all",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet17"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "south",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "south",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "south",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_east_and_north_west",
+            "south": "south",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet18"
+      }
+    },
+    {
+      "when": {
+        "north": "north",
+        "south": "south",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet19"
+      }
+    },
+    {
+      "when": {
+        "north": "north_and_north_east",
+        "south": "south",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet20"
+      }
+    },
+    {
+      "when": {
+        "north": "north_and_north_west",
+        "south": "south",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet21"
+      }
+    },
+    {
+      "when": {
+        "north": "all",
+        "south": "south",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet22"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "north",
+            "south": "south_and_south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_and_south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north",
+            "south": "all",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "all",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet23"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "all",
+            "south": "south",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "all",
+            "south": "south_and_south_east",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_and_south_east",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet24"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "all",
+            "south": "all",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "all",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "all",
+            "south": "south_and_south_west",
+            "east": "false",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_and_south_west",
+            "east": "false",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet25"
+      }
+    },
+    {
+      "when": {
+        "north": "north",
+        "south": "south_and_south_west",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet26"
+      }
+    },
+    {
+      "when": {
+        "north": "north_and_north_east",
+        "south": "south_and_south_west",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet27"
+      }
+    },
+    {
+      "when": {
+        "north": "north_and_north_west",
+        "south": "south_and_south_west",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet28"
+      }
+    },
+    {
+      "when": {
+        "north": "all",
+        "south": "south_and_south_west",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet29"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "north",
+            "south": "all",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "all",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet30"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "all",
+            "south": "south",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "all",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet31"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "all",
+            "south": "all",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "all",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "all",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "false"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet32"
+      }
+    },
+    {
+      "when": {
+        "north": "north",
+        "south": "south_and_south_east",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet33"
+      }
+    },
+    {
+      "when": {
+        "north": "north_and_north_east",
+        "south": "south_and_south_east",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet34"
+      }
+    },
+    {
+      "when": {
+        "north": "north_and_north_west",
+        "south": "south_and_south_east",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet35"
+      }
+    },
+    {
+      "when": {
+        "north": "all",
+        "south": "south_and_south_east",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet36"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "north_and_north_west",
+            "south": "none",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_east",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_west",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_west",
+            "south": "south_east_and_south_west",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet37"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "north_and_north_east",
+            "south": "none",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_east",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_west",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_and_north_east",
+            "south": "south_east_and_south_west",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet38"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "all",
+            "south": "none",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "all",
+            "south": "south_east",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "all",
+            "south": "south_west",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "all",
+            "south": "south_east_and_south_west",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet39"
+      }
+    },
+    {
+      "when": {
+        "north": "north",
+        "south": "all",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet40"
+      }
+    },
+    {
+      "when": {
+        "north": "north_and_north_east",
+        "south": "all",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet41"
+      }
+    },
+    {
+      "when": {
+        "north": "north_and_north_west",
+        "south": "all",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet42"
+      }
+    },
+    {
+      "when": {
+        "north": "all",
+        "south": "all",
+        "east": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet43"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_east_and_north_west",
+            "south": "south_and_south_west",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet44"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_east_and_north_west",
+            "south": "south_and_south_east",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet45"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "north": "none",
+            "south": "all",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_east",
+            "south": "all",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_west",
+            "south": "all",
+            "east": "true",
+            "west": "true"
+          },
+          {
+            "north": "north_east_and_north_west",
+            "south": "all",
+            "east": "true",
+            "west": "true"
+          }
+        ]
+      },
+      "apply": {
+        "model": "the_vault:block/velvet_carpet/velvet_carpet46"
+      }
+    }
+
+  ]
+}

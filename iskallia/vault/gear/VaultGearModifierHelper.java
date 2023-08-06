@@ -482,8 +482,7 @@ public class VaultGearModifierHelper {
                      affixType, itemLevel, random, data.getExistingModifierGroups(VaultGearData.Type.EXPLICIT_MODIFIERS)
                   )
                   .orElse(null);
-               if (modifier != null) {
-                  data.addModifier(affixType, modifier);
+               if (modifier != null && data.addModifier(affixType, modifier)) {
                   if (affixType == VaultGearModifier.AffixType.PREFIX) {
                      prefixCount++;
                   } else {
@@ -530,8 +529,7 @@ public class VaultGearModifierHelper {
                      type, itemLevel, random, data.getExistingModifierGroups(VaultGearData.Type.EXPLICIT_MODIFIERS)
                   )
                   .orElse(null);
-               if (modifier != null) {
-                  data.addModifier(type, modifier);
+               if (modifier != null && data.addModifier(type, modifier)) {
                   if (type == VaultGearModifier.AffixType.PREFIX) {
                      rolledPrefixes++;
                   } else {

@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:ornate_bricks_cracked"
+  },
+  "result": "the_vault:ornate_block",
+  "count": 1
+}

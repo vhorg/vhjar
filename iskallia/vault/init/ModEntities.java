@@ -15,6 +15,7 @@ import iskallia.vault.entity.entity.ElixirOrbEntity;
 import iskallia.vault.entity.entity.EtchingVendorEntity;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.entity.EternalSpiritEntity;
+import iskallia.vault.entity.entity.FallingSootEntity;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.FloatingGodAltarItemEntity;
 import iskallia.vault.entity.entity.FloatingItemEntity;
@@ -366,6 +367,7 @@ public class ModEntities {
    public static EntityType<VaultStormEntity> STORM;
    public static EntityType<VaultStormEntity.SmiteBolt> THUNDERSTORM_BOLT;
    public static EntityType<VaultBlizzardShard> BLIZZARD_SHARD;
+   public static EntityType<FallingSootEntity> FALLING_SOOT;
    private static final Map<EntityType<? extends LivingEntity>, Supplier<net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder>> ATTRIBUTE_BUILDERS = new HashMap<>();
 
    public static void register(Register<EntityType<?>> event) {
@@ -1084,6 +1086,9 @@ public class ModEntities {
       );
       SPEAR = register(
          "spear", Builder.of(ChampionGoal.ThrowableSpear::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10), event
+      );
+      FALLING_SOOT = register(
+         "falling_soot", Builder.of(FallingSootEntity::new, MobCategory.MISC).sized(0.98F, 0.98F).clientTrackingRange(10).updateInterval(20), event
       );
    }
 

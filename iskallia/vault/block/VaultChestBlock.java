@@ -21,6 +21,7 @@ import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ChestBlock;
@@ -35,6 +36,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class VaultChestBlock extends ChestBlock {
@@ -60,7 +62,11 @@ public class VaultChestBlock extends ChestBlock {
    }
 
    public boolean hasStepBreaking() {
-      return this == ModBlocks.GILDED_CHEST || this == ModBlocks.LIVING_CHEST || this == ModBlocks.ORNATE_CHEST;
+      return this == ModBlocks.GILDED_CHEST
+         || this == ModBlocks.LIVING_CHEST
+         || this == ModBlocks.ORNATE_CHEST
+         || this == ModBlocks.FLESH_CHEST
+         || this == ModBlocks.ENIGMA_CHEST;
    }
 
    public boolean isStrongbox() {
@@ -108,6 +114,10 @@ public class VaultChestBlock extends ChestBlock {
       }
    }
 
+   public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
+      return false;
+   }
+
    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
       return new VaultChestTileEntity(pPos, pState);
    }
@@ -124,6 +134,9 @@ public class VaultChestBlock extends ChestBlock {
                || state.getBlock() == ModBlocks.GILDED_CHEST_PLACEABLE
                || state.getBlock() == ModBlocks.LIVING_CHEST_PLACEABLE
                || state.getBlock() == ModBlocks.ORNATE_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.HARDENED_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.FLESH_CHEST_PLACEABLE
+               || state.getBlock() == ModBlocks.ENIGMA_CHEST_PLACEABLE
                || state.getBlock() == ModBlocks.TREASURE_CHEST_PLACEABLE
                || state.getBlock() == ModBlocks.WOODEN_CHEST_PLACEABLE
                || state.getBlock() == ModBlocks.ORNATE_STRONGBOX

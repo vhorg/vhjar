@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:ancient_copper_block"
+  },
+  "result": "the_vault:ancient_copper_block_exposed",
+  "count": 1
+}

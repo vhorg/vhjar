@@ -93,6 +93,9 @@ public class ClassicLootLogic extends LootLogic {
          || data.getState().getBlock() == ModBlocks.GILDED_CHEST
          || data.getState().getBlock() == ModBlocks.LIVING_CHEST
          || data.getState().getBlock() == ModBlocks.ORNATE_CHEST
+         || data.getState().getBlock() == ModBlocks.HARDENED_CHEST
+         || data.getState().getBlock() == ModBlocks.FLESH_CHEST
+         || data.getState().getBlock() == ModBlocks.ENIGMA_CHEST
          || data.getState().getBlock() == ModBlocks.GILDED_STRONGBOX
          || data.getState().getBlock() == ModBlocks.ORNATE_STRONGBOX
          || data.getState().getBlock() == ModBlocks.LIVING_STRONGBOX;

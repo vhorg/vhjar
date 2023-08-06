@@ -76,6 +76,8 @@ public class BonkLuckyStrikeAbility extends AbstractBonkAbility {
                      count += CHAMPION_COUNT;
                   } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("dungeon"), livingEntity)) {
                      count += DUNGEON_COUNT;
+                  } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("guardian"), livingEntity)) {
+                     count += GUARDIAN_COUNT;
                   } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("tank"), livingEntity)) {
                      count += TANK_COUNT;
                   } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("assassin"), livingEntity)) {

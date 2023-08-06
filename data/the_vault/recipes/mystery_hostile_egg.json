@@ -1,16 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "ses",
-    "eme",
-    "ses"
+    "svs",
+    "dmd",
+    "svs"
   ],
   "key": {
     "m": {
       "item": "the_vault:mystery_egg"
     },
-    "e": {
-      "item": "the_vault:eternal_soul"
+    "d": {
+      "item": "the_vault:vault_diamond"
+    },
+    "v": {
+      "item": "the_vault:vault_meat"
     },
     "s": {
       "item": "the_vault:vault_essence"

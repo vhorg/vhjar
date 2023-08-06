@@ -490,6 +490,62 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_SKILL_ALTAR_LOAD_TEXTURES = new ButtonElement.ButtonTextures(
       SKILL_ALTAR_LOAD, SKILL_ALTAR_LOAD_HOVER, SKILL_ALTAR_LOAD_PRESSED, SKILL_ALTAR_LOAD_DISABLED
    );
+   public static final TextureAtlasRegion SKILL_ALTAR_SHARE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_share")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_SHARE_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_share_hover")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_SHARE_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_share_pressed")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_SHARE_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_share_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_SKILL_ALTAR_SHARE_TEXTURES = new ButtonElement.ButtonTextures(
+      SKILL_ALTAR_SHARE, SKILL_ALTAR_SHARE_HOVER, SKILL_ALTAR_SHARE_PRESSED, SKILL_ALTAR_SHARE_DISABLED
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_COPY = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_copy"));
+   public static final TextureAtlasRegion SKILL_ALTAR_COPY_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_copy_hover")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_COPY_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_copy_pressed")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_COPY_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_copy_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_SKILL_ALTAR_COPY_TEXTURES = new ButtonElement.ButtonTextures(
+      SKILL_ALTAR_COPY, SKILL_ALTAR_COPY_HOVER, SKILL_ALTAR_COPY_PRESSED, SKILL_ALTAR_COPY_DISABLED
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_IMPORT = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_import")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_IMPORT_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_import_hover")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_IMPORT_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_import_pressed")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_IMPORT_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_import_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_SKILL_ALTAR_IMPORT_TEXTURES = new ButtonElement.ButtonTextures(
+      SKILL_ALTAR_IMPORT, SKILL_ALTAR_IMPORT_HOVER, SKILL_ALTAR_IMPORT_PRESSED, SKILL_ALTAR_IMPORT_DISABLED
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_BACK = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_back"));
+   public static final TextureAtlasRegion SKILL_ALTAR_BACK_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_back_hover")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_BACK_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_back_pressed")
+   );
+   public static final TextureAtlasRegion SKILL_ALTAR_BACK_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/button_back_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_SKILL_ALTAR_BACK_TEXTURES = new ButtonElement.ButtonTextures(
+      SKILL_ALTAR_BACK, SKILL_ALTAR_BACK_HOVER, SKILL_ALTAR_BACK_PRESSED, SKILL_ALTAR_BACK_DISABLED
+   );
    public static final TextureAtlasRegion BUTTON_QUEST = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_quest"));
    public static final TextureAtlasRegion BUTTON_QUEST_DISABLED = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_quest_disabled")

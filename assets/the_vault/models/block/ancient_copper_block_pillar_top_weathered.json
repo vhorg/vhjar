@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "the_vault:block/ancient_copper_pillar_top_weathered",
+    "side": "the_vault:block/ancient_copper_pillar_above_weathered"
+  }
+}

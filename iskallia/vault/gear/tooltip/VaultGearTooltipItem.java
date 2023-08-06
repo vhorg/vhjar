@@ -1,5 +1,7 @@
 package iskallia.vault.gear.tooltip;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import iskallia.vault.client.gui.overlay.VaultBarOverlay;
 import iskallia.vault.config.EtchingConfig;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import iskallia.vault.etching.EtchingSet;
@@ -18,11 +20,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
 public interface VaultGearTooltipItem {
@@ -30,6 +35,8 @@ public interface VaultGearTooltipItem {
       if (!ModConfigs.isInitialized()) {
          return Collections.emptyList();
       } else {
+         long window = Minecraft.getInstance().getWindow().getWindow();
+         boolean shiftDown = InputConstants.isKeyDown(window, 340) || InputConstants.isKeyDown(window, 344);
          VaultGearData data = VaultGearData.read(stack);
          List<Component> tooltip = new ArrayList<>();
          VaultGearState state = data.getState();
@@ -46,20 +53,30 @@ public interface VaultGearTooltipItem {
                );
          }
 
-         this.addTooltipRarity(data, stack, tooltip, state);
+         if (shiftDown || state == VaultGearState.UNIDENTIFIED) {
+            this.addTooltipRarity(data, stack, tooltip, state);
+         }
+
          if (state == VaultGearState.IDENTIFIED) {
             if (flag.displayBase()) {
-               this.addTooltipGearModel(data, stack, tooltip);
+               this.addTooltipEtchingSet(tooltip, data);
             }
 
-            if (flag.displayBase()) {
-               this.addTooltipEtchingSet(tooltip, data);
+            if (stack.getItem() instanceof VaultGearItem gearItem) {
+               EquipmentSlot slot = gearItem.getIntendedSlot(stack);
+               if (slot != null) {
+                  this.addSlotTooltip(tooltip, slot);
+               }
             }
 
             int usedRepairs = data.getUsedRepairSlots();
             int totalRepairs = data.getRepairSlots();
             this.addRepairTooltip(tooltip, usedRepairs, totalRepairs);
             this.addTooltipDurability(tooltip, stack);
+            if (shiftDown && flag.displayBase()) {
+               this.addTooltipGearModel(data, stack, tooltip);
+            }
+
             List<VaultGearModifier<?>> implicits = data.getModifiers(VaultGearModifier.AffixType.IMPLICIT);
             if (!implicits.isEmpty()) {
                this.addTooltipAffixGroup(data, VaultGearModifier.AffixType.IMPLICIT, stack, tooltip, flag.displayModifierDetail());
@@ -125,6 +142,12 @@ public interface VaultGearTooltipItem {
       }
    }
 
+   default void addSlotTooltip(List<Component> tooltip, EquipmentSlot slot) {
+      tooltip.add(
+         new TextComponent("Slot: ").append(new TranslatableComponent("the_vault.equipment." + slot.getName()).withStyle(Style.EMPTY.withColor(14869130)))
+      );
+   }
+
    default void addTooltipEtchingSet(List<Component> tooltip, VaultGearData data) {
       data.getFirstValue(ModGearAttributes.ETCHING).ifPresent(etchingSet -> {
          EtchingConfig.Etching etchingConfig = ModConfigs.ETCHING.getEtchingConfig((EtchingSet<?>)etchingSet);
@@ -175,7 +198,15 @@ public interface VaultGearTooltipItem {
    }
 
    default void addTooltipItemLevel(VaultGearData data, ItemStack stack, List<Component> tooltip, VaultGearState state) {
-      tooltip.add(new TextComponent("Level: ").append(new TextComponent(data.getItemLevel() + "").setStyle(Style.EMPTY.withColor(11583738))));
+      if (VaultBarOverlay.vaultLevel >= data.getItemLevel()) {
+         tooltip.add(new TextComponent("Level: ").append(new TextComponent(data.getItemLevel() + "").setStyle(Style.EMPTY.withColor(11583738))));
+      } else {
+         tooltip.add(
+            new TextComponent("Requires Level: ")
+               .withStyle(ChatFormatting.RED)
+               .append(new TextComponent(data.getItemLevel() + "").withStyle(ChatFormatting.RED))
+         );
+      }
    }
 
    default void addTooltipCraftingPotential(VaultGearData data, ItemStack stack, List<Component> tooltip, VaultGearState state) {

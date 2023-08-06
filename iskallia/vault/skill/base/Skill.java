@@ -33,6 +33,7 @@ import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
 import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
 import iskallia.vault.skill.ability.effect.JavelinSightAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldAbility;
+import iskallia.vault.skill.ability.effect.ManaShieldImplodeAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldRetributionAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpBreakDownAbility;
@@ -313,6 +314,7 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("empower_slowness_aura", EmpowerSlownessAuraAbility.class, EmpowerSlownessAuraAbility::new);
          this.register("mana_shield", ManaShieldAbility.class, ManaShieldAbility::new);
          this.register("mana_shield_retribution", ManaShieldRetributionAbility.class, ManaShieldRetributionAbility::new);
+         this.register("mana_shield_implode", ManaShieldImplodeAbility.class, ManaShieldImplodeAbility::new);
          this.register("rampage_damage", RampageAbility.class, RampageAbility::new);
          this.register("rampage_chain", RampageChainAbility.class, RampageChainAbility::new);
          this.register("rampage_leech", RampageLeechAbility.class, RampageLeechAbility::new);

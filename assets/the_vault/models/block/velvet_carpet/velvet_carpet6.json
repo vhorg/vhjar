@@ -1,0 +1,39 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"ambientocclusion": false,
+	"texture_size": [32, 32],
+	"textures": {
+		"5": "the_vault:block/velvet_carpet_connected",
+		"particle": "the_vault:block/velvet"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 1, 16],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 14, 8]},
+			"faces": {
+				"north": {"uv": [4, 2, 6, 2.125], "rotation": 180, "texture": "#5"},
+				"east": {"uv": [5.875, 2, 6, 4], "rotation": 90, "texture": "#5"},
+				"south": {"uv": [4, 3.875, 6, 4], "texture": "#5"},
+				"west": {"uv": [4, 2, 4.125, 4], "rotation": 270, "texture": "#5"},
+				"up": {"uv": [6, 4, 4, 2], "rotation": 180, "texture": "#5"},
+				"down": {"uv": [6, 2, 4, 4], "rotation": 180, "texture": "#5"}
+			}
+		}
+	],
+	"display": {
+		"firstperson_righthand": {
+			"rotation": [0, 135, 0],
+			"scale": [0.4, 0.4, 0.4]
+		}
+	},
+	"groups": [
+		{
+			"name": "VoxelShapes",
+			"origin": [10, -5, 0],
+			"color": 0,
+			"children": [0]
+		}
+	]
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "vvv",
+    "www"
+  ],
+  "key": {
+    "v": {
+      "item": "the_vault:velvet_block"
+    },
+    "w": {
+      "item": "the_vault:wooden_planks"
+    }
+  },
+  "result": {
+    "item": "the_vault:velvet_bed",
+    "count": 1
+  }
+}

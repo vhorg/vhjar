@@ -34,8 +34,8 @@ public class VaultGearAttributeInstance<T> {
       return this.attribute;
    }
 
-   protected boolean isValid() {
-      return this.value != null;
+   public boolean isValid() {
+      return this.value != null && this.getAttribute().getType().isValid(this.value);
    }
 
    @Nonnull

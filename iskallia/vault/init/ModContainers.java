@@ -90,7 +90,8 @@ public class ModContainers {
    public static MenuType<ModifierWorkbenchContainer> MODIFIER_WORKBENCH_CONTAINER;
    public static MenuType<AlchemyTableContainer> ALCHEMY_TABLE_CONTAINER;
    public static MenuType<VaultEnchanterContainer> VAULT_ENCHANTER_CONTAINER;
-   public static MenuType<SkillAltarContainer> SKILL_ALTAR_CONTAINER;
+   public static MenuType<SkillAltarContainer.Default> SKILL_ALTAR_CONTAINER;
+   public static MenuType<SkillAltarContainer.Import> SKILL_ALTAR_IMPORT_CONTAINER;
 
    public static void register(Register<MenuType<?>> event) {
       STATISTICS_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
@@ -232,7 +233,14 @@ public class ModContainers {
          SkillAltarData.SkillTemplate template = SkillAltarData.SkillTemplate.readFrom(buffer);
          int templateIndex = buffer.readInt();
          List<SkillAltarData.SkillIcon> skillIcons = (List<SkillAltarData.SkillIcon>)buffer.readCollection(ArrayList::new, SkillAltarData.SkillIcon::readFrom);
-         return new SkillAltarContainer(windowId, inventory, blockPos, template, templateIndex, skillIcons);
+         return new SkillAltarContainer.Default(windowId, inventory, blockPos, template, templateIndex, skillIcons);
+      });
+      SKILL_ALTAR_IMPORT_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         BlockPos blockPos = buffer.readBlockPos();
+         SkillAltarData.SkillTemplate template = SkillAltarData.SkillTemplate.readFrom(buffer);
+         int templateIndex = buffer.readInt();
+         List<SkillAltarData.SkillIcon> skillIcons = (List<SkillAltarData.SkillIcon>)buffer.readCollection(ArrayList::new, SkillAltarData.SkillIcon::readFrom);
+         return new SkillAltarContainer.Import(windowId, inventory, blockPos, template, templateIndex, skillIcons);
       });
       BOUNTY_CONTAINER = IForgeMenuType.create((windowId, inv, data) -> {
          CompoundTag tag = data.readNbt();
@@ -298,7 +306,8 @@ public class ModContainers {
                (MenuType)MODIFIER_WORKBENCH_CONTAINER.setRegistryName("modifier_workbench_container"),
                (MenuType)ALCHEMY_TABLE_CONTAINER.setRegistryName("alchemy_table_container"),
                (MenuType)VAULT_ENCHANTER_CONTAINER.setRegistryName("vault_enchanter_container"),
-               (MenuType)SKILL_ALTAR_CONTAINER.setRegistryName("skill_altar_container")
+               (MenuType)SKILL_ALTAR_CONTAINER.setRegistryName("skill_altar_container"),
+               (MenuType)SKILL_ALTAR_IMPORT_CONTAINER.setRegistryName("skill_altar_import_container")
             }
          );
    }

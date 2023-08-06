@@ -12,6 +12,7 @@ import iskallia.vault.entity.renderer.ElixirOrbRenderer;
 import iskallia.vault.entity.renderer.EtchingVendorRenderer;
 import iskallia.vault.entity.renderer.EternalRenderer;
 import iskallia.vault.entity.renderer.EternalSpiritRenderer;
+import iskallia.vault.entity.renderer.FallingSootRenderer;
 import iskallia.vault.entity.renderer.FighterRenderer;
 import iskallia.vault.entity.renderer.FireballRenderer;
 import iskallia.vault.entity.renderer.MonsterEyeRenderer;
@@ -303,5 +304,6 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.STORM, StormRenderer::new);
       EntityRenderers.register(ModEntities.THUNDERSTORM_BOLT, VaultStormEntity.SmiteBoltRenderer::new);
       EntityRenderers.register(ModEntities.BLIZZARD_SHARD, BlizzardShardRenderer::new);
+      EntityRenderers.register(ModEntities.FALLING_SOOT, FallingSootRenderer::new);
    }
 }
