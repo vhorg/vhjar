@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "wv",
+    "vw"
+  ],
+  "key": {
+    "w": {
+      "item": "the_vault:ornate_ingot"
+    },
+    "v": {
+      "item": "the_vault:velvet"
+    }
+  },
+  "result": {
+    "item": "the_vault:ornate_block_velvet"
+  }
+}

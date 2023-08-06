@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:vault_stone_bricks"
+  },
+  "result": "the_vault:vault_stone_brick_stairs",
+  "count": 1
+}

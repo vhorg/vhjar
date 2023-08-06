@@ -58,12 +58,12 @@
     "iskallia/vault/mixin/AnvilBlockMixin": {
       "damage": "Lnet/minecraft/world/level/block/AnvilBlock;m_48824_(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/state/BlockState;"
     },
-    "iskallia/vault/mixin/MixinBossOverlayGui": {
-      "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
-    },
     "iskallia/vault/mixin/MixinPickarang": {
       "Lnet/minecraft/world/level/block/state/BlockState;getDestroySpeed(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F": "Lnet/minecraft/world/level/block/state/BlockState;m_60800_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
       "onHit": "Lvazkii/quark/content/tools/entity/Pickarang;m_6532_(Lnet/minecraft/world/phys/HitResult;)V"
+    },
+    "iskallia/vault/mixin/MixinBossOverlayGui": {
+      "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
     },
     "iskallia/vault/mixin/MixinItemPickupParticle": {
       "render": "Lnet/minecraft/client/particle/ItemPickupParticle;m_5744_(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"
@@ -164,11 +164,11 @@
     "iskallia/vault/mixin/MixinSlot": {
       "mayPickup": "Lnet/minecraft/world/inventory/Slot;m_8010_(Lnet/minecraft/world/entity/player/Player;)Z"
     },
-    "iskallia/vault/mixin/MixinCapeLayer": {
-      "render": "Lnet/minecraft/client/renderer/entity/layers/CapeLayer;m_6494_(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V"
-    },
     "iskallia/vault/mixin/MixinBlockItem": {
       "canPlace": "Lnet/minecraft/world/item/BlockItem;m_40610_(Lnet/minecraft/world/item/context/BlockPlaceContext;Lnet/minecraft/world/level/block/state/BlockState;)Z"
+    },
+    "iskallia/vault/mixin/MixinCapeLayer": {
+      "render": "Lnet/minecraft/client/renderer/entity/layers/CapeLayer;m_6494_(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V"
     },
     "iskallia/vault/mixin/AccessorServerChunkCache": {
       "mainThread": "f_8330_:Ljava/lang/Thread;"
@@ -312,11 +312,11 @@
       "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z": "Lnet/minecraft/world/level/GameRules;m_46207_(Lnet/minecraft/world/level/GameRules$Key;)Z",
       "tick": "Lnet/minecraft/world/food/FoodData;m_38710_(Lnet/minecraft/world/entity/player/Player;)V"
     },
-    "iskallia/vault/mixin/MixinVirtualCraftingOutputSlot": {
-      "mayPickup": "Lmekanism/common/inventory/container/slot/VirtualCraftingOutputSlot;m_8010_(Lnet/minecraft/world/entity/player/Player;)Z"
-    },
     "iskallia/vault/mixin/MixinAccessibilityOptionsScreen": {
       "createFooter": "Lnet/minecraft/client/gui/screens/AccessibilityOptionsScreen;m_7853_()V"
+    },
+    "iskallia/vault/mixin/MixinVirtualCraftingOutputSlot": {
+      "mayPickup": "Lmekanism/common/inventory/container/slot/VirtualCraftingOutputSlot;m_8010_(Lnet/minecraft/world/entity/player/Player;)Z"
     },
     "iskallia/vault/mixin/MixinJigsawBlockEditScreen": {
       "init": "Lnet/minecraft/client/gui/screens/inventory/JigsawBlockEditScreen;m_7856_()V",
@@ -404,12 +404,12 @@
     "iskallia/vault/mixin/AccessorStructureTemplatePool": {
       "rawTemplates": "f_210559_:Ljava/util/List;"
     },
+    "iskallia/vault/mixin/MixinEnchantedBookItem": {
+      "appendHoverText": "Lnet/minecraft/world/item/EnchantedBookItem;m_7373_(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V"
+    },
     "iskallia/vault/mixin/MixinPiglinBruteAi": {
       "isNearestValidAttackTarget": "Lnet/minecraft/world/entity/monster/piglin/PiglinBruteAi;m_35088_(Lnet/minecraft/world/entity/monster/piglin/AbstractPiglin;Lnet/minecraft/world/entity/LivingEntity;)Z",
       "setAngerTarget": "Lnet/minecraft/world/entity/monster/piglin/PiglinBruteAi;m_149988_(Lnet/minecraft/world/entity/monster/piglin/PiglinBrute;Lnet/minecraft/world/entity/LivingEntity;)V"
-    },
-    "iskallia/vault/mixin/MixinEnchantedBookItem": {
-      "appendHoverText": "Lnet/minecraft/world/item/EnchantedBookItem;m_7373_(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V"
     },
     "iskallia/vault/mixin/MixinCrossbowItem": {
       "shootProjectile": "Lnet/minecraft/world/item/CrossbowItem;m_40894_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;FZFFF)V",
@@ -439,12 +439,12 @@
     "iskallia/vault/mixin/MixinExperienceOrb": {
       "playerTouch": "Lnet/minecraft/world/entity/ExperienceOrb;m_6123_(Lnet/minecraft/world/entity/player/Player;)V"
     },
+    "iskallia/vault/mixin/MixinModelPart": {
+      "translateAndRotate": "Lnet/minecraft/client/model/geom/ModelPart;m_104299_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
+    },
     "iskallia/vault/mixin/MixinCUpdateStructureBlockPacket": {
       "write": "Lnet/minecraft/network/protocol/game/ServerboundSetStructureBlockPacket;m_5779_(Lnet/minecraft/network/FriendlyByteBuf;)V",
       "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V": "Lnet/minecraft/network/protocol/game/ServerboundSetStructureBlockPacket;<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"
-    },
-    "iskallia/vault/mixin/MixinModelPart": {
-      "translateAndRotate": "Lnet/minecraft/client/model/geom/ModelPart;m_104299_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
     },
     "iskallia/vault/mixin/MixinSensor": {
       "isEntityAttackable": "Lnet/minecraft/world/entity/ai/sensing/Sensor;m_148312_(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/LivingEntity;)Z",
@@ -524,12 +524,12 @@
       "iskallia/vault/mixin/AnvilBlockMixin": {
         "damage": "Lnet/minecraft/world/level/block/AnvilBlock;m_48824_(Lnet/minecraft/world/level/block/state/BlockState;)Lnet/minecraft/world/level/block/state/BlockState;"
       },
-      "iskallia/vault/mixin/MixinBossOverlayGui": {
-        "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
-      },
       "iskallia/vault/mixin/MixinPickarang": {
         "Lnet/minecraft/world/level/block/state/BlockState;getDestroySpeed(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F": "Lnet/minecraft/world/level/block/state/BlockState;m_60800_(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)F",
         "onHit": "Lvazkii/quark/content/tools/entity/Pickarang;m_6532_(Lnet/minecraft/world/phys/HitResult;)V"
+      },
+      "iskallia/vault/mixin/MixinBossOverlayGui": {
+        "render": "Lnet/minecraft/client/gui/components/BossHealthOverlay;m_93704_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
       },
       "iskallia/vault/mixin/MixinItemPickupParticle": {
         "render": "Lnet/minecraft/client/particle/ItemPickupParticle;m_5744_(Lcom/mojang/blaze3d/vertex/VertexConsumer;Lnet/minecraft/client/Camera;F)V"
@@ -630,11 +630,11 @@
       "iskallia/vault/mixin/MixinSlot": {
         "mayPickup": "Lnet/minecraft/world/inventory/Slot;m_8010_(Lnet/minecraft/world/entity/player/Player;)Z"
       },
-      "iskallia/vault/mixin/MixinCapeLayer": {
-        "render": "Lnet/minecraft/client/renderer/entity/layers/CapeLayer;m_6494_(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V"
-      },
       "iskallia/vault/mixin/MixinBlockItem": {
         "canPlace": "Lnet/minecraft/world/item/BlockItem;m_40610_(Lnet/minecraft/world/item/context/BlockPlaceContext;Lnet/minecraft/world/level/block/state/BlockState;)Z"
+      },
+      "iskallia/vault/mixin/MixinCapeLayer": {
+        "render": "Lnet/minecraft/client/renderer/entity/layers/CapeLayer;m_6494_(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;FFFFFF)V"
       },
       "iskallia/vault/mixin/AccessorServerChunkCache": {
         "mainThread": "f_8330_:Ljava/lang/Thread;"
@@ -778,11 +778,11 @@
         "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z": "Lnet/minecraft/world/level/GameRules;m_46207_(Lnet/minecraft/world/level/GameRules$Key;)Z",
         "tick": "Lnet/minecraft/world/food/FoodData;m_38710_(Lnet/minecraft/world/entity/player/Player;)V"
       },
-      "iskallia/vault/mixin/MixinVirtualCraftingOutputSlot": {
-        "mayPickup": "Lmekanism/common/inventory/container/slot/VirtualCraftingOutputSlot;m_8010_(Lnet/minecraft/world/entity/player/Player;)Z"
-      },
       "iskallia/vault/mixin/MixinAccessibilityOptionsScreen": {
         "createFooter": "Lnet/minecraft/client/gui/screens/AccessibilityOptionsScreen;m_7853_()V"
+      },
+      "iskallia/vault/mixin/MixinVirtualCraftingOutputSlot": {
+        "mayPickup": "Lmekanism/common/inventory/container/slot/VirtualCraftingOutputSlot;m_8010_(Lnet/minecraft/world/entity/player/Player;)Z"
       },
       "iskallia/vault/mixin/MixinJigsawBlockEditScreen": {
         "init": "Lnet/minecraft/client/gui/screens/inventory/JigsawBlockEditScreen;m_7856_()V",
@@ -870,12 +870,12 @@
       "iskallia/vault/mixin/AccessorStructureTemplatePool": {
         "rawTemplates": "f_210559_:Ljava/util/List;"
       },
+      "iskallia/vault/mixin/MixinEnchantedBookItem": {
+        "appendHoverText": "Lnet/minecraft/world/item/EnchantedBookItem;m_7373_(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V"
+      },
       "iskallia/vault/mixin/MixinPiglinBruteAi": {
         "isNearestValidAttackTarget": "Lnet/minecraft/world/entity/monster/piglin/PiglinBruteAi;m_35088_(Lnet/minecraft/world/entity/monster/piglin/AbstractPiglin;Lnet/minecraft/world/entity/LivingEntity;)Z",
         "setAngerTarget": "Lnet/minecraft/world/entity/monster/piglin/PiglinBruteAi;m_149988_(Lnet/minecraft/world/entity/monster/piglin/PiglinBrute;Lnet/minecraft/world/entity/LivingEntity;)V"
-      },
-      "iskallia/vault/mixin/MixinEnchantedBookItem": {
-        "appendHoverText": "Lnet/minecraft/world/item/EnchantedBookItem;m_7373_(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/level/Level;Ljava/util/List;Lnet/minecraft/world/item/TooltipFlag;)V"
       },
       "iskallia/vault/mixin/MixinCrossbowItem": {
         "shootProjectile": "Lnet/minecraft/world/item/CrossbowItem;m_40894_(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;FZFFF)V",
@@ -905,12 +905,12 @@
       "iskallia/vault/mixin/MixinExperienceOrb": {
         "playerTouch": "Lnet/minecraft/world/entity/ExperienceOrb;m_6123_(Lnet/minecraft/world/entity/player/Player;)V"
       },
+      "iskallia/vault/mixin/MixinModelPart": {
+        "translateAndRotate": "Lnet/minecraft/client/model/geom/ModelPart;m_104299_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
+      },
       "iskallia/vault/mixin/MixinCUpdateStructureBlockPacket": {
         "write": "Lnet/minecraft/network/protocol/game/ServerboundSetStructureBlockPacket;m_5779_(Lnet/minecraft/network/FriendlyByteBuf;)V",
         "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V": "Lnet/minecraft/network/protocol/game/ServerboundSetStructureBlockPacket;<init>(Lnet/minecraft/network/FriendlyByteBuf;)V"
-      },
-      "iskallia/vault/mixin/MixinModelPart": {
-        "translateAndRotate": "Lnet/minecraft/client/model/geom/ModelPart;m_104299_(Lcom/mojang/blaze3d/vertex/PoseStack;)V"
       },
       "iskallia/vault/mixin/MixinSensor": {
         "isEntityAttackable": "Lnet/minecraft/world/entity/ai/sensing/Sensor;m_148312_(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/LivingEntity;)Z",

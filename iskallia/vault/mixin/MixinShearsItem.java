@@ -20,5 +20,17 @@ public class MixinShearsItem {
       if (pState.is(ModBlocks.MAGIC_SILK_BLOCK)) {
          cir.setReturnValue(5.0F);
       }
+
+      if (pState.is(ModBlocks.VELVET_BLOCK)) {
+         cir.setReturnValue(5.0F);
+      }
+
+      if (pState.is(ModBlocks.VELVET_BLOCK_CHISELED)) {
+         cir.setReturnValue(5.0F);
+      }
+
+      if (pState.is(ModBlocks.VELVET_BLOCK_STRIPS)) {
+         cir.setReturnValue(5.0F);
+      }
    }
 }

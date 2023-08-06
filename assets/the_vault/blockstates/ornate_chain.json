@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "the_vault:block/ornate_chain",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "the_vault:block/ornate_chain"
+    },
+    "axis=z": {
+      "model": "the_vault:block/ornate_chain",
+      "x": 90
+    }
+  }
+}

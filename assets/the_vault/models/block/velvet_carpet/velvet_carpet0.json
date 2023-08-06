@@ -1,0 +1,25 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/thin_block",
+	"ambientocclusion": false,
+	"texture_size": [32, 32],
+	"textures": {
+		"5": "the_vault:block/velvet_carpet_connected",
+		"particle": "the_vault:block/velvet"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 1, 16],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 14, 8]},
+			"faces": {
+				"north": {"uv": [0, 0, 2, 0.125], "rotation": 180, "texture": "#5"},
+				"east": {"uv": [1.875, 0, 2, 2], "rotation": 90, "texture": "#5"},
+				"south": {"uv": [0, 1.875, 2, 2], "texture": "#5"},
+				"west": {"uv": [0, 0, 0.125, 2], "rotation": 270, "texture": "#5"},
+				"up": {"uv": [2, 2, 0, 0], "rotation": 180, "texture": "#5"},
+				"down": {"uv": [2, 0, 0, 2], "rotation": 180, "texture": "#5"}
+			}
+		}
+	]
+}

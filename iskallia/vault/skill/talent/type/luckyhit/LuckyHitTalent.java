@@ -115,7 +115,7 @@ public abstract class LuckyHitTalent extends LearnableSkill {
                         }
 
                         if (!hasLuckyHit) {
-                           event.setAmount(event.getAmount() * 1.1F);
+                           event.setAmount(event.getAmount() * 1.5F);
                         }
 
                         event.getEntity().getLevel().playSound(null, event.getEntity(), SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.BLOCKS, 1.0F, 1.75F);

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "the_vault:block/wood/stripped_overgrown_wooden_log_top",
+    "side": "the_vault:block/wood/stripped_overgrown_wooden_log"
+  }
+}

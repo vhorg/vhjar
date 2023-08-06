@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "the_vault:wooden_planks"
+    }
+  ],
+  "result": {
+    "item": "the_vault:wooden_chunk",
+    "count": 4
+  }
+}

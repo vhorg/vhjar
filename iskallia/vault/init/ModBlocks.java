@@ -13,6 +13,7 @@ import iskallia.vault.block.CakeBlock;
 import iskallia.vault.block.CatalystInfusionBlock;
 import iskallia.vault.block.CoinPileBlock;
 import iskallia.vault.block.CoinPileDecorBlock;
+import iskallia.vault.block.ConnectingCarpet;
 import iskallia.vault.block.CrakeColumnBlock;
 import iskallia.vault.block.CrakePedestalBlock;
 import iskallia.vault.block.CryoChamberBlock;
@@ -32,6 +33,7 @@ import iskallia.vault.block.FloatingTextBlock;
 import iskallia.vault.block.HourglassBlock;
 import iskallia.vault.block.IdentificationStandBlock;
 import iskallia.vault.block.InscriptionTableBlock;
+import iskallia.vault.block.JunkGemBlock;
 import iskallia.vault.block.LodestoneBlock;
 import iskallia.vault.block.LootStatueBlock;
 import iskallia.vault.block.LootStatueUpperBlock;
@@ -44,13 +46,18 @@ import iskallia.vault.block.ModifierDiscoveryBlock;
 import iskallia.vault.block.ModifierWorkbenchBlock;
 import iskallia.vault.block.MonolithBlock;
 import iskallia.vault.block.ObeliskBlock;
+import iskallia.vault.block.OrnateChainBlock;
+import iskallia.vault.block.PillarBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.block.PylonBlock;
 import iskallia.vault.block.RelicPedestalBlock;
+import iskallia.vault.block.RottenMeatBlock;
 import iskallia.vault.block.ScavengerAltarBlock;
 import iskallia.vault.block.ScavengerTreasureBlock;
+import iskallia.vault.block.SconceWallBlock;
 import iskallia.vault.block.ShopPedestalBlock;
 import iskallia.vault.block.SkillAltarBlock;
+import iskallia.vault.block.SootLayerBlock;
 import iskallia.vault.block.SoulAltarBlock;
 import iskallia.vault.block.SpiritExtractorBlock;
 import iskallia.vault.block.StabilizerBlock;
@@ -85,6 +92,8 @@ import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.VaultRecyclerBlock;
 import iskallia.vault.block.VaultRockBlock;
+import iskallia.vault.block.VaultSweetsBlock;
+import iskallia.vault.block.VelvetBed;
 import iskallia.vault.block.WardrobeBlock;
 import iskallia.vault.block.WildSpawnerBlock;
 import iskallia.vault.block.XPAltarBlock;
@@ -156,6 +165,7 @@ import iskallia.vault.block.entity.VaultJewelApplicationStationTileEntity;
 import iskallia.vault.block.entity.VaultJewelCuttingStationTileEntity;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.block.entity.VaultRecyclerTileEntity;
+import iskallia.vault.block.entity.VelvetBedTileEntity;
 import iskallia.vault.block.entity.WardrobeTileEntity;
 import iskallia.vault.block.entity.WildSpawnerTileEntity;
 import iskallia.vault.block.entity.XpAltarTileEntity;
@@ -210,15 +220,19 @@ import iskallia.vault.block.render.VaultChestRenderer;
 import iskallia.vault.block.render.VaultDiffuserRenderer;
 import iskallia.vault.block.render.VaultEnchanterRenderer;
 import iskallia.vault.block.render.VaultPortalRenderer;
+import iskallia.vault.block.render.VelvetBedRenderer;
 import iskallia.vault.block.render.WardrobeRenderer;
 import iskallia.vault.client.render.AngelBlockISTER;
 import iskallia.vault.core.vault.stat.VaultChestType;
 import iskallia.vault.fluid.block.VoidFluidBlock;
 import iskallia.vault.item.CoinBlockItem;
+import iskallia.vault.item.SconceItem;
 import iskallia.vault.item.VaultChestBlockItem;
+import iskallia.vault.item.VelvetBedItem;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
@@ -230,9 +244,11 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GlassBlock;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.OreBlock;
+import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType.Builder;
@@ -293,7 +309,18 @@ public class ModBlocks {
    public static final Block VAULT_STONE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.STONE).strength(1.5F, 6.0F));
    public static final Block CHISELED_VAULT_STONE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
    public static final Block POLISHED_VAULT_STONE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
+   public static final SlabBlock POLISHED_VAULT_STONE_SLAB = new SlabBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
+   public static final StairBlock POLISHED_VAULT_STONE_STAIRS = new StairBlock(
+      POLISHED_VAULT_STONE::defaultBlockState, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE)
+   );
    public static final Block BUMBO_POLISHED_VAULT_STONE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
+   public static final Block VAULT_STONE_BRICKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
+   public static final SlabBlock VAULT_STONE_BRICK_SLAB = new SlabBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
+   public static final StairBlock VAULT_STONE_BRICK_STAIRS = new StairBlock(
+      VAULT_STONE_BRICKS::defaultBlockState, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE)
+   );
+   public static final Block VAULT_STONE_BRICKS_CRACKED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE));
+   public static final PillarBlock VAULT_STONE_PILLAR = new PillarBlock();
    public static final Block VAULT_COBBLESTONE = new Block(
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(VAULT_STONE).strength(2.0F, 6.0F)
    );
@@ -335,6 +362,16 @@ public class ModBlocks {
    public static final Block ORNATE_CHEST = new VaultChestBlock(
       VaultChestType.ORNATE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.6F, 5.0F).sound(SoundType.STONE)
    );
+   public static final Block HARDENED_CHEST = new VaultChestBlock(
+      VaultChestType.HARDENED, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(40.0F, 5.0F).sound(SoundType.STONE)
+   );
+   public static final Block FLESH_CHEST = new VaultChestBlock(
+      VaultChestType.FLESH,
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.6F, 5.0F).sound(SoundType.HONEY_BLOCK)
+   );
+   public static final Block ENIGMA_CHEST = new VaultChestBlock(
+      VaultChestType.ENIGMA, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.6F, 5.0F).sound(SoundType.STONE)
+   );
    public static final Block TREASURE_CHEST = new VaultChestBlock(
       VaultChestType.TREASURE, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(-1.0F, 5.0F).sound(SoundType.METAL)
    );
@@ -367,6 +404,15 @@ public class ModBlocks {
    );
    public static final Block ALTAR_CHEST_PLACEABLE = new VaultChestBlock(
       VaultChestType.ALTAR, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.3F).sound(SoundType.STONE)
+   );
+   public static final Block HARDENED_CHEST_PLACEABLE = new VaultChestBlock(
+      VaultChestType.HARDENED, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.3F).sound(SoundType.STONE)
+   );
+   public static final Block ENIGMA_CHEST_PLACEABLE = new VaultChestBlock(
+      VaultChestType.ENIGMA, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.3F).sound(SoundType.STONE)
+   );
+   public static final Block FLESH_CHEST_PLACEABLE = new VaultChestBlock(
+      VaultChestType.FLESH, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.3F).sound(SoundType.STONE)
    );
    public static final XPAltarBlock XP_ALTAR = new XPAltarBlock();
    public static final BloodAltarBlock BLOOD_ALTAR = new BloodAltarBlock();
@@ -442,6 +488,159 @@ public class ModBlocks {
    public static final EternalPedestalBlock ETERNAL_PEDESTAL = new EternalPedestalBlock();
    public static final AngelBlock ANGEL_BLOCK = new AngelBlock();
    public static final MobBarrier MOB_BARRIER = new MobBarrier();
+   public static final JunkGemBlock TOPAZ_BLOCK = new JunkGemBlock();
+   public static final TorchBlock GILDED_SCONCE = new TorchBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TORCH), ParticleTypes.FLAME
+   );
+   public static final SconceWallBlock GILDED_SCONCE_WALL = new SconceWallBlock();
+   public static SconceItem GILDED_SCONCE_ITEM = new SconceItem(VaultMod.id("gilded_sconce"), GILDED_SCONCE, GILDED_SCONCE_WALL);
+   public static final OrnateChainBlock ORNATE_CHAIN = new OrnateChainBlock();
+   public static final OrnateChainBlock ORNATE_CHAIN_RUSTY = new OrnateChainBlock();
+   public static final Block ORNATE_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BRICKS = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BRICKS_RUSTY = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BLOCK_CHISELED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BLOCK_TILED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final PillarBlock ORNATE_BLOCK_PILLAR = new PillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BRICKS_CHIPPED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BRICKS_CRACKED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BRICKS_NETHERITE = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final VelvetBed VELVET_BED = new VelvetBed();
+   public static VelvetBedItem VELVET_BED_ITEM = new VelvetBedItem(
+      VaultMod.id("velvet_bed"), VELVET_BED, new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(1)
+   );
+   public static final Block VELVET_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.RED_WOOL));
+   public static final Block VELVET_BLOCK_CHISELED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.RED_WOOL));
+   public static final Block VELVET_BLOCK_STRIPS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.RED_WOOL));
+   public static final ConnectingCarpet VELVET_CARPET = new ConnectingCarpet(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.RED_CARPET)
+   );
+   public static final Block ORNATE_BLOCK_VELVET = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BRICKS_VELVET = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final PillarBlock ORNATE_BLOCK_VELVET_PILLAR = new PillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final Block ORNATE_BLOCK_VELVET_CHISELED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHERITE_BLOCK).strength(5.0F, 6.0F)
+   );
+   public static final SootLayerBlock SOOT = new SootLayerBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SNOW).sound(SoundType.GRAVEL).color(MaterialColor.COLOR_BLACK)
+   );
+   public static final SootLayerBlock VAULT_MOSS = new SootLayerBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.MOSS_BLOCK).sound(SoundType.MOSS)
+   );
+   public static final Block GILDED_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE));
+   public static final PillarBlock GILDED_BLOCK_PILLAR = new PillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE).strength(5.0F, 6.0F)
+   );
+   public static final Block GILDED_BLOCK_CHISELED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE));
+   public static final Block GILDED_BLOCK_BUMBO = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE));
+   public static final Block GILDED_BRICKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE));
+   public static final Block GILDED_BRICKS_CRACKED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE));
+   public static final Block GILDED_BRICKS_DULL = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE));
+   public static final Block GILDED_BRICKS_CRACKED_DULL = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE));
+   public static final Block GILDED_COBBLE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BLACKSTONE));
+   public static final Block ANCIENT_COPPER_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK));
+   public static final Block ANCIENT_COPPER_BRICKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK));
+   public static final Block ANCIENT_COPPER_SMALL_BRICKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK));
+   public static final PillarBlock ANCIENT_COPPER_BLOCK_PILLAR = new PillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final Block ANCIENT_COPPER_BLOCK_EXPOSED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK));
+   public static final Block ANCIENT_COPPER_BRICKS_EXPOSED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final Block ANCIENT_COPPER_SMALL_BRICKS_EXPOSED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final PillarBlock ANCIENT_COPPER_BLOCK_PILLAR_EXPOSED = new PillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final Block ANCIENT_COPPER_BLOCK_WEATHERED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final Block ANCIENT_COPPER_BRICKS_WEATHERED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final Block ANCIENT_COPPER_SMALL_BRICKS_WEATHERED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final PillarBlock ANCIENT_COPPER_BLOCK_PILLAR_WEATHERED = new PillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final Block ANCIENT_COPPER_BLOCK_OXIDIZED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final Block ANCIENT_COPPER_BRICKS_OXIDIZED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final Block ANCIENT_COPPER_SMALL_BRICKS_OXIDIZED = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final PillarBlock ANCIENT_COPPER_BLOCK_PILLAR_OXIDIZED = new PillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+   );
+   public static final RottenMeatBlock ROTTEN_MEAT_BLOCK = new RottenMeatBlock();
+   public static final Block WOODEN_LOG = VaultLogBlock.log(() -> ModBlocks.STRIPPED_WOODEN_LOG, MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
+   public static final Block STRIPPED_WOODEN_LOG = VaultLogBlock.stripped(MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
+   public static final Block WOODEN_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
+   public static final SlabBlock WOODEN_SLAB = new SlabBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_SLAB));
+   public static final StairBlock WOODEN_STAIRS = new StairBlock(
+      WOODEN_PLANKS::defaultBlockState, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_STAIRS)
+   );
+   public static final Block OVERGROWN_WOODEN_LOG = VaultLogBlock.log(
+      () -> ModBlocks.STRIPPED_OVERGROWN_WOODEN_LOG, MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK
+   );
+   public static final Block STRIPPED_OVERGROWN_WOODEN_LOG = VaultLogBlock.stripped(MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
+   public static final Block OVERGROWN_WOODEN_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
+   public static final SlabBlock OVERGROWN_WOODEN_SLAB = new SlabBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_SLAB));
+   public static final StairBlock OVERGROWN_WOODEN_STAIRS = new StairBlock(
+      OVERGROWN_WOODEN_PLANKS::defaultBlockState, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_STAIRS)
+   );
+   public static final Block SANDY_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SANDSTONE));
+   public static final Block SANDY_BRICKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SANDSTONE));
+   public static final Block SANDY_SMALL_BRICKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SANDSTONE));
+   public static final Block SANDY_BRICKS_CRACKED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SANDSTONE));
+   public static final Block SANDY_SMALL_BRICKS_CRACKED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SANDSTONE));
+   public static final Block SANDY_BLOCK_POLISHED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SANDSTONE));
+   public static final Block SANDY_BLOCK_CHISELED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SANDSTONE));
+   public static final Block SANDY_BLOCK_BUMBO = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.SANDSTONE));
+   public static final Block LIVING_ROCK_BLOCK_COBBLE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TUFF));
+   public static final Block LIVING_ROCK_BLOCK_POLISHED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TUFF));
+   public static final Block LIVING_ROCK_BLOCK_STACKED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TUFF));
+   public static final Block LIVING_ROCK_BRICKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TUFF));
+   public static final Block MOSSY_LIVING_ROCK_BLOCK_COBBLE = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TUFF));
+   public static final Block MOSSY_LIVING_ROCK_BLOCK_POLISHED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TUFF));
+   public static final Block MOSSY_LIVING_ROCK_BLOCK_STACKED = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TUFF));
+   public static final Block MOSSY_LIVING_ROCK_BRICKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TUFF));
+   public static final RotatedPillarBlock MOSSY_BONE_BLOCK = new RotatedPillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BONE_BLOCK)
+   );
+   public static final VaultSweetsBlock VAULT_SWEETS_BLOCK = new VaultSweetsBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CAKE)
+   );
    public static final Block CHROMATIC_LOG = VaultLogBlock.log(() -> ModBlocks.STRIPPED_CHROMATIC_LOG, MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
    public static final Block STRIPPED_CHROMATIC_LOG = VaultLogBlock.stripped(MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
    public static final Block CHROMATIC_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
@@ -486,6 +685,9 @@ public class ModBlocks {
    public static final BlockItem ORNATE_STRONGBOX_ITEM = new VaultChestBlockItem(ORNATE_STRONGBOX, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem GILDED_STRONGBOX_ITEM = new VaultChestBlockItem(GILDED_STRONGBOX, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem LIVING_STRONGBOX_ITEM = new VaultChestBlockItem(LIVING_STRONGBOX, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem HARDENED_CHEST_ITEM = new VaultChestBlockItem(HARDENED_CHEST, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem ENIGMA_CHEST_ITEM = new VaultChestBlockItem(ENIGMA_CHEST, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem FLESH_CHEST_ITEM = new VaultChestBlockItem(FLESH_CHEST, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem WOODEN_CHEST_ITEM_PLACEABLE = new VaultChestBlockItem(WOODEN_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem GILDED_CHEST_ITEM_PLACEABLE = new VaultChestBlockItem(GILDED_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem LIVING_CHEST_ITEM_PLACEABLE = new VaultChestBlockItem(LIVING_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
@@ -494,6 +696,11 @@ public class ModBlocks {
       TREASURE_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP)
    );
    public static final BlockItem ALTAR_CHEST_ITEM_PLACEABLE = new VaultChestBlockItem(ALTAR_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem HARDENED_CHEST_ITEM_PLACEABLE = new VaultChestBlockItem(
+      HARDENED_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP)
+   );
+   public static final BlockItem ENIGMA_CHEST_ITEM_PLACEABLE = new VaultChestBlockItem(ENIGMA_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
+   public static final BlockItem FLESH_CHEST_ITEM_PLACEABLE = new VaultChestBlockItem(FLESH_CHEST_PLACEABLE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static final BlockItem SCAVENGER_ALTAR_ITEM = new BlockItem(SCAVENGER_ALTAR, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static BlockItem VAULT_BRONZE = new CoinBlockItem(BRONZE_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
    public static BlockItem VAULT_SILVER = new CoinBlockItem(SILVER_COIN_PILE, new Properties().tab(ModItems.VAULT_MOD_GROUP));
@@ -559,10 +766,16 @@ public class ModBlocks {
             LIVING_CHEST,
             ORNATE_CHEST,
             TREASURE_CHEST,
+            HARDENED_CHEST,
+            ENIGMA_CHEST,
+            FLESH_CHEST,
             WOODEN_CHEST_PLACEABLE,
             ALTAR_CHEST_PLACEABLE,
             GILDED_CHEST_PLACEABLE,
             LIVING_CHEST_PLACEABLE,
+            HARDENED_CHEST_PLACEABLE,
+            ENIGMA_CHEST_PLACEABLE,
+            FLESH_CHEST_PLACEABLE,
             ORNATE_CHEST_PLACEABLE,
             TREASURE_CHEST_PLACEABLE,
             ORNATE_STRONGBOX,
@@ -718,6 +931,7 @@ public class ModBlocks {
    public static final BlockEntityType<AngelBlockTileEntity> ANGEL_BLOCK_TILE_ENTITY = Builder.of(AngelBlockTileEntity::new, new Block[]{ANGEL_BLOCK})
       .build(null);
    public static final BlockEntityType<MobBarrierTileEntity> MOB_BARRIER_ENTITY = Builder.of(MobBarrierTileEntity::new, new Block[]{MOB_BARRIER}).build(null);
+   public static final BlockEntityType<VelvetBedTileEntity> VELVET_BED_TILE_ENTITY = Builder.of(VelvetBedTileEntity::new, new Block[]{VELVET_BED}).build(null);
 
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, ERROR_BLOCK, VaultMod.id("error_block"));
@@ -768,7 +982,14 @@ public class ModBlocks {
       registerBlock(event, VAULT_STONE, VaultMod.id("vault_stone"));
       registerBlock(event, CHISELED_VAULT_STONE, VaultMod.id("chiseled_vault_stone"));
       registerBlock(event, POLISHED_VAULT_STONE, VaultMod.id("polished_vault_stone"));
+      registerBlock(event, POLISHED_VAULT_STONE_SLAB, VaultMod.id("polished_vault_stone_slab"));
+      registerBlock(event, POLISHED_VAULT_STONE_STAIRS, VaultMod.id("polished_vault_stone_stairs"));
       registerBlock(event, BUMBO_POLISHED_VAULT_STONE, VaultMod.id("bumbo_polished_vault_stone"));
+      registerBlock(event, VAULT_STONE_BRICKS, VaultMod.id("vault_stone_bricks"));
+      registerBlock(event, VAULT_STONE_BRICK_SLAB, VaultMod.id("vault_stone_brick_slab"));
+      registerBlock(event, VAULT_STONE_BRICK_STAIRS, VaultMod.id("vault_stone_brick_stairs"));
+      registerBlock(event, VAULT_STONE_BRICKS_CRACKED, VaultMod.id("vault_stone_bricks_cracked"));
+      registerBlock(event, VAULT_STONE_PILLAR, VaultMod.id("vault_stone_pillar"));
       registerBlock(event, VAULT_COBBLESTONE, VaultMod.id("vault_cobblestone"));
       registerBlock(event, VAULT_GLASS, VaultMod.id("vault_glass"));
       registerBlock(event, RELIC_PEDESTAL, VaultMod.id("relic_pedestal"));
@@ -803,12 +1024,18 @@ public class ModBlocks {
       registerBlock(event, ORNATE_STRONGBOX, VaultMod.id("ornate_strongbox"));
       registerBlock(event, GILDED_STRONGBOX, VaultMod.id("gilded_strongbox"));
       registerBlock(event, LIVING_STRONGBOX, VaultMod.id("living_strongbox"));
+      registerBlock(event, HARDENED_CHEST, VaultMod.id("hardened_chest"));
+      registerBlock(event, ENIGMA_CHEST, VaultMod.id("enigma_chest"));
+      registerBlock(event, FLESH_CHEST, VaultMod.id("flesh_chest"));
       registerBlock(event, WOODEN_CHEST_PLACEABLE, VaultMod.id("wooden_chest_placeable"));
       registerBlock(event, GILDED_CHEST_PLACEABLE, VaultMod.id("gilded_chest_placeable"));
       registerBlock(event, LIVING_CHEST_PLACEABLE, VaultMod.id("living_chest_placeable"));
       registerBlock(event, ORNATE_CHEST_PLACEABLE, VaultMod.id("ornate_chest_placeable"));
       registerBlock(event, TREASURE_CHEST_PLACEABLE, VaultMod.id("treasure_chest_placeable"));
       registerBlock(event, ALTAR_CHEST_PLACEABLE, VaultMod.id("altar_chest_placeable"));
+      registerBlock(event, HARDENED_CHEST_PLACEABLE, VaultMod.id("hardened_chest_placeable"));
+      registerBlock(event, ENIGMA_CHEST_PLACEABLE, VaultMod.id("enigma_chest_placeable"));
+      registerBlock(event, FLESH_CHEST_PLACEABLE, VaultMod.id("flesh_chest_placeable"));
       registerBlock(event, XP_ALTAR, VaultMod.id("xp_altar"));
       registerBlock(event, BLOOD_ALTAR, VaultMod.id("blood_altar"));
       registerBlock(event, TIME_ALTAR, VaultMod.id("time_altar"));
@@ -869,6 +1096,85 @@ public class ModBlocks {
       registerBlock(event, VAULT_STONE_STAIRS, VaultMod.id("vault_stone_stairs"));
       registerBlock(event, ANGEL_BLOCK, VaultMod.id("angel_block"));
       registerBlock(event, MOB_BARRIER, VaultMod.id("mob_barrier"));
+      registerBlock(event, ORNATE_CHAIN, VaultMod.id("ornate_chain"));
+      registerBlock(event, ORNATE_CHAIN_RUSTY, VaultMod.id("ornate_chain_rusty"));
+      registerBlock(event, ORNATE_BLOCK, VaultMod.id("ornate_block"));
+      registerBlock(event, ORNATE_BRICKS, VaultMod.id("ornate_bricks"));
+      registerBlock(event, ORNATE_BRICKS_RUSTY, VaultMod.id("ornate_bricks_rusty"));
+      registerBlock(event, ORNATE_BLOCK_CHISELED, VaultMod.id("ornate_block_chiseled"));
+      registerBlock(event, ORNATE_BLOCK_TILED, VaultMod.id("ornate_block_tiled"));
+      registerBlock(event, ORNATE_BLOCK_PILLAR, VaultMod.id("ornate_block_pillar"));
+      registerBlock(event, ORNATE_BRICKS_CHIPPED, VaultMod.id("ornate_bricks_chipped"));
+      registerBlock(event, ORNATE_BRICKS_CRACKED, VaultMod.id("ornate_bricks_cracked"));
+      registerBlock(event, ORNATE_BRICKS_NETHERITE, VaultMod.id("ornate_bricks_netherite"));
+      registerBlock(event, VELVET_BED, VaultMod.id("velvet_bed"));
+      registerBlock(event, VELVET_BLOCK, VaultMod.id("velvet_block"));
+      registerBlock(event, VELVET_BLOCK_CHISELED, VaultMod.id("velvet_block_chiseled"));
+      registerBlock(event, VELVET_BLOCK_STRIPS, VaultMod.id("velvet_block_strips"));
+      registerBlock(event, VELVET_CARPET, VaultMod.id("velvet_carpet"));
+      registerBlock(event, ORNATE_BLOCK_VELVET, VaultMod.id("ornate_block_velvet"));
+      registerBlock(event, ORNATE_BRICKS_VELVET, VaultMod.id("ornate_bricks_velvet"));
+      registerBlock(event, ORNATE_BLOCK_VELVET_CHISELED, VaultMod.id("ornate_block_velvet_chiseled"));
+      registerBlock(event, ORNATE_BLOCK_VELVET_PILLAR, VaultMod.id("ornate_block_velvet_pillar"));
+      registerBlock(event, SOOT, VaultMod.id("soot"));
+      registerBlock(event, TOPAZ_BLOCK, VaultMod.id("topaz_block"));
+      registerBlock(event, GILDED_SCONCE, VaultMod.id("gilded_sconce"));
+      registerBlock(event, GILDED_SCONCE_WALL, VaultMod.id("gilded_sconce_wall"));
+      registerBlock(event, GILDED_BLOCK, VaultMod.id("gilded_block"));
+      registerBlock(event, GILDED_BLOCK_PILLAR, VaultMod.id("gilded_block_pillar"));
+      registerBlock(event, GILDED_BLOCK_CHISELED, VaultMod.id("gilded_block_chiseled"));
+      registerBlock(event, GILDED_BLOCK_BUMBO, VaultMod.id("gilded_block_bumbo"));
+      registerBlock(event, GILDED_BRICKS, VaultMod.id("gilded_bricks"));
+      registerBlock(event, GILDED_BRICKS_CRACKED, VaultMod.id("gilded_bricks_cracked"));
+      registerBlock(event, GILDED_BRICKS_DULL, VaultMod.id("gilded_bricks_dull"));
+      registerBlock(event, GILDED_BRICKS_CRACKED_DULL, VaultMod.id("gilded_bricks_cracked_dull"));
+      registerBlock(event, GILDED_COBBLE, VaultMod.id("gilded_cobble"));
+      registerBlock(event, ANCIENT_COPPER_BLOCK, VaultMod.id("ancient_copper_block"));
+      registerBlock(event, ANCIENT_COPPER_BRICKS, VaultMod.id("ancient_copper_bricks"));
+      registerBlock(event, ANCIENT_COPPER_SMALL_BRICKS, VaultMod.id("ancient_copper_small_bricks"));
+      registerBlock(event, ANCIENT_COPPER_BLOCK_PILLAR, VaultMod.id("ancient_copper_block_pillar"));
+      registerBlock(event, ANCIENT_COPPER_BLOCK_EXPOSED, VaultMod.id("ancient_copper_block_exposed"));
+      registerBlock(event, ANCIENT_COPPER_BRICKS_EXPOSED, VaultMod.id("ancient_copper_bricks_exposed"));
+      registerBlock(event, ANCIENT_COPPER_SMALL_BRICKS_EXPOSED, VaultMod.id("ancient_copper_small_bricks_exposed"));
+      registerBlock(event, ANCIENT_COPPER_BLOCK_PILLAR_EXPOSED, VaultMod.id("ancient_copper_block_pillar_exposed"));
+      registerBlock(event, ANCIENT_COPPER_BLOCK_WEATHERED, VaultMod.id("ancient_copper_block_weathered"));
+      registerBlock(event, ANCIENT_COPPER_BRICKS_WEATHERED, VaultMod.id("ancient_copper_bricks_weathered"));
+      registerBlock(event, ANCIENT_COPPER_SMALL_BRICKS_WEATHERED, VaultMod.id("ancient_copper_small_bricks_weathered"));
+      registerBlock(event, ANCIENT_COPPER_BLOCK_PILLAR_WEATHERED, VaultMod.id("ancient_copper_block_pillar_weathered"));
+      registerBlock(event, ANCIENT_COPPER_BLOCK_OXIDIZED, VaultMod.id("ancient_copper_block_oxidized"));
+      registerBlock(event, ANCIENT_COPPER_BRICKS_OXIDIZED, VaultMod.id("ancient_copper_bricks_oxidized"));
+      registerBlock(event, ANCIENT_COPPER_SMALL_BRICKS_OXIDIZED, VaultMod.id("ancient_copper_small_bricks_oxidized"));
+      registerBlock(event, ANCIENT_COPPER_BLOCK_PILLAR_OXIDIZED, VaultMod.id("ancient_copper_block_pillar_oxidized"));
+      registerBlock(event, WOODEN_LOG, VaultMod.id("wooden_log"));
+      registerBlock(event, STRIPPED_WOODEN_LOG, VaultMod.id("stripped_wooden_log"));
+      registerBlock(event, WOODEN_PLANKS, VaultMod.id("wooden_planks"));
+      registerBlock(event, WOODEN_SLAB, VaultMod.id("wooden_slab"));
+      registerBlock(event, WOODEN_STAIRS, VaultMod.id("wooden_stairs"));
+      registerBlock(event, SANDY_BLOCK, VaultMod.id("sandy_block"));
+      registerBlock(event, SANDY_BRICKS, VaultMod.id("sandy_bricks"));
+      registerBlock(event, SANDY_SMALL_BRICKS, VaultMod.id("sandy_small_bricks"));
+      registerBlock(event, SANDY_BRICKS_CRACKED, VaultMod.id("sandy_bricks_cracked"));
+      registerBlock(event, SANDY_SMALL_BRICKS_CRACKED, VaultMod.id("sandy_small_bricks_cracked"));
+      registerBlock(event, SANDY_BLOCK_POLISHED, VaultMod.id("sandy_block_polished"));
+      registerBlock(event, SANDY_BLOCK_CHISELED, VaultMod.id("sandy_block_chiseled"));
+      registerBlock(event, SANDY_BLOCK_BUMBO, VaultMod.id("sandy_block_bumbo"));
+      registerBlock(event, OVERGROWN_WOODEN_LOG, VaultMod.id("overgrown_wooden_log"));
+      registerBlock(event, STRIPPED_OVERGROWN_WOODEN_LOG, VaultMod.id("stripped_overgrown_wooden_log"));
+      registerBlock(event, OVERGROWN_WOODEN_PLANKS, VaultMod.id("overgrown_wooden_planks"));
+      registerBlock(event, OVERGROWN_WOODEN_SLAB, VaultMod.id("overgrown_wooden_slab"));
+      registerBlock(event, OVERGROWN_WOODEN_STAIRS, VaultMod.id("overgrown_wooden_stairs"));
+      registerBlock(event, ROTTEN_MEAT_BLOCK, VaultMod.id("rotten_meat_block"));
+      registerBlock(event, LIVING_ROCK_BLOCK_COBBLE, VaultMod.id("living_rock_block_cobble"));
+      registerBlock(event, LIVING_ROCK_BLOCK_POLISHED, VaultMod.id("living_rock_block_polished"));
+      registerBlock(event, LIVING_ROCK_BLOCK_STACKED, VaultMod.id("living_rock_block_stacked"));
+      registerBlock(event, LIVING_ROCK_BRICKS, VaultMod.id("living_rock_bricks"));
+      registerBlock(event, MOSSY_LIVING_ROCK_BLOCK_COBBLE, VaultMod.id("mossy_living_rock_block_cobble"));
+      registerBlock(event, MOSSY_LIVING_ROCK_BLOCK_POLISHED, VaultMod.id("mossy_living_rock_block_polished"));
+      registerBlock(event, MOSSY_LIVING_ROCK_BLOCK_STACKED, VaultMod.id("mossy_living_rock_block_stacked"));
+      registerBlock(event, MOSSY_LIVING_ROCK_BRICKS, VaultMod.id("mossy_living_rock_bricks"));
+      registerBlock(event, MOSSY_BONE_BLOCK, VaultMod.id("mossy_bone_block"));
+      registerBlock(event, VAULT_MOSS, VaultMod.id("vault_moss"));
+      registerBlock(event, VAULT_SWEETS_BLOCK, VaultMod.id("vault_sweets_block"));
       registerBlock(event, CHROMATIC_LOG, VaultMod.id("chromatic_log"));
       registerBlock(event, STRIPPED_CHROMATIC_LOG, VaultMod.id("stripped_chromatic_log"));
       registerBlock(event, CHROMATIC_PLANKS, VaultMod.id("chromatic_planks"));
@@ -956,6 +1262,7 @@ public class ModBlocks {
       registerTileEntity(event, TOTEM_PLAYER_DAMAGE_TILE_ENTITY, VaultMod.id("totem_player_damage_tile_entity"));
       registerTileEntity(event, ANGEL_BLOCK_TILE_ENTITY, VaultMod.id("angel_block_tile_entity"));
       registerTileEntity(event, MOB_BARRIER_ENTITY, VaultMod.id("mob_barrier_entity"));
+      registerTileEntity(event, VELVET_BED_TILE_ENTITY, VaultMod.id("velvet_bed_tile_entity"));
    }
 
    public static void registerTileEntityRenderers(RegisterRenderers event) {
@@ -1007,6 +1314,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(ANGEL_BLOCK_TILE_ENTITY, AngelBlockRenderer::new);
       event.registerBlockEntityRenderer(MOB_BARRIER_ENTITY, MobBarrierRenderer::new);
       event.registerBlockEntityRenderer(BOUNTY_TABLE_TILE_ENTITY, BountyTableRenderer::new);
+      event.registerBlockEntityRenderer(VELVET_BED_TILE_ENTITY, VelvetBedRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
@@ -1056,7 +1364,14 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_COBBLESTONE);
       registerBlockItem(event, CHISELED_VAULT_STONE);
       registerBlockItem(event, POLISHED_VAULT_STONE);
+      registerBlockItem(event, POLISHED_VAULT_STONE_SLAB);
+      registerBlockItem(event, POLISHED_VAULT_STONE_STAIRS);
       registerBlockItem(event, BUMBO_POLISHED_VAULT_STONE);
+      registerBlockItem(event, VAULT_STONE_BRICKS);
+      registerBlockItem(event, VAULT_STONE_BRICK_SLAB);
+      registerBlockItem(event, VAULT_STONE_BRICK_STAIRS);
+      registerBlockItem(event, VAULT_STONE_BRICKS_CRACKED);
+      registerBlockItem(event, VAULT_STONE_PILLAR);
       registerBlockItem(event, VAULT_GLASS);
       registerBlockItem(event, RELIC_PEDESTAL);
       registerBlockItem(event, LOOT_STATUE, LOOT_STATUE_ITEM);
@@ -1067,6 +1382,9 @@ public class ModBlocks {
       registerBlockItem(event, TRANSMOG_TABLE);
       registerBlockItem(event, WOODEN_CHEST, WOODEN_CHEST_ITEM);
       registerBlockItem(event, ALTAR_CHEST, ALTAR_CHEST_ITEM);
+      registerBlockItem(event, HARDENED_CHEST, HARDENED_CHEST_ITEM);
+      registerBlockItem(event, ENIGMA_CHEST, ENIGMA_CHEST_ITEM);
+      registerBlockItem(event, FLESH_CHEST, FLESH_CHEST_ITEM);
       registerBlockItem(event, GILDED_CHEST, GILDED_CHEST_ITEM);
       registerBlockItem(event, ORNATE_CHEST, ORNATE_CHEST_ITEM);
       registerBlockItem(event, TREASURE_CHEST, TREASURE_CHEST_ITEM);
@@ -1080,6 +1398,9 @@ public class ModBlocks {
       registerBlockItem(event, ORNATE_CHEST_PLACEABLE, ORNATE_CHEST_ITEM_PLACEABLE);
       registerBlockItem(event, TREASURE_CHEST_PLACEABLE, TREASURE_CHEST_ITEM_PLACEABLE);
       registerBlockItem(event, LIVING_CHEST_PLACEABLE, LIVING_CHEST_ITEM_PLACEABLE);
+      registerBlockItem(event, HARDENED_CHEST_PLACEABLE, HARDENED_CHEST_ITEM_PLACEABLE);
+      registerBlockItem(event, ENIGMA_CHEST_PLACEABLE, ENIGMA_CHEST_ITEM_PLACEABLE);
+      registerBlockItem(event, FLESH_CHEST_PLACEABLE, FLESH_CHEST_ITEM_PLACEABLE);
       registerBlockItem(event, XP_ALTAR);
       registerBlockItem(event, BLOOD_ALTAR);
       registerBlockItem(event, TIME_ALTAR);
@@ -1150,6 +1471,84 @@ public class ModBlocks {
       registerBlockItem(event, ETERNAL_PEDESTAL);
       registerBlockItem(event, ANGEL_BLOCK, ANGEL_BLOCK_ITEM);
       registerBlockItem(event, MOB_BARRIER);
+      registerBlockItem(event, ORNATE_CHAIN);
+      registerBlockItem(event, ORNATE_CHAIN_RUSTY);
+      registerBlockItem(event, ORNATE_BLOCK);
+      registerBlockItem(event, ORNATE_BRICKS);
+      registerBlockItem(event, ORNATE_BRICKS_RUSTY);
+      registerBlockItem(event, ORNATE_BLOCK_CHISELED);
+      registerBlockItem(event, ORNATE_BLOCK_TILED);
+      registerBlockItem(event, ORNATE_BLOCK_PILLAR);
+      registerBlockItem(event, ORNATE_BRICKS_CRACKED);
+      registerBlockItem(event, ORNATE_BRICKS_CHIPPED);
+      registerBlockItem(event, ORNATE_BRICKS_NETHERITE);
+      registerBlockItem(event, VELVET_BLOCK);
+      registerBlockItem(event, VELVET_BLOCK_CHISELED);
+      registerBlockItem(event, VELVET_BLOCK_STRIPS);
+      registerBlockItem(event, VELVET_CARPET);
+      registerBlockItem(event, ORNATE_BLOCK_VELVET);
+      registerBlockItem(event, ORNATE_BRICKS_VELVET);
+      registerBlockItem(event, ORNATE_BLOCK_VELVET_PILLAR);
+      registerBlockItem(event, ORNATE_BLOCK_VELVET_CHISELED);
+      registerBlockItem(event, SOOT);
+      registerBlockItem(event, TOPAZ_BLOCK);
+      event.getRegistry().register(GILDED_SCONCE_ITEM);
+      event.getRegistry().register(VELVET_BED_ITEM);
+      registerBlockItem(event, GILDED_BLOCK);
+      registerBlockItem(event, GILDED_BLOCK_PILLAR);
+      registerBlockItem(event, GILDED_BLOCK_CHISELED);
+      registerBlockItem(event, GILDED_BLOCK_BUMBO);
+      registerBlockItem(event, GILDED_BRICKS);
+      registerBlockItem(event, GILDED_BRICKS_CRACKED);
+      registerBlockItem(event, GILDED_BRICKS_DULL);
+      registerBlockItem(event, GILDED_BRICKS_CRACKED_DULL);
+      registerBlockItem(event, GILDED_COBBLE);
+      registerBlockItem(event, ANCIENT_COPPER_BLOCK);
+      registerBlockItem(event, ANCIENT_COPPER_BRICKS);
+      registerBlockItem(event, ANCIENT_COPPER_SMALL_BRICKS);
+      registerBlockItem(event, ANCIENT_COPPER_BLOCK_PILLAR);
+      registerBlockItem(event, ANCIENT_COPPER_BLOCK_EXPOSED);
+      registerBlockItem(event, ANCIENT_COPPER_BRICKS_EXPOSED);
+      registerBlockItem(event, ANCIENT_COPPER_SMALL_BRICKS_EXPOSED);
+      registerBlockItem(event, ANCIENT_COPPER_BLOCK_PILLAR_EXPOSED);
+      registerBlockItem(event, ANCIENT_COPPER_BLOCK_WEATHERED);
+      registerBlockItem(event, ANCIENT_COPPER_BRICKS_WEATHERED);
+      registerBlockItem(event, ANCIENT_COPPER_SMALL_BRICKS_WEATHERED);
+      registerBlockItem(event, ANCIENT_COPPER_BLOCK_PILLAR_WEATHERED);
+      registerBlockItem(event, ANCIENT_COPPER_BLOCK_OXIDIZED);
+      registerBlockItem(event, ANCIENT_COPPER_BRICKS_OXIDIZED);
+      registerBlockItem(event, ANCIENT_COPPER_SMALL_BRICKS_OXIDIZED);
+      registerBlockItem(event, ANCIENT_COPPER_BLOCK_PILLAR_OXIDIZED);
+      registerBlockItem(event, ROTTEN_MEAT_BLOCK);
+      registerBlockItem(event, LIVING_ROCK_BLOCK_COBBLE);
+      registerBlockItem(event, LIVING_ROCK_BLOCK_POLISHED);
+      registerBlockItem(event, LIVING_ROCK_BLOCK_STACKED);
+      registerBlockItem(event, LIVING_ROCK_BRICKS);
+      registerBlockItem(event, MOSSY_LIVING_ROCK_BLOCK_COBBLE);
+      registerBlockItem(event, MOSSY_LIVING_ROCK_BLOCK_POLISHED);
+      registerBlockItem(event, MOSSY_LIVING_ROCK_BLOCK_STACKED);
+      registerBlockItem(event, MOSSY_LIVING_ROCK_BRICKS);
+      registerBlockItem(event, MOSSY_BONE_BLOCK);
+      registerBlockItem(event, VAULT_MOSS);
+      registerBlockItem(event, VAULT_SWEETS_BLOCK);
+      registerBlockItem(event, WOODEN_PLANKS);
+      registerBlockItem(event, WOODEN_SLAB);
+      registerBlockItem(event, WOODEN_STAIRS);
+      registerBlockItem(event, WOODEN_LOG);
+      registerBlockItem(event, STRIPPED_WOODEN_LOG);
+      registerBlockItem(event, OVERGROWN_WOODEN_PLANKS);
+      registerBlockItem(event, OVERGROWN_WOODEN_SLAB);
+      registerBlockItem(event, OVERGROWN_WOODEN_STAIRS);
+      registerBlockItem(event, OVERGROWN_WOODEN_LOG);
+      registerBlockItem(event, STRIPPED_OVERGROWN_WOODEN_LOG);
+      registerBlockItem(event, SANDY_BLOCK);
+      registerBlockItem(event, SANDY_BRICKS);
+      registerBlockItem(event, SANDY_SMALL_BRICKS);
+      registerBlockItem(event, SANDY_BRICKS_CRACKED);
+      registerBlockItem(event, SANDY_SMALL_BRICKS_CRACKED);
+      registerBlockItem(event, SANDY_BLOCK_POLISHED);
+      registerBlockItem(event, SANDY_BLOCK_CHISELED);
+      registerBlockItem(event, SANDY_BLOCK_BUMBO);
       registerBlockItem(event, VAULT_STONE_SLAB);
       registerBlockItem(event, VAULT_STONE_STAIRS);
       registerBlockItem(event, CHROMATIC_LOG);

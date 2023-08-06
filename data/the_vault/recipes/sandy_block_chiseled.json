@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:sandy_block"
+  },
+  "result": "the_vault:sandy_block_chiseled",
+  "count": 1
+}

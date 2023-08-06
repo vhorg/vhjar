@@ -1,0 +1,22 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/thin_block",
+	"textures": {
+		"particle": "the_vault:block/soot",
+		"soot": "the_vault:block/soot"
+	},
+	"elements": [
+		{
+			"from": [0, 0, 0],
+			"to": [16, 8, 16],
+			"faces": {
+				"north": {"uv": [0, 8, 16, 16], "texture": "#soot", "cullface": "north"},
+				"east": {"uv": [0, 8, 16, 16], "texture": "#soot", "cullface": "east"},
+				"south": {"uv": [0, 8, 16, 16], "texture": "#soot", "cullface": "south"},
+				"west": {"uv": [0, 8, 16, 16], "texture": "#soot", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#soot"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#soot", "cullface": "down"}
+			}
+		}
+	]
+}

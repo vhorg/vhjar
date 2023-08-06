@@ -6,5 +6,8 @@ public enum VaultChestType {
    LIVING,
    ORNATE,
    TREASURE,
-   ALTAR;
+   ALTAR,
+   HARDENED,
+   ENIGMA,
+   FLESH;
 }

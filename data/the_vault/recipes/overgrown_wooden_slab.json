@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "wooden_stairs",
+  "pattern": [
+    "###"
+  ],
+  "key": {
+    "#": {
+      "item": "the_vault:overgrown_wooden_planks"
+    }
+  },
+  "result": {
+    "item": "the_vault:overgrown_wooden_slab",
+    "count": 6
+  }
+}

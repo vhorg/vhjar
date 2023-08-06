@@ -9,6 +9,7 @@ import iskallia.vault.gear.attribute.ability.special.GhostWalkDurationModificati
 import iskallia.vault.gear.attribute.ability.special.HealAdditionalHealthModification;
 import iskallia.vault.gear.attribute.ability.special.HunterRangeModification;
 import iskallia.vault.gear.attribute.ability.special.ManaShieldAbsorptionModification;
+import iskallia.vault.gear.attribute.ability.special.ManaShieldImplodeRadiusModification;
 import iskallia.vault.gear.attribute.ability.special.MegaJumpVelocityModification;
 import iskallia.vault.gear.attribute.ability.special.NovaRadiusModification;
 import iskallia.vault.gear.attribute.ability.special.RampageDamageModification;
@@ -45,6 +46,7 @@ public class SpecialAbilityModificationRegistry {
       register(new TauntRadiusModification());
       register(new VeinMinerAdditionalBlocksModification());
       register(new EternalsSpeedModification());
+      register(new ManaShieldImplodeRadiusModification());
    }
 
    private static void register(SpecialAbilityModification<?> modification) {

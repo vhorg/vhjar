@@ -176,17 +176,29 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
                && !Items.NETHERITE_SWORD.isCorrectToolForDrops(stack, state)
                && !(Items.SHEARS.getDestroySpeed(stack, state) > 1.0F)
                && !Items.SHEARS.isCorrectToolForDrops(stack, state)) {
-            if (data.get(ModGearAttributes.WOODEN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.WOODEN_CHEST)) {
-               return true;
-            } else if (!data.get(ModGearAttributes.ORNATE_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
-               || !state.is(ModBlocks.ORNATE_CHEST) && !state.is(ModBlocks.ORNATE_STRONGBOX)) {
-               if (!data.get(ModGearAttributes.GILDED_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
-                  || !state.is(ModBlocks.GILDED_CHEST) && !state.is(ModBlocks.GILDED_STRONGBOX)) {
-                  if (!data.get(ModGearAttributes.LIVING_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
-                     || !state.is(ModBlocks.LIVING_CHEST) && !state.is(ModBlocks.LIVING_STRONGBOX)) {
-                     return data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)
-                        ? true
-                        : SPAWNER_ID.equals(state.getBlock().getRegistryName());
+            if (!data.get(ModGearAttributes.WOODEN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+               || !state.is(ModBlocks.WOODEN_CHEST) && !state.is(ModBlocks.HARDENED_CHEST)) {
+               if (!data.get(ModGearAttributes.ORNATE_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+                  || !state.is(ModBlocks.ORNATE_CHEST)
+                     && !state.is(ModBlocks.ORNATE_STRONGBOX)
+                     && !state.is(ModBlocks.FLESH_CHEST)
+                     && !state.is(ModBlocks.ENIGMA_CHEST)) {
+                  if (!data.get(ModGearAttributes.GILDED_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+                     || !state.is(ModBlocks.GILDED_CHEST)
+                        && !state.is(ModBlocks.GILDED_STRONGBOX)
+                        && !state.is(ModBlocks.FLESH_CHEST)
+                        && !state.is(ModBlocks.ENIGMA_CHEST)) {
+                     if (!data.get(ModGearAttributes.LIVING_AFFINITY, VaultGearAttributeTypeMerger.anyTrue())
+                        || !state.is(ModBlocks.LIVING_CHEST)
+                           && !state.is(ModBlocks.LIVING_STRONGBOX)
+                           && !state.is(ModBlocks.FLESH_CHEST)
+                           && !state.is(ModBlocks.ENIGMA_CHEST)) {
+                        return data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)
+                           ? true
+                           : SPAWNER_ID.equals(state.getBlock().getRegistryName());
+                     } else {
+                        return true;
+                     }
                   } else {
                      return true;
                   }
@@ -310,9 +322,14 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
             if (block == ModBlocks.WOODEN_CHEST
                || block == ModBlocks.ORNATE_STRONGBOX
                || block == ModBlocks.GILDED_STRONGBOX
-               || block == ModBlocks.LIVING_STRONGBOX) {
+               || block == ModBlocks.LIVING_STRONGBOX
+               || block == ModBlocks.HARDENED_CHEST) {
                damage = 3.0;
-            } else if (block == ModBlocks.GILDED_CHEST || block == ModBlocks.LIVING_CHEST || block == ModBlocks.ORNATE_CHEST) {
+            } else if (block == ModBlocks.GILDED_CHEST
+               || block == ModBlocks.LIVING_CHEST
+               || block == ModBlocks.ORNATE_CHEST
+               || block == ModBlocks.FLESH_CHEST
+               || block == ModBlocks.ENIGMA_CHEST) {
                damage = 0.25;
             }
          } else if (SPAWNER_ID.equals(state.getBlock().getRegistryName())) {

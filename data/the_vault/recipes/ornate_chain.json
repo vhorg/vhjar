@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "w",
+    "w",
+    "w"
+  ],
+  "key": {
+    "w": {
+      "item": "the_vault:ornate_ingot"
+    }
+  },
+  "result": {
+    "item": "the_vault:ornate_chain"
+  }
+}

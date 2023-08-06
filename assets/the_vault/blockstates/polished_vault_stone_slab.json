@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "the_vault:block/polished_vault_stone_slab"
+    },
+    "type=double": {
+      "model": "the_vault:block/polished_vault_stone"
+    },
+    "type=top": {
+      "model": "the_vault:block/polished_vault_stone_slab_top"
+    }
+  }
+}

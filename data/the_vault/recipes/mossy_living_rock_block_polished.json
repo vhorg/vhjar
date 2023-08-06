@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:living_rock_block_cobble"
+  },
+  "result": "the_vault:mossy_living_rock_block_polished",
+  "count": 1
+}

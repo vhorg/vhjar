@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "the_vault:block/wood/overgrown_wooden_slab"
+    },
+    "type=double": {
+      "model": "the_vault:block/wood/overgrown_wooden_planks"
+    },
+    "type=top": {
+      "model": "the_vault:block/wood/overgrown_wooden_slab_top"
+    }
+  }
+}

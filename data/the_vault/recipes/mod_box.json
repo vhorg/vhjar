@@ -7,13 +7,13 @@
   ],
   "key": {
     "d": {
-      "item": "minecraft:diamond"
+      "item": "the_vault:vault_diamond"
     },
     "s": {
       "item": "the_vault:knowledge_star_shard"
     },
     "l": {
-      "item": "the_vault:gem_larimar"
+      "item": "the_vault:extraordinary_larimar"
     }
   },
   "result": {

@@ -5,6 +5,7 @@ import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.item.AnimalJarItem;
 import iskallia.vault.item.ArchetypeStarItem;
 import iskallia.vault.item.AugmentItem;
+import iskallia.vault.item.BasicFuelItem;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.item.BasicMobEggItem;
 import iskallia.vault.item.BasicScavengerItem;
@@ -201,6 +202,9 @@ public class ModItems {
    public static BasicItem ORNATE_CHEST_SCROLL = new BasicItem(VaultMod.id("ornate_chest_scroll"));
    public static BasicItem GILDED_CHEST_SCROLL = new BasicItem(VaultMod.id("gilded_chest_scroll"));
    public static BasicItem LIVING_CHEST_SCROLL = new BasicItem(VaultMod.id("living_chest_scroll"));
+   public static BasicItem HARDENED_CHEST_SCROLL = new BasicItem(VaultMod.id("hardened_chest_scroll"));
+   public static BasicItem FLESH_CHEST_SCROLL = new BasicItem(VaultMod.id("flesh_chest_scroll"));
+   public static BasicItem ENIGMA_CHEST_SCROLL = new BasicItem(VaultMod.id("enigma_chest_scroll"));
    public static BasicItem ALTAR_CHEST_SCROLL = new BasicItem(VaultMod.id("altar_chest_scroll"));
    public static BasicItem TREASURE_CHEST_SCROLL = new BasicItem(VaultMod.id("treasure_chest_scroll"));
    public static BasicItem WUTODIC_MASS = new BasicItem(VaultMod.id("wutodic_mass"));
@@ -448,6 +452,20 @@ public class ModItems {
    public static BasicItem BOUNTY_PEARL = new BasicItem(VaultMod.id("bounty_pearl"), new Properties().tab(VAULT_MOD_GROUP));
    public static OldNotesItem OLD_NOTES = new OldNotesItem(VaultMod.id("old_notes"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).rarity(Rarity.UNCOMMON));
    public static QuestBookItem QUEST_BOOK = new QuestBookItem(VaultMod.id("quest_book"));
+   public static BasicItem TOPAZ_SHARD = new BasicItem(VaultMod.id("topaz_shard"), new Properties().tab(VAULT_MOD_GROUP));
+   public static BasicItem GILDED_INGOT = new BasicItem(VaultMod.id("gilded_ingot"), new Properties().tab(VAULT_MOD_GROUP));
+   public static BasicItem ORNATE_INGOT = new BasicItem(VaultMod.id("ornate_ingot"), new Properties().tab(VAULT_MOD_GROUP));
+   public static BasicItem ANCIENT_COPPER_INGOT = new BasicItem(VaultMod.id("ancient_copper_ingot"), new Properties().tab(VAULT_MOD_GROUP));
+   public static BasicItem VELVET = new BasicItem(VaultMod.id("velvet"), new Properties().tab(VAULT_MOD_GROUP));
+   public static BasicItem ROTTEN_MEAT = new BasicItem(VaultMod.id("rotten_meat"), new Properties().tab(VAULT_MOD_GROUP));
+   public static BasicFuelItem WOODEN_CHUNK = new BasicFuelItem(VaultMod.id("wooden_chunk"), new Properties().tab(VAULT_MOD_GROUP), 400);
+   public static BasicFuelItem OVERGROWN_WOODEN_CHUNK = new BasicFuelItem(VaultMod.id("overgrown_wooden_chunk"), new Properties().tab(VAULT_MOD_GROUP), 400);
+   public static BasicItem SANDY_ROCKS = new BasicItem(VaultMod.id("sandy_rocks"), new Properties().tab(VAULT_MOD_GROUP));
+   public static BasicItem LIVING_ROCK = new BasicItem(VaultMod.id("living_rock"), new Properties().tab(VAULT_MOD_GROUP));
+   public static BasicItem MOSSY_BONE = new BasicItem(VaultMod.id("mossy_bone"), new Properties().tab(VAULT_MOD_GROUP));
+   public static VaultBasicFoodItem VAULT_SWEETS = new VaultBasicFoodItem(
+      VaultMod.id("vault_sweets"), new Builder().fast().nutrition(3).saturationMod(0.5F).build()
+   );
    public static AnimalJarItem ANIMAL_JAR = new AnimalJarItem(VaultMod.id("animal_jar"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BasicItem DRILL_ARROW_PART = new BasicItem(VaultMod.id("drill_arrow_part"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(8));
    public static ItemDrillArrow DRILL_ARROW = new ItemDrillArrow(VAULT_MOD_GROUP, VaultMod.id("drill_arrow"));
@@ -1232,6 +1250,9 @@ public class ModItems {
       registry.register(ORNATE_CHEST_SCROLL);
       registry.register(GILDED_CHEST_SCROLL);
       registry.register(LIVING_CHEST_SCROLL);
+      registry.register(HARDENED_CHEST_SCROLL);
+      registry.register(FLESH_CHEST_SCROLL);
+      registry.register(ENIGMA_CHEST_SCROLL);
       registry.register(ALTAR_CHEST_SCROLL);
       registry.register(TREASURE_CHEST_SCROLL);
       registry.register(WUTODIC_MASS);
@@ -1362,5 +1383,17 @@ public class ModItems {
       registry.register(BOUNTY_PEARL);
       registry.register(OLD_NOTES);
       registry.register(QUEST_BOOK);
+      registry.register(TOPAZ_SHARD);
+      registry.register(GILDED_INGOT);
+      registry.register(ORNATE_INGOT);
+      registry.register(ANCIENT_COPPER_INGOT);
+      registry.register(VELVET);
+      registry.register(ROTTEN_MEAT);
+      registry.register(WOODEN_CHUNK);
+      registry.register(OVERGROWN_WOODEN_CHUNK);
+      registry.register(SANDY_ROCKS);
+      registry.register(LIVING_ROCK);
+      registry.register(MOSSY_BONE);
+      registry.register(VAULT_SWEETS);
    }
 }

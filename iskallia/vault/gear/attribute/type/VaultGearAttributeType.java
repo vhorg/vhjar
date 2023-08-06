@@ -13,6 +13,7 @@ import iskallia.vault.util.NetcodeUtils;
 import java.awt.Color;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.FloatTag;
 import net.minecraft.nbt.IntTag;
@@ -43,6 +44,8 @@ public abstract class VaultGearAttributeType<T> implements IBitSerializer<T> {
 
    public abstract T cast(Object var1);
 
+   public abstract boolean isValid(T var1);
+
    public static <T> VaultGearAttributeType<T> of(
       BiConsumer<BitBuffer, T> writer,
       Function<BitBuffer, T> reader,
@@ -56,6 +59,19 @@ public abstract class VaultGearAttributeType<T> implements IBitSerializer<T> {
    }
 
    public static <T> VaultGearAttributeType<T> of(
+      BiConsumer<BitBuffer, T> writer,
+      Function<BitBuffer, T> reader,
+      BiConsumer<ByteBuf, T> netWriter,
+      Function<ByteBuf, T> netReader,
+      Function<T, JsonElement> serializer,
+      Function<Tag, T> nbtRead,
+      Function<T, Tag> nbtWrite,
+      Function<Object, T> valueCast
+   ) {
+      return of(writer, reader, netWriter, netReader, serializer, nbtRead, nbtWrite, valueCast, value -> true);
+   }
+
+   public static <T> VaultGearAttributeType<T> of(
       final BiConsumer<BitBuffer, T> writer,
       final Function<BitBuffer, T> reader,
       final BiConsumer<ByteBuf, T> netWriter,
@@ -63,7 +79,8 @@ public abstract class VaultGearAttributeType<T> implements IBitSerializer<T> {
       final Function<T, JsonElement> serializer,
       final Function<Tag, T> nbtRead,
       final Function<T, Tag> nbtWrite,
-      final Function<Object, T> valueCast
+      final Function<Object, T> valueCast,
+      final Predicate<T> validCheck
    ) {
       return new VaultGearAttributeType<T>() {
          @Override
@@ -104,6 +121,11 @@ public abstract class VaultGearAttributeType<T> implements IBitSerializer<T> {
          @Override
          public T cast(Object value) {
             return valueCast.apply(value);
+         }
+
+         @Override
+         public boolean isValid(T value) {
+            return validCheck.test(value);
          }
       };
    }
@@ -166,7 +188,9 @@ public abstract class VaultGearAttributeType<T> implements IBitSerializer<T> {
          ByteBuf::readBoolean,
          JsonPrimitive::new,
          stringTag(Boolean::parseBoolean),
-         flag -> StringTag.valueOf(Boolean.toString(flag))
+         flag -> StringTag.valueOf(Boolean.toString(flag)),
+         value -> (Boolean)value,
+         Boolean::booleanValue
       );
    }
 

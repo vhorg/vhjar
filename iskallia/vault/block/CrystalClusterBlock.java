@@ -9,6 +9,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.model.RawCrystalModel;
+import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.List;
@@ -148,6 +149,7 @@ public class CrystalClusterBlock extends Block implements SimpleWaterloggedBlock
          int level = entity instanceof Player player ? PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player).getVaultLevel() : 0;
          crystal.setLevel(level);
          crystal.setModel(new RawCrystalModel());
+         crystal.setObjective(new EmptyCrystalObjective());
          crystal.setTheme(new PoolCrystalTheme(VaultMod.id("raw")));
 
          for (VaultModifier<?> modifier : ModConfigs.VAULT_MODIFIER_POOLS.getRandom(VaultMod.id("raw"), level, JavaRandom.ofNanoTime())) {

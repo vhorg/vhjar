@@ -22,6 +22,8 @@ public class VaultChestModel extends Model {
    public static final ModelLayerLocation PRESENT_LOCATION = new ModelLayerLocation(VaultMod.id("present_chest"), "main");
    public static final ModelLayerLocation STRONGBOX_LOCATION = new ModelLayerLocation(VaultMod.id("strongbox_chest"), "main");
    public static final ModelLayerLocation LIVING_STRONGBOX_LOCATION = new ModelLayerLocation(VaultMod.id("living_strongbox_chest"), "main");
+   public static final ModelLayerLocation HARDENED_LOCATION = new ModelLayerLocation(VaultMod.id("hardened_chest"), "main");
+   public static final ModelLayerLocation FLESH_LOCATION = new ModelLayerLocation(VaultMod.id("flesh_chest"), "main");
    private final ModelPart chest;
    private final ModelPart base;
    private final ModelPart lid;
@@ -1122,6 +1124,132 @@ public class VaultChestModel extends Model {
          PartPose.offset(0.0F, 0.0F, 0.0F)
       );
       PartDefinition bone = base.addOrReplaceChild("bone", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
+      return LayerDefinition.create(meshdefinition, 128, 128);
+   }
+
+   public static LayerDefinition createHardenedLayer() {
+      MeshDefinition meshdefinition = new MeshDefinition();
+      PartDefinition partdefinition = meshdefinition.getRoot();
+      PartDefinition chest = partdefinition.addOrReplaceChild("chest", CubeListBuilder.create(), PartPose.offset(8.0F, 8.0F, 8.0F));
+      PartDefinition base = chest.addOrReplaceChild(
+         "base",
+         CubeListBuilder.create()
+            .texOffs(48, 4)
+            .addBox(9.5F, 0.0F, 0.0F, 4.0F, 6.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 0)
+            .addBox(0.0F, 6.0F, 0.0F, 16.0F, 4.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 44)
+            .addBox(0.75F, -0.25F, 0.75F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 38)
+            .addBox(0.75F, -0.25F, 12.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 26)
+            .addBox(12.25F, -0.25F, 12.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 0)
+            .addBox(12.25F, -0.25F, 0.75F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(48, 26)
+            .addBox(2.5F, 0.0F, 0.0F, 4.0F, 6.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 38)
+            .addBox(1.0F, 0.0F, 1.0F, 14.0F, 10.0F, 14.0F, new CubeDeformation(0.0F)),
+         PartPose.offset(-8.0F, -8.0F, -8.0F)
+      );
+      PartDefinition lid = chest.addOrReplaceChild(
+         "lid",
+         CubeListBuilder.create()
+            .texOffs(42, 38)
+            .addBox(7.0F, -2.0F, 15.0F, 2.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 48)
+            .addBox(1.0F, 0.0F, 0.0F, 14.0F, 5.0F, 14.0F, new CubeDeformation(0.0F))
+            .texOffs(24, 67)
+            .addBox(2.5F, 2.0F, -1.0F, 4.0F, 4.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 20)
+            .addBox(0.0F, 0.0F, -1.0F, 16.0F, 2.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(48, 6)
+            .addBox(0.75F, 2.25F, 11.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(48, 0)
+            .addBox(0.75F, 2.25F, -0.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 20)
+            .addBox(12.25F, 2.25F, 11.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 6)
+            .addBox(12.25F, 2.25F, -0.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 62)
+            .addBox(9.5F, 2.0F, -1.0F, 4.0F, 4.0F, 16.0F, new CubeDeformation(0.0F)),
+         PartPose.offset(-8.0F, 1.0F, -7.0F)
+      );
+      return LayerDefinition.create(meshdefinition, 128, 128);
+   }
+
+   public static LayerDefinition createFleshLayer() {
+      MeshDefinition meshdefinition = new MeshDefinition();
+      PartDefinition partdefinition = meshdefinition.getRoot();
+      PartDefinition chest = partdefinition.addOrReplaceChild("chest", CubeListBuilder.create(), PartPose.offset(0.0F, 24.0F, 0.0F));
+      PartDefinition base = chest.addOrReplaceChild(
+         "base",
+         CubeListBuilder.create()
+            .texOffs(0, 38)
+            .addBox(1.0F, 0.0F, 1.0F, 14.0F, 10.0F, 14.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 0)
+            .addBox(0.0F, 6.0F, 0.0F, 16.0F, 4.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 44)
+            .addBox(0.75F, -0.25F, 0.75F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 38)
+            .addBox(0.75F, -0.25F, 12.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 26)
+            .addBox(12.25F, -0.25F, 12.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 0)
+            .addBox(12.25F, -0.25F, 0.75F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(48, 26)
+            .addBox(2.5F, 0.0F, 0.0F, 4.0F, 6.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(48, 4)
+            .addBox(9.5F, 0.0F, 0.0F, 4.0F, 6.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(74, 86)
+            .addBox(5.0F, 8.0F, 5.0F, 6.0F, 5.0F, 6.0F, new CubeDeformation(0.0F)),
+         PartPose.offset(0.0F, -24.0F, 0.0F)
+      );
+      PartDefinition lid = chest.addOrReplaceChild(
+         "lid",
+         CubeListBuilder.create()
+            .texOffs(42, 38)
+            .addBox(5.0F, -2.0F, 15.0F, 2.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 38)
+            .addBox(1.0F, -2.0F, 15.0F, 2.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 38)
+            .addBox(13.0F, -2.0F, 15.0F, 2.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(10, 10)
+            .addBox(16.0F, -2.0F, 12.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(10, 10)
+            .addBox(16.0F, -2.0F, 8.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(10, 10)
+            .addBox(16.0F, -2.0F, 4.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(10, 10)
+            .addBox(16.0F, -2.0F, 0.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(10, 10)
+            .addBox(-1.0F, -2.0F, 4.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(10, 10)
+            .addBox(-1.0F, -2.0F, 12.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(10, 10)
+            .addBox(-1.0F, -2.0F, 8.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(10, 10)
+            .addBox(-1.0F, -2.0F, 0.0F, 1.0F, 4.0F, 2.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 38)
+            .addBox(9.0F, -2.0F, 15.0F, 2.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+            .texOffs(42, 48)
+            .addBox(1.0F, 0.0F, 0.0F, 14.0F, 5.0F, 14.0F, new CubeDeformation(0.0F))
+            .texOffs(24, 67)
+            .addBox(2.5F, 2.0F, -1.0F, 4.0F, 4.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 62)
+            .addBox(9.5F, 2.0F, -1.0F, 4.0F, 4.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 20)
+            .addBox(0.0F, 0.0F, -1.0F, 16.0F, 2.0F, 16.0F, new CubeDeformation(0.0F))
+            .texOffs(48, 6)
+            .addBox(0.75F, 2.25F, 11.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(48, 0)
+            .addBox(0.75F, 2.25F, -0.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 20)
+            .addBox(12.25F, 2.25F, 11.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F))
+            .texOffs(0, 6)
+            .addBox(12.25F, 2.25F, -0.25F, 3.0F, 3.0F, 3.0F, new CubeDeformation(0.0F)),
+         PartPose.offset(0.0F, -15.0F, 1.0F)
+      );
       return LayerDefinition.create(meshdefinition, 128, 128);
    }
 

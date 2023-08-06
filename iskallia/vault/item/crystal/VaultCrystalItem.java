@@ -12,6 +12,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
 import iskallia.vault.item.crystal.model.RawCrystalModel;
+import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.item.tool.IManualModelLoading;
 import java.util.HashMap;
@@ -81,6 +82,7 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
          this.addCrystal(items, crystal -> crystal.setLayout(new ClassicInfiniteCrystalLayout(1)));
          this.addCrystal(items, crystal -> {
             crystal.setModel(new RawCrystalModel());
+            crystal.setObjective(new EmptyCrystalObjective());
             crystal.setTheme(new PoolCrystalTheme(VaultMod.id("raw")));
          });
       }

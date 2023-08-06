@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "the_vault:block/ornate_block_velvet_pillar_top",
+    "side": "the_vault:block/ornate_block_velvet_pillar_center"
+  }
+}

@@ -13,8 +13,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Map.Entry;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -332,6 +334,44 @@ public class MiscUtils {
    @Nullable
    public static <T> T getRandomEntry(T... entries) {
       return getRandomEntry(Lists.newArrayList(entries), rand);
+   }
+
+   public static <K, V> V getRandomValueFromMap(Map<K, V> map) {
+      if (map.isEmpty()) {
+         return null;
+      } else {
+         int randomIndex = new Random().nextInt(map.size());
+         int currentIndex = 0;
+
+         for (V value : map.values()) {
+            if (currentIndex == randomIndex) {
+               return value;
+            }
+
+            currentIndex++;
+         }
+
+         return null;
+      }
+   }
+
+   public static <K, V> Entry<K, V> getRandomMapEntry(Map<K, V> map) {
+      if (map.isEmpty()) {
+         return null;
+      } else {
+         int randomIndex = new Random().nextInt(map.size());
+         int currentIndex = 0;
+
+         for (Entry<K, V> entry : map.entrySet()) {
+            if (currentIndex == randomIndex) {
+               return entry;
+            }
+
+            currentIndex++;
+         }
+
+         return null;
+      }
    }
 
    @Nullable

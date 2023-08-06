@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ww",
+    "ww"
+  ],
+  "key": {
+    "w": {
+      "item": "the_vault:topaz_shard"
+    }
+  },
+  "result": {
+    "item": "the_vault:topaz_block"
+  }
+}

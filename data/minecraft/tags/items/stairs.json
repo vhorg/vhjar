@@ -2,6 +2,8 @@
     "replace": false,
     "values": [
         "the_vault:chromatic_stairs",
+        "the_vault:wooden_stairs",
+        "the_vault:overgrown_wooden_stairs",
         "the_vault:vault_stone_stairs"
     ]
 }

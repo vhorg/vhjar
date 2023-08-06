@@ -13,6 +13,7 @@ import iskallia.vault.client.gui.framework.element.LabelElement;
 import iskallia.vault.client.gui.framework.element.NineSliceElement;
 import iskallia.vault.client.gui.framework.element.SlotsElement;
 import iskallia.vault.client.gui.framework.element.TabElement;
+import iskallia.vault.client.gui.framework.element.TextInputElement;
 import iskallia.vault.client.gui.framework.element.TextureAtlasElement;
 import iskallia.vault.client.gui.framework.element.VerticalScrollClipContainer;
 import iskallia.vault.client.gui.framework.element.spi.AbstractSpatialElement;
@@ -61,26 +62,17 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.FastColor.ARGB32;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarContainer> {
+public abstract class SkillAltarScreen<C extends SkillAltarContainer> extends AbstractElementContainerScreen<C> {
    private static final int MAX_TABS = 5;
-   private final ButtonElement<?> loadButton;
-   private final ButtonElement<?> saveButton;
-   private final SkillAltarScreen.SkillView skillView;
-   private boolean isSaveLocked = true;
-   @Nullable
-   private List<Component> loadTooltip = null;
-   @Nullable
-   private List<Component> saveTooltip = null;
-   private final boolean abilitiesTalentsEqual = this.areAbilitiesAndTalentsEqual();
-   private final int numberOfOrbsRequired = ((SkillAltarContainer)this.getMenu()).getNumberOfRegretOrbsRequired();
 
-   public SkillAltarScreen(SkillAltarContainer container, Inventory inventory, Component title) {
+   protected SkillAltarScreen(C container, Inventory inventory, Component title) {
       super(container, inventory, title, ScreenRenderers.getBuffered(), ScreenTooltipRenderer::create);
       this.setGuiSize(Spatials.size(176, 216));
       this.addTabs();
@@ -92,65 +84,6 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
          (LabelElement)new LabelElement(Spatials.positionXY(8, 6), title.copy().withStyle(Style.EMPTY.withColor(-12632257)), LabelTextStyle.defaultStyle())
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
-      this.skillView = this.createSkillView();
-      this.addElement(this.skillView);
-      MutableComponent inventoryName = inventory.getDisplayName().copy();
-      inventoryName.withStyle(Style.EMPTY.withColor(-12632257));
-      this.addElement(
-         (LabelElement)new LabelElement(
-               Spatials.positionXY(8, ((SkillAltarContainer)this.getMenu()).getSlot(0).y - 12), inventoryName, LabelTextStyle.defaultStyle()
-            )
-            .layout((screen, gui, parent, world) -> world.translateXY(gui))
-      );
-      this.addElement((SlotsElement)new SlotsElement(this).layout((screen, gui, parent, world) -> world.positionXY(gui)));
-      ButtonElement.ButtonTextures buttonTextures = ScreenTextures.BUTTON_SKILL_ALTAR_SAVE_TEXTURES;
-      this.saveButton = this.addElement(
-         new ButtonElement(
-               Spatials.positionXY(this.imageWidth / 4 - buttonTextures.button().width() / 2, 99),
-               buttonTextures,
-               ((SkillAltarContainer)this.getMenu())::saveTemplate
-            )
-            .layout((screen, gui, parent, world) -> world.translateXY(gui))
-      );
-      this.saveButton
-         .setDisabled(
-            () -> this.playerHasNoAbilitiesAndTalents()
-               || !((SkillAltarContainer)this.getMenu()).isEmptyTemplate() && this.isSaveLocked
-               || this.abilitiesTalentsEqual
-               || ((SkillAltarContainer)this.getMenu()).isOpenedByNonOwner()
-         );
-      this.saveButton.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
-         tooltipRenderer.renderComponentTooltip(poseStack, this.getSaveButtonTooltip(), mouseX, mouseY, TooltipDirection.RIGHT);
-         return true;
-      });
-      if (!((SkillAltarContainer)this.getMenu()).isEmptyTemplate()) {
-         this.addElement(
-            new SkillAltarScreen.LockButton(Spatials.positionX(-10).translateXY(this.saveButton), () -> this.isSaveLocked = !this.isSaveLocked)
-               .layout((screen, gui, parent, world) -> world.translateXY(gui))
-         );
-      }
-
-      buttonTextures = ScreenTextures.BUTTON_SKILL_ALTAR_LOAD_TEXTURES;
-      this.loadButton = this.addElement(
-         new ButtonElement(
-               Spatials.positionXY(3 * (this.imageWidth / 4) - buttonTextures.button().width() / 2, 99),
-               buttonTextures,
-               () -> ((SkillAltarContainer)this.getMenu()).setPlayerAbilitiesAndTalentsFromTemplate(VaultBarOverlay.unspentRegretPoints)
-            )
-            .layout((screen, gui, parent, world) -> world.translateXY(gui))
-      );
-      this.loadButton
-         .setDisabled(
-            () -> ((SkillAltarContainer)this.getMenu()).isEmptyTemplate()
-               || this.abilitiesTalentsEqual
-               || ((SkillAltarContainer)this.getMenu()).isOpenedByNonOwner()
-               || ((SkillAltarContainer)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints) > 0
-               || ((SkillAltarContainer)this.getMenu()).getMissingSkillPointsClient() > 0
-         );
-      this.loadButton.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
-         tooltipRenderer.renderComponentTooltip(poseStack, this.getLoadButtonTooltip(), mouseX, mouseY, TooltipDirection.RIGHT);
-         return true;
-      });
    }
 
    public static TextureAtlasRegion getSkillIcon(SkillAltarData.SkillIcon icon) {
@@ -169,135 +102,49 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
       return ScreenTextures.TAB_ICON_ABILITIES;
    }
 
-   private boolean playerHasNoAbilitiesAndTalents() {
-      return this.getPlayerAbilities().isEmpty() && this.getPlayerTalents().isEmpty();
-   }
-
-   private List<Component> getSaveButtonTooltip() {
-      if (this.saveTooltip != null) {
-         return this.saveTooltip;
-      } else {
-         this.saveTooltip = new ArrayList<>();
-         if (((SkillAltarContainer)this.getMenu()).isOpenedByNonOwner()) {
-            this.saveTooltip.add(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save.not_owner").withStyle(ChatFormatting.RED));
+   private void addTabs() {
+      for (AtomicInteger i = new AtomicInteger(0); i.get() < Math.min(5, ((SkillAltarContainer)this.getMenu()).getSkillIcons().size() + 1); i.incrementAndGet()) {
+         int templateIndex = i.get();
+         if (templateIndex == ((SkillAltarContainer)this.getMenu()).getTemplateIndex()) {
+            this.addSelectedTab();
+         } else if (templateIndex < ((SkillAltarContainer)this.getMenu()).getSkillIcons().size()) {
+            SkillAltarData.SkillIcon icon = ((SkillAltarContainer)this.getMenu()).getSkillIcons().get(templateIndex);
+            this.addElement(createTab(false, getSkillIcon(icon), 4 + templateIndex * 31, () -> this.openTab(templateIndex)));
          } else {
-            if (this.playerHasNoAbilitiesAndTalents()) {
-               this.saveTooltip = List.of(
-                  new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save.no_abilities_talents").withStyle(ChatFormatting.RED)
-               );
-               return this.saveTooltip;
-            }
-
-            if (this.abilitiesTalentsEqual) {
-               this.saveTooltip = List.of(
-                  new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save.same_abilities_talents").withStyle(ChatFormatting.YELLOW)
-               );
-               return this.saveTooltip;
-            }
-
-            if (!((SkillAltarContainer)this.getMenu()).isEmptyTemplate() && this.isSaveLocked) {
-               this.saveTooltip = List.of(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save.unlock_required").withStyle(ChatFormatting.RED));
-               return this.saveTooltip;
-            }
-
-            this.saveTooltip.add(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save"));
-         }
-
-         List<TieredSkill> templateAbilities = ((SkillAltarContainer)this.getMenu()).getTemplate() != null
-            ? this.getTemplateAbilities()
-            : Collections.emptyList();
-         List<TieredSkill> templateTalents = ((SkillAltarContainer)this.getMenu()).getTemplate() != null ? this.getTemplateTalents() : Collections.emptyList();
-         this.saveTooltip.addAll(this.getSkillDifferencesTooltip(templateAbilities, this.getPlayerAbilities(), templateTalents, this.getPlayerTalents()));
-         return this.saveTooltip;
-      }
-   }
-
-   private List<TieredSkill> getTemplateTalents() {
-      return ((SkillAltarContainer)this.getMenu()).getTemplate().getTalents().getAll(TieredSkill.class, TieredSkill::isUnlocked);
-   }
-
-   private List<TieredSkill> getTemplateAbilities() {
-      return ((SkillAltarContainer)this.getMenu())
-         .getTemplate()
-         .getAbilities()
-         .getAll(SpecializedSkill.class, SpecializedSkill::isUnlocked)
-         .stream()
-         .map(SpecializedSkill::getSpecialization)
-         .map(TieredSkill.class::cast)
-         .toList();
-   }
-
-   private List<TieredSkill> getPlayerTalents() {
-      return ClientTalentData.getLearnedTalentNodes();
-   }
-
-   private List<TieredSkill> getPlayerAbilities() {
-      return ClientAbilityData.getLearnedAbilities();
-   }
-
-   private List<Component> getLoadButtonTooltip() {
-      if (this.loadTooltip != null) {
-         return this.loadTooltip;
-      } else {
-         this.loadTooltip = new ArrayList<>();
-         if (((SkillAltarContainer)this.getMenu()).isOpenedByNonOwner()) {
-            this.loadTooltip.add(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load.not_owner").withStyle(ChatFormatting.RED));
-         } else {
-            if (((SkillAltarContainer)this.getMenu()).isEmptyTemplate()) {
-               this.loadTooltip = List.of(
-                  new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load.no_abilities_talents").withStyle(ChatFormatting.RED)
-               );
-               return this.loadTooltip;
-            }
-
-            if (this.abilitiesTalentsEqual) {
-               this.loadTooltip = List.of(
-                  new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load.same_abilities_talents").withStyle(ChatFormatting.YELLOW)
-               );
-               return this.loadTooltip;
-            }
-
-            if (((SkillAltarContainer)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints) > 0) {
-               this.loadTooltip
-                  .add(
-                     new TranslatableComponent(
-                           "screen.the_vault.skill_altar.tooltip.load.missing_orbs",
-                           new Object[]{((SkillAltarContainer)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints)}
-                        )
-                        .withStyle(ChatFormatting.RED)
-                  );
-            } else if (((SkillAltarContainer)this.getMenu()).getMissingSkillPointsClient() > 0) {
-               this.loadTooltip
-                  .add(
-                     new TranslatableComponent(
-                           "screen.the_vault.skill_altar.tooltip.load.missing_skill_points",
-                           new Object[]{((SkillAltarContainer)this.getMenu()).getMissingSkillPointsClient()}
-                        )
-                        .withStyle(ChatFormatting.RED)
-                  );
-            } else {
-               this.loadTooltip.add(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load"));
-               this.loadTooltip
-                  .add(
-                     new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load.cost", new Object[]{this.numberOfOrbsRequired})
-                        .withStyle(ChatFormatting.DARK_GRAY)
-                  );
-            }
-         }
-
-         if (((SkillAltarContainer)this.getMenu()).isEmptyTemplate()) {
-            return this.loadTooltip;
-         } else {
-            this.loadTooltip
-               .addAll(
-                  this.getSkillDifferencesTooltip(this.getPlayerAbilities(), this.getTemplateAbilities(), this.getPlayerTalents(), this.getTemplateTalents())
-               );
-            return this.loadTooltip;
+            this.addElement(createTab(false, ScreenTextures.TAB_ICON_ABILITIES, 4 + templateIndex * 31, () -> this.openTab(templateIndex)));
          }
       }
    }
 
-   private List<Component> getSkillDifferencesTooltip(
+   private void openTab(int templateIndex) {
+      if (this instanceof SkillAltarScreen.Default) {
+         ((SkillAltarContainer)this.getMenu()).openTab(templateIndex);
+      } else {
+         ((SkillAltarContainer)this.getMenu()).openImportScreen(templateIndex);
+      }
+   }
+
+   private void addSelectedTab() {
+      SkillAltarData.SkillTemplate template = ((SkillAltarContainer)this.getMenu()).getTemplate();
+      TextureAtlasRegion icon = ScreenTextures.TAB_ICON_ABILITIES;
+      if (template != null && !template.getIcon().key().isEmpty()) {
+         icon = getSkillIcon(template.getIcon());
+      }
+
+      this.addElement(createTab(true, icon, 4 + ((SkillAltarContainer)this.getMenu()).getTemplateIndex() * 31, () -> {}));
+   }
+
+   private static TabElement<?> createTab(boolean selected, TextureAtlasRegion icon, int x, Runnable onClick) {
+      return new TabElement(
+            Spatials.positionXYZ(x, selected ? -28 : -24, 1),
+            new TextureAtlasElement(selected ? ScreenTextures.TAB_BACKGROUND_TOP_SELECTED : ScreenTextures.TAB_BACKGROUND_TOP),
+            new TextureAtlasElement(Spatials.positionXYZ(6, selected ? 9 : 5, 10), icon),
+            onClick
+         )
+         .layout((screen, gui, parent, world) -> world.translateXY(gui));
+   }
+
+   protected List<Component> getSkillDifferencesTooltip(
       List<TieredSkill> abilitiesA, List<TieredSkill> abilitiesB, List<TieredSkill> talentsA, List<TieredSkill> talentsB
    ) {
       List<Component> tooltip = new ArrayList<>();
@@ -357,70 +204,30 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
       return new TextComponent("+" + levelDifference + " ").withStyle(ChatFormatting.GREEN).append(new TextComponent(name).withStyle(nameStyle));
    }
 
-   private void addTabs() {
-      for (AtomicInteger i = new AtomicInteger(0); i.get() < Math.min(5, ((SkillAltarContainer)this.getMenu()).getSkillIcons().size() + 1); i.incrementAndGet()) {
-         int templateIndex = i.get();
-         if (templateIndex == ((SkillAltarContainer)this.getMenu()).getTemplateIndex()) {
-            this.addSelectedTab();
-         } else if (templateIndex < ((SkillAltarContainer)this.getMenu()).getSkillIcons().size()) {
-            SkillAltarData.SkillIcon icon = ((SkillAltarContainer)this.getMenu()).getSkillIcons().get(templateIndex);
-            this.addElement(createTab(false, getSkillIcon(icon), 4 + templateIndex * 31, () -> ((SkillAltarContainer)this.getMenu()).openTab(templateIndex)));
-         } else {
-            this.addElement(
-               createTab(false, ScreenTextures.TAB_ICON_ABILITIES, 4 + templateIndex * 31, () -> ((SkillAltarContainer)this.getMenu()).openTab(templateIndex))
-            );
-         }
-      }
-   }
-
-   private SkillAltarScreen.SkillView createSkillView() {
-      return new SkillAltarScreen.SkillView(
-            Spatials.positionXY(7, 16).size(177, 81),
-            ((SkillAltarContainer)this.getMenu()).getTemplate(),
-            icon -> ((SkillAltarContainer)this.getMenu()).updateTemplateIcon(icon)
-         )
-         .layout((screen, gui, parent, world) -> world.translateXY(gui));
-   }
-
-   private void addSelectedTab() {
+   protected List<TieredSkill> getTemplateTalents() {
       SkillAltarData.SkillTemplate template = ((SkillAltarContainer)this.getMenu()).getTemplate();
-      TextureAtlasRegion icon = ScreenTextures.TAB_ICON_ABILITIES;
-      if (template != null && !template.getIcon().key().isEmpty()) {
-         icon = getSkillIcon(template.getIcon());
-      }
-
-      this.addElement(createTab(true, icon, 4 + ((SkillAltarContainer)this.getMenu()).getTemplateIndex() * 31, () -> {}));
+      return template == null ? Collections.emptyList() : this.getTemplateTalents(template);
    }
 
-   private static TabElement<?> createTab(boolean selected, TextureAtlasRegion icon, int x, Runnable onClick) {
-      return new TabElement(
-            Spatials.positionXYZ(x, selected ? -28 : -24, 1),
-            new TextureAtlasElement(selected ? ScreenTextures.TAB_BACKGROUND_TOP_SELECTED : ScreenTextures.TAB_BACKGROUND_TOP),
-            new TextureAtlasElement(Spatials.positionXYZ(6, selected ? 9 : 5, 1), icon),
-            onClick
-         )
-         .layout((screen, gui, parent, world) -> world.translateXY(gui));
+   protected List<TieredSkill> getTemplateTalents(SkillAltarData.SkillTemplate template) {
+      return template.getTalents().getAll(TieredSkill.class, TieredSkill::isUnlocked);
    }
 
-   @Override
-   public void mouseMoved(double mouseX, double mouseY) {
-      super.mouseMoved(mouseX, mouseY);
-      if (this.loadTooltip != null && !this.loadButton.isMouseOver(mouseX, mouseY)) {
-         this.loadTooltip = null;
-      } else if (this.saveTooltip != null && !this.saveButton.isMouseOver(mouseX, mouseY)) {
-         this.saveTooltip = null;
-      }
-   }
-
-   public boolean areAbilitiesAndTalentsEqual() {
+   protected List<TieredSkill> getTemplateAbilities() {
       SkillAltarData.SkillTemplate template = ((SkillAltarContainer)this.getMenu()).getTemplate();
-      return template == null
-         ? false
-         : this.areSkillsEqual(this.getPlayerAbilities(), this.getTemplateAbilities())
-            && this.areSkillsEqual(this.getPlayerTalents(), this.getTemplateTalents());
+      return template == null ? Collections.emptyList() : this.getTemplateAbilities(template);
    }
 
-   private boolean areSkillsEqual(List<TieredSkill> skillsA, List<TieredSkill> skillsB) {
+   protected List<TieredSkill> getTemplateAbilities(SkillAltarData.SkillTemplate template) {
+      return template.getAbilities()
+         .getAll(SpecializedSkill.class, SpecializedSkill::isUnlocked)
+         .stream()
+         .map(SpecializedSkill::getSpecialization)
+         .map(TieredSkill.class::cast)
+         .toList();
+   }
+
+   protected boolean areSkillsEqual(List<TieredSkill> skillsA, List<TieredSkill> skillsB) {
       if (skillsA.size() != skillsB.size()) {
          return false;
       } else {
@@ -437,16 +244,6 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
 
          return true;
       }
-   }
-
-   protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType clickType) {
-      super.slotClicked(slot, slotId, mouseButton, clickType);
-      this.loadTooltip = null;
-   }
-
-   public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
-      this.skillView.stopDragging();
-      return super.mouseReleased(pMouseX, pMouseY, pButton);
    }
 
    private static class AbilityElement extends AbstractSpatialElement<SkillAltarScreen.AbilityElement> implements IRenderedElement, IGuiEventElement {
@@ -501,18 +298,422 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
       }
    }
 
-   private class LockButton extends ButtonElement<SkillAltarScreen.LockButton> {
-      public LockButton(IPosition position, Runnable onClick) {
-         super(position, ScreenTextures.BUTTON_TOGGLE_OFF_TEXTURES, onClick);
+   public static class Default extends SkillAltarScreen<SkillAltarContainer.Default> {
+      private final ButtonElement<?> loadButton;
+      private final ButtonElement<?> saveButton;
+      private final SkillAltarScreen.SkillView skillView;
+      private boolean isSaveLocked = true;
+      @Nullable
+      private List<Component> loadTooltip = null;
+      @Nullable
+      private List<Component> saveTooltip = null;
+      private final boolean abilitiesTalentsEqual;
+      private final int numberOfOrbsRequired;
+      private String overlayMessageString;
+      private int overlayMessageTime;
+
+      public Default(SkillAltarContainer.Default container, Inventory inventory, Component title) {
+         super(container, inventory, title);
+         MutableComponent inventoryName = inventory.getDisplayName().copy();
+         inventoryName.withStyle(Style.EMPTY.withColor(-12632257));
+         this.addElement(
+            (LabelElement)new LabelElement(
+                  Spatials.positionXY(8, ((SkillAltarContainer.Default)this.getMenu()).getSlot(0).y - 12), inventoryName, LabelTextStyle.defaultStyle()
+               )
+               .layout((screen, gui, parent, world) -> world.translateXY(gui))
+         );
+         this.abilitiesTalentsEqual = this.areAbilitiesAndTalentsEqual();
+         this.numberOfOrbsRequired = ((SkillAltarContainer.Default)this.getMenu()).getNumberOfRegretOrbsRequired();
+         this.skillView = this.createSkillView();
+         this.addElement(this.skillView);
+         this.addElement((SlotsElement)new SlotsElement(this).layout((screen, gui, parent, world) -> world.positionXY(gui)));
+         ButtonElement.ButtonTextures buttonTextures = ScreenTextures.BUTTON_SKILL_ALTAR_SAVE_TEXTURES;
+         this.saveButton = this.addElement(
+            new ButtonElement(
+                  Spatials.positionXY(this.imageWidth / 4 - buttonTextures.button().width() / 2, 99),
+                  buttonTextures,
+                  ((SkillAltarContainer.Default)this.getMenu())::saveTemplate
+               )
+               .layout((screen, gui, parent, world) -> world.translateXY(gui))
+         );
+         this.saveButton
+            .setDisabled(
+               () -> this.playerHasNoAbilitiesAndTalents()
+                  || !((SkillAltarContainer.Default)this.getMenu()).isEmptyTemplate() && this.isSaveLocked
+                  || this.abilitiesTalentsEqual
+                  || ((SkillAltarContainer.Default)this.getMenu()).isOpenedByNonOwner()
+            );
+         this.saveButton.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+            tooltipRenderer.renderComponentTooltip(poseStack, this.getSaveButtonTooltip(), mouseX, mouseY, TooltipDirection.RIGHT);
+            return true;
+         });
+         if (!((SkillAltarContainer.Default)this.getMenu()).isEmptyTemplate()) {
+            this.addElement(
+               new SkillAltarScreen.Default.LockButton(Spatials.positionX(-10).translateXY(this.saveButton), () -> this.isSaveLocked = !this.isSaveLocked)
+                  .layout((screen, gui, parent, world) -> world.translateXY(gui))
+            );
+         }
+
+         buttonTextures = ScreenTextures.BUTTON_SKILL_ALTAR_LOAD_TEXTURES;
+         this.loadButton = this.addElement(
+            new ButtonElement(
+                  Spatials.positionXY(3 * (this.imageWidth / 4) - buttonTextures.button().width() / 2, 99),
+                  buttonTextures,
+                  () -> ((SkillAltarContainer.Default)this.getMenu()).setPlayerAbilitiesAndTalentsFromTemplate(VaultBarOverlay.unspentRegretPoints)
+               )
+               .layout((screen, gui, parent, world) -> world.translateXY(gui))
+         );
+         this.loadButton
+            .setDisabled(
+               () -> ((SkillAltarContainer.Default)this.getMenu()).isEmptyTemplate()
+                  || this.abilitiesTalentsEqual
+                  || ((SkillAltarContainer.Default)this.getMenu()).isOpenedByNonOwner()
+                  || ((SkillAltarContainer.Default)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints) > 0
+                  || ((SkillAltarContainer.Default)this.getMenu()).getMissingSkillPointsClient() > 0
+            );
+         this.loadButton.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+            tooltipRenderer.renderComponentTooltip(poseStack, this.getLoadButtonTooltip(), mouseX, mouseY, TooltipDirection.RIGHT);
+            return true;
+         });
+         buttonTextures = ScreenTextures.BUTTON_SKILL_ALTAR_SHARE_TEXTURES;
+         ((ButtonElement)((ButtonElement)this.addElement((ButtonElement)new ButtonElement(Spatials.positionXY(this.imageWidth + 2, 7), buttonTextures, () -> {
+               ((SkillAltarContainer.Default)this.getMenu()).shareInChat();
+               this.overlayMessageString = "Shared in chat";
+               this.overlayMessageTime = 80;
+            }).layout((screen, gui, parent, world) -> world.translateXY(gui)))).tooltip(() -> new TextComponent("Share in chat")))
+            .setDisabled(((SkillAltarContainer.Default)this.getMenu()).isEmptyTemplate() || ((SkillAltarContainer.Default)this.getMenu()).isOpenedByNonOwner());
+         buttonTextures = ScreenTextures.BUTTON_SKILL_ALTAR_COPY_TEXTURES;
+         ((ButtonElement)((ButtonElement)this.addElement((ButtonElement)new ButtonElement(Spatials.positionXY(this.imageWidth + 2, 29), buttonTextures, () -> {
+               ((SkillAltarContainer.Default)this.getMenu()).copyToClipboard();
+               this.overlayMessageString = "Copied to clipboard";
+               this.overlayMessageTime = 80;
+            }).layout((screen, gui, parent, world) -> world.translateXY(gui)))).tooltip(() -> new TextComponent("Copy to clipboard")))
+            .setDisabled(((SkillAltarContainer.Default)this.getMenu()).isEmptyTemplate() || ((SkillAltarContainer.Default)this.getMenu()).isOpenedByNonOwner());
+         buttonTextures = ScreenTextures.BUTTON_SKILL_ALTAR_IMPORT_TEXTURES;
+         ((ButtonElement)((ButtonElement)this.addElement(
+                  (ButtonElement)new ButtonElement(
+                        Spatials.positionXY(this.imageWidth + 2, 51),
+                        buttonTextures,
+                        () -> ((SkillAltarContainer.Default)this.getMenu()).openImportScreen(((SkillAltarContainer.Default)this.getMenu()).getTemplateIndex())
+                     )
+                     .layout((screen, gui, parent, world) -> world.translateXY(gui))
+               ))
+               .tooltip(() -> new TextComponent("Import")))
+            .setDisabled(((SkillAltarContainer.Default)this.getMenu()).isOpenedByNonOwner());
+      }
+
+      private SkillAltarScreen.SkillView createSkillView() {
+         return new SkillAltarScreen.SkillView(
+               Spatials.positionXY(7, 16).size(177, 81),
+               ((SkillAltarContainer.Default)this.getMenu()).getTemplate(),
+               icon -> ((SkillAltarContainer.Default)this.getMenu()).updateTemplateIcon(icon)
+            )
+            .layout((screen, gui, parent, world) -> world.translateXY(gui));
+      }
+
+      private boolean playerHasNoAbilitiesAndTalents() {
+         return this.getPlayerAbilities().isEmpty() && this.getPlayerTalents().isEmpty();
+      }
+
+      private List<TieredSkill> getPlayerAbilities() {
+         return ClientAbilityData.getLearnedAbilities();
+      }
+
+      private List<TieredSkill> getPlayerTalents() {
+         return ClientTalentData.getLearnedTalentNodes();
+      }
+
+      private List<Component> getLoadButtonTooltip() {
+         if (this.loadTooltip != null) {
+            return this.loadTooltip;
+         } else {
+            this.loadTooltip = new ArrayList<>();
+            if (((SkillAltarContainer.Default)this.getMenu()).isOpenedByNonOwner()) {
+               this.loadTooltip.add(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load.not_owner").withStyle(ChatFormatting.RED));
+            } else {
+               if (((SkillAltarContainer.Default)this.getMenu()).isEmptyTemplate()) {
+                  this.loadTooltip = List.of(
+                     new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load.no_abilities_talents").withStyle(ChatFormatting.RED)
+                  );
+                  return this.loadTooltip;
+               }
+
+               if (this.abilitiesTalentsEqual) {
+                  this.loadTooltip = List.of(
+                     new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load.same_abilities_talents").withStyle(ChatFormatting.YELLOW)
+                  );
+                  return this.loadTooltip;
+               }
+
+               if (((SkillAltarContainer.Default)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints) > 0) {
+                  this.loadTooltip
+                     .add(
+                        new TranslatableComponent(
+                              "screen.the_vault.skill_altar.tooltip.load.missing_orbs",
+                              new Object[]{((SkillAltarContainer.Default)this.getMenu()).getNumberOfMissingRegretOrbs(VaultBarOverlay.unspentRegretPoints)}
+                           )
+                           .withStyle(ChatFormatting.RED)
+                     );
+               } else if (((SkillAltarContainer.Default)this.getMenu()).getMissingSkillPointsClient() > 0) {
+                  this.loadTooltip
+                     .add(
+                        new TranslatableComponent(
+                              "screen.the_vault.skill_altar.tooltip.load.missing_skill_points",
+                              new Object[]{((SkillAltarContainer.Default)this.getMenu()).getMissingSkillPointsClient()}
+                           )
+                           .withStyle(ChatFormatting.RED)
+                     );
+               } else {
+                  this.loadTooltip.add(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load"));
+                  this.loadTooltip
+                     .add(
+                        new TranslatableComponent("screen.the_vault.skill_altar.tooltip.load.cost", new Object[]{this.numberOfOrbsRequired})
+                           .withStyle(ChatFormatting.DARK_GRAY)
+                     );
+               }
+            }
+
+            if (((SkillAltarContainer.Default)this.getMenu()).isEmptyTemplate()) {
+               return this.loadTooltip;
+            } else {
+               this.loadTooltip
+                  .addAll(
+                     this.getSkillDifferencesTooltip(this.getPlayerAbilities(), this.getTemplateAbilities(), this.getPlayerTalents(), this.getTemplateTalents())
+                  );
+               return this.loadTooltip;
+            }
+         }
+      }
+
+      private List<Component> getSaveButtonTooltip() {
+         if (this.saveTooltip != null) {
+            return this.saveTooltip;
+         } else {
+            this.saveTooltip = new ArrayList<>();
+            if (((SkillAltarContainer.Default)this.getMenu()).isOpenedByNonOwner()) {
+               this.saveTooltip.add(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save.not_owner").withStyle(ChatFormatting.RED));
+            } else {
+               if (this.playerHasNoAbilitiesAndTalents()) {
+                  this.saveTooltip = List.of(
+                     new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save.no_abilities_talents").withStyle(ChatFormatting.RED)
+                  );
+                  return this.saveTooltip;
+               }
+
+               if (this.abilitiesTalentsEqual) {
+                  this.saveTooltip = List.of(
+                     new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save.same_abilities_talents").withStyle(ChatFormatting.YELLOW)
+                  );
+                  return this.saveTooltip;
+               }
+
+               if (!((SkillAltarContainer.Default)this.getMenu()).isEmptyTemplate() && this.isSaveLocked) {
+                  this.saveTooltip = List.of(
+                     new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save.unlock_required").withStyle(ChatFormatting.RED)
+                  );
+                  return this.saveTooltip;
+               }
+
+               this.saveTooltip.add(new TranslatableComponent("screen.the_vault.skill_altar.tooltip.save"));
+            }
+
+            List<TieredSkill> templateAbilities = ((SkillAltarContainer.Default)this.getMenu()).getTemplate() != null
+               ? this.getTemplateAbilities()
+               : Collections.emptyList();
+            List<TieredSkill> templateTalents = ((SkillAltarContainer.Default)this.getMenu()).getTemplate() != null
+               ? this.getTemplateTalents()
+               : Collections.emptyList();
+            this.saveTooltip.addAll(this.getSkillDifferencesTooltip(templateAbilities, this.getPlayerAbilities(), templateTalents, this.getPlayerTalents()));
+            return this.saveTooltip;
+         }
       }
 
       @Override
-      public void render(IElementRenderer renderer, @NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
-         ButtonElement.ButtonTextures textures = SkillAltarScreen.this.isSaveLocked
-            ? ScreenTextures.BUTTON_TOGGLE_OFF_TEXTURES
-            : ScreenTextures.BUTTON_TOGGLE_ON_TEXTURES;
-         TextureAtlasRegion texture = textures.selectTexture(this.isDisabled(), this.containsMouse(mouseX, mouseY), false);
-         renderer.render(texture, poseStack, this.worldSpatial);
+      public void mouseMoved(double mouseX, double mouseY) {
+         super.mouseMoved(mouseX, mouseY);
+         if (this.loadTooltip != null && !this.loadButton.isMouseOver(mouseX, mouseY)) {
+            this.loadTooltip = null;
+         } else if (this.saveTooltip != null && !this.saveButton.isMouseOver(mouseX, mouseY)) {
+            this.saveTooltip = null;
+         }
+      }
+
+      public boolean areAbilitiesAndTalentsEqual() {
+         SkillAltarData.SkillTemplate template = ((SkillAltarContainer.Default)this.getMenu()).getTemplate();
+         return template == null
+            ? false
+            : this.areSkillsEqual(this.getPlayerAbilities(), this.getTemplateAbilities())
+               && this.areSkillsEqual(this.getPlayerTalents(), this.getTemplateTalents());
+      }
+
+      protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType clickType) {
+         super.slotClicked(slot, slotId, mouseButton, clickType);
+         this.loadTooltip = null;
+      }
+
+      public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
+         this.skillView.stopDragging();
+         return super.mouseReleased(pMouseX, pMouseY, pButton);
+      }
+
+      @Override
+      public void render(@NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+         super.render(poseStack, mouseX, mouseY, partialTick);
+         this.showOverlayMessage(
+            poseStack, this.skillView.x() + this.skillView.width() / 2.0F - 8.0F, this.skillView.y() + this.skillView.height() / 2.0F, partialTick
+         );
+      }
+
+      private void showOverlayMessage(PoseStack poseStack, double x, double y, float partialTicks) {
+         if (this.overlayMessageString != null && this.overlayMessageTime > 0) {
+            float time = this.overlayMessageTime - partialTicks;
+            int opacity = (int)(time * 255.0F / 20.0F);
+            if (opacity > 255) {
+               opacity = 255;
+            }
+
+            if (opacity > 8) {
+               poseStack.pushPose();
+               poseStack.translate(x, y, 0.0);
+               RenderSystem.enableBlend();
+               RenderSystem.defaultBlendFunc();
+               int k1 = 16777215;
+               int k = opacity << 24 & 0xFF000000;
+               int width = this.font.width(this.overlayMessageString);
+               int i = -1157627904;
+               if (i != 0) {
+                  int j = -width / 2;
+                  int padding = 4;
+                  fill(poseStack, j - padding - 1, -5 - padding, j + width + padding, 5 + padding, ARGB32.multiply(i, 16777215 | k));
+               }
+
+               this.font.draw(poseStack, this.overlayMessageString, -width / 2.0F, -4.0F, k1 | k);
+               RenderSystem.disableBlend();
+               poseStack.popPose();
+            }
+         }
+
+         if (this.overlayMessageTime > 0) {
+            this.overlayMessageTime--;
+         } else if (this.overlayMessageString != null) {
+            this.overlayMessageString = null;
+         }
+      }
+
+      private class LockButton extends ButtonElement<SkillAltarScreen.Default.LockButton> {
+         public LockButton(IPosition position, Runnable onClick) {
+            super(position, ScreenTextures.BUTTON_TOGGLE_OFF_TEXTURES, onClick);
+         }
+
+         @Override
+         public void render(IElementRenderer renderer, @NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+            ButtonElement.ButtonTextures textures = Default.this.isSaveLocked
+               ? ScreenTextures.BUTTON_TOGGLE_OFF_TEXTURES
+               : ScreenTextures.BUTTON_TOGGLE_ON_TEXTURES;
+            TextureAtlasRegion texture = textures.selectTexture(this.isDisabled(), this.containsMouse(mouseX, mouseY), false);
+            renderer.render(texture, poseStack, this.worldSpatial);
+         }
+      }
+   }
+
+   public static class Import extends SkillAltarScreen<SkillAltarContainer.Import> {
+      private final ButtonElement<?> importButton;
+      private final TextInputElement<?> templateInput;
+      private final LabelElement<?> validationError;
+      private List<Component> importTooltip;
+      private SkillAltarData.DeserializationResult<SkillAltarData.SkillTemplate> templateDeserializationResult;
+
+      public Import(SkillAltarContainer.Import container, Inventory inventory, Component title) {
+         super(container, inventory, title);
+         int usableWidth = this.getGuiSpatial().width() - 14;
+         this.validationError = this.addElement(
+            new LabelElement(Spatials.positionXY(10, 50), Spatials.width(usableWidth - 10), LabelTextStyle.defaultStyle().wrap().shadow())
+               .layout((screen, gui, parent, world) -> world.translateXY(gui))
+         );
+         this.validationError.setVisible(false);
+         this.templateInput = this.addElement(
+            new TextInputElement(Spatials.positionXY(7, 18).size(Spatials.size(usableWidth, 12)), Minecraft.getInstance().font)
+         );
+         this.templateInput.setMaxLength(2000);
+         this.templateInput.layout((screen, gui, parent, world) -> world.translateXY(gui));
+         this.templateInput.onTextChanged(this::onInputChange);
+         ButtonElement.ButtonTextures buttonTextures = ScreenTextures.BUTTON_SKILL_ALTAR_IMPORT_TEXTURES;
+         this.importButton = this.addElement(
+            new ButtonElement(
+                  Spatials.positionXY(this.imageWidth - 7 - 18, 34),
+                  buttonTextures,
+                  () -> ((SkillAltarContainer.Import)this.getMenu()).importTemplate(this.templateInput.getInput())
+               )
+               .layout((screen, gui, parent, world) -> world.translateXY(gui))
+         );
+         this.importButton.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
+            tooltipRenderer.renderComponentTooltip(poseStack, this.getImportTooltip(), mouseX, mouseY, TooltipDirection.RIGHT);
+            return true;
+         });
+         this.importButton.setDisabled(true);
+         ((ButtonElement)this.addElement(
+               (ButtonElement)new ButtonElement(
+                     Spatials.positionXY(this.imageWidth + 2, 51),
+                     ScreenTextures.BUTTON_SKILL_ALTAR_BACK_TEXTURES,
+                     () -> ((SkillAltarContainer.Import)this.getMenu()).openTab(((SkillAltarContainer.Import)this.getMenu()).getTemplateIndex())
+                  )
+                  .layout((screen, gui, parent, world) -> world.translateXY(gui))
+            ))
+            .tooltip(() -> new TextComponent("Back"));
+      }
+
+      private void onInputChange(String text) {
+         this.importTooltip = null;
+         this.templateDeserializationResult = SkillAltarData.SkillTemplate.fromString(text);
+         boolean displayValidationError = !text.trim().isEmpty() && !this.templateDeserializationResult.valid();
+         if (displayValidationError) {
+            this.validationError.set(new TextComponent(this.templateDeserializationResult.message()).withStyle(ChatFormatting.RED));
+         }
+
+         this.validationError.setVisible(displayValidationError);
+         this.importButton
+            .setDisabled(
+               !this.templateDeserializationResult.valid()
+                  || ((SkillAltarContainer.Import)this.getMenu()).getTemplate() != null
+                     && this.areSkillsEqual(this.getTemplateAbilities(), this.getTemplateAbilities(this.templateDeserializationResult.deserializedValue()))
+                     && this.areSkillsEqual(this.getTemplateTalents(), this.getTemplateTalents(this.templateDeserializationResult.deserializedValue()))
+            );
+      }
+
+      private List<Component> getImportTooltip() {
+         if (this.importTooltip == null) {
+            this.importTooltip = new ArrayList<>();
+            this.importTooltip.add(new TextComponent("Import abilities and talents"));
+            if (this.templateDeserializationResult != null && this.templateDeserializationResult.valid()) {
+               if (this.areSkillsEqual(this.getTemplateAbilities(), this.getTemplateAbilities(this.templateDeserializationResult.deserializedValue()))
+                  && this.areSkillsEqual(this.getTemplateTalents(), this.getTemplateTalents(this.templateDeserializationResult.deserializedValue()))) {
+                  this.importTooltip.add(new TextComponent("Abilities and Talents match the saved template").withStyle(ChatFormatting.RED));
+               } else {
+                  this.importTooltip
+                     .addAll(
+                        this.getSkillDifferencesTooltip(
+                           this.getTemplateAbilities(),
+                           this.getTemplateAbilities(this.templateDeserializationResult.deserializedValue()),
+                           this.getTemplateTalents(),
+                           this.getTemplateTalents(this.templateDeserializationResult.deserializedValue())
+                        )
+                     );
+               }
+            } else {
+               this.importTooltip.add(new TextComponent("Invalid data in input field").withStyle(ChatFormatting.RED));
+            }
+         }
+
+         return this.importTooltip;
+      }
+
+      public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+         if (keyCode == 256) {
+            ((SkillAltarContainer.Import)this.getMenu()).openTab(((SkillAltarContainer.Import)this.getMenu()).getTemplateIndex());
+            return true;
+         } else {
+            return super.keyPressed(keyCode, scanCode, modifiers);
+         }
       }
    }
 
@@ -584,13 +785,29 @@ public class SkillAltarScreen extends AbstractElementContainerScreen<SkillAltarC
       }
 
       @Override
+      public boolean isMouseOver(double mouseX, double mouseY) {
+         return !this.verticalScrollBarElement.isMouseOver(mouseX, mouseY) && super.isMouseOver(mouseX, mouseY);
+      }
+
+      @Override
+      public boolean containsMouse(double x, double y) {
+         return !this.verticalScrollBarElement.containsMouse(x, y) && this.worldSpatial.contains(x, y);
+      }
+
+      @Override
       public boolean onMouseScrolled(double mouseX, double mouseY, double delta) {
          if (this.verticalScrollBarElement.isMouseOver(mouseX, mouseY)) {
             return false;
          } else {
-            this.verticalScrollBarElement.setValue((float)Mth.clamp(this.verticalScrollBarElement.getValue() - delta * 0.5, 0.0, 1.0));
-            this.onScrollbarValueChanged(this.verticalScrollBarElement.getValue());
-            return true;
+            double heightDiff = Math.max(this.innerContainerElement.height() - this.clipContainerElement.height(), 0);
+            if (heightDiff == 0.0) {
+               return false;
+            } else {
+               double change = Math.min(heightDiff, 10.0) / heightDiff * delta;
+               this.verticalScrollBarElement.setValue((float)Mth.clamp(this.verticalScrollBarElement.getValue() - change, 0.0, 1.0));
+               this.onScrollbarValueChanged(this.verticalScrollBarElement.getValue());
+               return true;
+            }
          }
       }
 

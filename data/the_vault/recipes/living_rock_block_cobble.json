@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ww",
+    "ww"
+  ],
+  "key": {
+    "w": {
+      "item": "the_vault:living_rock"
+    }
+  },
+  "result": {
+    "item": "the_vault:living_rock_block_cobble"
+  }
+}

@@ -30,6 +30,7 @@ import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
 import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
 import iskallia.vault.skill.ability.effect.JavelinSightAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldAbility;
+import iskallia.vault.skill.ability.effect.ManaShieldImplodeAbility;
 import iskallia.vault.skill.ability.effect.ManaShieldRetributionAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpAbility;
 import iskallia.vault.skill.ability.effect.MegaJumpBreakDownAbility;
@@ -184,6 +185,15 @@ public class ModAbilityLabelBindings {
             ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedDamageRadius()),
             "damage",
             ability -> AbilityLabelFormatters.percentTwoDecimalPlaces(ability.getPercentageDamageDealt())
+         )
+      );
+      register(
+         ManaShieldImplodeAbility.class,
+         Map.of(
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
+            "damage",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getPercentManaDealt())
          )
       );
       register(MegaJumpAbility.class, Map.of("rangeVertical", ability -> AbilityLabelFormatters.integer(ability.getUnmodifiedHeight())));

@@ -1,22 +1,22 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " e ",
-    "csc",
-    "crc"
+    "s s",
+    "cfc",
+    "cbc"
   ],
   "key": {
-    "r": {
-      "item": "the_vault:vault_recycler"
-    },
     "c": {
+      "item": "the_vault:chromatic_steel_ingot"
+    },
+    "b": {
       "item": "the_vault:black_chromatic_steel_ingot"
     },
-    "s": {
-      "item": "the_vault:soul_flame"
+    "f": {
+      "item": "minecraft:soul_campfire"
     },
-    "e": {
-      "item": "the_vault:eternal_soul"
+    "s": {
+      "item": "the_vault:soul_shard"
     }
   },
   "result": {

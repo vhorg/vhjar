@@ -41,6 +41,7 @@ public class ModAbilities {
    public static final String FARMER_ANIMAL = "Farmer_Animal";
    public static final String MANA_SHIELD = "Mana Shield";
    public static final String MANA_SHIELD_RETRIBUTION = "Mana Shield_Retribution";
+   public static final String MANA_SHIELD_IMPLODE = "Mana_Shield_Implode";
    public static final String TAUNT = "Taunt";
    public static final String TAUNT_REPEL = "Taunt_Repel";
    public static final String TAUNT_CHARM = "Taunt_Charm";

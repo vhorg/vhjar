@@ -37,6 +37,9 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       Map.entry(ModBlocks.ORNATE_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_ornate_chest"))),
       Map.entry(ModBlocks.TREASURE_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_treasure_chest"))),
       Map.entry(ModBlocks.ALTAR_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_altar_chest"))),
+      Map.entry(ModBlocks.HARDENED_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_hardened_chest"))),
+      Map.entry(ModBlocks.ENIGMA_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_enigma_chest"))),
+      Map.entry(ModBlocks.FLESH_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_flesh_chest"))),
       Map.entry(ModBlocks.GILDED_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_gilded_strongbox"))),
       Map.entry(ModBlocks.ORNATE_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_ornate_strongbox"))),
       Map.entry(ModBlocks.LIVING_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_living_strongbox"))),
@@ -45,7 +48,10 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       Map.entry(ModBlocks.LIVING_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_mossy_chest"))),
       Map.entry(ModBlocks.ORNATE_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_ornate_chest"))),
       Map.entry(ModBlocks.TREASURE_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_treasure_chest"))),
-      Map.entry(ModBlocks.ALTAR_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_altar_chest")))
+      Map.entry(ModBlocks.ALTAR_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_altar_chest"))),
+      Map.entry(ModBlocks.HARDENED_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_hardened_chest"))),
+      Map.entry(ModBlocks.ENIGMA_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_enigma_chest"))),
+      Map.entry(ModBlocks.FLESH_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_flesh_chest")))
    );
    public static final Map<Block, Material> PRESENT_MATERIAL_MAP = Map.ofEntries(
       Map.entry(ModBlocks.WOODEN_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange"))),
@@ -54,6 +60,9 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       Map.entry(ModBlocks.ORNATE_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/red"))),
       Map.entry(ModBlocks.TREASURE_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/pink"))),
       Map.entry(ModBlocks.ALTAR_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/cyan"))),
+      Map.entry(ModBlocks.HARDENED_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange"))),
+      Map.entry(ModBlocks.ENIGMA_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange"))),
+      Map.entry(ModBlocks.FLESH_CHEST, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange"))),
       Map.entry(ModBlocks.ORNATE_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_ornate_strongbox"))),
       Map.entry(ModBlocks.GILDED_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_gilded_strongbox"))),
       Map.entry(ModBlocks.LIVING_STRONGBOX, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/vault_living_strongbox"))),
@@ -62,7 +71,10 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       Map.entry(ModBlocks.LIVING_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/green"))),
       Map.entry(ModBlocks.ORNATE_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/red"))),
       Map.entry(ModBlocks.TREASURE_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/pink"))),
-      Map.entry(ModBlocks.ALTAR_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/cyan")))
+      Map.entry(ModBlocks.ALTAR_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/cyan"))),
+      Map.entry(ModBlocks.HARDENED_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange"))),
+      Map.entry(ModBlocks.ENIGMA_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange"))),
+      Map.entry(ModBlocks.FLESH_CHEST_PLACEABLE, new Material(Sheets.CHEST_SHEET, VaultMod.id("entity/chest/present/orange")))
    );
    private static final Map<Block, VaultChestModel> NORMAL_MODEL_MAP = new HashMap<>();
    private static final Map<Block, VaultChestModel> PRESENT_MODEL_MAP = new HashMap<>();
@@ -93,18 +105,26 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       VaultChestModel livingStrongbox = new VaultChestModel(context.bakeLayer(VaultChestModel.LIVING_STRONGBOX_LOCATION));
       new VaultChestModel(context.bakeLayer(VaultChestModel.SCAVENGER_LOCATION));
       VaultChestModel presentChest = new VaultChestModel(context.bakeLayer(VaultChestModel.PRESENT_LOCATION));
+      VaultChestModel hardenedChest = new VaultChestModel(context.bakeLayer(VaultChestModel.HARDENED_LOCATION));
+      VaultChestModel fleshChest = new VaultChestModel(context.bakeLayer(VaultChestModel.FLESH_LOCATION));
       NORMAL_MODEL_MAP.put(ModBlocks.TREASURE_CHEST, treasureChest);
       NORMAL_MODEL_MAP.put(ModBlocks.ORNATE_CHEST, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.ALTAR_CHEST, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.WOODEN_CHEST, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.GILDED_CHEST, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.LIVING_CHEST, livingChest);
+      NORMAL_MODEL_MAP.put(ModBlocks.HARDENED_CHEST, hardenedChest);
+      NORMAL_MODEL_MAP.put(ModBlocks.ENIGMA_CHEST, hardenedChest);
+      NORMAL_MODEL_MAP.put(ModBlocks.FLESH_CHEST, fleshChest);
       NORMAL_MODEL_MAP.put(ModBlocks.TREASURE_CHEST_PLACEABLE, treasureChest);
       NORMAL_MODEL_MAP.put(ModBlocks.ORNATE_CHEST_PLACEABLE, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.ALTAR_CHEST_PLACEABLE, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.WOODEN_CHEST_PLACEABLE, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.GILDED_CHEST_PLACEABLE, livingChest);
       NORMAL_MODEL_MAP.put(ModBlocks.LIVING_CHEST_PLACEABLE, livingChest);
+      NORMAL_MODEL_MAP.put(ModBlocks.HARDENED_CHEST_PLACEABLE, hardenedChest);
+      NORMAL_MODEL_MAP.put(ModBlocks.ENIGMA_CHEST_PLACEABLE, hardenedChest);
+      NORMAL_MODEL_MAP.put(ModBlocks.FLESH_CHEST_PLACEABLE, fleshChest);
       NORMAL_MODEL_MAP.put(ModBlocks.ORNATE_STRONGBOX, strongbox);
       NORMAL_MODEL_MAP.put(ModBlocks.GILDED_STRONGBOX, strongbox);
       NORMAL_MODEL_MAP.put(ModBlocks.LIVING_STRONGBOX, livingStrongbox);
@@ -114,12 +134,18 @@ public class VaultChestRenderer<T extends ChestBlockEntity> extends ChestRendere
       PRESENT_MODEL_MAP.put(ModBlocks.WOODEN_CHEST, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.GILDED_CHEST, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.LIVING_CHEST, presentChest);
+      PRESENT_MODEL_MAP.put(ModBlocks.HARDENED_CHEST, presentChest);
+      PRESENT_MODEL_MAP.put(ModBlocks.ENIGMA_CHEST, presentChest);
+      PRESENT_MODEL_MAP.put(ModBlocks.FLESH_CHEST, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.TREASURE_CHEST_PLACEABLE, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.ORNATE_CHEST_PLACEABLE, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.ALTAR_CHEST_PLACEABLE, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.WOODEN_CHEST_PLACEABLE, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.GILDED_CHEST_PLACEABLE, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.LIVING_CHEST_PLACEABLE, presentChest);
+      PRESENT_MODEL_MAP.put(ModBlocks.HARDENED_CHEST_PLACEABLE, presentChest);
+      PRESENT_MODEL_MAP.put(ModBlocks.ENIGMA_CHEST_PLACEABLE, presentChest);
+      PRESENT_MODEL_MAP.put(ModBlocks.FLESH_CHEST_PLACEABLE, presentChest);
       PRESENT_MODEL_MAP.put(ModBlocks.ORNATE_STRONGBOX, strongbox);
       PRESENT_MODEL_MAP.put(ModBlocks.GILDED_STRONGBOX, strongbox);
       PRESENT_MODEL_MAP.put(ModBlocks.LIVING_STRONGBOX, livingStrongbox);

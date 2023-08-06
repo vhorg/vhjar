@@ -142,6 +142,10 @@ public class NightVisionTrinket extends TrinketEffect<NightVisionTrinket.Config>
 
          Optional<TrinketEffect<?>> trinketEffect = TrinketItem.getTrinket(stack);
          if (trinketEffect.isPresent()) {
+            if (!trinketEffect.get().isUsable(stack, player)) {
+               return;
+            }
+
             if (player.tickCount % 10 != 0) {
                return;
             }
