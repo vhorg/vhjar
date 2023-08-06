@@ -71,6 +71,7 @@ public class TransmogTableBlock extends Block implements EntityBlock {
          1723692179382680874L,
          2256850891809661999L,
          -2007293558487436784L,
+         8695023214094801682L,
          -3018326060607023160L,
          -1295540691216318578L,
          5845844909483154124L,
