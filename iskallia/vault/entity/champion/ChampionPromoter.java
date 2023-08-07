@@ -25,21 +25,25 @@ import net.minecraftforge.network.PacketDistributor;
 import org.apache.commons.lang3.Range;
 
 public class ChampionPromoter {
+   private static final String NO_CHAMPION_TAG = "no_champion";
+
    public static void applyRandomChampion(LivingEntity entity) {
-      double chance = ModConfigs.CHAMPIONS.defaultChampionChance;
+      if (!entity.getTags().contains("no_champion")) {
+         double chance = ModConfigs.CHAMPIONS.defaultChampionChance;
 
-      for (Entry<EntityPredicate, Float> entry : ModConfigs.CHAMPIONS.entityChampionChance.entrySet()) {
-         EntityPredicate predicate = entry.getKey();
-         if (predicate.test(entity)) {
-            chance = entry.getValue().floatValue();
-            break;
+         for (Entry<EntityPredicate, Float> entry : ModConfigs.CHAMPIONS.entityChampionChance.entrySet()) {
+            EntityPredicate predicate = entry.getKey();
+            if (predicate.test(entity)) {
+               chance = entry.getValue().floatValue();
+               break;
+            }
          }
-      }
 
-      chance = CommonEvents.CHAMPION_PROMOTE.invoke(chance).getProbability();
-      if (ChampionLogic.isChampion(entity) || entity.level.random.nextFloat() < chance) {
-         applyChampionAttributes(entity);
-         applyAffixes(entity);
+         chance = CommonEvents.CHAMPION_PROMOTE.invoke(chance).getProbability();
+         if (ChampionLogic.isChampion(entity) || entity.level.random.nextFloat() < chance) {
+            applyChampionAttributes(entity);
+            applyAffixes(entity);
+         }
       }
    }
 

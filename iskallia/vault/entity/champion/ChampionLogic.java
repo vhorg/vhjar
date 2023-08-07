@@ -19,13 +19,19 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
+import net.minecraftforge.event.entity.living.PotionEvent;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.network.PacketDistributor;
@@ -36,6 +42,7 @@ public class ChampionLogic {
    private static final String AFFIXES_TAG = "affixes";
    private final List<IChampionAffix> affixes = new ArrayList<>();
    public static final String CHAMPION_TAG = "vault_champion";
+   private boolean pacified = false;
 
    public static boolean isChampion(Entity entity) {
       return entity instanceof LivingEntity livingEntity && isChampion(livingEntity);
@@ -43,6 +50,10 @@ public class ChampionLogic {
 
    public static boolean isChampion(LivingEntity entity) {
       return entity.getTags().contains("vault_champion");
+   }
+
+   public boolean isPacified() {
+      return this.pacified;
    }
 
    public static ChampionLogic deserialize(CompoundTag tag) {
@@ -92,6 +103,59 @@ public class ChampionLogic {
       }
    }
 
+   @SubscribeEvent(
+      priority = EventPriority.LOWEST
+   )
+   public static void onPotionAdded(PotionAddedEvent event) {
+      if (!event.isCanceled()
+         && isChampion(event.getEntityLiving())
+         && event.getEntityLiving() instanceof ChampionLogic.IChampionLogicHolder championLogicHolder
+         && event.getPotionEffect().getEffect() instanceof IChampionPacifyEffect) {
+         championLogicHolder.getChampionLogic().pacified = true;
+      }
+   }
+
+   @SubscribeEvent(
+      priority = EventPriority.LOWEST
+   )
+   public static void onPotionExpired(PotionExpiryEvent event) {
+      if (!event.isCanceled()
+         && isChampion(event.getEntityLiving())
+         && event.getEntityLiving() instanceof ChampionLogic.IChampionLogicHolder championLogicHolder
+         && event.getPotionEffect() != null
+         && event.getPotionEffect().getEffect() instanceof IChampionPacifyEffect) {
+         makeAngryAgainIfNoOtherPacifyingEffects(event, championLogicHolder);
+      }
+   }
+
+   private static void makeAngryAgainIfNoOtherPacifyingEffects(PotionEvent event, ChampionLogic.IChampionLogicHolder championLogicHolder) {
+      boolean hasNoOtherPacifyingEffects = true;
+
+      for (MobEffectInstance effectInstance : event.getEntityLiving().getActiveEffects()) {
+         if (effectInstance.getEffect() != event.getPotionEffect().getEffect() && effectInstance.getEffect() instanceof IChampionPacifyEffect) {
+            hasNoOtherPacifyingEffects = false;
+            break;
+         }
+      }
+
+      if (hasNoOtherPacifyingEffects) {
+         championLogicHolder.getChampionLogic().pacified = false;
+      }
+   }
+
+   @SubscribeEvent(
+      priority = EventPriority.LOWEST
+   )
+   public static void onPotionRemoved(PotionRemoveEvent event) {
+      if (!event.isCanceled()
+         && isChampion(event.getEntityLiving())
+         && event.getEntityLiving() instanceof ChampionLogic.IChampionLogicHolder championLogicHolder
+         && event.getPotionEffect() != null
+         && event.getPotionEffect().getEffect() instanceof IChampionPacifyEffect) {
+         makeAngryAgainIfNoOtherPacifyingEffects(event, championLogicHolder);
+      }
+   }
+
    @SubscribeEvent
    public static void onStartTracking(StartTracking event) {
       if (isChampion(event.getTarget())
@@ -116,7 +180,7 @@ public class ChampionLogic {
    }
 
    private static void runIfChampion(Entity entity, Consumer<ChampionLogic> consumer) {
-      if (entity instanceof ChampionLogic.IChampionLogicHolder championLogicHolder) {
+      if (entity instanceof ChampionLogic.IChampionLogicHolder championLogicHolder && !championLogicHolder.getChampionLogic().pacified) {
          consumer.accept(championLogicHolder.getChampionLogic());
       }
    }

@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.entity.VaultBoss;
+import iskallia.vault.entity.champion.IChampionPacifyEffect;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.AbstractTauntAbility;
@@ -238,7 +239,7 @@ public class TauntRepelAbility extends AbstractTauntAbility {
       }
    }
 
-   public static class TauntRepelMobEffect extends MobEffect {
+   public static class TauntRepelMobEffect extends MobEffect implements IChampionPacifyEffect {
       private static final double SPEED_MODIFIER = 1.25;
 
       public TauntRepelMobEffect(int color, ResourceLocation resourceLocation) {

@@ -1,6 +1,7 @@
 package iskallia.vault.entity.ai;
 
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.entity.champion.ChampionLogic;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.util.EntityHelper;
@@ -47,9 +48,9 @@ public class ChampionGoal {
 
                   private boolean targetOutOfReachAbove() {
                      LivingEntity target = mob.getTarget();
-                     if (target == null) {
-                        return false;
-                     } else {
+                     if (target != null
+                        && mob instanceof ChampionLogic.IChampionLogicHolder championLogicHolder
+                        && !championLogicHolder.getChampionLogic().isPacified()) {
                         double targetDistance = mob.distanceToSqr(target);
                         double attackReach = this.getAttackReachSqr(target);
                         double yDiff = target.getY() - mob.getY();
@@ -59,6 +60,8 @@ public class ChampionGoal {
                         return targetDistance > attackReach
                            && targetDistance < attackReach * 16.0
                            && (yDiff >= 2.0 && yDiff <= 4.0 || canNotReach && mob.tickCount > 20);
+                     } else {
+                        return false;
                      }
                   }
 
