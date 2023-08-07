@@ -1,6 +1,7 @@
 package iskallia.vault.effect;
 
 import iskallia.vault.entity.champion.ChampionLogic;
+import iskallia.vault.entity.champion.IChampionPacifyEffect;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.event.ActiveFlagsCheck;
 import iskallia.vault.init.ModEffects;
@@ -32,7 +33,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
    modid = "the_vault",
    bus = Bus.FORGE
 )
-public class GlacialShatterEffect extends MobEffect {
+public class GlacialShatterEffect extends MobEffect implements IChampionPacifyEffect {
    public GlacialShatterEffect(MobEffectCategory typeIn, int liquidColorIn, ResourceLocation id) {
       super(typeIn, liquidColorIn);
       this.setRegistryName(id);
