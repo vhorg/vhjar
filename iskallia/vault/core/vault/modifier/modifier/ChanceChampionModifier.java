@@ -15,6 +15,10 @@ public class ChanceChampionModifier extends AbstractChanceModifier<AbstractChanc
 
    @Override
    public void initServer(VirtualWorld world, Vault vault, ModifierContext context) {
-      CommonEvents.CHAMPION_PROMOTE.register(context.getUUID(), data -> data.setProbability(data.getProbability() + this.properties.getChance(context)));
+      CommonEvents.CHAMPION_PROMOTE.register(context.getUUID(), data -> {
+         if (data.getEntity().level == world) {
+            data.setProbability(data.getProbability() + this.properties.getChance(context));
+         }
+      });
    }
 }
