@@ -6,6 +6,7 @@ import iskallia.vault.client.particles.SphericalParticleOptions;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.event.ActiveFlags;
+import iskallia.vault.event.ActiveFlagsCheck;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModParticles;
 import iskallia.vault.skill.ability.effect.spi.core.ToggleAbilityEffect;
@@ -14,6 +15,8 @@ import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.AABBHelper;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
+import iskallia.vault.util.damage.AttackScaleHelper;
+import iskallia.vault.util.damage.CritHelper;
 import iskallia.vault.util.damage.ThornsReflectDamageSource;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import java.util.ArrayList;
@@ -117,46 +120,56 @@ public class ManaShieldRetributionAbility extends ManaShieldAbility {
          && !(event.getSource() instanceof ThornsReflectDamageSource)) {
          float damageAbsorbed = getDamageAbsorbed(serverPlayer);
          if (!Mth.equal(damageAbsorbed, 0.0F)) {
-            AbilityTree abilities = PlayerAbilitiesData.get(serverPlayer.getLevel()).getAbilities(serverPlayer);
+            if (!ActiveFlagsCheck.isAnyFlagActiveLuckyHit()) {
+               if (!(event.getSource() instanceof ThornsReflectDamageSource)) {
+                  if (event.getSource().getEntity() instanceof ServerPlayer attacker) {
+                     if (!CritHelper.getCrit(attacker)) {
+                        if (!(AttackScaleHelper.getLastAttackScale(attacker) < 1.0F)) {
+                           AbilityTree abilities = PlayerAbilitiesData.get(serverPlayer.getLevel()).getAbilities(serverPlayer);
 
-            for (ManaShieldRetributionAbility ability : abilities.getAll(ManaShieldRetributionAbility.class, Skill::isUnlocked)) {
-               Vec3 origin = event.getEntity().position();
-               float damageRadius = ability.getRadius(serverPlayer);
-               AABB bounds = AABBHelper.create(origin, damageRadius);
-               ArrayList<LivingEntity> result = new ArrayList<>();
-               EntityHelper.getEntitiesInRange(serverPlayer.level, bounds, origin, damageRadius, ENTITY_SELECTION_FILTER, result);
-               AttributeInstance attributeInstance = serverPlayer.getAttribute(Attributes.ATTACK_DAMAGE);
-               if (attributeInstance == null) {
-                  return;
-               }
+                           for (ManaShieldRetributionAbility ability : abilities.getAll(ManaShieldRetributionAbility.class, Skill::isUnlocked)) {
+                              Vec3 origin = event.getEntity().position();
+                              float damageRadius = ability.getRadius(serverPlayer);
+                              AABB bounds = AABBHelper.create(origin, damageRadius);
+                              ArrayList<LivingEntity> result = new ArrayList<>();
+                              EntityHelper.getEntitiesInRange(serverPlayer.level, bounds, origin, damageRadius, ENTITY_SELECTION_FILTER, result);
+                              AttributeInstance attributeInstance = serverPlayer.getAttribute(Attributes.ATTACK_DAMAGE);
+                              if (attributeInstance == null) {
+                                 return;
+                              }
 
-               ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-                  event.setCanceled(true);
-                  float damage = (float)(attributeInstance.getValue() + damageAbsorbed * ability.getPercentageDamageDealt());
+                              ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                                 event.setCanceled(true);
+                                 float damage = (float)(attributeInstance.getValue() + damageAbsorbed * ability.getPercentageDamageDealt());
 
-                  for (LivingEntity entity : result) {
-                     entity.hurt(DamageSource.playerAttack(serverPlayer), damage);
+                                 for (LivingEntity entity : result) {
+                                    entity.hurt(DamageSource.playerAttack(serverPlayer), damage);
+                                 }
+                              });
+                              serverPlayer.getLevel()
+                                 .sendParticles(
+                                    new SphericalParticleOptions(
+                                       (ParticleType<SphericalParticleOptions>)ModParticles.MANA_SHIELD_RETRIBUTION_EFFECT_RANGE.get(),
+                                       damageRadius,
+                                       new Vector3f(0.0F, 1.0F, 1.0F)
+                                    ),
+                                    origin.x,
+                                    origin.y,
+                                    origin.z,
+                                    200,
+                                    0.0,
+                                    0.0,
+                                    0.0,
+                                    0.0
+                                 );
+                           }
+
+                           resetDamageAbsorbed(serverPlayer);
+                        }
+                     }
                   }
-               });
-               serverPlayer.getLevel()
-                  .sendParticles(
-                     new SphericalParticleOptions(
-                        (ParticleType<SphericalParticleOptions>)ModParticles.MANA_SHIELD_RETRIBUTION_EFFECT_RANGE.get(),
-                        damageRadius,
-                        new Vector3f(0.0F, 1.0F, 1.0F)
-                     ),
-                     origin.x,
-                     origin.y,
-                     origin.z,
-                     200,
-                     0.0,
-                     0.0,
-                     0.0,
-                     0.0
-                  );
+               }
             }
-
-            resetDamageAbsorbed(serverPlayer);
          }
       }
    }

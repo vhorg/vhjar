@@ -11,6 +11,7 @@ import iskallia.vault.item.BasicMobEggItem;
 import iskallia.vault.item.BasicScavengerItem;
 import iskallia.vault.item.BottleItem;
 import iskallia.vault.item.CompassItem;
+import iskallia.vault.item.ErrorItem;
 import iskallia.vault.item.GatedLootableItem;
 import iskallia.vault.item.GodBlessingItem;
 import iskallia.vault.item.InfiniteWaterBucketItem;
@@ -452,6 +453,7 @@ public class ModItems {
    public static BasicItem BOUNTY_PEARL = new BasicItem(VaultMod.id("bounty_pearl"), new Properties().tab(VAULT_MOD_GROUP));
    public static OldNotesItem OLD_NOTES = new OldNotesItem(VaultMod.id("old_notes"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).rarity(Rarity.UNCOMMON));
    public static QuestBookItem QUEST_BOOK = new QuestBookItem(VaultMod.id("quest_book"));
+   public static ErrorItem ERROR_ITEM = new ErrorItem(VaultMod.id("error_item"));
    public static BasicItem TOPAZ_SHARD = new BasicItem(VaultMod.id("topaz_shard"), new Properties().tab(VAULT_MOD_GROUP));
    public static BasicItem GILDED_INGOT = new BasicItem(VaultMod.id("gilded_ingot"), new Properties().tab(VAULT_MOD_GROUP));
    public static BasicItem ORNATE_INGOT = new BasicItem(VaultMod.id("ornate_ingot"), new Properties().tab(VAULT_MOD_GROUP));
@@ -1383,6 +1385,7 @@ public class ModItems {
       registry.register(BOUNTY_PEARL);
       registry.register(OLD_NOTES);
       registry.register(QUEST_BOOK);
+      registry.register(ERROR_ITEM);
       registry.register(TOPAZ_SHARD);
       registry.register(GILDED_INGOT);
       registry.register(ORNATE_INGOT);
