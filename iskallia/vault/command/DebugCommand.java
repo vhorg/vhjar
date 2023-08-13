@@ -1,6 +1,7 @@
 package iskallia.vault.command;
 
 import com.google.common.collect.Streams;
+import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -10,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import iskallia.vault.VaultMod;
 import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.core.Version;
+import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.data.key.VersionedKey;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.Event;
@@ -20,6 +22,7 @@ import iskallia.vault.core.vault.player.Completion;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
+import iskallia.vault.core.world.loot.generator.TieredLootTableGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.dump.EntityAttrDump;
 import iskallia.vault.dump.GearModelDump;
@@ -35,11 +38,14 @@ import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.item.ErrorItem;
 import iskallia.vault.item.gear.EtchingItem;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.InventoryUtil;
+import iskallia.vault.util.VaultRarity;
 import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerProficiencyData;
 import iskallia.vault.world.data.PlayerStatsData;
@@ -49,6 +55,8 @@ import iskallia.vault.world.data.VaultPlayerStats;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -64,8 +72,14 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.ClickEvent.Action;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -74,6 +88,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.GameRules.BooleanValue;
@@ -139,6 +154,20 @@ public class DebugCommand extends Command {
                   .then(Commands.argument("id", ResourceLocationArgument.id()).suggests(SUGGEST_LOOT_TABLE).executes(this::insertLoot))
             )
       );
+      builder.then(
+         Commands.literal("generate_loot")
+            .then(
+               Commands.argument("id", ResourceLocationArgument.id())
+                  .suggests(SUGGEST_LOOT_TABLE)
+                  .then(
+                     Commands.argument("quantity", FloatArgumentType.floatArg())
+                        .then(
+                           Commands.argument("rarity", FloatArgumentType.floatArg())
+                              .then(Commands.argument("count", IntegerArgumentType.integer(1)).executes(this::generateLoot))
+                        )
+                  )
+            )
+      );
       builder.then(Commands.literal("debug_events").executes(this::debugEvents));
       builder.then(Commands.literal("prompt_vault_stats").executes(this::promptVaultStats));
       builder.then(
@@ -150,6 +179,66 @@ public class DebugCommand extends Command {
             .then(Commands.literal("reset_all").then(Commands.argument("player", EntityArgument.player()).executes(this::resetPlayerExpertises)))
       );
       builder.then(Commands.literal("expertise").then(Commands.literal("world_reset").executes(this::resetAllPlayerExpertises)));
+   }
+
+   private int generateLoot(CommandContext<CommandSourceStack> context) {
+      ResourceLocation id = ResourceLocationArgument.getId(context, "id");
+      float quantity = FloatArgumentType.getFloat(context, "quantity");
+      float rarity = FloatArgumentType.getFloat(context, "rarity");
+      int count = IntegerArgumentType.getInteger(context, "count");
+      LootTableKey table = VaultRegistry.LOOT_TABLE.getKey(id);
+      if (table == null) {
+         ((CommandSourceStack)context.getSource()).sendFailure(new TextComponent("Invalid loot table " + id));
+         return 0;
+      } else {
+         TieredLootTableGenerator gen = new TieredLootTableGenerator(Version.latest(), table, rarity, quantity, 54);
+         Map<ResourceLocation, Integer> cache = new HashMap<>();
+         Map<VaultRarity, Integer> rarities = new HashMap<>();
+
+         for (int i = 0; i < count; i++) {
+            gen.generate(JavaRandom.ofNanoTime());
+            Iterator<ItemStack> it = gen.getItems();
+
+            while (it.hasNext()) {
+               ItemStack stack = it.next();
+               ResourceLocation itemId = stack.getItem() == ModItems.ERROR_ITEM ? ErrorItem.getId(stack) : stack.getItem().getRegistryName();
+               cache.put(itemId, cache.getOrDefault(itemId, 0) + stack.getCount());
+               it.remove();
+            }
+
+            VaultRarity rarityEnum = ModConfigs.VAULT_CHEST.getRarity(gen.getCDF());
+            rarities.put(rarityEnum, rarities.getOrDefault(rarityEnum, 0) + 1);
+         }
+
+         StringBuilder copy = new StringBuilder();
+
+         for (VaultRarity value : VaultRarity.values()) {
+            int frequency = rarities.getOrDefault(value, 0);
+            MutableComponent text = new TextComponent("")
+               .append(new TextComponent(frequency + " "))
+               .append(new TextComponent(value.name()).setStyle(Style.EMPTY.withColor(value.color)));
+            ((CommandSourceStack)context.getSource()).sendSuccess(text, false);
+            copy.append(text.getString()).append("\n");
+         }
+
+         List<Entry<ResourceLocation, Integer>> entries = new ArrayList<>(cache.entrySet());
+         entries.sort((o1, o2) -> Integer.compare(o2.getValue(), o1.getValue()));
+         entries.forEach(e -> {
+            Item item = (Item)Registry.ITEM.getOptional(e.getKey()).orElse(null);
+            Component textx = (Component)(item != null ? item.getName(new ItemStack(item)) : new TextComponent(e.getKey().toString()));
+            MutableComponent result = new TextComponent("").append(new TextComponent(e.getValue() + " ")).append(textx);
+            ((CommandSourceStack)context.getSource()).sendSuccess(result, false);
+            copy.append(result.getString()).append("\n");
+         });
+         ((CommandSourceStack)context.getSource())
+            .sendSuccess(
+               new TextComponent("[Copy]")
+                  .withStyle(ChatFormatting.GOLD)
+                  .withStyle(style -> style.withClickEvent(new ClickEvent(Action.COPY_TO_CLIPBOARD, copy.toString()))),
+               false
+            );
+         return 0;
+      }
    }
 
    private int corruptGear(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

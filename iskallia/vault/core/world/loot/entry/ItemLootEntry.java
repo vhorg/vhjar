@@ -8,6 +8,7 @@ import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.world.roll.IntRoll;
+import iskallia.vault.init.ModItems;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
@@ -68,18 +69,30 @@ public class ItemLootEntry implements LootEntry {
    @Override
    public void readJson(JsonElement json) {
       if (json instanceof JsonPrimitive primitive && primitive.isString()) {
-         Adapters.ITEM
-            .readJson(primitive)
-            .ifPresentOrElse(value -> this.item = value, () -> VaultMod.LOGGER.error("Unknown item " + primitive + ", using air instead"));
+         Adapters.ITEM.readJson(primitive).ifPresentOrElse(value -> this.item = value, () -> {
+            VaultMod.LOGGER.error("Unknown item " + primitive);
+            this.item = ModItems.ERROR_ITEM;
+            if (this.nbt == null) {
+               this.nbt = new CompoundTag();
+            }
+
+            this.nbt.putString("id", primitive.getAsString());
+         });
       } else {
          if (!(json instanceof JsonObject object)) {
             throw new UnsupportedOperationException(json + " cannot be read as an ItemLootEntry");
          }
 
-         Adapters.ITEM
-            .readJson(object.get("id"))
-            .ifPresentOrElse(value -> this.item = value, () -> VaultMod.LOGGER.error("Unknown item " + object.get("id") + ", using air instead"));
          Adapters.COMPOUND_NBT.readJson(object.get("nbt")).ifPresent(value -> this.nbt = value);
+         Adapters.ITEM.readJson(object.get("id")).ifPresentOrElse(value -> this.item = value, () -> {
+            VaultMod.LOGGER.error("Unknown item " + object.get("id"));
+            this.item = ModItems.ERROR_ITEM;
+            if (this.nbt == null) {
+               this.nbt = new CompoundTag();
+            }
+
+            this.nbt.putString("id", object.get("id").getAsString());
+         });
          Adapters.INT_ROLL.readJson(object.get("count")).ifPresent(count -> this.count = count);
       }
    }

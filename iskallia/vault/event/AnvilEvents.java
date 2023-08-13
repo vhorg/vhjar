@@ -244,6 +244,7 @@ public class AnvilEvents {
          CrystalData data = CrystalData.read(output);
          if (!data.isUnmodifiable() && data.getModifiers().hasRandomModifiers()) {
             data.setUnmodifiable(true);
+            data.getModifiers().setRandomModifiers(false);
             data.write(output);
             VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("vault_catalyst_chaos")), output);
             event.setOutput(output);
