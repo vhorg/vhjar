@@ -39,7 +39,7 @@ public class ChampionPromoter {
             }
          }
 
-         chance = CommonEvents.CHAMPION_PROMOTE.invoke(chance).getProbability();
+         chance = CommonEvents.CHAMPION_PROMOTE.invoke(entity, chance).getProbability();
          if (ChampionLogic.isChampion(entity) || entity.level.random.nextFloat() < chance) {
             applyChampionAttributes(entity);
             applyAffixes(entity);
