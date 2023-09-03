@@ -18,6 +18,7 @@ import iskallia.vault.item.PaxelJewelItem;
 import iskallia.vault.item.VaultCatalystInfusedItem;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
+import iskallia.vault.item.crystal.model.ChaosCrystalModel;
 import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.item.data.InscriptionData;
 import iskallia.vault.item.tool.PaxelItem;
@@ -243,8 +244,10 @@ public class AnvilEvents {
          ItemStack output = event.getLeft().copy();
          CrystalData data = CrystalData.read(output);
          if (!data.isUnmodifiable() && data.getModifiers().hasRandomModifiers()) {
-            data.setUnmodifiable(true);
+            data.setModel(new ChaosCrystalModel());
+            data.setTheme(new ValueCrystalTheme(VaultMod.id("classic_vault_chaos")));
             data.getModifiers().setRandomModifiers(false);
+            data.setUnmodifiable(true);
             data.write(output);
             VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("vault_catalyst_chaos")), output);
             event.setOutput(output);

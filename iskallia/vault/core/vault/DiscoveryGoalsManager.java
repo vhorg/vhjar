@@ -2,7 +2,7 @@ package iskallia.vault.core.vault;
 
 import iskallia.vault.block.entity.AlchemyArchiveTileEntity;
 import iskallia.vault.block.entity.ModifierDiscoveryTileEntity;
-import iskallia.vault.config.gear.VaultAlchemyTableConfig;
+import iskallia.vault.config.AlchemyTableConfig;
 import iskallia.vault.config.gear.VaultGearWorkbenchConfig;
 import iskallia.vault.core.data.DataObject;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
@@ -20,10 +20,10 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModModelDiscoveryGoals;
-import iskallia.vault.item.BottleItem;
+import iskallia.vault.item.bottle.BottleItem;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.util.MiscUtils;
-import iskallia.vault.world.data.DiscoveredAlchemyModifiersData;
+import iskallia.vault.world.data.DiscoveredAlchemyEffectsData;
 import iskallia.vault.world.data.DiscoveredWorkbenchModifiersData;
 import iskallia.vault.world.data.DiscoveryGoalStatesData;
 import java.util.ArrayList;
@@ -200,54 +200,34 @@ public class DiscoveryGoalsManager extends DataObject<DiscoveryGoalsManager> {
                      BlockPos pos = data.getPos();
                      if (world.getBlockEntity(pos) instanceof AlchemyArchiveTileEntity discoveryTile) {
                         if (discoveryTile.canBeUsed(player)) {
-                           int vaultLevel = vault.has(Vault.LEVEL) ? vault.get(Vault.LEVEL).get() : 0;
-                           List<ResourceLocation> itemConfigs = new ArrayList<>();
-                           DiscoveredAlchemyModifiersData discoveredModifiers = DiscoveredAlchemyModifiersData.get(world);
-
-                           for (VaultAlchemyTableConfig.CraftableModifierConfig cfg : ModConfigs.VAULT_ALCHEMY_TABLE.getAllCraftableModifiers()) {
-                              if (cfg.getUnlockCategory() == VaultAlchemyTableConfig.UnlockCategory.VAULT_DISCOVERY) {
-                                 ResourceLocation key = cfg.getWorkbenchCraftIdentifier();
-                                 if (!discoveredModifiers.hasDiscoveredCraft(player, key) && cfg.getMinLevel() <= vaultLevel) {
-                                    itemConfigs.add(key);
-                                 }
-                              }
-                           }
-
-                           ResourceLocation tpl = MiscUtils.getRandomEntry(itemConfigs);
-                           if (tpl == null) {
-                              MutableComponent cmp = new TextComponent("No modifiers left to discover at your current level").withStyle(ChatFormatting.RED);
-                              sPlayer.sendMessage(cmp, Util.NIL_UUID);
-                           } else if (discoveryTile.setUsedByPlayer(sPlayer)) {
-                              if (discoveredModifiers.compoundDiscoverWorkbenchCraft(sPlayer, tpl)) {
+                           DiscoveredAlchemyEffectsData discoveredEffectsData = DiscoveredAlchemyEffectsData.get(world);
+                           List<String> undiscoveredEffects = ModConfigs.VAULT_ALCHEMY_TABLE
+                              .getCraftableEffects()
+                              .stream()
+                              .filter(
+                                 effectCfgx -> effectCfgx.getUnlockCategory() == AlchemyTableConfig.UnlockCategory.VAULT_DISCOVERY
+                                    && !discoveredEffectsData.hasDiscoveredEffect(player, effectCfgx.getEffectId())
+                              )
+                              .map(AlchemyTableConfig.CraftableEffectConfig::getEffectId)
+                              .toList();
+                           String selectedEffect = MiscUtils.getRandomEntry(undiscoveredEffects);
+                           if (selectedEffect == null) {
+                              sPlayer.sendMessage(new TextComponent("No effects left to discover").withStyle(ChatFormatting.RED), Util.NIL_UUID);
+                           } else {
+                              discoveryTile.setUsedByPlayer(sPlayer);
+                              if (discoveredEffectsData.compoundDiscoverEffect(sPlayer, selectedEffect)) {
                                  data.setResult(InteractionResult.SUCCESS);
-                                 VaultAlchemyTableConfig cfgx = ModConfigs.VAULT_ALCHEMY_TABLE;
-                                 VaultAlchemyTableConfig.CraftableModifierConfig modifierCfg = cfgx.getConfig(tpl);
-                                 if (modifierCfg != null) {
-                                    modifierCfg.createModifier()
-                                       .ifPresent(
-                                          modifier -> {
-                                             ItemStack stack = BottleItem.create(null, null);
-                                             if (stack.getItem() instanceof VaultGearItem) {
-                                                VaultGearData vgData = VaultGearData.read(stack);
-                                                vgData.setState(VaultGearState.IDENTIFIED);
-                                                vgData.setRarity(VaultGearRarity.COMMON);
-                                                vgData.write(stack);
-                                             }
-
-                                             modifier.getConfigDisplay(stack)
-                                                .ifPresent(
-                                                   configDisplay -> {
-                                                      MutableComponent cmp = new TextComponent("")
-                                                         .append(player.getDisplayName())
-                                                         .append(" discovered the ")
-                                                         .append(stack.getHoverName())
-                                                         .append(" modifier: ")
-                                                         .append(configDisplay);
-                                                      MiscUtils.broadcast(cmp);
-                                                   }
-                                                );
-                                          }
-                                       );
+                                 AlchemyTableConfig cfg = ModConfigs.VAULT_ALCHEMY_TABLE;
+                                 AlchemyTableConfig.CraftableEffectConfig effectCfg = cfg.getConfig(selectedEffect);
+                                 if (effectCfg != null) {
+                                    ItemStack stack = BottleItem.create(null, null);
+                                    MutableComponent cmp = new TextComponent("")
+                                       .append(player.getDisplayName())
+                                       .append(" discovered the ")
+                                       .append(stack.getHoverName())
+                                       .append(" effect: ")
+                                       .append(effectCfg.getEffectName());
+                                    MiscUtils.broadcast(cmp);
                                  }
                               }
                            }

@@ -2,6 +2,9 @@ package iskallia.vault.snapshot;
 
 import iskallia.vault.event.event.VaultGearEquipmentChangeEvent;
 import iskallia.vault.gear.data.AttributeGearData;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.integration.IntegrationCurios;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.Map.Entry;
+import net.minecraft.Util;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -18,6 +22,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
@@ -130,6 +135,28 @@ public class AttributeSnapshotNotifier {
    private static void refreshSnapshotLater(EntityEvent event) {
       if (event.getEntity() instanceof ServerPlayer sPlayer) {
          AttributeSnapshotHelper.getInstance().refreshSnapshotDelayed(sPlayer);
+      }
+   }
+
+   @SubscribeEvent
+   public static void onEquipmentChange(LivingEquipmentChangeEvent event) {
+      if (event.getEntity() instanceof ServerPlayer sPlayer) {
+         ItemStack equipped = event.getTo();
+         if (!equipped.isEmpty() && equipped.getItem() instanceof VaultGearItem gearItem) {
+            ItemStack from = event.getFrom();
+            if (!from.isEmpty() && from.getItem() instanceof VaultGearItem) {
+               UUID fromId = VaultGearData.readUUID(from).orElse(Util.NIL_UUID);
+               UUID toId = VaultGearData.readUUID(equipped).orElse(Util.NIL_UUID);
+               if (fromId.equals(toId)) {
+                  return;
+               }
+            }
+
+            if (gearItem.shouldCauseEquipmentCooldown(sPlayer, equipped, event.getSlot())) {
+               int cooldownTicks = ModConfigs.VAULT_GEAR_COMMON.getOffHandSwapCooldown();
+               ModConfigs.VAULT_GEAR_COMMON.getOffHandSwapItems().forEach(item -> sPlayer.getCooldowns().addCooldown(item, cooldownTicks));
+            }
+         }
       }
    }
 

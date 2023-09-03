@@ -1,23 +1,26 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "cvc",
-    "vnv",
-    "cvc"
-  ],
-  "key": {
-    "c": {
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "the_vault:vault_scrap"
+    },
+    {
+      "item": "the_vault:vault_scrap"
+    },
+    {
+      "item": "the_vault:vault_scrap"
+    },
+    {
+      "item": "the_vault:vault_scrap"
+    },
+    {
       "item": "the_vault:chromatic_iron_ingot"
     },
-    "n": {
-      "item": "minecraft:netherite_scrap"
-    },
-    "v": {
-      "item": "the_vault:vault_scrap"
+    {
+      "item": "the_vault:chromatic_iron_ingot"
     }
-  },
+  ],
   "result": {
-    "item": "the_vault:vaulterite_ingot",
-    "count": 1
+    "item": "the_vault:vaulterite_ingot"
   }
 }

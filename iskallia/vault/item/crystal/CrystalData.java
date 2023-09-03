@@ -16,6 +16,7 @@ import iskallia.vault.item.crystal.layout.ClassicSpiralCrystalLayout;
 import iskallia.vault.item.crystal.layout.CrystalLayout;
 import iskallia.vault.item.crystal.layout.NullCrystalLayout;
 import iskallia.vault.item.crystal.model.AugmentCrystalModel;
+import iskallia.vault.item.crystal.model.ChaosCrystalModel;
 import iskallia.vault.item.crystal.model.CompoundCrystalModel;
 import iskallia.vault.item.crystal.model.CrystalModel;
 import iskallia.vault.item.crystal.model.GrayscaleCrystalModel;
@@ -59,7 +60,8 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
       .<TypeSupplierAdapter<CompoundCrystalModel>>register("null", NullCrystalModel.class, () -> NullCrystalModel.INSTANCE)
       .<TypeSupplierAdapter<RainbowCrystalModel>>register("compound", CompoundCrystalModel.class, CompoundCrystalModel::new)
       .<TypeSupplierAdapter<RawCrystalModel>>register("rainbow", RainbowCrystalModel.class, RainbowCrystalModel::new)
-      .<TypeSupplierAdapter<GrayscaleCrystalModel>>register("raw", RawCrystalModel.class, RawCrystalModel::new)
+      .<TypeSupplierAdapter<ChaosCrystalModel>>register("raw", RawCrystalModel.class, RawCrystalModel::new)
+      .<TypeSupplierAdapter<GrayscaleCrystalModel>>register("chaos", ChaosCrystalModel.class, ChaosCrystalModel::new)
       .<TypeSupplierAdapter<AugmentCrystalModel>>register("grayscale", GrayscaleCrystalModel.class, GrayscaleCrystalModel::new)
       .register("augment", AugmentCrystalModel.class, AugmentCrystalModel::new);
    public static TypeSupplierAdapter<CrystalTheme> THEME = new TypeSupplierAdapter<CrystalTheme>("type", false)

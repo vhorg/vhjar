@@ -1,6 +1,9 @@
 package iskallia.vault.util;
 
 import com.google.common.collect.Streams;
+import iskallia.vault.VaultMod;
+import iskallia.vault.entity.champion.ChampionLogic;
+import iskallia.vault.init.ModConfigs;
 import java.util.List;
 import java.util.function.Predicate;
 import net.minecraft.core.Vec3i;
@@ -20,6 +23,12 @@ import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
 public class EntityHelper {
    private static final AABB BOX = new AABB(0.0, 0.0, 0.0, 1.0, 1.0, 1.0);
+   public static int CHAMPION_COUNT = 30;
+   public static int DUNGEON_COUNT = 10;
+   public static int GUARDIAN_COUNT = 7;
+   public static int TANK_COUNT = 10;
+   public static int ASSASSIN_COUNT = 3;
+   public static int HORDE_COUNT = 1;
 
    public static void changeHealth(LivingEntity entity, int healthChange) {
       float health = entity.getHealth();
@@ -119,6 +128,22 @@ public class EntityHelper {
                result.add((LivingEntity)entity);
             }
          }
+      }
+   }
+
+   public static int getEntityValue(LivingEntity livingEntity) {
+      if (ChampionLogic.isChampion(livingEntity)) {
+         return CHAMPION_COUNT;
+      } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("dungeon"), livingEntity)) {
+         return DUNGEON_COUNT;
+      } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("guardian"), livingEntity)) {
+         return GUARDIAN_COUNT;
+      } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("tank"), livingEntity)) {
+         return TANK_COUNT;
+      } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("assassin"), livingEntity)) {
+         return ASSASSIN_COUNT;
+      } else {
+         return ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("horde"), livingEntity) ? HORDE_COUNT : 1;
       }
    }
 }

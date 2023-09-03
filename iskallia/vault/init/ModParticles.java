@@ -1,6 +1,7 @@
 package iskallia.vault.init;
 
 import com.mojang.serialization.Codec;
+import iskallia.vault.client.particles.AlchemyTableParticle;
 import iskallia.vault.client.particles.AltarFlameParticle;
 import iskallia.vault.client.particles.ChainingParticle;
 import iskallia.vault.client.particles.CloudEffectParticle;
@@ -106,6 +107,7 @@ public class ModParticles {
    public static final RegistryObject<SimpleParticleType> STORM_CLOUD = REGISTRY.register("storm_cloud", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> ENTITY_LOCKED = REGISTRY.register("entity_locked", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> BONK = REGISTRY.register("bonk", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> ALCHEMY_TABLE = REGISTRY.register("alchemy_table", () -> new SimpleParticleType(true));
    public static final RegistryObject<ParticleType<SphericalParticleOptions>> TAUNT_CHARM_EFFECT_RANGE = register(
       REGISTRY, "taunt_charm_effect_range", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
    );
@@ -177,6 +179,7 @@ public class ModParticles {
       particleManager.register((ParticleType)STORM_CLOUD.get(), StormCloudParticle.Provider::new);
       particleManager.register((ParticleType)ENTITY_LOCKED.get(), EntityLockedParticle.Provider::new);
       particleManager.register((ParticleType)BONK.get(), LuckyHitDrainParticle.Provider::new);
+      particleManager.register((ParticleType)ALCHEMY_TABLE.get(), AlchemyTableParticle.Provider::new);
       particleManager.register(
          (ParticleType)TOTEM_EFFECT_RANGE.get(), sprites -> new EffectRangeParticle.SphereProvider(sprites, 1.0F, 40, 0.5F, Tween.PARABOLIC)
       );

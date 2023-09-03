@@ -14,7 +14,6 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.item.BottleItem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -94,7 +93,7 @@ public interface VaultGearTooltipItem {
                }
             }
 
-            if (maxSuffixes > 0 || !suffixes.isEmpty() || this instanceof BottleItem) {
+            if (maxSuffixes > 0 || !suffixes.isEmpty()) {
                this.addTooltipAffixGroup(data, VaultGearModifier.AffixType.SUFFIX, stack, tooltip, flag.displayModifierDetail());
                if (!data.isModifiable()) {
                   tooltip.add(TextComponent.EMPTY);

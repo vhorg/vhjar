@@ -194,7 +194,7 @@ public class ChampionGoal {
 
                livingEntity.hurtMarked = true;
                EntityHelper.knockbackIgnoreResist(livingEntity, this.thrower, (float)ModConfigs.FIGHTER.knockback * 2.0F);
-               livingEntity.hurt(DamageSource.mobAttack(this.thrower), (float)this.thrower.getAttributeValue(Attributes.ATTACK_DAMAGE));
+               livingEntity.hurt(DamageSource.mobAttack(this.thrower), (float)this.thrower.getAttributeValue(Attributes.ATTACK_DAMAGE) / 2.0F);
             }
          }
       }

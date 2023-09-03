@@ -93,6 +93,6 @@ public enum ToolType {
    }
 
    public boolean has(ToolType type) {
-      return this == HAMMER || Arrays.stream(this.parents).anyMatch(toolType -> toolType == type);
+      return this == type || Arrays.stream(this.parents).anyMatch(toolType -> toolType == type);
    }
 }

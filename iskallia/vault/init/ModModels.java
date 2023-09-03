@@ -43,6 +43,7 @@ import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.item.AugmentItem;
 import iskallia.vault.item.ItemDrillArrow;
 import iskallia.vault.item.LegacyMagnetItem;
+import iskallia.vault.item.bottle.BottleItem;
 import iskallia.vault.item.tool.JewelItem;
 import iskallia.vault.research.StageManager;
 import iskallia.vault.research.type.Research;
@@ -119,7 +120,7 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.GILDED_SCONCE_WALL, RenderType.cutout());
       setRenderLayers(ModBlocks.VAULT_JEWEL_CUTTING_STATION, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_ARCHIVE, RenderType.solid(), RenderType.translucent());
-      setRenderLayers(ModBlocks.ALCHEMY_TABLE, RenderType.solid(), RenderType.translucent());
+      setRenderLayers(ModBlocks.ALCHEMY_TABLE, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.CRYO_CHAMBER, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.HOURGLASS, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.STABILIZER, RenderType.solid(), RenderType.translucent());
@@ -168,6 +169,13 @@ public class ModModels {
       );
       colors.register((stack, tintIndex) -> tintIndex == 0 ? JewelItem.getColor(stack) : -1, new ItemLike[]{ModItems.JEWEL});
       colors.register((stack, tintIndex) -> tintIndex == 1 ? AugmentItem.getColor(stack) : -1, new ItemLike[]{ModItems.AUGMENT});
+      colors.register((stack, tintIndex) -> {
+         if (tintIndex == 1) {
+            return BottleItem.getColor(stack);
+         } else {
+            return tintIndex == 2 ? BottleItem.getEffectColor(stack) : -1;
+         }
+      }, new ItemLike[]{ModItems.BOTTLE});
    }
 
    @SubscribeEvent
@@ -292,6 +300,12 @@ public class ModModels {
             (stack, world, entity, seed) -> (float)stack.getDamageValue() / CryoChamberBlock.ChamberState.values().length
          );
          ItemProperties.register(ModItems.VAULT_COMPASS, new ResourceLocation("angle"), new ModModels.ItemProperty.CompassPropertyFunction());
+         ItemProperties.register(
+            ModItems.BOTTLE, new ResourceLocation("type"), (stack, level, entity, seed) -> BottleItem.getType(stack).orElse(BottleItem.Type.VIAL).ordinal()
+         );
+         ItemProperties.register(
+            ModItems.BOTTLE, new ResourceLocation("fill"), (stack, level, entity, seed) -> 1.0F - (float)stack.getDamageValue() / stack.getMaxDamage()
+         );
          registerItemProperty(ModBlocks.PLACEHOLDER.asItem(), "placeholder_type", PLACEHOLDER_TYPE);
          registerItemProperty(ModBlocks.TREASURE_DOOR.asItem(), "treasure_door_type", TREASURE_DOOR_TYPE);
          registerItemProperty(ModBlocks.DUNGEON_DOOR.asItem(), "dungeon_door_type", DUNGEON_DOOR_TYPE);

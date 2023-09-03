@@ -192,6 +192,16 @@ public class TieredSkill extends LearnableSkill implements TickingSkill, Cooldow
       });
    }
 
+   public int getTierOf(String id) {
+      for (int i = 0; i < this.tiers.size(); i++) {
+         if (this.tiers.get(i).getId().equals(id)) {
+            return i + 1;
+         }
+      }
+
+      return 0;
+   }
+
    @Override
    public <T> void iterate(Class<T> type, Consumer<T> action) {
       super.iterate(type, action);

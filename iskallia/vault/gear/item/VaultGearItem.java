@@ -34,7 +34,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -42,7 +41,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -61,6 +59,7 @@ public interface VaultGearItem
    IAnvilPreventCombination,
    IdentifiableItem {
    JavaRandom random = JavaRandom.ofNanoTime();
+   int BROKEN_DAMAGE_VALUE = -1;
 
    default Item getItem() {
       return (Item)this;
@@ -161,6 +160,10 @@ public interface VaultGearItem
       return AttributeGearData.readUUID(stack);
    }
 
+   default boolean shouldCauseEquipmentCooldown(ServerPlayer sPlayer, ItemStack stack, EquipmentSlot slot) {
+      return !sPlayer.isCreative() && slot == EquipmentSlot.OFFHAND && this.getIntendedSlot(stack) == EquipmentSlot.OFFHAND;
+   }
+
    @Override
    default boolean isValidInput(ItemStack input) {
       return !input.isEmpty() && AttributeGearData.hasData(input);
@@ -216,14 +219,23 @@ public interface VaultGearItem
       return this.getIntendedSlot(stack) == slotType;
    }
 
-   default <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<T> onBroken) {
-      return stack.getDamageValue() + amount >= stack.getMaxDamage()
-         ? stack.getMaxDamage() - 1 - stack.getDamageValue()
-         : super.damageItem(stack, amount, entity, onBroken);
+   default void setDamage(ItemStack stack, int newDamage) {
+      int maxDamage = stack.getMaxDamage();
+      if (stack.getDamageValue() != newDamage) {
+         if (stack.getDamageValue() == -1 && newDamage < maxDamage) {
+            stack.getOrCreateTag().putInt("Damage", newDamage);
+            VaultGearData.read(stack).write(stack);
+         } else if (newDamage >= maxDamage) {
+            stack.getOrCreateTag().putInt("Damage", -1);
+            VaultGearData.read(stack).write(stack);
+         } else {
+            super.setDamage(stack, newDamage);
+         }
+      }
    }
 
    default boolean isBroken(ItemStack stack) {
-      return stack.getDamageValue() >= stack.getMaxDamage() - 1;
+      return stack.getDamageValue() == -1;
    }
 
    default void vaultGearTick(ItemStack stack, ServerPlayer player) {

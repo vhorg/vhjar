@@ -15,29 +15,22 @@ import iskallia.vault.client.gui.framework.render.TooltipDirection;
 import iskallia.vault.client.gui.framework.screen.AbstractElementContainerScreen;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
-import iskallia.vault.config.gear.VaultAlchemyTableConfig;
+import iskallia.vault.config.AlchemyTableConfig;
 import iskallia.vault.container.AlchemyTableContainer;
-import iskallia.vault.gear.attribute.VaultGearModifier;
-import iskallia.vault.gear.crafting.AlchemyTableHelper;
-import iskallia.vault.gear.data.AttributeGearData;
-import iskallia.vault.gear.data.VaultGearData;
-import iskallia.vault.gear.tooltip.GearTooltip;
-import iskallia.vault.gear.tooltip.VaultGearTooltipItem;
 import iskallia.vault.init.ModNetwork;
-import iskallia.vault.item.BottleItem;
-import iskallia.vault.network.message.ModifierAlchemyCraftMessage;
+import iskallia.vault.item.bottle.BottleEffect;
+import iskallia.vault.item.bottle.BottleItem;
+import iskallia.vault.network.message.AlchemyTableEffectCraftMessage;
 import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.util.function.ObservableSupplier;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -45,12 +38,12 @@ public class AlchemyTableScreen extends AbstractElementContainerScreen<AlchemyTa
    private final Inventory playerInventory;
    private final AlchemyCraftSelectorElement<?, ?> selectorElement;
    private final TextInputElement<?> searchInput;
-   private AlchemyTableHelper.CraftingOption selectedOption;
+   private AlchemyCraftSelectorElement.CraftingOption selectedOption;
 
    public AlchemyTableScreen(AlchemyTableContainer container, Inventory inventory, Component title) {
       super(container, inventory, title, ScreenRenderers.getImmediate(), ScreenTooltipRenderer::create);
       this.playerInventory = inventory;
-      this.setGuiSize(Spatials.size(176, 212));
+      this.setGuiSize(Spatials.size(176, 221));
       this.addElement(
          (NineSliceElement)new NineSliceElement(this.getGuiSpatial(), ScreenTextures.DEFAULT_WINDOW_BACKGROUND)
             .layout((screen, gui, parent, world) -> world.translateXY(gui).size(Spatials.copy(gui)))
@@ -66,17 +59,17 @@ public class AlchemyTableScreen extends AbstractElementContainerScreen<AlchemyTa
       MutableComponent inventoryName = inventory.getDisplayName().copy();
       inventoryName.withStyle(Style.EMPTY.withColor(-12632257));
       this.addElement(
-         (LabelElement)new LabelElement(Spatials.positionXY(8, 120), inventoryName, LabelTextStyle.defaultStyle())
+         (LabelElement)new LabelElement(Spatials.positionXY(8, 129), inventoryName, LabelTextStyle.defaultStyle())
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
       this.addElement((SlotsElement)new SlotsElement(this).layout((screen, gui, parent, world) -> world.positionXY(gui)));
       this.addElement(
-         this.searchInput = new TextInputElement(Spatials.positionXY(110, 5).size(60, 12), Minecraft.getInstance().font)
+         this.searchInput = new TextInputElement(Spatials.positionXY(108, 5).size(60, 12), Minecraft.getInstance().font)
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
       this.addElement(
          this.selectorElement = new AlchemyCraftSelectorElement(
-               Spatials.positionXY(8, 19).height(97),
+               Spatials.positionXY(7, 19).height(97),
                ObservableSupplier.ofIdentity(() -> ((AlchemyTableContainer)this.getMenu()).getInput()),
                this.searchInput::getInput
             )
@@ -84,30 +77,23 @@ public class AlchemyTableScreen extends AbstractElementContainerScreen<AlchemyTa
       );
       ButtonElement<?> craftButton;
       this.addElement(
-         craftButton = new ButtonElement(Spatials.positionXY(142, 48), ScreenTextures.BUTTON_CRAFT_TEXTURES, this::tryCraft)
+         craftButton = new ButtonElement(Spatials.positionXY(131, 118), ScreenTextures.BUTTON_ALCHEMY_CRAFT_TEXTURES, this::tryCraft)
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
       craftButton.tooltip((tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
          if (this.selectedOption == null) {
             return false;
          } else {
-            ItemStack gear = ((AlchemyTableContainer)this.getMenu()).getInput();
-            if (gear.isEmpty()) {
+            ItemStack bottle = ((AlchemyTableContainer)this.getMenu()).getInput();
+            if (bottle.isEmpty()) {
                return false;
-            } else if (AttributeGearData.hasData(gear) && !AttributeGearData.<AttributeGearData>read(gear).isModifiable()) {
-               Component cmp = new TranslatableComponent("the_vault.gear_modification.unmodifiable").withStyle(ChatFormatting.RED);
-               tooltipRenderer.renderTooltip(poseStack, cmp, mouseX, mouseY, TooltipDirection.RIGHT);
-               return true;
             } else {
-               List<ItemStack> inputs = this.selectedOption.getCraftingCost(gear);
+               List<ItemStack> inputs = this.selectedOption.getCraftingCost(bottle);
                List<ItemStack> missing = InventoryUtil.getMissingInputs(inputs, this.playerInventory);
                if (missing.isEmpty()) {
                   List<Component> tooltip = new ArrayList<>();
-                  tooltip.add(gear.getHoverName());
-                  if (gear.getItem() instanceof VaultGearTooltipItem gearTooltipItem) {
-                     tooltip.addAll(gearTooltipItem.createTooltip(gear, GearTooltip.craftingView()));
-                  }
-
+                  tooltip.add(bottle.getHoverName());
+                  BottleItem.getEffect(bottle).ifPresent(BottleEffect::getTooltip);
                   tooltipRenderer.renderComponentTooltip(poseStack, tooltip, mouseX, mouseY, TooltipDirection.RIGHT);
                   return true;
                } else {
@@ -119,15 +105,15 @@ public class AlchemyTableScreen extends AbstractElementContainerScreen<AlchemyTa
          }
       });
       craftButton.setDisabled(() -> {
-         ItemStack gear = ((AlchemyTableContainer)this.getMenu()).getInput();
-         if (gear.isEmpty()) {
+         ItemStack potion = ((AlchemyTableContainer)this.getMenu()).getInput();
+         if (potion.isEmpty()) {
             return true;
-         } else if (this.selectedOption == null) {
-            return true;
-         } else {
-            List<ItemStack> inputs = this.selectedOption.getCraftingCost(gear);
+         } else if (this.selectedOption != null) {
+            List<ItemStack> inputs = this.selectedOption.getCraftingCost(potion);
             List<ItemStack> missing = InventoryUtil.getMissingInputs(inputs, this.playerInventory);
-            return !missing.isEmpty() && BottleItem.getEmptyModifierSlots(gear) > 0;
+            return !missing.isEmpty();
+         } else {
+            return true;
          }
       });
       this.selectorElement.onSelect(option -> this.selectedOption = option);
@@ -136,30 +122,14 @@ public class AlchemyTableScreen extends AbstractElementContainerScreen<AlchemyTa
 
    private void tryCraft() {
       if (this.selectedOption != null) {
-         ItemStack gear = ((AlchemyTableContainer)this.getMenu()).getInput();
-         if (!gear.isEmpty()) {
-            ItemStack gearCopy = gear.copy();
-            VaultAlchemyTableConfig.CraftableModifierConfig cfg = this.selectedOption.cfg();
-            if (cfg != null) {
-               if (VaultGearData.read(gearCopy).getItemLevel() < cfg.getMinLevel()) {
-                  return;
-               }
-
-               VaultGearModifier<?> modifier = cfg.createModifier().orElse(null);
-               if (modifier != null) {
-                  VaultGearData data = VaultGearData.read(gearCopy);
-                  Set<String> modGroups = data.getExistingModifierGroups(VaultGearData.Type.EXPLICIT_MODIFIERS);
-                  if (modGroups.contains(modifier.getModifierGroup())) {
-                     return;
-                  }
-               }
-            }
-
-            List<ItemStack> inputs = this.selectedOption.getCraftingCost(gear);
+         ItemStack potion = ((AlchemyTableContainer)this.getMenu()).getInput();
+         if (!potion.isEmpty()) {
+            AlchemyTableConfig.CraftableEffectConfig cfg = this.selectedOption.cfg();
+            List<ItemStack> inputs = this.selectedOption.getCraftingCost(potion);
             List<ItemStack> missing = InventoryUtil.getMissingInputs(inputs, this.playerInventory);
             if (missing.isEmpty()) {
-               ResourceLocation craftKey = cfg == null ? null : cfg.getWorkbenchCraftIdentifier();
-               ModNetwork.CHANNEL.sendToServer(new ModifierAlchemyCraftMessage(((AlchemyTableContainer)this.getMenu()).getTilePos(), craftKey));
+               String craftId = cfg == null ? null : cfg.getEffectId();
+               ModNetwork.CHANNEL.sendToServer(new AlchemyTableEffectCraftMessage(((AlchemyTableContainer)this.getMenu()).getTilePos(), craftId));
             }
          }
       }

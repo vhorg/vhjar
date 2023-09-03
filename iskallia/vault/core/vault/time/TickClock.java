@@ -53,6 +53,7 @@ public abstract class TickClock extends DataObject<TickClock> implements ISuppli
       this.set(LOGICAL_TIME, Integer.valueOf(0));
       this.set(DISPLAY_TIME, Integer.valueOf(0));
       this.set(VISIBLE);
+      this.set(PAUSED);
       this.set(TEXT_COLOR, Integer.valueOf(-1));
       this.set(ROTATION_TIME, Integer.valueOf(360));
    }

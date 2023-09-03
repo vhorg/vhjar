@@ -179,6 +179,7 @@ import iskallia.vault.block.item.TreasureDoorBlockItem;
 import iskallia.vault.block.item.TrophyStatueBlockItem;
 import iskallia.vault.block.item.VaultChampionTrophyBlockItem;
 import iskallia.vault.block.item.VaultOreBlockItem;
+import iskallia.vault.block.render.AlchemyTableRenderer;
 import iskallia.vault.block.render.AngelBlockRenderer;
 import iskallia.vault.block.render.AnimalPenRenderer;
 import iskallia.vault.block.render.BlackMarketRenderer;
@@ -1294,6 +1295,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(SKILL_ALTAR_TILE_ENTITY, SkillAltarRenderer::new);
       event.registerBlockEntityRenderer(VAULT_DIFFUSER_ENTITY, VaultDiffuserRenderer::new);
       event.registerBlockEntityRenderer(BLACK_MARKET_TILE_ENTITY, BlackMarketRenderer::new);
+      event.registerBlockEntityRenderer(ALCHEMY_TABLE_TILE_ENTITY, AlchemyTableRenderer::new);
       event.registerBlockEntityRenderer(ANIMAL_PEN_ENTITY, AnimalPenRenderer::new);
       event.registerBlockEntityRenderer(ETERNAL_PEDESTAL_TILE_ENTITY, EternalPedestalRenderer::new);
       event.registerBlockEntityRenderer(PYLON_TILE_ENTITY, PylonRenderer::new);

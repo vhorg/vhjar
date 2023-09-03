@@ -85,7 +85,7 @@ public class AttributeSnapshotHelper {
    @Nonnull
    public AttributeSnapshot makeGearSnapshot(Function<EquipmentSlot, ItemStack> equipmentFn) {
       AttributeSnapshot snapshot = new AttributeSnapshot();
-      AttributeSnapshotCalculator.computeGearSnapshot(equipmentFn, Integer.MAX_VALUE, snapshot);
+      AttributeSnapshotCalculator.computeGearSnapshot(equipmentFn, item -> false, Integer.MAX_VALUE, snapshot);
       return snapshot;
    }
 

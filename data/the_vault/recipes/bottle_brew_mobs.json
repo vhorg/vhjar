@@ -1,0 +1,33 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "dfd",
+    "aba",
+    "cec"
+  ],
+  "key": {
+    "a": {
+      "item": "the_vault:hearty_apple"
+    },
+    "b": {
+      "item": "minecraft:glass_bottle"
+    },
+    "c": {
+      "item": "the_vault:vault_diamond"
+    },
+    "d": {
+      "item": "the_vault:vault_diamond_block"
+    },
+    "e": {
+      "item": "the_vault:echo_pog"
+    },
+    "f": {
+      "item": "minecraft:red_mushroom"
+    }
+  },
+  "result": {
+    "item": "the_vault:bottle",
+    "count": 1,
+    "nbt": "{charges:6,recharge:\"mobs\",type:\"brew\"}"
+  }
+}

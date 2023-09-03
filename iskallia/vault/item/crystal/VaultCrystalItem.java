@@ -149,6 +149,7 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
    public void loadModels(Consumer<ModelResourceLocation> consumer) {
       consumer.accept(new ModelResourceLocation("the_vault:crystal/core/rainbow#inventory"));
       consumer.accept(new ModelResourceLocation("the_vault:crystal/core/raw#inventory"));
+      consumer.accept(new ModelResourceLocation("the_vault:crystal/core/chaos#inventory"));
       consumer.accept(new ModelResourceLocation("the_vault:crystal/core/grayscale#inventory"));
       consumer.accept(new ModelResourceLocation("the_vault:crystal/augment/core#inventory"));
    }

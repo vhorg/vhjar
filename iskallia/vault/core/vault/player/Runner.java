@@ -21,14 +21,13 @@ import iskallia.vault.gear.trinket.effects.VaultExperienceTrinket;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModGameRules;
-import iskallia.vault.item.BottleItem;
 import iskallia.vault.item.VaultDollItem;
+import iskallia.vault.item.bottle.BottleItem;
 import iskallia.vault.skill.PlayerVaultStats;
 import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultJoinSnapshotData;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
@@ -193,13 +192,29 @@ public class Runner extends Listener {
             }
          }
       });
-      CommonEvents.ENTITY_DEATH.register(this, event -> {
-         if (event.getEntity().level == world) {
-            if (event.getEntity().getTags().contains("soul_shards")) {
-               this.getPlayer().flatMap(player -> BottleItem.getActive(vault, player)).ifPresent(BottleItem::onMobKill);
+      CommonEvents.ENTITY_DEATH
+         .register(
+            this,
+            event -> {
+               if (event.getEntity().level == world) {
+                  if (event.getEntity().getTags().contains("soul_shards")) {
+                     this.getPlayer()
+                        .ifPresent(player -> BottleItem.getActive(vault, player).ifPresent(stack -> BottleItem.onMobKill(stack, player, event.getEntity())));
+                  }
+               }
             }
-         }
-      });
+         );
+      CommonEvents.CHEST_LOOT_GENERATION
+         .post()
+         .register(
+            this,
+            event -> {
+               if (event.getTileEntity().getLevel() == world) {
+                  this.getPlayer()
+                     .ifPresent(player -> BottleItem.getActive(vault, player).ifPresent(stack -> BottleItem.onChestOpen(stack, player, event.getState())));
+               }
+            }
+         );
       this.ifPresent(INFLUENCES, influences -> influences.initServer(world, vault, this));
    }
 
@@ -251,11 +266,7 @@ public class Runner extends Listener {
             });
          }
 
-         BottleItem.getAnyInactive(player).ifPresent(stack -> {
-            CompoundTag nbt = stack.getOrCreateTag();
-            nbt.putString("vault", vault.get(Vault.ID).toString());
-            nbt.remove("progress");
-         });
+         BottleItem.setActive(vault, player);
       });
    }
 

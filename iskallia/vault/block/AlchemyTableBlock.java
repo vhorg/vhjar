@@ -2,6 +2,7 @@ package iskallia.vault.block;
 
 import iskallia.vault.block.entity.AlchemyTableTileEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.util.BlockHelper;
 import iskallia.vault.util.VoxelUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,6 +24,8 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
@@ -40,8 +43,8 @@ import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 
 public class AlchemyTableBlock extends HorizontalDirectionalBlock implements EntityBlock, SimpleWaterloggedBlock {
-   public static final VoxelShape SHAPE = Block.box(0.0, 11.0, 0.0, 16.0, 14.0, 16.0);
-   public static final VoxelShape SHAPE2 = Block.box(1.0, 0.0, 1.0, 15.0, 11.0, 15.0);
+   public static final VoxelShape SHAPE = Block.box(0.0, 5.0, 0.0, 16.0, 8.0, 16.0);
+   public static final VoxelShape SHAPE2 = Block.box(1.0, 0.0, 1.0, 15.0, 5.0, 15.0);
 
    public AlchemyTableBlock() {
       super(Properties.of(Material.STONE).sound(SoundType.STONE).strength(0.5F).noOcclusion());
@@ -100,6 +103,13 @@ public class AlchemyTableBlock extends HorizontalDirectionalBlock implements Ent
       } else {
          return InteractionResult.SUCCESS;
       }
+   }
+
+   @Nullable
+   public <A extends BlockEntity> BlockEntityTicker<A> getTicker(@NotNull Level level, @NotNull BlockState state, @NotNull BlockEntityType<A> type) {
+      return BlockHelper.getTicker(
+         type, ModBlocks.ALCHEMY_TABLE_TILE_ENTITY, (level1, blockPos, blockState, alchemyTableTile) -> alchemyTableTile.tick(level1, blockPos, blockState)
+      );
    }
 
    public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {

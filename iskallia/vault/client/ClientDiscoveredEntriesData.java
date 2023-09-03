@@ -21,21 +21,15 @@ public class ClientDiscoveredEntriesData {
       }
    }
 
-   public static class AlchemyCrafts {
-      private static Set<ResourceLocation> discoveredAlchemyCrafts = new HashSet<>();
+   public static class AlchemyEffects {
+      private static Set<String> discoveredAlchemyEffects = new HashSet<>();
 
-      public static Set<ResourceLocation> getDiscoveredWorkbenchCrafts() {
-         return discoveredAlchemyCrafts;
+      public static Set<String> getDiscoveredAlchemyEffects() {
+         return discoveredAlchemyEffects;
       }
 
-      public static ObservableSupplier<Set<ResourceLocation>> getObserverWorkbenchCrafts() {
-         return ObservableSupplier.of(
-            ClientDiscoveredEntriesData.AlchemyCrafts::getDiscoveredWorkbenchCrafts, (crafts, newCrafts) -> crafts.size() == newCrafts.size()
-         );
-      }
-
-      public static void receiveMessage(Set<ResourceLocation> workbenchCrafts) {
-         discoveredAlchemyCrafts = workbenchCrafts;
+      public static void receiveMessage(Set<String> effects) {
+         discoveredAlchemyEffects = effects;
       }
    }
 

@@ -20,7 +20,7 @@ import iskallia.vault.integration.IntegrationWorldMap;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.scheduler.DailyScheduler;
-import iskallia.vault.world.data.DiscoveredAlchemyModifiersData;
+import iskallia.vault.world.data.DiscoveredAlchemyEffectsData;
 import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.DiscoveredTrinketsData;
 import iskallia.vault.world.data.DiscoveredWorkbenchModifiersData;
@@ -151,7 +151,7 @@ public class VaultMod {
       DiscoveredModelsData.get(serverWorld).syncTo(player);
       DiscoveredTrinketsData.get(serverWorld).syncTo(player);
       DiscoveredWorkbenchModifiersData.get(serverWorld).syncTo(player);
-      DiscoveredAlchemyModifiersData.get(serverWorld).syncTo(player);
+      DiscoveredAlchemyEffectsData.get(serverWorld).syncTo(player);
       SkillAltarData.get(serverWorld).syncTo(player);
       ModConfigs.SOUL_SHARD.syncTo(ModConfigs.SOUL_SHARD, player);
       ModConfigs.OMEGA_SOUL_SHARD.syncTo(ModConfigs.OMEGA_SOUL_SHARD, player);

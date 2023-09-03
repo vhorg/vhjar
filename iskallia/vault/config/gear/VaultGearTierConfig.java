@@ -89,7 +89,6 @@ public class VaultGearTierConfig extends Config {
          ModItems.IDOL_TIMEKEEPER,
          ModItems.JEWEL,
          ModItems.MAGNET,
-         ModItems.BOTTLE,
          ModItems.WAND
       )) {
          gearConfig.put(item, new VaultGearTierConfig(item).readConfig());

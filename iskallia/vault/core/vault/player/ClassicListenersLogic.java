@@ -110,8 +110,6 @@ public class ClassicListenersLogic extends ListenersLogic {
       this.keepInVault(world, vault, runners);
       if (runners.stream().noneMatch(Listener::isOnline)) {
          vault.ifPresent(Vault.CLOCK, clock -> clock.set(TickClock.PAUSED));
-      } else {
-         vault.ifPresent(Vault.CLOCK, clock -> clock.remove(TickClock.PAUSED));
       }
 
       if (runners.isEmpty()) {

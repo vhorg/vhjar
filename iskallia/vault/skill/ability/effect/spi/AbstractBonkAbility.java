@@ -22,12 +22,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class AbstractBonkAbility extends InstantManaAbility {
-   public static int CHAMPION_COUNT = 30;
-   public static int DUNGEON_COUNT = 10;
-   public static int GUARDIAN_COUNT = 7;
-   public static int TANK_COUNT = 10;
-   public static int ASSASSIN_COUNT = 3;
-   public static int HORDE_COUNT = 1;
    private float radius;
    private int maxStacksTotal;
    private int maxStacksUsedPerHit;

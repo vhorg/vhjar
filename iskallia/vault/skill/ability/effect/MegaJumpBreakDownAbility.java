@@ -9,9 +9,7 @@ import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModifica
 import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
-import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.util.BlockHelper;
-import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.Optional;
 import net.minecraft.core.BlockPos;
@@ -59,7 +57,7 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility {
                }
 
                if (height == 0) {
-                  this.breakBlocks(height, player);
+                  this.breakBlocks(player.getLevel(), height, player);
                   return Ability.ActionResult.successCooldownImmediate();
                } else {
                   double magnitude = height * 0.15;
@@ -67,7 +65,7 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility {
                   player.push(0.0, -(addY + magnitude), 0.0);
                   player.startFallFlying();
                   player.hurtMarked = true;
-                  this.breakBlocks(height, player);
+                  this.breakBlocks(player.getLevel(), height, player);
                   return Ability.ActionResult.successCooldownImmediate();
                }
             }
@@ -75,28 +73,23 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility {
          .orElse(Ability.ActionResult.fail());
    }
 
-   private void breakBlocks(int height, ServerPlayer player) {
-      ServerLevel sWorld = (ServerLevel)player.getCommandSenderWorld();
-      AbilityTree abilityTree = PlayerAbilitiesData.get(sWorld).getAbilities(player);
-      Ability focusedAbilityNode = abilityTree.getSelectedAbility().orElse(null);
-      if (focusedAbilityNode != null && focusedAbilityNode.getClass() == this.getClass()) {
-         int radius = Math.max(this.getRadius(), 1);
-         int depth = Math.max(height, 1) + 1;
-         BlockPos centerPos = player.blockPosition();
-         if (depth > 2) {
-            centerPos = centerPos.below(depth - 2);
-         }
-
-         BlockHelper.withEllipsoidPositions(centerPos, radius, depth, radius, offset -> {
-            BlockState state = sWorld.getBlockState(offset);
-            if (this.canBreakBlock(state)) {
-               float hardness = state.getDestroySpeed(sWorld, offset);
-               if (hardness >= 0.0F && hardness <= 25.0F) {
-                  this.destroyBlock(sWorld, offset, player);
-               }
-            }
-         });
+   private void breakBlocks(ServerLevel world, int height, ServerPlayer player) {
+      int radius = Math.max(this.getRadius(), 1);
+      int depth = Math.max(height, 1) + 1;
+      BlockPos centerPos = player.blockPosition();
+      if (depth > 2) {
+         centerPos = centerPos.below(depth - 2);
       }
+
+      BlockHelper.withEllipsoidPositions(centerPos, radius, depth, radius, offset -> {
+         BlockState state = world.getBlockState(offset);
+         if (this.canBreakBlock(state)) {
+            float hardness = state.getDestroySpeed(world, offset);
+            if (hardness >= 0.0F && hardness <= 25.0F) {
+               this.destroyBlock(world, offset, player);
+            }
+         }
+      });
    }
 
    private void destroyBlock(ServerLevel world, BlockPos pos, Player player) {

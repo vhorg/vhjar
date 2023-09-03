@@ -73,7 +73,7 @@ public class IntegrationJEI implements IModPlugin {
       registration.registerSubtypeInterpreter(
          VanillaTypes.ITEM_STACK,
          ModItems.BOTTLE,
-         (stack, context) -> stack.getOrCreateTag().getString("type") + "_" + stack.getOrCreateTag().getInt("charges")
+         (stack, context) -> stack.getOrCreateTag().getString("type") + "_" + stack.getOrCreateTag().getString("recharge")
       );
       Item item = (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation("ispawner", "spawn_egg"));
       if (item != null) {

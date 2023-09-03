@@ -496,7 +496,7 @@ public class ModGearAttributes {
       ModGearAttributeReaders.percentageReader("Copiously", 16205696),
       VaultGearAttributeComparator.floatComparator()
    );
-   public static final VaultGearAttribute<Float> IMMMORTALITY = attr(
+   public static final VaultGearAttribute<Float> IMMORTALITY = attr(
       "immortality",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
@@ -515,6 +515,13 @@ public class ModGearAttributes {
       VaultGearAttributeType.booleanType(),
       ModGearAttributeGenerators.booleanFlag(),
       ModGearAttributeReaders.booleanReader("Pulverizing", 7582579),
+      VaultGearAttributeComparator.booleanComparator()
+   );
+   public static final VaultGearAttribute<Boolean> HYDROVOID = attr(
+      "hydrovoid",
+      VaultGearAttributeType.booleanType(),
+      ModGearAttributeGenerators.booleanFlag(),
+      ModGearAttributeReaders.booleanReader("Hydrovoid", 2177962),
       VaultGearAttributeComparator.booleanComparator()
    );
    public static final VaultGearAttribute<Integer> HAMMER_SIZE = attr(
@@ -756,8 +763,9 @@ public class ModGearAttributes {
       registry.register(JEWEL_SIZE);
       registry.register(MINING_SPEED);
       registry.register(COPIOUSLY);
-      registry.register(IMMMORTALITY);
+      registry.register(IMMORTALITY);
       registry.register(PULVERIZING);
+      registry.register(HYDROVOID);
       registry.register(HAMMER_SIZE);
       registry.register(SMELTING);
       registry.register(WOODEN_AFFINITY);

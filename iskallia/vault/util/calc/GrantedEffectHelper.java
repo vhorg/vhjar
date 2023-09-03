@@ -48,15 +48,19 @@ public class GrantedEffectHelper {
    }
 
    public static void applyEffects(LivingEntity entity, Map<MobEffect, Integer> effects) {
-      effects.forEach((effect, amplifier) -> {
-         if (amplifier >= 0) {
-            MobEffectInstance activeEffect = entity.getEffect(effect);
-            MobEffectInstance newEffect = new MobEffectInstance(effect, 339, amplifier, false, false, true);
-            if (activeEffect == null || activeEffect.getAmplifier() < amplifier || activeEffect.getDuration() <= 259) {
-               entity.addEffect(newEffect);
+      effects.forEach(
+         (effect, amplifier) -> {
+            if (amplifier >= 0) {
+               MobEffectInstance activeEffect = entity.getEffect(effect);
+               MobEffectInstance newEffect = new MobEffectInstance(effect, 339, amplifier, false, false, true);
+               if (activeEffect == null
+                  || activeEffect.getAmplifier() < amplifier
+                  || activeEffect.getAmplifier() == amplifier && activeEffect.getDuration() <= 259) {
+                  entity.addEffect(newEffect);
+               }
             }
          }
-      });
+      );
    }
 
    public static GrantedEffectHelper.GrantedEffects getEffectData(Player player, ServerLevel world) {
