@@ -1,11 +1,8 @@
 package iskallia.vault.skill.ability.effect;
 
 import com.google.gson.JsonObject;
-import iskallia.vault.VaultMod;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.entity.champion.ChampionLogic;
-import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
@@ -13,6 +10,7 @@ import iskallia.vault.network.message.BonkParticleMessage;
 import iskallia.vault.skill.ability.effect.spi.AbstractBonkAbility;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.SkillContext;
+import iskallia.vault.util.EntityHelper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -72,21 +70,7 @@ public class BonkLuckyStrikeAbility extends AbstractBonkAbility {
                            20 + (int)(new Random().nextFloat() * 20.0F)
                         )
                      );
-                  if (ChampionLogic.isChampion(livingEntity)) {
-                     count += CHAMPION_COUNT;
-                  } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("dungeon"), livingEntity)) {
-                     count += DUNGEON_COUNT;
-                  } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("guardian"), livingEntity)) {
-                     count += GUARDIAN_COUNT;
-                  } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("tank"), livingEntity)) {
-                     count += TANK_COUNT;
-                  } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("assassin"), livingEntity)) {
-                     count += ASSASSIN_COUNT;
-                  } else if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("horde"), livingEntity)) {
-                     count += HORDE_COUNT;
-                  } else {
-                     count++;
-                  }
+                  count += EntityHelper.getEntityValue(livingEntity);
                }
 
                if (count > 0) {

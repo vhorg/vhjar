@@ -3,10 +3,8 @@ package iskallia.vault.container;
 import iskallia.vault.block.entity.AlchemyTableTileEntity;
 import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.container.spi.AbstractElementContainer;
-import iskallia.vault.gear.VaultGearState;
-import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModContainers;
-import iskallia.vault.item.BottleItem;
+import iskallia.vault.item.bottle.BottleItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -33,25 +31,18 @@ public class AlchemyTableContainer extends AbstractElementContainer {
    private void initSlots(Inventory playerInventory) {
       for (int row = 0; row < 3; row++) {
          for (int column = 0; column < 9; column++) {
-            this.addSlot(new TabSlot(playerInventory, column + row * 9 + 9, 8 + column * 18, 130 + row * 18));
+            this.addSlot(new TabSlot(playerInventory, column + row * 9 + 9, 8 + column * 18, 139 + row * 18));
          }
       }
 
       for (int hotbarSlot = 0; hotbarSlot < 9; hotbarSlot++) {
-         this.addSlot(new TabSlot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 188));
+         this.addSlot(new TabSlot(playerInventory, hotbarSlot, 8 + hotbarSlot * 18, 197));
       }
 
       SimpleContainer ct = this.tileEntity.getInventory();
-      this.addSlot(new Slot(ct, 0, 143, 72) {
+      this.addSlot(new Slot(ct, 0, 152, 119) {
          public boolean mayPlace(ItemStack stack) {
-            if (stack.isEmpty()) {
-               return false;
-            } else if (!(stack.getItem() instanceof BottleItem)) {
-               return false;
-            } else {
-               VaultGearData data = VaultGearData.read(stack);
-               return data.getState() == VaultGearState.IDENTIFIED;
-            }
+            return stack.isEmpty() ? false : stack.getItem() instanceof BottleItem;
          }
       });
    }

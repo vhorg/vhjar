@@ -1,0 +1,116 @@
+{
+	"credit": "Made with Blockbench",
+	"texture_size": [32, 32],
+	"textures": {
+		"2": "the_vault:item/gear/wand/baguette"
+	},
+	"elements": [
+		{
+			"from": [6, -5.75, 6],
+			"to": [10, 25.25, 10],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8.5, 11.8985, 8.5]},
+			"faces": {
+				"north": {"uv": [0, 0, 2, 15.5], "texture": "#2"},
+				"east": {"uv": [2, 0, 4, 15.5], "texture": "#2"},
+				"south": {"uv": [4, 0, 6, 15.5], "texture": "#2"},
+				"west": {"uv": [6, 0, 8, 15.5], "texture": "#2"},
+				"up": {"uv": [10, 2, 8, 0], "texture": "#2"},
+				"down": {"uv": [10, 2, 8, 4], "texture": "#2"}
+			}
+		},
+		{
+			"from": [6.5, 25.25, 6],
+			"to": [9.5, 26.25, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12.8985, 8.5]},
+			"faces": {
+				"north": {"uv": [8, 7, 9.5, 7.5], "texture": "#2"},
+				"east": {"uv": [8, 7.5, 9.5, 8], "texture": "#2"},
+				"south": {"uv": [8, 8, 9.5, 8.5], "texture": "#2"},
+				"west": {"uv": [8, 8.5, 9.5, 9], "texture": "#2"},
+				"up": {"uv": [9.5, 5.5, 8, 4], "texture": "#2"},
+				"down": {"uv": [9.5, 5.5, 8, 7], "texture": "#2"}
+			}
+		},
+		{
+			"from": [6.5, -6.75, 6],
+			"to": [9.5, -5.75, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, -19.1015, 8.5]},
+			"faces": {
+				"north": {"uv": [8, 7, 9.5, 7.5], "texture": "#2"},
+				"east": {"uv": [8, 7.5, 9.5, 8], "texture": "#2"},
+				"south": {"uv": [8, 8, 9.5, 8.5], "texture": "#2"},
+				"west": {"uv": [8, 8.5, 9.5, 9], "texture": "#2"},
+				"up": {"uv": [9.5, 5.5, 8, 4], "texture": "#2"},
+				"down": {"uv": [9.5, 5.5, 8, 7], "texture": "#2"}
+			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, 1.75, 1.5],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, 1.75, 1.5],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"firstperson_righthand": {
+			"rotation": [-10, 0, 0],
+			"translation": [3.25, 2.5, 0.25],
+			"scale": [0.42, 0.42, 0.42]
+		},
+		"firstperson_lefthand": {
+			"rotation": [-10, 0, 0],
+			"translation": [3.25, 2.5, 0.25],
+			"scale": [0.42, 0.42, 0.42]
+		},
+		"ground": {
+			"rotation": [60, 180, 0],
+			"translation": [0, 1, 0],
+			"scale": [0.3, 0.3, 0.3]
+		},
+		"gui": {
+			"rotation": [-21, 0, -51],
+			"translation": [-0.75, -0.75, 0],
+			"scale": [0.5207, 0.5207, 0.5207]
+		},
+		"fixed": {
+			"rotation": [180, 0, -45],
+			"translation": [-1, 0.75, 0],
+			"scale": [0.63047, 0.63047, 0.63047]
+		}
+	},
+	"groups": [
+		{
+			"name": "common wand",
+			"origin": [-0.5, -9.25, 0.5],
+			"color": 0,
+			"children": [
+				{
+					"name": "center",
+					"origin": [8, 11.8985, 8],
+					"color": 0,
+					"children": []
+				},
+				{
+					"name": "top",
+					"origin": [8, 27.997, 8.25],
+					"color": 0,
+					"children": []
+				},
+				{
+					"name": "handle",
+					"origin": [8, 11.8985, 8],
+					"color": 0,
+					"children": [0, 1, 2]
+				},
+				{
+					"name": "shaft",
+					"origin": [0, -2, 0],
+					"color": 0,
+					"children": []
+				}
+			]
+		}
+	]
+}

@@ -1,3 +1,36 @@
 {
-  "parent": "builtin/entity"
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "the_vault:item/bottle/vial/empty"
+  },
+  "overrides": [
+    { "predicate": { "type": 0, "fill": 0 }, "model": "the_vault:item/bottle/vial/empty" },
+    { "predicate": { "type": 0, "fill": 0.16666669 }, "model": "the_vault:item/bottle/vial/fill_1" },
+    { "predicate": { "type": 0, "fill": 0.3333333 }, "model": "the_vault:item/bottle/vial/fill_2" },
+    { "predicate": { "type": 0, "fill": 0.5 }, "model": "the_vault:item/bottle/vial/fill_3" },
+    { "predicate": { "type": 0, "fill": 0.6666666 }, "model": "the_vault:item/bottle/vial/fill_4" },
+    { "predicate": { "type": 0, "fill": 0.8333333 }, "model": "the_vault:item/bottle/vial/fill_5" },
+    { "predicate": { "type": 0, "fill": 1 }, "model": "the_vault:item/bottle/vial/fill_6" },
+    { "predicate": { "type": 1, "fill": 0 }, "model": "the_vault:item/bottle/potion/empty" },
+    { "predicate": { "type": 1, "fill": 0.16666669 }, "model": "the_vault:item/bottle/potion/fill_1" },
+    { "predicate": { "type": 1, "fill": 0.3333333 }, "model": "the_vault:item/bottle/potion/fill_2" },
+    { "predicate": { "type": 1, "fill": 0.5 }, "model": "the_vault:item/bottle/potion/fill_3" },
+    { "predicate": { "type": 1, "fill": 0.6666666 }, "model": "the_vault:item/bottle/potion/fill_4" },
+    { "predicate": { "type": 1, "fill": 0.8333333 }, "model": "the_vault:item/bottle/potion/fill_5" },
+    { "predicate": { "type": 1, "fill": 1 }, "model": "the_vault:item/bottle/potion/fill_6" },
+    { "predicate": { "type": 2, "fill": 0 }, "model": "the_vault:item/bottle/mixture/empty" },
+    { "predicate": { "type": 2, "fill": 0.16666669 }, "model": "the_vault:item/bottle/mixture/fill_1" },
+    { "predicate": { "type": 2, "fill": 0.3333333 }, "model": "the_vault:item/bottle/mixture/fill_2" },
+    { "predicate": { "type": 2, "fill": 0.5 }, "model": "the_vault:item/bottle/mixture/fill_3" },
+    { "predicate": { "type": 2, "fill": 0.6666666 }, "model": "the_vault:item/bottle/mixture/fill_4" },
+    { "predicate": { "type": 2, "fill": 0.8333333 }, "model": "the_vault:item/bottle/mixture/fill_5" },
+    { "predicate": { "type": 2, "fill": 1 }, "model": "the_vault:item/bottle/mixture/fill_6" },
+    { "predicate": { "type": 3, "fill": 0 }, "model": "the_vault:item/bottle/brew/empty" },
+    { "predicate": { "type": 3, "fill": 0.16666669 }, "model": "the_vault:item/bottle/brew/fill_1" },
+    { "predicate": { "type": 3, "fill": 0.3333333 }, "model": "the_vault:item/bottle/brew/fill_2" },
+    { "predicate": { "type": 3, "fill": 0.5 }, "model": "the_vault:item/bottle/brew/fill_3" },
+    { "predicate": { "type": 3, "fill": 0.6666666 }, "model": "the_vault:item/bottle/brew/fill_4" },
+    { "predicate": { "type": 3, "fill": 0.8333333 }, "model": "the_vault:item/bottle/brew/fill_5" },
+    { "predicate": { "type": 3, "fill": 1 }, "model": "the_vault:item/bottle/brew/fill_6" }
+  ]
 }

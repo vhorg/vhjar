@@ -1,0 +1,8 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "the_vault:item/bottle/vial/empty",
+        "layer1": "the_vault:item/bottle/vial/band",
+        "layer2": "the_vault:item/bottle/vial/juice_2"
+    }
+}

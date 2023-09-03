@@ -124,6 +124,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                      int vaultLevel = vault.get(Vault.LEVEL).get();
                      PlayerSpiritRecoveryData data = PlayerSpiritRecoveryData.get(serverLevel);
                      if (serverLevel.players().size() > 1) {
+                        EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
                         server.tell(
                            new TickTask(
                               server.getTickCount() + 10,
@@ -132,7 +133,6 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                                  if (ModEntities.SPIRIT.spawn(serverLevel, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
                                     )
                                   {
-                                    EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
                                     spirit.transferSpiritData(player, event.getDrops(), joinState, vaultLevel);
                                  }
                               }

@@ -215,6 +215,7 @@ public abstract class PylonBuff<C extends PylonBuff.Config<?>> implements INBTSe
          REGISTRY.put("time", TimePylonBuff.Config::new);
          REGISTRY.put("attribute", AttributePylonBuff.Config::new);
          REGISTRY.put("stat", StatPylonBuff.Config::new);
+         REGISTRY.put("potion", PotionPylonBuff.Config::new);
       }
    }
 }

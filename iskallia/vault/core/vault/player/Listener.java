@@ -14,11 +14,14 @@ import iskallia.vault.core.data.key.registry.ISupplierKey;
 import iskallia.vault.core.data.sync.SyncMode;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.util.iterator.MappingIterator;
+import iskallia.vault.core.vault.ClassicPortalLogic;
 import iskallia.vault.core.vault.EntityState;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
+import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.vault.objective.Objective;
 import iskallia.vault.core.vault.objective.Objectives;
+import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.VaultMessage;
@@ -31,6 +34,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkDirection;
@@ -68,8 +72,24 @@ public abstract class Listener extends DataObject<Listener> implements ISupplier
    public void tickServer(VirtualWorld world, Vault vault) {
       this.getPlayer()
          .ifPresent(
-            player -> ModNetwork.CHANNEL
-               .sendTo(new VaultMessage.Sync(player, vault, SyncMode.FULL), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT)
+            player -> {
+               if (vault.get(Vault.CLOCK).has(TickClock.PAUSED)) {
+                  vault.ifPresent(
+                     Vault.WORLD,
+                     manager -> {
+                        if (manager.get(WorldManager.PORTAL_LOGIC) instanceof ClassicPortalLogic logic) {
+                           if (logic.getPlayerStartPos(vault)
+                              .map(start -> player.level.dimension().equals(world.dimension()) && player.distanceToSqr(Vec3.atCenterOf(start)) > 225.0)
+                              .orElse(false)) {
+                              vault.get(Vault.CLOCK).remove(TickClock.PAUSED);
+                           }
+                        }
+                     }
+                  );
+               }
+
+               ModNetwork.CHANNEL.sendTo(new VaultMessage.Sync(player, vault, SyncMode.FULL), player.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+            }
          );
    }
 

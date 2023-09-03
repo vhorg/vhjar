@@ -8,10 +8,13 @@ import iskallia.vault.network.message.AbilityLevelMessage;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
 import iskallia.vault.network.message.AbilitySelectSpecializationMessage;
 import iskallia.vault.network.message.ActiveEternalMessage;
+import iskallia.vault.network.message.AlchemyTableEffectCraftMessage;
 import iskallia.vault.network.message.AngelToggleMessage;
 import iskallia.vault.network.message.AnimalPenParticleMessage;
 import iskallia.vault.network.message.BonkParticleMessage;
 import iskallia.vault.network.message.ChainingParticleMessage;
+import iskallia.vault.network.message.ClientboundAlchemyParticleMessage;
+import iskallia.vault.network.message.ClientboundAlchemySecondParticleMessage;
 import iskallia.vault.network.message.ClientboundArchetypeMessage;
 import iskallia.vault.network.message.ClientboundChampionMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
@@ -28,11 +31,12 @@ import iskallia.vault.network.message.ClientboundResetCryoChamberMessage;
 import iskallia.vault.network.message.ClientboundSightParticlesFromJavelinMessage;
 import iskallia.vault.network.message.ClientboundSyncSkillAltarDataMessage;
 import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
+import iskallia.vault.network.message.ClientboundTESyncMessage;
 import iskallia.vault.network.message.ClientboundToastMessage;
 import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
 import iskallia.vault.network.message.DiffuserParticleMessage;
-import iskallia.vault.network.message.DiscoveredAlchemyModifierCraftsMessage;
+import iskallia.vault.network.message.DiscoveredAlchemyEffectsMessage;
 import iskallia.vault.network.message.DiscoveredWorkbenchModifierCraftsMessage;
 import iskallia.vault.network.message.EffectMessage;
 import iskallia.vault.network.message.EternalInteractionMessage;
@@ -54,7 +58,6 @@ import iskallia.vault.network.message.LuckyHitParticleMessage;
 import iskallia.vault.network.message.LuckyHitSweepingParticleMessage;
 import iskallia.vault.network.message.LuckyHitVortexParticleMessage;
 import iskallia.vault.network.message.MobCritParticleMessage;
-import iskallia.vault.network.message.ModifierAlchemyCraftMessage;
 import iskallia.vault.network.message.ModifierWorkbenchCraftMessage;
 import iskallia.vault.network.message.MonolithIgniteMessage;
 import iskallia.vault.network.message.NovaParticleMessage;
@@ -772,10 +775,10 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(),
-         DiscoveredAlchemyModifierCraftsMessage.class,
-         DiscoveredAlchemyModifierCraftsMessage::encode,
-         DiscoveredAlchemyModifierCraftsMessage::decode,
-         DiscoveredAlchemyModifierCraftsMessage::handle
+         DiscoveredAlchemyEffectsMessage.class,
+         DiscoveredAlchemyEffectsMessage::encode,
+         DiscoveredAlchemyEffectsMessage::decode,
+         DiscoveredAlchemyEffectsMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),
@@ -786,10 +789,10 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(),
-         ModifierAlchemyCraftMessage.class,
-         ModifierAlchemyCraftMessage::encode,
-         ModifierAlchemyCraftMessage::decode,
-         ModifierAlchemyCraftMessage::handle
+         AlchemyTableEffectCraftMessage.class,
+         AlchemyTableEffectCraftMessage::encode,
+         AlchemyTableEffectCraftMessage::decode,
+         AlchemyTableEffectCraftMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),
@@ -875,6 +878,23 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(), ClientboundChampionMessage.class, ClientboundChampionMessage::encode, ClientboundChampionMessage::decode, ClientboundChampionMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), ClientboundTESyncMessage.class, ClientboundTESyncMessage::encode, ClientboundTESyncMessage::decode, ClientboundTESyncMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundAlchemyParticleMessage.class,
+         ClientboundAlchemyParticleMessage::encode,
+         ClientboundAlchemyParticleMessage::decode,
+         ClientboundAlchemyParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundAlchemySecondParticleMessage.class,
+         ClientboundAlchemySecondParticleMessage::encode,
+         ClientboundAlchemySecondParticleMessage::decode,
+         ClientboundAlchemySecondParticleMessage::handle
       );
    }
 

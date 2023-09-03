@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.dynamodel.model.armor.ArmorModel;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
+import iskallia.vault.dynamodel.model.item.HandHeldModel;
 import iskallia.vault.dynamodel.registry.DynamicModelRegistry;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -115,6 +116,16 @@ public class GearModelRollRaritiesConfig extends Config {
          if (modelOpt.isPresent()) {
             ArmorModel armorModel = modelOpt.get();
             if (armorModel.equals(ModDynamicModels.Armor.GOBLIN) || armorModel.equals(ModDynamicModels.Armor.CHAMPION)) {
+               return VaultGearRarity.UNIQUE;
+            }
+         }
+      }
+
+      if (item instanceof VaultSwordItem) {
+         Optional<HandHeldModel> modelOptx = ModDynamicModels.Swords.REGISTRY.get(modelId);
+         if (modelOptx.isPresent()) {
+            HandHeldModel handHeldModel = modelOptx.get();
+            if (handHeldModel.equals(ModDynamicModels.Swords.GODSWORD)) {
                return VaultGearRarity.UNIQUE;
             }
          }

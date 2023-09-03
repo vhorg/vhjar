@@ -46,6 +46,15 @@ public abstract class Ability extends LearnableSkill implements TickingSkill, Co
       this.cooldown = new Cooldown(cooldownTicks, cooldownTicks, cooldownDelayTicks);
    }
 
+   public void reduceCooldownBy(int reduceBy) {
+      if (this.cooldown != null) {
+         int cooldownDelayTicks = Math.max(0, this.cooldown.getRemainingDelayTicks() - reduceBy);
+         int reduceCooldownBy = reduceBy - this.cooldown.getRemainingDelayTicks();
+         int cooldownTicks = reduceCooldownBy > 0 ? Math.max(0, this.cooldown.getRemainingTicks() - reduceCooldownBy) : this.cooldown.getRemainingTicks();
+         this.cooldown = new Cooldown(this.cooldown.getMaxTicks(), cooldownTicks, cooldownDelayTicks);
+      }
+   }
+
    public void setActive(boolean active) {
       this.active = active;
    }

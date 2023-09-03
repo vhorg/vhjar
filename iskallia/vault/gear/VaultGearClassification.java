@@ -11,8 +11,7 @@ public enum VaultGearClassification {
    JEWEL(VaultGearRarity::getJewelModifierCount),
    MAGNET(VaultGearRarity::getMagnetModifierCount),
    WAND(VaultGearRarity::getWandModifierCount),
-   TOOL(rarity -> 0),
-   DRINK(rarity -> 0);
+   TOOL(rarity -> 0);
 
    private final Function<VaultGearRarity, Integer> modifierCountFn;
 

@@ -63,6 +63,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.MendingEnchantment;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootContext.Builder;
@@ -193,9 +194,11 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
                            && !state.is(ModBlocks.LIVING_STRONGBOX)
                            && !state.is(ModBlocks.FLESH_CHEST)
                            && !state.is(ModBlocks.ENIGMA_CHEST)) {
-                        return data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)
-                           ? true
-                           : SPAWNER_ID.equals(state.getBlock().getRegistryName());
+                        if (data.get(ModGearAttributes.COIN_AFFINITY, VaultGearAttributeTypeMerger.anyTrue()) && state.is(ModBlocks.COIN_PILE)) {
+                           return true;
+                        } else {
+                           return SPAWNER_ID.equals(state.getBlock().getRegistryName()) ? true : state.getBlock() instanceof LiquidBlock;
+                        }
                      } else {
                         return true;
                      }
@@ -362,14 +365,13 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       }
    }
 
-   @Override
    public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T entity, Consumer<T> onBroken) {
       Level world = entity.level;
       VaultGearData data = VaultGearData.read(stack);
       return ServerVaults.get(world).isEmpty()
-            && world.getRandom().nextFloat() < data.get(ModGearAttributes.IMMMORTALITY, VaultGearAttributeTypeMerger.floatSum())
+            && world.getRandom().nextFloat() < data.get(ModGearAttributes.IMMORTALITY, VaultGearAttributeTypeMerger.floatSum())
          ? 0
-         : VaultGearItem.super.damageItem(stack, amount, entity, onBroken);
+         : amount;
    }
 
    @Override

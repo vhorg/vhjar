@@ -44,6 +44,7 @@ import iskallia.vault.gear.model.armor.layers.DruidArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FairyArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FlamingoArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FluxArmorLayers;
+import iskallia.vault.gear.model.armor.layers.FoxArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FurnaceArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GladiatorArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GoatArmorLayers;
@@ -1096,6 +1097,15 @@ public class ModDynamicModels {
             .addSlot(EquipmentSlot.LEGS)
             .addSlot(EquipmentSlot.FEET)
       );
+      public static final ArmorModel FOX = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/fox"), "Fox")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new FoxArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
    }
 
    public static class Axes {
@@ -1501,6 +1511,9 @@ public class ModDynamicModels {
          new HandHeldModel(VaultMod.id("gear/sword/honey_wand"), "Honey Wand")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
+      public static final HandHeldModel GODSWORD = REGISTRY.register(
+         new HandHeldModel(VaultMod.id("gear/sword/godsword"), "Godsword").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
    }
 
    public static class Wands {
@@ -1541,6 +1554,31 @@ public class ModDynamicModels {
       );
       public static final PlainItemModel LUNAR = REGISTRY.register(
          new PlainItemModel(VaultMod.id("gear/wand/lunar"), "Lunar Staff").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel LIGHTNING = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/lightning"), "Lightning Wand")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel FROST = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/frost"), "Frost Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel FLOWER = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/flower"), "Flower Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel BOOK_OF_SHADOWS = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/bookofshadows"), "Book of Shadows")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel BAGUETTE = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/baguette"), "Baguette").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel CARROT_ON_A_WAND = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/carrot_on_a_wand"), "Carrot on a Wand")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel CARRI_KING = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/carri_king"), "Carri King Scepter")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }
 }

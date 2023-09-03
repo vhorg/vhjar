@@ -1,6 +1,7 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "the_vault:item/bottle/potion/empty"
+        "layer0": "the_vault:item/bottle/potion/empty",
+        "layer1": "the_vault:item/bottle/potion/band"
     }
 }

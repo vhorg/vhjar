@@ -74,6 +74,21 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_CRAFT_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_CRAFT, BUTTON_CRAFT_HOVER, BUTTON_CRAFT_PRESSED, BUTTON_CRAFT_DISABLED
    );
+   public static final TextureAtlasRegion BUTTON_ALCHEMY_CRAFT = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_craft")
+   );
+   public static final TextureAtlasRegion BUTTON_ALCHEMY_CRAFT_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_craft_disabled")
+   );
+   public static final TextureAtlasRegion BUTTON_ALCHEMY_CRAFT_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_craft_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_ALCHEMY_CRAFT_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_craft_pressed")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_ALCHEMY_CRAFT_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_ALCHEMY_CRAFT, BUTTON_ALCHEMY_CRAFT_HOVER, BUTTON_ALCHEMY_CRAFT_PRESSED, BUTTON_ALCHEMY_CRAFT_DISABLED
+   );
    public static final TextureAtlasRegion BUTTON_TRANSMOG = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_transmog"));
    public static final TextureAtlasRegion BUTTON_TRANSMOG_DISABLED = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_transmog_disabled")
@@ -368,6 +383,21 @@ public final class ScreenTextures {
    );
    public static final ButtonElement.ButtonTextures BUTTON_WORKBENCH_MODIFIER_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_WORKBENCH_MODIFIER, BUTTON_WORKBENCH_MODIFIER_HOVER, BUTTON_WORKBENCH_MODIFIER_PRESSED, BUTTON_WORKBENCH_MODIFIER_DISABLED
+   );
+   public static final TextureAtlasRegion BUTTON_ALCHEMY_MODIFIER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_select")
+   );
+   public static final TextureAtlasRegion BUTTON_ALCHEMY_MODIFIER_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_select_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_ALCHEMY_MODIFIER_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_select_pressed")
+   );
+   public static final TextureAtlasRegion BUTTON_ALCHEMY_MODIFIER_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_alchemy_select_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_ALCHEMY_MODIFIER_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_ALCHEMY_MODIFIER, BUTTON_ALCHEMY_MODIFIER_HOVER, BUTTON_ALCHEMY_MODIFIER_PRESSED, BUTTON_ALCHEMY_MODIFIER_DISABLED
    );
    public static final TextureAtlasRegion BUTTON_ENCHANTER = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_enchanter_select")

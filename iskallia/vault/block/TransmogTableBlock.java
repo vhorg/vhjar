@@ -139,16 +139,29 @@ public class TransmogTableBlock extends Block implements EntityBlock {
    }
 
    public static boolean canTransmogModel(Player player, Collection<ResourceLocation> discoveredModelIds, ResourceLocation modelId) {
-      return ModDynamicModels.Armor.PIECE_REGISTRY.get(modelId).map(ArmorPieceModel::getArmorModel).map(armorModel -> {
-         if (armorModel.equals(ModDynamicModels.Armor.CHAMPION)) {
-            return !FMLEnvironment.production || CHAMPION_LIST.contains(hashId(player.getUUID()));
-         } else if (!armorModel.equals(ModDynamicModels.Armor.GOBLIN)) {
-            return null;
-         } else {
-            long id = hashId(player.getUUID());
-            return !FMLEnvironment.production || GOBLIN_LIST.contains(id) || CHAMPION_LIST.contains(id);
-         }
-      }).orElse(discoveredModelIds.contains(modelId));
+      return ModDynamicModels.Armor.PIECE_REGISTRY
+         .get(modelId)
+         .map(ArmorPieceModel::getArmorModel)
+         .map(armorModel -> {
+            if (armorModel.equals(ModDynamicModels.Armor.CHAMPION)) {
+               return !FMLEnvironment.production || CHAMPION_LIST.contains(hashId(player.getUUID()));
+            } else if (!armorModel.equals(ModDynamicModels.Armor.GOBLIN)) {
+               return null;
+            } else {
+               long id = hashId(player.getUUID());
+               return !FMLEnvironment.production || GOBLIN_LIST.contains(id) || CHAMPION_LIST.contains(id);
+            }
+         })
+         .orElseGet(
+            () -> ModDynamicModels.Swords.REGISTRY
+               .get(modelId)
+               .map(
+                  model -> !model.equals(ModDynamicModels.Swords.GODSWORD)
+                     ? null
+                     : !FMLEnvironment.production || CHAMPION_LIST.contains(hashId(player.getUUID()))
+               )
+               .orElse(discoveredModelIds.contains(modelId))
+         );
    }
 
    private static long hashId(UUID id) {

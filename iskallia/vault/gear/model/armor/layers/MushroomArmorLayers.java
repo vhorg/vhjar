@@ -38,25 +38,25 @@ public class MushroomArmorLayers extends ArmorLayers {
          PartDefinition partdefinition = meshdefinition.getRoot();
          PartDefinition body = partdefinition.addOrReplaceChild(
             "body",
-            CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(0.51F)),
+            CubeListBuilder.create().texOffs(26, 26).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(0.51F)),
             PartPose.offset(0.0F, 0.0F, 0.0F)
          );
          PartDefinition right_leg = partdefinition.addOrReplaceChild(
             "right_leg",
             CubeListBuilder.create()
-               .texOffs(0, 29)
+               .texOffs(30, 0)
                .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.5F))
-               .texOffs(20, 23)
-               .addBox(-4.0F, 2.0F, -3.0F, 7.0F, 7.0F, 6.0F, new CubeDeformation(0.0F)),
+               .texOffs(0, 15)
+               .addBox(-4.0F, 2.0F, -4.0F, 7.0F, 7.0F, 8.0F, new CubeDeformation(0.0F)),
             PartPose.offset(-1.9F, 12.0F, 0.0F)
          );
          PartDefinition left_leg = partdefinition.addOrReplaceChild(
             "left_leg",
             CubeListBuilder.create()
-               .texOffs(24, 0)
+               .texOffs(0, 30)
                .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(0.5F))
-               .texOffs(0, 16)
-               .addBox(-3.05F, 2.0F, -3.0F, 7.0F, 7.0F, 6.0F, new CubeDeformation(0.0F)),
+               .texOffs(0, 0)
+               .addBox(-3.05F, 2.0F, -4.0F, 7.0F, 7.0F, 8.0F, new CubeDeformation(0.0F)),
             PartPose.offset(1.9F, 12.0F, 0.0F)
          );
          return LayerDefinition.create(meshdefinition, 64, 64);

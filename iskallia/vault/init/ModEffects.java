@@ -2,10 +2,10 @@ package iskallia.vault.init;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.effect.BasicEffect;
-import iskallia.vault.effect.BottleEffect;
 import iskallia.vault.effect.ChilledEffect;
 import iskallia.vault.effect.FreezeEffect;
 import iskallia.vault.effect.GlacialShatterEffect;
+import iskallia.vault.effect.ImmortalityEffect;
 import iskallia.vault.effect.NoAiEffect;
 import iskallia.vault.effect.PoisonOverrideEffect;
 import iskallia.vault.effect.PylonEffect;
@@ -13,6 +13,7 @@ import iskallia.vault.effect.ThresholdEffect;
 import iskallia.vault.effect.TimerAccelerationEffect;
 import iskallia.vault.effect.VulnerableEffect;
 import iskallia.vault.effect.WeaknessEffect;
+import iskallia.vault.item.bottle.CleanseBottleEffect;
 import iskallia.vault.skill.ability.effect.EmpowerAbility;
 import iskallia.vault.skill.ability.effect.EmpowerIceArmourAbility;
 import iskallia.vault.skill.ability.effect.EmpowerSlownessAuraAbility;
@@ -123,6 +124,8 @@ public class ModEffects {
    public static final MobEffect BATTLE_CRY_LUCKY_STRIKE = new AbstractBonkAbility.BattleCryEffect(
       MobEffectCategory.BENEFICIAL, Color.GREEN.getRGB(), VaultMod.id("battle_cry_lucky_strike")
    );
+   public static final MobEffect IMMORTALITY = new ImmortalityEffect(VaultMod.id("immortality"), MobEffectCategory.BENEFICIAL, -16769217);
+   public static final MobEffect PURIFYING_AURA = new CleanseBottleEffect.PurifyingAuraEffect(VaultMod.id("purifying_aura"), -4675);
    public static final ThresholdEffect SORCERY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("sorcery"));
    public static final ThresholdEffect STONESKIN = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("stoneskin"));
    public static final ThresholdEffect WITCHERY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("witchery"));
@@ -134,7 +137,6 @@ public class ModEffects {
    public static final MobEffect RESISTANCE = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.YELLOW.getRGB(), VaultMod.id("resistance"));
    public static final MobEffect REACH = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.BLUE.getRGB(), VaultMod.id("reach"))
       .addAttributeModifier((Attribute)ForgeMod.REACH_DISTANCE.get(), "c55181ae-a259-11ed-a8fc-0242ac120002", 2.0, Operation.ADDITION);
-   public static final MobEffect BOTTLE = new BottleEffect(MobEffectCategory.BENEFICIAL, Color.RED.getRGB(), VaultMod.id("bottle"));
    public static final MobEffect TIMER_ACCELERATION = new TimerAccelerationEffect(MobEffectCategory.HARMFUL, -16448251, VaultMod.id("time_acceleration"));
    public static final MobEffect GLACIAL_SHATTER = new GlacialShatterEffect(MobEffectCategory.HARMFUL, -16711681, VaultMod.id("glacial_shatter"));
    public static final MobEffect POISON_OVERRIDE = new PoisonOverrideEffect();
@@ -172,7 +174,6 @@ public class ModEffects {
                NO_AI,
                RESISTANCE,
                REACH,
-               BOTTLE,
                TAUNT,
                TAUNT_REPEL_MOB,
                TAUNT_REPEL_PLAYER,
@@ -205,7 +206,9 @@ public class ModEffects {
                BATTLE_CRY_SPECTRAL_STRIKE,
                BATTLE_CRY_LUCKY_STRIKE,
                PYLON,
-               PYLON_OVERFLOW
+               PYLON_OVERFLOW,
+               IMMORTALITY,
+               PURIFYING_AURA
             }
          );
       MobEffects.POISON = POISON_OVERRIDE;

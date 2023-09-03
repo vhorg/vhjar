@@ -21,6 +21,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -265,11 +267,32 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
       }
    }
 
+   private boolean hasHydroVoid(ServerPlayer player) {
+      ItemStack stack = player.getMainHandItem();
+      if (stack.getItem() != ModItems.TOOL) {
+         return false;
+      } else {
+         VaultGearData data = VaultGearData.read(stack);
+         return data.get(ModGearAttributes.HYDROVOID, VaultGearAttributeTypeMerger.anyTrue());
+      }
+   }
+
    private void computeHammerTiles(BlockPos pos, Direction facing, int buildHeight) {
       ToolItem.getHammerPositions(this.player.getMainHandItem(), pos, facing, this.player).forEachRemaining(p -> {
          if (!p.equals(pos)) {
             this.hammer.tiles.add(new HammerTile(true, this.gameTicks, p, -1));
          }
       });
+   }
+
+   @Redirect(
+      method = {"removeBlock"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/server/level/ServerLevel;getFluidState(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/material/FluidState;"
+      )
+   )
+   private FluidState removeBlock(ServerLevel instance, BlockPos pos) {
+      return this.hasHydroVoid(this.player) ? Fluids.EMPTY.defaultFluidState() : instance.getFluidState(pos);
    }
 }

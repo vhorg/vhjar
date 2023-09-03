@@ -1,5 +1,6 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.OverlevelEnchantHelper;
 import net.minecraft.network.chat.Component;
@@ -29,6 +30,39 @@ public abstract class MixinItem {
                info.cancel();
             }
          }
+      }
+   }
+
+   @Inject(
+      method = {"getBarWidth"},
+      at = {@At("RETURN")},
+      cancellable = true
+   )
+   public void applyBrokenVaultGearBarWidth(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+      if (stack.getItem() instanceof VaultGearItem item && item.isBroken(stack)) {
+         cir.setReturnValue(13);
+      }
+   }
+
+   @Inject(
+      method = {"getBarColor"},
+      at = {@At("RETURN")},
+      cancellable = true
+   )
+   public void applyBrokenVaultGearBarColor(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+      if (stack.getItem() instanceof VaultGearItem item && item.isBroken(stack)) {
+         cir.setReturnValue(16711680);
+      }
+   }
+
+   @Inject(
+      method = {"isBarVisible"},
+      at = {@At("RETURN")},
+      cancellable = true
+   )
+   public void setBrokenVaultGearBarVisible(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+      if (stack.getItem() instanceof VaultGearItem item && item.isBroken(stack)) {
+         cir.setReturnValue(true);
       }
    }
 }

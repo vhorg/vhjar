@@ -15,7 +15,7 @@ import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.item.BottleItem;
+import iskallia.vault.item.bottle.BottleItem;
 import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.world.data.PhoenixModifierSnapshotData;
 import iskallia.vault.world.data.ServerVaults;

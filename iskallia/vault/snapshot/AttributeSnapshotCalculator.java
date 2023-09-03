@@ -14,11 +14,9 @@ import iskallia.vault.gear.item.CuriosGearItem;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.trinket.GearAttributeTrinket;
 import iskallia.vault.gear.trinket.TrinketHelper;
-import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.integration.IntegrationCurios;
-import iskallia.vault.item.BottleItem;
 import iskallia.vault.item.MagnetItem;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
@@ -29,11 +27,11 @@ import iskallia.vault.world.data.PlayerEtchingData;
 import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
-import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
@@ -46,8 +44,7 @@ public class AttributeSnapshotCalculator {
       addExpertiseInformationToSnapshot(player, snapshot);
       computeCuriosSnapshot(player, snapshot);
       int playerLevel = PlayerVaultStatsData.get(player.getLevel()).getVaultStats(player).getVaultLevel();
-      computeGearSnapshot(player::getItemBySlot, playerLevel, snapshot);
-      computeBottleSnapshot(player, playerLevel, snapshot);
+      computeGearSnapshot(player::getItemBySlot, player.getCooldowns()::isOnCooldown, playerLevel, snapshot);
    }
 
    private static void computeCuriosSnapshot(ServerPlayer player, AttributeSnapshot snapshot) {
@@ -91,23 +88,25 @@ public class AttributeSnapshotCalculator {
          );
    }
 
-   public static void computeGearSnapshot(Function<EquipmentSlot, ItemStack> equipmentFn, int playerLevel, AttributeSnapshot snapshot) {
+   public static void computeGearSnapshot(
+      Function<EquipmentSlot, ItemStack> equipmentFn, Predicate<Item> isItemOnCooldown, int playerLevel, AttributeSnapshot snapshot
+   ) {
       List<ItemStack> gear = new ArrayList<>();
 
       for (EquipmentSlot slot : EquipmentSlot.values()) {
          ItemStack stack = equipmentFn.apply(slot);
-         if (!stack.isEmpty()) {
-            Item var10 = stack.getItem();
-            if (var10 instanceof VaultGearItem) {
-               VaultGearItem gearItem = (VaultGearItem)var10;
+         if (!stack.isEmpty() && !isItemOnCooldown.test(stack.getItem())) {
+            Item var11 = stack.getItem();
+            if (var11 instanceof VaultGearItem) {
+               VaultGearItem gearItem = (VaultGearItem)var11;
                if (!gearItem.isIntendedForSlot(stack, slot) || gearItem.isBroken(stack)) {
                   continue;
                }
             }
 
-            var10 = stack.getItem();
-            if (var10 instanceof CuriosGearItem) {
-               CuriosGearItem gearItem = (CuriosGearItem)var10;
+            var11 = stack.getItem();
+            if (var11 instanceof CuriosGearItem) {
+               CuriosGearItem gearItem = (CuriosGearItem)var11;
                if (!gearItem.isIntendedSlot(stack, slot)) {
                   continue;
                }
@@ -131,28 +130,6 @@ public class AttributeSnapshotCalculator {
          }
       );
       computeAvoidances(snapshot);
-   }
-
-   private static void computeBottleSnapshot(ServerPlayer player, int playerLevel, AttributeSnapshot snapshot) {
-      if (player.hasEffect(ModEffects.BOTTLE)) {
-         ServerVaults.get(player.level)
-            .flatMap(vault -> BottleItem.getActive(vault, player))
-            .ifPresent(
-               stack -> {
-                  AttributeGearData data = AttributeGearData.read(stack);
-                  if (!(data instanceof VaultGearData vData && vData.getItemLevel() > playerLevel)) {
-                     for (VaultGearAttribute<?> attribute : VaultGearAttributeRegistry.getRegistry()) {
-                        data.get(attribute, VaultGearAttributeTypeMerger.asList())
-                           .forEach(
-                              value -> snapshot.gearAttributeValues
-                                 .computeIfAbsent(attribute, v -> new AttributeSnapshot.AttributeValue())
-                                 .addCachedValue(value)
-                           );
-                     }
-                  }
-               }
-            );
-      }
    }
 
    private static void computeAvoidances(AttributeSnapshot snapshot) {
