@@ -31,6 +31,7 @@ import iskallia.vault.client.gui.screen.block.ToolStationScreen;
 import iskallia.vault.client.gui.screen.block.TransmogTableScreen;
 import iskallia.vault.client.gui.screen.block.VaultArtisanStationScreen;
 import iskallia.vault.client.gui.screen.block.VaultDiffuserScreen;
+import iskallia.vault.client.gui.screen.block.VaultDiffuserUpgradedScreen;
 import iskallia.vault.client.gui.screen.block.VaultEnchanterScreen;
 import iskallia.vault.client.gui.screen.block.VaultEnhancementAltarScreen;
 import iskallia.vault.client.gui.screen.block.VaultForgeScreen;
@@ -81,6 +82,7 @@ public class ModScreens {
       MenuScreens.register(ModContainers.VAULT_JEWEL_APPLICATION_STATION_CONTAINER, VaultJewelApplicationStationScreen::new);
       MenuScreens.register(ModContainers.VAULT_RECYCLER_CONTAINER, VaultRecyclerScreen::new);
       MenuScreens.register(ModContainers.VAULT_DIFFUSER_CONTAINER, VaultDiffuserScreen::new);
+      MenuScreens.register(ModContainers.VAULT_HARVESTER_CONTAINER, VaultDiffuserUpgradedScreen::new);
       MenuScreens.register(ModContainers.RELIC_PEDESTAL_CONTAINER, RelicPedestalScreen::new);
       MenuScreens.register(ModContainers.SPIRIT_EXTRACTOR_CONTAINER, SpiritExtractorScreen::new);
       MenuScreens.register(ModContainers.WARDROBE_GEAR_CONTAINER, WardrobeScreen.Gear::new);

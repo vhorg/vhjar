@@ -18,6 +18,7 @@ import iskallia.vault.container.VaultArtisanStationContainer;
 import iskallia.vault.container.VaultCharmControllerContainer;
 import iskallia.vault.container.VaultCrateContainer;
 import iskallia.vault.container.VaultDiffuserContainer;
+import iskallia.vault.container.VaultDiffuserUpgradedContainer;
 import iskallia.vault.container.VaultEnchanterContainer;
 import iskallia.vault.container.VaultEndContainer;
 import iskallia.vault.container.VaultEnhancementAltarContainer;
@@ -80,6 +81,7 @@ public class ModContainers {
    public static MenuType<VaultJewelApplicationStationContainer> VAULT_JEWEL_APPLICATION_STATION_CONTAINER;
    public static MenuType<VaultRecyclerContainer> VAULT_RECYCLER_CONTAINER;
    public static MenuType<VaultDiffuserContainer> VAULT_DIFFUSER_CONTAINER;
+   public static MenuType<VaultDiffuserUpgradedContainer> VAULT_HARVESTER_CONTAINER;
    public static MenuType<VaultEndContainer> VAULT_END_CONTAINER;
    public static MenuType<RelicPedestalContainer> RELIC_PEDESTAL_CONTAINER;
    public static MenuType<SpiritExtractorContainer> SPIRIT_EXTRACTOR_CONTAINER;
@@ -207,6 +209,11 @@ public class ModContainers {
          BlockPos pos = buffer.readBlockPos();
          return new VaultDiffuserContainer(windowId, world, pos, inventory);
       });
+      VAULT_HARVESTER_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new VaultDiffuserUpgradedContainer(windowId, world, pos, inventory);
+      });
       VAULT_END_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          ArrayBitBuffer buffer2 = ArrayBitBuffer.backing(buffer.readLongArray(), 0);
          return new VaultEndContainer(windowId, inventory, new VaultSnapshot(buffer2));
@@ -296,6 +303,7 @@ public class ModContainers {
                (MenuType)VAULT_JEWEL_APPLICATION_STATION_CONTAINER.setRegistryName("vault_jewel_application_station_container"),
                (MenuType)VAULT_RECYCLER_CONTAINER.setRegistryName("vault_recycler_container"),
                (MenuType)VAULT_DIFFUSER_CONTAINER.setRegistryName("vault_diffuser_container"),
+               (MenuType)VAULT_HARVESTER_CONTAINER.setRegistryName("vault_harvester_container"),
                (MenuType)VAULT_END_CONTAINER.setRegistryName("vault_end_container"),
                (MenuType)RELIC_PEDESTAL_CONTAINER.setRegistryName("relic_pedestal_container"),
                (MenuType)SPIRIT_EXTRACTOR_CONTAINER.setRegistryName("spirit_extractor_container"),

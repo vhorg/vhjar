@@ -12,6 +12,7 @@ import iskallia.vault.dynamodel.model.item.PlainItemModel;
 import iskallia.vault.dynamodel.model.item.shield.AbsoluteBinnerShieldModel;
 import iskallia.vault.dynamodel.model.item.shield.BellShieldModel;
 import iskallia.vault.dynamodel.model.item.shield.CoconutShieldModel;
+import iskallia.vault.dynamodel.model.item.shield.FlowahShieldModel;
 import iskallia.vault.dynamodel.model.item.shield.ShieldModel;
 import iskallia.vault.dynamodel.registry.ArmorPieceModelRegistry;
 import iskallia.vault.dynamodel.registry.DynamicModelRegistries;
@@ -41,6 +42,7 @@ import iskallia.vault.gear.model.armor.layers.DeerArmorLayers;
 import iskallia.vault.gear.model.armor.layers.DevilArmorLayers;
 import iskallia.vault.gear.model.armor.layers.DonkeyArmorLayers;
 import iskallia.vault.gear.model.armor.layers.DruidArmorLayers;
+import iskallia.vault.gear.model.armor.layers.EmperorWolfArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FairyArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FlamingoArmorLayers;
 import iskallia.vault.gear.model.armor.layers.FluxArmorLayers;
@@ -99,6 +101,7 @@ import iskallia.vault.gear.model.armor.layers.WarriorArmorLayers;
 import iskallia.vault.gear.model.armor.layers.WitchArmorLayers;
 import iskallia.vault.gear.model.armor.layers.WitherArmorLayers;
 import iskallia.vault.gear.model.armor.layers.WizardArmorLayers;
+import iskallia.vault.gear.model.armor.layers.WolfArmorLayers;
 import iskallia.vault.gear.model.armor.layers.XnetArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ZombieArmorLayers;
 import iskallia.vault.gear.renderer.VaultArmorRenderProperties;
@@ -1106,6 +1109,42 @@ public class ModDynamicModels {
             .addSlot(EquipmentSlot.LEGS)
             .addSlot(EquipmentSlot.FEET)
       );
+      public static final ArmorModel SNOW_WOLF = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/snow_wolf"), "Snow Wolf")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new WolfArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel WITHER_WOLF = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/wither_wolf"), "Wither Wolf")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new WolfArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel EMPEROR_SNOW_WOLF = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/emperor_snow_wolf"), "Emperor Snow Wolf")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new EmperorWolfArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel EMPEROR_WITHER_WOLF = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/emperor_wither_wolf"), "Emperor Wither Wolf")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new EmperorWolfArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
    }
 
    public static class Axes {
@@ -1198,6 +1237,9 @@ public class ModDynamicModels {
       public static final HandHeldModel WENDARRS_CLOCKAXE = REGISTRY.register(
          new HandHeldModel(VaultMod.id("gear/axe/wendarrs_clockaxe"), "Wendarr's Clockaxe")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final HandHeldModel GODAXE = REGISTRY.register(
+         new HandHeldModel(VaultMod.id("gear/axe/godaxe"), "Godaxe").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }
 
@@ -1324,7 +1366,8 @@ public class ModDynamicModels {
          new ShieldModel(VaultMod.id("gear/shield/sculk"), "Sculk Shield").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
       public static final ShieldModel FLOWAH = REGISTRY.register(
-         new ShieldModel(VaultMod.id("gear/shield/flowah"), "Chamomile").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+         new FlowahShieldModel(VaultMod.id("gear/shield/flowah"), VaultMod.id("gear/shield/fried_egg"), "Chamomile")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
       public static final ShieldModel EMBERWING = REGISTRY.register(
          new ShieldModel(VaultMod.id("gear/shield/emberwing"), "Emberwing Dragonshield")

@@ -311,6 +311,7 @@
     },
     "iskallia/vault/mixin/MixinAbstractSkeletonEntity": {
       "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z": "Lnet/minecraft/world/level/Level;m_7967_(Lnet/minecraft/world/entity/Entity;)Z",
+      "Lnet/minecraft/world/entity/monster/AbstractSkeleton;reassessWeaponGoal()V": "Lnet/minecraft/world/entity/monster/AbstractSkeleton;m_32164_()V",
       "performRangedAttack": "Lnet/minecraft/world/entity/monster/AbstractSkeleton;m_6504_(Lnet/minecraft/world/entity/LivingEntity;F)V"
     },
     "iskallia/vault/mixin/AccessorChunkMap": {
@@ -450,6 +451,9 @@
     },
     "iskallia/vault/mixin/AccessorWorld": {
       "thread": "f_46423_:Ljava/lang/Thread;"
+    },
+    "iskallia/vault/mixin/MixinGameRuleCommand": {
+      "Lnet/minecraft/server/commands/GameRuleCommand;setRule(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/world/level/GameRules$Key;)I": "Lnet/minecraft/server/commands/GameRuleCommand;m_137754_(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/world/level/GameRules$Key;)I"
     },
     "iskallia/vault/mixin/MixinExperienceOrb": {
       "playerTouch": "Lnet/minecraft/world/entity/ExperienceOrb;m_6123_(Lnet/minecraft/world/entity/player/Player;)V"
@@ -798,6 +802,7 @@
       },
       "iskallia/vault/mixin/MixinAbstractSkeletonEntity": {
         "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z": "Lnet/minecraft/world/level/Level;m_7967_(Lnet/minecraft/world/entity/Entity;)Z",
+        "Lnet/minecraft/world/entity/monster/AbstractSkeleton;reassessWeaponGoal()V": "Lnet/minecraft/world/entity/monster/AbstractSkeleton;m_32164_()V",
         "performRangedAttack": "Lnet/minecraft/world/entity/monster/AbstractSkeleton;m_6504_(Lnet/minecraft/world/entity/LivingEntity;F)V"
       },
       "iskallia/vault/mixin/AccessorChunkMap": {
@@ -937,6 +942,9 @@
       },
       "iskallia/vault/mixin/AccessorWorld": {
         "thread": "f_46423_:Ljava/lang/Thread;"
+      },
+      "iskallia/vault/mixin/MixinGameRuleCommand": {
+        "Lnet/minecraft/server/commands/GameRuleCommand;setRule(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/world/level/GameRules$Key;)I": "Lnet/minecraft/server/commands/GameRuleCommand;m_137754_(Lcom/mojang/brigadier/context/CommandContext;Lnet/minecraft/world/level/GameRules$Key;)I"
       },
       "iskallia/vault/mixin/MixinExperienceOrb": {
         "playerTouch": "Lnet/minecraft/world/entity/ExperienceOrb;m_6123_(Lnet/minecraft/world/entity/player/Player;)V"
