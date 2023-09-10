@@ -152,7 +152,7 @@ public class TransmogTableBlock extends Block implements EntityBlock {
                return !FMLEnvironment.production || GOBLIN_LIST.contains(id) || CHAMPION_LIST.contains(id);
             }
          })
-         .orElseGet(
+         .or(
             () -> ModDynamicModels.Swords.REGISTRY
                .get(modelId)
                .map(
@@ -160,8 +160,15 @@ public class TransmogTableBlock extends Block implements EntityBlock {
                      ? null
                      : !FMLEnvironment.production || CHAMPION_LIST.contains(hashId(player.getUUID()))
                )
-               .orElse(discoveredModelIds.contains(modelId))
-         );
+         )
+         .or(
+            () -> ModDynamicModels.Axes.REGISTRY
+               .get(modelId)
+               .map(
+                  model -> !model.equals(ModDynamicModels.Axes.GODAXE) ? null : !FMLEnvironment.production || CHAMPION_LIST.contains(hashId(player.getUUID()))
+               )
+         )
+         .orElseGet(() -> discoveredModelIds.contains(modelId));
    }
 
    private static long hashId(UUID id) {

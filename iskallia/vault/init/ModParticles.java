@@ -10,6 +10,7 @@ import iskallia.vault.client.particles.DepthFireworkParticle;
 import iskallia.vault.client.particles.DepthNightVisionParticle;
 import iskallia.vault.client.particles.DiffuserCompleteParticle;
 import iskallia.vault.client.particles.DiffuserParticle;
+import iskallia.vault.client.particles.DiffuserUpgradedParticle;
 import iskallia.vault.client.particles.EffectRangeParticle;
 import iskallia.vault.client.particles.EnderAnchorParticle;
 import iskallia.vault.client.particles.EntityLockedParticle;
@@ -28,6 +29,7 @@ import iskallia.vault.client.particles.NovaExplosionWaveParticle;
 import iskallia.vault.client.particles.NovaSpeedParticle;
 import iskallia.vault.client.particles.PylonConsumeParticle;
 import iskallia.vault.client.particles.ReverseDiffuserParticle;
+import iskallia.vault.client.particles.ReverseDiffuserUpgradedParticle;
 import iskallia.vault.client.particles.ScavengerAltarConsumeParticle;
 import iskallia.vault.client.particles.ScavengerAltarParticle;
 import iskallia.vault.client.particles.ShockedParticle;
@@ -86,7 +88,11 @@ public class ModParticles {
    );
    public static final RegistryObject<SimpleParticleType> DIFFUSER = REGISTRY.register("diffuser", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> DIFFUSER_COMPLETE = REGISTRY.register("diffuser_complete", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> DIFFUSER_UPGRADED = REGISTRY.register("diffuser_upgraded", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> REVERSE_DIFFUSER = REGISTRY.register("reverse_diffuser", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> REVERSE_DIFFUSER_UPGRADED = REGISTRY.register(
+      "reverse_diffuser_upgraded", () -> new SimpleParticleType(true)
+   );
    public static final RegistryObject<SimpleParticleType> CLOUD_EFFECT = REGISTRY.register("cloud_effect", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> CHAINING = REGISTRY.register("chaining", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> STUNNED = REGISTRY.register("stunned", () -> new SimpleParticleType(true));
@@ -156,8 +162,10 @@ public class ModParticles {
       particleManager.register((ParticleType)STONEFALL_FROST.get(), StonefallFrostWaveParticle.Provider::new);
       particleManager.register((ParticleType)HEAL.get(), HealParticle.Provider::new);
       particleManager.register((ParticleType)DIFFUSER.get(), DiffuserParticle.Provider::new);
+      particleManager.register((ParticleType)DIFFUSER_UPGRADED.get(), DiffuserUpgradedParticle.Provider::new);
       particleManager.register((ParticleType)DIFFUSER_COMPLETE.get(), DiffuserCompleteParticle.Provider::new);
       particleManager.register((ParticleType)REVERSE_DIFFUSER.get(), ReverseDiffuserParticle.Provider::new);
+      particleManager.register((ParticleType)REVERSE_DIFFUSER_UPGRADED.get(), ReverseDiffuserUpgradedParticle.Provider::new);
       particleManager.register((ParticleType)TOTEM_FOUNTAIN.get(), TotemFountainParticle.Provider::new);
       particleManager.register((ParticleType)CLOUD_EFFECT.get(), CloudEffectParticle.Provider::new);
       particleManager.register((ParticleType)CHAINING.get(), ChainingParticle.Provider::new);

@@ -10,6 +10,7 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModParticles;
+import iskallia.vault.network.message.ClientboundTESyncMessage;
 import iskallia.vault.network.message.DiffuserParticleMessage;
 import iskallia.vault.util.nbt.NBTHelper;
 import java.util.ArrayList;
@@ -33,7 +34,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
@@ -134,9 +134,7 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
             }
 
             tile.setChanged();
-            if (world instanceof ServerLevel serverWorld) {
-               serverWorld.sendBlockUpdated(pos, state, state, 3);
-            }
+            tile.sync();
          }
       }
    }
@@ -230,6 +228,19 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
       return input.isEmpty() ? false : ModConfigs.VAULT_DIFFUSER.getDiffuserOutputMap().containsKey(input.getItem().getRegistryName());
    }
 
+   public void sync() {
+      if (this.level != null && !this.level.isClientSide) {
+         CompoundTag saveTag = new CompoundTag();
+         this.saveAdditional(saveTag);
+         ModNetwork.CHANNEL
+            .send(
+               PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)),
+               new ClientboundTESyncMessage(this.worldPosition, saveTag)
+            );
+         this.level.sendBlockUpdated(this.worldPosition, this.level.getBlockState(this.worldPosition), this.level.getBlockState(this.worldPosition), 2);
+      }
+   }
+
    private void resetProcess(@Nullable Level world) {
       this.startProcess(world);
    }
@@ -238,8 +249,8 @@ public class VaultDiffuserTileEntity extends BlockEntity implements MenuProvider
       int prevTick = this.processTick;
       this.processTick = 0;
       this.setChanged();
-      if (prevTick != this.processTick && world instanceof ServerLevel serverWorld) {
-         serverWorld.sendBlockUpdated(this.getBlockPos(), this.getBlockState(), this.getBlockState(), 3);
+      if (prevTick != this.processTick) {
+         this.sync();
       }
    }
 

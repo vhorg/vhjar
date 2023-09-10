@@ -66,12 +66,16 @@ public abstract class VaultXPFoodItem extends Item {
       return VaultBarOverlay.vaultLevel;
    }
 
-   public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity entityLiving) {
-      if (!world.isClientSide && entityLiving instanceof ServerPlayer player) {
-         this.grantExp(player);
+   public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity entity) {
+      if (!world.isClientSide && entity instanceof ServerPlayer player) {
+         this.grantExp(player, entity.isShiftKeyDown() ? stack.getCount() : 1);
       }
 
-      return super.finishUsingItem(stack, world, entityLiving);
+      if (stack.getItem().isEdible() && entity.isShiftKeyDown() && !(entity instanceof Player player && player.getAbilities().instabuild)) {
+         stack.setCount(1);
+      }
+
+      return super.finishUsingItem(stack, world, entity);
    }
 
    @OnlyIn(Dist.CLIENT)
@@ -86,7 +90,7 @@ public abstract class VaultXPFoodItem extends Item {
       }
    }
 
-   public abstract void grantExp(ServerPlayer var1);
+   public abstract void grantExp(ServerPlayer var1, int var2);
 
    public static class Flat extends VaultXPFoodItem {
       private final Supplier<Integer> min;
@@ -103,9 +107,15 @@ public abstract class VaultXPFoodItem extends Item {
       }
 
       @Override
-      public void grantExp(ServerPlayer sPlayer) {
+      public void grantExp(ServerPlayer sPlayer, int count) {
          PlayerVaultStatsData statsData = PlayerVaultStatsData.get(sPlayer.getLevel());
-         statsData.addVaultExp(sPlayer, MathUtilities.getRandomInt(this.min.get(), this.max.get()));
+         int exp = 0;
+
+         for (int i = 0; i < count; i++) {
+            exp += MathUtilities.getRandomInt(this.min.get(), this.max.get());
+         }
+
+         statsData.addVaultExp(sPlayer, exp);
       }
    }
 }

@@ -36,6 +36,7 @@ import iskallia.vault.network.message.ClientboundToastMessage;
 import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
 import iskallia.vault.network.message.DiffuserParticleMessage;
+import iskallia.vault.network.message.DiffuserUpgradedParticleMessage;
 import iskallia.vault.network.message.DiscoveredAlchemyEffectsMessage;
 import iskallia.vault.network.message.DiscoveredWorkbenchModifierCraftsMessage;
 import iskallia.vault.network.message.EffectMessage;
@@ -563,6 +564,13 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(), DiffuserParticleMessage.class, DiffuserParticleMessage::encode, DiffuserParticleMessage::decode, DiffuserParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         DiffuserUpgradedParticleMessage.class,
+         DiffuserUpgradedParticleMessage::encode,
+         DiffuserUpgradedParticleMessage::decode,
+         DiffuserUpgradedParticleMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(), AnimalPenParticleMessage.class, AnimalPenParticleMessage::encode, AnimalPenParticleMessage::decode, AnimalPenParticleMessage::handle

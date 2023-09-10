@@ -131,6 +131,16 @@ public class GearModelRollRaritiesConfig extends Config {
          }
       }
 
+      if (item instanceof VaultAxeItem) {
+         Optional<HandHeldModel> modelOptx = ModDynamicModels.Axes.REGISTRY.get(modelId);
+         if (modelOptx.isPresent()) {
+            HandHeldModel handHeldModel = modelOptx.get();
+            if (handHeldModel.equals(ModDynamicModels.Axes.GODAXE)) {
+               return VaultGearRarity.UNIQUE;
+            }
+         }
+      }
+
       return null;
    }
 

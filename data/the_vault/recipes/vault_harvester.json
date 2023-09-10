@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "d d",
+    "beb"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:echo_pog"
+    },
+    "b": {
+      "item": "the_vault:black_chromatic_steel_ingot"
+    },
+    "d": {
+      "item": "the_vault:vault_diffuser"
+    }
+  },
+  "result": {
+    "item": "the_vault:vault_harvester",
+    "count": 1
+  }
+}

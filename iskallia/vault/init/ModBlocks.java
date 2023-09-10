@@ -82,6 +82,7 @@ import iskallia.vault.block.VaultCharmControllerBlock;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.block.VaultDiffuserBlock;
+import iskallia.vault.block.VaultDiffuserUpgradedBlock;
 import iskallia.vault.block.VaultEnchanterBlock;
 import iskallia.vault.block.VaultEnhancementAltar;
 import iskallia.vault.block.VaultForgeBlock;
@@ -158,6 +159,7 @@ import iskallia.vault.block.entity.VaultCharmControllerTileEntity;
 import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.block.entity.VaultCrateTileEntity;
 import iskallia.vault.block.entity.VaultDiffuserTileEntity;
+import iskallia.vault.block.entity.VaultDiffuserUpgradedTileEntity;
 import iskallia.vault.block.entity.VaultEnchanterTileEntity;
 import iskallia.vault.block.entity.VaultEnhancementAltarTileEntity;
 import iskallia.vault.block.entity.VaultForgeTileEntity;
@@ -219,6 +221,7 @@ import iskallia.vault.block.render.VaultAltarRenderer;
 import iskallia.vault.block.render.VaultChampionTrophyRenderer;
 import iskallia.vault.block.render.VaultChestRenderer;
 import iskallia.vault.block.render.VaultDiffuserRenderer;
+import iskallia.vault.block.render.VaultDiffuserUpgradedRenderer;
 import iskallia.vault.block.render.VaultEnchanterRenderer;
 import iskallia.vault.block.render.VaultPortalRenderer;
 import iskallia.vault.block.render.VelvetBedRenderer;
@@ -345,6 +348,7 @@ public class ModBlocks {
    public static final VaultJewelApplicationStationBlock VAULT_JEWEL_APPLICATION_STATION = new VaultJewelApplicationStationBlock();
    public static final VaultRecyclerBlock VAULT_RECYCLER = new VaultRecyclerBlock();
    public static final VaultDiffuserBlock VAULT_DIFFUSER = new VaultDiffuserBlock();
+   public static final VaultDiffuserUpgradedBlock VAULT_HARVESTER = new VaultDiffuserUpgradedBlock();
    public static final ModifierWorkbenchBlock MODIFIER_WORKBENCH = new ModifierWorkbenchBlock();
    public static final ModifierDiscoveryBlock MODIFIER_DISCOVERY = new ModifierDiscoveryBlock();
    public static final AlchemyArchiveBlock ALCHEMY_ARCHIVE = new AlchemyArchiveBlock();
@@ -858,6 +862,10 @@ public class ModBlocks {
       .build(null);
    public static final BlockEntityType<VaultDiffuserTileEntity> VAULT_DIFFUSER_ENTITY = Builder.of(VaultDiffuserTileEntity::new, new Block[]{VAULT_DIFFUSER})
       .build(null);
+   public static final BlockEntityType<VaultDiffuserUpgradedTileEntity> VAULT_HARVESTER_ENTITY = Builder.of(
+         VaultDiffuserUpgradedTileEntity::new, new Block[]{VAULT_HARVESTER}
+      )
+      .build(null);
    public static final BlockEntityType<ModifierWorkbenchTileEntity> MODIFIER_WORKBENCH_ENTITY = Builder.of(
          ModifierWorkbenchTileEntity::new, new Block[]{MODIFIER_WORKBENCH}
       )
@@ -1010,6 +1018,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_JEWEL_APPLICATION_STATION, VaultMod.id("vault_jewel_application_station"));
       registerBlock(event, VAULT_RECYCLER, VaultMod.id("vault_recycler"));
       registerBlock(event, VAULT_DIFFUSER, VaultMod.id("vault_diffuser"));
+      registerBlock(event, VAULT_HARVESTER, VaultMod.id("vault_harvester"));
       registerBlock(event, MODIFIER_WORKBENCH, VaultMod.id("modifier_workbench"));
       registerBlock(event, MODIFIER_DISCOVERY, VaultMod.id("modifier_discovery"));
       registerBlock(event, ALCHEMY_ARCHIVE, VaultMod.id("alchemy_archive"));
@@ -1238,6 +1247,7 @@ public class ModBlocks {
       registerTileEntity(event, VAULT_JEWEL_APPLICATION_STATION_ENTITY, VaultMod.id("vault_jewel_application_station_tile_entity"));
       registerTileEntity(event, VAULT_RECYCLER_ENTITY, VaultMod.id("vault_recycler_tile_entity"));
       registerTileEntity(event, VAULT_DIFFUSER_ENTITY, VaultMod.id("vault_diffuser_tile_entity"));
+      registerTileEntity(event, VAULT_HARVESTER_ENTITY, VaultMod.id("vault_harvester_tile_entity"));
       registerTileEntity(event, MODIFIER_WORKBENCH_ENTITY, VaultMod.id("modifier_workbench_tile_entity"));
       registerTileEntity(event, ALCHEMY_TABLE_TILE_ENTITY, VaultMod.id("alchemy_table_tile_entity"));
       registerTileEntity(event, VAULT_ENCHANTER_TILE_ENTITY, VaultMod.id("vault_enchanter_tile_entity"));
@@ -1294,6 +1304,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(WARDROBE_TILE_ENTITY, WardrobeRenderer::new);
       event.registerBlockEntityRenderer(SKILL_ALTAR_TILE_ENTITY, SkillAltarRenderer::new);
       event.registerBlockEntityRenderer(VAULT_DIFFUSER_ENTITY, VaultDiffuserRenderer::new);
+      event.registerBlockEntityRenderer(VAULT_HARVESTER_ENTITY, VaultDiffuserUpgradedRenderer::new);
       event.registerBlockEntityRenderer(BLACK_MARKET_TILE_ENTITY, BlackMarketRenderer::new);
       event.registerBlockEntityRenderer(ALCHEMY_TABLE_TILE_ENTITY, AlchemyTableRenderer::new);
       event.registerBlockEntityRenderer(ANIMAL_PEN_ENTITY, AnimalPenRenderer::new);
@@ -1441,6 +1452,7 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_JEWEL_APPLICATION_STATION);
       registerBlockItem(event, VAULT_RECYCLER);
       registerBlockItem(event, VAULT_DIFFUSER);
+      registerBlockItem(event, VAULT_HARVESTER);
       registerBlockItem(event, MODIFIER_WORKBENCH);
       registerBlockItem(event, MODIFIER_DISCOVERY);
       registerBlockItem(event, ALCHEMY_ARCHIVE);
