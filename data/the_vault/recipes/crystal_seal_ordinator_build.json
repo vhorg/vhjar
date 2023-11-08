@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "e#e",
+        "ese",
+        "ede"
+    ],
+    "key": {
+        "e": {
+            "item": "the_vault:vault_essence"
+        },
+        "#": {
+            "item": "the_vault:gem_pog"
+        },
+        "d": {
+            "item": "the_vault:vault_diamond"
+        },
+        "s": {
+            "item": "the_vault:crystal_seal_empty"
+        }
+    },
+    "result": {
+        "item": "the_vault:crystal_seal_ordinator_build",
+        "count": 1
+    }
+}

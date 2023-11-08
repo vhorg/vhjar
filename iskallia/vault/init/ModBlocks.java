@@ -4,16 +4,19 @@ import com.mojang.datafixers.util.Pair;
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.AlchemyArchiveBlock;
 import iskallia.vault.block.AlchemyTableBlock;
+import iskallia.vault.block.AncientCopperButtonBlock;
+import iskallia.vault.block.AncientCopperTrapDoorBlock;
 import iskallia.vault.block.AngelBlock;
 import iskallia.vault.block.AnimalPenBlock;
+import iskallia.vault.block.ArtifactProjectorBlock;
 import iskallia.vault.block.BlackMarketBlock;
-import iskallia.vault.block.BloodAltarBlock;
 import iskallia.vault.block.BountyBlock;
 import iskallia.vault.block.CakeBlock;
 import iskallia.vault.block.CatalystInfusionBlock;
 import iskallia.vault.block.CoinPileBlock;
 import iskallia.vault.block.CoinPileDecorBlock;
 import iskallia.vault.block.ConnectingCarpet;
+import iskallia.vault.block.ConvertedSparkBlock;
 import iskallia.vault.block.CrakeColumnBlock;
 import iskallia.vault.block.CrakePedestalBlock;
 import iskallia.vault.block.CryoChamberBlock;
@@ -22,6 +25,7 @@ import iskallia.vault.block.CrystalClusterBlock;
 import iskallia.vault.block.CubeBlock;
 import iskallia.vault.block.CustomEntitySpawnerBlock;
 import iskallia.vault.block.DemagnetizerBlock;
+import iskallia.vault.block.DivineAltarBlock;
 import iskallia.vault.block.DungeonDoorBlock;
 import iskallia.vault.block.EasterEggBlock;
 import iskallia.vault.block.EliteSpawnerBlock;
@@ -30,6 +34,11 @@ import iskallia.vault.block.EtchingVendorControllerBlock;
 import iskallia.vault.block.EternalPedestalBlock;
 import iskallia.vault.block.FinalVaultFrameBlock;
 import iskallia.vault.block.FloatingTextBlock;
+import iskallia.vault.block.FoliageDecorBlock;
+import iskallia.vault.block.GateLockBlock;
+import iskallia.vault.block.GildedCandelabraBlock;
+import iskallia.vault.block.HeraldControllerBlock;
+import iskallia.vault.block.HeraldTrophyBlock;
 import iskallia.vault.block.HourglassBlock;
 import iskallia.vault.block.IdentificationStandBlock;
 import iskallia.vault.block.InscriptionTableBlock;
@@ -58,10 +67,9 @@ import iskallia.vault.block.SconceWallBlock;
 import iskallia.vault.block.ShopPedestalBlock;
 import iskallia.vault.block.SkillAltarBlock;
 import iskallia.vault.block.SootLayerBlock;
-import iskallia.vault.block.SoulAltarBlock;
+import iskallia.vault.block.SparkBlock;
 import iskallia.vault.block.SpiritExtractorBlock;
 import iskallia.vault.block.StabilizerBlock;
-import iskallia.vault.block.TimeAltarBlock;
 import iskallia.vault.block.ToolStationBlock;
 import iskallia.vault.block.ToolViseBlock;
 import iskallia.vault.block.TotemManaRegenBlock;
@@ -77,7 +85,6 @@ import iskallia.vault.block.VaultAnvilBlock;
 import iskallia.vault.block.VaultArtifactBlock;
 import iskallia.vault.block.VaultArtisanStationBlock;
 import iskallia.vault.block.VaultBedrockBlock;
-import iskallia.vault.block.VaultChampionTrophy;
 import iskallia.vault.block.VaultCharmControllerBlock;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.VaultCrateBlock;
@@ -93,34 +100,43 @@ import iskallia.vault.block.VaultOreBlock;
 import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.VaultRecyclerBlock;
 import iskallia.vault.block.VaultRockBlock;
+import iskallia.vault.block.VaultSmallSweetsBlock;
 import iskallia.vault.block.VaultSweetsBlock;
+import iskallia.vault.block.VaultTinySweetsBlock;
 import iskallia.vault.block.VelvetBed;
 import iskallia.vault.block.WardrobeBlock;
 import iskallia.vault.block.WildSpawnerBlock;
-import iskallia.vault.block.XPAltarBlock;
+import iskallia.vault.block.base.GodAltarBlock;
+import iskallia.vault.block.base.GodAltarTileEntity;
 import iskallia.vault.block.discoverable.DiscoverTriggeringBlock;
 import iskallia.vault.block.entity.AlchemyArchiveTileEntity;
 import iskallia.vault.block.entity.AlchemyTableTileEntity;
 import iskallia.vault.block.entity.AncientCryoChamberTileEntity;
 import iskallia.vault.block.entity.AngelBlockTileEntity;
 import iskallia.vault.block.entity.AnimalPenTileEntity;
+import iskallia.vault.block.entity.ArtifactProjectorTileEntity;
 import iskallia.vault.block.entity.BlackMarketTileEntity;
-import iskallia.vault.block.entity.BloodAltarTileEntity;
 import iskallia.vault.block.entity.BountyTableTileEntity;
 import iskallia.vault.block.entity.CatalystInfusionTableTileEntity;
 import iskallia.vault.block.entity.CoinPilesTileEntity;
+import iskallia.vault.block.entity.ConvertedSparkTileEntity;
 import iskallia.vault.block.entity.CrakePedestalTileEntity;
 import iskallia.vault.block.entity.CryoChamberTileEntity;
 import iskallia.vault.block.entity.CrystalBuddingBlockEntity;
 import iskallia.vault.block.entity.CubeTileEntity;
 import iskallia.vault.block.entity.CustomEntitySpawnerTileEntity;
 import iskallia.vault.block.entity.DemagnetizerTileEntity;
+import iskallia.vault.block.entity.DivineAltarTileEntity;
 import iskallia.vault.block.entity.DungeonDoorTileEntity;
 import iskallia.vault.block.entity.EliteSpawnerTileEntity;
 import iskallia.vault.block.entity.EtchingVendorControllerTileEntity;
 import iskallia.vault.block.entity.EternalPedestalTileEntity;
 import iskallia.vault.block.entity.FinalVaultFrameTileEntity;
 import iskallia.vault.block.entity.FloatingTextTileEntity;
+import iskallia.vault.block.entity.FoliageDecorTileEntity;
+import iskallia.vault.block.entity.GateLockTileEntity;
+import iskallia.vault.block.entity.HeraldControllerTileEntity;
+import iskallia.vault.block.entity.HeraldTrophyTileEntity;
 import iskallia.vault.block.entity.HourglassTileEntity;
 import iskallia.vault.block.entity.IdentificationStandTileEntity;
 import iskallia.vault.block.entity.InscriptionTableTileEntity;
@@ -138,10 +154,9 @@ import iskallia.vault.block.entity.ScavengerAltarTileEntity;
 import iskallia.vault.block.entity.ScavengerTreasureTileEntity;
 import iskallia.vault.block.entity.ShopPedestalBlockTile;
 import iskallia.vault.block.entity.SkillAltarTileEntity;
-import iskallia.vault.block.entity.SoulAltarTileEntity;
+import iskallia.vault.block.entity.SparkTileEntity;
 import iskallia.vault.block.entity.SpiritExtractorTileEntity;
 import iskallia.vault.block.entity.StabilizerTileEntity;
-import iskallia.vault.block.entity.TimeAltarTileEntity;
 import iskallia.vault.block.entity.ToolStationTileEntity;
 import iskallia.vault.block.entity.ToolViseTile;
 import iskallia.vault.block.entity.TotemManaRegenTileEntity;
@@ -154,7 +169,6 @@ import iskallia.vault.block.entity.TreasureSandTileEntity;
 import iskallia.vault.block.entity.TrophyTileEntity;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
 import iskallia.vault.block.entity.VaultArtisanStationTileEntity;
-import iskallia.vault.block.entity.VaultChampionTrophyTileEntity;
 import iskallia.vault.block.entity.VaultCharmControllerTileEntity;
 import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.block.entity.VaultCrateTileEntity;
@@ -170,29 +184,36 @@ import iskallia.vault.block.entity.VaultRecyclerTileEntity;
 import iskallia.vault.block.entity.VelvetBedTileEntity;
 import iskallia.vault.block.entity.WardrobeTileEntity;
 import iskallia.vault.block.entity.WildSpawnerTileEntity;
-import iskallia.vault.block.entity.XpAltarTileEntity;
 import iskallia.vault.block.item.DungeonDoorBlockItem;
 import iskallia.vault.block.item.EasterEggBlockItem;
 import iskallia.vault.block.item.FinalVaultFrameBlockItem;
+import iskallia.vault.block.item.GodAltarBlockItem;
+import iskallia.vault.block.item.HeraldTrophyItem;
 import iskallia.vault.block.item.HourglassBlockItem;
 import iskallia.vault.block.item.LootStatueBlockItem;
 import iskallia.vault.block.item.PlaceholderBlockItem;
 import iskallia.vault.block.item.TreasureDoorBlockItem;
 import iskallia.vault.block.item.TrophyStatueBlockItem;
-import iskallia.vault.block.item.VaultChampionTrophyBlockItem;
 import iskallia.vault.block.item.VaultOreBlockItem;
 import iskallia.vault.block.render.AlchemyTableRenderer;
 import iskallia.vault.block.render.AngelBlockRenderer;
 import iskallia.vault.block.render.AnimalPenRenderer;
+import iskallia.vault.block.render.ArtifactProjectorRenderer;
 import iskallia.vault.block.render.BlackMarketRenderer;
 import iskallia.vault.block.render.BountyTableRenderer;
+import iskallia.vault.block.render.ConvertedSparkRenderer;
 import iskallia.vault.block.render.CrakePedestalRenderer;
 import iskallia.vault.block.render.CryoChamberRenderer;
+import iskallia.vault.block.render.DivineAltarRenderer;
 import iskallia.vault.block.render.EnhancementAltarRenderer;
 import iskallia.vault.block.render.EternalPedestalRenderer;
-import iskallia.vault.block.render.FillableAltarRenderer;
 import iskallia.vault.block.render.FinalVaultFrameRenderer;
 import iskallia.vault.block.render.FloatingTextRenderer;
+import iskallia.vault.block.render.FoliageDecorRenderer;
+import iskallia.vault.block.render.GateLockRenderer;
+import iskallia.vault.block.render.GodAltarRenderer;
+import iskallia.vault.block.render.HeraldControllerRenderer;
+import iskallia.vault.block.render.HeraldTrophyRenderer;
 import iskallia.vault.block.render.HourglassRenderer;
 import iskallia.vault.block.render.IdentificationStandRenderer;
 import iskallia.vault.block.render.JewelApplicationStationRenderer;
@@ -208,6 +229,7 @@ import iskallia.vault.block.render.RelicPedestalRenderer;
 import iskallia.vault.block.render.ScavengerAltarRenderer;
 import iskallia.vault.block.render.ShopPedestalBlockTileRenderer;
 import iskallia.vault.block.render.SkillAltarRenderer;
+import iskallia.vault.block.render.SparkRenderer;
 import iskallia.vault.block.render.SpawnerRenderer;
 import iskallia.vault.block.render.SpiritExtractorRenderer;
 import iskallia.vault.block.render.ToolStationRenderer;
@@ -218,7 +240,6 @@ import iskallia.vault.block.render.TotemPlayerDamageRenderer;
 import iskallia.vault.block.render.TotemPlayerHealthRenderer;
 import iskallia.vault.block.render.TrophyRenderer;
 import iskallia.vault.block.render.VaultAltarRenderer;
-import iskallia.vault.block.render.VaultChampionTrophyRenderer;
 import iskallia.vault.block.render.VaultChestRenderer;
 import iskallia.vault.block.render.VaultDiffuserRenderer;
 import iskallia.vault.block.render.VaultDiffuserUpgradedRenderer;
@@ -232,30 +253,35 @@ import iskallia.vault.fluid.block.VoidFluidBlock;
 import iskallia.vault.item.CoinBlockItem;
 import iskallia.vault.item.SconceItem;
 import iskallia.vault.item.VaultChestBlockItem;
+import iskallia.vault.item.VaultSweetsBlockItem;
 import iskallia.vault.item.VelvetBedItem;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.food.FoodProperties.Builder;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DoubleHighBlockItem;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GlassBlock;
+import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.OreBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.StainedGlassPaneBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.VineBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.BlockEntityType.Builder;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraftforge.client.IItemRenderProperties;
@@ -266,7 +292,7 @@ public class ModBlocks {
    public static final ErrorBlock ERROR_BLOCK = new ErrorBlock();
    public static final FloatingTextBlock FLOATING_TEXT = new FloatingTextBlock();
    public static final VaultPortalBlock VAULT_PORTAL = new VaultPortalBlock();
-   public static final VaultChampionTrophy VAULT_CHAMPION_TROPHY = new VaultChampionTrophy();
+   public static final HeraldTrophyBlock HERALD_TROPHY = new HeraldTrophyBlock();
    public static final FinalVaultFrameBlock FINAL_VAULT_FRAME = new FinalVaultFrameBlock();
    public static final VaultAltarBlock VAULT_ALTAR = new VaultAltarBlock();
    public static final VaultOreBlock ALEXANDRITE_ORE = new VaultOreBlock(ModItems.ALEXANDRITE_GEM);
@@ -289,6 +315,8 @@ public class ModBlocks {
    public static final VaultRockBlock VAULT_ROCK_ORE = new VaultRockBlock();
    public static final TreasureDoorBlock TREASURE_DOOR = new TreasureDoorBlock();
    public static final DungeonDoorBlock DUNGEON_DOOR = new DungeonDoorBlock();
+   public static final GateLockBlock GATE_LOCK = new GateLockBlock();
+   public static final HeraldControllerBlock HERALD_CONTROLLER = new HeraldControllerBlock();
    public static final VaultArtifactBlock VAULT_ARTIFACT = new VaultArtifactBlock();
    public static final VaultCrateBlock VAULT_CRATE = new VaultCrateBlock();
    public static final VaultCrateBlock VAULT_CRATE_CAKE = new VaultCrateBlock();
@@ -298,6 +326,7 @@ public class ModBlocks {
    public static final VaultCrateBlock VAULT_CRATE_BOUNTY = new VaultCrateBlock();
    public static final VaultCrateBlock VAULT_CRATE_MONOLITH = new VaultCrateBlock();
    public static final VaultCrateBlock VAULT_CRATE_ELIXIR = new VaultCrateBlock();
+   public static final VaultCrateBlock VAULT_CRATE_PARADOX = new VaultCrateBlock();
    public static final ObeliskBlock OBELISK = new ObeliskBlock();
    public static final MonolithBlock MONOLITH = new MonolithBlock();
    public static final LodestoneBlock LODESTONE = new LodestoneBlock();
@@ -419,11 +448,9 @@ public class ModBlocks {
    public static final Block FLESH_CHEST_PLACEABLE = new VaultChestBlock(
       VaultChestType.FLESH, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHEST).strength(0.3F).sound(SoundType.STONE)
    );
-   public static final XPAltarBlock XP_ALTAR = new XPAltarBlock();
-   public static final BloodAltarBlock BLOOD_ALTAR = new BloodAltarBlock();
-   public static final TimeAltarBlock TIME_ALTAR = new TimeAltarBlock();
-   public static final SoulAltarBlock SOUL_ALTAR = new SoulAltarBlock();
+   public static final GodAltarBlock GOD_ALTAR = new GodAltarBlock();
    public static final HourglassBlock HOURGLASS = new HourglassBlock();
+   public static final DivineAltarBlock DIVINE_ALTAR = new DivineAltarBlock();
    public static final ScavengerAltarBlock SCAVENGER_ALTAR = new ScavengerAltarBlock();
    public static final ScavengerTreasureBlock SCAVENGER_TREASURE = new ScavengerTreasureBlock();
    public static final StabilizerBlock STABILIZER = new StabilizerBlock();
@@ -493,6 +520,12 @@ public class ModBlocks {
    public static final EternalPedestalBlock ETERNAL_PEDESTAL = new EternalPedestalBlock();
    public static final AngelBlock ANGEL_BLOCK = new AngelBlock();
    public static final MobBarrier MOB_BARRIER = new MobBarrier();
+   public static final SparkBlock SPARK = new SparkBlock();
+   public static final ConvertedSparkBlock CONVERTED_SPARK = new ConvertedSparkBlock();
+   public static final ArtifactProjectorBlock ARTIFACT_PROJECTOR_BLOCK = new ArtifactProjectorBlock();
+   public static final FoliageDecorBlock LIVING_ROCK_PLANTER = new FoliageDecorBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.DIRT).sound(SoundType.ROOTED_DIRT)
+   );
    public static final JunkGemBlock TOPAZ_BLOCK = new JunkGemBlock();
    public static final TorchBlock GILDED_SCONCE = new TorchBlock(
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.TORCH), ParticleTypes.FLAME
@@ -607,6 +640,46 @@ public class ModBlocks {
    public static final PillarBlock ANCIENT_COPPER_BLOCK_PILLAR_OXIDIZED = new PillarBlock(
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
    );
+   public static final AncientCopperTrapDoorBlock ANCIENT_COPPER_TRAPDOOR = new AncientCopperTrapDoorBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+         .requiresCorrectToolForDrops()
+         .strength(5.0F)
+         .noOcclusion()
+         .isValidSpawn((state, blockGetter, pos, entityType) -> false)
+   );
+   public static final AncientCopperButtonBlock ANCIENT_COPPER_BUTTON = new AncientCopperButtonBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BUTTON).sound(SoundType.COPPER)
+   );
+   public static final AncientCopperTrapDoorBlock ANCIENT_COPPER_TRAPDOOR_EXPOSED = new AncientCopperTrapDoorBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+         .requiresCorrectToolForDrops()
+         .strength(5.0F)
+         .noOcclusion()
+         .isValidSpawn((state, blockGetter, pos, entityType) -> false)
+   );
+   public static final AncientCopperButtonBlock ANCIENT_COPPER_BUTTON_EXPOSED = new AncientCopperButtonBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BUTTON).sound(SoundType.COPPER)
+   );
+   public static final AncientCopperTrapDoorBlock ANCIENT_COPPER_TRAPDOOR_WEATHERED = new AncientCopperTrapDoorBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+         .requiresCorrectToolForDrops()
+         .strength(5.0F)
+         .noOcclusion()
+         .isValidSpawn((state, blockGetter, pos, entityType) -> false)
+   );
+   public static final AncientCopperButtonBlock ANCIENT_COPPER_BUTTON_WEATHERED = new AncientCopperButtonBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BUTTON).sound(SoundType.COPPER)
+   );
+   public static final AncientCopperTrapDoorBlock ANCIENT_COPPER_TRAPDOOR_OXIDIZED = new AncientCopperTrapDoorBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.COPPER_BLOCK)
+         .requiresCorrectToolForDrops()
+         .strength(5.0F)
+         .noOcclusion()
+         .isValidSpawn((state, blockGetter, pos, entityType) -> false)
+   );
+   public static final AncientCopperButtonBlock ANCIENT_COPPER_BUTTON_OXIDIZED = new AncientCopperButtonBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BUTTON).sound(SoundType.COPPER)
+   );
    public static final RottenMeatBlock ROTTEN_MEAT_BLOCK = new RottenMeatBlock();
    public static final Block WOODEN_LOG = VaultLogBlock.log(() -> ModBlocks.STRIPPED_WOODEN_LOG, MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
    public static final Block STRIPPED_WOODEN_LOG = VaultLogBlock.stripped(MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
@@ -646,6 +719,18 @@ public class ModBlocks {
    public static final VaultSweetsBlock VAULT_SWEETS_BLOCK = new VaultSweetsBlock(
       net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CAKE)
    );
+   public static final VaultSmallSweetsBlock VAULT_SMALL_SWEETS_BLOCK = new VaultSmallSweetsBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CAKE)
+   );
+   public static final VaultTinySweetsBlock VAULT_SWEETS = new VaultTinySweetsBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CAKE)
+   );
+   public static final GildedCandelabraBlock GILDED_CANDELABRA = new GildedCandelabraBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.of(Material.METAL)
+         .strength(1.0F)
+         .explosionResistance(2.0F)
+         .lightLevel(state -> state.getValue(GildedCandelabraBlock.LIT) ? 15 : 0)
+   );
    public static final Block CHROMATIC_LOG = VaultLogBlock.log(() -> ModBlocks.STRIPPED_CHROMATIC_LOG, MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
    public static final Block STRIPPED_CHROMATIC_LOG = VaultLogBlock.stripped(MaterialColor.COLOR_PINK, MaterialColor.COLOR_PINK);
    public static final Block CHROMATIC_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
@@ -664,6 +749,87 @@ public class ModBlocks {
    public static final StairBlock VAULT_STONE_STAIRS = new StairBlock(
       VAULT_STONE::defaultBlockState, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_STAIRS)
    );
+   public static final Block IDONA_BRICK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHER_BRICKS));
+   public static final Block IDONA_CHISELED_BRICK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHER_BRICKS));
+   public static final Block IDONA_DARK_SMOOTH_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHER_BRICKS));
+   public static final Block IDONA_LIGHT_SMOOTH_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHER_BRICKS));
+   public static final Block IDONA_GEM_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.NETHER_BRICKS));
+   public static final Block TENOS_BRICK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.STONE)
+   );
+   public static final Block TENOS_CHISELED_BRICK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.STONE)
+   );
+   public static final Block TENOS_DARK_SMOOTH_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.STONE)
+   );
+   public static final Block TENOS_LIGHT_SMOOTH_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.STONE)
+   );
+   public static final Block TENOS_GEM_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.STONE)
+   );
+   public static final Block TENOS_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
+   public static final Block TENOS_VERTICAL_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
+   public static final Block TENOS_LOG = VaultLogBlock.log(() -> ModBlocks.VELARA_STRIPPED_LOG, MaterialColor.COLOR_GREEN, MaterialColor.COLOR_GREEN);
+   public static final Block TENOS_STRIPPED_LOG = new RotatedPillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STRIPPED_OAK_LOG)
+   );
+   public static final Block TENOS_BOOKSHELF = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BOOKSHELF));
+   public static final Block TENOS_BOOKSHELF_EMPTY = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.BOOKSHELF));
+   public static final Block VELARA_BRICK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.AZALEA)
+   );
+   public static final Block VELARA_CHISELED_BRICK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.AZALEA)
+   );
+   public static final Block VELARA_DARK_SMOOTH_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.AZALEA)
+   );
+   public static final Block VELARA_LIGHT_SMOOTH_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.AZALEA)
+   );
+   public static final Block VELARA_GEM_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STONE_BRICKS).sound(SoundType.AZALEA)
+   );
+   public static final Block VELARA_LOG = VaultLogBlock.log(() -> ModBlocks.VELARA_STRIPPED_LOG, MaterialColor.COLOR_GREEN, MaterialColor.COLOR_GREEN);
+   public static final Block VELARA_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
+   public static final Block VELARA_VERTICAL_PLANKS = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
+   public static final Block VELARA_PLANKS_STAIRS = new StairBlock(
+      VELARA_PLANKS::defaultBlockState, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS)
+   );
+   public static final Block VELARA_PLANKS_SLAB = new SlabBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_PLANKS));
+   public static final Block VELARA_STRIPPED_LOG = new RotatedPillarBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.STRIPPED_OAK_LOG)
+   );
+   public static final Block VELARA_MOSSY_LOG = VaultLogBlock.log(() -> VELARA_STRIPPED_LOG, MaterialColor.COLOR_GREEN, MaterialColor.COLOR_GREEN);
+   public static final Block VELARA_MOSSY_LOG_BLOOMING = VaultLogBlock.log(() -> VELARA_STRIPPED_LOG, MaterialColor.COLOR_GREEN, MaterialColor.COLOR_GREEN);
+   public static final Block VELARA_MOSSY_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.MOSS_BLOCK));
+   public static final Block VELARA_LEAVES = new LeavesBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_LEAVES));
+   public static final Block VELARA_BUSH = new LeavesBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.OAK_LEAVES));
+   public static final Block VELARA_VINE = new VineBlock(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.VINE));
+   public static final Block WENDARR_BRICK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHISELED_SANDSTONE).sound(SoundType.SAND)
+   );
+   public static final Block WENDARR_CHISELED_BRICK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHISELED_SANDSTONE).sound(SoundType.SAND)
+   );
+   public static final Block WENDARR_DARK_SMOOTH_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHISELED_SANDSTONE).sound(SoundType.SAND)
+   );
+   public static final Block WENDARR_LIGHT_SMOOTH_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHISELED_SANDSTONE).sound(SoundType.SAND)
+   );
+   public static final Block WENDARR_GEM_BLOCK = new Block(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.CHISELED_SANDSTONE).sound(SoundType.SAND)
+   );
+   public static final Block WENDARR_JEWEL_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.YELLOW_STAINED_GLASS));
+   public static final Block WENDARR_JEWEL_GLASS = new GlassBlock(
+      net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.YELLOW_STAINED_GLASS)
+   );
+   public static final Block WENDARR_JEWEL_GLASS_PANE = new StainedGlassPaneBlock(
+      DyeColor.YELLOW, net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.YELLOW_STAINED_GLASS_PANE)
+   );
    public static final TotemPlayerHealthBlock TOTEM_PLAYER_HEALTH = new TotemPlayerHealthBlock();
    public static final TotemMobDamageBlock TOTEM_MOB_DAMAGE = new TotemMobDamageBlock();
    public static final TotemManaRegenBlock TOTEM_MANA_REGEN = new TotemManaRegenBlock();
@@ -676,7 +842,7 @@ public class ModBlocks {
          .strength(100.0F)
          .noDrops()
    );
-   public static final VaultChampionTrophyBlockItem VAULT_CHAMPION_TROPHY_BLOCK_ITEM = new VaultChampionTrophyBlockItem(VAULT_CHAMPION_TROPHY);
+   public static final HeraldTrophyItem HERALD_TROPHY_BLOCK_ITEM = new HeraldTrophyItem(HERALD_TROPHY);
    public static final FinalVaultFrameBlockItem FINAL_VAULT_FRAME_BLOCK_ITEM = new FinalVaultFrameBlockItem(FINAL_VAULT_FRAME);
    public static final LootStatueBlockItem LOOT_STATUE_ITEM = new LootStatueBlockItem(LOOT_STATUE);
    public static final TrophyStatueBlockItem TROPHY_STATUE_BLOCK_ITEM = new TrophyStatueBlockItem(TROPHY_STATUE);
@@ -716,19 +882,24 @@ public class ModBlocks {
          consumer.accept(AngelBlockISTER.INSTANCE);
       }
    };
-   public static final BlockEntityType<FloatingTextTileEntity> FLOATING_TEXT_TILE_ENTITY = Builder.of(FloatingTextTileEntity::new, new Block[]{FLOATING_TEXT})
-      .build(null);
-   public static final BlockEntityType<VaultAltarTileEntity> VAULT_ALTAR_TILE_ENTITY = Builder.of(VaultAltarTileEntity::new, new Block[]{VAULT_ALTAR})
-      .build(null);
-   public static final BlockEntityType<VaultChampionTrophyTileEntity> VAULT_CHAMPION_TROPHY_TILE_ENTITY = Builder.of(
-         VaultChampionTrophyTileEntity::new, new Block[]{VAULT_CHAMPION_TROPHY}
+   public static BlockItem VAULT_SWEETS_ITEM = new VaultSweetsBlockItem(VAULT_SWEETS, new Builder().fast().nutrition(3).saturationMod(0.5F).build());
+   public static final BlockEntityType<FloatingTextTileEntity> FLOATING_TEXT_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         FloatingTextTileEntity::new, new Block[]{FLOATING_TEXT}
       )
       .build(null);
-   public static final BlockEntityType<FinalVaultFrameTileEntity> FINAL_VAULT_FRAME_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<VaultAltarTileEntity> VAULT_ALTAR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         VaultAltarTileEntity::new, new Block[]{VAULT_ALTAR}
+      )
+      .build(null);
+   public static final BlockEntityType<HeraldTrophyTileEntity> HERALD_TROPHY_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         HeraldTrophyTileEntity::new, new Block[]{HERALD_TROPHY}
+      )
+      .build(null);
+   public static final BlockEntityType<FinalVaultFrameTileEntity> FINAL_VAULT_FRAME_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          FinalVaultFrameTileEntity::new, new Block[]{FINAL_VAULT_FRAME}
       )
       .build(null);
-   public static final BlockEntityType<VaultCrateTileEntity> VAULT_CRATE_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<VaultCrateTileEntity> VAULT_CRATE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultCrateTileEntity::new,
          new Block[]{
             VAULT_CRATE,
@@ -739,30 +910,56 @@ public class ModBlocks {
             VAULT_CRATE_BOUNTY,
             VAULT_CRATE,
             VAULT_CRATE_MONOLITH,
-            VAULT_CRATE_ELIXIR
+            VAULT_CRATE_ELIXIR,
+            VAULT_CRATE_PARADOX
          }
       )
       .build(null);
-   public static final BlockEntityType<VaultPortalTileEntity> VAULT_PORTAL_TILE_ENTITY = Builder.of(VaultPortalTileEntity::new, new Block[]{VAULT_PORTAL})
+   public static final BlockEntityType<VaultPortalTileEntity> VAULT_PORTAL_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         VaultPortalTileEntity::new, new Block[]{VAULT_PORTAL}
+      )
       .build(null);
-   public static final BlockEntityType<RelicPedestalTileEntity> RELIC_STATUE_TILE_ENTITY = Builder.of(RelicPedestalTileEntity::new, new Block[]{RELIC_PEDESTAL})
+   public static final BlockEntityType<RelicPedestalTileEntity> RELIC_STATUE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         RelicPedestalTileEntity::new, new Block[]{RELIC_PEDESTAL}
+      )
       .build(null);
-   public static final BlockEntityType<LootStatueTileEntity> LOOT_STATUE_TILE_ENTITY = Builder.of(LootStatueTileEntity::new, new Block[]{LOOT_STATUE})
+   public static final BlockEntityType<LootStatueTileEntity> LOOT_STATUE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         LootStatueTileEntity::new, new Block[]{LOOT_STATUE}
+      )
       .build(null);
-   public static final BlockEntityType<ShopPedestalBlockTile> SHOP_PEDESTAL_TILE_ENTITY = Builder.of(ShopPedestalBlockTile::new, new Block[]{SHOP_PEDESTAL})
+   public static final BlockEntityType<ShopPedestalBlockTile> SHOP_PEDESTAL_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         ShopPedestalBlockTile::new, new Block[]{SHOP_PEDESTAL}
+      )
       .build(null);
-   public static final BlockEntityType<TrophyTileEntity> TROPHY_STATUE_TILE_ENTITY = Builder.of(TrophyTileEntity::new, new Block[]{TROPHY_STATUE}).build(null);
-   public static final BlockEntityType<CryoChamberTileEntity> CRYO_CHAMBER_TILE_ENTITY = Builder.of(CryoChamberTileEntity::new, new Block[]{CRYO_CHAMBER})
+   public static final BlockEntityType<TrophyTileEntity> TROPHY_STATUE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         TrophyTileEntity::new, new Block[]{TROPHY_STATUE}
+      )
       .build(null);
-   public static final BlockEntityType<AncientCryoChamberTileEntity> ANCIENT_CRYO_CHAMBER_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<CryoChamberTileEntity> CRYO_CHAMBER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         CryoChamberTileEntity::new, new Block[]{CRYO_CHAMBER}
+      )
+      .build(null);
+   public static final BlockEntityType<AncientCryoChamberTileEntity> ANCIENT_CRYO_CHAMBER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          AncientCryoChamberTileEntity::new, new Block[]{CRYO_CHAMBER}
       )
       .build(null);
-   public static final BlockEntityType<TreasureDoorTileEntity> TREASURE_DOOR_TILE_ENTITY = Builder.of(TreasureDoorTileEntity::new, new Block[]{TREASURE_DOOR})
+   public static final BlockEntityType<TreasureDoorTileEntity> TREASURE_DOOR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         TreasureDoorTileEntity::new, new Block[]{TREASURE_DOOR}
+      )
       .build(null);
-   public static final BlockEntityType<DungeonDoorTileEntity> DUNGEON_DOOR_TILE_ENTITY = Builder.of(DungeonDoorTileEntity::new, new Block[]{DUNGEON_DOOR})
+   public static final BlockEntityType<DungeonDoorTileEntity> DUNGEON_DOOR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         DungeonDoorTileEntity::new, new Block[]{DUNGEON_DOOR}
+      )
       .build(null);
-   public static final BlockEntityType<VaultChestTileEntity> VAULT_CHEST_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<GateLockTileEntity> GATE_LOCK_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         GateLockTileEntity::new, new Block[]{GATE_LOCK}
+      )
+      .build(null);
+   public static final BlockEntityType<HeraldControllerTileEntity> HERALD_CONTROLLER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         HeraldControllerTileEntity::new, new Block[]{HERALD_CONTROLLER}
+      )
+      .build(null);
+   public static final BlockEntityType<VaultChestTileEntity> VAULT_CHEST_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultChestTileEntity::new,
          new Block[]{
             WOODEN_CHEST,
@@ -789,164 +986,248 @@ public class ModBlocks {
          }
       )
       .build(null);
-   public static final BlockEntityType<XpAltarTileEntity> XP_ALTAR_TILE_ENTITY = Builder.of(XpAltarTileEntity::new, new Block[]{XP_ALTAR}).build(null);
-   public static final BlockEntityType<BloodAltarTileEntity> BLOOD_ALTAR_TILE_ENTITY = Builder.of(BloodAltarTileEntity::new, new Block[]{BLOOD_ALTAR})
+   public static final BlockEntityType<GodAltarTileEntity> GOD_ALTAR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         GodAltarTileEntity::new, new Block[]{GOD_ALTAR}
+      )
       .build(null);
-   public static final BlockEntityType<TimeAltarTileEntity> TIME_ALTAR_TILE_ENTITY = Builder.of(TimeAltarTileEntity::new, new Block[]{TIME_ALTAR}).build(null);
-   public static final BlockEntityType<SoulAltarTileEntity> SOUL_ALTAR_TILE_ENTITY = Builder.of(SoulAltarTileEntity::new, new Block[]{SOUL_ALTAR}).build(null);
-   public static final BlockEntityType<ObeliskTileEntity> OBELISK_TILE_ENTITY = Builder.of(ObeliskTileEntity::new, new Block[]{OBELISK}).build(null);
-   public static final BlockEntityType<MonolithTileEntity> MONOLITH_TILE_ENTITY = Builder.of(MonolithTileEntity::new, new Block[]{MONOLITH}).build(null);
-   public static final BlockEntityType<CrakePedestalTileEntity> CRAKE_PEDESTAL_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<ObeliskTileEntity> OBELISK_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         ObeliskTileEntity::new, new Block[]{OBELISK}
+      )
+      .build(null);
+   public static final BlockEntityType<MonolithTileEntity> MONOLITH_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         MonolithTileEntity::new, new Block[]{MONOLITH}
+      )
+      .build(null);
+   public static final BlockEntityType<CrakePedestalTileEntity> CRAKE_PEDESTAL_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          CrakePedestalTileEntity::new, new Block[]{CRAKE_PEDESTAL}
       )
       .build(null);
-   public static final BlockEntityType<LodestoneTileEntity> LODESTONE_TILE_ENTITY = Builder.of(LodestoneTileEntity::new, new Block[]{LODESTONE}).build(null);
-   public static final BlockEntityType<PylonTileEntity> PYLON_TILE_ENTITY = Builder.of(PylonTileEntity::new, new Block[]{PYLON}).build(null);
-   public static final BlockEntityType<VaultEnhancementAltarTileEntity> ENHANCEMENT_ALTAR_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<LodestoneTileEntity> LODESTONE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         LodestoneTileEntity::new, new Block[]{LODESTONE}
+      )
+      .build(null);
+   public static final BlockEntityType<PylonTileEntity> PYLON_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         PylonTileEntity::new, new Block[]{PYLON}
+      )
+      .build(null);
+   public static final BlockEntityType<VaultEnhancementAltarTileEntity> ENHANCEMENT_ALTAR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultEnhancementAltarTileEntity::new, new Block[]{ENHANCEMENT_ALTAR}
       )
       .build(null);
-   public static final BlockEntityType<HourglassTileEntity> HOURGLASS_TILE_ENTITY = Builder.of(HourglassTileEntity::new, new Block[]{HOURGLASS}).build(null);
-   public static final BlockEntityType<ScavengerAltarTileEntity> SCAVENGER_ALTAR_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<HourglassTileEntity> HOURGLASS_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         HourglassTileEntity::new, new Block[]{HOURGLASS}
+      )
+      .build(null);
+   public static final BlockEntityType<ScavengerAltarTileEntity> SCAVENGER_ALTAR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          ScavengerAltarTileEntity::new, new Block[]{SCAVENGER_ALTAR}
       )
       .build(null);
-   public static final BlockEntityType<ScavengerTreasureTileEntity> SCAVENGER_TREASURE_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<DivineAltarTileEntity> DIVINE_ALTAR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         DivineAltarTileEntity::new, new Block[]{DIVINE_ALTAR}
+      )
+      .build(null);
+   public static final BlockEntityType<ScavengerTreasureTileEntity> SCAVENGER_TREASURE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          ScavengerTreasureTileEntity::new, new Block[]{SCAVENGER_TREASURE}
       )
       .build(null);
-   public static final BlockEntityType<StabilizerTileEntity> STABILIZER_TILE_ENTITY = Builder.of(StabilizerTileEntity::new, new Block[]{STABILIZER})
+   public static final BlockEntityType<StabilizerTileEntity> STABILIZER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         StabilizerTileEntity::new, new Block[]{STABILIZER}
+      )
       .build(null);
-   public static final BlockEntityType<CatalystInfusionTableTileEntity> CATALYST_INFUSION_TABLE_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<CatalystInfusionTableTileEntity> CATALYST_INFUSION_TABLE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          CatalystInfusionTableTileEntity::new, new Block[]{CATALYST_INFUSION_TABLE}
       )
       .build(null);
-   public static final BlockEntityType<EtchingVendorControllerTileEntity> ETCHING_CONTROLLER_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<EtchingVendorControllerTileEntity> ETCHING_CONTROLLER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          EtchingVendorControllerTileEntity::new, new Block[]{ETCHING_CONTROLLER_BLOCK}
       )
       .build(null);
-   public static final BlockEntityType<VaultCharmControllerTileEntity> VAULT_CHARM_CONTROLLER_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<VaultCharmControllerTileEntity> VAULT_CHARM_CONTROLLER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultCharmControllerTileEntity::new, new Block[]{VAULT_CHARM_CONTROLLER_BLOCK}
       )
       .build(null);
-   public static final BlockEntityType<ToolViseTile> TOOL_VISE_TILE_ENTITY = Builder.of(ToolViseTile::new, new Block[]{TOOL_VISE}).build(null);
-   public static final BlockEntityType<MagnetTableTile> MAGNET_TABLE_TILE_ENTITY = Builder.of(MagnetTableTile::new, new Block[]{MAGNET_TABLE}).build(null);
-   public static final BlockEntityType<DemagnetizerTileEntity> DEMAGNETIZER_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<ToolViseTile> TOOL_VISE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         ToolViseTile::new, new Block[]{TOOL_VISE}
+      )
+      .build(null);
+   public static final BlockEntityType<MagnetTableTile> MAGNET_TABLE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         MagnetTableTile::new, new Block[]{MAGNET_TABLE}
+      )
+      .build(null);
+   public static final BlockEntityType<DemagnetizerTileEntity> DEMAGNETIZER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          DemagnetizerTileEntity::new, new Block[]{DEMAGNETIZER_BLOCK}
       )
       .build(null);
-   public static final BlockEntityType<CoinPilesTileEntity> COIN_PILE_TILE = Builder.of(CoinPilesTileEntity::new, new Block[]{COIN_PILE}).build(null);
-   public static final BlockEntityType<TreasureSandTileEntity> TREASURE_SAND_TILE_ENTITY = Builder.of(TreasureSandTileEntity::new, new Block[]{TREASURE_SAND})
+   public static final BlockEntityType<CoinPilesTileEntity> COIN_PILE_TILE = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         CoinPilesTileEntity::new, new Block[]{COIN_PILE}
+      )
       .build(null);
-   public static final BlockEntityType<VaultForgeTileEntity> VAULT_FORGE_TILE_ENTITY = Builder.of(VaultForgeTileEntity::new, new Block[]{VAULT_FORGE})
+   public static final BlockEntityType<TreasureSandTileEntity> TREASURE_SAND_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         TreasureSandTileEntity::new, new Block[]{TREASURE_SAND}
+      )
       .build(null);
-   public static final BlockEntityType<ToolStationTileEntity> TOOL_STATION_TILE_ENTITY = Builder.of(ToolStationTileEntity::new, new Block[]{TOOL_STATION})
+   public static final BlockEntityType<VaultForgeTileEntity> VAULT_FORGE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         VaultForgeTileEntity::new, new Block[]{VAULT_FORGE}
+      )
       .build(null);
-   public static final BlockEntityType<InscriptionTableTileEntity> INSCRIPTION_TABLE_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<ToolStationTileEntity> TOOL_STATION_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         ToolStationTileEntity::new, new Block[]{TOOL_STATION}
+      )
+      .build(null);
+   public static final BlockEntityType<InscriptionTableTileEntity> INSCRIPTION_TABLE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          InscriptionTableTileEntity::new, new Block[]{INSCRIPTION_TABLE}
       )
       .build(null);
-   public static final BlockEntityType<VaultArtisanStationTileEntity> VAULT_ARTISAN_STATION_ENTITY = Builder.of(
+   public static final BlockEntityType<VaultArtisanStationTileEntity> VAULT_ARTISAN_STATION_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultArtisanStationTileEntity::new, new Block[]{VAULT_ARTISAN_STATION}
       )
       .build(null);
-   public static final BlockEntityType<VaultJewelCuttingStationTileEntity> VAULT_JEWEL_CUTTING_STATION_ENTITY = Builder.of(
+   public static final BlockEntityType<VaultJewelCuttingStationTileEntity> VAULT_JEWEL_CUTTING_STATION_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultJewelCuttingStationTileEntity::new, new Block[]{VAULT_JEWEL_CUTTING_STATION}
       )
       .build(null);
-   public static final BlockEntityType<VaultJewelApplicationStationTileEntity> VAULT_JEWEL_APPLICATION_STATION_ENTITY = Builder.of(
+   public static final BlockEntityType<VaultJewelApplicationStationTileEntity> VAULT_JEWEL_APPLICATION_STATION_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultJewelApplicationStationTileEntity::new, new Block[]{VAULT_JEWEL_APPLICATION_STATION}
       )
       .build(null);
-   public static final BlockEntityType<VaultRecyclerTileEntity> VAULT_RECYCLER_ENTITY = Builder.of(VaultRecyclerTileEntity::new, new Block[]{VAULT_RECYCLER})
+   public static final BlockEntityType<VaultRecyclerTileEntity> VAULT_RECYCLER_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         VaultRecyclerTileEntity::new, new Block[]{VAULT_RECYCLER}
+      )
       .build(null);
-   public static final BlockEntityType<VaultDiffuserTileEntity> VAULT_DIFFUSER_ENTITY = Builder.of(VaultDiffuserTileEntity::new, new Block[]{VAULT_DIFFUSER})
+   public static final BlockEntityType<VaultDiffuserTileEntity> VAULT_DIFFUSER_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         VaultDiffuserTileEntity::new, new Block[]{VAULT_DIFFUSER}
+      )
       .build(null);
-   public static final BlockEntityType<VaultDiffuserUpgradedTileEntity> VAULT_HARVESTER_ENTITY = Builder.of(
+   public static final BlockEntityType<VaultDiffuserUpgradedTileEntity> VAULT_HARVESTER_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultDiffuserUpgradedTileEntity::new, new Block[]{VAULT_HARVESTER}
       )
       .build(null);
-   public static final BlockEntityType<ModifierWorkbenchTileEntity> MODIFIER_WORKBENCH_ENTITY = Builder.of(
+   public static final BlockEntityType<ModifierWorkbenchTileEntity> MODIFIER_WORKBENCH_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          ModifierWorkbenchTileEntity::new, new Block[]{MODIFIER_WORKBENCH}
       )
       .build(null);
-   public static final BlockEntityType<AlchemyTableTileEntity> ALCHEMY_TABLE_TILE_ENTITY = Builder.of(AlchemyTableTileEntity::new, new Block[]{ALCHEMY_TABLE})
+   public static final BlockEntityType<AlchemyTableTileEntity> ALCHEMY_TABLE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         AlchemyTableTileEntity::new, new Block[]{ALCHEMY_TABLE}
+      )
       .build(null);
-   public static final BlockEntityType<VaultEnchanterTileEntity> VAULT_ENCHANTER_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<VaultEnchanterTileEntity> VAULT_ENCHANTER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultEnchanterTileEntity::new, new Block[]{VAULT_ENCHANTER}
       )
       .build(null);
-   public static final BlockEntityType<IdentificationStandTileEntity> IDENTIFICATION_STAND_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<IdentificationStandTileEntity> IDENTIFICATION_STAND_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          IdentificationStandTileEntity::new, new Block[]{IDENTIFICATION_STAND}
       )
       .build(null);
-   public static final BlockEntityType<ModifierDiscoveryTileEntity> MODIFIER_DISCOVERY_ENTITY = Builder.of(
+   public static final BlockEntityType<ModifierDiscoveryTileEntity> MODIFIER_DISCOVERY_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          ModifierDiscoveryTileEntity::new, new Block[]{MODIFIER_DISCOVERY}
       )
       .build(null);
-   public static final BlockEntityType<AlchemyArchiveTileEntity> ALCHEMY_ARCHIVE_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<AlchemyArchiveTileEntity> ALCHEMY_ARCHIVE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          AlchemyArchiveTileEntity::new, new Block[]{ALCHEMY_ARCHIVE}
       )
       .build(null);
-   public static final BlockEntityType<AnimalPenTileEntity> ANIMAL_PEN_ENTITY = Builder.of(AnimalPenTileEntity::new, new Block[]{ANIMAL_PEN}).build(null);
-   public static final BlockEntityType<EliteSpawnerTileEntity> ELITE_SPAWNER_TILE_ENTITY = Builder.of(EliteSpawnerTileEntity::new, new Block[]{ELITE_SPAWNER})
+   public static final BlockEntityType<AnimalPenTileEntity> ANIMAL_PEN_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         AnimalPenTileEntity::new, new Block[]{ANIMAL_PEN}
+      )
       .build(null);
-   public static final BlockEntityType<WildSpawnerTileEntity> WILD_SPAWNER_TILE_ENTITY = Builder.of(WildSpawnerTileEntity::new, new Block[]{WILD_SPAWNER})
+   public static final BlockEntityType<EliteSpawnerTileEntity> ELITE_SPAWNER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         EliteSpawnerTileEntity::new, new Block[]{ELITE_SPAWNER}
+      )
       .build(null);
-   public static final BlockEntityType<CustomEntitySpawnerTileEntity> CUSTOM_ENTITY_SPAWNER_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<WildSpawnerTileEntity> WILD_SPAWNER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         WildSpawnerTileEntity::new, new Block[]{WILD_SPAWNER}
+      )
+      .build(null);
+   public static final BlockEntityType<CustomEntitySpawnerTileEntity> CUSTOM_ENTITY_SPAWNER_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          CustomEntitySpawnerTileEntity::new, new Block[]{CUSTOM_ENTITY_SPAWNER}
       )
       .build(null);
-   public static final BlockEntityType<CubeTileEntity> CUBE_BLOCK_TILE_ENTITY = Builder.of(CubeTileEntity::new, new Block[]{CUBE_BLOCK}).build(null);
-   public static final BlockEntityType<SpiritExtractorTileEntity> SPIRIT_EXTRACTOR_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<CubeTileEntity> CUBE_BLOCK_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         CubeTileEntity::new, new Block[]{CUBE_BLOCK}
+      )
+      .build(null);
+   public static final BlockEntityType<SpiritExtractorTileEntity> SPIRIT_EXTRACTOR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          SpiritExtractorTileEntity::new, new Block[]{SPIRIT_EXTRACTOR}
       )
       .build(null);
-   public static final BlockEntityType<WardrobeTileEntity> WARDROBE_TILE_ENTITY = Builder.of(WardrobeTileEntity::new, new Block[]{WARDROBE}).build(null);
-   public static final BlockEntityType<SkillAltarTileEntity> SKILL_ALTAR_TILE_ENTITY = Builder.of(SkillAltarTileEntity::new, new Block[]{SKILL_ALTAR})
+   public static final BlockEntityType<WardrobeTileEntity> WARDROBE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         WardrobeTileEntity::new, new Block[]{WARDROBE}
+      )
       .build(null);
-   public static final BlockEntityType<BountyTableTileEntity> BOUNTY_TABLE_TILE_ENTITY = Builder.of(BountyTableTileEntity::new, new Block[]{BOUNTY_BLOCK})
+   public static final BlockEntityType<SkillAltarTileEntity> SKILL_ALTAR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         SkillAltarTileEntity::new, new Block[]{SKILL_ALTAR}
+      )
       .build(null);
-   public static final BlockEntityType<CrystalBuddingBlockEntity> CRYSTAL_BUDDING_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<BountyTableTileEntity> BOUNTY_TABLE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         BountyTableTileEntity::new, new Block[]{BOUNTY_BLOCK}
+      )
+      .build(null);
+   public static final BlockEntityType<CrystalBuddingBlockEntity> CRYSTAL_BUDDING_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          CrystalBuddingBlockEntity::new, new Block[]{CRYSTAL_BUDDING}
       )
       .build(null);
-   public static final BlockEntityType<BlackMarketTileEntity> BLACK_MARKET_TILE_ENTITY = Builder.of(BlackMarketTileEntity::new, new Block[]{BLACK_MARKET})
+   public static final BlockEntityType<BlackMarketTileEntity> BLACK_MARKET_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         BlackMarketTileEntity::new, new Block[]{BLACK_MARKET}
+      )
       .build(null);
-   public static final BlockEntityType<TransmogTableTileEntity> TRANSMOG_TABLE_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<FoliageDecorTileEntity> FOLIAGE_DECOR_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         FoliageDecorTileEntity::new, new Block[]{LIVING_ROCK_PLANTER}
+      )
+      .build(null);
+   public static final BlockEntityType<TransmogTableTileEntity> TRANSMOG_TABLE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          TransmogTableTileEntity::new, new Block[]{TRANSMOG_TABLE}
       )
       .build(null);
-   public static final BlockEntityType<EternalPedestalTileEntity> ETERNAL_PEDESTAL_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<EternalPedestalTileEntity> ETERNAL_PEDESTAL_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          EternalPedestalTileEntity::new, new Block[]{ETERNAL_PEDESTAL}
       )
       .build(null);
-   public static final BlockEntityType<TotemPlayerHealthTileEntity> TOTEM_PLAYER_HEALTH_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<TotemPlayerHealthTileEntity> TOTEM_PLAYER_HEALTH_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          TotemPlayerHealthTileEntity::new, new Block[]{TOTEM_PLAYER_HEALTH}
       )
       .build(null);
-   public static final BlockEntityType<TotemMobDamageTileEntity> TOTEM_MOB_DAMAGE_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<TotemMobDamageTileEntity> TOTEM_MOB_DAMAGE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          TotemMobDamageTileEntity::new, new Block[]{TOTEM_MOB_DAMAGE}
       )
       .build(null);
-   public static final BlockEntityType<TotemManaRegenTileEntity> TOTEM_MANA_REGEN_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<TotemManaRegenTileEntity> TOTEM_MANA_REGEN_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          TotemManaRegenTileEntity::new, new Block[]{TOTEM_MANA_REGEN}
       )
       .build(null);
-   public static final BlockEntityType<TotemPlayerDamageTileEntity> TOTEM_PLAYER_DAMAGE_TILE_ENTITY = Builder.of(
+   public static final BlockEntityType<TotemPlayerDamageTileEntity> TOTEM_PLAYER_DAMAGE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          TotemPlayerDamageTileEntity::new, new Block[]{TOTEM_PLAYER_DAMAGE}
       )
       .build(null);
-   public static final BlockEntityType<AngelBlockTileEntity> ANGEL_BLOCK_TILE_ENTITY = Builder.of(AngelBlockTileEntity::new, new Block[]{ANGEL_BLOCK})
+   public static final BlockEntityType<AngelBlockTileEntity> ANGEL_BLOCK_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         AngelBlockTileEntity::new, new Block[]{ANGEL_BLOCK}
+      )
       .build(null);
-   public static final BlockEntityType<MobBarrierTileEntity> MOB_BARRIER_ENTITY = Builder.of(MobBarrierTileEntity::new, new Block[]{MOB_BARRIER}).build(null);
-   public static final BlockEntityType<VelvetBedTileEntity> VELVET_BED_TILE_ENTITY = Builder.of(VelvetBedTileEntity::new, new Block[]{VELVET_BED}).build(null);
+   public static final BlockEntityType<MobBarrierTileEntity> MOB_BARRIER_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         MobBarrierTileEntity::new, new Block[]{MOB_BARRIER}
+      )
+      .build(null);
+   public static final BlockEntityType<ArtifactProjectorTileEntity> ARTIFACT_PROJECTOR_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         ArtifactProjectorTileEntity::new, new Block[]{ARTIFACT_PROJECTOR_BLOCK}
+      )
+      .build(null);
+   public static final BlockEntityType<VelvetBedTileEntity> VELVET_BED_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         VelvetBedTileEntity::new, new Block[]{VELVET_BED}
+      )
+      .build(null);
+   public static final BlockEntityType<SparkTileEntity> SPARK_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         SparkTileEntity::new, new Block[]{SPARK}
+      )
+      .build(null);
+   public static final BlockEntityType<ConvertedSparkTileEntity> CONVERTED_SPARK_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         ConvertedSparkTileEntity::new, new Block[]{CONVERTED_SPARK}
+      )
+      .build(null);
 
    public static void registerBlocks(Register<Block> event) {
       registerBlock(event, ERROR_BLOCK, VaultMod.id("error_block"));
       registerBlock(event, FLOATING_TEXT, VaultMod.id("floating_text"));
       registerBlock(event, VAULT_PORTAL, VaultMod.id("vault_portal"));
-      registerBlock(event, VAULT_CHAMPION_TROPHY, VaultMod.id("vault_champion_trophy"));
+      registerBlock(event, HERALD_TROPHY, VaultMod.id("herald_trophy"));
       registerBlock(event, FINAL_VAULT_FRAME, VaultMod.id("final_vault_frame"));
       registerBlock(event, VAULT_ALTAR, VaultMod.id("vault_altar"));
       registerBlock(event, ALEXANDRITE_ORE, VaultMod.id("ore_alexandrite"));
@@ -968,6 +1249,8 @@ public class ModBlocks {
       registerBlock(event, XENIUM_ORE, VaultMod.id("ore_xenium"));
       registerBlock(event, VAULT_ROCK_ORE, VaultMod.id("ore_vault_rock"));
       registerBlock(event, TREASURE_DOOR, VaultMod.id("treasure_door"));
+      registerBlock(event, GATE_LOCK, VaultMod.id("gate_lock"));
+      registerBlock(event, HERALD_CONTROLLER, VaultMod.id("herald_controller"));
       registerBlock(event, DUNGEON_DOOR, VaultMod.id("dungeon_door"));
       registerBlock(event, VAULT_ARTIFACT, VaultMod.id("vault_artifact"));
       registerBlock(event, VAULT_CRATE, VaultMod.id("vault_crate"));
@@ -978,6 +1261,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_CRATE_BOUNTY, VaultMod.id("vault_crate_bounty"));
       registerBlock(event, VAULT_CRATE_MONOLITH, VaultMod.id("vault_crate_monolith"));
       registerBlock(event, VAULT_CRATE_ELIXIR, VaultMod.id("vault_crate_elixir"));
+      registerBlock(event, VAULT_CRATE_PARADOX, VaultMod.id("vault_crate_paradox"));
       registerBlock(event, OBELISK, VaultMod.id("obelisk"));
       registerBlock(event, MONOLITH, VaultMod.id("monolith"));
       registerBlock(event, LODESTONE, VaultMod.id("lodestone"));
@@ -1046,13 +1330,11 @@ public class ModBlocks {
       registerBlock(event, HARDENED_CHEST_PLACEABLE, VaultMod.id("hardened_chest_placeable"));
       registerBlock(event, ENIGMA_CHEST_PLACEABLE, VaultMod.id("enigma_chest_placeable"));
       registerBlock(event, FLESH_CHEST_PLACEABLE, VaultMod.id("flesh_chest_placeable"));
-      registerBlock(event, XP_ALTAR, VaultMod.id("xp_altar"));
-      registerBlock(event, BLOOD_ALTAR, VaultMod.id("blood_altar"));
-      registerBlock(event, TIME_ALTAR, VaultMod.id("time_altar"));
-      registerBlock(event, SOUL_ALTAR, VaultMod.id("soul_altar"));
+      registerBlock(event, GOD_ALTAR, VaultMod.id("god_altar"));
       registerBlock(event, VOID_LIQUID_BLOCK, VaultMod.id("void_liquid"));
       registerBlock(event, HOURGLASS, VaultMod.id("hourglass"));
       registerBlock(event, SCAVENGER_ALTAR, VaultMod.id("scavenger_altar"));
+      registerBlock(event, DIVINE_ALTAR, VaultMod.id("divine_altar"));
       registerBlock(event, SCAVENGER_TREASURE, VaultMod.id("scavenger_treasure"));
       registerBlock(event, STABILIZER, VaultMod.id("stabilizer"));
       registerBlock(event, CATALYST_INFUSION_TABLE, VaultMod.id("catalyst_infusion_table"));
@@ -1106,6 +1388,51 @@ public class ModBlocks {
       registerBlock(event, VAULT_STONE_STAIRS, VaultMod.id("vault_stone_stairs"));
       registerBlock(event, ANGEL_BLOCK, VaultMod.id("angel_block"));
       registerBlock(event, MOB_BARRIER, VaultMod.id("mob_barrier"));
+      registerBlock(event, SPARK, VaultMod.id("spark"));
+      registerBlock(event, CONVERTED_SPARK, VaultMod.id("converted_spark"));
+      registerBlock(event, ARTIFACT_PROJECTOR_BLOCK, VaultMod.id("artifact_projector_block"));
+      registerBlock(event, LIVING_ROCK_PLANTER, VaultMod.id("living_rock_planter"));
+      registerBlock(event, IDONA_BRICK, VaultMod.id("idona_brick"));
+      registerBlock(event, IDONA_CHISELED_BRICK, VaultMod.id("idona_brick_chiseled"));
+      registerBlock(event, IDONA_DARK_SMOOTH_BLOCK, VaultMod.id("idona_dark_smooth_brick"));
+      registerBlock(event, IDONA_LIGHT_SMOOTH_BLOCK, VaultMod.id("idona_light_smooth_brick"));
+      registerBlock(event, IDONA_GEM_BLOCK, VaultMod.id("idona_gem_block"));
+      registerBlock(event, TENOS_BRICK, VaultMod.id("tenos_brick"));
+      registerBlock(event, TENOS_CHISELED_BRICK, VaultMod.id("tenos_brick_chiseled"));
+      registerBlock(event, TENOS_DARK_SMOOTH_BLOCK, VaultMod.id("tenos_dark_smooth_brick"));
+      registerBlock(event, TENOS_LIGHT_SMOOTH_BLOCK, VaultMod.id("tenos_light_smooth_brick"));
+      registerBlock(event, TENOS_GEM_BLOCK, VaultMod.id("tenos_gem_block"));
+      registerBlock(event, TENOS_PLANKS, VaultMod.id("tenos_planks"));
+      registerBlock(event, TENOS_VERTICAL_PLANKS, VaultMod.id("tenos_vertical_planks"));
+      registerBlock(event, TENOS_LOG, VaultMod.id("tenos_log"));
+      registerBlock(event, TENOS_STRIPPED_LOG, VaultMod.id("tenos_stripped_log"));
+      registerBlock(event, TENOS_BOOKSHELF, VaultMod.id("tenos_bookshelf"));
+      registerBlock(event, TENOS_BOOKSHELF_EMPTY, VaultMod.id("tenos_bookshelf_empty"));
+      registerBlock(event, VELARA_BRICK, VaultMod.id("velara_brick"));
+      registerBlock(event, VELARA_CHISELED_BRICK, VaultMod.id("velara_brick_chiseled"));
+      registerBlock(event, VELARA_DARK_SMOOTH_BLOCK, VaultMod.id("velara_dark_smooth_brick"));
+      registerBlock(event, VELARA_LIGHT_SMOOTH_BLOCK, VaultMod.id("velara_light_smooth_brick"));
+      registerBlock(event, VELARA_GEM_BLOCK, VaultMod.id("velara_gem_block"));
+      registerBlock(event, VELARA_LOG, VaultMod.id("velara_log"));
+      registerBlock(event, VELARA_PLANKS, VaultMod.id("velara_planks"));
+      registerBlock(event, VELARA_VERTICAL_PLANKS, VaultMod.id("velara_vertical_planks"));
+      registerBlock(event, VELARA_PLANKS_STAIRS, VaultMod.id("velara_planks_stairs"));
+      registerBlock(event, VELARA_PLANKS_SLAB, VaultMod.id("velara_planks_slab"));
+      registerBlock(event, VELARA_STRIPPED_LOG, VaultMod.id("velara_stripped_log"));
+      registerBlock(event, VELARA_MOSSY_LOG, VaultMod.id("velara_mossy_log"));
+      registerBlock(event, VELARA_MOSSY_LOG_BLOOMING, VaultMod.id("velara_mossy_blooming_log"));
+      registerBlock(event, VELARA_MOSSY_BLOCK, VaultMod.id("velara_mossy_block"));
+      registerBlock(event, VELARA_LEAVES, VaultMod.id("velara_leaves"));
+      registerBlock(event, VELARA_BUSH, VaultMod.id("velara_bush"));
+      registerBlock(event, VELARA_VINE, VaultMod.id("velara_vine"));
+      registerBlock(event, WENDARR_BRICK, VaultMod.id("wendarr_brick"));
+      registerBlock(event, WENDARR_CHISELED_BRICK, VaultMod.id("wendarr_brick_chiseled"));
+      registerBlock(event, WENDARR_DARK_SMOOTH_BLOCK, VaultMod.id("wendarr_dark_smooth_brick"));
+      registerBlock(event, WENDARR_LIGHT_SMOOTH_BLOCK, VaultMod.id("wendarr_light_smooth_brick"));
+      registerBlock(event, WENDARR_GEM_BLOCK, VaultMod.id("wendarr_gem_block"));
+      registerBlock(event, WENDARR_JEWEL_BLOCK, VaultMod.id("wendarr_jewel_block"));
+      registerBlock(event, WENDARR_JEWEL_GLASS, VaultMod.id("wendarr_jewel_glass"));
+      registerBlock(event, WENDARR_JEWEL_GLASS_PANE, VaultMod.id("wendarr_jewel_glass_pane"));
       registerBlock(event, ORNATE_CHAIN, VaultMod.id("ornate_chain"));
       registerBlock(event, ORNATE_CHAIN_RUSTY, VaultMod.id("ornate_chain_rusty"));
       registerBlock(event, ORNATE_BLOCK, VaultMod.id("ornate_block"));
@@ -1143,6 +1470,14 @@ public class ModBlocks {
       registerBlock(event, ANCIENT_COPPER_BRICKS, VaultMod.id("ancient_copper_bricks"));
       registerBlock(event, ANCIENT_COPPER_SMALL_BRICKS, VaultMod.id("ancient_copper_small_bricks"));
       registerBlock(event, ANCIENT_COPPER_BLOCK_PILLAR, VaultMod.id("ancient_copper_block_pillar"));
+      registerBlock(event, ANCIENT_COPPER_TRAPDOOR, VaultMod.id("ancient_copper_trapdoor"));
+      registerBlock(event, ANCIENT_COPPER_BUTTON, VaultMod.id("ancient_copper_button"));
+      registerBlock(event, ANCIENT_COPPER_TRAPDOOR_EXPOSED, VaultMod.id("ancient_copper_trapdoor_exposed"));
+      registerBlock(event, ANCIENT_COPPER_BUTTON_EXPOSED, VaultMod.id("ancient_copper_button_exposed"));
+      registerBlock(event, ANCIENT_COPPER_TRAPDOOR_WEATHERED, VaultMod.id("ancient_copper_trapdoor_weathered"));
+      registerBlock(event, ANCIENT_COPPER_BUTTON_WEATHERED, VaultMod.id("ancient_copper_button_weathered"));
+      registerBlock(event, ANCIENT_COPPER_TRAPDOOR_OXIDIZED, VaultMod.id("ancient_copper_trapdoor_oxidized"));
+      registerBlock(event, ANCIENT_COPPER_BUTTON_OXIDIZED, VaultMod.id("ancient_copper_button_oxidized"));
       registerBlock(event, ANCIENT_COPPER_BLOCK_EXPOSED, VaultMod.id("ancient_copper_block_exposed"));
       registerBlock(event, ANCIENT_COPPER_BRICKS_EXPOSED, VaultMod.id("ancient_copper_bricks_exposed"));
       registerBlock(event, ANCIENT_COPPER_SMALL_BRICKS_EXPOSED, VaultMod.id("ancient_copper_small_bricks_exposed"));
@@ -1155,6 +1490,7 @@ public class ModBlocks {
       registerBlock(event, ANCIENT_COPPER_BRICKS_OXIDIZED, VaultMod.id("ancient_copper_bricks_oxidized"));
       registerBlock(event, ANCIENT_COPPER_SMALL_BRICKS_OXIDIZED, VaultMod.id("ancient_copper_small_bricks_oxidized"));
       registerBlock(event, ANCIENT_COPPER_BLOCK_PILLAR_OXIDIZED, VaultMod.id("ancient_copper_block_pillar_oxidized"));
+      registerBlock(event, GILDED_CANDELABRA, VaultMod.id("gilded_candelabra"));
       registerBlock(event, WOODEN_LOG, VaultMod.id("wooden_log"));
       registerBlock(event, STRIPPED_WOODEN_LOG, VaultMod.id("stripped_wooden_log"));
       registerBlock(event, WOODEN_PLANKS, VaultMod.id("wooden_planks"));
@@ -1185,6 +1521,8 @@ public class ModBlocks {
       registerBlock(event, MOSSY_BONE_BLOCK, VaultMod.id("mossy_bone_block"));
       registerBlock(event, VAULT_MOSS, VaultMod.id("vault_moss"));
       registerBlock(event, VAULT_SWEETS_BLOCK, VaultMod.id("vault_sweets_block"));
+      registerBlock(event, VAULT_SMALL_SWEETS_BLOCK, VaultMod.id("vault_small_sweets_block"));
+      registerBlock(event, VAULT_SWEETS, VaultMod.id("vault_sweets"));
       registerBlock(event, CHROMATIC_LOG, VaultMod.id("chromatic_log"));
       registerBlock(event, STRIPPED_CHROMATIC_LOG, VaultMod.id("stripped_chromatic_log"));
       registerBlock(event, CHROMATIC_PLANKS, VaultMod.id("chromatic_planks"));
@@ -1204,7 +1542,7 @@ public class ModBlocks {
    public static void registerTileEntities(Register<BlockEntityType<?>> event) {
       registerTileEntity(event, FLOATING_TEXT_TILE_ENTITY, VaultMod.id("floating_text_tile_entity"));
       registerTileEntity(event, VAULT_ALTAR_TILE_ENTITY, VaultMod.id("vault_altar_tile_entity"));
-      registerTileEntity(event, VAULT_CHAMPION_TROPHY_TILE_ENTITY, VaultMod.id("vault_champion_trophy_tile_entity"));
+      registerTileEntity(event, HERALD_TROPHY_TILE_ENTITY, VaultMod.id("herald_trophy_tile_entity"));
       registerTileEntity(event, FINAL_VAULT_FRAME_TILE_ENTITY, VaultMod.id("final_vault_frame_tile_entity"));
       registerTileEntity(event, VAULT_CRATE_TILE_ENTITY, VaultMod.id("vault_crate_tile_entity"));
       registerTileEntity(event, VAULT_PORTAL_TILE_ENTITY, VaultMod.id("vault_portal_tile_entity"));
@@ -1216,11 +1554,10 @@ public class ModBlocks {
       registerTileEntity(event, ANCIENT_CRYO_CHAMBER_TILE_ENTITY, VaultMod.id("ancient_cryo_chamber_tile_entity"));
       registerTileEntity(event, TREASURE_DOOR_TILE_ENTITY, VaultMod.id("treasure_door_tile_entity"));
       registerTileEntity(event, DUNGEON_DOOR_TILE_ENTITY, VaultMod.id("dungeon_door_tile_entity"));
+      registerTileEntity(event, GATE_LOCK_TILE_ENTITY, VaultMod.id("gate_lock_tile_entity"));
+      registerTileEntity(event, HERALD_CONTROLLER_TILE_ENTITY, VaultMod.id("herald_controller_tile_entity"));
       registerTileEntity(event, VAULT_CHEST_TILE_ENTITY, VaultMod.id("vault_chest_tile_entity"));
-      registerTileEntity(event, XP_ALTAR_TILE_ENTITY, VaultMod.id("xp_altar_tile_entity"));
-      registerTileEntity(event, BLOOD_ALTAR_TILE_ENTITY, VaultMod.id("blood_altar_tile_entity"));
-      registerTileEntity(event, TIME_ALTAR_TILE_ENTITY, VaultMod.id("time_altar_tile_entity"));
-      registerTileEntity(event, SOUL_ALTAR_TILE_ENTITY, VaultMod.id("soul_altar_tile_entity"));
+      registerTileEntity(event, GOD_ALTAR_TILE_ENTITY, VaultMod.id("god_altar_tile_entity"));
       registerTileEntity(event, OBELISK_TILE_ENTITY, VaultMod.id("obelisk_tile_entity"));
       registerTileEntity(event, MONOLITH_TILE_ENTITY, VaultMod.id("monolith_tile_entity"));
       registerTileEntity(event, CRAKE_PEDESTAL_TILE_ENTITY, VaultMod.id("crake_pedestal_tile_entity"));
@@ -1229,6 +1566,7 @@ public class ModBlocks {
       registerTileEntity(event, ENHANCEMENT_ALTAR_TILE_ENTITY, VaultMod.id("enhancement_altar_tile_entity"));
       registerTileEntity(event, HOURGLASS_TILE_ENTITY, VaultMod.id("hourglass_tile_entity"));
       registerTileEntity(event, SCAVENGER_ALTAR_TILE_ENTITY, VaultMod.id("scavenger_altar_tile_entity"));
+      registerTileEntity(event, DIVINE_ALTAR_TILE_ENTITY, VaultMod.id("divine_altar_tile_entity"));
       registerTileEntity(event, SCAVENGER_TREASURE_TILE_ENTITY, VaultMod.id("scavenger_treasure_tile_entity"));
       registerTileEntity(event, STABILIZER_TILE_ENTITY, VaultMod.id("stabilizer_tile_entity"));
       registerTileEntity(event, CATALYST_INFUSION_TABLE_TILE_ENTITY, VaultMod.id("catalyst_infusion_table_tile_entity"));
@@ -1273,12 +1611,16 @@ public class ModBlocks {
       registerTileEntity(event, TOTEM_PLAYER_DAMAGE_TILE_ENTITY, VaultMod.id("totem_player_damage_tile_entity"));
       registerTileEntity(event, ANGEL_BLOCK_TILE_ENTITY, VaultMod.id("angel_block_tile_entity"));
       registerTileEntity(event, MOB_BARRIER_ENTITY, VaultMod.id("mob_barrier_entity"));
+      registerTileEntity(event, ARTIFACT_PROJECTOR_ENTITY, VaultMod.id("artifact_projector_entity"));
       registerTileEntity(event, VELVET_BED_TILE_ENTITY, VaultMod.id("velvet_bed_tile_entity"));
+      registerTileEntity(event, SPARK_TILE_ENTITY, VaultMod.id("spark_tile_entity"));
+      registerTileEntity(event, CONVERTED_SPARK_TILE_ENTITY, VaultMod.id("converted_spark_tile_entity"));
+      registerTileEntity(event, FOLIAGE_DECOR_TILE_ENTITY, VaultMod.id("foliage_decor_tile_entity"));
    }
 
    public static void registerTileEntityRenderers(RegisterRenderers event) {
       event.registerBlockEntityRenderer(FLOATING_TEXT_TILE_ENTITY, FloatingTextRenderer::new);
-      event.registerBlockEntityRenderer(VAULT_CHAMPION_TROPHY_TILE_ENTITY, VaultChampionTrophyRenderer::new);
+      event.registerBlockEntityRenderer(HERALD_TROPHY_TILE_ENTITY, HeraldTrophyRenderer::new);
       event.registerBlockEntityRenderer(FINAL_VAULT_FRAME_TILE_ENTITY, FinalVaultFrameRenderer::new);
       event.registerBlockEntityRenderer(VAULT_ALTAR_TILE_ENTITY, VaultAltarRenderer::new);
       event.registerBlockEntityRenderer(RELIC_STATUE_TILE_ENTITY, RelicPedestalRenderer::new);
@@ -1289,10 +1631,8 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(ANCIENT_CRYO_CHAMBER_TILE_ENTITY, CryoChamberRenderer::new);
       event.registerBlockEntityRenderer(VAULT_CHEST_TILE_ENTITY, VaultChestRenderer::new);
       event.registerBlockEntityRenderer(SCAVENGER_ALTAR_TILE_ENTITY, ScavengerAltarRenderer::new);
-      event.registerBlockEntityRenderer(XP_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
-      event.registerBlockEntityRenderer(BLOOD_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
-      event.registerBlockEntityRenderer(TIME_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
-      event.registerBlockEntityRenderer(SOUL_ALTAR_TILE_ENTITY, FillableAltarRenderer::new);
+      event.registerBlockEntityRenderer(DIVINE_ALTAR_TILE_ENTITY, DivineAltarRenderer::new);
+      event.registerBlockEntityRenderer(GOD_ALTAR_TILE_ENTITY, GodAltarRenderer::new);
       event.registerBlockEntityRenderer(HOURGLASS_TILE_ENTITY, HourglassRenderer::new);
       event.registerBlockEntityRenderer(VAULT_PORTAL_TILE_ENTITY, VaultPortalRenderer::new);
       event.registerBlockEntityRenderer(MAGNET_TABLE_TILE_ENTITY, MagnetTableRenderer::new);
@@ -1306,6 +1646,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(VAULT_DIFFUSER_ENTITY, VaultDiffuserRenderer::new);
       event.registerBlockEntityRenderer(VAULT_HARVESTER_ENTITY, VaultDiffuserUpgradedRenderer::new);
       event.registerBlockEntityRenderer(BLACK_MARKET_TILE_ENTITY, BlackMarketRenderer::new);
+      event.registerBlockEntityRenderer(FOLIAGE_DECOR_TILE_ENTITY, FoliageDecorRenderer::new);
       event.registerBlockEntityRenderer(ALCHEMY_TABLE_TILE_ENTITY, AlchemyTableRenderer::new);
       event.registerBlockEntityRenderer(ANIMAL_PEN_ENTITY, AnimalPenRenderer::new);
       event.registerBlockEntityRenderer(ETERNAL_PEDESTAL_TILE_ENTITY, EternalPedestalRenderer::new);
@@ -1326,14 +1667,19 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(TOTEM_PLAYER_DAMAGE_TILE_ENTITY, TotemPlayerDamageRenderer::new);
       event.registerBlockEntityRenderer(ANGEL_BLOCK_TILE_ENTITY, AngelBlockRenderer::new);
       event.registerBlockEntityRenderer(MOB_BARRIER_ENTITY, MobBarrierRenderer::new);
+      event.registerBlockEntityRenderer(ARTIFACT_PROJECTOR_ENTITY, ArtifactProjectorRenderer::new);
       event.registerBlockEntityRenderer(BOUNTY_TABLE_TILE_ENTITY, BountyTableRenderer::new);
       event.registerBlockEntityRenderer(VELVET_BED_TILE_ENTITY, VelvetBedRenderer::new);
+      event.registerBlockEntityRenderer(GATE_LOCK_TILE_ENTITY, GateLockRenderer::new);
+      event.registerBlockEntityRenderer(SPARK_TILE_ENTITY, SparkRenderer::new);
+      event.registerBlockEntityRenderer(HERALD_CONTROLLER_TILE_ENTITY, HeraldControllerRenderer::new);
+      event.registerBlockEntityRenderer(CONVERTED_SPARK_TILE_ENTITY, ConvertedSparkRenderer::new);
    }
 
    public static void registerBlockItems(Register<Item> event) {
       registerBlockItem(event, FLOATING_TEXT);
       registerBlockItem(event, VAULT_PORTAL);
-      registerBlockItem(event, VAULT_CHAMPION_TROPHY, VAULT_CHAMPION_TROPHY_BLOCK_ITEM);
+      registerBlockItem(event, HERALD_TROPHY, HERALD_TROPHY_BLOCK_ITEM);
       registerBlockItem(event, FINAL_VAULT_FRAME, FINAL_VAULT_FRAME_BLOCK_ITEM);
       registerBlockItem(event, VAULT_ALTAR, 1);
       registerBlockItem(event, ALEXANDRITE_ORE, new VaultOreBlockItem(ALEXANDRITE_ORE));
@@ -1363,6 +1709,7 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_CRATE_BOUNTY, 1, Properties::fireResistant);
       registerBlockItem(event, VAULT_CRATE_MONOLITH, 1, Properties::fireResistant);
       registerBlockItem(event, VAULT_CRATE_ELIXIR, 1, Properties::fireResistant);
+      registerBlockItem(event, VAULT_CRATE_PARADOX, 1, Properties::fireResistant);
       registerBlockItem(event, OBELISK, 1);
       registerBlockItem(event, MONOLITH, 1);
       registerBlockItem(event, LODESTONE, 1);
@@ -1414,12 +1761,10 @@ public class ModBlocks {
       registerBlockItem(event, HARDENED_CHEST_PLACEABLE, HARDENED_CHEST_ITEM_PLACEABLE);
       registerBlockItem(event, ENIGMA_CHEST_PLACEABLE, ENIGMA_CHEST_ITEM_PLACEABLE);
       registerBlockItem(event, FLESH_CHEST_PLACEABLE, FLESH_CHEST_ITEM_PLACEABLE);
-      registerBlockItem(event, XP_ALTAR);
-      registerBlockItem(event, BLOOD_ALTAR);
-      registerBlockItem(event, TIME_ALTAR);
-      registerBlockItem(event, SOUL_ALTAR);
+      registerBlockItem(event, GOD_ALTAR, new GodAltarBlockItem());
       registerBlockItem(event, HOURGLASS, new HourglassBlockItem(HOURGLASS));
       registerBlockItem(event, SCAVENGER_ALTAR, SCAVENGER_ALTAR_ITEM);
+      registerBlockItem(event, DIVINE_ALTAR);
       registerBlockItem(event, SCAVENGER_TREASURE);
       registerBlockItem(event, STABILIZER);
       registerBlockItem(event, CATALYST_INFUSION_TABLE);
@@ -1427,6 +1772,8 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_CHARM_CONTROLLER_BLOCK);
       registerBlockItem(event, PLACEHOLDER, new PlaceholderBlockItem());
       registerBlockItem(event, TREASURE_DOOR, new TreasureDoorBlockItem());
+      registerBlockItem(event, GATE_LOCK);
+      registerBlockItem(event, HERALD_CONTROLLER);
       registerBlockItem(event, DUNGEON_DOOR, new DungeonDoorBlockItem());
       registerBlockItem(event, COIN_PILE);
       registerBlockItem(event, BRONZE_COIN_PILE, VAULT_BRONZE);
@@ -1485,6 +1832,8 @@ public class ModBlocks {
       registerBlockItem(event, ETERNAL_PEDESTAL);
       registerBlockItem(event, ANGEL_BLOCK, ANGEL_BLOCK_ITEM);
       registerBlockItem(event, MOB_BARRIER);
+      registerBlockItem(event, ARTIFACT_PROJECTOR_BLOCK);
+      registerBlockItem(event, LIVING_ROCK_PLANTER);
       registerBlockItem(event, ORNATE_CHAIN);
       registerBlockItem(event, ORNATE_CHAIN_RUSTY);
       registerBlockItem(event, ORNATE_BLOCK);
@@ -1521,6 +1870,14 @@ public class ModBlocks {
       registerBlockItem(event, ANCIENT_COPPER_BRICKS);
       registerBlockItem(event, ANCIENT_COPPER_SMALL_BRICKS);
       registerBlockItem(event, ANCIENT_COPPER_BLOCK_PILLAR);
+      registerBlockItem(event, ANCIENT_COPPER_TRAPDOOR);
+      registerBlockItem(event, ANCIENT_COPPER_BUTTON);
+      registerBlockItem(event, ANCIENT_COPPER_TRAPDOOR_EXPOSED);
+      registerBlockItem(event, ANCIENT_COPPER_BUTTON_EXPOSED);
+      registerBlockItem(event, ANCIENT_COPPER_TRAPDOOR_WEATHERED);
+      registerBlockItem(event, ANCIENT_COPPER_BUTTON_WEATHERED);
+      registerBlockItem(event, ANCIENT_COPPER_TRAPDOOR_OXIDIZED);
+      registerBlockItem(event, ANCIENT_COPPER_BUTTON_OXIDIZED);
       registerBlockItem(event, ANCIENT_COPPER_BLOCK_EXPOSED);
       registerBlockItem(event, ANCIENT_COPPER_BRICKS_EXPOSED);
       registerBlockItem(event, ANCIENT_COPPER_SMALL_BRICKS_EXPOSED);
@@ -1533,6 +1890,47 @@ public class ModBlocks {
       registerBlockItem(event, ANCIENT_COPPER_BRICKS_OXIDIZED);
       registerBlockItem(event, ANCIENT_COPPER_SMALL_BRICKS_OXIDIZED);
       registerBlockItem(event, ANCIENT_COPPER_BLOCK_PILLAR_OXIDIZED);
+      registerBlockItem(event, IDONA_BRICK);
+      registerBlockItem(event, IDONA_CHISELED_BRICK);
+      registerBlockItem(event, IDONA_DARK_SMOOTH_BLOCK);
+      registerBlockItem(event, IDONA_LIGHT_SMOOTH_BLOCK);
+      registerBlockItem(event, IDONA_GEM_BLOCK);
+      registerBlockItem(event, TENOS_BRICK);
+      registerBlockItem(event, TENOS_CHISELED_BRICK);
+      registerBlockItem(event, TENOS_DARK_SMOOTH_BLOCK);
+      registerBlockItem(event, TENOS_LIGHT_SMOOTH_BLOCK);
+      registerBlockItem(event, TENOS_GEM_BLOCK);
+      registerBlockItem(event, TENOS_PLANKS);
+      registerBlockItem(event, TENOS_VERTICAL_PLANKS);
+      registerBlockItem(event, TENOS_LOG);
+      registerBlockItem(event, TENOS_STRIPPED_LOG);
+      registerBlockItem(event, TENOS_BOOKSHELF);
+      registerBlockItem(event, TENOS_BOOKSHELF_EMPTY);
+      registerBlockItem(event, VELARA_BRICK);
+      registerBlockItem(event, VELARA_CHISELED_BRICK);
+      registerBlockItem(event, VELARA_DARK_SMOOTH_BLOCK);
+      registerBlockItem(event, VELARA_LIGHT_SMOOTH_BLOCK);
+      registerBlockItem(event, VELARA_GEM_BLOCK);
+      registerBlockItem(event, VELARA_LOG);
+      registerBlockItem(event, VELARA_PLANKS);
+      registerBlockItem(event, VELARA_VERTICAL_PLANKS);
+      registerBlockItem(event, VELARA_PLANKS_STAIRS);
+      registerBlockItem(event, VELARA_PLANKS_SLAB);
+      registerBlockItem(event, VELARA_STRIPPED_LOG);
+      registerBlockItem(event, VELARA_MOSSY_LOG);
+      registerBlockItem(event, VELARA_MOSSY_LOG_BLOOMING);
+      registerBlockItem(event, VELARA_MOSSY_BLOCK);
+      registerBlockItem(event, VELARA_LEAVES);
+      registerBlockItem(event, VELARA_BUSH);
+      registerBlockItem(event, VELARA_VINE);
+      registerBlockItem(event, WENDARR_BRICK);
+      registerBlockItem(event, WENDARR_CHISELED_BRICK);
+      registerBlockItem(event, WENDARR_DARK_SMOOTH_BLOCK);
+      registerBlockItem(event, WENDARR_LIGHT_SMOOTH_BLOCK);
+      registerBlockItem(event, WENDARR_GEM_BLOCK);
+      registerBlockItem(event, WENDARR_JEWEL_BLOCK);
+      registerBlockItem(event, WENDARR_JEWEL_GLASS);
+      registerBlockItem(event, WENDARR_JEWEL_GLASS_PANE);
       registerBlockItem(event, ROTTEN_MEAT_BLOCK);
       registerBlockItem(event, LIVING_ROCK_BLOCK_COBBLE);
       registerBlockItem(event, LIVING_ROCK_BLOCK_POLISHED);
@@ -1545,6 +1943,9 @@ public class ModBlocks {
       registerBlockItem(event, MOSSY_BONE_BLOCK);
       registerBlockItem(event, VAULT_MOSS);
       registerBlockItem(event, VAULT_SWEETS_BLOCK);
+      registerBlockItem(event, VAULT_SMALL_SWEETS_BLOCK);
+      registerBlockItem(event, VAULT_SWEETS, VAULT_SWEETS_ITEM);
+      registerBlockItem(event, GILDED_CANDELABRA);
       registerBlockItem(event, WOODEN_PLANKS);
       registerBlockItem(event, WOODEN_SLAB);
       registerBlockItem(event, WOODEN_STAIRS);

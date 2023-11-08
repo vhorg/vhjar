@@ -19,6 +19,7 @@ import iskallia.vault.util.calc.AbilityPowerHelper;
 import iskallia.vault.util.calc.AttributeLimitHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.CooldownHelper;
+import iskallia.vault.util.calc.GodAffinityHelper;
 import iskallia.vault.util.calc.LuckyHitHelper;
 import iskallia.vault.util.calc.SoulChanceHelper;
 import iskallia.vault.util.function.Memo;
@@ -96,14 +97,7 @@ public class StatisticsElementContainerScreenData {
 
    @NotNull
    private List<Component> getTooltipExtendedIdona() {
-      return List.of(
-         this.getGodFavorTitle(VaultGod.IDONA),
-         this.getGodFavorDescription(VaultGod.IDONA).withStyle(EXTENDED_DESCRIPTION_STYLE),
-         BLANK_LINE,
-         new TextComponent("  + Soul Shard Drop %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Damage %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Life Leech %").withStyle(EXTENDED_DESCRIPTION_STYLE)
-      );
+      return List.of(this.getGodFavorTitle(VaultGod.IDONA), this.getGodFavorDescription(VaultGod.IDONA).withStyle(EXTENDED_DESCRIPTION_STYLE));
    }
 
    @NotNull
@@ -128,14 +122,7 @@ public class StatisticsElementContainerScreenData {
 
    @NotNull
    private List<Component> getTooltipExtendedTenos() {
-      return List.of(
-         this.getGodFavorTitle(VaultGod.TENOS),
-         this.getGodFavorDescription(VaultGod.TENOS).withStyle(EXTENDED_DESCRIPTION_STYLE),
-         BLANK_LINE,
-         new TextComponent("  + Item Rarity %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Item Quantity %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  - Chest Trap Chance %").withStyle(EXTENDED_DESCRIPTION_STYLE)
-      );
+      return List.of(this.getGodFavorTitle(VaultGod.TENOS), this.getGodFavorDescription(VaultGod.TENOS).withStyle(EXTENDED_DESCRIPTION_STYLE));
    }
 
    @NotNull
@@ -160,14 +147,7 @@ public class StatisticsElementContainerScreenData {
 
    @NotNull
    private List<Component> getTooltipExtendedVelara() {
-      return List.of(
-         this.getGodFavorTitle(VaultGod.VELARA),
-         this.getGodFavorDescription(VaultGod.VELARA).withStyle(EXTENDED_DESCRIPTION_STYLE),
-         BLANK_LINE,
-         new TextComponent("  + Regeneration").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Healing Efficiency %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Max Health %").withStyle(EXTENDED_DESCRIPTION_STYLE)
-      );
+      return List.of(this.getGodFavorTitle(VaultGod.VELARA), this.getGodFavorDescription(VaultGod.VELARA).withStyle(EXTENDED_DESCRIPTION_STYLE));
    }
 
    @NotNull
@@ -192,14 +172,7 @@ public class StatisticsElementContainerScreenData {
 
    @NotNull
    private List<Component> getTooltipExtendedWendarr() {
-      return List.of(
-         this.getGodFavorTitle(VaultGod.WENDARR),
-         this.getGodFavorDescription(VaultGod.WENDARR).withStyle(EXTENDED_DESCRIPTION_STYLE),
-         BLANK_LINE,
-         new TextComponent("  + Mana Regeneration %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Maximum Mana %").withStyle(EXTENDED_DESCRIPTION_STYLE),
-         new TextComponent("  + Cooldown Reduction %").withStyle(EXTENDED_DESCRIPTION_STYLE)
-      );
+      return List.of(this.getGodFavorTitle(VaultGod.WENDARR), this.getGodFavorDescription(VaultGod.WENDARR).withStyle(EXTENDED_DESCRIPTION_STYLE));
    }
 
    @NotNull
@@ -209,10 +182,7 @@ public class StatisticsElementContainerScreenData {
 
    @NotNull
    private TextComponent getGodFavorDescription(VaultGod vaultGodType) {
-      return new TextComponent(
-         "Complete a%s %s altar for a chance to gain favour with %s. A favour will grant a buff in the subsequent vault. Completing the objective in said vault will grant a reputation point which slowly increases the power of the buffs."
-            .formatted(vaultGodType == VaultGod.IDONA ? "n" : "", vaultGodType.getName(), vaultGodType.getName())
-      );
+      return new TextComponent("Your reputation points with %s.".formatted(vaultGodType.getName()));
    }
 
    @NotNull
@@ -302,10 +272,10 @@ public class StatisticsElementContainerScreenData {
       result.sort(StatLabelElementBuilder.COMPARATOR);
       result.addAll(
          List.of(
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.VELARA_AFFINITY),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.TENOS_AFFINITY),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.WENDARR_AFFINITY),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.IDONA_AFFINITY)
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.VELARA_AFFINITY, GodAffinityHelper::getClientVelaraAffinityPercent),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.TENOS_AFFINITY, GodAffinityHelper::getClientTenosAffinityPercent),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.WENDARR_AFFINITY, GodAffinityHelper::getClientWendarrAffinityPercent),
+            GearAttributeStatLabel.of(this.player, ModGearAttributes.IDONA_AFFINITY, GodAffinityHelper::getClientIdonaAffinityPercent)
          )
       );
       return result;

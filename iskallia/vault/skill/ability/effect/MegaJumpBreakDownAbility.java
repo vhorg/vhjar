@@ -74,22 +74,24 @@ public class MegaJumpBreakDownAbility extends MegaJumpAbility {
    }
 
    private void breakBlocks(ServerLevel world, int height, ServerPlayer player) {
-      int radius = Math.max(this.getRadius(), 1);
-      int depth = Math.max(height, 1) + 1;
-      BlockPos centerPos = player.blockPosition();
-      if (depth > 2) {
-         centerPos = centerPos.below(depth - 2);
-      }
-
-      BlockHelper.withEllipsoidPositions(centerPos, radius, depth, radius, offset -> {
-         BlockState state = world.getBlockState(offset);
-         if (this.canBreakBlock(state)) {
-            float hardness = state.getDestroySpeed(world, offset);
-            if (hardness >= 0.0F && hardness <= 25.0F) {
-               this.destroyBlock(world, offset, player);
-            }
+      if (!player.gameMode.getGameModeForPlayer().isBlockPlacingRestricted()) {
+         int radius = Math.max(this.getRadius(), 1);
+         int depth = Math.max(height, 1) + 1;
+         BlockPos centerPos = player.blockPosition();
+         if (depth > 2) {
+            centerPos = centerPos.below(depth - 2);
          }
-      });
+
+         BlockHelper.withEllipsoidPositions(centerPos, radius, depth, radius, offset -> {
+            BlockState state = world.getBlockState(offset);
+            if (this.canBreakBlock(state)) {
+               float hardness = state.getDestroySpeed(world, offset);
+               if (hardness >= 0.0F && hardness <= 25.0F) {
+                  this.destroyBlock(world, offset, player);
+               }
+            }
+         });
+      }
    }
 
    private void destroyBlock(ServerLevel world, BlockPos pos, Player player) {

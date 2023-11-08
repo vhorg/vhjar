@@ -399,6 +399,21 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_ALCHEMY_MODIFIER_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_ALCHEMY_MODIFIER, BUTTON_ALCHEMY_MODIFIER_HOVER, BUTTON_ALCHEMY_MODIFIER_PRESSED, BUTTON_ALCHEMY_MODIFIER_DISABLED
    );
+   public static final TextureAtlasRegion BUTTON_MODIFIER_DISCOVERY = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_modifier_discovery_select")
+   );
+   public static final TextureAtlasRegion BUTTON_MODIFIER_DISCOVERY_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_modifier_discovery_select_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_MODIFIER_DISCOVERY_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_modifier_discovery_select_pressed")
+   );
+   public static final TextureAtlasRegion BUTTON_MODIFIER_DISCOVERY_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_modifier_discovery_select_disabled")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_MODIFIER_DISCOVERY_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_MODIFIER_DISCOVERY, BUTTON_MODIFIER_DISCOVERY_HOVER, BUTTON_MODIFIER_DISCOVERY_PRESSED, BUTTON_MODIFIER_DISCOVERY_DISABLED
+   );
    public static final TextureAtlasRegion BUTTON_ENCHANTER = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_enchanter_select")
    );

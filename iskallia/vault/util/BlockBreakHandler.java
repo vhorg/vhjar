@@ -1,6 +1,10 @@
 package iskallia.vault.util;
 
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.init.ModItems;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -19,6 +23,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.GameMasterBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
 
@@ -49,6 +55,10 @@ public abstract class BlockBreakHandler {
       } else {
          ItemStack heldItem = player.getItemInHand(InteractionHand.MAIN_HAND);
          if (heldItem.isDamageableItem()) {
+            if (heldItem.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(heldItem)) {
+               return false;
+            }
+
             int usesLeft = heldItem.getMaxDamage() - heldItem.getDamageValue();
             if (usesLeft <= 1) {
                return false;
@@ -151,12 +161,23 @@ public abstract class BlockBreakHandler {
 
    private boolean removeBlock(ServerLevel level, ServerPlayer player, BlockPos pos, boolean canHarvest) {
       BlockState blockState = level.getBlockState(pos);
-      boolean removed = blockState.onDestroyedByPlayer(level, pos, player, canHarvest, level.getFluidState(pos));
+      FluidState fluid = this.hasHydroVoid(player) ? Fluids.EMPTY.defaultFluidState() : level.getFluidState(pos);
+      boolean removed = blockState.onDestroyedByPlayer(level, pos, player, canHarvest, fluid);
       if (removed) {
          blockState.getBlock().destroy(level, pos, blockState);
       }
 
       return removed;
+   }
+
+   private boolean hasHydroVoid(ServerPlayer player) {
+      ItemStack stack = player.getMainHandItem();
+      if (stack.getItem() != ModItems.TOOL) {
+         return false;
+      } else {
+         VaultGearData data = VaultGearData.read(stack);
+         return data.get(ModGearAttributes.HYDROVOID, VaultGearAttributeTypeMerger.anyTrue());
+      }
    }
 
    private static class DefaultItemDamageHandler implements BlockBreakHandler.IItemDamageHandler {

@@ -46,12 +46,13 @@ public class ClassicInfiniteLayout extends ClassicVaultLayout {
       } else {
          Direction facing = vault.get(Vault.WORLD).get(WorldManager.FACING);
          int distance = Math.abs(x) + Math.abs(z);
+         boolean usesStart = this.getType(vault, region.with(0, 0)) == VaultLayout.PieceType.START;
          if (x % unit == 0) {
-            return distance < unit && z * facing.getStepZ() <= 0 ? VaultLayout.PieceType.NONE : VaultLayout.PieceType.TUNNEL_Z;
+            return usesStart && distance < unit && z * facing.getStepZ() <= 0 ? VaultLayout.PieceType.NONE : VaultLayout.PieceType.TUNNEL_Z;
          } else if (z % unit != 0) {
             throw new IllegalStateException("You have stumbled upon a number that doesn't exist");
          } else {
-            return distance < unit && x * facing.getStepX() <= 0 ? VaultLayout.PieceType.NONE : VaultLayout.PieceType.TUNNEL_X;
+            return usesStart && distance < unit && x * facing.getStepX() <= 0 ? VaultLayout.PieceType.NONE : VaultLayout.PieceType.TUNNEL_X;
          }
       }
    }

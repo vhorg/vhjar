@@ -14,6 +14,7 @@ import iskallia.vault.core.world.generator.theme.DIYVaultTheme;
 import iskallia.vault.core.world.generator.theme.Theme;
 import java.io.IOException;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public class ThemeAdapter extends TypeAdapter<Theme> {
    public static final TypeAdapterFactory FACTORY = new TypeAdapterFactory() {
@@ -62,6 +63,8 @@ public class ThemeAdapter extends TypeAdapter<Theme> {
             int waterFogColor = 0;
             String particle = null;
             float particleProbability = 0.0F;
+            int time = 15000;
+            ResourceLocation effects = DimensionType.NETHER_EFFECTS;
 
             while (in.peek() == JsonToken.NAME) {
                String name = in.nextName();
@@ -98,12 +101,30 @@ public class ThemeAdapter extends TypeAdapter<Theme> {
                      break;
                   case "particle_probability":
                      particleProbability = (float)in.nextDouble();
+                     break;
+                  case "time":
+                     time = in.nextInt();
+                     break;
+                  case "effects":
+                     effects = new ResourceLocation(in.nextString());
                }
             }
 
             in.endObject();
             return new ClassicVaultTheme(
-               starts, rooms, tunnels, ambientLight, fogColor, grassColor, foliageColor, waterColor, waterFogColor, particle, particleProbability
+               starts,
+               rooms,
+               tunnels,
+               ambientLight,
+               fogColor,
+               grassColor,
+               foliageColor,
+               waterColor,
+               waterFogColor,
+               particle,
+               particleProbability,
+               time,
+               effects
             );
          } else if ("diy_vault".equals(type)) {
             TemplatePoolKey starts = null;

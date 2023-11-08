@@ -197,9 +197,11 @@ public class Runner extends Listener {
             this,
             event -> {
                if (event.getEntity().level == world) {
-                  if (event.getEntity().getTags().contains("soul_shards")) {
-                     this.getPlayer()
-                        .ifPresent(player -> BottleItem.getActive(vault, player).ifPresent(stack -> BottleItem.onMobKill(stack, player, event.getEntity())));
+                  if (event.getEntity().getUUID().equals(this.getId())) {
+                     if (event.getEntity().getTags().contains("soul_shards")) {
+                        this.getPlayer()
+                           .ifPresent(player -> BottleItem.getActive(vault, player).ifPresent(stack -> BottleItem.onMobKill(stack, player, event.getEntity())));
+                     }
                   }
                }
             }
@@ -210,8 +212,10 @@ public class Runner extends Listener {
             this,
             event -> {
                if (event.getTileEntity().getLevel() == world) {
-                  this.getPlayer()
-                     .ifPresent(player -> BottleItem.getActive(vault, player).ifPresent(stack -> BottleItem.onChestOpen(stack, player, event.getState())));
+                  if (event.getPlayer().getUUID().equals(this.getId())) {
+                     this.getPlayer()
+                        .ifPresent(player -> BottleItem.getActive(vault, player).ifPresent(stack -> BottleItem.onChestOpen(stack, player, event.getState())));
+                  }
                }
             }
          );
@@ -274,6 +278,6 @@ public class Runner extends Listener {
    public void onLeave(VirtualWorld world, Vault vault) {
       super.onLeave(world, vault);
       this.ifPresent(INFLUENCES, influences -> influences.onLeave(world, vault, this));
-      this.getPlayer().ifPresent(InventoryUtil::makeScavItemsRotten);
+      this.getPlayer().ifPresent(InventoryUtil::makeItemsRotten);
    }
 }

@@ -21,7 +21,7 @@ import iskallia.vault.util.calc.ResistanceHelper;
 import iskallia.vault.util.calc.ThornsHelper;
 import iskallia.vault.world.data.EternalsData;
 import iskallia.vault.world.data.PlayerAbilitiesData;
-import iskallia.vault.world.data.PlayerInfluences;
+import iskallia.vault.world.data.PlayerReputationData;
 import iskallia.vault.world.data.PlayerResearchesData;
 import iskallia.vault.world.data.PlayerTalentsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
@@ -105,10 +105,9 @@ public class PlayerSnapshotDump {
       snapshot.powerLevel = stats.getTotalSpentSkillPoints() + stats.getUnspentSkillPoints();
 
       for (VaultGod type : VaultGod.values()) {
-         snapshot.reputation.put(type.getName(), PlayerInfluences.getReputation(sPlayer.getUUID(), type));
+         snapshot.reputation.put(type.getName(), PlayerReputationData.getReputation(sPlayer.getUUID(), type));
       }
 
-      PlayerInfluences.getFavour(sPlayer.getUUID()).ifPresent(god -> snapshot.favour = god.getName());
       EternalsData.EternalGroup group = EternalsData.get(sWorld).getEternals(sPlayer);
 
       for (EternalData eternal : group.getEternals()) {

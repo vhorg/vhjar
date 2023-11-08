@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.config.entry.LevelEntryList;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.NaturalSpawner;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.world.VaultDifficulty;

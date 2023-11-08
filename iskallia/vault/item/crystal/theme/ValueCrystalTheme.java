@@ -99,7 +99,7 @@ public class ValueCrystalTheme extends CrystalTheme {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
       ThemeKey theme = VaultRegistry.THEME.getKey(this.id);
       if (theme == null) {
          tooltip.add(new TextComponent("Theme: ").append(new TextComponent("Unknown").withStyle(ChatFormatting.RED)));

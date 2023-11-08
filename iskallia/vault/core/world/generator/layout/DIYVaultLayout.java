@@ -130,13 +130,17 @@ public class DIYVaultLayout extends VaultLayout {
 
    @Override
    public Template getTemplate(VaultLayout.PieceType type, Vault vault, RegionPos region, RandomSource random, PlacementSettings settings) {
+      Version version = vault.get(Vault.VERSION);
+
       return (Template)(switch (this.getType(vault, region)) {
          case NONE -> EmptyTemplate.INSTANCE;
-         case START -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, vault.get(Vault.WORLD).get(WorldManager.FACING), settings);
-         case START_NORTH -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, Direction.NORTH, settings);
-         case START_SOUTH -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, Direction.SOUTH, settings);
-         case START_WEST -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, Direction.WEST, settings);
-         case START_EAST -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, Direction.EAST, settings);
+         case START -> this.getStart(
+            this.get(START_POOL).get(version), vault.get(Vault.VERSION), region, random, vault.get(Vault.WORLD).get(WorldManager.FACING), settings
+         );
+         case START_NORTH -> this.getStart(this.get(START_POOL).get(version), vault.get(Vault.VERSION), region, random, Direction.NORTH, settings);
+         case START_SOUTH -> this.getStart(this.get(START_POOL).get(version), vault.get(Vault.VERSION), region, random, Direction.SOUTH, settings);
+         case START_WEST -> this.getStart(this.get(START_POOL).get(version), vault.get(Vault.VERSION), region, random, Direction.WEST, settings);
+         case START_EAST -> this.getStart(this.get(START_POOL).get(version), vault.get(Vault.VERSION), region, random, Direction.EAST, settings);
          case ROOM -> {
             int unit = this.get(TUNNEL_SPAN) + 1;
             int x = region.getX();
@@ -145,10 +149,10 @@ public class DIYVaultLayout extends VaultLayout {
             int index = this.getSpiralIndex(x / unit, z / unit, facing, Rotation.CLOCKWISE_90) - 1;
             List<TemplatePoolKey> entries = this.get(ROOM_ENTRIES).flatten(this);
             Collections.shuffle(entries, new Random(vault.get(Vault.SEED)));
-            yield this.getRoom(entries.get(index), vault.get(Vault.VERSION), region, random, settings);
+            yield this.getRoom(entries.get(index).get(version), vault.get(Vault.VERSION), region, random, settings);
          }
-         case TUNNEL_X -> this.getTunnel(this.get(TUNNEL_POOL), vault.get(Vault.VERSION), region, random, Axis.X, settings);
-         case TUNNEL_Z -> this.getTunnel(this.get(TUNNEL_POOL), vault.get(Vault.VERSION), region, random, Axis.Z, settings);
+         case TUNNEL_X -> this.getTunnel(this.get(TUNNEL_POOL).get(version), vault.get(Vault.VERSION), region, random, Axis.X, settings);
+         case TUNNEL_Z -> this.getTunnel(this.get(TUNNEL_POOL).get(version), vault.get(Vault.VERSION), region, random, Axis.Z, settings);
       });
    }
 

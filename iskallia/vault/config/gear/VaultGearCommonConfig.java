@@ -34,6 +34,7 @@ public class VaultGearCommonConfig extends Config {
    protected void reset() {
       this.offHandSwapCooldown = 100;
       this.offHandSwapItems.clear();
+      this.offHandSwapItems.add(ModItems.FOCUS.getRegistryName());
       this.offHandSwapItems.add(ModItems.WAND.getRegistryName());
       this.offHandSwapItems.add(ModItems.SHIELD.getRegistryName());
       this.offHandSwapItems.add(ModItems.IDOL_BENEVOLENT.getRegistryName());

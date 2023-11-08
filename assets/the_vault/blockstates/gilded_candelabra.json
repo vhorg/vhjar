@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=east,hanging=false,lit=true": {
+      "model": "the_vault:block/gilded_candelabra",
+      "y": 270
+    },
+    "facing=east,hanging=false,lit=false": {
+      "model": "the_vault:block/gilded_candelabra_unlit",
+      "y": 270
+    },
+    "facing=north,hanging=false,lit=true": {
+      "model": "the_vault:block/gilded_candelabra",
+      "y": 180
+    },
+    "facing=north,hanging=false,lit=false": {
+      "model": "the_vault:block/gilded_candelabra_unlit",
+      "y": 180
+    },
+    "facing=south,hanging=false,lit=true": {
+      "model": "the_vault:block/gilded_candelabra"
+    },
+    "facing=south,hanging=false,lit=false": {
+      "model": "the_vault:block/gilded_candelabra_unlit"
+    },
+    "facing=west,hanging=false,lit=true": {
+      "model": "the_vault:block/gilded_candelabra",
+      "y": 90
+    },
+    "facing=west,hanging=false,lit=false": {
+      "model": "the_vault:block/gilded_candelabra_unlit",
+      "y": 90
+    },
+    "facing=east,hanging=true,lit=true": {
+      "model": "the_vault:block/gilded_candelabra_hanging",
+      "y": 270
+    },
+    "facing=east,hanging=true,lit=false": {
+      "model": "the_vault:block/gilded_candelabra_unlit_hanging",
+      "y": 270
+    },
+    "facing=north,hanging=true,lit=true": {
+      "model": "the_vault:block/gilded_candelabra_hanging",
+      "y": 180
+    },
+    "facing=north,hanging=true,lit=false": {
+      "model": "the_vault:block/gilded_candelabra_unlit_hanging",
+      "y": 180
+    },
+    "facing=south,hanging=true,lit=true": {
+      "model": "the_vault:block/gilded_candelabra_hanging"
+    },
+    "facing=south,hanging=true,lit=false": {
+      "model": "the_vault:block/gilded_candelabra_unlit_hanging"
+    },
+    "facing=west,hanging=true,lit=true": {
+      "model": "the_vault:block/gilded_candelabra_hanging",
+      "y": 90
+    },
+    "facing=west,hanging=true,lit=false": {
+      "model": "the_vault:block/gilded_candelabra_unlit_hanging",
+      "y": 90
+    }
+  }
+}

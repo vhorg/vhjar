@@ -8,7 +8,7 @@ import iskallia.vault.core.vault.objective.ScavengerObjective;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public class CoinStacksScavengerTask extends ScavengeTask {
    public final double probability;
@@ -23,7 +23,7 @@ public class CoinStacksScavengerTask extends ScavengeTask {
 
    @Override
    public Optional<ScavengerGoal> generateGoal(int count, RandomSource random) {
-      return this.entries.getRandom(random).map(entry -> new ScavengerGoal(entry.item, (int)Math.ceil(count * entry.multiplier), this.icon, entry.color));
+      return this.entries.getRandom(random).map(entry -> new ScavengerGoal((int)Math.ceil(count * entry.multiplier)).put(entry.item, this.icon, entry.color));
    }
 
    @Override
@@ -31,18 +31,21 @@ public class CoinStacksScavengerTask extends ScavengeTask {
       CommonEvents.COIN_STACK_LOOT_GENERATION.post().register(objective, data -> {
          if (data.getPlayer().level == world) {
             if (!(data.getRandom().nextDouble() >= this.probability)) {
-               this.entries.getRandom(data.getRandom()).ifPresent(entry -> data.getLoot().add(this.createStack(vault, entry.item)));
+               this.entries.getRandom(data.getRandom()).ifPresent(entry -> {
+                  data.getLoot().add(this.createStack(vault, entry.item));
+                  CommonEvents.ITEM_SCAVENGE_TASK.invoke(vault, world, data.getPos(), data.getLoot());
+               });
             }
          }
       });
    }
 
    public static class Entry {
-      public final Item item;
+      public final ItemStack item;
       public final double multiplier;
       public final int color;
 
-      public Entry(Item item, double multiplier, int color) {
+      public Entry(ItemStack item, double multiplier, int color) {
          this.item = item;
          this.multiplier = multiplier;
          this.color = color;

@@ -1,6 +1,6 @@
 package iskallia.vault.core.world.processor.entity;
 
-import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;

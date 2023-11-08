@@ -5,6 +5,7 @@ import iskallia.vault.client.gui.helper.UIHelper;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.time.TickStopwatch;
 import iskallia.vault.core.vault.time.TickTimer;
 import iskallia.vault.core.world.roll.IntRoll;
 import java.util.List;
@@ -31,11 +32,17 @@ public class ValueCrystalTime extends CrystalTime {
 
    @Override
    public void configure(Vault vault, RandomSource random) {
-      vault.ifPresent(Vault.CLOCK, clock -> clock.set(TickTimer.DISPLAY_TIME, Integer.valueOf(this.roll.get(random))));
+      vault.ifPresent(Vault.CLOCK, clock -> {
+         if (clock instanceof TickTimer) {
+            clock.set(TickTimer.DISPLAY_TIME, Integer.valueOf(this.roll.get(random)));
+         } else if (clock instanceof TickStopwatch) {
+            clock.set(TickStopwatch.LIMIT, Integer.valueOf(this.roll.get(random)));
+         }
+      });
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
       int min = IntRoll.getMin(this.roll);
       int max = IntRoll.getMax(this.roll);
       String text = UIHelper.formatTimeString(min);

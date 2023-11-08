@@ -9,6 +9,7 @@ import iskallia.vault.dynamodel.registry.DynamicModelRegistry;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModDynamicModels;
+import iskallia.vault.item.gear.FocusItem;
 import iskallia.vault.item.gear.VaultArmorItem;
 import iskallia.vault.item.gear.VaultAxeItem;
 import iskallia.vault.item.gear.VaultShieldItem;
@@ -38,6 +39,8 @@ public class GearModelRollRaritiesConfig extends Config {
    Map<VaultGearRarity, List<String>> SHIELD_MODEL_ROLLS;
    @Expose
    Map<VaultGearRarity, List<String>> WAND_MODEL_ROLLS;
+   @Expose
+   Map<VaultGearRarity, List<String>> FOCUS_MODEL_ROLLS;
 
    public Map<VaultGearRarity, List<String>> getRolls(VaultGearItem gear) {
       if (gear instanceof VaultArmorItem) {
@@ -48,8 +51,10 @@ public class GearModelRollRaritiesConfig extends Config {
          return this.AXE_MODEL_ROLLS;
       } else if (gear instanceof VaultShieldItem) {
          return this.SHIELD_MODEL_ROLLS;
+      } else if (gear instanceof WandItem) {
+         return this.WAND_MODEL_ROLLS;
       } else {
-         return gear instanceof WandItem ? this.WAND_MODEL_ROLLS : Collections.emptyMap();
+         return gear instanceof FocusItem ? this.FOCUS_MODEL_ROLLS : Collections.emptyMap();
       }
    }
 
@@ -167,7 +172,10 @@ public class GearModelRollRaritiesConfig extends Config {
       this.SHIELD_MODEL_ROLLS
          .put(VaultGearRarity.SCRAPPY, ModDynamicModels.Shields.REGISTRY.getIds().stream().<String>map(ResourceLocation::toString).collect(Collectors.toList()));
       this.WAND_MODEL_ROLLS = new HashMap<>();
-      this.SHIELD_MODEL_ROLLS
+      this.WAND_MODEL_ROLLS
          .put(VaultGearRarity.SCRAPPY, ModDynamicModels.Wands.REGISTRY.getIds().stream().<String>map(ResourceLocation::toString).collect(Collectors.toList()));
+      this.FOCUS_MODEL_ROLLS = new HashMap<>();
+      this.FOCUS_MODEL_ROLLS
+         .put(VaultGearRarity.SCRAPPY, ModDynamicModels.Focus.REGISTRY.getIds().stream().<String>map(ResourceLocation::toString).collect(Collectors.toList()));
    }
 }

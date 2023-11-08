@@ -2,7 +2,7 @@ package iskallia.vault.bounty.task.properties;
 
 import iskallia.vault.bounty.TaskRegistry;
 import iskallia.vault.core.data.adapter.Adapters;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;

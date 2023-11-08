@@ -14,10 +14,12 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.AnimalJarItem;
+import iskallia.vault.item.gear.CharmItem;
 import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.mana.Mana;
 import iskallia.vault.network.message.FighterSizeMessage;
 import iskallia.vault.network.message.InvalidConfigsMessage;
+import iskallia.vault.patreon.PatreonManager;
 import iskallia.vault.util.AdvancementHelper;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.VaultRarity;
@@ -60,6 +62,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.Clone;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimensionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
@@ -116,8 +119,12 @@ public class PlayerEvents {
    @SubscribeEvent
    public static void customTrinketCurioEquip(CurioEquipEvent event) {
       ItemStack stack = event.getStack();
-      if (stack.getItem() instanceof TrinketItem trinketItem) {
-         if (trinketItem.canEquip(event.getSlotContext(), stack)) {
+      if (stack.getItem() instanceof TrinketItem || stack.getItem() instanceof CharmItem) {
+         if (stack.getItem() instanceof TrinketItem trinketItem && trinketItem.canEquip(event.getSlotContext(), stack)) {
+            event.setResult(Result.ALLOW);
+         }
+
+         if (stack.getItem() instanceof CharmItem charmItem && charmItem.canEquip(event.getSlotContext(), stack)) {
             event.setResult(Result.ALLOW);
          }
       }
@@ -294,6 +301,22 @@ public class PlayerEvents {
             ModNetwork.CHANNEL
                .sendTo(new InvalidConfigsMessage(ModConfigs.INVALID_CONFIGS), serverPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
          }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onPatreonLoad(PlayerLoggedInEvent event) {
+      if (event.getPlayer() instanceof ServerPlayer sPlayer) {
+         if (sPlayer.getServer() != null && sPlayer.getServer().usesAuthentication()) {
+            PatreonManager.getInstance().getPatreonTiers(event.getPlayer().getUUID());
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void clearPatreonCache(PlayerLoggedOutEvent event) {
+      if (event.getPlayer() instanceof ServerPlayer sPlayer && sPlayer.getServer() != null) {
+         PatreonManager.getInstance().clearCache(event.getPlayer().getUUID());
       }
    }
 

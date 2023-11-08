@@ -3,6 +3,7 @@ package iskallia.vault.init;
 import iskallia.vault.client.gui.overlay.AbilitiesOverlay;
 import iskallia.vault.client.gui.overlay.BonkOverlay;
 import iskallia.vault.client.gui.overlay.BountyProgressOverlay;
+import iskallia.vault.client.gui.overlay.GodAltarOverlay;
 import iskallia.vault.client.gui.overlay.HarmfulPotionOverlay;
 import iskallia.vault.client.gui.overlay.PlayerArmorOverlay;
 import iskallia.vault.client.gui.overlay.PlayerDamageOverlay;
@@ -21,8 +22,10 @@ import iskallia.vault.client.gui.screen.ShardTradeScreen;
 import iskallia.vault.client.gui.screen.ToolViseScreen;
 import iskallia.vault.client.gui.screen.VaultCharmControllerScreen;
 import iskallia.vault.client.gui.screen.VaultCrateScreen;
+import iskallia.vault.client.gui.screen.block.AlchemyArchiveScreen;
 import iskallia.vault.client.gui.screen.block.AlchemyTableScreen;
 import iskallia.vault.client.gui.screen.block.InscriptionTableScreen;
+import iskallia.vault.client.gui.screen.block.ModifierDiscoveryScreen;
 import iskallia.vault.client.gui.screen.block.ModifierWorkbenchScreen;
 import iskallia.vault.client.gui.screen.block.RelicPedestalScreen;
 import iskallia.vault.client.gui.screen.block.SkillAltarScreen;
@@ -91,6 +94,8 @@ public class ModScreens {
       MenuScreens.register(ModContainers.ENHANCEMENT_ALTAR_CONTAINER, VaultEnhancementAltarScreen::new);
       MenuScreens.register(ModContainers.MODIFIER_WORKBENCH_CONTAINER, ModifierWorkbenchScreen::new);
       MenuScreens.register(ModContainers.ALCHEMY_TABLE_CONTAINER, AlchemyTableScreen::new);
+      MenuScreens.register(ModContainers.ALCHEMY_ARCHIVE_CONTAINER, AlchemyArchiveScreen::new);
+      MenuScreens.register(ModContainers.MODIFIER_DISCOVERY_CONTAINER, ModifierDiscoveryScreen::new);
       MenuScreens.register(ModContainers.VAULT_ENCHANTER_CONTAINER, VaultEnchanterScreen::new);
       MenuScreens.register(ModContainers.SKILL_ALTAR_CONTAINER, SkillAltarScreen.Default::new);
       MenuScreens.register(ModContainers.SKILL_ALTAR_IMPORT_CONTAINER, SkillAltarScreen.Import::new);
@@ -111,6 +116,7 @@ public class ModScreens {
       registerBottom(new VaultBarOverlay());
       registerBottom(new VaultPartyOverlay());
       registerBottom(new BountyProgressOverlay());
+      registerBottom(new GodAltarOverlay());
    }
 
    private static void registerTop(IIngameOverlay overlay) {

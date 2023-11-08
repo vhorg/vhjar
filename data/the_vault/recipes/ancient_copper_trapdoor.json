@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "www",
+    "www"
+  ],
+  "key": {
+    "w": {
+      "item": "the_vault:ancient_copper_block"
+    }
+  },
+  "result": {
+    "item": "the_vault:ancient_copper_trapdoor",
+    "count": 2
+  }
+}

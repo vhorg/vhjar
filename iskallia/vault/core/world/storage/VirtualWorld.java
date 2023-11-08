@@ -192,8 +192,8 @@ public class VirtualWorld extends ServerLevel {
          false,
          false,
          0,
-         64,
-         64,
+         192,
+         192,
          BlockTags.INFINIBURN_OVERWORLD,
          DimensionType.NETHER_EFFECTS,
          0.05F

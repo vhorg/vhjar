@@ -4,8 +4,6 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.basic.EnumAdapter;
 import iskallia.vault.core.data.adapter.basic.TypeSupplierAdapter;
-import iskallia.vault.core.random.RandomSource;
-import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
 import iskallia.vault.item.crystal.layout.ArchitectCrystalLayout;
@@ -14,7 +12,9 @@ import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicPolygonCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicSpiralCrystalLayout;
 import iskallia.vault.item.crystal.layout.CrystalLayout;
+import iskallia.vault.item.crystal.layout.HeraldCrystalLayout;
 import iskallia.vault.item.crystal.layout.NullCrystalLayout;
+import iskallia.vault.item.crystal.layout.ParadoxCrystalLayout;
 import iskallia.vault.item.crystal.model.AugmentCrystalModel;
 import iskallia.vault.item.crystal.model.ChaosCrystalModel;
 import iskallia.vault.item.crystal.model.CompoundCrystalModel;
@@ -23,13 +23,18 @@ import iskallia.vault.item.crystal.model.GrayscaleCrystalModel;
 import iskallia.vault.item.crystal.model.NullCrystalModel;
 import iskallia.vault.item.crystal.model.RainbowCrystalModel;
 import iskallia.vault.item.crystal.model.RawCrystalModel;
+import iskallia.vault.item.crystal.modifiers.CrystalModifiers;
+import iskallia.vault.item.crystal.modifiers.DefaultCrystalModifiers;
+import iskallia.vault.item.crystal.modifiers.ParadoxCrystalModifiers;
 import iskallia.vault.item.crystal.objective.BossCrystalObjective;
 import iskallia.vault.item.crystal.objective.CakeCrystalObjective;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.item.crystal.objective.ElixirCrystalObjective;
 import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
+import iskallia.vault.item.crystal.objective.HeraldCrystalObjective;
 import iskallia.vault.item.crystal.objective.MonolithCrystalObjective;
 import iskallia.vault.item.crystal.objective.NullCrystalObjective;
+import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
 import iskallia.vault.item.crystal.objective.ScavengerCrystalObjective;
 import iskallia.vault.item.crystal.objective.SpeedrunCrystalObjective;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
@@ -41,9 +46,13 @@ import iskallia.vault.item.crystal.time.NullCrystalTime;
 import iskallia.vault.item.crystal.time.PoolCrystalTime;
 import iskallia.vault.item.crystal.time.ValueCrystalTime;
 import java.awt.Color;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -53,8 +62,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
 
-public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
-   public static final String NBT_KEY = "CrystalData";
+public class CrystalData extends CrystalProperty implements ISerializable<CompoundTag, JsonObject> {
    public static EnumAdapter<CrystalVersion> VERSION = Adapters.ofEnum(CrystalVersion.class, EnumAdapter.Mode.ORDINAL);
    public static TypeSupplierAdapter<CrystalModel> MODEL = new TypeSupplierAdapter<CrystalModel>("type", false)
       .<TypeSupplierAdapter<CompoundCrystalModel>>register("null", NullCrystalModel.class, () -> NullCrystalModel.INSTANCE)
@@ -74,7 +82,9 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
       .<TypeSupplierAdapter<ClassicPolygonCrystalLayout>>register("circle", ClassicCircleCrystalLayout.class, ClassicCircleCrystalLayout::new)
       .<TypeSupplierAdapter<ClassicSpiralCrystalLayout>>register("polygon", ClassicPolygonCrystalLayout.class, ClassicPolygonCrystalLayout::new)
       .<TypeSupplierAdapter<ArchitectCrystalLayout>>register("spiral", ClassicSpiralCrystalLayout.class, ClassicSpiralCrystalLayout::new)
-      .register("architect", ArchitectCrystalLayout.class, ArchitectCrystalLayout::new);
+      .<TypeSupplierAdapter<ParadoxCrystalLayout>>register("architect", ArchitectCrystalLayout.class, ArchitectCrystalLayout::new)
+      .<TypeSupplierAdapter<HeraldCrystalLayout>>register("paradox", ParadoxCrystalLayout.class, ParadoxCrystalLayout::new)
+      .register("herald", HeraldCrystalLayout.class, HeraldCrystalLayout::new);
    public static TypeSupplierAdapter<CrystalObjective> OBJECTIVE = new TypeSupplierAdapter<CrystalObjective>("type", false)
       .<TypeSupplierAdapter<EmptyCrystalObjective>>register("null", NullCrystalObjective.class, () -> NullCrystalObjective.INSTANCE)
       .<TypeSupplierAdapter<BossCrystalObjective>>register("empty", EmptyCrystalObjective.class, EmptyCrystalObjective::new)
@@ -83,11 +93,16 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
       .<TypeSupplierAdapter<SpeedrunCrystalObjective>>register("scavenger", ScavengerCrystalObjective.class, ScavengerCrystalObjective::new)
       .<TypeSupplierAdapter<MonolithCrystalObjective>>register("speedrun", SpeedrunCrystalObjective.class, SpeedrunCrystalObjective::new)
       .<TypeSupplierAdapter<ElixirCrystalObjective>>register("monolith", MonolithCrystalObjective.class, MonolithCrystalObjective::new)
-      .register("elixir", ElixirCrystalObjective.class, ElixirCrystalObjective::new);
+      .<TypeSupplierAdapter<ParadoxCrystalObjective>>register("elixir", ElixirCrystalObjective.class, ElixirCrystalObjective::new)
+      .<TypeSupplierAdapter<HeraldCrystalObjective>>register("paradox", ParadoxCrystalObjective.class, ParadoxCrystalObjective::new)
+      .register("herald", HeraldCrystalObjective.class, HeraldCrystalObjective::new);
    public static TypeSupplierAdapter<CrystalTime> TIME = new TypeSupplierAdapter<CrystalTime>("type", false)
       .<TypeSupplierAdapter<ValueCrystalTime>>register("null", NullCrystalTime.class, () -> NullCrystalTime.INSTANCE)
       .<TypeSupplierAdapter<PoolCrystalTime>>register("value", ValueCrystalTime.class, ValueCrystalTime::new)
       .register("pool", PoolCrystalTime.class, PoolCrystalTime::new);
+   public static TypeSupplierAdapter<CrystalModifiers> MODIFIERS = new TypeSupplierAdapter<DefaultCrystalModifiers>("type", false)
+      .<TypeSupplierAdapter<ParadoxCrystalModifiers>>register("default", DefaultCrystalModifiers.class, DefaultCrystalModifiers::new)
+      .register("paradox", ParadoxCrystalModifiers.class, ParadoxCrystalModifiers::new);
    private CrystalVersion version = CrystalVersion.latest();
    private UUID vaultId = null;
    private int level = 0;
@@ -96,7 +111,7 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
    private CrystalLayout layout = NullCrystalLayout.INSTANCE;
    private CrystalObjective objective = NullCrystalObjective.INSTANCE;
    private CrystalTime time = NullCrystalTime.INSTANCE;
-   private CrystalModifiers modifiers = new CrystalModifiers();
+   private CrystalModifiers modifiers = new DefaultCrystalModifiers();
    private boolean unmodifiable = false;
    private float instability = 0.0F;
 
@@ -120,6 +135,12 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
    public CrystalData write(ItemStack stack) {
       this.writeNbt().ifPresent(nbt -> stack.getOrCreateTag().put("CrystalData", nbt));
       return this;
+   }
+
+   public static void run(ItemStack stack, Consumer<CrystalData> consumer) {
+      CrystalData data = read(stack);
+      consumer.accept(data);
+      data.write(stack);
    }
 
    public UUID getVaultId() {
@@ -214,20 +235,23 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
       return this.modifiers.addByCrafting(this, modifierStack, preventsRandomModifiers, simulate);
    }
 
-   public void configure(Vault vault, RandomSource random) {
-      this.time.configure(vault, random);
-      this.layout.configure(vault, random);
-      this.theme.configure(vault, random);
-      this.objective.configure(vault, random);
-      this.modifiers.configure(vault, random);
+   @Override
+   public Collection<CrystalProperty> getChildren() {
+      return Arrays.asList(this.layout, this.theme, this.objective, this.time, this.modifiers);
    }
 
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
-      tooltip.add(new TextComponent("Level: ").append(new TextComponent(this.getLevel() + "").setStyle(Style.EMPTY.withColor(11583738))));
-      this.objective.addText(tooltip, flag);
-      this.theme.addText(tooltip, flag);
-      this.layout.addText(tooltip, flag);
-      this.time.addText(tooltip, flag);
+   @Override
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+      if (this.level < 0) {
+         tooltip.add(new TextComponent("Level: ???").withStyle(ChatFormatting.GRAY));
+      } else {
+         tooltip.add(new TextComponent("Level: ").append(new TextComponent(this.getLevel() + "").setStyle(Style.EMPTY.withColor(11583738))));
+      }
+
+      this.objective.addText(tooltip, flag, time);
+      this.theme.addText(tooltip, flag, time);
+      this.layout.addText(tooltip, flag, time);
+      this.time.addText(tooltip, flag, time);
       if (this.instability > 0.0F) {
          TextComponent instabilityComponent = new TextComponent("%.1f%%".formatted(this.instability * 100.0F));
          instabilityComponent.setStyle(Style.EMPTY.withColor(this.getInstabilityTextColor(Math.round(this.instability * 100.0F))));
@@ -238,7 +262,7 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
          tooltip.add(new TextComponent("Unmodifiable").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(11027010))));
       }
 
-      this.modifiers.addText(tooltip, flag);
+      this.modifiers.addText(tooltip, flag, time);
    }
 
    private TextColor getInstabilityTextColor(float instability) {
@@ -274,7 +298,7 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
       LAYOUT.writeNbt(this.layout).ifPresent(layout -> nbt.put("Layout", layout));
       OBJECTIVE.writeNbt(this.objective).ifPresent(objective -> nbt.put("Objective", objective));
       TIME.writeNbt(this.time).ifPresent(time -> nbt.put("Time", time));
-      CrystalModifiers.ADAPTER.writeNbt(this.modifiers).ifPresent(modifiers -> nbt.put("Modifiers", modifiers));
+      MODIFIERS.writeNbt(this.modifiers).ifPresent(modifiers -> nbt.put("Modifiers", modifiers));
       Adapters.BOOLEAN.writeNbt(this.unmodifiable).ifPresent(exhausted -> nbt.put("Exhausted", exhausted));
       Adapters.FLOAT.writeNbt(Float.valueOf(this.instability)).ifPresent(instability -> nbt.put("Instability", instability));
       return Optional.of(nbt);
@@ -290,7 +314,7 @@ public class CrystalData implements ISerializable<CompoundTag, JsonObject> {
       this.layout = LAYOUT.readNbt(nbt.getCompound("Layout")).orElse(NullCrystalLayout.INSTANCE);
       this.objective = OBJECTIVE.readNbt(nbt.getCompound("Objective")).orElse(NullCrystalObjective.INSTANCE);
       this.time = TIME.readNbt(nbt.getCompound("Time")).orElse(NullCrystalTime.INSTANCE);
-      this.modifiers = CrystalModifiers.ADAPTER.readNbt(nbt.getCompound("Modifiers")).orElse(new CrystalModifiers());
+      this.modifiers = MODIFIERS.readNbt(nbt.getCompound("Modifiers")).orElse(new DefaultCrystalModifiers());
       this.unmodifiable = Adapters.BOOLEAN.readNbt(nbt.get("Exhausted")).orElse(false);
       this.instability = Adapters.FLOAT.readNbt(nbt.get("Instability")).orElse(0.0F);
    }

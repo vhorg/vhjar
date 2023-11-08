@@ -1,6 +1,6 @@
 package iskallia.vault.quest.type;
 
-import iskallia.vault.block.base.FillableAltarTileEntity;
+import iskallia.vault.block.base.GodAltarTileEntity;
 import iskallia.vault.config.entry.DescriptionData;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.world.data.QuestStatesData;
@@ -37,11 +37,11 @@ public class BlockInteractionQuest extends Quest {
       if (event.getPlayer() instanceof ServerPlayer player) {
          if (QuestStatesData.get().getState(player).getInProgress().contains(this.id)) {
             if (this.id.equals("complete_god_altar")) {
-               if (!(player.getLevel().getBlockEntity(event.getPos()) instanceof FillableAltarTileEntity altar)) {
+               if (!(player.getLevel().getBlockEntity(event.getPos()) instanceof GodAltarTileEntity altar)) {
                   return;
                }
 
-               if (altar.isCompleted() && !altar.isConsumed()) {
+               if (altar.isCompleted()) {
                   this.progress(player, 1.0F);
                }
             } else {

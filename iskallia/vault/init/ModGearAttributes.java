@@ -20,6 +20,8 @@ import iskallia.vault.gear.attribute.custom.EffectAvoidanceGearAttribute;
 import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
 import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
+import iskallia.vault.gear.charm.CharmEffect;
+import iskallia.vault.gear.charm.CharmEffectRegistry;
 import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.reader.AttackSpeedDecimalReader;
 import iskallia.vault.gear.reader.EffectImmunityModifierReader;
@@ -684,6 +686,12 @@ public class ModGearAttributes {
       ModGearAttributeGenerators.noneGenerator(),
       ModGearAttributeReaders.none()
    );
+   public static final VaultGearAttribute<CharmEffect<?>> CHARM_EFFECT = attr(
+      "charm",
+      VaultGearAttributeType.registryType(CharmEffectRegistry.getRegistry()),
+      ModGearAttributeGenerators.noneGenerator(),
+      ModGearAttributeReaders.none()
+   );
    public static final VaultGearAttribute<VaultGearState> STATE = attr(
       "state", VaultGearAttributeType.enumType(VaultGearState.class), ModGearAttributeGenerators.noneGenerator(), ModGearAttributeReaders.none()
    );
@@ -800,6 +808,7 @@ public class ModGearAttributes {
       registry.register(ETCHING);
       registry.register(CRAFTING_POTENTIAL);
       registry.register(TRINKET_EFFECT);
+      registry.register(CHARM_EFFECT);
       registry.register(STATE);
    }
 

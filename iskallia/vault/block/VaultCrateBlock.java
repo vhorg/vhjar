@@ -66,6 +66,7 @@ public class VaultCrateBlock extends Block implements EntityBlock {
          case BOUNTY -> ModBlocks.VAULT_CRATE_BOUNTY;
          case MONOLITH -> ModBlocks.VAULT_CRATE_MONOLITH;
          case ELIXIR -> ModBlocks.VAULT_CRATE_ELIXIR;
+         case PARADOX -> ModBlocks.VAULT_CRATE_PARADOX;
       };
       if (items.size() > 54) {
          VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
@@ -92,6 +93,7 @@ public class VaultCrateBlock extends Block implements EntityBlock {
          case BOUNTY -> ModBlocks.VAULT_CRATE_BOUNTY;
          case MONOLITH -> ModBlocks.VAULT_CRATE_MONOLITH;
          case ELIXIR -> ModBlocks.VAULT_CRATE_ELIXIR;
+         case PARADOX -> ModBlocks.VAULT_CRATE_PARADOX;
       };
       if (items.size() > 54) {
          VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
@@ -179,6 +181,7 @@ public class VaultCrateBlock extends Block implements EntityBlock {
       CHAMPION,
       BOUNTY,
       MONOLITH,
-      ELIXIR;
+      ELIXIR,
+      PARADOX;
    }
 }

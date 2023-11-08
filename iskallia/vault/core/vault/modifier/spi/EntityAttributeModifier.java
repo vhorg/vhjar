@@ -22,7 +22,11 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
 
    public EntityAttributeModifier(ResourceLocation id, P properties, VaultModifier.Display display) {
       super(id, properties, display);
-      this.setDescriptionFormatter(properties.getType().getDescriptionFormatter());
+      if (properties.getType() != null) {
+         this.setDescriptionFormatter(properties.getType().getDescriptionFormatter());
+      } else {
+         this.setDescriptionFormatter((t, p, s) -> t);
+      }
    }
 
    public void applyToEntity(LivingEntity entity, UUID contextUUID, ModifierContext context) {
@@ -69,11 +73,11 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
       }
    }
 
-   private UUID getId(UUID uuid) {
+   protected UUID getId(UUID uuid) {
       return new UUID(uuid.getMostSignificantBits(), this.leastSignificantBits);
    }
 
-   private boolean isId(UUID uuid) {
+   protected boolean isId(UUID uuid) {
       return uuid.getLeastSignificantBits() == this.leastSignificantBits;
    }
 
@@ -125,6 +129,10 @@ public class EntityAttributeModifier<P extends EntityAttributeModifier.Propertie
          List.of(VaultMod.id("generic.mana_regen")),
          Operation.MULTIPLY_BASE,
          EntityAttributeModifier.ModifierType.Constants.DESCRIPTION_FORMATTER_ADDITIVE_PERCENTILE
+      ),
+      @SerializedName("crit_chance_additive")
+      CRIT_CHANCE_ADDITIVE(
+         List.of(VaultMod.id("generic.crit_chance")), Operation.ADDITION, EntityAttributeModifier.ModifierType.Constants.DESCRIPTION_FORMATTER_ADDITIVE
       );
 
       private final List<ResourceLocation> attributeResourceLocations;

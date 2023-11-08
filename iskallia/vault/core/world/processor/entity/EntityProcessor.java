@@ -1,7 +1,7 @@
 package iskallia.vault.core.world.processor.entity;
 
 import iskallia.vault.core.random.RandomSource;
-import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import iskallia.vault.core.world.processor.Processor;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.Mirror;

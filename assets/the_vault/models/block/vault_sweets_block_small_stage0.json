@@ -1,0 +1,25 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"4": "the_vault:block/vault_sweets_block_bottom_small",
+		"5": "the_vault:block/vault_sweets_block_side_small",
+		"6": "the_vault:block/vault_sweets_block_top_small",
+		"particle": "the_vault:block/vault_sweets_block_side_small"
+	},
+	"elements": [
+		{
+			"name": "pie",
+			"from": [3, 0, 3],
+			"to": [13, 7, 13],
+			"faces": {
+				"north": {"uv": [3, 9, 13, 16], "texture": "#5"},
+				"east": {"uv": [3, 9, 13, 16], "texture": "#5"},
+				"south": {"uv": [3, 9, 13, 16], "texture": "#5"},
+				"west": {"uv": [3, 9, 13, 16], "texture": "#5"},
+				"up": {"uv": [3, 3, 13, 13], "texture": "#6"},
+				"down": {"uv": [3, 3, 13, 13], "texture": "#4"}
+			}
+		}
+	]
+}

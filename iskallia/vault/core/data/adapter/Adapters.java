@@ -25,6 +25,7 @@ import iskallia.vault.core.data.adapter.nbt.IntNbtAdapter;
 import iskallia.vault.core.data.adapter.nbt.ListNbtAdapter;
 import iskallia.vault.core.data.adapter.nbt.LongArrayNbtAdapter;
 import iskallia.vault.core.data.adapter.nbt.LongNbtAdapter;
+import iskallia.vault.core.data.adapter.nbt.NbtAdapter;
 import iskallia.vault.core.data.adapter.nbt.NumericNbtAdapter;
 import iskallia.vault.core.data.adapter.nbt.ShortNbtAdapter;
 import iskallia.vault.core.data.adapter.nbt.StringNbtAdapter;
@@ -32,6 +33,7 @@ import iskallia.vault.core.data.adapter.number.BigDecimalAdapter;
 import iskallia.vault.core.data.adapter.number.BigIntegerAdapter;
 import iskallia.vault.core.data.adapter.number.BooleanAdapter;
 import iskallia.vault.core.data.adapter.number.BoundedIntAdapter;
+import iskallia.vault.core.data.adapter.number.BoundedLongAdapter;
 import iskallia.vault.core.data.adapter.number.ByteAdapter;
 import iskallia.vault.core.data.adapter.number.CharAdapter;
 import iskallia.vault.core.data.adapter.number.DoubleAdapter;
@@ -40,6 +42,7 @@ import iskallia.vault.core.data.adapter.number.IntAdapter;
 import iskallia.vault.core.data.adapter.number.LongAdapter;
 import iskallia.vault.core.data.adapter.number.NumericAdapter;
 import iskallia.vault.core.data.adapter.number.SegmentedIntAdapter;
+import iskallia.vault.core.data.adapter.number.SegmentedLongAdapter;
 import iskallia.vault.core.data.adapter.number.ShortAdapter;
 import iskallia.vault.core.data.adapter.util.BlockPosAdapter;
 import iskallia.vault.core.data.adapter.util.ForgeRegistryAdapter;
@@ -47,12 +50,18 @@ import iskallia.vault.core.data.adapter.util.IdentifierAdapter;
 import iskallia.vault.core.data.adapter.util.ItemStackAdapter;
 import iskallia.vault.core.data.adapter.util.ResourceKeyAdapter;
 import iskallia.vault.core.data.adapter.util.SerializableWeightedTreeAdapter;
+import iskallia.vault.core.random.ChunkRandom;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.random.LCGRandom;
+import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.random.lcg.Lcg;
 import iskallia.vault.core.vault.enhancement.BreakBlocksEnhancementTask;
 import iskallia.vault.core.vault.enhancement.EnhancementTask;
 import iskallia.vault.core.vault.enhancement.KillMobsEnhancementTask;
 import iskallia.vault.core.vault.enhancement.LootChestsEnhancementTask;
-import iskallia.vault.core.world.data.EntityPredicate;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.vault.influence.VaultGod;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.item.ItemPredicate;
 import iskallia.vault.core.world.data.item.PartialItem;
 import iskallia.vault.core.world.data.tile.PartialBlock;
@@ -61,6 +70,7 @@ import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.loot.LootPool;
+import iskallia.vault.core.world.loot.LootTable;
 import iskallia.vault.core.world.loot.entry.ItemLootEntry;
 import iskallia.vault.core.world.loot.entry.LootEntry;
 import iskallia.vault.core.world.loot.entry.ReferenceLootEntry;
@@ -72,9 +82,18 @@ import iskallia.vault.core.world.template.data.TemplatePool;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.item.crystal.layout.preset.ParadoxTemplatePreset;
+import iskallia.vault.item.crystal.layout.preset.PoolTemplatePreset;
+import iskallia.vault.item.crystal.layout.preset.StructurePreset;
+import iskallia.vault.item.crystal.layout.preset.TemplatePreset;
 import iskallia.vault.skill.base.Skill;
+import iskallia.vault.task.Task;
+import iskallia.vault.task.renderer.TaskRenderer;
+import iskallia.vault.task.source.EntityTaskSource;
+import iskallia.vault.task.source.TaskSource;
 import java.nio.charset.StandardCharsets;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -100,6 +119,9 @@ public class Adapters {
    public static final IntRoll.Adapter INT_ROLL = new IntRoll.Adapter();
    public static final FloatAdapter FLOAT = new FloatAdapter(false);
    public static final LongAdapter LONG = new LongAdapter(false);
+   public static final SegmentedLongAdapter LONG_SEGMENTED_3 = new SegmentedLongAdapter(3, false);
+   public static final SegmentedLongAdapter LONG_SEGMENTED_7 = new SegmentedLongAdapter(7, false);
+   public static final SegmentedLongAdapter LONG_SEGMENTED_15 = new SegmentedLongAdapter(15, false);
    public static final LongArrayAdapter LONG_ARRAY = new LongArrayAdapter(LONG, false);
    public static final DoubleAdapter DOUBLE = new DoubleAdapter(false);
    public static final BigIntegerAdapter BIG_INTEGER = new BigIntegerAdapter(false);
@@ -107,7 +129,6 @@ public class Adapters {
    public static final VoidAdapter<?> VOID = new VoidAdapter();
    public static final StringAdapter UTF_8 = new StringAdapter(StandardCharsets.UTF_8, false);
    public static final UuidAdapter UUID = new UuidAdapter(false);
-   public static final GenericNbtAdapter GENERIC_NBT = new GenericNbtAdapter(false);
    public static final NumericNbtAdapter NUMERIC_NBT = new NumericNbtAdapter(false);
    public static final CollectionNbtAdapter COLLECTION_NBT = new CollectionNbtAdapter(false);
    public static final EndNbtAdapter END_NBT = new EndNbtAdapter(false);
@@ -123,6 +144,10 @@ public class Adapters {
    public static final CompoundNbtAdapter COMPOUND_NBT = new CompoundNbtAdapter(false);
    public static final IntArrayNbtAdapter INT_ARRAY_NBT = new IntArrayNbtAdapter(false);
    public static final LongArrayNbtAdapter LONG_ARRAY_NBT = new LongArrayNbtAdapter(false);
+   public static final NbtAdapter[] NBT = new NbtAdapter[]{
+      END_NBT, BYTE_NBT, SHORT_NBT, INT_NBT, LONG_NBT, FLOAT_NBT, DOUBLE_NBT, BYTE_ARRAY_NBT, STRING_NBT, LIST_NBT, COMPOUND_NBT, INT_ARRAY_NBT, LONG_ARRAY_NBT
+   };
+   public static final GenericNbtAdapter GENERIC_NBT = new GenericNbtAdapter(false);
    public static final IdentifierAdapter IDENTIFIER = new IdentifierAdapter(false);
    public static final ItemStackAdapter ITEM_STACK = new ItemStackAdapter(false);
    public static final PartialBlock.Adapter PARTIAL_BLOCK = new PartialBlock.Adapter();
@@ -141,9 +166,15 @@ public class Adapters {
    public static final ForgeRegistryAdapter<MobEffect> EFFECT = new ForgeRegistryAdapter(() -> ForgeRegistries.MOB_EFFECTS, false);
    public static final ForgeRegistryAdapter<Attribute> ATTRIBUTE = new ForgeRegistryAdapter(() -> ForgeRegistries.ATTRIBUTES, false);
    public static final ForgeRegistryAdapter<VaultGearAttribute<?>> GEAR_ATTRIBUTE = new ForgeRegistryAdapter(VaultGearAttributeRegistry::getRegistry, false);
+   public static final EnumAdapter<VaultGod> GOD_ORDINAL = ofEnum(VaultGod.class, EnumAdapter.Mode.ORDINAL);
+   public static final EnumAdapter<VaultGod> GOD_NAME = ofEnum(VaultGod.class, EnumAdapter.Mode.NAME);
    public static final SerializableAdapter<CrystalData, CompoundTag, JsonObject> CRYSTAL = new SerializableAdapter<>(CrystalData::empty, true);
    public static final Skill.Adapter SKILL = new Skill.Adapter();
    public static final BlockPosAdapter BLOCK_POS = new BlockPosAdapter(false);
+   public static final SerializableAdapter<StructurePreset, CompoundTag, JsonObject> STRUCTURE_PRESET = new SerializableAdapter<>(StructurePreset::new, true);
+   public static final TypeSupplierAdapter<TemplatePreset> TEMPLATE_PRESET = new TypeSupplierAdapter<PoolTemplatePreset>("type", true)
+      .<TypeSupplierAdapter<ParadoxTemplatePreset>>register("pool", PoolTemplatePreset.class, PoolTemplatePreset::new)
+      .register("paradox", ParadoxTemplatePreset.class, ParadoxTemplatePreset::new);
    public static TypeSupplierAdapter<EnhancementTask<?>> ENHANCEMENT_TASK = new TypeSupplierAdapter<BreakBlocksEnhancementTask>("type", true)
       .<TypeSupplierAdapter<KillMobsEnhancementTask>>register("break_blocks", BreakBlocksEnhancementTask.class, BreakBlocksEnhancementTask::new)
       .<TypeSupplierAdapter<LootChestsEnhancementTask>>register("kill_mobs", KillMobsEnhancementTask.class, KillMobsEnhancementTask::new)
@@ -157,11 +188,22 @@ public class Adapters {
    public static SerializableWeightedTreeAdapter<LootEntry, LootPool> LOOT_POOL = new SerializableWeightedTreeAdapter<LootEntry, LootPool>(LootPool::new)
       .register("item", ItemLootEntry.class, ItemLootEntry::new)
       .register("reference", ReferenceLootEntry.class, ReferenceLootEntry::new);
+   public static SerializableAdapter<LootTable, CompoundTag, JsonObject> LOOT_TABLE = new SerializableAdapter<>(LootTable::new, false);
+   public static SerializableAdapter<LootTable.Entry, CompoundTag, JsonObject> LOOT_TABLE_ENTRY = new SerializableAdapter<>(LootTable.Entry::new, false);
    public static SerializableWeightedTreeAdapter<TemplateEntry, TemplatePool> TEMPLATE_POOL = new SerializableWeightedTreeAdapter<TemplateEntry, TemplatePool>(
          TemplatePool::new
       )
       .register("value", DirectTemplateEntry.class, DirectTemplateEntry::new)
       .register("reference", IndirectTemplateEntry.class, IndirectTemplateEntry::new);
+   public static Task.Adapter TASK = new Task.Adapter();
+   public static TaskRenderer.Adapter TASK_RENDERER = new TaskRenderer.Adapter();
+   public static TypeSupplierAdapter<TaskSource> TASK_SOURCE = new TypeSupplierAdapter<TaskSource>("type", false)
+      .register("entity", EntityTaskSource.class, EntityTaskSource::empty);
+   public static Lcg.Adapter LCG = new Lcg.Adapter(false);
+   public static TypeSupplierAdapter<RandomSource> RANDOM = new TypeSupplierAdapter<RandomSource>("type", false)
+      .<TypeSupplierAdapter<RandomSource>>register("lcg", LCGRandom.class, () -> LCGRandom.of(Lcg.JAVA, 0L))
+      .<TypeSupplierAdapter<RandomSource>>register("java", JavaRandom.class, () -> JavaRandom.ofInternal(0L))
+      .register("chunk", ChunkRandom.class, ChunkRandom::any);
 
    public static BoundedIntAdapter ofBoundedInt(int bound) {
       return new BoundedIntAdapter(0, bound - 1, false);
@@ -169,6 +211,14 @@ public class Adapters {
 
    public static BoundedIntAdapter ofBoundedInt(int min, int max) {
       return new BoundedIntAdapter(min, max, false);
+   }
+
+   public static BoundedLongAdapter ofBoundedLong(long bound) {
+      return new BoundedLongAdapter(0L, bound - 1L, false);
+   }
+
+   public static BoundedLongAdapter ofBoundedLong(long min, long max) {
+      return new BoundedLongAdapter(min, max, false);
    }
 
    public static <T> ArrayAdapter<T> ofArray(IntFunction<T[]> constructor, Object elementAdapter) {
@@ -189,5 +239,9 @@ public class Adapters {
 
    public static <T> ResourceKeyAdapter<T> ofResourceKey(ResourceKey<Registry<T>> registry) {
       return new ResourceKeyAdapter<>(registry, false);
+   }
+
+   public static <T> SerializableAdapter<T, ?, ?> of(Supplier<T> constructor, boolean nullable) {
+      return new SerializableAdapter<>(constructor, nullable);
    }
 }

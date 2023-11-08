@@ -28,12 +28,13 @@ public class VaultLootTileProcessor extends TileProcessor {
          if (facing != null && facing.getAxis() != Axis.Y) {
             tile.getState().set(BlockStateProperties.HORIZONTAL_FACING, facing);
          } else {
-            Direction randomFacing = Direction.from2DDataValue(context.random.nextInt(4));
+            Direction randomFacing = Direction.from2DDataValue(context.getRandom(tile.getPos()).nextInt(4));
             tile.getState().set(BlockStateProperties.HORIZONTAL_FACING, randomFacing);
          }
 
+         CommonEvents.PLACEHOLDER_PROCESSING.invoke(tile, context);
          TileProcessor processor = null;
-         int level = context.vault == null ? 0 : context.vault.get(Vault.LEVEL).get();
+         int level = context.getVault() == null ? 0 : context.getVault().get(Vault.LEVEL).get();
 
          for (Entry<Integer, TileProcessor> entry : this.levels.entrySet()) {
             if (entry.getKey() > level) {
@@ -45,7 +46,7 @@ public class VaultLootTileProcessor extends TileProcessor {
 
          if (processor instanceof BernoulliWeightedTileProcessor bernoulli) {
             PlaceholderGenerationEvent.Data result = CommonEvents.PLACEHOLDER_GENERATION
-               .invoke(context.vault, this, tile, bernoulli.probability, bernoulli.success, bernoulli.failure);
+               .invoke(context.getVault(), this, tile, bernoulli.probability, bernoulli.success, bernoulli.failure);
             return bernoulli.process(tile, result.getProbability(), context);
          } else {
             return processor == null ? tile : processor.process(tile, context);

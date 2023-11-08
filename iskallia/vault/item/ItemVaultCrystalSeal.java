@@ -1,11 +1,12 @@
 package iskallia.vault.item;
 
+import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.item.crystal.objective.NullCrystalObjective;
 import java.util.List;
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -26,28 +27,14 @@ public class ItemVaultCrystalSeal extends Item {
       return ModConfigs.VAULT_CRYSTAL.applySeal(new ItemStack(ModItems.VAULT_CRYSTAL), new ItemStack(this), new ItemStack(ModItems.VAULT_CRYSTAL), crystal);
    }
 
-   @Nullable
-   public static String getEventKey(ItemStack stack) {
-      if (!stack.isEmpty() && stack.getItem() instanceof ItemVaultCrystalSeal) {
-         CompoundTag tag = stack.getOrCreateTag();
-         return !tag.contains("eventKey", 8) ? null : tag.getString("eventKey");
-      } else {
-         return null;
-      }
-   }
-
-   public static void setEventKey(ItemStack stack, String eventKey) {
-      if (!stack.isEmpty() && stack.getItem() instanceof ItemVaultCrystalSeal) {
-         stack.getOrCreateTag().putString("eventKey", eventKey);
-      }
-   }
-
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
       if (ModConfigs.isInitialized()) {
          CrystalData crystal = CrystalData.empty();
          if (this.configure(crystal)) {
-            crystal.getObjective().addText(tooltip, flag);
+            if (crystal.getObjective() != NullCrystalObjective.INSTANCE) {
+               crystal.getObjective().addText(tooltip, flag, (float)ClientScheduler.INSTANCE.getTickCount());
+            }
          }
       }
    }

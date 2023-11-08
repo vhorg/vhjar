@@ -6,12 +6,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import iskallia.vault.block.VaultChampionTrophy;
 import iskallia.vault.block.VaultCrateBlock;
 import iskallia.vault.block.item.FinalVaultFrameBlockItem;
 import iskallia.vault.block.item.LootStatueBlockItem;
 import iskallia.vault.block.item.TrophyStatueBlockItem;
-import iskallia.vault.block.item.VaultChampionTrophyBlockItem;
 import iskallia.vault.config.LegacyLootTablesConfig;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.CrateLootGenerator;
@@ -128,26 +126,6 @@ public class GiveLootCommand extends Command {
                      Commands.argument("ownerNickname", StringArgumentType.word())
                         .executes(
                            ctx -> this.giveFinalVaultFrame(ctx, UuidArgument.getUuid(ctx, "ownerUUID"), StringArgumentType.getString(ctx, "ownerNickname"))
-                        )
-                  )
-            )
-      );
-      builder.then(
-         Commands.literal("champion_trophy")
-            .then(
-               Commands.argument("ownerUUID", UuidArgument.uuid())
-                  .then(
-                     Commands.argument("ownerNickname", StringArgumentType.word())
-                        .then(
-                           Commands.argument("variant", EnumArgument.enumArgument(VaultChampionTrophy.Variant.class))
-                              .executes(
-                                 ctx -> this.giveChampionTrophy(
-                                    ctx,
-                                    UuidArgument.getUuid(ctx, "ownerUUID"),
-                                    StringArgumentType.getString(ctx, "ownerNickname"),
-                                    (VaultChampionTrophy.Variant)ctx.getArgument("variant", VaultChampionTrophy.Variant.class)
-                                 )
-                              )
                         )
                   )
             )
@@ -297,13 +275,6 @@ public class GiveLootCommand extends Command {
       FinalVaultFrameBlockItem.writeToItemStack(frameStack, ownerUUID, ownerNickname);
       ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
       EntityHelper.giveItem(player, frameStack);
-      return 0;
-   }
-
-   public int giveChampionTrophy(CommandContext<CommandSourceStack> context, UUID ownerUUID, String ownerNickname, VaultChampionTrophy.Variant variant) throws CommandSyntaxException {
-      ItemStack trophyStack = VaultChampionTrophyBlockItem.create(ownerUUID, ownerNickname, variant);
-      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
-      EntityHelper.giveItem(player, trophyStack);
       return 0;
    }
 

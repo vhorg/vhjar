@@ -10,7 +10,7 @@ import iskallia.vault.core.vault.objective.elixir.ElixirTask;
 import iskallia.vault.core.vault.objective.elixir.MobElixirTask;
 import iskallia.vault.core.vault.objective.elixir.OreElixirTask;
 import iskallia.vault.core.vault.stat.VaultChestType;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.roll.IntRoll;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

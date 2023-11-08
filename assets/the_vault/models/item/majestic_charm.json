@@ -1,0 +1,12 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_vault:item/charm/unidentified_majestic"
+  },
+  "overrides": [
+    {"predicate": {"the_vault:charm":  8}, "model": "the_vault:item/charm/majestic_idona"},
+    {"predicate": {"the_vault:charm":  9}, "model": "the_vault:item/charm/majestic_tenos"},
+    {"predicate": {"the_vault:charm": 10}, "model": "the_vault:item/charm/majestic_velara"},
+    {"predicate": {"the_vault:charm": 11}, "model": "the_vault:item/charm/majestic_wendarr"}
+  ]
+}

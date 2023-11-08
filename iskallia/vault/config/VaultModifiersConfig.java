@@ -40,7 +40,7 @@ import iskallia.vault.core.vault.modifier.registry.VaultModifierTypeRegistry;
 import iskallia.vault.core.vault.modifier.spi.AbstractChanceModifier;
 import iskallia.vault.core.vault.modifier.spi.EntityAttributeModifier;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.init.ModBlocks;

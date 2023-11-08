@@ -36,6 +36,7 @@ public class VictoryObjective extends Objective {
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Integer> TICKS_LEFT = FieldKey.of("ticks_left", Integer.class)
       .with(Version.v1_0, Adapters.INT_SEGMENTED_7, DISK.all().or(CLIENT.all()))
+      .with(Version.v1_19, Adapters.INT_SEGMENTED_7.asNullable(), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Void> TICKED = FieldKey.of("ticked", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
    public static final FieldKey<VictoryObjective.TicksMap> TICKS = FieldKey.of("ticks", VictoryObjective.TicksMap.class)
@@ -43,6 +44,7 @@ public class VictoryObjective extends Objective {
       .register(FIELDS);
 
    protected VictoryObjective() {
+      this.set(TICKS, new VictoryObjective.TicksMap());
    }
 
    protected VictoryObjective(int ticksLeft) {
@@ -52,6 +54,10 @@ public class VictoryObjective extends Objective {
 
    public static VictoryObjective of(int ticksLeft) {
       return new VictoryObjective(ticksLeft);
+   }
+
+   public static Objective empty() {
+      return new VictoryObjective();
    }
 
    @Override
@@ -72,7 +78,9 @@ public class VictoryObjective extends Objective {
    public void tickServer(VirtualWorld world, Vault vault) {
       vault.ifPresent(Vault.CLOCK, clock -> {
          clock.set(TickClock.PAUSED);
-         clock.remove(TickClock.VISIBLE);
+         if (this.has(TICKS_LEFT)) {
+            clock.remove(TickClock.VISIBLE);
+         }
       });
       super.tickServer(world, vault);
    }
@@ -85,7 +93,7 @@ public class VictoryObjective extends Objective {
          ticksLeft = this.get(TICKS).get(listener.getId());
          firstTick = false;
       } else {
-         ticksLeft = this.get(TICKS_LEFT);
+         ticksLeft = this.getOr(TICKS_LEFT, Integer.valueOf(Integer.MAX_VALUE));
          firstTick = true;
          this.get(TICKS).put(listener.getId(), Integer.valueOf(ticksLeft));
       }
@@ -120,7 +128,7 @@ public class VictoryObjective extends Objective {
                      );
                }
 
-               if (ticksLeft % 20 == 0) {
+               if (this.has(TICKS_LEFT) && ticksLeft % 20 == 0) {
                   listener.getPlayer().ifPresent(player -> {
                      String s = "Teleporting back in %d seconds...".formatted(ticksLeft / 20);
                      player.displayClientMessage(new TextComponent(s).withStyle(ChatFormatting.WHITE), true);
@@ -128,7 +136,10 @@ public class VictoryObjective extends Objective {
                }
             }
          );
-         this.get(TICKS).put(listener.getId(), Integer.valueOf(ticksLeft - 1));
+         if (this.has(TICKS_LEFT)) {
+            this.get(TICKS).put(listener.getId(), Integer.valueOf(ticksLeft - 1));
+         }
+
          super.tickListener(world, vault, listener);
       }
    }

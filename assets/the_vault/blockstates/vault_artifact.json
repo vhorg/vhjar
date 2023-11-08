@@ -1,378 +1,777 @@
 {
   "variants": {
-    "facing=south,order=1": {
+    "facing=south,grayscale=false,order=1": {
       "model": "the_vault:block/artifact/vault_artifact_1"
     },
-    "facing=east,order=1": {
+    "facing=east,grayscale=false,order=1": {
       "model": "the_vault:block/artifact/vault_artifact_1",
       "y": 270
     },
-    "facing=north,order=1": {
+    "facing=north,grayscale=false,order=1": {
       "model": "the_vault:block/artifact/vault_artifact_1",
       "y": 180
     },
-    "facing=west,order=1": {
+    "facing=west,grayscale=false,order=1": {
       "model": "the_vault:block/artifact/vault_artifact_1",
       "y": 90
     },
-    "facing=south,order=2": {
+    "facing=south,grayscale=true,order=1": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_1"
+    },
+    "facing=east,grayscale=true,order=1": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_1",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=1": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_1",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=1": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_1",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=2": {
       "model": "the_vault:block/artifact/vault_artifact_2"
     },
-    "facing=east,order=2": {
+    "facing=east,grayscale=false,order=2": {
       "model": "the_vault:block/artifact/vault_artifact_2",
       "y": 270
     },
-    "facing=north,order=2": {
+    "facing=north,grayscale=false,order=2": {
       "model": "the_vault:block/artifact/vault_artifact_2",
       "y": 180
     },
-    "facing=west,order=2": {
+    "facing=west,grayscale=false,order=2": {
       "model": "the_vault:block/artifact/vault_artifact_2",
       "y": 90
     },
-    "facing=south,order=3": {
+    "facing=south,grayscale=true,order=2": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_2"
+    },
+    "facing=east,grayscale=true,order=2": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_2",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=2": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_2",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=2": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_2",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=3": {
       "model": "the_vault:block/artifact/vault_artifact_3"
     },
-    "facing=east,order=3": {
+    "facing=east,grayscale=false,order=3": {
       "model": "the_vault:block/artifact/vault_artifact_3",
       "y": 270
     },
-    "facing=north,order=3": {
+    "facing=north,grayscale=false,order=3": {
       "model": "the_vault:block/artifact/vault_artifact_3",
       "y": 180
     },
-    "facing=west,order=3": {
+    "facing=west,grayscale=false,order=3": {
       "model": "the_vault:block/artifact/vault_artifact_3",
       "y": 90
     },
-    "facing=south,order=4": {
+    "facing=south,grayscale=true,order=3": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_3"
+    },
+    "facing=east,grayscale=true,order=3": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_3",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=3": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_3",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=3": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_3",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=4": {
       "model": "the_vault:block/artifact/vault_artifact_4"
     },
-    "facing=east,order=4": {
+    "facing=east,grayscale=false,order=4": {
       "model": "the_vault:block/artifact/vault_artifact_4",
       "y": 270
     },
-    "facing=north,order=4": {
+    "facing=north,grayscale=false,order=4": {
       "model": "the_vault:block/artifact/vault_artifact_4",
       "y": 180
     },
-    "facing=west,order=4": {
+    "facing=west,grayscale=false,order=4": {
       "model": "the_vault:block/artifact/vault_artifact_4",
       "y": 90
     },
-    "facing=south,order=5": {
+    "facing=south,grayscale=true,order=4": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_4"
+    },
+    "facing=east,grayscale=true,order=4": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_4",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=4": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_4",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=4": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_4",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=5": {
       "model": "the_vault:block/artifact/vault_artifact_5"
     },
-    "facing=east,order=5": {
+    "facing=east,grayscale=false,order=5": {
       "model": "the_vault:block/artifact/vault_artifact_5",
       "y": 270
     },
-    "facing=north,order=5": {
+    "facing=north,grayscale=false,order=5": {
       "model": "the_vault:block/artifact/vault_artifact_5",
       "y": 180
     },
-    "facing=west,order=5": {
+    "facing=west,grayscale=false,order=5": {
       "model": "the_vault:block/artifact/vault_artifact_5",
       "y": 90
     },
-    "facing=south,order=6": {
+    "facing=south,grayscale=true,order=5": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_5"
+    },
+    "facing=east,grayscale=true,order=5": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_5",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=5": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_5",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=5": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_5",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=6": {
       "model": "the_vault:block/artifact/vault_artifact_6"
     },
-    "facing=east,order=6": {
+    "facing=east,grayscale=false,order=6": {
       "model": "the_vault:block/artifact/vault_artifact_6",
       "y": 270
     },
-    "facing=north,order=6": {
+    "facing=north,grayscale=false,order=6": {
       "model": "the_vault:block/artifact/vault_artifact_6",
       "y": 180
     },
-    "facing=west,order=6": {
+    "facing=west,grayscale=false,order=6": {
       "model": "the_vault:block/artifact/vault_artifact_6",
       "y": 90
     },
-    "facing=south,order=7": {
+    "facing=south,grayscale=true,order=6": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_6"
+    },
+    "facing=east,grayscale=true,order=6": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_6",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=6": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_6",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=6": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_6",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=7": {
       "model": "the_vault:block/artifact/vault_artifact_7"
     },
-    "facing=east,order=7": {
+    "facing=east,grayscale=false,order=7": {
       "model": "the_vault:block/artifact/vault_artifact_7",
       "y": 270
     },
-    "facing=north,order=7": {
+    "facing=north,grayscale=false,order=7": {
       "model": "the_vault:block/artifact/vault_artifact_7",
       "y": 180
     },
-    "facing=west,order=7": {
+    "facing=west,grayscale=false,order=7": {
       "model": "the_vault:block/artifact/vault_artifact_7",
       "y": 90
     },
-    "facing=south,order=8": {
+    "facing=south,grayscale=true,order=7": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_7"
+    },
+    "facing=east,grayscale=true,order=7": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_7",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=7": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_7",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=7": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_7",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=8": {
       "model": "the_vault:block/artifact/vault_artifact_8"
     },
-    "facing=east,order=8": {
+    "facing=east,grayscale=false,order=8": {
       "model": "the_vault:block/artifact/vault_artifact_8",
       "y": 270
     },
-    "facing=north,order=8": {
+    "facing=north,grayscale=false,order=8": {
       "model": "the_vault:block/artifact/vault_artifact_8",
       "y": 180
     },
-    "facing=west,order=8": {
+    "facing=west,grayscale=false,order=8": {
       "model": "the_vault:block/artifact/vault_artifact_8",
       "y": 90
     },
-    "facing=south,order=9": {
+    "facing=south,grayscale=true,order=8": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_8"
+    },
+    "facing=east,grayscale=true,order=8": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_8",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=8": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_8",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=8": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_8",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=9": {
       "model": "the_vault:block/artifact/vault_artifact_9"
     },
-    "facing=east,order=9": {
+    "facing=east,grayscale=false,order=9": {
       "model": "the_vault:block/artifact/vault_artifact_9",
       "y": 270
     },
-    "facing=north,order=9": {
+    "facing=north,grayscale=false,order=9": {
       "model": "the_vault:block/artifact/vault_artifact_9",
       "y": 180
     },
-    "facing=west,order=9": {
+    "facing=west,grayscale=false,order=9": {
       "model": "the_vault:block/artifact/vault_artifact_9",
       "y": 90
     },
-    "facing=south,order=10": {
+    "facing=south,grayscale=true,order=9": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_9"
+    },
+    "facing=east,grayscale=true,order=9": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_9",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=9": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_9",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=9": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_9",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=10": {
       "model": "the_vault:block/artifact/vault_artifact_10"
     },
-    "facing=east,order=10": {
+    "facing=east,grayscale=false,order=10": {
       "model": "the_vault:block/artifact/vault_artifact_10",
       "y": 270
     },
-    "facing=north,order=10": {
+    "facing=north,grayscale=false,order=10": {
       "model": "the_vault:block/artifact/vault_artifact_10",
       "y": 180
     },
-    "facing=west,order=10": {
+    "facing=west,grayscale=false,order=10": {
       "model": "the_vault:block/artifact/vault_artifact_10",
       "y": 90
     },
-    "facing=south,order=11": {
+    "facing=south,grayscale=true,order=10": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_10"
+    },
+    "facing=east,grayscale=true,order=10": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_10",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=10": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_10",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=10": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_10",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=11": {
       "model": "the_vault:block/artifact/vault_artifact_11"
     },
-    "facing=east,order=11": {
+    "facing=east,grayscale=false,order=11": {
       "model": "the_vault:block/artifact/vault_artifact_11",
       "y": 270
     },
-    "facing=north,order=11": {
+    "facing=north,grayscale=false,order=11": {
       "model": "the_vault:block/artifact/vault_artifact_11",
       "y": 180
     },
-    "facing=west,order=11": {
+    "facing=west,grayscale=false,order=11": {
       "model": "the_vault:block/artifact/vault_artifact_11",
       "y": 90
     },
-    "facing=south,order=12": {
+    "facing=south,grayscale=true,order=11": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_11"
+    },
+    "facing=east,grayscale=true,order=11": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_11",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=11": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_11",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=11": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_11",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=12": {
       "model": "the_vault:block/artifact/vault_artifact_12"
     },
-    "facing=east,order=12": {
+    "facing=east,grayscale=false,order=12": {
       "model": "the_vault:block/artifact/vault_artifact_12",
       "y": 270
     },
-    "facing=north,order=12": {
+    "facing=north,grayscale=false,order=12": {
       "model": "the_vault:block/artifact/vault_artifact_12",
       "y": 180
     },
-    "facing=west,order=12": {
+    "facing=west,grayscale=false,order=12": {
       "model": "the_vault:block/artifact/vault_artifact_12",
       "y": 90
     },
-    "facing=south,order=13": {
+    "facing=south,grayscale=true,order=12": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_12"
+    },
+    "facing=east,grayscale=true,order=12": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_12",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=12": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_12",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=12": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_12",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=13": {
       "model": "the_vault:block/artifact/vault_artifact_13"
     },
-    "facing=east,order=13": {
+    "facing=east,grayscale=false,order=13": {
       "model": "the_vault:block/artifact/vault_artifact_13",
       "y": 270
     },
-    "facing=north,order=13": {
+    "facing=north,grayscale=false,order=13": {
       "model": "the_vault:block/artifact/vault_artifact_13",
       "y": 180
     },
-    "facing=west,order=13": {
+    "facing=west,grayscale=false,order=13": {
       "model": "the_vault:block/artifact/vault_artifact_13",
       "y": 90
     },
-    "facing=south,order=14": {
+    "facing=south,grayscale=true,order=13": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_13"
+    },
+    "facing=east,grayscale=true,order=13": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_13",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=13": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_13",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=13": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_13",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=14": {
       "model": "the_vault:block/artifact/vault_artifact_14"
     },
-    "facing=east,order=14": {
+    "facing=east,grayscale=false,order=14": {
       "model": "the_vault:block/artifact/vault_artifact_14",
       "y": 270
     },
-    "facing=north,order=14": {
+    "facing=north,grayscale=false,order=14": {
       "model": "the_vault:block/artifact/vault_artifact_14",
       "y": 180
     },
-    "facing=west,order=14": {
+    "facing=west,grayscale=false,order=14": {
       "model": "the_vault:block/artifact/vault_artifact_14",
       "y": 90
     },
-    "facing=south,order=15": {
+    "facing=south,grayscale=true,order=14": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_14"
+    },
+    "facing=east,grayscale=true,order=14": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_14",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=14": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_14",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=14": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_14",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=15": {
       "model": "the_vault:block/artifact/vault_artifact_15"
     },
-    "facing=east,order=15": {
+    "facing=east,grayscale=false,order=15": {
       "model": "the_vault:block/artifact/vault_artifact_15",
       "y": 270
     },
-    "facing=north,order=15": {
+    "facing=north,grayscale=false,order=15": {
       "model": "the_vault:block/artifact/vault_artifact_15",
       "y": 180
     },
-    "facing=west,order=15": {
+    "facing=west,grayscale=false,order=15": {
       "model": "the_vault:block/artifact/vault_artifact_15",
       "y": 90
     },
-    "facing=south,order=16": {
+    "facing=south,grayscale=true,order=15": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_15"
+    },
+    "facing=east,grayscale=true,order=15": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_15",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=15": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_15",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=15": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_15",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=16": {
       "model": "the_vault:block/artifact/vault_artifact_16"
     },
-    "facing=east,order=16": {
+    "facing=east,grayscale=false,order=16": {
       "model": "the_vault:block/artifact/vault_artifact_16",
       "y": 270
     },
-    "facing=north,order=16": {
+    "facing=north,grayscale=false,order=16": {
       "model": "the_vault:block/artifact/vault_artifact_16",
       "y": 180
     },
-    "facing=west,order=16": {
+    "facing=west,grayscale=false,order=16": {
       "model": "the_vault:block/artifact/vault_artifact_16",
       "y": 90
     },
-    "facing=south,order=17": {
+    "facing=south,grayscale=true,order=16": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_16"
+    },
+    "facing=east,grayscale=true,order=16": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_16",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=16": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_16",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=16": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_16",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=17": {
       "model": "the_vault:block/artifact/vault_artifact_17"
     },
-    "facing=east,order=17": {
+    "facing=east,grayscale=false,order=17": {
       "model": "the_vault:block/artifact/vault_artifact_17",
       "y": 270
     },
-    "facing=north,order=17": {
+    "facing=north,grayscale=false,order=17": {
       "model": "the_vault:block/artifact/vault_artifact_17",
       "y": 180
     },
-    "facing=west,order=17": {
+    "facing=west,grayscale=false,order=17": {
       "model": "the_vault:block/artifact/vault_artifact_17",
       "y": 90
     },
-    "facing=south,order=18": {
+    "facing=south,grayscale=true,order=17": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_17"
+    },
+    "facing=east,grayscale=true,order=17": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_17",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=17": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_17",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=17": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_17",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=18": {
       "model": "the_vault:block/artifact/vault_artifact_18"
     },
-    "facing=east,order=18": {
+    "facing=east,grayscale=false,order=18": {
       "model": "the_vault:block/artifact/vault_artifact_18",
       "y": 270
     },
-    "facing=north,order=18": {
+    "facing=north,grayscale=false,order=18": {
       "model": "the_vault:block/artifact/vault_artifact_18",
       "y": 180
     },
-    "facing=west,order=18": {
+    "facing=west,grayscale=false,order=18": {
       "model": "the_vault:block/artifact/vault_artifact_18",
       "y": 90
     },
-    "facing=south,order=19": {
+    "facing=south,grayscale=true,order=18": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_18"
+    },
+    "facing=east,grayscale=true,order=18": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_18",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=18": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_18",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=18": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_18",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=19": {
       "model": "the_vault:block/artifact/vault_artifact_19"
     },
-    "facing=east,order=19": {
+    "facing=east,grayscale=false,order=19": {
       "model": "the_vault:block/artifact/vault_artifact_19",
       "y": 270
     },
-    "facing=north,order=19": {
+    "facing=north,grayscale=false,order=19": {
       "model": "the_vault:block/artifact/vault_artifact_19",
       "y": 180
     },
-    "facing=west,order=19": {
+    "facing=west,grayscale=false,order=19": {
       "model": "the_vault:block/artifact/vault_artifact_19",
       "y": 90
     },
-    "facing=south,order=20": {
+    "facing=south,grayscale=true,order=19": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_19"
+    },
+    "facing=east,grayscale=true,order=19": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_19",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=19": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_19",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=19": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_19",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=20": {
       "model": "the_vault:block/artifact/vault_artifact_20"
     },
-    "facing=east,order=20": {
+    "facing=east,grayscale=false,order=20": {
       "model": "the_vault:block/artifact/vault_artifact_20",
       "y": 270
     },
-    "facing=north,order=20": {
+    "facing=north,grayscale=false,order=20": {
       "model": "the_vault:block/artifact/vault_artifact_20",
       "y": 180
     },
-    "facing=west,order=20": {
+    "facing=west,grayscale=false,order=20": {
       "model": "the_vault:block/artifact/vault_artifact_20",
       "y": 90
     },
-    "facing=south,order=21": {
+    "facing=south,grayscale=true,order=20": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_20"
+    },
+    "facing=east,grayscale=true,order=20": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_20",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=20": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_20",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=20": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_20",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=21": {
       "model": "the_vault:block/artifact/vault_artifact_21"
     },
-    "facing=east,order=21": {
+    "facing=east,grayscale=false,order=21": {
       "model": "the_vault:block/artifact/vault_artifact_21",
       "y": 270
     },
-    "facing=north,order=21": {
+    "facing=north,grayscale=false,order=21": {
       "model": "the_vault:block/artifact/vault_artifact_21",
       "y": 180
     },
-    "facing=west,order=21": {
+    "facing=west,grayscale=false,order=21": {
       "model": "the_vault:block/artifact/vault_artifact_21",
       "y": 90
     },
-    "facing=south,order=22": {
+    "facing=south,grayscale=true,order=21": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_21"
+    },
+    "facing=east,grayscale=true,order=21": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_21",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=21": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_21",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=21": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_21",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=22": {
       "model": "the_vault:block/artifact/vault_artifact_22"
     },
-    "facing=east,order=22": {
+    "facing=east,grayscale=false,order=22": {
       "model": "the_vault:block/artifact/vault_artifact_22",
       "y": 270
     },
-    "facing=north,order=22": {
+    "facing=north,grayscale=false,order=22": {
       "model": "the_vault:block/artifact/vault_artifact_22",
       "y": 180
     },
-    "facing=west,order=22": {
+    "facing=west,grayscale=false,order=22": {
       "model": "the_vault:block/artifact/vault_artifact_22",
       "y": 90
     },
-    "facing=south,order=23": {
+    "facing=south,grayscale=true,order=22": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_22"
+    },
+    "facing=east,grayscale=true,order=22": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_22",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=22": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_22",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=22": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_22",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=23": {
       "model": "the_vault:block/artifact/vault_artifact_23"
     },
-    "facing=east,order=23": {
+    "facing=east,grayscale=false,order=23": {
       "model": "the_vault:block/artifact/vault_artifact_23",
       "y": 270
     },
-    "facing=north,order=23": {
+    "facing=north,grayscale=false,order=23": {
       "model": "the_vault:block/artifact/vault_artifact_23",
       "y": 180
     },
-    "facing=west,order=23": {
+    "facing=west,grayscale=false,order=23": {
       "model": "the_vault:block/artifact/vault_artifact_23",
       "y": 90
     },
-    "facing=south,order=24": {
+    "facing=south,grayscale=true,order=23": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_23"
+    },
+    "facing=east,grayscale=true,order=23": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_23",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=23": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_23",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=23": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_23",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=24": {
       "model": "the_vault:block/artifact/vault_artifact_24"
     },
-    "facing=east,order=24": {
+    "facing=east,grayscale=false,order=24": {
       "model": "the_vault:block/artifact/vault_artifact_24",
       "y": 270
     },
-    "facing=north,order=24": {
+    "facing=north,grayscale=false,order=24": {
       "model": "the_vault:block/artifact/vault_artifact_24",
       "y": 180
     },
-    "facing=west,order=24": {
+    "facing=west,grayscale=false,order=24": {
       "model": "the_vault:block/artifact/vault_artifact_24",
       "y": 90
     },
-    "facing=south,order=25": {
+    "facing=south,grayscale=true,order=24": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_24"
+    },
+    "facing=east,grayscale=true,order=24": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_24",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=24": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_24",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=24": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_24",
+      "y": 90
+    },
+
+    "facing=south,grayscale=false,order=25": {
       "model": "the_vault:block/artifact/vault_artifact_25"
     },
-    "facing=east,order=25": {
+    "facing=east,grayscale=false,order=25": {
       "model": "the_vault:block/artifact/vault_artifact_25",
       "y": 270
     },
-    "facing=north,order=25": {
+    "facing=north,grayscale=false,order=25": {
       "model": "the_vault:block/artifact/vault_artifact_25",
       "y": 180
     },
-    "facing=west,order=25": {
+    "facing=west,grayscale=false,order=25": {
       "model": "the_vault:block/artifact/vault_artifact_25",
+      "y": 90
+    },
+    "facing=south,grayscale=true,order=25": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_25"
+    },
+    "facing=east,grayscale=true,order=25": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_25",
+      "y": 270
+    },
+    "facing=north,grayscale=true,order=25": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_25",
+      "y": 180
+    },
+    "facing=west,grayscale=true,order=25": {
+      "model": "the_vault:block/artifact/grayscale/vault_artifact_25",
       "y": 90
     }
   }

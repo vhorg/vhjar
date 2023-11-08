@@ -3,7 +3,7 @@ package iskallia.vault.skill.talent.type.onhit;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.talent.type.EntityFilterTalent;
 import iskallia.vault.skill.tree.TalentTree;

@@ -1,5 +1,6 @@
 package iskallia.vault.core.world.template.configured;
 
+import iskallia.vault.core.world.processor.ProcessorContext;
 import iskallia.vault.core.world.template.EmptyTemplate;
 import iskallia.vault.core.world.template.PlacementSettings;
 import iskallia.vault.core.world.template.Template;
@@ -7,7 +8,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ServerLevelAccessor;
 
 public class ConfiguredTemplate {
-   public static final ConfiguredTemplate EMPTY = new ConfiguredTemplate(EmptyTemplate.INSTANCE, new PlacementSettings());
+   public static final ConfiguredTemplate EMPTY = new ConfiguredTemplate(EmptyTemplate.INSTANCE, new PlacementSettings(new ProcessorContext()));
    protected Template parent;
    protected PlacementSettings settings;
 

@@ -3,7 +3,7 @@ package iskallia.vault.core.world.data.tile;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
 import java.util.HashMap;
 import java.util.Iterator;

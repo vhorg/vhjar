@@ -10,7 +10,7 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.PlayerStatisticsMessage;
-import iskallia.vault.world.data.PlayerInfluences;
+import iskallia.vault.world.data.PlayerReputationData;
 import iskallia.vault.world.data.VaultSnapshots;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -36,12 +36,11 @@ public class PlayerStatisticsCollector {
             CompoundTag reputationStats = new CompoundTag();
 
             for (VaultGod type : VaultGod.values()) {
-               reputationStats.putInt(type.getName(), PlayerInfluences.getReputation(sPlayer.getUUID(), type));
+               reputationStats.putInt(type.getName(), PlayerReputationData.getReputation(sPlayer.getUUID(), type));
             }
 
             CompoundTag serialized = new CompoundTag();
             serialized.put("reputation", reputationStats);
-            PlayerInfluences.getFavour(sPlayer.getUUID()).ifPresent(god -> serialized.putString("favour", god.getName()));
             PlayerStatisticsMessage pkt = new PlayerStatisticsMessage(serialized);
             ModNetwork.CHANNEL.sendTo(pkt, sPlayer.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
          }
@@ -144,12 +143,12 @@ public class PlayerStatisticsCollector {
                      }
 
                      for (ItemStack reward : stats.get(StatCollector.REWARD)) {
-                        Item patt3134$temp = reward.getItem();
-                        if (patt3134$temp instanceof BlockItem) {
-                           BlockItem blockItem = (BlockItem)patt3134$temp;
-                           Block patt3189$temp = blockItem.getBlock();
-                           if (patt3189$temp instanceof VaultCrateBlock) {
-                              VaultCrateBlock block = (VaultCrateBlock)patt3189$temp;
+                        Item patt3152$temp = reward.getItem();
+                        if (patt3152$temp instanceof BlockItem) {
+                           BlockItem blockItem = (BlockItem)patt3152$temp;
+                           Block patt3207$temp = blockItem.getBlock();
+                           if (patt3207$temp instanceof VaultCrateBlock) {
+                              VaultCrateBlock block = (VaultCrateBlock)patt3207$temp;
                               if (reward.getTag() != null) {
                                  CompoundTag tag = reward.getOrCreateTag().getCompound("BlockEntityTag").copy();
                                  tag.putString("id", ModBlocks.VAULT_CRATE_TILE_ENTITY.getRegistryName().toString());

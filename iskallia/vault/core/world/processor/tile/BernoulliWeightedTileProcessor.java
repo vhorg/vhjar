@@ -19,11 +19,11 @@ public class BernoulliWeightedTileProcessor extends TargetTileProcessor<Weighted
    public PartialTile process(PartialTile tile, double probability, ProcessorContext context) {
       if (this.target.test(tile)) {
          WeightedList<PartialTile> pool = this.failure;
-         if (context.random.nextFloat() < probability) {
+         if (context.getRandom(tile.getPos()).nextFloat() < probability) {
             pool = this.success;
          }
 
-         Optional<PartialTile> output = pool.getRandom(context.random);
+         Optional<PartialTile> output = pool.getRandom(context.getRandom(tile.getPos()));
          output.ifPresent(out -> out.fillInto(tile));
       }
 

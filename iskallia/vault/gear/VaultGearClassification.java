@@ -11,6 +11,7 @@ public enum VaultGearClassification {
    JEWEL(VaultGearRarity::getJewelModifierCount),
    MAGNET(VaultGearRarity::getMagnetModifierCount),
    WAND(VaultGearRarity::getWandModifierCount),
+   FOCUS(VaultGearRarity::getFocusModifierCount),
    TOOL(rarity -> 0);
 
    private final Function<VaultGearRarity, Integer> modifierCountFn;
@@ -21,5 +22,9 @@ public enum VaultGearClassification {
 
    public int getModifierCount(VaultGearRarity rarity) {
       return this.modifierCountFn.apply(rarity);
+   }
+
+   public boolean hasOnlySuffixes() {
+      return this == IDOL || this == JEWEL;
    }
 }

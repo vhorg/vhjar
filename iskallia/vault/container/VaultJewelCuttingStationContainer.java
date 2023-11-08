@@ -4,9 +4,8 @@ import iskallia.vault.block.entity.VaultJewelCuttingStationTileEntity;
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
-import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModContainers;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSlotIcons;
 import iskallia.vault.item.tool.JewelItem;
 import net.minecraft.core.BlockPos;
@@ -71,12 +70,12 @@ public class VaultJewelCuttingStationContainer extends OverSizedSlotContainer {
       Container invContainer = this.tileEntity.getInventory();
       this.addSlot(
          new OverSizedTabSlot(invContainer, 0, 19, 30)
-            .setFilter(stack -> stack.is(ModItems.SILVER_SCRAP))
+            .setFilter(stack -> stack.is(ModConfigs.VAULT_JEWEL_CUTTING_CONFIG.getJewelCuttingInput().getMainInput().getItem()))
             .setBackground(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.SILVER_SCRAP_NO_ITEM)
       );
       this.addSlot(
          new OverSizedTabSlot(invContainer, 1, 39, 30)
-            .setFilter(stack -> stack.is(ModBlocks.VAULT_BRONZE))
+            .setFilter(stack -> stack.is(ModConfigs.VAULT_JEWEL_CUTTING_CONFIG.getJewelCuttingInput().getSecondInput().getItem()))
             .setBackground(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.COINS_NO_ITEM)
       );
       this.addSlot(new OverSizedTabSlot(invContainer, 2, 99, 40) {

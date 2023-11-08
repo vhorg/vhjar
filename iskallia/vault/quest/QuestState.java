@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import iskallia.vault.config.quest.QuestConfig;
 import iskallia.vault.core.SkyVaultsChunkGenerator;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModGameRules;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ClientboundToastMessage;
@@ -43,16 +44,17 @@ public class QuestState implements INBTSerializable<CompoundTag> {
 
    public void initialize() {
       if (this.getServerPlayer() != null) {
+         ServerLevel serverLevel = this.getServerPlayer().getLevel();
          if (!this.isInitialized()) {
             EntityHelper.giveItem(this.getServerPlayer(), ModItems.QUEST_BOOK.getDefaultInstance());
-            this.<QuestConfig>getConfig(this.getServerPlayer().getLevel())
-               .getQuests()
-               .stream()
-               .filter(quest -> quest.getUnlockedBy().isEmpty())
-               .forEach(this::setInProgress);
+            this.<QuestConfig>getConfig(serverLevel).getQuests().stream().filter(quest -> quest.getUnlockedBy().isEmpty()).forEach(this::setInProgress);
          }
 
          this.addNewQuests(this.getServerPlayer());
+         if (serverLevel.getGameRules().getBoolean(ModGameRules.QUEST_EXPERT_MODE)) {
+            this.setExpertMode(serverLevel);
+         }
+
          this.syncAndPersist();
       }
    }
@@ -69,6 +71,22 @@ public class QuestState implements INBTSerializable<CompoundTag> {
                   && !this.getInProgress().contains(quest.getId())
          )
          .forEach(this::setInProgress);
+   }
+
+   public void setExpertMode(ServerLevel level) {
+      QuestConfig config = this.getConfig(level);
+
+      for (Quest quest : config.getQuests()) {
+         if (!this.isQuestActivated(quest.getId())) {
+            this.setInProgress(quest);
+         }
+      }
+
+      this.syncAndPersist();
+   }
+
+   private boolean isQuestActivated(String questId) {
+      return this.getCompleted().contains(questId) || this.getReadyToComplete().contains(questId) || this.getInProgress().contains(questId);
    }
 
    public <C extends QuestConfig> C getConfig(ServerLevel level) {
@@ -161,9 +179,9 @@ public class QuestState implements INBTSerializable<CompoundTag> {
    }
 
    public void syncAndPersist() {
+      QuestStatesData questStatesData = QuestStatesData.get();
+      questStatesData.setDirty();
       if (this.getServerPlayer() != null) {
-         QuestStatesData questStatesData = QuestStatesData.get();
-         questStatesData.setDirty();
          ModNetwork.CHANNEL.sendTo(new QuestSyncMessage(this), this.getServerPlayer().connection.connection, NetworkDirection.PLAY_TO_CLIENT);
       }
    }

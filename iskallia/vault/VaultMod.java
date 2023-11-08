@@ -59,6 +59,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import software.bernie.geckolib3.GeckoLib;
 
 @Mod("the_vault")
 public class VaultMod {
@@ -102,6 +103,7 @@ public class VaultMod {
       }
 
       CommonEvents.init();
+      GeckoLib.initialize();
    }
 
    public void registerDeferredRegistries() {

@@ -27,6 +27,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Final;
@@ -66,6 +67,18 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
 
    protected MixinPlayerEntity(EntityType<? extends LivingEntity> type, Level worldIn) {
       super(type, worldIn);
+   }
+
+   @Inject(
+      method = {"blockActionRestricted"},
+      at = {@At("RETURN")},
+      cancellable = true
+   )
+   public void blockActionRestricted(Level world, BlockPos pos, GameType gameMode, CallbackInfoReturnable<Boolean> cir) {
+      boolean restricted = CommonEvents.PLAYER_ACTION.invoke((Player)this, world, pos, gameMode, (Boolean)cir.getReturnValue()).isRestricted();
+      if (restricted != (Boolean)cir.getReturnValue()) {
+         cir.setReturnValue(restricted);
+      }
    }
 
    @Inject(

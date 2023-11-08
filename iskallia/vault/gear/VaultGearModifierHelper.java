@@ -414,7 +414,7 @@ public class VaultGearModifierHelper {
             }
          }
 
-         if (classification == VaultGearClassification.IDOL) {
+         if (classification.hasOnlySuffixes()) {
             prefixes = 0;
             suffixes = classification.getModifierCount(rarity);
          }
@@ -433,7 +433,11 @@ public class VaultGearModifierHelper {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
       } else if (data.isModifiable()) {
          int itemLevel = data.getItemLevel();
-         cfg.generateImplicits(itemLevel, random).forEach(modifier -> data.addModifier(VaultGearModifier.AffixType.IMPLICIT, (VaultGearModifier<?>)modifier));
+         cfg.generateImplicits(itemLevel, random).forEach(modifier -> {
+            if (!data.hasModifier(modifier.getModifierIdentifier())) {
+               data.addModifier(VaultGearModifier.AffixType.IMPLICIT, (VaultGearModifier<?>)modifier);
+            }
+         });
          data.write(stack);
       }
    }

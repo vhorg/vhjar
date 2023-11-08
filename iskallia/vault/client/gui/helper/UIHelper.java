@@ -251,10 +251,10 @@ public class UIHelper {
       return (float)text.stream().mapToDouble(manager::stringWidth).max().orElse(0.0);
    }
 
-   public static String formatTimeString(int remainingTicks) {
-      long seconds = remainingTicks / 20 % 60;
-      long minutes = remainingTicks / 20 / 60 % 60;
-      long hours = remainingTicks / 20 / 60 / 60;
+   public static String formatTimeString(long remainingTicks) {
+      long seconds = remainingTicks / 20L % 60L;
+      long minutes = remainingTicks / 20L / 60L % 60L;
+      long hours = remainingTicks / 20L / 60L / 60L;
       return hours > 0L ? String.format("%02d:%02d:%02d", hours, minutes, seconds) : String.format("%02d:%02d", minutes, seconds);
    }
 

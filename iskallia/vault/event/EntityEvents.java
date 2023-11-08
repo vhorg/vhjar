@@ -8,6 +8,7 @@ import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.item.gear.FocusItem;
 import iskallia.vault.item.gear.IdolItem;
 import iskallia.vault.item.gear.VaultShieldItem;
 import iskallia.vault.item.gear.WandItem;
@@ -109,7 +110,10 @@ public class EntityEvents {
             if (!event.getSource().isBypassArmor()) {
                ItemStack offHand = event.getEntityLiving().getOffhandItem();
                if (!ServerVaults.get(world).isEmpty() || !(offHand.getItem() instanceof VaultGearItem)) {
-                  if (offHand.getItem() instanceof IdolItem || offHand.getItem() instanceof VaultShieldItem || offHand.getItem() instanceof WandItem) {
+                  if (offHand.getItem() instanceof IdolItem
+                     || offHand.getItem() instanceof VaultShieldItem
+                     || offHand.getItem() instanceof WandItem
+                     || offHand.getItem() instanceof FocusItem) {
                      int damage = (int)CommonEvents.PLAYER_STAT
                         .invoke(PlayerStat.DURABILITY_DAMAGE, player, Math.max(1.0F, event.getAmount() / 6.0F))
                         .getValue();

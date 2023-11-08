@@ -39,6 +39,20 @@ public final class ModRenderTypes extends RenderType {
          .setLightmapState(RenderStateShard.LIGHTMAP)
          .createCompositeState(false)
    );
+   public static final RenderType IMMORTALITY_INDICATOR = RenderType.create(
+      "immortality_indicator",
+      DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+      Mode.QUADS,
+      256,
+      true,
+      true,
+      CompositeState.builder()
+         .setShaderState(RenderStateShard.POSITION_COLOR_TEX_LIGHTMAP_SHADER)
+         .setTextureState(new TextureStateShard(VaultMod.id("textures/mob_effect/immortality.png"), false, false))
+         .setCullState(RenderStateShard.NO_CULL)
+         .setLightmapState(RenderStateShard.LIGHTMAP)
+         .createCompositeState(false)
+   );
    public static final RenderType VULNERABLE_INDICATOR = RenderType.create(
       "vulnerable_indicator",
       DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,

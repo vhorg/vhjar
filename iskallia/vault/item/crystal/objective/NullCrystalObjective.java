@@ -24,12 +24,12 @@ public class NullCrystalObjective extends CrystalObjective {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Objective: ???").withStyle(ChatFormatting.GRAY));
    }
 
    @Override
-   public Optional<Integer> getColor() {
+   public Optional<Integer> getColor(float time) {
       return Optional.empty();
    }
 

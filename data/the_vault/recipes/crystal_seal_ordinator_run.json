@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ddd",
+        "dsd",
+        "ddd"
+    ],
+    "key": {
+        "d": {
+            "item": "the_vault:vault_diamond"
+        },
+        "s": {
+            "item": "the_vault:crystal_seal_ordinator_build"
+        }
+    },
+    "result": {
+        "item": "the_vault:crystal_seal_ordinator_run",
+        "count": 1
+    }
+}

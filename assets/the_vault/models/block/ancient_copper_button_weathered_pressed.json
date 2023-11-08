@@ -1,0 +1,6 @@
+{
+	"parent": "minecraft:block/button_pressed",
+	"textures": {
+		"texture": "the_vault:block/ancient_copper_block_weathered"
+	}
+}

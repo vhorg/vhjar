@@ -32,7 +32,7 @@ public class EnhancementTaskManager extends DataObject<EnhancementTaskManager> {
             BlockPos pos = data.getPos();
             BlockEntity entity = data.getWorld().getBlockEntity(data.getPos());
             ChunkRandom random = ChunkRandom.any();
-            random.setBlockSeed(vault.get(Vault.SEED), pos.getX(), pos.getY(), pos.getZ(), 1215835893);
+            random.setBlockSeed(vault.get(Vault.SEED), pos.getX(), pos.getY(), pos.getZ(), 1215835893L);
             if (entity instanceof VaultEnhancementAltarTileEntity altar) {
                List<EnhancementTask<?>> tasks = EnhancementData.get(player);
                if (tasks.stream().anyMatch(task -> task.isFinished() && task.getAltar().equals(altar.getUUID()))) {

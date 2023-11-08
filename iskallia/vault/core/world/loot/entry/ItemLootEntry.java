@@ -4,13 +4,18 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import iskallia.vault.VaultMod;
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.init.ModItems;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -31,6 +36,11 @@ public class ItemLootEntry implements LootEntry {
       this.count = count;
    }
 
+   public ItemLootEntry(Tag nbt) {
+      this();
+      this.readNbt(nbt);
+   }
+
    public Item getItem() {
       return this.item;
    }
@@ -44,13 +54,79 @@ public class ItemLootEntry implements LootEntry {
    }
 
    @Override
-   public ItemStack getStack(RandomSource random) {
-      ItemStack stack = new ItemStack(this.item, this.count.get(random));
+   public List<ItemStack> getStack(RandomSource random) {
+      List<ItemStack> items = new ArrayList<>();
+      int count = this.count.get(random);
+      ItemStack stack = new ItemStack(this.item);
       if (this.nbt != null) {
          stack.setTag(this.nbt.copy());
       }
 
-      return stack;
+      for (int i = 0; i < count; i += stack.getMaxStackSize()) {
+         ItemStack copy = stack.copy();
+         copy.setCount(Math.min(count - i, stack.getMaxStackSize()));
+         items.add(copy);
+      }
+
+      return items;
+   }
+
+   @Override
+   public OverSizedItemStack getOverStack(RandomSource random) {
+      int count = this.count.get(random);
+      ItemStack stack = new ItemStack(this.item);
+      stack.setCount(count);
+      if (this.nbt != null) {
+         stack.setTag(this.nbt.copy());
+      }
+
+      return OverSizedItemStack.of(stack).copyAmount(count);
+   }
+
+   @Override
+   public Optional<Tag> writeNbt() {
+      if (this.nbt == null && this.count instanceof IntRoll.Constant constant && constant.getCount() == 1) {
+         return Adapters.ITEM.writeNbt((IForgeRegistryEntry)this.item);
+      } else {
+         CompoundTag nbt = new CompoundTag();
+         Adapters.ITEM.writeNbt((IForgeRegistryEntry)this.item).ifPresent(element -> nbt.put("id", element));
+         Adapters.COMPOUND_NBT.writeNbt(this.nbt).ifPresent(element -> nbt.put("nbt", element));
+         Adapters.INT_ROLL.writeNbt(this.count).ifPresent(element -> nbt.put("count", element));
+         return Optional.of(nbt);
+      }
+   }
+
+   @Override
+   public void readNbt(Tag nbt) {
+      if (nbt instanceof StringTag primitive) {
+         Adapters.ITEM.readNbt(primitive).ifPresentOrElse(value -> this.item = value, () -> {
+            VaultMod.LOGGER.error("Unknown item " + primitive);
+            this.item = ModItems.ERROR_ITEM;
+            if (this.nbt == null) {
+               this.nbt = new CompoundTag();
+            }
+
+            this.nbt.putString("id", primitive.getAsString());
+         });
+      } else {
+         if (!(nbt instanceof CompoundTag object)) {
+            throw new UnsupportedOperationException(nbt + " cannot be read as an ItemLootEntry");
+         }
+
+         Adapters.COMPOUND_NBT.readNbt(object.get("nbt")).ifPresent(value -> this.nbt = value);
+         Adapters.ITEM.readNbt(object.get("id")).ifPresentOrElse(value -> this.item = value, () -> {
+            VaultMod.LOGGER.error("Unknown item " + object.get("id"));
+            this.item = ModItems.ERROR_ITEM;
+            if (this.nbt == null) {
+               this.nbt = new CompoundTag();
+            }
+
+            if (object.contains("id")) {
+               this.nbt.put("id", object.get("id"));
+            }
+         });
+         Adapters.INT_ROLL.readNbt(object.get("count")).ifPresent(count -> this.count = count);
+      }
    }
 
    @Override
@@ -59,7 +135,7 @@ public class ItemLootEntry implements LootEntry {
          return Adapters.ITEM.writeJson((IForgeRegistryEntry)this.item);
       } else {
          JsonObject json = new JsonObject();
-         Adapters.ITEM.writeJson((IForgeRegistryEntry)this.item).ifPresent(element -> json.add("item", element));
+         Adapters.ITEM.writeJson((IForgeRegistryEntry)this.item).ifPresent(element -> json.add("id", element));
          Adapters.COMPOUND_NBT.writeJson(this.nbt).ifPresent(element -> json.add("nbt", element));
          Adapters.INT_ROLL.writeJson(this.count).ifPresent(element -> json.add("count", element));
          return Optional.of(json);

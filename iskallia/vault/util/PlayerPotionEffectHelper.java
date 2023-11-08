@@ -1,5 +1,6 @@
 package iskallia.vault.util;
 
+import iskallia.vault.init.ModEffects;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,7 +46,7 @@ public class PlayerPotionEffectHelper {
          if (!sPlayer.level.isClientSide) {
             if (!ServerVaults.get(sPlayer.level).isEmpty()) {
                MobEffect effect = event.getPotionEffect().getEffect();
-               if (effect.getCategory() == MobEffectCategory.HARMFUL) {
+               if (effect.getCategory() == MobEffectCategory.HARMFUL && effect != ModEffects.BLEED) {
                   UUID uuid = sPlayer.getUUID();
                   Map<MobEffect, Integer> immunities = PLAYER_IMMUNITIES.computeIfAbsent(uuid, k -> new HashMap<>());
                   if (immunities.containsKey(event.getPotionEffect().getEffect())) {

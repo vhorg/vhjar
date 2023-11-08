@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=east,pieces=1": {
+      "model": "the_vault:block/vault_sweets_block_small_stage3",
+      "y": 90
+    },
+    "facing=east,pieces=2": {
+      "model": "the_vault:block/vault_sweets_block_small_stage2",
+      "y": 90
+    },
+    "facing=east,pieces=3": {
+      "model": "the_vault:block/vault_sweets_block_small_stage1",
+      "y": 90
+    },
+    "facing=east,pieces=4": {
+      "model": "the_vault:block/vault_sweets_block_small_stage0",
+      "y": 90
+    },
+    "facing=north,pieces=1": {
+      "model": "the_vault:block/vault_sweets_block_small_stage3"
+    },
+    "facing=north,pieces=2": {
+      "model": "the_vault:block/vault_sweets_block_small_stage2"
+    },
+    "facing=north,pieces=3": {
+      "model": "the_vault:block/vault_sweets_block_small_stage1"
+    },
+    "facing=north,pieces=4": {
+      "model": "the_vault:block/vault_sweets_block_small_stage0"
+    },
+    "facing=south,pieces=1": {
+      "model": "the_vault:block/vault_sweets_block_small_stage3",
+      "y": 180
+    },
+    "facing=south,pieces=2": {
+      "model": "the_vault:block/vault_sweets_block_small_stage2",
+      "y": 180
+    },
+    "facing=south,pieces=3": {
+      "model": "the_vault:block/vault_sweets_block_small_stage1",
+      "y": 180
+    },
+    "facing=south,pieces=4": {
+      "model": "the_vault:block/vault_sweets_block_small_stage0",
+      "y": 180
+    },
+    "facing=west,pieces=1": {
+      "model": "the_vault:block/vault_sweets_block_small_stage3",
+      "y": 270
+    },
+    "facing=west,pieces=2": {
+      "model": "the_vault:block/vault_sweets_block_small_stage2",
+      "y": 270
+    },
+    "facing=west,pieces=3": {
+      "model": "the_vault:block/vault_sweets_block_small_stage1",
+      "y": 270
+    },
+    "facing=west,pieces=4": {
+      "model": "the_vault:block/vault_sweets_block_small_stage0",
+      "y": 270
+    }
+  }
+}

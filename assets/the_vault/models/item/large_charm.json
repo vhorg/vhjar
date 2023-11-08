@@ -1,0 +1,12 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_vault:item/charm/unidentified_large"
+  },
+  "overrides": [
+    {"predicate": {"the_vault:charm":  4}, "model": "the_vault:item/charm/large_idona"},
+    {"predicate": {"the_vault:charm":  5}, "model": "the_vault:item/charm/large_tenos"},
+    {"predicate": {"the_vault:charm":  6}, "model": "the_vault:item/charm/large_velara"},
+    {"predicate": {"the_vault:charm":  7}, "model": "the_vault:item/charm/large_wendarr"}
+  ]
+}

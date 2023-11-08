@@ -68,13 +68,13 @@ public class WolfArmorLayers extends ArmorLayers {
             "head",
             CubeListBuilder.create()
                .texOffs(22, 26)
-               .addBox(-4.0F, -6.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(1.0F))
+               .addBox(-4.0F, -9.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(1.0F))
                .texOffs(93, 8)
-               .addBox(-2.0F, -7.0F, -5.75F, 1.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+               .addBox(-2.0F, -10.0F, -5.75F, 1.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
                .texOffs(93, 15)
-               .addBox(-1.0F, -6.0F, -5.75F, 2.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
+               .addBox(-1.0F, -9.0F, -5.75F, 2.0F, 4.0F, 1.0F, new CubeDeformation(0.0F))
                .texOffs(93, 8)
-               .addBox(1.0F, -7.0F, -5.75F, 1.0F, 4.0F, 1.0F, new CubeDeformation(0.0F)),
+               .addBox(1.0F, -10.0F, -5.75F, 1.0F, 4.0F, 1.0F, new CubeDeformation(0.0F)),
             PartPose.offset(0.0F, 0.0F, 0.0F)
          );
          PartDefinition body = partdefinition.addOrReplaceChild(

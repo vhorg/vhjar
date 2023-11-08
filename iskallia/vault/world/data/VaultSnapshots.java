@@ -6,23 +6,29 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.stat.VaultSnapshot;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.nbt.VListNBT;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongArrayTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class VaultSnapshots extends SavedData {
    protected static final String DATA_NAME = "the_vault_VaultSnapshots";
-   private final VListNBT<VaultSnapshot, LongArrayTag> snapshots = new VListNBT<>(new ArrayList<>(), snapshot -> {
-      ArrayBitBuffer buffer = ArrayBitBuffer.empty();
-      snapshot.writeBits(buffer);
-      return new LongArrayTag(buffer.toLongArray());
-   }, nbt -> new VaultSnapshot(ArrayBitBuffer.backing(nbt.getAsLongArray(), 0)));
+   private final VListNBT<VaultSnapshot, LongArrayTag> snapshots = new VListNBT<>(
+      new ArrayList<>(), snapshot -> new LongArrayTag(snapshot.getCache()), nbt -> new VaultSnapshot(ArrayBitBuffer.backing(nbt.getAsLongArray(), 0))
+   );
 
    public static VaultSnapshot get(UUID vaultId) {
       for (VaultSnapshot snapshot : get(ServerLifecycleHooks.getCurrentServer()).snapshots) {
@@ -83,13 +89,32 @@ public class VaultSnapshots extends SavedData {
    }
 
    public void save(File file) {
-      long timeMs = System.currentTimeMillis();
-      super.save(file);
-      if (System.currentTimeMillis() - timeMs > 50L) {
+      if (this.isDirty()) {
+         long start = System.nanoTime();
+
+         try (
+            FileOutputStream fos = new FileOutputStream(file);
+            FileChannel channel = fos.getChannel();
+         ) {
+            VaultSnapshots.ArrayOutputStream array = new VaultSnapshots.ArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(array);
+            CompoundTag nbt = new CompoundTag();
+            nbt.put("data", this.save(new CompoundTag()));
+            nbt.putInt("DataVersion", SharedConstants.getCurrentVersion().getWorldVersion());
+            NbtIo.write(nbt, dos);
+            ByteBuffer buffer = ByteBuffer.wrap(array.getBuf(), 0, array.getCount());
+            channel.write(buffer);
+         } catch (IOException var14) {
+            var14.printStackTrace();
+         }
+
          MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
          if (srv != null && srv.getGameRules().getBoolean(ModGameRules.PRINT_SAVE_DATA_TIMING)) {
-            VaultMod.LOGGER.info("VaultSnapshots saving took %s ms".formatted(System.currentTimeMillis() - timeMs));
+            long time = System.nanoTime() - start;
+            VaultMod.LOGGER.info("VaultSnapshots saving took %f ms".formatted(time / 1000000.0));
          }
+
+         this.setDirty(false);
       }
    }
 
@@ -101,5 +126,15 @@ public class VaultSnapshots extends SavedData {
       VaultSnapshots data = new VaultSnapshots();
       data.load(tag);
       return data;
+   }
+
+   private static class ArrayOutputStream extends ByteArrayOutputStream {
+      public byte[] getBuf() {
+         return this.buf;
+      }
+
+      public int getCount() {
+         return this.count;
+      }
    }
 }

@@ -1,0 +1,67 @@
+{
+  "variants": {
+    "god=velara,facing=east": {
+      "model": "the_vault:block/god_altar/velara",
+      "y": 270
+    },
+    "god=velara,facing=north": {
+      "model": "the_vault:block/god_altar/velara",
+      "y": 180
+    },
+    "god=velara,facing=south": {
+      "model": "the_vault:block/god_altar/velara"
+    },
+    "god=velara,facing=west": {
+      "model": "the_vault:block/god_altar/velara",
+      "y": 90
+    },
+
+    "god=wendarr,facing=east": {
+      "model": "the_vault:block/god_altar/wendarr",
+      "y": 270
+    },
+    "god=wendarr,facing=north": {
+      "model": "the_vault:block/god_altar/wendarr",
+      "y": 180
+    },
+    "god=wendarr,facing=south": {
+      "model": "the_vault:block/god_altar/wendarr"
+    },
+    "god=wendarr,facing=west": {
+      "model": "the_vault:block/god_altar/wendarr",
+      "y": 90
+    },
+
+    "god=idona,facing=east": {
+      "model": "the_vault:block/god_altar/idona",
+      "y": 270
+    },
+    "god=idona,facing=north": {
+      "model": "the_vault:block/god_altar/idona",
+      "y": 180
+    },
+    "god=idona,facing=south": {
+      "model": "the_vault:block/god_altar/idona"
+    },
+    "god=idona,facing=west": {
+      "model": "the_vault:block/god_altar/idona",
+      "y": 90
+    },
+
+    "god=tenos,facing=east": {
+      "model": "the_vault:block/god_altar/tenos",
+      "y": 270
+    },
+    "god=tenos,facing=north": {
+      "model": "the_vault:block/god_altar/tenos",
+      "y": 180
+    },
+    "god=tenos,facing=south": {
+      "model": "the_vault:block/god_altar/tenos"
+    },
+    "god=tenos,facing=west": {
+      "model": "the_vault:block/god_altar/tenos",
+      "y": 90
+    }
+  }
+}

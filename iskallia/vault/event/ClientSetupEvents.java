@@ -6,6 +6,7 @@ import iskallia.vault.init.ModEntityRenderers;
 import iskallia.vault.init.ModKeybinds;
 import iskallia.vault.init.ModScreens;
 import iskallia.vault.init.ModTooltips;
+import iskallia.vault.integration.curios.CuriosCharmCompat;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -32,5 +33,6 @@ public class ClientSetupEvents {
       ClientSandEventData.getInstance().init();
       ModTooltips.register(event);
       ModAbilityLabelBindings.register();
+      CuriosCharmCompat.register();
    }
 }

@@ -1,17 +1,22 @@
 package iskallia.vault.core.random;
 
-import iskallia.vault.core.random.lcg.LCG;
+import com.google.gson.JsonObject;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.core.random.lcg.Lcg;
+import java.util.Optional;
 import java.util.Random;
+import net.minecraft.nbt.CompoundTag;
 
 public class JavaRandom extends LCGRandom {
-   public static final long MULTIPLIER = LCG.JAVA.multiplier;
-   public static final long ADDEND = LCG.JAVA.addend;
-   public static final long MASK = LCG.JAVA.modulus - 1L;
+   public static final long MULTIPLIER = Lcg.JAVA.multiplier;
+   public static final long ADDEND = Lcg.JAVA.addend;
+   public static final long MASK = Lcg.JAVA.modulus - 1L;
    protected double nextNextGaussian;
    protected boolean haveNextNextGaussian;
 
    protected JavaRandom(long seed) {
-      super(LCG.JAVA, seed);
+      super(Lcg.JAVA, seed);
    }
 
    public static JavaRandom ofInternal(long seed) {
@@ -118,6 +123,66 @@ public class JavaRandom extends LCGRandom {
       copy.haveNextNextGaussian = this.haveNextNextGaussian;
       copy.nextNextGaussian = this.nextNextGaussian;
       return copy;
+   }
+
+   @Override
+   public void writeBits(BitBuffer buffer) {
+      Adapters.ofBoundedLong(this.lcg.modulus).writeBits(Long.valueOf(this.seed), buffer);
+      Adapters.BOOLEAN.writeBits(this.haveNextNextGaussian, buffer);
+      if (this.haveNextNextGaussian) {
+         Adapters.DOUBLE.writeBits(Double.valueOf(this.nextNextGaussian), buffer);
+      }
+   }
+
+   @Override
+   public void readBits(BitBuffer buffer) {
+      this.seed = Adapters.ofBoundedLong(this.lcg.modulus).readBits(buffer).orElseThrow();
+      this.haveNextNextGaussian = Adapters.BOOLEAN.readBits(buffer).orElseThrow();
+      if (this.haveNextNextGaussian) {
+         this.nextNextGaussian = Adapters.DOUBLE.readBits(buffer).orElseThrow();
+      }
+   }
+
+   @Override
+   public Optional<CompoundTag> writeNbt() {
+      CompoundTag nbt = new CompoundTag();
+      Adapters.LONG.writeNbt(Long.valueOf(this.seed)).ifPresent(value -> nbt.put("seed", value));
+      Adapters.BOOLEAN.writeNbt(this.haveNextNextGaussian).ifPresent(value -> nbt.put("haveNextNextGaussian", value));
+      if (this.haveNextNextGaussian) {
+         Adapters.DOUBLE.writeNbt(Double.valueOf(this.nextNextGaussian)).ifPresent(value -> nbt.put("nextNextGaussian", value));
+      }
+
+      return Optional.of(nbt);
+   }
+
+   @Override
+   public void readNbt(CompoundTag nbt) {
+      this.seed = Adapters.LONG.readNbt(nbt.get("seed")).orElseThrow();
+      this.haveNextNextGaussian = Adapters.BOOLEAN.readNbt(nbt.get("haveNextNextGaussian")).orElseThrow();
+      if (this.haveNextNextGaussian) {
+         this.nextNextGaussian = Adapters.DOUBLE.readNbt(nbt.get("nextNextGaussian")).orElseThrow();
+      }
+   }
+
+   @Override
+   public Optional<JsonObject> writeJson() {
+      JsonObject json = new JsonObject();
+      Adapters.LONG.writeJson(Long.valueOf(this.seed)).ifPresent(value -> json.add("seed", value));
+      Adapters.BOOLEAN.writeJson(this.haveNextNextGaussian).ifPresent(value -> json.add("haveNextNextGaussian", value));
+      if (this.haveNextNextGaussian) {
+         Adapters.DOUBLE.writeJson(Double.valueOf(this.nextNextGaussian)).ifPresent(value -> json.add("nextNextGaussian", value));
+      }
+
+      return Optional.of(json);
+   }
+
+   @Override
+   public void readJson(JsonObject json) {
+      this.seed = Adapters.LONG.readJson(json.get("seed")).orElseThrow();
+      this.haveNextNextGaussian = Adapters.BOOLEAN.readJson(json.get("haveNextNextGaussian")).orElseThrow();
+      if (this.haveNextNextGaussian) {
+         this.nextNextGaussian = Adapters.DOUBLE.readJson(json.get("nextNextGaussian")).orElseThrow();
+      }
    }
 
    protected static class View extends Random {

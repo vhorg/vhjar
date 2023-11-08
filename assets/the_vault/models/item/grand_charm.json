@@ -1,0 +1,12 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_vault:item/charm/unidentified_grand"
+  },
+  "overrides": [
+    {"predicate": {"the_vault:charm":  0}, "model": "the_vault:item/charm/grand_idona"},
+    {"predicate": {"the_vault:charm":  1}, "model": "the_vault:item/charm/grand_tenos"},
+    {"predicate": {"the_vault:charm":  2}, "model": "the_vault:item/charm/grand_velara"},
+    {"predicate": {"the_vault:charm":  3}, "model": "the_vault:item/charm/grand_wendarr"}
+  ]
+}

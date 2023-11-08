@@ -9,6 +9,7 @@ import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.crafting.ProficiencyType;
 import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.data.VaultGearData;
@@ -19,6 +20,7 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -26,15 +28,16 @@ import java.util.Random;
 import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -59,10 +62,7 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
          return super.getName(stack).copy().setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
       } else {
          String prefix = this.getDescriptionId() + "." + rarity.name().toLowerCase(Locale.ROOT);
-         return new TranslatableComponent(prefix)
-            .append(new TextComponent(" "))
-            .append(super.getName(stack))
-            .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
+         return new TranslatableComponent(prefix).append(super.getName(stack)).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(color)));
       }
    }
 
@@ -99,6 +99,68 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
       }
    }
 
+   public void fillItemCategory(@Nonnull CreativeModeTab category, @Nonnull NonNullList<ItemStack> items) {
+      if (category == ModItems.GEAR_GROUP) {
+         List<ItemStack> jewels = new ArrayList<>();
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.PICKING, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.AXING, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.SHOVELLING, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.WOODEN_AFFINITY, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ORNATE_AFFINITY, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.GILDED_AFFINITY, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.LIVING_AFFINITY, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.COIN_AFFINITY, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.SMELTING, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.PULVERIZING, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.HYDROVOID, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.SOULBOUND, true))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.MINING_SPEED, 0.1F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.MINING_SPEED, 1.0F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.MINING_SPEED, 10.0F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.MINING_SPEED, 100.0F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.DURABILITY, 1))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.DURABILITY, 10))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.DURABILITY, 100))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.DURABILITY, 1000))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.DURABILITY, 10000))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.COPIOUSLY, 0.001F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.COPIOUSLY, 0.01F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.COPIOUSLY, 0.1F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.COPIOUSLY, 1.0F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ITEM_QUANTITY, 0.001F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ITEM_QUANTITY, 0.01F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ITEM_QUANTITY, 0.1F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ITEM_QUANTITY, 1.0F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ITEM_RARITY, 0.001F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ITEM_RARITY, 0.01F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ITEM_RARITY, 0.1F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.ITEM_RARITY, 1.0F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.TRAP_DISARMING, 0.001F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.TRAP_DISARMING, 0.01F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.TRAP_DISARMING, 0.1F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.TRAP_DISARMING, 1.0F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.IMMORTALITY, 0.001F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.IMMORTALITY, 0.01F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.IMMORTALITY, 0.1F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.IMMORTALITY, 1.0F))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.REACH, 0.01))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.REACH, 0.1))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.REACH, 1.0))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.HAMMER_SIZE, 1))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.HAMMER_SIZE, 5))));
+         jewels.add(create(datax -> datax.addModifier(VaultGearModifier.AffixType.SUFFIX, new VaultGearModifier<>(ModGearAttributes.HAMMER_SIZE, 10))));
+
+         for (ItemStack jewel : jewels) {
+            VaultGearData data = VaultGearData.read(jewel);
+            data.setRarity(VaultGearRarity.UNIQUE);
+            data.setState(VaultGearState.IDENTIFIED);
+            data.write(jewel);
+         }
+
+         items.addAll(jewels);
+      }
+   }
+
    @Override
    public void initialize(ItemStack stack, RandomSource random) {
       Random rand = ((JavaRandom)random).asRandomView();
@@ -107,6 +169,7 @@ public class JewelItem extends Item implements VaultGearItem, DataInitialization
          .flatMap(rollTypeStr -> ModConfigs.VAULT_GEAR_TYPE_CONFIG.getRollPool(rollTypeStr))
          .orElse(ModConfigs.VAULT_GEAR_TYPE_CONFIG.getDefaultRoll())
          .getRandom(rand);
+      data.setState(VaultGearState.IDENTIFIED);
       data.setRarity(rarity);
       data.write(stack);
       GearRollHelper.initializeGear(stack);

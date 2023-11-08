@@ -49,6 +49,14 @@ public class ModModelLayers {
    public static final ModelLayerLocation T3_MINER_ZOMBIE = new ModelLayerLocation(VaultMod.id("t3_miner_zombie"), "main");
    public static final ModelLayerLocation T4_MINER_ZOMBIE = new ModelLayerLocation(VaultMod.id("t4_miner_zombie"), "main");
    public static final ModelLayerLocation T5_MINER_ZOMBIE = new ModelLayerLocation(VaultMod.id("t5_miner_zombie"), "main");
+   public static final ModelLayerLocation T0_BLOOD_SKELETON = new ModelLayerLocation(VaultMod.id("t0_blood_skeleton"), "main");
+   public static final ModelLayerLocation T1_BLOOD_SKELETON = new ModelLayerLocation(VaultMod.id("t1_blood_skeleton"), "main");
+   public static final ModelLayerLocation T2_BLOOD_SKELETON = new ModelLayerLocation(VaultMod.id("t2_blood_skeleton"), "main");
+   public static final ModelLayerLocation T3_BLOOD_SKELETON = new ModelLayerLocation(VaultMod.id("t3_blood_skeleton"), "main");
+   public static final ModelLayerLocation T4_BLOOD_SKELETON = new ModelLayerLocation(VaultMod.id("t4_blood_skeleton"), "main");
+   public static final ModelLayerLocation T5_BLOOD_SKELETON = new ModelLayerLocation(VaultMod.id("t5_blood_skeleton"), "main");
+   public static final ModelLayerLocation BLOOD_SILVERFISH = new ModelLayerLocation(VaultMod.id("blood_silverfish"), "main");
+   public static final ModelLayerLocation BLOOD_SLIME = new ModelLayerLocation(VaultMod.id("blood_slime"), "main");
    public static final ModelLayerLocation T0_MUSHROOM = new ModelLayerLocation(VaultMod.id("t0_mushroom"), "main");
    public static final ModelLayerLocation T1_MUSHROOM = new ModelLayerLocation(VaultMod.id("t1_mushroom"), "main");
    public static final ModelLayerLocation T2_MUSHROOM = new ModelLayerLocation(VaultMod.id("t2_mushroom"), "main");
@@ -78,6 +86,7 @@ public class ModModelLayers {
    public static final ModelLayerLocation T3_PIGLIN = new ModelLayerLocation(VaultMod.id("t3_piglin"), "main");
    public static final ModelLayerLocation T3_ZOMBIE = new ModelLayerLocation(VaultMod.id("t3_zombie"), "main");
    public static final ModelLayerLocation VAULT_SPIDER_BABY = new ModelLayerLocation(VaultMod.id("vault_spider_baby"), "main");
+   public static final ModelLayerLocation ANCIENT_COPPER_GOLEM = new ModelLayerLocation(VaultMod.id("ancient_copper_golem"), "main");
    public static final ModelLayerLocation ANGEL_BLOCK_EYE = new ModelLayerLocation(VaultMod.id("angel_block_eye"), "main");
    public static final ModelLayerLocation ANGEL_BLOCK_WIND = new ModelLayerLocation(VaultMod.id("angel_block_wind"), "main");
    public static final ModelLayerLocation ANGEL_BLOCK_CAGE = new ModelLayerLocation(VaultMod.id("angel_block_cage"), "main");

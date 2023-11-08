@@ -23,6 +23,10 @@ public abstract class BottleEffect {
       return tag;
    }
 
+   public String getEffectId() {
+      return this.effectId;
+   }
+
    public int getColor() {
       AlchemyTableConfig.CraftableEffectConfig effectConfig = ModConfigs.VAULT_ALCHEMY_TABLE.getConfig(this.effectId);
       if (effectConfig == null) {

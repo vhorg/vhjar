@@ -93,11 +93,11 @@ public class VaultJewelCuttingStationTileEntity extends BlockEntity implements M
             Random random = new Random();
             boolean broken = false;
             boolean chipped = false;
-            float probability = this.getJewelCuttingModifierRemovalChance();
+            int freeCuts = 0;
             ExpertiseTree expertises = PlayerExpertisesData.get(player.getLevel()).getExpertises(player);
 
             for (JewelExpertise expertise : expertises.getAll(JewelExpertise.class, Skill::isUnlocked)) {
-               probability -= expertise.getModifierChanceReduction();
+               freeCuts = expertise.getNumberOfFreeCuts();
             }
 
             int sizeToRemove = this.getJewelCuttingRange().getRandom();
@@ -107,7 +107,11 @@ public class VaultJewelCuttingStationTileEntity extends BlockEntity implements M
                data.write(stack);
             }
 
-            if (random.nextFloat() < probability) {
+            if ((freeCuts <= 0 || !stack.getOrCreateTag().contains("freeCuts") || stack.getOrCreateTag().getInt("freeCuts") < freeCuts) && freeCuts != 0) {
+               if (freeCuts > 0 && (!stack.getOrCreateTag().contains("freeCuts") || stack.getOrCreateTag().getInt("freeCuts") < freeCuts)) {
+                  stack.getOrCreateTag().putInt("freeCuts", stack.getOrCreateTag().getInt("freeCuts") + 1);
+               }
+            } else {
                List<VaultGearModifier<?>> prefix = new ArrayList<>(data.getModifiers(VaultGearModifier.AffixType.PREFIX));
                List<VaultGearModifier<?>> suffix = new ArrayList<>(data.getModifiers(VaultGearModifier.AffixType.SUFFIX));
                int affixSize = prefix.size() + suffix.size();
@@ -179,12 +183,15 @@ public class VaultJewelCuttingStationTileEntity extends BlockEntity implements M
             Level level = this.getLevel();
             if (level != null) {
                if (broken) {
-                  level.playSound(null, container.getTilePos(), SoundEvents.ITEM_BREAK, SoundSource.BLOCKS, 0.8F, level.random.nextFloat() * 0.1F + 0.9F);
+                  level.playSound(null, container.getTilePos(), ModSounds.JEWEL_CUT, SoundSource.BLOCKS, 0.8F, level.random.nextFloat() * 0.1F + 0.9F);
                } else {
                   if (chipped) {
-                     level.playSound(null, container.getTilePos(), ModSounds.ARTISAN_SMITHING, SoundSource.BLOCKS, 0.3F, level.random.nextFloat() * 0.1F + 0.7F);
+                     level.playSound(null, container.getTilePos(), ModSounds.JEWEL_CUT, SoundSource.BLOCKS, 0.3F, level.random.nextFloat() * 0.1F + 0.7F);
                   } else {
-                     level.playSound(null, container.getTilePos(), ModSounds.ARTISAN_SMITHING, SoundSource.BLOCKS, 0.2F, level.random.nextFloat() * 0.1F + 0.9F);
+                     level.playSound(null, container.getTilePos(), ModSounds.JEWEL_CUT, SoundSource.BLOCKS, 0.3F, level.random.nextFloat() * 0.1F + 0.7F);
+                     level.playSound(
+                        null, container.getTilePos(), ModSounds.JEWEL_CUT_SUCCESS, SoundSource.BLOCKS, 0.2F, level.random.nextFloat() * 0.1F + 0.9F
+                     );
                   }
 
                   data.write(stack);
@@ -195,7 +202,7 @@ public class VaultJewelCuttingStationTileEntity extends BlockEntity implements M
       }
    }
 
-   private static VaultGearRarity getNewRarity(int size) {
+   public static VaultGearRarity getNewRarity(int size) {
       if (size == VaultGearRarity.SCRAPPY.getJewelModifierCount()) {
          return VaultGearRarity.SCRAPPY;
       } else if (size == VaultGearRarity.COMMON.getJewelModifierCount()) {

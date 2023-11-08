@@ -102,7 +102,7 @@ public class DollMiniMeEntity extends Monster implements IPlayerSkinHolder {
          && this.level instanceof ServerLevel serverLevel) {
          DollLootData dollLootData = DollLootData.get(serverLevel, this.dollId);
          List<ItemStack> loot = dollLootData.getLoot();
-         InventoryUtil.makeScavItemsRotten(loot);
+         InventoryUtil.makeItemsRotten(loot);
          loot.forEach(this::spawnAtLocation);
          dollLootData.clearLoot();
          PlayerVaultStatsData statsData = PlayerVaultStatsData.get(player.getLevel());

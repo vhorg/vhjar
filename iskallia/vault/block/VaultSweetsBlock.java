@@ -108,7 +108,7 @@ public class VaultSweetsBlock extends Block {
                return Shapes.joinUnoptimized(CAKE_SHAPE_PIECE.move(0.5, 0.0, 0.5), CAKE_SHAPE_PIECE.move(0.5, 0.0, 0.0), BooleanOp.OR);
             case 3:
                return Shapes.joinUnoptimized(
-                  Shapes.joinUnoptimized(CAKE_SHAPE_PIECE.move(0.5, 0.0, 0.5), CAKE_SHAPE_PIECE.move(0.5, 0.0, 0.5), BooleanOp.OR),
+                  Shapes.joinUnoptimized(CAKE_SHAPE_PIECE.move(0.5, 0.0, 0.5), CAKE_SHAPE_PIECE.move(0.0, 0.0, 0.0), BooleanOp.OR),
                   CAKE_SHAPE_PIECE.move(0.5, 0.0, 0.0),
                   BooleanOp.OR
                );

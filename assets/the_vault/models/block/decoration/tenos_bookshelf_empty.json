@@ -1,0 +1,7 @@
+{
+	"parent": "minecraft:block/cube_column",
+	"textures": {
+		"end": "the_vault:block/decoration/tenos_planks",
+		"side": "the_vault:block/decoration/tenos_bookshelf_empty"
+	}
+}

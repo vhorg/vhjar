@@ -6,7 +6,7 @@ import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.roll.IntRoll;
 import java.util.Optional;
 import java.util.UUID;

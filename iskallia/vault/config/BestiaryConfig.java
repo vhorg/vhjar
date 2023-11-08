@@ -162,9 +162,7 @@ public class BestiaryConfig extends Config {
             for (MobScavengerTask.Entry entry : mobScavengerTask.entries) {
                if (entry.group.contains(entityId)) {
                   return List.of(
-                     new BestiaryConfig.EntityDrop(
-                        entry.item.getDefaultInstance(), new IntRangeEntry(0, 1), new IntRangeEntry(0, (int)(mobScavengerTask.probability * 100.0))
-                     )
+                     new BestiaryConfig.EntityDrop(entry.item, new IntRangeEntry(0, 1), new IntRangeEntry(0, (int)(mobScavengerTask.probability * 100.0)))
                   );
                }
             }

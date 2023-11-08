@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.core.data.adapter.Adapters;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.item.crystal.data.adapter.ISimpleAdapter;
 import java.util.Optional;
 import javax.annotation.Nullable;
@@ -23,6 +23,10 @@ public class PartialStack implements ItemPlacement<PartialStack> {
 
    public static PartialStack of(PartialItem item, PartialCompoundNbt nbt) {
       return new PartialStack(item, nbt);
+   }
+
+   public static PartialStack of(ItemStack stack) {
+      return new PartialStack(PartialItem.of(stack), PartialCompoundNbt.of(stack));
    }
 
    public PartialItem getItem() {
@@ -70,6 +74,11 @@ public class PartialStack implements ItemPlacement<PartialStack> {
 
    public PartialStack copy() {
       return new PartialStack(this.item.copy(), this.nbt.copy());
+   }
+
+   @Override
+   public String toString() {
+      return this.item.toString() + this.nbt.toString();
    }
 
    public static Optional<PartialStack> parse(String string, boolean logErrors) {

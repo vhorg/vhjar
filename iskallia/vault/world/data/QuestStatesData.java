@@ -40,6 +40,12 @@ public class QuestStatesData extends SavedData {
       }
    }
 
+   public void setExpertMode(ServerLevel level) {
+      for (QuestState state : this.STATES.values()) {
+         state.setExpertMode(level);
+      }
+   }
+
    public boolean isSkyVaultWorld() {
       return this.isSkyVaultWorld;
    }

@@ -9,7 +9,6 @@ import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
-import iskallia.vault.core.random.ChunkRandom;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Modifiers;
@@ -19,9 +18,10 @@ import iskallia.vault.core.vault.player.Completion;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import iskallia.vault.gear.charm.CharmHelper;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.world.data.PlayerInfluences;
-import iskallia.vault.world.data.PlayerVaultStatsData;
+import iskallia.vault.item.gear.CharmItem;
+import iskallia.vault.world.data.PlayerReputationData;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
@@ -56,22 +56,11 @@ public class Influences extends DataObject<Influences> {
       this.ifPresent(FAVOURS, favours -> favours.initServer(world, vault));
       CommonEvents.ALTAR_PROGRESS.in(world).register(this, data -> {
          if (data.isConsuming() && data.getPlayer().getUUID().equals(runner.getId())) {
-            ChunkRandom random = ChunkRandom.ofInternal(vault.get(Vault.SEED));
-            long a = random.nextLong() | 1L;
-            long b = random.nextLong() | 1L;
-            long c = random.nextLong() | 1L;
-            int x = data.getPos().getX();
-            int y = data.getPos().getY();
-            int z = data.getPos().getZ();
-            random.setSeed(a * x + b * y + c * z ^ vault.get(Vault.SEED));
-            VaultGod god = data.getBlockEntity().getVaultGod();
-            int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(data.getPlayer().getUUID()).getVaultLevel();
-            int diff = playerLevel - vault.get(Vault.LEVEL).get();
-            if (diff <= 5) {
-               PlayerInfluences.attemptFavour(data.getPlayer(), data.getBlockEntity().getVaultGod(), random);
-            }
-
-            data.getBlockEntity().placeReward(data.getWorld(), data.getPos().above(), god.getColor(), random);
+            CharmHelper.getCharms(data.getPlayer()).forEach(charm -> {
+               if (charm.isUsable(data.getPlayer())) {
+                  CharmItem.addUsedVault(charm.stack(), vault.get(Vault.ID));
+               }
+            });
          }
       });
    }
@@ -92,16 +81,15 @@ public class Influences extends DataObject<Influences> {
       if (this.has(CURRENT)) {
          vault.getOptional(Vault.STATS).map(stats -> stats.get(runner)).ifPresent(stats -> {
             if (stats.getCompletion() == Completion.COMPLETED) {
-               PlayerInfluences.addReputation(runner.getId(), this.get(CURRENT), 1);
+               PlayerReputationData.addReputation(runner.getId(), this.get(CURRENT), 1);
             }
          });
       }
    }
 
    public void initialize(VirtualWorld world, Vault vault, Runner runner) {
-      PlayerInfluences.consumeFavour(runner.getId()).ifPresent(god -> this.set(CURRENT, god));
       if (this.has(CURRENT)) {
-         int reputation = PlayerInfluences.getReputation(runner.getId(), this.get(CURRENT));
+         int reputation = PlayerReputationData.getReputation(runner.getId(), this.get(CURRENT));
          this.set(FAVOURS, new Favours(runner.getId(), reputation));
          this.get(FAVOURS).initServer(world, vault);
          RandomSource random = JavaRandom.ofInternal(vault.get(Vault.SEED) ^ runner.getId().getLeastSignificantBits());

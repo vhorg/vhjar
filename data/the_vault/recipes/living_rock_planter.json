@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "l l",
+    "ldl",
+    "lll"
+  ],
+  "key": {
+    "d": {
+      "item": "minecraft:dirt"
+    },
+    "l": {
+      "item": "the_vault:living_rock_block_cobble"
+    }
+  },
+  "result": {
+    "item": "the_vault:living_rock_planter",
+    "count": 1
+  }
+}

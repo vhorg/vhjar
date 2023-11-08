@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "god=velara": {
+      "model": "the_vault:block/velara_altar"
+    },
+    "god=wendarr": {
+      "model": "the_vault:block/wendarr_altar"
+    },
+    "god=tenos": {
+      "model": "the_vault:block/tenos_altar"
+    },
+    "god=idona": {
+      "model": "the_vault:block/idona_altar"
+    }
+  }
+}

@@ -68,7 +68,7 @@ public class ChunkRandom extends JavaRandom {
       return seed & MathUtils.MASK_48;
    }
 
-   public long setRegionSeed(long worldSeed, int regionX, int regionZ, int salt) {
+   public long setRegionSeed(long worldSeed, int regionX, int regionZ, long salt) {
       long seed = regionX * 341873128712L + regionZ * 132897987541L + worldSeed + salt;
       this.setSeed(seed);
       return seed & MathUtils.MASK_48;
@@ -99,11 +99,11 @@ public class ChunkRandom extends JavaRandom {
       return seed & MathUtils.MASK_48;
    }
 
-   public long setBlockSeed(long worldSeed, BlockPos pos, int salt) {
+   public long setBlockSeed(long worldSeed, BlockPos pos, long salt) {
       return this.setBlockSeed(worldSeed, pos.getX(), pos.getY(), pos.getZ(), salt);
    }
 
-   public long setBlockSeed(long worldSeed, int blockX, int blockY, int blockZ, int salt) {
+   public long setBlockSeed(long worldSeed, int blockX, int blockY, int blockZ, long salt) {
       this.setSeed(worldSeed + salt);
       long a = this.nextLong() | 1L;
       long b = this.nextLong() | 1L;

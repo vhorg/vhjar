@@ -18,6 +18,7 @@ import iskallia.vault.core.event.Event;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.core.vault.player.Completion;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.stat.StatCollector;
@@ -48,6 +49,7 @@ import iskallia.vault.util.InventoryUtil;
 import iskallia.vault.util.VaultRarity;
 import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerProficiencyData;
+import iskallia.vault.world.data.PlayerReputationData;
 import iskallia.vault.world.data.PlayerStatsData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.ServerVaults;
@@ -179,6 +181,23 @@ public class DebugCommand extends Command {
             .then(Commands.literal("reset_all").then(Commands.argument("player", EntityArgument.player()).executes(this::resetPlayerExpertises)))
       );
       builder.then(Commands.literal("expertise").then(Commands.literal("world_reset").executes(this::resetAllPlayerExpertises)));
+
+      for (VaultGod god : VaultGod.values()) {
+         builder.then(
+            Commands.literal("reputation")
+               .then(
+                  Commands.literal(god.name().toLowerCase())
+                     .then(Commands.argument("count", IntegerArgumentType.integer()).executes(context -> this.addReputation(god, context)))
+               )
+         );
+      }
+   }
+
+   private int addReputation(VaultGod god, CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      PlayerReputationData.addReputation(
+         ((CommandSourceStack)context.getSource()).getPlayerOrException().getUUID(), god, IntegerArgumentType.getInteger(context, "count")
+      );
+      return 0;
    }
 
    private int generateLoot(CommandContext<CommandSourceStack> context) {

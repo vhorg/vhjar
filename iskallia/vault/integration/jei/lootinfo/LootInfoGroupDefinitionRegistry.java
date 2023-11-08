@@ -53,6 +53,7 @@ public final class LootInfoGroupDefinitionRegistry {
       register("completion_crate_kill", () -> new ItemStack(ModBlocks.VAULT_CRATE));
       register("completion_crate_elixir", () -> new ItemStack(ModBlocks.VAULT_CRATE_ELIXIR));
       register("completion_crate_scavenger", () -> new ItemStack(ModBlocks.VAULT_CRATE_SCAVENGER));
+      register("completion_crate_paradox", () -> new ItemStack(ModBlocks.VAULT_CRATE_PARADOX));
       register("altar_chest", () -> new ItemStack(ModBlocks.ALTAR_CHEST));
       register("living_strongbox", () -> new ItemStack(ModBlocks.LIVING_STRONGBOX));
       register("gilded_strongbox", () -> new ItemStack(ModBlocks.GILDED_STRONGBOX));

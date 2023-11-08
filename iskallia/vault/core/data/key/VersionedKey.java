@@ -36,7 +36,7 @@ public class VersionedKey<K extends VersionedKey<K, T>, T> {
 
    public K with(Version version, T value) {
       this.entries.put(version, value);
-      if (value instanceof Keyed<?> keyedValue) {
+      if (value instanceof IKeyed<?> keyedValue) {
          keyedValue.setKey(this);
       }
 

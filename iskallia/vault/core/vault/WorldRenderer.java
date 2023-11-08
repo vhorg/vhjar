@@ -9,8 +9,10 @@ import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.ClientEvents;
 import iskallia.vault.core.world.generator.theme.Theme;
+import iskallia.vault.mixin.AccessorDimensionSpecialEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.resources.ResourceLocation;
@@ -45,6 +47,12 @@ public class WorldRenderer extends DataObject<WorldRenderer> {
       .register(FIELDS);
    public static final FieldKey<Float> PARTICLE_PROBABILITY = FieldKey.of("particle_probability", Float.class)
       .with(Version.v1_0, Adapters.FLOAT, DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
+   public static final FieldKey<Integer> TIME = FieldKey.of("time", Integer.class)
+      .with(Version.v1_19, Adapters.INT, DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
+   public static final FieldKey<ResourceLocation> EFFECTS = FieldKey.of("effects", ResourceLocation.class)
+      .with(Version.v1_19, Adapters.IDENTIFIER, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    private float prevAmbientLight;
    private float[] ambientLightRamp;
@@ -89,6 +97,18 @@ public class WorldRenderer extends DataObject<WorldRenderer> {
             this.ifPresent(PARTICLE, particle -> data.setSettings(new AmbientParticleSettings(this.readParticle(particle), this.get(PARTICLE_PROBABILITY))));
          }
       });
+      ClientEvents.CLIENT_TICK.register(vault, data -> {
+         ClientLevel world = Minecraft.getInstance().level;
+         if (world != null && world.dimension().location().equals(vault.get(Vault.WORLD).get(WorldManager.KEY))) {
+            this.ifPresent(TIME, time -> world.setDayTime(time.intValue()));
+         }
+      });
+      ClientEvents.WORLD_EFFECT.register(vault, data -> {
+         ClientLevel world = Minecraft.getInstance().level;
+         if (world != null && vault.has(Vault.WORLD) && world.dimension().location().equals(vault.get(Vault.WORLD).get(WorldManager.KEY))) {
+            this.ifPresent(EFFECTS, effects -> data.setEffects((DimensionSpecialEffects)AccessorDimensionSpecialEffects.getEffects().get(effects)));
+         }
+      });
    }
 
    public WorldRenderer setTheme(Theme theme) {
@@ -102,7 +122,9 @@ public class WorldRenderer extends DataObject<WorldRenderer> {
          .set(GRASS_COLOR, Integer.valueOf(theme.getGrassColor()))
          .set(FOLIAGE_COLOR, Integer.valueOf(theme.getFoliageColor()))
          .set(WATER_COLOR, Integer.valueOf(theme.getWaterColor()))
-         .set(WATER_FOG_COLOR, Integer.valueOf(theme.getWaterFogColor()));
+         .set(WATER_FOG_COLOR, Integer.valueOf(theme.getWaterFogColor()))
+         .set(TIME, Integer.valueOf(theme.getTime()))
+         .set(EFFECTS, theme.getEffects());
    }
 
    public float getBrightness(int lightLevel) {

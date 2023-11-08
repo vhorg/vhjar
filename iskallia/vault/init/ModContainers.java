@@ -1,9 +1,13 @@
 package iskallia.vault.init;
 
+import iskallia.vault.block.entity.AlchemyArchiveTileEntity;
+import iskallia.vault.block.entity.ModifierDiscoveryTileEntity;
+import iskallia.vault.container.AlchemyArchiveContainer;
 import iskallia.vault.container.AlchemyTableContainer;
 import iskallia.vault.container.BountyContainer;
 import iskallia.vault.container.InscriptionTableContainer;
 import iskallia.vault.container.LootStatueContainer;
+import iskallia.vault.container.ModifierDiscoveryContainer;
 import iskallia.vault.container.ModifierWorkbenchContainer;
 import iskallia.vault.container.NBTElementContainer;
 import iskallia.vault.container.RelicPedestalContainer;
@@ -91,6 +95,8 @@ public class ModContainers {
    public static MenuType<VaultEnhancementAltarContainer> ENHANCEMENT_ALTAR_CONTAINER;
    public static MenuType<ModifierWorkbenchContainer> MODIFIER_WORKBENCH_CONTAINER;
    public static MenuType<AlchemyTableContainer> ALCHEMY_TABLE_CONTAINER;
+   public static MenuType<AlchemyArchiveContainer> ALCHEMY_ARCHIVE_CONTAINER;
+   public static MenuType<ModifierDiscoveryContainer> MODIFIER_DISCOVERY_CONTAINER;
    public static MenuType<VaultEnchanterContainer> VAULT_ENCHANTER_CONTAINER;
    public static MenuType<SkillAltarContainer.Default> SKILL_ALTAR_CONTAINER;
    public static MenuType<SkillAltarContainer.Import> SKILL_ALTAR_IMPORT_CONTAINER;
@@ -269,6 +275,24 @@ public class ModContainers {
          BlockPos pos = buffer.readBlockPos();
          return new AlchemyTableContainer(windowId, world, pos, inventory);
       });
+      ALCHEMY_ARCHIVE_CONTAINER = IForgeMenuType.create(
+         (windowId, inventory, buffer) -> {
+            Level world = inventory.player.getCommandSenderWorld();
+            BlockPos pos = buffer.readBlockPos();
+            return new AlchemyArchiveContainer(
+               windowId, world, pos, inventory.player, AlchemyArchiveTileEntity.readEffects(buffer.readNbt().getList("effects", 8))
+            );
+         }
+      );
+      MODIFIER_DISCOVERY_CONTAINER = IForgeMenuType.create(
+         (windowId, inventory, buffer) -> {
+            Level world = inventory.player.getCommandSenderWorld();
+            BlockPos pos = buffer.readBlockPos();
+            return new ModifierDiscoveryContainer(
+               windowId, world, pos, inventory.player, ModifierDiscoveryTileEntity.readGearModifiers(buffer.readNbt().getList("gearModifiers", 10))
+            );
+         }
+      );
       VAULT_ENCHANTER_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          Level world = inventory.player.getCommandSenderWorld();
          BlockPos pos = buffer.readBlockPos();
@@ -313,6 +337,8 @@ public class ModContainers {
                (MenuType)ENHANCEMENT_ALTAR_CONTAINER.setRegistryName("enhancement_altar_container"),
                (MenuType)MODIFIER_WORKBENCH_CONTAINER.setRegistryName("modifier_workbench_container"),
                (MenuType)ALCHEMY_TABLE_CONTAINER.setRegistryName("alchemy_table_container"),
+               (MenuType)ALCHEMY_ARCHIVE_CONTAINER.setRegistryName("alchemy_archive_container"),
+               (MenuType)MODIFIER_DISCOVERY_CONTAINER.setRegistryName("modifier_discovery_container"),
                (MenuType)VAULT_ENCHANTER_CONTAINER.setRegistryName("vault_enchanter_container"),
                (MenuType)SKILL_ALTAR_CONTAINER.setRegistryName("skill_altar_container"),
                (MenuType)SKILL_ALTAR_IMPORT_CONTAINER.setRegistryName("skill_altar_import_container")

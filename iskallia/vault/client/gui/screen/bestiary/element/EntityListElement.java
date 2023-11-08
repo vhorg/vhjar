@@ -7,7 +7,7 @@ import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.framework.text.LabelTextStyle;
 import iskallia.vault.client.gui.screen.bestiary.BestiaryScreen;
-import iskallia.vault.core.world.data.PartialEntityGroup;
+import iskallia.vault.core.world.data.entity.PartialEntityGroup;
 import iskallia.vault.util.EntityGroupsUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.entity.EntityType;

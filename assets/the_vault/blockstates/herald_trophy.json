@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "variant=bronze": {
+      "model": "the_vault:block/herald_trophy/bronze"
+    },
+    "variant=silver": {
+      "model": "the_vault:block/herald_trophy/silver"
+    },
+    "variant=gold": {
+      "model": "the_vault:block/herald_trophy/gold"
+    },
+    "variant=platinum": {
+      "model": "the_vault:block/herald_trophy/platinum"
+    }
+  }
+}

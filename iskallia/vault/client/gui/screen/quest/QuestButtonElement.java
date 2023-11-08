@@ -44,6 +44,16 @@ public class QuestButtonElement extends NineSliceButtonElement<QuestButtonElemen
             1
          );
       }
+
+      if (state.getReadyToComplete().contains(this.quest.getId())) {
+         renderer.render(
+            TextureAtlasRegion.of(ModTextureAtlases.QUESTS, VaultMod.id("gui/quests/exclamation_point")),
+            poseStack,
+            this.getWorldSpatial().right() - 18,
+            this.getWorldSpatial().y() + 2,
+            1
+         );
+      }
    }
 
    @Override

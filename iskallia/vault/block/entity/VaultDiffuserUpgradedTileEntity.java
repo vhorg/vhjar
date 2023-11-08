@@ -205,7 +205,7 @@ public class VaultDiffuserUpgradedTileEntity extends BlockEntity implements Menu
                IItemHandler handler = (IItemHandler)itemHandlerResult.getKey();
 
                for (int i = 0; i < handler.getSlots(); i++) {
-                  int count = handler.getStackInSlot(i).getCount();
+                  int count = Math.min(64, handler.getStackInSlot(i).getCount());
                   ItemStack extractItem = handler.extractItem(i, count, true);
                   if (!extractItem.isEmpty()) {
                      for (int j = 0; j < dest.inputInv.getContainerSize(); j++) {
@@ -338,7 +338,7 @@ public class VaultDiffuserUpgradedTileEntity extends BlockEntity implements Menu
       if (!itemstack.isEmpty() && canTakeItemFromContainer(pContainer, itemstack, pSlot, pDirection)) {
          ItemStack itemstack1 = itemstack.copy();
          ItemStack stack = pContainer.getItem(pSlot);
-         ItemStack itemstack2 = addItem(pContainer, diffuser.inputInv, pContainer.removeItem(pSlot, stack.getCount()), (Direction)null);
+         ItemStack itemstack2 = addItem(pContainer, diffuser.inputInv, pContainer.removeItem(pSlot, Math.min(64, stack.getCount())), (Direction)null);
          if (itemstack2.isEmpty()) {
             pContainer.setChanged();
             return true;

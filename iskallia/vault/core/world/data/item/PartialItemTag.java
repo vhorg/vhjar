@@ -2,7 +2,7 @@ package iskallia.vault.core.world.data.item;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import java.util.Optional;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;

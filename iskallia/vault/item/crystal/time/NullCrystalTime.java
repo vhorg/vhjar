@@ -23,7 +23,7 @@ public class NullCrystalTime extends CrystalTime {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
    }
 
    @Override

@@ -2,10 +2,11 @@ package iskallia.vault.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
-import iskallia.vault.client.render.ChampionBuffsIndicatorRenderer;
 import iskallia.vault.client.render.ChampionRenderer;
 import iskallia.vault.client.render.FearIndicatorRenderer;
 import iskallia.vault.client.render.GlacialShatterIndicatorRenderer;
+import iskallia.vault.client.render.ImmortalityIndicatorRenderer;
+import iskallia.vault.client.render.SpecialEffectsMobRenderer;
 import iskallia.vault.client.render.TauntCharmIndicatorRenderer;
 import iskallia.vault.client.render.VulnerableIndicatorRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -46,8 +47,9 @@ public abstract class MixinEntityRenderDispatcher {
       TauntCharmIndicatorRenderer.render(entity, poseStack, bufferSource, this.cameraOrientation());
       FearIndicatorRenderer.render(entity, poseStack, bufferSource, this.cameraOrientation());
       VulnerableIndicatorRenderer.render(entity, poseStack, bufferSource, this.cameraOrientation());
+      ImmortalityIndicatorRenderer.render(entity, poseStack, bufferSource, this.cameraOrientation());
       GlacialShatterIndicatorRenderer.render(entity, poseStack, bufferSource, this.cameraOrientation());
       ChampionRenderer.render(entity, poseStack, bufferSource, this.cameraOrientation(), partialTicks);
-      ChampionBuffsIndicatorRenderer.render(entity, poseStack, bufferSource, this.cameraOrientation());
+      SpecialEffectsMobRenderer.render(entity, poseStack, bufferSource, this.cameraOrientation());
    }
 }

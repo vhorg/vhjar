@@ -4,7 +4,6 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
-import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.random.RandomSource;
@@ -21,6 +20,7 @@ import iskallia.vault.core.world.template.JigsawTemplate;
 import iskallia.vault.core.world.template.PlacementSettings;
 import iskallia.vault.core.world.template.Template;
 import iskallia.vault.core.world.template.data.TemplateEntry;
+import iskallia.vault.core.world.template.data.TemplatePool;
 import iskallia.vault.init.ModBlocks;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -39,17 +39,20 @@ public abstract class VaultLayout extends GridLayout {
    public static final FieldKey<Float> OBJECTIVE_PROBABILITY = FieldKey.of("objective_probability", Float.class)
       .with(Version.v1_0, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
+   public static final FieldKey<Void> FILL_AIR = FieldKey.of("fill_stone", Void.class).with(Version.v1_19, Adapters.ofVoid(), DISK.all()).register(FIELDS);
 
    @Override
    public void initServer(VirtualWorld world, Vault vault, GridGenerator generator) {
       CommonEvents.NOISE_GENERATION.in(world).register(this, data -> {
-         MutableBlockPos pos = new MutableBlockPos();
-         BlockState state = ModBlocks.VAULT_BEDROCK.defaultBlockState();
+         if (!this.has(FILL_AIR)) {
+            MutableBlockPos pos = new MutableBlockPos();
+            BlockState state = ModBlocks.VAULT_BEDROCK.defaultBlockState();
 
-         for (int y = 63; y >= 0; y--) {
-            for (int x = 0; x < 16; x++) {
-               for (int z = 0; z < 16; z++) {
-                  data.getChunk().setBlockState(pos.set(x, y, z), state, false);
+            for (int y = 63; y >= 0; y--) {
+               for (int x = 0; x < 16; x++) {
+                  for (int z = 0; z < 16; z++) {
+                     data.getChunk().setBlockState(pos.set(x, y, z), state, false);
+                  }
                }
             }
          }
@@ -106,81 +109,95 @@ public abstract class VaultLayout extends GridLayout {
 
    public abstract VaultLayout.PieceType getType(Vault var1, RegionPos var2);
 
-   public Template getStart(TemplatePoolKey pool, Version version, RegionPos region, RandomSource random, Direction facing, PlacementSettings settings) {
-      TemplateEntry entry = pool.get(version).getRandomFlat(version, random).orElse(null);
-      if (entry == null) {
+   public Template getStart(TemplatePool pool, Version version, RegionPos region, RandomSource random, Direction facing, PlacementSettings settings) {
+      if (pool == null) {
          return EmptyTemplate.INSTANCE;
       } else {
-         Mirror mirror = random.nextBoolean() ? Mirror.FRONT_BACK : Mirror.NONE;
+         TemplateEntry entry = pool.getRandomFlat(version, random).orElse(null);
+         if (entry == null) {
+            return EmptyTemplate.INSTANCE;
+         } else {
+            Mirror mirror = random.nextBoolean() ? Mirror.FRONT_BACK : Mirror.NONE;
 
-         Rotation rotation = switch (facing) {
-            case NORTH -> Rotation.CLOCKWISE_180;
-            case EAST -> Rotation.COUNTERCLOCKWISE_90;
-            case WEST -> Rotation.CLOCKWISE_90;
-            case SOUTH -> Rotation.NONE;
-            default -> throw new UnsupportedOperationException("Cannot place start facing " + facing);
-         };
-         BlockPos offset = new BlockPos(13, 0, 26);
-         BlockPos pos = region.toBlockPos().above(22);
-         settings.addProcessors(
-            TileProcessor.translate(offset),
-            TileProcessor.mirror(mirror, 23, 23, true),
-            TileProcessor.rotate(rotation, 23, 23, true),
-            TileProcessor.translate(pos),
-            EntityProcessor.translate(offset),
-            EntityProcessor.mirror(mirror, 23, 23, true),
-            EntityProcessor.rotate(rotation, 23, 23, true),
-            EntityProcessor.translate(pos)
-         );
-         return JigsawTemplate.of(version, entry, 10, random);
-      }
-   }
-
-   public Template getRoom(TemplatePoolKey pool, Version version, RegionPos region, RandomSource random, PlacementSettings settings) {
-      TemplateEntry entry = pool.get(version).getRandomFlat(version, random).orElse(null);
-      if (entry == null) {
-         return EmptyTemplate.INSTANCE;
-      } else {
-         Mirror mirror = random.nextBoolean() ? Mirror.NONE : Mirror.FRONT_BACK;
-         Rotation rotation = new Rotation[]{Rotation.NONE, Rotation.COUNTERCLOCKWISE_90, Rotation.CLOCKWISE_90, Rotation.CLOCKWISE_180}[random.nextInt(4)];
-         BlockPos pos = region.toBlockPos().above(9);
-         settings.addProcessors(
-            TileProcessor.mirror(mirror, 23, 23, true),
-            TileProcessor.rotate(rotation, 23, 23, true),
-            TileProcessor.translate(pos),
-            EntityProcessor.mirror(mirror, 23, 23, true),
-            EntityProcessor.rotate(rotation, 23, 23, true),
-            EntityProcessor.translate(pos)
-         );
-         return JigsawTemplate.of(version, entry, 10, random);
-      }
-   }
-
-   public Template getTunnel(TemplatePoolKey pool, Version version, RegionPos region, RandomSource random, Axis axis, PlacementSettings settings) {
-      TemplateEntry entry = pool.get(version).getRandomFlat(version, random).orElse(null);
-      if (entry == null) {
-         return EmptyTemplate.INSTANCE;
-      } else {
-         int index = random.nextInt(4);
-         Mirror mirror = new Mirror[]{Mirror.NONE, Mirror.FRONT_BACK, Mirror.LEFT_RIGHT, Mirror.NONE}[index];
-         Rotation rotation = index == 3 ? Rotation.CLOCKWISE_180 : Rotation.NONE;
-         if (axis == Axis.X) {
-            rotation = rotation.getRotated(Rotation.CLOCKWISE_90);
+            Rotation rotation = switch (facing) {
+               case NORTH -> Rotation.CLOCKWISE_180;
+               case EAST -> Rotation.COUNTERCLOCKWISE_90;
+               case WEST -> Rotation.CLOCKWISE_90;
+               case SOUTH -> Rotation.NONE;
+               default -> throw new UnsupportedOperationException("Cannot place start facing " + facing);
+            };
+            BlockPos offset = new BlockPos(13, 0, 26);
+            BlockPos pos = region.toBlockPos().above(22);
+            settings.addProcessors(
+               TileProcessor.translate(offset),
+               TileProcessor.mirror(mirror, 23, 23, true),
+               TileProcessor.rotate(rotation, 23, 23, true),
+               TileProcessor.translate(pos),
+               EntityProcessor.translate(offset),
+               EntityProcessor.mirror(mirror, 23, 23, true),
+               EntityProcessor.rotate(rotation, 23, 23, true),
+               EntityProcessor.translate(pos)
+            );
+            return JigsawTemplate.of(version, entry, 10, random);
          }
+      }
+   }
 
-         BlockPos offset = new BlockPos(18, 0, 0);
-         BlockPos pos = region.toBlockPos().above(27);
-         settings.addProcessors(
-            TileProcessor.translate(offset),
-            TileProcessor.mirror(mirror, 23, 23, true),
-            TileProcessor.rotate(rotation, 23, 23, true),
-            TileProcessor.translate(pos),
-            EntityProcessor.translate(offset),
-            EntityProcessor.mirror(mirror, 23, 23, true),
-            EntityProcessor.rotate(rotation, 23, 23, true),
-            EntityProcessor.translate(pos)
-         );
-         return JigsawTemplate.of(version, entry, 10, random);
+   public Template getRoom(TemplatePool pool, Version version, RegionPos region, RandomSource random, PlacementSettings settings) {
+      if (pool == null) {
+         return EmptyTemplate.INSTANCE;
+      } else {
+         TemplateEntry entry = pool.getRandomFlat(version, random).orElse(null);
+         if (entry == null) {
+            return EmptyTemplate.INSTANCE;
+         } else {
+            Mirror mirror = random.nextBoolean() ? Mirror.NONE : Mirror.FRONT_BACK;
+            Rotation rotation = new Rotation[]{Rotation.NONE, Rotation.COUNTERCLOCKWISE_90, Rotation.CLOCKWISE_90, Rotation.CLOCKWISE_180}[random.nextInt(4)];
+            BlockPos pos = region.toBlockPos().above(region.getSizeX() > 47 ? 0 : 9);
+            int offsetX = region.getSizeX() / 2;
+            int offsetZ = region.getSizeZ() / 2;
+            settings.addProcessors(
+               TileProcessor.mirror(mirror, offsetX, offsetZ, true),
+               TileProcessor.rotate(rotation, offsetX, offsetZ, true),
+               TileProcessor.translate(pos),
+               EntityProcessor.mirror(mirror, offsetX, offsetZ, true),
+               EntityProcessor.rotate(rotation, offsetX, offsetZ, true),
+               EntityProcessor.translate(pos)
+            );
+            return JigsawTemplate.of(version, entry, 10, random);
+         }
+      }
+   }
+
+   public Template getTunnel(TemplatePool pool, Version version, RegionPos region, RandomSource random, Axis axis, PlacementSettings settings) {
+      if (pool == null) {
+         return EmptyTemplate.INSTANCE;
+      } else {
+         TemplateEntry entry = pool.getRandomFlat(version, random).orElse(null);
+         if (entry == null) {
+            return EmptyTemplate.INSTANCE;
+         } else {
+            int index = random.nextInt(4);
+            Mirror mirror = new Mirror[]{Mirror.NONE, Mirror.FRONT_BACK, Mirror.LEFT_RIGHT, Mirror.NONE}[index];
+            Rotation rotation = index == 3 ? Rotation.CLOCKWISE_180 : Rotation.NONE;
+            if (axis == Axis.X) {
+               rotation = rotation.getRotated(Rotation.CLOCKWISE_90);
+            }
+
+            BlockPos offset = new BlockPos(18, 0, 0);
+            BlockPos pos = region.toBlockPos().above(27);
+            settings.addProcessors(
+               TileProcessor.translate(offset),
+               TileProcessor.mirror(mirror, 23, 23, true),
+               TileProcessor.rotate(rotation, 23, 23, true),
+               TileProcessor.translate(pos),
+               EntityProcessor.translate(offset),
+               EntityProcessor.mirror(mirror, 23, 23, true),
+               EntityProcessor.rotate(rotation, 23, 23, true),
+               EntityProcessor.translate(pos)
+            );
+            return JigsawTemplate.of(version, entry, 10, random);
+         }
       }
    }
 

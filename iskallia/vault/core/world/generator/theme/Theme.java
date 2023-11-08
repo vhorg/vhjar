@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import iskallia.vault.config.adapter.ThemeAdapter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import net.minecraft.resources.ResourceLocation;
 
 public abstract class Theme {
    private static final Gson GSON = new GsonBuilder().registerTypeAdapterFactory(ThemeAdapter.FACTORY).setPrettyPrinting().create();
@@ -17,9 +18,20 @@ public abstract class Theme {
    protected int waterFogColor;
    protected String particle;
    protected float particleProbability;
+   protected int time;
+   protected ResourceLocation effects;
 
    public Theme(
-      float ambientLight, int fogColor, int grassColor, int foliageColor, int waterColor, int waterFogColor, String particle, float particleProbability
+      float ambientLight,
+      int fogColor,
+      int grassColor,
+      int foliageColor,
+      int waterColor,
+      int waterFogColor,
+      String particle,
+      float particleProbability,
+      int time,
+      ResourceLocation effects
    ) {
       this.ambientLight = ambientLight;
       this.fogColor = fogColor;
@@ -29,6 +41,8 @@ public abstract class Theme {
       this.waterFogColor = waterFogColor;
       this.particle = particle;
       this.particleProbability = particleProbability;
+      this.time = time;
+      this.effects = effects;
    }
 
    public float getAmbientLight() {
@@ -61,6 +75,14 @@ public abstract class Theme {
 
    public float getParticleProbability() {
       return this.particleProbability;
+   }
+
+   public int getTime() {
+      return this.time;
+   }
+
+   public ResourceLocation getEffects() {
+      return this.effects;
    }
 
    public static Theme fromPath(String path) {

@@ -22,6 +22,7 @@
     { "predicate": { "the_vault:placeholder_type": 18 }, "model": "the_vault:item/placeholder_treasure_door" },
     { "predicate": { "the_vault:placeholder_type": 19 }, "model": "the_vault:item/placeholder_dungeon_door" },
     { "predicate": { "the_vault:placeholder_type": 20 }, "model": "the_vault:item/placeholder_pylon" },
-    { "predicate": { "the_vault:placeholder_type": 21 }, "model": "the_vault:item/placeholder_dungeon_discoverable" }
+    { "predicate": { "the_vault:placeholder_type": 21 }, "model": "the_vault:item/placeholder_dungeon_discoverable" },
+    { "predicate": { "the_vault:placeholder_type": 22 }, "model": "the_vault:item/placeholder_gate" }
   ]
 }

@@ -39,7 +39,7 @@ public class AbilityQuickselectMessage {
       Context context = contextSupplier.get();
       context.enqueueWork(() -> {
          ServerPlayer sender = context.getSender();
-         if (sender != null) {
+         if (sender != null && !sender.isSpectator()) {
             PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
             AbilityTree abilityTree = abilitiesData.getAbilities(sender);
             SpecializedSkill skill = (SpecializedSkill)abilityTree.getForId(pkt.abilityName).orElse(null);

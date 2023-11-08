@@ -33,7 +33,7 @@ public class ServerboundAbilityKeyMessage {
       Context ctx = contextSupplier.get();
       ctx.enqueueWork(() -> {
          ServerPlayer sender = ctx.getSender();
-         if (sender != null) {
+         if (sender != null && !sender.isSpectator()) {
             PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)sender.level);
             AbilityTree abilityTree = abilitiesData.getAbilities(sender);
             SkillContext context = SkillContext.of(sender);

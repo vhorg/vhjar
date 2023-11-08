@@ -45,6 +45,11 @@ public abstract class Objective extends DataObject<Objective> implements ISuppli
       this.get(CHILDREN).forEach(child -> child.initServer(world, vault));
    }
 
+   @OnlyIn(Dist.CLIENT)
+   public void initClient(Vault vault) {
+      this.get(CHILDREN).forEach(child -> child.initClient(vault));
+   }
+
    public void tickServer(VirtualWorld world, Vault vault) {
       this.get(CHILDREN).forEach(child -> child.tickServer(world, vault));
    }

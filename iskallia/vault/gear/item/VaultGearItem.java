@@ -225,11 +225,11 @@ public interface VaultGearItem
          if (stack.getDamageValue() == -1 && newDamage < maxDamage) {
             stack.getOrCreateTag().putInt("Damage", newDamage);
             VaultGearData.read(stack).write(stack);
-         } else if (newDamage >= maxDamage) {
+         } else if (newDamage != -1 && newDamage < maxDamage) {
+            super.setDamage(stack, newDamage);
+         } else {
             stack.getOrCreateTag().putInt("Damage", -1);
             VaultGearData.read(stack).write(stack);
-         } else {
-            super.setDamage(stack, newDamage);
          }
       }
    }

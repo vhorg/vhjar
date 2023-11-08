@@ -1,0 +1,12 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "the_vault:item/charm/unidentified_small"
+  },
+  "overrides": [
+    {"predicate": {"the_vault:charm": 12}, "model": "the_vault:item/charm/small_idona"},
+    {"predicate": {"the_vault:charm": 13}, "model": "the_vault:item/charm/small_tenos"},
+    {"predicate": {"the_vault:charm": 14}, "model": "the_vault:item/charm/small_velara"},
+    {"predicate": {"the_vault:charm": 15}, "model": "the_vault:item/charm/small_wendarr"}
+  ]
+}

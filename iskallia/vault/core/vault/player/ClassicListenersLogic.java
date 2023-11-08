@@ -8,6 +8,7 @@ import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.vault.EntityState;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.stat.StatCollector;
@@ -25,6 +26,7 @@ import iskallia.vault.item.gear.TrinketItem;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.expertise.type.TrinketerExpertise;
 import iskallia.vault.world.data.PlayerExpertisesData;
+import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultPartyData;
 import iskallia.vault.world.data.VaultPlayerStats;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -43,6 +45,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitleTextPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.GameType;
 import net.minecraftforge.common.MinecraftForge;
 
 public class ClassicListenersLogic extends ListenersLogic {
@@ -50,6 +53,9 @@ public class ClassicListenersLogic extends ListenersLogic {
    public static final FieldRegistry FIELDS = ListenersLogic.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Integer> MAX_PLAYERS = FieldKey.of("max_players", Integer.class)
       .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all())
+      .register(FIELDS);
+   public static final FieldKey<Integer> MIN_LEVEL = FieldKey.of("min_level", Integer.class)
+      .with(Version.v1_19, Adapters.INT_SEGMENTED_3, DISK.all())
       .register(FIELDS);
    public static final FieldKey<Void> NATURAL_REGEN = FieldKey.of("natural_regen", Void.class)
       .with(Version.v1_0, Adapters.ofVoid(), DISK.all())
@@ -59,6 +65,9 @@ public class ClassicListenersLogic extends ListenersLogic {
       .register(FIELDS);
    public static final FieldKey<UUIDList> LEAVERS = FieldKey.of("leavers", UUIDList.class)
       .with(Version.v1_0, CompoundAdapter.of(UUIDList::create), DISK.all())
+      .register(FIELDS);
+   public static final FieldKey<GameType> GAME_MODE = FieldKey.of("game_mode", GameType.class)
+      .with(Version.v1_19, Adapters.ofOrdinal(Enum::ordinal, GameType.values()).asNullable(), DISK.all())
       .register(FIELDS);
 
    public ClassicListenersLogic() {
@@ -141,8 +150,18 @@ public class ClassicListenersLogic extends ListenersLogic {
             if (active >= this.get(MAX_PLAYERS).intValue() && listener instanceof Runner) {
                listener.getPlayer()
                   .ifPresent(
-                     player -> player.displayClientMessage(new TextComponent("This vault has reached max capacity.").withStyle(ChatFormatting.RED), true)
+                     player -> player.displayClientMessage(new TextComponent("This vault has reached maximum capacity.").withStyle(ChatFormatting.RED), true)
                   );
+               return false;
+            }
+         }
+
+         if (this.has(MIN_LEVEL)) {
+            ServerPlayer player = listener.getPlayer().orElse(null);
+            if (player != null && PlayerVaultStatsData.get(player.getServer()).getVaultStats(player).getVaultLevel() < this.get(MIN_LEVEL)) {
+               player.displayClientMessage(
+                  new TextComponent("The minimum level for this vault is " + this.get(MIN_LEVEL) + ".").withStyle(ChatFormatting.RED), true
+               );
                return false;
             }
          }
@@ -216,6 +235,7 @@ public class ClassicListenersLogic extends ListenersLogic {
       player.connection.send(titlePacket);
       player.connection.send(subtitlePacket);
       this.printJoinMessage(world, vault, player);
+      this.ifPresent(GAME_MODE, player::setGameMode);
    }
 
    private void printJoinMessage(VirtualWorld world, Vault vault, ServerPlayer player) {
@@ -247,6 +267,8 @@ public class ClassicListenersLogic extends ListenersLogic {
       return listener.getPlayer().map(player -> {
          if (!player.isDeadOrDying()) {
             this.recallToJoinState(Stream.of(listener));
+         } else {
+            player.setGameMode(listener.get(Listener.JOIN_STATE).get(EntityState.GAME_MODE));
          }
 
          VaultPlayerStats.addStats(player.getUUID(), vault.get(Vault.ID));

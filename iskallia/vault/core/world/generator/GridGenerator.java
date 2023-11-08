@@ -16,6 +16,7 @@ import iskallia.vault.core.util.RegionPos;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.world.generator.layout.GridLayout;
+import iskallia.vault.core.world.processor.ProcessorContext;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.core.world.template.EmptyTemplate;
 import iskallia.vault.core.world.template.PlacementSettings;
@@ -86,7 +87,7 @@ public class GridGenerator extends VaultGenerator {
             if (vault.get(Vault.VERSION).isOlderThan(Version.v1_7)) {
                random.setCarverSeed(vault.get(Vault.SEED), region.getX(), region.getZ());
             } else {
-               random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890);
+               random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890L);
             }
 
             if (this.cache == null) {
@@ -97,9 +98,7 @@ public class GridGenerator extends VaultGenerator {
             if (this.cache.has(region)) {
                template = this.cache.get(region);
             } else {
-               PlacementSettings settings = new PlacementSettings().setFlags(3);
-               settings.getProcessorContext().random = random;
-               settings.getProcessorContext().vault = vault;
+               PlacementSettings settings = new PlacementSettings(new ProcessorContext(vault, random)).setFlags(3);
                template = this.get(LAYOUT).getAt(vault, region, random, settings).configure(ChunkedTemplate::new, settings);
                if (template.getParent() != EmptyTemplate.INSTANCE) {
                   this.cache.set(region, template);
@@ -117,10 +116,8 @@ public class GridGenerator extends VaultGenerator {
 
    public void generate(Vault vault, ServerLevelAccessor world, RegionPos region) {
       ChunkRandom random = ChunkRandom.any();
-      random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890);
-      PlacementSettings settings = new PlacementSettings().setFlags(272);
-      settings.getProcessorContext().random = random;
-      settings.getProcessorContext().vault = vault;
+      random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 1234567890L);
+      PlacementSettings settings = new PlacementSettings(new ProcessorContext(vault, random)).setFlags(272);
       ConfiguredTemplate template = this.get(LAYOUT).getAt(vault, region, random, settings).configure(ConfiguredTemplate::new, settings);
       int minX = region.getX() * region.getSizeX();
       int maxX = minX + region.getSizeX();

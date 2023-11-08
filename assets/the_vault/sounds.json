@@ -1,4 +1,77 @@
 {
+  "spark_expunge": {
+    "category": "block",
+    "sounds": [
+      "the_vault:spark_expunge"
+    ]
+  },
+  "artifact_boss_catalyst_hit": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:artifact_boss_catalyst_hit"
+    ]
+  },
+  "artifact_boss_catalyst_hit_wrong": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:artifact_boss_catalyst_hit_wrong"
+    ]
+  },
+  "artifact_boss_attack": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:artifact_boss_attack",
+      "the_vault:artifact_boss_attack2"
+    ]
+  },
+  "artifact_boss_magic_attack": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:artifact_boss_magic_attack"
+    ]
+  },
+  "artifact_boss_magic_attack_hit": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:artifact_boss_magic_attack_hit"
+    ]
+  },
+  "artifact_boss_death": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:artifact_boss_death"
+    ]
+  },
+  "artifact_boss_hurt": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:artifact_boss_hurt"
+    ]
+  },
+  "artifact_boss_ambient": {
+    "category": "hostile",
+    "sounds": [
+      "the_vault:artifact_boss_ambient"
+    ]
+  },
+  "artifact_complete": {
+    "category": "block",
+    "sounds": [
+      "the_vault:artifact_complete"
+    ]
+  },
+  "jewel_cut": {
+    "category": "block",
+    "sounds": [
+      "the_vault:jewel_cut"
+    ]
+  },
+  "jewel_cut_success": {
+    "category": "block",
+    "sounds": [
+      "the_vault:jewel_cut_success"
+    ]
+  },
   "bonk": {
     "category": "master",
     "sounds": [
@@ -755,6 +828,42 @@
     "category": "block",
     "sounds": [
       "the_vault:disarm_trap"
+    ]
+  },
+  "gate_open": {
+    "category": "master",
+    "sounds": [
+      "the_vault:gate_open"
+    ]
+  },
+  "gate_close": {
+    "category": "master",
+    "sounds": [
+      "the_vault:gate_close"
+    ]
+  },
+  "boss_fight_1": {
+    "category": "master",
+    "sounds": [
+      "the_vault:boss_fight_1"
+    ]
+  },
+  "boss_fight_2": {
+    "category": "master",
+    "sounds": [
+      "the_vault:boss_fight_2"
+    ]
+  },
+  "boss_fight_3": {
+    "category": "master",
+    "sounds": [
+      "the_vault:boss_fight_3"
+    ]
+  },
+  "boss_fight_4": {
+    "category": "master",
+    "sounds": [
+      "the_vault:boss_fight_4"
     ]
   }
 }

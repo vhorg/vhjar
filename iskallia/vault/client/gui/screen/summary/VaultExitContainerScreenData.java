@@ -409,7 +409,7 @@ public class VaultExitContainerScreenData {
          StatLabelListElement.Stat.ofInteger(() -> "Vault Level", () -> "Level: " + vault.get(Vault.LEVEL).get(), () -> vault.get(Vault.LEVEL).get()),
          StatLabelListElement.Stat.ofSeconds(
             () -> "Time Left",
-            () -> UIHelper.formatTimeString(vault.get(Vault.CLOCK).get(TickClock.DISPLAY_TIME)),
+            () -> UIHelper.formatTimeString(vault.get(Vault.CLOCK).get(TickClock.DISPLAY_TIME).intValue()),
             () -> vault.get(Vault.CLOCK).get(TickClock.DISPLAY_TIME) / 20
          ),
          StatLabelListElement.Stat.ofSeconds(() -> "Time Spent", () -> UIHelper.formatTimeString(endTime - startTime), () -> (endTime - startTime) / 20),

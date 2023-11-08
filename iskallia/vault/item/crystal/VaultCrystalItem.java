@@ -4,16 +4,24 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.VaultPortalSize;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
+import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.objective.ParadoxObjective;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
+import iskallia.vault.item.crystal.layout.HeraldCrystalLayout;
+import iskallia.vault.item.crystal.layout.ParadoxCrystalLayout;
 import iskallia.vault.item.crystal.model.RawCrystalModel;
+import iskallia.vault.item.crystal.modifiers.ParadoxCrystalModifiers;
 import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
+import iskallia.vault.item.crystal.objective.HeraldCrystalObjective;
+import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
+import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.item.tool.IManualModelLoading;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,6 +93,39 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
             crystal.setObjective(new EmptyCrystalObjective());
             crystal.setTheme(new PoolCrystalTheme(VaultMod.id("raw")));
          });
+         this.addCrystal(items, crystal -> {
+            crystal.setLevel(-1);
+            crystal.setObjective(new ParadoxCrystalObjective(ParadoxObjective.Type.BUILD));
+            crystal.setLayout(new ParadoxCrystalLayout());
+            crystal.setModifiers(new ParadoxCrystalModifiers());
+            crystal.setUnmodifiable(true);
+         });
+         this.addCrystal(items, crystal -> {
+            crystal.setLevel(-1);
+            crystal.setObjective(new ParadoxCrystalObjective(ParadoxObjective.Type.RUN));
+            crystal.setLayout(new ParadoxCrystalLayout());
+            crystal.setModifiers(new ParadoxCrystalModifiers());
+            crystal.setUnmodifiable(true);
+         });
+         this.addCrystal(items, crystal -> {
+            crystal.setLevel(100);
+            crystal.setObjective(new HeraldCrystalObjective());
+            crystal.setTheme(new ValueCrystalTheme(VaultMod.id("classic_vault_herald")));
+            crystal.setLayout(new HeraldCrystalLayout());
+            crystal.getModifiers().setRandomModifiers(false);
+            crystal.setUnmodifiable(true);
+         });
+      }
+   }
+
+   public CompoundTag getShareTag(ItemStack stack) {
+      CompoundTag nbt = super.getShareTag(stack);
+      if (nbt == null) {
+         return null;
+      } else {
+         nbt = nbt.copy();
+         nbt.remove("scheduledTasks");
+         return nbt;
       }
    }
 
@@ -101,7 +142,7 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
       if (!context.getLevel().isClientSide && context.getPlayer() != null) {
          CrystalData data = CrystalData.read(context.getItemInHand());
          BlockPos pos = context.getClickedPos();
-         if (this.tryCreatePortal(context.getLevel(), pos, context.getClickedFace(), data)) {
+         if (data.onPlaced(context) && this.tryCreatePortal(context.getLevel(), pos, context.getClickedFace(), data)) {
             context.getLevel().playSound(null, pos.getX(), pos.getY(), pos.getZ(), ModSounds.VAULT_PORTAL_OPEN, SoundSource.BLOCKS, 1.0F, 1.0F);
             MutableComponent playerName = context.getPlayer().getDisplayName().copy();
             playerName.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(9974168)));
@@ -141,7 +182,10 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
    @OnlyIn(Dist.CLIENT)
    @ParametersAreNonnullByDefault
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-      CrystalData.read(stack).addText(tooltip, flag);
+      if (ModConfigs.isInitialized()) {
+         CrystalData.run(stack, data -> data.addText(tooltip, flag, (float)ClientScheduler.INSTANCE.getTickCount()));
+      }
+
       super.appendHoverText(stack, world, tooltip, flag);
    }
 
@@ -169,6 +213,7 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
          this.clearScheduledTasks(itemStack);
       }
 
+      CrystalData.run(itemStack, data -> data.onInventoryTick(world, entity, itemSlot, isSelected));
       super.inventoryTick(itemStack, world, entity, itemSlot, isSelected);
    }
 

@@ -2,8 +2,8 @@ package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.core.world.data.EntityPredicate;
-import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import iskallia.vault.entity.champion.LeechOnHitAffix;
 import iskallia.vault.entity.champion.OnHitApplyPotionAffix;
 import iskallia.vault.entity.champion.PotionAuraAffix;
