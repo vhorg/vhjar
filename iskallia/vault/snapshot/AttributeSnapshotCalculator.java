@@ -8,6 +8,8 @@ import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
 import iskallia.vault.gear.attribute.type.EffectAvoidanceCombinedMerger;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.gear.charm.CharmHelper;
+import iskallia.vault.gear.charm.GearAttributeCharm;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.CuriosGearItem;
@@ -18,6 +20,7 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.gear.CharmItem;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.talent.GearAttributeSkill;
@@ -59,6 +62,30 @@ public class AttributeSnapshotCalculator {
                            .computeIfAbsent(attributeInstance.getAttribute(), v -> new AttributeSnapshot.AttributeValue())
                            .addCachedValue(attributeInstance.getValue())
                      );
+               }
+            }
+         );
+      CharmHelper.getCharms(IntegrationCurios.getCuriosItemStacks(player), GearAttributeCharm.class)
+         .forEach(
+            gearCharm -> {
+               if (gearCharm.isUsable(player)) {
+                  if (CharmItem.hasValue(gearCharm.stack())) {
+                     ((GearAttributeCharm)gearCharm.charm())
+                        .getAttributes(CharmItem.getValue(gearCharm.stack()))
+                        .forEach(
+                           attributeInstance -> snapshot.gearAttributeValues
+                              .computeIfAbsent(attributeInstance.getAttribute(), v -> new AttributeSnapshot.AttributeValue())
+                              .addCachedValue(attributeInstance.getValue())
+                        );
+                  } else {
+                     ((GearAttributeCharm)gearCharm.charm())
+                        .getAttributes()
+                        .forEach(
+                           attributeInstance -> snapshot.gearAttributeValues
+                              .computeIfAbsent(attributeInstance.getAttribute(), v -> new AttributeSnapshot.AttributeValue())
+                              .addCachedValue(attributeInstance.getValue())
+                        );
+                  }
                }
             }
          );

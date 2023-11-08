@@ -4,7 +4,7 @@ import iskallia.vault.bounty.task.properties.KillEntityProperties;
 import iskallia.vault.config.bounty.task.entry.GenericEntry;
 import iskallia.vault.config.bounty.task.entry.TaskEntry;
 import iskallia.vault.config.entry.IntRangeEntry;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import java.util.ArrayList;
 import java.util.Set;
 import net.minecraft.world.entity.EntityType;

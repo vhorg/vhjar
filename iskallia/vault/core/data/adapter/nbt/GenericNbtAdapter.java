@@ -15,22 +15,7 @@ import javax.annotation.Nullable;
 import net.minecraft.nbt.Tag;
 
 public class GenericNbtAdapter extends NbtAdapter<Tag> {
-   protected static final NbtAdapter[] ADAPTERS = new NbtAdapter[]{
-      Adapters.END_NBT,
-      Adapters.BYTE_NBT,
-      Adapters.SHORT_NBT,
-      Adapters.INT_NBT,
-      Adapters.LONG_NBT,
-      Adapters.FLOAT_NBT,
-      Adapters.DOUBLE_NBT,
-      Adapters.BYTE_ARRAY_NBT,
-      Adapters.STRING_NBT,
-      Adapters.LIST_NBT,
-      Adapters.COMPOUND_NBT,
-      Adapters.INT_ARRAY_NBT,
-      Adapters.LONG_ARRAY_NBT
-   };
-   protected static final BoundedByteAdapter NBT_ID = new BoundedByteAdapter((byte)0, (byte)(ADAPTERS.length - 1), false);
+   protected static final BoundedByteAdapter NBT_ID = new BoundedByteAdapter((byte)0, (byte)(Adapters.NBT.length - 1), false);
 
    public GenericNbtAdapter(boolean nullable) {
       super(nullable);
@@ -43,52 +28,52 @@ public class GenericNbtAdapter extends NbtAdapter<Tag> {
    @Override
    protected void writeTagBits(Tag value, BitBuffer buffer) {
       NBT_ID.writeBits(Byte.valueOf(value.getId()), buffer);
-      ADAPTERS[value.getId()].writeBits(value, buffer);
+      Adapters.NBT[value.getId()].writeBits(value, buffer);
    }
 
    @Override
    protected Tag readTagBits(BitBuffer buffer) {
-      return (Tag)ADAPTERS[NBT_ID.readBits(buffer).orElseThrow()].readBits(buffer).orElseThrow();
+      return (Tag)Adapters.NBT[NBT_ID.readBits(buffer).orElseThrow()].readBits(buffer).orElseThrow();
    }
 
    @Override
    protected void writeTagBytes(Tag value, ByteBuf buffer) {
       NBT_ID.writeBytes(Byte.valueOf(value.getId()), buffer);
-      ADAPTERS[value.getId()].writeBytes(value, buffer);
+      Adapters.NBT[value.getId()].writeBytes(value, buffer);
    }
 
    @Override
    protected Tag readTagBytes(ByteBuf buffer) {
-      return (Tag)ADAPTERS[NBT_ID.readBytes(buffer).orElseThrow()].readBytes(buffer).orElseThrow();
+      return (Tag)Adapters.NBT[NBT_ID.readBytes(buffer).orElseThrow()].readBytes(buffer).orElseThrow();
    }
 
    @Override
    protected void writeTagData(Tag value, DataOutput data) throws IOException {
       NBT_ID.writeData(Byte.valueOf(value.getId()), data);
-      ADAPTERS[value.getId()].writeData(value, data);
+      Adapters.NBT[value.getId()].writeData(value, data);
    }
 
    @Override
    protected Tag readTagData(DataInput data) throws IOException {
-      return (Tag)ADAPTERS[NBT_ID.readData(data).orElseThrow()].readData(data).orElseThrow();
+      return (Tag)Adapters.NBT[NBT_ID.readData(data).orElseThrow()].readData(data).orElseThrow();
    }
 
    @Nullable
    @Override
    protected Tag writeTagNbt(Tag value) {
-      return ADAPTERS[value.getId()].writeNbt(value).orElse(null);
+      return Adapters.NBT[value.getId()].writeNbt(value).orElse(null);
    }
 
    @Nullable
    @Override
    protected Tag readTagNbt(Tag nbt) {
-      return (Tag)ADAPTERS[nbt.getId()].readNbt(nbt).orElse(null);
+      return (Tag)Adapters.NBT[nbt.getId()].readNbt(nbt).orElse(null);
    }
 
    @Nullable
    @Override
    protected JsonElement writeTagJson(Tag value) {
-      return ADAPTERS[value.getId()].writeJson(value).orElse(null);
+      return Adapters.NBT[value.getId()].writeJson(value).orElse(null);
    }
 
    @Nullable

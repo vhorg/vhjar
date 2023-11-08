@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "the_vault:gilded_candelabra"
+    }
+  ],
+  "result": {
+    "item": "the_vault:gilded_sconce",
+    "count": 4
+  }
+}

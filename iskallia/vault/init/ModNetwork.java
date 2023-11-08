@@ -8,6 +8,7 @@ import iskallia.vault.network.message.AbilityLevelMessage;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
 import iskallia.vault.network.message.AbilitySelectSpecializationMessage;
 import iskallia.vault.network.message.ActiveEternalMessage;
+import iskallia.vault.network.message.AlchemyArchiveDiscoverEffectMessage;
 import iskallia.vault.network.message.AlchemyTableEffectCraftMessage;
 import iskallia.vault.network.message.AngelToggleMessage;
 import iskallia.vault.network.message.AnimalPenParticleMessage;
@@ -16,6 +17,9 @@ import iskallia.vault.network.message.ChainingParticleMessage;
 import iskallia.vault.network.message.ClientboundAlchemyParticleMessage;
 import iskallia.vault.network.message.ClientboundAlchemySecondParticleMessage;
 import iskallia.vault.network.message.ClientboundArchetypeMessage;
+import iskallia.vault.network.message.ClientboundArtifactBossImmunityParticleMessage;
+import iskallia.vault.network.message.ClientboundArtifactBossWendarrExplodeMessage;
+import iskallia.vault.network.message.ClientboundBossStagesMessage;
 import iskallia.vault.network.message.ClientboundChampionMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
 import iskallia.vault.network.message.ClientboundFireballExplosionMessage;
@@ -37,8 +41,10 @@ import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
 import iskallia.vault.network.message.DiffuserParticleMessage;
 import iskallia.vault.network.message.DiffuserUpgradedParticleMessage;
+import iskallia.vault.network.message.DiscoverModifierMessage;
 import iskallia.vault.network.message.DiscoveredAlchemyEffectsMessage;
 import iskallia.vault.network.message.DiscoveredWorkbenchModifierCraftsMessage;
+import iskallia.vault.network.message.DivineAltarConsumeMessage;
 import iskallia.vault.network.message.EffectMessage;
 import iskallia.vault.network.message.EternalInteractionMessage;
 import iskallia.vault.network.message.EternalSyncMessage;
@@ -120,6 +126,8 @@ import iskallia.vault.network.message.TauntParticleMessage;
 import iskallia.vault.network.message.ToolMessage;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.network.message.TrinketJumpMessage;
+import iskallia.vault.network.message.UpdateGodAltarDataMessage;
+import iskallia.vault.network.message.UpdateParadoxDataMessage;
 import iskallia.vault.network.message.VaultArtisanRequestModificationMessage;
 import iskallia.vault.network.message.VaultCharmControllerScrollMessage;
 import iskallia.vault.network.message.VaultEnchanterEnchantMessage;
@@ -131,6 +139,7 @@ import iskallia.vault.network.message.VaultLevelMessage;
 import iskallia.vault.network.message.VaultMessage;
 import iskallia.vault.network.message.VaultPlayerHistoricDataMessage;
 import iskallia.vault.network.message.VaultPlayerStatsMessage;
+import iskallia.vault.network.message.WendarrSparkParticleMessage;
 import iskallia.vault.network.message.WorldListUpdateMessage;
 import iskallia.vault.network.message.bounty.ClientboundBountyAvailableMessage;
 import iskallia.vault.network.message.bounty.ClientboundBountyCompleteMessage;
@@ -469,6 +478,9 @@ public class ModNetwork {
          ScavengerAltarConsumeMessage::handle
       );
       CHANNEL.registerMessage(
+         nextId(), DivineAltarConsumeMessage.class, DivineAltarConsumeMessage::encode, DivineAltarConsumeMessage::decode, DivineAltarConsumeMessage::handle
+      );
+      CHANNEL.registerMessage(
          nextId(),
          ServerboundAbandonBountyMessage.class,
          ServerboundAbandonBountyMessage::encode,
@@ -662,6 +674,13 @@ public class ModNetwork {
          PylonConsumeParticleMessage::handle
       );
       CHANNEL.registerMessage(nextId(), NovaParticleMessage.class, NovaParticleMessage::encode, NovaParticleMessage::decode, NovaParticleMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(),
+         WendarrSparkParticleMessage.class,
+         WendarrSparkParticleMessage::encode,
+         WendarrSparkParticleMessage::decode,
+         WendarrSparkParticleMessage::handle
+      );
       CHANNEL.registerMessage(
          nextId(),
          StonefallFrostParticleMessage.class,
@@ -903,6 +922,43 @@ public class ModNetwork {
          ClientboundAlchemySecondParticleMessage::encode,
          ClientboundAlchemySecondParticleMessage::decode,
          ClientboundAlchemySecondParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundBossStagesMessage.class,
+         ClientboundBossStagesMessage::encode,
+         ClientboundBossStagesMessage::decode,
+         ClientboundBossStagesMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundArtifactBossImmunityParticleMessage.class,
+         ClientboundArtifactBossImmunityParticleMessage::encode,
+         ClientboundArtifactBossImmunityParticleMessage::decode,
+         ClientboundArtifactBossImmunityParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), UpdateParadoxDataMessage.class, UpdateParadoxDataMessage::encode, UpdateParadoxDataMessage::decode, UpdateParadoxDataMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundArtifactBossWendarrExplodeMessage.class,
+         ClientboundArtifactBossWendarrExplodeMessage::encode,
+         ClientboundArtifactBossWendarrExplodeMessage::decode,
+         ClientboundArtifactBossWendarrExplodeMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), UpdateGodAltarDataMessage.class, UpdateGodAltarDataMessage::encode, UpdateGodAltarDataMessage::decode, UpdateGodAltarDataMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         AlchemyArchiveDiscoverEffectMessage.class,
+         AlchemyArchiveDiscoverEffectMessage::encode,
+         AlchemyArchiveDiscoverEffectMessage::decode,
+         AlchemyArchiveDiscoverEffectMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), DiscoverModifierMessage.class, DiscoverModifierMessage::encode, DiscoverModifierMessage::decode, DiscoverModifierMessage::handle
       );
    }
 

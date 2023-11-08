@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_glass_pane_side_alt",
+  "textures": {
+    "pane": "the_vault:block/decoration/wendarr_jewel_glass",
+    "edge": "the_vault:block/decoration/wendarr_jewel_glass_top"
+  }
+}

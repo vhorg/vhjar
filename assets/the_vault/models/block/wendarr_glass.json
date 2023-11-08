@@ -1,0 +1,12 @@
+{
+	"parent": "minecraft:block/cube",
+	"textures": {
+		"particle": "the_vault:block/wendarr_glass",
+		"north": "the_vault:block/wendarr_glass",
+		"south": "the_vault:block/wendarr_glass",
+		"east": "the_vault:block/wendarr_glass",
+		"west": "the_vault:block/wendarr_glass",
+		"up": "the_vault:block/wendarr_glass",
+		"down": "the_vault:block/wendarr_glass_bottom"
+	}
+}

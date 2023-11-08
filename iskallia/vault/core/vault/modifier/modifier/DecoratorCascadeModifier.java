@@ -8,7 +8,7 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.reputation.ScalarReputationProperty;
 import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePredicate;
@@ -57,7 +57,7 @@ public class DecoratorCascadeModifier extends VaultModifier<DecoratorCascadeModi
             if (raw.contains("cascade_seed", 4)) {
                random.setSeed(raw.getLong("cascade_seed"));
             } else {
-               random.setBlockSeed(vault.get(Vault.SEED), tile.getPos(), 237429473);
+               random.setBlockSeed(vault.get(Vault.SEED), tile.getPos(), 237429473L);
             }
 
             for (float p = this.properties.chance; p > 0.0F && random.nextFloat() < p; p--) {

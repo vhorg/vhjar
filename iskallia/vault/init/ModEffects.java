@@ -2,6 +2,7 @@ package iskallia.vault.init;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.effect.BasicEffect;
+import iskallia.vault.effect.BleedEffect;
 import iskallia.vault.effect.ChilledEffect;
 import iskallia.vault.effect.FreezeEffect;
 import iskallia.vault.effect.GlacialShatterEffect;
@@ -141,11 +142,20 @@ public class ModEffects {
    public static final MobEffect GLACIAL_SHATTER = new GlacialShatterEffect(MobEffectCategory.HARMFUL, -16711681, VaultMod.id("glacial_shatter"));
    public static final MobEffect POISON_OVERRIDE = new PoisonOverrideEffect();
    public static final MobEffect NO_AI = new NoAiEffect(VaultMod.id("noai"), -2039584);
+   public static final MobEffect BLEED = new BleedEffect(VaultMod.id("bleed"));
    public static final Set<MobEffect> PREVENT_DURATION_FLASH = Set.of(
-      TOTEM_PLAYER_HEALTH, TOTEM_MANA_REGEN, TOTEM_PLAYER_DAMAGE, SORCERY, STONESKIN, WITCHERY, METHODICAL, DEPLETED, LAST_STAND, BERSERKING
+      TOTEM_PLAYER_HEALTH, TOTEM_MANA_REGEN, TOTEM_PLAYER_DAMAGE, SORCERY, STONESKIN, WITCHERY, METHODICAL, DEPLETED, LAST_STAND, BERSERKING, BLEED
    );
    public static final Set<MobEffect> SYNC_TO_CLIENT_ON_MOB = Set.of(
-      TAUNT_CHARM, TAUNT_REPEL_MOB, GLACIAL_SHATTER, CHILLED, VULNERABLE, MobEffects.DAMAGE_RESISTANCE, MobEffects.MOVEMENT_SPEED, MobEffects.DAMAGE_BOOST
+      TAUNT_CHARM,
+      TAUNT_REPEL_MOB,
+      GLACIAL_SHATTER,
+      CHILLED,
+      VULNERABLE,
+      IMMORTALITY,
+      MobEffects.DAMAGE_RESISTANCE,
+      MobEffects.MOVEMENT_SPEED,
+      MobEffects.DAMAGE_BOOST
    );
 
    public static void register(Register<MobEffect> event) {
@@ -208,7 +218,8 @@ public class ModEffects {
                PYLON,
                PYLON_OVERFLOW,
                IMMORTALITY,
-               PURIFYING_AURA
+               PURIFYING_AURA,
+               BLEED
             }
          );
       MobEffects.POISON = POISON_OVERRIDE;

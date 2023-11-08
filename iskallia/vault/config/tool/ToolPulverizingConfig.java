@@ -11,12 +11,13 @@ import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 public class ToolPulverizingConfig extends Config {
    @Expose
-   private Map<Item, List<LootTable.Entry>> loot;
+   private Map<ResourceLocation, List<LootTable.Entry>> loot;
 
    @Override
    public String getName() {
@@ -24,10 +25,14 @@ public class ToolPulverizingConfig extends Config {
    }
 
    public LootTable get(Item item) {
+      return this.get(item.getRegistryName());
+   }
+
+   public LootTable get(ResourceLocation item) {
       return this.loot.get(item) == null ? null : new LootTable(this.loot.get(item));
    }
 
-   public Map<Item, List<LootTable.Entry>> getLoot() {
+   public Map<ResourceLocation, List<LootTable.Entry>> getLoot() {
       return this.loot;
    }
 
@@ -56,6 +61,10 @@ public class ToolPulverizingConfig extends Config {
    }
 
    private void put(Item item, LootTable lootTable) {
+      this.put(item.getRegistryName(), lootTable);
+   }
+
+   private void put(ResourceLocation item, LootTable lootTable) {
       this.loot.put(item, lootTable.getEntries());
    }
 }

@@ -8,8 +8,10 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import iskallia.vault.VaultMod;
 import iskallia.vault.client.render.IVaultOptions;
+import iskallia.vault.init.ModEffects;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.BiFunction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -23,12 +25,19 @@ import net.minecraftforge.client.gui.IIngameOverlay;
 public class HarmfulPotionOverlay implements IIngameOverlay {
    protected static final ResourceLocation VIGNETTE_LOCATION = VaultMod.id("textures/gui/vignette.png");
    private static final int MAX_ALPHA_DURATION = 300;
-   private static final Map<MobEffect, Float> EFFECT_ALPHA = Map.of(MobEffects.POISON, 0.75F, MobEffects.WITHER, 1.0F);
+   private static final Map<MobEffect, BiFunction<Integer, Integer, Float>> EFFECT_ALPHA = Map.of(
+      MobEffects.POISON,
+      (duration, amplifier) -> Math.min(duration, 300) / 300.0F * 0.75F,
+      MobEffects.WITHER,
+      (duration, amplifier) -> Math.min(duration, 300) / 300.0F * 1.0F,
+      ModEffects.BLEED,
+      (duration, amplifier) -> (float)Math.min(duration, 3) * amplifier.intValue() / 20.0F
+   );
 
    public void render(ForgeIngameGui gui, PoseStack matrixStack, float partialTick, int width, int height) {
       Minecraft minecraft = Minecraft.getInstance();
       if (minecraft.player != null && minecraft.getCameraEntity() == minecraft.player && !((IVaultOptions)minecraft.options).doVanillaPotionDamageEffects()) {
-         for (Entry<MobEffect, Float> entry : EFFECT_ALPHA.entrySet()) {
+         for (Entry<MobEffect, BiFunction<Integer, Integer, Float>> entry : EFFECT_ALPHA.entrySet()) {
             if (minecraft.player.hasEffect(entry.getKey())) {
                this.renderEffect(width, height, entry.getKey(), minecraft.player, entry.getValue());
                break;
@@ -37,10 +46,10 @@ public class HarmfulPotionOverlay implements IIngameOverlay {
       }
    }
 
-   private void renderEffect(int width, int height, MobEffect effect, LocalPlayer player, float maxAlpha) {
+   private void renderEffect(int width, int height, MobEffect effect, LocalPlayer player, BiFunction<Integer, Integer, Float> getAlpha) {
       MobEffectInstance effectInstance = player.getEffect(effect);
       if (effectInstance != null) {
-         float alpha = Math.min(effectInstance.getDuration(), 300) / 300.0F * maxAlpha;
+         float alpha = getAlpha.apply(effectInstance.getDuration(), effectInstance.getAmplifier());
          this.render(effect.getColor(), width, height, VIGNETTE_LOCATION, alpha);
       }
    }

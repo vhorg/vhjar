@@ -4,7 +4,6 @@ import iskallia.vault.block.base.FacedBlock;
 import iskallia.vault.block.property.HiddenIntegerProperty;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.MathUtilities;
-import iskallia.vault.util.ServerScheduler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,12 +21,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Material;
@@ -40,6 +39,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class VaultArtifactBlock extends FacedBlock {
    public static final int ARTIFACT_COUNT = 25;
    public static final IntegerProperty ORDER_PROPERTY = HiddenIntegerProperty.create("order", 1, 25);
+   public static final BooleanProperty GRAYSCALE = BooleanProperty.create("grayscale");
    public static final VoxelShape EAST_SHAPE = Block.box(15.75, 0.0, 0.0, 16.0, 16.0, 16.0);
    public static final VoxelShape NORTH_SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 16.0, 0.25);
    public static final VoxelShape WEST_SHAPE = Block.box(0.0, 0.0, 0.0, 0.25, 16.0, 16.0);
@@ -47,7 +47,7 @@ public class VaultArtifactBlock extends FacedBlock {
 
    public VaultArtifactBlock() {
       super(Properties.of(Material.CLAY, MaterialColor.WOOD).sound(SoundType.WOOL).noOcclusion());
-      this.registerDefaultState((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.SOUTH));
+      this.registerDefaultState((BlockState)((BlockState)((BlockState)this.stateDefinition.any()).setValue(FACING, Direction.SOUTH)).setValue(GRAYSCALE, false));
    }
 
    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
@@ -71,26 +71,14 @@ public class VaultArtifactBlock extends FacedBlock {
    @Override
    public BlockState getStateForPlacement(BlockPlaceContext context) {
       ItemStack artifactBlockItem = context.getItemInHand();
-      return (BlockState)super.getStateForPlacement(context).setValue(ORDER_PROPERTY, this.getOrder(artifactBlockItem));
+      return (BlockState)((BlockState)super.getStateForPlacement(context).setValue(ORDER_PROPERTY, this.getOrder(artifactBlockItem)))
+         .setValue(GRAYSCALE, false);
    }
 
    @Override
    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
       super.createBlockStateDefinition(builder);
-      builder.add(new Property[]{ORDER_PROPERTY});
-   }
-
-   public void onBlockExploded(BlockState state, Level world, BlockPos pos, Explosion explosion) {
-      if (world instanceof ServerLevel sWorld) {
-         List<BlockPos> validPositions = isValidArtifactSetup(sWorld, pos, state);
-         if (!validPositions.isEmpty()) {
-            validPositions.forEach(at -> world.removeBlock(at, false));
-            ServerScheduler.INSTANCE.schedule(5, () -> {
-               ItemStack frameStack = new ItemStack(ModBlocks.FINAL_VAULT_FRAME_BLOCK_ITEM);
-               Block.popResource(sWorld, pos, frameStack);
-            });
-         }
-      }
+      builder.add(new Property[]{ORDER_PROPERTY, GRAYSCALE});
    }
 
    public boolean canDropFromExplosion(BlockState state, BlockGetter world, BlockPos pos, Explosion explosion) {

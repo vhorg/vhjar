@@ -12,10 +12,13 @@ import com.mojang.math.Vector3f;
 import iskallia.vault.client.atlas.ITextureAtlas;
 import iskallia.vault.config.VaultModifierOverlayConfig;
 import iskallia.vault.core.vault.Modifiers;
+import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModTextureAtlases;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import java.awt.Color;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Map.Entry;
@@ -53,6 +56,16 @@ public class ModifiersRenderer {
       renderVaultModifiers(modifiers, matrixStack);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
       RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
+   }
+
+   public static void renderVaultModifiers(List<VaultModifierStack> group, PoseStack matrixStack) {
+      Map<VaultModifier<?>, Integer> modifiers = new Object2IntLinkedOpenHashMap();
+
+      for (VaultModifierStack stack : group) {
+         modifiers.put(stack.getModifier(), stack.getSize());
+      }
+
+      renderVaultModifiers(modifiers, matrixStack);
    }
 
    public static void renderVaultModifiers(Map<VaultModifier<?>, Integer> group, PoseStack matrixStack) {

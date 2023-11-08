@@ -3,7 +3,7 @@ package iskallia.vault.skill.talent.type.onhit;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.mana.FullManaPlayer;
 import iskallia.vault.skill.ability.effect.spi.core.InstantAbility;

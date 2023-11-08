@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "expended=true": {
+      "model": "the_vault:block/empty"
+    },
+    "expended=false": {
+      "model": "the_vault:block/wendarr_glass"
+    }
+  }
+}

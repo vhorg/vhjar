@@ -8,6 +8,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
@@ -18,8 +19,8 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
 
 public class PillarBlock extends Block {
-   public static BooleanProperty ABOVE = BooleanProperty.create("above");
-   public static BooleanProperty BELOW = BooleanProperty.create("below");
+   public static final BooleanProperty ABOVE = BooleanProperty.create("above");
+   public static final BooleanProperty BELOW = BooleanProperty.create("below");
    public static final EnumProperty<Axis> AXIS = BlockStateProperties.AXIS;
 
    public PillarBlock() {
@@ -32,23 +33,58 @@ public class PillarBlock extends Block {
       this.registerDefaultState((BlockState)this.defaultBlockState().setValue(AXIS, Axis.Y));
    }
 
-   public BlockState rotate(BlockState pState, Rotation pRot) {
-      return rotatePillar(pState, pRot);
-   }
+   public BlockState rotate(BlockState state, Rotation rotation) {
+      BlockState swapped = (BlockState)((BlockState)state.setValue(ABOVE, !(Boolean)state.getValue(ABOVE))).setValue(BELOW, !(Boolean)state.getValue(BELOW));
 
-   public static BlockState rotatePillar(BlockState pState, Rotation pRotation) {
-      return switch (pRotation) {
-         case COUNTERCLOCKWISE_90, CLOCKWISE_90 -> {
-            switch ((Axis)pState.getValue(AXIS)) {
+      return switch (rotation) {
+         case NONE -> state;
+         case CLOCKWISE_90 -> {
+            switch ((Axis)state.getValue(AXIS)) {
                case X:
-                  yield (BlockState)pState.setValue(AXIS, Axis.Z);
+                  yield (BlockState)swapped.setValue(AXIS, Axis.Z);
+               case Y:
+                  yield state;
                case Z:
-                  yield (BlockState)pState.setValue(AXIS, Axis.X);
+                  yield (BlockState)state.setValue(AXIS, Axis.X);
                default:
-                  yield pState;
+                  throw new IncompatibleClassChangeError();
             }
          }
-         default -> pState;
+         case CLOCKWISE_180 -> {
+            switch ((Axis)state.getValue(AXIS)) {
+               case X:
+               case Z:
+                  yield swapped;
+               case Y:
+                  yield state;
+               default:
+                  throw new IncompatibleClassChangeError();
+            }
+         }
+         case COUNTERCLOCKWISE_90 -> {
+            switch ((Axis)state.getValue(AXIS)) {
+               case X:
+                  yield (BlockState)state.setValue(AXIS, Axis.Z);
+               case Y:
+                  yield state;
+               case Z:
+                  yield (BlockState)swapped.setValue(AXIS, Axis.X);
+               default:
+                  throw new IncompatibleClassChangeError();
+            }
+         }
+         default -> throw new IncompatibleClassChangeError();
+      };
+   }
+
+   public BlockState mirror(BlockState state, Mirror mirror) {
+      BlockState swapped = (BlockState)((BlockState)state.setValue(ABOVE, !(Boolean)state.getValue(ABOVE))).setValue(BELOW, !(Boolean)state.getValue(BELOW));
+
+      return switch (mirror) {
+         case NONE -> state;
+         case LEFT_RIGHT -> state.getValue(AXIS) == Axis.Z ? swapped : state;
+         case FRONT_BACK -> state.getValue(AXIS) == Axis.X ? swapped : state;
+         default -> throw new IncompatibleClassChangeError();
       };
    }
 
@@ -74,13 +110,13 @@ public class PillarBlock extends Block {
       BlockState above;
       BlockState below;
       switch (axis) {
-         case Z:
-            above = world.getBlockState(pos.north());
-            below = world.getBlockState(pos.south());
-            break;
          case Y:
             above = world.getBlockState(pos.above());
             below = world.getBlockState(pos.below());
+            break;
+         case Z:
+            above = world.getBlockState(pos.north());
+            below = world.getBlockState(pos.south());
             break;
          default:
             above = world.getBlockState(pos.east());

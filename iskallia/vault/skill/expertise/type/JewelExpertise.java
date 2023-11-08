@@ -8,24 +8,28 @@ import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 
 public class JewelExpertise extends LearnableSkill {
-   private float modifierChanceReduction;
+   private int numberOfFreeCuts;
+
+   public int getNumberOfFreeCuts() {
+      return this.numberOfFreeCuts;
+   }
 
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.modifierChanceReduction), buffer);
+      Adapters.INT.writeBits(Integer.valueOf(this.numberOfFreeCuts), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.modifierChanceReduction = Adapters.FLOAT.readBits(buffer).orElseThrow();
+      this.numberOfFreeCuts = Adapters.INT.readBits(buffer).orElseThrow();
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.modifierChanceReduction)).ifPresent(tag -> nbt.put("modifierChanceReduction", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.numberOfFreeCuts)).ifPresent(tag -> nbt.put("numberOfFreeCuts", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -33,13 +37,13 @@ public class JewelExpertise extends LearnableSkill {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.modifierChanceReduction = Adapters.FLOAT.readNbt(nbt.get("modifierChanceReduction")).orElseThrow();
+      this.numberOfFreeCuts = Adapters.INT.readNbt(nbt.get("numberOfFreeCuts")).orElse(0);
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
-         Adapters.FLOAT.writeJson(Float.valueOf(this.modifierChanceReduction)).ifPresent(element -> json.add("modifierChanceReduction", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.numberOfFreeCuts)).ifPresent(element -> json.add("numberOfFreeCuts", element));
          return (JsonObject)json;
       });
    }
@@ -47,10 +51,6 @@ public class JewelExpertise extends LearnableSkill {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.modifierChanceReduction = Adapters.FLOAT.readJson(json.get("modifierChanceReduction")).orElseThrow();
-   }
-
-   public float getModifierChanceReduction() {
-      return this.modifierChanceReduction;
+      this.numberOfFreeCuts = Adapters.INT.readJson(json.get("numberOfFreeCuts")).orElse(0);
    }
 }

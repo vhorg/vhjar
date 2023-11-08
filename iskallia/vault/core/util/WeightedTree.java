@@ -20,9 +20,9 @@ public class WeightedTree<T> {
       return null;
    }
 
-   public WeightedTree<T> addLeaf(T value, int weight) {
+   public <W extends WeightedTree<T>> W addLeaf(T value, double weight) {
       this.children.add(value, weight);
-      return this;
+      return (W)this;
    }
 
    public WeightedTree<T> addTree(WeightedTree<T> tree, double weight) {

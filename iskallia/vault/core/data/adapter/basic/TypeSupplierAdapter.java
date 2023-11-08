@@ -12,15 +12,16 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
 public class TypeSupplierAdapter<T extends ISerializable<?, ?>> extends SupplierAdapter<T> {
-   private Map<String, Supplier<? extends T>> typeToSupplier = new HashMap<>();
-   private Map<Class<? extends T>, String> classToType = new HashMap<>();
-   private final String key;
+   protected Map<String, Supplier<? extends T>> typeToSupplier = new HashMap<>();
+   protected Map<Class<? extends T>, String> classToType = new HashMap<>();
+   protected final String key;
 
    public TypeSupplierAdapter(String key, boolean nullable) {
       super(nullable);
@@ -29,6 +30,10 @@ public class TypeSupplierAdapter<T extends ISerializable<?, ?>> extends Supplier
 
    public String getKey() {
       return this.key;
+   }
+
+   public Set<Class<? extends T>> getClasses() {
+      return this.classToType.keySet();
    }
 
    public <A extends TypeSupplierAdapter<T>> A register(String id, Class<? extends T> type, Supplier<? extends T> supplier) {

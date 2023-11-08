@@ -20,7 +20,7 @@ public class ReferenceTileProcessor extends TileProcessor {
    }
 
    public PartialTile process(PartialTile value, ProcessorContext context) {
-      Version version = context.vault == null ? Version.latest() : context.vault.get(Vault.VERSION);
+      Version version = context.getVault() == null ? Version.latest() : context.getVault().get(Vault.VERSION);
       Palette palette = VaultRegistry.PALETTE.getKey(this.id).get(version);
 
       for (TileProcessor child : palette.getTileProcessors()) {

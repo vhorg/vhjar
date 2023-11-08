@@ -105,13 +105,19 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
             .append(new TextComponent(")").withStyle(ChatFormatting.BLACK)),
          LabelTextStyle.defaultStyle()
       );
-      LabelElement<?> vaultExpLabel = new LabelElement(
-         Spatials.positionXYZ(2, rewardText.bottom(), 1),
-         new TextComponent("+" + this.taskReward.getVaultExp() + " Vault XP").withStyle(ChatFormatting.YELLOW),
-         LabelTextStyle.shadow()
-      );
+      int vaultExp = this.taskReward.getVaultExp();
+      boolean hasVaultExp = vaultExp > 0;
+      LabelElement<?> vaultExpLabel = null;
+      if (hasVaultExp) {
+         vaultExpLabel = new LabelElement(
+            Spatials.positionXYZ(2, rewardText.bottom(), 1),
+            new TextComponent("+" + vaultExp + " Vault XP").withStyle(ChatFormatting.YELLOW),
+            LabelTextStyle.shadow()
+         );
+      }
+
       int stackX = 2;
-      int stackY = vaultExpLabel.y() + vaultExpLabel.height() + 1;
+      int stackY = hasVaultExp ? vaultExpLabel.y() + vaultExpLabel.height() + 1 : rewardText.bottom();
 
       for (OverSizedItemStack stack : this.taskReward.getRewardItems()) {
          this.addElement(
@@ -157,11 +163,6 @@ public abstract class AbstractTaskElement<T extends Task<?>> extends ElasticCont
          }
       }
 
-      new LabelElement(
-         Spatials.positionXYZ(2, rewardText.bottom(), 1),
-         new TextComponent("+" + this.taskReward.getVaultExp() + " Vault XP").withStyle(ChatFormatting.YELLOW),
-         LabelTextStyle.shadow()
-      );
       this.addElements(
          statusLabel, new IElement[]{descriptionLabel, this.description, progressLabel, this.progressBar, progressText, rewardText, vaultExpLabel}
       );

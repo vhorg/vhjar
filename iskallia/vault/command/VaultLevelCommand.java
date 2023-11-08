@@ -5,7 +5,9 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.skill.PlayerVaultStats;
+import iskallia.vault.world.data.PlayerReputationData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.server.command.EnumArgument;
 
 public class VaultLevelCommand extends Command {
    @Override
@@ -35,6 +38,13 @@ public class VaultLevelCommand extends Command {
    @Override
    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
       builder.then(Commands.literal("add_exp").then(Commands.argument("exp", IntegerArgumentType.integer()).executes(this::addExp)));
+      builder.then(
+         Commands.literal("set_rep")
+            .then(
+               Commands.argument("level", IntegerArgumentType.integer())
+                  .then(Commands.argument("god", EnumArgument.enumArgument(VaultGod.class)).executes(this::setRep))
+            )
+      );
       builder.then(Commands.literal("set_level").then(Commands.argument("level", IntegerArgumentType.integer()).executes(this::setLevel)));
       builder.then(Commands.literal("add_skill_points").then(Commands.argument("amount", IntegerArgumentType.integer()).executes(this::addSkillPoints)));
       builder.then(
@@ -114,6 +124,15 @@ public class VaultLevelCommand extends Command {
       CommandSourceStack source = (CommandSourceStack)context.getSource();
       ServerPlayer player = source.getPlayerOrException();
       PlayerVaultStatsData.get(source.getLevel()).setVaultLevel(player, level);
+      player.refreshTabListName();
+      return 0;
+   }
+
+   private int setRep(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      VaultGod god = (VaultGod)context.getArgument("god", VaultGod.class);
+      int level = IntegerArgumentType.getInteger(context, "level");
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      PlayerReputationData.addReputation(player.getUUID(), god, level);
       player.refreshTabListName();
       return 0;
    }

@@ -9,6 +9,7 @@ import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
+import iskallia.vault.core.world.processor.ProcessorContext;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
 import iskallia.vault.core.world.template.JigsawTemplate;
 import iskallia.vault.core.world.template.PlacementSettings;
@@ -174,8 +175,7 @@ public class SkyVaultsChunkGenerator extends ChunkGenerator {
          RandomSource random = JavaRandom.ofInternal(world.getSeed());
          TemplatePoolKey pool = VaultRegistry.TEMPLATE_POOL.getKey(VaultMod.id("skyblock/island"));
          pool.get(version).getRandomFlat(version, random).ifPresent(entry -> {
-            PlacementSettings settings = new PlacementSettings().setFlags(3);
-            settings.getProcessorContext().random = random;
+            PlacementSettings settings = new PlacementSettings(new ProcessorContext(null, random)).setFlags(3);
             Mirror mirror = random.nextBoolean() ? Mirror.NONE : Mirror.FRONT_BACK;
             Rotation rotation = new Rotation[]{Rotation.NONE, Rotation.COUNTERCLOCKWISE_90, Rotation.CLOCKWISE_90, Rotation.CLOCKWISE_180}[random.nextInt(4)];
             settings.addProcessor(TileProcessor.rotate(rotation, 0, 0, true));

@@ -12,6 +12,8 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Predicate;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class Objectives extends DataObject<Objectives> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
@@ -94,5 +96,10 @@ public class Objectives extends DataObject<Objectives> {
 
          return false;
       }
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   public void initClient(Vault vault) {
+      this.get(LIST).forEach(objective -> objective.initClient(vault));
    }
 }

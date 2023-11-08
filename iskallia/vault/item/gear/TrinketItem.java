@@ -55,7 +55,11 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
 
    public static ItemStack createRandomTrinket(TrinketEffect<?> trinket) {
       ItemStack stack = createBaseTrinket(trinket);
-      setUses(stack, trinket.getTrinketConfig().getRandomUses());
+      TrinketConfig.Trinket config = trinket.getTrinketConfig();
+      if (config != null) {
+         setUses(stack, config.getRandomUses());
+      }
+
       return stack;
    }
 
@@ -198,12 +202,12 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
    }
 
    public Component getName(ItemStack stack) {
-      return !isIdentified(stack) ? super.getName(stack) : getTrinket(stack).map(effect -> {
+      return (Component)(!isIdentified(stack) ? super.getName(stack).copy().withStyle(Style.EMPTY.withColor(16004495)) : getTrinket(stack).map(effect -> {
          TrinketConfig.Trinket cfg = effect.getTrinketConfig();
          TextComponent cmp = new TextComponent(cfg.getName());
          cmp.withStyle(Style.EMPTY.withColor(cfg.getComponentColor()));
          return cmp;
-      }).orElseGet(() -> super.getName(stack));
+      }).orElseGet(() -> super.getName(stack)));
    }
 
    @Override
@@ -308,8 +312,19 @@ public class TrinketItem extends BasicItem implements ICurioItem, DataTransferIt
 
    public void curioTick(SlotContext slotContext, ItemStack stack) {
       if (isIdentified(stack)) {
-         getTrinket(stack).ifPresent(trinketEffect -> trinketEffect.onWornTick(slotContext.entity(), stack));
-         super.curioTick(slotContext, stack);
+         Optional<String> id = getSlotIdentifier(stack);
+         if (id.isPresent()) {
+            String identifier = id.get();
+            if (!slotContext.identifier().equals(identifier) && slotContext.entity() instanceof Player player && !player.getLevel().isClientSide) {
+               player.getInventory().placeItemBackInInventory(stack.copy());
+               stack.setCount(0);
+            }
+         }
+
+         if (!stack.isEmpty()) {
+            getTrinket(stack).ifPresent(trinketEffect -> trinketEffect.onWornTick(slotContext.entity(), stack));
+            super.curioTick(slotContext, stack);
+         }
       }
    }
 

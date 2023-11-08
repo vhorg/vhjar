@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:vault_sweets_block"
+  },
+  "result": "the_vault:vault_small_sweets_block",
+  "count": 1
+}

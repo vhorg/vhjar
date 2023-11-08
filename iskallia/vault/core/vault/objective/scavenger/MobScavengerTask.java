@@ -5,6 +5,7 @@ import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.ScavengerObjective;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -14,7 +15,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
@@ -34,7 +34,7 @@ public class MobScavengerTask extends ScavengeTask {
    @Override
    public Optional<ScavengerGoal> generateGoal(int count, RandomSource random) {
       MobScavengerTask.Entry entry = this.entries.get(random.nextInt(this.entries.size()));
-      return Optional.of(new ScavengerGoal(entry.item, (int)Math.ceil(count * entry.multiplier), this.icon, this.color));
+      return Optional.of(new ScavengerGoal((int)Math.ceil(count * entry.multiplier)).put(entry.item, this.icon, this.color));
    }
 
    @Override
@@ -53,8 +53,14 @@ public class MobScavengerTask extends ScavengeTask {
                      if (!matchingEntries.isEmpty()) {
                         MobScavengerTask.Entry entry = matchingEntries.get(world.getRandom().nextInt(matchingEntries.size()));
                         ItemStack stack = this.createStack(vault, entry.item);
-                        ItemEntity item = new ItemEntity(world, entity.getX(), entity.getY(), entity.getZ(), stack);
-                        event.getDrops().add(item);
+                        List<ItemStack> items = new ArrayList<>();
+                        items.add(stack);
+                        CommonEvents.ITEM_SCAVENGE_TASK.invoke(vault, world, entity.blockPosition(), items);
+
+                        for (ItemStack item : items) {
+                           ItemEntity itemEntity = new ItemEntity(world, entity.getX(), entity.getY(), entity.getZ(), item);
+                           event.getDrops().add(itemEntity);
+                        }
                      }
                   }
                }
@@ -63,17 +69,17 @@ public class MobScavengerTask extends ScavengeTask {
    }
 
    public static class Entry {
-      public final Item item;
+      public final ItemStack item;
       public final double multiplier;
       public final Set<ResourceLocation> group;
 
-      public Entry(Item item, double multiplier, EntityType<?>... group) {
+      public Entry(ItemStack item, double multiplier, EntityType<?>... group) {
          this.item = item;
          this.multiplier = multiplier;
          this.group = new LinkedHashSet<>(Arrays.stream(group).map(ForgeRegistryEntry::getRegistryName).toList());
       }
 
-      public Entry(Item item, double multiplier, Set<ResourceLocation> group) {
+      public Entry(ItemStack item, double multiplier, Set<ResourceLocation> group) {
          this.item = item;
          this.multiplier = multiplier;
          this.group = group;

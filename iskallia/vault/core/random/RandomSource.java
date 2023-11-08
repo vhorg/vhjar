@@ -1,6 +1,10 @@
 package iskallia.vault.core.random;
 
-public interface RandomSource {
+import com.google.gson.JsonObject;
+import iskallia.vault.item.crystal.data.serializable.ISerializable;
+import net.minecraft.nbt.CompoundTag;
+
+public interface RandomSource extends ISerializable<CompoundTag, JsonObject> {
    default boolean nextBoolean() {
       return this.nextInt() < 0;
    }

@@ -1,10 +1,12 @@
 package iskallia.vault.core.util;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.ChunkPos;
 
 public class RegionPos extends Vec3i {
+   public static final RegionPos ORIGIN = new RegionPos(0, 0, 1, 1);
    private final int sizeX;
    private final int sizeZ;
 
@@ -60,5 +62,11 @@ public class RegionPos extends Vec3i {
 
    public RegionPos add(int x, int z) {
       return new RegionPos(this.getX() + x, this.getZ() + z, this.sizeX, this.sizeZ);
+   }
+
+   public RegionPos add(Direction direction, int distance) {
+      return distance == 0
+         ? this
+         : new RegionPos(this.getX() + direction.getStepX() * distance, this.getZ() + direction.getStepZ() * distance, this.sizeX, this.sizeZ);
    }
 }

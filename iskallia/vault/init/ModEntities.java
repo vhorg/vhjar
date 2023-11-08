@@ -3,8 +3,16 @@ package iskallia.vault.init;
 import iskallia.vault.VaultMod;
 import iskallia.vault.entity.IPlayerSkinHolder;
 import iskallia.vault.entity.ai.ChampionGoal;
+import iskallia.vault.entity.boss.AreaOfEffectBossEntity;
+import iskallia.vault.entity.boss.ArtifactBossEntity;
+import iskallia.vault.entity.boss.BloodOrbEntity;
+import iskallia.vault.entity.boss.BossProtectionCatalystEntity;
+import iskallia.vault.entity.boss.CatalystInhibitorEntity;
+import iskallia.vault.entity.boss.ConjurationMagicProjectileEntity;
+import iskallia.vault.entity.boss.MagicProjectileEntity;
 import iskallia.vault.entity.entity.AggressiveCowBossEntity;
 import iskallia.vault.entity.entity.AggressiveCowEntity;
+import iskallia.vault.entity.entity.AncientCopperGolemEntity;
 import iskallia.vault.entity.entity.ArenaBossEntity;
 import iskallia.vault.entity.entity.BlueBlazeEntity;
 import iskallia.vault.entity.entity.BoogiemanEntity;
@@ -20,6 +28,7 @@ import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.FloatingGodAltarItemEntity;
 import iskallia.vault.entity.entity.FloatingItemEntity;
 import iskallia.vault.entity.entity.MonsterEyeEntity;
+import iskallia.vault.entity.entity.NagaEntity;
 import iskallia.vault.entity.entity.RobotEntity;
 import iskallia.vault.entity.entity.ShiverEntity;
 import iskallia.vault.entity.entity.SpiritEntity;
@@ -38,6 +47,14 @@ import iskallia.vault.entity.entity.VaultStormArrow;
 import iskallia.vault.entity.entity.VaultStormEntity;
 import iskallia.vault.entity.entity.VaultThrownJavelin;
 import iskallia.vault.entity.entity.WinterWolfEntity;
+import iskallia.vault.entity.entity.bloodmoon.BloodSilverfishEntity;
+import iskallia.vault.entity.entity.bloodmoon.BloodSlimeEntity;
+import iskallia.vault.entity.entity.bloodmoon.Tier0BloodSkeletonEntity;
+import iskallia.vault.entity.entity.bloodmoon.Tier1BloodSkeletonEntity;
+import iskallia.vault.entity.entity.bloodmoon.Tier2BloodSkeletonEntity;
+import iskallia.vault.entity.entity.bloodmoon.Tier3BloodSkeletonEntity;
+import iskallia.vault.entity.entity.bloodmoon.Tier4BloodSkeletonEntity;
+import iskallia.vault.entity.entity.bloodmoon.Tier5BloodSkeletonEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkHorrorEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkPiglinEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkSilverfishEntity;
@@ -72,6 +89,7 @@ import iskallia.vault.entity.entity.mummy.Tier0MummyEntity;
 import iskallia.vault.entity.entity.mummy.Tier1MummyEntity;
 import iskallia.vault.entity.entity.mummy.Tier2MummyEntity;
 import iskallia.vault.entity.entity.mushroom.DeathcapEntity;
+import iskallia.vault.entity.entity.mushroom.LevishroomEntity;
 import iskallia.vault.entity.entity.mushroom.MushroomEntity;
 import iskallia.vault.entity.entity.mushroom.SmolcapEntity;
 import iskallia.vault.entity.entity.mushroom.Tier0MushroomEntity;
@@ -125,6 +143,7 @@ import iskallia.vault.entity.entity.winterwalker.Tier2WinterwalkerEntity;
 import iskallia.vault.entity.entity.winterwalker.Tier3WinterwalkerEntity;
 import iskallia.vault.entity.entity.winterwalker.Tier4WinterwalkerEntity;
 import iskallia.vault.entity.entity.winterwalker.Tier5WinterwalkerEntity;
+import iskallia.vault.entity.model.AncientCopperGolemModel;
 import iskallia.vault.entity.model.FighterModel;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.ShiverModel;
@@ -132,6 +151,13 @@ import iskallia.vault.entity.model.TreasureGoblinModel;
 import iskallia.vault.entity.model.VaultDoodModel;
 import iskallia.vault.entity.model.VaultSpiderBabyModel;
 import iskallia.vault.entity.model.WinterWolfModel;
+import iskallia.vault.entity.model.bloodmoon.BloodSlimeModel;
+import iskallia.vault.entity.model.bloodmoon.Tier0BloodSkeletonModel;
+import iskallia.vault.entity.model.bloodmoon.Tier1BloodSkeletonModel;
+import iskallia.vault.entity.model.bloodmoon.Tier2BloodSkeletonModel;
+import iskallia.vault.entity.model.bloodmoon.Tier3BloodSkeletonModel;
+import iskallia.vault.entity.model.bloodmoon.Tier4BloodSkeletonModel;
+import iskallia.vault.entity.model.bloodmoon.Tier5BloodSkeletonModel;
 import iskallia.vault.entity.model.deep_dark.DeepDarkHorrorModel;
 import iskallia.vault.entity.model.deep_dark.DeepDarkPiglinModel;
 import iskallia.vault.entity.model.deep_dark.DeepDarkSilverfishModel;
@@ -203,6 +229,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.SilverfishModel;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
 import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.world.entity.Entity;
@@ -215,6 +242,7 @@ import net.minecraft.world.entity.animal.Wolf;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.monster.EnderMan;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Pillager;
 import net.minecraft.world.entity.monster.Silverfish;
 import net.minecraft.world.entity.monster.Skeleton;
@@ -263,6 +291,7 @@ public class ModEntities {
    public static EntityType<EyesoreEntity> EYESORE;
    public static EntityType<EyestalkEntity> EYESTALK;
    public static EntityType<DollMiniMeEntity> DOLL_MINI_ME;
+   public static EntityType<NagaEntity> NAGA;
    public static EntityType<EliteZombieEntity> ELITE_ZOMBIE;
    public static EntityType<EliteHuskEntity> ELITE_HUSK;
    public static EntityType<EliteDrownedEntity> ELITE_DROWNED;
@@ -306,12 +335,21 @@ public class ModEntities {
    public static EntityType<Tier5MushroomEntity> T5_MUSHROOM;
    public static EntityType<DeathcapEntity> DEATHCAP;
    public static EntityType<SmolcapEntity> SMOLCAP;
+   public static EntityType<LevishroomEntity> LEVISHROOM;
    public static EntityType<Tier0MinerZombieEntity> T0_MINER_ZOMBIE;
    public static EntityType<Tier1MinerZombieEntity> T1_MINER_ZOMBIE;
    public static EntityType<Tier2MinerZombieEntity> T2_MINER_ZOMBIE;
    public static EntityType<Tier3MinerZombieEntity> T3_MINER_ZOMBIE;
    public static EntityType<Tier4MinerZombieEntity> T4_MINER_ZOMBIE;
    public static EntityType<Tier5MinerZombieEntity> T5_MINER_ZOMBIE;
+   public static EntityType<Tier0BloodSkeletonEntity> T0_BLOOD_SKELETON;
+   public static EntityType<Tier1BloodSkeletonEntity> T1_BLOOD_SKELETON;
+   public static EntityType<Tier2BloodSkeletonEntity> T2_BLOOD_SKELETON;
+   public static EntityType<Tier3BloodSkeletonEntity> T3_BLOOD_SKELETON;
+   public static EntityType<Tier4BloodSkeletonEntity> T4_BLOOD_SKELETON;
+   public static EntityType<Tier5BloodSkeletonEntity> T5_BLOOD_SKELETON;
+   public static EntityType<BloodSilverfishEntity> BLOOD_SILVERFISH;
+   public static EntityType<BloodSlimeEntity> BLOOD_SLIME;
    public static EntityType<Tier1CreeperEntity> T1_CREEPER;
    public static EntityType<Tier1DrownedEntity> T1_DROWNED;
    public static EntityType<Tier1EndermanEntity> T1_ENDERMAN;
@@ -368,6 +406,14 @@ public class ModEntities {
    public static EntityType<VaultStormEntity.SmiteBolt> THUNDERSTORM_BOLT;
    public static EntityType<VaultBlizzardShard> BLIZZARD_SHARD;
    public static EntityType<FallingSootEntity> FALLING_SOOT;
+   public static EntityType<ArtifactBossEntity> ARTIFACT_BOSS;
+   public static EntityType<MagicProjectileEntity> MAGIC_PROJECTILE;
+   public static EntityType<ConjurationMagicProjectileEntity> CONJURATION_MAGIC_PROJECTILE;
+   public static EntityType<BossProtectionCatalystEntity> BOSS_PROTECTION_CATALYST;
+   public static EntityType<CatalystInhibitorEntity> CATALYST_INHIBITOR;
+   public static EntityType<BloodOrbEntity> BLOOD_ORB;
+   public static EntityType<AreaOfEffectBossEntity> AREA_OF_EFFECT_BOSS;
+   public static EntityType<AncientCopperGolemEntity> ANCIENT_COPPER_GOLEM;
    private static final Map<EntityType<? extends LivingEntity>, Supplier<net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder>> ATTRIBUTE_BUILDERS = new HashMap<>();
 
    public static void register(Register<EntityType<?>> event) {
@@ -470,6 +516,7 @@ public class ModEntities {
       DOLL_MINI_ME = registerLiving(
          "doll_mini_me", Builder.of(DollMiniMeEntity::new, MobCategory.MONSTER).sized(0.6F, 1.95F), DollMiniMeEntity::createAttributes, event
       );
+      NAGA = registerLiving("naga", Builder.of(NagaEntity::new, MobCategory.MONSTER).sized(1.2F, 3.9F), Zombie::createAttributes, event);
       ELITE_ZOMBIE = registerLiving(
          "elite_zombie", Builder.of(EliteZombieEntity::new, MobCategory.MONSTER).sized(0.72F, 2.85F).clientTrackingRange(8), Zombie::createAttributes, event
       );
@@ -763,6 +810,12 @@ public class ModEntities {
       SMOLCAP = registerLiving(
          "smolcap", Builder.of(SmolcapEntity::new, MobCategory.MONSTER).sized(0.875F, 0.4375F).clientTrackingRange(8), MushroomEntity::createAttributes, event
       );
+      LEVISHROOM = registerLiving(
+         "levishroom",
+         Builder.of(LevishroomEntity::new, MobCategory.MONSTER).sized(0.875F, 0.4375F).clientTrackingRange(8),
+         MushroomEntity::createAttributes,
+         event
+      );
       T0_MINER_ZOMBIE = registerLiving(
          "miner_zombie_t0",
          Builder.of(Tier0MinerZombieEntity::new, MobCategory.MONSTER).sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight()).clientTrackingRange(8),
@@ -797,6 +850,68 @@ public class ModEntities {
          "miner_zombie_t5",
          Builder.of(Tier5MinerZombieEntity::new, MobCategory.MONSTER).sized(EntityType.ZOMBIE.getWidth(), EntityType.ZOMBIE.getHeight()).clientTrackingRange(8),
          Zombie::createAttributes,
+         event
+      );
+      T0_BLOOD_SKELETON = registerLiving(
+         "blood_skeleton_t0",
+         Builder.of(Tier0BloodSkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 0.9F)
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T1_BLOOD_SKELETON = registerLiving(
+         "blood_skeleton_t1",
+         Builder.of(Tier1BloodSkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T2_BLOOD_SKELETON = registerLiving(
+         "blood_skeleton_t2",
+         Builder.of(Tier2BloodSkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T3_BLOOD_SKELETON = registerLiving(
+         "blood_skeleton_t3",
+         Builder.of(Tier3BloodSkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T4_BLOOD_SKELETON = registerLiving(
+         "blood_skeleton_t4",
+         Builder.of(Tier4BloodSkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 1.15F)
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      T5_BLOOD_SKELETON = registerLiving(
+         "blood_skeleton_t5",
+         Builder.of(Tier5BloodSkeletonEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 1.15F)
+            .clientTrackingRange(8),
+         AbstractSkeleton::createAttributes,
+         event
+      );
+      BLOOD_SILVERFISH = registerLiving(
+         "blood_silverfish",
+         Builder.of(BloodSilverfishEntity::new, MobCategory.MONSTER)
+            .sized(EntityType.SILVERFISH.getWidth(), EntityType.SILVERFISH.getHeight())
+            .clientTrackingRange(8),
+         Silverfish::createAttributes,
+         event
+      );
+      BLOOD_SLIME = registerLiving(
+         "blood_slime",
+         Builder.of(BloodSlimeEntity::new, MobCategory.MONSTER).sized(EntityType.SLIME.getWidth(), EntityType.SLIME.getHeight()).clientTrackingRange(8),
+         Monster::createMonsterAttributes,
          event
       );
       T1_CREEPER = registerLiving(
@@ -1090,6 +1205,37 @@ public class ModEntities {
       FALLING_SOOT = register(
          "falling_soot", Builder.of(FallingSootEntity::new, MobCategory.MISC).sized(0.98F, 0.98F).clientTrackingRange(10).updateInterval(20), event
       );
+      ARTIFACT_BOSS = registerLiving(
+         "artifact_boss", Builder.of(ArtifactBossEntity::new, MobCategory.MONSTER).sized(0.9F, 3.5F), ArtifactBossEntity::createAttributes, event
+      );
+      MAGIC_PROJECTILE = register(
+         "magic_projectile", Builder.of(MagicProjectileEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10), event
+      );
+      CONJURATION_MAGIC_PROJECTILE = register(
+         "conjuration_magic_projectile",
+         Builder.of(ConjurationMagicProjectileEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10),
+         event
+      );
+      BOSS_PROTECTION_CATALYST = register(
+         "boss_protection_catalyst",
+         Builder.of(BossProtectionCatalystEntity::new, MobCategory.MISC).sized(1.0F, 1.0F).clientTrackingRange(4).updateInterval(2),
+         event
+      );
+      CATALYST_INHIBITOR = register(
+         "catalyst_inhibitor", Builder.of(CatalystInhibitorEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10), event
+      );
+      BLOOD_ORB = register("blood_orb", Builder.of(BloodOrbEntity::new, MobCategory.MISC).sized(0.8F, 0.8F).clientTrackingRange(4).updateInterval(10), event);
+      AREA_OF_EFFECT_BOSS = register(
+         "area_of_effect_boss",
+         Builder.of(AreaOfEffectBossEntity::new, MobCategory.MISC).fireImmune().sized(6.0F, 0.5F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE),
+         event
+      );
+      ANCIENT_COPPER_GOLEM = registerLiving(
+         "ancient_copper_golem",
+         Builder.of(AncientCopperGolemEntity::new, MobCategory.CREATURE).sized(0.6F, 1.0F).clientTrackingRange(8),
+         AncientCopperGolemEntity::createAttributes,
+         event
+      );
    }
 
    private static EntityType<VaultFighterEntity> registerVaultFighter(int count, Register<EntityType<?>> event) {
@@ -1200,11 +1346,20 @@ public class ModEntities {
          event.registerLayerDefinition(ModModelLayers.T3_MINER_ZOMBIE, Tier3MinerZombieModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.T4_MINER_ZOMBIE, Tier4MinerZombieModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.T5_MINER_ZOMBIE, Tier5MinerZombieModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T0_BLOOD_SKELETON, Tier0BloodSkeletonModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T1_BLOOD_SKELETON, Tier1BloodSkeletonModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T2_BLOOD_SKELETON, Tier2BloodSkeletonModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T3_BLOOD_SKELETON, Tier3BloodSkeletonModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T4_BLOOD_SKELETON, Tier4BloodSkeletonModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.T5_BLOOD_SKELETON, Tier5BloodSkeletonModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.BLOOD_SILVERFISH, SilverfishModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.BLOOD_SLIME, BloodSlimeModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.DEEP_DARK_ZOMBIE, DeepDarkZombieModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.DEEP_DARK_SKELETON, DeepDarkSkeletonModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.DEEP_DARK_PIGLIN, DeepDarkPiglinModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.DEEP_DARK_SILVERFISH, DeepDarkSilverfishModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.DEEP_DARK_HORROR, DeepDarkHorrorModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.ANCIENT_COPPER_GOLEM, AncientCopperGolemModel::createBodyLayer);
       }
 
       @NotNull

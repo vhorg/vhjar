@@ -1,9 +1,9 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.core.world.data.EntityPredicate;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
-import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;

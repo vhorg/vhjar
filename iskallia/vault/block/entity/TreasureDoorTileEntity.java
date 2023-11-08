@@ -6,9 +6,10 @@ import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.random.ChunkRandom;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.processor.ProcessorContext;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
 import iskallia.vault.core.world.template.DynamicTemplate;
 import iskallia.vault.core.world.template.JigsawTemplate;
@@ -206,9 +207,7 @@ public class TreasureDoorTileEntity extends BlockEntity {
                         random.setDecoratorSeed(vault.get(Vault.SEED), pos.getX(), pos.getZ(), 329057345);
                      }
 
-                     PlacementSettings settings = new PlacementSettings().setFlags(3);
-                     settings.getProcessorContext().random = random;
-                     settings.getProcessorContext().vault = vault;
+                     PlacementSettings settings = new PlacementSettings(new ProcessorContext(vault, random)).setFlags(3);
                      CompoundTag nbt = new CompoundTag();
                      nbt.putString("target", tile.target.toString());
                      nbt.putString("pool", tile.pool.toString());

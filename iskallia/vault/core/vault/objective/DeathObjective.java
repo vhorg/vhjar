@@ -14,6 +14,8 @@ import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.time.TickClock;
+import iskallia.vault.core.vault.time.TickStopwatch;
+import iskallia.vault.core.vault.time.TickTimer;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import net.minecraft.world.entity.player.Player;
 
@@ -51,7 +53,15 @@ public class DeathObjective extends Objective {
    public void tickListener(VirtualWorld world, Vault vault, Listener listener) {
       listener.getPlayer().ifPresent(player -> {
          if (listener instanceof Runner) {
-            if (this.has(KILL_ALL) || this.has(TIMER_DEATH) && vault.get(Vault.CLOCK).get(TickClock.DISPLAY_TIME) < 0) {
+            TickClock clock = vault.get(Vault.CLOCK);
+            int timeLeft = 0;
+            if (clock instanceof TickTimer) {
+               timeLeft = clock.get(TickTimer.DISPLAY_TIME);
+            } else if (clock instanceof TickStopwatch) {
+               timeLeft = clock.get(TickStopwatch.LIMIT) - clock.get(TickTimer.LOGICAL_TIME);
+            }
+
+            if (this.has(KILL_ALL) || this.has(TIMER_DEATH) && timeLeft < 0) {
                player.kill();
             }
 

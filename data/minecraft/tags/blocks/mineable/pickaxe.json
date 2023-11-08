@@ -127,6 +127,18 @@
     "the_vault:ancient_copper_block_oxidized",
     "the_vault:ancient_copper_bricks_oxidized",
     "the_vault:ancient_copper_small_bricks_oxidized",
-    "the_vault:ancient_copper_block_pillar_oxidized"
+    "the_vault:ancient_copper_block_pillar_oxidized",
+    "the_vault:ancient_copper_button",
+    "the_vault:ancient_copper_trapdoor",
+    "the_vault:ancient_copper_button_exposed",
+    "the_vault:ancient_copper_trapdoor_exposed",
+    "the_vault:ancient_copper_button_weathered",
+    "the_vault:ancient_copper_trapdoor_weathered",
+    "the_vault:ancient_copper_button_oxidized",
+    "the_vault:ancient_copper_trapdoor_oxidized",
+    "the_vault:artifact_projector_block",
+    "the_vault:gilded_candelabra",
+    "the_vault:herald_trophy",
+    "the_vault:spark"
   ]
 }

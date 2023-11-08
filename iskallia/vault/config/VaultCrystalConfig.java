@@ -8,12 +8,12 @@ import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.CrystalModifiers;
 import iskallia.vault.item.crystal.layout.ClassicCircleCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicPolygonCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicSpiralCrystalLayout;
 import iskallia.vault.item.crystal.layout.CrystalLayout;
+import iskallia.vault.item.crystal.modifiers.CrystalModifiers;
 import iskallia.vault.item.crystal.objective.BossCrystalObjective;
 import iskallia.vault.item.crystal.objective.CakeCrystalObjective;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
@@ -93,10 +93,6 @@ public class VaultCrystalConfig extends Config {
                   crystal.setModifiers(entry.modifiers);
                }
 
-               if (entry.randomModifiers != null) {
-                  crystal.getModifiers().setRandomModifiers(entry.randomModifiers);
-               }
-
                if (entry.exhausted != null) {
                   crystal.setUnmodifiable(entry.exhausted);
                }
@@ -159,7 +155,6 @@ public class VaultCrystalConfig extends Config {
             null,
             null,
             null,
-            null,
             null
          )
       );
@@ -174,19 +169,17 @@ public class VaultCrystalConfig extends Config {
             null,
             null,
             null,
-            null,
             null
          )
       );
       list = new LevelEntryList<>();
-      this.SEALS.put(ModItems.CRYSTAL_SEAL_ANCIENTS.getRegistryName(), list);
+      this.SEALS.put(ModItems.CRYSTAL_SEAL_HERALD.getRegistryName(), list);
       list.add(
          new VaultCrystalConfig.SealEntry(
             0,
             Arrays.asList(ModItems.VAULT_CRYSTAL.getRegistryName()),
             new CakeCrystalObjective(IntRoll.ofUniform(10, 15)),
             new ClassicSpiralCrystalLayout(1, 99, Rotation.CLOCKWISE_90),
-            null,
             null,
             null,
             null,
@@ -263,8 +256,6 @@ public class VaultCrystalConfig extends Config {
       @Expose
       private final CrystalModifiers modifiers;
       @Expose
-      private final Boolean randomModifiers;
-      @Expose
       private final Boolean exhausted;
 
       public SealEntry(
@@ -275,7 +266,6 @@ public class VaultCrystalConfig extends Config {
          CrystalTheme theme,
          CrystalTime time,
          CrystalModifiers modifiers,
-         Boolean randomModifiers,
          Boolean exhausted
       ) {
          this.level = level;
@@ -285,7 +275,6 @@ public class VaultCrystalConfig extends Config {
          this.theme = theme;
          this.time = time;
          this.modifiers = modifiers;
-         this.randomModifiers = randomModifiers;
          this.exhausted = exhausted;
       }
 

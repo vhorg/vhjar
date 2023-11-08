@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "the_vault:block/decoration/velara_log_top",
+    "side": "the_vault:block/decoration/velara_mossy_blooming_log"
+  }
+}

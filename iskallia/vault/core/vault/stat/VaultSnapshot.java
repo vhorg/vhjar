@@ -11,6 +11,7 @@ public class VaultSnapshot implements IBitSerializable {
    private Version version;
    private Vault start;
    private Vault end;
+   private long[] cache;
 
    public VaultSnapshot(Version version) {
       this.version = version;
@@ -38,12 +39,36 @@ public class VaultSnapshot implements IBitSerializable {
       return this.end;
    }
 
+   public long[] getCache() {
+      this.compute();
+      return this.cache;
+   }
+
+   private void compute() {
+      if (this.cache == null) {
+         ArrayBitBuffer buffer = ArrayBitBuffer.empty();
+         buffer.writeEnum(this.version);
+         buffer.writeBoolean(this.start != null);
+         if (this.start != null) {
+            this.start.write(buffer, new DiskSyncContext(this.version));
+         }
+
+         buffer.writeBoolean(this.end != null);
+         if (this.end != null) {
+            this.end.write(buffer, new DiskSyncContext(this.version));
+         }
+
+         this.cache = buffer.toLongArray();
+      }
+   }
+
    public VaultSnapshot setStart(Vault start) {
       this.start = new Vault();
       ArrayBitBuffer buffer = ArrayBitBuffer.empty();
       start.write(buffer, new DiskSyncContext(this.version));
       buffer.setPosition(0);
       this.start.read(buffer, new DiskSyncContext(this.version));
+      this.cache = null;
       return this;
    }
 
@@ -53,6 +78,7 @@ public class VaultSnapshot implements IBitSerializable {
       end.write(buffer, new DiskSyncContext(this.version));
       buffer.setPosition(0);
       this.end.read(buffer, new DiskSyncContext(this.version));
+      this.cache = null;
       return this;
    }
 
@@ -62,15 +88,10 @@ public class VaultSnapshot implements IBitSerializable {
 
    @Override
    public void writeBits(BitBuffer buffer) {
-      buffer.writeEnum(this.version);
-      buffer.writeBoolean(this.start != null);
-      if (this.start != null) {
-         this.start.write(buffer, new DiskSyncContext(this.version));
-      }
+      this.compute();
 
-      buffer.writeBoolean(this.end != null);
-      if (this.end != null) {
-         this.end.write(buffer, new DiskSyncContext(this.version));
+      for (long l : this.cache) {
+         buffer.writeLong(l);
       }
    }
 

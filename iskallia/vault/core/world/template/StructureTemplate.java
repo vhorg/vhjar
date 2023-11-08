@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.util.iterator.MappingIterator;
-import iskallia.vault.core.world.data.EntityPredicate;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
-import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePredicate;
@@ -49,20 +49,26 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
    private Vec3i size = Vec3i.ZERO;
    private Set<ResourceLocation> tags = new HashSet<>();
    private String path;
+   private TilePredicate filter;
 
-   protected StructureTemplate(String path) {
+   protected StructureTemplate(String path, TilePredicate filter) {
       this.path = path;
+      this.filter = filter;
    }
 
    public static StructureTemplate fromPath(String path) {
+      return fromPath(path, TilePredicate.FALSE);
+   }
+
+   public static StructureTemplate fromPath(String path, TilePredicate filter) {
       CompoundTag nbt;
       try {
          nbt = NbtIo.readCompressed(new FileInputStream(path));
-      } catch (IOException var3) {
+      } catch (IOException var4) {
          return null;
       }
 
-      StructureTemplate template = new StructureTemplate(path);
+      StructureTemplate template = new StructureTemplate(path, filter);
       template.deserializeNBT(nbt);
       return template;
    }
@@ -228,12 +234,14 @@ public class StructureTemplate extends Template implements INBTSerializable<Comp
          CompoundTag blockNBT = blocksNBT.getCompound(j);
          PartialTile tile = fromPaletteNBT(blockNBT, this.palette::getStateFor);
          BlockState state = tile.getState().asWhole().orElse(ModBlocks.ERROR_BLOCK.defaultBlockState());
-         if (tile.getEntity().asWhole().isPresent()) {
-            withNBT.add(tile);
-         } else if (!state.getBlock().hasDynamicShape() && state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
-            normal.add(tile);
-         } else {
-            withSpecialShape.add(tile);
+         if (!this.filter.test(tile)) {
+            if (tile.getEntity().asWhole().isPresent()) {
+               withNBT.add(tile);
+            } else if (!state.getBlock().hasDynamicShape() && state.isCollisionShapeFullBlock(EmptyBlockGetter.INSTANCE, BlockPos.ZERO)) {
+               normal.add(tile);
+            } else {
+               withSpecialShape.add(tile);
+            }
          }
       }
 

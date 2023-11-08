@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class ScavengerConfig extends Config {
@@ -69,21 +70,21 @@ public class ScavengerConfig extends Config {
 
             for (Map.Entry<ChestScavengerTask.Entry, Double> entry : scavengeTask.entries.entrySet()) {
                ChestScavengerTask.Entry taskEntry = entry.getKey();
-               nameColors.put(taskEntry.item, taskEntry.color);
+               nameColors.put(taskEntry.item.getItem(), taskEntry.color);
             }
          } else if (task instanceof CoinStacksScavengerTask scavengeTask) {
             for (Map.Entry<CoinStacksScavengerTask.Entry, Double> entry : scavengeTask.entries.entrySet()) {
                CoinStacksScavengerTask.Entry taskEntry = entry.getKey();
-               nameColors.put(taskEntry.item, taskEntry.color);
+               nameColors.put(taskEntry.item.getItem(), taskEntry.color);
             }
          } else if (task instanceof OreScavengerTask scavengeTask) {
             for (Map.Entry<OreScavengerTask.Entry, Double> entry : scavengeTask.entries.entrySet()) {
                OreScavengerTask.Entry taskEntry = entry.getKey();
-               nameColors.put(taskEntry.item, taskEntry.color);
+               nameColors.put(taskEntry.item.getItem(), taskEntry.color);
             }
          } else if (task instanceof MobScavengerTask scavengeTask) {
             for (MobScavengerTask.Entry entry : scavengeTask.entries) {
-               nameColors.put(entry.item, Color.WHITE.getRGB());
+               nameColors.put(entry.item.getItem(), Color.WHITE.getRGB());
             }
          }
       }
@@ -102,10 +103,10 @@ public class ScavengerConfig extends Config {
                0.5,
                VaultMod.id("gui/scav/wooden_chest"),
                new WeightedList<ChestScavengerTask.Entry>()
-                  .add(new ChestScavengerTask.Entry(Items.LIGHT_BLUE_WOOL, 1.0, 16777215), 8)
-                  .add(new ChestScavengerTask.Entry(Items.YELLOW_WOOL, 1.0, 16777215), 4)
-                  .add(new ChestScavengerTask.Entry(Items.PURPLE_WOOL, 1.0, 16777215), 2)
-                  .add(new ChestScavengerTask.Entry(Items.LIME_WOOL, 1.0, 16777215), 1)
+                  .add(new ChestScavengerTask.Entry(new ItemStack(Items.LIGHT_BLUE_WOOL), 1.0, 16777215), 8)
+                  .add(new ChestScavengerTask.Entry(new ItemStack(Items.YELLOW_WOOL), 1.0, 16777215), 4)
+                  .add(new ChestScavengerTask.Entry(new ItemStack(Items.PURPLE_WOOL), 1.0, 16777215), 2)
+                  .add(new ChestScavengerTask.Entry(new ItemStack(Items.LIME_WOOL), 1.0, 16777215), 1)
             )
          );
       this.tasks
@@ -114,10 +115,10 @@ public class ScavengerConfig extends Config {
                0.5,
                VaultMod.id("gui/scav/wooden_chest"),
                new WeightedList<CoinStacksScavengerTask.Entry>()
-                  .add(new CoinStacksScavengerTask.Entry(Items.LIGHT_BLUE_WOOL, 1.0, 16777215), 8)
-                  .add(new CoinStacksScavengerTask.Entry(Items.YELLOW_WOOL, 1.0, 16777215), 4)
-                  .add(new CoinStacksScavengerTask.Entry(Items.PURPLE_WOOL, 1.0, 16777215), 2)
-                  .add(new CoinStacksScavengerTask.Entry(Items.LIME_WOOL, 1.0, 16777215), 1)
+                  .add(new CoinStacksScavengerTask.Entry(new ItemStack(Items.LIGHT_BLUE_WOOL), 1.0, 16777215), 8)
+                  .add(new CoinStacksScavengerTask.Entry(new ItemStack(Items.YELLOW_WOOL), 1.0, 16777215), 4)
+                  .add(new CoinStacksScavengerTask.Entry(new ItemStack(Items.PURPLE_WOOL), 1.0, 16777215), 2)
+                  .add(new CoinStacksScavengerTask.Entry(new ItemStack(Items.LIME_WOOL), 1.0, 16777215), 1)
             )
          );
       this.tasks
@@ -126,7 +127,7 @@ public class ScavengerConfig extends Config {
                0.5,
                VaultMod.id("gui/scav/wooden_chest"),
                16777215,
-               new MobScavengerTask.Entry(Items.GOLDEN_APPLE, 1.0, EntityType.ZOMBIE, EntityType.CREEPER, EntityType.SPIDER)
+               new MobScavengerTask.Entry(new ItemStack(Items.GOLDEN_APPLE), 1.0, EntityType.ZOMBIE, EntityType.CREEPER, EntityType.SPIDER)
             )
          );
       this.levels.add(new ScavengerConfig.Entry(0, IntRoll.ofUniform(2, 6), IntRoll.ofUniform(4, 10)));

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "the_vault:block/vault_sweets_tiny",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "the_vault:block/vault_sweets_tiny"
+    },
+    "facing=south": {
+      "model": "the_vault:block/vault_sweets_tiny",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "the_vault:block/vault_sweets_tiny",
+      "y": 270
+    }
+  }
+}

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 public class VaultGearData extends AttributeGearData {
@@ -130,6 +131,16 @@ public class VaultGearData extends AttributeGearData {
    public boolean has(VaultGearAttribute<?> attribute, VaultGearData.Type type) {
       for (VaultGearAttributeInstance<?> instance : type.getAttributeSource(this)) {
          if (instance.getAttribute().equals(attribute)) {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public boolean hasModifier(ResourceLocation modifierIdentifier) {
+      for (VaultGearAttributeInstance<?> instance : VaultGearData.Type.ALL.getAttributeSource(this)) {
+         if (instance instanceof VaultGearModifier<?> modifier && modifier.getModifierIdentifier().equals(modifierIdentifier)) {
             return true;
          }
       }

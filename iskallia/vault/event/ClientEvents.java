@@ -9,6 +9,7 @@ import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.patreon.PatreonManager;
 import java.util.List;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiComponent;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedInEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent.LoggedOutEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.Post;
@@ -42,6 +44,14 @@ public class ClientEvents {
    public static void onDisconnect(LoggedOutEvent event) {
       ClientActiveEternalData.clearClientCache();
       ClientDamageData.clearClientCache();
+      PatreonManager.getInstance().clearCache();
+   }
+
+   @SubscribeEvent
+   public static void onConnect(LoggedInEvent event) {
+      if (event.getPlayer() != null) {
+         PatreonManager.getInstance().getPlayerData(event.getPlayer().getUUID());
+      }
    }
 
    @SubscribeEvent

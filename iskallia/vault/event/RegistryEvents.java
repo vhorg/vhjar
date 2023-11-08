@@ -4,6 +4,8 @@ import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
+import iskallia.vault.gear.charm.CharmEffect;
+import iskallia.vault.gear.charm.CharmEffectRegistry;
 import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.gear.modification.GearModificationRegistry;
 import iskallia.vault.gear.trinket.TrinketEffect;
@@ -12,6 +14,7 @@ import iskallia.vault.init.ModAbilities;
 import iskallia.vault.init.ModArchetypes;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModCharms;
 import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModEffects;
@@ -61,6 +64,7 @@ public class RegistryEvents {
       VaultGearAttributeRegistry.buildRegistry(event);
       EtchingRegistry.buildRegistry(event);
       TrinketEffectRegistry.buildRegistry(event);
+      CharmEffectRegistry.buildRegistry(event);
       GearModificationRegistry.buildRegistry(event);
       ArchetypeRegistry.buildRegistry(event);
    }
@@ -165,6 +169,11 @@ public class RegistryEvents {
    @SubscribeEvent
    public static void onTrinketRegistry(Register<TrinketEffect<?>> event) {
       ModTrinkets.init(event);
+   }
+
+   @SubscribeEvent
+   public static void onCharmRegistry(Register<CharmEffect<?>> event) {
+      ModCharms.init(event);
    }
 
    @SubscribeEvent

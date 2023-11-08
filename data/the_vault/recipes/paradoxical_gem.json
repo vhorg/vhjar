@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ded",
+    "pkp",
+    "ded"
+  ],
+  "key": {
+    "d": {
+      "item": "the_vault:dreamstone"
+    },
+    "e": {
+      "item": "the_vault:extraordinary_echo_gem"
+    },
+    "p": {
+      "item": "the_vault:gem_pog"
+    },
+    "k": {
+      "item": "the_vault:knowledge_star"
+    }
+  },
+  "result": {
+    "item": "the_vault:paradoxical_gem"
+  }
+}

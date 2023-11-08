@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.skill.base.LearnableSkill;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;

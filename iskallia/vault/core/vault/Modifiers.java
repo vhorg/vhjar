@@ -42,8 +42,7 @@ public class Modifiers extends DataObject<Modifiers> {
 
    public Modifiers addModifier(VaultModifier<?> modifier, int amount, boolean display, RandomSource random, Consumer<ModifierContext> configurator) {
       for (int i = 0; i < amount; i++) {
-         modifier.flatten(random).forEach(child -> {
-            Modifiers.Entry entry = new Modifiers.Entry((VaultModifier<?>)child, display);
+         modifier.flatten(display, random).forEach(entry -> {
             configurator.accept(entry.getContext());
             this.get(ENTRIES).add(entry);
          });

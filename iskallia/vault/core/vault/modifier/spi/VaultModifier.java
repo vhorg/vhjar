@@ -3,6 +3,7 @@ package iskallia.vault.core.vault.modifier.spi;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.vault.Modifiers;
 import java.util.Optional;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
@@ -48,8 +49,8 @@ public abstract class VaultModifier<P> implements IVaultModifierBehaviorApply {
       return this.display.getName();
    }
 
-   public Stream<VaultModifier<?>> flatten(RandomSource random) {
-      return Stream.of(this);
+   public Stream<Modifiers.Entry> flatten(boolean display, RandomSource random) {
+      return Stream.of(new Modifiers.Entry(this, display));
    }
 
    protected <T extends VaultModifier<P>> T setNameFormatter(@Nonnull IVaultModifierTextFormatter<P> nameFormatter) {

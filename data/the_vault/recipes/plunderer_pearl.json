@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ede",
+    "dad",
+    "ede"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "a": {
+      "item": "the_vault:bounty_pearl"
+    },
+    "d": {
+      "item": "the_vault:vault_diamond"
+    }
+  },
+  "result": {
+    "item": "the_vault:plunderer_pearl",
+    "count": 1
+  }
+}

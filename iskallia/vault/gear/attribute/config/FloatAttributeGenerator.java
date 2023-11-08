@@ -7,7 +7,6 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.util.Mth;
 
 public class FloatAttributeGenerator extends NumberRangeGenerator<Float, FloatAttributeGenerator.Range> {
    private static final DecimalFormat FORMAT = new DecimalFormat("0.##");
@@ -56,8 +55,8 @@ public class FloatAttributeGenerator extends NumberRangeGenerator<Float, FloatAt
       }
 
       public Float generateNumber(Random random) {
-         int steps = Mth.floor(Math.max(this.max - this.min, 0.0F) / this.step) + 1;
-         return this.min + random.nextInt(steps) * this.step;
+         int steps = Math.round(Math.max(this.max - this.min, 0.0F) / this.step) + 1;
+         return Math.min(this.min + random.nextInt(steps) * this.step, this.max);
       }
    }
 }

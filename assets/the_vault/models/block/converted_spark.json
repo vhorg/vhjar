@@ -1,0 +1,7 @@
+{
+  "parent": "the_vault:block/spark",
+  "textures": {
+    "0": "the_vault:block/converted_spark",
+    "particle": "the_vault:block/converted_spark"
+  }
+}

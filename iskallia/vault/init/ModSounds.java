@@ -103,6 +103,24 @@ public class ModSounds {
    public static SoundEvent ABILITY_ON_COOLDOWN;
    public static SoundEvent BONK_CHARGE;
    public static SoundEvent BONK;
+   public static SoundEvent JEWEL_CUT;
+   public static SoundEvent JEWEL_CUT_SUCCESS;
+   public static SoundEvent ARTIFACT_COMPLETE;
+   public static SoundEvent GATE_OPEN;
+   public static SoundEvent GATE_CLOSE;
+   public static SoundEvent BOSS_FIGHT_1;
+   public static SoundEvent BOSS_FIGHT_2;
+   public static SoundEvent BOSS_FIGHT_3;
+   public static SoundEvent BOSS_FIGHT_4;
+   public static SoundEvent ARTIFACT_BOSS_AMBIENT;
+   public static SoundEvent ARTIFACT_BOSS_HURT;
+   public static SoundEvent ARTIFACT_BOSS_DEATH;
+   public static SoundEvent ARTIFACT_BOSS_ATTACK;
+   public static SoundEvent ARTIFACT_BOSS_MAGIC_ATTACK;
+   public static SoundEvent ARTIFACT_BOSS_MAGIC_ATTACK_HIT;
+   public static SoundEvent ARTIFACT_BOSS_CATALYST_HIT;
+   public static SoundEvent ARTIFACT_BOSS_CATALYST_HIT_WRONG;
+   public static SoundEvent SPARK_EXPUNGE;
    public static ForgeSoundType VAULT_GET_SOUND_TYPE = new ForgeSoundType(
       0.25F, 1.0F, () -> VAULT_GEM_BREAK, SoundType.STONE::getStepSound, SoundType.STONE::getPlaceSound, () -> VAULT_GEM_HIT, SoundType.STONE::getFallSound
    );
@@ -209,6 +227,24 @@ public class ModSounds {
       ABILITY_ON_COOLDOWN = registerSound(event, "ability_on_cooldown");
       BONK_CHARGE = registerSound(event, "bonk_charge");
       BONK = registerSound(event, "bonk");
+      JEWEL_CUT = registerSound(event, "jewel_cut");
+      JEWEL_CUT_SUCCESS = registerSound(event, "jewel_cut_success");
+      ARTIFACT_COMPLETE = registerSound(event, "artifact_complete");
+      GATE_OPEN = registerSound(event, "gate_open");
+      GATE_CLOSE = registerSound(event, "gate_close");
+      ARTIFACT_BOSS_AMBIENT = registerSound(event, "artifact_boss_ambient");
+      ARTIFACT_BOSS_HURT = registerSound(event, "artifact_boss_hurt");
+      ARTIFACT_BOSS_DEATH = registerSound(event, "artifact_boss_death");
+      ARTIFACT_BOSS_ATTACK = registerSound(event, "artifact_boss_attack");
+      ARTIFACT_BOSS_MAGIC_ATTACK = registerSound(event, "artifact_boss_magic_attack");
+      ARTIFACT_BOSS_MAGIC_ATTACK_HIT = registerSound(event, "artifact_boss_magic_attack_hit");
+      SPARK_EXPUNGE = registerSound(event, "spark_expunge");
+      BOSS_FIGHT_1 = registerSound(event, "boss_fight_1");
+      BOSS_FIGHT_2 = registerSound(event, "boss_fight_2");
+      BOSS_FIGHT_3 = registerSound(event, "boss_fight_3");
+      BOSS_FIGHT_4 = registerSound(event, "boss_fight_4");
+      ARTIFACT_BOSS_CATALYST_HIT = registerSound(event, "artifact_boss_catalyst_hit");
+      ARTIFACT_BOSS_CATALYST_HIT_WRONG = registerSound(event, "artifact_boss_catalyst_hit_wrong");
    }
 
    private static SoundEvent registerSound(Register<SoundEvent> event, String soundName) {

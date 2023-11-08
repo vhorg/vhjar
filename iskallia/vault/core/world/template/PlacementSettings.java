@@ -11,7 +11,7 @@ import java.util.List;
 import net.minecraft.world.entity.MobSpawnType;
 
 public class PlacementSettings {
-   public static final PlacementSettings EMPTY = new PlacementSettings();
+   public static final PlacementSettings EMPTY = new PlacementSettings(new ProcessorContext());
    protected int flags;
    protected boolean keepFluids = false;
    protected boolean ignoreTiles = false;
@@ -20,10 +20,14 @@ public class PlacementSettings {
    protected MobSpawnType mobSpawnType = MobSpawnType.STRUCTURE;
    protected List<TileProcessor> tileProcessors = new ArrayList<>();
    protected List<EntityProcessor> entityProcessors = new ArrayList<>();
-   protected ProcessorContext processorContext = new ProcessorContext();
+   protected ProcessorContext processorContext;
+
+   public PlacementSettings(ProcessorContext context) {
+      this.processorContext = context;
+   }
 
    public PlacementSettings copy() {
-      PlacementSettings copy = new PlacementSettings();
+      PlacementSettings copy = new PlacementSettings(this.processorContext);
       copy.flags = this.flags;
       copy.keepFluids = this.keepFluids;
       copy.ignoreTiles = this.ignoreTiles;
@@ -32,7 +36,6 @@ public class PlacementSettings {
       copy.mobSpawnType = this.mobSpawnType;
       copy.tileProcessors.addAll(this.tileProcessors);
       copy.entityProcessors.addAll(this.entityProcessors);
-      copy.processorContext = this.processorContext;
       return copy;
    }
 

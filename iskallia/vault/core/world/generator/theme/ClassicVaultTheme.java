@@ -1,6 +1,7 @@
 package iskallia.vault.core.world.generator.theme;
 
 import iskallia.vault.core.data.key.TemplatePoolKey;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClassicVaultTheme extends Theme {
    protected TemplatePoolKey starts;
@@ -18,9 +19,11 @@ public class ClassicVaultTheme extends Theme {
       int waterColor,
       int waterFogColor,
       String particle,
-      float particleProbability
+      float particleProbability,
+      int time,
+      ResourceLocation effects
    ) {
-      super(ambientLight, fogColor, grassColor, foliageColor, waterColor, waterFogColor, particle, particleProbability);
+      super(ambientLight, fogColor, grassColor, foliageColor, waterColor, waterFogColor, particle, particleProbability, time, effects);
       this.starts = starts;
       this.rooms = rooms;
       this.tunnels = tunnels;

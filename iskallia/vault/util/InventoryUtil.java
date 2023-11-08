@@ -5,6 +5,8 @@ import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.integration.IntegrationSB;
 import iskallia.vault.item.BasicScavengerItem;
+import iskallia.vault.item.CatalystInhibitorItem;
+import iskallia.vault.item.GodBlessingItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -68,10 +70,10 @@ public class InventoryUtil {
       return itemAccesses;
    }
 
-   public static void makeScavItemsRotten(Player player) {
+   public static void makeItemsRotten(Player player) {
       for (InventoryUtil.ItemAccess items : findAllItems(player)) {
          ItemStack stack = items.getStack();
-         if (stack.getItem() instanceof BasicScavengerItem) {
+         if (stack.getItem() instanceof BasicScavengerItem || stack.getItem() instanceof CatalystInhibitorItem || stack.getItem() instanceof GodBlessingItem) {
             CompoundTag tag = stack.getOrCreateTag();
             tag.putBoolean("rotten", true);
             tag.remove("VaultId");
@@ -80,9 +82,9 @@ public class InventoryUtil {
       }
    }
 
-   public static void makeScavItemsRotten(List<ItemStack> items) {
+   public static void makeItemsRotten(List<ItemStack> items) {
       for (ItemStack stack : items) {
-         if (stack.getItem() instanceof BasicScavengerItem) {
+         if (stack.getItem() instanceof BasicScavengerItem || stack.getItem() instanceof CatalystInhibitorItem || stack.getItem() instanceof GodBlessingItem) {
             CompoundTag tag = stack.getOrCreateTag();
             tag.putBoolean("rotten", true);
             tag.remove("VaultId");

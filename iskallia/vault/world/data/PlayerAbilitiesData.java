@@ -45,7 +45,7 @@ public class PlayerAbilitiesData extends SavedData {
    private AbilityTree previous;
    private final Set<UUID> scheduledRefund = new HashSet<>();
    private final Set<UUID> scheduledCorruptionCheck = new HashSet<>();
-   private int version;
+   private int version = 1;
 
    public AbilityTree getAbilities(Player player) {
       return this.getAbilities(player.getUUID());

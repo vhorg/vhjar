@@ -4,13 +4,17 @@ import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.block.DivineAltarBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.client.gui.helper.FontHelper;
 import iskallia.vault.client.gui.helper.ScreenDrawHelper;
 import iskallia.vault.client.gui.helper.UIHelper;
+import iskallia.vault.client.util.ClientScheduler;
+import iskallia.vault.config.ScavengerConfig;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.DataMap;
 import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.adapter.basic.EnumAdapter;
 import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
@@ -23,16 +27,19 @@ import iskallia.vault.core.vault.objective.scavenger.ScavengeTask;
 import iskallia.vault.core.vault.objective.scavenger.ScavengerGoal;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.item.GodBlessingItem;
+import iskallia.vault.item.KeystoneItem;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Supplier;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -52,7 +59,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.RenderProperties;
@@ -66,18 +73,22 @@ public class ScavengerObjective extends Objective {
    public static final FieldKey<Float> OBJECTIVE_PROBABILITY = FieldKey.of("objective_probability", Float.class)
       .with(Version.v1_2, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
+   public static final FieldKey<ScavengerObjective.Config> CONFIG = FieldKey.of("config", ScavengerObjective.Config.class)
+      .with(Version.v1_19, Adapters.ofEnum(ScavengerObjective.Config.class, EnumAdapter.Mode.ORDINAL), DISK.all())
+      .register(FIELDS);
 
    protected ScavengerObjective() {
       this.set(GOALS, new ScavengerObjective.GoalMap());
    }
 
-   protected ScavengerObjective(float objectiveProbability) {
+   protected ScavengerObjective(float objectiveProbability, ScavengerObjective.Config config) {
       this.set(GOALS, new ScavengerObjective.GoalMap());
       this.set(OBJECTIVE_PROBABILITY, Float.valueOf(objectiveProbability));
+      this.set(CONFIG, config);
    }
 
-   public static ScavengerObjective of(float objectiveProbability) {
-      return new ScavengerObjective(objectiveProbability);
+   public static ScavengerObjective of(float objectiveProbability, ScavengerObjective.Config config) {
+      return new ScavengerObjective(objectiveProbability, config);
    }
 
    @Override
@@ -105,6 +116,23 @@ public class ScavengerObjective extends Objective {
          if (data.getLevel() == world && data.getTile().getItemPlacedBy() != null) {
             Listener listener = vault.get(Vault.LISTENERS).get(data.getTile().getItemPlacedBy());
             if (listener instanceof Runner) {
+               BlockState state = data.getTile().getBlockState();
+               if (state.getBlock() == ModBlocks.DIVINE_ALTAR) {
+                  if (data.getTile().getHeldItem().getItem() instanceof KeystoneItem keystone) {
+                     if (keystone.getGod() != state.getValue(DivineAltarBlock.GOD)) {
+                        return;
+                     }
+                  } else {
+                     if (!(data.getTile().getHeldItem().getItem() instanceof GodBlessingItem)) {
+                        return;
+                     }
+
+                     if (GodBlessingItem.getGod(data.getTile().getHeldItem()) != state.getValue(DivineAltarBlock.GOD)) {
+                        return;
+                     }
+                  }
+               }
+
                boolean creative = listener.getPlayer().<Boolean>map(ServerPlayer::isCreative).orElse(false);
                CompoundTag nbt = data.getTile().getHeldItem().getTag();
                if (creative || nbt != null && nbt.getString("VaultId").equals(vault.get(Vault.ID).toString())) {
@@ -116,7 +144,7 @@ public class ScavengerObjective extends Objective {
          }
       });
 
-      for (ScavengeTask task : ModConfigs.SCAVENGER.getTasks()) {
+      for (ScavengeTask task : this.getOr(CONFIG, ScavengerObjective.Config.DEFAULT).get().getTasks()) {
          task.initServer(world, vault, this);
       }
 
@@ -147,7 +175,7 @@ public class ScavengerObjective extends Objective {
       ScavengerGoal.ObjList list = new ScavengerGoal.ObjList();
       this.get(GOALS).put(listener.get(Listener.ID), list);
       JavaRandom random = JavaRandom.ofInternal(vault.get(Vault.SEED) ^ listener.get(Listener.ID).getMostSignificantBits());
-      list.addAll(ModConfigs.SCAVENGER.generateGoals(vault.get(Vault.LEVEL).get(), random));
+      list.addAll(this.getOr(CONFIG, ScavengerObjective.Config.DEFAULT).get().generateGoals(vault.get(Vault.LEVEL).get(), random));
    }
 
    @OnlyIn(Dist.CLIENT)
@@ -190,7 +218,7 @@ public class ScavengerObjective extends Objective {
          int totalY = (int)(tabListOffset + itemBoxWidth * 0.75);
 
          for (ScavengerGoal goal : filteredGoals) {
-            int reqYOffset = renderItemRequirement(matrixStack, goal, itemBoxWidth, totalX, totalY);
+            int reqYOffset = renderItemRequirement(matrixStack, goal, itemBoxWidth, totalX, totalY, partialTicks);
             if (reqYOffset > yOffset) {
                yOffset = reqYOffset;
             }
@@ -206,9 +234,13 @@ public class ScavengerObjective extends Objective {
    }
 
    @OnlyIn(Dist.CLIENT)
-   private static int renderItemRequirement(PoseStack matrixStack, ScavengerGoal goal, int itemBoxWidth, int totalX, int totalY) {
-      ItemStack requiredStack = new ItemStack((ItemLike)goal.get(ScavengerGoal.ITEM));
-      ResourceLocation iconPath = goal.get(ScavengerGoal.ICON);
+   private static int renderItemRequirement(PoseStack matrixStack, ScavengerGoal goal, int itemBoxWidth, int totalX, int totalY, float partialTicks) {
+      List<ScavengerGoal.Entry> entries = new ArrayList<>();
+      goal.getEntries().forEachRemaining(entries::add);
+      float time = (float)ClientScheduler.INSTANCE.getTickCount() + partialTicks;
+      ScavengerGoal.Entry entry = entries.get((int)(time / 20.0F) % entries.size());
+      ItemStack requiredStack = entry.getStack();
+      ResourceLocation iconPath = entry.getIcon();
       matrixStack.pushPose();
       matrixStack.translate(0.0, -itemBoxWidth / 2.0F, 0.0);
       totalY = (int)(totalY + -itemBoxWidth / 2.0F);
@@ -228,7 +260,7 @@ public class ScavengerObjective extends Objective {
       matrixStack.pushPose();
       matrixStack.scale(0.5F, 0.5F, 1.0F);
       Component name = requiredStack.getHoverName();
-      MutableComponent display = name.copy().withStyle(Style.EMPTY.withColor(goal.get(ScavengerGoal.COLOR)));
+      MutableComponent display = name.copy().withStyle(Style.EMPTY.withColor(entry.getColor()));
       int lines = UIHelper.renderCenteredWrappedText(matrixStack, display, 60, 0);
       matrixStack.popPose();
       matrixStack.popPose();
@@ -259,9 +291,13 @@ public class ScavengerObjective extends Objective {
       if (scavengerGoals != null) {
          List<ScavengerGoal> filteredGoals = new ArrayList<>(scavengerGoals);
          filteredGoals.removeIf(ScavengerGoal::isCompleted);
-         filteredGoals.forEach(
-            goal -> scavItems.add(new ItemStack((ItemLike)goal.get(ScavengerGoal.ITEM), goal.get(ScavengerGoal.TOTAL) - goal.get(ScavengerGoal.CURRENT)))
-         );
+         filteredGoals.forEach(goal -> {
+            List<ScavengerGoal.Entry> entries = new ArrayList<>();
+            goal.getEntries().forEachRemaining(entries::add);
+            float time = (float)ClientScheduler.INSTANCE.getTickCount();
+            ScavengerGoal.Entry entry = entries.get((int)(time / 20.0F) % entries.size());
+            scavItems.add(entry.getStack(goal.get(ScavengerGoal.TOTAL) - goal.get(ScavengerGoal.CURRENT)));
+         });
          if (!scavItems.isEmpty()) {
             matrixStack.translate(-10.0 - (scavItems.size() + 1) * 18.0, 3.0, 100.0);
 
@@ -306,6 +342,21 @@ public class ScavengerObjective extends Objective {
          }
 
          return false;
+      }
+   }
+
+   public static enum Config {
+      DEFAULT(() -> ModConfigs.SCAVENGER),
+      DIVINE_PARADOX(() -> ModConfigs.DIVINE_PARADOX);
+
+      private Supplier<ScavengerConfig> supplier;
+
+      private Config(Supplier<ScavengerConfig> supplier) {
+         this.supplier = supplier;
+      }
+
+      public ScavengerConfig get() {
+         return this.supplier.get();
       }
    }
 

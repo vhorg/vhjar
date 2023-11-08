@@ -1,6 +1,8 @@
 package iskallia.vault.core.vault;
 
 import iskallia.vault.core.Version;
+import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
@@ -11,6 +13,8 @@ import iskallia.vault.entity.entity.EffectCloudEntity;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.entity.MonsterEyeEntity;
 import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModItems;
@@ -19,7 +23,9 @@ import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.calc.SoulChanceHelper;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Predicate;
+import net.minecraft.Util;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -29,6 +35,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobType;
+import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -48,6 +55,9 @@ public class ClassicMobLogic extends MobLogic {
    public static final String SOUL_SHARDS = "soul_shards";
    public static final SupplierKey<MobLogic> KEY = SupplierKey.of("classic", MobLogic.class).with(Version.v1_0, ClassicMobLogic::new);
    public static final FieldRegistry FIELDS = MobLogic.FIELDS.merge(new FieldRegistry());
+   public static final FieldKey<Void> BLOCK_SPAWNS = FieldKey.of("block_spawns", Void.class)
+      .with(Version.v1_19, Adapters.ofVoid(), DISK.all())
+      .register(FIELDS);
 
    @Override
    public FieldRegistry getFields() {
@@ -61,9 +71,20 @@ public class ClassicMobLogic extends MobLogic {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
+      CommonEvents.ENTITY_CREATION.register(this, event -> {
+         if (event.getEntity().level == world) {
+            if (event.getEntity() instanceof LivingEntity) {
+               if (this.has(BLOCK_SPAWNS)) {
+                  event.getEntity().remove(RemovalReason.DISCARDED);
+               }
+            }
+         }
+      });
       CommonEvents.ENTITY_CHECK_SPAWN.register(this, event -> {
-         if (event.getEntity().level == world && !event.isSpawner()) {
-            event.setResult(Result.DENY);
+         if (event.getEntity().level == world) {
+            if (!event.isSpawner()) {
+               event.setResult(Result.DENY);
+            }
          }
       });
       CommonEvents.ENTITY_TICK
@@ -112,7 +133,7 @@ public class ClassicMobLogic extends MobLogic {
                }
             }
          }
-      });
+      }, 100);
       CommonEvents.ENTITY_TICK.register(this, event -> {
          if (event.getEntity().level == world) {
             if (event.getEntity().getTags().contains("soul_shards")) {
@@ -187,6 +208,28 @@ public class ClassicMobLogic extends MobLogic {
             if (event.getPotionEffect().getEffect() == MobEffects.POISON) {
                if (event.getEntityLiving().getMobType() == MobType.UNDEAD || event.getEntityLiving() instanceof Spider) {
                   event.setResult(Result.ALLOW);
+               }
+            }
+         }
+      });
+      CommonEvents.PLAYER_EQUIPMENT_SWAP.register(this, event -> {
+         if (event.player().level == world) {
+            if (event.player() instanceof ServerPlayer sPlayer) {
+               ItemStack equipped = event.to();
+               if (!equipped.isEmpty() && equipped.getItem() instanceof VaultGearItem gearItem) {
+                  ItemStack from = event.from();
+                  if (!from.isEmpty() && from.getItem() instanceof VaultGearItem) {
+                     UUID fromId = VaultGearData.readUUID(from).orElse(Util.NIL_UUID);
+                     UUID toId = VaultGearData.readUUID(equipped).orElse(Util.NIL_UUID);
+                     if (fromId.equals(toId)) {
+                        return;
+                     }
+                  }
+
+                  if (gearItem.shouldCauseEquipmentCooldown(sPlayer, equipped, event.slot())) {
+                     int cooldownTicks = ModConfigs.VAULT_GEAR_COMMON.getOffHandSwapCooldown();
+                     ModConfigs.VAULT_GEAR_COMMON.getOffHandSwapItems().forEach(item -> sPlayer.getCooldowns().addCooldown(item, cooldownTicks));
+                  }
                }
             }
          }

@@ -2,10 +2,11 @@ package iskallia.vault.core.world.template;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.data.key.Keyed;
-import iskallia.vault.core.world.data.EntityPredicate;
-import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePredicate;
+import iskallia.vault.core.world.generator.JigsawData;
 import iskallia.vault.core.world.template.configured.ConfiguredTemplate;
 import iskallia.vault.init.ModBlocks;
 import java.util.ArrayList;
@@ -35,7 +36,12 @@ public abstract class Template extends Keyed<Template> {
    public static final TilePredicate ALL_TILES = (state, nbt) -> true;
    public static final TilePredicate JIGSAWS = TilePredicate.of(Blocks.JIGSAW);
    public static final TilePredicate PLACEHOLDERS = TilePredicate.of(ModBlocks.PLACEHOLDER);
-   public static final TilePredicate VAULT_PORTALS = TilePredicate.of(ModBlocks.VAULT_PORTAL);
+   public static final TilePredicate VAULT_PORTALS = (state, nbt) -> {
+      Block block = state.getBlock().asWhole().orElse(null);
+      return block == ModBlocks.VAULT_PORTAL
+         ? true
+         : block == Blocks.JIGSAW && new JigsawData(PartialTile.of(state, nbt)).getFinalState().getBlock() == ModBlocks.VAULT_PORTAL;
+   };
    public static final EntityPredicate ALL_ENTITIES = (pos, blockPos, nbt) -> true;
    protected static final Direction[] FLOWING_DIRECTIONS = new Direction[]{Direction.UP, Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST};
    protected static final Template.TilePlacementResult EMPTY_TILE_RESULT = new Template.TilePlacementResult(

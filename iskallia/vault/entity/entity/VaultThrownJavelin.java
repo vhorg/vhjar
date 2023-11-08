@@ -159,14 +159,18 @@ public class VaultThrownJavelin extends AbstractArrow {
    }
 
    public VaultThrownJavelin createBouncingJavelin(Level level, LivingEntity thrower, int bounceCount) {
-      VaultThrownJavelin javelin = new VaultThrownJavelin(level, thrower);
-      javelin.bounceCount = bounceCount;
-      javelin.entityData.set(ID_BOUNCES, bounceCount);
-      javelin.entityData.set(IS_GHOST, (Boolean)this.entityData.get(IS_GHOST));
-      javelin.piercingIgnoreEntityIds = this.piercingIgnoreEntityIds;
-      javelin.piercedAndKilledEntities = this.piercedAndKilledEntities;
-      javelin.maxPierced = this.maxPierced;
-      return javelin;
+      if (thrower == null) {
+         return null;
+      } else {
+         VaultThrownJavelin javelin = new VaultThrownJavelin(level, thrower);
+         javelin.bounceCount = bounceCount;
+         javelin.entityData.set(ID_BOUNCES, bounceCount);
+         javelin.entityData.set(IS_GHOST, (Boolean)this.entityData.get(IS_GHOST));
+         javelin.piercingIgnoreEntityIds = this.piercingIgnoreEntityIds;
+         javelin.piercedAndKilledEntities = this.piercedAndKilledEntities;
+         javelin.maxPierced = this.maxPierced;
+         return javelin;
+      }
    }
 
    protected void defineSynchedData() {
@@ -584,6 +588,10 @@ public class VaultThrownJavelin extends AbstractArrow {
          Vec3 result = direction.scale(0.5).add(reflect).normalize();
          result = result.xRot(pitch).yRot(yaw).zRot(Math.abs(roll));
          VaultThrownJavelin thrownJavelin = this.createBouncingJavelin(world, this.getThrower(), this.bounceCount + 1);
+         if (thrownJavelin == null) {
+            return;
+         }
+
          thrownJavelin.setPos(
             this.position().x() + result.normalize().x / 5.0,
             this.position().y() + result.normalize().y / 5.0,
@@ -773,6 +781,10 @@ public class VaultThrownJavelin extends AbstractArrow {
                   double dot = motion.dot(normal) * 1.5;
                   Vec3 reflect = motion.subtract(normal.multiply(new Vec3(dot, dot, dot))).add(0.0, 0.1F, 0.0);
                   VaultThrownJavelin thrownJavelin = this.createBouncingJavelin(this.level, this.thrower, this.bounceCount + 1);
+                  if (thrownJavelin == null) {
+                     return;
+                  }
+
                   thrownJavelin.setPos(
                      result.getLocation().x() + reflect.normalize().x / 5.0,
                      result.getLocation().y() + reflect.normalize().y / 5.0,

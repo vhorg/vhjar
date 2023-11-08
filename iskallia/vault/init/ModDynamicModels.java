@@ -96,6 +96,7 @@ import iskallia.vault.gear.model.armor.layers.SweetheartArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ThermalArmorLayers;
 import iskallia.vault.gear.model.armor.layers.TorchArmorLayers;
 import iskallia.vault.gear.model.armor.layers.TrashArmorLayers;
+import iskallia.vault.gear.model.armor.layers.VictoryArmorLayers;
 import iskallia.vault.gear.model.armor.layers.VillagerArmorLayers;
 import iskallia.vault.gear.model.armor.layers.WarriorArmorLayers;
 import iskallia.vault.gear.model.armor.layers.WitchArmorLayers;
@@ -153,7 +154,8 @@ public class ModDynamicModels {
          .associate(ModItems.RELIC, ModDynamicModels.Relics.RELIC_REGISTRY)
          .associate(ModItems.RELIC_FRAGMENT, ModDynamicModels.Relics.FRAGMENT_REGISTRY)
          .associate(ModItems.MAGNET, ModDynamicModels.Magnets.REGISTRY_MAGNETS)
-         .associate(ModItems.WAND, ModDynamicModels.Wands.REGISTRY);
+         .associate(ModItems.WAND, ModDynamicModels.Wands.REGISTRY)
+         .associate(ModItems.FOCUS, ModDynamicModels.Focus.REGISTRY);
    }
 
    public static void initCauldronWashables() {
@@ -1145,6 +1147,15 @@ public class ModDynamicModels {
             .addSlot(EquipmentSlot.LEGS)
             .addSlot(EquipmentSlot.FEET)
       );
+      public static final ArmorModel VICTORY = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/victory"), "Victory")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new VictoryArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
    }
 
    public static class Axes {
@@ -1240,6 +1251,29 @@ public class ModDynamicModels {
       );
       public static final HandHeldModel GODAXE = REGISTRY.register(
          new HandHeldModel(VaultMod.id("gear/axe/godaxe"), "Godaxe").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+   }
+
+   public static class Focus {
+      public static final DynamicModelRegistry<PlainItemModel> REGISTRY = new DynamicModelRegistry<>();
+      public static final PlainItemModel TATTERED_TOME = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/focus/tatteredtome"), "Tattered Tome")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel GRIMOIRE = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/focus/grimoire"), "Grimoire").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel ARCANE_CODEX = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/focus/arcanecodex"), "Arcane Codex")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel MYSTICAL_LEXICON = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/focus/mysticallexicon"), "Mystical Lexicon")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel TOME_OF_KNOWLEDGE = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/focus/tomeofknowledge"), "Tome of Knowledge")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }
 

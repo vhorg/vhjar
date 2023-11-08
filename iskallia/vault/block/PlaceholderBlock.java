@@ -101,7 +101,8 @@ public class PlaceholderBlock extends Block {
       TREASURE_DOOR,
       DUNGEON_DOOR,
       PYLON,
-      DUNGEON_DISCOVERABLE;
+      DUNGEON_DISCOVERABLE,
+      GATE;
 
       private static final Map<String, PlaceholderBlock.Type> NAME_TO_TYPE = Arrays.stream(values())
          .collect(Collectors.toMap(PlaceholderBlock.Type::getSerializedName, Functions.identity()));

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ss",
+    "ss"
+  ],
+  "key": {
+    "s": {
+      "item": "the_vault:gilded_sconce"
+    }
+  },
+  "result": {
+    "item": "the_vault:gilded_candelabra"
+  }
+}

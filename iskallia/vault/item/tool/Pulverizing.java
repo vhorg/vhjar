@@ -16,6 +16,7 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import mezz.jei.api.constants.VanillaTypes;
@@ -32,9 +33,11 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class Pulverizing {
    public static void handle(List<ItemStack> loot) {
@@ -58,15 +61,10 @@ public class Pulverizing {
    }
 
    public static void register(IRecipeRegistration registration) {
-      registration.addRecipes(
-         Pulverizing.Category.RECIPE_TYPE,
-         ModConfigs.TOOL_PULVERIZING
-            .getLoot()
-            .entrySet()
-            .stream()
-            .map(entry -> new Pulverizing.Recipe(new ItemStack((ItemLike)entry.getKey()), new LootTable(entry.getValue())))
-            .toList()
-      );
+      registration.addRecipes(Pulverizing.Category.RECIPE_TYPE, ModConfigs.TOOL_PULVERIZING.getLoot().entrySet().stream().flatMap(entry -> {
+         Item item = (Item)ForgeRegistries.ITEMS.getValue(entry.getKey());
+         return item != null && item != Items.AIR ? Stream.of(new Pulverizing.Recipe(new ItemStack(item), new LootTable(entry.getValue()))) : Stream.empty();
+      }).toList());
    }
 
    public static void register(IRecipeCatalystRegistration registration) {

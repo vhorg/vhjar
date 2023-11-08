@@ -1,0 +1,29 @@
+{
+  "parent": "the_vault:block/error_block",
+  "overrides": [
+    {
+      "predicate": {
+        "custom_model_data": 0
+      },
+      "model": "the_vault:block/herald_trophy/bronze"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 1
+      },
+      "model": "the_vault:block/herald_trophy/silver"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 2
+      },
+      "model": "the_vault:block/herald_trophy/gold"
+    },
+    {
+      "predicate": {
+        "custom_model_data": 3
+      },
+      "model": "the_vault:block/herald_trophy/platinum"
+    }
+  ]
+}

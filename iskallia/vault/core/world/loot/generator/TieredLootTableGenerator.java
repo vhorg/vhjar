@@ -132,7 +132,7 @@ public class TieredLootTableGenerator extends LootTableGenerator {
             if (this.poolToIndex.containsKey(next)) {
                this.frequencies[this.poolToIndex.get(next)]++;
             }
-         }).map(e -> e.getStack(random)).ifPresent(this.items::add);
+         }).map(e -> e.getStack(random)).ifPresent(this.items::addAll);
       }
    }
 

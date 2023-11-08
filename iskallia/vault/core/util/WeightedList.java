@@ -13,7 +13,12 @@ import java.util.random.RandomGenerator;
 import org.jetbrains.annotations.NotNull;
 
 public class WeightedList<T> extends AbstractMap<T, Double> {
+   private static final WeightedList<?> EMPTY = new WeightedList();
    private final Map<T, Double> delegate = new LinkedHashMap<>();
+
+   public static <T> T empty() {
+      return (T)EMPTY;
+   }
 
    @NotNull
    @Override

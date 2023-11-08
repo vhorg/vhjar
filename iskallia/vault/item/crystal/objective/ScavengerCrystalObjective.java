@@ -38,7 +38,7 @@ public class ScavengerCrystalObjective extends CrystalObjective {
          Vault.OBJECTIVES,
          objectives -> {
             objectives.add(
-               ScavengerObjective.of(this.objectiveProbability)
+               ScavengerObjective.of(this.objectiveProbability, ScavengerObjective.Config.DEFAULT)
                   .add(AwardCrateObjective.ofConfig(VaultCrateBlock.Type.SCAVENGER, "scavenger", level, true))
                   .add(VictoryObjective.of(300))
             );
@@ -50,12 +50,14 @@ public class ScavengerCrystalObjective extends CrystalObjective {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
-      tooltip.add(new TextComponent("Objective: ").append(new TextComponent("Scavenger Hunt").withStyle(Style.EMPTY.withColor(this.getColor().orElseThrow()))));
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+      tooltip.add(
+         new TextComponent("Objective: ").append(new TextComponent("Scavenger Hunt").withStyle(Style.EMPTY.withColor(this.getColor(time).orElseThrow())))
+      );
    }
 
    @Override
-   public Optional<Integer> getColor() {
+   public Optional<Integer> getColor(float time) {
       return Optional.of(11136021);
    }
 

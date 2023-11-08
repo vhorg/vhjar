@@ -1,0 +1,113 @@
+{
+	"format_version": "1.12.0",
+	"minecraft:geometry": [
+		{
+			"description": {
+				"identifier": "geometry.unknown",
+				"texture_width": 256,
+				"texture_height": 256,
+				"visible_bounds_width": 9,
+				"visible_bounds_height": 6.5,
+				"visible_bounds_offset": [0, 2.75, 0]
+			},
+			"bones": [
+				{
+					"name": "Body",
+					"pivot": [0, 29, 0],
+					"rotation": [0, 180, 0],
+					"cubes": [
+						{"origin": [-12, 33, -6.5], "size": [24, 16, 16], "pivot": [0, 41.5, 0], "rotation": [-22.5, 0, 0], "uv": [0, 40]}
+					]
+				},
+				{
+					"name": "Head",
+					"parent": "Body",
+					"pivot": [0, 44, 9],
+					"cubes": [
+						{"origin": [-5, 40, 6], "size": [10, 12, 10], "uv": [139, 23]},
+						{"origin": [-5, 48, 6], "size": [10, 3, 10], "inflate": 0.25, "uv": [0, 150]},
+						{"origin": [3, 48, 5], "size": [4, 10, 4], "uv": [67, 130]},
+						{"origin": [-7, 48, 5], "size": [4, 10, 4], "uv": [26, 127]},
+						{"origin": [-7, 47, 11], "size": [3, 8, 3], "uv": [44, 0]},
+						{"origin": [3, 47, 11], "size": [3, 8, 3], "uv": [0, 40]}
+					]
+				},
+				{
+					"name": "LeftArm",
+					"parent": "Body",
+					"pivot": [-13, 43, 2],
+					"cubes": [
+						{"origin": [-14, 39, -6], "size": [4, 16, 16], "uv": [114, 39]},
+						{"origin": [-26, 39, -4], "size": [12, 14, 12], "uv": [0, 100]},
+						{"origin": [-24, 28, -2], "size": [8, 11, 8], "uv": [41, 153]}
+					]
+				},
+				{
+					"name": "LeftElbow",
+					"parent": "LeftArm",
+					"pivot": [-20, 29, 0],
+					"cubes": [
+						{"origin": [-25, 15, -3], "size": [10, 16, 10], "uv": [126, 72]},
+						{"origin": [-27, 24, -4], "size": [4, 4, 12], "pivot": [-25, 26, 7], "rotation": [0, 0, -45], "uv": [152, 141]},
+						{"origin": [-27, 13, 5], "size": [4, 6, 4], "uv": [37, 100]},
+						{"origin": [-27, 13, -5], "size": [4, 6, 4], "uv": [39, 73]},
+						{"origin": [-22, 11, -5], "size": [10, 10, 14], "uv": [98, 105]}
+					]
+				},
+				{
+					"name": "RightArm",
+					"parent": "Body",
+					"pivot": [13, 43, 2],
+					"cubes": [
+						{"origin": [14, 39, -4], "size": [12, 10, 12], "uv": [123, 0]},
+						{"origin": [8, 39, -5], "size": [12, 12, 14], "pivot": [14, 45, 2], "rotation": [0, 0, 22.5], "uv": [0, 73]},
+						{"origin": [16, 30, -2], "size": [8, 9, 8], "inflate": 0.25, "uv": [74, 153]}
+					]
+				},
+				{
+					"name": "RightElbow",
+					"parent": "RightArm",
+					"pivot": [20, 29, 0],
+					"cubes": [
+						{"origin": [17, 11, -1], "size": [6, 21, 6], "uv": [0, 0]},
+						{"origin": [16, 22, -2], "size": [8, 6, 8], "uv": [155, 55]},
+						{"origin": [16, 14, -2], "size": [8, 6, 8], "pivot": [20, 17, 2], "rotation": [0, 180, 0], "uv": [107, 153]}
+					]
+				},
+				{
+					"name": "hand",
+					"parent": "RightElbow",
+					"pivot": [18, 13, 2],
+					"cubes": [
+						{"origin": [12.25, 6.75, -5], "size": [10, 10, 14], "uv": [49, 105]}
+					]
+				},
+				{
+					"name": "weapon",
+					"parent": "hand",
+					"pivot": [18, 13, -10],
+					"cubes": [
+						{"origin": [14, 9, -10], "size": [4, 4, 35], "pivot": [16, 11, -10], "rotation": [0, 0, 45], "uv": [0, 0]},
+						{"origin": [12, 7, -19], "size": [8, 8, 10], "pivot": [16, 11, -10], "rotation": [0, 0, 45], "uv": [149, 120]},
+						{"origin": [13, 8, 25], "size": [6, 6, 14], "pivot": [16, 11, 32], "rotation": [0, 0, -45], "uv": [147, 99]},
+						{"origin": [6, 9, 27], "size": [20, 4, 4], "pivot": [16, 11, 29], "rotation": [45, 0, 0], "uv": [139, 46]},
+						{"origin": [4, 4, 38], "size": [24, 15, 15], "uv": [44, 0]},
+						{"origin": [17, 15, 48], "size": [5, 7, 15], "uv": [123, 130]},
+						{"origin": [10, 15, 48], "size": [5, 7, 15], "uv": [82, 130]},
+						{"origin": [17, 0, 48], "size": [5, 7, 15], "uv": [41, 130]},
+						{"origin": [10, 0, 48], "size": [5, 7, 15], "uv": [0, 127]}
+					]
+				},
+				{
+					"name": "LowerBody",
+					"parent": "Body",
+					"pivot": [0, 31, 0],
+					"cubes": [
+						{"origin": [-8, 0, -6], "size": [16, 31, 12], "uv": [69, 61]},
+						{"origin": [-9, 29, -7], "size": [18, 9, 14], "uv": [65, 31]}
+					]
+				}
+			]
+		}
+	]
+}

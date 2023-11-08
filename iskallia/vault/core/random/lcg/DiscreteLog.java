@@ -4,11 +4,11 @@ import iskallia.vault.core.util.MathUtils;
 import java.math.BigInteger;
 
 public class DiscreteLog {
-   public static boolean supports(LCG lcg) {
+   public static boolean supports(Lcg lcg) {
       return lcg.isModPowerOf2() && lcg.getModTrailingZeroes() <= 61 ? lcg.multiplier % 2L != 0L && lcg.addend % 2L != 0L : false;
    }
 
-   public static long distanceFromZero(LCG lcg, long seed) {
+   public static long distanceFromZero(Lcg lcg, long seed) {
       int exp = lcg.getModTrailingZeroes();
       long a = lcg.multiplier;
       long b = MathUtils.mask(seed * (lcg.multiplier - 1L) * MathUtils.modInverse(lcg.addend, exp) + 1L, exp + 2);

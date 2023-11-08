@@ -125,6 +125,7 @@ public class Vault extends DataObject<Vault> {
       ClientEvents.CLIENT_TICK.at(Phase.END).register(this, data -> this.tickClient());
       this.ifPresent(WORLD, worldManager -> worldManager.initClient(this));
       this.ifPresent(OVERLAY, overlay -> overlay.initClient(this));
+      this.ifPresent(OBJECTIVES, objectives -> objectives.initClient(this));
       this.get(MODIFIERS).getModifiers().stream().filter(m -> m instanceof GameControlsModifier).forEach(m -> {
          GameControlsModifier modifier = (GameControlsModifier)m;
          GameControlsModifier.Properties currentProps = ClientVaults.CONTROLS_PROPERTIES;

@@ -9,16 +9,23 @@ import iskallia.vault.block.EasterEggBlock;
 import iskallia.vault.block.PlaceholderBlock;
 import iskallia.vault.block.TreasureDoorBlock;
 import iskallia.vault.block.VaultOreBlock;
+import iskallia.vault.block.model.BloodOrbModel;
 import iskallia.vault.block.model.BountyBlockExclamationModel;
 import iskallia.vault.block.model.BountyBlockQuestionModel;
+import iskallia.vault.block.model.HeraldControllerModel;
 import iskallia.vault.block.model.PylonCrystalModel;
+import iskallia.vault.block.model.WendarrChainModel;
+import iskallia.vault.block.model.WendarrSparkSourceModel;
 import iskallia.vault.block.render.AngelBlockRenderer;
+import iskallia.vault.block.render.ArtifactProjectorRenderer;
 import iskallia.vault.block.render.IdentificationStandRenderer;
 import iskallia.vault.block.render.PotionModifierDiscoveryRenderer;
+import iskallia.vault.block.render.SparkRenderer;
 import iskallia.vault.block.render.VaultEnchanterRenderer;
 import iskallia.vault.block.render.VelvetBedRenderer;
 import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.client.util.color.ColorUtil;
+import iskallia.vault.config.CharmConfig;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
 import iskallia.vault.core.event.ClientEvents;
 import iskallia.vault.core.vault.ClientVaults;
@@ -26,6 +33,7 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Listeners;
+import iskallia.vault.entity.model.BossProtectionCatalystModel;
 import iskallia.vault.entity.model.FireballModel;
 import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.model.PiercingJavelinModel;
@@ -36,6 +44,9 @@ import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
 import iskallia.vault.gear.VaultGearHelper;
 import iskallia.vault.gear.VaultGearState;
+import iskallia.vault.gear.charm.AttributeCharm;
+import iskallia.vault.gear.charm.CharmEffect;
+import iskallia.vault.gear.charm.CharmEffectRegistry;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.trinket.TrinketEffect;
@@ -93,10 +104,7 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_ALTAR, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_ARTIFACT, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.MVP_CROWN, RenderType.cutout());
-      ItemBlockRenderTypes.setRenderLayer(ModBlocks.XP_ALTAR, RenderType.translucent());
-      ItemBlockRenderTypes.setRenderLayer(ModBlocks.BLOOD_ALTAR, RenderType.translucent());
-      ItemBlockRenderTypes.setRenderLayer(ModBlocks.TIME_ALTAR, RenderType.translucent());
-      ItemBlockRenderTypes.setRenderLayer(ModBlocks.SOUL_ALTAR, RenderType.translucent());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.GOD_ALTAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_GLASS, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.SKILL_ALTAR, RenderType.translucent());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.MOB_BARRIER, RenderType.translucent());
@@ -118,6 +126,16 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.VAULT_JEWEL_APPLICATION_STATION, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.GILDED_SCONCE, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.GILDED_SCONCE_WALL, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.SPARK, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.CONVERTED_SPARK, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.GILDED_CANDELABRA, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.ARTIFACT_PROJECTOR_BLOCK, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR_EXPOSED, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR_WEATHERED, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR_OXIDIZED, RenderType.cutout());
+      setRenderLayers(ModBlocks.VAULT_SWEETS, RenderType.solid(), RenderType.translucent());
+      setRenderLayers(ModBlocks.DIVINE_ALTAR, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.VAULT_JEWEL_CUTTING_STATION, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_ARCHIVE, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.ALCHEMY_TABLE, RenderType.cutout(), RenderType.translucent());
@@ -126,6 +144,9 @@ public class ModModels {
       setRenderLayers(ModBlocks.STABILIZER, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.VAULT_CHARM_CONTROLLER_BLOCK, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.CRAKE_PEDESTAL, RenderType.translucent());
+      setRenderLayers(ModBlocks.WENDARR_JEWEL_GLASS, RenderType.translucent());
+      setRenderLayers(ModBlocks.WENDARR_JEWEL_GLASS_PANE, RenderType.translucent());
+      setRenderLayers(ModBlocks.VELARA_VINE, RenderType.cutout());
    }
 
    private static void setRenderLayers(Block block, RenderType... renderTypes) {
@@ -164,7 +185,8 @@ public class ModModels {
             ModItems.IDOL_TIMEKEEPER,
             ModItems.IDOL_MALEVOLENCE,
             ModItems.MAGNET,
-            ModItems.WAND
+            ModItems.WAND,
+            ModItems.FOCUS
          }
       );
       colors.register((stack, tintIndex) -> tintIndex == 0 ? JewelItem.getColor(stack) : -1, new ItemLike[]{ModItems.JEWEL});
@@ -187,6 +209,9 @@ public class ModModels {
       event.registerLayerDefinition(ScatterJavelinModel.MODEL_LOCATION, ScatterJavelinModel::createBodyLayer);
       event.registerLayerDefinition(PiercingJavelinModel.MODEL_LOCATION, PiercingJavelinModel::createBodyLayer);
       event.registerLayerDefinition(FireballModel.MODEL_LOCATION, FireballModel::createBodyLayer);
+      event.registerLayerDefinition(BossProtectionCatalystModel.MODEL_LOCATION, BossProtectionCatalystModel::createBodyLayer);
+      event.registerLayerDefinition(HeraldControllerModel.MODEL_LOCATION, HeraldControllerModel::createBodyLayer);
+      event.registerLayerDefinition(BloodOrbModel.LAYER_LOCATION, BloodOrbModel::createBodyLayer);
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_EYE, AngelBlockRenderer::createEyeLayer);
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_WIND, AngelBlockRenderer::createWindLayer);
       event.registerLayerDefinition(ModModelLayers.ANGEL_BLOCK_CAGE, AngelBlockRenderer::createCageLayer);
@@ -194,6 +219,8 @@ public class ModModels {
       event.registerLayerDefinition(BountyBlockQuestionModel.LAYER_LOCATION, BountyBlockQuestionModel::createBodyLayer);
       event.registerLayerDefinition(VelvetBedRenderer.HEAD_LAYER_LOCATION, VelvetBedRenderer::createHeadLayer);
       event.registerLayerDefinition(VelvetBedRenderer.FOOT_LAYER_LOCATION, VelvetBedRenderer::createFootLayer);
+      event.registerLayerDefinition(WendarrSparkSourceModel.LAYER_LOCATION, WendarrSparkSourceModel::createBodyLayer);
+      event.registerLayerDefinition(WendarrChainModel.LAYER_LOCATION, WendarrChainModel::createBodyLayer);
    }
 
    @SubscribeEvent
@@ -201,7 +228,10 @@ public class ModModels {
    public static void stitchTextures(Pre event) {
       if (event.getAtlas().location().equals(TextureAtlas.LOCATION_BLOCKS)) {
          event.addSprite(PylonCrystalModel.TEXTURE_LOCATION);
+         event.addSprite(HeraldControllerModel.TEXTURE_LOCATION);
+         event.addSprite(HeraldControllerModel.FILLED_TEXTURE_LOCATION);
          event.addSprite(VaultEnchanterRenderer.BOOK_TEXTURE);
+         event.addSprite(ArtifactProjectorRenderer.BOOK_TEXTURE);
          event.addSprite(IdentificationStandRenderer.BOOK_TEXTURE);
          event.addSprite(PotionModifierDiscoveryRenderer.BOOK_TEXTURE.texture());
          event.addSprite(AngelBlockRenderer.ANGEL_OUTTER.texture());
@@ -212,6 +242,17 @@ public class ModModels {
          event.addSprite(BountyBlockExclamationModel.TEXTURE_LOCATION);
          event.addSprite(BountyBlockQuestionModel.TEXTURE_LOCATION);
          event.addSprite(VelvetBedRenderer.TEXTURE_LOCATION);
+         event.addSprite(SparkRenderer.TEXTURE_LOCATION);
+         event.addSprite(WendarrSparkSourceModel.TEXTURE_LOCATION);
+         event.addSprite(WendarrChainModel.TEXTURE_LOCATION);
+      }
+   }
+
+   @SubscribeEvent
+   @OnlyIn(Dist.CLIENT)
+   public static void stitchParticleTextures(Pre event) {
+      if (event.getAtlas().location().equals(TextureAtlas.LOCATION_PARTICLES)) {
+         CharmConfig.LOC.forEach(event::addSprite);
       }
    }
 
@@ -225,6 +266,11 @@ public class ModModels {
          AttributeGearData data = AttributeGearData.read(stack);
          TrinketEffect<?> trinket = data.getFirstValue(ModGearAttributes.TRINKET_EFFECT).orElse(null);
          return trinket == null ? -1.0F : TrinketEffectRegistry.getOrderedEntries().indexOf(trinket);
+      };
+      public static ItemPropertyFunction CHARM = (stack, world, entity, seed) -> {
+         AttributeGearData data = AttributeGearData.read(stack);
+         CharmEffect<?> charm = data.getFirstValue(ModGearAttributes.CHARM_EFFECT).orElse(null);
+         return charm instanceof AttributeCharm<?> attributeCharm ? CharmEffectRegistry.getOrderedEntries().indexOf(charm) : -1.0F;
       };
       public static ItemPropertyFunction PLACEHOLDER_TYPE = (stack, world, entity, seed) -> {
          CompoundTag nbt = stack.getTag();
@@ -278,10 +324,23 @@ public class ModModels {
             ? type.ordinal()
             : (float)((ClientScheduler.INSTANCE.getTickCount() >> 4) % VaultGod.values().length);
       };
+      public static ItemPropertyFunction GOD_ALTAR_TYPE = (stack, world, entity, seed) -> {
+         CompoundTag nbt = stack.getTag();
+         if (nbt == null) {
+            return -1.0F;
+         } else {
+            VaultGod god = VaultGod.fromName(nbt.getString("god"));
+            return god == null ? -1.0F : god.ordinal();
+         }
+      };
 
       public static void register() {
          registerItemProperty(ModItems.ETCHING, "etching", ETCHING);
          registerItemProperty(ModItems.TRINKET, "trinket", TRINKET);
+         registerItemProperty(ModItems.SMALL_CHARM, "charm", CHARM);
+         registerItemProperty(ModItems.LARGE_CHARM, "charm", CHARM);
+         registerItemProperty(ModItems.GRAND_CHARM, "charm", CHARM);
+         registerItemProperty(ModItems.MAJESTIC_CHARM, "charm", CHARM);
          registerItemProperty(ModItems.SHIELD, "blocking", (stack, world, entity, seed) -> {
             if (entity instanceof Player player && BlockChanceHelper.isPlayerBlocking(player)) {
                return 1.0F;
@@ -318,6 +377,7 @@ public class ModModels {
 
          registerItemProperty(ModBlocks.EASTER_EGG.asItem(), "easter_egg_type", EASTER_EGG_TYPE);
          registerItemProperty(ModItems.GOD_BLESSING, "god_blessing_type", GOD_BLESSING_TYPE);
+         registerItemProperty(ModBlocks.GOD_ALTAR.asItem(), "god_altar_type", GOD_ALTAR_TYPE);
       }
 
       public static void registerOverrides() {

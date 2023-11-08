@@ -50,6 +50,7 @@ public class IntegrationJEI implements IModPlugin {
             ModItems.ETCHING,
             ModItems.GOD_BLESSING,
             ModItems.TOOL,
+            ModItems.JEWEL,
             ModItems.AUGMENT,
             ModBlocks.ASHIUM_ORE.asItem(),
             ModBlocks.ALEXANDRITE_ORE.asItem(),
@@ -67,7 +68,9 @@ public class IntegrationJEI implements IModPlugin {
             ModBlocks.UPALINE_ORE.asItem(),
             ModBlocks.WUTODIE_ORE.asItem(),
             ModBlocks.XENIUM_ORE.asItem(),
-            ModBlocks.PLACEHOLDER.asItem()
+            ModBlocks.PLACEHOLDER.asItem(),
+            ModBlocks.HERALD_TROPHY_BLOCK_ITEM,
+            ModBlocks.GOD_ALTAR.asItem()
          }
       );
       registration.registerSubtypeInterpreter(

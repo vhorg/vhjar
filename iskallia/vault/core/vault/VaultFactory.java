@@ -49,8 +49,7 @@ public class VaultFactory {
          .set(Vault.STATS, new StatsCollector())
          .set(Vault.DISCOVERY, new DiscoveryGoalsManager())
          .set(Vault.ENHANCEMENT_TASKS, new EnhancementTaskManager())
-         .set(Vault.QUESTS, new QuestManager())
-         .set(Vault.CRYSTAL, crystal.serializeNBT());
+         .set(Vault.QUESTS, new QuestManager());
       crystal.configure(vault, random);
       return vault;
    }

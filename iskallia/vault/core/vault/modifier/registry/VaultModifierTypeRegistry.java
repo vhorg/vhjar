@@ -8,8 +8,10 @@ import iskallia.vault.core.vault.modifier.modifier.ChanceChestTrapModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceSoulShardModifier;
 import iskallia.vault.core.vault.modifier.modifier.DecoratorAddModifier;
 import iskallia.vault.core.vault.modifier.modifier.DecoratorCascadeModifier;
+import iskallia.vault.core.vault.modifier.modifier.EntityEffectModifier;
 import iskallia.vault.core.vault.modifier.modifier.ExperienceModifier;
 import iskallia.vault.core.vault.modifier.modifier.GameControlsModifier;
+import iskallia.vault.core.vault.modifier.modifier.GroupedModifier;
 import iskallia.vault.core.vault.modifier.modifier.InlinePoolModifier;
 import iskallia.vault.core.vault.modifier.modifier.LootItemQuantityModifier;
 import iskallia.vault.core.vault.modifier.modifier.LootItemRarityModifier;
@@ -17,9 +19,11 @@ import iskallia.vault.core.vault.modifier.modifier.MobAttributeModifier;
 import iskallia.vault.core.vault.modifier.modifier.MobCurseOnHitModifier;
 import iskallia.vault.core.vault.modifier.modifier.MobFrenzyModifier;
 import iskallia.vault.core.vault.modifier.modifier.MobSpawnCountModifier;
+import iskallia.vault.core.vault.modifier.modifier.NoSoulShardsModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerAttributeModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerDurabilityDamageModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerEffectModifier;
+import iskallia.vault.core.vault.modifier.modifier.PlayerHealCutModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerInventoryRestoreModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerNoExitModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerNoVaultFruitModifier;
@@ -99,6 +103,10 @@ public final class VaultModifierTypeRegistry {
             VaultModifierType.of(PlayerEffectModifier.class, PlayerEffectModifier.Properties.class, PlayerEffectModifier::new)
          );
          this.put(
+            VaultMod.id("modifier_type/entity_effect"),
+            VaultModifierType.of(EntityEffectModifier.class, EntityEffectModifier.Properties.class, EntityEffectModifier::new)
+         );
+         this.put(
             VaultMod.id("modifier_type/player_inventory_restore"),
             VaultModifierType.of(PlayerInventoryRestoreModifier.class, PlayerInventoryRestoreModifier.Properties.class, PlayerInventoryRestoreModifier::new)
          );
@@ -140,6 +148,15 @@ public final class VaultModifierTypeRegistry {
          this.put(
             VaultMod.id("modifier_type/decorator_cascade"),
             VaultModifierType.of(DecoratorCascadeModifier.class, DecoratorCascadeModifier.Properties.class, DecoratorCascadeModifier::new)
+         );
+         this.put(VaultMod.id("modifier_type/grouped"), VaultModifierType.of(GroupedModifier.class, GroupedModifier.Properties.class, GroupedModifier::new));
+         this.put(
+            VaultMod.id("modifier_type/player_heal_cut"),
+            VaultModifierType.of(PlayerHealCutModifier.class, EntityAttributeModifier.Properties.class, PlayerHealCutModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/no_soul_shards"),
+            VaultModifierType.of(NoSoulShardsModifier.class, NoSoulShardsModifier.Properties.class, NoSoulShardsModifier::new)
          );
       }
    };

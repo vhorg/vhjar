@@ -4,6 +4,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.core.vault.ClientVaults;
+import iskallia.vault.core.vault.modifier.modifier.EntityEffectModifier;
 import iskallia.vault.entity.champion.ChampionLogic;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.VaultGuardianEntity;
@@ -16,6 +17,8 @@ import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.calc.ResistanceHelper;
 import iskallia.vault.world.data.ServerVaults;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
@@ -59,10 +62,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({LivingEntity.class})
-public abstract class MixinLivingEntity extends Entity implements ChampionLogic.IChampionLogicHolder {
+public abstract class MixinLivingEntity extends Entity implements ChampionLogic.IChampionLogicHolder, EntityEffectModifier.ILivingEntityAccessor {
    private float prevSize = -1.0F;
    @Nullable
    private ChampionLogic championLogic = new ChampionLogic();
+   private Map<MobEffectInstance, Double> scheduledEffects = new HashMap<>();
    @Shadow
    protected ItemStack useItem;
    @Shadow
@@ -82,6 +86,11 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
 
    public MixinLivingEntity(EntityType<?> entityType, Level world) {
       super(entityType, world);
+   }
+
+   @Override
+   public Map<MobEffectInstance, Double> getEffects() {
+      return this.scheduledEffects;
    }
 
    @Shadow

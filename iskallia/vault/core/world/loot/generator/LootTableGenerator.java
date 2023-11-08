@@ -38,6 +38,11 @@ public class LootTableGenerator implements LootGenerator {
       return this.items.iterator();
    }
 
+   public void setItems(List<ItemStack> items) {
+      this.items.clear();
+      this.items.addAll(items);
+   }
+
    @Override
    public void generate(RandomSource random) {
       CommonEvents.LOOT_GENERATION.invoke(this, LootGenerationEvent.Phase.PRE);
@@ -57,7 +62,7 @@ public class LootTableGenerator implements LootGenerator {
       roll = (int)fRoll + (random.nextFloat() < fRoll - roll ? 1 : 0);
 
       for (int i = 0; i < roll; i++) {
-         entry.getPool().getRandomFlat(this.version, random).map(e -> e.getStack(random)).ifPresent(this.items::add);
+         entry.getPool().getRandomFlat(this.version, random).map(e -> e.getStack(random)).ifPresent(this.items::addAll);
       }
    }
 }

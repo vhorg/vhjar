@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Matrix4f;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.core.vault.VaultUtils;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModEffects;
@@ -45,6 +46,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
@@ -60,7 +62,8 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
    private static final String TAG_REMAINING_INTERVAL_TICKS = "remainingIntervalTicks";
    public static final Predicate<Entity> ENTITY_PREDICATE = entity -> !(entity instanceof Player)
       && entity instanceof LivingEntity livingEntity
-      && livingEntity.isAlive();
+      && livingEntity.isAlive()
+      && (VaultUtils.isVaultLevel(entity.level) || entity.getType().getCategory() == MobCategory.MONSTER);
 
    public AbstractSmiteAbility(
       int unlockLevel,

@@ -1,6 +1,7 @@
 package iskallia.vault.core.world.generator.theme;
 
 import iskallia.vault.core.data.key.TemplatePoolKey;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public class DIYVaultTheme extends Theme {
    protected TemplatePoolKey starts;
@@ -24,7 +25,7 @@ public class DIYVaultTheme extends Theme {
       String particle,
       float particleProbability
    ) {
-      super(ambientLight, fogColor, grassColor, foliageColor, waterColor, waterFogColor, particle, particleProbability);
+      super(ambientLight, fogColor, grassColor, foliageColor, waterColor, waterFogColor, particle, particleProbability, 23000, DimensionType.NETHER_EFFECTS);
       this.starts = starts;
       this.commonRooms = commonRooms;
       this.challengeRooms = challengeRooms;

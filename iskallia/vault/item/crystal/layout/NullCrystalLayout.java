@@ -21,7 +21,7 @@ public class NullCrystalLayout extends CrystalLayout {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Layout: ???").withStyle(ChatFormatting.GRAY));
    }
 

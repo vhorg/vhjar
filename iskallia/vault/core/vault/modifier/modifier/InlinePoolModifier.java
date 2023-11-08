@@ -2,6 +2,7 @@ package iskallia.vault.core.vault.modifier.modifier;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.core.random.RandomSource;
+import iskallia.vault.core.vault.Modifiers;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModConfigs;
 import java.util.stream.Stream;
@@ -13,8 +14,11 @@ public class InlinePoolModifier extends VaultModifier<InlinePoolModifier.Propert
    }
 
    @Override
-   public Stream<VaultModifier<?>> flatten(RandomSource random) {
-      return ModConfigs.VAULT_MODIFIER_POOLS.getRandom(this.properties.pool, this.properties.level, random).stream();
+   public Stream<Modifiers.Entry> flatten(boolean display, RandomSource random) {
+      return ModConfigs.VAULT_MODIFIER_POOLS
+         .getRandom(this.properties.pool, this.properties.level, random)
+         .stream()
+         .map(modifier -> new Modifiers.Entry((VaultModifier<?>)modifier, display));
    }
 
    public static class Properties {

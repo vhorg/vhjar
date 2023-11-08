@@ -37,7 +37,7 @@ public class ClassicPolygonCrystalLayout extends ClassicInfiniteCrystalLayout {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Layout: ").append(new TextComponent("Polygon").withStyle(ChatFormatting.GOLD)));
    }
 

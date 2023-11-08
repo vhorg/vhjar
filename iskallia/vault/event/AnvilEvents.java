@@ -5,6 +5,7 @@ import iskallia.vault.config.entry.EnchantedBookEntry;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.objective.ParadoxObjective;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -18,7 +19,11 @@ import iskallia.vault.item.PaxelJewelItem;
 import iskallia.vault.item.VaultCatalystInfusedItem;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
+import iskallia.vault.item.crystal.layout.ParadoxCrystalLayout;
 import iskallia.vault.item.crystal.model.ChaosCrystalModel;
+import iskallia.vault.item.crystal.modifiers.ParadoxCrystalModifiers;
+import iskallia.vault.item.crystal.objective.NullCrystalObjective;
+import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
 import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.item.data.InscriptionData;
 import iskallia.vault.item.tool.PaxelItem;
@@ -28,6 +33,7 @@ import iskallia.vault.skill.expertise.type.InfuserExpertise;
 import iskallia.vault.skill.expertise.type.MysticExpertise;
 import iskallia.vault.util.EnchantmentUtil;
 import iskallia.vault.util.OverlevelEnchantHelper;
+import iskallia.vault.world.data.ParadoxCrystalData;
 import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.HashMap;
@@ -47,6 +53,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.event.AnvilUpdateEvent;
+import net.minecraftforge.event.entity.player.AnvilRepairEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -258,6 +265,23 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
+   public static void onApplyPlundererSeal(AnvilUpdateEvent event) {
+      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == ModItems.PLUNDERER_PEARL) {
+         ItemStack output = event.getLeft().copy();
+         CrystalData data = CrystalData.read(output);
+         if (!data.isUnmodifiable() && data.getModifiers().hasRandomModifiers() && data.getObjective() == NullCrystalObjective.INSTANCE) {
+            data.getModifiers().setRandomModifiers(false);
+            data.setUnmodifiable(true);
+            data.write(output);
+            VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("plunderer_pearl")), output);
+            event.setOutput(output);
+            event.setCost(1);
+            event.setMaterialCost(1);
+         }
+      }
+   }
+
+   @SubscribeEvent
    public static void onApplyMote(AnvilUpdateEvent event) {
       if (event.getLeft().getItem() instanceof VaultCrystalItem) {
          Item item = event.getRight().getItem();
@@ -408,13 +432,60 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
-   public static void onApplyPog(AnvilUpdateEvent event) {
+   public static void onApplyOmegaPog(AnvilUpdateEvent event) {
       if (event.getRight().getItem() == ModItems.OMEGA_POG) {
          ResourceLocation name = event.getLeft().getItem().getRegistryName();
          if (name.equals(ModBlocks.VAULT_ARTIFACT.getRegistryName())) {
             event.setOutput(new ItemStack(ModItems.UNIDENTIFIED_ARTIFACT));
             event.setMaterialCost(1);
             event.setCost(1);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyParadoxicalGem(AnvilUpdateEvent event) {
+      if (event.getRight().getItem() == ModItems.PARADOXICAL_GEM) {
+         if (event.getLeft().getItem() == ModItems.VAULT_CRYSTAL) {
+            ItemStack copy = event.getLeft().copy();
+            CrystalData data = CrystalData.read(copy);
+            if (!(data.getObjective() instanceof ParadoxCrystalObjective objective)) {
+               return;
+            }
+
+            if (objective.getType() != ParadoxObjective.Type.BUILD) {
+               return;
+            }
+
+            objective.setPlayerUuid(null);
+            if (data.getLayout() instanceof ParadoxCrystalLayout layout) {
+               layout.setPlayerUuid(null);
+            }
+
+            if (data.getModifiers() instanceof ParadoxCrystalModifiers modifiers) {
+               modifiers.setPlayerUuid(null);
+            }
+
+            data.write(copy);
+            event.setOutput(copy);
+            event.setMaterialCost(1);
+            event.setCost(1);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyParadoxicalGemPost(AnvilRepairEvent event) {
+      if (!event.getPlayer().level.isClientSide()) {
+         if (event.getIngredientInput().getItem() == ModItems.PARADOXICAL_GEM) {
+            if (event.getItemInput().getItem() == ModItems.VAULT_CRYSTAL) {
+               CrystalData data = CrystalData.read(event.getItemInput());
+               if (!(data.getObjective() instanceof ParadoxCrystalObjective)) {
+                  return;
+               }
+
+               ParadoxCrystalData.get(event.getPlayer().getLevel().getServer()).getOrCreate(event.getPlayer().getUUID()).reset();
+            }
          }
       }
    }

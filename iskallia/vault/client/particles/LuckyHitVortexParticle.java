@@ -60,7 +60,7 @@ public class LuckyHitVortexParticle extends TextureSheetParticle {
       float c2 = c1 * 1.525F;
       this.alpha = (float)(this.lifetime - this.age) / this.lifetime > 0.5F
          ? (float)(Math.pow(2.0 * this.x, 2.0) * ((c2 + 1.0F) * 2.0F * this.x - c2)) / 2.25F
-         : Mth.clamp((float)(this.lifetime - this.age) / this.lifetime, 0.15F, 0.95F);
+         : Mth.clamp((float)(this.lifetime - this.age) / this.lifetime, 0.25F, 0.95F);
       super.render(pBuffer, pRenderInfo, pPartialTicks);
    }
 

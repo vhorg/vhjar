@@ -18,7 +18,7 @@ import iskallia.vault.client.gui.screen.bestiary.BestiaryScreen;
 import iskallia.vault.client.gui.screen.bounty.element.HeaderElement;
 import iskallia.vault.config.BestiaryConfig;
 import iskallia.vault.config.entry.IntRangeEntry;
-import iskallia.vault.core.world.data.PartialEntityGroup;
+import iskallia.vault.core.world.data.entity.PartialEntityGroup;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.EntityGroupsUtils;
 import iskallia.vault.util.TextComponentUtils;

@@ -6,7 +6,6 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.util.Mth;
 
 public class IntegerAttributeGenerator extends NumberRangeGenerator<Integer, IntegerAttributeGenerator.Range> {
    @Nullable
@@ -51,7 +50,7 @@ public class IntegerAttributeGenerator extends NumberRangeGenerator<Integer, Int
       }
 
       public Integer generateNumber(Random random) {
-         int steps = Mth.floor(Math.max(this.max - this.min, 0) / this.step) + 1;
+         int steps = Math.max(this.max - this.min, 0) / this.step + 1;
          return this.min + random.nextInt(steps) * this.step;
       }
    }

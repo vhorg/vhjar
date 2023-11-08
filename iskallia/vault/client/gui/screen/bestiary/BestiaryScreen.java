@@ -16,8 +16,8 @@ import iskallia.vault.client.gui.screen.bestiary.element.EntityDefinitionElement
 import iskallia.vault.client.gui.screen.bestiary.element.EntityGroupElement;
 import iskallia.vault.client.gui.screen.bestiary.element.GroupListElement;
 import iskallia.vault.client.gui.screen.bounty.element.HeaderElement;
-import iskallia.vault.core.world.data.EntityPredicate;
-import iskallia.vault.core.world.data.PartialEntityGroup;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
+import iskallia.vault.core.world.data.entity.PartialEntityGroup;
 import iskallia.vault.util.EntityGroupsUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;

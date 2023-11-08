@@ -1,7 +1,7 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.item.ItemPredicate;
 import iskallia.vault.core.world.data.item.PartialItem;
 import iskallia.vault.core.world.data.item.PartialStack;

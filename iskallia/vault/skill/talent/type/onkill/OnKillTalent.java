@@ -1,6 +1,6 @@
 package iskallia.vault.skill.talent.type.onkill;
 
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.talent.type.EntityFilterTalent;
 import iskallia.vault.skill.tree.TalentTree;

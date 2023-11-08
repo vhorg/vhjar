@@ -1,10 +1,10 @@
 package iskallia.vault.util;
 
 import iskallia.vault.VaultMod;
-import iskallia.vault.core.world.data.EntityPredicate;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
-import iskallia.vault.core.world.data.PartialEntity;
-import iskallia.vault.core.world.data.PartialEntityGroup;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialEntity;
+import iskallia.vault.core.world.data.entity.PartialEntityGroup;
 import iskallia.vault.init.ModConfigs;
 import java.util.ArrayList;
 import java.util.Comparator;

@@ -13,6 +13,7 @@ import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.world.template.EmptyTemplate;
 import iskallia.vault.core.world.template.PlacementSettings;
 import iskallia.vault.core.world.template.Template;
+import iskallia.vault.core.world.template.data.TemplatePool;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 
@@ -36,18 +37,29 @@ public abstract class ClassicVaultLayout extends VaultLayout {
       return FIELDS;
    }
 
+   public TemplatePool getTemplatePool(VaultLayout.PieceType type, Vault vault, RegionPos region, RandomSource random) {
+      return switch (type) {
+         case NONE -> null;
+         case START, START_NORTH, START_SOUTH, START_WEST, START_EAST -> (TemplatePool)this.get(START_POOL).get(vault.get(Vault.VERSION));
+         case ROOM -> (TemplatePool)this.get(ROOM_POOL).get(vault.get(Vault.VERSION));
+         case TUNNEL_X, TUNNEL_Z -> (TemplatePool)this.get(TUNNEL_POOL).get(vault.get(Vault.VERSION));
+      };
+   }
+
    @Override
    public Template getTemplate(VaultLayout.PieceType type, Vault vault, RegionPos region, RandomSource random, PlacementSettings settings) {
+      TemplatePool pool = this.getTemplatePool(type, vault, region, random);
+
       return (Template)(switch (this.getType(vault, region)) {
          case NONE -> EmptyTemplate.INSTANCE;
-         case START -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, vault.get(Vault.WORLD).get(WorldManager.FACING), settings);
-         case START_NORTH -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, Direction.NORTH, settings);
-         case START_SOUTH -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, Direction.SOUTH, settings);
-         case START_WEST -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, Direction.WEST, settings);
-         case START_EAST -> this.getStart(this.get(START_POOL), vault.get(Vault.VERSION), region, random, Direction.EAST, settings);
-         case ROOM -> this.getRoom(this.get(ROOM_POOL), vault.get(Vault.VERSION), region, random, settings);
-         case TUNNEL_X -> this.getTunnel(this.get(TUNNEL_POOL), vault.get(Vault.VERSION), region, random, Axis.X, settings);
-         case TUNNEL_Z -> this.getTunnel(this.get(TUNNEL_POOL), vault.get(Vault.VERSION), region, random, Axis.Z, settings);
+         case START -> this.getStart(pool, vault.get(Vault.VERSION), region, random, vault.get(Vault.WORLD).get(WorldManager.FACING), settings);
+         case START_NORTH -> this.getStart(pool, vault.get(Vault.VERSION), region, random, Direction.NORTH, settings);
+         case START_SOUTH -> this.getStart(pool, vault.get(Vault.VERSION), region, random, Direction.SOUTH, settings);
+         case START_WEST -> this.getStart(pool, vault.get(Vault.VERSION), region, random, Direction.WEST, settings);
+         case START_EAST -> this.getStart(pool, vault.get(Vault.VERSION), region, random, Direction.EAST, settings);
+         case ROOM -> this.getRoom(pool, vault.get(Vault.VERSION), region, random, settings);
+         case TUNNEL_X -> this.getTunnel(pool, vault.get(Vault.VERSION), region, random, Axis.X, settings);
+         case TUNNEL_Z -> this.getTunnel(pool, vault.get(Vault.VERSION), region, random, Axis.Z, settings);
       });
    }
 }

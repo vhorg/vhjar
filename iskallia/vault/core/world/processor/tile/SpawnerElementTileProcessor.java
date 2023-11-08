@@ -1,9 +1,9 @@
 package iskallia.vault.core.world.processor.tile;
 
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.core.world.data.EntityPredicate;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
-import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import net.minecraft.nbt.CompoundTag;
@@ -39,7 +39,7 @@ public class SpawnerElementTileProcessor extends TargetTileProcessor<SpawnerElem
                   CompoundTag nbt = stack.getCompound("tag").getCompound("EntityTag");
                   PartialEntity entity = PartialEntity.of(null, null, PartialCompoundNbt.of(nbt));
                   if (this.element.test(entity)) {
-                     this.output.getRandom(context.random).ifPresent(other -> {
+                     this.output.getRandom(context.getRandom(tile.getPos())).ifPresent(other -> {
                         PartialCompoundNbt result = PartialCompoundNbt.of(nbt);
                         other.getNbt().fillInto(result);
                         result.asWhole().ifPresent(compoundTag -> {

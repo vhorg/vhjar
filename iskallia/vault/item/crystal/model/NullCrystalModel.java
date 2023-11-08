@@ -2,6 +2,7 @@ package iskallia.vault.item.crystal.model;
 
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.client.util.color.ColorUtil;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.tool.SpecialItemRenderer;
@@ -25,17 +26,18 @@ public class NullCrystalModel extends CrystalModel {
       int light,
       int overlay
    ) {
-      this.resolve(crystal).renderItem(renderer, crystal, stack, transformType, matrices, buffer, light, overlay);
+      this.resolve(crystal, (float)ClientScheduler.INSTANCE.getTickCount())
+         .renderItem(renderer, crystal, stack, transformType, matrices, buffer, light, overlay);
    }
 
    @Override
    public int getBlockColor(CrystalData crystal, float time) {
-      return this.resolve(crystal).getBlockColor(crystal, time);
+      return this.resolve(crystal, time).getBlockColor(crystal, time);
    }
 
-   public CrystalModel resolve(CrystalData crystal) {
+   public CrystalModel resolve(CrystalData crystal, float time) {
       CrystalModel core = crystal.getObjective()
-         .getColor()
+         .getColor(time)
          .map(color -> new GrayscaleCrystalModel(ColorUtil.blendColors(color, 16777215, 0.85F)))
          .orElseGet(RainbowCrystalModel::new);
       CrystalModel augment = crystal.getTheme().getColor().map(AugmentCrystalModel::new).orElse(null);

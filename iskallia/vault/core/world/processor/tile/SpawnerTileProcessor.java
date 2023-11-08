@@ -1,8 +1,8 @@
 package iskallia.vault.core.world.processor.tile;
 
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.core.world.data.PartialCompoundNbt;
-import iskallia.vault.core.world.data.PartialEntity;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
+import iskallia.vault.core.world.data.entity.PartialEntity;
 import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.processor.ProcessorContext;
 import net.minecraft.nbt.CompoundTag;
@@ -25,7 +25,7 @@ public class SpawnerTileProcessor extends TargetTileProcessor<SpawnerTileProcess
          CompoundTag nbt = new CompoundTag();
          CompoundTag inventory = new CompoundTag();
          ListTag stacks = new ListTag();
-         this.output.getRandom(context.random).ifPresent(result -> {
+         this.output.getRandom(context.getRandom(tile.getPos())).ifPresent(result -> {
             result.forEach((entity, weight) -> {
                CompoundTag entry = new CompoundTag();
                entry.putString("id", "ispawner:spawn_egg");

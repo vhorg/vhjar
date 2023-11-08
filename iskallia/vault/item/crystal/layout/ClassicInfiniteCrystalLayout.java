@@ -34,7 +34,7 @@ public class ClassicInfiniteCrystalLayout extends CrystalLayout {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Layout: ").append(new TextComponent("Infinite").withStyle(ChatFormatting.RED)));
    }
 
@@ -52,7 +52,6 @@ public class ClassicInfiniteCrystalLayout extends CrystalLayout {
    @Override
    public Optional<JsonObject> writeJson() {
       JsonObject json = new JsonObject();
-      json.addProperty("type", "infinite");
       json.addProperty("tunnel_span", this.tunnelSpan);
       return Optional.of(json);
    }

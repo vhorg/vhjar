@@ -27,14 +27,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.PacketDistributor;
 
 public class ScavengerAltarTileEntity extends BlockEntity {
-   private static final Random rand = new Random();
+   protected static final Random rand = new Random();
    private ItemStack heldItem = ItemStack.EMPTY;
    private UUID itemPlacedBy = null;
    public static final int MAX_CONSUME_TICKS = 40;
    public int ticksToConsume = 40;
    public int ticksToConsumeOld;
    public boolean consuming = false;
-   private static final BlockPos[] list = new BlockPos[]{
+   protected static final BlockPos[] list = new BlockPos[]{
       BlockPos.ZERO.north(),
       BlockPos.ZERO.north().north(),
       BlockPos.ZERO.north().east(),
@@ -83,6 +83,10 @@ public class ScavengerAltarTileEntity extends BlockEntity {
       }
    }
 
+   public void sendConsumeParticleMessage() {
+      ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ScavengerAltarConsumeMessage(this.getBlockPos()));
+   }
+
    public static void tickServer(Level world, BlockPos pos, BlockState state, ScavengerAltarTileEntity tile) {
       if (!tile.heldItem.isEmpty()) {
          if (tile.ticksToConsume > 0) {
@@ -102,7 +106,7 @@ public class ScavengerAltarTileEntity extends BlockEntity {
             if (tile.heldItem.getCount() != original.getCount()) {
                world.playSound(null, pos, SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.BLOCKS, 1.0F, 1.0F);
                world.playSound(null, pos, SoundEvents.PLAYER_BURP, SoundSource.BLOCKS, 1.0F, 1.0F);
-               ModNetwork.CHANNEL.send(PacketDistributor.ALL.noArg(), new ScavengerAltarConsumeMessage(tile.getBlockPos()));
+               tile.sendConsumeParticleMessage();
             } else {
                world.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.BLOCKS, 1.0F, 2.0F);
             }
@@ -118,7 +122,7 @@ public class ScavengerAltarTileEntity extends BlockEntity {
    }
 
    @OnlyIn(Dist.CLIENT)
-   private void playEffects(Level level) {
+   protected void playEffects(Level level) {
       if (level.isClientSide) {
          BlockPos pos = this.getBlockPos().above();
          Vec3 vec3 = new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);

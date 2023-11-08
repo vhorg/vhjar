@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "the_vault:block/decoration/velara_planks_slab"
+    },
+    "type=double": {
+      "model": "the_vault:block/decoration/velara_planks"
+    },
+    "type=top": {
+      "model": "the_vault:block/decoration/velara_planks_slab_top"
+    }
+  }
+}

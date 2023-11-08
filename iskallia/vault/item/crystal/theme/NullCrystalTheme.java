@@ -28,7 +28,7 @@ public class NullCrystalTheme extends CrystalTheme {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag) {
+   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Theme: ???").withStyle(ChatFormatting.GRAY));
    }
 

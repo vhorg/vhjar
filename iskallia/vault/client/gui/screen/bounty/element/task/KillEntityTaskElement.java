@@ -3,7 +3,7 @@ package iskallia.vault.client.gui.screen.bounty.element.task;
 import iskallia.vault.bounty.task.KillEntityTask;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
-import iskallia.vault.core.world.data.EntityPredicate;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.util.EntityGroupsUtils;
 import java.util.ArrayList;
 import java.util.List;

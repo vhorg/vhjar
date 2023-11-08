@@ -8,11 +8,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import iskallia.vault.VaultMod;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.ScavengerObjective;
+import iskallia.vault.core.world.data.item.PartialStack;
 import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import java.lang.reflect.Type;
@@ -22,17 +24,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public abstract class ScavengeTask {
    public abstract Optional<ScavengerGoal> generateGoal(int var1, RandomSource var2);
 
    public abstract void initServer(VirtualWorld var1, Vault var2, ScavengerObjective var3);
 
-   public ItemStack createStack(Vault vault, Item item) {
-      ItemStack stack = new ItemStack(item, 1);
+   public ItemStack createStack(Vault vault, ItemStack stack) {
+      stack = stack.copy();
       stack.getOrCreateTag().putString("VaultId", vault.get(Vault.ID).toString());
       return stack;
    }
@@ -49,13 +49,18 @@ public abstract class ScavengeTask {
                JsonObject obj = object.get("entries").getAsJsonObject();
 
                for (String key : obj.keySet()) {
-                  JsonObject value = obj.get(key).getAsJsonObject();
-                  entries.put(
-                     new ChestScavengerTask.Entry(
-                        (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
-                     ),
-                     value.get("weight").getAsInt()
-                  );
+                  PartialStack.parse(key, true)
+                     .flatMap(partialStack -> partialStack.generate(1))
+                     .ifPresentOrElse(
+                        itemStack -> {
+                           JsonObject value = obj.get(key).getAsJsonObject();
+                           entries.put(
+                              new ChestScavengerTask.Entry(itemStack, value.get("multiplier").getAsDouble(), value.get("color").getAsInt()),
+                              value.get("weight").getAsInt()
+                           );
+                        },
+                        () -> VaultMod.LOGGER.error("Invalid item: " + key)
+                     );
                }
 
                return new ChestScavengerTask(
@@ -70,12 +75,15 @@ public abstract class ScavengeTask {
 
                for (String key : obj.keySet()) {
                   JsonObject value = obj.get(key).getAsJsonObject();
-                  entries.put(
-                     new CoinStacksScavengerTask.Entry(
-                        (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
-                     ),
-                     value.get("weight").getAsInt()
-                  );
+                  PartialStack.parse(key, true)
+                     .flatMap(partialStack -> partialStack.generate(1))
+                     .ifPresentOrElse(
+                        itemStack -> entries.put(
+                           new CoinStacksScavengerTask.Entry(itemStack, value.get("multiplier").getAsDouble(), value.get("color").getAsInt()),
+                           value.get("weight").getAsInt()
+                        ),
+                        () -> VaultMod.LOGGER.error("Invalid item: " + key)
+                     );
                }
 
                return new CoinStacksScavengerTask(object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries);
@@ -85,12 +93,15 @@ public abstract class ScavengeTask {
 
                for (String key : obj.keySet()) {
                   JsonObject value = obj.get(key).getAsJsonObject();
-                  entries.put(
-                     new OreScavengerTask.Entry(
-                        (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), value.get("multiplier").getAsDouble(), value.get("color").getAsInt()
-                     ),
-                     value.get("weight").getAsInt()
-                  );
+                  PartialStack.parse(key, true)
+                     .flatMap(partialStack -> partialStack.generate(1))
+                     .ifPresentOrElse(
+                        itemStack -> entries.put(
+                           new OreScavengerTask.Entry(itemStack, value.get("multiplier").getAsDouble(), value.get("color").getAsInt()),
+                           value.get("weight").getAsInt()
+                        ),
+                        () -> VaultMod.LOGGER.error("Invalid item: " + key)
+                     );
                }
 
                return new OreScavengerTask(object.get("probability").getAsDouble(), new ResourceLocation(object.get("icon").getAsString()), entries);
@@ -107,9 +118,12 @@ public abstract class ScavengeTask {
                      group.add(new ResourceLocation(element.getAsString()));
                   }
 
-                  entries.add(
-                     new MobScavengerTask.Entry((Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation(key)), entry.get("multiplier").getAsDouble(), group)
-                  );
+                  PartialStack.parse(key, true)
+                     .flatMap(partialStack -> partialStack.generate(1))
+                     .ifPresentOrElse(
+                        itemStack -> entries.add(new MobScavengerTask.Entry(itemStack, entry.get("multiplier").getAsDouble(), group)),
+                        () -> VaultMod.LOGGER.error("Invalid item: " + key)
+                     );
                }
 
                return new MobScavengerTask(
@@ -118,6 +132,14 @@ public abstract class ScavengeTask {
                   object.get("color").getAsInt(),
                   entries.toArray(MobScavengerTask.Entry[]::new)
                );
+            case "compound":
+               List<ScavengeTask> children = new ArrayList<>();
+
+               for (JsonElement element : object.get("children").getAsJsonArray()) {
+                  children.add((ScavengeTask)context.deserialize(element, ScavengeTask.class));
+               }
+
+               return new CompoundScavengerTask(children);
             default:
                return null;
          }
@@ -131,11 +153,11 @@ public abstract class ScavengeTask {
             object.addProperty("probability", chest.probability);
             object.addProperty("icon", chest.icon.toString());
             JsonObject entries = new JsonObject();
-            chest.entries.forEach((entryx, weight) -> {
+            chest.entries.forEach((entry, weight) -> {
                JsonObject obj = new JsonObject();
                obj.addProperty("weight", weight);
-               obj.addProperty("color", entryx.color);
-               entries.add(entryx.item.getRegistryName().toString(), obj);
+               obj.addProperty("color", entry.color);
+               entries.add(PartialStack.of(entry.item).toString(), obj);
             });
             object.add("entries", entries);
          } else if (value instanceof CoinStacksScavengerTask coin) {
@@ -143,11 +165,11 @@ public abstract class ScavengeTask {
             object.addProperty("probability", coin.probability);
             object.addProperty("icon", coin.icon.toString());
             JsonObject entries = new JsonObject();
-            coin.entries.forEach((entryx, weight) -> {
+            coin.entries.forEach((entry, weight) -> {
                JsonObject obj = new JsonObject();
                obj.addProperty("weight", weight);
-               obj.addProperty("color", entryx.color);
-               entries.add(entryx.item.getRegistryName().toString(), obj);
+               obj.addProperty("color", entry.color);
+               entries.add(PartialStack.of(entry.item).toString(), obj);
             });
             object.add("entries", entries);
          } else if (value instanceof OreScavengerTask ore) {
@@ -155,11 +177,11 @@ public abstract class ScavengeTask {
             object.addProperty("probability", ore.probability);
             object.addProperty("icon", ore.icon.toString());
             JsonObject entries = new JsonObject();
-            ore.entries.forEach((entryx, weight) -> {
+            ore.entries.forEach((entry, weight) -> {
                JsonObject obj = new JsonObject();
                obj.addProperty("weight", weight);
-               obj.addProperty("color", entryx.color);
-               entries.add(entryx.item.getRegistryName().toString(), obj);
+               obj.addProperty("color", entry.color);
+               entries.add(PartialStack.of(entry.item).toString(), obj);
             });
             object.add("entries", entries);
          } else if (value instanceof MobScavengerTask mob) {
@@ -172,10 +194,19 @@ public abstract class ScavengeTask {
             for (MobScavengerTask.Entry entry : mob.entries) {
                JsonArray group = new JsonArray();
                entry.group.forEach(id -> group.add(id.toString()));
-               entries.add(entry.item.getRegistryName().toString(), group);
+               entries.add(PartialStack.of(entry.item).toString(), group);
             }
 
             object.add("entries", entries);
+         } else if (value instanceof CompoundScavengerTask compound) {
+            object.addProperty("type", "compound");
+            JsonArray children = new JsonArray();
+
+            for (ScavengeTask child : compound.children) {
+               children.add(context.serialize(child));
+            }
+
+            object.add("children", children);
          }
 
          return object;

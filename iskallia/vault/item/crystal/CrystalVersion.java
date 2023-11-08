@@ -6,7 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 
 public enum CrystalVersion implements IVersion<CrystalVersion> {
    LEGACY(CrystalVersion::convertLegacyTo1),
-   v1(CrystalVersion::convert1to2);
+   v1(CrystalVersion::convert1to2),
+   v2(CrystalVersion::convert2to3);
 
    private final Consumer<CompoundTag> fixer;
 
@@ -52,5 +53,15 @@ public enum CrystalVersion implements IVersion<CrystalVersion> {
    }
 
    static void convert1to2(CompoundTag nbt) {
+      nbt.putInt("Version", v2.ordinal());
+      if (nbt.contains("Modifiers", 10)) {
+         CompoundTag modifiers = nbt.getCompound("Modifiers");
+         if (!modifiers.contains("type", 8)) {
+            modifiers.putString("type", "default");
+         }
+      }
+   }
+
+   private static void convert2to3(CompoundTag tag) {
    }
 }

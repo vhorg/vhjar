@@ -197,7 +197,7 @@ public class CakeObjective extends Objective {
             vault.get(Vault.WORLD).get(WorldManager.GENERATOR).get(GridGenerator.CELL_Z)
          );
          ChunkRandom random = ChunkRandom.any();
-         random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 912345678);
+         random.setRegionSeed(vault.get(Vault.SEED), region.getX(), region.getZ(), 912345678L);
          this.generateCake(world, region, random);
       } else {
          world.getChunkSource().blockChanged(this.get(CAKE_POS));
@@ -229,7 +229,7 @@ public class CakeObjective extends Objective {
                this.set(TARGET, this.get(COUNT));
             } else {
                ChunkRandom random = ChunkRandom.any();
-               random.setRegionSeed(vault.get(Vault.SEED), var11.getX(), var11.getZ(), 987654321);
+               random.setRegionSeed(vault.get(Vault.SEED), var11.getX(), var11.getZ(), 987654321L);
                RegionPos neighbor = (RegionPos)neighbors.get(random.nextInt(neighbors.size()));
                this.generateRoom(vault, world, gen, var11, neighbor);
                this.generateCake(world, neighbor, random);

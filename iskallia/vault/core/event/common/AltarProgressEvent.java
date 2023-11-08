@@ -1,6 +1,6 @@
 package iskallia.vault.core.event.common;
 
-import iskallia.vault.block.base.FillableAltarTileEntity;
+import iskallia.vault.block.base.GodAltarTileEntity;
 import iskallia.vault.core.event.Event;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -21,7 +21,7 @@ public class AltarProgressEvent extends Event<AltarProgressEvent, AltarProgressE
    }
 
    public AltarProgressEvent.Data invoke(
-      ServerLevel world, ServerPlayer player, BlockState state, BlockPos pos, FillableAltarTileEntity blockEntity, int progress, int total, boolean consuming
+      ServerLevel world, ServerPlayer player, BlockState state, BlockPos pos, GodAltarTileEntity blockEntity, int progress, int total, boolean consuming
    ) {
       return this.invoke(new AltarProgressEvent.Data(world, player, state, pos, blockEntity, progress, total, consuming));
    }
@@ -35,20 +35,13 @@ public class AltarProgressEvent extends Event<AltarProgressEvent, AltarProgressE
       private final ServerPlayer player;
       private final BlockState state;
       private final BlockPos pos;
-      private final FillableAltarTileEntity blockEntity;
+      private final GodAltarTileEntity blockEntity;
       private final int progress;
       private final int total;
       private final boolean consuming;
 
       public Data(
-         ServerLevel world,
-         ServerPlayer player,
-         BlockState state,
-         BlockPos pos,
-         FillableAltarTileEntity blockEntity,
-         int progress,
-         int total,
-         boolean consuming
+         ServerLevel world, ServerPlayer player, BlockState state, BlockPos pos, GodAltarTileEntity blockEntity, int progress, int total, boolean consuming
       ) {
          this.world = world;
          this.player = player;
@@ -76,7 +69,7 @@ public class AltarProgressEvent extends Event<AltarProgressEvent, AltarProgressE
          return this.pos;
       }
 
-      public FillableAltarTileEntity getBlockEntity() {
+      public GodAltarTileEntity getBlockEntity() {
          return this.blockEntity;
       }
 

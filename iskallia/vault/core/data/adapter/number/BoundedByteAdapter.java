@@ -11,7 +11,7 @@ public class BoundedByteAdapter extends ByteAdapter {
       super(nullable);
       this.min = min;
       this.max = max;
-      this.bits = 8 - Integer.numberOfLeadingZeros(this.max - this.min);
+      this.bits = 32 - Integer.numberOfLeadingZeros(this.max - this.min);
    }
 
    public byte getMin() {

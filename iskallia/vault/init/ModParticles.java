@@ -3,7 +3,13 @@ package iskallia.vault.init;
 import com.mojang.serialization.Codec;
 import iskallia.vault.client.particles.AlchemyTableParticle;
 import iskallia.vault.client.particles.AltarFlameParticle;
+import iskallia.vault.client.particles.AltarParticleOptions;
+import iskallia.vault.client.particles.ArtifactBossImmunityParticle;
+import iskallia.vault.client.particles.ArtifactBossImmunityParticleOptions;
+import iskallia.vault.client.particles.ArtifactProjectorParticle;
+import iskallia.vault.client.particles.ArtifactProjectorParticleOptions;
 import iskallia.vault.client.particles.ChainingParticle;
+import iskallia.vault.client.particles.CharmParticle;
 import iskallia.vault.client.particles.CloudEffectParticle;
 import iskallia.vault.client.particles.ColoredParticleOptions;
 import iskallia.vault.client.particles.DepthFireworkParticle;
@@ -11,6 +17,8 @@ import iskallia.vault.client.particles.DepthNightVisionParticle;
 import iskallia.vault.client.particles.DiffuserCompleteParticle;
 import iskallia.vault.client.particles.DiffuserParticle;
 import iskallia.vault.client.particles.DiffuserUpgradedParticle;
+import iskallia.vault.client.particles.DivineAltarConsumeParticle;
+import iskallia.vault.client.particles.DivineAltarParticle;
 import iskallia.vault.client.particles.EffectRangeParticle;
 import iskallia.vault.client.particles.EnderAnchorParticle;
 import iskallia.vault.client.particles.EntityLockedParticle;
@@ -41,6 +49,7 @@ import iskallia.vault.client.particles.StunnedParticle;
 import iskallia.vault.client.particles.TotemFountainParticle;
 import iskallia.vault.client.particles.UberPylonFountainParticle;
 import iskallia.vault.client.particles.UberPylonParticle;
+import iskallia.vault.client.particles.WendarrSparkExplosionParticle;
 import iskallia.vault.util.Tween;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
@@ -114,6 +123,13 @@ public class ModParticles {
    public static final RegistryObject<SimpleParticleType> ENTITY_LOCKED = REGISTRY.register("entity_locked", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> BONK = REGISTRY.register("bonk", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> ALCHEMY_TABLE = REGISTRY.register("alchemy_table", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> CHARM = REGISTRY.register("charm", () -> new SimpleParticleType(true));
+   public static final RegistryObject<ParticleType<ArtifactBossImmunityParticleOptions>> ARTIFACT_BOSS_IMMUNITY = register(
+      REGISTRY, "artifact_boss_immunity", ArtifactBossImmunityParticleOptions.DESERIALIZER, ArtifactBossImmunityParticleOptions::codec, true
+   );
+   public static final RegistryObject<ParticleType<ArtifactProjectorParticleOptions>> ARTIFACT_PROJECTOR = register(
+      REGISTRY, "artifact_projector", ArtifactProjectorParticleOptions.DESERIALIZER, ArtifactProjectorParticleOptions::codec, true
+   );
    public static final RegistryObject<ParticleType<SphericalParticleOptions>> TAUNT_CHARM_EFFECT_RANGE = register(
       REGISTRY, "taunt_charm_effect_range", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
    );
@@ -137,6 +153,16 @@ public class ModParticles {
    );
    public static final RegistryObject<ParticleType<SphericalParticleOptions>> IMPLODE = register(
       REGISTRY, "implode", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
+   );
+   public static final RegistryObject<ParticleType<AltarParticleOptions>> DIVINE_ALTAR = register(
+      REGISTRY, "divine_altar", AltarParticleOptions.DESERIALIZER, AltarParticleOptions::codec, true
+   );
+   public static final RegistryObject<ParticleType<AltarParticleOptions>> DIVINE_ALTAR_CONSUME = register(
+      REGISTRY, "divine_altar_consume", AltarParticleOptions.DESERIALIZER, AltarParticleOptions::codec, true
+   );
+   public static final RegistryObject<SimpleParticleType> WENDARR_SPARK_EXPLODE = REGISTRY.register("wendarr_spark_explode", () -> new SimpleParticleType(true));
+   public static final RegistryObject<ParticleType<SphericalParticleOptions>> BOSS_WENDARR_EXPLODE = register(
+      REGISTRY, "boss_wendarr_explode", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
    );
 
    @OnlyIn(Dist.CLIENT)
@@ -188,6 +214,9 @@ public class ModParticles {
       particleManager.register((ParticleType)ENTITY_LOCKED.get(), EntityLockedParticle.Provider::new);
       particleManager.register((ParticleType)BONK.get(), LuckyHitDrainParticle.Provider::new);
       particleManager.register((ParticleType)ALCHEMY_TABLE.get(), AlchemyTableParticle.Provider::new);
+      particleManager.register((ParticleType)CHARM.get(), CharmParticle.Provider::new);
+      particleManager.register((ParticleType)ARTIFACT_BOSS_IMMUNITY.get(), ArtifactBossImmunityParticle.AltarProvider::new);
+      particleManager.register((ParticleType)ARTIFACT_PROJECTOR.get(), ArtifactProjectorParticle.AltarProvider::new);
       particleManager.register(
          (ParticleType)TOTEM_EFFECT_RANGE.get(), sprites -> new EffectRangeParticle.SphereProvider(sprites, 1.0F, 40, 0.5F, Tween.PARABOLIC)
       );
@@ -209,6 +238,10 @@ public class ModParticles {
       );
       particleManager.register((ParticleType)SIGHT_JAVELIN_RANGE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 2.0F, 60, 1.0F));
       particleManager.register((ParticleType)IMPLODE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 0.0F, 10, 1.0F));
+      particleManager.register((ParticleType)DIVINE_ALTAR.get(), sprites -> new DivineAltarParticle.AltarProvider(sprites, 1.0F));
+      particleManager.register((ParticleType)DIVINE_ALTAR_CONSUME.get(), DivineAltarConsumeParticle.AltarProvider::new);
+      particleManager.register((ParticleType)WENDARR_SPARK_EXPLODE.get(), WendarrSparkExplosionParticle.Provider::new);
+      particleManager.register((ParticleType)BOSS_WENDARR_EXPLODE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 1.0F, 60, 1.0F));
    }
 
    private static <T extends ParticleOptions> RegistryObject<ParticleType<T>> register(
