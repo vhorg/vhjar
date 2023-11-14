@@ -127,10 +127,10 @@ public class QuestOverviewElementScreen extends AbstractElementScreen {
             .stream()
             .findFirst()
             .orElse(state.getReadyToComplete().stream().findFirst().orElse(state.getCompleted().stream().findFirst().orElse("")));
-         if (id.equals("")) {
+         if (id.isEmpty()) {
             ModNetwork.CHANNEL.sendToServer(new QuestRequestSyncMessage());
          } else {
-            this.selectedQuest = ClientQuestState.INSTANCE.<QuestConfig>getConfig().getQuestById(id);
+            ClientQuestState.INSTANCE.<QuestConfig>getConfig().<Quest>getQuestById(id).ifPresent(quest -> this.selectedQuest = quest);
          }
 
          return this.selectedQuest;

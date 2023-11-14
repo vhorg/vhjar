@@ -21,8 +21,8 @@ public class PhoenixModifierSnapshotData extends InventorySnapshotData {
    }
 
    @Override
-   protected InventorySnapshotData.Builder makeSnapshotBuilder(Player player) {
-      return new InventorySnapshotData.Builder(player).setStackFilter(this::shouldSnapshotItem);
+   protected InventorySnapshot.Builder makeSnapshotBuilder(Player player) {
+      return new InventorySnapshot.Builder(player).setStackFilter(this::shouldSnapshotItem);
    }
 
    private static PhoenixModifierSnapshotData create(CompoundTag tag) {

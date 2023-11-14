@@ -11,15 +11,15 @@ import iskallia.vault.init.ModContainers;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSlotIcons;
-import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.network.message.ClientboundRefreshSpiritExtractorMessage;
 import iskallia.vault.network.message.SpiritExtractorMessage;
 import iskallia.vault.util.SidedHelper;
+import iskallia.vault.world.data.InventorySnapshot;
 import iskallia.vault.world.data.PlayerSpiritRecoveryData;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -28,7 +28,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.network.NetworkDirection;
 
 public class SpiritExtractorContainer extends OverSizedSlotContainer {
@@ -52,24 +51,9 @@ public class SpiritExtractorContainer extends OverSizedSlotContainer {
    }
 
    private void calculateCostForCurrentPlayer() {
-      List<ItemStack> items = NonNullList.create();
-
-      for (int slot = 0; slot < this.player.getInventory().getContainerSize(); slot++) {
-         ItemStack stackInSlot = this.player.getInventory().getItem(slot);
-         if (shouldAddItem(stackInSlot)) {
-            items.add(stackInSlot.copy());
-         }
-      }
-
-      if (ModList.get().isLoaded("curios")) {
-         IntegrationCurios.getCuriosItemStacks(this.player).forEach((slotType, stacks) -> stacks.forEach(stack -> {
-            if (shouldAddItem((ItemStack)stack.getA())) {
-               items.add(((ItemStack)stack.getA()).copy());
-            }
-         }));
-      }
-
-      this.currentPlayersRecoveryCost.calculate(this.getMultiplier(), this.getPlayerLevel(), items, this.heroDiscount, this.getRescuedBonus());
+      InventorySnapshot inventorySnapshot = new InventorySnapshot.Builder(this.player).setStackFilter((p, stack) -> shouldAddItem(stack)).createSnapshot();
+      this.currentPlayersRecoveryCost
+         .calculate(this.getMultiplier(), this.getPlayerLevel(), Collections.emptyList(), inventorySnapshot, this.heroDiscount, this.getRescuedBonus());
    }
 
    private static boolean shouldAddItem(ItemStack stack) {
@@ -116,7 +100,7 @@ public class SpiritExtractorContainer extends OverSizedSlotContainer {
    }
 
    public void startSpewingItems() {
-      this.tileEntity.spewItems();
+      this.tileEntity.spewItems(this.player);
       if (this.player.level.isClientSide()) {
          ModNetwork.CHANNEL.sendToServer(new SpiritExtractorMessage(this.getExtractorPos(), SpiritExtractorMessage.Action.REVIVE));
       }

@@ -13,8 +13,11 @@ import iskallia.vault.quest.base.Quest;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.nbt.NBTHelper;
 import iskallia.vault.world.data.QuestStatesData;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -50,6 +53,7 @@ public class QuestState implements INBTSerializable<CompoundTag> {
             this.<QuestConfig>getConfig(serverLevel).getQuests().stream().filter(quest -> quest.getUnlockedBy().isEmpty()).forEach(this::setInProgress);
          }
 
+         this.removeMissingQuests(this.getServerPlayer());
          this.addNewQuests(this.getServerPlayer());
          if (serverLevel.getGameRules().getBoolean(ModGameRules.QUEST_EXPERT_MODE)) {
             this.setExpertMode(serverLevel);
@@ -57,6 +61,53 @@ public class QuestState implements INBTSerializable<CompoundTag> {
 
          this.syncAndPersist();
       }
+   }
+
+   private void removeMissingQuests(ServerPlayer player) {
+      ServerLevel level = player.getServer().overworld();
+      QuestConfig config = this.getConfig(level);
+
+      for (String questId : this.getAllQuestIds()) {
+         if (config.getQuestById(questId).isEmpty()) {
+            this.removeQuest(questId);
+            this.syncAndPersist();
+         }
+      }
+
+      if (this.getInProgress().isEmpty()) {
+         this.updateMissingInProgress(level);
+      }
+   }
+
+   private void updateMissingInProgress(ServerLevel level) {
+      List<Quest> quests = this.<QuestConfig>getConfig(level)
+         .getQuests()
+         .stream()
+         .filter(quest -> !this.getInProgress().contains(quest.getId()))
+         .filter(quest -> !this.getReadyToComplete().contains(quest.getId()))
+         .filter(quest -> !this.getCompleted().contains(quest.getId()))
+         .filter(quest -> quest.getUnlockedBy().isEmpty() || this.getCompleted().contains(quest.getUnlockedBy()))
+         .toList();
+      if (quests.isEmpty()) {
+         throw new IllegalStateException("There is no quest which is eligible to be set in progress. This is a config issue. Report to Devs.");
+      } else {
+         quests.forEach(this::setInProgress);
+         this.syncAndPersist();
+      }
+   }
+
+   private void removeQuest(String questId) {
+      this.inProgress.remove(questId);
+      this.readyToComplete.remove(questId);
+      this.completed.remove(questId);
+   }
+
+   private Collection<String> getAllQuestIds() {
+      List<String> quests = new ArrayList<>();
+      quests.addAll(this.getInProgress());
+      quests.addAll(this.getReadyToComplete());
+      quests.addAll(this.getCompleted());
+      return quests;
    }
 
    private void addNewQuests(ServerPlayer serverPlayer) {

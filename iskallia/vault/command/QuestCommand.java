@@ -13,6 +13,7 @@ import iskallia.vault.quest.QuestState;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.world.data.QuestStatesData;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -58,8 +59,8 @@ public class QuestCommand extends Command {
       ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
       QuestState state = QuestStatesData.get().getState(player);
       String inProgress = (String)state.getInProgress().stream().findFirst().orElseThrow();
-      Quest quest = state.<QuestConfig>getConfig(player.getLevel()).getQuestById(inProgress);
-      state.addProgress(quest, IntegerArgumentType.getInteger(context, "amount"));
+      Optional<Quest> quest = state.<QuestConfig>getConfig(player.getLevel()).getQuestById(inProgress);
+      quest.ifPresent(q -> state.addProgress(q, IntegerArgumentType.getInteger(context, "amount")));
       return 1;
    }
 

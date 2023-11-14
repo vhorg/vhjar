@@ -48,7 +48,7 @@ public class MonolithCrystalObjective extends CrystalObjective {
                         .add(AwardCrateObjective.ofConfig(VaultCrateBlock.Type.MONOLITH, "monolith", level, true))
                   )
             );
-            objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
+            objectives.add(BailObjective.create(true, ClassicPortalLogic.EXIT));
             objectives.add(DeathObjective.create(true));
             objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
          }

@@ -2,7 +2,9 @@ package iskallia.vault.network.message.quest;
 
 import iskallia.vault.config.quest.QuestConfig;
 import iskallia.vault.quest.QuestState;
+import iskallia.vault.quest.base.Quest;
 import iskallia.vault.world.data.QuestStatesData;
+import java.util.Optional;
 import java.util.function.Supplier;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
@@ -34,7 +36,8 @@ public class QuestCompleteMessage {
       ServerPlayer player = context.getSender();
       if (player != null) {
          QuestState state = QuestStatesData.get().getState(player);
-         state.setComplete(state.<QuestConfig>getConfig(player.getLevel()).getQuestById(pkt.getQuestId()));
+         Optional<Quest> quest = state.<QuestConfig>getConfig(player.getLevel()).getQuestById(pkt.getQuestId());
+         quest.ifPresent(state::setComplete);
          context.setPacketHandled(true);
       }
    }

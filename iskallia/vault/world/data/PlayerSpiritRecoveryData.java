@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -264,16 +265,53 @@ public class PlayerSpiritRecoveryData extends SavedData {
       return this.vaultSpiritData.getOrDefault(vaultId, Collections.emptySet());
    }
 
-   public record SpiritData(
-      UUID vaultId,
-      UUID playerId,
-      List<ItemStack> drops,
-      int vaultLevel,
-      int playerLevel,
-      ResourceKey<Level> respawnDimension,
-      BlockPos respawnPos,
-      GameProfile playerGameProfile
-   ) {
+   public static final class SpiritData {
+      private final UUID vaultId;
+      private final UUID playerId;
+      @Deprecated
+      private final List<ItemStack> drops;
+      private final InventorySnapshot inventorySnapshot;
+      private final int vaultLevel;
+      private final int playerLevel;
+      private final ResourceKey<Level> respawnDimension;
+      private final BlockPos respawnPos;
+      private final GameProfile playerGameProfile;
+
+      public SpiritData(
+         UUID vaultId,
+         UUID playerId,
+         InventorySnapshot inventorySnapshot,
+         int vaultLevel,
+         int playerLevel,
+         ResourceKey<Level> respawnDimension,
+         BlockPos respawnPos,
+         GameProfile playerGameProfile
+      ) {
+         this(vaultId, playerId, Collections.emptyList(), inventorySnapshot, vaultLevel, playerLevel, respawnDimension, respawnPos, playerGameProfile);
+      }
+
+      private SpiritData(
+         UUID vaultId,
+         UUID playerId,
+         List<ItemStack> drops,
+         InventorySnapshot inventorySnapshot,
+         int vaultLevel,
+         int playerLevel,
+         ResourceKey<Level> respawnDimension,
+         BlockPos respawnPos,
+         GameProfile playerGameProfile
+      ) {
+         this.vaultId = vaultId;
+         this.playerId = playerId;
+         this.drops = drops;
+         this.inventorySnapshot = inventorySnapshot;
+         this.vaultLevel = vaultLevel;
+         this.playerLevel = playerLevel;
+         this.respawnDimension = respawnDimension;
+         this.respawnPos = respawnPos;
+         this.playerGameProfile = playerGameProfile;
+      }
+
       public CompoundTag serialize() {
          CompoundTag tag = new CompoundTag();
          tag.putUUID("vaultId", this.vaultId);
@@ -287,14 +325,18 @@ public class PlayerSpiritRecoveryData extends SavedData {
             .ifPresent(dimNbt -> tag.put("respawnDimension", dimNbt));
          tag.putLong("respawnPos", this.respawnPos.asLong());
          tag.put("playerGameProfile", NbtUtils.writeGameProfile(new CompoundTag(), this.playerGameProfile));
+         tag.put("inventorySnapshot", this.inventorySnapshot.serializeNBT());
          return tag;
       }
 
       public static PlayerSpiritRecoveryData.SpiritData deserialize(CompoundTag tag) {
+         InventorySnapshot invSnapshot = new InventorySnapshot(false, false);
+         invSnapshot.deserializeNBT(tag.getCompound("inventorySnapshot"));
          return new PlayerSpiritRecoveryData.SpiritData(
             tag.getUUID("vaultId"),
             tag.getUUID("playerId"),
             deserializeStacks(tag.getList("drops", 10)),
+            invSnapshot,
             tag.getInt("vaultLevel"),
             tag.getInt("playerLevel"),
             Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, tag.get("respawnDimension")).resultOrPartial(VaultMod.LOGGER::error).orElse(Level.OVERWORLD),
@@ -307,6 +349,91 @@ public class PlayerSpiritRecoveryData extends SavedData {
          List<ItemStack> lootStacks = new ArrayList<>();
          lootStacksNbt.forEach(nbt -> lootStacks.add(ItemStack.of((CompoundTag)nbt)));
          return lootStacks;
+      }
+
+      public UUID vaultId() {
+         return this.vaultId;
+      }
+
+      public UUID playerId() {
+         return this.playerId;
+      }
+
+      public List<ItemStack> drops() {
+         return this.drops;
+      }
+
+      public int vaultLevel() {
+         return this.vaultLevel;
+      }
+
+      public int playerLevel() {
+         return this.playerLevel;
+      }
+
+      public ResourceKey<Level> respawnDimension() {
+         return this.respawnDimension;
+      }
+
+      public BlockPos respawnPos() {
+         return this.respawnPos;
+      }
+
+      public GameProfile playerGameProfile() {
+         return this.playerGameProfile;
+      }
+
+      public InventorySnapshot inventorySnapshot() {
+         return this.inventorySnapshot;
+      }
+
+      @Override
+      public boolean equals(Object obj) {
+         if (obj == this) {
+            return true;
+         } else if (obj != null && obj.getClass() == this.getClass()) {
+            PlayerSpiritRecoveryData.SpiritData that = (PlayerSpiritRecoveryData.SpiritData)obj;
+            return Objects.equals(this.vaultId, that.vaultId)
+               && Objects.equals(this.playerId, that.playerId)
+               && Objects.equals(this.drops, that.drops)
+               && this.vaultLevel == that.vaultLevel
+               && this.playerLevel == that.playerLevel
+               && Objects.equals(this.respawnDimension, that.respawnDimension)
+               && Objects.equals(this.respawnPos, that.respawnPos)
+               && Objects.equals(this.playerGameProfile, that.playerGameProfile);
+         } else {
+            return false;
+         }
+      }
+
+      @Override
+      public int hashCode() {
+         return Objects.hash(
+            this.vaultId, this.playerId, this.drops, this.vaultLevel, this.playerLevel, this.respawnDimension, this.respawnPos, this.playerGameProfile
+         );
+      }
+
+      @Override
+      public String toString() {
+         return "SpiritData[vaultId="
+            + this.vaultId
+            + ", playerId="
+            + this.playerId
+            + ", drops="
+            + this.drops
+            + ", inventorySnapshot="
+            + this.inventorySnapshot
+            + ", vaultLevel="
+            + this.vaultLevel
+            + ", playerLevel="
+            + this.playerLevel
+            + ", respawnDimension="
+            + this.respawnDimension
+            + ", respawnPos="
+            + this.respawnPos
+            + ", playerGameProfile="
+            + this.playerGameProfile
+            + "]";
       }
    }
 }

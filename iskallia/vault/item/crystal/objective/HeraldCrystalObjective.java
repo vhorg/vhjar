@@ -39,7 +39,7 @@ public class HeraldCrystalObjective extends CrystalObjective {
       vault.get(Vault.WORLD).set(WorldManager.FACING, Direction.EAST);
       vault.ifPresent(Vault.OBJECTIVES, objectives -> {
          objectives.add(HeraldObjective.of().add(FindExitObjective.create(ClassicPortalLogic.EXIT)).add(VictoryObjective.empty()));
-         objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
+         objectives.add(BailObjective.create(true, ClassicPortalLogic.EXIT));
          objectives.add(DeathObjective.create(true));
          objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
       });

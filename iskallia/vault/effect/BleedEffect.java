@@ -1,7 +1,6 @@
 package iskallia.vault.effect;
 
 import iskallia.vault.init.ModEffects;
-import iskallia.vault.util.damage.DamageUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -20,13 +19,15 @@ public class BleedEffect extends MobEffect {
    }
 
    public void applyEffectTick(LivingEntity entity, int amplifier) {
-      MobEffectInstance instance = entity.getEffect(ModEffects.BLEED);
-      if (instance != null) {
-         if (instance.getDuration() % 40 == 0) {
-            DamageUtil.shotgunAttack(entity, e -> {
-               e.hurt(DamageSource.MAGIC, 0.001F);
-               e.setHealth(e.getHealth() - (instance.getAmplifier() + 1));
-            });
+      if (!entity.level.isClientSide) {
+         MobEffectInstance instance = entity.getEffect(ModEffects.BLEED);
+         if (instance != null) {
+            if (instance.getDuration() % 40 == 0) {
+               entity.setHealth(entity.getHealth() - (instance.getAmplifier() + 1));
+               if (entity.isDeadOrDying()) {
+                  entity.die(DamageSource.MAGIC);
+               }
+            }
          }
       }
    }

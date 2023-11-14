@@ -97,7 +97,7 @@ public class ParadoxCrystalObjective extends CrystalObjective {
             }
 
             objectives.add(ParadoxObjective.of(this.type, this.playerUuid, this.getSeed()));
-            objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
+            objectives.add(BailObjective.create(true, ClassicPortalLogic.EXIT));
             objectives.add(DeathObjective.create(true));
             objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
          }

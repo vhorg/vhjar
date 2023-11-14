@@ -311,6 +311,23 @@ public class ModifierDiscoveryTileEntity extends BlockEntity implements MenuProv
          }
       }
 
+      itemCfg.forEach((itemx, map) -> map.forEach((modifier, list) -> {
+         int minTier = Integer.MAX_VALUE;
+         ResourceLocation minValue = null;
+
+         for (ResourceLocation id : list) {
+            VaultGearWorkbenchConfig.CraftableModifierConfig cfgx = ModConfigs.VAULT_GEAR_WORKBENCH_CONFIG.get(itemx).getConfig(id);
+            if (cfgx != null && cfgx.getModifierTier() < minTier) {
+               minTier = cfgx.getModifierTier();
+               minValue = id;
+            }
+         }
+
+         if (minValue != null) {
+            list.clear();
+            list.add(minValue);
+         }
+      }));
       return itemCfg;
    }
 

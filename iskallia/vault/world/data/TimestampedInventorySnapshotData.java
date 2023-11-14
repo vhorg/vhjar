@@ -20,8 +20,8 @@ public abstract class TimestampedInventorySnapshotData extends SavedData {
       TimestampedInventorySnapshotData.TimestampedInventorySnapshot::new
    );
 
-   protected InventorySnapshotData.Builder makeSnapshotBuilder(Player player) {
-      return new InventorySnapshotData.Builder(player).setStackFilter((p, stack) -> true);
+   protected InventorySnapshot.Builder makeSnapshotBuilder(Player player) {
+      return new InventorySnapshot.Builder(player).setStackFilter((p, stack) -> true);
    }
 
    public void createSnapshot(Player player) {
@@ -80,12 +80,12 @@ public abstract class TimestampedInventorySnapshotData extends SavedData {
    }
 
    public static class TimestampedInventorySnapshot implements INBTSerializable<CompoundTag> {
-      private final VMapNBT<Integer, InventorySnapshotData.InventorySnapshot> timestampedSnapshots = VMapNBT.ofInt(InventorySnapshotData.InventorySnapshot::new);
+      private final VMapNBT<Integer, InventorySnapshot> timestampedSnapshots = VMapNBT.ofInt(InventorySnapshot::new);
 
       TimestampedInventorySnapshot() {
       }
 
-      public void addSnapshot(int timestamp, InventorySnapshotData.InventorySnapshot snapshot) {
+      public void addSnapshot(int timestamp, InventorySnapshot snapshot) {
          this.timestampedSnapshots.put(timestamp, snapshot);
          List<Integer> timestamps = new ArrayList<>(this.timestampedSnapshots.keySet());
          timestamps.sort(Comparator.reverseOrder());
@@ -105,7 +105,7 @@ public abstract class TimestampedInventorySnapshotData extends SavedData {
          this.timestampedSnapshots.deserializeNBT(nbt.getList("timestampedSnapshots", 10));
       }
 
-      public Optional<InventorySnapshotData.InventorySnapshot> getSnapshot(int timestamp) {
+      public Optional<InventorySnapshot> getSnapshot(int timestamp) {
          return Optional.ofNullable(this.timestampedSnapshots.get(timestamp));
       }
 

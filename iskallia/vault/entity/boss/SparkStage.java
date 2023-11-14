@@ -24,7 +24,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal.Flag;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.level.ChunkPos;
@@ -207,8 +206,7 @@ public class SparkStage implements IBossStage {
 
    @Override
    public void start() {
-      this.boss.getAttribute(Attributes.MAX_HEALTH).setBaseValue(this.attributes.health);
-      this.boss.setHealth(this.attributes.health);
+      this.boss.setScaledHealth(this.attributes.health);
    }
 
    private void placeSpark(ServerLevel serverLevel) {

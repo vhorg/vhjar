@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -289,12 +290,8 @@ public class QuestConfig extends Config {
       this.quests.forEach(eventBus::unregister);
    }
 
-   public <G extends Quest> G getQuestById(String id) {
-      return (G)this.getQuests()
-         .stream()
-         .filter(goal -> goal.getId().equals(id))
-         .findFirst()
-         .orElseThrow(() -> new IllegalArgumentException("No quest found with the ID: " + id));
+   public <G extends Quest> Optional<G> getQuestById(String id) {
+      return (Optional<G>)this.getQuests().stream().filter(goal -> goal.getId().equals(id)).findFirst();
    }
 
    public <G extends Quest> G getNextQuest(Quest current) {

@@ -25,6 +25,7 @@ import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.network.PacketDistributor;
@@ -78,7 +79,7 @@ public class GodAltarData extends SavedData {
    }
 
    @SubscribeEvent
-   public static void onServerStopped(ServerStartedEvent event) {
+   public static void onServerStopped(ServerStoppedEvent event) {
       get().entries.forEach((id, entry) -> entry.task.onDetach());
    }
 

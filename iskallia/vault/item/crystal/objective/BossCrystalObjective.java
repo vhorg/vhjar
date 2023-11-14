@@ -48,7 +48,7 @@ public class BossCrystalObjective extends CrystalObjective {
                   .add(AwardCrateObjective.ofConfig(VaultCrateBlock.Type.BOSS, "boss", level, true))
                   .add(VictoryObjective.of(300))
             );
-            objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
+            objectives.add(BailObjective.create(true, ClassicPortalLogic.EXIT));
             objectives.add(DeathObjective.create(true));
             objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
          }

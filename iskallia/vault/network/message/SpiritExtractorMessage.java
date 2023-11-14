@@ -34,7 +34,7 @@ public class SpiritExtractorMessage {
          ServerLevel serverWorld = serverPlayer.getLevel();
          if (serverWorld.getBlockEntity(message.extractorPos) instanceof SpiritExtractorTileEntity spiritExtractor) {
             if (message.action == SpiritExtractorMessage.Action.REVIVE) {
-               spiritExtractor.spewItems();
+               spiritExtractor.spewItems(serverPlayer);
                int totalCost = spiritExtractor.getRecoveryCost().getTotalCost().getCount();
                ModModelDiscoveryGoals.SPIRIT_EXTRACTION.onSpiritExtracted(serverPlayer, totalCost);
             } else if (message.action == SpiritExtractorMessage.Action.RECYCLE) {

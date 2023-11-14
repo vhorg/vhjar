@@ -1292,6 +1292,7 @@
   "the_vault.proficiency.wand": "Wand",
   "the_vault.proficiency.idol": "Idol",
   "the_vault.proficiency.magnet": "Magnet",
+  "the_vault.proficiency.focus": "Focus",
   "the_vault.gear_modification.information": "Can be used to modify Vault Gear",
   "the_vault.gear_modification.unmodifiable": "Item cannot be modified",
   "the_vault.gear_modification.reforge_all": "Reforge all Prefixes and Suffixes",

@@ -29,6 +29,7 @@ import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultJoinSnapshotData;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 
 public class Runner extends Listener {
@@ -197,7 +198,8 @@ public class Runner extends Listener {
             this,
             event -> {
                if (event.getEntity().level == world) {
-                  if (event.getEntity().getUUID().equals(this.getId())) {
+                  Entity source = event.getSource().getEntity();
+                  if (source != null && source.getUUID().equals(this.getId())) {
                      if (event.getEntity().getTags().contains("soul_shards")) {
                         this.getPlayer()
                            .ifPresent(player -> BottleItem.getActive(vault, player).ifPresent(stack -> BottleItem.onMobKill(stack, player, event.getEntity())));

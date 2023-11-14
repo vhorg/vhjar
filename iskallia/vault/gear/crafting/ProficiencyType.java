@@ -41,6 +41,7 @@ public enum ProficiencyType {
    public static List<ProficiencyType> getCraftableTypes() {
       List<ProficiencyType> proficiencies = new ArrayList<>(Arrays.asList(values()));
       proficiencies.remove(UNKNOWN);
+      proficiencies.remove(IDOL);
       return proficiencies;
    }
 }

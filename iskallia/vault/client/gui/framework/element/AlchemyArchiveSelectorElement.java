@@ -75,6 +75,8 @@ public class AlchemyArchiveSelectorElement
       @Override
       public void render(IElementRenderer renderer, @NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
          super.render(renderer, poseStack, mouseX, mouseY, partialTick);
+         poseStack.pushPose();
+         poseStack.translate(0.0, 0.0, 1.0);
          this.getEffectDescription()
             .ifPresent(
                cfgDisplay -> this.textStyle
@@ -91,6 +93,7 @@ public class AlchemyArchiveSelectorElement
                      this.worldSpatial.width()
                   )
             );
+         poseStack.popPose();
       }
 
       public BottleEffect getEffect() {
