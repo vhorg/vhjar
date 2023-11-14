@@ -5,7 +5,6 @@ import iskallia.vault.core.event.client.AmbientParticlesEvent;
 import iskallia.vault.core.event.client.BiomeColorsEvent;
 import iskallia.vault.core.event.client.ClientTickEvent;
 import iskallia.vault.core.event.client.DimensionEffectEvent;
-import iskallia.vault.core.event.client.DimensionEffectLocationEvent;
 import iskallia.vault.core.event.client.FogColorsEvent;
 import iskallia.vault.core.event.client.RenderLevelLastEvent;
 import iskallia.vault.core.event.client.RenderOverlayEvent;
@@ -23,7 +22,6 @@ public class ClientEvents {
    public static final AmbientParticlesEvent AMBIENT_PARTICLE = register(new AmbientParticlesEvent());
    public static final FogColorsEvent FOG_COLORS = register(new FogColorsEvent());
    public static final UpdateLightEvent UPDATE_LIGHT = register(new UpdateLightEvent());
-   public static final DimensionEffectLocationEvent WORLD_EFFECT_LOCATION = register(new DimensionEffectLocationEvent());
    public static final DimensionEffectEvent WORLD_EFFECT = register(new DimensionEffectEvent());
    public static final RenderLevelLastEvent RENDER_LEVEL_LAST = register(new RenderLevelLastEvent());
    public static final CompassPropertyEvent COMPASS_PROPERTY = register(new CompassPropertyEvent());

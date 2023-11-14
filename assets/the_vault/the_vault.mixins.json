@@ -41,7 +41,6 @@
     "MixinCUpdateStructureBlockPacket",
     "MixinCuriosHelper",
     "MixinDamageEnchantment",
-    "MixinDimensionType",
     "MixinEnchantment",
     "MixinEnchantmentHelper",
     "MixinEntity",

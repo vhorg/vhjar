@@ -90,6 +90,7 @@ public class SpiritExtractorBlock extends Block implements EntityBlock {
          } else {
             spirit.getGameProfile().ifPresent(spiritExtractorTile::setGameProfile);
             spiritExtractorTile.setItems(spirit.getItems());
+            spiritExtractorTile.setInventorySnapshot(spirit.getInventorySnapshot());
             spiritExtractorTile.setVaultLevel(spirit.getVaultLevel());
             spiritExtractorTile.setPlayerLevel(spirit.getPlayerLevel());
             spiritExtractorTile.setRecyclable(spirit.isRecyclable());
@@ -122,6 +123,7 @@ public class SpiritExtractorBlock extends Block implements EntityBlock {
          spirit.setVaultLevel(spiritExtractorTile.getVaultLevel());
          spirit.setPlayerLevel(spiritExtractorTile.getPlayerLevel());
          spirit.setItems(spiritExtractorTile.getItems());
+         spirit.setInventorySnapshot(spiritExtractorTile.getInventorySnapshot());
          spirit.setRescuedBonus(spiritExtractorTile.getRescuedBonus());
          spirit.putInPlayersHand(player);
          spiritExtractorTile.removeSpirit();

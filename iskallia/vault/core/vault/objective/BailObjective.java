@@ -38,9 +38,13 @@ public class BailObjective extends Objective {
       this.set(TAGS, IdentifierList.create());
    }
 
-   public static BailObjective create(ResourceLocation... tags) {
+   public static BailObjective create(boolean allowLocked, ResourceLocation... tags) {
       BailObjective objective = new BailObjective();
       objective.get(TAGS).addAll(Arrays.asList(tags));
+      if (!allowLocked) {
+         objective.remove(LOCKED_STACK);
+      }
+
       return objective;
    }
 
@@ -63,7 +67,7 @@ public class BailObjective extends Objective {
             data -> {
                Listener listener = vault.get(Vault.LISTENERS).get(data.getPlayer().getUUID());
                if (listener instanceof Runner runner) {
-                  if (this.get(LOCKED_STACK) > 0) {
+                  if (this.getOr(LOCKED_STACK, Integer.valueOf(0)) > 0) {
                      data.getPlayer().displayClientMessage(new TextComponent("You cannot bail a locked vault.").withStyle(ChatFormatting.RED), true);
                   } else if (!data.getPlayer().isOnPortalCooldown()) {
                      if (vault.has(Vault.WORLD)) {

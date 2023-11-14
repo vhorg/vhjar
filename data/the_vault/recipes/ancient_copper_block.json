@@ -1,8 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "ww",
-    "ww"
+    "www",
+    "www",
+    "www"
   ],
   "key": {
     "w": {

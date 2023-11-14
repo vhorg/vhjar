@@ -201,6 +201,10 @@ public class VaultGearWorkbenchConfig extends Config {
          this.craftingCost = craftingCost;
       }
 
+      public int getModifierTier() {
+         return this.modifierTier;
+      }
+
       public boolean hasPrerequisites(Player player) {
          int level = this.getMinLevel();
          if (level == Integer.MIN_VALUE) {

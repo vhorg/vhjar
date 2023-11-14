@@ -15,7 +15,7 @@ public class PlayerNoExitModifier extends VaultModifier<PlayerNoExitModifier.Pro
    @Override
    public void onVaultAdd(VirtualWorld world, Vault vault, ModifierContext context) {
       vault.ifPresent(Vault.OBJECTIVES, objectives -> objectives.forEach(BailObjective.class, bailObjective -> {
-         bailObjective.modify(BailObjective.LOCKED_STACK, i -> i + 1);
+         bailObjective.modifyIfPresent(BailObjective.LOCKED_STACK, i -> i + 1);
          return false;
       }));
    }
@@ -23,7 +23,7 @@ public class PlayerNoExitModifier extends VaultModifier<PlayerNoExitModifier.Pro
    @Override
    public void onVaultRemove(VirtualWorld world, Vault vault, ModifierContext context) {
       vault.ifPresent(Vault.OBJECTIVES, objectives -> objectives.forEach(BailObjective.class, bailObjective -> {
-         bailObjective.modify(BailObjective.LOCKED_STACK, i -> i - 1);
+         bailObjective.modifyIfPresent(BailObjective.LOCKED_STACK, i -> i - 1);
          return false;
       }));
    }

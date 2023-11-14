@@ -48,7 +48,7 @@ public class CatalystStage implements IBossStage {
    }
 
    private void setProjectilesToShoot(ArtifactBossEntity boss) {
-      this.projectilesToShoot = 1 + boss.level.random.nextInt(3);
+      this.projectilesToShoot = boss.level.random.nextInt(Math.max(1, 4 - boss.getPlayerCount()), Math.max(3, 8 - boss.getPlayerCount()) + 1);
    }
 
    @Override
@@ -122,7 +122,10 @@ public class CatalystStage implements IBossStage {
 
    private void spawnCatalysts() {
       CatalystStageAttributes.CatalystWave wave = this.attributes.getCatalystWaves().get(this.catalystWaveIndex);
-      this.currentWaveCatalystCount = this.boss.level.random.nextInt(wave.minCatalysts(), wave.maxCatalysts() + 1);
+      this.currentWaveCatalystCount = this.boss
+         .level
+         .random
+         .nextInt(wave.minCatalysts() + (this.boss.getPlayerCount() - 1), wave.maxCatalysts() + (this.boss.getPlayerCount() - 1) + 1);
       double angle = (Math.PI * 2) / this.currentWaveCatalystCount;
 
       for (int i = 0; i < this.currentWaveCatalystCount; i++) {

@@ -20,7 +20,7 @@ public class EmptyCrystalObjective extends CrystalObjective {
    @Override
    public void configure(Vault vault, RandomSource random) {
       vault.ifPresent(Vault.OBJECTIVES, objectives -> {
-         objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
+         objectives.add(BailObjective.create(false, ClassicPortalLogic.EXIT));
          objectives.add(DeathObjective.create(true));
          objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
       });

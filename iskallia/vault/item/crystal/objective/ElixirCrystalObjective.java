@@ -39,7 +39,7 @@ public class ElixirCrystalObjective extends CrystalObjective {
                         .add(VictoryObjective.of(300))
                   )
             );
-            objectives.add(BailObjective.create(ClassicPortalLogic.EXIT));
+            objectives.add(BailObjective.create(true, ClassicPortalLogic.EXIT));
             objectives.add(DeathObjective.create(true));
             objectives.set(Objectives.KEY, CrystalData.OBJECTIVE.getType(this));
          }

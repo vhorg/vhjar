@@ -106,7 +106,12 @@ public class GodAltarTileEntity extends BlockEntity {
          VaultDifficulty difficulty = WorldSettings.get(world).getPlayerDifficulty(player.getUUID());
          VaultGod god = (VaultGod)world.getBlockState(this.worldPosition).getValue(GodAltarBlock.GOD);
          this.uuid = UUID.randomUUID();
-         Task completion = new CompleteGodAltarTask(this.uuid, this.modifierCompletionPool).add(new GodAltarRenderer.Complete());
+         Task completion = new CompleteGodAltarTask(
+               this.uuid,
+               this.modifierCompletionPool,
+               difficulty == VaultDifficulty.HARD || difficulty == VaultDifficulty.IMPOSSIBLE || difficulty == VaultDifficulty.FRAGGED
+            )
+            .add(new GodAltarRenderer.Complete());
          Task failure = new FailGodAltarTask(vaultUuid, player.getUUID(), this.uuid, this.modifierFailurePool);
          Task task = new NodeTask(
                new TimedTask(this.timePool.get(difficulty).get(random)).add(new GodAltarRenderer.Timed()),

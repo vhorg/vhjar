@@ -43,20 +43,23 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 public class CompleteGodAltarTask extends Task {
    public static final Map<VaultGod, List<String>> MESSAGES = new HashMap<>();
    private static final ResourceLocation GROUP = VaultMod.id("god_altar");
    private UUID uuid;
    private ResourceLocation modifierPool;
+   private boolean requiresDraining;
    private boolean completed;
 
    public CompleteGodAltarTask() {
    }
 
-   public CompleteGodAltarTask(UUID uuid, ResourceLocation modifierPool) {
+   public CompleteGodAltarTask(UUID uuid, ResourceLocation modifierPool, boolean requiresDraining) {
       this.uuid = uuid;
       this.modifierPool = modifierPool;
+      this.requiresDraining = requiresDraining;
       this.completed = false;
    }
 
@@ -67,93 +70,95 @@ public class CompleteGodAltarTask extends Task {
 
    @Override
    public void onAttach(TaskSource source) {
-      CommonEvents.PLAYER_INTERACT
-         .register(
-            this,
-            event -> {
-               if (!event.getWorld().isClientSide() && !this.completed) {
-                  if (source instanceof EntityTaskSource entitySource && entitySource.matches(event.getPlayer())) {
-                     if (event.getWorld().getBlockEntity(event.getPos()) instanceof GodAltarTileEntity altar && this.uuid.equals(altar.getUuid())) {
-                        VaultGod god = GodAltarData.get(this.uuid).map(GodAltarData.Entry::getGod).orElse(null);
-                        if (god != null) {
-                           PlayerReputationData.attemptFavour(event.getPlayer(), god, entitySource.getRandom());
-                           this.completed = true;
-                           GodAltarData.remove(this.uuid);
-                           Vault vault = ServerVaults.get(event.getWorld()).orElse(null);
-                           int level = vault == null ? 0 : vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
-                           CharmHelper.getCharms(event.getPlayer()).forEach(charm -> {
-                              if (vault != null && charm.isUsable(event.getPlayer())) {
-                                 CharmItem.addUsedVault(charm.stack(), vault.get(Vault.ID));
-                              }
-                           });
-                           List<VaultModifier<?>> modifiers = ModConfigs.VAULT_MODIFIER_POOLS.getRandom(this.modifierPool, level, source.getRandom());
-                           Object2IntMap<VaultModifier<?>> groups = new Object2IntOpenHashMap();
-                           modifiers.forEach(modifier -> groups.put(modifier, groups.getOrDefault(modifier, 0) + 1));
-                           ObjectIterator<Entry<VaultModifier<?>>> it = groups.object2IntEntrySet().iterator();
-                           TextComponent suffix = new TextComponent("");
-
-                           while (it.hasNext()) {
-                              Entry<VaultModifier<?>> entry = (Entry<VaultModifier<?>>)it.next();
-                              suffix.append(((VaultModifier)entry.getKey()).getChatDisplayNameComponent(entry.getIntValue()));
-                              if (it.hasNext()) {
-                                 suffix.append(new TextComponent(", "));
-                              }
-                           }
-
-                           TextComponent text = new TextComponent("");
-                           if (!modifiers.isEmpty()) {
-                              text.append(event.getPlayer().getDisplayName())
-                                 .append(new TextComponent(" added ").withStyle(ChatFormatting.GRAY))
-                                 .append(suffix)
-                                 .append(new TextComponent(".").withStyle(ChatFormatting.GRAY));
-                           }
-
-                           Set<Player> notified = new HashSet<>();
-                           notified.add(event.getPlayer());
-                           if (vault != null) {
-                              groups.forEach(
-                                 (modifier, count) -> vault.ifPresent(
-                                    Vault.MODIFIERS,
-                                    value -> {
-                                       for (Modifiers.Entry entry : value.getEntries()) {
-                                          if (GROUP.equals(entry.get(Modifiers.Entry.CONTEXT).get(ModifierContext.GROUP))) {
-                                             entry.get(Modifiers.Entry.CONTEXT).setExpired();
-                                          }
-                                       }
-
-                                       value.addModifier(
-                                          modifier, count, true, source.getRandom(), context -> context.set(ModifierContext.GROUP, VaultMod.id("god_altar"))
-                                       );
-                                    }
-                                 )
-                              );
-
-                              for (Listener listener : vault.get(Vault.LISTENERS).getAll()) {
-                                 listener.getPlayer().ifPresent(notified::add);
-                              }
-                           }
-
-                           String message = MESSAGES.get(god).get(source.getRandom().nextInt(MESSAGES.get(god).size()));
-                           MutableComponent vgName = new TextComponent(god.getName()).withStyle(god.getChatColor());
-                           vgName.withStyle(style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, god.getHoverChatComponent())));
-                           MutableComponent txt = new TextComponent("");
-                           txt.append(vgName).append(new TextComponent(": ").withStyle(ChatFormatting.WHITE)).append(new TextComponent(message));
-
-                           for (Player other : notified) {
-                              event.getWorld()
-                                 .playSound(null, other.getX(), other.getY(), other.getZ(), SoundEvents.NOTE_BLOCK_BELL, SoundSource.PLAYERS, 0.9F, 1.2F);
-                              other.displayClientMessage(txt, false);
-                              if (!modifiers.isEmpty()) {
-                                 other.displayClientMessage(text, false);
-                              }
-                           }
-                        }
-                     }
-                  }
+      CommonEvents.PLAYER_INTERACT.register(this, event -> {
+         if (!event.getWorld().isClientSide() && this.requiresDraining && !this.completed) {
+            if (source instanceof EntityTaskSource entitySource && entitySource.matches(event.getPlayer())) {
+               if (event.getWorld().getBlockEntity(event.getPos()) instanceof GodAltarTileEntity altar && this.uuid.equals(altar.getUuid())) {
+                  this.onComplete(event.getWorld(), event.getPlayer(), source);
                }
             }
-         );
+         }
+      });
       super.onAttach(source);
+   }
+
+   @Override
+   public void onStart(TaskSource source) {
+      super.onStart(source);
+      if (!this.completed && !this.requiresDraining && source instanceof EntityTaskSource entitySource) {
+         for (Player player : entitySource.getEntities(Player.class)) {
+            this.onComplete(player.level, player, source);
+         }
+      }
+   }
+
+   private void onComplete(Level world, Player player, TaskSource source) {
+      VaultGod god = GodAltarData.get(this.uuid).map(GodAltarData.Entry::getGod).orElse(null);
+      if (god != null) {
+         PlayerReputationData.attemptFavour(player, god, source.getRandom());
+         this.completed = true;
+         GodAltarData.remove(this.uuid);
+         Vault vault = ServerVaults.get(world).orElse(null);
+         int level = vault == null ? 0 : vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
+         CharmHelper.getCharms(player).forEach(charm -> {
+            if (vault != null && charm.isUsable(player)) {
+               CharmItem.addUsedVault(charm.stack(), vault.get(Vault.ID));
+            }
+         });
+         List<VaultModifier<?>> modifiers = ModConfigs.VAULT_MODIFIER_POOLS.getRandom(this.modifierPool, level, source.getRandom());
+         Object2IntMap<VaultModifier<?>> groups = new Object2IntOpenHashMap();
+         modifiers.forEach(modifier -> groups.put(modifier, groups.getOrDefault(modifier, 0) + 1));
+         ObjectIterator<Entry<VaultModifier<?>>> it = groups.object2IntEntrySet().iterator();
+         TextComponent suffix = new TextComponent("");
+
+         while (it.hasNext()) {
+            Entry<VaultModifier<?>> entry = (Entry<VaultModifier<?>>)it.next();
+            suffix.append(((VaultModifier)entry.getKey()).getChatDisplayNameComponent(entry.getIntValue()));
+            if (it.hasNext()) {
+               suffix.append(new TextComponent(", "));
+            }
+         }
+
+         TextComponent text = new TextComponent("");
+         if (!modifiers.isEmpty()) {
+            text.append(player.getDisplayName())
+               .append(new TextComponent(" added ").withStyle(ChatFormatting.GRAY))
+               .append(suffix)
+               .append(new TextComponent(".").withStyle(ChatFormatting.GRAY));
+         }
+
+         Set<Player> notified = new HashSet<>();
+         notified.add(player);
+         if (vault != null) {
+            groups.forEach((modifier, count) -> vault.ifPresent(Vault.MODIFIERS, value -> {
+               for (Modifiers.Entry entry : value.getEntries()) {
+                  if (GROUP.equals(entry.get(Modifiers.Entry.CONTEXT).get(ModifierContext.GROUP))) {
+                     entry.get(Modifiers.Entry.CONTEXT).setExpired();
+                  }
+               }
+
+               value.addModifier(modifier, count, true, source.getRandom(), context -> context.set(ModifierContext.GROUP, VaultMod.id("god_altar")));
+            }));
+
+            for (Listener listener : vault.get(Vault.LISTENERS).getAll()) {
+               listener.getPlayer().ifPresent(notified::add);
+            }
+         }
+
+         String message = MESSAGES.get(god).get(source.getRandom().nextInt(MESSAGES.get(god).size()));
+         MutableComponent vgName = new TextComponent(god.getName()).withStyle(god.getChatColor());
+         vgName.withStyle(style -> style.withHoverEvent(new HoverEvent(Action.SHOW_TEXT, god.getHoverChatComponent())));
+         MutableComponent txt = new TextComponent("");
+         txt.append(vgName).append(new TextComponent(": ").withStyle(ChatFormatting.WHITE)).append(new TextComponent(message));
+
+         for (Player other : notified) {
+            world.playSound(null, other.getX(), other.getY(), other.getZ(), SoundEvents.NOTE_BLOCK_BELL, SoundSource.PLAYERS, 0.9F, 1.2F);
+            other.displayClientMessage(txt, false);
+            if (!modifiers.isEmpty()) {
+               other.displayClientMessage(text, false);
+            }
+         }
+      }
    }
 
    @Override
@@ -166,7 +171,8 @@ public class CompleteGodAltarTask extends Task {
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       Adapters.UUID.writeBits(this.uuid, buffer);
-      Adapters.IDENTIFIER.writeBits(this.modifierPool, buffer);
+      Adapters.IDENTIFIER.asNullable().writeBits(this.modifierPool, buffer);
+      Adapters.BOOLEAN.writeBits(this.requiresDraining, buffer);
       Adapters.BOOLEAN.writeBits(this.completed, buffer);
    }
 
@@ -174,7 +180,8 @@ public class CompleteGodAltarTask extends Task {
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
       this.uuid = Adapters.UUID.readBits(buffer).orElseThrow();
-      this.modifierPool = Adapters.IDENTIFIER.readBits(buffer).orElse(null);
+      this.modifierPool = Adapters.IDENTIFIER.asNullable().readBits(buffer).orElse(null);
+      this.requiresDraining = Adapters.BOOLEAN.readBits(buffer).orElseThrow();
       this.completed = Adapters.BOOLEAN.readBits(buffer).orElseThrow();
    }
 
@@ -183,6 +190,7 @@ public class CompleteGodAltarTask extends Task {
       return super.writeNbt().map(nbt -> {
          Adapters.UUID.writeNbt(this.uuid).ifPresent(value -> nbt.put("uuid", value));
          Adapters.IDENTIFIER.writeNbt(this.modifierPool).ifPresent(value -> nbt.put("modifierPool", value));
+         Adapters.BOOLEAN.writeNbt(this.requiresDraining).ifPresent(value -> nbt.put("requiresDraining", value));
          Adapters.BOOLEAN.writeNbt(this.completed).ifPresent(value -> nbt.put("completed", value));
          return (CompoundTag)nbt;
       });
@@ -193,6 +201,7 @@ public class CompleteGodAltarTask extends Task {
       super.readNbt(nbt);
       this.uuid = Adapters.UUID.readNbt(nbt.get("uuid")).orElse(null);
       this.modifierPool = Adapters.IDENTIFIER.readNbt(nbt.get("modifierPool")).orElse(null);
+      this.requiresDraining = Adapters.BOOLEAN.readNbt(nbt.get("requiresDraining")).orElse(false);
       this.completed = Adapters.BOOLEAN.readNbt(nbt.get("completed")).orElse(false);
    }
 
@@ -201,6 +210,7 @@ public class CompleteGodAltarTask extends Task {
       return super.writeJson().map(json -> {
          Adapters.UUID.writeJson(this.uuid).ifPresent(value -> json.add("uuid", value));
          Adapters.IDENTIFIER.writeJson(this.modifierPool).ifPresent(value -> json.add("modifierPool", value));
+         Adapters.BOOLEAN.writeJson(this.requiresDraining).ifPresent(value -> json.add("requiresDraining", value));
          Adapters.BOOLEAN.writeJson(this.completed).ifPresent(value -> json.add("completed", value));
          return (JsonObject)json;
       });
@@ -211,6 +221,7 @@ public class CompleteGodAltarTask extends Task {
       super.readJson(json);
       this.uuid = Adapters.UUID.readJson(json.get("uuid")).orElse(null);
       this.modifierPool = Adapters.IDENTIFIER.readJson(json.get("modifierPool")).orElse(null);
+      this.requiresDraining = Adapters.BOOLEAN.readJson(json.get("requiresDraining")).orElse(false);
       this.completed = Adapters.BOOLEAN.readJson(json.get("completed")).orElse(false);
    }
 

@@ -12,6 +12,7 @@ import iskallia.vault.init.ModSounds;
 import iskallia.vault.network.message.ClientboundArtifactBossImmunityParticleMessage;
 import iskallia.vault.network.message.ClientboundBossStagesMessage;
 import iskallia.vault.world.data.ServerVaults;
+import iskallia.vault.world.data.WorldSettings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -249,6 +250,21 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
             && potionEffect.getEffect() != ModEffects.NO_AI
          ? super.canBeAffected(potionEffect)
          : false;
+   }
+
+   public void setScaledHealth(int baseHealth) {
+      double healthMultiplier = ServerVaults.get(this.level)
+         .map(vault -> WorldSettings.get(this.level).getPlayerDifficulty(vault.get(Vault.OWNER)).getBossHealthMultiplier())
+         .orElse(1.0);
+      this.getAttribute(Attributes.MAX_HEALTH).setBaseValue(baseHealth * healthMultiplier);
+      this.setHealth((float)(baseHealth * healthMultiplier));
+   }
+
+   public void setScaledDamage(double baseDamage) {
+      double damageMultiplier = ServerVaults.get(this.level)
+         .map(vault -> WorldSettings.get(this.level).getPlayerDifficulty(vault.get(Vault.OWNER)).getBossDamageMultiplier())
+         .orElse(1.0);
+      this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(baseDamage * damageMultiplier);
    }
 
    protected SoundEvent getAmbientSound() {

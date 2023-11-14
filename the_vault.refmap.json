@@ -115,9 +115,6 @@
     "iskallia/vault/mixin/MixinFogRenderer": {
       "setupColor": "Lnet/minecraft/client/renderer/FogRenderer;m_109018_(Lnet/minecraft/client/Camera;FLnet/minecraft/client/multiplayer/ClientLevel;IF)V"
     },
-    "iskallia/vault/mixin/MixinDimensionType": {
-      "effectsLocation": "Lnet/minecraft/world/level/dimension/DimensionType;m_63969_()Lnet/minecraft/resources/ResourceLocation;"
-    },
     "iskallia/vault/mixin/MixinLootTable": {
       "getRandomItems(Lnet/minecraft/world/level/storage/loot/LootContext;)Ljava/util/List;": "Lnet/minecraft/world/level/storage/loot/LootTable;m_79129_(Lnet/minecraft/world/level/storage/loot/LootContext;)Ljava/util/List;"
     },
@@ -618,9 +615,6 @@
       },
       "iskallia/vault/mixin/MixinFogRenderer": {
         "setupColor": "Lnet/minecraft/client/renderer/FogRenderer;m_109018_(Lnet/minecraft/client/Camera;FLnet/minecraft/client/multiplayer/ClientLevel;IF)V"
-      },
-      "iskallia/vault/mixin/MixinDimensionType": {
-        "effectsLocation": "Lnet/minecraft/world/level/dimension/DimensionType;m_63969_()Lnet/minecraft/resources/ResourceLocation;"
       },
       "iskallia/vault/mixin/MixinLootTable": {
         "getRandomItems(Lnet/minecraft/world/level/storage/loot/LootContext;)Ljava/util/List;": "Lnet/minecraft/world/level/storage/loot/LootTable;m_79129_(Lnet/minecraft/world/level/storage/loot/LootContext;)Ljava/util/List;"

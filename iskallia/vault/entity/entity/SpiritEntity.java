@@ -1,7 +1,6 @@
 package iskallia.vault.entity.entity;
 
 import com.mojang.authlib.GameProfile;
-import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.sync.context.DiskSyncContext;
 import iskallia.vault.core.net.ArrayBitBuffer;
@@ -16,13 +15,12 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.init.ModGearAttributes;
-import iskallia.vault.integration.IntegrationCurios;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.world.VaultMode;
+import iskallia.vault.world.data.InventorySnapshot;
 import iskallia.vault.world.data.PlayerSpiritRecoveryData;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,27 +52,23 @@ import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber
 public class SpiritEntity extends Mob implements IPlayerSkinHolder {
-   @Deprecated
-   private static final String SPAWN_SPIRIT_TAG = VaultMod.sId("spawnSpirit");
    private static final String OWNER_PROFILE_TAG = "ownerProfile";
    private static final String JOIN_STATE_TAG = "joinState";
    private static final String RECYCLABLE_TAG = "recyclable";
    private GameProfile gameProfile = null;
+   @Deprecated
    private final NonNullList<ItemStack> items = NonNullList.create();
    private int vaultLevel;
    private int playerLevel;
@@ -88,21 +82,23 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    @Nullable
    private UUID heroId = null;
    private float rescuedBonus = 0.0F;
+   @Nullable
+   private InventorySnapshot inventorySnapshot = null;
 
    public SpiritEntity(EntityType<SpiritEntity> entityType, Level level) {
       super(entityType, level);
    }
 
-   public void transferSpiritData(Player player, Collection<ItemEntity> drops, EntityState joinState, int vaultLevel) {
+   public void transferSpiritData(Player player, EntityState joinState, int vaultLevel) {
       this.setGameProfile(player.getGameProfile());
       this.setVaultLevel(vaultLevel);
       this.setPlayerLevel(SidedHelper.getVaultLevel(player));
-      this.addDrops(drops);
+      this.addDrops(player);
       this.setJoinState(joinState);
    }
 
-   private void addDrops(Collection<ItemEntity> drops) {
-      drops.stream().<ItemStack>map(ItemEntity::getItem).filter(SpiritEntity::shouldAddItem).forEach(stack -> this.items.add(stack.copy()));
+   private void addDrops(Player player) {
+      this.inventorySnapshot = new InventorySnapshot.Builder(player).setStackFilter((p, stack) -> shouldAddItem(stack)).createSnapshot();
    }
 
    public void setJoinState(EntityState joinState) {
@@ -112,7 +108,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    @SubscribeEvent(
       priority = EventPriority.LOW
    )
-   public static void onPlayerDrops(LivingDropsEvent event) {
+   public static void onPlayerDeath(LivingDeathEvent event) {
       if (event.getEntity() instanceof ServerPlayer player) {
          ServerLevel serverLevel = player.getLevel();
          MinecraftServer server = serverLevel.getServer();
@@ -123,23 +119,26 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                      && ((VaultMode.GameRuleValue)serverLevel.getGameRules().getRule(ModGameRules.MODE)).get() != VaultMode.HARDCORE) {
                      int vaultLevel = vault.get(Vault.LEVEL).get();
                      PlayerSpiritRecoveryData data = PlayerSpiritRecoveryData.get(serverLevel);
+                     InventorySnapshot invSnapshot = new InventorySnapshot.Builder(player).setStackFilter((p, stack) -> shouldAddItem(stack)).createSnapshot();
                      if (serverLevel.players().size() > 1) {
                         EntityState joinState = vault.get(Vault.LISTENERS).get(player.getUUID()).get(Listener.JOIN_STATE);
                         server.tell(
                            new TickTask(
                               server.getTickCount() + 10,
                               () -> {
-                                 data.putVaultSpiritData(initSpiritData(event, vault, player, vaultLevel));
+                                 data.putVaultSpiritData(initSpiritData(vault, player, invSnapshot, vaultLevel));
                                  if (ModEntities.SPIRIT.spawn(serverLevel, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
                                     )
                                   {
-                                    spirit.transferSpiritData(player, event.getDrops(), joinState, vaultLevel);
+                                    spirit.transferSpiritData(player, joinState, vaultLevel);
                                  }
                               }
                            )
                         );
                      } else {
-                        server.tell(new TickTask(server.getTickCount() + 10, () -> data.putVaultSpiritData(initSpiritData(event, vault, player, vaultLevel))));
+                        server.tell(
+                           new TickTask(server.getTickCount() + 10, () -> data.putVaultSpiritData(initSpiritData(vault, player, invSnapshot, vaultLevel)))
+                        );
                      }
                   }
                }
@@ -161,6 +160,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                         respawnLevel,
                         spiritData.vaultLevel(),
                         spiritData.drops(),
+                        spiritData.inventorySnapshot(),
                         spiritData.playerLevel(),
                         Vec3.atCenterOf(spiritData.respawnPos()),
                         spiritData.respawnPos(),
@@ -175,50 +175,30 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       }
    }
 
-   @Deprecated
-   @SubscribeEvent
-   public static void onPlayerRespawn(PlayerRespawnEvent event) {
-      Player player = event.getPlayer();
-      if (player.getTags().contains(SPAWN_SPIRIT_TAG) && player.getLevel() instanceof ServerLevel serverLevel) {
-         player.getTags().remove(SPAWN_SPIRIT_TAG);
-         PlayerSpiritRecoveryData var6 = PlayerSpiritRecoveryData.get(serverLevel);
-         UUID playerId = player.getUUID();
-         List<ItemStack> drops = var6.getDrops(playerId);
-         if (!drops.isEmpty()) {
-            doLegacyRespawn(player, serverLevel, var6, playerId, drops);
-         }
-      }
-   }
-
-   private static void doLegacyRespawn(Player player, ServerLevel serverLevel, PlayerSpiritRecoveryData data, UUID playerId, List<ItemStack> drops) {
-      int playerLevel = SidedHelper.getVaultLevel(player);
-      Vec3 precisePosition = player.position();
-      BlockPos position = player.blockPosition();
-      int vaultLevel = data.getLastVaultLevel(playerId).orElse(0);
-      spawnSpirit(serverLevel, vaultLevel, drops, playerLevel, precisePosition, position, player.getGameProfile());
-      data.removeDrops(playerId);
-      data.removeLastVaultLevel(playerId);
-   }
-
    private static void spawnSpirit(
-      ServerLevel respawnLevel, int vaultLevel, List<ItemStack> drops, int playerLevel, Vec3 precisePosition, BlockPos position, GameProfile playerGameProfile
+      ServerLevel respawnLevel,
+      int vaultLevel,
+      List<ItemStack> drops,
+      InventorySnapshot inventorySnapshot,
+      int playerLevel,
+      Vec3 precisePosition,
+      BlockPos position,
+      GameProfile playerGameProfile
    ) {
       for (MutableBlockPos p : BlockPos.spiralAround(new BlockPos(precisePosition), 1, Direction.EAST, Direction.SOUTH)) {
          if (!p.equals(position)) {
             Vec3 respawnPos = DismountHelper.findSafeDismountLocation(ModEntities.SPIRIT, respawnLevel, p.immutable(), false);
             if (respawnPos != null) {
-               spawnSpirit(respawnLevel, respawnPos, playerLevel, vaultLevel, drops, playerGameProfile);
+               spawnSpirit(respawnLevel, respawnPos, playerLevel, vaultLevel, drops, inventorySnapshot, playerGameProfile);
                return;
             }
          }
       }
 
-      spawnSpirit(respawnLevel, precisePosition, playerLevel, vaultLevel, drops, playerGameProfile);
+      spawnSpirit(respawnLevel, precisePosition, playerLevel, vaultLevel, drops, inventorySnapshot, playerGameProfile);
    }
 
-   private static PlayerSpiritRecoveryData.SpiritData initSpiritData(LivingDropsEvent event, Vault vault, ServerPlayer player, int vaultLevel) {
-      List<ItemStack> drops = new ArrayList<>();
-      event.getDrops().stream().<ItemStack>map(ItemEntity::getItem).filter(SpiritEntity::shouldAddItem).forEach(stack -> drops.add(stack.copy()));
+   private static PlayerSpiritRecoveryData.SpiritData initSpiritData(Vault vault, ServerPlayer player, InventorySnapshot invSnapshot, int vaultLevel) {
       BlockPos respawnPosition = player.getRespawnPosition();
       if (respawnPosition == null) {
          ServerLevel respawnDimensionLevel = player.getServer().getLevel(player.getRespawnDimension());
@@ -229,7 +209,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       return new PlayerSpiritRecoveryData.SpiritData(
          vault.get(Vault.ID),
          player.getUUID(),
-         drops,
+         invSnapshot,
          vaultLevel,
          SidedHelper.getVaultLevel(player),
          player.getRespawnDimension(),
@@ -239,10 +219,17 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
    }
 
    private static void spawnSpirit(
-      ServerLevel serverLevel, Vec3 respawnPos, int playerLevel, int vaultLevel, List<ItemStack> drops, GameProfile playerGameProfile
+      ServerLevel serverLevel,
+      Vec3 respawnPos,
+      int playerLevel,
+      int vaultLevel,
+      List<ItemStack> drops,
+      InventorySnapshot inventorySnapshot,
+      GameProfile playerGameProfile
    ) {
       if (ModEntities.SPIRIT.spawn(serverLevel, null, null, new BlockPos(respawnPos), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit) {
          spirit.setItems(drops);
+         spirit.setInventorySnapshot(inventorySnapshot);
          spirit.setGameProfile(playerGameProfile);
          spirit.setVaultLevel(vaultLevel);
          spirit.setPlayerLevel(playerLevel);
@@ -250,21 +237,12 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       }
    }
 
-   public void addPlayersItems(Player player) {
-      for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
-         ItemStack stackInSlot = player.getInventory().getItem(slot);
-         if (shouldAddItem(stackInSlot)) {
-            this.items.add(stackInSlot.copy());
-         }
-      }
+   public void setInventorySnapshot(InventorySnapshot inventorySnapshot) {
+      this.inventorySnapshot = inventorySnapshot;
+   }
 
-      if (ModList.get().isLoaded("curios")) {
-         IntegrationCurios.getCuriosItemStacks(player).forEach((slotType, stacks) -> stacks.forEach(stack -> {
-            if (shouldAddItem((ItemStack)stack.getA())) {
-               this.items.add(((ItemStack)stack.getA()).copy());
-            }
-         }));
-      }
+   public void addPlayersItems(Player player) {
+      this.setInventorySnapshot(new InventorySnapshot.Builder(player).setStackFilter((p, stack) -> shouldAddItem(stack)).createSnapshot());
    }
 
    private static boolean shouldAddItem(ItemStack stack) {
@@ -480,6 +458,10 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       }
 
       compound.put("items", itemList);
+      if (this.inventorySnapshot != null) {
+         compound.put("inventorySnapshot", this.inventorySnapshot.serializeNBT());
+      }
+
       compound.putInt("vaultLevel", this.vaultLevel);
       compound.putInt("playerLevel", this.playerLevel);
       if (this.joinState != null) {
@@ -507,6 +489,13 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
 
       for (Tag tag : compound.getList("items", 10)) {
          this.items.add(ItemStack.of((CompoundTag)tag));
+      }
+
+      if (compound.contains("inventorySnapshot")) {
+         this.inventorySnapshot = new InventorySnapshot(false, false);
+         this.inventorySnapshot.deserializeNBT(compound.getCompound("inventorySnapshot"));
+      } else {
+         this.inventorySnapshot = null;
       }
 
       this.vaultLevel = compound.getInt("vaultLevel");
@@ -566,5 +555,9 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
 
    public void setRescuedBonus(float rescuedBonus) {
       this.rescuedBonus = rescuedBonus;
+   }
+
+   public InventorySnapshot getInventorySnapshot() {
+      return this.inventorySnapshot;
    }
 }
