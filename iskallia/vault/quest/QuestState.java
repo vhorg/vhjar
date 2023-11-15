@@ -74,7 +74,7 @@ public class QuestState implements INBTSerializable<CompoundTag> {
          }
       }
 
-      if (this.getInProgress().isEmpty()) {
+      if (this.getInProgress().isEmpty() && this.getReadyToComplete().isEmpty()) {
          this.updateMissingInProgress(level);
       }
    }
