@@ -3,6 +3,7 @@ package iskallia.vault.world.data;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.PlayerVaultStats;
+import iskallia.vault.skill.base.LearnableSkill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -54,6 +55,7 @@ public class PlayerExpertisesData extends SavedData {
    }
 
    public PlayerExpertisesData resetExpertiseTree(ServerPlayer player) {
+      this.getExpertises(player).iterate(LearnableSkill.class, skill -> skill.onRemove(SkillContext.of(player)));
       this.playerMap.remove(player.getUUID());
       this.setDirty();
       this.getExpertises(player).sync(SkillContext.of(player));

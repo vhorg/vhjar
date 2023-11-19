@@ -2,6 +2,7 @@ package iskallia.vault.event;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.block.entity.VaultChestTileEntity;
+import iskallia.vault.entity.entity.AncientCopperConduitItemEntity;
 import iskallia.vault.entity.entity.EternalEntity;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.gear.data.VaultGearData;
@@ -9,6 +10,7 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.trinket.TrinketHelper;
 import iskallia.vault.gear.trinket.effects.DamageImmunityTrinket;
 import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
@@ -30,6 +32,7 @@ import iskallia.vault.world.data.VaultCharmData;
 import java.util.List;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -54,6 +57,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
@@ -79,6 +83,25 @@ import top.theillusivec4.curios.api.event.CurioEquipEvent;
    bus = Bus.FORGE
 )
 public class PlayerEvents {
+   @SubscribeEvent
+   public static void onTossItem(EntityJoinWorldEvent event) {
+      if (event.getEntity() instanceof ItemEntity item
+         && !(item instanceof AncientCopperConduitItemEntity)
+         && item.getItem().getItem() == ModBlocks.ANCIENT_COPPER_CONDUIT_BLOCK_ITEM) {
+         AncientCopperConduitItemEntity ancientCopperConduitItemEntity = new AncientCopperConduitItemEntity(
+            item.level, item.getX(), item.getY(), item.getZ(), item.getItem()
+         );
+         CompoundTag tag = new CompoundTag();
+         item.save(tag);
+         ancientCopperConduitItemEntity.load(tag);
+         if (!event.getWorld().isClientSide) {
+            event.getWorld().addFreshEntity(ancientCopperConduitItemEntity);
+         }
+
+         event.setCanceled(true);
+      }
+   }
+
    @SubscribeEvent
    public static void onStartTracking(StartTracking event) {
       Entity target = event.getTarget();

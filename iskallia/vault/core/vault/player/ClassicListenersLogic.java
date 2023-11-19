@@ -236,6 +236,7 @@ public class ClassicListenersLogic extends ListenersLogic {
       player.connection.send(subtitlePacket);
       this.printJoinMessage(world, vault, player);
       this.ifPresent(GAME_MODE, player::setGameMode);
+      player.removeAllEffects();
    }
 
    private void printJoinMessage(VirtualWorld world, Vault vault, ServerPlayer player) {

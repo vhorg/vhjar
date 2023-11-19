@@ -12,6 +12,7 @@ import iskallia.vault.entity.boss.ConjurationMagicProjectileEntity;
 import iskallia.vault.entity.boss.MagicProjectileEntity;
 import iskallia.vault.entity.entity.AggressiveCowBossEntity;
 import iskallia.vault.entity.entity.AggressiveCowEntity;
+import iskallia.vault.entity.entity.AncientCopperConduitItemEntity;
 import iskallia.vault.entity.entity.AncientCopperGolemEntity;
 import iskallia.vault.entity.entity.ArenaBossEntity;
 import iskallia.vault.entity.entity.BlueBlazeEntity;
@@ -390,6 +391,7 @@ public class ModEntities {
    public static EntityType<VaultSandEntity> VAULT_SAND;
    public static EntityType<FloatingItemEntity> FLOATING_ITEM;
    public static EntityType<FloatingGodAltarItemEntity> FLOATING_ALTAR_ITEM;
+   public static EntityType<AncientCopperConduitItemEntity> CONDUIT_ITEM;
    public static EntityType<EyesoreFireballEntity> EYESORE_FIREBALL;
    public static EntityType<FixedArrowEntity> FIXED_ARROW;
    public static EntityType<ElixirOrbEntity> ELIXIR_ORB;
@@ -1235,6 +1237,9 @@ public class ModEntities {
          Builder.of(AncientCopperGolemEntity::new, MobCategory.CREATURE).sized(0.6F, 1.0F).clientTrackingRange(8),
          AncientCopperGolemEntity::createAttributes,
          event
+      );
+      CONDUIT_ITEM = register(
+         "conduit_item", Builder.of(AncientCopperConduitItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20), event
       );
    }
 

@@ -1,31 +1,20 @@
 package iskallia.vault.util;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.dump.PlayerSnapshotDump;
-import iskallia.vault.init.ModConfigs;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.event.entity.player.PlayerEvent.SaveToFile;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 @EventBusSubscriber
 public class PlayerDataSnapshotHelper {
-   @SubscribeEvent
-   public static void onSave(SaveToFile event) {
-      if (event.getPlayer() instanceof ServerPlayer) {
-         if (ModConfigs.VAULT_GENERAL.SAVE_PLAYER_SNAPSHOTS) {
-            savePlayerSnapshot((ServerPlayer)event.getPlayer());
-         }
-      }
-   }
-
-   private static void savePlayerSnapshot(ServerPlayer sPlayer) {
-      savePlayerSnapshot(sPlayer, getSnapshotDirectory());
+   private static void savePlayerSnapshot(ServerPlayer player) {
+      savePlayerSnapshot(player, getSnapshotDirectory());
    }
 
    private static void savePlayerSnapshot(ServerPlayer sPlayer, File directory) {
@@ -50,5 +39,10 @@ public class PlayerDataSnapshotHelper {
       }
 
       return snapshotDirectory;
+   }
+
+   static {
+      CommonEvents.LISTENER_JOIN
+         .register(PlayerDataSnapshotHelper.class, data -> data.getListener().getPlayer().ifPresent(PlayerDataSnapshotHelper::savePlayerSnapshot));
    }
 }

@@ -9,6 +9,7 @@ import iskallia.vault.gear.item.IdentifiableItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.util.BlockHelper;
+import iskallia.vault.util.InventoryUtil;
 import java.util.Random;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -101,13 +102,30 @@ public class IdentificationStandBlock extends FacedBlock implements EntityBlock 
       boolean identified = false;
 
       for (ItemStack itemStack : player.getInventory().items) {
-         Item state = itemStack.getItem();
-         if (state instanceof IdentifiableItem) {
-            IdentifiableItem identifiableItem = (IdentifiableItem)state;
-            VaultGearState statex = identifiableItem.getState(itemStack);
-            if (statex == VaultGearState.UNIDENTIFIED) {
+         Item identifiableItem = itemStack.getItem();
+         if (identifiableItem instanceof IdentifiableItem) {
+            IdentifiableItem identifiableItemx = (IdentifiableItem)identifiableItem;
+            VaultGearState state = identifiableItemx.getState(itemStack);
+            if (state == VaultGearState.UNIDENTIFIED) {
                if (player instanceof ServerPlayer serverPlayer) {
-                  identifiableItem.instantIdentify(serverPlayer, itemStack);
+                  identifiableItemx.instantIdentify(serverPlayer, itemStack);
+               }
+
+               identified = true;
+            }
+         }
+      }
+
+      for (InventoryUtil.ItemAccess itemAccess : InventoryUtil.findAllItemsInMainHand(player)) {
+         ItemStack itemStackx = itemAccess.getStack();
+         Item var19 = itemStackx.getItem();
+         if (var19 instanceof IdentifiableItem) {
+            IdentifiableItem identifiableItem = (IdentifiableItem)var19;
+            VaultGearState state = identifiableItem.getState(itemStackx);
+            if (state == VaultGearState.UNIDENTIFIED) {
+               if (player instanceof ServerPlayer serverPlayer) {
+                  identifiableItem.instantIdentify(serverPlayer, itemStackx);
+                  itemAccess.setStack(itemStackx);
                }
 
                identified = true;
@@ -124,7 +142,7 @@ public class IdentificationStandBlock extends FacedBlock implements EntityBlock 
          return InteractionResult.SUCCESS;
       } else {
          level.playSound(null, pos, SoundEvents.BONE_BLOCK_PLACE, SoundSource.BLOCKS, 0.5F, 1.0F);
-         return InteractionResult.FAIL;
+         return InteractionResult.SUCCESS;
       }
    }
 

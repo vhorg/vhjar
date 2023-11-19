@@ -50,6 +50,16 @@ public class InventoryUtil {
       }));
       return items;
    });
+   private static final Set<Function<Player, List<InventoryUtil.ItemAccess>>> MAIN_HAND_ACCESS = Set.of(player -> {
+      List<InventoryUtil.ItemAccess> items = new ArrayList<>();
+      ItemStack mainHandItem = player.getMainHandItem();
+      if (!mainHandItem.isEmpty()) {
+         Inventory inv = player.getInventory();
+         items.add(new InventoryUtil.ItemAccess(mainHandItem, newStack -> inv.setItem(inv.selected, newStack)));
+      }
+
+      return items;
+   });
    private static final Set<Function<InventoryUtil.ItemAccess, List<InventoryUtil.ItemAccess>>> CONTENT_ACCESSORS = Set.of(
       IntegrationSB::getBackpackItemAccess,
       InventoryUtil::getShulkerBoxAccess,
@@ -65,6 +75,16 @@ public class InventoryUtil {
 
       for (Function<Player, List<InventoryUtil.ItemAccess>> inventoryFn : INVENTORY_ACCESS) {
          inventoryFn.apply(player).forEach(inventoryStackAccess -> discoverContents(inventoryStackAccess, itemAccesses));
+      }
+
+      return itemAccesses;
+   }
+
+   public static List<InventoryUtil.ItemAccess> findAllItemsInMainHand(Player player) {
+      List<InventoryUtil.ItemAccess> itemAccesses = new ArrayList<>();
+
+      for (Function<Player, List<InventoryUtil.ItemAccess>> mainHandFn : MAIN_HAND_ACCESS) {
+         mainHandFn.apply(player).forEach(mainHandStackAccess -> discoverContents(mainHandStackAccess, itemAccesses));
       }
 
       return itemAccesses;

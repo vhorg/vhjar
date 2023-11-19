@@ -45,6 +45,7 @@
       "calculateTargetStrength": "Lnet/minecraft/world/level/block/RedStoneWireBlock;m_55527_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)I"
     },
     "iskallia/vault/mixin/MixinGrindstoneMenu": {
+      "removeNonCurses": "Lnet/minecraft/world/inventory/GrindstoneMenu;m_39579_(Lnet/minecraft/world/item/ItemStack;II)Lnet/minecraft/world/item/ItemStack;",
       "createResult": "Lnet/minecraft/world/inventory/GrindstoneMenu;m_39593_()V"
     },
     "iskallia/vault/mixin/AccessorMinecraftServer": {
@@ -546,6 +547,7 @@
         "calculateTargetStrength": "Lnet/minecraft/world/level/block/RedStoneWireBlock;m_55527_(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)I"
       },
       "iskallia/vault/mixin/MixinGrindstoneMenu": {
+        "removeNonCurses": "Lnet/minecraft/world/inventory/GrindstoneMenu;m_39579_(Lnet/minecraft/world/item/ItemStack;II)Lnet/minecraft/world/item/ItemStack;",
         "createResult": "Lnet/minecraft/world/inventory/GrindstoneMenu;m_39593_()V"
       },
       "iskallia/vault/mixin/AccessorMinecraftServer": {
