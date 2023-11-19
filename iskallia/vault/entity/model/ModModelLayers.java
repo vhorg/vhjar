@@ -90,4 +90,7 @@ public class ModModelLayers {
    public static final ModelLayerLocation ANGEL_BLOCK_EYE = new ModelLayerLocation(VaultMod.id("angel_block_eye"), "main");
    public static final ModelLayerLocation ANGEL_BLOCK_WIND = new ModelLayerLocation(VaultMod.id("angel_block_wind"), "main");
    public static final ModelLayerLocation ANGEL_BLOCK_CAGE = new ModelLayerLocation(VaultMod.id("angel_block_cage"), "main");
+   public static final ModelLayerLocation ANCIENT_COPPER_CONDUIT_BLOCK_EYE = new ModelLayerLocation(VaultMod.id("ancient_copper_conduit_block_eye"), "main");
+   public static final ModelLayerLocation ANCIENT_COPPER_CONDUIT_BLOCK_WIND = new ModelLayerLocation(VaultMod.id("ancient_copper_conduit_block_wind"), "main");
+   public static final ModelLayerLocation ANCIENT_COPPER_CONDUIT_BLOCK_CAGE = new ModelLayerLocation(VaultMod.id("ancient_copper_conduit_block_cage"), "main");
 }

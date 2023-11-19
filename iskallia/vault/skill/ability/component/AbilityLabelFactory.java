@@ -2,12 +2,16 @@ package iskallia.vault.skill.ability.component;
 
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.base.Skill;
+import iskallia.vault.util.calc.AbilityPowerHelper;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 
 public final class AbilityLabelFactory {
    public static final String COOLDOWN = "cooldown";
@@ -87,11 +91,25 @@ public final class AbilityLabelFactory {
                return new TextComponent("ERROR");
             }
          });
+         Player player = Minecraft.getInstance().player;
          this.put("distance", context -> AbilityLabelFactory.label("\n Distance: ", AbilityLabelFactory.binding(context.config(), "distance"), "distance"));
-         this.put("damage", context -> AbilityLabelFactory.label("\n Damage: ", AbilityLabelFactory.binding(context.config(), "damage"), "damage"));
+         this.put(
+            "damage",
+            context -> AbilityLabelFactory.labelWithAbilityValue(
+               "\n Damage: ",
+               AbilityLabelFactory.binding(context.config(), "damage"),
+               "damage",
+               player != null ? (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE) : 0.0F
+            )
+         );
          this.put(
             "ability_power",
-            context -> AbilityLabelFactory.label("\n Ability Power: ", AbilityLabelFactory.binding(context.config(), "ability_power"), "ability_power")
+            context -> AbilityLabelFactory.labelWithAbilityValue(
+               "\n Ability Power: ",
+               AbilityLabelFactory.binding(context.config(), "ability_power"),
+               "ability_power",
+               player != null ? AbilityPowerHelper.getAbilityPower(player) : 0.0F
+            )
          );
          this.put("duration", context -> AbilityLabelFactory.label("\n Duration: ", AbilityLabelFactory.binding(context.config(), "duration"), "duration"));
          this.put("delay", context -> AbilityLabelFactory.label("\n Delay: ", AbilityLabelFactory.binding(context.config(), "delay"), "delay"));
@@ -258,6 +276,13 @@ public final class AbilityLabelFactory {
 
    private static MutableComponent label(String label, String value, String colorKey) {
       return new TextComponent(label).withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("text"))).append(text(value, colorKey));
+   }
+
+   private static MutableComponent labelWithAbilityValue(String label, String value, String colorKey, float abilityValue) {
+      float result = Float.parseFloat(value.replace("%", "")) / 100.0F;
+      return new TextComponent(label)
+         .withStyle(Style.EMPTY.withColor(ModConfigs.COLORS.getColor("text")))
+         .append(text(value, colorKey).append(text(" (" + String.format("%.0f", result * abilityValue) + ")", colorKey)));
    }
 
    private static MutableComponent text(String text, String colorKey) {

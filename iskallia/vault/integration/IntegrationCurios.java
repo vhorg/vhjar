@@ -207,6 +207,20 @@ public class IntegrationCurios {
       }).orElse(Collections.emptyList());
    }
 
+   public static List<ItemStack> getCuriosItemStacksFromTag(CompoundTag tag) {
+      List<ItemStack> stacks = new ArrayList<>();
+
+      for (String handlerKey : tag.getAllKeys()) {
+         CompoundTag handlerKeyMap = tag.getCompound(handlerKey);
+
+         for (String strSlot : handlerKeyMap.getAllKeys()) {
+            stacks.add(ItemStack.of(handlerKeyMap.getCompound(strSlot)));
+         }
+      }
+
+      return stacks;
+   }
+
    public static ItemStack getItemFromCuriosHeadSlot(Player player, Predicate<ItemStack> stackMatcher) {
       return CuriosApi.getCuriosHelper().getCuriosHandler(player).map(h -> h.getStacksHandler(SlotTypePreset.HEAD.getIdentifier()).map(stackHandler -> {
          IDynamicStackHandler stacks = stackHandler.getStacks();

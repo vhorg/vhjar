@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "w",
+    "n",
+    "w"
+  ],
+  "key": {
+    "w": {
+      "item": "the_vault:ancient_copper_block"
+    },
+    "n": {
+      "item": "minecraft:nautilus_shell"
+    }
+  },
+  "result": {
+    "item": "the_vault:ancient_copper_conduit_block"
+  }
+}

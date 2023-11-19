@@ -78,7 +78,11 @@ public class AngelBlock extends BaseEntityBlock implements EntityBlock {
    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
       if (pState.getBlock() != pNewState.getBlock()) {
          pLevel.getBlockEntity(pPos, ModBlocks.ANGEL_BLOCK_TILE_ENTITY)
-            .ifPresent(blockEntity -> this.playerAngelBlocks.getOrDefault(blockEntity.getOwner(), new HashSet<>()).remove(pPos));
+            .ifPresent(
+               blockEntity -> this.playerAngelBlocks
+                  .getOrDefault(blockEntity.getOwner(), new HashSet<>())
+                  .remove(new AngelBlock.DimensionPos(pLevel.dimension(), pPos))
+            );
       }
 
       super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);

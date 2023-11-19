@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin({GrindstoneMenu.class})
 public class MixinGrindstoneMenu {
@@ -30,6 +31,20 @@ public class MixinGrindstoneMenu {
             AbstractContainerMenu thisContainer = (AbstractContainerMenu)this;
             thisContainer.broadcastChanges();
          }
+      }
+   }
+
+   @Inject(
+      method = {"removeNonCurses"},
+      at = {@At("RETURN")},
+      cancellable = true
+   )
+   public void reapplyBrokenDamage(ItemStack originalStack, int damage, int count, CallbackInfoReturnable<ItemStack> cir) {
+      int damageValue = originalStack.getDamageValue();
+      if (damageValue == -1) {
+         ItemStack returnedStack = (ItemStack)cir.getReturnValue();
+         returnedStack.setDamageValue(damageValue);
+         cir.setReturnValue(returnedStack);
       }
    }
 }

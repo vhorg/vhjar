@@ -14,7 +14,6 @@ import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.vault.time.modifier.ClockModifier;
 import iskallia.vault.core.vault.time.modifier.FruitExtension;
 import iskallia.vault.core.vault.time.modifier.VoidFluidExtension;
-import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.gear.trinket.TrinketHelper;
 import iskallia.vault.gear.trinket.effects.VaultExperienceTrinket;
@@ -25,7 +24,6 @@ import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.item.bottle.BottleItem;
 import iskallia.vault.skill.PlayerVaultStats;
 import iskallia.vault.util.InventoryUtil;
-import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultJoinSnapshotData;
 import net.minecraft.server.level.ServerPlayer;
@@ -132,67 +130,6 @@ public class Runner extends Listener {
             }
          }
       });
-      CommonEvents.LOOT_GENERATION.pre().register(this, data -> {
-         if (data.getGenerator() instanceof LootTableGenerator generator) {
-            if (!(generator.source instanceof ServerPlayer player)) {
-               return;
-            }
-
-            if (player.level != world) {
-               return;
-            }
-
-            if (!player.getUUID().equals(this.get(ID))) {
-               return;
-            }
-
-            int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
-            int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
-            if (!player.getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY)) {
-               diff = 0;
-            }
-
-            if (diff <= 0) {
-               return;
-            }
-
-            generator.itemQuantity -= diff * 0.05F;
-            generator.itemQuantity = Math.max(generator.itemQuantity, -0.8F);
-         }
-      }, -100);
-      CommonEvents.SOUL_SHARD_CHANCE.register(this, data -> {
-         if (data.getKiller().level == world) {
-            if (data.getKiller().getUUID().equals(this.get(ID))) {
-               int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
-               int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
-               if (!data.getKiller().getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY)) {
-                  diff = 0;
-               }
-
-               if (diff > 0) {
-                  data.setChance(data.getChance() - diff * 0.05F);
-               }
-            }
-         }
-      }, -100);
-      CommonEvents.PLAYER_STAT.of(PlayerStat.DURABILITY_WEAR_REDUCTION).register(this, data -> {
-         if (data.getEntity() instanceof Player player) {
-            if (player.level == world) {
-               if (player.getUUID().equals(this.get(ID))) {
-                  int playerLevel = PlayerVaultStatsData.get(world).getVaultStats(this.getId()).getVaultLevel();
-                  int diff = playerLevel - vault.get(Vault.LEVEL).get() - 6;
-                  if (!player.getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY)) {
-                     diff = 0;
-                  }
-
-                  if (diff > 0) {
-                     float reduction = Math.min(0.25F + diff * 0.05F, 1.0F);
-                     data.setValue(data.getValue() + reduction);
-                  }
-               }
-            }
-         }
-      });
       CommonEvents.ENTITY_DEATH
          .register(
             this,
@@ -254,22 +191,25 @@ public class Runner extends Listener {
          for (TrinketHelper.TrinketStack<VaultExperienceTrinket> trinketStack : TrinketHelper.getTrinkets(player, VaultExperienceTrinket.class)) {
             if (trinketStack.isUsable(player)) {
                vault.getOptional(Vault.STATS).map(s -> s.get(player.getUUID())).ifPresent(stats -> {
-                  float multiplier = 1.0F + trinketStack.trinket().getConfig().getExperienceIncrease();
-                  stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> m * multiplier);
-                  stats.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> m * multiplier);
+                  float multiplierx = 1.0F + trinketStack.trinket().getConfig().getExperienceIncrease();
+                  stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> m * multiplierx);
+                  stats.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> m * multiplierx);
                });
             }
          }
 
-         PlayerVaultStats playerStats = PlayerVaultStatsData.get(world).getVaultStats(player);
-         int vaultLevel = vault.get(Vault.LEVEL).get();
-         int playerLevel = playerStats.getVaultLevel();
-         int diff = !player.getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY) ? 0 : playerLevel - vaultLevel - 3;
-         if (diff > 0) {
-            vault.getOptional(Vault.STATS).map(s -> s.get(player.getUUID())).ifPresent(stats -> {
-               stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> Math.max(0.0F, m - 0.1F * diff));
-               stats.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> Math.max(0.0F, m - 0.1F * diff));
-            });
+         if (player.getLevel().getGameRules().getBoolean(ModGameRules.BOOST_PENALTY)) {
+            PlayerVaultStats playerStats = PlayerVaultStatsData.get(world).getVaultStats(player);
+            int vaultLevel = vault.get(Vault.LEVEL).get();
+            int playerLevel = playerStats.getVaultLevel();
+            int delta = playerLevel - vaultLevel - 1;
+            if (delta > 0) {
+               float multiplier = Math.max(0.0F, 1.0F - delta * 0.2F);
+               vault.getOptional(Vault.STATS).map(s -> s.get(player.getUUID())).ifPresent(stats -> {
+                  stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, m -> m * multiplier);
+                  stats.modify(StatCollector.BONUS_EXP_MULTIPLIER, m -> m * multiplier);
+               });
+            }
          }
 
          BottleItem.setActive(vault, player);

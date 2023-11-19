@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 public class ChampionGoal {
    public static void registerProjectileGoal(Vault vault, final Mob mob) {
       VaultDifficulty vaultDifficulty = WorldSettings.get(mob.level).getPlayerDifficulty(vault.get(Vault.OWNER));
-      if (vaultDifficulty.shouldAddAntiNerdPoleAi()) {
+      if (vaultDifficulty.shouldChampionRangeAttack()) {
          mob.goalSelector
             .addGoal(
                3,

@@ -89,16 +89,16 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
       super(entityType, level);
    }
 
-   public void transferSpiritData(Player player, EntityState joinState, int vaultLevel) {
+   public void transferSpiritData(Player player, EntityState joinState, InventorySnapshot invSnapshot, int vaultLevel) {
       this.setGameProfile(player.getGameProfile());
       this.setVaultLevel(vaultLevel);
       this.setPlayerLevel(SidedHelper.getVaultLevel(player));
-      this.addDrops(player);
+      this.addDrops(invSnapshot);
       this.setJoinState(joinState);
    }
 
-   private void addDrops(Player player) {
-      this.inventorySnapshot = new InventorySnapshot.Builder(player).setStackFilter((p, stack) -> shouldAddItem(stack)).createSnapshot();
+   private void addDrops(InventorySnapshot invSnapshot) {
+      this.inventorySnapshot = invSnapshot;
    }
 
    public void setJoinState(EntityState joinState) {
@@ -130,7 +130,7 @@ public class SpiritEntity extends Mob implements IPlayerSkinHolder {
                                  if (ModEntities.SPIRIT.spawn(serverLevel, null, null, player.blockPosition(), MobSpawnType.EVENT, false, false) instanceof SpiritEntity spirit
                                     )
                                   {
-                                    spirit.transferSpiritData(player, joinState, vaultLevel);
+                                    spirit.transferSpiritData(player, joinState, invSnapshot, vaultLevel);
                                  }
                               }
                            )

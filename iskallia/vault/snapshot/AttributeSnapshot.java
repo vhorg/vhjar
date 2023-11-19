@@ -22,7 +22,7 @@ public class AttributeSnapshot {
    Map<VaultGearAttribute<?>, AttributeSnapshot.AttributeValue<?, ?>> gearAttributeValues = new HashMap<>();
    List<EtchingSet<?>> etchings = new ArrayList<>();
 
-   protected AttributeSnapshot() {
+   public AttributeSnapshot() {
    }
 
    public AttributeSnapshot(FriendlyByteBuf buf) {

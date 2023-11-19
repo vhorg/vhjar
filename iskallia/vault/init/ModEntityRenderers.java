@@ -215,6 +215,7 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.VAULT_SAND, ItemEntityRenderer::new);
       EntityRenderers.register(ModEntities.FLOATING_ITEM, ItemEntityRenderer::new);
       EntityRenderers.register(ModEntities.FLOATING_ALTAR_ITEM, ItemEntityRenderer::new);
+      EntityRenderers.register(ModEntities.CONDUIT_ITEM, ItemEntityRenderer::new);
       EntityRenderers.register(ModEntities.EYESORE_FIREBALL, rm -> new ThrownItemRenderer(rm, 2.0F, true));
       EntityRenderers.register(ModEntities.ELITE_ZOMBIE, EliteZombieRenderer::new);
       EntityRenderers.register(ModEntities.ELITE_HUSK, EliteHuskRenderer::new);

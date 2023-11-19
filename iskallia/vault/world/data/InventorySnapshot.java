@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiPredicate;
+import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -21,6 +22,8 @@ public class InventorySnapshot implements INBTSerializable<CompoundTag> {
    private final VListNBT<Integer, IntTag> invIds = new VListNBT<>(IntTag::valueOf, IntTag::getAsInt);
    private final VListNBT<ItemStack, CompoundTag> items = new VListNBT<>(IForgeItemStack::serializeNBT, ItemStack::of);
    private final Map<String, CompoundTag> customInventoryData = new HashMap<>();
+   @Nullable
+   private List<ItemStack> allItems = null;
    private boolean removeSnapshotItems = false;
    private boolean replaceExisting = false;
 
@@ -99,7 +102,17 @@ public class InventorySnapshot implements INBTSerializable<CompoundTag> {
    }
 
    public List<ItemStack> getItems() {
-      return this.items;
+      if (this.allItems == null) {
+         this.allItems = new ArrayList<>();
+         if (ModList.get().isLoaded("curios") && this.customInventoryData.containsKey("curios")) {
+            CompoundTag curiosData = this.customInventoryData.get("curios");
+            this.allItems.addAll(IntegrationCurios.getCuriosItemStacksFromTag(curiosData));
+         }
+
+         this.allItems.addAll(this.items);
+      }
+
+      return this.allItems;
    }
 
    public CompoundTag serializeNBT() {

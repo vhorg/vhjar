@@ -75,9 +75,10 @@ public class AncientCopperGolemEntity extends PathfinderMob {
 
    protected void registerGoals() {
       this.goalSelector.addGoal(0, new FloatGoal(this));
-      this.goalSelector.addGoal(1, new PanicGoal(this, 1.5));
-      this.goalSelector.addGoal(3, new TemptGoal(this, 1.25, Ingredient.of(new ItemLike[]{ModItems.ANCIENT_COPPER_INGOT}), false));
-      this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 1.0));
+      this.goalSelector.addGoal(1, new AncientCopperGolemEntity.PanicGoalGolem(this, 1.5));
+      this.goalSelector
+         .addGoal(3, new AncientCopperGolemEntity.TemptGoalGolem(this, 1.25, Ingredient.of(new ItemLike[]{ModItems.ANCIENT_COPPER_INGOT}), false));
+      this.goalSelector.addGoal(5, new AncientCopperGolemEntity.WaterAvoidingRandomStrollGoalGolem(this, 1.0));
       this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 6.0F));
       this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
       this.addBehaviourGoals();
@@ -370,6 +371,9 @@ public class AncientCopperGolemEntity extends PathfinderMob {
       }
    }
 
+   public void checkDespawn() {
+   }
+
    protected void dropFromLootTable(DamageSource pDamageSource, boolean pAttackedRecently) {
       super.dropFromLootTable(pDamageSource, pAttackedRecently);
       if (!this.level.isClientSide()) {
@@ -445,5 +449,62 @@ public class AncientCopperGolemEntity extends PathfinderMob {
    ) {
       this.setAge(ModConfigs.ANCIENT_COPPER_GOLEM.degradeTime);
       return super.finalizeSpawn(pLevel, pDifficulty, pReason, pSpawnData, pDataTag);
+   }
+
+   public static class PanicGoalGolem extends PanicGoal {
+      protected final AncientCopperGolemEntity mob;
+
+      public PanicGoalGolem(AncientCopperGolemEntity pMob, double pSpeedModifier) {
+         super(pMob, pSpeedModifier);
+         this.mob = pMob;
+      }
+
+      public boolean canUse() {
+         return this.mob.getWaxed() ? false : super.canUse();
+      }
+
+      public boolean canContinueToUse() {
+         return this.mob.getWaxed() ? false : super.canContinueToUse();
+      }
+   }
+
+   public static class TemptGoalGolem extends TemptGoal {
+      protected final AncientCopperGolemEntity mob;
+
+      public TemptGoalGolem(AncientCopperGolemEntity pMob, double pSpeedModifier, Ingredient pItems, boolean pCanScare) {
+         super(pMob, pSpeedModifier, pItems, pCanScare);
+         this.mob = pMob;
+      }
+
+      public boolean canUse() {
+         return this.mob.getWaxed() ? false : super.canUse();
+      }
+
+      public boolean canContinueToUse() {
+         return this.mob.getWaxed() ? false : super.canContinueToUse();
+      }
+   }
+
+   public static class WaterAvoidingRandomStrollGoalGolem extends WaterAvoidingRandomStrollGoal {
+      protected final float probability;
+      protected final AncientCopperGolemEntity mob;
+
+      public WaterAvoidingRandomStrollGoalGolem(AncientCopperGolemEntity p_25987_, double p_25988_) {
+         this(p_25987_, p_25988_, 0.001F);
+      }
+
+      public WaterAvoidingRandomStrollGoalGolem(AncientCopperGolemEntity pMob, double pSpeedModifier, float pProbability) {
+         super(pMob, pSpeedModifier);
+         this.mob = pMob;
+         this.probability = pProbability;
+      }
+
+      public boolean canUse() {
+         return this.mob.getWaxed() ? false : super.canUse();
+      }
+
+      public boolean canContinueToUse() {
+         return this.mob.getWaxed() ? false : super.canContinueToUse();
+      }
    }
 }

@@ -5,6 +5,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.block.AlchemyArchiveBlock;
 import iskallia.vault.block.AlchemyTableBlock;
 import iskallia.vault.block.AncientCopperButtonBlock;
+import iskallia.vault.block.AncientCopperConduitBlock;
 import iskallia.vault.block.AncientCopperTrapDoorBlock;
 import iskallia.vault.block.AngelBlock;
 import iskallia.vault.block.AnimalPenBlock;
@@ -111,6 +112,7 @@ import iskallia.vault.block.base.GodAltarTileEntity;
 import iskallia.vault.block.discoverable.DiscoverTriggeringBlock;
 import iskallia.vault.block.entity.AlchemyArchiveTileEntity;
 import iskallia.vault.block.entity.AlchemyTableTileEntity;
+import iskallia.vault.block.entity.AncientCopperConduitTileEntity;
 import iskallia.vault.block.entity.AncientCryoChamberTileEntity;
 import iskallia.vault.block.entity.AngelBlockTileEntity;
 import iskallia.vault.block.entity.AnimalPenTileEntity;
@@ -196,6 +198,7 @@ import iskallia.vault.block.item.TreasureDoorBlockItem;
 import iskallia.vault.block.item.TrophyStatueBlockItem;
 import iskallia.vault.block.item.VaultOreBlockItem;
 import iskallia.vault.block.render.AlchemyTableRenderer;
+import iskallia.vault.block.render.AncientCopperConduitRenderer;
 import iskallia.vault.block.render.AngelBlockRenderer;
 import iskallia.vault.block.render.AnimalPenRenderer;
 import iskallia.vault.block.render.ArtifactProjectorRenderer;
@@ -247,6 +250,7 @@ import iskallia.vault.block.render.VaultEnchanterRenderer;
 import iskallia.vault.block.render.VaultPortalRenderer;
 import iskallia.vault.block.render.VelvetBedRenderer;
 import iskallia.vault.block.render.WardrobeRenderer;
+import iskallia.vault.client.render.AncientCopperConduitBlockISTER;
 import iskallia.vault.client.render.AngelBlockISTER;
 import iskallia.vault.core.vault.stat.VaultChestType;
 import iskallia.vault.fluid.block.VoidFluidBlock;
@@ -519,6 +523,7 @@ public class ModBlocks {
    public static final Block WUTODIC_SILVER_BLOCK = new Block(net.minecraft.world.level.block.state.BlockBehaviour.Properties.copy(Blocks.IRON_BLOCK));
    public static final EternalPedestalBlock ETERNAL_PEDESTAL = new EternalPedestalBlock();
    public static final AngelBlock ANGEL_BLOCK = new AngelBlock();
+   public static final AncientCopperConduitBlock ANCIENT_COPPER_CONDUIT_BLOCK = new AncientCopperConduitBlock();
    public static final MobBarrier MOB_BARRIER = new MobBarrier();
    public static final SparkBlock SPARK = new SparkBlock();
    public static final ConvertedSparkBlock CONVERTED_SPARK = new ConvertedSparkBlock();
@@ -882,6 +887,11 @@ public class ModBlocks {
          consumer.accept(AngelBlockISTER.INSTANCE);
       }
    };
+   public static BlockItem ANCIENT_COPPER_CONDUIT_BLOCK_ITEM = new BlockItem(ANCIENT_COPPER_CONDUIT_BLOCK, new Properties().tab(ModItems.VAULT_MOD_GROUP)) {
+      public void initializeClient(Consumer<IItemRenderProperties> consumer) {
+         consumer.accept(AncientCopperConduitBlockISTER.INSTANCE);
+      }
+   };
    public static BlockItem VAULT_SWEETS_ITEM = new VaultSweetsBlockItem(VAULT_SWEETS, new Builder().fast().nutrition(3).saturationMod(0.5F).build());
    public static final BlockEntityType<FloatingTextTileEntity> FLOATING_TEXT_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          FloatingTextTileEntity::new, new Block[]{FLOATING_TEXT}
@@ -1202,6 +1212,10 @@ public class ModBlocks {
          AngelBlockTileEntity::new, new Block[]{ANGEL_BLOCK}
       )
       .build(null);
+   public static final BlockEntityType<AncientCopperConduitTileEntity> ANCIENT_COPPER_CONDUIT_BLOCK_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         AncientCopperConduitTileEntity::new, new Block[]{ANCIENT_COPPER_CONDUIT_BLOCK}
+      )
+      .build(null);
    public static final BlockEntityType<MobBarrierTileEntity> MOB_BARRIER_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          MobBarrierTileEntity::new, new Block[]{MOB_BARRIER}
       )
@@ -1387,6 +1401,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_STONE_SLAB, VaultMod.id("vault_stone_slab"));
       registerBlock(event, VAULT_STONE_STAIRS, VaultMod.id("vault_stone_stairs"));
       registerBlock(event, ANGEL_BLOCK, VaultMod.id("angel_block"));
+      registerBlock(event, ANCIENT_COPPER_CONDUIT_BLOCK, VaultMod.id("ancient_copper_conduit_block"));
       registerBlock(event, MOB_BARRIER, VaultMod.id("mob_barrier"));
       registerBlock(event, SPARK, VaultMod.id("spark"));
       registerBlock(event, CONVERTED_SPARK, VaultMod.id("converted_spark"));
@@ -1611,6 +1626,7 @@ public class ModBlocks {
       registerTileEntity(event, TOTEM_PLAYER_DAMAGE_TILE_ENTITY, VaultMod.id("totem_player_damage_tile_entity"));
       registerTileEntity(event, ANGEL_BLOCK_TILE_ENTITY, VaultMod.id("angel_block_tile_entity"));
       registerTileEntity(event, MOB_BARRIER_ENTITY, VaultMod.id("mob_barrier_entity"));
+      registerTileEntity(event, ANCIENT_COPPER_CONDUIT_BLOCK_TILE_ENTITY, VaultMod.id("ancient_copper_conduit_block_entity"));
       registerTileEntity(event, ARTIFACT_PROJECTOR_ENTITY, VaultMod.id("artifact_projector_entity"));
       registerTileEntity(event, VELVET_BED_TILE_ENTITY, VaultMod.id("velvet_bed_tile_entity"));
       registerTileEntity(event, SPARK_TILE_ENTITY, VaultMod.id("spark_tile_entity"));
@@ -1666,6 +1682,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(TOTEM_MANA_REGEN_TILE_ENTITY, TotemManaRegenRenderer::new);
       event.registerBlockEntityRenderer(TOTEM_PLAYER_DAMAGE_TILE_ENTITY, TotemPlayerDamageRenderer::new);
       event.registerBlockEntityRenderer(ANGEL_BLOCK_TILE_ENTITY, AngelBlockRenderer::new);
+      event.registerBlockEntityRenderer(ANCIENT_COPPER_CONDUIT_BLOCK_TILE_ENTITY, AncientCopperConduitRenderer::new);
       event.registerBlockEntityRenderer(MOB_BARRIER_ENTITY, MobBarrierRenderer::new);
       event.registerBlockEntityRenderer(ARTIFACT_PROJECTOR_ENTITY, ArtifactProjectorRenderer::new);
       event.registerBlockEntityRenderer(BOUNTY_TABLE_TILE_ENTITY, BountyTableRenderer::new);
@@ -1831,6 +1848,7 @@ public class ModBlocks {
       registerBlockItem(event, WUTODIC_SILVER_BLOCK);
       registerBlockItem(event, ETERNAL_PEDESTAL);
       registerBlockItem(event, ANGEL_BLOCK, ANGEL_BLOCK_ITEM);
+      registerBlockItem(event, ANCIENT_COPPER_CONDUIT_BLOCK, ANCIENT_COPPER_CONDUIT_BLOCK_ITEM);
       registerBlockItem(event, MOB_BARRIER);
       registerBlockItem(event, ARTIFACT_PROJECTOR_BLOCK);
       registerBlockItem(event, LIVING_ROCK_PLANTER);
