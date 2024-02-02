@@ -132,6 +132,10 @@ public class GodAltarData extends SavedData {
       }
    }
 
+   public static boolean contains(UUID uuid) {
+      return get().entries.containsKey(uuid);
+   }
+
    @Nonnull
    public CompoundTag save(CompoundTag nbt) {
       this.entries.forEach((uuid, entry) -> entry.writeNbt().ifPresent(entryNbt -> nbt.put(uuid.toString(), entryNbt)));

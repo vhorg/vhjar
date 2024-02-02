@@ -285,12 +285,16 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
       return super.getRenderBoundingBox().expandTowards(0.0, 2.0, 0.0);
    }
 
-   public List<ItemStack> getItems() {
+   public List<ItemStack> getStoredItems() {
       if (!this.items.isEmpty()) {
          return this.items;
       } else {
          return this.inventorySnapshot != null ? this.inventorySnapshot.getItems() : Collections.emptyList();
       }
+   }
+
+   public List<ItemStack> getItems() {
+      return this.items;
    }
 
    public void spewItems(Player player) {

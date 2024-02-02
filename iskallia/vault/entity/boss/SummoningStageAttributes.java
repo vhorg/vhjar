@@ -12,7 +12,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class SummoningStageAttributes {
    WeightedList<SummoningStageAttributes.EntitySpawnData> entityTypes;
-   int spawnDelay;
+   int maxMobsAliveBeforeNextSpawn;
    int radius;
    int minMobCount;
    int maxMobCount;
@@ -21,7 +21,7 @@ public class SummoningStageAttributes {
 
    public SummoningStageAttributes(
       WeightedList<SummoningStageAttributes.EntitySpawnData> entityTypes,
-      int spawnDelay,
+      int maxMobsAliveBeforeNextSpawn,
       int radius,
       int minMobCount,
       int maxMobCount,
@@ -29,7 +29,7 @@ public class SummoningStageAttributes {
       int maxGroupCount
    ) {
       this.entityTypes = entityTypes;
-      this.spawnDelay = spawnDelay;
+      this.maxMobsAliveBeforeNextSpawn = maxMobsAliveBeforeNextSpawn;
       this.radius = radius;
       this.minMobCount = minMobCount;
       this.maxMobCount = maxMobCount;
@@ -40,7 +40,7 @@ public class SummoningStageAttributes {
    public static SummoningStageAttributes from(CompoundTag tag) {
       return new SummoningStageAttributes(
          deserializeEntityTypes(tag.getList("EntityTypes", 10)),
-         tag.getInt("SpawnDelay"),
+         tag.getInt("MaxMobsAliveBeforeNextSpawn"),
          tag.getInt("Radius"),
          tag.getInt("MinMobCount"),
          tag.getInt("MaxMobCount"),
@@ -64,7 +64,7 @@ public class SummoningStageAttributes {
    public CompoundTag serialize() {
       CompoundTag tag = new CompoundTag();
       tag.put("EntityTypes", this.serializeEntityTypes());
-      tag.putInt("SpawnDelay", this.spawnDelay);
+      tag.putInt("MaxMobsAliveBeforeNextSpawn", this.maxMobsAliveBeforeNextSpawn);
       tag.putInt("Radius", this.radius);
       tag.putInt("MinMobCount", this.minMobCount);
       tag.putInt("MaxMobCount", this.maxMobCount);

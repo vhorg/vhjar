@@ -54,5 +54,7 @@ public enum PlayerStat {
    @SerializedName("lucky_hit_chance")
    LUCKY_HIT_CHANCE,
    @SerializedName("soul_chance")
-   SOUL_CHANCE;
+   SOUL_CHANCE,
+   @SerializedName("trap_disarm_chance")
+   TRAP_DISARM_CHANCE;
 }

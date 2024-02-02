@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "e e",
+    "ese",
+    "sbs"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:gem_echo"
+    },
+    "b": {
+      "item": "the_vault:black_chromatic_steel_block"
+    },
+    "s": {
+      "item": "minecraft:soul_campfire"
+    }
+  },
+  "result": {
+    "item": "the_vault:ascension_forge",
+    "count": 1
+  }
+}

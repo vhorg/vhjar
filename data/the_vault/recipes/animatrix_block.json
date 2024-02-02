@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "   ",
+    " v ",
+    " c "
+  ],
+  "key": {
+    "c": {
+      "item": "the_vault:ancient_copper_block_oxidized"
+    },
+    "v": {
+      "item": "the_vault:vault_diamond_block"
+    }
+  },
+  "result": {
+    "item": "the_vault:animatrix_block"
+  }
+}

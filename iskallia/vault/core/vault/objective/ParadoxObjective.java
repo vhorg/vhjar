@@ -142,7 +142,6 @@ public class ParadoxObjective extends Objective {
                               )
                               .count()
                            + 1;
-                        count = Math.min(count, 25);
                         data.getEntity().setReputationCost(count);
                         if (!hasTunnel && !hasRoom) {
                            if (state != GateLockTileEntity.State.TUNNEL_AND_ROOM) {

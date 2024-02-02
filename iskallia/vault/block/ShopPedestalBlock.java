@@ -6,7 +6,10 @@ import iskallia.vault.event.event.ShopPedestalPriceEvent;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.BlockHelper;
 import iskallia.vault.util.InventoryUtil;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -15,6 +18,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -44,6 +48,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterBlock {
    public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
    public static final VoxelShape SHAPE = Shapes.or(Block.box(0.0, 12.0, 0.0, 16.0, 16.0, 16.0), Block.box(2.0, 0.0, 2.0, 14.0, 12.0, 14.0));
+   private static Map<Item, ShopPedestalBlock.CoinDefinition> COIN_DEFINITIONS;
 
    public ShopPedestalBlock() {
       super(Properties.of(Material.STONE, MaterialColor.STONE).noOcclusion().strength(3600000.0F, 3600000.0F));
@@ -98,7 +103,7 @@ public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterB
 
                      if (!worldIn.isClientSide) {
                         if (!player.isCreative()) {
-                           this.extractCurrency(allItems, currency);
+                           this.extractCurrency(player, allItems, currency);
                            BlockState inactiveState = (BlockState)state.setValue(ACTIVE, false);
                            tile.setRemoved();
                            worldIn.setBlockAndUpdate(pos, inactiveState);
@@ -148,39 +153,117 @@ public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterB
    }
 
    private boolean hasEnoughCurrency(List<InventoryUtil.ItemAccess> allItems, ItemStack currency) {
-      int amount = 0;
+      return getCoinDefinition(currency.getItem())
+         .map(
+            priceCoinDefinition -> {
+               int priceValue = priceCoinDefinition.coinValue() * currency.getCount();
 
-      for (InventoryUtil.ItemAccess itemAccess : allItems) {
-         ItemStack stack = itemAccess.getStack();
-         if (stack.is(currency.getItem())) {
-            amount += stack.getCount();
-            if (amount >= currency.getCount()) {
-               return true;
+               for (InventoryUtil.ItemAccess itemAccess : allItems) {
+                  priceValue -= getCoinDefinition(itemAccess.getStack().getItem())
+                     .map(coinDefinition -> coinDefinition.coinValue() * itemAccess.getStack().getCount())
+                     .orElse(0);
+                  if (priceValue <= 0) {
+                     return true;
+                  }
+               }
+
+               return false;
             }
-         }
-      }
-
-      return false;
+         )
+         .orElse(false);
    }
 
-   private void extractCurrency(List<InventoryUtil.ItemAccess> allItems, ItemStack currency) {
-      int required = currency.getCount();
+   public boolean extractCurrency(Player player, List<InventoryUtil.ItemAccess> allItems, ItemStack price) {
+      getCoinDefinition(price.getItem()).ifPresent(priceCoinDefinition -> {
+         int priceValue = priceCoinDefinition.coinValue() * price.getCount();
+         priceValue = this.deductCoins(allItems, priceValue, priceCoinDefinition);
+         if (priceValue > 0) {
+            priceValue = this.payUsingLowerDenominations(allItems, priceValue, priceCoinDefinition);
+            priceValue = this.payUsingHigherDenominations(allItems, priceValue, priceCoinDefinition);
+         }
 
-      for (InventoryUtil.ItemAccess itemAccess : allItems) {
-         ItemStack stack = itemAccess.getStack();
-         if (stack.is(currency.getItem())) {
-            int min = Math.min(required, stack.getCount());
-            itemAccess.setStack(ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - min));
-            required -= min;
-            if (required <= 0) {
-               break;
+         if (priceValue < 0) {
+            int change = -priceValue;
+            returnChangeToPlayer(player, change);
+         }
+      });
+      return true;
+   }
+
+   private static void returnChangeToPlayer(Player player, int change) {
+      while (change > 0) {
+         for (ShopPedestalBlock.CoinDefinition definition : COIN_DEFINITIONS.values()) {
+            if (definition.coinValue() <= change && change / definition.coinValue() < 9) {
+               ItemHandlerHelper.giveItemToPlayer(player, new ItemStack(definition.coinItem(), change / definition.coinValue()));
+               change -= definition.coinValue() * (change / definition.coinValue());
             }
          }
       }
+   }
+
+   private int payUsingHigherDenominations(List<InventoryUtil.ItemAccess> allItems, int priceValue, ShopPedestalBlock.CoinDefinition coinDefinition) {
+      while (priceValue > 0 && coinDefinition.previousHigherDenomination != null) {
+         Optional<ShopPedestalBlock.CoinDefinition> higherCoinDefinition = getCoinDefinition(coinDefinition.previousHigherDenomination);
+         if (higherCoinDefinition.isPresent()) {
+            coinDefinition = higherCoinDefinition.get();
+            priceValue = this.deductCoins(allItems, priceValue, coinDefinition);
+         }
+      }
+
+      return priceValue;
+   }
+
+   private int payUsingLowerDenominations(List<InventoryUtil.ItemAccess> allItems, int priceValue, ShopPedestalBlock.CoinDefinition coinDefinition) {
+      while (priceValue > 0 && coinDefinition.nextLowerDenomination != null) {
+         Optional<ShopPedestalBlock.CoinDefinition> lowerCoinDefinition = getCoinDefinition(coinDefinition.nextLowerDenomination);
+         if (lowerCoinDefinition.isPresent()) {
+            coinDefinition = lowerCoinDefinition.get();
+            priceValue = this.deductCoins(allItems, priceValue, coinDefinition);
+         }
+      }
+
+      return priceValue;
+   }
+
+   private int deductCoins(List<InventoryUtil.ItemAccess> allItems, int priceValue, ShopPedestalBlock.CoinDefinition coinDefinition) {
+      for (InventoryUtil.ItemAccess itemAccess : allItems) {
+         ItemStack stack = itemAccess.getStack();
+         if (stack.getItem() == coinDefinition.coinItem()) {
+            int countToRemove = (int)Math.ceil((double)Math.min(priceValue, stack.getCount() * coinDefinition.coinValue()) / coinDefinition.coinValue());
+            if (countToRemove > 0) {
+               itemAccess.setStack(ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - countToRemove));
+               priceValue -= countToRemove * coinDefinition.coinValue();
+               if (priceValue <= 0) {
+                  break;
+               }
+            }
+         }
+      }
+
+      return priceValue;
+   }
+
+   private static Optional<ShopPedestalBlock.CoinDefinition> getCoinDefinition(Item coin) {
+      if (COIN_DEFINITIONS == null) {
+         COIN_DEFINITIONS = new LinkedHashMap<>();
+         COIN_DEFINITIONS.put(ModBlocks.VAULT_BRONZE, new ShopPedestalBlock.CoinDefinition(ModBlocks.VAULT_BRONZE, ModBlocks.VAULT_SILVER, null, 1));
+         COIN_DEFINITIONS.put(
+            ModBlocks.VAULT_SILVER, new ShopPedestalBlock.CoinDefinition(ModBlocks.VAULT_SILVER, ModBlocks.VAULT_GOLD, ModBlocks.VAULT_BRONZE, 9)
+         );
+         COIN_DEFINITIONS.put(
+            ModBlocks.VAULT_GOLD, new ShopPedestalBlock.CoinDefinition(ModBlocks.VAULT_GOLD, ModBlocks.VAULT_PLATINUM, ModBlocks.VAULT_SILVER, 81)
+         );
+         COIN_DEFINITIONS.put(ModBlocks.VAULT_PLATINUM, new ShopPedestalBlock.CoinDefinition(ModBlocks.VAULT_PLATINUM, null, ModBlocks.VAULT_GOLD, 729));
+      }
+
+      return Optional.ofNullable(COIN_DEFINITIONS.get(coin));
    }
 
    @Nullable
    public BlockEntity newBlockEntity(BlockPos pPos, BlockState pState) {
       return pState.getValue(ACTIVE) ? new ShopPedestalBlockTile(pPos, pState) : null;
+   }
+
+   private record CoinDefinition(Item coinItem, @Nullable Item previousHigherDenomination, @Nullable Item nextLowerDenomination, int coinValue) {
    }
 }

@@ -11,7 +11,6 @@ import iskallia.vault.entity.EntityScaler;
 import iskallia.vault.entity.Targeting;
 import iskallia.vault.entity.entity.EffectCloudEntity;
 import iskallia.vault.entity.entity.EternalEntity;
-import iskallia.vault.entity.entity.MonsterEyeEntity;
 import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -29,7 +28,6 @@ import net.minecraft.Util;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,9 +37,7 @@ import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.NearestVisibleLivingEntities;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Slime;
 import net.minecraft.world.entity.monster.Spider;
-import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
@@ -172,34 +168,28 @@ public class ClassicMobLogic extends MobLogic {
          }
       });
       CommonEvents.ENTITY_DEATH.register(this, event -> {
-         if (event.getEntity().level == world) {
-            if (event.getEntityLiving() instanceof Slime slime) {
-               if (!(slime instanceof MonsterEyeEntity)) {
-                  int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
-                  ModConfigs.VAULT_ENTITIES.getSlimeEffectConfig(level).map(EffectCloudAttribute.EffectCloud::fromConfig).ifPresent(config -> {
-                     if (!(world.getRandom().nextFloat() >= config.getTriggerChance())) {
-                        EffectCloudEntity cloud = new EffectCloudEntity(slime.getLevel(), slime.getX(), slime.getY(), slime.getZ());
-                        config.apply(cloud);
-                        slime.getLevel().addFreshEntity(cloud);
-                     }
-                  });
+         Entity entity = event.getEntity();
+         if (entity.level == world) {
+            int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
+            ModConfigs.VAULT_ENTITIES.getDeathEffects(level, entity).forEach(raw -> {
+               EffectCloudAttribute.EffectCloud config = EffectCloudAttribute.EffectCloud.fromConfig(raw);
+               if (!(world.getRandom().nextFloat() >= config.getTriggerChance())) {
+                  EffectCloudEntity cloud = new EffectCloudEntity(entity.getLevel(), entity.getX(), entity.getY(), entity.getZ());
+                  config.apply(cloud);
+                  entity.getLevel().addFreshEntity(cloud);
                }
-            }
+            });
          }
       });
       CommonEvents.ENTITY_JOIN.register(this, event -> {
          if (event.getWorld() == world) {
             if (!event.loadedFromDisk() && event.getEntity() instanceof ThrownPotion potion) {
-               Entity thrower = potion.getOwner();
-               if (thrower instanceof Witch) {
-                  int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
-                  List<MobEffectInstance> configuredEffects = ModConfigs.VAULT_ENTITIES.getWitchAdditionalThrownEffects(level);
-                  ItemStack thrown = potion.getItem();
-                  List<MobEffectInstance> effects = new ArrayList<>(configuredEffects);
-                  PotionUtils.setPotion(thrown, Potions.WATER);
-                  PotionUtils.setCustomEffects(thrown, effects);
-                  potion.setItem(thrown);
-               }
+               Entity var7 = potion.getOwner();
+               int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
+               ItemStack thrown = potion.getItem();
+               PotionUtils.setPotion(thrown, Potions.WATER);
+               PotionUtils.setCustomEffects(thrown, ModConfigs.VAULT_ENTITIES.getThrowEffects(level, var7));
+               potion.setItem(thrown);
             }
          }
       });

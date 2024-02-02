@@ -1,7 +1,6 @@
 package iskallia.vault.skill.ability.effect.spi;
 
 import com.google.gson.JsonObject;
-import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
@@ -27,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
@@ -131,7 +131,7 @@ public class HunterAbility extends InstantManaAbility {
                      ServerScheduler.INSTANCE
                         .schedule(
                            delay * 5,
-                           () -> this.selectPositions(serverWorld, player)
+                           () -> selectPositions(serverWorld, player, this.getRadius(player), new Color(this.getColor(), false), this::shouldHighlightTile)
                               .forEach(
                                  highlightPosition -> {
                                     Color color = highlightPosition.color;
@@ -173,24 +173,20 @@ public class HunterAbility extends InstantManaAbility {
          );
    }
 
-   protected List<HunterAbility.HighlightPosition> selectPositions(ServerLevel world, ServerPlayer player) {
+   public static List<HunterAbility.HighlightPosition> selectPositions(
+      ServerLevel world, ServerPlayer player, double radius, Color color, Predicate<PartialTile> shouldHighlight
+   ) {
       List<HunterAbility.HighlightPosition> result = new ArrayList<>();
-      Color c = new Color(this.getColor(), false);
-      this.forEachTile(world, player, tile -> {
-         if (this.shouldHighlightTile(tile)) {
-            if (tile instanceof HunterHiddenTileEntity hiddenTile && hiddenTile.isHidden()) {
-               return;
-            }
-
-            result.add(new HunterAbility.HighlightPosition(tile.getPos(), c));
+      forEachTile(world, player, radius, tile -> {
+         if (shouldHighlight.test(tile)) {
+            result.add(new HunterAbility.HighlightPosition(tile.getPos(), color));
          }
       });
       return result;
    }
 
-   protected void forEachTile(Level world, Player player, Consumer<PartialTile> consumer) {
+   private static void forEachTile(Level world, Player player, double radius, Consumer<PartialTile> consumer) {
       BlockPos playerOffset = player.blockPosition();
-      double radius = this.getRadius(player);
       double radiusSq = radius * radius;
       int iRadius = Mth.ceil(radius);
       Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);

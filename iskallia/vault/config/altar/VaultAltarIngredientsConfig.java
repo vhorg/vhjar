@@ -76,6 +76,7 @@ public class VaultAltarIngredientsConfig extends Config {
 
    public List<RequiredItems> getIngredients(ServerPlayer player, BlockPos pos) {
       ServerLevel level = player.getLevel();
+      boolean isLucky = false;
       int altarLevel = PlayerVaultStatsData.get(level).getVaultStats(player).getVaultLevel();
       int crystalsCrafted = PlayerStatsData.get(level.getServer()).get(player.getUUID()).getCrystals().size();
       VaultCrystalMode mode = ((VaultCrystalMode.GameRuleValue)player.getLevel().getGameRules().getRule(ModGameRules.CRYSTAL_MODE)).get();
@@ -88,8 +89,8 @@ public class VaultAltarIngredientsConfig extends Config {
       }
 
       if (Config.rand.nextFloat() < luckyAltarChance) {
-         amtMultiplier *= 0.1F;
          this.spawnLuckyEffects(level, pos);
+         isLucky = true;
       }
 
       List<RequiredItems> requiredItems = new ArrayList<>();
@@ -100,7 +101,9 @@ public class VaultAltarIngredientsConfig extends Config {
          AltarIngredientEntry ingredientEntry = entry.getValue();
          List<ItemStack> items = ingredientEntry.getItems().stream().<ItemStack>map(ItemStack::copy).peek(itemStack -> itemStack.setCount(1)).toList();
          int amount = ingredientEntry.getAmount();
-         if (ingredientEntry.getScale() != 0.0) {
+         if (isLucky) {
+            amount = 0;
+         } else if (ingredientEntry.getScale() != 0.0) {
             double scale = this.getScale(poolId, crystalsCrafted);
             amount = Math.max((int)(Math.round(amount * scale * amtMultiplier) * ingredientEntry.getScale()), mode.getMinCost());
          } else {

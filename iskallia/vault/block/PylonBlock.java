@@ -12,7 +12,10 @@ import iskallia.vault.world.data.PlayerPylons;
 import iskallia.vault.world.data.ServerVaults;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -98,6 +101,13 @@ public class PylonBlock extends Block implements EntityBlock {
             if (duration > 0) {
                player.addEffect(new MobEffectInstance(effect, duration, 60, false, false, true));
             }
+
+            player.sendMessage(
+               new TextComponent("You have used a ")
+                  .append(new TextComponent(pylon.config.getDescription()).setStyle(Style.EMPTY.withColor(pylon.config.getColor())))
+                  .append(" Pylon!"),
+               Util.NIL_UUID
+            );
          }
 
          return InteractionResult.SUCCESS;

@@ -284,7 +284,7 @@ public class LootStatsContainerElement extends VerticalScrollClipContainer<LootS
             Entry<ResourceLocation> entry = (Entry<ResourceLocation>)var71.next();
             ResourceLocation loc = (ResourceLocation)entry.getKey();
             int amount = entry.getIntValue();
-            if (!loc.getPath().equals("coin_pile") && !loc.getPath().equals("treasure_sand")) {
+            if (amount != 0 && !loc.getPath().equals("coin_pile") && !loc.getPath().equals("treasure_sand")) {
                ItemStack stack = new ItemStack((ItemLike)ForgeRegistries.ITEMS.getValue(loc));
                float xpMul = map.get(loc);
                this.addElements(

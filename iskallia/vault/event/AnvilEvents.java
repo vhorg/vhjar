@@ -2,6 +2,8 @@ package iskallia.vault.event;
 
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.EnchantedBookEntry;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
@@ -13,19 +15,26 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.AugmentItem;
+import iskallia.vault.item.GodTokenItem;
 import iskallia.vault.item.ItemVaultCrystalSeal;
 import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.PaxelJewelItem;
+import iskallia.vault.item.SoulFlameItem;
 import iskallia.vault.item.VaultCatalystInfusedItem;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.crystal.layout.ParadoxCrystalLayout;
 import iskallia.vault.item.crystal.model.ChaosCrystalModel;
+import iskallia.vault.item.crystal.modifiers.DefaultCrystalModifiers;
 import iskallia.vault.item.crystal.modifiers.ParadoxCrystalModifiers;
+import iskallia.vault.item.crystal.objective.AscensionCrystalObjective;
+import iskallia.vault.item.crystal.objective.CompoundCrystalObjective;
 import iskallia.vault.item.crystal.objective.NullCrystalObjective;
 import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
+import iskallia.vault.item.crystal.objective.PoolCrystalObjective;
 import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.item.data.InscriptionData;
+import iskallia.vault.item.gear.CharmItem;
 import iskallia.vault.item.tool.PaxelItem;
 import iskallia.vault.item.tool.ToolItem;
 import iskallia.vault.skill.base.Skill;
@@ -150,15 +159,13 @@ public class AnvilEvents {
       ItemStack input = event.getLeft();
       ItemStack seal = event.getRight();
       if (seal.getItem() instanceof ItemVaultCrystalSeal) {
-         if (seal.getItem() != ModItems.CRYSTAL_SEAL_SPEEDRUN) {
-            ItemStack copy = input.getItem() == ModItems.VAULT_CRYSTAL ? input.copy() : new ItemStack(ModItems.VAULT_CRYSTAL);
-            CrystalData crystal = CrystalData.read(copy);
-            if (crystal.getModifiers().isEmpty()) {
-               if (ModConfigs.VAULT_CRYSTAL.applySeal(input, seal, copy, crystal)) {
-                  event.setOutput(copy);
-                  event.setMaterialCost(1);
-                  event.setCost(8);
-               }
+         ItemStack copy = input.getItem() == ModItems.VAULT_CRYSTAL ? input.copy() : new ItemStack(ModItems.VAULT_CRYSTAL);
+         CrystalData crystal = CrystalData.read(copy);
+         if (crystal.getModifiers().isEmpty()) {
+            if (ModConfigs.VAULT_CRYSTAL.applySeal(input, seal, copy, crystal)) {
+               event.setOutput(copy);
+               event.setMaterialCost(1);
+               event.setCost(8);
             }
          }
       }
@@ -282,6 +289,23 @@ public class AnvilEvents {
    }
 
    @SubscribeEvent
+   public static void onApplyWardensSeal(AnvilUpdateEvent event) {
+      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == ModItems.WARDENS_PEARL) {
+         ItemStack output = event.getLeft().copy();
+         CrystalData data = CrystalData.read(output);
+         if (!data.isUnmodifiable() && data.getModifiers().hasRandomModifiers() && data.getObjective() == NullCrystalObjective.INSTANCE) {
+            data.getModifiers().setRandomModifiers(false);
+            data.setUnmodifiable(true);
+            data.write(output);
+            VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("wardens_pearl")), output);
+            event.setOutput(output);
+            event.setCost(1);
+            event.setMaterialCost(1);
+         }
+      }
+   }
+
+   @SubscribeEvent
    public static void onApplyMote(AnvilUpdateEvent event) {
       if (event.getLeft().getItem() instanceof VaultCrystalItem) {
          Item item = event.getRight().getItem();
@@ -361,19 +385,68 @@ public class AnvilEvents {
       if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() == ModItems.SOUL_FLAME) {
          ItemStack output = event.getLeft().copy();
          CrystalData data = CrystalData.read(output);
-         if (data.getModifiers().isEmpty()) {
-            VaultModifierRegistry.getOpt(VaultMod.id("afterlife")).ifPresent(vaultModifier -> {
-               VaultModifierStack modifierStack = VaultModifierStack.of((VaultModifier<?>)vaultModifier);
-               if (data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
-                  data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
-                  VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("soul_flame_curse")), output);
-                  data.setUnmodifiable(true);
-                  data.write(output);
-                  event.setOutput(output);
-                  event.setMaterialCost(1);
-                  event.setCost(10);
+         if (data.getModifiers().isEmpty() && data.getLevel() >= 65 && !data.isUnmodifiable() && data.getObjective() == NullCrystalObjective.INSTANCE) {
+            for (VaultModifier<?> modifier : ModConfigs.VAULT_MODIFIER_POOLS
+               .getRandom(VaultMod.id("soul_flame_apply"), data.getLevel(), JavaRandom.ofNanoTime())) {
+               data.getModifiers().add(VaultModifierStack.of(modifier));
+            }
+
+            for (int i = 0; i < SoulFlameItem.getStacks(event.getRight()); i++) {
+               for (VaultModifier<?> modifier : ModConfigs.VAULT_MODIFIER_POOLS
+                  .getRandom(VaultMod.id("soul_flame_stack"), data.getLevel(), JavaRandom.ofNanoTime())) {
+                  data.getModifiers().add(VaultModifierStack.of(modifier));
+               }
+            }
+
+            data.setObjective(
+               CompoundCrystalObjective.flatten(
+                  new PoolCrystalObjective(VaultMod.id("ascension")),
+                  new AscensionCrystalObjective(
+                     SoulFlameItem.getStacks(event.getRight()),
+                     SoulFlameItem.getOwnerName(event.getRight()).orElse(null),
+                     SoulFlameItem.getOwnerUUID(event.getRight()).orElse(null),
+                     SoulFlameItem.getModifiers(event.getRight()).orElseGet(DefaultCrystalModifiers::new)
+                  )
+               )
+            );
+            SoulFlameItem.getModifiers(event.getRight()).ifPresent(modifiers -> {
+               for (VaultModifierStack stack : modifiers.getList()) {
+                  data.getModifiers().add(stack);
                }
             });
+            data.setUnmodifiable(true);
+            data.getModifiers().setRandomModifiers(false);
+            data.write(output);
+            event.setOutput(output);
+            event.setMaterialCost(1);
+            event.setCost(10);
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyCharm(AnvilUpdateEvent event) {
+      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() instanceof CharmItem) {
+         ItemStack output = event.getLeft().copy();
+         CrystalData data = CrystalData.read(output);
+         float value = CharmItem.getValue(event.getRight());
+         float use = CharmItem.getUsePercentage(event.getRight());
+         VaultGod god = CharmItem.getCharm(event.getRight()).map(effect -> effect.getCharmConfig().getGod()).orElse(null);
+         if (!data.isUnmodifiable() && !(value <= 0.0F) && god != null) {
+            int stacks = Math.round(value * use * 100.0F);
+
+            for (int i = 0; i < stacks; i++) {
+               for (VaultModifier<?> modifier : ModConfigs.VAULT_MODIFIER_POOLS
+                  .getRandom(VaultMod.id(god.getSerializedName() + "_charm_stack"), data.getLevel(), JavaRandom.ofNanoTime())) {
+                  data.getModifiers().add(VaultModifierStack.of(modifier));
+               }
+            }
+
+            data.getModifiers().setRandomModifiers(false);
+            data.write(output);
+            event.setOutput(output);
+            event.setMaterialCost(1);
+            event.setCost(1);
          }
       }
    }
@@ -428,6 +501,28 @@ public class AnvilEvents {
                event.setCost(10);
             }
          });
+      }
+   }
+
+   @SubscribeEvent
+   public static void onApplyGodShard(AnvilUpdateEvent event) {
+      if (event.getLeft().getItem() instanceof VaultCrystalItem && event.getRight().getItem() instanceof GodTokenItem) {
+         ItemStack output = event.getLeft().copy();
+         CrystalData data = CrystalData.read(output);
+
+         for (VaultModifier<?> modifier : ModConfigs.VAULT_MODIFIER_POOLS
+            .getRandom(VaultMod.id("god_token_" + GodTokenItem.getGod(event.getRight()).getName().toLowerCase()), data.getLevel(), JavaRandom.ofNanoTime())) {
+            VaultModifierStack modifierStack = VaultModifierStack.of(modifier);
+            if (data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.TRUE)) {
+               data.addModifierByCrafting(modifierStack, false, CrystalData.Simulate.FALSE);
+            }
+         }
+
+         data.setUnmodifiable(true);
+         data.write(output);
+         event.setOutput(output);
+         event.setMaterialCost(1);
+         event.setCost(1);
       }
    }
 

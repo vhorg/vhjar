@@ -12,15 +12,16 @@ import net.minecraftforge.server.command.EnumArgument;
 import org.jetbrains.annotations.Nullable;
 
 public enum VaultLoot implements StringRepresentable {
-   NORMAL("normal", 1),
-   PLENTY("plenty", 2),
-   EXTREME("extreme", 3);
+   LEGACY("legacy", 0.5F),
+   NORMAL("normal", 1.0F),
+   PLENTY("plenty", 2.0F),
+   EXTREME("extreme", 3.0F);
 
    private final String name;
-   private final int multiplier;
+   private final float multiplier;
    private static final Map<String, VaultLoot> NAME_VALUES;
 
-   private VaultLoot(String name, int multiplier) {
+   private VaultLoot(String name, float multiplier) {
       this.name = name;
       this.multiplier = multiplier;
    }
@@ -29,7 +30,7 @@ public enum VaultLoot implements StringRepresentable {
       return this.name;
    }
 
-   public int getMultiplier() {
+   public float getMultiplier() {
       return this.multiplier;
    }
 

@@ -10,6 +10,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -113,6 +116,25 @@ public class CoinPileDecorBlock extends Block {
       builder.add(new Property[]{SIZE, COINS, WATERLOGGED});
    }
 
+   public InteractionResult use(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHit) {
+      if (pPlayer.isCrouching()) {
+         if (!pLevel.isClientSide) {
+            if ((Integer)pState.getValue(COINS) > 1) {
+               pLevel.playSound(null, pPos, ModSounds.COIN_PILE_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
+               pLevel.setBlockAndUpdate(pPos, updateCoinsState(pState, (Integer)pState.getValue(COINS) - 1));
+               popResource(pLevel, pPos, new ItemStack(pState.getBlock().asItem(), 1));
+            } else {
+               pLevel.setBlockAndUpdate(pPos, Blocks.AIR.defaultBlockState());
+               popResource(pLevel, pPos, new ItemStack(pState.getBlock().asItem(), 1));
+            }
+         }
+
+         return InteractionResult.SUCCESS;
+      } else {
+         return super.use(pState, pLevel, pPos, pPlayer, pHand, pHit);
+      }
+   }
+
    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving) {
       if (!state.is(newState.getBlock())) {
          BlockEntity blockentity = world.getBlockEntity(pos);
@@ -130,5 +152,24 @@ public class CoinPileDecorBlock extends Block {
       if (!pOldState.hasProperty(COINS) && (Integer)pState.getValue(COINS) > 1) {
          pLevel.playSound(null, pPos, ModSounds.COIN_PILE_PLACE, SoundSource.BLOCKS, 1.0F, 1.0F);
       }
+   }
+
+   public static BlockState updateCoinsState(BlockState blockState, int newCoins) {
+      int size = switch (newCoins) {
+         case 2 -> 2;
+         case 3 -> 3;
+         case 4 -> 4;
+         case 5, 6, 7 -> 5;
+         case 8, 9, 10, 11, 12, 13, 14, 15 -> 6;
+         case 16, 17, 18, 19, 20, 21, 22, 23 -> 7;
+         case 24, 25, 26, 27, 28, 29, 30, 31 -> 8;
+         case 32, 33, 34, 35, 36, 37, 38, 39 -> 9;
+         case 40, 41, 42, 43, 44, 45, 46, 47 -> 10;
+         case 48, 49, 50, 51, 52, 53, 54, 55 -> 11;
+         case 56, 57, 58, 59, 60, 61, 62, 63 -> 12;
+         case 64 -> 13;
+         default -> 1;
+      };
+      return (BlockState)((BlockState)blockState.setValue(SIZE, size)).setValue(COINS, Math.min(64, newCoins));
    }
 }

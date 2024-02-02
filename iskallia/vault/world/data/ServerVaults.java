@@ -9,6 +9,7 @@ import iskallia.vault.core.world.storage.ThreadingMode;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.nbt.VListNBT;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.nbt.CompoundTag;
@@ -94,6 +95,10 @@ public class ServerVaults extends SavedData {
 
          return Optional.empty();
       }
+   }
+
+   public static List<Vault> getAll() {
+      return get(ServerLifecycleHooks.getCurrentServer()).vaults;
    }
 
    public static Optional<Vault> get(UUID uuid) {

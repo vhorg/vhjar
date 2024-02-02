@@ -1,6 +1,7 @@
 package iskallia.vault.item.crystal.objective;
 
 import com.google.gson.JsonObject;
+import iskallia.vault.VaultMod;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.init.ModConfigs;
@@ -20,7 +21,9 @@ public class NullCrystalObjective extends CrystalObjective {
 
    @Override
    public void configure(Vault vault, RandomSource random) {
-      ModConfigs.VAULT_CRYSTAL.getRandomObjective(vault.get(Vault.LEVEL).get(), random).ifPresent(objective -> objective.configure(vault, random));
+      ModConfigs.VAULT_CRYSTAL
+         .getRandomObjective(VaultMod.id("default"), vault.get(Vault.LEVEL).get(), random)
+         .ifPresent(objective -> objective.configure(vault, random));
    }
 
    @Override

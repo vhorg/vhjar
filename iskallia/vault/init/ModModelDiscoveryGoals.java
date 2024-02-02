@@ -5,6 +5,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.discoverylogic.goal.OverworldSpiritExtractionGoal;
 import iskallia.vault.discoverylogic.goal.VaultAttackBlockComboGoal;
+import iskallia.vault.discoverylogic.goal.VaultBlockBreakGoal;
 import iskallia.vault.discoverylogic.goal.VaultBlockPlacementGoal;
 import iskallia.vault.discoverylogic.goal.VaultChainAttackGoal;
 import iskallia.vault.discoverylogic.goal.VaultCompletionGoal;
@@ -16,6 +17,7 @@ import iskallia.vault.discoverylogic.goal.VaultSoulShardCollectionGoal;
 import iskallia.vault.discoverylogic.goal.VaultThornsDamageGoal;
 import iskallia.vault.discoverylogic.goal.base.DiscoveryGoal;
 import iskallia.vault.discoverylogic.goal.base.FlaggedVaultDiscoveryGoal;
+import iskallia.vault.entity.entity.miner_zombie.MinerZombieEntity;
 import iskallia.vault.world.data.DiscoveredModelsData;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,20 +151,15 @@ public class ModModelDiscoveryGoals {
          )
    );
    public static OverworldSpiritExtractionGoal SPIRIT_EXTRACTION = registerGoal(
-      VaultMod.id("spirit_extraction"),
-      new OverworldSpiritExtractionGoal(189.0F)
-         .setReward(
-            (player, goal) -> {
-               DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());
-               ResourceLocation modelId = ModDynamicModels.Swords.DEATHS_DOOR.getId();
-               if (!discoversData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
-                  MutableComponent info = new TextComponent("You have revived a spirit " + (int)goal.getTargetProgress() + " for at least 189 gold!")
-                     .withStyle(ChatFormatting.GOLD);
-                  player.sendMessage(info, Util.NIL_UUID);
-                  discoversData.discoverModelAndBroadcast(ModItems.SWORD, modelId, player);
-               }
-            }
-         )
+      VaultMod.id("spirit_extraction"), new OverworldSpiritExtractionGoal(189.0F).setReward((player, goal) -> {
+         DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());
+         ResourceLocation modelId = ModDynamicModels.Swords.DEATHS_DOOR.getId();
+         if (!discoversData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
+            MutableComponent info = new TextComponent("You have revived a spirit for at least 189 gold!").withStyle(ChatFormatting.GOLD);
+            player.sendMessage(info, Util.NIL_UUID);
+            discoversData.discoverModelAndBroadcast(ModItems.SWORD, modelId, player);
+         }
+      })
    );
    public static VaultBlockPlacementGoal BAMBOO_PLACEMENT = registerGoal(
       VaultMod.id("bamboo_placement"),
@@ -191,6 +188,23 @@ public class ModModelDiscoveryGoals {
          }
       })
    );
+   public static VaultMobKillGoal MOBS_KILLED_2 = registerGoal(
+      VaultMod.id("mobs_killed_2"),
+      new VaultMobKillGoal(500)
+         .withPredicate(e -> e.getEntityLiving() instanceof MinerZombieEntity)
+         .setReward(
+            (player, goal) -> {
+               DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());
+               ResourceLocation modelId = ModDynamicModels.Armor.LUPICANIS.getId();
+               if (!discoversData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
+                  MutableComponent info = new TextComponent("You have killed " + (int)goal.getTargetProgress() + " Miner Zombies this Vault!")
+                     .withStyle(ChatFormatting.GREEN);
+                  player.sendMessage(info, Util.NIL_UUID);
+                  discoversData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.LUPICANIS);
+               }
+            }
+         )
+   );
    public static VaultMobKillGoal MOBS_PROJECTILE_KILLED = registerGoal(
       VaultMod.id("mobs_projectile_killed"),
       new VaultMobKillGoal(20)
@@ -208,6 +222,17 @@ public class ModModelDiscoveryGoals {
                }
             }
          )
+   );
+   public static VaultBlockBreakGoal BREAK_FOOLS_GOLD = registerGoal(
+      VaultMod.id("break_fools_gold"), new VaultBlockBreakGoal(ModBlocks.FOOLS_GOLD_BLOCK, 1.0F).setReward((player, goal) -> {
+         DiscoveredModelsData discoversData = DiscoveredModelsData.get(player.getLevel());
+         ResourceLocation modelId = ModDynamicModels.Armor.PIRATE.getId();
+         if (!discoversData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
+            MutableComponent info = new TextComponent("YARHAR fiddle dee dee, this gold isn't for thee!").withStyle(ChatFormatting.GOLD);
+            player.sendMessage(info, Util.NIL_UUID);
+            discoversData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.PIRATE);
+         }
+      })
    );
    public static VaultMobKillGoal SLOWED_MOBS_KILLED = registerGoal(
       VaultMod.id("slowed_mobs_killed"),

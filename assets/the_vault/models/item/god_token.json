@@ -1,0 +1,9 @@
+{
+  "parent": "the_vault:block/god_token_velara",
+  "overrides": [
+    { "predicate": { "the_vault:god_item_type": 0 }, "model": "the_vault:item/god_token_velara" },
+    { "predicate": { "the_vault:god_item_type": 1 }, "model": "the_vault:item/god_token_tenos" },
+    { "predicate": { "the_vault:god_item_type": 2 }, "model": "the_vault:item/god_token_wendarr" },
+    { "predicate": { "the_vault:god_item_type": 3 }, "model": "the_vault:item/god_token_idona" }
+  ]
+}

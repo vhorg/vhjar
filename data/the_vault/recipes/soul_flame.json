@@ -1,9 +1,9 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " W ",
-        "TST",
-        " T "
+        "SWS",
+        "TPT",
+        "ETE"
     ],
     "key": {
         "S": {
@@ -14,6 +14,12 @@
         },
         "T": {
             "item": "minecraft:soul_torch"
+        },
+        "P": {
+            "item": "the_vault:gem_pog"
+        },
+        "E": {
+            "item": "the_vault:gem_echo"
         }
     },
     "result": {

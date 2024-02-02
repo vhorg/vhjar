@@ -41,6 +41,9 @@ public class AwardCrateObjective extends Objective {
    public static final FieldKey<LootTableKey> LOOT_TABLE = FieldKey.of("loot_table", LootTableKey.class)
       .with(Version.v1_0, RegistryKeyAdapter.<LootTableKey, LootTable>of(() -> VaultRegistry.LOOT_TABLE).asNullable(), DISK.all())
       .register(FIELDS);
+   public static final FieldKey<Float> ITEM_QUANTITY = FieldKey.of("item_quantity", Float.class)
+      .with(Version.v1_23, Adapters.FLOAT, DISK.all())
+      .register(FIELDS);
    public static final FieldKey<Void> ADD_ARTIFACT = FieldKey.of("add_artifact", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
    public static final FieldKey<Float> ARTIFACT_CHANCE = FieldKey.of("artifact_chance", Float.class)
       .with(Version.v1_0, Adapters.FLOAT, DISK.all())
@@ -111,7 +114,9 @@ public class AwardCrateObjective extends Objective {
          if (stats != null) {
             float xpMul = Mth.clamp(stats.getExpMultiplier(), 0.0F, 1.0F);
             float artifactChance = this.get(ARTIFACT_CHANCE) * xpMul;
-            CrateLootGenerator crateLootGenerator = new CrateLootGenerator(this.get(LOOT_TABLE), this.has(ADD_ARTIFACT), artifactChance);
+            CrateLootGenerator crateLootGenerator = new CrateLootGenerator(
+               this.get(LOOT_TABLE), this.getOr(ITEM_QUANTITY, Float.valueOf(0.0F)), this.has(ADD_ARTIFACT), artifactChance
+            );
             VaultCrateBlock.Type crateType = this.get(TYPE);
             listener.getPlayer()
                .ifPresent(

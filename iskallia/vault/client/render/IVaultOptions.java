@@ -12,6 +12,14 @@ public interface IVaultOptions {
 
    void setVanillaPotionDamageEffects(boolean var1);
 
+   boolean showPointMessages();
+
+   void setShowPointMessages(boolean var1);
+
+   boolean showRarityNames();
+
+   void setShowRarityNames(boolean var1);
+
    boolean isHunterCustomColorsEnabled();
 
    void setHunterCustomColorsEnabled(boolean var1);

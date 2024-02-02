@@ -4,6 +4,7 @@ import iskallia.vault.client.gui.framework.ScreenTextures;
 import iskallia.vault.client.gui.framework.render.Tooltips;
 import iskallia.vault.client.gui.framework.spatial.spi.IPosition;
 import iskallia.vault.container.VaultArtisanStationContainer;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.modification.GearModification;
@@ -76,7 +77,8 @@ public class ModificationButtonElement<E extends ModificationButtonElement<E>> e
                      if (hasInput) {
                         if (!failedModification && !inputItem.isEmpty()) {
                            VaultGearData data = VaultGearData.read(gearStack);
-                           GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), data.getItemLevel(), potential, modification);
+                           String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
+                           GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), rollType, data.getItemLevel(), potential, modification);
                            ItemStack plating = container.getPlatingSlot().getItem();
                            ItemStack bronze = container.getBronzeSlot().getItem();
                            tooltip.add(

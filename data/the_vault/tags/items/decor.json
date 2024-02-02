@@ -88,6 +88,7 @@
     "the_vault:velvet_block_strips",
     "the_vault:velvet_carpet",
     "the_vault:velvet_bed",
-    "the_vault:vault_sweets_block"
+    "the_vault:vault_sweets_block",
+    "the_vault:compressed_soot_block"
   ]
 }

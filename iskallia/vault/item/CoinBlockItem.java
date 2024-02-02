@@ -84,7 +84,7 @@ public class CoinBlockItem extends BlockItem {
             int coinsTillFull = 64 - existingCoins;
             int coinsToAdd = isShiftKeyDown ? Math.min(coinsTillFull, stack.getCount()) : 1;
             int newCoins = existingCoins + coinsToAdd;
-            blockState = this.updateCoinsState(blockState, newCoins);
+            blockState = CoinPileDecorBlock.updateCoinsState(blockState, newCoins);
             if (!this.placeBlock(blockplacecontext, blockState)) {
                return InteractionResult.FAIL;
             } else {
@@ -114,24 +114,5 @@ public class CoinBlockItem extends BlockItem {
             }
          }
       }
-   }
-
-   public BlockState updateCoinsState(BlockState blockState, int newCoins) {
-      int size = switch (newCoins) {
-         case 2 -> 2;
-         case 3 -> 3;
-         case 4 -> 4;
-         case 5, 6, 7 -> 5;
-         case 8, 9, 10, 11, 12, 13, 14, 15 -> 6;
-         case 16, 17, 18, 19, 20, 21, 22, 23 -> 7;
-         case 24, 25, 26, 27, 28, 29, 30, 31 -> 8;
-         case 32, 33, 34, 35, 36, 37, 38, 39 -> 9;
-         case 40, 41, 42, 43, 44, 45, 46, 47 -> 10;
-         case 48, 49, 50, 51, 52, 53, 54, 55 -> 11;
-         case 56, 57, 58, 59, 60, 61, 62, 63 -> 12;
-         case 64 -> 13;
-         default -> 1;
-      };
-      return (BlockState)((BlockState)blockState.setValue(CoinPileDecorBlock.SIZE, size)).setValue(CoinPileDecorBlock.COINS, Math.min(64, newCoins));
    }
 }

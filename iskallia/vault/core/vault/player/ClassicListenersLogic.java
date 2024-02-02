@@ -11,6 +11,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.EntityState;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.time.TickClock;
 import iskallia.vault.core.vault.time.modifier.RelicExtension;
@@ -98,11 +99,12 @@ public class ClassicListenersLogic extends ListenersLogic {
             StatCollector stats = vault.get(Vault.STATS).get(data.getListener().get(Listener.ID));
             if (stats != null) {
                Completion completion = stats.getCompletion();
+               String objective = this.getVaultObjective(vault.get(Vault.OBJECTIVES).get(Objectives.KEY));
 
                TextComponent prefix = new TextComponent(switch (completion) {
-                  case COMPLETED -> " completed the Vault!";
-                  case BAILED -> " survived.";
-                  case FAILED -> " was defeated.";
+                  case COMPLETED -> " completed a " + objective + " Vault!";
+                  case BAILED -> " survived a " + objective + " Vault.";
+                  case FAILED -> " was defeated in a " + objective + " Vault.";
                });
                prefix.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16777215)));
                MutableComponent playerName = player.getDisplayName().copy();
@@ -255,7 +257,8 @@ public class ClassicListenersLogic extends ListenersLogic {
       }
 
       TextComponent prefix = new TextComponent(startsWithVowel.get() ? " entered an " : " entered a ");
-      text.append("Vault").append("!");
+      String objective = this.getVaultObjective(vault.get(Vault.OBJECTIVES).get(Objectives.KEY));
+      text.append(objective + " Vault").append("!");
       prefix.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16777215)));
       text.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16777215)));
       MutableComponent playerName = player.getDisplayName().copy();
@@ -277,5 +280,17 @@ public class ClassicListenersLogic extends ListenersLogic {
          this.get(LEAVERS).add(player.getUUID());
          return true;
       }).orElse(false);
+   }
+
+   public String getVaultObjective(String key) {
+      String var2 = key == null ? "" : key.toLowerCase();
+
+      return switch (var2) {
+         case "boss" -> "Hunt the Guardians";
+         case "monolith" -> "Brazier";
+         case "empty" -> "Architect";
+         case "" -> "";
+         default -> key.substring(0, 1).toUpperCase() + key.substring(1);
+      };
    }
 }

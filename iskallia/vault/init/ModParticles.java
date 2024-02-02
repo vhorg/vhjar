@@ -8,6 +8,7 @@ import iskallia.vault.client.particles.ArtifactBossImmunityParticle;
 import iskallia.vault.client.particles.ArtifactBossImmunityParticleOptions;
 import iskallia.vault.client.particles.ArtifactProjectorParticle;
 import iskallia.vault.client.particles.ArtifactProjectorParticleOptions;
+import iskallia.vault.client.particles.AscensionForgeParticle;
 import iskallia.vault.client.particles.ChainingParticle;
 import iskallia.vault.client.particles.CharmParticle;
 import iskallia.vault.client.particles.CloudEffectParticle;
@@ -161,6 +162,7 @@ public class ModParticles {
       REGISTRY, "divine_altar_consume", AltarParticleOptions.DESERIALIZER, AltarParticleOptions::codec, true
    );
    public static final RegistryObject<SimpleParticleType> WENDARR_SPARK_EXPLODE = REGISTRY.register("wendarr_spark_explode", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> ASCENSION_FORGE = REGISTRY.register("ascension_forge", () -> new SimpleParticleType(true));
    public static final RegistryObject<ParticleType<SphericalParticleOptions>> BOSS_WENDARR_EXPLODE = register(
       REGISTRY, "boss_wendarr_explode", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
    );
@@ -241,6 +243,7 @@ public class ModParticles {
       particleManager.register((ParticleType)DIVINE_ALTAR.get(), sprites -> new DivineAltarParticle.AltarProvider(sprites, 1.0F));
       particleManager.register((ParticleType)DIVINE_ALTAR_CONSUME.get(), DivineAltarConsumeParticle.AltarProvider::new);
       particleManager.register((ParticleType)WENDARR_SPARK_EXPLODE.get(), WendarrSparkExplosionParticle.Provider::new);
+      particleManager.register((ParticleType)ASCENSION_FORGE.get(), AscensionForgeParticle.Provider::new);
       particleManager.register((ParticleType)BOSS_WENDARR_EXPLODE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 1.0F, 60, 1.0F));
    }
 

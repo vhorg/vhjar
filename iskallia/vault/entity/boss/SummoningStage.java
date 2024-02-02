@@ -18,6 +18,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.goal.Goal.Flag;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import software.bernie.geckolib3.core.builder.AnimationBuilder;
@@ -29,7 +30,7 @@ public class SummoningStage implements IBossStage {
    private static final String TAG_BOSS_SUMMONED = "boss_summoned";
    private final ArtifactBossEntity boss;
    private final SummoningStageAttributes summoningStageAttributes;
-   private long lastSpawnTime = 0L;
+   private long lastSpawnCheckTime = 0L;
    private int totalMobGroupsToSummon;
    private int mobGroupsSummoned;
    private int totalMobsSpawned = 0;
@@ -60,36 +61,42 @@ public class SummoningStage implements IBossStage {
       if (this.mobGroupsSummoned >= this.totalMobGroupsToSummon) {
          this.spawningFinished = true;
       } else if (this.boss.getLevel() instanceof ServerLevel serverLevel) {
-         if (this.lastSpawnTime + this.summoningStageAttributes.spawnDelay <= serverLevel.getGameTime()) {
-            int mobsToSpawn;
-            if (this.summoningStageAttributes.minMobCount > this.summoningStageAttributes.maxMobCount) {
-               mobsToSpawn = this.boss.getPlayerAdjustedRandomCount(this.summoningStageAttributes.minMobCount, this.summoningStageAttributes.minMobCount, 0.4F);
-               VaultMod.LOGGER.error("minMobCount is greater than maxMobCount in summoning stage attributes, defaulting to minMobCount");
-            } else {
-               mobsToSpawn = this.boss.getPlayerAdjustedRandomCount(this.summoningStageAttributes.minMobCount, this.summoningStageAttributes.maxMobCount, 0.4F);
-            }
+         if (this.lastSpawnCheckTime + 20L <= this.boss.getLevel().getGameTime()) {
+            this.lastSpawnCheckTime = this.boss.getLevel().getGameTime();
+            if (this.spawnedMobs.size() <= this.summoningStageAttributes.maxMobsAliveBeforeNextSpawn * this.boss.getPlayerCount()) {
+               int mobsToSpawn;
+               if (this.summoningStageAttributes.minMobCount > this.summoningStageAttributes.maxMobCount) {
+                  mobsToSpawn = this.boss
+                     .getPlayerAdjustedRandomCount(this.summoningStageAttributes.minMobCount, this.summoningStageAttributes.minMobCount, 0.4F);
+                  VaultMod.LOGGER.error("minMobCount is greater than maxMobCount in summoning stage attributes, defaulting to minMobCount");
+               } else {
+                  mobsToSpawn = this.boss
+                     .getPlayerAdjustedRandomCount(this.summoningStageAttributes.minMobCount, this.summoningStageAttributes.maxMobCount, 0.4F);
+               }
 
-            for (int i = 0; i < mobsToSpawn; i++) {
-               this.summoningStageAttributes
-                  .entityTypes
-                  .getRandom(serverLevel.getRandom())
-                  .ifPresent(
-                     entityType -> this.spawnEntity(
-                        this.boss, serverLevel, this.summoningStageAttributes.radius, entityType.entityType(), entityType.entityNbt()
-                     )
-                  );
-               this.lastSpawnTime = serverLevel.getGameTime();
-            }
+               for (int i = 0; i < mobsToSpawn; i++) {
+                  this.summoningStageAttributes
+                     .entityTypes
+                     .getRandom(serverLevel.getRandom())
+                     .ifPresent(
+                        entityType -> this.spawnEntity(
+                           this.boss, serverLevel, this.summoningStageAttributes.radius, entityType.entityType(), entityType.entityNbt()
+                        )
+                     );
+                  this.lastSpawnCheckTime = serverLevel.getGameTime();
+               }
 
-            this.mobGroupsSummoned++;
+               this.mobGroupsSummoned++;
+            }
          }
       }
    }
 
    private void spawnEntity(ArtifactBossEntity artifactBossEntity, ServerLevel serverLevel, double radius, EntityType<?> entityType, CompoundTag entityNbt) {
-      double x = artifactBossEntity.getX() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * radius + 0.5;
-      double y = artifactBossEntity.getY();
-      double z = artifactBossEntity.getZ() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * radius + 0.5;
+      Vec3 spawnCenter = artifactBossEntity.getSpawnPosition();
+      double x = spawnCenter.x() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * radius + 0.5;
+      double y = spawnCenter.y();
+      double z = spawnCenter.z() + (serverLevel.random.nextDouble() - serverLevel.random.nextDouble()) * radius + 0.5;
       BlockPos spawnPos = new BlockPos(x, y, z);
       Entity entity = entityType.spawn(serverLevel, null, null, spawnPos, MobSpawnType.SPAWNER, false, false);
       if (entity == null) {
@@ -127,6 +134,10 @@ public class SummoningStage implements IBossStage {
    }
 
    @Override
+   public void init() {
+   }
+
+   @Override
    public void start() {
       this.onLivingDeath = this::onSummonedMobDeath;
       MinecraftForge.EVENT_BUS.addListener(this.onLivingDeath);
@@ -146,6 +157,10 @@ public class SummoningStage implements IBossStage {
    }
 
    @Override
+   public void finish() {
+   }
+
+   @Override
    public CompoundTag serialize() {
       CompoundTag tag = IBossStage.super.serialize();
       tag.put("SummoningStageAttributes", this.summoningStageAttributes.serialize());
@@ -153,7 +168,7 @@ public class SummoningStage implements IBossStage {
       tag.putInt("TotalMobGroupsToSummon", this.totalMobGroupsToSummon);
       tag.putInt("MobGroupsSummoned", this.mobGroupsSummoned);
       tag.putInt("TotalMobsSpawned", this.totalMobsSpawned);
-      tag.putLong("LastSpawnTime", this.lastSpawnTime);
+      tag.putLong("LastSpawnTime", this.lastSpawnCheckTime);
       tag.putBoolean("SpawningFinished", this.spawningFinished);
       tag.put("SpawnedMobs", this.serializeSpawnedMobs());
       return tag;
@@ -190,7 +205,7 @@ public class SummoningStage implements IBossStage {
       summoningStage.totalMobGroupsToSummon = tag.getInt("TotalMobGroupsToSummon");
       summoningStage.mobGroupsSummoned = tag.getInt("MobGroupsSummoned");
       summoningStage.totalMobsSpawned = tag.getInt("TotalMobsSpawned");
-      summoningStage.lastSpawnTime = tag.getLong("LastSpawnTime");
+      summoningStage.lastSpawnCheckTime = tag.getLong("LastSpawnTime");
       summoningStage.spawningFinished = tag.getBoolean("SpawningFinished");
       summoningStage.spawnedMobs.addAll(deserializeSpawnedMobs(tag.getList("SpawnedMobs", 11)));
       return summoningStage;

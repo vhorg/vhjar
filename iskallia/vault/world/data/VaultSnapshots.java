@@ -128,7 +128,7 @@ public class VaultSnapshots extends SavedData {
       return data;
    }
 
-   private static class ArrayOutputStream extends ByteArrayOutputStream {
+   public static class ArrayOutputStream extends ByteArrayOutputStream {
       public byte[] getBuf() {
          return this.buf;
       }

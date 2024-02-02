@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "the_vault:soot"},
+    {"item": "the_vault:soot"},
+    {"item": "the_vault:soot"},
+    {"item": "the_vault:soot"},
+    {"item": "the_vault:soot"},
+    {"item": "the_vault:soot"},
+    {"item": "the_vault:soot"},
+    {"item": "the_vault:soot"},
+    {"item": "the_vault:soot"}
+  ],
+  "result": {
+    "item": "the_vault:compressed_soot_block",
+    "count": 1
+  }
+}

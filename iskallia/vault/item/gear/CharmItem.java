@@ -1,6 +1,7 @@
 package iskallia.vault.item.gear;
 
 import iskallia.vault.config.CharmConfig;
+import iskallia.vault.config.VaultRecyclerConfig;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.charm.CharmEffect;
 import iskallia.vault.gear.data.AttributeGearData;
@@ -49,7 +50,7 @@ import top.theillusivec4.curios.api.SlotContext;
 import top.theillusivec4.curios.api.type.ISlotType;
 import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
-public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem, IdentifiableItem {
+public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem, IdentifiableItem, RecyclableItem {
    CharmConfig.Size size;
 
    public CharmItem(ResourceLocation id, CharmConfig.Size size) {
@@ -72,7 +73,7 @@ public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem
    }
 
    public int getBarColor(ItemStack pStack) {
-      return Mth.hsvToRgb(getUsePercentage(pStack) / 3.0F, 1.0F, 1.0F);
+      return Mth.hsvToRgb(Math.max(0.0F, getUsePercentage(pStack) / 3.0F), 1.0F, 1.0F);
    }
 
    public boolean isBarVisible(ItemStack pStack) {
@@ -334,5 +335,29 @@ public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem
 
    public boolean canUnequip(SlotContext slotContext, ItemStack stack) {
       return slotContext.entity() instanceof Player player && ServerVaults.get(player.level).isPresent() ? false : super.canUnequip(slotContext, stack);
+   }
+
+   @Override
+   public Optional<UUID> getUuid(ItemStack stack) {
+      return AttributeGearData.readUUID(stack);
+   }
+
+   @Override
+   public boolean isValidInput(ItemStack input) {
+      return !input.isEmpty() && AttributeGearData.hasData(input);
+   }
+
+   @Override
+   public VaultRecyclerConfig.RecyclerOutput getOutput(ItemStack input) {
+      return ModConfigs.VAULT_RECYCLER.getCharmRecyclingOutput();
+   }
+
+   @Override
+   public float getResultPercentage(ItemStack input) {
+      if (input.isEmpty()) {
+         return 0.0F;
+      } else {
+         return !isIdentified(input) ? 1.0F : 1.0F - (float)getUsedVaults(input).size() / getUses(input);
+      }
    }
 }

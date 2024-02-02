@@ -11,7 +11,7 @@
                 {
                     "type": "minecraft:item",
                     "weight": 10,
-                    "name": "the_vault:crystal_seal_speedrun",
+                    "name": "the_vault:crystal_seal_scout",
                     "functions": [
                         {
                             "function": "minecraft:set_count",

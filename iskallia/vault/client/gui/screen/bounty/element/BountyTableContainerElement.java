@@ -45,6 +45,7 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
    BountyElement bountyElement;
    final List<Pair<ButtonElement<?>, TextureAtlasElement<?>>> buttons = new ArrayList<>();
    final List<ColorHollowRectElement> rarityOutlines = new ArrayList<>();
+   final List<UUID> oldBountyIDs = new ArrayList<>();
 
    public BountyTableContainerElement(ISpatial spatial, BountyContainer container) {
       super(spatial);
@@ -120,10 +121,13 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
    }
 
    private void handleReroll() {
+      this.oldBountyIDs.clear();
+      this.container.getAvailable().forEach(bountyx -> this.oldBountyIDs.add(bountyx.getId()));
       Bounty bounty = this.bountyElement.getSelectedBounty();
       if (bounty != null) {
          ItemStack pearl = this.container.getBountyPearlSlot().getItem();
          int amount = pearl.getCount();
+         int index = this.container.getAvailable().indexOf(bounty);
          int cost = ModConfigs.BOUNTY_CONFIG.getCost(this.container.getVaultLevel());
          if (amount >= cost) {
             ModNetwork.CHANNEL.sendToServer(new ServerboundRerollMessage(bounty.getId()));
@@ -145,6 +149,12 @@ public class BountyTableContainerElement extends ContainerElement<BountyTableCon
       this.refreshBountyElement();
       this.createBountySelection();
       ScreenLayout.requestLayout();
+
+      for (Bounty bounty : this.container.getAvailable()) {
+         if (!this.oldBountyIDs.contains(bounty.getId())) {
+            this.bountyElement.setBounty(bounty.getId(), BountyElement.Status.AVAILABLE);
+         }
+      }
    }
 
    private void refreshBountyElement() {

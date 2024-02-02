@@ -1,11 +1,13 @@
 package iskallia.vault.core.world.loot.generator;
 
+import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.LootGenerationEvent;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.MathUtils;
+import iskallia.vault.core.world.data.item.ItemPredicate;
 import iskallia.vault.core.world.loot.LootPool;
 import iskallia.vault.core.world.loot.LootTable;
 import it.unimi.dsi.fastutil.doubles.Double2ObjectArrayMap;
@@ -61,9 +63,13 @@ public class TieredLootTableGenerator extends LootTableGenerator {
    }
 
    public static boolean supports(LootTable table) {
-      return table.getEntries().size() != 1
-         ? false
-         : !table.getEntries().get(0).getPool().getChildren().keySet().stream().anyMatch(o -> !(o instanceof LootPool));
+      if (table.getEntries().size() != 1) {
+         return false;
+      } else {
+         return table.getEntries().get(0).getPool().getChildren().size() != 4
+            ? false
+            : !table.getEntries().get(0).getPool().getChildren().keySet().stream().anyMatch(o -> !(o instanceof LootPool));
+      }
    }
 
    public double[] getKey() {
@@ -132,7 +138,25 @@ public class TieredLootTableGenerator extends LootTableGenerator {
             if (this.poolToIndex.containsKey(next)) {
                this.frequencies[this.poolToIndex.get(next)]++;
             }
-         }).map(e -> e.getStack(random)).ifPresent(this.items::addAll);
+         }).map(e -> {
+            OverSizedItemStack stack = e.getOverStack(random);
+            double increase = 0.0;
+
+            for (Entry<ItemPredicate, Float> override : this.itemQuantityOverrides.entrySet()) {
+               if (override.getKey().test(stack.overSizedStack())) {
+                  increase += override.getValue().floatValue();
+               }
+            }
+
+            double fAmount = stack.amount() * (1.0 + increase);
+
+            int amount;
+            for (amount = 0; fAmount > 0.0 && random.nextFloat() < fAmount; fAmount--) {
+               amount++;
+            }
+
+            return stack.copyAmount(amount).splitByStackSize();
+         }).ifPresent(this.items::addAll);
       }
    }
 

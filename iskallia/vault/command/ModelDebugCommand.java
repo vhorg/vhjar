@@ -7,6 +7,7 @@ import iskallia.vault.dynamodel.model.armor.ArmorModel;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
@@ -21,6 +22,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 public class ModelDebugCommand extends Command {
    @Override
@@ -107,10 +109,14 @@ public class ModelDebugCommand extends Command {
    private int givePiece(CommandContext<CommandSourceStack> context, Item gear, ResourceLocation modelId) {
       try {
          ItemStack helmetStack = new ItemStack(gear);
-         this.configureGear(helmetStack, modelId, VaultGearRarity.COMMON);
-         ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
-         EntityHelper.giveItem(player, helmetStack);
-         return 0;
+         if (FMLEnvironment.production && !ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(gear, modelId)) {
+            return 0;
+         } else {
+            this.configureGear(helmetStack, modelId, VaultGearRarity.COMMON);
+            ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+            EntityHelper.giveItem(player, helmetStack);
+            return 0;
+         }
       } catch (CommandSyntaxException var6) {
          return 0;
       }

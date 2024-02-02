@@ -156,14 +156,22 @@ public class CatalystStage implements IBossStage {
    }
 
    @Override
-   public void start() {
+   public void init() {
       this.movingUp = true;
       this.moveTimer = 40;
       this.boss.setNoGravity(true);
    }
 
    @Override
+   public void start() {
+   }
+
+   @Override
    public void stop() {
+   }
+
+   @Override
+   public void finish() {
       this.boss.setNoGravity(false);
       this.clearChests();
    }

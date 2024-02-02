@@ -224,14 +224,16 @@ public class TauntCharmAbility extends AbstractTauntAbility {
                   AttributeInstance attributeInstance = player.getAttribute(Attributes.ATTACK_DAMAGE);
                   if (attributeInstance != null) {
                      LivingEntity targetEntity = event.getEntityLiving();
-                     ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_CHARMED_ATTACKING.runIfNotSet(() -> {
-                        float percentAbilityPowerDealt = abilityData.getFloat("percentAbilityPowerDealt");
-                        float damage = AbilityPowerHelper.getAbilityPower((ServerPlayer)player) * percentAbilityPowerDealt;
-                        Vec3 movement = targetEntity.getDeltaMovement();
-                        targetEntity.hurt(DamageSource.playerAttack(player), damage);
-                        targetEntity.setDeltaMovement(new Vec3(movement.x, Math.min(movement.y + 0.2, 0.2), movement.z));
-                     }));
-                     event.setCanceled(true);
+                     if (!(targetEntity instanceof ServerPlayer)) {
+                        ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_CHARMED_ATTACKING.runIfNotSet(() -> {
+                           float percentAbilityPowerDealt = abilityData.getFloat("percentAbilityPowerDealt");
+                           float damage = AbilityPowerHelper.getAbilityPower((ServerPlayer)player) * percentAbilityPowerDealt;
+                           Vec3 movement = targetEntity.getDeltaMovement();
+                           targetEntity.hurt(DamageSource.playerAttack(player), damage);
+                           targetEntity.setDeltaMovement(new Vec3(movement.x, Math.min(movement.y + 0.2, 0.2), movement.z));
+                        }));
+                        event.setCanceled(true);
+                     }
                   }
                }
             }

@@ -8,9 +8,12 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.Objective;
 import iskallia.vault.core.world.data.item.PartialStack;
+import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.item.crystal.data.serializable.IBitSerializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -25,6 +28,9 @@ public class ScavengerGoal extends DataObject<ScavengerGoal> {
    private static final FieldKey<Item> ITEM = FieldKey.of("item", Item.class).with(Version.v1_0, Adapters.ITEM, DISK.all().or(CLIENT.all())).register(FIELDS);
    public static final FieldKey<Integer> TOTAL = FieldKey.of("total", Integer.class)
       .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
+   public static final FieldKey<Integer> BASE_TOTAL = FieldKey.of("base_total", Integer.class)
+      .with(Version.v1_25, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<Integer> CURRENT = FieldKey.of("current", Integer.class)
       .with(Version.v1_0, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
@@ -47,6 +53,7 @@ public class ScavengerGoal extends DataObject<ScavengerGoal> {
 
    public ScavengerGoal(int count) {
       this.set(TOTAL, Integer.valueOf(count));
+      this.set(BASE_TOTAL, Integer.valueOf(count));
       this.set(CURRENT, Integer.valueOf(0));
       this.set(ENTRIES, new ScavengerGoal.Entry.ObjList(Version.v1_20));
    }
@@ -88,6 +95,13 @@ public class ScavengerGoal extends DataObject<ScavengerGoal> {
       return this.get(CURRENT) >= this.get(TOTAL);
    }
 
+   public void tick(VirtualWorld world, Vault vault) {
+      this.getOptional(BASE_TOTAL).ifPresent(baseTotal -> {
+         double increase = CommonEvents.OBJECTIVE_TARGET.invoke(world, vault, 0.0).getIncrease();
+         this.set(TOTAL, Integer.valueOf((int)Math.round(baseTotal.intValue() * (1.0 + increase))));
+      });
+   }
+
    public boolean consume(ItemStack stack) {
       if (stack.isEmpty()) {
          return false;
@@ -109,6 +123,7 @@ public class ScavengerGoal extends DataObject<ScavengerGoal> {
       ScavengerGoal copy = this.copy();
       copy.set(CURRENT, Integer.valueOf(this.getOr(CURRENT, Integer.valueOf(0)) + other.getOr(CURRENT, Integer.valueOf(0))));
       copy.set(TOTAL, Integer.valueOf(this.getOr(TOTAL, Integer.valueOf(0)) + other.getOr(TOTAL, Integer.valueOf(0))));
+      copy.set(BASE_TOTAL, Integer.valueOf(this.getOr(BASE_TOTAL, Integer.valueOf(0)) + other.getOr(BASE_TOTAL, Integer.valueOf(0))));
       other.getEntries().forEachRemaining(copy::put);
       return copy;
    }
@@ -117,6 +132,7 @@ public class ScavengerGoal extends DataObject<ScavengerGoal> {
       ScavengerGoal copy = new ScavengerGoal();
       copy.set(CURRENT, this.get(CURRENT));
       copy.set(TOTAL, this.get(TOTAL));
+      copy.set(BASE_TOTAL, this.get(BASE_TOTAL));
       this.getEntries().forEachRemaining(copy::put);
       return copy;
    }

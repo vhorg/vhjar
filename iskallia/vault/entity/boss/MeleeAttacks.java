@@ -6,13 +6,13 @@ import net.minecraft.nbt.CompoundTag;
 
 public class MeleeAttacks {
    public static final BasicMeleeAttack.BasicMeleeAttackAttributes HAMMERSMASH_ATTACK = new BasicMeleeAttack.BasicMeleeAttackAttributes(
-      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 30, 20, ArtifactBossEntity.AttackMove.HAMMERSMASH, 1.0F, 0.0F
+      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 30, 17, ArtifactBossEntity.AttackMove.HAMMERSMASH, 1.0F, 0.0F
    );
    public static final BasicMeleeAttack.BasicMeleeAttackAttributes UPPERCUT_ATTACK = new BasicMeleeAttack.BasicMeleeAttackAttributes(
-      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 25, 18, ArtifactBossEntity.AttackMove.UPPERCUT, 3.0F, 0.3F
+      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 25, 15, ArtifactBossEntity.AttackMove.UPPERCUT, 1.5F, 0.3F
    );
    public static final BasicMeleeAttack.BasicMeleeAttackAttributes GROUNDSLAM_ATTACK = new BasicMeleeAttack.BasicMeleeAttackAttributes(
-      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 45, 28, ArtifactBossEntity.AttackMove.GROUNDSLAM, 5.0F, 0.1F
+      new BasicMeleeAttack.BasicMeleeAttackAttributes.Slice(-0.1F, 0.6F), 45, 24, ArtifactBossEntity.AttackMove.GROUNDSLAM, 2.5F, 0.1F
    );
    public static final Map<String, BiFunction<ArtifactBossEntity, Double, IMeleeAttack>> MELEE_ATTACK_FACTORIES = Map.of(
       "hammersmash",
@@ -22,7 +22,9 @@ public class MeleeAttacks {
       "groundslam",
       (boss, multiplier) -> new BasicMeleeAttack(boss, multiplier, GROUNDSLAM_ATTACK),
       "throw",
-      ThrowAttack::new
+      ThrowAttack::new,
+      "aoeclose",
+      AoeCloseAttack::new
    );
 
    public record AttackData(String name, double multiplier) {

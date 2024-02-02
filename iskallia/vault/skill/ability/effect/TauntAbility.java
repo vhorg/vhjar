@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.entity.VaultBoss;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.skill.ability.effect.spi.AbstractTauntAbility;
@@ -55,7 +56,8 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
    bus = Bus.FORGE
 )
 public class TauntAbility extends AbstractTauntAbility {
-   protected static final Predicate<LivingEntity> MONSTER_PREDICATE = entity -> entity.getType().getCategory() == MobCategory.MONSTER;
+   protected static final Predicate<LivingEntity> MONSTER_PREDICATE = entity -> entity.getType().getCategory() == MobCategory.MONSTER
+      && !(entity instanceof VaultBoss);
    private int amplifier;
 
    public TauntAbility(

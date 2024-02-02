@@ -25,10 +25,15 @@ public class VaultArmorRenderProperties implements IItemRenderProperties {
    @Nullable
    public HumanoidModel<?> getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot equipmentSlot, HumanoidModel<?> _default) {
       VaultGearData gearData = VaultGearData.read(itemStack);
-      return gearData.getFirstValue(ModGearAttributes.GEAR_MODEL)
+      ArmorLayers.BaseLayer model = gearData.getFirstValue(ModGearAttributes.GEAR_MODEL)
          .flatMap(ModDynamicModels.Armor.PIECE_REGISTRY::get)
          .map(DynamicModel::getId)
          .map(BAKED_LAYERS::get)
          .orElse(null);
+      if (model != null) {
+         model.setScaleModel(_default);
+      }
+
+      return model;
    }
 }

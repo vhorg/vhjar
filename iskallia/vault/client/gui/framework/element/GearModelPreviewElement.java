@@ -17,7 +17,6 @@ import iskallia.vault.dynamodel.model.armor.ArmorLayers;
 import iskallia.vault.dynamodel.model.armor.ArmorPieceModel;
 import iskallia.vault.dynamodel.registry.DynamicModelRegistry;
 import iskallia.vault.gear.data.VaultGearData;
-import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.renderer.VaultArmorRenderProperties;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
@@ -50,14 +49,12 @@ public class GearModelPreviewElement<E extends GearModelPreviewElement<E>> exten
       super.render(renderer, poseStack, mouseX, mouseY, partialTick);
       ItemStack itemStack = this.gearStack.get();
       Item item = itemStack.getItem();
-      if (item instanceof VaultGearItem) {
-         if (item instanceof VaultArmorItem) {
-            poseStack.pushPose();
-            this.renderArmorPiece(itemStack);
-            poseStack.popPose();
-         } else {
-            this.renderItemStack(itemStack);
-         }
+      if (item instanceof VaultArmorItem) {
+         poseStack.pushPose();
+         this.renderArmorPiece(itemStack);
+         poseStack.popPose();
+      } else {
+         this.renderItemStack(itemStack);
       }
    }
 

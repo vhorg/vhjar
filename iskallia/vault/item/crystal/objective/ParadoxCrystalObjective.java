@@ -78,6 +78,7 @@ public class ParadoxCrystalObjective extends CrystalObjective {
 
          if (this.type == ParadoxObjective.Type.BUILD) {
             classic.set(ClassicListenersLogic.GAME_MODE, GameType.ADVENTURE);
+            classic.set(ClassicListenersLogic.MAX_PLAYERS, Integer.valueOf(1));
          }
       }
 

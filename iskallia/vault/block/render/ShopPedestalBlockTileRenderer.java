@@ -5,7 +5,13 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 import iskallia.vault.block.entity.ShopPedestalBlockTile;
+import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.event.event.ShopPedestalPriceEvent;
+import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModGearAttributes;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -16,6 +22,8 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Plane;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
@@ -25,11 +33,13 @@ import net.minecraftforge.common.MinecraftForge;
 public class ShopPedestalBlockTileRenderer implements BlockEntityRenderer<ShopPedestalBlockTile> {
    private final ItemRenderer itemRenderer;
    private final Font font;
+   IVaultOptions options;
 
    public ShopPedestalBlockTileRenderer(Context context) {
       Minecraft minecraft = Minecraft.getInstance();
       this.itemRenderer = minecraft.getItemRenderer();
       this.font = minecraft.gui.getFont();
+      this.options = (IVaultOptions)Minecraft.getInstance().options;
    }
 
    public static void renderName(Component name, float h, PoseStack poseStack, MultiBufferSource bufferIn, int combinedLightIn) {
@@ -68,7 +78,18 @@ public class ShopPedestalBlockTileRenderer implements BlockEntityRenderer<ShopPe
             this.drawPrice(currency, matrixStack, buffer, String.valueOf(currency.getCount()), combinedLightIn, combinedOverlayIn);
             matrixStack.pushPose();
             matrixStack.translate(0.0, 0.625, 0.0);
-            renderName(offerStack.getHoverName(), 0.875F, matrixStack, buffer, combinedLightIn);
+            Component[] hoverName = new Component[]{offerStack.getHoverName()};
+            if (this.options.showRarityNames() && offerStack.getItem() instanceof VaultGearItem vgi) {
+               VaultGearData data = VaultGearData.read(offerStack);
+               data.getFirstValue(ModGearAttributes.GEAR_ROLL_TYPE)
+                  .flatMap(ModConfigs.VAULT_GEAR_TYPE_CONFIG::getRollPool)
+                  .ifPresent(
+                     pool -> hoverName[0] = new TextComponent(hoverName[0].getString().replace("Unidentified", "Unidentified " + pool.getName()))
+                        .withStyle(Style.EMPTY.withColor(TextColor.fromLegacyFormat(ChatFormatting.WHITE)))
+                  );
+            }
+
+            renderName(hoverName[0], 0.875F, matrixStack, buffer, combinedLightIn);
             matrixStack.scale(0.5F, 0.5F, 0.5F);
             matrixStack.translate(0.0, 0.25, 0.0);
             TransformType transform = TransformType.FIXED;

@@ -168,16 +168,17 @@ public class ItemStackAdapter implements ISimpleAdapter<ItemStack, Tag, JsonElem
    public Optional<ItemStack> readJson(@Nullable JsonElement json) {
       if (json instanceof JsonPrimitive primitive && primitive.isString()) {
          return Adapters.ITEM.readJson(primitive).map(ItemStack::new);
+      } else if (json instanceof JsonObject object) {
+         ItemStack stack = new ItemStack(
+            (ItemLike)Adapters.ITEM.readJson(object.get("id")).orElse(Items.AIR), Adapters.INT.readJson(object.get("count")).orElse(1)
+         );
+         if (object.has("nbt")) {
+            stack.setTag(Adapters.COMPOUND_NBT.readJson(object.get("nbt")).orElse(null));
+         }
+
+         return Optional.of(stack);
       } else {
-         return json instanceof JsonObject object
-            ? Optional.of(
-               new ItemStack(
-                  (ItemLike)Adapters.ITEM.readJson(object.get("id")).orElse(Items.AIR),
-                  Adapters.INT.readJson(object.get("count")).orElse(1),
-                  Adapters.COMPOUND_NBT.readJson(object.get("nbt")).orElse(null)
-               )
-            )
-            : Optional.empty();
+         return Optional.empty();
       }
    }
 }

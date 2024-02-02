@@ -92,15 +92,20 @@ public class VaultOreBlock extends OreBlock {
 
       if ((Boolean)state.getValue(GENERATED)) {
          float chance = getCopiouslyChance(builder);
-         if (this.RANDOM.nextFloat() < chance) {
+
+         for (List<ItemStack> copy = new ArrayList<>(drops); chance > 0.0F && this.RANDOM.nextFloat() < chance; chance--) {
             Entity player = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
             BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
             player.level.playSound(null, pos, ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.1F, 0.85F);
-            drops.addAll(drops);
-            if (stack != null && stack.getItem() instanceof ToolItem tool) {
-               Entity entity = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
-               if (entity instanceof LivingEntity livingEntity) {
-                  tool.hurt(stack, builder.getLevel(), livingEntity, 6.0);
+            drops.addAll(copy);
+            if (stack != null) {
+               Item entity = stack.getItem();
+               if (entity instanceof ToolItem) {
+                  ToolItem tool = (ToolItem)entity;
+                  Entity entityx = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
+                  if (entityx instanceof LivingEntity livingEntity) {
+                     tool.hurt(stack, builder.getLevel(), livingEntity, 6.0);
+                  }
                }
             }
          }

@@ -8,7 +8,9 @@ import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.entity.ai.ChampionGoal;
 import iskallia.vault.entity.boss.ArtifactBossEntity;
 import iskallia.vault.entity.entity.SpiritEntity;
+import iskallia.vault.entity.entity.VaultGuardianEntity;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModEffects;
 import iskallia.vault.world.VaultDifficulty;
 import iskallia.vault.world.data.ServerVaults;
 import iskallia.vault.world.data.WorldSettings;
@@ -30,7 +32,11 @@ public class ChampionPromoter {
    private static final String NO_CHAMPION_TAG = "no_champion";
 
    public static void applyRandomChampion(LivingEntity entity) {
-      if (!entity.getTags().contains("no_champion") && !(entity instanceof SpiritEntity) && !(entity instanceof ArtifactBossEntity)) {
+      if (!entity.getTags().contains("no_champion")
+         && !(entity instanceof SpiritEntity)
+         && !(entity instanceof ArtifactBossEntity)
+         && !(entity instanceof VaultGuardianEntity)
+         && !entity.hasEffect(ModEffects.IMMORTALITY)) {
          double chance = ModConfigs.CHAMPIONS.defaultChampionChance;
 
          for (Entry<EntityPredicate, Float> entry : ModConfigs.CHAMPIONS.entityChampionChance.entrySet()) {

@@ -16,7 +16,7 @@ public final class ItemQuantityHelper {
       result += snapshot.getAttributeValue(ModGearAttributes.ITEM_QUANTITY, VaultGearAttributeTypeMerger.floatSum());
       result = CommonEvents.PLAYER_STAT.invoke(PlayerStat.ITEM_QUANTITY, entity, result).getValue();
       result *= ((VaultLoot.GameRuleValue)entity.level.getGameRules().getRule(ModGameRules.LOOT)).get().getMultiplier();
-      return result + (((VaultLoot.GameRuleValue)entity.level.getGameRules().getRule(ModGameRules.LOOT)).get().getMultiplier() - 1);
+      return result + (((VaultLoot.GameRuleValue)entity.level.getGameRules().getRule(ModGameRules.LOOT)).get().getMultiplier() - 1.0F);
    }
 
    private ItemQuantityHelper() {

@@ -135,6 +135,26 @@ public class VaultAccessibilityScreen extends AbstractElementScreen {
             )
             .layout(this.translateWorldSpatial())
       );
+      y += widgetHeight + padding;
+      this.addElement(
+         new ToggleButtonElement(
+               Spatials.positionXY(startX, y).size(widgetWidth, widgetHeight),
+               new TextComponent("Show Point Messages"),
+               () -> options.showPointMessages() ? "ON" : "OFF",
+               () -> options.setShowPointMessages(!options.showPointMessages())
+            )
+            .layout(this.translateWorldSpatial())
+      );
+      x = startX + widgetWidth + padding;
+      this.addElement(
+         new ToggleButtonElement(
+               Spatials.positionXY(x, y).size(widgetWidth, widgetHeight),
+               new TextComponent("Show Rarity Names"),
+               () -> options.showRarityNames() ? "ON" : "OFF",
+               () -> options.setShowRarityNames(!options.showRarityNames())
+            )
+            .layout(this.translateWorldSpatial())
+      );
       this.addElement(this.colorSquareElement).layout(this.translateWorldSpatial());
       this.addElement(this.redSliderElement).layout(this.translateWorldSpatial());
       this.addElement(this.greenSliderElement).layout(this.translateWorldSpatial());

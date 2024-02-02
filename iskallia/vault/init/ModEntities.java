@@ -889,7 +889,7 @@ public class ModEntities {
       T4_BLOOD_SKELETON = registerLiving(
          "blood_skeleton_t4",
          Builder.of(Tier4BloodSkeletonEntity::new, MobCategory.MONSTER)
-            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 1.15F)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 1.05F)
             .clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
@@ -897,7 +897,7 @@ public class ModEntities {
       T5_BLOOD_SKELETON = registerLiving(
          "blood_skeleton_t5",
          Builder.of(Tier5BloodSkeletonEntity::new, MobCategory.MONSTER)
-            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 1.15F)
+            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 1.05F)
             .clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event

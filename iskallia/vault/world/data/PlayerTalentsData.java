@@ -53,6 +53,7 @@ public class PlayerTalentsData extends SavedData {
       this.playerMap.put(player.getUUID(), talentTree);
       if (player instanceof ServerPlayer serverPlayer) {
          talentTree.getAll(LearnableSkill.class, Skill::isUnlocked).forEach(skill -> skill.onAdd(SkillContext.of(serverPlayer)));
+         talentTree.sync(SkillContext.of(serverPlayer));
       }
 
       this.setDirty();

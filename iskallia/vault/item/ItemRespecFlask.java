@@ -38,7 +38,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemRespecFlask extends Item {
    public ItemRespecFlask(CreativeModeTab group, ResourceLocation id) {
-      super(new Properties().tab(group).stacksTo(2));
+      super(new Properties().tab(group).stacksTo(64));
       this.setRegistryName(id);
    }
 

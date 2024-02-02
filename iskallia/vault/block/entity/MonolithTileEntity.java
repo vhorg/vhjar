@@ -1,35 +1,113 @@
 package iskallia.vault.block.entity;
 
 import iskallia.vault.block.MonolithBlock;
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModBlocks;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 public class MonolithTileEntity extends BlockEntity {
    private static final Random rand = new Random();
+   private boolean generated;
+   private boolean overStacking;
+   private Map<ResourceLocation, Integer> modifiers = new HashMap<>();
 
    public MonolithTileEntity(BlockPos pos, BlockState state) {
       super(ModBlocks.MONOLITH_TILE_ENTITY, pos, state);
    }
 
+   public boolean isGenerated() {
+      return this.generated;
+   }
+
+   public boolean isOverStacking() {
+      return this.overStacking;
+   }
+
+   public Map<ResourceLocation, Integer> getModifiers() {
+      return this.modifiers;
+   }
+
+   public void setGenerated(boolean generated) {
+      this.generated = generated;
+      this.sendUpdates();
+   }
+
+   public void setOverStacking(boolean overStacking) {
+      this.overStacking = overStacking;
+      this.sendUpdates();
+   }
+
+   public void addModifier(VaultModifier<?> modifier) {
+      this.modifiers.put(modifier.getId(), this.modifiers.getOrDefault(modifier.getId(), 0) + 1);
+      this.sendUpdates();
+   }
+
+   public void removeModifiers() {
+      this.modifiers.clear();
+      this.sendUpdates();
+   }
+
+   public CompoundTag getUpdateTag() {
+      return this.saveWithoutMetadata();
+   }
+
+   @Nullable
+   public Packet<ClientGamePacketListener> getUpdatePacket() {
+      return ClientboundBlockEntityDataPacket.create(this);
+   }
+
+   public void sendUpdates() {
+      if (this.level != null) {
+         this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 3);
+         this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
+         this.setChanged();
+      }
+   }
+
+   public void load(CompoundTag nbt) {
+      super.load(nbt);
+      this.generated = nbt.getBoolean("Generated");
+      this.overStacking = nbt.getBoolean("OverStacking");
+      this.modifiers = new HashMap<>();
+      CompoundTag modifiersNBT = nbt.getCompound("Modifiers");
+      modifiersNBT.getAllKeys().forEach(key -> {
+         ResourceLocation id = new ResourceLocation(key);
+         int count = modifiersNBT.getInt(key);
+         this.modifiers.put(id, count);
+      });
+   }
+
+   protected void saveAdditional(CompoundTag nbt) {
+      super.saveAdditional(nbt);
+      nbt.putBoolean("Generated", this.generated);
+      nbt.putBoolean("OverStacking", this.overStacking);
+      CompoundTag modifiersNBT = new CompoundTag();
+      this.modifiers.forEach((id, count) -> modifiersNBT.putInt(id.toString(), count));
+      nbt.put("Modifiers", modifiersNBT);
+   }
+
    public static void tick(Level level, BlockPos pos, BlockState state, MonolithTileEntity tile) {
-      if (!level.isClientSide()) {
-         BlockState up = level.getBlockState(pos.above());
-         if (!(up.getBlock() instanceof MonolithBlock)) {
-            level.setBlockAndUpdate(pos.above(), (BlockState)ModBlocks.MONOLITH.defaultBlockState().setValue(MonolithBlock.HALF, DoubleBlockHalf.UPPER));
-         }
-      } else {
+      CommonEvents.MONOLITH_UPDATE.invoke(level, state, pos, tile);
+      if (level.isClientSide()) {
          tile.playEffects();
       }
    }
@@ -39,9 +117,9 @@ public class MonolithTileEntity extends BlockEntity {
       if (this.getLevel() != null) {
          BlockPos pos = this.getBlockPos();
          BlockState state = this.getBlockState();
-         if (this.getLevel().getGameTime() % 5L == 0L) {
+         if (this.getLevel().getGameTime() % 1L == 0L) {
             ParticleEngine mgr = Minecraft.getInstance().particleEngine;
-            if ((Boolean)state.getValue(MonolithBlock.FILLED)) {
+            if (state.getValue(MonolithBlock.STATE) == MonolithBlock.State.LIT) {
                Random random = this.getLevel().getRandom();
                if (random.nextInt(5) == 0) {
                   Vec3 offset = new Vec3(
@@ -77,7 +155,7 @@ public class MonolithTileEntity extends BlockEntity {
                      );
                }
 
-               if (random.nextInt(3) == 0) {
+               if (random.nextInt(15) == 0) {
                   Vec3 offset = new Vec3(
                      random.nextDouble() / 3.0 * (random.nextBoolean() ? 1 : -1), 0.0, random.nextDouble() / 3.0 * (random.nextBoolean() ? 1 : -1)
                   );
@@ -92,18 +170,6 @@ public class MonolithTileEntity extends BlockEntity {
                         random.nextDouble() * 0.1 + 0.1,
                         offset.z / 12.0
                      );
-               }
-            } else {
-               for (int count = 0; count < 1; count++) {
-                  double x = pos.getX() + 0.5F + rand.nextFloat() * 0.4F - 0.2F;
-                  double y = pos.getY() + rand.nextFloat() * 2.0F;
-                  double z = pos.getZ() + 0.5F + rand.nextFloat() * 0.4F - 0.2F;
-                  Particle fwParticle = mgr.createParticle(ParticleTypes.FIREWORK, x, y, z, 0.0, 0.0, 0.0);
-                  if (fwParticle == null) {
-                     return;
-                  }
-
-                  fwParticle.setLifetime((int)(fwParticle.getLifetime() * 1.5F));
                }
             }
          }

@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ese",
+    "sas",
+    "ede"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "a": {
+      "item": "the_vault:bounty_pearl"
+    },
+    "d": {
+      "item": "the_vault:dreamstone"
+    },
+    "s": {
+      "item": "the_vault:eternal_soul"
+    }
+  },
+  "result": {
+    "item": "the_vault:wardens_pearl",
+    "count": 1
+  }
+}

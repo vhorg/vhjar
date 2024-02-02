@@ -32,6 +32,7 @@ import iskallia.vault.network.message.ClientboundPlayerLastDamageSourceMessage;
 import iskallia.vault.network.message.ClientboundRefreshSpiritExtractorMessage;
 import iskallia.vault.network.message.ClientboundRefreshToolViseMessage;
 import iskallia.vault.network.message.ClientboundResetCryoChamberMessage;
+import iskallia.vault.network.message.ClientboundSafePointPlaceParticleMessage;
 import iskallia.vault.network.message.ClientboundSightParticlesFromJavelinMessage;
 import iskallia.vault.network.message.ClientboundSyncSkillAltarDataMessage;
 import iskallia.vault.network.message.ClientboundSyncVaultAllowWaypointsMessage;
@@ -88,6 +89,7 @@ import iskallia.vault.network.message.ScavengerAltarConsumeMessage;
 import iskallia.vault.network.message.ServerboundAbilityKeyMessage;
 import iskallia.vault.network.message.ServerboundAbilitySelectMessage;
 import iskallia.vault.network.message.ServerboundAddHistoricFavoriteMessage;
+import iskallia.vault.network.message.ServerboundAscensionForgeBuyMessage;
 import iskallia.vault.network.message.ServerboundChangeDifficultyMessage;
 import iskallia.vault.network.message.ServerboundCuriosScrollMessage;
 import iskallia.vault.network.message.ServerboundMagnetToggleMessage;
@@ -103,6 +105,7 @@ import iskallia.vault.network.message.ServerboundPickaxeOffsetKeyMessage;
 import iskallia.vault.network.message.ServerboundRenameEternalMessage;
 import iskallia.vault.network.message.ServerboundResetBlackMarketTradesMessage;
 import iskallia.vault.network.message.ServerboundSelectArchetypeMessage;
+import iskallia.vault.network.message.ServerboundSelectAscensionForgeItemMessage;
 import iskallia.vault.network.message.ServerboundSendSnapshotLinkMessage;
 import iskallia.vault.network.message.ServerboundSkillAltarActionMessage;
 import iskallia.vault.network.message.ServerboundToggleEternalPlayerSkinMessage;
@@ -128,6 +131,7 @@ import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.network.message.TrinketJumpMessage;
 import iskallia.vault.network.message.UpdateGodAltarDataMessage;
 import iskallia.vault.network.message.UpdateParadoxDataMessage;
+import iskallia.vault.network.message.UpdateTitlesDataMessage;
 import iskallia.vault.network.message.VaultArtisanRequestModificationMessage;
 import iskallia.vault.network.message.VaultCharmControllerScrollMessage;
 import iskallia.vault.network.message.VaultEnchanterEnchantMessage;
@@ -139,6 +143,7 @@ import iskallia.vault.network.message.VaultLevelMessage;
 import iskallia.vault.network.message.VaultMessage;
 import iskallia.vault.network.message.VaultPlayerHistoricDataMessage;
 import iskallia.vault.network.message.VaultPlayerStatsMessage;
+import iskallia.vault.network.message.VaultResearchPenaltyMessage;
 import iskallia.vault.network.message.WendarrSparkParticleMessage;
 import iskallia.vault.network.message.WorldListUpdateMessage;
 import iskallia.vault.network.message.bounty.ClientboundBountyAvailableMessage;
@@ -959,6 +964,44 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(), DiscoverModifierMessage.class, DiscoverModifierMessage::encode, DiscoverModifierMessage::decode, DiscoverModifierMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         VaultResearchPenaltyMessage.S2C.class,
+         VaultResearchPenaltyMessage.S2C::encode,
+         VaultResearchPenaltyMessage.S2C::decode,
+         VaultResearchPenaltyMessage.S2C::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         VaultResearchPenaltyMessage.C2S.class,
+         VaultResearchPenaltyMessage.C2S::encode,
+         VaultResearchPenaltyMessage.C2S::decode,
+         VaultResearchPenaltyMessage.C2S::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), UpdateTitlesDataMessage.class, UpdateTitlesDataMessage::encode, UpdateTitlesDataMessage::decode, UpdateTitlesDataMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundSafePointPlaceParticleMessage.class,
+         ClientboundSafePointPlaceParticleMessage::encode,
+         ClientboundSafePointPlaceParticleMessage::decode,
+         ClientboundSafePointPlaceParticleMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundSelectAscensionForgeItemMessage.class,
+         ServerboundSelectAscensionForgeItemMessage::encode,
+         ServerboundSelectAscensionForgeItemMessage::decode,
+         ServerboundSelectAscensionForgeItemMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ServerboundAscensionForgeBuyMessage.class,
+         ServerboundAscensionForgeBuyMessage::encode,
+         ServerboundAscensionForgeBuyMessage::decode,
+         ServerboundAscensionForgeBuyMessage::handle
       );
    }
 

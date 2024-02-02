@@ -6,12 +6,14 @@ import iskallia.vault.core.vault.modifier.modifier.ChanceCatalystModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceChampionModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceChestTrapModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceSoulShardModifier;
+import iskallia.vault.core.vault.modifier.modifier.CrateItemQuantityModifier;
 import iskallia.vault.core.vault.modifier.modifier.DecoratorAddModifier;
 import iskallia.vault.core.vault.modifier.modifier.DecoratorCascadeModifier;
 import iskallia.vault.core.vault.modifier.modifier.EntityEffectModifier;
 import iskallia.vault.core.vault.modifier.modifier.ExperienceModifier;
 import iskallia.vault.core.vault.modifier.modifier.GameControlsModifier;
 import iskallia.vault.core.vault.modifier.modifier.GroupedModifier;
+import iskallia.vault.core.vault.modifier.modifier.HunterModifier;
 import iskallia.vault.core.vault.modifier.modifier.InlinePoolModifier;
 import iskallia.vault.core.vault.modifier.modifier.LootItemQuantityModifier;
 import iskallia.vault.core.vault.modifier.modifier.LootItemRarityModifier;
@@ -20,6 +22,7 @@ import iskallia.vault.core.vault.modifier.modifier.MobCurseOnHitModifier;
 import iskallia.vault.core.vault.modifier.modifier.MobFrenzyModifier;
 import iskallia.vault.core.vault.modifier.modifier.MobSpawnCountModifier;
 import iskallia.vault.core.vault.modifier.modifier.NoSoulShardsModifier;
+import iskallia.vault.core.vault.modifier.modifier.ObjectiveTargetModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerAttributeModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerDurabilityDamageModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerEffectModifier;
@@ -28,6 +31,7 @@ import iskallia.vault.core.vault.modifier.modifier.PlayerInventoryRestoreModifie
 import iskallia.vault.core.vault.modifier.modifier.PlayerNoExitModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerNoVaultFruitModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerStatModifier;
+import iskallia.vault.core.vault.modifier.modifier.SpawnerMobsModifier;
 import iskallia.vault.core.vault.modifier.modifier.VaultLevelModifier;
 import iskallia.vault.core.vault.modifier.modifier.VaultLootableWeightModifier;
 import iskallia.vault.core.vault.modifier.modifier.VaultTimeModifier;
@@ -74,6 +78,10 @@ public final class VaultModifierTypeRegistry {
          this.put(
             VaultMod.id("modifier_type/loot_item_rarity"),
             VaultModifierType.of(LootItemRarityModifier.class, LootItemRarityModifier.Properties.class, LootItemRarityModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/crate_item_quantity"),
+            VaultModifierType.of(CrateItemQuantityModifier.class, CrateItemQuantityModifier.Properties.class, CrateItemQuantityModifier::new)
          );
          this.put(
             VaultMod.id("modifier_type/mob_attribute"),
@@ -157,6 +165,15 @@ public final class VaultModifierTypeRegistry {
          this.put(
             VaultMod.id("modifier_type/no_soul_shards"),
             VaultModifierType.of(NoSoulShardsModifier.class, NoSoulShardsModifier.Properties.class, NoSoulShardsModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/spawner_mobs"),
+            VaultModifierType.of(SpawnerMobsModifier.class, SpawnerMobsModifier.Properties.class, SpawnerMobsModifier::new)
+         );
+         this.put(VaultMod.id("modifier_type/hunter"), VaultModifierType.of(HunterModifier.class, HunterModifier.Properties.class, HunterModifier::new));
+         this.put(
+            VaultMod.id("modifier_type/objective_target"),
+            VaultModifierType.of(ObjectiveTargetModifier.class, ObjectiveTargetModifier.Properties.class, ObjectiveTargetModifier::new)
          );
       }
    };

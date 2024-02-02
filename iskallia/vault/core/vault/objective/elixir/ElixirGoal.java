@@ -6,6 +6,7 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.objective.ElixirObjective;
 import iskallia.vault.core.vault.objective.Objective;
@@ -19,6 +20,9 @@ public class ElixirGoal extends DataObject<ElixirGoal> {
       .register(FIELDS);
    public static final FieldKey<Integer> TARGET = FieldKey.of("target", Integer.class)
       .with(Version.v1_12, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
+   public static final FieldKey<Integer> BASE_TARGET = FieldKey.of("base_target", Integer.class)
+      .with(Version.v1_25, Adapters.INT_SEGMENTED_3, DISK.all().or(CLIENT.all()))
       .register(FIELDS);
    public static final FieldKey<ElixirTask.List> TASKS = FieldKey.of("tasks", ElixirTask.List.class)
       .with(Version.v1_12, CompoundAdapter.of(ElixirTask.List::new), DISK.all())
@@ -42,6 +46,11 @@ public class ElixirGoal extends DataObject<ElixirGoal> {
       for (ElixirTask task : this.get(TASKS)) {
          task.initServer(world, vault, objective, listener);
       }
+   }
+
+   public void tickServer(VirtualWorld world, Vault vault, ElixirObjective objective, UUID listener) {
+      double increase = CommonEvents.OBJECTIVE_TARGET.invoke(world, vault, 0.0).getIncrease();
+      this.set(TARGET, Integer.valueOf((int)Math.round(this.get(BASE_TARGET).intValue() * (1.0 + increase))));
    }
 
    public void releaseServer() {

@@ -1,6 +1,9 @@
 package iskallia.vault.event;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.block.AnimatrixBlock;
+import iskallia.vault.block.CoinPileDecorBlock;
+import iskallia.vault.block.entity.AnimatrixTileEntity;
 import iskallia.vault.block.entity.VaultChestTileEntity;
 import iskallia.vault.entity.entity.AncientCopperConduitItemEntity;
 import iskallia.vault.entity.entity.EternalEntity;
@@ -51,6 +54,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -69,6 +75,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.EntityInteract;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickBlock;
 import net.minecraftforge.event.world.BlockEvent.BreakEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -174,6 +181,24 @@ public class PlayerEvents {
          player.setHealth(player.getMaxHealth());
          if (player instanceof ServerPlayer sPlayer) {
             sPlayer.lastSentHealth = player.getHealth();
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void blockInteractRightClick(RightClickBlock event) {
+      Level world = event.getWorld();
+      Block block = world.getBlockState(event.getPos()).getBlock();
+      if (block instanceof CoinPileDecorBlock) {
+         event.setUseBlock(Result.ALLOW);
+      } else if (block instanceof AnimatrixBlock && world.getBlockEntity(event.getPos()) instanceof AnimatrixTileEntity animatrixTileEntity) {
+         ItemStack itemStack = event.getItemStack();
+         if (itemStack.getItem() instanceof SpawnEggItem) {
+            if (animatrixTileEntity.getItemHandler().isItemValid(0, itemStack)) {
+               event.setUseBlock(Result.ALLOW);
+            }
+
+            event.setUseItem(Result.DENY);
          }
       }
    }

@@ -130,6 +130,10 @@ public class VaultGummySoldier extends Monster {
       }
    }
 
+   public float getScale() {
+      return this.isBaby() ? 0.6F : 1.0F;
+   }
+
    protected boolean supportsBreakDoorGoal() {
       return true;
    }

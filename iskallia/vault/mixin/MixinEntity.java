@@ -29,22 +29,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MixinEntity {
    @Shadow
    public Level level;
+   @Shadow
+   @Nullable
+   private RemovalReason removalReason;
 
    @Shadow
    @Nullable
    public abstract Entity changeDimension(ServerLevel var1, ITeleporter var2);
 
    @Inject(
-      method = {"baseTick"},
-      at = {@At(
-         value = "INVOKE",
-         target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"
-      )}
+      method = {"setRemoved"},
+      at = {@At("HEAD")}
    )
-   public void baseTick(CallbackInfo ci) {
+   public final void setRemoved(RemovalReason p_146876_, CallbackInfo ci) {
       Entity self = (Entity)this;
       if (!self.level.isClientSide) {
-         if (self.getClass() == ItemEntity.class) {
+         if (self.getClass() == ItemEntity.class && p_146876_ == RemovalReason.DISCARDED) {
             ItemEntity itemEntity = (ItemEntity)self;
             Item artifactItem = (Item)ForgeRegistries.ITEMS.getValue(ModBlocks.VAULT_ARTIFACT.getRegistryName());
             if (itemEntity.getItem().getItem() == artifactItem) {
@@ -52,7 +52,7 @@ public abstract class MixinEntity {
                ItemEntity newItemEntity = new ItemEntity(world, self.getX(), self.getY(), self.getZ(), new ItemStack(ModItems.ARTIFACT_FRAGMENT));
                this.spawnParticles(world, self.blockPosition());
                world.addFreshEntity(newItemEntity);
-               itemEntity.remove(RemovalReason.DISCARDED);
+               itemEntity.remove(RemovalReason.KILLED);
             }
          }
       }

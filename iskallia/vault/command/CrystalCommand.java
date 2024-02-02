@@ -13,6 +13,10 @@ import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.crystal.objective.NullCrystalObjective;
+import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
+import iskallia.vault.world.data.ParadoxCrystalData;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.stream.Collectors;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -56,6 +60,28 @@ public class CrystalCommand extends Command {
       builder.then(Commands.literal("clearObjective").executes(this::clearObjective));
       builder.then(Commands.literal("setInstability").then(Commands.argument("instability", FloatArgumentType.floatArg(0.0F)).executes(this::setInstability)));
       builder.then(Commands.literal("setLevel").then(Commands.argument("level", IntegerArgumentType.integer(0)).executes(this::setLevel)));
+      builder.then(
+         Commands.literal("setParadoxCooldown").then(Commands.argument("timeoutSeconds", IntegerArgumentType.integer(0)).executes(this::setParadoxCooldown))
+      );
+   }
+
+   private int setParadoxCooldown(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ItemStack crystal = this.getCrystal(context);
+      CrystalData data = CrystalData.read(crystal);
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      if (!(data.getObjective() instanceof ParadoxCrystalObjective)) {
+         player.sendMessage(new TextComponent("Only works on divine paradox crystals"), Util.NIL_UUID);
+         return 0;
+      } else {
+         ParadoxCrystalData.Entry entry = ParadoxCrystalData.get(player.getServer()).getOrCreate(player.getUUID());
+         entry.unlockTime = ZonedDateTime.now()
+            .plusSeconds(IntegerArgumentType.getInteger(context, "timeoutSeconds"))
+            .withZoneSameInstant(ZoneId.of("UTC"))
+            .toInstant()
+            .toEpochMilli();
+         entry.changed = true;
+         return 0;
+      }
    }
 
    private int setLevel(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {

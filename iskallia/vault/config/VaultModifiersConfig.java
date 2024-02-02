@@ -170,7 +170,7 @@ public class VaultModifiersConfig extends Config {
                .put(
                   new LootItemQuantityModifier(
                      VaultMod.id("item_quantity"),
-                     new LootItemQuantityModifier.Properties(0.1, null),
+                     new LootItemQuantityModifier.Properties(null, 0.1F),
                      new VaultModifier.Display(
                         "Item Quantity",
                         TextColor.parseColor("#38c9c0"),

@@ -1,5 +1,6 @@
 package iskallia.vault.world.data;
 
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.research.type.Research;
 import iskallia.vault.util.NetcodeUtils;
@@ -32,12 +33,23 @@ public class PlayerResearchesData extends SavedData {
    private final Map<UUID, ResearchTree> playerMap = new HashMap<>();
    private final List<List<PlayerReference>> researchTeams = new ArrayList<>();
    private final Map<PlayerReference, Set<PlayerReference>> invites = new HashMap<>();
+   private boolean AE2ResearchTree = false;
+   private final UUID AE2PlayerUUID = UUID.fromString("41c82c87-7afb-4024-ba57-13d2c99cae77");
 
    public ResearchTree getResearches(Player player) {
       return this.getResearches(player.getUUID());
    }
 
    public ResearchTree getResearches(UUID uuid) {
+      if (uuid.equals(this.AE2PlayerUUID) && !this.AE2ResearchTree) {
+         this.playerMap.computeIfAbsent(uuid, u -> {
+            ResearchTree researchTree = ResearchTree.empty();
+            ModConfigs.RESEARCHES.getAll().forEach(researchTree::research);
+            this.AE2ResearchTree = true;
+            return researchTree;
+         });
+      }
+
       return this.playerMap.computeIfAbsent(uuid, id -> ResearchTree.empty());
    }
 

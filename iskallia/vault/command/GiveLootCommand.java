@@ -173,6 +173,7 @@ public class GiveLootCommand extends Command {
             AwardCrateObjective objective = AwardCrateObjective.ofConfig(type, type.toString().toLowerCase(), level, true);
             CrateLootGenerator crateLootGenerator = new CrateLootGenerator(
                objective.get(AwardCrateObjective.LOOT_TABLE),
+               0.0F,
                objective.has(AwardCrateObjective.ADD_ARTIFACT),
                objective.get(AwardCrateObjective.ARTIFACT_CHANCE)
             );

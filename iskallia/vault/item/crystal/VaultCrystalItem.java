@@ -142,7 +142,7 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
       if (!context.getLevel().isClientSide && context.getPlayer() != null) {
          CrystalData data = CrystalData.read(context.getItemInHand());
          BlockPos pos = context.getClickedPos();
-         if (data.onPlaced(context) && this.tryCreatePortal(context.getLevel(), pos, context.getClickedFace(), data)) {
+         if (this.tryCreatePortal(context.getLevel(), pos, context.getClickedFace(), data) && data.onPlaced(context)) {
             context.getLevel().playSound(null, pos.getX(), pos.getY(), pos.getZ(), ModSounds.VAULT_PORTAL_OPEN, SoundSource.BLOCKS, 1.0F, 1.0F);
             MutableComponent playerName = context.getPlayer().getDisplayName().copy();
             playerName.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(9974168)));

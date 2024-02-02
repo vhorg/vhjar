@@ -42,11 +42,18 @@ public class StageManager {
    public static ResearchTree RESEARCH_TREE = ResearchTree.empty();
 
    public static ResearchTree getResearchTree(Player player) {
+      ResearchTree researchTree = ResearchTree.empty();
       if (player instanceof FakePlayer) {
-         return ResearchTree.empty();
+         researchTree = PlayerResearchesData.get((ServerLevel)player.level).getResearches(player);
       } else {
-         return player.level.isClientSide ? RESEARCH_TREE : PlayerResearchesData.get((ServerLevel)player.level).getResearches(player);
+         if (player.level.isClientSide) {
+            return RESEARCH_TREE;
+         }
+
+         researchTree = PlayerResearchesData.get((ServerLevel)player.level).getResearches(player);
       }
+
+      return researchTree;
    }
 
    private static void warnResearchRequirement(String researchName, String i18nKey) {

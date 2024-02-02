@@ -110,7 +110,7 @@ public class VaultExitContainerScreenData {
          new TextComponent("  Mobs Unalived - ")
             .append(shiftDown ? String.format("(x%.1f) %.1f xp", xpMultiplier, mobsKilledXp) : String.format("%.1f xp", mobsKilledXp * xpMultiplier))
       );
-      float completionXp = getCompletionXp(vault, statCollector);
+      float completionXp = getCompletionXp(vault, statCollector, xpMultiplier);
       list.add(
          new TextComponent("  Objective - ")
             .append(shiftDown ? String.format("(x%.1f) %.1f xp", xpMultiplier, completionXp) : String.format("%.1f xp", completionXp * xpMultiplier))
@@ -163,8 +163,11 @@ public class VaultExitContainerScreenData {
       return xp;
    }
 
-   public static float getCompletionXp(Vault vault, StatCollector statCollector) {
-      return ModConfigs.VAULT_STATS.getCompletion(vault).get(statCollector.getCompletion());
+   public static float getCompletionXp(Vault vault, StatCollector statCollector, float xpMultiplier) {
+      return xpMultiplier == 0.0F
+         ? 0.0F
+         : ModConfigs.VAULT_STATS.getCompletion(vault).get(statCollector.getCompletion())
+            * (statCollector.get(StatCollector.OBJECTIVE_EXP_MULTIPLIER) / xpMultiplier);
    }
 
    public static int getCoinPile(StatCollector statCollector) {

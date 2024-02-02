@@ -352,7 +352,7 @@ public class ModGearAttributes {
       "item_rarity",
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
-      ModGearAttributeReaders.percentageReader("Item Rarity", 15054873),
+      ModGearAttributeReaders.percentageReader("Item Rarity", 15400704),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> TRAP_DISARMING = attr(
@@ -416,6 +416,48 @@ public class ModGearAttributes {
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
       ModGearAttributeReaders.percentageReader("Nether Damage", 16749406),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> DAMAGE_CHAMPION = attr(
+      "damage_champion",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.increasedReader("Champion Damage", 6213132),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> DAMAGE_DUNGEON = attr(
+      "damage_dungeon",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Dungeon Damage", 823502),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> DAMAGE_TANK = attr(
+      "damage_tank",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Tank Damage", 13513996),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> DAMAGE_HORDE = attr(
+      "damage_horde",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Horde Damage", 13094412),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> DAMAGE_ASSASSIN = attr(
+      "damage_assassin",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Assassin Damage", 11881191),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> DAMAGE_DWELLER = attr(
+      "damage_dweller",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Dweller Damage", 15895195),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> VELARA_AFFINITY = attr(
@@ -759,6 +801,12 @@ public class ModGearAttributes {
       registry.register(DAMAGE_SPIDERS);
       registry.register(DAMAGE_UNDEAD);
       registry.register(DAMAGE_NETHER);
+      registry.register(DAMAGE_CHAMPION);
+      registry.register(DAMAGE_DUNGEON);
+      registry.register(DAMAGE_TANK);
+      registry.register(DAMAGE_HORDE);
+      registry.register(DAMAGE_ASSASSIN);
+      registry.register(DAMAGE_DWELLER);
       registry.register(VELARA_AFFINITY);
       registry.register(TENOS_AFFINITY);
       registry.register(WENDARR_AFFINITY);

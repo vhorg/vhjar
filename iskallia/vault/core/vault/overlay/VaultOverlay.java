@@ -81,7 +81,7 @@ public class VaultOverlay extends DataObject<VaultOverlay> {
          }
 
          vault.ifPresent(Vault.MODIFIERS, modifiers -> renderModifiers.putAll(modifiers.getDisplayGroup()));
-         ModifiersRenderer.renderVaultModifiers(renderModifiers, matrixStack);
+         ModifiersRenderer.renderVaultModifiers(renderModifiers, matrixStack, false);
       }
    }
 }

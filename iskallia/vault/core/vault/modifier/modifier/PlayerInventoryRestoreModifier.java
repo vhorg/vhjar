@@ -87,7 +87,7 @@ public class PlayerInventoryRestoreModifier extends VaultModifier<PlayerInventor
                      }
 
                      if (instantRestoreModifier != null && !event.getSource().isBypassInvul()) {
-                        ModifierContext actualContext = vault.get(Vault.MODIFIERS).getContext(instantRestoreModifier);
+                        ModifierContext actualContext = vault.get(Vault.MODIFIERS).getContexts(instantRestoreModifier).findFirst().orElse(null);
                         if (actualContext != null) {
                            sPlayer.setHealth(sPlayer.getMaxHealth());
                            sPlayer.removeAllEffects();

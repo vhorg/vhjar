@@ -1,9 +1,9 @@
 {
   "parent": "the_vault:block/god_blessing_velara",
   "overrides": [
-    { "predicate": { "the_vault:god_blessing_type": 0 }, "model": "the_vault:item/god_blessing_velara" },
-    { "predicate": { "the_vault:god_blessing_type": 1 }, "model": "the_vault:item/god_blessing_tenos" },
-    { "predicate": { "the_vault:god_blessing_type": 2 }, "model": "the_vault:item/god_blessing_wendarr" },
-    { "predicate": { "the_vault:god_blessing_type": 3 }, "model": "the_vault:item/god_blessing_idona" }
+    { "predicate": { "the_vault:god_item_type": 0 }, "model": "the_vault:item/god_blessing_velara" },
+    { "predicate": { "the_vault:god_item_type": 1 }, "model": "the_vault:item/god_blessing_tenos" },
+    { "predicate": { "the_vault:god_item_type": 2 }, "model": "the_vault:item/god_blessing_wendarr" },
+    { "predicate": { "the_vault:god_item_type": 3 }, "model": "the_vault:item/god_blessing_idona" }
   ]
 }

@@ -3,6 +3,7 @@ package iskallia.vault.entity.boss;
 import com.mojang.math.Vector3f;
 import iskallia.vault.client.particles.ArtifactBossImmunityParticleOptions;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.entity.VaultBoss;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
@@ -26,6 +27,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -33,9 +35,12 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.BossEvent.BossBarColor;
+import net.minecraft.world.BossEvent.BossBarOverlay;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.SpawnGroupData;
@@ -69,7 +74,7 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 @EventBusSubscriber
-public class ArtifactBossEntity extends Monster implements IAnimatable {
+public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBoss {
    public static final EntityDataSerializer<Optional<ArtifactBossEntity.AttackMove>> OPTIONAL_ATTACK_MOVE = new EntityDataSerializer<Optional<ArtifactBossEntity.AttackMove>>() {
       public void write(FriendlyByteBuf buf, Optional<ArtifactBossEntity.AttackMove> value) {
          if (value.isPresent()) {
@@ -112,6 +117,7 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
       .addAnimation("animation.vaultbattlemage.stunnedloop", EDefaultLoopTypes.LOOP);
    protected static final AnimationBuilder IDLE_ANIM = new AnimationBuilder().addAnimation("animation.vaultbattlemage.idle", EDefaultLoopTypes.LOOP);
    protected static final AnimationBuilder WALK_ANIM = new AnimationBuilder().addAnimation("animation.vaultbattlemage.walk", EDefaultLoopTypes.LOOP);
+   protected static final AnimationBuilder AOE_CLOSE = new AnimationBuilder().addAnimation("animation.vaultbattlemage.aoeclose2", EDefaultLoopTypes.PLAY_ONCE);
    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 
    public ArtifactBossEntity(EntityType<ArtifactBossEntity> type, Level world) {
@@ -147,6 +153,7 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
 
    public static Builder createAttributes() {
       return Monster.createMonsterAttributes()
+         .add(Attributes.MAX_HEALTH, 1000000.0)
          .add(Attributes.FOLLOW_RANGE, 35.0)
          .add(Attributes.MOVEMENT_SPEED, 0.1)
          .add(Attributes.ATTACK_DAMAGE, 3.0)
@@ -252,6 +259,16 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
          : false;
    }
 
+   public void push(Entity pEntity) {
+   }
+
+   public void push(double pX, double pY, double pZ) {
+   }
+
+   public boolean startRiding(Entity pEntity, boolean pForce) {
+      return true;
+   }
+
    public void setScaledHealth(int baseHealth) {
       double healthMultiplier = ServerVaults.get(this.level)
          .map(vault -> WorldSettings.get(this.level).getPlayerDifficulty(vault.get(Vault.OWNER)).getBossHealthMultiplier())
@@ -317,6 +334,7 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
 
    private void setNextStage() {
       this.setCurrentStageIndex(this.getCurrentStageIndex() + 1);
+      this.getCurrentStage().ifPresent(IBossStage::init);
    }
 
    public boolean hasMoreStages() {
@@ -394,7 +412,10 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
       } else {
          super.die(cause);
          this.meleeAttackGoal.stop();
-         this.getCurrentStage().ifPresent(IBossStage::stop);
+         this.getCurrentStage().ifPresent(stage -> {
+            stage.stop();
+            stage.finish();
+         });
       }
    }
 
@@ -436,7 +457,7 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
       data.addAnimationController(new AnimationController(this, "StageAnimation", 5.0F, this::stageAnimController));
       data.addAnimationController(new AnimationController(this, "Walking", 5.0F, this::walkAnimController));
       data.addAnimationController(new AnimationController(this, "Idle", 5.0F, this::idleAnimController));
-      data.addAnimationController(new AnimationController(this, "AttackMove", 5.0F, this::attackMoveAnimController));
+      data.addAnimationController(new AnimationController(this, "AttackMove", 0.0F, this::attackMoveAnimController));
    }
 
    private PlayState attackMoveAnimController(AnimationEvent<ArtifactBossEntity> event) {
@@ -457,6 +478,10 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
             }
             case SUMMON -> {
                controller.setAnimation(SUMMON_ANIM);
+               yield PlayState.CONTINUE;
+            }
+            case AOECLOSE -> {
+               controller.setAnimation(AOE_CLOSE);
                yield PlayState.CONTINUE;
             }
          };
@@ -546,6 +571,11 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
       return true;
    }
 
+   @Override
+   public ServerBossEvent getServerBossInfo() {
+      return new ServerBossEvent(this.getDisplayName(), BossBarColor.RED, BossBarOverlay.PROGRESS);
+   }
+
    static {
       EntityDataSerializers.registerSerializer(OPTIONAL_ATTACK_MOVE);
    }
@@ -554,7 +584,8 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
       SUMMON,
       HAMMERSMASH,
       UPPERCUT,
-      GROUNDSLAM;
+      GROUNDSLAM,
+      AOECLOSE;
    }
 
    private static class BossStageGoal extends Goal {
@@ -603,6 +634,7 @@ public class ArtifactBossEntity extends Monster implements IAnimatable {
             currentStage.getControlFlags().forEach(f -> this.boss.goalSelector.setControlFlag(f, true));
             currentStage.stop();
             if (currentStage.isFinished()) {
+               currentStage.finish();
                this.boss.setNextStage();
             }
          });

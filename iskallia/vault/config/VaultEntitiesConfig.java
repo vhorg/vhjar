@@ -3,31 +3,55 @@ package iskallia.vault.config;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.entry.LevelEntryList;
+import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class VaultEntitiesConfig extends Config {
    @Expose
-   private final LevelEntryList<VaultEntitiesConfig.SlimeEffectLevel> slimeClouds = new LevelEntryList<>();
+   private final List<VaultEntitiesConfig.DeathEffect> deathEffects = new ArrayList<>();
    @Expose
-   private final LevelEntryList<VaultEntitiesConfig.WitchEffectsLevel> witchThrownEffects = new LevelEntryList<>();
+   private final List<VaultEntitiesConfig.ThrowEffect> throwEffects = new ArrayList<>();
 
-   public Optional<EffectCloudAttribute.CloudConfig> getSlimeEffectConfig(int level) {
-      return this.slimeClouds.getForLevel(level).map(VaultEntitiesConfig.SlimeEffectLevel::getConfig);
+   public List<EffectCloudAttribute.CloudConfig> getDeathEffects(int level, Entity entity) {
+      List<EffectCloudAttribute.CloudConfig> effects = new ArrayList<>();
+
+      for (VaultEntitiesConfig.DeathEffect deathEffect : this.deathEffects) {
+         if (deathEffect.getFilter().test(entity)) {
+            effects.addAll(
+               deathEffect.getLevels()
+                  .getForLevel(level)
+                  .map(VaultEntitiesConfig.DeathEffect.Level::getConfig)
+                  .map(Collections::singletonList)
+                  .orElse(Collections.emptyList())
+            );
+         }
+      }
+
+      return effects;
    }
 
-   public List<MobEffectInstance> getWitchAdditionalThrownEffects(int level) {
-      return this.witchThrownEffects.getForLevel(level).map(VaultEntitiesConfig.WitchEffectsLevel::getEffects).orElse(Collections.emptyList());
+   public List<MobEffectInstance> getThrowEffects(int level, Entity entity) {
+      List<MobEffectInstance> effects = new ArrayList<>();
+
+      for (VaultEntitiesConfig.ThrowEffect throwEffect : this.throwEffects) {
+         if (throwEffect.getFilter().test(entity)) {
+            effects.addAll(throwEffect.getLevels().getForLevel(level).map(VaultEntitiesConfig.ThrowEffect.Level::getEffects).orElse(Collections.emptyList()));
+         }
+      }
+
+      return effects;
    }
 
    @Override
@@ -37,81 +61,131 @@ public class VaultEntitiesConfig extends Config {
 
    @Override
    protected void reset() {
-      this.slimeClouds.clear();
+      this.deathEffects.clear();
+      this.throwEffects.clear();
       EffectCloudAttribute.CloudConfig config = new EffectCloudAttribute.CloudConfig("", VaultMod.id(""), 80, 5.0F, Color.GREEN.getRGB(), true, 1.0F);
       config.setAdditionalEffect(new EffectCloudAttribute.CloudEffectConfig(MobEffects.POISON.getRegistryName(), 900, 0));
-      this.slimeClouds.add(new VaultEntitiesConfig.SlimeEffectLevel(0, config));
-      this.witchThrownEffects.clear();
-      this.witchThrownEffects.add(new VaultEntitiesConfig.WitchEffectsLevel(0).addEffect(new VaultEntitiesConfig.CustomEffect(MobEffects.POISON, 0, 120)));
+      this.deathEffects.add(new VaultEntitiesConfig.DeathEffect(EntityPredicate.of("minecraft:slime", true).orElseThrow()).put(0, config));
+      this.throwEffects
+         .add(
+            new VaultEntitiesConfig.ThrowEffect(EntityPredicate.of("minecraft:witch", true).orElseThrow())
+               .put(0, new VaultEntitiesConfig.ThrowEffect.CustomEffect(MobEffects.POISON, 0, 120))
+         );
    }
 
-   public static class CustomEffect {
+   public static class DeathEffect {
       @Expose
-      private final ResourceLocation effect;
+      private EntityPredicate filter;
       @Expose
-      private final int amplifier;
-      @Expose
-      private final int duration;
+      private LevelEntryList<VaultEntitiesConfig.DeathEffect.Level> levels;
 
-      public CustomEffect(MobEffect effect, int amplifier, int duration) {
-         this(effect.getRegistryName(), amplifier, duration);
+      public DeathEffect(EntityPredicate filter) {
+         this.filter = filter;
+         this.levels = new LevelEntryList<>();
       }
 
-      public CustomEffect(ResourceLocation effect, int amplifier, int duration) {
-         this.effect = effect;
-         this.amplifier = amplifier;
-         this.duration = duration;
+      public EntityPredicate getFilter() {
+         return this.filter;
       }
 
-      public MobEffectInstance makeEffect() {
-         MobEffect effect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(this.effect);
-         return new MobEffectInstance(effect, this.duration, this.amplifier, false, false, true);
-      }
-   }
-
-   public static class SlimeEffectLevel implements LevelEntryList.ILevelEntry {
-      @Expose
-      private final int level;
-      @Expose
-      private final EffectCloudAttribute.CloudConfig config;
-
-      public SlimeEffectLevel(int level, EffectCloudAttribute.CloudConfig config) {
-         this.level = level;
-         this.config = config;
+      public LevelEntryList<VaultEntitiesConfig.DeathEffect.Level> getLevels() {
+         return this.levels;
       }
 
-      private EffectCloudAttribute.CloudConfig getConfig() {
-         return this.config;
-      }
-
-      @Override
-      public int getLevel() {
-         return this.level;
-      }
-   }
-
-   public static class WitchEffectsLevel implements LevelEntryList.ILevelEntry {
-      @Expose
-      private final int level;
-      @Expose
-      private final List<VaultEntitiesConfig.CustomEffect> effects = new ArrayList<>();
-
-      public WitchEffectsLevel(int level) {
-         this.level = level;
-      }
-
-      private VaultEntitiesConfig.WitchEffectsLevel addEffect(VaultEntitiesConfig.CustomEffect effect) {
-         this.effects.add(effect);
+      public VaultEntitiesConfig.DeathEffect put(int level, EffectCloudAttribute.CloudConfig config) {
+         this.levels.put(new VaultEntitiesConfig.DeathEffect.Level(level, config));
          return this;
       }
 
-      public List<MobEffectInstance> getEffects() {
-         return this.effects.stream().map(VaultEntitiesConfig.CustomEffect::makeEffect).collect(Collectors.toList());
+      public static class Level implements LevelEntryList.ILevelEntry {
+         @Expose
+         private final int level;
+         @Expose
+         private final EffectCloudAttribute.CloudConfig config;
+
+         public Level(int level, EffectCloudAttribute.CloudConfig config) {
+            this.level = level;
+            this.config = config;
+         }
+
+         @Override
+         public int getLevel() {
+            return this.level;
+         }
+
+         private EffectCloudAttribute.CloudConfig getConfig() {
+            return this.config;
+         }
+      }
+   }
+
+   public static class ThrowEffect {
+      @Expose
+      private EntityPredicate filter;
+      @Expose
+      private LevelEntryList<VaultEntitiesConfig.ThrowEffect.Level> levels;
+
+      public ThrowEffect(EntityPredicate filter) {
+         this.filter = filter;
+         this.levels = new LevelEntryList<>();
       }
 
-      @Override
-      public int getLevel() {
-         return this.level;
+      public EntityPredicate getFilter() {
+         return this.filter;
+      }
+
+      public LevelEntryList<VaultEntitiesConfig.ThrowEffect.Level> getLevels() {
+         return this.levels;
+      }
+
+      public VaultEntitiesConfig.ThrowEffect put(int level, VaultEntitiesConfig.ThrowEffect.CustomEffect... effects) {
+         this.levels.put(new VaultEntitiesConfig.ThrowEffect.Level(level, Arrays.asList(effects)));
+         return this;
+      }
+
+      public static class CustomEffect {
+         @Expose
+         private final ResourceLocation effect;
+         @Expose
+         private final int amplifier;
+         @Expose
+         private final int duration;
+
+         public CustomEffect(MobEffect effect, int amplifier, int duration) {
+            this(effect.getRegistryName(), amplifier, duration);
+         }
+
+         public CustomEffect(ResourceLocation effect, int amplifier, int duration) {
+            this.effect = effect;
+            this.amplifier = amplifier;
+            this.duration = duration;
+         }
+
+         public MobEffectInstance makeEffect() {
+            MobEffect effect = (MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(this.effect);
+            return new MobEffectInstance(effect, this.duration, this.amplifier, false, false, true);
+         }
+      }
+
+      public static class Level implements LevelEntryList.ILevelEntry {
+         @Expose
+         private final int level;
+         @Expose
+         private final List<VaultEntitiesConfig.ThrowEffect.CustomEffect> effects = new ArrayList<>();
+
+         public Level(int level, List<VaultEntitiesConfig.ThrowEffect.CustomEffect> effects) {
+            this.level = level;
+            this.effects.addAll(effects);
+         }
+
+         public List<MobEffectInstance> getEffects() {
+            return this.effects.stream().map(VaultEntitiesConfig.ThrowEffect.CustomEffect::makeEffect).collect(Collectors.toList());
+         }
+
+         @Override
+         public int getLevel() {
+            return this.level;
+         }
       }
    }
 }

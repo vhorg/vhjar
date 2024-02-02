@@ -20,11 +20,13 @@ import net.minecraft.world.item.ItemStack;
 public class CrateLootGenerator {
    @Nullable
    private final LootTableKey lootTable;
+   private final float itemQuantity;
    private final boolean addArtifact;
    private final float artifactChance;
 
-   public CrateLootGenerator(@Nullable LootTableKey lootTable, boolean addArtifact, float artifactChance) {
+   public CrateLootGenerator(@Nullable LootTableKey lootTable, float itemQuantity, boolean addArtifact, float artifactChance) {
       this.lootTable = lootTable;
+      this.itemQuantity = itemQuantity;
       this.addArtifact = addArtifact;
       this.artifactChance = artifactChance;
    }
@@ -46,7 +48,7 @@ public class CrateLootGenerator {
    public NonNullList<ItemStack> createLoot(Vault vault, Listener listener, RandomSource random) {
       NonNullList<ItemStack> loot = NonNullList.create();
       if (this.lootTable != null) {
-         LootTableGenerator generator = new LootTableGenerator(vault.get(Vault.VERSION), this.lootTable, 0.0F);
+         LootTableGenerator generator = new LootTableGenerator(vault.get(Vault.VERSION), this.lootTable, this.itemQuantity);
          generator.generate(random);
          generator.getItems().forEachRemaining(loot::add);
       }

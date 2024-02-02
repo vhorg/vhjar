@@ -102,7 +102,7 @@ public class PlayerReputationData extends SavedData {
 
    private static class Entry implements INBTSerializable<CompoundTag> {
       private final Map<VaultGod, Integer> reputation = new HashMap<>();
-      private int version;
+      private int version = 1;
 
       public void addReputation(VaultGod god, int reputation) {
          reputation = Math.min(25 - this.reputation.getOrDefault(god, 0), reputation);

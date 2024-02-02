@@ -1,6 +1,7 @@
 package iskallia.vault.gear.modification;
 
 import iskallia.vault.container.VaultArtisanStationContainer;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModGearAttributes;
 import java.util.Optional;
@@ -37,7 +38,8 @@ public record GearModificationAction(int slotIndex, GearModification modificatio
                ItemStack material = input.copy();
                input.shrink(1);
                inSlot.set(input);
-               GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), data.getItemLevel(), potential.get(), this.modification());
+               String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
+               GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), rollType, data.getItemLevel(), potential.get(), this.modification());
                ItemStack bronze = container.getBronzeSlot().getItem();
                bronze.shrink(cost.costBronze());
                container.getBronzeSlot().set(bronze);
@@ -63,7 +65,8 @@ public record GearModificationAction(int slotIndex, GearModification modificatio
             if (potential.isEmpty()) {
                return false;
             } else {
-               GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), data.getItemLevel(), potential.get(), this.modification());
+               String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
+               GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), rollType, data.getItemLevel(), potential.get(), this.modification());
                ItemStack bronze = container.getBronzeSlot().getItem();
                ItemStack plating = container.getPlatingSlot().getItem();
                return bronze.getCount() >= cost.costBronze() && plating.getCount() >= cost.costPlating()

@@ -19,7 +19,7 @@ public class BleedEffect extends MobEffect {
    }
 
    public void applyEffectTick(LivingEntity entity, int amplifier) {
-      if (!entity.level.isClientSide) {
+      if (!entity.level.isClientSide && !entity.isDeadOrDying()) {
          MobEffectInstance instance = entity.getEffect(ModEffects.BLEED);
          if (instance != null) {
             if (instance.getDuration() % 40 == 0) {

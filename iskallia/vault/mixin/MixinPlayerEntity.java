@@ -12,7 +12,10 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
+import iskallia.vault.world.data.PlayerTitlesData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
@@ -64,6 +67,9 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
 
    @Shadow
    protected abstract void actuallyHurt(DamageSource var1, float var2);
+
+   @Shadow
+   protected abstract MutableComponent decorateDisplayNameComponent(MutableComponent var1);
 
    protected MixinPlayerEntity(EntityType<? extends LivingEntity> type, Level worldIn) {
       super(type, worldIn);
@@ -227,5 +233,17 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
       Player thisPlayer = (Player)this;
       ItemStack mainHandItem = thisPlayer.getMainHandItem();
       return mainHandItem.getItem() instanceof VaultGearItem gearItem && gearItem.isBroken(mainHandItem) ? SoundEvents.PLAYER_ATTACK_NODAMAGE : sound;
+   }
+
+   @Inject(
+      method = {"getDisplayName"},
+      at = {@At("RETURN")},
+      cancellable = true
+   )
+   public void getDisplayName(CallbackInfoReturnable<Component> cir) {
+      if (!this.level.isClientSide) {
+         PlayerTitlesData.getCustomName((Player)this, (Component)cir.getReturnValue(), PlayerTitlesData.Type.CHAT)
+            .ifPresent(newName -> cir.setReturnValue(this.decorateDisplayNameComponent(newName)));
+      }
    }
 }
