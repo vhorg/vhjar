@@ -21,6 +21,7 @@ import iskallia.vault.item.crystal.objective.ScavengerCrystalObjective;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
 import iskallia.vault.item.crystal.time.CrystalTime;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class VaultCrystalConfig extends Config {
    @Expose
    public LevelEntryList<VaultCrystalConfig.LayoutEntry> LAYOUTS;
    @Expose
-   public LevelEntryList<VaultCrystalConfig.ObjectiveEntry> OBJECTIVES;
+   public Map<ResourceLocation, LevelEntryList<VaultCrystalConfig.ObjectiveEntry>> OBJECTIVES;
    @Expose
    public Map<ResourceLocation, LevelEntryList<VaultCrystalConfig.TimeEntry>> TIMES;
    @Expose
@@ -59,8 +60,8 @@ public class VaultCrystalConfig extends Config {
       return this.LAYOUTS.getForLevel(level).flatMap(entry -> entry.pool.getRandom(random));
    }
 
-   public Optional<CrystalObjective> getRandomObjective(int level, RandomSource random) {
-      return this.OBJECTIVES.getForLevel(level).flatMap(entry -> entry.pool.getRandom(random));
+   public Optional<CrystalObjective> getRandomObjective(ResourceLocation id, int level, RandomSource random) {
+      return this.OBJECTIVES.getOrDefault(id, LevelEntryList.empty()).getForLevel(level).flatMap(entry -> entry.pool.getRandom(random));
    }
 
    public Optional<CrystalTime> getRandomTime(ResourceLocation id, int level, RandomSource random) {
@@ -133,16 +134,7 @@ public class VaultCrystalConfig extends Config {
                   .add(new ClassicPolygonCrystalLayout(1, new int[]{-4, 0, 0, 4, 4, 0, 0, -4}), 1)
             )
          );
-      this.OBJECTIVES = new LevelEntryList<>();
-      this.OBJECTIVES
-         .add(
-            new VaultCrystalConfig.ObjectiveEntry(
-               0,
-               new WeightedList<CrystalObjective>()
-                  .add(new BossCrystalObjective(IntRoll.ofUniform(3, 6), IntRoll.ofUniform(3, 6), 0.1F), 1)
-                  .add(new ScavengerCrystalObjective(0.1F), 1)
-            )
-         );
+      this.OBJECTIVES = new HashMap<>();
       this.SEALS = new LinkedHashMap<>();
       LevelEntryList<VaultCrystalConfig.SealEntry> list = new LevelEntryList<>();
       this.SEALS.put(ModItems.CRYSTAL_SEAL_EXECUTIONER.getRegistryName(), list);

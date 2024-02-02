@@ -24,6 +24,7 @@ import iskallia.vault.client.gui.screen.VaultCharmControllerScreen;
 import iskallia.vault.client.gui.screen.VaultCrateScreen;
 import iskallia.vault.client.gui.screen.block.AlchemyArchiveScreen;
 import iskallia.vault.client.gui.screen.block.AlchemyTableScreen;
+import iskallia.vault.client.gui.screen.block.AscensionForgeScreen;
 import iskallia.vault.client.gui.screen.block.InscriptionTableScreen;
 import iskallia.vault.client.gui.screen.block.ModifierDiscoveryScreen;
 import iskallia.vault.client.gui.screen.block.ModifierWorkbenchScreen;
@@ -99,6 +100,7 @@ public class ModScreens {
       MenuScreens.register(ModContainers.VAULT_ENCHANTER_CONTAINER, VaultEnchanterScreen::new);
       MenuScreens.register(ModContainers.SKILL_ALTAR_CONTAINER, SkillAltarScreen.Default::new);
       MenuScreens.register(ModContainers.SKILL_ALTAR_IMPORT_CONTAINER, SkillAltarScreen.Import::new);
+      MenuScreens.register(ModContainers.ASCENSION_FORGE_CONTAINER, AscensionForgeScreen::new);
    }
 
    public static void registerOverlayEvents() {

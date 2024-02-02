@@ -52,6 +52,7 @@ import iskallia.vault.gear.model.armor.layers.GladiatorArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GoatArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GoblinArmorLayers;
 import iskallia.vault.gear.model.armor.layers.GrizzlyArmorLayers;
+import iskallia.vault.gear.model.armor.layers.GuybrushArmorLayers;
 import iskallia.vault.gear.model.armor.layers.HellCowArmorLayers;
 import iskallia.vault.gear.model.armor.layers.HellDuckArmorLayers;
 import iskallia.vault.gear.model.armor.layers.HippopotamusArmorLayers;
@@ -63,6 +64,7 @@ import iskallia.vault.gear.model.armor.layers.KitsuneArmorLayers;
 import iskallia.vault.gear.model.armor.layers.KnightArmorLayers;
 import iskallia.vault.gear.model.armor.layers.LeprechaunArmorLayers;
 import iskallia.vault.gear.model.armor.layers.LionguardArmorLayers;
+import iskallia.vault.gear.model.armor.layers.LupiCanisArmorLayers;
 import iskallia.vault.gear.model.armor.layers.MagmaticArmorLayers;
 import iskallia.vault.gear.model.armor.layers.MailboxArmorLayers;
 import iskallia.vault.gear.model.armor.layers.MekaArmorLayers;
@@ -87,8 +89,10 @@ import iskallia.vault.gear.model.armor.layers.SamuraiArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ScarecrowArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ScoutArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ShadowKingArmorLayers;
+import iskallia.vault.gear.model.armor.layers.SilentFoxxyArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SkallibombaArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SoulEaterArmorLayers;
+import iskallia.vault.gear.model.armor.layers.SoulflameArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SpikyPlatemailArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SquireArmorLayers;
 import iskallia.vault.gear.model.armor.layers.StressFlowerArmorLayers;
@@ -1151,6 +1155,51 @@ public class ModDynamicModels {
          new ArmorModel(VaultMod.id("gear/armor/victory"), "Victory")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
             .usingLayers(new VictoryArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel SILENTFOXXY = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/silentfoxxy"), "SilentFoxxy")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new SilentFoxxyArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel LUPICANIS = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/lupicanis"), "LupiCanis")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new LupiCanisArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel GUYBRUSH = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/guybrush"), "Mighty Pirate")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new GuybrushArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel SOULFLAME = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/soulflame"), "Soul Flame")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new SoulflameArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel GOLDFLAME = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/goldflame"), "Gold Flame")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new SoulflameArmorLayers())
             .addSlot(EquipmentSlot.HEAD)
             .addSlot(EquipmentSlot.CHEST)
             .addSlot(EquipmentSlot.LEGS)

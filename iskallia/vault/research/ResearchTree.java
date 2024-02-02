@@ -22,6 +22,7 @@ import net.minecraftforge.network.NetworkDirection;
 public class ResearchTree implements INBTSerializable<CompoundTag> {
    protected final List<String> researchesDone = new ArrayList<>();
    protected final List<PlayerReference> researchShares = new ArrayList<>();
+   public static boolean isPenalty;
 
    private ResearchTree() {
    }
@@ -32,6 +33,10 @@ public class ResearchTree implements INBTSerializable<CompoundTag> {
 
    public static ResearchTree empty() {
       return new ResearchTree();
+   }
+
+   public static void setResearchGamerule(boolean pen) {
+      isPenalty = pen;
    }
 
    public List<String> getResearchesDone() {
@@ -88,7 +93,7 @@ public class ResearchTree implements INBTSerializable<CompoundTag> {
    }
 
    public float getTeamResearchCostIncreaseMultiplier() {
-      return this.researchShares.size() * 0.5F;
+      return isPenalty ? 0.0F : this.researchShares.size() * 0.5F;
    }
 
    public String restrictedBy(ItemStack item, Restrictions.Type restrictionType) {

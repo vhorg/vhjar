@@ -8,9 +8,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
 public class BasicMeleeAttack implements IMeleeAttack {
    private final double damageMultiplier;
@@ -41,23 +38,14 @@ public class BasicMeleeAttack implements IMeleeAttack {
    }
 
    private boolean canAttack(double distToEnemy, double reach, BasicMeleeAttack.BasicMeleeAttackAttributes attackData, LivingEntity target) {
-      return distToEnemy <= reach && this.isWithinAttackableSlice(attackData, target);
+      return distToEnemy <= reach
+         && this.isWithinAttackableSlice(this.boss, target, attackData.attackableSlice().closenessRatioRequired(), attackData.attackableSlice().angleOffset());
    }
 
    public boolean isWithinAttackableSlice(LivingEntity target) {
-      return this.isWithinAttackableSlice(this.attackData, target);
-   }
-
-   public boolean isWithinAttackableSlice(BasicMeleeAttack.BasicMeleeAttackAttributes attackData, LivingEntity target) {
-      if (target == null) {
-         return false;
-      } else {
-         Vec3 bossViewVector = this.boss.calculateViewVector(this.boss.getViewYRot(1.0F) + attackData.attackableSlice().angleOffset()).normalize();
-         Vec3 positionsVector = new Vec3(target.getX() - this.boss.getX(), target.getEyeY() - this.boss.getEyeY(), target.getZ() - this.boss.getZ());
-         positionsVector = positionsVector.normalize();
-         double closenessRatio = bossViewVector.dot(positionsVector);
-         return closenessRatio > attackData.attackableSlice().closenessRatioRequired();
-      }
+      return this.isWithinAttackableSlice(
+         this.boss, target, this.attackData.attackableSlice().closenessRatioRequired(), this.attackData.attackableSlice().angleOffset()
+      );
    }
 
    @Override
@@ -104,15 +92,10 @@ public class BasicMeleeAttack implements IMeleeAttack {
 
    public boolean doHurtTarget(Entity target) {
       double baseDamage = this.boss.getAttributeValue(Attributes.ATTACK_DAMAGE);
-      double baseKnockback = this.boss.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
       boolean flag = target.hurt(DamageSource.mobAttack(this.boss), (float)(baseDamage * this.damageMultiplier));
       if (flag) {
          if (target instanceof LivingEntity livingTarget) {
-            float ratioX = Mth.sin(this.boss.getYRot() * (float) (Math.PI / 180.0));
-            float ratioZ = -Mth.cos(this.boss.getYRot() * (float) (Math.PI / 180.0));
-            this.knockbackTarget(
-               livingTarget, baseKnockback, this.attackData.horizontalKnockbackMultiplier(), ratioX, ratioZ, this.attackData.verticalKnockbackMultiplier()
-            );
+            this.knockbackTarget(this.boss, livingTarget, this.attackData.horizontalKnockbackMultiplier(), this.attackData.verticalKnockbackMultiplier());
          }
 
          this.boss.setLastHurtMob(target);
@@ -120,24 +103,6 @@ public class BasicMeleeAttack implements IMeleeAttack {
 
       this.boss.level.playSound(null, this.boss.blockPosition(), ModSounds.ARTIFACT_BOSS_ATTACK, SoundSource.HOSTILE, 1.0F, 1.0F);
       return flag;
-   }
-
-   private void knockbackTarget(
-      LivingEntity target, double strength, double horizontalKnockbackMultiplier, double ratioX, double ratioZ, double verticalKnockbackMultiplier
-   ) {
-      LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(target, (float)strength, ratioX, ratioZ);
-      if (!event.isCanceled()) {
-         strength = event.getStrength();
-         ratioX = event.getRatioX() * horizontalKnockbackMultiplier;
-         ratioZ = event.getRatioZ() * horizontalKnockbackMultiplier;
-         strength *= 1.0 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE) / 2.0;
-         if (strength > 0.0) {
-            target.hasImpulse = true;
-            Vec3 vec3 = target.getDeltaMovement();
-            Vec3 vec31 = new Vec3(ratioX, 0.0, ratioZ).normalize().scale(strength);
-            target.setDeltaMovement(vec3.x / 2.0 - vec31.x, vec3.y / 2.0 + strength * verticalKnockbackMultiplier, vec3.z / 2.0 - vec31.z);
-         }
-      }
    }
 
    @Override

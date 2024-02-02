@@ -17,9 +17,11 @@ import iskallia.vault.core.world.storage.VirtualWorld;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
+import net.minecraft.resources.ResourceLocation;
 
 public class Modifiers extends DataObject<Modifiers> {
    public static final FieldRegistry FIELDS = new FieldRegistry();
@@ -55,24 +57,15 @@ public class Modifiers extends DataObject<Modifiers> {
       return entry.get(Modifiers.Entry.CONTEXT).copy();
    }
 
-   @Nullable
-   public ModifierContext getContext(VaultModifier<?> modifier) {
-      for (Modifiers.Entry entry : this.get(ENTRIES)) {
-         if (entry.has(Modifiers.Entry.MODIFIER) && entry.get(Modifiers.Entry.MODIFIER) == modifier) {
-            return entry.get(Modifiers.Entry.CONTEXT);
-         }
-      }
-
-      return null;
+   public Stream<ModifierContext> getContexts(VaultModifier<?> modifier) {
+      return this.get(ENTRIES).stream().filter(entry -> entry.getModifier().orElse(null) == modifier).map(Modifiers.Entry::getContext);
    }
 
    public java.util.List<VaultModifier<?>> getModifiers() {
       java.util.List<VaultModifier<?>> modifiers = new ArrayList<>();
 
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
-         if (entry.has(Modifiers.Entry.MODIFIER)) {
-            modifiers.add(entry.get(Modifiers.Entry.MODIFIER));
-         }
+         entry.getModifier().ifPresent(modifiers::add);
       }
 
       return modifiers;
@@ -84,13 +77,13 @@ public class Modifiers extends DataObject<Modifiers> {
 
    public void onListenerAdd(VirtualWorld world, Vault vault, Listener listener) {
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
-         entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, this.getContext(entry), listener);
+         entry.getModifier().ifPresent(modifier -> modifier.onListenerAdd(world, vault, this.getContext(entry), listener));
       }
    }
 
    public void onListenerRemove(VirtualWorld world, Vault vault, Listener listener) {
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
-         entry.get(Modifiers.Entry.MODIFIER).onListenerRemove(world, vault, this.getContext(entry), listener);
+         entry.getModifier().ifPresent(modifier -> modifier.onListenerRemove(world, vault, this.getContext(entry), listener));
       }
    }
 
@@ -99,8 +92,7 @@ public class Modifiers extends DataObject<Modifiers> {
 
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
          if (entry.has(Modifiers.Entry.DISPLAY)) {
-            VaultModifier<?> modifier = entry.get(Modifiers.Entry.MODIFIER);
-            map.put(modifier, map.getOrDefault(modifier, 0) + 1);
+            entry.getModifier().ifPresent(modifier -> map.put(modifier, map.getOrDefault(modifier, 0) + 1));
          }
       }
 
@@ -110,13 +102,15 @@ public class Modifiers extends DataObject<Modifiers> {
    public void initServer(VirtualWorld world, Vault vault) {
       for (Modifiers.Entry entry : this.get(ENTRIES)) {
          if (entry.has(Modifiers.Entry.CONSUMED)) {
-            entry.get(Modifiers.Entry.MODIFIER).initServer(world, vault, this.getContext(entry));
+            entry.getModifier().ifPresent(modifier -> modifier.initServer(world, vault, this.getContext(entry)));
          } else {
-            entry.get(Modifiers.Entry.MODIFIER).onVaultAdd(world, vault, this.getContext(entry));
-            vault.ifPresent(Vault.LISTENERS, listeners -> {
-               for (Listener listener : listeners.getAll()) {
-                  entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, this.getContext(entry), listener);
-               }
+            entry.getModifier().ifPresent(modifier -> {
+               modifier.onVaultAdd(world, vault, this.getContext(entry));
+               vault.ifPresent(Vault.LISTENERS, listeners -> {
+                  for (Listener listener : listeners.getAll()) {
+                     modifier.onListenerAdd(world, vault, this.getContext(entry), listener);
+                  }
+               });
             });
             entry.set(Modifiers.Entry.CONSUMED);
          }
@@ -130,22 +124,26 @@ public class Modifiers extends DataObject<Modifiers> {
          } else if (!entry.has(Modifiers.Entry.CONSUMED)) {
             return true;
          } else {
-            entry.get(Modifiers.Entry.MODIFIER).onVaultRemove(world, vault, this.getContext(entry));
-            vault.ifPresent(Vault.LISTENERS, listeners -> {
-               for (Listener listener : listeners.getAll()) {
-                  entry.get(Modifiers.Entry.MODIFIER).onListenerRemove(world, vault, this.getContext(entry), listener);
-               }
+            entry.getModifier().ifPresent(modifier -> {
+               modifier.onVaultRemove(world, vault, this.getContext(entry));
+               vault.ifPresent(Vault.LISTENERS, listeners -> {
+                  for (Listener listener : listeners.getAll()) {
+                     modifier.onListenerRemove(world, vault, this.getContext(entry), listener);
+                  }
+               });
             });
             return true;
          }
       });
       this.get(ENTRIES).forEach(entry -> {
          if (!entry.has(Modifiers.Entry.CONSUMED)) {
-            entry.get(Modifiers.Entry.MODIFIER).onVaultAdd(world, vault, this.getContext(entry));
-            vault.ifPresent(Vault.LISTENERS, listeners -> {
-               for (Listener listener : listeners.getAll()) {
-                  entry.get(Modifiers.Entry.MODIFIER).onListenerAdd(world, vault, this.getContext(entry), listener);
-               }
+            entry.getModifier().ifPresent(modifier -> {
+               modifier.onVaultAdd(world, vault, this.getContext(entry));
+               vault.ifPresent(Vault.LISTENERS, listeners -> {
+                  for (Listener listener : listeners.getAll()) {
+                     modifier.onListenerAdd(world, vault, this.getContext(entry), listener);
+                  }
+               });
             });
             entry.set(Modifiers.Entry.CONSUMED);
          }
@@ -154,17 +152,15 @@ public class Modifiers extends DataObject<Modifiers> {
    }
 
    public void releaseServer() {
-      this.get(ENTRIES).forEach(entry -> entry.get(Modifiers.Entry.MODIFIER).releaseServer(this.getContext(entry)));
+      this.get(ENTRIES).forEach(entry -> entry.getModifier().ifPresent(modifier -> modifier.releaseServer(this.getContext(entry))));
    }
 
    public static class Entry extends DataObject<Modifiers.Entry> {
       public static final FieldRegistry FIELDS = new FieldRegistry();
-      public static final FieldKey<VaultModifier> MODIFIER = FieldKey.of("modifier", VaultModifier.class)
+      public static final FieldKey<ResourceLocation> MODIFIER = FieldKey.of("modifier", ResourceLocation.class)
          .with(
             Version.v1_0,
-            new DirectAdapter<>(
-               (value, buffer, context) -> buffer.writeIdentifier(value.getId()), (buffer, context) -> VaultModifierRegistry.getOpt(buffer.readIdentifier())
-            ),
+            new DirectAdapter<>((value, buffer, context) -> buffer.writeIdentifier(value), (buffer, context) -> Optional.of(buffer.readIdentifier())),
             DISK.all().or(CLIENT.all())
          )
          .register(FIELDS);
@@ -182,13 +178,13 @@ public class Modifiers extends DataObject<Modifiers> {
       }
 
       public Entry(VaultModifier<?> modifier, boolean display) {
-         this.set(MODIFIER, modifier);
+         this.set(MODIFIER, modifier.getId());
          this.set(CONTEXT, new ModifierContext().set(ModifierContext.UUID, UUID.randomUUID()));
          this.setIf(DISPLAY, () -> display);
       }
 
       public Entry(VaultModifier<?> modifier, int timeLeft, boolean display) {
-         this.set(MODIFIER, modifier);
+         this.set(MODIFIER, modifier.getId());
          this.set(CONTEXT, new ModifierContext().set(ModifierContext.UUID, UUID.randomUUID()).set(ModifierContext.TICKS_LEFT, Integer.valueOf(timeLeft)));
          this.setIf(DISPLAY, () -> display);
       }
@@ -200,6 +196,10 @@ public class Modifiers extends DataObject<Modifiers> {
 
       public ModifierContext getContext() {
          return this.get(CONTEXT);
+      }
+
+      public Optional<VaultModifier<?>> getModifier() {
+         return VaultModifierRegistry.getOpt(this.get(MODIFIER));
       }
 
       public boolean hasExpired() {

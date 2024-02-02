@@ -13,10 +13,10 @@ import iskallia.vault.core.vault.objective.FindExitObjective;
 import iskallia.vault.core.vault.objective.MonolithObjective;
 import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.world.roll.IntRoll;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.CrystalData;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -42,7 +42,13 @@ public class MonolithCrystalObjective extends CrystalObjective {
          Vault.OBJECTIVES,
          objectives -> {
             objectives.add(
-               MonolithObjective.of(this.target.get(random), this.objectiveProbability)
+               MonolithObjective.of(
+                     this.target.get(random),
+                     this.objectiveProbability,
+                     ModConfigs.MONOLITH.getStackModifierPool(level),
+                     ModConfigs.MONOLITH.getOverStackModifierPool(level),
+                     ModConfigs.MONOLITH.getOverStackLootTable(level)
+                  )
                   .add(
                      FindExitObjective.create(ClassicPortalLogic.EXIT)
                         .add(AwardCrateObjective.ofConfig(VaultCrateBlock.Type.MONOLITH, "monolith", level, true))
@@ -58,13 +64,13 @@ public class MonolithCrystalObjective extends CrystalObjective {
    @Override
    public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
       tooltip.add(
-         new TextComponent("Objective: ").append(new TextComponent("Light the Monoliths").withStyle(Style.EMPTY.withColor(this.getColor(time).orElseThrow())))
+         new TextComponent("Objective: ").append(new TextComponent("Light the Braziers").withStyle(Style.EMPTY.withColor(this.getColor(time).orElseThrow())))
       );
    }
 
    @Override
    public Optional<Integer> getColor(float time) {
-      return Optional.ofNullable(ChatFormatting.RED.getColor());
+      return Optional.of(14661643);
    }
 
    @Override

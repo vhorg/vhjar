@@ -40,14 +40,22 @@ public class MeleeStage<T extends MeleeStageAttributes> implements IBossStage {
    }
 
    @Override
-   public void start() {
+   public void init() {
       this.boss.setScaledHealth(this.meleeStageAttributes.getHealth() * this.boss.getPlayerCount());
       this.boss.setScaledDamage(this.meleeStageAttributes.getBaseAttackDamage());
       this.boss.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(this.meleeStageAttributes.getBaseSpeed());
    }
 
    @Override
+   public void start() {
+   }
+
+   @Override
    public void stop() {
+   }
+
+   @Override
+   public void finish() {
    }
 
    @Override

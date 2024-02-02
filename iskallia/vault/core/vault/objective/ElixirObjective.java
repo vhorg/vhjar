@@ -75,6 +75,7 @@ public class ElixirObjective extends Objective {
 
    @Override
    public void tickServer(VirtualWorld world, Vault vault) {
+      this.get(GOALS).forEach((uuid, goal) -> goal.tickServer(world, vault, this, uuid));
       if (this.get(GOALS).areAllCompleted(vault)) {
          super.tickServer(world, vault);
       }
@@ -104,6 +105,7 @@ public class ElixirObjective extends Objective {
       this.get(GOALS).put(listener.get(Listener.ID), goal);
       JavaRandom random = JavaRandom.ofInternal(vault.get(Vault.SEED) ^ listener.get(Listener.ID).getMostSignificantBits());
       goal.set(ElixirGoal.TARGET, Integer.valueOf(ModConfigs.ELIXIR.generateTarget(vault.get(Vault.LEVEL).get(), random)));
+      goal.set(ElixirGoal.BASE_TARGET, goal.get(ElixirGoal.TARGET));
 
       for (ElixirTask task : ModConfigs.ELIXIR.generateGoals(vault.get(Vault.LEVEL).get(), random)) {
          goal.get(ElixirGoal.TASKS).add(task);

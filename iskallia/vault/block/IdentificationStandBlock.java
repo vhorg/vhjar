@@ -1,5 +1,6 @@
 package iskallia.vault.block;
 
+import iskallia.vault.VaultMod;
 import iskallia.vault.block.base.FacedBlock;
 import iskallia.vault.block.entity.IdentificationStandTileEntity;
 import iskallia.vault.block.entity.base.BookAnimatingTileEntity;
@@ -121,14 +122,18 @@ public class IdentificationStandBlock extends FacedBlock implements EntityBlock 
          Item var19 = itemStackx.getItem();
          if (var19 instanceof IdentifiableItem) {
             IdentifiableItem identifiableItem = (IdentifiableItem)var19;
-            VaultGearState state = identifiableItem.getState(itemStackx);
-            if (state == VaultGearState.UNIDENTIFIED) {
-               if (player instanceof ServerPlayer serverPlayer) {
-                  identifiableItem.instantIdentify(serverPlayer, itemStackx);
-                  itemAccess.setStack(itemStackx);
-               }
+            if (itemStackx.getCount() > 1) {
+               VaultMod.LOGGER.debug("Skipping overstacked item: {}", itemStackx.getItem());
+            } else {
+               VaultGearState state = identifiableItem.getState(itemStackx);
+               if (state == VaultGearState.UNIDENTIFIED) {
+                  if (player instanceof ServerPlayer serverPlayer) {
+                     identifiableItem.instantIdentify(serverPlayer, itemStackx);
+                     itemAccess.setStack(itemStackx);
+                  }
 
-               identified = true;
+                  identified = true;
+               }
             }
          }
       }

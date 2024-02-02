@@ -96,7 +96,7 @@ public class SpiritExtractorContainer extends OverSizedSlotContainer {
    }
 
    public List<ItemStack> getStoredItems() {
-      return this.tileEntity.getItems();
+      return this.tileEntity.getStoredItems();
    }
 
    public void startSpewingItems() {

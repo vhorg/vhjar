@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import iskallia.vault.client.gui.helper.AnimationTwoPhased;
 import iskallia.vault.client.gui.helper.FontHelper;
 import iskallia.vault.client.gui.screen.player.AbstractSkillTabElementContainerScreen;
+import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.util.function.ObservableSupplier;
@@ -129,44 +130,47 @@ public class VaultBarOverlay implements IIngameOverlay {
          matrixStack.translate(0.0, potionOffsetY, 0.0);
       }
 
-      minecraft.getProfiler().popPush("batchSkillPointText");
-      if (unspentSkillPoints != 0) {
-         SKILL_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentSkillPointsChanged);
-         int x = right - unspentSkillPointComponentWidth - gap;
-         minecraft.font.drawInBatch(unspentSkillPointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
-         matrixStack.translate(0.0, 12.0, 0.0);
-      }
+      IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
+      if (options.showPointMessages()) {
+         minecraft.getProfiler().popPush("batchSkillPointText");
+         if (unspentSkillPoints != 0) {
+            SKILL_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentSkillPointsChanged);
+            int x = right - unspentSkillPointComponentWidth - gap;
+            minecraft.font.drawInBatch(unspentSkillPointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
+            matrixStack.translate(0.0, 12.0, 0.0);
+         }
 
-      minecraft.getProfiler().popPush("batchExpertisePointText");
-      if (unspentExpertisePoints != 0) {
-         EXPERTISE_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentExpertisePointsChanged);
-         int x = right - unspentExpertisePointComponentWidth - gap;
-         minecraft.font.drawInBatch(unspentExpertisePointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
-         matrixStack.translate(0.0, 12.0, 0.0);
-      }
+         minecraft.getProfiler().popPush("batchExpertisePointText");
+         if (unspentExpertisePoints != 0) {
+            EXPERTISE_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentExpertisePointsChanged);
+            int x = right - unspentExpertisePointComponentWidth - gap;
+            minecraft.font.drawInBatch(unspentExpertisePointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
+            matrixStack.translate(0.0, 12.0, 0.0);
+         }
 
-      minecraft.getProfiler().popPush("batchRegretPointText");
-      if (unspentRegretPoints != 0) {
-         REGRET_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentRegretPointsChanged);
-         int x = right - unspentRegretPointComponentWidth - gap;
-         minecraft.font.drawInBatch(unspentRegretPointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
-         matrixStack.translate(0.0, 12.0, 0.0);
-      }
+         minecraft.getProfiler().popPush("batchRegretPointText");
+         if (unspentRegretPoints != 0) {
+            REGRET_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentRegretPointsChanged);
+            int x = right - unspentRegretPointComponentWidth - gap;
+            minecraft.font.drawInBatch(unspentRegretPointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
+            matrixStack.translate(0.0, 12.0, 0.0);
+         }
 
-      minecraft.getProfiler().popPush("batchKnowledgePointText");
-      if (unspentKnowledgePoints != 0) {
-         KNOWLEDGE_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentKnowledgePointsChanged);
-         int x = right - unspentKnowledgePointComponentWidth - gap;
-         minecraft.font.drawInBatch(unspentKnowledgePointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
-         matrixStack.translate(0.0, 12.0, 0.0);
-      }
+         minecraft.getProfiler().popPush("batchKnowledgePointText");
+         if (unspentKnowledgePoints != 0) {
+            KNOWLEDGE_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentKnowledgePointsChanged);
+            int x = right - unspentKnowledgePointComponentWidth - gap;
+            minecraft.font.drawInBatch(unspentKnowledgePointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
+            matrixStack.translate(0.0, 12.0, 0.0);
+         }
 
-      minecraft.getProfiler().popPush("batchArchetypePointText");
-      if (unspentArchetypePoints != 0) {
-         ARCHETYPE_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentArchetypePointsChanged);
-         int x = right - unspentArchetypePointComponentWidth - gap;
-         minecraft.font.drawInBatch(unspentArchetypePointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
-         matrixStack.translate(0.0, 12.0, 0.0);
+         minecraft.getProfiler().popPush("batchArchetypePointText");
+         if (unspentArchetypePoints != 0) {
+            ARCHETYPE_POINT_SUPPLIER.ifChanged(VaultBarOverlay::onUnspentArchetypePointsChanged);
+            int x = right - unspentArchetypePointComponentWidth - gap;
+            minecraft.font.drawInBatch(unspentArchetypePointComponent, x, 18.0F, 16777215, true, matrixStack.last().pose(), buffer, false, 0, 15728880);
+            matrixStack.translate(0.0, 12.0, 0.0);
+         }
       }
 
       matrixStack.popPose();

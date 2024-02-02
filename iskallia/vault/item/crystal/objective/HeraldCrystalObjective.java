@@ -14,6 +14,7 @@ import iskallia.vault.core.vault.objective.VictoryObjective;
 import iskallia.vault.core.vault.player.ClassicListenersLogic;
 import iskallia.vault.core.vault.player.Listeners;
 import iskallia.vault.core.vault.time.TickStopwatch;
+import iskallia.vault.init.ModGameRules;
 import iskallia.vault.item.crystal.CrystalData;
 import java.util.List;
 import java.util.Optional;
@@ -24,15 +25,17 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.GameType;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class HeraldCrystalObjective extends CrystalObjective {
    @Override
    public void configure(Vault vault, RandomSource random) {
+      int level = ServerLifecycleHooks.getCurrentServer().getGameRules().getInt(ModGameRules.HERALD_MIN_LEVEL);
       vault.set(Vault.SEED, Long.valueOf(0L));
       vault.set(Vault.CLOCK, new TickStopwatch());
       if (vault.get(Vault.LISTENERS).get(Listeners.LOGIC) instanceof ClassicListenersLogic classic) {
          classic.set(ClassicListenersLogic.GAME_MODE, GameType.ADVENTURE);
-         classic.set(ClassicListenersLogic.MIN_LEVEL, Integer.valueOf(vault.get(Vault.LEVEL).get()));
+         classic.set(ClassicListenersLogic.MIN_LEVEL, Integer.valueOf(level));
          classic.set(ClassicListenersLogic.ADDED_BONUS_TIME);
       }
 

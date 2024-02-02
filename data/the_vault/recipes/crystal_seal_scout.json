@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ece",
+    "ese",
+    "e#e"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "#": {
+      "item": "the_vault:eternal_soul"
+    },
+    "c": {
+      "item": "minecraft:campfire"
+    },
+    "s": {
+      "item": "the_vault:crystal_seal_empty"
+    }
+  },
+  "result": {
+    "item": "the_vault:crystal_seal_scout",
+    "count": 1
+  }
+}

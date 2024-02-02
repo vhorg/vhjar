@@ -58,6 +58,22 @@ public class ToolPulverizingConfig extends Config {
       this.put(
          Items.PRISMARINE_BRICKS, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.PRISMARINE_SHARD, null, IntRoll.ofConstant(8), 1))
       );
+      this.put(Items.WHITE_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.ORANGE_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.MAGENTA_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.LIGHT_BLUE_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.YELLOW_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.LIME_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.PINK_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.GRAY_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.LIGHT_GRAY_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.CYAN_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.PURPLE_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.BLUE_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.BROWN_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.GREEN_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.RED_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
+      this.put(Items.BLACK_WOOL, new LootTable().add(IntRoll.ofConstant(1), new LootPool().addItem(Items.STRING, null, IntRoll.ofConstant(2), 1)));
    }
 
    private void put(Item item, LootTable lootTable) {

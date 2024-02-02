@@ -326,7 +326,7 @@ public class ModModels {
             return type == null ? -1.0F : type.ordinal();
          }
       };
-      public static ItemPropertyFunction GOD_BLESSING_TYPE = (stack, world, entity, seed) -> {
+      public static ItemPropertyFunction GOD_ITEM_TYPE = (stack, world, entity, seed) -> {
          CompoundTag nbt = stack.getTag();
          VaultGod type;
          return nbt != null && (type = VaultGod.fromName(nbt.getString("type"))) != null
@@ -385,7 +385,8 @@ public class ModModels {
          }
 
          registerItemProperty(ModBlocks.EASTER_EGG.asItem(), "easter_egg_type", EASTER_EGG_TYPE);
-         registerItemProperty(ModItems.GOD_BLESSING, "god_blessing_type", GOD_BLESSING_TYPE);
+         registerItemProperty(ModItems.GOD_BLESSING, "god_item_type", GOD_ITEM_TYPE);
+         registerItemProperty(ModItems.GOD_TOKEN, "god_item_type", GOD_ITEM_TYPE);
          registerItemProperty(ModBlocks.GOD_ALTAR.asItem(), "god_altar_type", GOD_ALTAR_TYPE);
       }
 

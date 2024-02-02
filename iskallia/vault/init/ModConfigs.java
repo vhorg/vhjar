@@ -13,6 +13,8 @@ import iskallia.vault.config.ArchetypeDescriptionsConfig;
 import iskallia.vault.config.ArchetypeGUIConfig;
 import iskallia.vault.config.ArchetypesConfig;
 import iskallia.vault.config.ArchitectConfig;
+import iskallia.vault.config.AscensionConfig;
+import iskallia.vault.config.AscensionForgeConfig;
 import iskallia.vault.config.AugmentConfig;
 import iskallia.vault.config.BestiaryConfig;
 import iskallia.vault.config.BlackMarketConfig;
@@ -52,6 +54,7 @@ import iskallia.vault.config.LootInfoConfig;
 import iskallia.vault.config.ManaConfig;
 import iskallia.vault.config.MenuPlayerStatDescriptionConfig;
 import iskallia.vault.config.ModBoxConfig;
+import iskallia.vault.config.MonolithConfig;
 import iskallia.vault.config.MysteryBoxConfig;
 import iskallia.vault.config.MysteryEggConfig;
 import iskallia.vault.config.MysteryHostileEggConfig;
@@ -61,6 +64,7 @@ import iskallia.vault.config.OverLevelEnchantConfig;
 import iskallia.vault.config.PandorasBoxConfig;
 import iskallia.vault.config.PaxelConfigs;
 import iskallia.vault.config.PlayerResearchTransferConfig;
+import iskallia.vault.config.PlayerTitlesConfig;
 import iskallia.vault.config.PotionConfig;
 import iskallia.vault.config.ResearchConfig;
 import iskallia.vault.config.ResearchGroupConfig;
@@ -243,6 +247,7 @@ public class ModConfigs {
    public static CustomEntitySpawnerConfig CUSTOM_ENTITY_SPAWNER;
    public static EternalsNamepoolConfig ETERNALS_NAMEPOOL;
    public static ScavengerConfig SCAVENGER;
+   public static MonolithConfig MONOLITH;
    public static DivineParadoxConfig DIVINE_PARADOX;
    public static ElixirConfig ELIXIR;
    public static VaultStatsConfig VAULT_STATS;
@@ -293,6 +298,9 @@ public class ModConfigs {
    public static PotionConfig POTION;
    public static VaultBossConfig BOSS;
    public static AncientCopperGolemConfig ANCIENT_COPPER_GOLEM;
+   public static PlayerTitlesConfig PLAYER_TITLES;
+   public static AscensionConfig ASCENSION;
+   public static AscensionForgeConfig ASCENSION_FORGE;
 
    public static void register() {
       INVALID_CONFIGS.clear();
@@ -384,6 +392,7 @@ public class ModConfigs {
       CUSTOM_ENTITY_SPAWNER = new CustomEntitySpawnerConfig().readConfig();
       ETERNALS_NAMEPOOL = new EternalsNamepoolConfig().readConfig();
       SCAVENGER = new ScavengerConfig().readConfig();
+      MONOLITH = new MonolithConfig().readConfig();
       DIVINE_PARADOX = new DivineParadoxConfig().readConfig();
       ELIXIR = new ElixirConfig().readConfig();
       VAULT_STATS = new VaultStatsConfig().readConfig();
@@ -410,6 +419,9 @@ public class ModConfigs {
       BESTIARY = new BestiaryConfig().readConfig();
       HERALD_TROPHY = new HeraldTrophyConfig().readConfig();
       ANCIENT_COPPER_GOLEM = new AncientCopperGolemConfig().readConfig();
+      PLAYER_TITLES = new PlayerTitlesConfig().readConfig();
+      ASCENSION = new AscensionConfig().readConfig();
+      ASCENSION_FORGE = new AscensionForgeConfig().readConfig();
       TOOL_PULVERIZING = new ToolPulverizingConfig().readConfig();
       VAULT_GEAR_COMMON = new VaultGearCommonConfig().readConfig();
       VAULT_GEAR_CONFIG = VaultGearTierConfig.registerConfigs();

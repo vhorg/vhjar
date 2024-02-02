@@ -3,11 +3,8 @@ package iskallia.vault.block;
 import iskallia.vault.block.entity.AngelBlockTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.BlockHelper;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class AngelBlock extends BaseEntityBlock implements EntityBlock {
    private static final int ANGEL_BLOCK_RANGE = 64;
-   private final Map<UUID, Set<AngelBlock.DimensionPos>> playerAngelBlocks = new HashMap<>();
+   private final Set<AngelBlock.DimensionPos> angelBlocks = new HashSet<>();
    protected static final VoxelShape SHAPE = Block.box(4.0, 4.0, 4.0, 12.0, 12.0, 12.0);
 
    public AngelBlock() {
@@ -42,12 +39,12 @@ public class AngelBlock extends BaseEntityBlock implements EntityBlock {
       return SHAPE;
    }
 
-   public void addPlayerAngelBlock(UUID owner, ResourceKey<Level> dimension, BlockPos pos) {
-      this.playerAngelBlocks.computeIfAbsent(owner, uuid -> new HashSet<>()).add(new AngelBlock.DimensionPos(dimension, pos));
+   public void addPlayerAngelBlock(ResourceKey<Level> dimension, BlockPos pos) {
+      this.angelBlocks.add(new AngelBlock.DimensionPos(dimension, pos));
    }
 
    public boolean isInRange(Player player) {
-      for (AngelBlock.DimensionPos dimensionPos : this.playerAngelBlocks.getOrDefault(player.getUUID(), Set.of())) {
+      for (AngelBlock.DimensionPos dimensionPos : this.angelBlocks) {
          if (player.getLevel().dimension().equals(dimensionPos.dimension()) && dimensionPos.pos().closerThan(player.blockPosition(), 64.0)) {
             return true;
          }
@@ -65,24 +62,20 @@ public class AngelBlock extends BaseEntityBlock implements EntityBlock {
       return new AngelBlockTileEntity(pPos, pState);
    }
 
-   @javax.annotation.Nullable
+   @Nullable
    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level pLevel, BlockState pState, BlockEntityType<T> pBlockEntityType) {
-      return BlockHelper.getTicker(pBlockEntityType, ModBlocks.ANGEL_BLOCK_TILE_ENTITY, AngelBlockTileEntity::tick);
+      return pLevel.isClientSide() ? BlockHelper.getTicker(pBlockEntityType, ModBlocks.ANGEL_BLOCK_TILE_ENTITY, AngelBlockTileEntity::tick) : null;
    }
 
-   public void setPlacedBy(Level pLevel, BlockPos pos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
-      super.setPlacedBy(pLevel, pos, pState, pPlacer, pStack);
-      pLevel.getBlockEntity(pos, ModBlocks.ANGEL_BLOCK_TILE_ENTITY).ifPresent(blockEntity -> blockEntity.setOwner(pPlacer.getUUID()));
+   public void setPlacedBy(Level level, BlockPos pos, BlockState pState, @Nullable LivingEntity pPlacer, ItemStack pStack) {
+      super.setPlacedBy(level, pos, pState, pPlacer, pStack);
+      ModBlocks.ANGEL_BLOCK.addPlayerAngelBlock(level.dimension(), pos);
    }
 
    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
       if (pState.getBlock() != pNewState.getBlock()) {
          pLevel.getBlockEntity(pPos, ModBlocks.ANGEL_BLOCK_TILE_ENTITY)
-            .ifPresent(
-               blockEntity -> this.playerAngelBlocks
-                  .getOrDefault(blockEntity.getOwner(), new HashSet<>())
-                  .remove(new AngelBlock.DimensionPos(pLevel.dimension(), pPos))
-            );
+            .ifPresent(blockEntity -> this.angelBlocks.remove(new AngelBlock.DimensionPos(pLevel.dimension(), pPos)));
       }
 
       super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);

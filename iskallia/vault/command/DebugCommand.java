@@ -24,7 +24,6 @@ import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import iskallia.vault.core.world.loot.generator.TieredLootTableGenerator;
-import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.dump.EntityAttrDump;
 import iskallia.vault.dump.GearModelDump;
 import iskallia.vault.dump.TranslationsDump;
@@ -500,15 +499,20 @@ public class DebugCommand extends Command {
 
    private int kickFromVault(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       ServerPlayer player = EntityArgument.getPlayer(context, "player");
-      ServerLevel world = player.getLevel();
-      ServerVaults.get(world).ifPresent(vault -> vault.ifPresent(Vault.LISTENERS, listeners -> {
-         Listener listener = listeners.get(player.getUUID());
-         listeners.remove((VirtualWorld)world, vault, listener);
-         vault.ifPresent(Vault.STATS, collector -> {
-            StatCollector stats = collector.get(listener.get(Listener.ID));
-            stats.set(StatCollector.COMPLETION, Completion.BAILED);
+
+      for (Vault vault : ServerVaults.getAll()) {
+         vault.ifPresent(Vault.LISTENERS, listeners -> {
+            Listener listener = listeners.get(player.getUUID());
+            ServerVaults.getWorld(vault).ifPresent(world -> {
+               listeners.remove(world, vault, listener);
+               vault.ifPresent(Vault.STATS, collector -> {
+                  StatCollector stats = collector.get(listener.get(Listener.ID));
+                  stats.set(StatCollector.COMPLETION, Completion.BAILED);
+               });
+            });
          });
-      }));
+      }
+
       return 0;
    }
 

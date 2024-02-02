@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "the_vault:block/animatrix_block" },
+    "facing=east": { "model": "the_vault:block/animatrix_block", "y": 90 },
+    "facing=south": { "model": "the_vault:block/animatrix_block", "y": 180 },
+    "facing=west": { "model": "the_vault:block/animatrix_block", "y": 270 }
+  }
+}

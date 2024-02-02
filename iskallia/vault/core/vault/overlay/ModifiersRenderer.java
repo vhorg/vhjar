@@ -53,7 +53,7 @@ public class ModifiersRenderer {
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
       RenderSystem.setShaderTexture(0, RESOURCE);
       RenderSystem.disableDepthTest();
-      renderVaultModifiers(modifiers, matrixStack);
+      renderVaultModifiers(modifiers, matrixStack, false);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
       RenderSystem.setShaderTexture(0, GuiComponent.GUI_ICONS_LOCATION);
    }
@@ -65,10 +65,20 @@ public class ModifiersRenderer {
          modifiers.put(stack.getModifier(), stack.getSize());
       }
 
-      renderVaultModifiers(modifiers, matrixStack);
+      renderVaultModifiers(modifiers, matrixStack, false);
    }
 
-   public static void renderVaultModifiers(Map<VaultModifier<?>, Integer> group, PoseStack matrixStack) {
+   public static void renderVaultModifiersWithDepth(List<VaultModifierStack> group, PoseStack matrixStack) {
+      Map<VaultModifier<?>, Integer> modifiers = new Object2IntLinkedOpenHashMap();
+
+      for (VaultModifierStack stack : group) {
+         modifiers.put(stack.getModifier(), stack.getSize());
+      }
+
+      renderVaultModifiers(modifiers, matrixStack, true);
+   }
+
+   public static void renderVaultModifiers(Map<VaultModifier<?>, Integer> group, PoseStack matrixStack, boolean depthTest) {
       Minecraft minecraft = Minecraft.getInstance();
       int right = minecraft.getWindow().getGuiScaledWidth();
       int bottom = minecraft.getWindow().getGuiScaledHeight();
@@ -182,7 +192,10 @@ public class ModifiersRenderer {
       RenderSystem.enableTexture();
       RenderSystem.enableBlend();
       RenderSystem.defaultBlendFunc();
-      RenderSystem.disableDepthTest();
+      if (!depthTest) {
+         RenderSystem.disableDepthTest();
+      }
+
       RenderSystem.setShader(GameRenderer::getPositionTexShader);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
       RenderSystem.setShaderTexture(0, textureAtlas.getAtlasResourceLocation());

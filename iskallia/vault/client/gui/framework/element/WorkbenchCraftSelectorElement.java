@@ -134,6 +134,8 @@ public class WorkbenchCraftSelectorElement<E extends WorkbenchCraftSelectorEleme
       public void render(IElementRenderer renderer, @NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
          this.setDisabled(!this.canCraft());
          super.render(renderer, poseStack, mouseX, mouseY, partialTick);
+         poseStack.pushPose();
+         poseStack.translate(0.0, 0.0, 1.0);
          if (this.displayModifier != null) {
             this.getCraftedModifierDescription()
                .ifPresent(
@@ -152,6 +154,8 @@ public class WorkbenchCraftSelectorElement<E extends WorkbenchCraftSelectorEleme
                      )
                );
          }
+
+         poseStack.popPose();
       }
 
       @Override
@@ -347,6 +351,8 @@ public class WorkbenchCraftSelectorElement<E extends WorkbenchCraftSelectorEleme
       public void render(IElementRenderer renderer, @NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
          this.setDisabled(!this.canCraft());
          super.render(renderer, poseStack, mouseX, mouseY, partialTick);
+         poseStack.pushPose();
+         poseStack.translate(0.0, 0.0, 1.0);
          this.textStyle
             .textBorder()
             .render(
@@ -360,6 +366,7 @@ public class WorkbenchCraftSelectorElement<E extends WorkbenchCraftSelectorEleme
                this.worldSpatial.z(),
                this.worldSpatial.width()
             );
+         poseStack.popPose();
       }
 
       @Override

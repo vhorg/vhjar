@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
@@ -16,6 +17,7 @@ import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.TieredSkill;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
+import iskallia.vault.util.StatUtils;
 import iskallia.vault.util.calc.AbilityPowerHelper;
 import iskallia.vault.util.calc.AttributeLimitHelper;
 import iskallia.vault.util.calc.BlockChanceHelper;
@@ -61,6 +63,7 @@ public class PlayerSnapshotDump {
    public static PlayerSnapshotDump.PlayerSnapshot createSnapshot(ServerPlayer player) {
       PlayerSnapshotDump.PlayerSnapshot snapshot = new PlayerSnapshotDump.PlayerSnapshot(player);
       ServerLevel world = player.getLevel();
+      snapshot.version = 1;
       PlayerVaultStats stats = PlayerVaultStatsData.get(world).getVaultStats(player);
       snapshot.vaultLevel = stats.getVaultLevel();
       if (snapshot.vaultLevel >= ModConfigs.LEVELS_META.getMaxLevel()) {
@@ -107,6 +110,8 @@ public class PlayerSnapshotDump {
       snapshot.putGearAttribute(ModGearAttributes.VELARA_AFFINITY, () -> GodAffinityHelper.getAffinityPercent(player, VaultGod.TENOS));
       snapshot.putGearAttribute(ModGearAttributes.VELARA_AFFINITY, () -> GodAffinityHelper.getAffinityPercent(player, VaultGod.WENDARR));
       snapshot.putGearAttribute(ModGearAttributes.VELARA_AFFINITY, () -> GodAffinityHelper.getAffinityPercent(player, VaultGod.IDONA));
+      snapshot.summaryAttributes.put("dps", new JsonPrimitive(StatUtils.getAverageDps(player)));
+      snapshot.summaryAttributes.put("defense", new JsonPrimitive(StatUtils.getDefence(player)));
       Arrays.stream(EquipmentSlot.values()).forEach(slotType -> {
          ItemStack stack = player.getItemBySlot(slotType);
          if (!stack.isEmpty()) {
@@ -177,6 +182,7 @@ public class PlayerSnapshotDump {
    }
 
    public static class PlayerSnapshot {
+      protected int version;
       protected final UUID playerUUID;
       protected final String playerNickname;
       protected final long timestamp;
@@ -187,6 +193,7 @@ public class PlayerSnapshotDump {
       protected float levelPercent = 0.0F;
       protected Map<String, Double> vanillaAttributes = new LinkedHashMap<>();
       protected Map<String, JsonElement> gearAttributes = new LinkedHashMap<>();
+      protected Map<String, JsonElement> summaryAttributes = new LinkedHashMap<>();
       protected Map<String, Integer> reputation = new LinkedHashMap<>();
       protected Map<String, PlayerSnapshotDump.SerializableItemStack> equipment = new LinkedHashMap<>();
       protected Map<String, Integer> abilities = new LinkedHashMap<>();

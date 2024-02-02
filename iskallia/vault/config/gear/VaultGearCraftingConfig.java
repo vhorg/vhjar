@@ -21,6 +21,8 @@ public class VaultGearCraftingConfig extends Config {
    @Expose
    private final Map<VaultGearRarity, VaultGearCraftingConfig.Range> potentialRanges = new HashMap<>();
    @Expose
+   private Map<String, Double> potentialModifiers = new HashMap<>();
+   @Expose
    private int totalMaximumProficiency;
    @Expose
    private int totalCategoryProficiency;
@@ -54,14 +56,14 @@ public class VaultGearCraftingConfig extends Config {
       return this.potentialIncreasePerLevel;
    }
 
-   public int getMaxCraftingPotential(VaultGearRarity rarity) {
+   public int getMaxCraftingPotential(VaultGearRarity rarity, String pool) {
       VaultGearCraftingConfig.Range range = this.potentialRanges.get(rarity);
-      return range == null ? 0 : range.getMax();
+      return range == null ? 0 : (int)Math.round(range.getMax() * this.potentialModifiers.getOrDefault(pool, 1.0));
    }
 
-   public int getNewCraftingPotential(VaultGearRarity rarity) {
+   public int getNewCraftingPotential(VaultGearRarity rarity, String pool) {
       VaultGearCraftingConfig.Range range = this.potentialRanges.get(rarity);
-      return range == null ? 0 : range.getRandom(rand);
+      return range == null ? 0 : (int)Math.round(range.getRandom(rand) * this.potentialModifiers.getOrDefault(pool, 1.0));
    }
 
    public VaultGearTypeConfig.RollType getDefaultCraftedPool() {

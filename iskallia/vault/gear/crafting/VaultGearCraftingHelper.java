@@ -3,6 +3,7 @@ package iskallia.vault.gear.crafting;
 import iskallia.vault.config.gear.VaultGearCraftingConfig;
 import iskallia.vault.config.gear.VaultGearTypeConfig;
 import iskallia.vault.gear.VaultGearRarity;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.modification.GearModification;
@@ -87,7 +88,8 @@ public class VaultGearCraftingHelper {
    public static void reRollCraftingPotential(ItemStack stack) {
       VaultGearData data = VaultGearData.read(stack);
       VaultGearRarity rarity = data.getRarity();
-      int potential = ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getNewCraftingPotential(rarity);
+      String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
+      int potential = ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getNewCraftingPotential(rarity, rollType);
       potential = (int)(potential * (1.0F + ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getPotentialIncreasePerLevel() * data.getItemLevel()));
       data.updateAttribute(ModGearAttributes.CRAFTING_POTENTIAL, Integer.valueOf(potential));
       data.write(stack);

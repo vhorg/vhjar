@@ -26,8 +26,10 @@ import iskallia.vault.item.crystal.model.RawCrystalModel;
 import iskallia.vault.item.crystal.modifiers.CrystalModifiers;
 import iskallia.vault.item.crystal.modifiers.DefaultCrystalModifiers;
 import iskallia.vault.item.crystal.modifiers.ParadoxCrystalModifiers;
+import iskallia.vault.item.crystal.objective.AscensionCrystalObjective;
 import iskallia.vault.item.crystal.objective.BossCrystalObjective;
 import iskallia.vault.item.crystal.objective.CakeCrystalObjective;
+import iskallia.vault.item.crystal.objective.CompoundCrystalObjective;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.item.crystal.objective.ElixirCrystalObjective;
 import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
@@ -35,6 +37,7 @@ import iskallia.vault.item.crystal.objective.HeraldCrystalObjective;
 import iskallia.vault.item.crystal.objective.MonolithCrystalObjective;
 import iskallia.vault.item.crystal.objective.NullCrystalObjective;
 import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
+import iskallia.vault.item.crystal.objective.PoolCrystalObjective;
 import iskallia.vault.item.crystal.objective.ScavengerCrystalObjective;
 import iskallia.vault.item.crystal.objective.SpeedrunCrystalObjective;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
@@ -86,7 +89,8 @@ public class CrystalData extends CrystalProperty implements ISerializable<Compou
       .<TypeSupplierAdapter<HeraldCrystalLayout>>register("paradox", ParadoxCrystalLayout.class, ParadoxCrystalLayout::new)
       .register("herald", HeraldCrystalLayout.class, HeraldCrystalLayout::new);
    public static TypeSupplierAdapter<CrystalObjective> OBJECTIVE = new TypeSupplierAdapter<CrystalObjective>("type", false)
-      .<TypeSupplierAdapter<EmptyCrystalObjective>>register("null", NullCrystalObjective.class, () -> NullCrystalObjective.INSTANCE)
+      .<TypeSupplierAdapter<PoolCrystalObjective>>register("null", NullCrystalObjective.class, () -> NullCrystalObjective.INSTANCE)
+      .<TypeSupplierAdapter<EmptyCrystalObjective>>register("pool", PoolCrystalObjective.class, PoolCrystalObjective::new)
       .<TypeSupplierAdapter<BossCrystalObjective>>register("empty", EmptyCrystalObjective.class, EmptyCrystalObjective::new)
       .<TypeSupplierAdapter<CakeCrystalObjective>>register("boss", BossCrystalObjective.class, BossCrystalObjective::new)
       .<TypeSupplierAdapter<ScavengerCrystalObjective>>register("cake", CakeCrystalObjective.class, CakeCrystalObjective::new)
@@ -95,7 +99,9 @@ public class CrystalData extends CrystalProperty implements ISerializable<Compou
       .<TypeSupplierAdapter<ElixirCrystalObjective>>register("monolith", MonolithCrystalObjective.class, MonolithCrystalObjective::new)
       .<TypeSupplierAdapter<ParadoxCrystalObjective>>register("elixir", ElixirCrystalObjective.class, ElixirCrystalObjective::new)
       .<TypeSupplierAdapter<HeraldCrystalObjective>>register("paradox", ParadoxCrystalObjective.class, ParadoxCrystalObjective::new)
-      .register("herald", HeraldCrystalObjective.class, HeraldCrystalObjective::new);
+      .<TypeSupplierAdapter<CompoundCrystalObjective>>register("herald", HeraldCrystalObjective.class, HeraldCrystalObjective::new)
+      .<TypeSupplierAdapter<AscensionCrystalObjective>>register("compound", CompoundCrystalObjective.class, CompoundCrystalObjective::new)
+      .register("ascension", AscensionCrystalObjective.class, AscensionCrystalObjective::new);
    public static TypeSupplierAdapter<CrystalTime> TIME = new TypeSupplierAdapter<CrystalTime>("type", false)
       .<TypeSupplierAdapter<ValueCrystalTime>>register("null", NullCrystalTime.class, () -> NullCrystalTime.INSTANCE)
       .<TypeSupplierAdapter<PoolCrystalTime>>register("value", ValueCrystalTime.class, ValueCrystalTime::new)

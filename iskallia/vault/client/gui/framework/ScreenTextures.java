@@ -604,6 +604,19 @@ public final class ScreenTextures {
    public static final ButtonElement.ButtonTextures BUTTON_QUEST_TEXTURES = new ButtonElement.ButtonTextures(
       BUTTON_QUEST, BUTTON_QUEST_HOVER, BUTTON_QUEST_PRESSED, BUTTON_QUEST_DISABLED
    );
+   public static final TextureAtlasRegion BUTTON_EMBER_PAY = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_ember_pay"));
+   public static final TextureAtlasRegion BUTTON_EMBER_PAY_DISABLED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_ember_pay_disabled")
+   );
+   public static final TextureAtlasRegion BUTTON_EMBER_PAY_HOVER = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_ember_pay_hover")
+   );
+   public static final TextureAtlasRegion BUTTON_EMBER_PAY_PRESSED = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/button_ember_pay_pressed")
+   );
+   public static final ButtonElement.ButtonTextures BUTTON_EMBER_PAY_TEXTURES = new ButtonElement.ButtonTextures(
+      BUTTON_EMBER_PAY, BUTTON_EMBER_PAY_HOVER, BUTTON_EMBER_PAY_PRESSED, BUTTON_EMBER_PAY_DISABLED
+   );
    public static final TextureAtlasRegion SLIDER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider"));
    public static final TextureAtlasRegion SLIDER_BACKGROUND = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_background"));
    public static final TextureAtlasRegion SLIDER_HOVER = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/slider_hover"));

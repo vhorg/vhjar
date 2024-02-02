@@ -31,7 +31,7 @@ public abstract class MixinServerPlayerEntity extends Player {
          target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"
       )
    )
-   public boolean yes(GameRules instance, Key<BooleanValue> key) {
+   public boolean keepInventory(GameRules instance, Key<BooleanValue> key) {
       return ServerVaults.get(this.getLevel()).isPresent() || instance.getBoolean(key);
    }
 }

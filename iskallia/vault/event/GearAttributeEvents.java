@@ -422,18 +422,38 @@ public class GearAttributeEvents {
 
             if (type == MobType.UNDEAD) {
                increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_UNDEAD, VaultGearAttributeTypeMerger.floatSum());
-            }
-
-            if (type == MobType.ARTHROPOD) {
+            } else if (type == MobType.ARTHROPOD) {
                increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_SPIDERS, VaultGearAttributeTypeMerger.floatSum());
-            }
-
-            if (type == MobType.ILLAGER) {
+            } else if (type == MobType.ILLAGER) {
                increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_ILLAGERS, VaultGearAttributeTypeMerger.floatSum());
             }
 
             if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("mob_type/nether"), attacked)) {
                increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_NETHER, VaultGearAttributeTypeMerger.floatSum());
+            }
+
+            if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("mob_type/champion"), attacked)) {
+               increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_CHAMPION, VaultGearAttributeTypeMerger.floatSum());
+            }
+
+            if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("mob_type/dungeon"), attacked)) {
+               increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_DUNGEON, VaultGearAttributeTypeMerger.floatSum());
+            }
+
+            if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("mob_type/tank"), attacked)) {
+               increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_TANK, VaultGearAttributeTypeMerger.floatSum());
+            }
+
+            if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("mob_type/horde"), attacked)) {
+               increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_HORDE, VaultGearAttributeTypeMerger.floatSum());
+            }
+
+            if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("mob_type/assassin"), attacked)) {
+               increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_ASSASSIN, VaultGearAttributeTypeMerger.floatSum());
+            }
+
+            if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("mob_type/dweller"), attacked)) {
+               increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_DWELLER, VaultGearAttributeTypeMerger.floatSum());
             }
 
             event.setAmount(event.getAmount() * (1.0F + increasedDamage));

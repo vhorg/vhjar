@@ -1,13 +1,13 @@
 {
   "variants": {
-    "half=upper": {
-      "model": "the_vault:block/monolith_top"
+    "state=extinguished": {
+      "model": "the_vault:block/monolith_extinguished"
     },
-    "half=lower,filled=false": {
-      "model": "the_vault:block/monolith_inactive"
+    "state=lit": {
+      "model": "the_vault:block/monolith_lit"
     },
-    "half=lower,filled=true": {
-      "model": "the_vault:block/monolith_active"
+    "state=destroyed": {
+      "model": "the_vault:block/monolith_destroyed"
     }
   }
 }

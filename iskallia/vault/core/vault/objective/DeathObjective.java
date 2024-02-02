@@ -73,7 +73,7 @@ public class DeathObjective extends Objective {
                vault.ifPresent(Vault.STATS, collector -> {
                   StatCollector stats = collector.get(listener.get(Listener.ID));
                   stats.set(StatCollector.COMPLETION, Completion.FAILED);
-                  stats.set(StatCollector.REWARD, ItemStackList.create());
+                  stats.set(StatCollector.REWARD, ItemStackList.createLegacy());
                });
                vault.get(Vault.LISTENERS).remove(world, vault, listener);
                player.getInventory().clearContent();

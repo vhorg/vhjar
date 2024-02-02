@@ -18,11 +18,15 @@ import iskallia.vault.client.gui.screen.summary.VaultExitContainerScreenData;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.init.ModConfigs;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -65,7 +69,12 @@ public class VaultCoopPlayersElement<E extends VaultCoopPlayersElement<E>> exten
          )
       );
       AtomicInteger iterator = new AtomicInteger();
-      supplier.forEach(
+      Comparator<Entry<UUID, StatCollector>> byExperience = Comparator.comparingInt(entry -> entry.getValue().getExperience(vault));
+      Map<UUID, StatCollector> sortedMap = supplier.entrySet()
+         .stream()
+         .sorted(byExperience.reversed())
+         .collect(Collectors.toMap(Entry::getKey, Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+      sortedMap.forEach(
          (uuid, statCollector) -> {
             Level level = Minecraft.getInstance().level;
             if (level != null) {

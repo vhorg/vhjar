@@ -5,6 +5,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModAttributes;
+import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
@@ -18,10 +19,15 @@ import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.calc.PlayerStat;
 import iskallia.vault.util.damage.ThornsReflectDamageSource;
+import iskallia.vault.world.data.DiscoveredModelsData;
 import iskallia.vault.world.data.ServerVaults;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import java.util.List;
 import java.util.Random;
+import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,6 +39,8 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.Fox.Type;
 import net.minecraft.world.entity.npc.VillagerTrades.ItemListing;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -44,6 +52,7 @@ import net.minecraft.world.item.TippedArrowItem;
 import net.minecraft.world.item.trading.MerchantOffer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDestroyBlockEvent;
@@ -244,6 +253,20 @@ public class EntityEvents {
                   }
                }
             }
+         }
+      }
+   }
+
+   @SubscribeEvent
+   public static void breedSnowFox(BabyEntitySpawnEvent event) {
+      if (event.getParentA() instanceof Fox foxA && event.getParentB() instanceof Fox foxB && foxA.getFoxType() == Type.SNOW && foxB.getFoxType() == Type.SNOW) {
+         ServerPlayer player = (ServerPlayer)event.getCausedByPlayer();
+         DiscoveredModelsData discoveredModelsData = DiscoveredModelsData.get((ServerLevel)player.level);
+         ResourceLocation modelId = ModDynamicModels.Armor.SILENTFOXXY.getId();
+         if (!discoveredModelsData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
+            MutableComponent info = new TextComponent("You have bred a snowfox!!!").withStyle(ChatFormatting.GOLD);
+            player.sendMessage(info, Util.NIL_UUID);
+            discoveredModelsData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.SILENTFOXXY);
          }
       }
    }

@@ -9,6 +9,7 @@ import iskallia.vault.item.VaultDollItem;
 import iskallia.vault.nbt.VListNBT;
 import iskallia.vault.nbt.VMapNBT;
 import iskallia.vault.network.message.VaultPlayerStatsMessage;
+import iskallia.vault.util.ServerScheduler;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,10 +40,7 @@ public class VaultPlayerStats extends SavedData {
       get(server).pending.computeIfAbsent(playerId, uuid -> new VaultPlayerStats.Entry()).vaultIds.add(vaultId);
       ServerPlayer player = server.getPlayerList().getPlayer(playerId);
       if (player != null) {
-         if (!player.isDeadOrDying()) {
-            prompt(player);
-         }
-
+         ServerScheduler.INSTANCE.schedule(1, () -> prompt(player));
          get(server).setDirty();
       }
    }

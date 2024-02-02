@@ -140,7 +140,7 @@ public class PlayerVaultStatsData extends SavedData {
    }
 
    public PlayerVaultStatsData resetSkills(ServerPlayer player) {
-      return this.resetSkills(player, true);
+      return this.resetSkills(player, false);
    }
 
    public PlayerVaultStatsData resetSkills(ServerPlayer player, boolean resetPoints) {

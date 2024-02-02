@@ -153,6 +153,7 @@ public class ScavengerObjective extends Objective {
 
    @Override
    public void tickServer(VirtualWorld world, Vault vault) {
+      this.get(GOALS).forEach((uuid, goal) -> goal.forEach(task -> task.tick(world, vault)));
       if (this.get(GOALS).areAllCompleted(vault)) {
          super.tickServer(world, vault);
       }

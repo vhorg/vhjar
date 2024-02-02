@@ -27,6 +27,7 @@ import net.minecraftforge.network.PacketDistributor;
 public class ModGameRules {
    public static Key<BooleanValue> FINAL_VAULT_ALLOW_PARTY;
    public static Key<BooleanValue> JOIN_REQUIRE_PARTY;
+   public static Key<IntegerValue> HERALD_MIN_LEVEL;
    public static Key<IntegerValue> TEMPLATE_CACHE_SIZE;
    public static Key<BooleanValue> ALLOW_WAYPOINTS;
    public static Key<BooleanValue> NO_OP_DIFFICULTY;
@@ -36,10 +37,12 @@ public class ModGameRules {
    public static Key<BooleanValue> PRINT_SAVE_DATA_TIMING;
    public static Key<BooleanValue> BOOST_PENALTY;
    public static Key<BooleanValue> QUEST_EXPERT_MODE;
+   public static Key<BooleanValue> NO_RESEARCH_TEAM_PENALTY;
 
    public static void initialize() {
       FINAL_VAULT_ALLOW_PARTY = register("finalVaultAllowParty", Category.MISC, booleanRule(true));
       JOIN_REQUIRE_PARTY = register("vaultJoinRequireParty", Category.MISC, booleanRule(true));
+      HERALD_MIN_LEVEL = register("vaultHeraldMinLevel", Category.MISC, integerRule(100));
       TEMPLATE_CACHE_SIZE = register("vaultTemplateCacheSize", Category.MISC, integerRule(32));
       ALLOW_WAYPOINTS = register(
          "vaultAllowWaypoints",
@@ -59,6 +62,7 @@ public class ModGameRules {
             QuestStatesData.get().setExpertMode(server.overworld());
          }
       }));
+      NO_RESEARCH_TEAM_PENALTY = register("vaultNoResearchTeamPenalty", Category.MISC, booleanRule(false));
    }
 
    public static <T extends Value<T>> Key<T> register(String name, Category category, Type<T> type) {

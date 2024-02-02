@@ -8,6 +8,7 @@ import iskallia.vault.core.data.key.TemplatePoolKey;
 import iskallia.vault.core.data.key.ThemeKey;
 import iskallia.vault.core.data.key.registry.KeyRegistry;
 import iskallia.vault.core.data.key.registry.SupplierRegistry;
+import iskallia.vault.core.vault.objective.AscensionObjective;
 import iskallia.vault.core.vault.objective.AwardCrateObjective;
 import iskallia.vault.core.vault.objective.BailObjective;
 import iskallia.vault.core.vault.objective.CakeObjective;
@@ -104,7 +105,8 @@ public class VaultRegistry {
       .add(LodestoneObjective.KEY)
       .add(CrakePedestalObjective.KEY)
       .add(ParadoxObjective.KEY)
-      .add(HeraldObjective.KEY);
+      .add(HeraldObjective.KEY)
+      .add(AscensionObjective.KEY);
    public static final SupplierRegistry<ListenersLogic> LISTENERS_LOGIC = new SupplierRegistry<ListenersLogic>().add(ClassicListenersLogic.KEY);
    public static final SupplierRegistry<LootLogic> CHEST_LOGIC = new SupplierRegistry<LootLogic>().add(ClassicLootLogic.KEY);
    public static final SupplierRegistry<PortalLogic> PORTAL_LOGIC = new SupplierRegistry<PortalLogic>().add(ClassicPortalLogic.KEY);

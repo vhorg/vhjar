@@ -1,16 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "bpb",
+    "bfb",
     "eke",
-    "bpb"
+    "bfb"
   ],
   "key": {
     "b": {
       "item": "the_vault:black_chromatic_steel_ingot"
     },
-    "p": {
-      "item": "the_vault:phoenix_feather"
+    "f": {
+      "item": "minecraft:feather"
     },
     "e": {
       "item": "the_vault:echo_pog"

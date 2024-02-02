@@ -8,7 +8,10 @@ import iskallia.vault.gear.attribute.ability.special.VeinMinerAdditionalBlocksMo
 import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
 import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
 import iskallia.vault.gear.attribute.ability.special.base.template.IntValueConfig;
+import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.item.tool.ToolItem;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.ability.effect.spi.core.HoldAbility;
 import iskallia.vault.skill.tree.AbilityTree;
@@ -91,6 +94,13 @@ public abstract class AbstractVeinMinerAbility extends HoldAbility {
          && !(event.getPlayer() instanceof FakePlayer)
          && event.getPlayer() instanceof ServerPlayer player
          && event.getWorld() instanceof ServerLevel level) {
+         if (event.getPlayer().getMainHandItem().getItem() instanceof ToolItem) {
+            VaultGearData gearData = VaultGearData.read(event.getPlayer().getMainHandItem());
+            if (gearData.has(ModGearAttributes.HAMMERING)) {
+               return;
+            }
+         }
+
          AbilityTree abilities = PlayerAbilitiesData.get(level).getAbilities(player);
 
          for (AbstractVeinMinerAbility ability : abilities.getAll(AbstractVeinMinerAbility.class, Ability::isActive)) {

@@ -18,9 +18,13 @@ public interface IBossStage {
 
    Set<Flag> getControlFlags();
 
+   void init();
+
    void start();
 
    void stop();
+
+   void finish();
 
    default CompoundTag serialize() {
       CompoundTag tag = new CompoundTag();

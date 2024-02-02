@@ -70,7 +70,9 @@ public class IntegrationJEI implements IModPlugin {
             ModBlocks.XENIUM_ORE.asItem(),
             ModBlocks.PLACEHOLDER.asItem(),
             ModBlocks.HERALD_TROPHY_BLOCK_ITEM,
-            ModBlocks.GOD_ALTAR.asItem()
+            ModBlocks.SOUL_PLAQUE_BLOCK_ITEM,
+            ModBlocks.GOD_ALTAR.asItem(),
+            ModItems.TITLE_SCROLL
          }
       );
       registration.registerSubtypeInterpreter(

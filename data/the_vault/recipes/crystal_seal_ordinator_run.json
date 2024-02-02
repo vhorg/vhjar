@@ -1,11 +1,14 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "ddd",
-        "dsd",
-        "ddd"
+        "ede",
+        "ese",
+        "ede"
     ],
     "key": {
+        "e": {
+            "item": "the_vault:gem_echo"
+        },
         "d": {
             "item": "the_vault:vault_diamond"
         },

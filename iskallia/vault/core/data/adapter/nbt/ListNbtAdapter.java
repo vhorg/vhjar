@@ -34,14 +34,19 @@ public class ListNbtAdapter extends NbtAdapter<ListTag> {
       Adapters.INT_SEGMENTED_3.writeBits(Integer.valueOf(value.size()), buffer);
 
       for (Tag element : value) {
-         Adapters.NBT[value.getId()].writeBits(element, buffer);
+         Adapters.NBT[value.getElementType()].writeBits(element, buffer);
       }
    }
 
    protected ListTag readTagBits(BitBuffer buffer) {
       ListTag list = new ListTag();
       byte id = GenericNbtAdapter.NBT_ID.readBits(buffer).orElseThrow();
-      list.add((Tag)Adapters.NBT[id].readBits(buffer).orElseThrow());
+      int size = Adapters.INT_SEGMENTED_3.readBits(buffer).orElseThrow();
+
+      for (int i = 0; i < size; i++) {
+         list.add((Tag)Adapters.NBT[id].readBits(buffer).orElseThrow());
+      }
+
       return list;
    }
 
@@ -50,14 +55,19 @@ public class ListNbtAdapter extends NbtAdapter<ListTag> {
       Adapters.INT_SEGMENTED_3.writeBytes(Integer.valueOf(value.size()), buffer);
 
       for (Tag element : value) {
-         Adapters.NBT[value.getId()].writeBytes(element, buffer);
+         Adapters.NBT[value.getElementType()].writeBytes(element, buffer);
       }
    }
 
    protected ListTag readTagBytes(ByteBuf buffer) {
       ListTag list = new ListTag();
       byte id = GenericNbtAdapter.NBT_ID.readBytes(buffer).orElseThrow();
-      list.add((Tag)Adapters.NBT[id].readBytes(buffer).orElseThrow());
+      int size = Adapters.INT_SEGMENTED_3.readBytes(buffer).orElseThrow();
+
+      for (int i = 0; i < size; i++) {
+         list.add((Tag)Adapters.NBT[id].readBytes(buffer).orElseThrow());
+      }
+
       return list;
    }
 
@@ -66,14 +76,19 @@ public class ListNbtAdapter extends NbtAdapter<ListTag> {
       Adapters.INT_SEGMENTED_3.writeData(Integer.valueOf(value.size()), data);
 
       for (Tag element : value) {
-         Adapters.NBT[value.getId()].writeData(element, data);
+         Adapters.NBT[value.getElementType()].writeData(element, data);
       }
    }
 
    protected ListTag readTagData(DataInput data) throws IOException {
       ListTag list = new ListTag();
       byte id = GenericNbtAdapter.NBT_ID.readData(data).orElseThrow();
-      list.add((Tag)Adapters.NBT[id].readData(data).orElseThrow());
+      int size = Adapters.INT_SEGMENTED_3.readData(data).orElseThrow();
+
+      for (int i = 0; i < size; i++) {
+         list.add((Tag)Adapters.NBT[id].readData(data).orElseThrow());
+      }
+
       return list;
    }
 
@@ -99,7 +114,7 @@ public class ListNbtAdapter extends NbtAdapter<ListTag> {
 
    @Nullable
    protected ListTag readTagJson(JsonElement json) {
-      if (json instanceof JsonArray array && array.size() > 0) {
+      if (json instanceof JsonArray array && !array.isEmpty()) {
          ListTag list = new ListTag();
          int id;
          if (array.get(0) instanceof JsonPrimitive primitive && primitive.isString() && (id = KEY_TO_ID.getInt(primitive.getAsString())) >= 0) {

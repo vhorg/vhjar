@@ -35,16 +35,21 @@ public class PlayerHealCutModifier extends EntityAttributeModifier<EntityAttribu
             event -> {
                if (vault.get(Vault.LISTENERS).contains(event.player.getUUID())
                   && event.player.getServer() != null
-                  && event.player.getLevel().getGameTime() % 10L == 0L) {
+                  && event.player.getLevel().getGameTime() % 10L == 0L
+                  && !(event.player.getMaxHealth() <= event.player.getHealth())) {
                   if (!context.hasTarget() || context.getTarget().equals(event.player.getUUID())) {
                      UUID uuid = this.getId(context.getUUID());
                      AttributeInstance attribute = event.player.getAttribute(Attributes.MAX_HEALTH);
                      if (attribute != null) {
                         synchronized (event.player) {
+                           float negativeAddition = event.player.getHealth() - event.player.getMaxHealth();
+                           AttributeModifier currentModifier = attribute.getModifier(uuid);
+                           if (currentModifier != null) {
+                              negativeAddition = (float)(negativeAddition + currentModifier.getAmount());
+                           }
+
                            attribute.removeModifier(uuid);
-                           attribute.addTransientModifier(
-                              new AttributeModifier(uuid, "Heal Cut", event.player.getHealth() - event.player.getMaxHealth(), Operation.ADDITION)
-                           );
+                           attribute.addTransientModifier(new AttributeModifier(uuid, "Heal Cut", negativeAddition, Operation.ADDITION));
                         }
                      }
                   }

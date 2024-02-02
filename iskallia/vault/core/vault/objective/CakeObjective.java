@@ -29,6 +29,7 @@ import iskallia.vault.core.vault.PortalLogic;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
+import iskallia.vault.core.vault.player.Completion;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
 import iskallia.vault.core.vault.stat.StatCollector;
@@ -143,9 +144,6 @@ public class CakeObjective extends Objective {
                         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
                         this.doEatingEffects(world, pos);
                         this.onCakeEaten(world, vault, vault.get(Vault.WORLD).get(WorldManager.GENERATOR), data.getPlayer());
-                        if (this.has(TARGET) && this.get(COUNT) >= this.get(TARGET)) {
-                           this.onCompleted(world, vault);
-                        }
                      }
                   }
                }
@@ -171,7 +169,19 @@ public class CakeObjective extends Objective {
                if (data.getVault() == vault) {
                   vault.getOptional(Vault.STATS)
                      .map(stats -> stats.get(data.getListener()))
-                     .ifPresent(stats -> stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, exp -> exp * this.get(COUNT).intValue()));
+                     .ifPresent(
+                        stats -> {
+                           stats.modify(StatCollector.OBJECTIVE_EXP_MULTIPLIER, exp -> exp * this.get(COUNT).intValue());
+                           if (stats.getCompletion() == Completion.COMPLETED && this.get(COUNT) > 75) {
+                              data.getListener()
+                                 .getPlayer()
+                                 .ifPresent(
+                                    player -> DiscoveredModelsData.get(world)
+                                       .discoverRandomArmorPieceAndBroadcast(player, ModDynamicModels.Armor.CAKE, new Random())
+                                 );
+                           }
+                        }
+                     );
                }
             }
          );
@@ -360,13 +370,6 @@ public class CakeObjective extends Objective {
          return false;
       });
       return neighbors;
-   }
-
-   private void onCompleted(VirtualWorld world, Vault vault) {
-      for (Listener listener : vault.get(Vault.LISTENERS).getAll()) {
-         listener.getPlayer()
-            .ifPresent(player -> DiscoveredModelsData.get(world).discoverRandomArmorPieceAndBroadcast(player, ModDynamicModels.Armor.CAKE, new Random()));
-      }
    }
 
    @OnlyIn(Dist.CLIENT)

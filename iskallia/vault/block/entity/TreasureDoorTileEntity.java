@@ -36,6 +36,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.DoorBlock;
 import net.minecraft.world.level.block.JigsawBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -149,7 +150,7 @@ public class TreasureDoorTileEntity extends BlockEntity {
       BlockState current = world.getBlockState(pos);
       BlockPos otherPos = pos.above(current.getValue(TreasureDoorBlock.HALF) == DoubleBlockHalf.LOWER ? 1 : -1);
       BlockState other = world.getBlockState(otherPos);
-      if (other.getBlock() != ModBlocks.TREASURE_DOOR && other.getBlock() != ModBlocks.DUNGEON_DOOR) {
+      if (!(other.getBlock() instanceof DoorBlock)) {
          other = (BlockState)current.setValue(
             TreasureDoorBlock.HALF, current.getValue(TreasureDoorBlock.HALF) == DoubleBlockHalf.LOWER ? DoubleBlockHalf.UPPER : DoubleBlockHalf.LOWER
          );

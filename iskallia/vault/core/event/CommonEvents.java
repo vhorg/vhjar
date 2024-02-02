@@ -38,10 +38,13 @@ import iskallia.vault.core.event.common.GrantedEffectEvent;
 import iskallia.vault.core.event.common.ItemScavengeTaskEvent;
 import iskallia.vault.core.event.common.ListenerJoinEvent;
 import iskallia.vault.core.event.common.ListenerLeaveEvent;
+import iskallia.vault.core.event.common.ListenerTickEvent;
 import iskallia.vault.core.event.common.LootGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
+import iskallia.vault.core.event.common.MonolithUpdateEvent;
 import iskallia.vault.core.event.common.NoiseGenerationEvent;
 import iskallia.vault.core.event.common.ObjectivePieceGenerationEvent;
+import iskallia.vault.core.event.common.ObjectiveTargetEvent;
 import iskallia.vault.core.event.common.PlaceholderGenerationEvent;
 import iskallia.vault.core.event.common.PlaceholderProcessingEvent;
 import iskallia.vault.core.event.common.PlayerActionEvent;
@@ -132,11 +135,14 @@ public class CommonEvents {
    public static final TreasureRoomOpenEvent TREASURE_ROOM_OPEN = register(new TreasureRoomOpenEvent());
    public static final GateLockOpenEvent GATE_LOCK_OPEN = register(new GateLockOpenEvent());
    public static final GateLockUpdateEvent GATE_LOCK_UPDATE = register(new GateLockUpdateEvent());
+   public static final MonolithUpdateEvent MONOLITH_UPDATE = register(new MonolithUpdateEvent());
    public static final SoulShardChanceEvent SOUL_SHARD_CHANCE = register(new SoulShardChanceEvent());
+   public static final ObjectiveTargetEvent OBJECTIVE_TARGET = register(new ObjectiveTargetEvent());
    public static final VaultStartEvent VAULT_START = register(new VaultStartEvent());
    public static final VaultEndEvent VAULT_END = register(new VaultEndEvent());
    public static final ListenerJoinEvent LISTENER_JOIN = register(new ListenerJoinEvent());
    public static final ListenerLeaveEvent LISTENER_LEAVE = register(new ListenerLeaveEvent());
+   public static final ListenerTickEvent LISTENER_TICK = register(new ListenerTickEvent());
 
    public static void release(Object reference) {
       REGISTRY.forEach(event -> event.release(reference));

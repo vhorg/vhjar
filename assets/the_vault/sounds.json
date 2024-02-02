@@ -865,5 +865,11 @@
     "sounds": [
       "the_vault:boss_fight_4"
     ]
+  },
+  "destroy_monolith": {
+    "category": "block",
+    "sounds": [
+      "the_vault:destroy_monolith"
+    ]
   }
 }

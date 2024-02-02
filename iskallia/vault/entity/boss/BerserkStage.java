@@ -144,8 +144,8 @@ public class BerserkStage extends MeleeStage<BerserkStageAttributes> {
    }
 
    @Override
-   public void start() {
-      super.start();
+   public void init() {
+      super.init();
       this.boss
          .getAttribute(ModAttributes.CRIT_CHANCE)
          .addTransientModifier(new AttributeModifier(CRIT_CHANCE_MODIFIER_UUID, "BerserkCritChance", 1.0, Operation.ADDITION));
@@ -155,12 +155,12 @@ public class BerserkStage extends MeleeStage<BerserkStageAttributes> {
    }
 
    @Override
-   public void stop() {
-      super.stop();
-      this.removeModifier(Attributes.ATTACK_DAMAGE, BERSERK_ATTACK_DAMAGE_MODIFIER_UUID);
-      this.removeModifier(Attributes.MOVEMENT_SPEED, BERSERK_SPEED_MODIFIER_UUID);
+   public void finish() {
+      super.finish();
       this.removeModifier(ModAttributes.CRIT_CHANCE, CRIT_CHANCE_MODIFIER_UUID);
       this.removeModifier(ModAttributes.CRIT_MULTIPLIER, CRIT_MULTIPLIER_MODIFIER_UUID);
+      this.removeModifier(Attributes.ATTACK_DAMAGE, BERSERK_ATTACK_DAMAGE_MODIFIER_UUID);
+      this.removeModifier(Attributes.MOVEMENT_SPEED, BERSERK_SPEED_MODIFIER_UUID);
       this.bloodOrbs.forEach(bloodOrb -> {
          if (this.boss.level instanceof ServerLevel serverLevel) {
             Entity entity = serverLevel.getEntity(bloodOrb);

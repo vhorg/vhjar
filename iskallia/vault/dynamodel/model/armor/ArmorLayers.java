@@ -43,14 +43,20 @@ public abstract class ArmorLayers {
    @OnlyIn(Dist.CLIENT)
    public abstract static class BaseLayer extends HumanoidModel<LivingEntity> {
       protected ArmorPieceModel definition;
+      protected HumanoidModel<?> scaleModel = this;
 
       public BaseLayer(ArmorPieceModel associatedDefinition, ModelPart root) {
          super(root);
          this.definition = associatedDefinition;
+         this.young = false;
       }
 
       public ArmorPieceModel getDefinition() {
          return this.definition;
+      }
+
+      public void setScaleModel(HumanoidModel<?> scaleModel) {
+         this.scaleModel = scaleModel;
       }
 
       protected void adjustForRender(
@@ -97,6 +103,12 @@ public abstract class ArmorLayers {
       ) {
          poseStack.pushPose();
          this.adjustForRender(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+         if (this.scaleModel.young) {
+            float bodyScale = 1.0F / this.scaleModel.babyBodyScale;
+            poseStack.scale(bodyScale, bodyScale, bodyScale);
+            poseStack.translate(0.0, this.scaleModel.bodyYOffset / 16.0F, 0.0);
+         }
+
          this.body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
          this.right_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
          this.left_leg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
@@ -144,14 +156,31 @@ public abstract class ArmorLayers {
          poseStack.pushPose();
          this.adjustForRender(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
          if (this.definition.getEquipmentSlot() == EquipmentSlot.HEAD) {
+            if (this.scaleModel.young) {
+               if (this.scaleModel.scaleHead) {
+                  float headScale = 1.5F / this.scaleModel.babyHeadScale;
+                  poseStack.scale(headScale, headScale, headScale);
+               }
+
+               poseStack.translate(0.0, this.scaleModel.babyYHeadOffset / 16.0F, this.scaleModel.babyZHeadOffset / 16.0F);
+            }
+
             this.head.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-         } else if (this.definition.getEquipmentSlot() == EquipmentSlot.CHEST) {
-            this.body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-            this.rightArm.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-            this.leftArm.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-         } else if (this.definition.getEquipmentSlot() == EquipmentSlot.FEET) {
-            this.rightLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
-            this.leftLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+         } else {
+            if (this.scaleModel.young) {
+               float bodyScale = 1.0F / this.scaleModel.babyBodyScale;
+               poseStack.scale(bodyScale, bodyScale, bodyScale);
+               poseStack.translate(0.0, this.scaleModel.bodyYOffset / 16.0F, 0.0);
+            }
+
+            if (this.definition.getEquipmentSlot() == EquipmentSlot.CHEST) {
+               this.body.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+               this.rightArm.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+               this.leftArm.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+            } else if (this.definition.getEquipmentSlot() == EquipmentSlot.FEET) {
+               this.rightLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+               this.leftLeg.render(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha);
+            }
          }
 
          poseStack.popPose();

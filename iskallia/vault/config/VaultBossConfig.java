@@ -107,7 +107,7 @@ public class VaultBossConfig extends Config {
                      "berserk", "berserk", new BerserkStageAttributes(200, 10, 0.33, 4.5, 3.3, meleeAttacks, rageAttacks, 80, 4).serialize()
                   ),
                   new VaultBossConfig.StageConfig("generic1", "melee", new MeleeStageAttributes(200, 15, 0.1, meleeAttacks, WeightedList.empty()).serialize()),
-                  new VaultBossConfig.StageConfig("summoning", "summoning", new SummoningStageAttributes(entityTypes, 20, 10, 3, 6, 10, 15).serialize()),
+                  new VaultBossConfig.StageConfig("summoning", "summoning", new SummoningStageAttributes(entityTypes, 50, 10, 3, 6, 10, 15).serialize()),
                   new VaultBossConfig.StageConfig("generic2", "melee", new MeleeStageAttributes(200, 11, 0.1, meleeAttacks, WeightedList.empty()).serialize()),
                   new VaultBossConfig.StageConfig("spark", "spark", new SparkStageAttributes(40, 5, 10, 200, 2, 300, 100, 2.5).serialize()),
                   new VaultBossConfig.StageConfig("generic3", "melee", new MeleeStageAttributes(200, 12, 0.2, meleeAttacks, WeightedList.empty()).serialize())

@@ -8,9 +8,12 @@ import iskallia.vault.block.GateLockBlock;
 import iskallia.vault.block.entity.GateLockTileEntity;
 import iskallia.vault.client.ClientStatisticsData;
 import iskallia.vault.config.VaultModifierOverlayConfig;
+import iskallia.vault.core.vault.modifier.VaultModifierStack;
+import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.core.vault.overlay.ModifiersRenderer;
 import iskallia.vault.init.ModConfigs;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -76,8 +79,20 @@ public class GateLockRenderer implements BlockEntityRenderer<GateLockTileEntity>
             matrices.popPose();
          }
 
+         AtomicInteger index = new AtomicInteger(1);
+
+         for (VaultModifierStack stack : entity.getModifiers()) {
+            VaultModifierRegistry.getOpt(stack.getModifierId()).ifPresent(modifier -> {
+               matrices.pushPose();
+               matrices.translate(0.0, 10.0 * index.get(), 0.0);
+               this.renderLine(modifier.getChatDisplayNameComponent(stack.getSize()), true, matrices, pBufferSource, pPackedLight);
+               matrices.popPose();
+               index.getAndIncrement();
+            });
+         }
+
          if (entity.getReputationCost() > 0) {
-            matrices.translate(0.0, 5.0, 0.0);
+            matrices.translate(0.0, 10.0 * index.get(), 0.0);
             matrices.pushPose();
             int reputation = ClientStatisticsData.getReputation(entity.getGod());
             ChatFormatting form = reputation >= entity.getReputationCost() ? ChatFormatting.WHITE : ChatFormatting.RED;
@@ -95,7 +110,7 @@ public class GateLockRenderer implements BlockEntityRenderer<GateLockTileEntity>
          }
 
          for (ItemStack stack : entity.getCost()) {
-            matrices.translate(0.0, 35.0, 0.0);
+            matrices.translate(0.0, 45.0, 0.0);
             ChatFormatting color = this.check(items, stack.copy(), true) && this.check(items, stack.copy(), false) ? ChatFormatting.WHITE : ChatFormatting.RED;
             this.renderItemLine(
                stack,

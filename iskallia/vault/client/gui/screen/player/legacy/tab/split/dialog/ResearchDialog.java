@@ -15,6 +15,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.network.message.ResearchMessage;
+import iskallia.vault.network.message.VaultResearchPenaltyMessage;
 import iskallia.vault.research.ResearchTree;
 import iskallia.vault.research.type.Research;
 import iskallia.vault.util.PlayerReference;
@@ -36,6 +37,7 @@ public class ResearchDialog extends AbstractDialog<ResearchesElementContainerScr
    public ResearchDialog(ResearchTree researchTree, ResearchesElementContainerScreen skillTreeScreen) {
       super(skillTreeScreen);
       this.researchTree = researchTree;
+      this.getResearchGamerule();
    }
 
    @Override
@@ -47,7 +49,7 @@ public class ResearchDialog extends AbstractDialog<ResearchesElementContainerScr
          Research research = ModConfigs.RESEARCHES.getByName(this.researchName);
          int researchCost = this.researchTree.getResearchCost(research);
          String teamIncrease = "";
-         if (!this.researchTree.getResearchShares().isEmpty()) {
+         if (!this.researchTree.getResearchShares().isEmpty() && !ResearchTree.isPenalty) {
             teamIncrease = " (+" + Math.round(this.researchTree.getTeamResearchCostIncreaseMultiplier() * 100.0F) + "%)";
          }
 
@@ -74,6 +76,10 @@ public class ResearchDialog extends AbstractDialog<ResearchesElementContainerScr
          boolean isLocked = ModConfigs.SKILL_GATES.getGates().isLocked(this.researchName, this.researchTree);
          this.learnButton.active = !this.researchTree.isResearched(research) && !isLocked && VaultBarOverlay.unspentKnowledgePoints >= researchCost;
       }
+   }
+
+   public void getResearchGamerule() {
+      ModNetwork.CHANNEL.sendToServer(new VaultResearchPenaltyMessage.C2S());
    }
 
    public void setResearchName(String researchName) {

@@ -10,6 +10,7 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.util.WeightedList;
+import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.gear.charm.AttributeCharm;
 import iskallia.vault.gear.charm.CharmEffect;
 import iskallia.vault.gear.charm.CharmEffectRegistry;
@@ -88,7 +89,12 @@ public class CharmConfig extends Config {
 
       for (CharmEffect<?> effect : CharmEffectRegistry.getOrderedEntries()) {
          CharmConfig.Charm charm = new CharmConfig.Charm(
-            100, effect.getRegistryName().getPath(), "textures/particle/charm/" + effect.getRegistryName().getPath() + ".png", 16733525, 16733525
+            100,
+            VaultGod.VELARA,
+            effect.getRegistryName().getPath(),
+            "textures/particle/charm/" + effect.getRegistryName().getPath() + ".png",
+            16733525,
+            16733525
          );
          charm.charmConfig = effect.getDefaultConfig();
          this.CHARMS.put(effect.getRegistryName(), charm);
@@ -98,6 +104,8 @@ public class CharmConfig extends Config {
    public static class Charm {
       @Expose
       private int weight;
+      @Expose
+      private VaultGod god;
       @Expose
       private String name;
       @Expose
@@ -116,12 +124,15 @@ public class CharmConfig extends Config {
       private int maxAffinity;
       private Object charmConfig;
 
-      public Charm(int weight, String name, String particleLoc, int color, int majesticColor) {
-         this(weight, name, particleLoc, color, majesticColor, 6, 9, 0, 1);
+      public Charm(int weight, VaultGod god, String name, String particleLoc, int color, int majesticColor) {
+         this(weight, god, name, particleLoc, color, majesticColor, 6, 9, 0, 1);
       }
 
-      public Charm(int weight, String name, String particleLoc, int color, int majesticColor, int minUses, int maxUses, int minAffinity, int maxAffinity) {
+      public Charm(
+         int weight, VaultGod god, String name, String particleLoc, int color, int majesticColor, int minUses, int maxUses, int minAffinity, int maxAffinity
+      ) {
          this.weight = weight;
+         this.god = god;
          this.name = name;
          this.particleLoc = particleLoc;
          this.color = color;
@@ -134,6 +145,10 @@ public class CharmConfig extends Config {
 
       public int getWeight() {
          return this.weight;
+      }
+
+      public VaultGod getGod() {
+         return this.god;
       }
 
       public String getName() {

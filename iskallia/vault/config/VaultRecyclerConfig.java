@@ -27,6 +27,8 @@ public class VaultRecyclerConfig extends Config {
    private VaultRecyclerConfig.RecyclerOutput inscriptionRecyclingOutput;
    @Expose
    private VaultRecyclerConfig.RecyclerOutput magnetRecyclingOutput;
+   @Expose
+   private VaultRecyclerConfig.RecyclerOutput charmRecyclingOutput;
 
    @Override
    public String getName() {
@@ -55,6 +57,10 @@ public class VaultRecyclerConfig extends Config {
 
    public VaultRecyclerConfig.RecyclerOutput getMagnetRecyclingOutput() {
       return this.magnetRecyclingOutput;
+   }
+
+   public VaultRecyclerConfig.RecyclerOutput getCharmRecyclingOutput() {
+      return this.charmRecyclingOutput;
    }
 
    public float getAdditionalOutputRarityChance(VaultGearRarity rarity) {
@@ -92,6 +98,11 @@ public class VaultRecyclerConfig extends Config {
       );
       this.magnetRecyclingOutput = new VaultRecyclerConfig.RecyclerOutput(
          new ChanceItemStackEntry(new ItemStack(ModItems.MAGNETITE), 1, 1, 1.0F),
+         new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F),
+         new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F)
+      );
+      this.charmRecyclingOutput = new VaultRecyclerConfig.RecyclerOutput(
+         new ChanceItemStackEntry(new ItemStack(ModItems.ALEXANDRITE_GEM), 1, 1, 1.0F),
          new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F),
          new ChanceItemStackEntry(ItemStack.EMPTY, 1, 1, 0.0F)
       );

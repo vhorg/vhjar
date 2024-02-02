@@ -4,6 +4,7 @@ import iskallia.vault.block.entity.AlchemyArchiveTileEntity;
 import iskallia.vault.block.entity.ModifierDiscoveryTileEntity;
 import iskallia.vault.container.AlchemyArchiveContainer;
 import iskallia.vault.container.AlchemyTableContainer;
+import iskallia.vault.container.AscensionForgeContainer;
 import iskallia.vault.container.BountyContainer;
 import iskallia.vault.container.InscriptionTableContainer;
 import iskallia.vault.container.LootStatueContainer;
@@ -100,6 +101,7 @@ public class ModContainers {
    public static MenuType<VaultEnchanterContainer> VAULT_ENCHANTER_CONTAINER;
    public static MenuType<SkillAltarContainer.Default> SKILL_ALTAR_CONTAINER;
    public static MenuType<SkillAltarContainer.Import> SKILL_ALTAR_IMPORT_CONTAINER;
+   public static MenuType<AscensionForgeContainer> ASCENSION_FORGE_CONTAINER;
 
    public static void register(Register<MenuType<?>> event) {
       STATISTICS_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
@@ -298,6 +300,11 @@ public class ModContainers {
          BlockPos pos = buffer.readBlockPos();
          return new VaultEnchanterContainer(windowId, world, pos, inventory);
       });
+      ASCENSION_FORGE_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new AscensionForgeContainer(windowId, world, pos, inventory);
+      });
       event.getRegistry()
          .registerAll(
             new MenuType[]{
@@ -341,7 +348,8 @@ public class ModContainers {
                (MenuType)MODIFIER_DISCOVERY_CONTAINER.setRegistryName("modifier_discovery_container"),
                (MenuType)VAULT_ENCHANTER_CONTAINER.setRegistryName("vault_enchanter_container"),
                (MenuType)SKILL_ALTAR_CONTAINER.setRegistryName("skill_altar_container"),
-               (MenuType)SKILL_ALTAR_IMPORT_CONTAINER.setRegistryName("skill_altar_import_container")
+               (MenuType)SKILL_ALTAR_IMPORT_CONTAINER.setRegistryName("skill_altar_import_container"),
+               (MenuType)ASCENSION_FORGE_CONTAINER.setRegistryName("ascension_forge_container")
             }
          );
    }

@@ -16,6 +16,8 @@ public class MixinOptions implements IVaultOptions {
    public boolean doVanillaPotionDamageEffects = false;
    public boolean hunterCustomColorsEnabled = false;
    public boolean abilityScrollingEnabled = true;
+   public boolean showPointMessages = true;
+   public boolean showRarityNames = false;
    public ColorOption chestHunterSpec = new ColorOption(ColorOption.HunterSpec.BASE, 0.8901961F, 0.5529412F, 0.0F);
    public ColorOption blockHunterSpec = new ColorOption(ColorOption.HunterSpec.OBSERVER, 0.14509805F, 0.6745098F, 0.0F);
    public ColorOption gildedHunterSpec = new ColorOption(ColorOption.HunterSpec.GILDED, 1.0F, 1.0F, 0.0F);
@@ -31,6 +33,8 @@ public class MixinOptions implements IVaultOptions {
       this.doVanillaPotionDamageEffects = pAccessor.process("doVanillaPotionDamageEffects", this.doVanillaPotionDamageEffects);
       this.hunterCustomColorsEnabled = pAccessor.process("hunter_CustomColorsEnabled", this.hunterCustomColorsEnabled);
       this.abilityScrollingEnabled = pAccessor.process("abilityScrollingEnabled", this.abilityScrollingEnabled);
+      this.showPointMessages = pAccessor.process("showPointMessages", this.showPointMessages);
+      this.showRarityNames = pAccessor.process("showRarityNames", this.showRarityNames);
       this.cooldownGuiOption = (CooldownGuiOption)pAccessor.process(
          CooldownGuiOption.OFF.getSerializedName(), this.cooldownGuiOption, CooldownGuiOption::fromString, CooldownGuiOption::getSerializedName
       );
@@ -101,6 +105,26 @@ public class MixinOptions implements IVaultOptions {
    @Override
    public void setAbilityScrollingEnabled(boolean abilityScrollingEnabled) {
       this.abilityScrollingEnabled = abilityScrollingEnabled;
+   }
+
+   @Override
+   public boolean showPointMessages() {
+      return this.showPointMessages;
+   }
+
+   @Override
+   public void setShowPointMessages(boolean showPointMessages) {
+      this.showPointMessages = showPointMessages;
+   }
+
+   @Override
+   public boolean showRarityNames() {
+      return this.showRarityNames;
+   }
+
+   @Override
+   public void setShowRarityNames(boolean showRarityNames) {
+      this.showRarityNames = showRarityNames;
    }
 
    @Override

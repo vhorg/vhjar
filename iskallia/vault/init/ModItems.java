@@ -16,6 +16,7 @@ import iskallia.vault.item.CompassItem;
 import iskallia.vault.item.ErrorItem;
 import iskallia.vault.item.GatedLootableItem;
 import iskallia.vault.item.GodBlessingItem;
+import iskallia.vault.item.GodTokenItem;
 import iskallia.vault.item.InfiniteWaterBucketItem;
 import iskallia.vault.item.InscriptionItem;
 import iskallia.vault.item.InscriptionPieceItem;
@@ -42,6 +43,8 @@ import iskallia.vault.item.RegretOrbItem;
 import iskallia.vault.item.RelicFragmentItem;
 import iskallia.vault.item.RelicItem;
 import iskallia.vault.item.RokkitLaunchaItem;
+import iskallia.vault.item.SoulFlameItem;
+import iskallia.vault.item.TitleScrollItem;
 import iskallia.vault.item.VaultBasicFoodItem;
 import iskallia.vault.item.VaultCatalystInfusedItem;
 import iskallia.vault.item.VaultCatalystItem;
@@ -51,7 +54,6 @@ import iskallia.vault.item.VaultRuneItem;
 import iskallia.vault.item.VaultXPFoodItem;
 import iskallia.vault.item.bottle.BottleItem;
 import iskallia.vault.item.consumable.AbsorptionAppleItem;
-import iskallia.vault.item.crystal.CrystalShardItem;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.gear.CharmItem;
 import iskallia.vault.item.gear.EtchingItem;
@@ -74,7 +76,6 @@ import iskallia.vault.util.function.Memo;
 import java.util.Random;
 import java.util.function.Supplier;
 import javax.annotation.Nonnull;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties.Builder;
@@ -227,10 +228,12 @@ public class ModItems {
    public static BasicItem KEYSTONE_VELARA = new KeystoneItem(VaultMod.id("keystone_velara"), VaultGod.VELARA);
    public static BasicItem KEYSTONE_WENDARR = new KeystoneItem(VaultMod.id("keystone_wendarr"), VaultGod.WENDARR);
    public static GodBlessingItem GOD_BLESSING = new GodBlessingItem(VaultMod.id("god_blessing"));
+   public static GodTokenItem GOD_TOKEN = new GodTokenItem(VaultMod.id("god_token"));
    public static BasicItem POISONOUS_MUSHROOM = new BasicItem(VaultMod.id("poisonous_mushroom"));
    public static BasicItem HUNTER_EYE = new BasicItem(VaultMod.id("hunter_eye"));
    public static BasicItem ETERNAL_SOUL = new BasicItem(VaultMod.id("eternal_soul"));
    public static BasicItem INFUSED_ETERNAL_SOUL = new BasicItem(VaultMod.id("infused_eternal_soul"));
+   public static TitleScrollItem TITLE_SCROLL = new TitleScrollItem(VaultMod.id("title_scroll"));
    public static BasicItem KEY_PIECE = new BasicItem(VaultMod.id("key_piece"));
    public static BasicItem KEY_MOULD = new BasicItem(VaultMod.id("key_mould"));
    public static BasicItem BLANK_KEY = new BasicItem(VaultMod.id("blank_key"));
@@ -412,11 +415,13 @@ public class ModItems {
    public static BasicItem WAXING_FOCUS = new GearModificationItem(VaultMod.id("waxing_focus"), ModGearModifications.REFORGE_PREFIXES);
    public static BasicItem WANING_FOCUS = new GearModificationItem(VaultMod.id("waning_focus"), ModGearModifications.REFORGE_SUFFIXES);
    public static VaultCrystalItem VAULT_CRYSTAL = new VaultCrystalItem(VAULT_MOD_GROUP, VaultMod.id("vault_crystal"));
-   public static BasicItem SOUL_FLAME = new BasicItem(VaultMod.id("soul_flame"));
+   public static SoulFlameItem SOUL_FLAME = new SoulFlameItem(VaultMod.id("soul_flame"));
+   public static BasicItem EMBER = new BasicItem(VaultMod.id("ember"));
    public static VaultCatalystItem VAULT_CATALYST = new VaultCatalystItem(VAULT_MOD_GROUP, VaultMod.id("vault_catalyst"));
    public static VaultCatalystInfusedItem VAULT_CATALYST_INFUSED = new VaultCatalystInfusedItem(VAULT_MOD_GROUP, VaultMod.id("vault_catalyst_infused"));
    public static BasicItem VAULT_CATALYST_CHAOS = new BasicItem(VaultMod.id("vault_catalyst_chaos"));
    public static BasicItem PLUNDERER_PEARL = new BasicItem(VaultMod.id("plunderer_pearl"));
+   public static BasicItem WARDENS_PEARL = new BasicItem(VaultMod.id("wardens_pearl"));
    public static BasicItem CRYSTAL_SEAL_EMPTY = new BasicItem(VaultMod.id("crystal_seal_empty"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_EXECUTIONER = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_executioner"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_HUNTER = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_hunter"));
@@ -425,7 +430,7 @@ public class ModItems {
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_RAID = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_raid"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_CAKE = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_cake"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_SAGE = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_sage"));
-   public static ItemVaultCrystalSeal CRYSTAL_SEAL_SPEEDRUN = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_speedrun"));
+   public static ItemVaultCrystalSeal CRYSTAL_SEAL_SCOUT = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_scout"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_ORDINATOR_BUILD = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_ordinator_build"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_ORDINATOR_RUN = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_ordinator_run"));
    public static VaultRuneItem RUNE = new VaultRuneItem(VAULT_MOD_GROUP, VaultMod.id("rune"));
@@ -452,18 +457,6 @@ public class ModItems {
          ModFluids.VOID_LIQUID, new Properties().craftRemainder(Items.BUCKET).stacksTo(1).tab(VAULT_MOD_GROUP)
       )
       .setRegistryName(VaultMod.id("void_liquid_bucket"));
-   public static CrystalShardItem CRYSTAL_SHARD_BENEVOLENT = new CrystalShardItem(
-      VaultMod.id("shard_benevolent"), VAULT_MOD_GROUP, new TranslatableComponent("tooltip.the_vault.shard_benevolent")
-   );
-   public static CrystalShardItem CRYSTAL_SHARD_OMNISCIENT = new CrystalShardItem(
-      VaultMod.id("shard_omniscient"), VAULT_MOD_GROUP, new TranslatableComponent("tooltip.the_vault.shard_omniscient")
-   );
-   public static CrystalShardItem CRYSTAL_SHARD_TIMEKEEPER = new CrystalShardItem(
-      VaultMod.id("shard_timekeeper"), VAULT_MOD_GROUP, new TranslatableComponent("tooltip.the_vault.shard_timekeeper")
-   );
-   public static CrystalShardItem CRYSTAL_SHARD_MALEVOLENCE = new CrystalShardItem(
-      VaultMod.id("shard_malevolence"), VAULT_MOD_GROUP, new TranslatableComponent("tooltip.the_vault.shard_malevolence")
-   );
    public static BasicItem LOST_BOUNTY = new BasicItem(VaultMod.id("lost_bounty"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).rarity(Rarity.UNCOMMON));
    public static BasicItem BOUNTY_PEARL = new BasicItem(VaultMod.id("bounty_pearl"), new Properties().tab(VAULT_MOD_GROUP));
    public static OldNotesItem OLD_NOTES = new OldNotesItem(VaultMod.id("old_notes"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1).rarity(Rarity.UNCOMMON));
@@ -1145,6 +1138,7 @@ public class ModItems {
       registry.register(WAND);
       registry.register(FOCUS);
       registry.register(INFUSED_ETERNAL_SOUL);
+      registry.register(TITLE_SCROLL);
       registry.register(UNKNOWN_EGG);
       registry.register(VAULT_APPLE);
       registry.register(HEARTY_APPLE);
@@ -1177,16 +1171,14 @@ public class ModItems {
       registry.register(VAULT_CATALYST_INFUSED);
       registry.register(VAULT_CATALYST_CHAOS);
       registry.register(PLUNDERER_PEARL);
+      registry.register(WARDENS_PEARL);
       registry.register(RUNE);
       registry.register(INSCRIPTION);
       registry.register(INSCRIPTION_PIECE);
       registry.register(AUGMENT);
       registry.register(VAULT_CATALYST_FRAGMENT);
-      registry.register(CRYSTAL_SHARD_BENEVOLENT);
-      registry.register(CRYSTAL_SHARD_OMNISCIENT);
-      registry.register(CRYSTAL_SHARD_TIMEKEEPER);
-      registry.register(CRYSTAL_SHARD_MALEVOLENCE);
       registry.register(SOUL_FLAME);
+      registry.register(EMBER);
       registry.register(CRYSTAL_SEAL_EMPTY);
       registry.register(CRYSTAL_SEAL_EXECUTIONER);
       registry.register(CRYSTAL_SEAL_HUNTER);
@@ -1195,7 +1187,7 @@ public class ModItems {
       registry.register(CRYSTAL_SEAL_RAID);
       registry.register(CRYSTAL_SEAL_CAKE);
       registry.register(CRYSTAL_SEAL_SAGE);
-      registry.register(CRYSTAL_SEAL_SPEEDRUN);
+      registry.register(CRYSTAL_SEAL_SCOUT);
       registry.register(CRYSTAL_SEAL_ORDINATOR_BUILD);
       registry.register(CRYSTAL_SEAL_ORDINATOR_RUN);
       registry.register(IDENTIFICATION_TOME);
@@ -1288,6 +1280,7 @@ public class ModItems {
       registry.register(KEYSTONE_TENOS);
       registry.register(KEYSTONE_WENDARR);
       registry.register(GOD_BLESSING);
+      registry.register(GOD_TOKEN);
       registry.register(RAW_CHROMATIC_IRON);
       registry.register(CHROMATIC_IRON_TINY_DUST);
       registry.register(CHROMATIC_IRON_SMALL_DUST);

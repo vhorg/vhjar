@@ -70,6 +70,7 @@ public abstract class Listener extends DataObject<Listener> implements ISupplier
    }
 
    public void tickServer(VirtualWorld world, Vault vault) {
+      CommonEvents.LISTENER_TICK.invoke(vault, this, world);
       this.getPlayer()
          .ifPresent(
             player -> {
