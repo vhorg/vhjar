@@ -42,6 +42,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -179,6 +180,15 @@ public class CrystalWorkbenchScreen extends AbstractElementContainerScreen<Cryst
             )
             .layout((screen, gui, parent, world) -> world.translateXY(gui))
       );
+   }
+
+   @Override
+   protected void init() {
+      super.init();
+      Player player = Minecraft.getInstance().player;
+      if (player != null) {
+         ((CrystalWorkbenchContainer)this.menu).getEntity().onOpen(player);
+      }
    }
 
    @Override

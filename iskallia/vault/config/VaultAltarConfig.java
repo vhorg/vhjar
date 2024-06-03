@@ -52,8 +52,8 @@ public class VaultAltarConfig extends Config {
 
    public Optional<ItemStack> getOutput(ItemStack input, UUID uuid) {
       for (VaultAltarConfig.Interface element : this.INTERFACES) {
-         if (element.input.test(input)) {
-            return Optional.of(element.output);
+         if (element.matchesInput(input)) {
+            return Optional.of(element.getOutput());
          }
       }
 
@@ -120,8 +120,8 @@ public class VaultAltarConfig extends Config {
    }
 
    public static class Interface implements ISerializable<CompoundTag, JsonObject> {
-      public ItemPredicate input;
-      public ItemStack output;
+      protected ItemPredicate input;
+      protected ItemStack output;
 
       public Interface() {
       }
@@ -129,6 +129,14 @@ public class VaultAltarConfig extends Config {
       public Interface(ItemPredicate input, ItemStack output) {
          this.input = input;
          this.output = output;
+      }
+
+      public boolean matchesInput(ItemStack input) {
+         return this.input.test(input);
+      }
+
+      public ItemStack getOutput() {
+         return this.output.copy();
       }
 
       @Override

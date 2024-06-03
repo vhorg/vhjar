@@ -1,5 +1,6 @@
 package iskallia.vault.gear.data;
 
+import com.google.common.collect.Streams;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.ByteArrayTag;
+import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.IntTag;
@@ -108,6 +110,22 @@ public class GearDataCache {
 
    private <T extends Enum<T>> T queryEnumCache(String key, Class<T> enumClass, Function<ItemStack, Integer> cacheInit) {
       return this.queryCache(key, tag -> ((IntTag)tag).getAsInt(), IntTag::valueOf, null, ordinal -> MiscUtils.getEnumEntry(enumClass, ordinal), cacheInit);
+   }
+
+   public boolean hasModifierOfCategory(VaultGearModifier.AffixCategory category) {
+      return this.queryCache(
+         String.format("hasModifier%s", category.name()),
+         tag -> tag.getType() == ByteTag.TYPE && ((ByteTag)tag).getAsByte() == 1,
+         ByteTag::valueOf,
+         false,
+         Boolean::booleanValue,
+         stack -> AttributeGearData.read(this.stack) instanceof VaultGearData vgd
+            ? Streams.stream(VaultGearData.Type.ALL.getAttributeSource(vgd))
+               .filter(attribute -> attribute instanceof VaultGearModifier)
+               .map(attribute -> (VaultGearModifier)attribute)
+               .anyMatch(modifier -> modifier.getCategory() == category)
+            : false
+      );
    }
 
    @Nullable

@@ -102,7 +102,9 @@ public class VaultGearTierConfig extends Config {
    }
 
    public static Optional<VaultGearTierConfig> getConfig(ItemStack stack) {
-      return VaultGearData.read(stack).getRarity() == VaultGearRarity.UNIQUE ? getConfig(UNIQUE_ITEM) : getConfig(stack.getItem().getRegistryName());
+      return !stack.isEmpty() && VaultGearData.read(stack).getRarity() == VaultGearRarity.UNIQUE
+         ? getConfig(UNIQUE_ITEM)
+         : getConfig(stack.getItem().getRegistryName());
    }
 
    static Optional<VaultGearTierConfig> getConfig(ResourceLocation key) {
