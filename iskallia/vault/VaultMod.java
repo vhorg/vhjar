@@ -162,6 +162,7 @@ public class VaultMod {
       ModConfigs.TRINKET_RECIPES.syncTo(ModConfigs.TRINKET_RECIPES, player);
       ModConfigs.TOOL_RECIPES.syncTo(ModConfigs.TOOL_RECIPES, player);
       ModConfigs.INSCRIPTION_RECIPES.syncTo(ModConfigs.INSCRIPTION_RECIPES, player);
+      ModConfigs.CATALYST_RECIPES.syncTo(ModConfigs.CATALYST_RECIPES, player);
       DiscoveredModelsData.get(serverWorld).ensureResearchDiscoverables(player);
    }
 

@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.WorldManager;
+import iskallia.vault.core.vault.objective.ArchitectObjective;
 import iskallia.vault.core.world.generator.GridGenerator;
 import iskallia.vault.core.world.generator.layout.ArchitectRoomEntry;
 import iskallia.vault.core.world.generator.layout.ArchitectVaultLayout;
@@ -21,9 +22,9 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.TooltipFlag;
 
 public class ArchitectCrystalLayout extends CrystalLayout {
-   private int tunnelSpan;
+   private Integer tunnelSpan;
    private ArchitectRoomEntry.List entries = new ArchitectRoomEntry.List();
-   private float completion;
+   private Float completion;
 
    public ArchitectCrystalLayout() {
    }
@@ -45,32 +46,42 @@ public class ArchitectCrystalLayout extends CrystalLayout {
       return this;
    }
 
-   public ArchitectCrystalLayout addCompletion(float completion) {
-      this.completion += completion;
-      return this;
+   public boolean addCompletion(float completion) {
+      if (this.completion == null) {
+         return false;
+      } else {
+         this.completion = this.completion + completion;
+         return true;
+      }
    }
 
    @Override
    public void configure(Vault vault, RandomSource random) {
       if (vault.has(Vault.WORLD)) {
-         vault.get(Vault.WORLD).ifPresent(WorldManager.GENERATOR, generator -> {
-            if (generator instanceof GridGenerator grid) {
-               grid.set(GridGenerator.LAYOUT, new ArchitectVaultLayout(this.tunnelSpan, this.entries, this.completion));
-            }
-         });
+         if (this.tunnelSpan != null && this.completion != null) {
+            vault.get(Vault.WORLD).ifPresent(WorldManager.GENERATOR, generator -> {
+               if (generator instanceof GridGenerator grid) {
+                  grid.set(GridGenerator.LAYOUT, new ArchitectVaultLayout(this.tunnelSpan, this.entries, this.completion));
+               }
+            });
+         } else {
+            vault.get(Vault.OBJECTIVES).add(ArchitectObjective.create(this.entries));
+         }
       }
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
-      tooltip.add(
-         new TextComponent("Layout: ")
-            .append(
-               new TextComponent("Architect")
-                  .withStyle(Style.EMPTY.withColor(4766456))
-                  .append(new TextComponent(" | %.1f%%".formatted(Math.min(this.completion, 1.0F) * 100.0F)).withStyle(ChatFormatting.GRAY))
-            )
-      );
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
+      if (this.completion != null) {
+         tooltip.add(
+            new TextComponent("Layout: ")
+               .append(
+                  new TextComponent("Architect")
+                     .withStyle(Style.EMPTY.withColor(4766456))
+                     .append(new TextComponent(" | %.1f%%".formatted(Math.min(this.completion, 1.0F) * 100.0F)).withStyle(ChatFormatting.GRAY))
+               )
+         );
+      }
 
       for (ArchitectRoomEntry entry : this.entries) {
          int count = entry.get(ArchitectRoomEntry.COUNT);
@@ -88,7 +99,10 @@ public class ArchitectCrystalLayout extends CrystalLayout {
    @Override
    public Optional<CompoundTag> writeNbt() {
       CompoundTag nbt = new CompoundTag();
-      nbt.putInt("tunnel_span", this.tunnelSpan);
+      if (this.tunnelSpan != null) {
+         nbt.putInt("tunnel_span", this.tunnelSpan);
+      }
+
       ListTag list = new ListTag();
 
       for (ArchitectRoomEntry entry : this.entries) {
@@ -96,12 +110,15 @@ public class ArchitectCrystalLayout extends CrystalLayout {
       }
 
       nbt.put("entries", list);
-      nbt.putFloat("completion", this.completion);
+      if (this.completion != null) {
+         nbt.putFloat("completion", this.completion);
+      }
+
       return Optional.of(nbt);
    }
 
    public void readNbt(CompoundTag nbt) {
-      this.tunnelSpan = nbt.getInt("tunnel_span");
+      this.tunnelSpan = nbt.contains("tunnel_span") ? nbt.getInt("tunnel_span") : null;
       this.entries.clear();
       ListTag list = nbt.getList("entries", 10);
 
@@ -109,13 +126,16 @@ public class ArchitectCrystalLayout extends CrystalLayout {
          this.entries.add(ArchitectRoomEntry.fromNBT(list.getCompound(i)));
       }
 
-      this.completion = nbt.getFloat("completion");
+      this.completion = nbt.contains("completion") ? nbt.getFloat("completion") : null;
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       JsonObject json = new JsonObject();
-      json.addProperty("tunnel_span", this.tunnelSpan);
+      if (this.tunnelSpan != null) {
+         json.addProperty("tunnel_span", this.tunnelSpan);
+      }
+
       JsonArray list = new JsonArray();
 
       for (ArchitectRoomEntry entry : this.entries) {
@@ -123,12 +143,15 @@ public class ArchitectCrystalLayout extends CrystalLayout {
       }
 
       json.add("entries", list);
-      json.addProperty("completion", this.completion);
+      if (this.completion != null) {
+         json.addProperty("completion", this.completion);
+      }
+
       return Optional.of(json);
    }
 
    public void readJson(JsonObject json) {
-      this.tunnelSpan = json.get("tunnel_span").getAsInt();
+      this.tunnelSpan = json.has("tunnel_span") ? json.get("tunnel_span").getAsInt() : null;
       this.entries.clear();
       if (json.has("entries")) {
          for (JsonElement element : json.getAsJsonArray("entries")) {
@@ -136,6 +159,6 @@ public class ArchitectCrystalLayout extends CrystalLayout {
          }
       }
 
-      this.completion = json.get("completion").getAsFloat();
+      this.completion = json.has("completion") ? json.get("completion").getAsFloat() : null;
    }
 }

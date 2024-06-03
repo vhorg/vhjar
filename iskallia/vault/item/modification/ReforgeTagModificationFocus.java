@@ -31,6 +31,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ReforgeTagModificationFocus extends GearModificationItem implements DataTransferItem {
    private static final Map<Item, String> ITEM_TO_NAME = new HashMap<>();
@@ -109,7 +110,7 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
       Map<VaultGearAttribute<?>, List<Item>> attributes = new LinkedHashMap<>();
       ModConfigs.VAULT_GEAR_CONFIG.forEach((item, config) -> tagGroup.getTags().forEach(tag -> config.getModifierConfigurationsByTag(tag).forEach(tpl -> {
          VaultGearAttribute<?> attribute = VaultGearAttributeRegistry.getAttribute(((VaultGearTierConfig.ModifierTierGroup)tpl.getB()).getAttribute());
-         attributes.computeIfAbsent(attribute, a -> new ArrayList<>()).add(item);
+         ForgeRegistries.ITEMS.getHolder(item).ifPresent(holder -> attributes.computeIfAbsent(attribute, a -> new ArrayList<>()).add((Item)holder.value()));
       })));
       return attributes;
    }
@@ -185,6 +186,14 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
          idols.forEach(item -> lines.add(ITEM_TO_NAME.get(item)));
       }
 
+      if (items.contains(ModItems.FOCUS)) {
+         lines.add("Focus");
+      }
+
+      if (items.contains(ModItems.WAND)) {
+         lines.add("Wand");
+      }
+
       StringBuilder result = new StringBuilder();
       Iterator<String> it = lines.iterator();
 
@@ -211,5 +220,7 @@ public class ReforgeTagModificationFocus extends GearModificationItem implements
       ITEM_TO_NAME.put(ModItems.IDOL_OMNISCIENT, "Tenos Idol");
       ITEM_TO_NAME.put(ModItems.IDOL_TIMEKEEPER, "Wendarr Idol");
       ITEM_TO_NAME.put(ModItems.IDOL_MALEVOLENCE, "Idona Idol");
+      ITEM_TO_NAME.put(ModItems.FOCUS, "Focus");
+      ITEM_TO_NAME.put(ModItems.WAND, "Wand");
    }
 }

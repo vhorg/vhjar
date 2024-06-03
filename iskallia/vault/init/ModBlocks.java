@@ -25,6 +25,7 @@ import iskallia.vault.block.CrakePedestalBlock;
 import iskallia.vault.block.CryoChamberBlock;
 import iskallia.vault.block.CrystalBuddingBlock;
 import iskallia.vault.block.CrystalClusterBlock;
+import iskallia.vault.block.CrystalWorkbenchBlock;
 import iskallia.vault.block.CubeBlock;
 import iskallia.vault.block.CustomEntitySpawnerBlock;
 import iskallia.vault.block.DemagnetizerBlock;
@@ -42,6 +43,7 @@ import iskallia.vault.block.GateLockBlock;
 import iskallia.vault.block.GildedCandelabraBlock;
 import iskallia.vault.block.HeraldControllerBlock;
 import iskallia.vault.block.HeraldTrophyBlock;
+import iskallia.vault.block.HologramBlock;
 import iskallia.vault.block.HourglassBlock;
 import iskallia.vault.block.IdentificationStandBlock;
 import iskallia.vault.block.InscriptionTableBlock;
@@ -131,6 +133,7 @@ import iskallia.vault.block.entity.ConvertedSparkTileEntity;
 import iskallia.vault.block.entity.CrakePedestalTileEntity;
 import iskallia.vault.block.entity.CryoChamberTileEntity;
 import iskallia.vault.block.entity.CrystalBuddingBlockEntity;
+import iskallia.vault.block.entity.CrystalWorkbenchTileEntity;
 import iskallia.vault.block.entity.CubeTileEntity;
 import iskallia.vault.block.entity.CustomEntitySpawnerTileEntity;
 import iskallia.vault.block.entity.DemagnetizerTileEntity;
@@ -145,6 +148,7 @@ import iskallia.vault.block.entity.FoliageDecorTileEntity;
 import iskallia.vault.block.entity.GateLockTileEntity;
 import iskallia.vault.block.entity.HeraldControllerTileEntity;
 import iskallia.vault.block.entity.HeraldTrophyTileEntity;
+import iskallia.vault.block.entity.HologramTileEntity;
 import iskallia.vault.block.entity.HourglassTileEntity;
 import iskallia.vault.block.entity.IdentificationStandTileEntity;
 import iskallia.vault.block.entity.InscriptionTableTileEntity;
@@ -218,6 +222,7 @@ import iskallia.vault.block.render.BountyTableRenderer;
 import iskallia.vault.block.render.ConvertedSparkRenderer;
 import iskallia.vault.block.render.CrakePedestalRenderer;
 import iskallia.vault.block.render.CryoChamberRenderer;
+import iskallia.vault.block.render.CrystalWorkbenchRenderer;
 import iskallia.vault.block.render.DivineAltarRenderer;
 import iskallia.vault.block.render.EnhancementAltarRenderer;
 import iskallia.vault.block.render.EternalPedestalRenderer;
@@ -228,6 +233,7 @@ import iskallia.vault.block.render.GateLockRenderer;
 import iskallia.vault.block.render.GodAltarRenderer;
 import iskallia.vault.block.render.HeraldControllerRenderer;
 import iskallia.vault.block.render.HeraldTrophyRenderer;
+import iskallia.vault.block.render.HologramRenderer;
 import iskallia.vault.block.render.HourglassRenderer;
 import iskallia.vault.block.render.IdentificationStandRenderer;
 import iskallia.vault.block.render.JewelApplicationStationRenderer;
@@ -334,6 +340,7 @@ public class ModBlocks {
    public static final DungeonDoorBlock DUNGEON_DOOR = new DungeonDoorBlock();
    public static final VendorDoorBlock VENDOR_DOOR = new VendorDoorBlock();
    public static final GateLockBlock GATE_LOCK = new GateLockBlock();
+   public static final HologramBlock HOLOGRAM = new HologramBlock();
    public static final HeraldControllerBlock HERALD_CONTROLLER = new HeraldControllerBlock();
    public static final VaultArtifactBlock VAULT_ARTIFACT = new VaultArtifactBlock();
    public static final VaultCrateBlock VAULT_CRATE = new VaultCrateBlock();
@@ -393,6 +400,7 @@ public class ModBlocks {
    public static final VaultArtisanStationBlock VAULT_ARTISAN_STATION = new VaultArtisanStationBlock();
    public static final VaultJewelCuttingStationBlock VAULT_JEWEL_CUTTING_STATION = new VaultJewelCuttingStationBlock();
    public static final VaultJewelApplicationStationBlock VAULT_JEWEL_APPLICATION_STATION = new VaultJewelApplicationStationBlock();
+   public static final CrystalWorkbenchBlock CRYSTAL_WORKBENCH = new CrystalWorkbenchBlock();
    public static final VaultRecyclerBlock VAULT_RECYCLER = new VaultRecyclerBlock();
    public static final VaultDiffuserBlock VAULT_DIFFUSER = new VaultDiffuserBlock();
    public static final VaultDiffuserUpgradedBlock VAULT_HARVESTER = new VaultDiffuserUpgradedBlock();
@@ -991,6 +999,10 @@ public class ModBlocks {
          GateLockTileEntity::new, new Block[]{GATE_LOCK}
       )
       .build(null);
+   public static final BlockEntityType<HologramTileEntity> HOLOGRAM_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         HologramTileEntity::new, new Block[]{HOLOGRAM}
+      )
+      .build(null);
    public static final BlockEntityType<SoulPlaqueTileEntity> SOUL_PLAQUE_TILE_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          SoulPlaqueTileEntity::new, new Block[]{SOUL_PLAQUE}
       )
@@ -1128,6 +1140,10 @@ public class ModBlocks {
       .build(null);
    public static final BlockEntityType<VaultJewelApplicationStationTileEntity> VAULT_JEWEL_APPLICATION_STATION_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
          VaultJewelApplicationStationTileEntity::new, new Block[]{VAULT_JEWEL_APPLICATION_STATION}
+      )
+      .build(null);
+   public static final BlockEntityType<CrystalWorkbenchTileEntity> CRYSTAL_WORKBENCH_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
+         CrystalWorkbenchTileEntity::new, new Block[]{CRYSTAL_WORKBENCH}
       )
       .build(null);
    public static final BlockEntityType<VaultRecyclerTileEntity> VAULT_RECYCLER_ENTITY = net.minecraft.world.level.block.entity.BlockEntityType.Builder.of(
@@ -1304,6 +1320,7 @@ public class ModBlocks {
       registerBlock(event, DUNGEON_DOOR, VaultMod.id("dungeon_door"));
       registerBlock(event, VENDOR_DOOR, VaultMod.id("vendor_door"));
       registerBlock(event, GATE_LOCK, VaultMod.id("gate_lock"));
+      registerBlock(event, HOLOGRAM, VaultMod.id("hologram"));
       registerBlock(event, HERALD_CONTROLLER, VaultMod.id("herald_controller"));
       registerBlock(event, VAULT_ARTIFACT, VaultMod.id("vault_artifact"));
       registerBlock(event, VAULT_CRATE, VaultMod.id("vault_crate"));
@@ -1353,6 +1370,7 @@ public class ModBlocks {
       registerBlock(event, VAULT_ARTISAN_STATION, VaultMod.id("vault_artisan_station"));
       registerBlock(event, VAULT_JEWEL_CUTTING_STATION, VaultMod.id("vault_jewel_cutting_station"));
       registerBlock(event, VAULT_JEWEL_APPLICATION_STATION, VaultMod.id("vault_jewel_application_station"));
+      registerBlock(event, CRYSTAL_WORKBENCH, VaultMod.id("crystal_workbench"));
       registerBlock(event, VAULT_RECYCLER, VaultMod.id("vault_recycler"));
       registerBlock(event, VAULT_DIFFUSER, VaultMod.id("vault_diffuser"));
       registerBlock(event, VAULT_HARVESTER, VaultMod.id("vault_harvester"));
@@ -1615,6 +1633,7 @@ public class ModBlocks {
       registerTileEntity(event, DUNGEON_DOOR_TILE_ENTITY, VaultMod.id("dungeon_door_tile_entity"));
       registerTileEntity(event, VENDOR_DOOR_TILE_ENTITY, VaultMod.id("vendor_door_tile_entity"));
       registerTileEntity(event, GATE_LOCK_TILE_ENTITY, VaultMod.id("gate_lock_tile_entity"));
+      registerTileEntity(event, HOLOGRAM_TILE_ENTITY, VaultMod.id("hologram_tile_entity"));
       registerTileEntity(event, SOUL_PLAQUE_TILE_ENTITY, VaultMod.id("soul_plaque_tile_entity"));
       registerTileEntity(event, HERALD_CONTROLLER_TILE_ENTITY, VaultMod.id("herald_controller_tile_entity"));
       registerTileEntity(event, VAULT_CHEST_TILE_ENTITY, VaultMod.id("vault_chest_tile_entity"));
@@ -1644,6 +1663,7 @@ public class ModBlocks {
       registerTileEntity(event, VAULT_ARTISAN_STATION_ENTITY, VaultMod.id("vault_artisan_station_tile_entity"));
       registerTileEntity(event, VAULT_JEWEL_CUTTING_STATION_ENTITY, VaultMod.id("vault_jewel_cutting_station_tile_entity"));
       registerTileEntity(event, VAULT_JEWEL_APPLICATION_STATION_ENTITY, VaultMod.id("vault_jewel_application_station_tile_entity"));
+      registerTileEntity(event, CRYSTAL_WORKBENCH_ENTITY, VaultMod.id("crystal_workbench_tile_entity"));
       registerTileEntity(event, VAULT_RECYCLER_ENTITY, VaultMod.id("vault_recycler_tile_entity"));
       registerTileEntity(event, VAULT_DIFFUSER_ENTITY, VaultMod.id("vault_diffuser_tile_entity"));
       registerTileEntity(event, VAULT_HARVESTER_ENTITY, VaultMod.id("vault_harvester_tile_entity"));
@@ -1719,6 +1739,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(TOOL_STATION_TILE_ENTITY, ToolStationRenderer::new);
       event.registerBlockEntityRenderer(VAULT_JEWEL_CUTTING_STATION_ENTITY, JewelCuttingStationRenderer::new);
       event.registerBlockEntityRenderer(VAULT_JEWEL_APPLICATION_STATION_ENTITY, JewelApplicationStationRenderer::new);
+      event.registerBlockEntityRenderer(CRYSTAL_WORKBENCH_ENTITY, CrystalWorkbenchRenderer::new);
       event.registerBlockEntityRenderer(ENHANCEMENT_ALTAR_TILE_ENTITY, EnhancementAltarRenderer::new);
       event.registerBlockEntityRenderer(MODIFIER_DISCOVERY_ENTITY, ModifierDiscoveryRenderer::new);
       event.registerBlockEntityRenderer(ALCHEMY_ARCHIVE_TILE_ENTITY, PotionModifierDiscoveryRenderer::new);
@@ -1736,6 +1757,7 @@ public class ModBlocks {
       event.registerBlockEntityRenderer(BOUNTY_TABLE_TILE_ENTITY, BountyTableRenderer::new);
       event.registerBlockEntityRenderer(VELVET_BED_TILE_ENTITY, VelvetBedRenderer::new);
       event.registerBlockEntityRenderer(GATE_LOCK_TILE_ENTITY, GateLockRenderer::new);
+      event.registerBlockEntityRenderer(HOLOGRAM_TILE_ENTITY, HologramRenderer::new);
       event.registerBlockEntityRenderer(SOUL_PLAQUE_TILE_ENTITY, SoulPlaqueRenderer::new);
       event.registerBlockEntityRenderer(SPARK_TILE_ENTITY, SparkRenderer::new);
       event.registerBlockEntityRenderer(HERALD_CONTROLLER_TILE_ENTITY, HeraldControllerRenderer::new);
@@ -1842,6 +1864,7 @@ public class ModBlocks {
       registerBlockItem(event, PLACEHOLDER, new PlaceholderBlockItem());
       registerBlockItem(event, TREASURE_DOOR, new TreasureDoorBlockItem());
       registerBlockItem(event, GATE_LOCK);
+      registerBlockItem(event, HOLOGRAM);
       registerBlockItem(event, HERALD_CONTROLLER);
       registerBlockItem(event, DUNGEON_DOOR, new DungeonDoorBlockItem());
       registerBlockItem(event, VENDOR_DOOR, new VendorDoorBlockItem());
@@ -1867,6 +1890,7 @@ public class ModBlocks {
       registerBlockItem(event, VAULT_ARTISAN_STATION);
       registerBlockItem(event, VAULT_JEWEL_CUTTING_STATION);
       registerBlockItem(event, VAULT_JEWEL_APPLICATION_STATION);
+      registerBlockItem(event, CRYSTAL_WORKBENCH);
       registerBlockItem(event, VAULT_RECYCLER);
       registerBlockItem(event, VAULT_DIFFUSER);
       registerBlockItem(event, VAULT_HARVESTER);

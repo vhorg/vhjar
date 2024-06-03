@@ -76,7 +76,7 @@ public class TransmogTableScreen extends AbstractElementContainerScreen<Transmog
          (DiscoveredModelSelectElement)new DiscoveredModelSelectElement(
                Spatials.positionXY(62, 6).height(50),
                5,
-               () -> container.getSlot(container.getInternalInventoryIndexRange().getContainerIndex(0)).getItem().getItem(),
+               () -> container.getSlot(container.getInternalInventoryIndexRange().getContainerIndex(0)).getItem(),
                ClientDiscoveredEntriesData.Models.getObserverModels(),
                selectedModelId -> {
                   container.selectModelId(selectedModelId);

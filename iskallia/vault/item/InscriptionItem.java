@@ -63,6 +63,7 @@ public class InscriptionItem extends Item implements VaultLevelItem, IManualMode
             data.setCompletion(0.05F);
             data.setTime(400);
             data.setInstability(0.01F);
+            data.setSize(10);
             data.setModel(0);
             data.write(stack);
             items.add(stack);

@@ -20,7 +20,7 @@ public class ToolRecipesConfig extends ForgeRecipesConfig<ConfigToolRecipe, Tool
    }
 
    @Override
-   protected List<ConfigToolRecipe> getConfigRecipes() {
+   public List<ConfigToolRecipe> getConfigRecipes() {
       return this.toolRecipes;
    }
 

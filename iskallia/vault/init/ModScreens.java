@@ -25,6 +25,7 @@ import iskallia.vault.client.gui.screen.VaultCrateScreen;
 import iskallia.vault.client.gui.screen.block.AlchemyArchiveScreen;
 import iskallia.vault.client.gui.screen.block.AlchemyTableScreen;
 import iskallia.vault.client.gui.screen.block.AscensionForgeScreen;
+import iskallia.vault.client.gui.screen.block.CrystalWorkbenchScreen;
 import iskallia.vault.client.gui.screen.block.InscriptionTableScreen;
 import iskallia.vault.client.gui.screen.block.ModifierDiscoveryScreen;
 import iskallia.vault.client.gui.screen.block.ModifierWorkbenchScreen;
@@ -84,6 +85,7 @@ public class ModScreens {
       MenuScreens.register(ModContainers.VAULT_ARTISAN_STATION_CONTAINER, VaultArtisanStationScreen::new);
       MenuScreens.register(ModContainers.VAULT_JEWEL_CUTTING_STATION_CONTAINER, VaultJewelCuttingStationScreen::new);
       MenuScreens.register(ModContainers.VAULT_JEWEL_APPLICATION_STATION_CONTAINER, VaultJewelApplicationStationScreen::new);
+      MenuScreens.register(ModContainers.CRYSTAL_MODIFICATION_STATION_CONTAINER, CrystalWorkbenchScreen::new);
       MenuScreens.register(ModContainers.VAULT_RECYCLER_CONTAINER, VaultRecyclerScreen::new);
       MenuScreens.register(ModContainers.VAULT_DIFFUSER_CONTAINER, VaultDiffuserScreen::new);
       MenuScreens.register(ModContainers.VAULT_HARVESTER_CONTAINER, VaultDiffuserUpgradedScreen::new);

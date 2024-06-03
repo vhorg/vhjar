@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "the_vault:item/god_token_tenos"
+    "layer0": "the_vault:item/tenos_capstone"
   }
 }

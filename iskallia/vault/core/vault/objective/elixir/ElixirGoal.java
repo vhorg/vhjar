@@ -49,8 +49,10 @@ public class ElixirGoal extends DataObject<ElixirGoal> {
    }
 
    public void tickServer(VirtualWorld world, Vault vault, ElixirObjective objective, UUID listener) {
-      double increase = CommonEvents.OBJECTIVE_TARGET.invoke(world, vault, 0.0).getIncrease();
-      this.set(TARGET, Integer.valueOf((int)Math.round(this.get(BASE_TARGET).intValue() * (1.0 + increase))));
+      this.ifPresent(BASE_TARGET, value -> {
+         double increase = CommonEvents.OBJECTIVE_TARGET.invoke(world, vault, 0.0).getIncrease();
+         this.set(TARGET, Integer.valueOf((int)Math.round(this.get(BASE_TARGET).intValue() * (1.0 + increase))));
+      });
    }
 
    public void releaseServer() {

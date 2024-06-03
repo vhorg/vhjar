@@ -1,6 +1,7 @@
 package iskallia.vault.core.data.adapter;
 
 import com.google.gson.JsonObject;
+import iskallia.vault.config.VaultAltarConfig;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.data.adapter.array.ByteArrayAdapter;
 import iskallia.vault.core.data.adapter.array.IntArrayAdapter;
@@ -83,6 +84,7 @@ import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.layout.preset.ParadoxTemplatePreset;
+import iskallia.vault.item.crystal.layout.preset.PoolKeyTemplatePreset;
 import iskallia.vault.item.crystal.layout.preset.PoolTemplatePreset;
 import iskallia.vault.item.crystal.layout.preset.StructurePreset;
 import iskallia.vault.item.crystal.layout.preset.TemplatePreset;
@@ -173,7 +175,8 @@ public class Adapters {
    public static final BlockPosAdapter BLOCK_POS = new BlockPosAdapter(false);
    public static final SerializableAdapter<StructurePreset, CompoundTag, JsonObject> STRUCTURE_PRESET = new SerializableAdapter<>(StructurePreset::new, true);
    public static final TypeSupplierAdapter<TemplatePreset> TEMPLATE_PRESET = new TypeSupplierAdapter<PoolTemplatePreset>("type", true)
-      .<TypeSupplierAdapter<ParadoxTemplatePreset>>register("pool", PoolTemplatePreset.class, PoolTemplatePreset::new)
+      .<TypeSupplierAdapter<PoolKeyTemplatePreset>>register("pool", PoolTemplatePreset.class, PoolTemplatePreset::new)
+      .<TypeSupplierAdapter<ParadoxTemplatePreset>>register("pool_key", PoolKeyTemplatePreset.class, PoolKeyTemplatePreset::new)
       .register("paradox", ParadoxTemplatePreset.class, ParadoxTemplatePreset::new);
    public static TypeSupplierAdapter<EnhancementTask<?>> ENHANCEMENT_TASK = new TypeSupplierAdapter<BreakBlocksEnhancementTask>("type", true)
       .<TypeSupplierAdapter<KillMobsEnhancementTask>>register("break_blocks", BreakBlocksEnhancementTask.class, BreakBlocksEnhancementTask::new)
@@ -204,6 +207,7 @@ public class Adapters {
       .<TypeSupplierAdapter<RandomSource>>register("lcg", LCGRandom.class, () -> LCGRandom.of(Lcg.JAVA, 0L))
       .<TypeSupplierAdapter<RandomSource>>register("java", JavaRandom.class, () -> JavaRandom.ofInternal(0L))
       .register("chunk", ChunkRandom.class, ChunkRandom::any);
+   public static SerializableAdapter<VaultAltarConfig.Interface, ?, ?> ALTAR_INTERFACE = of(VaultAltarConfig.Interface::new, false);
 
    public static BoundedIntAdapter ofBoundedInt(int bound) {
       return new BoundedIntAdapter(0, bound - 1, false);

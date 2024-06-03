@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import iskallia.vault.config.adapter.PaletteAdapter;
 import iskallia.vault.core.world.processor.entity.EntityProcessor;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +20,8 @@ public class Palette {
       Palette palette;
       try {
          palette = (Palette)GSON.fromJson(new FileReader(path), Palette.class);
-      } catch (FileNotFoundException var3) {
+      } catch (Exception var3) {
+         var3.printStackTrace();
          return null;
       }
 

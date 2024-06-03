@@ -14,11 +14,11 @@ import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModDynamicModels;
 import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.util.SideOnlyFixer;
 import iskallia.vault.util.function.ObservableSupplier;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -29,20 +29,19 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement<E>>
    extends ScrollableItemStackSelectorElement<E, DiscoveredModelSelectElement.TransmogModelEntry> {
    protected int columns;
-   protected ObservableSupplier<Item> gearItem;
+   protected ObservableSupplier<ItemStack> gearItem;
    protected ObservableSupplier<Set<ResourceLocation>> discoveredModelIds;
 
    public DiscoveredModelSelectElement(
       ISpatial spatial,
       int columns,
-      Supplier<Item> gearItem,
+      Supplier<ItemStack> gearItem,
       ObservableSupplier<Set<ResourceLocation>> discoveredModelIds,
       Consumer<ResourceLocation> onModelSelected
    ) {
@@ -50,11 +49,11 @@ public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement
          Spatials.copy(spatial),
          columns,
          new DiscoveredModelSelectElement.DiscoveredModelSelectorModel(
-            ObservableSupplier.of(gearItem, Objects::deepEquals), discoveredModelIds, onModelSelected
+            ObservableSupplier.of(gearItem, SideOnlyFixer::stackEqualExact), discoveredModelIds, onModelSelected
          )
       );
       this.columns = columns;
-      this.gearItem = ObservableSupplier.of(gearItem, Objects::deepEquals);
+      this.gearItem = ObservableSupplier.of(gearItem, SideOnlyFixer::stackEqualExact);
       this.discoveredModelIds = discoveredModelIds;
    }
 
@@ -69,12 +68,12 @@ public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement
    }
 
    public static class DiscoveredModelSelectorModel extends ScrollableItemStackSelectorElement.SelectorModel<DiscoveredModelSelectElement.TransmogModelEntry> {
-      private final ObservableSupplier<Item> usedItem;
+      private final ObservableSupplier<ItemStack> usedItem;
       private final ObservableSupplier<Set<ResourceLocation>> discoveredModelIds;
       private final Consumer<ResourceLocation> onModelSelected;
 
       public DiscoveredModelSelectorModel(
-         ObservableSupplier<Item> usedItem, ObservableSupplier<Set<ResourceLocation>> discoveredModelIds, Consumer<ResourceLocation> onModelSelected
+         ObservableSupplier<ItemStack> usedItem, ObservableSupplier<Set<ResourceLocation>> discoveredModelIds, Consumer<ResourceLocation> onModelSelected
       ) {
          this.usedItem = usedItem;
          this.discoveredModelIds = discoveredModelIds;
@@ -83,15 +82,15 @@ public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement
 
       @Override
       public List<DiscoveredModelSelectElement.TransmogModelEntry> getEntries() {
-         Item item = this.usedItem.get();
-         if (item instanceof VaultGearItem vaultGearItem) {
+         ItemStack stack = this.usedItem.get();
+         if (stack.getItem() instanceof VaultGearItem vaultGearItem) {
             Player player = Minecraft.getInstance().player;
             if (player == null) {
                return Collections.emptyList();
             } else {
                Set<ResourceLocation> discoveredIds = this.discoveredModelIds.get();
                return ModDynamicModels.REGISTRIES
-                  .getAssociatedRegistry(item)
+                  .getAssociatedRegistry(vaultGearItem.getItem())
                   .map(
                      modelRegistry -> {
                         List<ResourceLocation> modelIds = new ArrayList<>(modelRegistry.getIds());
@@ -101,13 +100,13 @@ public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement
                            if (discovered1 != discovered2) {
                               return discovered1 ? -1 : 1;
                            } else {
-                              boolean special1 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(vaultGearItem, id1);
-                              boolean special2 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(vaultGearItem, id2);
+                              boolean special1 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(stack, id1);
+                              boolean special2 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(stack, id2);
                               if (special1 != special2) {
                                  return special1 ? -1 : 1;
                               } else {
-                                 VaultGearRarity rarity1 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, id1);
-                                 VaultGearRarity rarity2 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, id2);
+                                 VaultGearRarity rarity1 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(stack, id1);
+                                 VaultGearRarity rarity2 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(stack, id2);
                                  if (rarity1 != rarity2) {
                                     return Integer.compare(rarity1.ordinal(), rarity2.ordinal());
                                  } else {
@@ -171,7 +170,7 @@ public class DiscoveredModelSelectElement<E extends DiscoveredModelSelectElement
          slot.tooltip(
             (tooltipRenderer, poseStack, mouseX, mouseY, tooltipFlag) -> {
                if (this.getDisplayStack().getItem() instanceof VaultGearItem vaultGearItem) {
-                  VaultGearRarity var9 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, this.model.getId());
+                  VaultGearRarity var9 = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(this.getDisplayStack(), this.model.getId());
                   if (this.isDisabled()) {
                      tooltipRenderer.renderTooltip(
                         poseStack,

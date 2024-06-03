@@ -4,7 +4,6 @@ import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.init.ModItems;
-import iskallia.vault.util.SidedHelper;
 import java.util.List;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +23,7 @@ public class InscriptionForgeRecipe extends VaultForgeRecipe {
       ItemStack stack = super.createOutput(consumed, crafter, vaultLevel);
       if (stack.getItem() == ModItems.INSCRIPTION) {
          stack.removeTagKey("display");
-         stack.getOrCreateTag().putInt("level", SidedHelper.getVaultLevel(crafter));
+         stack.getOrCreateTag().putInt("level", vaultLevel);
          ModItems.INSCRIPTION.initialize(stack, JavaRandom.ofNanoTime());
       }
 

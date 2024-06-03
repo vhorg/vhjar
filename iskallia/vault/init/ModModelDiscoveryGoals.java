@@ -230,7 +230,7 @@ public class ModModelDiscoveryGoals {
          if (!discoversData.getDiscoveredModels(player.getUUID()).contains(modelId)) {
             MutableComponent info = new TextComponent("YARHAR fiddle dee dee, this gold isn't for thee!").withStyle(ChatFormatting.GOLD);
             player.sendMessage(info, Util.NIL_UUID);
-            discoversData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.PIRATE);
+            discoversData.discoverAllArmorPieceAndBroadcast(player, ModDynamicModels.Armor.GUYBRUSH);
          }
       })
    );

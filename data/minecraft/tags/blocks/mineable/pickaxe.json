@@ -54,6 +54,7 @@
     "the_vault:vault_diffuser",
     "the_vault:vault_harvester",
     "the_vault:crystal_cluster",
+    "the_vault:crystal_workbench",
     "the_vault:animal_pen",
     "the_vault:wutodic_silver_block",
     "the_vault:eternal_pedestal",

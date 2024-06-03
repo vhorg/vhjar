@@ -25,6 +25,9 @@ public class ModSlotIcons {
    public static final ResourceLocation SILVER_SCRAP_NO_ITEM = register("gui/slot/silver_scrap_no_item");
    public static final ResourceLocation TOOL_NO_ITEM = register("gui/slot/tool_no_item");
    public static final ResourceLocation EMBER_NO_ITEM = register("gui/slot/ember_no_item");
+   public static final ResourceLocation SEAL_NO_ITEM = register("gui/slot/seal_no_item");
+   public static final ResourceLocation AUGMENT_NO_ITEM = register("gui/slot/augment_no_item");
+   public static final ResourceLocation CAPSTONE_NO_ITEM = register("gui/slot/capstone_no_item");
    public static final ResourceLocation TOOL_VISE_SLOT_0_NO_ITEM = register("gui/slot/tool_vise/0_no_item");
    public static final ResourceLocation TOOL_VISE_SLOT_1_NO_ITEM = register("gui/slot/tool_vise/1_no_item");
    public static final ResourceLocation TOOL_VISE_SLOT_2_NO_ITEM = register("gui/slot/tool_vise/2_no_item");

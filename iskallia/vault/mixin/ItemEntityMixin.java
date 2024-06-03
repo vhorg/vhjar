@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.item.LegacyMagnetItem;
 import iskallia.vault.item.MagnetItem;
+import iskallia.vault.item.crystal.VaultCrystalItem;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -23,6 +24,16 @@ public abstract class ItemEntityMixin extends Entity {
 
    public ItemEntityMixin(EntityType<?> pEntityType, Level pLevel) {
       super(pEntityType, pLevel);
+   }
+
+   @Inject(
+      method = {"tick"},
+      at = {@At("RETURN")}
+   )
+   public void tick(CallbackInfo ci) {
+      if (this.getItem().getItem() instanceof VaultCrystalItem crystalItem) {
+         crystalItem.onWorldTick(this.level, (ItemEntity)this);
+      }
    }
 
    @Inject(

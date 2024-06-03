@@ -2,7 +2,8 @@
 	"credit": "Made with Blockbench, by Slarkles",
 	"texture_size": [64, 64],
 	"textures": {
-		"0": "the_vault:item/gear/shield/turtle"
+		"0": "the_vault:item/gear/shield/turtle",
+		"particle": "the_vault:item/gear/shield/turtle"
 	},
 	"elements": [
 		{

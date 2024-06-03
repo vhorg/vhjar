@@ -3,17 +3,20 @@ package iskallia.vault.item.data;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.client.gui.helper.UIHelper;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.vault.modifier.VaultModifierStack;
+import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.world.generator.layout.ArchitectRoomEntry;
 import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.crystal.layout.ArchitectCrystalLayout;
+import iskallia.vault.item.crystal.layout.CompoundCrystalLayout;
+import iskallia.vault.item.crystal.properties.CapacityCrystalProperties;
+import iskallia.vault.item.crystal.properties.InstabilityCrystalProperties;
 import iskallia.vault.item.crystal.time.ValueCrystalTime;
 import iskallia.vault.nbt.VListNBT;
-import iskallia.vault.skill.base.Skill;
-import iskallia.vault.skill.expertise.type.MysticExpertise;
-import iskallia.vault.world.data.PlayerExpertisesData;
 import java.util.List;
 import java.util.Random;
 import javax.annotation.Nullable;
@@ -24,7 +27,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -37,9 +39,10 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
    public static final String NBT_KEY = "data";
    public static final int MODELS = 16;
    private VListNBT<InscriptionData.Entry, CompoundTag> entries = VListNBT.of(InscriptionData.Entry::new);
-   private float completion;
-   private int time;
-   private float instability;
+   private Float completion;
+   private Integer time;
+   private Float instability;
+   private Integer size;
    private int model;
    private Integer color;
 
@@ -103,6 +106,14 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
       this.instability = instability;
    }
 
+   public void setSize(int size) {
+      this.size = size;
+   }
+
+   public int getSize() {
+      return this.size;
+   }
+
    public void setModel(int model) {
       this.model = model;
    }
@@ -112,49 +123,78 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
    }
 
    public boolean apply(Player player, ItemStack stack, CrystalData crystal) {
-      if (crystal.isUnmodifiable()) {
-         return false;
-      } else if (!(crystal.getLayout() instanceof ArchitectCrystalLayout layout)) {
+      if (crystal.getProperties().isUnmodifiable()) {
          return false;
       } else {
+         ArchitectCrystalLayout layout = CompoundCrystalLayout.get(crystal.getLayout(), ArchitectCrystalLayout.class);
+         ArchitectCrystalLayout architect;
+         if (layout == null) {
+            if (this.completion != null) {
+               return false;
+            }
+
+            architect = new ArchitectCrystalLayout();
+            crystal.setLayout(CompoundCrystalLayout.flatten(crystal.getLayout(), architect));
+         } else {
+            architect = layout;
+         }
+
          for (InscriptionData.Entry entry : this.entries) {
-            layout.add(entry.toRoomEntry());
+            architect.add(entry.toRoomEntry());
          }
 
-         layout.addCompletion(this.completion);
-         if (crystal.getTime() instanceof ValueCrystalTime data) {
-            if (data.getRoll() instanceof IntRoll.Constant constant) {
-               crystal.setTime(new ValueCrystalTime(IntRoll.ofConstant(constant.getCount() + this.time)));
-            } else if (data.getRoll() instanceof IntRoll.Uniform uniform) {
-               crystal.setTime(new ValueCrystalTime(IntRoll.ofUniform(uniform.getMin() + this.time, uniform.getMax() + this.time)));
-            }
-         }
-
-         float instability = crystal.getInstability();
-         Random random = new Random();
-         if (random.nextFloat() < instability) {
-            double instabilityAvoidanceChance = 0.0;
-            if (player instanceof ServerPlayer serverPlayer) {
-               instabilityAvoidanceChance = PlayerExpertisesData.get(serverPlayer.getLevel())
-                  .getExpertises(serverPlayer)
-                  .getAll(MysticExpertise.class, Skill::isUnlocked)
-                  .stream()
-                  .mapToDouble(MysticExpertise::getInstabilityChanceReduction)
-                  .sum();
-            }
-
-            if (random.nextDouble() > instabilityAvoidanceChance) {
-               if (random.nextFloat() < ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.exhaustProbability) {
-                  VaultCrystalItem.scheduleTask(VaultCrystalItem.ExhaustTask.INSTANCE, stack);
-               } else {
-                  VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("catalyst_curse")), stack);
+         if (this.completion != null && !architect.addCompletion(this.completion)) {
+            return false;
+         } else {
+            if (this.time != null && crystal.getTime() instanceof ValueCrystalTime data) {
+               if (data.getRoll() instanceof IntRoll.Constant constant) {
+                  crystal.setTime(new ValueCrystalTime(IntRoll.ofConstant(constant.getCount() + this.time)));
+               } else if (data.getRoll() instanceof IntRoll.Uniform uniform) {
+                  crystal.setTime(new ValueCrystalTime(IntRoll.ofUniform(uniform.getMin() + this.time, uniform.getMax() + this.time)));
                }
             }
-         }
 
-         crystal.setInstability(crystal.getInstability() + this.instability);
-         crystal.write(stack);
-         return true;
+            if (crystal.getProperties() instanceof InstabilityCrystalProperties properties) {
+               if (this.instability == null) {
+                  return false;
+               }
+
+               float instability = properties.getInstability();
+               Random random = new Random();
+               if (random.nextFloat() < instability && stack != null) {
+                  double instabilityAvoidanceChance = 0.0;
+                  if (random.nextDouble() > instabilityAvoidanceChance) {
+                     if (random.nextFloat() < ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.exhaustProbability) {
+                        VaultCrystalItem.scheduleTask(VaultCrystalItem.ExhaustTask.INSTANCE, stack);
+                     } else {
+                        VaultCrystalItem.scheduleTask(new VaultCrystalItem.AddModifiersTask(VaultMod.id("catalyst_curse"), 1), stack);
+                     }
+                  }
+               }
+
+               properties.setInstability(instability + this.instability);
+            } else if (crystal.getProperties() instanceof CapacityCrystalProperties properties) {
+               Integer capacity = properties.getCapacity().orElse(null);
+               Integer level = crystal.getProperties().getLevel().orElse(null);
+               if (this.size == null || capacity == null || level == null) {
+                  return false;
+               }
+
+               if (capacity < this.size) {
+                  ModConfigs.VAULT_MODIFIER_POOLS
+                     .getRandom(VaultMod.id("catalyst_curse"), level, JavaRandom.ofNanoTime())
+                     .forEach(modifier -> crystal.getModifiers().add(VaultModifierStack.of((VaultModifier<?>)modifier)));
+               }
+
+               properties.setSize(properties.getSize() + this.size);
+            }
+
+            if (stack != null) {
+               crystal.write(stack);
+            }
+
+            return true;
+         }
       }
    }
 
@@ -167,9 +207,22 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
       }
 
       nbt.put("entries", entriesList);
-      nbt.putFloat("completion", this.completion);
-      nbt.putInt("time", this.time);
-      nbt.putFloat("instability", this.instability);
+      if (this.completion != null) {
+         nbt.putFloat("completion", this.completion);
+      }
+
+      if (this.time != null) {
+         nbt.putInt("time", this.time);
+      }
+
+      if (this.instability != null) {
+         nbt.putFloat("instability", this.instability);
+      }
+
+      if (this.size != null) {
+         nbt.putInt("size", this.size);
+      }
+
       nbt.putInt("model", this.model);
       if (this.color != null) {
          nbt.putInt("color", this.color);
@@ -188,9 +241,10 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
          this.entries.add(entry);
       }
 
-      this.completion = nbt.getFloat("completion");
-      this.time = nbt.getInt("time");
-      this.instability = nbt.getFloat("instability");
+      this.completion = nbt.contains("completion") ? nbt.getFloat("completion") : null;
+      this.time = nbt.contains("time") ? nbt.getInt("time") : null;
+      this.instability = nbt.contains("instability") ? nbt.getFloat("instability") : null;
+      this.size = nbt.contains("size") ? nbt.getInt("size") : null;
       this.model = nbt.getInt("model");
       if (nbt.contains("color", 3)) {
          this.color = nbt.getInt("color");
@@ -199,11 +253,23 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
 
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
-      tooltip.add(
-         new TextComponent("Completion: ").append(new TextComponent(Math.round(this.completion * 100.0F) + "%").withStyle(Style.EMPTY.withColor(4766456)))
-      );
-      tooltip.add(new TextComponent("Time: ").append(new TextComponent(UIHelper.formatTimeString(this.time)).withStyle(ChatFormatting.GRAY)));
-      tooltip.add(new TextComponent("Instability: ").append(new TextComponent("%.1f%%".formatted(this.instability * 100.0F)).withStyle(ChatFormatting.RED)));
+      if (this.completion != null) {
+         tooltip.add(
+            new TextComponent("Completion: ").append(new TextComponent(Math.round(this.completion * 100.0F) + "%").withStyle(Style.EMPTY.withColor(4766456)))
+         );
+      }
+
+      if (this.time != null) {
+         tooltip.add(new TextComponent("Time: ").append(new TextComponent(UIHelper.formatTimeString(this.time.intValue())).withStyle(ChatFormatting.GRAY)));
+      }
+
+      if (this.instability != null) {
+         tooltip.add(new TextComponent("Instability: ").append(new TextComponent("%.1f%%".formatted(this.instability * 100.0F)).withStyle(ChatFormatting.RED)));
+      }
+
+      if (this.size != null) {
+         tooltip.add(new TextComponent("Size: ").append(new TextComponent(String.valueOf(this.size)).withStyle(ChatFormatting.RED)));
+      }
 
       for (InscriptionData.Entry entry : this.entries) {
          String roomStr = entry.count > 1 ? "Rooms" : "Room";

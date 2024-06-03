@@ -28,6 +28,7 @@ import net.minecraft.Util;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -184,12 +185,15 @@ public class ClassicMobLogic extends MobLogic {
       CommonEvents.ENTITY_JOIN.register(this, event -> {
          if (event.getWorld() == world) {
             if (!event.loadedFromDisk() && event.getEntity() instanceof ThrownPotion potion) {
-               Entity var7 = potion.getOwner();
+               Entity var8 = potion.getOwner();
                int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
-               ItemStack thrown = potion.getItem();
-               PotionUtils.setPotion(thrown, Potions.WATER);
-               PotionUtils.setCustomEffects(thrown, ModConfigs.VAULT_ENTITIES.getThrowEffects(level, var7));
-               potion.setItem(thrown);
+               List<MobEffectInstance> configuredEffects = ModConfigs.VAULT_ENTITIES.getThrowEffects(level, var8);
+               if (!configuredEffects.isEmpty()) {
+                  ItemStack thrown = potion.getItem();
+                  PotionUtils.setPotion(thrown, Potions.WATER);
+                  PotionUtils.setCustomEffects(thrown, configuredEffects);
+                  potion.setItem(thrown);
+               }
             }
          }
       });

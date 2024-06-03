@@ -406,7 +406,7 @@ public class SpiritExtractorTileEntity extends BlockEntity implements IPlayerSki
          if (this.recyclable) {
             ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
             CrystalData crystal = CrystalData.read(stack);
-            crystal.setLevel(this.vaultLevel);
+            crystal.getProperties().setLevel(this.vaultLevel);
             crystal.write(stack);
             BlockPos pos = this.getBlockPos();
             Containers.dropItemStack(this.level, pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5, stack);

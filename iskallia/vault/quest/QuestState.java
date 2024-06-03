@@ -203,12 +203,13 @@ public class QuestState implements INBTSerializable<CompoundTag> {
          if (this.readyToComplete.contains(id)) {
             this.readyToComplete.remove(id);
             this.completed.add(id);
-            Quest nextQuest = this.<QuestConfig>getConfig(serverPlayer.getLevel()).getNextQuest(quest);
-            if (nextQuest != null
-               && !this.getInProgress().contains(nextQuest.getId())
-               && !this.getReadyToComplete().contains(nextQuest.getId())
-               && !this.getCompleted().contains(nextQuest.getId())) {
-               this.setInProgress(nextQuest);
+
+            for (Quest nextQuest : this.<QuestConfig>getConfig(serverPlayer.getLevel()).getNextQuests(quest)) {
+               if (!this.getInProgress().contains(nextQuest.getId())
+                  && !this.getReadyToComplete().contains(nextQuest.getId())
+                  && !this.getCompleted().contains(nextQuest.getId())) {
+                  this.setInProgress(nextQuest);
+               }
             }
 
             quest.getReward().apply(serverPlayer);

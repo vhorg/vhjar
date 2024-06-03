@@ -40,6 +40,7 @@ import iskallia.vault.network.message.ClientboundTESyncMessage;
 import iskallia.vault.network.message.ClientboundToastMessage;
 import iskallia.vault.network.message.ClientboundUpdateAltarIndexMessage;
 import iskallia.vault.network.message.ClientboundUpdateDifficultyMessage;
+import iskallia.vault.network.message.CrystalWorkbenchMessage;
 import iskallia.vault.network.message.DiffuserParticleMessage;
 import iskallia.vault.network.message.DiffuserUpgradedParticleMessage;
 import iskallia.vault.network.message.DiscoverModifierMessage;
@@ -1002,6 +1003,9 @@ public class ModNetwork {
          ServerboundAscensionForgeBuyMessage::encode,
          ServerboundAscensionForgeBuyMessage::decode,
          ServerboundAscensionForgeBuyMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(), CrystalWorkbenchMessage.class, CrystalWorkbenchMessage::encode, CrystalWorkbenchMessage::decode, CrystalWorkbenchMessage::handle
       );
    }
 

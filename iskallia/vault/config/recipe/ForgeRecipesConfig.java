@@ -27,7 +27,7 @@ public abstract class ForgeRecipesConfig<T extends ConfigForgeRecipe<V>, V exten
       return "recipes%s%s_recipes".formatted(File.separator, this.recipeType.name().toLowerCase(Locale.ROOT));
    }
 
-   protected abstract List<T> getConfigRecipes();
+   public abstract List<T> getConfigRecipes();
 
    @Nullable
    public V getRecipe(ResourceLocation id) {

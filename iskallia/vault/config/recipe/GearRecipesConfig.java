@@ -18,7 +18,7 @@ public class GearRecipesConfig extends ForgeRecipesConfig<ConfigGearRecipe, Gear
    }
 
    @Override
-   protected List<ConfigGearRecipe> getConfigRecipes() {
+   public List<ConfigGearRecipe> getConfigRecipes() {
       return this.gearRecipes;
    }
 

@@ -49,7 +49,7 @@ public class AscensionCrystalObjective extends CrystalObjective {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Ascension: "));
       if (this.playerUuid == null) {
          tooltip.add(

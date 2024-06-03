@@ -102,6 +102,6 @@ public class SoulFlameItem extends BasicItem {
          tooltip.add(new TextComponent("").append(new TextComponent("Player: ")).append(new TextComponent(name).withStyle(ChatFormatting.YELLOW)));
       }, () -> tooltip.add(new TextComponent("").append(new TextComponent("Player: ")).append(new TextComponent("???").withStyle(ChatFormatting.GRAY))));
       tooltip.add(new TextComponent("").append(new TextComponent("Stacks: ")).append(new TextComponent(getStacks(stack) + "").withStyle(ChatFormatting.AQUA)));
-      getModifiers(stack).ifPresent(modifiers -> modifiers.addText(tooltip, flag, (float)ClientScheduler.INSTANCE.getTickCount()));
+      getModifiers(stack).ifPresent(modifiers -> modifiers.addText(tooltip, tooltip.size(), flag, (float)ClientScheduler.INSTANCE.getTickCount()));
    }
 }

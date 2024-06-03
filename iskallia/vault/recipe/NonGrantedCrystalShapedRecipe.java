@@ -37,7 +37,7 @@ public class NonGrantedCrystalShapedRecipe extends ShapedRecipe {
    public boolean matches(CraftingContainer inv, Level worldIn) {
       for (int i = 0; i < inv.getContainerSize(); i++) {
          ItemStack stack = inv.getItem(i);
-         if (stack.getItem() instanceof VaultCrystalItem && CrystalData.read(stack).isUnmodifiable()) {
+         if (stack.getItem() instanceof VaultCrystalItem && CrystalData.read(stack).getProperties().isUnmodifiable()) {
             return false;
          }
       }

@@ -2,7 +2,8 @@
 	"credit": "Made with Blockbench",
 	"texture_size": [64, 64],
 	"textures": {
-		"1": "the_vault:item/gear/shield/ender"
+		"1": "the_vault:item/gear/shield/ender",
+		"particle": "the_vault:item/gear/shield/ender"
 	},
 	"elements": [
 		{

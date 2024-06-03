@@ -24,7 +24,7 @@ public class SpecialEvents {
       if (name.equalsIgnoreCase("LupiCanis")) {
          armorType = ModDynamicModels.Armor.LUPICANIS;
       } else if (name.equalsIgnoreCase("Guybrrush")) {
-         armorType = ModDynamicModels.Armor.PIRATE;
+         armorType = ModDynamicModels.Armor.GUYBRUSH;
       } else if (name.equalsIgnoreCase("SilentFoxxy")) {
          armorType = ModDynamicModels.Armor.SILENTFOXXY;
       }

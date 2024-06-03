@@ -42,7 +42,7 @@ public class ValueCrystalTime extends CrystalTime {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
       int min = IntRoll.getMin(this.roll);
       int max = IntRoll.getMax(this.roll);
       String text = UIHelper.formatTimeString(min);

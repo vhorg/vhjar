@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "sss",
-    "scs",
+    "sls",
     "bdb"
   ],
   "key": {
@@ -15,8 +15,8 @@
     "d": {
       "item": "the_vault:vault_diamond_block"
     },
-    "c": {
-      "item": "the_vault:catalyst_infusion_table"
+    "l": {
+      "item": "minecraft:lectern"
     }
   },
   "result": {

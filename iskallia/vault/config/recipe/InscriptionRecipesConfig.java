@@ -21,7 +21,7 @@ public class InscriptionRecipesConfig extends ForgeRecipesConfig<ConfigInscripti
    }
 
    @Override
-   protected List<ConfigInscriptionRecipe> getConfigRecipes() {
+   public List<ConfigInscriptionRecipe> getConfigRecipes() {
       return this.inscriptionRecipes;
    }
 }

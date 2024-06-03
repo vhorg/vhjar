@@ -13,6 +13,7 @@ import com.google.gson.annotations.Expose;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.Config;
 import iskallia.vault.core.util.WeightedList;
+import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
@@ -38,6 +39,7 @@ import iskallia.vault.gear.attribute.config.IntegerAttributeGenerator;
 import iskallia.vault.gear.attribute.custom.EffectAvoidanceGearAttribute;
 import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
 import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
+import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
@@ -45,7 +47,6 @@ import java.awt.Color;
 import java.io.File;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,58 +58,64 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.apache.commons.lang3.ObjectUtils;
 
 public class VaultGearTierConfig extends Config {
    public static final String NO_LEGENDARY_TAG = "noLegendary";
-   private Item gearItem;
+   public static final ResourceLocation UNIQUE_ITEM = VaultMod.id("unique");
+   private ResourceLocation key;
    @Expose
    private final Map<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.AttributeGroup> modifierGroup = new LinkedHashMap<>();
 
-   public static Map<Item, VaultGearTierConfig> registerConfigs() {
-      Map<Item, VaultGearTierConfig> gearConfig = new HashMap<>();
-
-      for (Item item : Arrays.asList(
-         ModItems.HELMET,
-         ModItems.CHESTPLATE,
-         ModItems.LEGGINGS,
-         ModItems.BOOTS,
-         ModItems.SWORD,
-         ModItems.AXE,
-         ModItems.SHIELD,
-         ModItems.IDOL_BENEVOLENT,
-         ModItems.IDOL_MALEVOLENCE,
-         ModItems.IDOL_OMNISCIENT,
-         ModItems.IDOL_TIMEKEEPER,
-         ModItems.JEWEL,
-         ModItems.MAGNET,
-         ModItems.WAND,
-         ModItems.FOCUS
-      )) {
-         gearConfig.put(item, new VaultGearTierConfig(item).readConfig());
-      }
-
+   public static Map<ResourceLocation, VaultGearTierConfig> registerConfigs() {
+      Map<ResourceLocation, VaultGearTierConfig> gearConfig = new HashMap<>();
+      Stream.of(
+            ModItems.HELMET,
+            ModItems.CHESTPLATE,
+            ModItems.LEGGINGS,
+            ModItems.BOOTS,
+            ModItems.SWORD,
+            ModItems.AXE,
+            ModItems.SHIELD,
+            ModItems.IDOL_BENEVOLENT,
+            ModItems.IDOL_MALEVOLENCE,
+            ModItems.IDOL_OMNISCIENT,
+            ModItems.IDOL_TIMEKEEPER,
+            ModItems.JEWEL,
+            ModItems.MAGNET,
+            ModItems.WAND,
+            ModItems.FOCUS
+         )
+         .map(rec$ -> ((ForgeRegistryEntry)rec$).getRegistryName())
+         .forEach(key -> gearConfig.put(key, (VaultGearTierConfig)new VaultGearTierConfig(key).readConfig()));
+      gearConfig.put(UNIQUE_ITEM, new VaultGearTierConfig(UNIQUE_ITEM).readConfig());
       return gearConfig;
    }
 
-   public static Optional<VaultGearTierConfig> getConfig(Item item) {
-      return Optional.ofNullable(ModConfigs.VAULT_GEAR_CONFIG.get(item));
+   public static Optional<VaultGearTierConfig> getConfig(ItemStack stack) {
+      return VaultGearData.read(stack).getRarity() == VaultGearRarity.UNIQUE ? getConfig(UNIQUE_ITEM) : getConfig(stack.getItem().getRegistryName());
    }
 
-   public VaultGearTierConfig(Item gearItem) {
-      this.gearItem = gearItem;
+   static Optional<VaultGearTierConfig> getConfig(ResourceLocation key) {
+      return Optional.ofNullable(ModConfigs.VAULT_GEAR_CONFIG.get(key));
+   }
+
+   public VaultGearTierConfig(ResourceLocation key) {
+      this.key = key;
    }
 
    @Override
    public String getName() {
-      return "gear_modifiers%s%s".formatted(File.separator, this.gearItem.getRegistryName().getPath());
+      return "gear_modifiers%s%s".formatted(File.separator, this.key.getPath());
    }
 
    @Nullable
@@ -236,6 +243,20 @@ public class VaultGearTierConfig extends Config {
       return null;
    }
 
+   public List<VaultGearTierConfig.ModifierTierGroup> getTierGroups(@Nullable String tag) {
+      List<VaultGearTierConfig.ModifierTierGroup> groups = new ArrayList<>();
+
+      for (VaultGearTierConfig.AttributeGroup attributePool : this.modifierGroup.values()) {
+         for (VaultGearTierConfig.ModifierTierGroup group : attributePool) {
+            if (group.tags.contains(tag)) {
+               groups.add(group);
+            }
+         }
+      }
+
+      return groups;
+   }
+
    public List<VaultGearModifier<?>> generateImplicits(int level, Random random) {
       VaultGearTierConfig.AttributeGroup attributePool = this.modifierGroup.get(VaultGearTierConfig.ModifierAffixTagGroup.IMPLICIT);
       if (attributePool != null && !attributePool.isEmpty()) {
@@ -349,7 +370,7 @@ public class VaultGearTierConfig extends Config {
       this.modifierGroup.put(VaultGearTierConfig.ModifierAffixTagGroup.SUFFIX, suffixes);
       VaultGearTierConfig.AttributeGroup enhancements = new VaultGearTierConfig.AttributeGroup();
       this.modifierGroup.put(VaultGearTierConfig.ModifierAffixTagGroup.ABILITY_ENHANCEMENT, enhancements);
-      if (this.gearItem == ModItems.HELMET) {
+      if (this.key == ModItems.HELMET.getRegistryName()) {
          this.addHelmetEnhancementConfigs();
       }
    }
@@ -591,7 +612,7 @@ public class VaultGearTierConfig extends Config {
    protected void onLoad(Config oldConfigInstance) {
       super.onLoad(oldConfigInstance);
       if (oldConfigInstance instanceof VaultGearTierConfig cfg) {
-         this.gearItem = cfg.gearItem;
+         this.key = cfg.key;
       }
    }
 

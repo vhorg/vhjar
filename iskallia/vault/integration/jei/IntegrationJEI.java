@@ -3,17 +3,25 @@ package iskallia.vault.integration.jei;
 import iskallia.vault.VaultMod;
 import iskallia.vault.client.gui.screen.block.SkillAltarScreen;
 import iskallia.vault.client.gui.screen.player.AbstractSkillTabElementContainerScreen;
+import iskallia.vault.gear.attribute.VaultGearModifier;
+import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.integration.jei.lootinfo.LootInfoFactory;
 import iskallia.vault.integration.jei.lootinfo.LootInfoGroupDefinition;
 import iskallia.vault.integration.jei.lootinfo.LootInfoGroupDefinitionRegistry;
 import iskallia.vault.integration.jei.lootinfo.LootInfoRecipeCategory;
+import iskallia.vault.item.crystal.recipe.AnvilRecipes;
 import iskallia.vault.item.tool.Pulverizing;
 import iskallia.vault.item.tool.Smelting;
+import iskallia.vault.item.tool.ToolType;
 import iskallia.vault.recipe.CatalystInfusionTableRecipe;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.annotation.Nonnull;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -49,8 +57,6 @@ public class IntegrationJEI implements IModPlugin {
             ModItems.TRINKET,
             ModItems.ETCHING,
             ModItems.GOD_BLESSING,
-            ModItems.TOOL,
-            ModItems.JEWEL,
             ModItems.AUGMENT,
             ModBlocks.ASHIUM_ORE.asItem(),
             ModBlocks.ALEXANDRITE_ORE.asItem(),
@@ -80,6 +86,22 @@ public class IntegrationJEI implements IModPlugin {
          ModItems.BOTTLE,
          (stack, context) -> stack.getOrCreateTag().getString("type") + "_" + stack.getOrCreateTag().getString("recharge")
       );
+      registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.JEWEL, (stack, context) -> {
+         VaultGearData data = VaultGearData.read(stack);
+         Set<String> modifiers = new HashSet<>();
+
+         for (VaultGearModifier<?> modifier : data.getAllModifierAffixes()) {
+            modifiers.add(modifier.getAttribute().getRegistryName().toString());
+         }
+
+         List<String> sorted = new ArrayList<>(modifiers);
+         Collections.sort(sorted);
+         return String.join(".", sorted);
+      });
+      registration.registerSubtypeInterpreter(VanillaTypes.ITEM_STACK, ModItems.TOOL, (stack, context) -> {
+         ToolType type = ToolType.of(stack);
+         return type == null ? "" : type.getId();
+      });
       Item item = (Item)ForgeRegistries.ITEMS.getValue(new ResourceLocation("ispawner", "spawn_egg"));
       if (item != null) {
          registration.useNbtForSubtypes(new Item[]{item});
@@ -115,6 +137,7 @@ public class IntegrationJEI implements IModPlugin {
    }
 
    public void registerRecipes(IRecipeRegistration registration) {
+      AnvilRecipes.registerJEI(registration);
       RecipeManager rm = Objects.requireNonNull(Minecraft.getInstance().level).getRecipeManager();
       registration.addRecipes(CatalystInfusionTableRecipeCategory.RECIPE_TYPE, List.of(new CatalystInfusionTableRecipe()));
       List<VaultRecyclerRecipeJEI> recipes = VaultRecyclerRecipeJEI.getRecipeList();

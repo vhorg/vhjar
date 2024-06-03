@@ -67,6 +67,12 @@ public class AugmentItem extends Item implements VaultLevelItem, DataTransferIte
       }
    }
 
+   public static ItemStack create(ResourceLocation theme) {
+      ItemStack stack = new ItemStack(ModItems.AUGMENT);
+      stack.getOrCreateTag().putString("theme", theme.toString());
+      return stack;
+   }
+
    @Override
    public void initializeVaultLoot(Vault vault, ItemStack stack, @Nullable BlockPos pos) {
       vault.getOptional(Vault.WORLD).map(world -> world.get(WorldManager.THEME)).ifPresent(theme -> stack.getOrCreateTag().putString("pool", theme.toString()));

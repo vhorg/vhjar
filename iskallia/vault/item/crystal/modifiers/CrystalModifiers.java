@@ -12,8 +12,9 @@ import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.CrystalProperty;
+import iskallia.vault.item.crystal.CrystalEntry;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
+import iskallia.vault.item.crystal.properties.InstabilityCrystalProperties;
 import iskallia.vault.world.VaultMode;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -29,7 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.NotNull;
 
-public abstract class CrystalModifiers extends CrystalProperty implements Iterable<VaultModifierStack>, ISerializable<CompoundTag, JsonObject> {
+public abstract class CrystalModifiers extends CrystalEntry implements Iterable<VaultModifierStack>, ISerializable<CompoundTag, JsonObject> {
    public abstract List<VaultModifierStack> getList();
 
    @NotNull
@@ -71,35 +72,38 @@ public abstract class CrystalModifiers extends CrystalProperty implements Iterab
    }
 
    protected boolean canAdd(CrystalData crystal, VaultModifierStack modifierStack) {
-      return !crystal.isUnmodifiable();
+      return !crystal.getProperties().isUnmodifiable();
    }
 
-   public boolean addByCrafting(CrystalData crystal, List<VaultModifierStack> modifierStackList, CrystalData.Simulate simulate) {
+   public boolean addByCrafting(CrystalData crystal, List<VaultModifierStack> modifierStackList, boolean simulate) {
       for (VaultModifierStack modifierStack : modifierStackList) {
-         if (!this.addByCrafting(crystal, modifierStack, true, CrystalData.Simulate.TRUE)) {
+         if (!this.addByCrafting(crystal, modifierStack, true, true)) {
             return false;
          }
       }
 
-      if (simulate == CrystalData.Simulate.FALSE) {
+      if (!simulate) {
          for (VaultModifierStack modifierStackx : modifierStackList) {
-            this.addByCrafting(crystal, modifierStackx, true, simulate);
+            this.addByCrafting(crystal, modifierStackx, true, false);
          }
       }
 
       return true;
    }
 
-   public boolean addByCrafting(CrystalData crystal, VaultModifierStack modifierStack, boolean preventsRandomModifiers, CrystalData.Simulate simulate) {
+   public boolean addByCrafting(CrystalData crystal, VaultModifierStack modifierStack, boolean preventsRandomModifiers, boolean simulate) {
       if (!this.canAdd(crystal, modifierStack)) {
          return false;
       } else {
-         if (simulate == CrystalData.Simulate.FALSE) {
+         if (!simulate) {
             if (preventsRandomModifiers) {
                this.setRandomModifiers(false);
             }
 
-            crystal.setInstability(crystal.getInstability() + ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.instabilityPerCraft);
+            if (crystal.getProperties() instanceof InstabilityCrystalProperties properties) {
+               properties.setInstability(properties.getInstability() + ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.instabilityPerCraft);
+            }
+
             this.add(modifierStack);
          }
 

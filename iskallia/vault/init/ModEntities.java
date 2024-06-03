@@ -60,6 +60,7 @@ import iskallia.vault.entity.entity.deepdark.DeepDarkHorrorEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkPiglinEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkSilverfishEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkSkeletonEntity;
+import iskallia.vault.entity.entity.deepdark.DeepDarkWitchEntity;
 import iskallia.vault.entity.entity.deepdark.DeepDarkZombieEntity;
 import iskallia.vault.entity.entity.dungeon.DungeonBlackWidowSpiderEntity;
 import iskallia.vault.entity.entity.dungeon.DungeonPiglinBruteEntity;
@@ -163,6 +164,7 @@ import iskallia.vault.entity.model.deep_dark.DeepDarkHorrorModel;
 import iskallia.vault.entity.model.deep_dark.DeepDarkPiglinModel;
 import iskallia.vault.entity.model.deep_dark.DeepDarkSilverfishModel;
 import iskallia.vault.entity.model.deep_dark.DeepDarkSkeletonModel;
+import iskallia.vault.entity.model.deep_dark.DeepDarkWitchModel;
 import iskallia.vault.entity.model.deep_dark.DeepDarkZombieModel;
 import iskallia.vault.entity.model.elite.EliteDrownedModel;
 import iskallia.vault.entity.model.elite.EliteHuskModel;
@@ -328,6 +330,7 @@ public class ModEntities {
    public static EntityType<DeepDarkPiglinEntity> DEEP_DARK_PIGLIN;
    public static EntityType<DeepDarkSilverfishEntity> DEEP_DARK_SILVERFISH;
    public static EntityType<DeepDarkHorrorEntity> DEEP_DARK_HORROR;
+   public static EntityType<DeepDarkWitchEntity> DEEP_DARK_WITCH;
    public static EntityType<Tier0MushroomEntity> T0_MUSHROOM;
    public static EntityType<Tier1MushroomEntity> T1_MUSHROOM;
    public static EntityType<Tier2MushroomEntity> T2_MUSHROOM;
@@ -759,6 +762,12 @@ public class ModEntities {
             .sized(EntityType.ZOMBIE.getWidth() * 1.6F, EntityType.ZOMBIE.getHeight() * 1.6F)
             .clientTrackingRange(8),
          DeepDarkHorrorEntity::createAttributes,
+         event
+      );
+      DEEP_DARK_WITCH = registerLiving(
+         "deep_dark_witch",
+         Builder.of(DeepDarkWitchEntity::new, MobCategory.MONSTER).sized(EntityType.WITCH.getWidth(), EntityType.WITCH.getHeight()).clientTrackingRange(8),
+         Witch::createAttributes,
          event
       );
       T0_MUSHROOM = registerLiving(
@@ -1364,6 +1373,7 @@ public class ModEntities {
          event.registerLayerDefinition(ModModelLayers.DEEP_DARK_PIGLIN, DeepDarkPiglinModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.DEEP_DARK_SILVERFISH, DeepDarkSilverfishModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.DEEP_DARK_HORROR, DeepDarkHorrorModel::createBodyLayer);
+         event.registerLayerDefinition(ModModelLayers.DEEP_DARK_WITCH, DeepDarkWitchModel::createBodyLayer);
          event.registerLayerDefinition(ModModelLayers.ANCIENT_COPPER_GOLEM, AncientCopperGolemModel::createBodyLayer);
       }
 

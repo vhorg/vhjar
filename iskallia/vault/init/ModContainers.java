@@ -6,6 +6,7 @@ import iskallia.vault.container.AlchemyArchiveContainer;
 import iskallia.vault.container.AlchemyTableContainer;
 import iskallia.vault.container.AscensionForgeContainer;
 import iskallia.vault.container.BountyContainer;
+import iskallia.vault.container.CrystalWorkbenchContainer;
 import iskallia.vault.container.InscriptionTableContainer;
 import iskallia.vault.container.LootStatueContainer;
 import iskallia.vault.container.ModifierDiscoveryContainer;
@@ -84,6 +85,7 @@ public class ModContainers {
    public static MenuType<VaultArtisanStationContainer> VAULT_ARTISAN_STATION_CONTAINER;
    public static MenuType<VaultJewelCuttingStationContainer> VAULT_JEWEL_CUTTING_STATION_CONTAINER;
    public static MenuType<VaultJewelApplicationStationContainer> VAULT_JEWEL_APPLICATION_STATION_CONTAINER;
+   public static MenuType<CrystalWorkbenchContainer> CRYSTAL_MODIFICATION_STATION_CONTAINER;
    public static MenuType<VaultRecyclerContainer> VAULT_RECYCLER_CONTAINER;
    public static MenuType<VaultDiffuserContainer> VAULT_DIFFUSER_CONTAINER;
    public static MenuType<VaultDiffuserUpgradedContainer> VAULT_HARVESTER_CONTAINER;
@@ -206,6 +208,11 @@ public class ModContainers {
          Level world = inventory.player.getCommandSenderWorld();
          BlockPos pos = buffer.readBlockPos();
          return new VaultJewelApplicationStationContainer(windowId, world, pos, inventory);
+      });
+      CRYSTAL_MODIFICATION_STATION_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new CrystalWorkbenchContainer(windowId, world, pos, inventory.player);
       });
       VAULT_RECYCLER_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          Level world = inventory.player.getCommandSenderWorld();
@@ -332,6 +339,7 @@ public class ModContainers {
                (MenuType)VAULT_ARTISAN_STATION_CONTAINER.setRegistryName("vault_artisan_station_container"),
                (MenuType)VAULT_JEWEL_CUTTING_STATION_CONTAINER.setRegistryName("vault_jewel_cutting_station_container"),
                (MenuType)VAULT_JEWEL_APPLICATION_STATION_CONTAINER.setRegistryName("vault_jewel_application_station_container"),
+               (MenuType)CRYSTAL_MODIFICATION_STATION_CONTAINER.setRegistryName("crystal_modification_station_container"),
                (MenuType)VAULT_RECYCLER_CONTAINER.setRegistryName("vault_recycler_container"),
                (MenuType)VAULT_DIFFUSER_CONTAINER.setRegistryName("vault_diffuser_container"),
                (MenuType)VAULT_HARVESTER_CONTAINER.setRegistryName("vault_harvester_container"),
