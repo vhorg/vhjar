@@ -1,6 +1,7 @@
 package iskallia.vault.gear.attribute;
 
 import com.google.gson.JsonObject;
+import iskallia.vault.VaultMod;
 import iskallia.vault.config.gear.VaultGearTierConfig;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
@@ -11,6 +12,7 @@ import iskallia.vault.util.MiscUtils;
 import java.util.Optional;
 import java.util.function.Function;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -225,13 +227,15 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
 
    public static enum AffixCategory {
       NONE,
-      LEGENDARY("Legendary", ModifierCategoryTooltip::modifyLegendaryTooltip),
+      LEGENDARY("Legendary", ModifierCategoryTooltip::modifyLegendaryTooltip, VaultMod.id("textures/item/gear/legendary_overlay.png")),
       ABYSSAL("Abyssal", ModifierCategoryTooltip::modifyAbyssalTooltip),
       ABILITY_ENHANCEMENT("Enhancement", ModifierCategoryTooltip::modifyEnhancementTooltip),
       CRAFTED("Crafted", ModifierCategoryTooltip::modifyCraftedTooltip);
 
       private final String descriptor;
       private final Function<MutableComponent, MutableComponent> modifierFormatter;
+      @Nullable
+      private final ResourceLocation overlayIcon;
 
       private AffixCategory() {
          this("");
@@ -242,8 +246,13 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
       }
 
       private AffixCategory(String descriptor, Function<MutableComponent, MutableComponent> modifierFormatter) {
+         this(descriptor, modifierFormatter, null);
+      }
+
+      private AffixCategory(String descriptor, Function<MutableComponent, MutableComponent> modifierFormatter, @Nullable ResourceLocation overlayIcon) {
          this.descriptor = descriptor;
          this.modifierFormatter = modifierFormatter;
+         this.overlayIcon = overlayIcon;
       }
 
       @Nonnull
@@ -257,6 +266,11 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
 
       public boolean isModifiableByArtisanFoci() {
          return this != ABYSSAL && this != ABILITY_ENHANCEMENT;
+      }
+
+      @Nullable
+      public ResourceLocation getOverlayIcon() {
+         return this.overlayIcon;
       }
 
       public void write(BitBuffer buf) {

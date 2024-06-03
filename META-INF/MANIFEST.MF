@@ -3,8 +3,8 @@ Specification-Title: TheVault
 Specification-Vendor: Iskallia
 Specification-Version: 1
 Implementation-Title: Vault
-Implementation-Version: 1.18.2-3.11.0.3088
+Implementation-Version: 1.18.2-3.11.0.3093
 Implementation-Vendor: Iskallia
-Implementation-Timestamp: 2024-06-02T21:45:22+0000
+Implementation-Timestamp: 2024-06-03T17:44:42+0000
 MixinConnector: iskallia.vault.MixinConnector
 
