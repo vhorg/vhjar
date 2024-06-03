@@ -51,12 +51,12 @@ public class ParadoxCrystalModifiers extends CrystalModifiers {
    }
 
    @Override
-   public boolean addByCrafting(CrystalData crystal, List<VaultModifierStack> modifierStackList, CrystalData.Simulate simulate) {
+   public boolean addByCrafting(CrystalData crystal, List<VaultModifierStack> modifierStackList, boolean simulate) {
       return false;
    }
 
    @Override
-   public boolean addByCrafting(CrystalData crystal, VaultModifierStack modifierStack, boolean preventsRandomModifiers, CrystalData.Simulate simulate) {
+   public boolean addByCrafting(CrystalData crystal, VaultModifierStack modifierStack, boolean preventsRandomModifiers, boolean simulate) {
       return false;
    }
 
@@ -67,7 +67,7 @@ public class ParadoxCrystalModifiers extends CrystalModifiers {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
       Style style = Style.EMPTY.withColor(ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.curseColor);
       this.addCatalystModifierInformation(
          stack -> ModConfigs.VAULT_CRYSTAL_CATALYST.isCurse(stack.getModifierId()), new TextComponent("Cursed").withStyle(style), tooltip

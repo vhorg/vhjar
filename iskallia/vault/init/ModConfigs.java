@@ -18,6 +18,7 @@ import iskallia.vault.config.AscensionForgeConfig;
 import iskallia.vault.config.AugmentConfig;
 import iskallia.vault.config.BestiaryConfig;
 import iskallia.vault.config.BlackMarketConfig;
+import iskallia.vault.config.CatalystConfig;
 import iskallia.vault.config.CatalystInfusionTableConfig;
 import iskallia.vault.config.ChampionsConfig;
 import iskallia.vault.config.CharmConfig;
@@ -88,6 +89,7 @@ import iskallia.vault.config.TraderExclusionsConfig;
 import iskallia.vault.config.TrinketConfig;
 import iskallia.vault.config.UnidentifiedRelicFragmentsConfig;
 import iskallia.vault.config.UnidentifiedTreasureKeyConfig;
+import iskallia.vault.config.UniqueGearConfig;
 import iskallia.vault.config.UnknownEggConfig;
 import iskallia.vault.config.VaultAltarConfig;
 import iskallia.vault.config.VaultBossConfig;
@@ -136,6 +138,7 @@ import iskallia.vault.config.gear.VaultGearTypePoolConfig;
 import iskallia.vault.config.gear.VaultGearWorkbenchConfig;
 import iskallia.vault.config.quest.QuestConfig;
 import iskallia.vault.config.quest.SkyVaultQuestConfig;
+import iskallia.vault.config.recipe.CatalystRecipesConfig;
 import iskallia.vault.config.recipe.GearRecipesConfig;
 import iskallia.vault.config.recipe.InscriptionRecipesConfig;
 import iskallia.vault.config.recipe.JewelRecipesConfig;
@@ -158,6 +161,7 @@ import iskallia.vault.core.world.template.data.TemplatePool;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 
 public class ModConfigs {
@@ -262,6 +266,7 @@ public class ModConfigs {
    public static VaultGuardianConfig VAULT_GUARDIAN;
    public static ToolPulverizingConfig TOOL_PULVERIZING;
    public static InscriptionConfig INSCRIPTION;
+   public static CatalystConfig CATALYST;
    public static AugmentConfig AUGMENT;
    public static EntityGroupsConfig ENTITY_GROUPS;
    public static TileGroupsConfig TILE_GROUPS;
@@ -270,7 +275,7 @@ public class ModConfigs {
    public static BestiaryConfig BESTIARY;
    public static HeraldTrophyConfig HERALD_TROPHY;
    public static VaultGearCommonConfig VAULT_GEAR_COMMON;
-   public static Map<Item, VaultGearTierConfig> VAULT_GEAR_CONFIG;
+   public static Map<ResourceLocation, VaultGearTierConfig> VAULT_GEAR_CONFIG;
    public static Map<Item, VaultGearWorkbenchConfig> VAULT_GEAR_WORKBENCH_CONFIG;
    public static AlchemyTableConfig VAULT_ALCHEMY_TABLE;
    public static VaultGearTypePoolConfig VAULT_GEAR_TYPE_POOL_CONFIG;
@@ -284,11 +289,13 @@ public class ModConfigs {
    public static VaultGearModificationConfig VAULT_GEAR_MODIFICATION_CONFIG;
    public static VaultJewelCuttingConfig VAULT_JEWEL_CUTTING_CONFIG;
    public static VaultGearEnchantmentConfig VAULT_GEAR_ENCHANTMENT_CONFIG;
+   public static UniqueGearConfig UNIQUE_GEAR;
    public static GearRecipesConfig GEAR_RECIPES;
    public static JewelRecipesConfig JEWEL_RECIPES;
    public static TrinketRecipesConfig TRINKET_RECIPES;
    public static ToolRecipesConfig TOOL_RECIPES;
    public static InscriptionRecipesConfig INSCRIPTION_RECIPES;
+   public static CatalystRecipesConfig CATALYST_RECIPES;
    public static VaultAltarIngredientsConfig VAULT_ALTAR_INGREDIENTS;
    public static SkillAltarConfig SKILL_ALTAR;
    public static QuestConfig QUESTS;
@@ -407,6 +414,7 @@ public class ModConfigs {
       LOOT_INFO_CONFIG = new LootInfoConfig().readConfig();
       VAULT_GUARDIAN = new VaultGuardianConfig().readConfig();
       INSCRIPTION = new InscriptionConfig().readConfig();
+      CATALYST = new CatalystConfig().readConfig();
       AUGMENT = new AugmentConfig().readConfig();
       ENTITY_GROUPS = new EntityGroupsConfig().readConfig();
       TILE_GROUPS = new TileGroupsConfig().readConfig();
@@ -433,6 +441,7 @@ public class ModConfigs {
       VAULT_GEAR_CRAFTING_CONFIG = new VaultGearCraftingConfig().readConfig();
       VAULT_GEAR_MODIFICATION_CONFIG = new VaultGearModificationConfig().readConfig();
       VAULT_GEAR_ENCHANTMENT_CONFIG = new VaultGearEnchantmentConfig().readConfig();
+      UNIQUE_GEAR = new UniqueGearConfig().readConfig();
       VAULT_JEWEL_CUTTING_CONFIG = new VaultJewelCuttingConfig().readConfig();
       VAULT_ALTAR_INGREDIENTS = new VaultAltarIngredientsConfig().readConfig();
       GEAR_RECIPES = new GearRecipesConfig().readConfig();
@@ -440,6 +449,7 @@ public class ModConfigs {
       TRINKET_RECIPES = new TrinketRecipesConfig().readConfig();
       TOOL_RECIPES = new ToolRecipesConfig().readConfig();
       INSCRIPTION_RECIPES = new InscriptionRecipesConfig().readConfig();
+      CATALYST_RECIPES = new CatalystRecipesConfig().readConfig();
       TRADER_EXCLUSIONS = new TraderExclusionsConfig().readConfig();
       PLAYER_RESEARCH_TRANSFER = new PlayerResearchTransferConfig().readConfig();
       registerBountyConfigs();
@@ -456,11 +466,15 @@ public class ModConfigs {
 
       for (PaletteKey key : VaultRegistry.PALETTE.getKeys()) {
          for (Palette palette : key.getMap().values()) {
-            for (TileProcessor processor : palette.getTileProcessors()) {
-               if (processor instanceof ReferenceTileProcessor) {
-                  ReferenceTileProcessor reference = (ReferenceTileProcessor)processor;
-                  if (VaultRegistry.PALETTE.getKey(reference.getId()) == null) {
-                     VaultMod.LOGGER.error("Palette " + key.getId() + " has processor with invalid reference " + reference.getId());
+            if (palette == null) {
+               VaultMod.LOGGER.error("Palette " + key.getId() + " is null");
+            } else {
+               for (TileProcessor processor : palette.getTileProcessors()) {
+                  if (processor instanceof ReferenceTileProcessor) {
+                     ReferenceTileProcessor reference = (ReferenceTileProcessor)processor;
+                     if (VaultRegistry.PALETTE.getKey(reference.getId()) == null) {
+                        VaultMod.LOGGER.error("Palette " + key.getId() + " has processor with invalid reference " + reference.getId());
+                     }
                   }
                }
             }

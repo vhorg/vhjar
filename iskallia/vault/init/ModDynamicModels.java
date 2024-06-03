@@ -32,6 +32,7 @@ import iskallia.vault.gear.model.armor.layers.BuilderArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BumboCactoniArmorLayers;
 import iskallia.vault.gear.model.armor.layers.BunnyGuardianArmorLayers;
 import iskallia.vault.gear.model.armor.layers.CakeArmorLayers;
+import iskallia.vault.gear.model.armor.layers.CastleArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ChampionArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ClericArmorLayers;
 import iskallia.vault.gear.model.armor.layers.CrayonArmorLayers;
@@ -74,6 +75,7 @@ import iskallia.vault.gear.model.armor.layers.MushroomArmorLayers;
 import iskallia.vault.gear.model.armor.layers.OrcArmorLayers;
 import iskallia.vault.gear.model.armor.layers.PaladinArmorLayers;
 import iskallia.vault.gear.model.armor.layers.PenguinArmorLayers;
+import iskallia.vault.gear.model.armor.layers.PhoenixSoulflameArmorLayers;
 import iskallia.vault.gear.model.armor.layers.PirateArmorLayers;
 import iskallia.vault.gear.model.armor.layers.PlatemailArmorLayers;
 import iskallia.vault.gear.model.armor.layers.PowahArmorLayers;
@@ -1205,6 +1207,30 @@ public class ModDynamicModels {
             .addSlot(EquipmentSlot.LEGS)
             .addSlot(EquipmentSlot.FEET)
       );
+      public static final ArmorModel PHOENIX_SOULFLAME = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/phoenix_soulflame"), "Phoenix Soul Flame")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new PhoenixSoulflameArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel PHOENIX_GOLDFLAME = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/phoenix_goldflame"), "Phoenix Gold Flame")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new PhoenixSoulflameArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+            .addSlot(EquipmentSlot.LEGS)
+            .addSlot(EquipmentSlot.FEET)
+      );
+      public static final ArmorModel CASTLE = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/castle"), "Castle")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new CastleArmorLayers())
+            .addSlot(EquipmentSlot.CHEST)
+      );
    }
 
    public static class Axes {
@@ -1323,6 +1349,9 @@ public class ModDynamicModels {
       public static final PlainItemModel TOME_OF_KNOWLEDGE = REGISTRY.register(
          new PlainItemModel(VaultMod.id("gear/focus/tomeofknowledge"), "Tome of Knowledge")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel SOUL_ORB = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/focus/soulorb"), "Soul Orb").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }
 
@@ -1492,6 +1521,12 @@ public class ModDynamicModels {
       public static final ShieldModel LIFEBUOY = REGISTRY.register(
          new ShieldModel(VaultMod.id("gear/shield/lifebuoy"), "Lifebuoy").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
+      public static final ShieldModel GRIM = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/grim"), "Grim Shield").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final ShieldModel SLAB = REGISTRY.register(
+         new ShieldModel(VaultMod.id("gear/shield/slab"), "Slab Shield").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
    }
 
    public static class Swords {
@@ -1640,6 +1675,10 @@ public class ModDynamicModels {
       public static final HandHeldModel GODSWORD = REGISTRY.register(
          new HandHeldModel(VaultMod.id("gear/sword/godsword"), "Godsword").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
+      public static final HandHeldModel SOULFLAME = REGISTRY.register(
+         new HandHeldModel(VaultMod.id("gear/sword/soulflame"), "Soulflame Blade")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
    }
 
    public static class Wands {
@@ -1705,6 +1744,9 @@ public class ModDynamicModels {
       public static final PlainItemModel CARRI_KING = REGISTRY.register(
          new PlainItemModel(VaultMod.id("gear/wand/carri_king"), "Carri King Scepter")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+      );
+      public static final PlainItemModel SOUL = REGISTRY.register(
+         new PlainItemModel(VaultMod.id("gear/wand/soul"), "Soul Wand").properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
       );
    }
 }

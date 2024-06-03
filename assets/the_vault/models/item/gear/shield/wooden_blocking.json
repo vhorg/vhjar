@@ -3,7 +3,8 @@
   "gui_light": "front",
   "texture_size": [64, 64],
   "textures": {
-    "0": "the_vault:item/gear/shield/wooden"
+    "0": "the_vault:item/gear/shield/wooden",
+    "particle": "the_vault:item/gear/shield/wooden"
   },
   "elements": [
     {

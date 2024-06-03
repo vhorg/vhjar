@@ -7,7 +7,6 @@ import com.mojang.math.Vector3f;
 import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.altar.RequiredItems;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
-import iskallia.vault.init.ModItems;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +40,9 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
             if (player != null) {
                int lightLevel = this.getLightAtPos(altar.getLevel(), altar.getBlockPos().above());
                this.renderItem(
-                  new ItemStack(ModItems.VAULT_ROCK),
+                  altar.getInput(),
                   new double[]{0.5, 1.35, 0.5},
+                  1.0F,
                   Vector3f.YP.rotationDegrees(180.0F - player.getYRot()),
                   matrixStack,
                   buffer,
@@ -78,6 +78,7 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
                         this.renderItem(
                            toRender,
                            translation,
+                           0.5F,
                            Vector3f.YP.rotationDegrees(this.getAngle(player, partialTicks) * 5.0F),
                            matrixStack,
                            buffer,
@@ -97,6 +98,7 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
    private void renderItem(
       ItemStack stack,
       double[] translation,
+      float scale,
       Quaternion rotation,
       PoseStack matrixStack,
       MultiBufferSource buffer,
@@ -107,10 +109,7 @@ public class VaultAltarRenderer implements BlockEntityRenderer<VaultAltarTileEnt
       matrixStack.pushPose();
       matrixStack.translate(translation[0], translation[1], translation[2]);
       matrixStack.mulPose(rotation);
-      if (stack.getItem() != ModItems.VAULT_ROCK) {
-         matrixStack.scale(0.5F, 0.5F, 0.5F);
-      }
-
+      matrixStack.scale(scale, scale, scale);
       BakedModel ibakedmodel = this.mc.getItemRenderer().getModel(stack, null, null, 0);
       this.mc.getItemRenderer().render(stack, TransformType.GROUND, true, matrixStack, buffer, lightLevel, combinedOverlay, ibakedmodel);
       matrixStack.popPose();

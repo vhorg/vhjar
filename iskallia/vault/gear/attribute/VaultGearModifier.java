@@ -115,7 +115,7 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
                } else {
                   Style txtStyle = Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(false).withUnderlined(false).withBold(false);
                   String categoryInfo = this.getCategory().getTooltipDescriptor();
-                  VaultGearTierConfig.ModifierConfigRange configRange = VaultGearTierConfig.getConfig(stack.getItem())
+                  VaultGearTierConfig.ModifierConfigRange configRange = VaultGearTierConfig.getConfig(stack)
                      .map(tierCfg -> tierCfg.getTierConfigRange(this, data.getItemLevel()))
                      .orElse(VaultGearTierConfig.ModifierConfigRange.empty());
                   ConfigurableAttributeGenerator attributeGenerator = this.getAttribute().getGenerator();
@@ -163,7 +163,7 @@ public final class VaultGearModifier<T> extends VaultGearAttributeInstance<T> {
    }
 
    public Optional<MutableComponent> getConfigDisplay(ItemStack stack) {
-      return VaultGearTierConfig.getConfig(stack.getItem()).map(tierCfg -> tierCfg.getTierConfig(this)).map(cfg -> {
+      return VaultGearTierConfig.getConfig(stack).map(tierCfg -> tierCfg.getTierConfig(this)).map(cfg -> {
          ConfigurableAttributeGenerator configGen = this.getAttribute().getGenerator();
          return configGen.getConfigDisplay(this.getAttribute().getReader(), cfg);
       });

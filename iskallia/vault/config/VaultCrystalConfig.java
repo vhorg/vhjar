@@ -18,6 +18,7 @@ import iskallia.vault.item.crystal.objective.BossCrystalObjective;
 import iskallia.vault.item.crystal.objective.CakeCrystalObjective;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
 import iskallia.vault.item.crystal.objective.ScavengerCrystalObjective;
+import iskallia.vault.item.crystal.properties.CrystalProperties;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
 import iskallia.vault.item.crystal.time.CrystalTime;
 import java.util.Arrays;
@@ -45,6 +46,8 @@ public class VaultCrystalConfig extends Config {
    @Expose
    public Map<ResourceLocation, LevelEntryList<VaultCrystalConfig.TimeEntry>> TIMES;
    @Expose
+   public Map<ResourceLocation, LevelEntryList<VaultCrystalConfig.PropertiesEntry>> PROPERTIES;
+   @Expose
    private Map<ResourceLocation, LevelEntryList<VaultCrystalConfig.SealEntry>> SEALS;
 
    @Override
@@ -68,13 +71,19 @@ public class VaultCrystalConfig extends Config {
       return this.TIMES.getOrDefault(id, LevelEntryList.empty()).getForLevel(level).flatMap(entry -> entry.pool.getRandom(random));
    }
 
+   public Optional<CrystalProperties> getRandomProperties(ResourceLocation id, int level) {
+      return this.PROPERTIES.getOrDefault(id, LevelEntryList.empty()).getForLevel(level).map(entry -> entry.value);
+   }
+
    public boolean applySeal(ItemStack input, ItemStack seal, ItemStack output, CrystalData crystal) {
-      return !this.SEALS.containsKey(seal.getItem().getRegistryName())
-         ? false
-         : this.SEALS.get(seal.getItem().getRegistryName()).getForLevel(crystal.getLevel()).map(entry -> {
+      if (!this.SEALS.containsKey(seal.getItem().getRegistryName())) {
+         return false;
+      } else {
+         Integer level = crystal.getProperties().getLevel().orElse(null);
+         return level == null ? false : this.SEALS.get(seal.getItem().getRegistryName()).getForLevel(level).map(entry -> {
             if (!entry.input.contains(input.getItem().getRegistryName())) {
                return false;
-            } else if (crystal.isUnmodifiable()) {
+            } else if (crystal.getProperties().isUnmodifiable()) {
                return false;
             } else {
                crystal.setObjective(entry.objective);
@@ -95,13 +104,14 @@ public class VaultCrystalConfig extends Config {
                }
 
                if (entry.exhausted != null) {
-                  crystal.setUnmodifiable(entry.exhausted);
+                  crystal.getProperties().setUnmodifiable(entry.exhausted);
                }
 
                crystal.write(output);
                return true;
             }
          }).orElse(false);
+      }
    }
 
    @Override
@@ -224,6 +234,23 @@ public class VaultCrystalConfig extends Config {
       public ObjectiveEntry(int level, WeightedList<CrystalObjective> pool) {
          this.level = level;
          this.pool = pool;
+      }
+
+      @Override
+      public int getLevel() {
+         return this.level;
+      }
+   }
+
+   private static class PropertiesEntry implements LevelEntryList.ILevelEntry {
+      @Expose
+      public int level;
+      @Expose
+      public CrystalProperties value;
+
+      public PropertiesEntry(int level, CrystalProperties value) {
+         this.level = level;
+         this.value = value;
       }
 
       @Override

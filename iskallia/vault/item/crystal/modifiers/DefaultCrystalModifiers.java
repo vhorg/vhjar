@@ -61,7 +61,7 @@ public class DefaultCrystalModifiers extends CrystalModifiers {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
       if (this.clarity) {
          tooltip.add(new TextComponent("Clarity").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(4973509))));
          if (Screen.hasShiftDown()) {

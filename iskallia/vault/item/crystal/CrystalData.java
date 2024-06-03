@@ -11,6 +11,7 @@ import iskallia.vault.item.crystal.layout.ClassicCircleCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicPolygonCrystalLayout;
 import iskallia.vault.item.crystal.layout.ClassicSpiralCrystalLayout;
+import iskallia.vault.item.crystal.layout.CompoundCrystalLayout;
 import iskallia.vault.item.crystal.layout.CrystalLayout;
 import iskallia.vault.item.crystal.layout.HeraldCrystalLayout;
 import iskallia.vault.item.crystal.layout.NullCrystalLayout;
@@ -40,6 +41,9 @@ import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
 import iskallia.vault.item.crystal.objective.PoolCrystalObjective;
 import iskallia.vault.item.crystal.objective.ScavengerCrystalObjective;
 import iskallia.vault.item.crystal.objective.SpeedrunCrystalObjective;
+import iskallia.vault.item.crystal.properties.CapacityCrystalProperties;
+import iskallia.vault.item.crystal.properties.CrystalProperties;
+import iskallia.vault.item.crystal.properties.InstabilityCrystalProperties;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
 import iskallia.vault.item.crystal.theme.NullCrystalTheme;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
@@ -48,24 +52,18 @@ import iskallia.vault.item.crystal.time.CrystalTime;
 import iskallia.vault.item.crystal.time.NullCrystalTime;
 import iskallia.vault.item.crystal.time.PoolCrystalTime;
 import iskallia.vault.item.crystal.time.ValueCrystalTime;
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Consumer;
-import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextColor;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
 
-public class CrystalData extends CrystalProperty implements ISerializable<CompoundTag, JsonObject> {
+public class CrystalData extends CrystalEntry implements ISerializable<CompoundTag, JsonObject> {
    public static EnumAdapter<CrystalVersion> VERSION = Adapters.ofEnum(CrystalVersion.class, EnumAdapter.Mode.ORDINAL);
    public static TypeSupplierAdapter<CrystalModel> MODEL = new TypeSupplierAdapter<CrystalModel>("type", false)
       .<TypeSupplierAdapter<CompoundCrystalModel>>register("null", NullCrystalModel.class, () -> NullCrystalModel.INSTANCE)
@@ -87,7 +85,8 @@ public class CrystalData extends CrystalProperty implements ISerializable<Compou
       .<TypeSupplierAdapter<ArchitectCrystalLayout>>register("spiral", ClassicSpiralCrystalLayout.class, ClassicSpiralCrystalLayout::new)
       .<TypeSupplierAdapter<ParadoxCrystalLayout>>register("architect", ArchitectCrystalLayout.class, ArchitectCrystalLayout::new)
       .<TypeSupplierAdapter<HeraldCrystalLayout>>register("paradox", ParadoxCrystalLayout.class, ParadoxCrystalLayout::new)
-      .register("herald", HeraldCrystalLayout.class, HeraldCrystalLayout::new);
+      .<TypeSupplierAdapter<CompoundCrystalLayout>>register("herald", HeraldCrystalLayout.class, HeraldCrystalLayout::new)
+      .register("compound", CompoundCrystalLayout.class, CompoundCrystalLayout::new);
    public static TypeSupplierAdapter<CrystalObjective> OBJECTIVE = new TypeSupplierAdapter<CrystalObjective>("type", false)
       .<TypeSupplierAdapter<PoolCrystalObjective>>register("null", NullCrystalObjective.class, () -> NullCrystalObjective.INSTANCE)
       .<TypeSupplierAdapter<EmptyCrystalObjective>>register("pool", PoolCrystalObjective.class, PoolCrystalObjective::new)
@@ -109,17 +108,17 @@ public class CrystalData extends CrystalProperty implements ISerializable<Compou
    public static TypeSupplierAdapter<CrystalModifiers> MODIFIERS = new TypeSupplierAdapter<DefaultCrystalModifiers>("type", false)
       .<TypeSupplierAdapter<ParadoxCrystalModifiers>>register("default", DefaultCrystalModifiers.class, DefaultCrystalModifiers::new)
       .register("paradox", ParadoxCrystalModifiers.class, ParadoxCrystalModifiers::new);
+   public static TypeSupplierAdapter<CrystalProperties> PROPERTIES = new TypeSupplierAdapter<InstabilityCrystalProperties>("type", false)
+      .<TypeSupplierAdapter<CapacityCrystalProperties>>register("instability", InstabilityCrystalProperties.class, InstabilityCrystalProperties::new)
+      .register("capacity", CapacityCrystalProperties.class, CapacityCrystalProperties::new);
    private CrystalVersion version = CrystalVersion.latest();
-   private UUID vaultId = null;
-   private int level = 0;
    private CrystalModel model = NullCrystalModel.INSTANCE;
    private CrystalTheme theme = NullCrystalTheme.INSTANCE;
    private CrystalLayout layout = NullCrystalLayout.INSTANCE;
    private CrystalObjective objective = NullCrystalObjective.INSTANCE;
    private CrystalTime time = NullCrystalTime.INSTANCE;
    private CrystalModifiers modifiers = new DefaultCrystalModifiers();
-   private boolean unmodifiable = false;
-   private float instability = 0.0F;
+   private CrystalProperties properties = new CapacityCrystalProperties();
 
    protected CrystalData() {
    }
@@ -149,14 +148,6 @@ public class CrystalData extends CrystalProperty implements ISerializable<Compou
       data.write(stack);
    }
 
-   public UUID getVaultId() {
-      return this.vaultId;
-   }
-
-   public int getLevel() {
-      return this.level;
-   }
-
    public CrystalModel getModel() {
       return this.model;
    }
@@ -181,20 +172,8 @@ public class CrystalData extends CrystalProperty implements ISerializable<Compou
       return this.modifiers;
    }
 
-   public boolean isUnmodifiable() {
-      return this.unmodifiable;
-   }
-
-   public float getInstability() {
-      return this.instability;
-   }
-
-   public void setVaultId(UUID vaultId) {
-      this.vaultId = vaultId;
-   }
-
-   public void setLevel(int level) {
-      this.level = level;
+   public CrystalProperties getProperties() {
+      return this.properties;
    }
 
    public void setModel(CrystalModel model) {
@@ -221,12 +200,8 @@ public class CrystalData extends CrystalProperty implements ISerializable<Compou
       this.modifiers = modifiers;
    }
 
-   public void setUnmodifiable(boolean unmodifiable) {
-      this.unmodifiable = unmodifiable;
-   }
-
-   public void setInstability(float instability) {
-      this.instability = instability;
+   public void setProperties(CrystalProperties properties) {
+      this.properties = properties;
    }
 
    public boolean canGenerateCatalystFragments() {
@@ -237,100 +212,52 @@ public class CrystalData extends CrystalProperty implements ISerializable<Compou
       return !(this.layout instanceof ArchitectCrystalLayout);
    }
 
-   public boolean addModifierByCrafting(VaultModifierStack modifierStack, boolean preventsRandomModifiers, CrystalData.Simulate simulate) {
+   public boolean addModifierByCrafting(VaultModifierStack modifierStack, boolean preventsRandomModifiers, boolean simulate) {
       return this.modifiers.addByCrafting(this, modifierStack, preventsRandomModifiers, simulate);
    }
 
    @Override
-   public Collection<CrystalProperty> getChildren() {
-      return Arrays.asList(this.layout, this.theme, this.objective, this.time, this.modifiers);
+   public Collection<CrystalEntry> getChildren() {
+      return Arrays.asList(this.properties, this.objective, this.layout, this.theme, this.time, this.modifiers);
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
-      if (this.level < 0) {
-         tooltip.add(new TextComponent("Level: ???").withStyle(ChatFormatting.GRAY));
-      } else {
-         tooltip.add(new TextComponent("Level: ").append(new TextComponent(this.getLevel() + "").setStyle(Style.EMPTY.withColor(11583738))));
-      }
-
-      this.objective.addText(tooltip, flag, time);
-      this.theme.addText(tooltip, flag, time);
-      this.layout.addText(tooltip, flag, time);
-      this.time.addText(tooltip, flag, time);
-      if (this.instability > 0.0F) {
-         TextComponent instabilityComponent = new TextComponent("%.1f%%".formatted(this.instability * 100.0F));
-         instabilityComponent.setStyle(Style.EMPTY.withColor(this.getInstabilityTextColor(Math.round(this.instability * 100.0F))));
-         tooltip.add(new TextComponent("Instability: ").append(instabilityComponent));
-      }
-
-      if (this.unmodifiable) {
-         tooltip.add(new TextComponent("Unmodifiable").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(11027010))));
-      }
-
-      this.modifiers.addText(tooltip, flag, time);
-   }
-
-   private TextColor getInstabilityTextColor(float instability) {
-      float threshold = 0.5F;
-      float hueDarkGreen = 0.3334F;
-      float hueGold = 0.1111F;
-      float hue;
-      float saturation;
-      float value;
-      if (instability <= 0.5F) {
-         float p = instability / 0.5F;
-         hue = (1.0F - p) * 0.3334F + p * 0.1111F;
-         saturation = 1.0F;
-         value = (1.0F - p) * 0.8F + p;
-      } else {
-         float p = (instability - 0.5F) / 0.5F;
-         hue = (1.0F - p) * 0.1111F;
-         saturation = 1.0F - p + p * 0.8F;
-         value = 1.0F - p + p * 0.8F;
-      }
-
-      return TextColor.fromRgb(Color.HSBtoRGB(hue, saturation, value));
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
+      this.objective.addText(tooltip, minIndex, flag, time);
+      this.theme.addText(tooltip, minIndex, flag, time);
+      this.layout.addText(tooltip, minIndex, flag, time);
+      this.time.addText(tooltip, minIndex, flag, time);
+      this.properties.addText(tooltip, minIndex, flag, time);
+      this.modifiers.addText(tooltip, minIndex, flag, time);
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       CompoundTag nbt = new CompoundTag();
       VERSION.writeNbt(this.version).ifPresent(version -> nbt.put("Version", version));
-      Adapters.UUID.writeNbt(this.vaultId).ifPresent(vaultId -> nbt.put("VaultId", vaultId));
-      Adapters.INT.writeNbt(Integer.valueOf(this.level)).ifPresent(level -> nbt.put("Level", level));
       MODEL.writeNbt(this.model).ifPresent(model -> nbt.put("Model", model));
       THEME.writeNbt(this.theme).ifPresent(theme -> nbt.put("Theme", theme));
       LAYOUT.writeNbt(this.layout).ifPresent(layout -> nbt.put("Layout", layout));
       OBJECTIVE.writeNbt(this.objective).ifPresent(objective -> nbt.put("Objective", objective));
       TIME.writeNbt(this.time).ifPresent(time -> nbt.put("Time", time));
       MODIFIERS.writeNbt(this.modifiers).ifPresent(modifiers -> nbt.put("Modifiers", modifiers));
-      Adapters.BOOLEAN.writeNbt(this.unmodifiable).ifPresent(exhausted -> nbt.put("Exhausted", exhausted));
-      Adapters.FLOAT.writeNbt(Float.valueOf(this.instability)).ifPresent(instability -> nbt.put("Instability", instability));
+      PROPERTIES.writeNbt(this.properties).ifPresent(modifiers -> nbt.put("Properties", modifiers));
       return Optional.of(nbt);
    }
 
    public void readNbt(CompoundTag nbt) {
       nbt = CrystalVersion.upgrade(nbt.copy());
       this.version = VERSION.readNbt(nbt.get("Version")).orElse(CrystalVersion.LEGACY);
-      this.vaultId = Adapters.UUID.readNbt(nbt.get("VaultId")).orElse(null);
-      this.level = Adapters.INT.readNbt(nbt.get("Level")).orElse(0);
       this.model = MODEL.readNbt(nbt.getCompound("Model")).orElse(NullCrystalModel.INSTANCE);
       this.theme = THEME.readNbt(nbt.getCompound("Theme")).orElse(NullCrystalTheme.INSTANCE);
       this.layout = LAYOUT.readNbt(nbt.getCompound("Layout")).orElse(NullCrystalLayout.INSTANCE);
       this.objective = OBJECTIVE.readNbt(nbt.getCompound("Objective")).orElse(NullCrystalObjective.INSTANCE);
       this.time = TIME.readNbt(nbt.getCompound("Time")).orElse(NullCrystalTime.INSTANCE);
       this.modifiers = MODIFIERS.readNbt(nbt.getCompound("Modifiers")).orElse(new DefaultCrystalModifiers());
-      this.unmodifiable = Adapters.BOOLEAN.readNbt(nbt.get("Exhausted")).orElse(false);
-      this.instability = Adapters.FLOAT.readNbt(nbt.get("Instability")).orElse(0.0F);
+      this.properties = PROPERTIES.readNbt(nbt.getCompound("Properties")).orElse(new CapacityCrystalProperties());
    }
 
    public CrystalData copy() {
       return new CrystalData(this.writeNbt().orElse(null));
-   }
-
-   public static enum Simulate {
-      TRUE,
-      FALSE;
    }
 }

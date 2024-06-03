@@ -5,6 +5,7 @@ import iskallia.vault.init.ModEntities;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModRecipes;
+import iskallia.vault.item.crystal.recipe.AnvilRecipes;
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterLayerDefinitions;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -24,6 +25,7 @@ public class SetupEvents {
       ModNetwork.initialize();
       ModRecipes.initialize();
       ModGameRules.initialize();
+      AnvilRecipes.register();
    }
 
    @SubscribeEvent

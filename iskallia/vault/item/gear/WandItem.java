@@ -3,7 +3,6 @@ package iskallia.vault.item.gear;
 import com.google.common.collect.Multimap;
 import iskallia.vault.gear.VaultGearClassification;
 import iskallia.vault.gear.VaultGearHelper;
-import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.ProficiencyType;
@@ -14,10 +13,8 @@ import iskallia.vault.gear.tooltip.GearTooltip;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.item.BasicItem;
-import iskallia.vault.util.MiscUtils;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
@@ -68,10 +65,8 @@ public class WandItem extends BasicItem implements VaultGearItem {
    @Override
    public ResourceLocation getRandomModel(ItemStack stack, Random random) {
       VaultGearData gearData = VaultGearData.read(stack);
-      VaultGearRarity rarity = gearData.getRarity();
       EquipmentSlot intendedSlot = this.getIntendedSlot(stack);
-      Set<ResourceLocation> possibleIds = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getPossibleRolls(this, rarity, intendedSlot);
-      return MiscUtils.getRandomEntry(possibleIds, random);
+      return ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRandomRoll(stack, gearData, intendedSlot, random);
    }
 
    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {

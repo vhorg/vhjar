@@ -47,7 +47,7 @@ public class ElixirCrystalObjective extends CrystalObjective {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Objective: ").append(new TextComponent("Elixir Rush").withStyle(Style.EMPTY.withColor(this.getColor(time).orElseThrow()))));
    }
 

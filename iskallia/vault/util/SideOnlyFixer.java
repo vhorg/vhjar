@@ -14,7 +14,7 @@ public class SideOnlyFixer {
       return -1;
    }
 
-   private static boolean stackEqualExact(ItemStack stack1, ItemStack stack2) {
+   public static boolean stackEqualExact(ItemStack stack1, ItemStack stack2) {
       return stack1.getItem() == stack2.getItem() && ItemStack.tagMatches(stack1, stack2);
    }
 }

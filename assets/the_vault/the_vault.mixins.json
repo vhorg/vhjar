@@ -106,6 +106,7 @@
     "AccessorBakedOverride",
     "AccessorClientLevel",
     "AccessorCommandSuggestions",
+    "AccessorCubeListBuilder",
     "AccessorDimensionSpecialEffects",
     "AccessorInfo",
     "AccessorLightTexture",

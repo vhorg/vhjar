@@ -3,6 +3,7 @@ package iskallia.vault.block;
 import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.BlockHelper;
 import iskallia.vault.world.data.PlayerVaultAltarData;
@@ -100,17 +101,17 @@ public class VaultAltarBlock extends Block implements EntityBlock {
    ) {
       if (!world.isClientSide && hand == InteractionHand.MAIN_HAND && player instanceof ServerPlayer serverPlayer && !(player instanceof FakePlayer)) {
          ServerLevel serverLevel = serverPlayer.getLevel();
-         ItemStack heldItem = player.getMainHandItem();
+         ItemStack input = player.getMainHandItem();
          VaultAltarTileEntity altar = this.getAltarTileEntity(world, pos);
          if (altar == null) {
             return InteractionResult.SUCCESS;
          } else if (altar.getAltarState() == VaultAltarTileEntity.AltarState.IDLE) {
-            return heldItem.getItem() == ModItems.VAULT_ROCK ? altar.onAddVaultRock(serverPlayer, heldItem) : InteractionResult.SUCCESS;
+            return ModConfigs.VAULT_ALTAR.getOutput(input, player.getUUID()).isPresent() ? altar.onAddInput(serverPlayer, input) : InteractionResult.SUCCESS;
          } else if (!player.isShiftKeyDown()
             || altar.getAltarState() != VaultAltarTileEntity.AltarState.ACCEPTING && altar.getAltarState() != VaultAltarTileEntity.AltarState.COMPLETE) {
             return InteractionResult.SUCCESS;
          } else {
-            InteractionResult result = altar.onRemoveVaultRock(serverPlayer.getUUID());
+            InteractionResult result = altar.onRemoveInput(serverPlayer.getUUID());
             PlayerVaultAltarData.get(serverLevel).setDirty();
             return result;
          }

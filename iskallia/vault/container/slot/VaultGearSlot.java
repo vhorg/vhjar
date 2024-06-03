@@ -1,5 +1,6 @@
 package iskallia.vault.container.slot;
 
+import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -17,6 +18,11 @@ public class VaultGearSlot extends Slot {
    }
 
    public boolean mayPlace(ItemStack itemStack) {
-      return itemStack.getItem() instanceof VaultGearItem && VaultGearData.read(itemStack).getState() == VaultGearState.IDENTIFIED;
+      if (!(itemStack.getItem() instanceof VaultGearItem)) {
+         return false;
+      } else {
+         VaultGearData data = VaultGearData.read(itemStack);
+         return data.getState() == VaultGearState.IDENTIFIED && data.getRarity() != VaultGearRarity.UNIQUE;
+      }
    }
 }

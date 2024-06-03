@@ -34,7 +34,7 @@ public class ClassicInfiniteCrystalLayout extends CrystalLayout {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Layout: ").append(new TextComponent("Infinite").withStyle(ChatFormatting.RED)));
    }
 

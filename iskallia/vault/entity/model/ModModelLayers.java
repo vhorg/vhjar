@@ -73,6 +73,7 @@ public class ModModelLayers {
    public static final ModelLayerLocation DEEP_DARK_PIGLIN = new ModelLayerLocation(VaultMod.id("deep_dark_piglin"), "main");
    public static final ModelLayerLocation DEEP_DARK_SILVERFISH = new ModelLayerLocation(VaultMod.id("deep_dark_silverfish"), "main");
    public static final ModelLayerLocation DEEP_DARK_HORROR = new ModelLayerLocation(VaultMod.id("deep_dark_horror"), "main");
+   public static final ModelLayerLocation DEEP_DARK_WITCH = new ModelLayerLocation(VaultMod.id("deep_dark_witch"), "main");
    public static final ModelLayerLocation T2_HUSK = new ModelLayerLocation(VaultMod.id("t2_husk"), "main");
    public static final ModelLayerLocation T2_CREEPER = new ModelLayerLocation(VaultMod.id("t2_creeper"), "main");
    public static final ModelLayerLocation T2_ENDERMAN = new ModelLayerLocation(VaultMod.id("t2_enderman"), "main");

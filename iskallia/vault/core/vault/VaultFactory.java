@@ -17,14 +17,12 @@ import net.minecraft.core.Direction;
 
 public class VaultFactory {
    public static Vault create(Version version, CrystalData crystal) {
-      int level = Math.max(crystal.getLevel(), 0);
       long seed = new Random().nextLong();
       JavaRandom random = JavaRandom.ofScrambled(seed);
       Vault vault = new Vault();
       vault.set(Vault.ID, UUID.randomUUID())
          .set(Vault.VERSION, version)
          .set(Vault.SEED, Long.valueOf(seed))
-         .set(Vault.LEVEL, new VaultLevel().set(VaultLevel.VALUE, Integer.valueOf(level)))
          .set(Vault.CLOCK, new TickTimer())
          .set(
             Vault.WORLD,

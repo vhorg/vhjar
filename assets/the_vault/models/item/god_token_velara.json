@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "the_vault:item/god_token_velara"
+    "layer0": "the_vault:item/velara_capstone"
   }
 }

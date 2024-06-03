@@ -29,8 +29,9 @@ public abstract class ConfigForgeRecipe<T extends VaultForgeRecipe> {
       return this.id;
    }
 
-   public void addInput(ItemStack in) {
+   public <R extends ConfigForgeRecipe<T>> R addInput(ItemStack in) {
       this.inputs.add(new ItemEntry(in));
+      return (R)this;
    }
 
    public abstract T makeRecipe();

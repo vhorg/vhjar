@@ -3,7 +3,7 @@ package iskallia.vault.item.crystal.objective;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.item.crystal.CrystalProperty;
+import iskallia.vault.item.crystal.CrystalEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,8 +23,8 @@ public class CompoundCrystalObjective extends CrystalObjective {
    }
 
    @Override
-   public Collection<CrystalProperty> getChildren() {
-      return this.children.stream().map(child -> (CrystalProperty)child).toList();
+   public Collection<CrystalEntry> getChildren() {
+      return this.children.stream().map(child -> (CrystalEntry)child).toList();
    }
 
    @Override

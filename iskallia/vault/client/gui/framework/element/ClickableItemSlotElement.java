@@ -222,7 +222,7 @@ public class ClickableItemSlotElement<E extends ClickableItemSlotElement<E>> ext
       pBuilder.vertex(pMatrix, pX2, pY2, pBlitOffset).color(f5, f6, f7, f4).endVertex();
    }
 
-   private void renderLabel(PoseStack poseStack) {
+   protected void renderLabel(PoseStack poseStack) {
       Component label = this.labelSupplier.get();
       if (label != null && !label.getString().isEmpty()) {
          poseStack.pushPose();
@@ -248,7 +248,7 @@ public class ClickableItemSlotElement<E extends ClickableItemSlotElement<E>> ext
       }
    }
 
-   private void renderItemStack(ItemStack itemStack, float x, float y, boolean disabled) {
+   protected void renderItemStack(ItemStack itemStack, float x, float y, boolean disabled) {
       Minecraft minecraft = Minecraft.getInstance();
       BakedModel bakedModel = minecraft.getItemRenderer().getModel(itemStack, null, null, 0);
       PoseStack poseStack2 = new PoseStack();

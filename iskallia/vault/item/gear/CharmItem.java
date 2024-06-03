@@ -52,6 +52,7 @@ import top.theillusivec4.curios.api.type.capability.ICurioItem;
 
 public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem, IdentifiableItem, RecyclableItem {
    CharmConfig.Size size;
+   private static final int crystalIngredientSize = 10;
 
    public CharmItem(ResourceLocation id, CharmConfig.Size size) {
       super(id, new Properties().tab(ModItems.GEAR_GROUP).stacksTo(1));
@@ -221,6 +222,7 @@ public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem
                   new TextComponent(Math.round(getValue(stack) * 100.0F) + "% " + percentage.getModifierName())
                      .setStyle(Style.EMPTY.withColor(percentage.getRgbColor()))
                );
+               tooltip.add(new TextComponent("Size: ").append(new TextComponent(String.valueOf(10))));
                tooltip.add(TextComponent.EMPTY);
             }
          );
@@ -229,6 +231,10 @@ public class CharmItem extends BasicItem implements ICurioItem, DataTransferItem
       type = type.withStyle(ChatFormatting.YELLOW);
       slotsTooltip.append(type);
       tooltip.add(slotsTooltip);
+   }
+
+   public static int getCrystalIngredientSize() {
+      return 10;
    }
 
    public InteractionResultHolder<ItemStack> use(Level world, Player player, InteractionHand hand) {

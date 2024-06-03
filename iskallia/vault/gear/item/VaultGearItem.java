@@ -127,8 +127,8 @@ public interface VaultGearItem
             String modelStr = tag.getString(modelAttrKey);
             if (modelStr.equalsIgnoreCase("random")) {
                Set<String> models = new HashSet<>();
-               ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRolls(this).forEach((rarity, modelList) -> {
-                  if (rarity != VaultGearRarity.UNIQUE) {
+               ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRolls(stack).forEach((rarity, modelList) -> {
+                  if (!rarity.equals(VaultGearRarity.UNIQUE.name()) && !rarity.equals("SPECIAL")) {
                      models.addAll(modelList);
                   }
                });

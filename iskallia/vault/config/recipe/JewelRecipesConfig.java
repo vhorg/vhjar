@@ -21,7 +21,7 @@ public class JewelRecipesConfig extends ForgeRecipesConfig<ConfigJewelRecipe, Je
    }
 
    @Override
-   protected List<ConfigJewelRecipe> getConfigRecipes() {
+   public List<ConfigJewelRecipe> getConfigRecipes() {
       return this.jewelRecipes;
    }
 }

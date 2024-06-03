@@ -128,7 +128,7 @@ public class QuestConfig extends Config {
          ModBlocks.VAULT_STONE.getRegistryName(),
          8.0F,
          "find_chromatic_iron",
-         new Quest.QuestReward(List.of(new ItemStack(ModItems.CHIPPED_VAULT_ROCK, 8)), 0)
+         new Quest.QuestReward(List.of(new ItemStack(ModItems.VAULT_ROCK, 2)), 0)
       );
       this.crafting(
          "craft_vault_altar",
@@ -296,6 +296,18 @@ public class QuestConfig extends Config {
 
    public <G extends Quest> G getNextQuest(Quest current) {
       return this.getNextQuest(current.getId());
+   }
+
+   public List<Quest> getNextQuests(Quest completedQuest) {
+      List<Quest> nextQuests = new ArrayList<>();
+
+      for (Quest quest : this.getQuests()) {
+         if (completedQuest.getId().equals(quest.getUnlockedBy())) {
+            nextQuests.add(quest);
+         }
+      }
+
+      return nextQuests;
    }
 
    public <G extends Quest> G getNextQuest(String currentId) {

@@ -1,16 +1,8 @@
 {
-  "type": "minecraft:crafting_shaped",
-  "pattern": [
-    "www",
-    "www"
-  ],
-  "key": {
-    "w": {
-      "item": "the_vault:ancient_copper_block_exposed"
-    }
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "item": "the_vault:ancient_copper_trapdoor"
   },
-  "result": {
-    "item": "the_vault:ancient_copper_trapdoor_exposed",
-    "count": 2
-  }
+  "result": "the_vault:ancient_copper_trapdoor_exposed",
+  "count": 1
 }

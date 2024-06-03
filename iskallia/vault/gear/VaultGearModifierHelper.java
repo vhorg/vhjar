@@ -78,7 +78,7 @@ public class VaultGearModifierHelper {
       VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack
    ) {
       WeightedList<VaultGearModifierHelper.TierGroupOutcome> groupOutcomes = new WeightedList<>();
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          return groupOutcomes;
       } else {
@@ -124,7 +124,7 @@ public class VaultGearModifierHelper {
 
    public static boolean reForgeTierOfRandomModifier(ItemStack stack, long worldGameTime, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
          return false;
@@ -211,7 +211,7 @@ public class VaultGearModifierHelper {
 
    public static boolean addNewModifier(ItemStack stack, long worldGameTime, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
          return false;
@@ -326,7 +326,7 @@ public class VaultGearModifierHelper {
 
    public static boolean createOrReplaceAbilityEnhancementModifier(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
          return false;
@@ -361,7 +361,7 @@ public class VaultGearModifierHelper {
 
    public static boolean generateLegendaryModifier(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
          return false;
@@ -428,7 +428,7 @@ public class VaultGearModifierHelper {
 
    public static void generateImplicits(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
       } else if (data.isModifiable()) {
@@ -456,7 +456,7 @@ public class VaultGearModifierHelper {
 
    public static boolean generateModifiersOfAffix(ItemStack stack, VaultGearModifier.AffixType affixType, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
          return false;
@@ -503,7 +503,7 @@ public class VaultGearModifierHelper {
 
    public static void generateModifiers(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack.getItem()).orElse(null);
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
       } else if (data.isModifiable()) {

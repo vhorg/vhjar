@@ -1,7 +1,8 @@
 {
 	"credit": "Made with Blockbench, by Slarkles",
 	"textures": {
-		"0": "the_vault:item/gear/shield/bell"
+		"0": "the_vault:item/gear/shield/bell",
+		"particle": "the_vault:item/gear/shield/bell"
 	},
 	"elements": [
 		{

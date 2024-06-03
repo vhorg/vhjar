@@ -1,16 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "ese",
-    "sas",
-    "ede"
+    "sds",
+    "ded",
+    "sds"
   ],
   "key": {
     "e": {
-      "item": "the_vault:vault_essence"
-    },
-    "a": {
-      "item": "the_vault:bounty_pearl"
+      "item": "the_vault:vault_rock"
     },
     "d": {
       "item": "the_vault:dreamstone"

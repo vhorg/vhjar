@@ -2,7 +2,6 @@ package iskallia.vault.block;
 
 import iskallia.vault.block.entity.CatalystInfusionTableTileEntity;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.util.BlockHelper;
 import javax.annotation.Nonnull;
 import javax.annotation.ParametersAreNonnullByDefault;
 import net.minecraft.core.BlockPos;
@@ -22,8 +21,6 @@ import net.minecraft.world.level.block.LecternBlock;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
@@ -35,21 +32,12 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
-import org.jetbrains.annotations.Nullable;
 
 public class CatalystInfusionBlock extends Block implements EntityBlock {
    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
    public CatalystInfusionBlock() {
       super(Properties.of(Material.STONE).strength(1.5F, 6.0F).noOcclusion());
-   }
-
-   @ParametersAreNonnullByDefault
-   @Nullable
-   public <A extends BlockEntity> BlockEntityTicker<A> getTicker(Level world, BlockState state, BlockEntityType<A> blockEntityType) {
-      return world.isClientSide
-         ? null
-         : BlockHelper.getTicker(blockEntityType, ModBlocks.CATALYST_INFUSION_TABLE_TILE_ENTITY, CatalystInfusionTableTileEntity::serverTick);
    }
 
    public BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -85,26 +73,27 @@ public class CatalystInfusionBlock extends Block implements EntityBlock {
    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
       if (world.isClientSide()) {
          return InteractionResult.SUCCESS;
-      } else {
-         BlockEntity blockEntity = world.getBlockEntity(pos);
-         if (!(blockEntity instanceof CatalystInfusionTableTileEntity)) {
-            return InteractionResult.SUCCESS;
-         } else if (!(player instanceof ServerPlayer)) {
+      } else if (world.getBlockEntity(pos) instanceof CatalystInfusionTableTileEntity entity) {
+         if (player instanceof ServerPlayer serverPlayer) {
+            NetworkHooks.openGui(serverPlayer, entity, buffer -> buffer.writeBlockPos(pos));
             return InteractionResult.SUCCESS;
          } else {
-            NetworkHooks.openGui((ServerPlayer)player, (CatalystInfusionTableTileEntity)blockEntity, buffer -> buffer.writeBlockPos(pos));
             return InteractionResult.SUCCESS;
          }
+      } else {
+         return InteractionResult.SUCCESS;
       }
    }
 
    public void onRemove(BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, BlockState newState, boolean isMoving) {
-      if (!state.is(newState.getBlock()) && world.getBlockEntity(pos) instanceof CatalystInfusionTableTileEntity tileEntity) {
-         tileEntity.getItemStackHandlers().forEach(itemStackHandler -> {
-            for (int i = 0; i < itemStackHandler.getSlots(); i++) {
-               Containers.dropItemStack(world, pos.getX(), pos.getY(), pos.getZ(), itemStackHandler.getStackInSlot(i));
-            }
-         });
+      if (!state.is(newState.getBlock()) && world.getBlockEntity(pos) instanceof CatalystInfusionTableTileEntity entity) {
+         entity.getInventory()
+            .getOverSizedContents()
+            .forEach(stack -> stack.splitByStackSize().forEach(split -> Containers.dropItemStack(world, pos.getX(), pos.getY(), pos.getZ(), split)));
+         Containers.dropContents(world, pos, entity.getResultContainer());
+         entity.getInventory().clearContent();
+         entity.getResultContainer().clearContent();
+         world.updateNeighbourForOutputSignal(pos, this);
       }
 
       super.onRemove(state, world, pos, newState, isMoving);

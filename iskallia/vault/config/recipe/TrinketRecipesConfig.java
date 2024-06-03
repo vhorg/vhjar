@@ -19,7 +19,7 @@ public class TrinketRecipesConfig extends ForgeRecipesConfig<ConfigTrinketRecipe
    }
 
    @Override
-   protected List<ConfigTrinketRecipe> getConfigRecipes() {
+   public List<ConfigTrinketRecipe> getConfigRecipes() {
       return this.trinketRecipes;
    }
 

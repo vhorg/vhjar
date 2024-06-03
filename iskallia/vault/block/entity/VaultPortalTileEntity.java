@@ -56,11 +56,11 @@ public class VaultPortalTileEntity extends BlockEntity {
    }
 
    public static void tick(Level level, BlockPos pos, BlockState state, VaultPortalTileEntity te) {
-      UUID vaultId = te.getData().map(CrystalData::getVaultId).orElse(null);
+      UUID vaultId = te.getData().map(crystal -> crystal.getProperties().getVaultId()).orElse(null);
       if (vaultId != null && ServerVaults.get(vaultId).isEmpty()) {
          level.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
       }
 
-      te.getData().ifPresent(data -> data.onWorldTick(level, pos, state));
+      te.getData().ifPresent(data -> data.onPortalTick(level, pos, state));
    }
 }

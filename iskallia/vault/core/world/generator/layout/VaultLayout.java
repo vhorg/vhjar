@@ -66,7 +66,11 @@ public abstract class VaultLayout extends GridLayout {
 
    @Override
    public Template getAt(Vault vault, RegionPos region, RandomSource random, PlacementSettings settings) {
-      Template template = this.getTemplate(this.getType(vault, region), vault, region, random, settings);
+      Template template = CommonEvents.LAYOUT_TEMPLATE_GENERATION.invoke(this, vault, region, random, settings, null).getTemplate();
+      if (template == null) {
+         template = this.getTemplate(this.getType(vault, region), vault, region, random, settings);
+      }
+
       if (template instanceof JigsawTemplate jigsaw) {
          Iterator<JigsawTemplate> iterator = jigsaw.getChildren().iterator();
          JigsawTemplate target = null;

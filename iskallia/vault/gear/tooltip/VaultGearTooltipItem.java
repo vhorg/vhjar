@@ -168,7 +168,7 @@ public interface VaultGearTooltipItem {
                      name = modelPiece.getArmorModel().getDisplayName();
                   }
 
-                  VaultGearRarity rollRarity = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(gearItem, gearModel.getId());
+                  VaultGearRarity rollRarity = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(stack, gearModel.getId());
                   MutableComponent modelTooltip = new TextComponent("Model: ")
                      .withStyle(new ChatFormatting[0])
                      .append(new TextComponent(name).withStyle(Style.EMPTY.withColor(rollRarity.getColor().getValue())));

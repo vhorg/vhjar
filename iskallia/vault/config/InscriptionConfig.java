@@ -18,10 +18,22 @@ import net.minecraft.resources.ResourceLocation;
 public class InscriptionConfig extends Config {
    @Expose
    public Map<ResourceLocation, LevelEntryList<InscriptionConfig.Pool>> pools;
+   @Expose
+   public Map<ResourceLocation, Integer> poolToModel;
+   @Expose
+   public List<Integer> ringWeights;
 
    @Override
    public String getName() {
       return "inscription";
+   }
+
+   public int getModel(ResourceLocation pool) {
+      return this.poolToModel.getOrDefault(pool, 0);
+   }
+
+   public List<Integer> getRingWeights() {
+      return this.ringWeights;
    }
 
    @Override
@@ -40,7 +52,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/challenge/crystal_caves"), null, 1, 16711935)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            16
@@ -50,7 +63,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/challenge/digsite"), null, 1, 16711935)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            16
@@ -60,7 +74,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/challenge/dragon"), null, 1, 16711935)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            16
@@ -70,7 +85,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/challenge/factory"), null, 1, 16711935)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            16
@@ -80,7 +96,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/challenge/village"), null, 1, 16711935)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            16
@@ -90,7 +107,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/challenge/wildwest"), null, 1, 16711935)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            16
@@ -100,7 +118,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/challenge/x-mark"), null, 1, 16711935)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            16
@@ -110,7 +129,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/omega/cube"), null, 1, 7012096)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            4
@@ -120,7 +140,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/omega/blacksmith"), null, 1, 7012096)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            4
@@ -130,7 +151,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/omega/digsite"), null, 1, 7012096)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            4
@@ -140,7 +162,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/omega/mine"), null, 1, 7012096)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            4
@@ -150,7 +173,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/omega/painting"), null, 1, 7012096)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            4
@@ -160,7 +184,8 @@ public class InscriptionConfig extends Config {
                               Arrays.asList(new InscriptionData.Entry(VaultMod.id("vault/rooms/omega/vendor"), null, 1, 7012096)),
                               FloatRoll.ofUniform(0.1F, 0.2F),
                               IntRoll.ofUniform(200, 600),
-                              FloatRoll.ofUniform(0.01F, 0.02F),
+                              IntRoll.ofUniform(10, 30),
+                              null,
                               IntRoll.ofUniform(0, 15)
                            ),
                            4
@@ -168,17 +193,31 @@ public class InscriptionConfig extends Config {
                   )
                )
          );
+      this.poolToModel = new LinkedHashMap<>();
    }
 
    public Optional<InscriptionData> generate(ResourceLocation id, int level, RandomSource random) {
-      return Optional.ofNullable(this.pools.get(id)).flatMap(p -> p.getForLevel(level)).flatMap(pool -> pool.pool.getRandom(random)).map(pool -> {
+      return Optional.ofNullable(this.pools.get(id)).flatMap(p -> p.getForLevel(level)).flatMap(pool -> pool.pool.getRandom(random)).map(entry -> {
          InscriptionData data = InscriptionData.empty();
-         pool.entries.forEach(data::add);
-         data.setCompletion(pool.completion.get(random));
-         data.setTime(pool.time.get(random));
-         data.setInstability(pool.instability.get(random));
-         data.setModel(pool.model.get(random));
-         data.setColor(pool.color);
+         entry.entries.forEach(data::add);
+         if (entry.completion != null) {
+            data.setCompletion(entry.completion.get(random));
+         }
+
+         if (entry.time != null) {
+            data.setTime(entry.time.get(random));
+         }
+
+         if (entry.instability != null) {
+            data.setInstability(entry.instability.get(random));
+         }
+
+         if (entry.size != null) {
+            data.setSize(entry.size.get(random));
+         }
+
+         data.setModel(entry.model.get(random));
+         data.setColor(entry.color);
          return data;
       });
    }
@@ -193,15 +232,18 @@ public class InscriptionConfig extends Config {
       @Expose
       private final FloatRoll instability;
       @Expose
+      private final IntRoll size;
+      @Expose
       private final IntRoll model;
       @Expose
       private final Integer color;
 
-      public Entry(List<InscriptionData.Entry> entries, FloatRoll completion, IntRoll time, FloatRoll instability, IntRoll model) {
+      public Entry(List<InscriptionData.Entry> entries, FloatRoll completion, IntRoll size, IntRoll time, FloatRoll instability, IntRoll model) {
          this.entries = entries;
          this.completion = completion;
          this.time = time;
          this.instability = instability;
+         this.size = size;
          this.model = model;
          this.color = null;
       }

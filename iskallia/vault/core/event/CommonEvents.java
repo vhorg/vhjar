@@ -36,6 +36,7 @@ import iskallia.vault.core.event.common.GateLockOpenEvent;
 import iskallia.vault.core.event.common.GateLockUpdateEvent;
 import iskallia.vault.core.event.common.GrantedEffectEvent;
 import iskallia.vault.core.event.common.ItemScavengeTaskEvent;
+import iskallia.vault.core.event.common.LayoutTemplateGenerationEvent;
 import iskallia.vault.core.event.common.ListenerJoinEvent;
 import iskallia.vault.core.event.common.ListenerLeaveEvent;
 import iskallia.vault.core.event.common.ListenerTickEvent;
@@ -81,6 +82,7 @@ public class CommonEvents {
    public static final SpawnGenerationEvent SPAWN_GENERATION = register(new SpawnGenerationEvent());
    public static final LootGenerationEvent LOOT_GENERATION = register(new LootGenerationEvent());
    public static final TemplateGenerationEvent TEMPLATE_GENERATION = register(new TemplateGenerationEvent());
+   public static final LayoutTemplateGenerationEvent LAYOUT_TEMPLATE_GENERATION = register(new LayoutTemplateGenerationEvent());
    public static final PlaceholderProcessingEvent PLACEHOLDER_PROCESSING = register(new PlaceholderProcessingEvent());
    public static final PlaceholderGenerationEvent PLACEHOLDER_GENERATION = register(new PlaceholderGenerationEvent());
    public static final ObjectivePieceGenerationEvent OBJECTIVE_PIECE_GENERATION = register(new ObjectivePieceGenerationEvent());

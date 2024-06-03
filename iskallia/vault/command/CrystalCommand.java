@@ -14,6 +14,8 @@ import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.VaultCrystalItem;
 import iskallia.vault.item.crystal.objective.NullCrystalObjective;
 import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
+import iskallia.vault.item.crystal.properties.CapacityCrystalProperties;
+import iskallia.vault.item.crystal.properties.InstabilityCrystalProperties;
 import iskallia.vault.world.data.ParadoxCrystalData;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -63,6 +65,7 @@ public class CrystalCommand extends Command {
       builder.then(
          Commands.literal("setParadoxCooldown").then(Commands.argument("timeoutSeconds", IntegerArgumentType.integer(0)).executes(this::setParadoxCooldown))
       );
+      builder.then(Commands.literal("setVolume").then(Commands.argument("volume", IntegerArgumentType.integer(0)).executes(this::setVolume)));
    }
 
    private int setParadoxCooldown(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -88,7 +91,19 @@ public class CrystalCommand extends Command {
       ItemStack crystal = this.getCrystal(context);
       CrystalData data = CrystalData.read(crystal);
       int level = IntegerArgumentType.getInteger(context, "level");
-      data.setLevel(level);
+      data.getProperties().setLevel(level);
+      data.write(crystal);
+      return 0;
+   }
+
+   private int setVolume(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ItemStack crystal = this.getCrystal(context);
+      CrystalData data = CrystalData.read(crystal);
+      int volume = IntegerArgumentType.getInteger(context, "volume");
+      if (data.getProperties() instanceof CapacityCrystalProperties capacityCrystalProperties) {
+         capacityCrystalProperties.setVolume(volume);
+      }
+
       data.write(crystal);
       return 0;
    }
@@ -105,7 +120,7 @@ public class CrystalCommand extends Command {
    private int setUnmodifiable(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ItemStack crystal = this.getCrystal(ctx);
       CrystalData data = CrystalData.read(crystal);
-      data.setUnmodifiable(BoolArgumentType.getBool(ctx, "unmodifiable"));
+      data.getProperties().setUnmodifiable(BoolArgumentType.getBool(ctx, "unmodifiable"));
       data.write(crystal);
       return 0;
    }
@@ -138,7 +153,10 @@ public class CrystalCommand extends Command {
       ItemStack crystal = this.getCrystal(ctx);
       CrystalData data = CrystalData.read(crystal);
       float instability = FloatArgumentType.getFloat(ctx, "instability");
-      data.setInstability(instability);
+      if (data.getProperties() instanceof InstabilityCrystalProperties properties) {
+         properties.setInstability(instability);
+      }
+
       data.write(crystal);
       return 0;
    }

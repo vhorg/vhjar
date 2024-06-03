@@ -8,28 +8,28 @@ import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 
 public class MysticExpertise extends LearnableSkill {
-   private float instabilityChanceReduction;
+   private int additionalCrystalVolume;
 
-   public float getInstabilityChanceReduction() {
-      return this.instabilityChanceReduction;
+   public int getAdditionalCrystalVolume() {
+      return this.additionalCrystalVolume;
    }
 
    @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
-      Adapters.FLOAT.writeBits(Float.valueOf(this.instabilityChanceReduction), buffer);
+      Adapters.INT.writeBits(Integer.valueOf(this.additionalCrystalVolume), buffer);
    }
 
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.instabilityChanceReduction = Adapters.FLOAT.readBits(buffer).orElseThrow();
+      this.additionalCrystalVolume = Adapters.INT.readBits(buffer).orElseThrow();
    }
 
    @Override
    public Optional<CompoundTag> writeNbt() {
       return super.writeNbt().map(nbt -> {
-         Adapters.FLOAT.writeNbt(Float.valueOf(this.instabilityChanceReduction)).ifPresent(tag -> nbt.put("instabilityChanceReduction", tag));
+         Adapters.INT.writeNbt(Integer.valueOf(this.additionalCrystalVolume)).ifPresent(tag -> nbt.put("additionalCrystalVolume", tag));
          return (CompoundTag)nbt;
       });
    }
@@ -37,13 +37,13 @@ public class MysticExpertise extends LearnableSkill {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.instabilityChanceReduction = Adapters.FLOAT.readNbt(nbt.get("instabilityChanceReduction")).orElseThrow();
+      this.additionalCrystalVolume = Adapters.INT.readNbt(nbt.get("additionalCrystalVolume")).orElseThrow();
    }
 
    @Override
    public Optional<JsonObject> writeJson() {
       return super.writeJson().map(json -> {
-         Adapters.FLOAT.writeJson(Float.valueOf(this.instabilityChanceReduction)).ifPresent(element -> json.add("instabilityChanceReduction", element));
+         Adapters.INT.writeJson(Integer.valueOf(this.additionalCrystalVolume)).ifPresent(element -> json.add("additionalCrystalVolume", element));
          return (JsonObject)json;
       });
    }
@@ -51,6 +51,6 @@ public class MysticExpertise extends LearnableSkill {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.instabilityChanceReduction = Adapters.FLOAT.readJson(json.get("instabilityChanceReduction")).orElseThrow();
+      this.additionalCrystalVolume = Adapters.INT.readJson(json.get("additionalCrystalVolume")).orElseThrow();
    }
 }

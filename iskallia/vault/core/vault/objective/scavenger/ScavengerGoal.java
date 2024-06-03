@@ -96,7 +96,7 @@ public class ScavengerGoal extends DataObject<ScavengerGoal> {
    }
 
    public void tick(VirtualWorld world, Vault vault) {
-      this.getOptional(BASE_TOTAL).ifPresent(baseTotal -> {
+      this.ifPresent(BASE_TOTAL, baseTotal -> {
          double increase = CommonEvents.OBJECTIVE_TARGET.invoke(world, vault, 0.0).getIncrease();
          this.set(TOTAL, Integer.valueOf((int)Math.round(baseTotal.intValue() * (1.0 + increase))));
       });

@@ -288,8 +288,7 @@ public class ClassicListenersLogic extends ListenersLogic {
       return switch (var2) {
          case "boss" -> "Hunt the Guardians";
          case "monolith" -> "Brazier";
-         case "empty" -> "Architect";
-         case "" -> "";
+         case "empty", "" -> "";
          default -> key.substring(0, 1).toUpperCase() + key.substring(1);
       };
    }

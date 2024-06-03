@@ -48,6 +48,7 @@ import iskallia.vault.entity.renderer.deep_dark.DeepDarkHorrorRenderer;
 import iskallia.vault.entity.renderer.deep_dark.DeepDarkPiglinRenderer;
 import iskallia.vault.entity.renderer.deep_dark.DeepDarkSilverfishRenderer;
 import iskallia.vault.entity.renderer.deep_dark.DeepDarkSkeletonRenderer;
+import iskallia.vault.entity.renderer.deep_dark.DeepDarkWitchRenderer;
 import iskallia.vault.entity.renderer.deep_dark.DeepDarkZombieRenderer;
 import iskallia.vault.entity.renderer.dungeon.DungeonBlackWidowSpiderRenderer;
 import iskallia.vault.entity.renderer.dungeon.DungeonPiglinRenderer;
@@ -275,6 +276,7 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.DEEP_DARK_PIGLIN, DeepDarkPiglinRenderer::new);
       EntityRenderers.register(ModEntities.DEEP_DARK_SILVERFISH, DeepDarkSilverfishRenderer::new);
       EntityRenderers.register(ModEntities.DEEP_DARK_HORROR, DeepDarkHorrorRenderer::new);
+      EntityRenderers.register(ModEntities.DEEP_DARK_WITCH, DeepDarkWitchRenderer::new);
       EntityRenderers.register(ModEntities.T1_CREEPER, Tier1CreeperRenderer::new);
       EntityRenderers.register(ModEntities.T1_DROWNED, Tier1DrownedRenderer::new);
       EntityRenderers.register(ModEntities.T1_ENDERMAN, Tier1EndermanRenderer::new);

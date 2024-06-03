@@ -1,13 +1,13 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "ede",
-    "dad",
-    "ede"
+    "ada",
+    "ded",
+    "ada"
   ],
   "key": {
     "e": {
-      "item": "the_vault:vault_essence"
+      "item": "the_vault:vault_rock"
     },
     "a": {
       "item": "the_vault:bounty_pearl"

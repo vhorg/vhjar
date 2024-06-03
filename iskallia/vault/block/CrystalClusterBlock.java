@@ -147,7 +147,7 @@ public class CrystalClusterBlock extends Block implements SimpleWaterloggedBlock
          CrystalData crystal = CrystalData.read(stack);
          Entity entity = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
          int level = entity instanceof Player player ? PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player).getVaultLevel() : 0;
-         crystal.setLevel(level);
+         crystal.getProperties().setLevel(level);
          crystal.setModel(new RawCrystalModel());
          crystal.setObjective(new EmptyCrystalObjective());
          crystal.setTheme(new PoolCrystalTheme(VaultMod.id("raw")));
@@ -156,7 +156,7 @@ public class CrystalClusterBlock extends Block implements SimpleWaterloggedBlock
             crystal.getModifiers().add(VaultModifierStack.of(modifier, 1));
          }
 
-         crystal.setUnmodifiable(true);
+         crystal.getProperties().setUnmodifiable(true);
          crystal.getModifiers().setRandomModifiers(false);
          crystal.write(stack);
          drops.add(stack);

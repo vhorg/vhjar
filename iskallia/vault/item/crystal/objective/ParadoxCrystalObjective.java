@@ -21,6 +21,7 @@ import iskallia.vault.core.vault.objective.ScavengerObjective;
 import iskallia.vault.core.vault.objective.VictoryObjective;
 import iskallia.vault.core.vault.player.ClassicListenersLogic;
 import iskallia.vault.core.vault.player.Listeners;
+import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.tool.ColorBlender;
 import iskallia.vault.world.data.ParadoxCrystalData;
@@ -32,12 +33,16 @@ import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.GameType;
@@ -51,6 +56,7 @@ public class ParadoxCrystalObjective extends CrystalObjective {
    protected String playerName;
    protected UUID playerUuid;
    protected long expiry;
+   private int resetTimer;
 
    public ParadoxCrystalObjective() {
    }
@@ -106,7 +112,7 @@ public class ParadoxCrystalObjective extends CrystalObjective {
    }
 
    @Override
-   public void addText(List<Component> tooltip, TooltipFlag flag, float time) {
+   public void addText(List<Component> tooltip, int minIndex, TooltipFlag flag, float time) {
       tooltip.add(new TextComponent("Objective: ").append(this.styleLetters("Divine Paradox", time, 2.0F)));
       tooltip.add(
          new TextComponent("")
@@ -149,12 +155,12 @@ public class ParadoxCrystalObjective extends CrystalObjective {
    }
 
    @Override
-   public void onWorldTick(Level world, BlockPos pos, BlockState state) {
+   public void onPortalTick(Level world, BlockPos pos, BlockState state) {
       if (this.isExpired()) {
          world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
       }
 
-      super.onWorldTick(world, pos, state);
+      super.onPortalTick(world, pos, state);
    }
 
    @Override
@@ -201,6 +207,51 @@ public class ParadoxCrystalObjective extends CrystalObjective {
       }
    }
 
+   @Override
+   public void onWorldTick(Level world, ItemEntity entity) {
+      if (world.isClientSide() && this.resetTimer > 0) {
+         this.renderParticles(world, entity);
+      }
+
+      if (this.type == ParadoxObjective.Type.BUILD && entity.getThrower() != null && entity.getThrower().equals(this.playerUuid)) {
+         BlockState state = world.getBlockState(entity.blockPosition());
+         if (state.getBlock() == ModBlocks.VOID_LIQUID_BLOCK) {
+            if (this.resetTimer == 0) {
+               world.playSound(null, entity.blockPosition(), SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 1.0F, 0.2F);
+            }
+
+            this.resetTimer++;
+         } else {
+            this.resetTimer = 0;
+         }
+
+         if (this.resetTimer < 0) {
+            this.resetTimer = 0;
+         } else if (this.resetTimer >= 100) {
+            ParadoxCrystalData.get(world.getServer()).getOrCreate(this.playerUuid).reset();
+            world.setBlock(entity.blockPosition(), Blocks.AIR.defaultBlockState(), 3);
+            this.resetTimer = 0;
+         }
+      }
+   }
+
+   private void renderParticles(Level world, ItemEntity entity) {
+      BlockState state = world.getBlockState(entity.blockPosition());
+      if (state.getBlock() == ModBlocks.VOID_LIQUID_BLOCK) {
+         for (int i = 0; i < this.resetTimer / 5; i++) {
+            world.addParticle(
+               ParticleTypes.ASH,
+               entity.getX(),
+               entity.getY() + 1.0,
+               entity.getZ(),
+               (world.random.nextFloat() - 0.5F) * 0.1F,
+               world.random.nextFloat() * 0.3F,
+               (world.random.nextFloat() - 0.5F) * 0.1F
+            );
+         }
+      }
+   }
+
    private TextComponent styleLetters(String string, float time, float offset) {
       TextComponent text = new TextComponent("");
       int count = 0;
@@ -236,6 +287,10 @@ public class ParadoxCrystalObjective extends CrystalObjective {
          Adapters.LONG.writeNbt(Long.valueOf(this.expiry)).ifPresent(tag -> nbt.put("expiry", tag));
       }
 
+      if (this.resetTimer > 0) {
+         Adapters.INT.writeNbt(Integer.valueOf(this.resetTimer)).ifPresent(tag -> nbt.put("reset_timer", tag));
+      }
+
       return Optional.of(nbt);
    }
 
@@ -244,6 +299,7 @@ public class ParadoxCrystalObjective extends CrystalObjective {
       this.playerName = Adapters.UTF_8.readNbt(nbt.get("player_name")).orElse(null);
       this.playerUuid = Adapters.UUID.readNbt(nbt.get("player_uuid")).orElse(null);
       this.expiry = Adapters.LONG.readNbt(nbt.get("expiry")).orElse(0L);
+      this.resetTimer = Adapters.INT.readNbt(nbt.get("reset_timer")).orElse(0);
    }
 
    @Override
@@ -256,6 +312,10 @@ public class ParadoxCrystalObjective extends CrystalObjective {
          Adapters.LONG.writeJson(Long.valueOf(this.expiry)).ifPresent(tag -> json.add("expiry", tag));
       }
 
+      if (this.resetTimer > 0) {
+         Adapters.INT.writeJson(Integer.valueOf(this.resetTimer)).ifPresent(tag -> json.add("reset_timer", tag));
+      }
+
       return Optional.of(json);
    }
 
@@ -264,5 +324,6 @@ public class ParadoxCrystalObjective extends CrystalObjective {
       this.playerName = Adapters.UTF_8.readJson(json.get("player_name")).orElse(null);
       this.playerUuid = Adapters.UUID.readJson(json.get("player_uuid")).orElse(null);
       this.expiry = Adapters.LONG.readJson(json.get("expiry")).orElse(0L);
+      this.resetTimer = Adapters.INT.readJson(json.get("reset_timer")).orElse(0);
    }
 }

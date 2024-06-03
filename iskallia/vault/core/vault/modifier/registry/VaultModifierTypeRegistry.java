@@ -32,6 +32,7 @@ import iskallia.vault.core.vault.modifier.modifier.PlayerNoExitModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerNoVaultFruitModifier;
 import iskallia.vault.core.vault.modifier.modifier.PlayerStatModifier;
 import iskallia.vault.core.vault.modifier.modifier.SpawnerMobsModifier;
+import iskallia.vault.core.vault.modifier.modifier.TemplateProcessorModifier;
 import iskallia.vault.core.vault.modifier.modifier.VaultLevelModifier;
 import iskallia.vault.core.vault.modifier.modifier.VaultLootableWeightModifier;
 import iskallia.vault.core.vault.modifier.modifier.VaultTimeModifier;
@@ -174,6 +175,10 @@ public final class VaultModifierTypeRegistry {
          this.put(
             VaultMod.id("modifier_type/objective_target"),
             VaultModifierType.of(ObjectiveTargetModifier.class, ObjectiveTargetModifier.Properties.class, ObjectiveTargetModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/template_processor"),
+            VaultModifierType.of(TemplateProcessorModifier.class, TemplateProcessorModifier.Properties.class, TemplateProcessorModifier::new)
          );
       }
    };

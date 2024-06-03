@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "eee",
+    "dbd",
+    "dsd"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "d": {
+      "item": "the_vault:vault_diamond"
+    },
+    "b": {
+      "item": "the_vault:black_chromatic_steel_ingot"
+    },
+    "s": {
+      "item": "the_vault:polished_vault_stone"
+    }
+  },
+  "result": {
+    "item": "the_vault:crystal_workbench",
+    "count": 1
+  }
+}

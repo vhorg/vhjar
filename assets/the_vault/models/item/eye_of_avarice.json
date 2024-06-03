@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "the_vault:item/eye_of_avarice"
+    "layer0": "the_vault:item/avarice_capstone"
   }
 }

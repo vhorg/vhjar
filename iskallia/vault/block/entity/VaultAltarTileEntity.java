@@ -3,6 +3,7 @@ package iskallia.vault.block.entity;
 import com.mojang.math.Vector3f;
 import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.altar.RequiredItems;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.event.event.CraftCrystalEvent;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
@@ -41,6 +42,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class VaultAltarTileEntity extends BlockEntity {
    private UUID owner;
+   private ItemStack input = ItemStack.EMPTY;
    private AltarInfusionRecipe recipe;
    private VaultAltarTileEntity.AltarState altarState;
    private HashMap<String, Integer> displayedIndex = new HashMap<>();
@@ -56,6 +58,10 @@ public class VaultAltarTileEntity extends BlockEntity {
 
    public void setOwner(UUID owner) {
       this.owner = owner;
+   }
+
+   public ItemStack getInput() {
+      return this.input;
    }
 
    public AltarInfusionRecipe getRecipe() {
@@ -160,7 +166,7 @@ public class VaultAltarTileEntity extends BlockEntity {
                   if (!this.getBlockPos().equals(altarPos)
                      && this.level.getBlockEntity(altarPos) instanceof VaultAltarTileEntity altar
                      && altar.getAltarState() != VaultAltarTileEntity.AltarState.IDLE) {
-                     altar.onRemoveVaultRock(this.owner);
+                     altar.onRemoveInput(this.owner);
                   }
                }
             );
@@ -173,7 +179,7 @@ public class VaultAltarTileEntity extends BlockEntity {
       }
    }
 
-   public InteractionResult onAddVaultRock(ServerPlayer player, ItemStack heldItem) {
+   public InteractionResult onAddInput(ServerPlayer player, ItemStack input) {
       if (this.level != null && this.owner.equals(player.getUUID())) {
          ServerLevel serverLevel = (ServerLevel)this.level;
 
@@ -189,8 +195,10 @@ public class VaultAltarTileEntity extends BlockEntity {
          this.recipe = altarData.getRecipe(player, this.worldPosition);
          this.updateDisplayedIndex(this.recipe);
          this.setAltarState(VaultAltarTileEntity.AltarState.ACCEPTING);
+         this.input = input.copy();
+         this.input.setCount(1);
          if (!player.isCreative()) {
-            heldItem.shrink(1);
+            input.shrink(1);
          }
 
          this.sendUpdates();
@@ -200,7 +208,7 @@ public class VaultAltarTileEntity extends BlockEntity {
       }
    }
 
-   public InteractionResult onRemoveVaultRock(UUID playerId) {
+   public InteractionResult onRemoveInput(UUID playerId) {
       if (!this.owner.equals(playerId)) {
          return InteractionResult.FAIL;
       } else {
@@ -210,13 +218,7 @@ public class VaultAltarTileEntity extends BlockEntity {
          if (this.getLevel() != null) {
             this.getLevel()
                .addFreshEntity(
-                  new ItemEntity(
-                     this.getLevel(),
-                     this.getBlockPos().getX() + 0.5,
-                     this.getBlockPos().getY() + 1.5,
-                     this.getBlockPos().getZ() + 0.5,
-                     new ItemStack(ModItems.VAULT_ROCK)
-                  )
+                  new ItemEntity(this.getLevel(), this.getBlockPos().getX() + 0.5, this.getBlockPos().getY() + 1.5, this.getBlockPos().getZ() + 0.5, this.input)
                );
          }
 
@@ -228,7 +230,7 @@ public class VaultAltarTileEntity extends BlockEntity {
    private void completeInfusion(Level world) {
       if (this.recipe != null) {
          ServerLevel serverLevel = (ServerLevel)world;
-         ItemStack stack = this.createCrystal(serverLevel);
+         ItemStack stack = this.createOutput(serverLevel);
          serverLevel.addFreshEntity(
             new ItemEntity(world, this.getBlockPos().getX() + 0.5, this.worldPosition.getY() + 1.5, this.worldPosition.getZ() + 0.5, stack)
          );
@@ -241,12 +243,17 @@ public class VaultAltarTileEntity extends BlockEntity {
    }
 
    @NotNull
-   private ItemStack createCrystal(ServerLevel serverLevel) {
-      ItemStack stack = new ItemStack(ModItems.VAULT_CRYSTAL);
-      CrystalData crystal = CrystalData.read(stack);
-      int level = PlayerVaultStatsData.get(serverLevel).getVaultStats(this.owner).getVaultLevel();
-      crystal.setLevel(level);
-      crystal.write(stack);
+   private ItemStack createOutput(ServerLevel serverLevel) {
+      ItemStack stack = ModConfigs.VAULT_ALTAR.getOutput(this.input, this.owner).orElse(ItemStack.EMPTY);
+      if (stack.getItem() == ModItems.VAULT_CRYSTAL) {
+         CrystalData crystal = CrystalData.read(stack);
+         int level = PlayerVaultStatsData.get(serverLevel).getVaultStats(this.owner).getVaultLevel();
+         if (crystal.getProperties().getLevel().isEmpty()) {
+            crystal.getProperties().setLevel(level);
+            crystal.write(stack);
+         }
+      }
+
       return stack;
    }
 
@@ -381,6 +388,7 @@ public class VaultAltarTileEntity extends BlockEntity {
       CompoundTag displayed = new CompoundTag();
       this.displayedIndex.forEach(displayed::putInt);
       tag.put("Displayed", displayed);
+      Adapters.ITEM_STACK.writeNbt(this.input).ifPresent(input -> tag.put("Input", input));
    }
 
    public void load(@NotNull CompoundTag tag) {
@@ -412,6 +420,11 @@ public class VaultAltarTileEntity extends BlockEntity {
          for (String poolId : displayed.getAllKeys()) {
             this.displayedIndex.put(poolId, displayed.getInt(poolId));
          }
+      }
+
+      this.input = Adapters.ITEM_STACK.readNbt(tag.get("Input")).orElse(null);
+      if (!tag.contains("Input") && this.altarState != VaultAltarTileEntity.AltarState.IDLE) {
+         this.input = new ItemStack(ModItems.VAULT_ROCK);
       }
    }
 

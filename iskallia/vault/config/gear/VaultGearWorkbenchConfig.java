@@ -264,12 +264,12 @@ public class VaultGearWorkbenchConfig extends Config {
       }
 
       public Optional<VaultGearModifier<?>> createModifier() {
-         return VaultGearTierConfig.getConfig(this.gearItem)
+         return VaultGearTierConfig.getConfig(this.gearItem.getRegistryName())
             .flatMap(cfg -> cfg.createModifier(this.affixGroup, this.modifierIdentifier, this.modifierTier, Config.rand));
       }
 
       public int getMinLevel() {
-         return VaultGearTierConfig.getConfig(this.gearItem)
+         return VaultGearTierConfig.getConfig(this.gearItem.getRegistryName())
             .flatMap(cfg -> cfg.getConfiguredModifierTier(this.affixGroup, this.modifierIdentifier, this.modifierTier))
             .map(VaultGearTierConfig.ModifierOutcome::tier)
             .map(VaultGearTierConfig.ModifierTier::getMinLevel)

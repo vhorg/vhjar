@@ -11,6 +11,7 @@ import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.objective.ParadoxObjective;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.crystal.layout.ClassicInfiniteCrystalLayout;
 import iskallia.vault.item.crystal.layout.HeraldCrystalLayout;
@@ -20,6 +21,7 @@ import iskallia.vault.item.crystal.modifiers.ParadoxCrystalModifiers;
 import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
 import iskallia.vault.item.crystal.objective.HeraldCrystalObjective;
 import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
+import iskallia.vault.item.crystal.properties.CapacityCrystalProperties;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.item.tool.IManualModelLoading;
@@ -50,6 +52,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -84,38 +87,59 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
       this.setRegistryName(id);
    }
 
+   public void onWorldTick(Level world, ItemEntity entity) {
+      ItemStack stack = entity.getItem().copy();
+      CrystalData data = CrystalData.read(stack);
+      data.onWorldTick(world, entity);
+      data.write(stack);
+      entity.setItem(stack);
+   }
+
    public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
       if (this.allowdedIn(group)) {
-         this.addCrystal(items, data -> {});
-         this.addCrystal(items, crystal -> crystal.setLayout(new ClassicInfiniteCrystalLayout(1)));
-         this.addCrystal(items, crystal -> {
+         items.add(create(crystal -> crystal.setProperties(new CapacityCrystalProperties())));
+         items.add(create(crystal -> {
+            crystal.setLayout(new ClassicInfiniteCrystalLayout(1));
+            crystal.setProperties(new CapacityCrystalProperties());
+         }));
+         items.add(create(crystal -> {
             crystal.setModel(new RawCrystalModel());
             crystal.setObjective(new EmptyCrystalObjective());
             crystal.setTheme(new PoolCrystalTheme(VaultMod.id("raw")));
-         });
-         this.addCrystal(items, crystal -> {
-            crystal.setLevel(-1);
+            crystal.setProperties(new CapacityCrystalProperties());
+         }));
+         items.add(create(crystal -> {
             crystal.setObjective(new ParadoxCrystalObjective(ParadoxObjective.Type.BUILD));
             crystal.setLayout(new ParadoxCrystalLayout());
             crystal.setModifiers(new ParadoxCrystalModifiers());
-            crystal.setUnmodifiable(true);
-         });
-         this.addCrystal(items, crystal -> {
-            crystal.setLevel(-1);
+            crystal.setProperties(new CapacityCrystalProperties().setVolume(0).setUnmodifiable(true));
+         }));
+         items.add(create(crystal -> {
             crystal.setObjective(new ParadoxCrystalObjective(ParadoxObjective.Type.RUN));
             crystal.setLayout(new ParadoxCrystalLayout());
             crystal.setModifiers(new ParadoxCrystalModifiers());
-            crystal.setUnmodifiable(true);
-         });
-         this.addCrystal(items, crystal -> {
-            crystal.setLevel(100);
+            crystal.setProperties(new CapacityCrystalProperties().setVolume(0).setUnmodifiable(true));
+         }));
+         items.add(create(crystal -> {
             crystal.setObjective(new HeraldCrystalObjective());
             crystal.setTheme(new ValueCrystalTheme(VaultMod.id("classic_vault_herald")));
             crystal.setLayout(new HeraldCrystalLayout());
             crystal.getModifiers().setRandomModifiers(false);
-            crystal.setUnmodifiable(true);
-         });
+            crystal.setProperties(new CapacityCrystalProperties().setVolume(0).setLevel(Integer.valueOf(100)).setUnmodifiable(true));
+         }));
       }
+   }
+
+   public static ItemStack create(Consumer<CrystalData> action) {
+      return create(new ItemStack(ModItems.VAULT_CRYSTAL), action);
+   }
+
+   public static ItemStack create(ItemStack base, Consumer<CrystalData> action) {
+      ItemStack stack = base.copy();
+      CrystalData crystal = CrystalData.read(stack);
+      action.accept(crystal);
+      crystal.write(stack);
+      return stack;
    }
 
    public CompoundTag getShareTag(ItemStack stack) {
@@ -127,14 +151,6 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
          nbt.remove("scheduledTasks");
          return nbt;
       }
-   }
-
-   private void addCrystal(NonNullList<ItemStack> items, Consumer<CrystalData> action) {
-      ItemStack stack = new ItemStack(this);
-      CrystalData crystal = CrystalData.read(stack);
-      action.accept(crystal);
-      crystal.write(stack);
-      items.add(stack);
    }
 
    @Nonnull
@@ -183,7 +199,7 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
    @ParametersAreNonnullByDefault
    public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
       if (ModConfigs.isInitialized()) {
-         CrystalData.run(stack, data -> data.addText(tooltip, flag, (float)ClientScheduler.INSTANCE.getTickCount()));
+         CrystalData.run(stack, data -> data.addText(tooltip, tooltip.size(), flag, (float)ClientScheduler.INSTANCE.getTickCount()));
       }
 
       super.appendHoverText(stack, world, tooltip, flag);
@@ -277,7 +293,7 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
       }
    }
 
-   public record AddModifiersTask(ResourceLocation pool) implements VaultCrystalItem.IScheduledTask {
+   public record AddModifiersTask(ResourceLocation pool, int count) implements VaultCrystalItem.IScheduledTask {
       public static final String ID = "addCurses";
 
       @Override
@@ -287,21 +303,25 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
 
       @Override
       public void execute(ServerPlayer player, ItemStack stack, CrystalData data) {
-         ModConfigs.VAULT_MODIFIER_POOLS
-            .getRandom(this.pool, data.getLevel(), JavaRandom.ofNanoTime())
-            .forEach(modifier -> data.getModifiers().add(VaultModifierStack.of((VaultModifier<?>)modifier)));
-         data.write(stack);
+         Integer level = data.getProperties().getLevel().orElse(null);
+         if (level != null) {
+            ModConfigs.VAULT_MODIFIER_POOLS
+               .getRandom(this.pool, level, JavaRandom.ofNanoTime())
+               .forEach(modifier -> data.getModifiers().add(VaultModifierStack.of((VaultModifier<?>)modifier)));
+            data.write(stack);
+         }
       }
 
       @Override
       public CompoundTag serializeNBT() {
          CompoundTag nbt = VaultCrystalItem.IScheduledTask.super.serializeNBT();
          nbt.putString("pool", this.pool.toString());
+         nbt.putInt("count", this.count);
          return nbt;
       }
 
       public static VaultCrystalItem.AddModifiersTask deserializeNBT(CompoundTag nbt) {
-         return new VaultCrystalItem.AddModifiersTask(new ResourceLocation(nbt.getString("pool")));
+         return new VaultCrystalItem.AddModifiersTask(new ResourceLocation(nbt.getString("pool")), nbt.contains("count") ? nbt.getInt("count") : 1);
       }
    }
 
@@ -372,8 +392,8 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
 
       @Override
       public void execute(ServerPlayer player, ItemStack stack, CrystalData data) {
-         if (!data.isUnmodifiable()) {
-            data.setUnmodifiable(true);
+         if (!data.getProperties().isUnmodifiable()) {
+            data.getProperties().setUnmodifiable(true);
             data.write(stack);
          }
       }

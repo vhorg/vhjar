@@ -6,6 +6,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.config.adapter.IdentifierAdapter;
 import iskallia.vault.config.adapter.ItemStackAdapter;
 import iskallia.vault.config.adapter.PartialTileAdapter;
+import iskallia.vault.config.adapter.ProcessorAdapter;
 import iskallia.vault.config.adapter.RegistryCodecAdapter;
 import iskallia.vault.config.adapter.TextColorAdapter;
 import iskallia.vault.config.adapter.VersionedKeyAdapter;
@@ -21,6 +22,7 @@ import iskallia.vault.core.world.data.item.ItemPredicate;
 import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.loot.LootPool;
 import iskallia.vault.core.world.loot.LootTable;
+import iskallia.vault.core.world.processor.Processor;
 import iskallia.vault.core.world.roll.FloatRoll;
 import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.init.ModConfigs;
@@ -28,6 +30,7 @@ import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.item.crystal.layout.CrystalLayout;
 import iskallia.vault.item.crystal.modifiers.CrystalModifiers;
 import iskallia.vault.item.crystal.objective.CrystalObjective;
+import iskallia.vault.item.crystal.properties.CrystalProperties;
 import iskallia.vault.item.crystal.theme.CrystalTheme;
 import iskallia.vault.item.crystal.time.CrystalTime;
 import iskallia.vault.quest.base.Quest;
@@ -72,6 +75,7 @@ public abstract class Config {
       .registerTypeHierarchyAdapter(CrystalObjective.class, CrystalData.OBJECTIVE)
       .registerTypeHierarchyAdapter(CrystalTime.class, CrystalData.TIME)
       .registerTypeHierarchyAdapter(CrystalModifiers.class, CrystalData.MODIFIERS)
+      .registerTypeHierarchyAdapter(CrystalProperties.class, CrystalData.PROPERTIES)
       .registerTypeHierarchyAdapter(ScavengeTask.class, ScavengeTask.Adapter.INSTANCE)
       .registerTypeHierarchyAdapter(LootPool.class, Adapters.LOOT_POOL)
       .registerTypeHierarchyAdapter(LootTable.Entry.class, Adapters.LOOT_TABLE_ENTRY)
@@ -84,6 +88,8 @@ public abstract class Config {
       .registerTypeAdapter(EntityPredicate.class, Adapters.ENTITY_PREDICATE)
       .registerTypeAdapter(ItemPredicate.class, Adapters.ITEM_PREDICATE)
       .registerTypeAdapter(SkillGateType.class, SkillGates.GATE_TYPE)
+      .registerTypeAdapter(VaultAltarConfig.Interface.class, Adapters.ALTAR_INTERFACE)
+      .registerTypeHierarchyAdapter(Processor.class, ProcessorAdapter.INSTANCE)
       .excludeFieldsWithoutExposeAnnotation()
       .enableComplexMapKeySerialization()
       .setPrettyPrinting()

@@ -134,7 +134,7 @@ public class DiscoveredModelsData extends SavedData {
          MutableComponent msgContainer = new TextComponent("").withStyle(ChatFormatting.WHITE);
          playerName.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(9974168)));
          MutableComponent pieceName = new TextComponent(model.getDisplayName());
-         VaultGearRarity rollRarity = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(vaultGearItem, modelId);
+         VaultGearRarity rollRarity = ModConfigs.GEAR_MODEL_ROLL_RARITIES.getRarityOf(new ItemStack(vaultGearItem.getItem()), modelId);
          pieceName.setStyle(Style.EMPTY.withColor(rollRarity.getColor()));
          MiscUtils.broadcast(msgContainer.append(playerName).append(" has discovered ").append(pieceName).append(" transmog."));
       });

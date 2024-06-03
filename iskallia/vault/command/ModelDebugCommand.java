@@ -78,6 +78,7 @@ public class ModelDebugCommand extends Command {
    private int discoverAll(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
       DiscoveredModelsData modelsData = DiscoveredModelsData.get(player.server);
+      this.givePiece(context, ModItems.SWORD, ModDynamicModels.Swords.SOULFLAME.getId());
       ModDynamicModels.REGISTRIES
          .getUniqueRegistries()
          .forEach(registry -> registry.forEach((modelId, model) -> modelsData.discoverModel(player.getUUID(), modelId)));
@@ -109,7 +110,7 @@ public class ModelDebugCommand extends Command {
    private int givePiece(CommandContext<CommandSourceStack> context, Item gear, ResourceLocation modelId) {
       try {
          ItemStack helmetStack = new ItemStack(gear);
-         if (FMLEnvironment.production && !ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(gear, modelId)) {
+         if (FMLEnvironment.production && !ModConfigs.GEAR_MODEL_ROLL_RARITIES.canAppearNormally(helmetStack, modelId)) {
             return 0;
          } else {
             this.configureGear(helmetStack, modelId, VaultGearRarity.COMMON);

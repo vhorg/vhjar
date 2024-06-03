@@ -25,6 +25,7 @@ import iskallia.vault.core.world.processor.tile.LeveledTileProcessor;
 import iskallia.vault.core.world.processor.tile.ReferenceTileProcessor;
 import iskallia.vault.core.world.processor.tile.SpawnerElementTileProcessor;
 import iskallia.vault.core.world.processor.tile.SpawnerTileProcessor;
+import iskallia.vault.core.world.processor.tile.TemplateStackTileProcessor;
 import iskallia.vault.core.world.processor.tile.TileProcessor;
 import iskallia.vault.core.world.processor.tile.VaultLootTileProcessor;
 import iskallia.vault.core.world.processor.tile.WeightedTileProcessor;
@@ -157,6 +158,18 @@ public class ProcessorAdapter implements JsonSerializer<Processor<?>>, JsonDeser
                }
 
                return processorx;
+            case "template_stack":
+               TemplateStackTileProcessor processor = new TemplateStackTileProcessor();
+               processor.target(object.get("target").getAsString());
+               processor.path(object.get("path").getAsString());
+               JsonElement stack = object.get("stack");
+               if (stack.isJsonArray()) {
+                  stack.getAsJsonArray().forEach(ex -> processor.stack(ex.getAsString()));
+               } else {
+                  processor.stack(stack.getAsString());
+               }
+
+               return processor;
             case "spawner_element":
                SpawnerElementTileProcessor processor = new SpawnerElementTileProcessor();
                processor.target(object.get("target").getAsString());

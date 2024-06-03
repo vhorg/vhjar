@@ -42,8 +42,12 @@ public class OverSizedInventory implements Container {
    }
 
    public void load(CompoundTag tag) {
+      this.load("items", tag);
+   }
+
+   public void load(String key, CompoundTag tag) {
       this.contents.clear();
-      ListTag items = tag.getList("items", 10);
+      ListTag items = tag.getList(key, 10);
 
       for (int i = 0; i < items.size(); i++) {
          CompoundTag stackTag = items.getCompound(i);
@@ -53,6 +57,10 @@ public class OverSizedInventory implements Container {
    }
 
    public void save(CompoundTag tag) {
+      this.save("items", tag);
+   }
+
+   public void save(String key, CompoundTag tag) {
       ListTag items = new ListTag();
 
       for (int i = 0; i < this.contents.size(); i++) {
@@ -65,7 +73,7 @@ public class OverSizedInventory implements Container {
          }
       }
 
-      tag.put("items", items);
+      tag.put(key, items);
    }
 
    public List<ItemStack> getContents() {

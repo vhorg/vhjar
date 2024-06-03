@@ -1,5 +1,10 @@
 package iskallia.vault.gear;
 
+import iskallia.vault.config.UniqueGearConfig;
+import iskallia.vault.config.gear.VaultGearTierConfig;
+import iskallia.vault.core.random.JavaRandom;
+import iskallia.vault.core.util.WeightedList;
+import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.crafting.VaultGearCraftingHelper;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -15,6 +20,7 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,7 +53,7 @@ public class GearRollHelper {
 
    public static void initializeAndDiscoverGear(ItemStack stack, Player player) {
       initializeGear(stack, player);
-      if (player instanceof ServerPlayer sPlayer) {
+      if (player instanceof ServerPlayer sPlayer && VaultGearData.read(stack).getRarity() != VaultGearRarity.UNIQUE) {
          DiscoveredModelsData worldData = DiscoveredModelsData.get(sPlayer.getLevel().getServer());
          worldData.discoverModelAndBroadcast(stack, sPlayer);
       }
@@ -62,22 +68,58 @@ public class GearRollHelper {
       data.setState(VaultGearState.IDENTIFIED);
       data.write(stack);
       VaultGearModifierHelper.reRollRepairSlots(stack, rand);
-      VaultGearCraftingHelper.reRollCraftingPotential(stack);
-      VaultGearModifierHelper.generateAffixSlots(stack, rand);
-      VaultGearModifierHelper.generateImplicits(stack, rand);
-      VaultGearModifierHelper.generateModifiers(stack, rand);
-      float extraLegendaryChance = 0.0F;
-      if (player instanceof ServerPlayer && player.level instanceof ServerLevel sLevel) {
-         ExpertiseTree expertises = PlayerExpertisesData.get(sLevel).getExpertises(player);
+      if (data.getRarity() == VaultGearRarity.UNIQUE) {
+         JavaRandom random = JavaRandom.ofNanoTime();
+         UniqueGearConfig.Entry entry = ModConfigs.UNIQUE_GEAR.getRandomEntry(stack, data.getItemLevel(), random).orElseThrow();
+         data.updateAttribute(ModGearAttributes.GEAR_MODEL, entry.getModel());
+         data.write(stack);
+         VaultGearTierConfig.getConfig(stack).ifPresent(config -> {
+            entry.getModifierIdentifiers().forEach((affix, identifiers) -> {
+               for (ResourceLocation id : identifiers) {
+                  VaultGearTierConfig.ModifierTierGroup group = config.getTierGroup(id);
+                  generateModifiers(data, random, affix, group);
+               }
+            });
+            entry.getModifierTags().forEach((affix, tags) -> {
+               for (String tag : tags) {
+                  for (VaultGearTierConfig.ModifierTierGroup group : config.getTierGroups(tag)) {
+                     generateModifiers(data, random, affix, group);
+                  }
+               }
+            });
+         });
+         data.write(stack);
+         stack.setHoverName(new TextComponent(entry.getName()));
+      } else {
+         VaultGearCraftingHelper.reRollCraftingPotential(stack);
+         VaultGearModifierHelper.generateAffixSlots(stack, rand);
+         VaultGearModifierHelper.generateImplicits(stack, rand);
+         VaultGearModifierHelper.generateModifiers(stack, rand);
+         float extraLegendaryChance = 0.0F;
+         if (player instanceof ServerPlayer && player.level instanceof ServerLevel sLevel) {
+            ExpertiseTree expertises = PlayerExpertisesData.get(sLevel).getExpertises(player);
 
-         for (LegendaryExpertise expertise : expertises.getAll(LegendaryExpertise.class, Skill::isUnlocked)) {
-            extraLegendaryChance += expertise.getExtraLegendaryChance();
+            for (LegendaryExpertise expertise : expertises.getAll(LegendaryExpertise.class, Skill::isUnlocked)) {
+               extraLegendaryChance += expertise.getExtraLegendaryChance();
+            }
+         }
+
+         if (data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false)
+            && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance() + extraLegendaryChance) {
+            VaultGearModifierHelper.generateLegendaryModifier(stack, rand);
          }
       }
+   }
 
-      if (data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false)
-         && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance() + extraLegendaryChance) {
-         VaultGearModifierHelper.generateLegendaryModifier(stack, rand);
+   private static void generateModifiers(VaultGearData data, JavaRandom random, VaultGearModifier.AffixType affix, VaultGearTierConfig.ModifierTierGroup group) {
+      if (group != null) {
+         WeightedList<VaultGearTierConfig.ModifierTier<?>> tiers = new WeightedList<>();
+
+         for (VaultGearTierConfig.ModifierTier<?> tier : group.getModifiersForLevel(data.getItemLevel())) {
+            tiers.add(tier, tier.getWeight());
+         }
+
+         tiers.getRandom(random).ifPresent(tierx -> data.addModifier(affix, tierx.makeModifier(group, random.asRandomView())));
       }
    }
 

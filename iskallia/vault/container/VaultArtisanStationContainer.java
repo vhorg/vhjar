@@ -4,6 +4,8 @@ import iskallia.vault.block.entity.VaultArtisanStationTileEntity;
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
+import iskallia.vault.gear.VaultGearRarity;
+import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.gear.modification.GearModificationAction;
@@ -90,11 +92,15 @@ public class VaultArtisanStationContainer extends OverSizedSlotContainer {
       this.addModSlot(new OverSizedTabSlot(invContainer, 10, 8, 116), ModGearModifications.REFORGE_PREFIXES, true);
       this.addModSlot(new OverSizedTabSlot(invContainer, 11, 150, 116), ModGearModifications.REFORGE_SUFFIXES, false);
       Container inputContainer = this.tileEntity.getGearInput();
-      this.addSlot(new TabSlot(inputContainer, 0, 79, 72) {
-         public boolean mayPlace(ItemStack stack) {
-            return stack.getItem() instanceof VaultGearItem && stack.getItem() != ModItems.JEWEL;
+      this.addSlot(
+         new TabSlot(inputContainer, 0, 79, 72) {
+            public boolean mayPlace(ItemStack stack) {
+               return stack.getItem() instanceof VaultGearItem
+                  && stack.getItem() != ModItems.JEWEL
+                  && VaultGearData.read(stack).getRarity() != VaultGearRarity.UNIQUE;
+            }
          }
-      });
+      );
    }
 
    private void addModSlot(OverSizedTabSlot slot, GearModification modification, boolean rightSide) {
