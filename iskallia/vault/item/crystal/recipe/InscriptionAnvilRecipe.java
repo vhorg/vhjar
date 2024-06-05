@@ -52,7 +52,7 @@ public class InscriptionAnvilRecipe extends VanillaAnvilRecipe {
          secondary.add(inscription);
          output.add(VaultCrystalItem.create(primary.get(0), crystal -> {
             InscriptionData data = InscriptionData.from(inscription);
-            if (!data.apply(null, null, crystal)) {
+            if (!data.apply(null, ItemStack.EMPTY, crystal)) {
                VaultMod.LOGGER.error("Failed to apply inscription to crystal for recipe " + recipe.getId());
             }
          }));
