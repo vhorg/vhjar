@@ -114,6 +114,10 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
       return this.size;
    }
 
+   public boolean hasSize() {
+      return this.size != null;
+   }
+
    public void setModel(int model) {
       this.model = model;
    }
@@ -161,7 +165,7 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
 
                float instability = properties.getInstability();
                Random random = new Random();
-               if (random.nextFloat() < instability && stack != null) {
+               if (random.nextFloat() < instability && !stack.isEmpty()) {
                   double instabilityAvoidanceChance = 0.0;
                   if (random.nextDouble() > instabilityAvoidanceChance) {
                      if (random.nextFloat() < ModConfigs.VAULT_CRYSTAL.MODIFIER_STABILITY.exhaustProbability) {
@@ -189,7 +193,7 @@ public class InscriptionData implements INBTSerializable<CompoundTag> {
                properties.setSize(properties.getSize() + this.size);
             }
 
-            if (stack != null) {
+            if (!stack.isEmpty()) {
                crystal.write(stack);
             }
 
