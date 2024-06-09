@@ -80,16 +80,29 @@ public class ArchitectRoomEntry extends DataObject<ArchitectRoomEntry> implement
       }
    }
 
-   public TemplatePoolKey getPool(ArchitectVaultLayout layout) {
+   public TemplatePoolKey getPool(VaultLayout layout) {
       if (this.has(TYPE)) {
-         return switch ((ArchitectRoomEntry.Type)this.get(TYPE)) {
-            case COMMON -> (TemplatePoolKey)layout.get(ArchitectVaultLayout.COMMON_ROOM_POOL);
-            case CHALLENGE -> (TemplatePoolKey)layout.get(ArchitectVaultLayout.CHALLENGE_ROOM_POOL);
-            case OMEGA -> (TemplatePoolKey)layout.get(ArchitectVaultLayout.OMEGA_ROOM_POOL);
-         };
-      } else {
-         return VaultRegistry.TEMPLATE_POOL.getKey(this.get(POOL));
+         if (layout instanceof ArchitectVaultLayout) {
+            return switch ((ArchitectRoomEntry.Type)this.get(TYPE)) {
+               case COMMON -> (TemplatePoolKey)layout.get(ArchitectVaultLayout.COMMON_ROOM_POOL);
+               case CHALLENGE -> (TemplatePoolKey)layout.get(ArchitectVaultLayout.CHALLENGE_ROOM_POOL);
+               case OMEGA -> (TemplatePoolKey)layout.get(ArchitectVaultLayout.OMEGA_ROOM_POOL);
+            };
+         }
+
+         if (layout instanceof ClassicVaultLayout) {
+            switch ((ArchitectRoomEntry.Type)this.get(TYPE)) {
+               case COMMON:
+               case CHALLENGE:
+               case OMEGA:
+                  return layout.get(ClassicVaultLayout.ROOM_POOL);
+               default:
+                  throw new IncompatibleClassChangeError();
+            }
+         }
       }
+
+      return VaultRegistry.TEMPLATE_POOL.getKey(this.get(POOL));
    }
 
    public CompoundTag serializeNBT() {
@@ -163,7 +176,7 @@ public class ArchitectRoomEntry extends DataObject<ArchitectRoomEntry> implement
          super(new ArrayList<>(), CompoundAdapter.of(ArchitectRoomEntry::new));
       }
 
-      public java.util.List<TemplatePoolKey> flatten(ArchitectVaultLayout layout) {
+      public java.util.List<TemplatePoolKey> flatten(VaultLayout layout) {
          java.util.List<TemplatePoolKey> result = new ArrayList<>();
 
          for (ArchitectRoomEntry entry : this) {

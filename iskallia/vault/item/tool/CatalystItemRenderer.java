@@ -16,10 +16,8 @@ public class CatalystItemRenderer extends SpecialItemRenderer {
    public void renderByItem(
       @NotNull ItemStack stack, @NotNull TransformType transformType, @NotNull PoseStack matrices, @NotNull MultiBufferSource buffer, int light, int overlay
    ) {
-      int model = stack.getTag() == null ? -1 : stack.getTag().getInt("model");
-      if (model >= 0) {
-         ModelResourceLocation shape = new ModelResourceLocation("the_vault:catalyst/%d#inventory".formatted(model));
-         this.renderModel(shape, 16777215, stack, transformType, matrices, buffer, light, overlay, null);
-      }
+      int model = stack.getTag() == null ? 0 : stack.getTag().getInt("model");
+      ModelResourceLocation shape = new ModelResourceLocation("the_vault:catalyst/%d#inventory".formatted(model));
+      this.renderModel(shape, 16777215, stack, transformType, matrices, buffer, light, overlay, null);
    }
 }

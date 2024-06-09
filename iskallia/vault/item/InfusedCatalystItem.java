@@ -72,7 +72,7 @@ public class InfusedCatalystItem extends Item implements VaultLevelItem, IManual
    }
 
    public static Optional<Integer> getSize(ItemStack stack) {
-      return stack.getTag() != null && stack.getTag().contains("size", 99) ? Optional.of(stack.getTag().getInt("size")) : Optional.empty();
+      return stack.getTag() != null && stack.getTag().contains("size", 99) ? Optional.of(stack.getTag().getInt("size")) : Optional.of(10);
    }
 
    public static List<ResourceLocation> getModifiers(ItemStack stack) {

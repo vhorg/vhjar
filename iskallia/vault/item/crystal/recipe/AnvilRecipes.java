@@ -27,7 +27,6 @@ public class AnvilRecipes {
       register(new SoulFlameAnvilRecipe());
       register(new TreasureKeyAnvilRecipe());
       register(new WardensPearlAnvilRecipe());
-      register(new WitherSkullAnvilRecipe());
       register(new DungeonCapstoneAnvilRecipe());
       register(new TreasureCapstoneAnvilRecipe());
    }
