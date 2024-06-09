@@ -109,14 +109,9 @@ public class CrystalWorkbenchTileEntity extends BlockEntity implements MenuProvi
                for (int i = 0; i < this.ingredients.getContainerSize(); i++) {
                   ItemStack ingredient = this.ingredients.getItem(i);
                   if (ingredient.getItem() instanceof InfusedCatalystItem) {
-                     capacity = capacity - InfusedCatalystItem.getSize(ingredient).orElse(10);
+                     capacity = capacity - InfusedCatalystItem.getSize(ingredient).orElse(0);
                   } else if (ingredient.getItem() instanceof InscriptionItem) {
-                     InscriptionData inscriptionData = InscriptionData.from(ingredient);
-                     if (inscriptionData.hasSize()) {
-                        capacity = capacity - inscriptionData.getSize();
-                     } else {
-                        capacity = capacity - 10;
-                     }
+                     capacity = capacity - InscriptionData.from(ingredient).getSize();
                   } else if (ingredient.getItem() instanceof CharmItem) {
                      capacity = capacity - CharmItem.getCrystalIngredientSize();
                   }

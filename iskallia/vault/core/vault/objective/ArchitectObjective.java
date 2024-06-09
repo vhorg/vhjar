@@ -22,6 +22,7 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.WorldManager;
 import iskallia.vault.core.world.generator.GridGenerator;
+import iskallia.vault.core.world.generator.VaultGenerator;
 import iskallia.vault.core.world.generator.layout.ArchitectRoomEntry;
 import iskallia.vault.core.world.generator.layout.ClassicInfiniteLayout;
 import iskallia.vault.core.world.generator.layout.VaultLayout;
@@ -82,52 +83,51 @@ public class ArchitectObjective extends Objective {
 
    @Override
    public void initServer(VirtualWorld world, Vault vault) {
-      List<TemplatePoolKey> entries = this.get(ROOM_ENTRIES).flatten(null);
+      VaultGenerator generator = vault.get(Vault.WORLD).get(WorldManager.GENERATOR);
+      VaultLayout layout = generator instanceof GridGenerator grid ? (grid.get(GridGenerator.LAYOUT) instanceof VaultLayout l ? l : null) : null;
+      List<TemplatePoolKey> entries = this.get(ROOM_ENTRIES).flatten(layout);
       JavaRandom random = JavaRandom.ofScrambled(vault.get(Vault.SEED));
       Collections.shuffle(entries, random.asRandomView());
-      if (this.get(PRESET) == null) {
+      if (this.get(PRESET) == null && generator != null && layout != null) {
          StructurePreset preset = new StructurePreset();
          Map<Integer, Set<RegionPos>> rings = new LinkedHashMap<>();
          List<Integer> weights = ModConfigs.INSCRIPTION.getRingWeights();
-         if (vault.get(Vault.WORLD).get(WorldManager.GENERATOR) instanceof GridGenerator generator
-            && generator.get(GridGenerator.LAYOUT) instanceof VaultLayout layout) {
-            RegionPos center = RegionPos.of(0, 0, generator.get(GridGenerator.CELL_X), generator.get(GridGenerator.CELL_Z));
-            AtomicInteger noHits = new AtomicInteger(0);
-            int i = 0;
+         RegionPos center = RegionPos.of(0, 0, generator.get(GridGenerator.CELL_X), generator.get(GridGenerator.CELL_Z));
+         AtomicInteger noHits = new AtomicInteger(0);
+         int i = 0;
 
-            while (true) {
-               Set<RegionPos> regions = new LinkedHashSet<>();
-               AtomicBoolean noHit = new AtomicBoolean(true);
-               this.iterateRing(center, i, region -> {
-                  if (layout.getType(vault, region) == VaultLayout.PieceType.ROOM) {
-                     regions.add(region);
-                     noHit.set(false);
-                  }
-               });
-               if (noHit.get()) {
-                  noHits.getAndAdd(1);
-               } else {
-                  noHits.set(0);
+         while (true) {
+            Set<RegionPos> regions = new LinkedHashSet<>();
+            AtomicBoolean noHit = new AtomicBoolean(true);
+            this.iterateRing(center, i, region -> {
+               if (layout.getType(vault, region) == VaultLayout.PieceType.ROOM) {
+                  regions.add(region);
+                  noHit.set(false);
                }
-
-               if (noHits.get() >= 3) {
-                  break;
-               }
-
-               if (!regions.isEmpty()) {
-                  rings.put(i, regions);
-               }
-
-               if (rings.size() >= weights.size() && rings.values().stream().mapToInt(Set::size).sum() >= entries.size()) {
-                  break;
-               }
-
-               i++;
+            });
+            if (noHit.get()) {
+               noHits.getAndAdd(1);
+            } else {
+               noHits.set(0);
             }
+
+            if (noHits.get() >= 3) {
+               break;
+            }
+
+            if (!regions.isEmpty()) {
+               rings.put(i, regions);
+            }
+
+            if (rings.size() >= weights.size() && rings.values().stream().mapToInt(Set::size).sum() >= entries.size()) {
+               break;
+            }
+
+            i++;
          }
 
-         for (int i = entries.size() - 1; i >= 0; i--) {
-            TemplatePoolKey entry = entries.get(i);
+         for (int ix = entries.size() - 1; ix >= 0; ix--) {
+            TemplatePoolKey entry = entries.get(ix);
             WeightedList<Integer> weightedRings = new WeightedList<>();
             List<Integer> ringIndices = new ArrayList<>(rings.keySet());
 
@@ -142,7 +142,7 @@ public class ArchitectObjective extends Objective {
                   rings.remove(ringIndex);
                }
             });
-            entries.remove(i);
+            entries.remove(ix);
          }
 
          this.set(PRESET, preset);
@@ -155,16 +155,16 @@ public class ArchitectObjective extends Objective {
                if (data.getVault() == vault) {
                   this.ifPresent(
                      PRESET,
-                     presetx -> {
-                        if (presetx.get(data.getRegion()).orElse(null) instanceof PoolKeyTemplatePreset entry) {
-                           TemplatePoolKey key = VaultRegistry.TEMPLATE_POOL.getKey(entry.getPool());
+                     preset -> {
+                        if (preset.get(data.getRegion()).orElse(null) instanceof PoolKeyTemplatePreset entryx) {
+                           TemplatePoolKey key = VaultRegistry.TEMPLATE_POOL.getKey(entryx.getPool());
                            if (key == null) {
                               return;
                            }
 
                            data.setTemplate(
                               data.getLayout()
-                                 .getRoom(key.get(vault.get(Vault.VERSION)), vault.get(Vault.VERSION), data.getRegion(), random, data.getSettings())
+                                 .getRoom(key.get(vault.get(Vault.VERSION)), vault.get(Vault.VERSION), data.getRegion(), data.getRandom(), data.getSettings())
                            );
                         }
                      }
