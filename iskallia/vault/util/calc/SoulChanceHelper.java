@@ -8,11 +8,15 @@ import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import net.minecraft.world.entity.LivingEntity;
 
 public class SoulChanceHelper {
-   public static float getSoulChance(LivingEntity entity) {
+   public static float getSoulChance(LivingEntity attacker) {
+      return getSoulChance(attacker, null);
+   }
+
+   public static float getSoulChance(LivingEntity attacker, LivingEntity attacked) {
       float soulChance = 0.0F;
-      AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
+      AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
       soulChance += snapshot.getAttributeValue(ModGearAttributes.SOUL_CHANCE, VaultGearAttributeTypeMerger.floatSum());
       soulChance += snapshot.getAttributeValue(ModGearAttributes.SOUL_CHANCE_PERCENTILE, VaultGearAttributeTypeMerger.floatSum()) * soulChance;
-      return CommonEvents.PLAYER_STAT.invoke(PlayerStat.SOUL_CHANCE, entity, soulChance).getValue();
+      return CommonEvents.PLAYER_STAT.invoke(PlayerStat.SOUL_CHANCE, attacker, soulChance, data -> data.setEnemy(attacked)).getValue();
    }
 }

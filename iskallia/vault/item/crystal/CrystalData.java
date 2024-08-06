@@ -28,6 +28,7 @@ import iskallia.vault.item.crystal.modifiers.CrystalModifiers;
 import iskallia.vault.item.crystal.modifiers.DefaultCrystalModifiers;
 import iskallia.vault.item.crystal.modifiers.ParadoxCrystalModifiers;
 import iskallia.vault.item.crystal.objective.AscensionCrystalObjective;
+import iskallia.vault.item.crystal.objective.BingoCrystalObjective;
 import iskallia.vault.item.crystal.objective.BossCrystalObjective;
 import iskallia.vault.item.crystal.objective.CakeCrystalObjective;
 import iskallia.vault.item.crystal.objective.CompoundCrystalObjective;
@@ -37,6 +38,7 @@ import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
 import iskallia.vault.item.crystal.objective.HeraldCrystalObjective;
 import iskallia.vault.item.crystal.objective.MonolithCrystalObjective;
 import iskallia.vault.item.crystal.objective.NullCrystalObjective;
+import iskallia.vault.item.crystal.objective.OfferingBossCrystalObjective;
 import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
 import iskallia.vault.item.crystal.objective.PoolCrystalObjective;
 import iskallia.vault.item.crystal.objective.ScavengerCrystalObjective;
@@ -100,7 +102,9 @@ public class CrystalData extends CrystalEntry implements ISerializable<CompoundT
       .<TypeSupplierAdapter<HeraldCrystalObjective>>register("paradox", ParadoxCrystalObjective.class, ParadoxCrystalObjective::new)
       .<TypeSupplierAdapter<CompoundCrystalObjective>>register("herald", HeraldCrystalObjective.class, HeraldCrystalObjective::new)
       .<TypeSupplierAdapter<AscensionCrystalObjective>>register("compound", CompoundCrystalObjective.class, CompoundCrystalObjective::new)
-      .register("ascension", AscensionCrystalObjective.class, AscensionCrystalObjective::new);
+      .<TypeSupplierAdapter<BingoCrystalObjective>>register("ascension", AscensionCrystalObjective.class, AscensionCrystalObjective::new)
+      .<TypeSupplierAdapter<OfferingBossCrystalObjective>>register("bingo", BingoCrystalObjective.class, BingoCrystalObjective::new)
+      .register("offering_boss", OfferingBossCrystalObjective.class, OfferingBossCrystalObjective::new);
    public static TypeSupplierAdapter<CrystalTime> TIME = new TypeSupplierAdapter<CrystalTime>("type", false)
       .<TypeSupplierAdapter<ValueCrystalTime>>register("null", NullCrystalTime.class, () -> NullCrystalTime.INSTANCE)
       .<TypeSupplierAdapter<PoolCrystalTime>>register("value", ValueCrystalTime.class, ValueCrystalTime::new)

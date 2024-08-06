@@ -8,6 +8,7 @@ import iskallia.vault.core.vault.modifier.modifier.EntityEffectModifier;
 import iskallia.vault.entity.champion.ChampionLogic;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.VaultGuardianEntity;
+import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.trinket.TrinketHelper;
@@ -17,7 +18,9 @@ import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.SidedHelper;
 import iskallia.vault.util.calc.ResistanceHelper;
 import iskallia.vault.world.data.ServerVaults;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -228,7 +231,7 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
    public void applyResistance(DamageSource pSource, float pDamage, CallbackInfoReturnable<Float> cir) {
       LivingEntity entity = (LivingEntity)this;
       if (AttributeSnapshotHelper.canHaveSnapshot(entity)) {
-         float resistance = ResistanceHelper.getResistance(entity);
+         float resistance = ResistanceHelper.getResistance(entity, pSource.getEntity() instanceof LivingEntity living ? living : null);
          if (resistance > 1.0E-4) {
             float damage = (Float)cir.getReturnValue();
             cir.setReturnValue(Math.max(damage - damage * resistance, 0.0F));
@@ -283,6 +286,42 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
             ci.setReturnValue(false);
          }
       }
+   }
+
+   @Redirect(
+      method = {"collectEquipmentChanges"},
+      at = @At(
+         value = "INVOKE",
+         target = "Lnet/minecraft/world/entity/LivingEntity;getItemBySlot(Lnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/world/item/ItemStack;"
+      )
+   )
+   private ItemStack getBySlot(LivingEntity entity, EquipmentSlot slot) {
+      ItemStack stack = entity.getItemBySlot(slot);
+      if (entity instanceof Player player && stack.getItem() instanceof VaultGearItem) {
+         ItemStack resultCopy = stack.copy();
+         VaultGearData data = VaultGearData.read(resultCopy);
+         boolean preventModifiers = false;
+         int playerLevel = SidedHelper.getVaultLevel(player);
+         if (player.getCooldowns().isOnCooldown(stack.getItem())) {
+            preventModifiers = true;
+         }
+
+         if (VaultGearData.read(stack).getItemLevel() > playerLevel) {
+            preventModifiers = true;
+         }
+
+         if (preventModifiers) {
+            for (VaultGearModifier.AffixType type : VaultGearModifier.AffixType.values()) {
+               List<VaultGearModifier<?>> modifiers = new ArrayList<>(data.getModifiers(type));
+               modifiers.forEach(data::removeModifier);
+            }
+
+            data.writeUnchanged(resultCopy);
+            return resultCopy;
+         }
+      }
+
+      return stack;
    }
 
    @Redirect(
@@ -364,23 +403,31 @@ public abstract class MixinLivingEntity extends Entity implements ChampionLogic.
    )
    private void getFlag(CallbackInfo ci) {
       LivingEntity livingEntity = (LivingEntity)this;
-      AtomicBoolean flag = new AtomicBoolean(this.getSharedFlag(7));
-      if (flag.get() && !this.onGround && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)) {
-         ItemStack itemstack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
-         flag.set(itemstack.canElytraFly(livingEntity) && itemstack.elytraFlightTick(livingEntity, this.fallFlyTicks));
-         if (livingEntity instanceof Player player) {
-            TrinketHelper.getTrinkets(player, WingsTrinket.class).forEach(wings -> {
-               if (wings.isUsable(player)) {
-                  flag.set(true);
-               }
-            });
+      ItemStack chestStack = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
+      if (livingEntity instanceof Player player && player.getCooldowns().isOnCooldown(chestStack.getItem())) {
+         if (!this.level.isClientSide) {
+            this.setSharedFlag(7, false);
          }
-      }
 
-      if (!this.level.isClientSide) {
-         this.setSharedFlag(7, flag.get());
-      }
+         ci.cancel();
+      } else {
+         AtomicBoolean flag = new AtomicBoolean(this.getSharedFlag(7));
+         if (flag.get() && !this.onGround && !this.isPassenger() && !this.hasEffect(MobEffects.LEVITATION)) {
+            flag.set(chestStack.canElytraFly(livingEntity) && chestStack.elytraFlightTick(livingEntity, this.fallFlyTicks));
+            if (livingEntity instanceof Player player) {
+               TrinketHelper.getTrinkets(player, WingsTrinket.class).forEach(wings -> {
+                  if (wings.isUsable(player)) {
+                     flag.set(true);
+                  }
+               });
+            }
+         }
 
-      ci.cancel();
+         if (!this.level.isClientSide) {
+            this.setSharedFlag(7, flag.get());
+         }
+
+         ci.cancel();
+      }
    }
 }

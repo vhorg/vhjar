@@ -12,7 +12,6 @@ import iskallia.vault.container.LootStatueContainer;
 import iskallia.vault.container.ModifierDiscoveryContainer;
 import iskallia.vault.container.ModifierWorkbenchContainer;
 import iskallia.vault.container.NBTElementContainer;
-import iskallia.vault.container.RelicPedestalContainer;
 import iskallia.vault.container.RenamingContainer;
 import iskallia.vault.container.SkillAltarContainer;
 import iskallia.vault.container.SpiritExtractorContainer;
@@ -33,6 +32,10 @@ import iskallia.vault.container.VaultJewelApplicationStationContainer;
 import iskallia.vault.container.VaultJewelCuttingStationContainer;
 import iskallia.vault.container.VaultRecyclerContainer;
 import iskallia.vault.container.WardrobeContainer;
+import iskallia.vault.container.inventory.AntiqueCollectorBookContainer;
+import iskallia.vault.container.inventory.CardDeckContainer;
+import iskallia.vault.container.inventory.CardDeckContainerMenu;
+import iskallia.vault.container.inventory.CardEssenceExtractorContainer;
 import iskallia.vault.container.inventory.CatalystInfusionTableContainer;
 import iskallia.vault.container.inventory.CryochamberContainer;
 import iskallia.vault.container.inventory.EtchingTradeContainer;
@@ -47,6 +50,7 @@ import iskallia.vault.skill.archetype.ArchetypeContainer;
 import iskallia.vault.skill.tree.AbilityTree;
 import iskallia.vault.skill.tree.ExpertiseTree;
 import iskallia.vault.skill.tree.TalentTree;
+import iskallia.vault.world.data.PlayerStoredAntiquesData;
 import iskallia.vault.world.data.SkillAltarData;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +58,8 @@ import java.util.Optional;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.minecraftforge.event.RegistryEvent.Register;
@@ -73,6 +77,7 @@ public class ModContainers {
    public static MenuType<TransmogTableContainer> TRANSMOG_TABLE_CONTAINER;
    public static MenuType<CatalystInfusionTableContainer> CATALYST_INFUSION_TABLE_CONTAINER;
    public static MenuType<ShardPouchContainer> SHARD_POUCH_CONTAINER;
+   public static MenuType<AntiqueCollectorBookContainer> ANTIQUE_COLLECTOR_BOOK_CONTAINER;
    public static MenuType<ShardTradeContainer> SHARD_TRADE_CONTAINER;
    public static MenuType<CryochamberContainer> CRYOCHAMBER_CONTAINER;
    public static MenuType<EtchingTradeContainer> ETCHING_TRADE_CONTAINER;
@@ -90,7 +95,6 @@ public class ModContainers {
    public static MenuType<VaultDiffuserContainer> VAULT_DIFFUSER_CONTAINER;
    public static MenuType<VaultDiffuserUpgradedContainer> VAULT_HARVESTER_CONTAINER;
    public static MenuType<VaultEndContainer> VAULT_END_CONTAINER;
-   public static MenuType<RelicPedestalContainer> RELIC_PEDESTAL_CONTAINER;
    public static MenuType<SpiritExtractorContainer> SPIRIT_EXTRACTOR_CONTAINER;
    public static MenuType<WardrobeContainer.Gear> WARDROBE_GEAR_CONTAINER;
    public static MenuType<WardrobeContainer.Hotbar> WARDROBE_HOTBAR_CONTAINER;
@@ -104,6 +108,8 @@ public class ModContainers {
    public static MenuType<SkillAltarContainer.Default> SKILL_ALTAR_CONTAINER;
    public static MenuType<SkillAltarContainer.Import> SKILL_ALTAR_IMPORT_CONTAINER;
    public static MenuType<AscensionForgeContainer> ASCENSION_FORGE_CONTAINER;
+   public static MenuType<CardDeckContainerMenu> CARD_DECK_CONTAINER;
+   public static MenuType<CardEssenceExtractorContainer> CARD_ESSENCE_EXTRACTOR_CONTAINER;
 
    public static void register(Register<MenuType<?>> event) {
       STATISTICS_TAB_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
@@ -162,6 +168,12 @@ public class ModContainers {
       SHARD_POUCH_CONTAINER = IForgeMenuType.create((windowId, inventory, data) -> {
          int pouchSlot = data.readInt();
          return new ShardPouchContainer(windowId, inventory, pouchSlot);
+      });
+      ANTIQUE_COLLECTOR_BOOK_CONTAINER = IForgeMenuType.create((windowId, inventory, data) -> {
+         int bookSlot = data.readInt();
+         PlayerStoredAntiquesData.StoredAntiques antiques = new PlayerStoredAntiquesData.StoredAntiques();
+         antiques.load(data);
+         return new AntiqueCollectorBookContainer(windowId, inventory, bookSlot, antiques);
       });
       SHARD_TRADE_CONTAINER = IForgeMenuType.create((windowId, inventory, data) -> new ShardTradeContainer(windowId, inventory));
       CRYOCHAMBER_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
@@ -232,11 +244,6 @@ public class ModContainers {
       VAULT_END_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          ArrayBitBuffer buffer2 = ArrayBitBuffer.backing(buffer.readLongArray(), 0);
          return new VaultEndContainer(windowId, inventory, new VaultSnapshot(buffer2));
-      });
-      RELIC_PEDESTAL_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
-         Player player = inventory.player;
-         BlockPos blockPos = buffer.readBlockPos();
-         return new RelicPedestalContainer(windowId, player, blockPos);
       });
       SPIRIT_EXTRACTOR_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
          BlockPos blockPos = buffer.readBlockPos();
@@ -312,6 +319,17 @@ public class ModContainers {
          BlockPos pos = buffer.readBlockPos();
          return new AscensionForgeContainer(windowId, world, pos, inventory);
       });
+      CARD_DECK_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         ItemStack stack = buffer.readItem();
+         int slot = buffer.readInt();
+         boolean curios = buffer.readBoolean();
+         return new CardDeckContainerMenu(windowId, inventory, slot, curios, new CardDeckContainer(stack));
+      });
+      CARD_ESSENCE_EXTRACTOR_CONTAINER = IForgeMenuType.create((windowId, inventory, buffer) -> {
+         Level world = inventory.player.getCommandSenderWorld();
+         BlockPos pos = buffer.readBlockPos();
+         return new CardEssenceExtractorContainer(windowId, world, pos, inventory);
+      });
       event.getRegistry()
          .registerAll(
             new MenuType[]{
@@ -327,6 +345,7 @@ public class ModContainers {
                (MenuType)TRANSMOG_TABLE_CONTAINER.setRegistryName("transmog_table_container"),
                (MenuType)CATALYST_INFUSION_TABLE_CONTAINER.setRegistryName("catalyst_infusion_table_container"),
                (MenuType)SHARD_POUCH_CONTAINER.setRegistryName("shard_pouch_container"),
+               (MenuType)ANTIQUE_COLLECTOR_BOOK_CONTAINER.setRegistryName("antique_collector_book_container"),
                (MenuType)SHARD_TRADE_CONTAINER.setRegistryName("shard_trade_container"),
                (MenuType)CRYOCHAMBER_CONTAINER.setRegistryName("cryochamber_container"),
                (MenuType)ETCHING_TRADE_CONTAINER.setRegistryName("etching_trade_container"),
@@ -344,7 +363,6 @@ public class ModContainers {
                (MenuType)VAULT_DIFFUSER_CONTAINER.setRegistryName("vault_diffuser_container"),
                (MenuType)VAULT_HARVESTER_CONTAINER.setRegistryName("vault_harvester_container"),
                (MenuType)VAULT_END_CONTAINER.setRegistryName("vault_end_container"),
-               (MenuType)RELIC_PEDESTAL_CONTAINER.setRegistryName("relic_pedestal_container"),
                (MenuType)SPIRIT_EXTRACTOR_CONTAINER.setRegistryName("spirit_extractor_container"),
                (MenuType)WARDROBE_GEAR_CONTAINER.setRegistryName("wardrobe_gear_container"),
                (MenuType)WARDROBE_HOTBAR_CONTAINER.setRegistryName("wardrobe_hotbar_container"),
@@ -357,7 +375,9 @@ public class ModContainers {
                (MenuType)VAULT_ENCHANTER_CONTAINER.setRegistryName("vault_enchanter_container"),
                (MenuType)SKILL_ALTAR_CONTAINER.setRegistryName("skill_altar_container"),
                (MenuType)SKILL_ALTAR_IMPORT_CONTAINER.setRegistryName("skill_altar_import_container"),
-               (MenuType)ASCENSION_FORGE_CONTAINER.setRegistryName("ascension_forge_container")
+               (MenuType)ASCENSION_FORGE_CONTAINER.setRegistryName("ascension_forge_container"),
+               (MenuType)CARD_DECK_CONTAINER.setRegistryName("card_deck_container"),
+               (MenuType)CARD_ESSENCE_EXTRACTOR_CONTAINER.setRegistryName("card_essence_extractor_container")
             }
          );
    }

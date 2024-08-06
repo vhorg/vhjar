@@ -136,6 +136,7 @@ public class DebugCommand extends Command {
       );
       builder.then(Commands.literal("vault_kick").then(Commands.argument("player", EntityArgument.player()).executes(this::kickFromVault)));
       builder.then(Commands.literal("corrupt_gear").executes(this::corruptGear));
+      builder.then(Commands.literal("make_legendary").executes(this::setGearLegenary));
       builder.then(
          Commands.literal("add_ability_level_prefix")
             .then(
@@ -255,6 +256,25 @@ public class DebugCommand extends Command {
                   .withStyle(style -> style.withClickEvent(new ClickEvent(Action.COPY_TO_CLIPBOARD, copy.toString()))),
                false
             );
+         return 0;
+      }
+   }
+
+   private int setGearLegenary(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+      ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
+      ItemStack held = player.getItemInHand(InteractionHand.MAIN_HAND);
+      if (!held.isEmpty() && held.getItem() instanceof VaultGearItem) {
+         VaultGearData data = VaultGearData.read(held);
+         if (!data.isModifiable()) {
+            player.sendMessage(new TextComponent("Item is corrupted"), Util.NIL_UUID);
+            return 0;
+         } else {
+            data.updateAttribute(ModGearAttributes.IS_LEGENDARY, Boolean.valueOf(true));
+            data.write(held);
+            return 0;
+         }
+      } else {
+         player.sendMessage(new TextComponent("Not holding VaultGear item"), Util.NIL_UUID);
          return 0;
       }
    }

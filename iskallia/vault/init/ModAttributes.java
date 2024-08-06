@@ -23,6 +23,8 @@ public class ModAttributes {
    public static Attribute CROSSBOW_CHARGE_TIME;
    public static Attribute THORNS_CHANCE;
    public static Attribute THORNS_DAMAGE;
+   public static Attribute HEAL_RANGE;
+   public static Attribute HEAL_AMOUNT;
 
    public static void register(Register<Attribute> event) {
       Attributes.ATTACK_DAMAGE.setSyncable(true);
@@ -63,6 +65,10 @@ public class ModAttributes {
       THORNS_CHANCE = register(event.getRegistry(), "generic.thorns_chance", new RangedAttribute("attribute.name.generic.thorns_chance", 0.0, 0.0, 512.0))
          .setSyncable(true);
       THORNS_DAMAGE = register(event.getRegistry(), "generic.thorns_damage", new RangedAttribute("attribute.name.generic.thorns_damage", 0.0, 0.0, 512.0))
+         .setSyncable(true);
+      HEAL_RANGE = register(event.getRegistry(), "generic.heal_range", new RangedAttribute("attribute.name.generic.heal_range", 0.0, 0.0, 512.0))
+         .setSyncable(true);
+      HEAL_AMOUNT = register(event.getRegistry(), "generic.heal_amount", new RangedAttribute("attribute.name.generic.heal_amount", 0.0, 0.0, 512.0))
          .setSyncable(true);
    }
 

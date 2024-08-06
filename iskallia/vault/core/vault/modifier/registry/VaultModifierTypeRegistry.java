@@ -1,6 +1,7 @@
 package iskallia.vault.core.vault.modifier.registry;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.core.vault.modifier.modifier.CastOnKillModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceArtifactModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceCatalystModifier;
 import iskallia.vault.core.vault.modifier.modifier.ChanceChampionModifier;
@@ -9,6 +10,7 @@ import iskallia.vault.core.vault.modifier.modifier.ChanceSoulShardModifier;
 import iskallia.vault.core.vault.modifier.modifier.CrateItemQuantityModifier;
 import iskallia.vault.core.vault.modifier.modifier.DecoratorAddModifier;
 import iskallia.vault.core.vault.modifier.modifier.DecoratorCascadeModifier;
+import iskallia.vault.core.vault.modifier.modifier.DropOnKillModifier;
 import iskallia.vault.core.vault.modifier.modifier.EntityEffectModifier;
 import iskallia.vault.core.vault.modifier.modifier.ExperienceModifier;
 import iskallia.vault.core.vault.modifier.modifier.GameControlsModifier;
@@ -179,6 +181,14 @@ public final class VaultModifierTypeRegistry {
          this.put(
             VaultMod.id("modifier_type/template_processor"),
             VaultModifierType.of(TemplateProcessorModifier.class, TemplateProcessorModifier.Properties.class, TemplateProcessorModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/cast_on_kill"),
+            VaultModifierType.of(CastOnKillModifier.class, CastOnKillModifier.Properties.class, CastOnKillModifier::new)
+         );
+         this.put(
+            VaultMod.id("modifier_type/drop_on_kill"),
+            VaultModifierType.of(DropOnKillModifier.class, DropOnKillModifier.Properties.class, DropOnKillModifier::new)
          );
       }
    };

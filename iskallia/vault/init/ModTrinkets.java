@@ -14,7 +14,6 @@ import iskallia.vault.gear.trinket.effects.NightVisionTrinket;
 import iskallia.vault.gear.trinket.effects.PotionEffectTrinket;
 import iskallia.vault.gear.trinket.effects.VanillaAttributeTrinket;
 import iskallia.vault.gear.trinket.effects.VaultExperienceTrinket;
-import iskallia.vault.gear.trinket.effects.VaultTimeExtensionTrinket;
 import iskallia.vault.gear.trinket.effects.WallClimbingTrinket;
 import iskallia.vault.gear.trinket.effects.WingsTrinket;
 import net.minecraft.world.damagesource.DamageSource;
@@ -59,7 +58,9 @@ public class ModTrinkets {
    public static final DamageImmunityTrinket CARAPACE = new DamageImmunityTrinket(VaultMod.id("carapace"), DamageSource::isFire, true);
    public static final PotionEffectTrinket VELARAS_PETAL = new PotionEffectTrinket(VaultMod.id("velaras_petal"), MobEffects.REGENERATION, 1);
    public static final NightVisionTrinket NIGHT_VISION_GOGGLES = new NightVisionTrinket(VaultMod.id("night_vision_goggles"), MobEffects.NIGHT_VISION, 1, 10.0F);
-   public static final VaultTimeExtensionTrinket WENDARRS_HOURGLASS = new VaultTimeExtensionTrinket(VaultMod.id("wendarrs_hourglass"), 3000);
+   public static final AttributeTrinket<Float> WENDARRS_HOURGLASS = new AttributeTrinket<>(
+      VaultMod.id("wendarrs_hourglass"), ModGearAttributes.FRUIT_EFFECTIVENESS, 0.5F
+   );
    public static final ExplosionBlockPreventionTrinket CAT_IN_A_JAR = new ExplosionBlockPreventionTrinket(VaultMod.id("cat_in_a_jar"), 0.75F);
    public static final WallClimbingTrinket CENTIPEDE_FEET = new WallClimbingTrinket(VaultMod.id("centipede_feet"));
    public static final MultiJumpTrinket CHROMATIC_FEATHER = new MultiJumpTrinket(VaultMod.id("chromatic_feather"));

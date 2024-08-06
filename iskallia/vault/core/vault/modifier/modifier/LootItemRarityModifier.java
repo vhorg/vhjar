@@ -39,10 +39,10 @@ public class LootItemRarityModifier extends VaultModifier<LootItemRarityModifier
 
    public Optional<TieredLootTableGenerator> getGenerator(Vault vault, LootGenerationEvent.Data data, ModifierContext context) {
       if (data.getGenerator() instanceof TieredLootTableGenerator generator) {
-         if (generator.source == null) {
+         if (generator.getSource() == null) {
             return Optional.empty();
          } else {
-            UUID uuid = generator.source.getUUID();
+            UUID uuid = generator.getSource().getUUID();
             if (!vault.get(Vault.LISTENERS).contains(uuid)) {
                return Optional.empty();
             } else {

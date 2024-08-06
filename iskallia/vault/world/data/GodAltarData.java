@@ -1,11 +1,12 @@
 package iskallia.vault.world.data;
 
 import iskallia.vault.core.data.adapter.Adapters;
-import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.crystal.data.serializable.INbtSerializable;
 import iskallia.vault.network.message.UpdateGodAltarDataMessage;
+import iskallia.vault.task.GodAltarTask;
 import iskallia.vault.task.Task;
+import iskallia.vault.task.TaskContext;
 import iskallia.vault.task.source.EntityTaskSource;
 import iskallia.vault.task.source.TaskSource;
 import java.util.ArrayList;
@@ -41,10 +42,10 @@ public class GodAltarData extends SavedData {
       return Optional.ofNullable(get().entries.get(uuid));
    }
 
-   public static UUID add(UUID uuid, Task task, TaskSource source, VaultGod god) {
+   public static UUID add(UUID uuid, Task task, TaskSource source, MinecraftServer server) {
       GodAltarData data = get();
-      data.entries.put(uuid, new GodAltarData.Entry(task, source, god));
-      task.onStart(source);
+      data.entries.put(uuid, new GodAltarData.Entry(task, source));
+      task.onAttach(TaskContext.of(source, server));
       return uuid;
    }
 
@@ -68,14 +69,7 @@ public class GodAltarData extends SavedData {
 
    @SubscribeEvent
    public static void onServerStarted(ServerStartedEvent event) {
-      get().entries.forEach((id, entry) -> entry.task.onAttach(entry.source));
-   }
-
-   @SubscribeEvent
-   public static void tick(ServerTickEvent event) {
-      if (event.phase == Phase.END) {
-         new ArrayList<>(get().entries.values()).forEach(entry -> entry.task.onTick(entry.source));
-      }
+      get().entries.forEach((id, entry) -> entry.task.onAttach(TaskContext.of(entry.source, event.getServer())));
    }
 
    @SubscribeEvent
@@ -105,6 +99,16 @@ public class GodAltarData extends SavedData {
    @SubscribeEvent
    public static void onServerTick(ServerTickEvent event) {
       if (event.phase == Phase.END) {
+         for (GodAltarData.Entry entry : new ArrayList<>(get().entries.values())) {
+            Task tasks = entry.task;
+            if (tasks instanceof GodAltarTask) {
+               GodAltarTask root = (GodAltarTask)tasks;
+               if (root.isExpired()) {
+                  remove(root.getAltarUuid());
+               }
+            }
+         }
+
          MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
 
          for (ServerPlayer player : server.getPlayerList().getPlayers()) {
@@ -166,15 +170,13 @@ public class GodAltarData extends SavedData {
    public static class Entry implements INbtSerializable<CompoundTag> {
       private Task task;
       private TaskSource source;
-      private VaultGod god;
 
       public Entry() {
       }
 
-      public Entry(Task task, TaskSource source, VaultGod god) {
+      public Entry(Task task, TaskSource source) {
          this.task = task;
          this.source = source;
-         this.god = god;
       }
 
       public Task getTask() {
@@ -185,23 +187,17 @@ public class GodAltarData extends SavedData {
          return this.source;
       }
 
-      public VaultGod getGod() {
-         return this.god;
-      }
-
       @Override
       public Optional<CompoundTag> writeNbt() {
          CompoundTag nbt = new CompoundTag();
          Adapters.TASK.writeNbt(this.task).ifPresent(task -> nbt.put("task", task));
          Adapters.TASK_SOURCE.writeNbt(this.source).ifPresent(source -> nbt.put("source", source));
-         Adapters.GOD_ORDINAL.writeNbt(this.god).ifPresent(god -> nbt.put("god", god));
          return Optional.of(nbt);
       }
 
       public void readNbt(CompoundTag nbt) {
          this.task = Adapters.TASK.readNbt(nbt.get("task")).orElse(null);
          this.source = Adapters.TASK_SOURCE.readNbt(nbt.get("source")).orElse(null);
-         this.god = Adapters.GOD_ORDINAL.readNbt(nbt.get("god")).orElse(null);
       }
    }
 }

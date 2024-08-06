@@ -114,7 +114,7 @@ public class ModifierWorkbenchCraftMessage {
                               if (createdModifier == null) {
                                  ModifierWorkbenchHelper.removeCraftedModifiers(input);
                               } else {
-                                 createdModifier.setCategory(VaultGearModifier.AffixCategory.CRAFTED);
+                                 createdModifier.addCategory(VaultGearModifier.AffixCategory.CRAFTED);
                                  createdModifier.setGameTimeAdded(player.getLevel().getGameTime());
                                  ModifierWorkbenchHelper.removeCraftedModifiers(input);
                                  VaultGearData datax = VaultGearData.read(input);

@@ -41,4 +41,11 @@ public class ModifierCategoryTooltip {
       MutableComponent abyssalCt = new TextComponent("⏶ ").withStyle(Style.EMPTY.withColor(TextColor.fromRgb(37544)));
       return abyssalCt.append(cmp);
    }
+
+   public static MutableComponent modifyFrozenTooltip(MutableComponent cmp) {
+      Style frozenColor = Style.EMPTY.withColor(TextColor.fromRgb(49151)).withBold(true);
+      MutableComponent prefix = new TextComponent("❰ ").withStyle(frozenColor);
+      MutableComponent suffix = new TextComponent(" ❱").withStyle(frozenColor);
+      return new TextComponent("").append(prefix).append(cmp).append(suffix);
+   }
 }

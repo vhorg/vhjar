@@ -19,7 +19,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class ItemVaultCrystalSeal extends Item {
    public ItemVaultCrystalSeal(ResourceLocation id) {
-      super(new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(1));
+      this(id, 1);
+   }
+
+   public ItemVaultCrystalSeal(ResourceLocation id, int maxStackSize) {
+      super(new Properties().tab(ModItems.VAULT_MOD_GROUP).stacksTo(maxStackSize));
       this.setRegistryName(id);
    }
 

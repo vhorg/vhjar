@@ -8,36 +8,58 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.annotations.SerializedName;
 import com.mojang.serialization.JsonOps;
+import iskallia.vault.VaultMod;
+import iskallia.vault.core.Version;
+import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
-import iskallia.vault.core.vault.stat.VaultChestType;
-import iskallia.vault.entity.boss.BerserkStageAttributes;
-import iskallia.vault.entity.boss.CatalystStageAttributes;
-import iskallia.vault.entity.boss.MeleeAttacks;
-import iskallia.vault.entity.boss.MeleeStageAttributes;
-import iskallia.vault.entity.boss.SparkStageAttributes;
-import iskallia.vault.entity.boss.SummoningStageAttributes;
+import iskallia.vault.core.vault.VaultRegistry;
+import iskallia.vault.core.world.loot.LootTable;
+import iskallia.vault.entity.boss.MobSpawningUtils;
+import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.attack.PersistentMeleeAttackGoal;
+import iskallia.vault.entity.boss.goal.BloodOrbGoal;
+import iskallia.vault.entity.boss.goal.EvokerFangsGoal;
+import iskallia.vault.entity.boss.goal.FireballRangedAttackGoal;
+import iskallia.vault.entity.boss.goal.HealGoal;
+import iskallia.vault.entity.boss.goal.PotionAuraGoal;
+import iskallia.vault.entity.boss.goal.ShulkerAttackGoal;
+import iskallia.vault.entity.boss.goal.SummoningGoal;
+import iskallia.vault.entity.boss.goal.ThrowPotionGoal;
+import iskallia.vault.entity.boss.trait.ApplyPotionOnHitEffect;
+import iskallia.vault.entity.boss.trait.AttributeModifierTrait;
+import iskallia.vault.entity.boss.trait.LifeLeechOnHitEffect;
+import iskallia.vault.init.ModConfigs;
+import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModEntities;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 public class VaultBossConfig extends Config {
    @Expose
-   private Map<String, VaultBossConfig.BossDefinition> bossDefinitions = new HashMap<>();
-
-   public List<VaultBossConfig.StageConfig> getBossStageConfigs(String bossDefinitionName) {
-      return this.bossDefinitions.get(bossDefinitionName).stages;
-   }
+   @SerializedName("Bosses")
+   private Map<ResourceLocation, VaultBossConfig.BossDefinition> bosses;
+   @Expose
+   @SerializedName("Traits")
+   private Map<String, VaultBossConfig.TraitDefinition> traits;
 
    @Override
    public String getName() {
@@ -46,97 +68,274 @@ public class VaultBossConfig extends Config {
 
    @Override
    protected void reset() {
-      WeightedList<SummoningStageAttributes.EntitySpawnData> entityTypes = new WeightedList<>();
-      entityTypes.add(new SummoningStageAttributes.EntitySpawnData(EntityType.ZOMBIE, null), 1);
-      entityTypes.add(new SummoningStageAttributes.EntitySpawnData(EntityType.SKELETON, null), 1);
-      entityTypes.add(new SummoningStageAttributes.EntitySpawnData(EntityType.CREEPER, null), 1);
+      this.traits = new LinkedHashMap<>();
+      this.traits
+         .put(
+            "fireball_ranged_attack",
+            new VaultBossConfig.TraitDefinition(
+               "fireball_ranged_attack", new FireballRangedAttackGoal(null).setAttributes(1.0, 20, 60, 25.0F, 0.5).serializeNBT()
+            )
+         );
+      WeightedList<MeleeAttacks.AttackData> meleeAttacks = new WeightedList<MeleeAttacks.AttackData>().add(new MeleeAttacks.AttackData("punch", 1.0), 1);
+      this.traits
+         .put(
+            "melee_attack", new VaultBossConfig.TraitDefinition("melee_attack", new PersistentMeleeAttackGoal(null).setAttributes(meleeAttacks).serializeNBT())
+         );
+      meleeAttacks = new WeightedList<MeleeAttacks.AttackData>().add(new MeleeAttacks.AttackData("aoeclose", 1.0), 1);
+      this.traits
+         .put(
+            "sweep_attack", new VaultBossConfig.TraitDefinition("melee_attack", new PersistentMeleeAttackGoal(null).setAttributes(meleeAttacks).serializeNBT())
+         );
+      WeightedList<MobSpawningUtils.EntitySpawnData> entityTypes = new WeightedList<>();
+      entityTypes.add(new MobSpawningUtils.EntitySpawnData(EntityType.ZOMBIE, null), 1);
+      entityTypes.add(new MobSpawningUtils.EntitySpawnData(EntityType.SKELETON, null), 1);
+      entityTypes.add(new MobSpawningUtils.EntitySpawnData(EntityType.CREEPER, null), 1);
+      this.traits
+         .put(
+            "summoning_vanilla",
+            new VaultBossConfig.TraitDefinition("summoning", new SummoningGoal(null).setAttributes(10, 1, 4, 100, 15, entityTypes).serializeNBT())
+         );
+      entityTypes.clear();
       ListTag handItemsTag = new ListTag();
       handItemsTag.add(new ItemStack(Items.NETHERITE_SWORD).save(new CompoundTag()));
       CompoundTag mobTag = new CompoundTag();
       mobTag.put("HandItems", handItemsTag);
-      entityTypes.add(new SummoningStageAttributes.EntitySpawnData(ModEntities.FIGHTER, mobTag), 1);
-      entityTypes.add(new SummoningStageAttributes.EntitySpawnData(ModEntities.DUNGEON_SKELETON, null), 1);
-      entityTypes.add(new SummoningStageAttributes.EntitySpawnData(ModEntities.DUNGEON_VINDICATOR, null), 1);
-      WeightedList<MeleeAttacks.AttackData> meleeAttacks = new WeightedList<>();
-      meleeAttacks.add(new MeleeAttacks.AttackData("hammersmash", 1.5), 1);
-      meleeAttacks.add(new MeleeAttacks.AttackData("uppercut", 1.0), 2);
-      meleeAttacks.add(new MeleeAttacks.AttackData("groundslam", 0.9), 4);
-      WeightedList<MeleeAttacks.AttackData> rageAttacks = new WeightedList<>();
-      rageAttacks.add(new MeleeAttacks.AttackData("throw", 1.0), 1);
-      WeightedList<CatalystStageAttributes.EffectAttributes> effects = new WeightedList<>();
-      effects.put(new CatalystStageAttributes.EffectAttributes(MobEffects.HARM, 1, 3), 1);
-      effects.put(new CatalystStageAttributes.EffectAttributes(MobEffects.DIG_SLOWDOWN, 200, 2), 1);
-      effects.put(new CatalystStageAttributes.EffectAttributes(MobEffects.SLOW_FALLING, 400, 2), 1);
-      effects.put(new CatalystStageAttributes.EffectAttributes(MobEffects.MOVEMENT_SLOWDOWN, 200, 2), 1);
-      this.bossDefinitions
+      entityTypes.add(new MobSpawningUtils.EntitySpawnData(ModEntities.FIGHTER, mobTag), 1);
+      entityTypes.add(new MobSpawningUtils.EntitySpawnData(ModEntities.DUNGEON_SKELETON, null), 1);
+      entityTypes.add(new MobSpawningUtils.EntitySpawnData(ModEntities.DUNGEON_VINDICATOR, null), 1);
+      this.traits
          .put(
-            "artifact_boss",
+            "summoning_vault",
+            new VaultBossConfig.TraitDefinition("summoning", new SummoningGoal(null).setAttributes(10, 1, 4, 100, 15, entityTypes).serializeNBT())
+         );
+      this.traits
+         .put("shulker_bullet", new VaultBossConfig.TraitDefinition("shulker_bullet", new ShulkerAttackGoal(null).setAttributes(10, 40).serializeNBT()));
+      this.traits.put("heal", new VaultBossConfig.TraitDefinition("heal", new HealGoal(null).setAttributes(40, 0.1F).serializeNBT()));
+      this.traits.put("blood_orb", new VaultBossConfig.TraitDefinition("blood_orb", new BloodOrbGoal(null).setAttributes(40, 100, 20, 4).serializeNBT()));
+      this.traits
+         .put(
+            "evoker_fangs",
+            new VaultBossConfig.TraitDefinition("evoker_fangs", new EvokerFangsGoal(null).setAttributes(100, 200, 1.5F, 3, 5, 0.7F).serializeNBT())
+         );
+      this.traits
+         .put(
+            "higher_health",
+            new VaultBossConfig.TraitDefinition(
+               "attribute_modifier",
+               new AttributeModifierTrait().setAttributes(Attributes.MAX_HEALTH.getRegistryName().toString(), 1.5, "multiply").serializeNBT()
+            )
+         );
+      this.traits
+         .put(
+            "higher_speed",
+            new VaultBossConfig.TraitDefinition(
+               "attribute_modifier",
+               new AttributeModifierTrait().setAttributes(Attributes.MOVEMENT_SPEED.getRegistryName().toString(), 0.3F, "add").serializeNBT()
+            )
+         );
+      this.traits
+         .put("life_leech_on_hit", new VaultBossConfig.TraitDefinition("life_leech_on_hit", new LifeLeechOnHitEffect().setAttributes(0.5F).serializeNBT()));
+      this.traits
+         .put(
+            "wither_on_hit",
+            new VaultBossConfig.TraitDefinition(
+               "apply_potion_on_hit", new ApplyPotionOnHitEffect().setAttributes(MobEffects.WITHER, 100, 0, 0.2F).serializeNBT()
+            )
+         );
+      this.traits
+         .put(
+            "levitate_on_hit",
+            new VaultBossConfig.TraitDefinition(
+               "apply_potion_on_hit", new ApplyPotionOnHitEffect().setAttributes(MobEffects.LEVITATION, 100, 0, 0.5F).serializeNBT()
+            )
+         );
+      this.traits
+         .put(
+            "steal_mana_on_hit",
+            new VaultBossConfig.TraitDefinition(
+               "apply_potion_on_hit", new ApplyPotionOnHitEffect().setAttributes(ModEffects.MANA_STEAL, 20, 0, 0.5F).serializeNBT()
+            )
+         );
+      this.traits
+         .put(
+            "throw_lingering_poison",
+            new VaultBossConfig.TraitDefinition(
+               "throw_potion", new ThrowPotionGoal(null).setAttributes(1.0, 100, 200, 10.0F, MobEffects.POISON, 100, 0, true).serializeNBT()
+            )
+         );
+      this.traits
+         .put(
+            "levitation_aura",
+            new VaultBossConfig.TraitDefinition(PotionAuraGoal.TYPE, new PotionAuraGoal(null).setAttributes(MobEffects.LEVITATION, 40, 0, 5).serializeNBT())
+         );
+      this.traits
+         .put(
+            "bleed_aura",
+            new VaultBossConfig.TraitDefinition(PotionAuraGoal.TYPE, new PotionAuraGoal(null).setAttributes(ModEffects.BLEED, 40, 0, 5).serializeNBT())
+         );
+      this.bosses = new LinkedHashMap<>();
+      this.bosses
+         .put(
+            ModEntities.BLAZE_BOSS.getRegistryName(),
+            new VaultBossConfig.BossDefinition(List.of("fireball_ranged_attack", "evoker_fangs", "heal"), Map.of("light_ranged", "shulker_bullet"))
+         );
+      this.bosses
+         .put(
+            ModEntities.GOLEM_BOSS.getRegistryName(),
             new VaultBossConfig.BossDefinition(
-               "artifact_boss",
-               List.of(
-                  new VaultBossConfig.StageConfig(
-                     "catalyst",
-                     "catalyst",
-                     new CatalystStageAttributes(
-                           List.of(
-                              new CatalystStageAttributes.CatalystWave(1, 1),
-                              new CatalystStageAttributes.CatalystWave(2, 4),
-                              new CatalystStageAttributes.CatalystWave(3, 6),
-                              new CatalystStageAttributes.CatalystWave(5, 10)
-                           ),
-                           5.5F,
-                           0.3F,
-                           0.4F,
-                           22.5F,
-                           1.5F,
-                           effects,
-                           Map.of(
-                              VaultChestType.WOODEN,
-                              new ResourceLocation("the_vault:wooden_chest_lvl0_v2"),
-                              VaultChestType.LIVING,
-                              new ResourceLocation("the_vault:living_chest_lvl0_v2"),
-                              VaultChestType.GILDED,
-                              new ResourceLocation("the_vault:gilded_chest_lvl0_v2"),
-                              VaultChestType.ORNATE,
-                              new ResourceLocation("the_vault:ornate_chest_lvl0_v2")
-                           )
-                        )
-                        .serialize()
-                  ),
-                  new VaultBossConfig.StageConfig(
-                     "berserk", "berserk", new BerserkStageAttributes(200, 10, 0.33, 4.5, 3.3, meleeAttacks, rageAttacks, 80, 4).serialize()
-                  ),
-                  new VaultBossConfig.StageConfig("generic1", "melee", new MeleeStageAttributes(200, 15, 0.1, meleeAttacks, WeightedList.empty()).serialize()),
-                  new VaultBossConfig.StageConfig("summoning", "summoning", new SummoningStageAttributes(entityTypes, 50, 10, 3, 6, 10, 15).serialize()),
-                  new VaultBossConfig.StageConfig("generic2", "melee", new MeleeStageAttributes(200, 11, 0.1, meleeAttacks, WeightedList.empty()).serialize()),
-                  new VaultBossConfig.StageConfig("spark", "spark", new SparkStageAttributes(40, 5, 10, 200, 2, 300, 100, 2.5).serialize()),
-                  new VaultBossConfig.StageConfig("generic3", "melee", new MeleeStageAttributes(200, 12, 0.2, meleeAttacks, WeightedList.empty()).serialize())
-               )
+               List.of("melee_attack", "summoning_vault", "life_leech_on_hit", "levitate_on_hit"), Map.of("light_ranged", "blood_orb")
+            )
+         );
+      this.bosses
+         .put(
+            ModEntities.BLACK_WIDOW_BOSS.getRegistryName(),
+            new VaultBossConfig.BossDefinition(
+               List.of("melee_attack", "life_leech_on_hit", "wither_on_hit", "throw_lingering_poison"), Map.of("light_ranged", "evoker_fangs")
             )
          );
    }
 
-   public static final class BossDefinition {
-      @Expose
-      private final String name;
-      @Expose
-      private final List<VaultBossConfig.StageConfig> stages;
+   @Override
+   public <T extends Config> T readConfig() {
+      VaultBossConfig config = super.readConfig();
 
-      public BossDefinition(String name, List<VaultBossConfig.StageConfig> stages) {
-         this.name = name;
-         this.stages = stages;
+      for (Entry<String, VaultBossConfig.TraitDefinition> trait : config.traits.entrySet()) {
+         trait.getValue().id = trait.getKey();
       }
 
-      public String name() {
-         return this.name;
+      return (T)config;
+   }
+
+   public ResourceLocation getRandomBossId() {
+      int index = rand.nextInt(this.bosses.size());
+      Iterator<ResourceLocation> it = this.bosses.keySet().iterator();
+
+      for (int i = 0; i < index; i++) {
+         it.next();
       }
 
-      public List<VaultBossConfig.StageConfig> stages() {
-         return this.stages;
+      return it.next();
+   }
+
+   public String getRandomModifier() {
+      Set<String> modifiers = this.bosses.values().iterator().next().modifierTraitMap.keySet();
+      int index = rand.nextInt(modifiers.size());
+      Iterator<String> it = modifiers.iterator();
+      int i = 0;
+
+      while (it.hasNext()) {
+         String modifier = it.next();
+         if (++i == index) {
+            return modifier;
+         }
+      }
+
+      return modifiers.iterator().next();
+   }
+
+   public List<ItemStack> getRandomLootItems(int vaultLevel, RandomSource random) {
+      LegacyLootTablesConfig.Level levelLootTables = ModConfigs.LOOT_TABLES.getForLevel(vaultLevel);
+      if (levelLootTables == null) {
+         return Collections.emptyList();
+      } else {
+         String lootTableId = levelLootTables.OFFERING_BOSS;
+         LootTable table = VaultRegistry.LOOT_TABLE.getKey(lootTableId).get(Version.latest());
+         List<ItemStack> items = new ArrayList<>();
+         if (table != null) {
+            for (LootTable.Entry entry : table.getEntries()) {
+               this.generateEntry(items, entry, random);
+            }
+         }
+
+         return items;
+      }
+   }
+
+   protected void generateEntry(List<ItemStack> items, LootTable.Entry entry, RandomSource random) {
+      int roll = entry.getRoll().get(random);
+
+      for (int i = 0; i < roll; i++) {
+         entry.getPool().getRandomFlat(Version.latest(), random).map(e -> e.getStack(random)).ifPresent(items::addAll);
+      }
+   }
+
+   public List<VaultBossConfig.TraitDefinition> getBossBaseTraits(ResourceLocation bossRegistryName) {
+      VaultBossConfig.BossDefinition bossDefinition = this.bosses.get(bossRegistryName);
+      if (bossDefinition == null) {
+         return List.of();
+      } else {
+         List<VaultBossConfig.TraitDefinition> bossTraits = new ArrayList<>();
+
+         for (String baseTraitId : bossDefinition.baseTraits) {
+            VaultBossConfig.TraitDefinition baseTraitDefinition = this.traits.get(baseTraitId);
+            if (baseTraitDefinition != null) {
+               bossTraits.add(baseTraitDefinition);
+            }
+         }
+
+         return bossTraits;
+      }
+   }
+
+   public Map<String, VaultBossConfig.TraitDefinition> getBossModifierTraits(ResourceLocation bossRegistryName, Set<String> modifiers) {
+      VaultBossConfig.BossDefinition bossDefinition = this.bosses.get(bossRegistryName);
+      if (bossDefinition == null) {
+         return Map.of();
+      } else {
+         Map<String, VaultBossConfig.TraitDefinition> modifierTraits = new HashMap<>();
+
+         for (String modifier : modifiers) {
+            String modifierTraitId = bossDefinition.modifierTraitMap.get(modifier);
+            VaultBossConfig.TraitDefinition modifierTraitDefinition = this.traits.get(modifierTraitId);
+            if (modifierTraitDefinition != null) {
+               modifierTraits.put(modifier, modifierTraitDefinition);
+            }
+         }
+
+         return modifierTraits;
+      }
+   }
+
+   @Override
+   protected boolean isValid() {
+      boolean valid = super.isValid();
+
+      for (VaultBossConfig.BossDefinition boss : this.bosses.values()) {
+         for (String baseTrait : boss.baseTraits) {
+            if (!this.traits.containsKey(baseTrait)) {
+               VaultMod.LOGGER.error("Base trait {} for boss is not defined in traits", baseTrait);
+               valid = false;
+            }
+         }
+
+         for (String modifierTrait : boss.modifierTraitMap.values()) {
+            if (!this.traits.containsKey(modifierTrait)) {
+               VaultMod.LOGGER.error("Modifier trait {} for boss is not defined in traits", modifierTrait);
+               valid = false;
+            }
+         }
+      }
+
+      return valid;
+   }
+
+   private static class BossDefinition {
+      @Expose
+      @SerializedName("BaseTraits")
+      List<String> baseTraits;
+      @Expose
+      @SerializedName("ModifierTraits")
+      Map<String, String> modifierTraitMap;
+
+      public BossDefinition(List<String> baseTraits, Map<String, String> modifierTraitMap) {
+         this.baseTraits = baseTraits;
+         this.modifierTraitMap = modifierTraitMap;
       }
    }
 
    private static class CompoundTagJsonObjectSerializer implements JsonSerializer<CompoundTag>, JsonDeserializer<CompoundTag> {
+      private static final VaultBossConfig.CompoundTagJsonObjectSerializer INSTANCE = new VaultBossConfig.CompoundTagJsonObjectSerializer();
+
       public JsonElement serialize(CompoundTag src, Type typeOfSrc, JsonSerializationContext context) {
          return (JsonElement)NbtOps.INSTANCE.convertTo(JsonOps.INSTANCE, src);
       }
@@ -146,30 +345,30 @@ public class VaultBossConfig extends Config {
       }
    }
 
-   public static final class StageConfig {
+   public static class TraitDefinition {
+      private String id;
       @Expose
-      private final String stageName;
+      @SerializedName("Type")
+      private String type;
       @Expose
-      private final String stageType;
-      @Expose
+      @SerializedName("Attributes")
       @JsonAdapter(VaultBossConfig.CompoundTagJsonObjectSerializer.class)
-      private final CompoundTag attributes;
+      private CompoundTag attributes;
 
-      public StageConfig(String stageName, String stageType, CompoundTag attributes) {
-         this.stageName = stageName;
-         this.stageType = stageType;
+      public TraitDefinition(String type, CompoundTag attributes) {
+         this.type = type;
          this.attributes = attributes;
       }
 
-      public String stageName() {
-         return this.stageName;
+      public String id() {
+         return this.id;
       }
 
-      public String stageType() {
-         return this.stageType;
+      public String type() {
+         return this.type;
       }
 
-      public CompoundTag attributes() {
+      public CompoundTag attributesNbt() {
          return this.attributes;
       }
    }

@@ -44,6 +44,7 @@
     "the_vault:transmog_table",
     "the_vault:tool_vise",
     "the_vault:demagnetizer",
+    "the_vault:debagnetizer",
     "the_vault:magnet_modification_table",
     "the_vault:vault_altar",
     "the_vault:vault_recycler",
@@ -144,6 +145,8 @@
     "the_vault:spark",
     "the_vault:animatrix_block",
     "the_vault:fools_gold",
-    "the_vault:ascension_forge"
+    "the_vault:ascension_forge",
+    "the_vault:barred_door",
+    "the_vault:card_essence_extractor"
   ]
 }

@@ -9,8 +9,11 @@ import iskallia.vault.gear.attribute.config.FloatAttributeGenerator;
 import iskallia.vault.gear.attribute.config.IdentityObjectGenerator;
 import iskallia.vault.gear.attribute.config.IntegerAttributeGenerator;
 import iskallia.vault.gear.attribute.config.RegistryAttributeGenerator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Function;
+import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -58,6 +61,18 @@ public class ModGearAttributeGenerators {
          @Override
          public T generateRandomValue(C object, Random random) {
             return null;
+         }
+
+         @Nullable
+         @Override
+         public Optional<T> getMinimumValue(List<C> configurations) {
+            return Optional.empty();
+         }
+
+         @Nullable
+         @Override
+         public Optional<T> getMaximumValue(List<C> configurations) {
+            return Optional.empty();
          }
       };
    }

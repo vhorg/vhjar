@@ -3,6 +3,7 @@ package iskallia.vault.command;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -60,6 +61,7 @@ public class CrystalCommand extends Command {
             )
       );
       builder.then(Commands.literal("clearObjective").executes(this::clearObjective));
+      builder.then(Commands.literal("setObjective").then(Commands.argument("objective", StringArgumentType.string()).executes(this::setObjective)));
       builder.then(Commands.literal("setInstability").then(Commands.argument("instability", FloatArgumentType.floatArg(0.0F)).executes(this::setInstability)));
       builder.then(Commands.literal("setLevel").then(Commands.argument("level", IntegerArgumentType.integer(0)).executes(this::setLevel)));
       builder.then(
@@ -145,6 +147,15 @@ public class CrystalCommand extends Command {
       ItemStack crystal = this.getCrystal(ctx);
       CrystalData data = CrystalData.read(crystal);
       data.setObjective(NullCrystalObjective.INSTANCE);
+      data.write(crystal);
+      return 0;
+   }
+
+   private int setObjective(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+      ItemStack crystal = this.getCrystal(ctx);
+      CrystalData data = CrystalData.read(crystal);
+      String objectiveId = StringArgumentType.getString(ctx, "objective");
+      data.setObjective(CrystalData.OBJECTIVE.getValue(objectiveId));
       data.write(crystal);
       return 0;
    }

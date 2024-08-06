@@ -1,10 +1,8 @@
 package iskallia.vault.entity.entity;
 
 import com.google.common.collect.Lists;
-import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
-import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.event.ActiveFlags;
 import iskallia.vault.init.ModEntities;
@@ -25,20 +23,16 @@ import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.world.data.PlayerAbilitiesData;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -60,7 +54,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.AbstractArrow.Pickup;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ClipContext.Block;
@@ -68,7 +61,6 @@ import net.minecraft.world.level.ClipContext.Fluid;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
@@ -101,16 +93,6 @@ public class VaultThrownJavelin extends AbstractArrow {
    private List<Entity> piercedAndKilledEntities;
    private LivingEntity thrower = null;
    private int bounceCount = 0;
-   private static List<TilePredicate> filters = List.of(
-      TilePredicate.of("the_vault:wooden_chest{Hidden:0b}", true).orElseThrow(),
-      TilePredicate.of("the_vault:gilded_strongbox{Hidden:0b}", true).orElseThrow(),
-      TilePredicate.of("the_vault:gilded_chest{Hidden:0b}", true).orElseThrow(),
-      TilePredicate.of("the_vault:ornate_strongbox{Hidden:0b}", true).orElseThrow(),
-      TilePredicate.of("the_vault:ornate_chest{Hidden:0b}", true).orElseThrow(),
-      TilePredicate.of("the_vault:coin_pile{Hidden:0b}", true).orElseThrow(),
-      TilePredicate.of("the_vault:living_strongbox{Hidden:0b}", true).orElseThrow(),
-      TilePredicate.of("the_vault:living_chest{Hidden:0b}", true).orElseThrow()
-   );
    private static ArrayAdapter<TilePredicate> KEYS = Adapters.ofArray(TilePredicate[]::new, Adapters.TILE_PREDICATE);
 
    public VaultThrownJavelin(EntityType<? extends AbstractArrow> entityType, Level level) {
@@ -492,80 +474,6 @@ public class VaultThrownJavelin extends AbstractArrow {
       }
    }
 
-   public boolean shouldHighlightTile(PartialTile tile) {
-      return filters.stream().anyMatch(filter -> filter.test(tile));
-   }
-
-   protected List<VaultThrownJavelin.HighlightPosition> selectPositions(ServerLevel world, ServerPlayer player, double radius) {
-      List<VaultThrownJavelin.HighlightPosition> result = new ArrayList<>();
-      this.forEachTile(
-         world,
-         player,
-         radius,
-         tile -> {
-            AbilityTree abilities = PlayerAbilitiesData.get(player.getLevel()).getAbilities(player);
-
-            for (HunterAbility ability : abilities.getAll(HunterAbility.class, serverPlayer -> true)) {
-               if (!ability.getParent().getId().equals("Hunter_Base")
-                  && ability.getFilters().stream().anyMatch(filter -> filter.test(tile))
-                  && this.shouldHighlightTile(tile)) {
-                  if (tile instanceof HunterHiddenTileEntity hiddenTile && hiddenTile.isHidden()) {
-                     return;
-                  }
-
-                  result.add(new VaultThrownJavelin.HighlightPosition(tile.getPos(), ability.getParent().getId()));
-                  break;
-               }
-            }
-         }
-      );
-      return result;
-   }
-
-   protected void forEachTileEntity(Level world, Player player, double radius, BiConsumer<BlockPos, BlockEntity> consumer) {
-      BlockPos playerOffset = player.blockPosition();
-      double radiusSq = radius * radius;
-      int iRadius = Mth.ceil(radius);
-      Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);
-      ChunkPos posMin = new ChunkPos(this.blockPosition().subtract(radVec));
-      ChunkPos posMax = new ChunkPos(this.blockPosition().offset(radVec));
-
-      for (int xx = posMin.x; xx <= posMax.x; xx++) {
-         for (int zz = posMin.z; zz <= posMax.z; zz++) {
-            LevelChunk ch = world.getChunkSource().getChunkNow(xx, zz);
-            if (ch != null) {
-               ch.getBlockEntities().forEach((pos, tile) -> {
-                  if (tile != null && pos.distSqr(this.blockPosition()) <= radiusSq) {
-                     consumer.accept(pos, tile);
-                  }
-               });
-            }
-         }
-      }
-   }
-
-   protected void forEachTile(Level world, Player player, double radius, Consumer<PartialTile> consumer) {
-      BlockPos playerOffset = player.blockPosition();
-      double radiusSq = radius * radius;
-      int iRadius = Mth.ceil(radius);
-      Vec3i radVec = new Vec3i(iRadius, iRadius, iRadius);
-      ChunkPos posMin = new ChunkPos(this.blockPosition().subtract(radVec));
-      ChunkPos posMax = new ChunkPos(this.blockPosition().offset(radVec));
-
-      for (int xx = posMin.x; xx <= posMax.x; xx++) {
-         for (int zz = posMin.z; zz <= posMax.z; zz++) {
-            LevelChunk ch = world.getChunkSource().getChunkNow(xx, zz);
-            if (ch != null) {
-               ch.getBlockEntities().forEach((pos, tile) -> {
-                  if (tile != null && pos.distSqr(this.blockPosition()) <= radiusSq) {
-                     consumer.accept(PartialTile.at(world, pos));
-                  }
-               });
-            }
-         }
-      }
-   }
-
    protected void onHit(HitResult result) {
       if (!this.level.isClientSide()) {
       }
@@ -748,19 +656,21 @@ public class VaultThrownJavelin extends AbstractArrow {
                      .schedule(
                         delay * spacing,
                         () -> {
-                           this.selectPositions((ServerLevel)this.level, player, rad)
+                           HunterAbility.selectPositions((ServerLevel)this.level, player, rad)
                               .forEach(
                                  highlightPosition -> {
-                                    for (int i = 0; i < 8; i++) {
-                                       Vec3 v = MiscUtils.getRandomOffset(highlightPosition.blockPos(), this.level.getRandom());
-                                       ModNetwork.CHANNEL
-                                          .sendTo(
-                                             new ClientboundHunterParticlesFromJavelinMessage(
-                                                v.x, v.y, v.z, this.getSightDuration(), 0.0, 0.0, highlightPosition.type
-                                             ),
-                                             player.connection.getConnection(),
-                                             NetworkDirection.PLAY_TO_CLIENT
-                                          );
+                                    if (!highlightPosition.type().equals("blocks")) {
+                                       for (int i = 0; i < 8; i++) {
+                                          Vec3 v = MiscUtils.getRandomOffset(highlightPosition.blockPos(), this.level.getRandom());
+                                          ModNetwork.CHANNEL
+                                             .sendTo(
+                                                new ClientboundHunterParticlesFromJavelinMessage(
+                                                   v.x, v.y, v.z, this.getSightDuration(), highlightPosition.type()
+                                                ),
+                                                player.connection.getConnection(),
+                                                NetworkDirection.PLAY_TO_CLIENT
+                                             );
+                                       }
                                     }
                                  }
                               );
@@ -859,9 +769,6 @@ public class VaultThrownJavelin extends AbstractArrow {
 
    public boolean shouldRender(double pX, double pY, double pZ) {
       return true;
-   }
-
-   public record HighlightPosition(BlockPos blockPos, String type) {
    }
 
    public static enum JavelinType {

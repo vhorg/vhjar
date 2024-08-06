@@ -19,8 +19,7 @@ public class ResetPotentialModification extends GearModification {
    }
 
    @Override
-   public boolean doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
-      VaultGearCraftingHelper.reRollCraftingPotential(stack);
-      return true;
+   public GearModification.Result doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
+      return VaultGearCraftingHelper.reRollCraftingPotential(stack);
    }
 }

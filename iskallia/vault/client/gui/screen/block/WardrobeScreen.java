@@ -497,7 +497,7 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
                value = ath.invert(value);
             }
 
-            mergeIntoInstance.setValue(mergeIntoInstance.getAttribute().getAttributeComparator().merge(mergeIntoInstance.getValue(), value));
+            mergeIntoInstance.setValue(mergeIntoInstance.getAttribute().getAttributeComparator().merge(mergeIntoInstance.getValue(), value).orElseThrow());
          } else {
             T value = instance.getValue();
             if (inverted) {

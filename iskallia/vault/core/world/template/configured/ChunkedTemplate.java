@@ -22,6 +22,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 public class ChunkedTemplate extends ConfiguredTemplate {
    private final Map<ChunkPos, StaticTemplate> cache = new HashMap<>();
    private boolean locked;
+   private final Object lock = new Object();
 
    public ChunkedTemplate(Template parent, PlacementSettings settings) {
       super(parent, settings);
@@ -40,18 +41,21 @@ public class ChunkedTemplate extends ConfiguredTemplate {
 
    @Override
    public void place(ServerLevelAccessor world, ChunkPos pos) {
-      if (!this.locked) {
-         new ChunkedTemplate.Wrapping(this.parent, pos).place(world, this.settings);
-         this.locked = true;
-         this.cache.values().forEach(t -> {
-            ((ArrayList)t.getTiles()).trimToSize();
-            ((ArrayList)t.getEntities()).trimToSize();
-         });
-      } else {
-         StaticTemplate child = this.cache.get(pos);
-         if (child != null) {
-            child.place(world, this.settings);
+      synchronized (this.lock) {
+         if (!this.locked) {
+            new ChunkedTemplate.Wrapping(this.parent, pos).place(world, this.settings);
+            this.locked = true;
+            this.cache.values().forEach(t -> {
+               ((ArrayList)t.getTiles()).trimToSize();
+               ((ArrayList)t.getEntities()).trimToSize();
+            });
+            return;
          }
+      }
+
+      StaticTemplate child = this.cache.get(pos);
+      if (child != null) {
+         child.place(world, this.settings);
       }
    }
 

@@ -27,7 +27,7 @@ public class CooldownReductionBottleEffect extends BottleEffect {
       PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get((ServerLevel)player.level);
       AbilityTree abilityTree = abilitiesData.getAbilities(player);
       abilityTree.iterate(
-         Ability.class, ability -> ability.getCooldown().ifPresent(cooldown -> ability.reduceCooldownBy((int)(cooldown.getMaxTicks() * this.amount)))
+         Ability.class, ability -> ability.getCooldown().ifPresent(cooldown -> ability.reduceCooldownBy((int)(cooldown.getRemainingTicks() * this.amount)))
       );
       abilityTree.sync(SkillContext.of(player));
    }

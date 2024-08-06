@@ -2,6 +2,8 @@ package iskallia.vault.gear.attribute.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
@@ -33,6 +35,16 @@ public class DoubleAttributeGenerator extends NumberRangeGenerator<Double, Doubl
             .append(new TextComponent(reader.getModifierName()).withStyle(reader.getColoredTextStyle()));
    }
 
+   @Override
+   public Optional<Double> getMinimumValue(List<DoubleAttributeGenerator.Range> configurations) {
+      return configurations.stream().map(range -> range.min).min(Double::compare);
+   }
+
+   @Override
+   public Optional<Double> getMaximumValue(List<DoubleAttributeGenerator.Range> configurations) {
+      return configurations.stream().map(DoubleAttributeGenerator.Range::generateMaximumNumber).min(Double::compare);
+   }
+
    public static class Range extends NumberRangeGenerator.NumberRange<Double> {
       @Expose
       private double min;
@@ -53,7 +65,12 @@ public class DoubleAttributeGenerator extends NumberRangeGenerator<Double, Doubl
 
       public Double generateNumber(Random random) {
          int steps = (int)(Math.round(Math.max(this.max - this.min, 0.0) / this.step) + 1L);
-         return Math.min(this.min + random.nextInt(steps) * this.step, this.max);
+         return this.min + random.nextInt(steps) * this.step;
+      }
+
+      public Double generateMaximumNumber() {
+         int steps = (int)Math.round(Math.max(this.max - this.min, 0.0) / this.step);
+         return this.min + steps * this.step;
       }
    }
 }

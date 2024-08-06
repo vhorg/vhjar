@@ -26,7 +26,7 @@ public class VaultGearCraftingHelper {
    private static final Random rand = new Random();
 
    public static void reducePotential(ItemStack stack, Player player, GearModification action) {
-      if (!stack.isEmpty() && stack.getItem() instanceof VaultGearItem) {
+      if (!stack.isEmpty() && stack.getItem() instanceof VaultGearItem && !player.isCreative()) {
          float chance = 0.0F;
          ExpertiseTree expertises = PlayerExpertisesData.get((ServerLevel)player.level).getExpertises(player);
 
@@ -85,13 +85,18 @@ public class VaultGearCraftingHelper {
       }
    }
 
-   public static void reRollCraftingPotential(ItemStack stack) {
+   public static GearModification.Result reRollCraftingPotential(ItemStack stack) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearRarity rarity = data.getRarity();
-      String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
-      int potential = ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getNewCraftingPotential(rarity, rollType);
-      potential = (int)(potential * (1.0F + ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getPotentialIncreasePerLevel() * data.getItemLevel()));
-      data.updateAttribute(ModGearAttributes.CRAFTING_POTENTIAL, Integer.valueOf(potential));
-      data.write(stack);
+      if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
+      } else {
+         VaultGearRarity rarity = data.getRarity();
+         String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
+         int potential = ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getNewCraftingPotential(rarity, rollType);
+         potential = (int)(potential * (1.0F + ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getPotentialIncreasePerLevel() * data.getItemLevel()));
+         data.updateAttribute(ModGearAttributes.CRAFTING_POTENTIAL, Integer.valueOf(potential));
+         data.write(stack);
+         return GearModification.Result.makeSuccess();
+      }
    }
 }

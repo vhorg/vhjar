@@ -19,8 +19,7 @@ public class ReforgeRepairSlotsModification extends GearModification {
    }
 
    @Override
-   public boolean doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
-      VaultGearModifierHelper.reRollRepairSlots(stack, rand);
-      return true;
+   public GearModification.Result doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
+      return VaultGearModifierHelper.reRollRepairSlots(stack, rand);
    }
 }

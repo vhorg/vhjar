@@ -1,0 +1,15 @@
+{
+    "loader": "forge:multi-layer",
+    "layers": {
+        "solid": {
+            "parent": "the_vault:block/card_essence_extractor_solid"
+        },
+        "translucent": {
+            "parent": "the_vault:block/card_essence_extractor_transparent"
+        }
+    },
+    "ambientocclusion": false,
+    "textures": {
+        "particle": "the_vault:block/card_essence_extractor"
+    }
+}

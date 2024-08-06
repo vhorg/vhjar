@@ -38,6 +38,10 @@ public class VaultGearAttributeInstance<T> {
       return this.value != null && this.getAttribute().getType().isValid(this.value);
    }
 
+   public boolean canBeModified() {
+      return true;
+   }
+
    @Nonnull
    public T getValue() {
       return this.value;

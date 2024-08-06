@@ -28,6 +28,18 @@ public class GearAttributeTalent extends LearnableSkill implements GearAttribute
    public GearAttributeTalent() {
    }
 
+   public VaultGearAttribute<?> getAttribute() {
+      return this.attribute;
+   }
+
+   public double getValue() {
+      return this.value;
+   }
+
+   public boolean canApply(SkillContext context) {
+      return this.isUnlocked();
+   }
+
    @Override
    public void onAdd(SkillContext context) {
       context.getSource().as(ServerPlayer.class).ifPresent(this::refreshSnapshot);
@@ -42,14 +54,14 @@ public class GearAttributeTalent extends LearnableSkill implements GearAttribute
    public void onTick(SkillContext context) {
       if (!this.isUnlocked()) {
          this.onRemoveModifiers(context);
-      } else {
+      } else if (this.canApply(context)) {
          this.onAddModifiers(context);
       }
    }
 
    @Override
    public Stream<VaultGearAttributeInstance<?>> getGearAttributes(SkillContext context) {
-      return Stream.of(VaultGearAttributeInstance.cast(this.attribute, this.value));
+      return this.canApply(context) ? Stream.of(VaultGearAttributeInstance.cast(this.getAttribute(), this.getValue())) : Stream.empty();
    }
 
    @Override

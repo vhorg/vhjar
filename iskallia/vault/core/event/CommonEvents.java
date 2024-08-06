@@ -5,6 +5,7 @@ import iskallia.vault.core.event.common.ArtifactChanceEvent;
 import iskallia.vault.core.event.common.BlockBreakSpeedEvent;
 import iskallia.vault.core.event.common.BlockSetEvent;
 import iskallia.vault.core.event.common.BlockUseEvent;
+import iskallia.vault.core.event.common.BlockUseMergedEvent;
 import iskallia.vault.core.event.common.CarversGenerationEvent;
 import iskallia.vault.core.event.common.ChampionPromoteEvent;
 import iskallia.vault.core.event.common.ChestCatalystGenerationEvent;
@@ -35,6 +36,7 @@ import iskallia.vault.core.event.common.FruitEatenEvent;
 import iskallia.vault.core.event.common.GateLockOpenEvent;
 import iskallia.vault.core.event.common.GateLockUpdateEvent;
 import iskallia.vault.core.event.common.GrantedEffectEvent;
+import iskallia.vault.core.event.common.GridGatewayUpdateEvent;
 import iskallia.vault.core.event.common.ItemScavengeTaskEvent;
 import iskallia.vault.core.event.common.LayoutTemplateGenerationEvent;
 import iskallia.vault.core.event.common.ListenerJoinEvent;
@@ -42,6 +44,7 @@ import iskallia.vault.core.event.common.ListenerLeaveEvent;
 import iskallia.vault.core.event.common.ListenerTickEvent;
 import iskallia.vault.core.event.common.LootGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
+import iskallia.vault.core.event.common.ManaModifyEvent;
 import iskallia.vault.core.event.common.MonolithUpdateEvent;
 import iskallia.vault.core.event.common.NoiseGenerationEvent;
 import iskallia.vault.core.event.common.ObjectivePieceGenerationEvent;
@@ -95,6 +98,7 @@ public class CommonEvents {
    public static final ChampionPromoteEvent CHAMPION_PROMOTE = register(new ChampionPromoteEvent());
    public static final CrateAwardEvent CRATE_AWARD_EVENT = register(new CrateAwardEvent());
    public static final BlockUseEvent BLOCK_USE = register(new BlockUseEvent());
+   public static final BlockUseMergedEvent BLOCK_USE_MERGED = register(new BlockUseMergedEvent());
    public static final BlockSetEvent BLOCK_SET = register(new BlockSetEvent());
    public static final BlockBreakSpeedEvent BLOCK_BREAK_SPEED = register(new BlockBreakSpeedEvent());
    public static final VaultPortalCollideEvent VAULT_PORTAL_COLLIDE = register(new VaultPortalCollideEvent());
@@ -138,6 +142,7 @@ public class CommonEvents {
    public static final GateLockOpenEvent GATE_LOCK_OPEN = register(new GateLockOpenEvent());
    public static final GateLockUpdateEvent GATE_LOCK_UPDATE = register(new GateLockUpdateEvent());
    public static final MonolithUpdateEvent MONOLITH_UPDATE = register(new MonolithUpdateEvent());
+   public static final GridGatewayUpdateEvent GRID_GATEWAY_UPDATE = register(new GridGatewayUpdateEvent());
    public static final SoulShardChanceEvent SOUL_SHARD_CHANCE = register(new SoulShardChanceEvent());
    public static final ObjectiveTargetEvent OBJECTIVE_TARGET = register(new ObjectiveTargetEvent());
    public static final VaultStartEvent VAULT_START = register(new VaultStartEvent());
@@ -145,6 +150,7 @@ public class CommonEvents {
    public static final ListenerJoinEvent LISTENER_JOIN = register(new ListenerJoinEvent());
    public static final ListenerLeaveEvent LISTENER_LEAVE = register(new ListenerLeaveEvent());
    public static final ListenerTickEvent LISTENER_TICK = register(new ListenerTickEvent());
+   public static final ManaModifyEvent MANA_MODIFY = register(new ManaModifyEvent());
 
    public static void release(Object reference) {
       REGISTRY.forEach(event -> event.release(reference));

@@ -10,10 +10,10 @@
       "item": "the_vault:vault_essence"
     },
     "#": {
-      "item": "the_vault:eternal_soul"
+      "item": "the_vault:perfect_alexandrite"
     },
     "c": {
-      "item": "minecraft:campfire"
+      "item": "minecraft:torch"
     },
     "s": {
       "item": "the_vault:crystal_seal_empty"

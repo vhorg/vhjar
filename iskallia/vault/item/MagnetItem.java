@@ -111,6 +111,8 @@ public class MagnetItem extends Item implements VaultGearItem, CuriosGearItem, I
    public Multimap<Attribute, AttributeModifier> getAttributeModifiers(SlotContext context, UUID uuid, ItemStack stack) {
       if (isLegacy(stack)) {
          return ImmutableMultimap.of();
+      } else if (context.entity() instanceof Player player && player.getCooldowns().isOnCooldown(stack.getItem())) {
+         return ImmutableMultimap.of();
       } else {
          return (Multimap<Attribute, AttributeModifier>)("belt".equals(context.identifier())
             ? VaultGearHelper.getModifiers(VaultGearData.read(stack))

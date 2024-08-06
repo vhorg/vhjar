@@ -17,6 +17,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 public abstract class DataObject<D extends DataObject<D>> implements ICompound<D> {
@@ -89,8 +90,8 @@ public abstract class DataObject<D extends DataObject<D>> implements ICompound<D
       return (D)(this.values.containsKey(key) ? this.set(key, value) : this);
    }
 
-   public <T> D setIfAbsent(FieldKey<T> key, T value) {
-      return (D)(!this.values.containsKey(key) ? this.set(key, value) : this);
+   public <T> D setIfAbsent(FieldKey<T> key, Supplier<T> value) {
+      return (D)(!this.values.containsKey(key) ? this.set(key, value.get()) : this);
    }
 
    public <T> D setIf(FieldKey<T> key, T value, Predicate<T> condition) {

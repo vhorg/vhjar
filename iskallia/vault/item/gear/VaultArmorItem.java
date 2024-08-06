@@ -66,7 +66,7 @@ public class VaultArmorItem extends DyeableArmorItem implements VaultGearItem {
 
    @Nullable
    public EquipmentSlot getEquipmentSlot(ItemStack stack) {
-      return this.getSlot();
+      return VaultGearData.read(stack).getState() != VaultGearState.IDENTIFIED ? EquipmentSlot.MAINHAND : this.getSlot();
    }
 
    @NotNull

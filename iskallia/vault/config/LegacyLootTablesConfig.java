@@ -26,6 +26,7 @@ public class LegacyLootTablesConfig extends Config {
       level.ALTAR = VaultMod.sId("chest/altar");
       level.COMPLETION_CRATE = new LinkedHashMap<>();
       level.CHAMPION = VaultMod.sId("entities/lvl0/champion");
+      level.OFFERING_BOSS = VaultMod.sId("entities/lvl0/offering_boss");
       level.TREASURE_GOBLIN = VaultMod.sId("entities/lvl0/treasure_goblin");
       level.ARTIFACT_CHANCE = 0.01F;
       this.LEVELS.add(level);
@@ -47,6 +48,8 @@ public class LegacyLootTablesConfig extends Config {
       public String ALTAR;
       @Expose
       public Map<String, String> COMPLETION_CRATE;
+      @Expose
+      public String OFFERING_BOSS;
       @Expose
       public String GLADIATOR_CRATE;
       @Expose

@@ -79,7 +79,7 @@ public class CrakePedestalObjective extends Objective {
             data.setResult(InteractionResult.SUCCESS);
          } else if (!(Boolean)data.getState().getValue(CrakePedestalBlock.CONSUMED)) {
             if (!this.get(COMPLETED_PLAYERS).contains(data.getPlayer().getUUID())) {
-               if (vault.get(Vault.LISTENERS).get(data.getPlayer().getUUID()) instanceof Runner runner && runner.isActive(vault, this)) {
+               if (vault.get(Vault.LISTENERS).get(data.getPlayer().getUUID()) instanceof Runner runner && runner.isActive(world, vault, this)) {
                   data.getWorld().setBlock(data.getPos(), (BlockState)data.getState().setValue(CrakePedestalBlock.CONSUMED, true), 3);
                   this.get(COMPLETED_PLAYERS).add(data.getPlayer().getUUID());
                   data.setResult(InteractionResult.SUCCESS);
@@ -120,7 +120,7 @@ public class CrakePedestalObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       return objective == this;
    }
 }

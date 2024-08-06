@@ -12,19 +12,13 @@ import java.util.UUID;
 import java.util.Map.Entry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
-import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
@@ -103,37 +97,6 @@ public class AttributeSnapshotNotifier {
 
    private static void curioChanged(ServerPlayer player, AttributeSnapshotNotifier.CurioSlot slot) {
       MinecraftForge.EVENT_BUS.post(new VaultGearEquipmentChangeEvent.Curio(player, slot.slotIdentifier(), slot.slotId()));
-   }
-
-   @SubscribeEvent(
-      priority = EventPriority.LOWEST
-   )
-   public static void onPotionAdded(PotionAddedEvent event) {
-      if (event.getOldPotionEffect() != null) {
-         MobEffectInstance existing = event.getOldPotionEffect();
-         MobEffectInstance added = event.getPotionEffect();
-         if (existing.getAmplifier() >= added.getAmplifier()) {
-            return;
-         }
-      }
-
-      refreshSnapshotLater(event);
-   }
-
-   @SubscribeEvent
-   public static void onPotionRemove(PotionRemoveEvent event) {
-      refreshSnapshotLater(event);
-   }
-
-   @SubscribeEvent
-   public static void onPotionExpiry(PotionExpiryEvent event) {
-      refreshSnapshotLater(event);
-   }
-
-   private static void refreshSnapshotLater(EntityEvent event) {
-      if (event.getEntity() instanceof ServerPlayer sPlayer) {
-         AttributeSnapshotHelper.getInstance().refreshSnapshotDelayed(sPlayer);
-      }
    }
 
    @SubscribeEvent

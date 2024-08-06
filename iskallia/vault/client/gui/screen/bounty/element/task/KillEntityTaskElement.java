@@ -4,7 +4,7 @@ import iskallia.vault.bounty.task.KillEntityTask;
 import iskallia.vault.client.gui.framework.spatial.spi.ISpatial;
 import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
-import iskallia.vault.util.EntityGroupsUtils;
+import iskallia.vault.util.GroupUtils;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.ChatFormatting;
@@ -39,7 +39,7 @@ public class KillEntityTaskElement extends AbstractTaskElement<KillEntityTask> {
    public List<MutableComponent> getDescription() {
       List<MutableComponent> description = new ArrayList<>();
       EntityPredicate filter = this.getTask().getProperties().getFilter();
-      Component entityText = EntityGroupsUtils.getName(filter);
+      Component entityText = GroupUtils.getEntityName(filter);
       description.add(new TextComponent("Kill ").append(entityText).append(" Mobs in:").withStyle(Style.EMPTY.withColor(ChatFormatting.BLACK)));
       description.addAll(this.getDimensionsForDescription());
       return description;

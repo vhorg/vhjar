@@ -7,6 +7,7 @@ import iskallia.vault.effect.ChilledEffect;
 import iskallia.vault.effect.FreezeEffect;
 import iskallia.vault.effect.GlacialShatterEffect;
 import iskallia.vault.effect.ImmortalityEffect;
+import iskallia.vault.effect.ManaStealEffect;
 import iskallia.vault.effect.NoAiEffect;
 import iskallia.vault.effect.PoisonOverrideEffect;
 import iskallia.vault.effect.PylonEffect;
@@ -127,6 +128,7 @@ public class ModEffects {
    );
    public static final MobEffect IMMORTALITY = new ImmortalityEffect(VaultMod.id("immortality"), MobEffectCategory.BENEFICIAL, -16769217);
    public static final MobEffect PURIFYING_AURA = new CleanseBottleEffect.PurifyingAuraEffect(VaultMod.id("purifying_aura"), -4675);
+   public static final MobEffect MANA_STEAL = new ManaStealEffect(VaultMod.id("mana_steal"), MobEffectCategory.HARMFUL, -16777046);
    public static final ThresholdEffect SORCERY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("sorcery"));
    public static final ThresholdEffect STONESKIN = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("stoneskin"));
    public static final ThresholdEffect WITCHERY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("witchery"));
@@ -134,6 +136,13 @@ public class ModEffects {
    public static final ThresholdEffect DEPLETED = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("depleted"));
    public static final ThresholdEffect LAST_STAND = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("last_stand"));
    public static final ThresholdEffect BERSERKING = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("berserking"));
+   public static final ThresholdEffect FRENZY = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("frenzy"));
+   public static final ThresholdEffect BLOOD_THIRST = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("blood_thirst"));
+   public static final ThresholdEffect ARCANA = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("arcana"));
+   public static final ThresholdEffect BLAZING = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("blazing"));
+   public static final ThresholdEffect LUCKY_MOMENTUM = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("lucky_momentum"));
+   public static final ThresholdEffect TREASURE_SEEKER = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("treasure_seeker"));
+   public static final ThresholdEffect BOUNTIFUL_HARVEST = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("bountiful_harvest"));
    public static final PlayerRageHelper.RageEffect RAGE = new PlayerRageHelper.RageEffect(Color.RED.getRGB(), VaultMod.id("rage"));
    public static final MobEffect RESISTANCE = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.YELLOW.getRGB(), VaultMod.id("resistance"));
    public static final MobEffect REACH = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.BLUE.getRGB(), VaultMod.id("reach"))
@@ -144,7 +153,24 @@ public class ModEffects {
    public static final MobEffect NO_AI = new NoAiEffect(VaultMod.id("noai"), -2039584);
    public static final MobEffect BLEED = new BleedEffect(VaultMod.id("bleed"));
    public static final Set<MobEffect> PREVENT_DURATION_FLASH = Set.of(
-      TOTEM_PLAYER_HEALTH, TOTEM_MANA_REGEN, TOTEM_PLAYER_DAMAGE, SORCERY, STONESKIN, WITCHERY, METHODICAL, DEPLETED, LAST_STAND, BERSERKING, BLEED
+      TOTEM_PLAYER_HEALTH,
+      TOTEM_MANA_REGEN,
+      TOTEM_PLAYER_DAMAGE,
+      SORCERY,
+      STONESKIN,
+      WITCHERY,
+      METHODICAL,
+      DEPLETED,
+      LAST_STAND,
+      BERSERKING,
+      FRENZY,
+      BLOOD_THIRST,
+      ARCANA,
+      BLAZING,
+      LUCKY_MOMENTUM,
+      TREASURE_SEEKER,
+      BOUNTIFUL_HARVEST,
+      BLEED
    );
    public static final Set<MobEffect> SYNC_TO_CLIENT_ON_MOB = Set.of(
       TAUNT_CHARM,
@@ -209,6 +235,13 @@ public class ModEffects {
                METHODICAL,
                DEPLETED,
                BERSERKING,
+               FRENZY,
+               BLOOD_THIRST,
+               ARCANA,
+               BLAZING,
+               LUCKY_MOMENTUM,
+               TREASURE_SEEKER,
+               BOUNTIFUL_HARVEST,
                LAST_STAND,
                VULNERABLE,
                CHILLED,
@@ -219,7 +252,8 @@ public class ModEffects {
                PYLON_OVERFLOW,
                IMMORTALITY,
                PURIFYING_AURA,
-               BLEED
+               BLEED,
+               MANA_STEAL
             }
          );
       MobEffects.POISON = POISON_OVERRIDE;

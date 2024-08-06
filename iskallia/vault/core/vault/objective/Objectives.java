@@ -9,7 +9,9 @@ import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.world.storage.VirtualWorld;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import net.minecraftforge.api.distmarker.Dist;
@@ -71,6 +73,15 @@ public class Objectives extends DataObject<Objectives> {
    public Objectives addAll(Collection<Objective> objectives) {
       objectives.forEach(this::add);
       return this;
+   }
+
+   public <T extends Objective> List<T> getAll(Class<T> type) {
+      List<T> objectives = new ArrayList<>();
+      this.forEach(type, t -> {
+         objectives.add(t);
+         return false;
+      });
+      return objectives;
    }
 
    public <T extends Objective> boolean forEach(Class<T> type, Predicate<T> consumer) {

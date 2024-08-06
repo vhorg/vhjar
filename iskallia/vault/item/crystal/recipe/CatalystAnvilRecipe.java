@@ -4,7 +4,6 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
-import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.item.InfusedCatalystItem;
@@ -15,6 +14,7 @@ import iskallia.vault.item.crystal.properties.InstabilityCrystalProperties;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.expertise.type.InfuserExpertise;
 import iskallia.vault.world.data.PlayerExpertisesData;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -45,7 +45,7 @@ public class CatalystAnvilRecipe extends VanillaAnvilRecipe {
                if (capacity < size) {
                   ModConfigs.VAULT_MODIFIER_POOLS
                      .getRandom(VaultMod.id("catalyst_curse"), level, JavaRandom.ofNanoTime())
-                     .forEach(modifier -> crystal.getModifiers().add(VaultModifierStack.of((VaultModifier<?>)modifier)));
+                     .forEach(modifierx -> crystal.getModifiers().add(VaultModifierStack.of(modifierx)));
                   crystal.write(output);
                }
 
@@ -63,7 +63,17 @@ public class CatalystAnvilRecipe extends VanillaAnvilRecipe {
             } else {
                Random random = new Random();
                if (shouldRemoveRandomModifier(context.getPlayer().orElse(null), modifiers, random)) {
-                  VaultCrystalItem.scheduleTask(VaultCrystalItem.RemoveRandomNegativeModifierTask.INSTANCE, output);
+                  Iterator<VaultModifierStack> iterator = crystal.getModifiers().getList().iterator();
+
+                  while (iterator.hasNext()) {
+                     VaultModifierStack modifier = iterator.next();
+                     if (modifier.getModifier().getId().equals(VaultCrystalItem.NEGATIVE_MODIFIER_POOL_NAME)) {
+                        modifier.shrink(1);
+                        if (modifier.isEmpty()) {
+                           iterator.remove();
+                        }
+                     }
+                  }
                }
 
                if (crystal.getProperties() instanceof InstabilityCrystalProperties properties

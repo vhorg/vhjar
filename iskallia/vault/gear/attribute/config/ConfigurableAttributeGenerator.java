@@ -4,6 +4,8 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
@@ -28,6 +30,10 @@ public abstract class ConfigurableAttributeGenerator<T, C> {
    public MutableComponent getConfigDisplay(VaultGearModifierReader<T> reader, C object) {
       return this.getConfigRangeDisplay(reader, object);
    }
+
+   public abstract Optional<T> getMinimumValue(List<C> var1);
+
+   public abstract Optional<T> getMaximumValue(List<C> var1);
 
    public interface CustomTierConfig {
       void deserializeAdditional(JsonObject var1, JsonDeserializationContext var2);

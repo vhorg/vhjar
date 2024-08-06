@@ -7,6 +7,7 @@ import iskallia.vault.client.gui.framework.element.DynamicProgressElement;
 import iskallia.vault.client.gui.framework.element.NineSliceButtonElement;
 import iskallia.vault.client.gui.framework.element.ProgressElement;
 import iskallia.vault.client.gui.framework.render.NineSlice;
+import iskallia.vault.client.gui.framework.render.ThreeSliceHorizontal;
 import iskallia.vault.init.ModTextureAtlases;
 import net.minecraft.resources.ResourceLocation;
 
@@ -45,6 +46,63 @@ public final class ScreenTextures {
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/omega_black_market_ornament")
    );
    public static final TextureAtlasRegion VAULT_FORGE_BACKGROUND = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/vault_forge"));
+   public static final TextureAtlasRegion ANTIQUE_COLLECTOR_BOOK_BACKGROUND = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/antique_collector_book")
+   );
+   public static final TextureAtlasRegion ANTIQUE_COLLECTOR_BOOK_NAV_LEFT_ACTIVE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/antique_collector_book_arrow_left_active")
+   );
+   public static final TextureAtlasRegion ANTIQUE_COLLECTOR_BOOK_NAV_LEFT_INACTIVE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/antique_collector_book_arrow_left_inactive")
+   );
+   public static final TextureAtlasRegion ANTIQUE_COLLECTOR_BOOK_NAV_RIGHT_ACTIVE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/antique_collector_book_arrow_right_active")
+   );
+   public static final TextureAtlasRegion ANTIQUE_COLLECTOR_BOOK_NAV_RIGHT_INACTIVE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/button/antique_collector_book_arrow_right_inactive")
+   );
+   public static final ButtonElement.ButtonTextures ANTIQUE_COLLECTOR_BOOK_NAV_LEFT = new ButtonElement.ButtonTextures(
+      ANTIQUE_COLLECTOR_BOOK_NAV_LEFT_INACTIVE,
+      ANTIQUE_COLLECTOR_BOOK_NAV_LEFT_ACTIVE,
+      ANTIQUE_COLLECTOR_BOOK_NAV_LEFT_ACTIVE,
+      ANTIQUE_COLLECTOR_BOOK_NAV_LEFT_INACTIVE
+   );
+   public static final ButtonElement.ButtonTextures ANTIQUE_COLLECTOR_BOOK_NAV_RIGHT = new ButtonElement.ButtonTextures(
+      ANTIQUE_COLLECTOR_BOOK_NAV_RIGHT_INACTIVE,
+      ANTIQUE_COLLECTOR_BOOK_NAV_RIGHT_ACTIVE,
+      ANTIQUE_COLLECTOR_BOOK_NAV_RIGHT_ACTIVE,
+      ANTIQUE_COLLECTOR_BOOK_NAV_RIGHT_INACTIVE
+   );
+   public static final TextureAtlasRegion CARD_ESSENCE_EXTRACTOR_BACKGROUND = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_essence_extractor/background")
+   );
+   public static final TextureAtlasRegion CARD_ESSENCE_EXTRACTOR_EXTRACT_TUMBLE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_essence_extractor/extract_tumble")
+   );
+   public static final TextureAtlasRegion CARD_ESSENCE_EXTRACTOR_SLOT_HINT = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_essence_extractor/card_slot")
+   );
+   public static final TextureAtlasRegion CARD_ESSENCE_EXTRACTOR_PROGRESS_INPUT = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_essence_extractor/card_progress_input")
+   );
+   public static final TextureAtlasRegion CARD_ESSENCE_EXTRACTOR_PROGRESS_OUTPUT = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_essence_extractor/card_progress_output")
+   );
+   public static final TextureAtlasRegion CARD_ESSENCE_EXTRACTOR_BUTTON_UPGRADE_ACTIVE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_essence_extractor/upgrade_active")
+   );
+   public static final TextureAtlasRegion CARD_ESSENCE_EXTRACTOR_BUTTON_UPGRADE_ACTIVE_HELD = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_essence_extractor/upgrade_held")
+   );
+   public static final TextureAtlasRegion CARD_ESSENCE_EXTRACTOR_BUTTON_UPGRADE_INACTIVE = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_essence_extractor/upgrade_inactive")
+   );
+   public static final ButtonElement.ButtonTextures CARD_ESSENCE_EXTRACTOR_BUTTON_UPGRADE = new ButtonElement.ButtonTextures(
+      CARD_ESSENCE_EXTRACTOR_BUTTON_UPGRADE_ACTIVE,
+      CARD_ESSENCE_EXTRACTOR_BUTTON_UPGRADE_ACTIVE_HELD,
+      CARD_ESSENCE_EXTRACTOR_BUTTON_UPGRADE_ACTIVE_HELD,
+      CARD_ESSENCE_EXTRACTOR_BUTTON_UPGRADE_INACTIVE
+   );
    public static final TextureAtlasRegion INSET_ITEM_SLOT_BACKGROUND = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/inset_item_slot_background")
    );
@@ -56,6 +114,9 @@ public final class ScreenTextures {
    );
    public static final TextureAtlasRegion INSET_SLOT_SELECT_FRAME = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/inset_item_slot_select_frame")
+   );
+   public static final TextureAtlasRegion INSET_CARD_SLOT_BACKGROUND = TextureAtlasRegion.of(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/inset_card_slot_background")
    );
    public static final TextureAtlasRegion SCROLLBAR_HANDLE = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/scrollbar_handle"));
    public static final TextureAtlasRegion SCROLLBAR_HANDLE_DISABLED = TextureAtlasRegion.of(
@@ -240,6 +301,31 @@ public final class ScreenTextures {
    );
    public static final TextureAtlasRegion TAB_BACKGROUND_RIGHT_DISABLED = TextureAtlasRegion.of(
       ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_background_right_disabled")
+   );
+   public static final NineSlice.TextureRegion TAB_BACKGROUND_LEFT_9 = NineSlice.region(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_left_background.9"), NineSlice.slice(5, 3, 5, 5)
+   );
+   public static final NineSlice.TextureRegion TAB_BACKGROUND_LEFT_9_DISABLED = NineSlice.region(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_left_background_disabled.9"), NineSlice.slice(5, 3, 5, 5)
+   );
+   public static final NineSlice.TextureRegion TAB_BACKGROUND_RIGHT_9 = NineSlice.region(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_right_background.9"), NineSlice.slice(3, 5, 5, 5)
+   );
+   public static final NineSlice.TextureRegion TAB_BACKGROUND_RIGHT_9_DISABLED = NineSlice.region(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_right_background_disabled.9"), NineSlice.slice(3, 5, 5, 5)
+   );
+   public static final NineSlice.TextureRegion CARD_DECK_BACKGROUND_9 = NineSlice.region(
+      ModTextureAtlases.SCREEN,
+      VaultMod.id("gui/screen/card_deck_background.9"),
+      NineSlice.slice(20, 20, 20, 20),
+      NineSlice.CenterDrawMode.Tiled,
+      NineSlice.FrameDrawMode.Tiled
+   );
+   public static final ThreeSliceHorizontal.TextureRegion CARD_DECK_TITLE_SMALL_3 = ThreeSliceHorizontal.region(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_deck_title_small"), ThreeSliceHorizontal.slice(4, 4)
+   );
+   public static final ThreeSliceHorizontal.TextureRegion CARD_DECK_TITLE_LARGE_3 = ThreeSliceHorizontal.region(
+      ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/card_deck_title_large"), ThreeSliceHorizontal.slice(16, 16)
    );
    public static final TextureAtlasRegion TAB_ICON_STATISTICS = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_statistics"));
    public static final TextureAtlasRegion TAB_ICON_ABILITIES = TextureAtlasRegion.of(ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/tab_icon_abilities"));

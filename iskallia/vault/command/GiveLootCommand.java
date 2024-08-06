@@ -11,6 +11,7 @@ import iskallia.vault.block.item.FinalVaultFrameBlockItem;
 import iskallia.vault.block.item.LootStatueBlockItem;
 import iskallia.vault.block.item.TrophyStatueBlockItem;
 import iskallia.vault.config.LegacyLootTablesConfig;
+import iskallia.vault.core.data.compound.ItemStackList;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.CrateLootGenerator;
 import iskallia.vault.core.vault.objective.AwardCrateObjective;
@@ -22,7 +23,6 @@ import iskallia.vault.util.EntityHelper;
 import iskallia.vault.util.WeekKey;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
@@ -39,7 +39,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.LootContext.Builder;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -64,31 +63,6 @@ public class GiveLootCommand extends Command {
 
    @Override
    public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
-      builder.then(
-         Commands.literal("arena_crate")
-            .then(
-               Commands.argument("champion", StringArgumentType.word())
-                  .executes(
-                     ctx -> this.giveArenaCrate(
-                        ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException(), StringArgumentType.getString(ctx, "champion")
-                     )
-                  )
-            )
-      );
-      builder.then(
-         Commands.literal("raffle_boss_crate")
-            .then(
-               Commands.argument("boss_name", StringArgumentType.word())
-                  .executes(
-                     ctx -> this.giveRaffleBossCrate(
-                        ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException(), StringArgumentType.getString(ctx, "boss_name")
-                     )
-                  )
-            )
-      );
-      builder.then(
-         Commands.literal("normal_boss_crate").executes(ctx -> this.giveNormalBossCrate(ctx, ((CommandSourceStack)ctx.getSource()).getPlayerOrException()))
-      );
       builder.then(
          Commands.literal("loot_statue")
             .then(
@@ -174,6 +148,7 @@ public class GiveLootCommand extends Command {
             CrateLootGenerator crateLootGenerator = new CrateLootGenerator(
                objective.get(AwardCrateObjective.LOOT_TABLE),
                0.0F,
+               ItemStackList.create(),
                objective.has(AwardCrateObjective.ADD_ARTIFACT),
                objective.get(AwardCrateObjective.ARTIFACT_CHANCE)
             );
@@ -225,43 +200,6 @@ public class GiveLootCommand extends Command {
    private int giveLootStatue(String name, CommandContext<CommandSourceStack> context, ServerPlayer player) {
       ItemStack statue = LootStatueBlockItem.getStatueBlockItem(name);
       player.addItem(statue);
-      return 0;
-   }
-
-   public int giveArenaCrate(CommandContext<CommandSourceStack> context, ServerPlayer player, String championName) {
-      ServerLevel world = player.getLevel();
-      Builder builder = new Builder(world).withRandom(world.random).withLuck(player.getLuck());
-      LootContext ctx = builder.create(LootContextParamSets.EMPTY);
-      NonNullList<ItemStack> stacks = NonNullList.create();
-      stacks.add(LootStatueBlockItem.getStatueBlockItem(championName));
-      int level = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
-      List<ItemStack> items = world.getServer().getLootTables().get(ModConfigs.LOOT_TABLES.getForLevel(level).getArenaCrate()).getRandomItems(ctx);
-      stacks.addAll(items);
-      ItemStack crate = VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.ARENA, stacks);
-      EntityHelper.giveItem(player, crate);
-      return 0;
-   }
-
-   public int giveNormalBossCrate(CommandContext<CommandSourceStack> context, ServerPlayer player) {
-      ServerLevel world = player.getLevel();
-      Builder builder = new Builder(world).withRandom(world.random).withLuck(player.getLuck());
-      LootContext ctx = builder.create(LootContextParamSets.EMPTY);
-      int level = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
-      NonNullList<ItemStack> stacks = NonNullList.create();
-      ItemStack crate = VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.BOSS, stacks);
-      EntityHelper.giveItem(player, crate);
-      return 0;
-   }
-
-   public int giveRaffleBossCrate(CommandContext<CommandSourceStack> context, ServerPlayer player, String bossName) {
-      ServerLevel world = player.getLevel();
-      Builder builder = new Builder(world).withRandom(world.random).withLuck(player.getLuck());
-      LootContext ctx = builder.create(LootContextParamSets.EMPTY);
-      NonNullList<ItemStack> stacks = NonNullList.create();
-      stacks.add(LootStatueBlockItem.getStatueBlockItem(bossName));
-      int level = PlayerVaultStatsData.get(world).getVaultStats(player).getVaultLevel();
-      ItemStack crate = VaultCrateBlock.getCrateWithLoot(VaultCrateBlock.Type.BOSS, stacks);
-      EntityHelper.giveItem(player, crate);
       return 0;
    }
 

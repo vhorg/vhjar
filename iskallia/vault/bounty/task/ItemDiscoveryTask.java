@@ -90,6 +90,10 @@ public class ItemDiscoveryTask extends Task<ItemDiscoveryProperties> {
             return;
          }
 
+         if (e.getPlayer() == null) {
+            return;
+         }
+
          player = e.getPlayer();
          items = e.getLoot();
       }

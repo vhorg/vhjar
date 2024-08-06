@@ -11,6 +11,8 @@ import iskallia.vault.client.gui.overlay.PlayerRageOverlay;
 import iskallia.vault.client.gui.overlay.VaultBarOverlay;
 import iskallia.vault.client.gui.overlay.VaultPartyOverlay;
 import iskallia.vault.client.gui.overlay.VignetteOverlay;
+import iskallia.vault.client.gui.screen.AntiqueCollectorBookScreen;
+import iskallia.vault.client.gui.screen.CardDeckScreen;
 import iskallia.vault.client.gui.screen.CatalystInfusionTableScreen;
 import iskallia.vault.client.gui.screen.CryochamberScreen;
 import iskallia.vault.client.gui.screen.EtchingTradeScreen;
@@ -25,11 +27,11 @@ import iskallia.vault.client.gui.screen.VaultCrateScreen;
 import iskallia.vault.client.gui.screen.block.AlchemyArchiveScreen;
 import iskallia.vault.client.gui.screen.block.AlchemyTableScreen;
 import iskallia.vault.client.gui.screen.block.AscensionForgeScreen;
+import iskallia.vault.client.gui.screen.block.CardEssenceExtractorScreen;
 import iskallia.vault.client.gui.screen.block.CrystalWorkbenchScreen;
 import iskallia.vault.client.gui.screen.block.InscriptionTableScreen;
 import iskallia.vault.client.gui.screen.block.ModifierDiscoveryScreen;
 import iskallia.vault.client.gui.screen.block.ModifierWorkbenchScreen;
-import iskallia.vault.client.gui.screen.block.RelicPedestalScreen;
 import iskallia.vault.client.gui.screen.block.SkillAltarScreen;
 import iskallia.vault.client.gui.screen.block.SpiritExtractorScreen;
 import iskallia.vault.client.gui.screen.block.ToolStationScreen;
@@ -73,6 +75,7 @@ public class ModScreens {
       MenuScreens.register(ModContainers.TRANSMOG_TABLE_CONTAINER, TransmogTableScreen::new);
       MenuScreens.register(ModContainers.CATALYST_INFUSION_TABLE_CONTAINER, CatalystInfusionTableScreen::new);
       MenuScreens.register(ModContainers.SHARD_POUCH_CONTAINER, ShardPouchScreen::new);
+      MenuScreens.register(ModContainers.ANTIQUE_COLLECTOR_BOOK_CONTAINER, AntiqueCollectorBookScreen::new);
       MenuScreens.register(ModContainers.SHARD_TRADE_CONTAINER, ShardTradeScreen::new);
       MenuScreens.register(ModContainers.CRYOCHAMBER_CONTAINER, CryochamberScreen::new);
       MenuScreens.register(ModContainers.ETCHING_TRADE_CONTAINER, EtchingTradeScreen::new);
@@ -89,7 +92,6 @@ public class ModScreens {
       MenuScreens.register(ModContainers.VAULT_RECYCLER_CONTAINER, VaultRecyclerScreen::new);
       MenuScreens.register(ModContainers.VAULT_DIFFUSER_CONTAINER, VaultDiffuserScreen::new);
       MenuScreens.register(ModContainers.VAULT_HARVESTER_CONTAINER, VaultDiffuserUpgradedScreen::new);
-      MenuScreens.register(ModContainers.RELIC_PEDESTAL_CONTAINER, RelicPedestalScreen::new);
       MenuScreens.register(ModContainers.SPIRIT_EXTRACTOR_CONTAINER, SpiritExtractorScreen::new);
       MenuScreens.register(ModContainers.WARDROBE_GEAR_CONTAINER, WardrobeScreen.Gear::new);
       MenuScreens.register(ModContainers.WARDROBE_HOTBAR_CONTAINER, WardrobeScreen.Hotbar::new);
@@ -103,6 +105,8 @@ public class ModScreens {
       MenuScreens.register(ModContainers.SKILL_ALTAR_CONTAINER, SkillAltarScreen.Default::new);
       MenuScreens.register(ModContainers.SKILL_ALTAR_IMPORT_CONTAINER, SkillAltarScreen.Import::new);
       MenuScreens.register(ModContainers.ASCENSION_FORGE_CONTAINER, AscensionForgeScreen::new);
+      MenuScreens.register(ModContainers.CARD_DECK_CONTAINER, CardDeckScreen::new);
+      MenuScreens.register(ModContainers.CARD_ESSENCE_EXTRACTOR_CONTAINER, CardEssenceExtractorScreen::new);
    }
 
    public static void registerOverlayEvents() {

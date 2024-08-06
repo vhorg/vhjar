@@ -12,7 +12,9 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.item.gear.VaultLevelItem;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
@@ -21,12 +23,14 @@ public class CrateLootGenerator {
    @Nullable
    private final LootTableKey lootTable;
    private final float itemQuantity;
+   private final List<ItemStack> additionalItems;
    private final boolean addArtifact;
    private final float artifactChance;
 
-   public CrateLootGenerator(@Nullable LootTableKey lootTable, float itemQuantity, boolean addArtifact, float artifactChance) {
+   public CrateLootGenerator(@Nullable LootTableKey lootTable, float itemQuantity, List<ItemStack> additionalItems, boolean addArtifact, float artifactChance) {
       this.lootTable = lootTable;
       this.itemQuantity = itemQuantity;
+      this.additionalItems = additionalItems;
       this.addArtifact = addArtifact;
       this.artifactChance = artifactChance;
    }
@@ -53,6 +57,8 @@ public class CrateLootGenerator {
          generator.getItems().forEachRemaining(loot::add);
       }
 
+      this.additionalItems.forEach(stack -> loot.add(stack.copy()));
+      this.mergeLoot(loot);
       loot.removeIf(ItemStack::isEmpty);
       NonNullList<ItemStack> specialLoot = this.createSpecialLoot(listener, random);
 
@@ -63,6 +69,30 @@ public class CrateLootGenerator {
       loot.addAll(specialLoot);
       Collections.shuffle(loot);
       return loot;
+   }
+
+   private void mergeLoot(NonNullList<ItemStack> loot) {
+      List<ItemStack> merged = new ArrayList<>();
+
+      for (ItemStack stack : loot) {
+         for (ItemStack result : merged) {
+            if (result.is(stack.getItem())
+               && !(result.hasTag() ^ stack.hasTag())
+               && result.areCapsCompatible(stack)
+               && (!result.hasTag() || result.getTag().equals(stack.getTag()))) {
+               int difference = Math.min(stack.getCount(), result.getMaxStackSize() - result.getCount());
+               stack.shrink(difference);
+               result.grow(difference);
+            }
+         }
+
+         if (!stack.isEmpty()) {
+            merged.add(stack.copy());
+         }
+      }
+
+      loot.clear();
+      loot.addAll(merged);
    }
 
    public NonNullList<ItemStack> createSpecialLoot(@Nullable Listener listener, RandomSource random) {

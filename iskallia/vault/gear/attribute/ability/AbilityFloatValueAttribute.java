@@ -7,6 +7,8 @@ import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.util.NetcodeUtils;
 import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -107,6 +109,16 @@ public abstract class AbilityFloatValueAttribute extends AbilityGearAttribute {
 
       public T generateRandomValue(C object, Random random) {
          return this.cfgConverter.apply(object);
+      }
+
+      @Override
+      public Optional<T> getMinimumValue(List<C> configurations) {
+         return configurations.stream().map(this.cfgConverter).min((a, b) -> Float.compare(a.getAmount(), b.getAmount()));
+      }
+
+      @Override
+      public Optional<T> getMaximumValue(List<C> configurations) {
+         return configurations.stream().map(this.cfgConverter).max((a, b) -> Float.compare(a.getAmount(), b.getAmount()));
       }
    }
 

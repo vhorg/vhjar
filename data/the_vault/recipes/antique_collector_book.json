@@ -1,0 +1,29 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " le",
+        "gbg",
+        "rl "
+    ],
+    "key": {
+        "b": {
+            "item": "minecraft:book"
+        },
+        "l": {
+            "item": "minecraft:lime_dye"
+        },
+        "g": {
+            "item": "minecraft:green_dye"
+        },
+        "r": {
+            "item": "minecraft:red_dye"
+        },
+        "e": {
+            "item": "the_vault:gem_echo"
+        }
+    },
+    "result": {
+        "item": "the_vault:antique_collector_book",
+        "count": 1
+    }
+}

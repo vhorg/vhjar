@@ -11,6 +11,7 @@ import iskallia.vault.core.event.common.CrateAwardEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
 import iskallia.vault.core.vault.ClientVaults;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.VaultLevel;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEntities;
@@ -86,6 +87,7 @@ public class VaultDollItem extends BasicItem {
          ServerLevel serverLevel = player.getLevel();
          Vault vault = data.getVault();
          UUID vaultId = vault.get(Vault.ID);
+         int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
          ItemStack doll = getFirstDollMatching(player, stack -> isDollOwnedByDifferentPlayer(serverLevel, stack, player) && this.isTheSameVault(stack, vaultId));
          if (doll.isEmpty()) {
             return;
@@ -95,7 +97,7 @@ public class VaultDollItem extends BasicItem {
             float percentage = getLootPercent(doll);
             if (data.getRandom().nextFloat() < percentage) {
                NonNullList<ItemStack> items = data.getCrateLootGenerator().generate(vault, data.getListener(), data.getRandom());
-               ItemStack crate = VaultCrateBlock.getCrateWithLoot(data.getCrateType(), items);
+               ItemStack crate = VaultCrateBlock.getCrateWithLootWithAntiques(data.getCrateType(), level, items);
                DollLootData.get(serverLevel, dollId).addLoot(crate);
             }
          });

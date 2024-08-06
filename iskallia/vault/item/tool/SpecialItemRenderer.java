@@ -38,6 +38,21 @@ public class SpecialItemRenderer extends BlockEntityWithoutLevelRenderer {
       int overlay,
       Boolean foil
    ) {
+      this.renderModel(location, tint, stack, transformType, matrices, buffer, light, overlay, foil, () -> {});
+   }
+
+   public void renderModel(
+      ModelResourceLocation location,
+      int tint,
+      ItemStack stack,
+      TransformType transformType,
+      PoseStack matrices,
+      MultiBufferSource buffer,
+      int light,
+      int overlay,
+      Boolean foil,
+      Runnable runnable
+   ) {
       BakedModel model = Minecraft.getInstance().getModelManager().getModel(location);
       if (transformType == TransformType.GUI && !model.usesBlockLight()) {
          Lighting.setupForFlatItems();
@@ -49,6 +64,7 @@ public class SpecialItemRenderer extends BlockEntityWithoutLevelRenderer {
          matrices, model, transformType, transformType == TransformType.FIRST_PERSON_LEFT_HAND || transformType == TransformType.THIRD_PERSON_LEFT_HAND
       );
       matrices.translate(-0.5, -0.5, -0.5);
+      runnable.run();
       if (model.isLayered()) {
          for (Pair<BakedModel, RenderType> layerModel : model.getLayerModels(stack, true)) {
             BakedModel layer = (BakedModel)layerModel.getFirst();

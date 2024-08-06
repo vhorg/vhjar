@@ -9,7 +9,6 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.item.modification.ReforgeTagModificationFocus;
 import java.util.List;
 import java.util.Random;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Player;
@@ -32,46 +31,31 @@ public class ReforgeAddTaggedModification extends GearModification {
          return modTag == null
             ? Lists.newArrayList(
                new Component[]{
-                  new TranslatableComponent("the_vault.gear_modification.reforge_all_add_tag.1"),
-                  new TranslatableComponent("the_vault.gear_modification.reforge_all_add_tag.2")
+                  this.makeModificationComponent("description.1", new Component[0]), this.makeModificationComponent("description.2", new Component[0])
                }
             )
             : Lists.newArrayList(
                new Component[]{
-                  new TranslatableComponent("the_vault.gear_modification.reforge_all_add_tag.1"),
-                  new TranslatableComponent("the_vault.gear_modification.reforge_all_add_tag.2.value", new Object[]{modTag.getDisplayComponent()})
+                  this.makeModificationComponent("description.1", new Component[0]),
+                  new TranslatableComponent(this.getTranslationKey("description.2.value"), new Object[]{modTag.getDisplayComponent()})
                }
             );
       } else {
          return Lists.newArrayList(
             new Component[]{
-               new TranslatableComponent("the_vault.gear_modification.reforge_all_add_tag.1"),
-               new TranslatableComponent("the_vault.gear_modification.reforge_all_add_tag.2")
+               this.makeModificationComponent("description.1", new Component[0]), this.makeModificationComponent("description.2", new Component[0])
             }
          );
       }
    }
 
    @Override
-   public Component getInvalidDescription(ItemStack materialStack) {
+   public GearModification.Result doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
       if (!materialStack.isEmpty() && materialStack.getItem() instanceof ReforgeTagModificationFocus) {
          VaultGearTagConfig.ModTagGroup modTag = ReforgeTagModificationFocus.getModifierTag(materialStack);
-         return (Component)(modTag == null
-            ? super.getInvalidDescription(materialStack)
-            : new TranslatableComponent("the_vault.gear_modification.reforge_all_add_tag.value.invalid", new Object[]{modTag.getDisplayComponent()})
-               .withStyle(ChatFormatting.RED));
+         return modTag == null ? GearModification.Result.makeActionError("no_tag") : VaultGearModifierHelper.reForgeAllWithTag(modTag, stack, rand);
       } else {
-         return super.getInvalidDescription(materialStack);
-      }
-   }
-
-   @Override
-   public boolean doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
-      if (!materialStack.isEmpty() && materialStack.getItem() instanceof ReforgeTagModificationFocus) {
-         VaultGearTagConfig.ModTagGroup modTag = ReforgeTagModificationFocus.getModifierTag(materialStack);
-         return modTag == null ? false : VaultGearModifierHelper.reForgeAllWithTag(modTag, stack, rand);
-      } else {
-         return false;
+         return GearModification.Result.errorInternal();
       }
    }
 }

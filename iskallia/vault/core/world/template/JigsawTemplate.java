@@ -35,6 +35,10 @@ public class JigsawTemplate extends Template {
       this.root = root;
    }
 
+   public Template getRoot() {
+      return this.root;
+   }
+
    @Override
    public Iterator<ResourceLocation> getTags() {
       return this.root.getTags();
@@ -131,18 +135,24 @@ public class JigsawTemplate extends Template {
                      Rotation rotation = this.getRotation(data2, data1, random);
                      JigsawTemplate child = new JigsawTemplate(childTemplate);
                      child.configurator = settings -> {
-                        int index = 0;
-                        settings.getTileProcessors().add(index++, TileProcessor.rotate(rotation, target, true));
-                        settings.getTileProcessors().add(index++, TileProcessor.translate(offset));
-                        settings.getTileProcessors().add(index++, TileProcessor.ofJigsaw());
+                        int tileIndex = 0;
+                        settings.getTileProcessors().add(tileIndex++, TileProcessor.rotate(rotation, target, true));
+                        settings.getTileProcessors().add(tileIndex++, TileProcessor.translate(offset));
+                        settings.getTileProcessors().add(tileIndex++, TileProcessor.ofJigsaw());
 
                         for (PaletteKey palette : entry.getPalettes()) {
                            for (TileProcessor tileProcessor : palette.get(version).getTileProcessors()) {
-                              settings.getTileProcessors().add(index++, tileProcessor);
+                              settings.getTileProcessors().add(tileIndex++, tileProcessor);
                            }
+                        }
 
+                        int entityIndex = 0;
+                        settings.getEntityProcessors().add(entityIndex++, EntityProcessor.rotate(rotation, target, true));
+                        settings.getEntityProcessors().add(entityIndex++, EntityProcessor.translate(offset));
+
+                        for (PaletteKey palette : entry.getPalettes()) {
                            for (EntityProcessor entityProcessor : palette.get(version).getEntityProcessors()) {
-                              settings.getEntityProcessors().add(index++, entityProcessor);
+                              settings.getEntityProcessors().add(entityIndex++, entityProcessor);
                            }
                         }
                      };

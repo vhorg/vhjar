@@ -15,7 +15,7 @@ import iskallia.vault.bounty.task.Task;
 import iskallia.vault.client.gui.screen.bounty.BountyScreen;
 import iskallia.vault.client.gui.screen.bounty.element.BountyElement;
 import iskallia.vault.init.ModKeybinds;
-import iskallia.vault.util.EntityGroupsUtils;
+import iskallia.vault.util.GroupUtils;
 import iskallia.vault.util.TextUtil;
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -137,7 +137,7 @@ public class BountyProgressOverlay implements IIngameOverlay {
       TextComponent target;
       int iconX;
       if (task instanceof KillEntityTask killEntityTask) {
-         this.killEntityTargets.computeIfAbsent(bounty.getId(), id -> EntityGroupsUtils.getDescriptions(killEntityTask.getProperties().getFilter()));
+         this.killEntityTargets.computeIfAbsent(bounty.getId(), id -> GroupUtils.getEntityNamesAsString(killEntityTask.getProperties().getFilter()));
          if (this.time <= 0L) {
             this.updateIndex(bounty.getId());
          }

@@ -8,10 +8,12 @@ import javax.annotation.Nonnull;
 
 public class ComparableAttributeComparator<T extends Comparable<T>> extends VaultGearAttributeComparator.Merger<T> {
    private final BiFunction<T, T, T> differenceFn;
+   private final BiFunction<T, T, T> addFn;
 
-   public ComparableAttributeComparator(VaultGearAttributeTypeMerger<T, T> merger, BiFunction<T, T, T> differenceFn) {
+   public ComparableAttributeComparator(VaultGearAttributeTypeMerger<T, T> merger, BiFunction<T, T, T> differenceFn, BiFunction<T, T, T> addFn) {
       super(merger);
       this.differenceFn = differenceFn;
+      this.addFn = addFn;
    }
 
    @Deprecated

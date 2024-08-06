@@ -457,10 +457,10 @@ public class CakeObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       if (objective != this || this.has(TARGET) && this.get(COUNT) >= this.get(TARGET)) {
          for (Objective child : this.get(CHILDREN)) {
-            if (child.isActive(vault, objective)) {
+            if (child.isActive(world, vault, objective)) {
                return true;
             }
          }

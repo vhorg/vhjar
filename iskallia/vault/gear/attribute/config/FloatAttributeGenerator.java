@@ -3,6 +3,8 @@ package iskallia.vault.gear.attribute.config;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import java.text.DecimalFormat;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
@@ -36,6 +38,16 @@ public class FloatAttributeGenerator extends NumberRangeGenerator<Float, FloatAt
             .append(new TextComponent(reader.getModifierName()).withStyle(reader.getColoredTextStyle()));
    }
 
+   @Override
+   public Optional<Float> getMinimumValue(List<FloatAttributeGenerator.Range> configurations) {
+      return configurations.stream().map(range -> range.min).min(Double::compare);
+   }
+
+   @Override
+   public Optional<Float> getMaximumValue(List<FloatAttributeGenerator.Range> configurations) {
+      return configurations.stream().map(FloatAttributeGenerator.Range::generateMaximumNumber).min(Double::compare);
+   }
+
    public static class Range extends NumberRangeGenerator.NumberRange<Float> {
       @Expose
       private float min;
@@ -56,7 +68,12 @@ public class FloatAttributeGenerator extends NumberRangeGenerator<Float, FloatAt
 
       public Float generateNumber(Random random) {
          int steps = Math.round(Math.max(this.max - this.min, 0.0F) / this.step) + 1;
-         return Math.min(this.min + random.nextInt(steps) * this.step, this.max);
+         return this.min + random.nextInt(steps) * this.step;
+      }
+
+      public Float generateMaximumNumber() {
+         int steps = Math.round(Math.max(this.max - this.min, 0.0F) / this.step);
+         return this.min + steps * this.step;
       }
    }
 }

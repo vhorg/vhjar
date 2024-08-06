@@ -24,9 +24,19 @@ public final class NineSlice {
    }
 
    public static NineSlice.TextureRegion region(
-      Supplier<ITextureAtlas> atlasSupplier, ResourceLocation resourceLocation, NineSlice.Slices slices, NineSlice.DrawMode drawMode
+      Supplier<ITextureAtlas> atlasSupplier, ResourceLocation resourceLocation, NineSlice.Slices slices, NineSlice.CenterDrawMode drawMode
    ) {
       return NineSlice.TextureRegion.of(atlasSupplier, resourceLocation, slices, drawMode);
+   }
+
+   public static NineSlice.TextureRegion region(
+      Supplier<ITextureAtlas> atlasSupplier,
+      ResourceLocation resourceLocation,
+      NineSlice.Slices slices,
+      NineSlice.CenterDrawMode drawMode,
+      NineSlice.FrameDrawMode frameDrawMode
+   ) {
+      return NineSlice.TextureRegion.of(atlasSupplier, resourceLocation, slices, drawMode, frameDrawMode);
    }
 
    public static NineSlice.Slices slice(int left, int right, int top, int bottom) {
@@ -49,9 +59,10 @@ public final class NineSlice {
       int height,
       NineSlice.Slices slices,
       TextureAtlasSprite sprite,
-      NineSlice.DrawMode drawMode
+      NineSlice.CenterDrawMode drawMode,
+      NineSlice.FrameDrawMode frameDrawMode
    ) {
-      buffer(buffer.getFor(sprite.atlas().location()), poseStack, posX, posY, posZ, width, height, slices, sprite, drawMode);
+      buffer(buffer.getFor(sprite.atlas().location()), poseStack, posX, posY, posZ, width, height, slices, sprite, drawMode, frameDrawMode);
    }
 
    public static void buffer(
@@ -76,7 +87,8 @@ public final class NineSlice {
          sprite.getU1(),
          sprite.getV0(),
          sprite.getV1(),
-         textureRegion.drawMode()
+         textureRegion.drawMode(),
+         textureRegion.frameDrawMode()
       );
    }
 
@@ -92,7 +104,8 @@ public final class NineSlice {
       iskallia.vault.client.render.TextureRegion region,
       int atlasWidth,
       int atlasHeight,
-      NineSlice.DrawMode drawMode
+      NineSlice.CenterDrawMode drawMode,
+      NineSlice.FrameDrawMode frameDrawMode
    ) {
       buffer(
          vertexConsumer,
@@ -112,7 +125,8 @@ public final class NineSlice {
          (float)(region.x() + region.width()) / atlasWidth,
          (float)region.y() / atlasWidth,
          (float)(region.y() + region.height()) / atlasHeight,
-         drawMode
+         drawMode,
+         frameDrawMode
       );
    }
 
@@ -126,7 +140,8 @@ public final class NineSlice {
       int height,
       NineSlice.Slices slices,
       TextureAtlasSprite sprite,
-      NineSlice.DrawMode drawMode
+      NineSlice.CenterDrawMode drawMode,
+      NineSlice.FrameDrawMode frameDrawMode
    ) {
       buffer(
          vertexConsumer,
@@ -146,7 +161,8 @@ public final class NineSlice {
          sprite.getU1(),
          sprite.getV0(),
          sprite.getV1(),
-         drawMode
+         drawMode,
+         frameDrawMode
       );
    }
 
@@ -168,7 +184,8 @@ public final class NineSlice {
       float u1,
       float v0,
       float v1,
-      NineSlice.DrawMode drawMode
+      NineSlice.CenterDrawMode drawMode,
+      NineSlice.FrameDrawMode frameDrawMode
    ) {
       float pU = (u1 - u0) / spriteWidth;
       float pV = (v1 - v0) / spriteHeight;
@@ -186,23 +203,118 @@ public final class NineSlice {
       float bottomY = posY + height - sliceBottomHeight;
       float middleWidth = rightX - leftX;
       float middleHeight = bottomY - topY;
+      int spriteMiddleWidth = spriteWidth - sliceLeftWidth - sliceRightWidth - 2;
+      int spriteMiddleHeight = spriteHeight - sliceTopHeight - sliceBottomHeight - 2;
       bufferQuad(vertexConsumer, poseStack, posX, posY, posZ, sliceLeftWidth, sliceTopHeight, u0, leftU1, v0, topV1);
       bufferQuad(vertexConsumer, poseStack, rightX, posY, posZ, sliceRightWidth, sliceTopHeight, rightU0, u1, v0, topV1);
       bufferQuad(vertexConsumer, poseStack, posX, bottomY, posZ, sliceLeftWidth, sliceBottomHeight, u0, leftU1, bottomV0, v1);
       bufferQuad(vertexConsumer, poseStack, rightX, bottomY, posZ, sliceRightWidth, sliceBottomHeight, rightU0, u1, bottomV0, v1);
-      bufferQuad(vertexConsumer, poseStack, leftX, posY, posZ, middleWidth, sliceTopHeight, middleU0, middleU1, v0, topV1);
-      bufferQuad(vertexConsumer, poseStack, leftX, bottomY, posZ, middleWidth, sliceBottomHeight, middleU0, middleU1, bottomV0, v1);
-      bufferQuad(vertexConsumer, poseStack, posX, topY, posZ, sliceLeftWidth, middleHeight, u0, leftU1, middleV0, middleV1);
-      bufferQuad(vertexConsumer, poseStack, rightX, topY, posZ, sliceRightWidth, middleHeight, rightU0, u1, middleV0, middleV1);
-      if (drawMode == NineSlice.DrawMode.Stretched) {
+      if (frameDrawMode == NineSlice.FrameDrawMode.Stretched) {
+         bufferQuad(vertexConsumer, poseStack, leftX, posY, posZ, middleWidth, sliceTopHeight, middleU0, middleU1, v0, topV1);
+         bufferQuad(vertexConsumer, poseStack, leftX, bottomY, posZ, middleWidth, sliceBottomHeight, middleU0, middleU1, bottomV0, v1);
+         bufferQuad(vertexConsumer, poseStack, posX, topY, posZ, sliceLeftWidth, middleHeight, u0, leftU1, middleV0, middleV1);
+         bufferQuad(vertexConsumer, poseStack, rightX, topY, posZ, sliceRightWidth, middleHeight, rightU0, u1, middleV0, middleV1);
+      } else {
+         if (frameDrawMode != NineSlice.FrameDrawMode.Tiled) {
+            throw new UnsupportedOperationException("Unsupported nine-slice frame draw mode: " + frameDrawMode.toString());
+         }
+
+         for (float topStepX = leftX; topStepX < rightX; topStepX += spriteMiddleWidth) {
+            float topWidth = Math.min((float)spriteMiddleWidth, rightX - topStepX);
+            float topU1 = middleU0 + topWidth / spriteMiddleWidth * (middleU1 - middleU0);
+            bufferQuadBounded(
+               vertexConsumer,
+               poseStack,
+               topStepX,
+               posY,
+               posZ,
+               topWidth,
+               sliceTopHeight,
+               middleU0,
+               topU1,
+               v0,
+               topV1,
+               leftX,
+               rightX,
+               posY,
+               posY + sliceTopHeight
+            );
+         }
+
+         for (float bottomStepX = leftX; bottomStepX < rightX; bottomStepX += spriteMiddleWidth) {
+            float bottomWidth = Math.min((float)spriteMiddleWidth, rightX - bottomStepX);
+            float bottomU1 = middleU0 + bottomWidth / spriteMiddleWidth * (middleU1 - middleU0);
+            bufferQuadBounded(
+               vertexConsumer,
+               poseStack,
+               bottomStepX,
+               bottomY,
+               posZ,
+               bottomWidth,
+               sliceBottomHeight,
+               middleU0,
+               bottomU1,
+               bottomV0,
+               v1,
+               leftX,
+               rightX,
+               bottomY,
+               bottomY + sliceBottomHeight
+            );
+         }
+
+         for (float leftStepY = topY; leftStepY < bottomY; leftStepY += spriteMiddleHeight) {
+            float leftHeight = Math.min((float)spriteMiddleHeight, bottomY - leftStepY);
+            float leftV1 = middleV0 + leftHeight / spriteMiddleHeight * (middleV1 - middleV0);
+            bufferQuadBounded(
+               vertexConsumer,
+               poseStack,
+               posX,
+               leftStepY,
+               posZ,
+               sliceLeftWidth,
+               leftHeight,
+               u0,
+               leftU1,
+               middleV0,
+               leftV1,
+               posX,
+               posX + sliceLeftWidth,
+               topY,
+               bottomY
+            );
+         }
+
+         for (float rightStepY = topY; rightStepY < bottomY; rightStepY += spriteMiddleHeight) {
+            float rightHeight = Math.min((float)spriteMiddleHeight, bottomY - rightStepY);
+            float rightV1 = middleV0 + rightHeight / spriteMiddleHeight * (middleV1 - middleV0);
+            bufferQuadBounded(
+               vertexConsumer,
+               poseStack,
+               rightX,
+               rightStepY,
+               posZ,
+               sliceRightWidth,
+               rightHeight,
+               rightU0,
+               u1,
+               middleV0,
+               rightV1,
+               rightX,
+               rightX + sliceRightWidth,
+               topY,
+               bottomY
+            );
+         }
+      }
+
+      if (drawMode == NineSlice.CenterDrawMode.Stretched) {
          bufferQuad(vertexConsumer, poseStack, leftX, topY, posZ, middleWidth, middleHeight, middleU0, middleU1, middleV0, middleV1);
       } else {
-         if (drawMode != NineSlice.DrawMode.Tiled) {
+         if (drawMode != NineSlice.CenterDrawMode.Tiled) {
             throw new UnsupportedOperationException("Unsupported nine-slice draw mode: " + drawMode.toString());
          }
 
-         int spriteMiddleWidth = spriteWidth - sliceLeftWidth - sliceRightWidth;
-         int spriteMiddleHeight = spriteHeight - sliceTopHeight - sliceBottomHeight;
          int cols = Mth.ceil(middleWidth / spriteMiddleWidth);
          int rows = Mth.ceil(middleHeight / spriteMiddleHeight);
 
@@ -283,7 +395,12 @@ public final class NineSlice {
    private NineSlice() {
    }
 
-   public static enum DrawMode {
+   public static enum CenterDrawMode {
+      Stretched,
+      Tiled;
+   }
+
+   public static enum FrameDrawMode {
       Stretched,
       Tiled;
    }
@@ -294,15 +411,31 @@ public final class NineSlice {
       }
    }
 
-   public record TextureRegion(Supplier<ITextureAtlas> atlas, ResourceLocation resourceLocation, NineSlice.Slices slices, NineSlice.DrawMode drawMode) {
+   public record TextureRegion(
+      Supplier<ITextureAtlas> atlas,
+      ResourceLocation resourceLocation,
+      NineSlice.Slices slices,
+      NineSlice.CenterDrawMode drawMode,
+      NineSlice.FrameDrawMode frameDrawMode
+   ) {
       public static NineSlice.TextureRegion of(Supplier<ITextureAtlas> atlasSupplier, ResourceLocation resourceLocation, NineSlice.Slices slices) {
-         return of(atlasSupplier, resourceLocation, slices, NineSlice.DrawMode.Stretched);
+         return of(atlasSupplier, resourceLocation, slices, NineSlice.CenterDrawMode.Stretched);
       }
 
       public static NineSlice.TextureRegion of(
-         Supplier<ITextureAtlas> atlasSupplier, ResourceLocation resourceLocation, NineSlice.Slices slices, NineSlice.DrawMode drawMode
+         Supplier<ITextureAtlas> atlasSupplier, ResourceLocation resourceLocation, NineSlice.Slices slices, NineSlice.CenterDrawMode drawMode
       ) {
-         return new NineSlice.TextureRegion(atlasSupplier, resourceLocation, slices, drawMode);
+         return of(atlasSupplier, resourceLocation, slices, drawMode, NineSlice.FrameDrawMode.Stretched);
+      }
+
+      public static NineSlice.TextureRegion of(
+         Supplier<ITextureAtlas> atlasSupplier,
+         ResourceLocation resourceLocation,
+         NineSlice.Slices slices,
+         NineSlice.CenterDrawMode drawMode,
+         NineSlice.FrameDrawMode frameDrawMode
+      ) {
+         return new NineSlice.TextureRegion(atlasSupplier, resourceLocation, slices, drawMode, frameDrawMode);
       }
 
       public TextureAtlasSprite getSprite() {

@@ -1,0 +1,27 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ece",
+        "ese",
+        "e#e"
+    ],
+    "key": {
+        "e": {
+            "item": "the_vault:magic_silk"
+        },
+        "#": {
+            "item": "the_vault:magic_silk_block"
+        },
+        "c": {
+            "item": "the_vault:vault_diamond"
+        },
+        "s": {
+            "item": "minecraft:gold_ingot"
+        }
+    },
+    "result": {
+        "item": "the_vault:card_deck",
+        "count": 1,
+        "nbt": "{id:\"starter\"}"
+    }
+}

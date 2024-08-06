@@ -267,8 +267,10 @@ public class MonolithObjective extends Objective {
 
    @Override
    public void tickServer(VirtualWorld world, Vault vault) {
-      double increase = CommonEvents.OBJECTIVE_TARGET.invoke(world, vault, 0.0).getIncrease();
-      this.set(TARGET, Integer.valueOf((int)Math.round(this.get(BASE_TARGET).intValue() * (1.0 + increase))));
+      this.ifPresent(BASE_TARGET, value -> {
+         double increase = CommonEvents.OBJECTIVE_TARGET.invoke(world, vault, 0.0).getIncrease();
+         this.set(TARGET, Integer.valueOf((int)Math.round(this.get(BASE_TARGET).intValue() * (1.0 + increase))));
+      });
       if (this.get(COUNT) >= this.get(TARGET)) {
          super.tickServer(world, vault);
       }
@@ -351,12 +353,12 @@ public class MonolithObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       if (this.get(COUNT) < this.get(TARGET)) {
          return objective == this;
       } else {
          for (Objective child : this.get(CHILDREN)) {
-            if (child.isActive(vault, objective)) {
+            if (child.isActive(world, vault, objective)) {
                return true;
             }
          }

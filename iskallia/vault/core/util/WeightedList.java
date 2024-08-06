@@ -2,7 +2,9 @@ package iskallia.vault.core.util;
 
 import iskallia.vault.core.random.RandomSource;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -85,5 +87,24 @@ public class WeightedList<T> extends AbstractMap<T, Double> {
 
          return Optional.empty();
       }
+   }
+
+   public List<T> getNRandom(int amount, RandomSource random) {
+      List<T> randomValues = new ArrayList<>();
+      WeightedList<T> copy = new WeightedList<>();
+      copy.putAll(this);
+
+      while (randomValues.size() < amount) {
+         Optional<T> randomValue = copy.getRandom(random);
+         if (randomValue.isPresent()) {
+            randomValues.add(randomValue.get());
+            copy.remove(randomValue.get());
+            if (copy.isEmpty() && randomValues.size() < amount) {
+               copy.putAll(this);
+            }
+         }
+      }
+
+      return randomValues;
    }
 }

@@ -39,6 +39,7 @@ public class ModSlotIcons {
    public static final ResourceLocation MAGNET_TABLE_SLOT_2_NO_ITEM = register("gui/slot/magnet_table/2_no_item");
    public static final ResourceLocation MAGNET_TABLE_SLOT_3_NO_ITEM = register("gui/slot/magnet_table/3_no_item");
    public static final ResourceLocation BOUNTY_TABLE_SLOT_PEARL = register("gui/slot/bounty_table/empty_pearl");
+   public static final ResourceLocation CURIOS_CARD_DECK_SLOT = register("gui/slot/curios/deck_slot");
 
    private static ResourceLocation register(String path) {
       ResourceLocation icon = VaultMod.id(path);

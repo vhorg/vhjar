@@ -135,6 +135,7 @@ public class ModModels {
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR_EXPOSED, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR_WEATHERED, RenderType.cutout());
       ItemBlockRenderTypes.setRenderLayer(ModBlocks.ANCIENT_COPPER_TRAPDOOR_OXIDIZED, RenderType.cutout());
+      ItemBlockRenderTypes.setRenderLayer(ModBlocks.GRID_GATEWAY, RenderType.cutout());
       setRenderLayers(ModBlocks.VAULT_SWEETS, RenderType.solid(), RenderType.translucent());
       setRenderLayers(ModBlocks.DIVINE_ALTAR, RenderType.cutout(), RenderType.translucent());
       setRenderLayers(ModBlocks.VAULT_JEWEL_CUTTING_STATION, RenderType.cutout(), RenderType.translucent());
@@ -148,6 +149,8 @@ public class ModModels {
       setRenderLayers(ModBlocks.WENDARR_JEWEL_GLASS, RenderType.translucent());
       setRenderLayers(ModBlocks.WENDARR_JEWEL_GLASS_PANE, RenderType.translucent());
       setRenderLayers(ModBlocks.VELARA_VINE, RenderType.cutout());
+      setRenderLayers(ModBlocks.VAULT_BARS, RenderType.cutout());
+      setRenderLayers(ModBlocks.CARD_ESSENCE_EXTRACTOR, RenderType.solid(), RenderType.translucent());
    }
 
    private static void setRenderLayers(Block block, RenderType... renderTypes) {

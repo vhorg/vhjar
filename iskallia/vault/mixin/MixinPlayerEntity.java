@@ -24,6 +24,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Entity.RemovalReason;
 import net.minecraft.world.entity.player.Inventory;
@@ -71,6 +72,9 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
    @Shadow
    protected abstract MutableComponent decorateDisplayNameComponent(MutableComponent var1);
 
+   @Shadow
+   public abstract ItemStack getItemBySlot(EquipmentSlot var1);
+
    protected MixinPlayerEntity(EntityType<? extends LivingEntity> type, Level worldIn) {
       super(type, worldIn);
    }
@@ -115,6 +119,21 @@ public abstract class MixinPlayerEntity extends LivingEntity implements BlockCha
             cir.setReturnValue(true);
          }
       });
+   }
+
+   @Inject(
+      method = {"tryToStartFallFlying"},
+      at = {@At("HEAD")},
+      cancellable = true
+   )
+   protected void preventFallFlying(CallbackInfoReturnable<Boolean> cir) {
+      ItemStack chestItem = this.getItemBySlot(EquipmentSlot.CHEST);
+      if (!chestItem.isEmpty()) {
+         Player player = (Player)this;
+         if (player.getCooldowns().isOnCooldown(chestItem.getItem())) {
+            cir.setReturnValue(false);
+         }
+      }
    }
 
    @Inject(

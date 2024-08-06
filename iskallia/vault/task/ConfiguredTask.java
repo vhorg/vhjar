@@ -5,13 +5,12 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.item.crystal.data.serializable.ISerializable;
-import iskallia.vault.task.source.TaskSource;
 import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
-public abstract class ConfiguredTask<C extends ConfiguredTask.Config> extends Task {
+public abstract class ConfiguredTask<C extends ConfiguredTask.Config> extends OperableTask implements ResettingTask {
    private C config;
    private boolean populated;
 
@@ -30,46 +29,33 @@ public abstract class ConfiguredTask<C extends ConfiguredTask.Config> extends Ta
       return this.populated;
    }
 
-   public abstract void onPopulate(TaskSource var1);
+   public void setPopulated(boolean populated) {
+      this.populated = populated;
+   }
+
+   public abstract void onPopulate(TaskContext var1);
 
    @Override
-   public boolean isCompleted(TaskSource source) {
-      if (!this.populated && source != null) {
-         this.onPopulate(source);
-         this.populated = true;
-      }
-
-      return true;
+   public boolean isCompleted() {
+      return this.populated;
    }
 
    @Override
-   public void onAttach(TaskSource source) {
+   public void onAttach(TaskContext context) {
       if (!this.populated) {
-         this.onPopulate(source);
+         this.onPopulate(context);
          this.populated = true;
       }
 
-      super.onAttach(source);
+      super.onAttach(context);
    }
 
    @Override
-   public void onStart(TaskSource source) {
+   public void onReset(TaskContext context) {
       if (!this.populated) {
-         this.onPopulate(source);
+         this.onPopulate(context);
          this.populated = true;
       }
-
-      super.onStart(source);
-   }
-
-   @Override
-   public void onTick(TaskSource source) {
-      if (!this.populated) {
-         this.onPopulate(source);
-         this.populated = true;
-      }
-
-      super.onTick(source);
    }
 
    @Override

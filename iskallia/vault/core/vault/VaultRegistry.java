@@ -12,17 +12,20 @@ import iskallia.vault.core.vault.objective.ArchitectObjective;
 import iskallia.vault.core.vault.objective.AscensionObjective;
 import iskallia.vault.core.vault.objective.AwardCrateObjective;
 import iskallia.vault.core.vault.objective.BailObjective;
+import iskallia.vault.core.vault.objective.BingoObjective;
 import iskallia.vault.core.vault.objective.CakeObjective;
 import iskallia.vault.core.vault.objective.CrakePedestalObjective;
 import iskallia.vault.core.vault.objective.DeathObjective;
 import iskallia.vault.core.vault.objective.ElixirObjective;
 import iskallia.vault.core.vault.objective.FindExitObjective;
+import iskallia.vault.core.vault.objective.GridGatewayObjective;
 import iskallia.vault.core.vault.objective.HeraldObjective;
 import iskallia.vault.core.vault.objective.KillBossObjective;
 import iskallia.vault.core.vault.objective.LodestoneObjective;
 import iskallia.vault.core.vault.objective.MonolithObjective;
 import iskallia.vault.core.vault.objective.ObeliskObjective;
 import iskallia.vault.core.vault.objective.Objective;
+import iskallia.vault.core.vault.objective.OfferingBossObjective;
 import iskallia.vault.core.vault.objective.ParadoxObjective;
 import iskallia.vault.core.vault.objective.ScavengerObjective;
 import iskallia.vault.core.vault.objective.TrackSpeedrunObjective;
@@ -108,7 +111,10 @@ public class VaultRegistry {
       .add(ParadoxObjective.KEY)
       .add(HeraldObjective.KEY)
       .add(AscensionObjective.KEY)
-      .add(ArchitectObjective.KEY);
+      .add(ArchitectObjective.KEY)
+      .add(BingoObjective.KEY)
+      .add(GridGatewayObjective.KEY)
+      .add(OfferingBossObjective.KEY);
    public static final SupplierRegistry<ListenersLogic> LISTENERS_LOGIC = new SupplierRegistry<ListenersLogic>().add(ClassicListenersLogic.KEY);
    public static final SupplierRegistry<LootLogic> CHEST_LOGIC = new SupplierRegistry<LootLogic>().add(ClassicLootLogic.KEY);
    public static final SupplierRegistry<PortalLogic> PORTAL_LOGIC = new SupplierRegistry<PortalLogic>().add(ClassicPortalLogic.KEY);

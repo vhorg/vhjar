@@ -4,7 +4,6 @@ import iskallia.vault.altar.AltarInfusionRecipe;
 import iskallia.vault.block.entity.VaultAltarTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.init.ModItems;
 import iskallia.vault.util.BlockHelper;
 import iskallia.vault.world.data.PlayerVaultAltarData;
 import java.util.Random;
@@ -150,7 +149,7 @@ public class VaultAltarBlock extends Block implements EntityBlock {
       if (altar != null) {
          if (newState.getBlock() == Blocks.AIR) {
             if (altar.getAltarState() == VaultAltarTileEntity.AltarState.ACCEPTING || altar.getAltarState() == VaultAltarTileEntity.AltarState.COMPLETE) {
-               ItemEntity entity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, new ItemStack(ModItems.VAULT_ROCK));
+               ItemEntity entity = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 1.2, pos.getZ() + 0.5, altar.getInput());
                level.addFreshEntity(entity);
             }
 

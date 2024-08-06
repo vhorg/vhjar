@@ -1,9 +1,8 @@
 package iskallia.vault.gear.data;
 
-import com.google.common.collect.Streams;
 import iskallia.vault.gear.VaultGearRarity;
 import iskallia.vault.gear.VaultGearState;
-import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
+import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.util.MiscUtils;
@@ -104,6 +103,10 @@ public class GearDataCache {
       }
    }
 
+   private Boolean queryBooleanCache(String key, boolean defaultValue, Function<ItemStack, Boolean> cacheInit) {
+      return this.queryCache(key, tag -> ((ByteTag)tag).getAsByte() == 1, bool -> ByteTag.valueOf(bool), defaultValue, Function.identity(), cacheInit);
+   }
+
    private Integer queryIntCache(String key, int defaultValue, Function<ItemStack, Integer> cacheInit) {
       return this.queryCache(key, tag -> ((IntTag)tag).getAsInt(), IntTag::valueOf, defaultValue, Function.identity(), cacheInit);
    }
@@ -120,10 +123,11 @@ public class GearDataCache {
          false,
          Boolean::booleanValue,
          stack -> AttributeGearData.read(this.stack) instanceof VaultGearData vgd
-            ? Streams.stream(VaultGearData.Type.ALL.getAttributeSource(vgd))
+            ? VaultGearData.Type.ALL
+               .getAttributeSource(vgd)
                .filter(attribute -> attribute instanceof VaultGearModifier)
                .map(attribute -> (VaultGearModifier)attribute)
-               .anyMatch(modifier -> modifier.getCategory() == category)
+               .anyMatch(modifier -> modifier.hasCategory(category))
             : false
       );
    }
@@ -184,24 +188,31 @@ public class GearDataCache {
       });
    }
 
+   public boolean hasAttribute(VaultGearAttribute<?> attr) {
+      return this.queryBooleanCache("present" + attr.getRegistryName(), false, stack -> AttributeGearData.<AttributeGearData>read(stack).has(attr));
+   }
+
    @Nullable
    public List<Integer> getGearColorComponents() {
       return this.queryCache(
-         "colors", tag -> ((IntArrayTag)tag).getAsIntArray(), IntArrayTag::new, null, components -> Arrays.stream(components).boxed().toList(), stack -> {
-            if (!(AttributeGearData.read(this.stack) instanceof VaultGearData gearData)) {
-               return null;
-            } else {
+         "colors",
+         tag -> ((IntArrayTag)tag).getAsIntArray(),
+         IntArrayTag::new,
+         null,
+         components -> Arrays.stream(components).boxed().toList(),
+         stack -> {
+            if (AttributeGearData.read(this.stack) instanceof VaultGearData gearData) {
                List<Integer> components = new ArrayList<>();
                components.add(gearData.getRarity().getColor().getValue());
-
-               for (VaultGearAttributeInstance<?> attributeInstance : gearData.getAllAttributes()) {
-                  if (attributeInstance instanceof VaultGearModifier<?> modifier && modifier.getCategory() == VaultGearModifier.AffixCategory.LEGENDARY) {
-                     components.add(15853364);
-                     break;
-                  }
-               }
-
+               gearData.getAllAttributes()
+                  .filter(attrInstance -> attrInstance instanceof VaultGearModifier)
+                  .map(attrInstance -> (VaultGearModifier)attrInstance)
+                  .filter(modifier -> modifier.hasCategory(VaultGearModifier.AffixCategory.LEGENDARY))
+                  .findFirst()
+                  .ifPresent(modifier -> components.add(15853364));
                return components.stream().mapToInt(Integer::intValue).toArray();
+            } else {
+               return null;
             }
          }
       );

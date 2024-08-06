@@ -50,7 +50,7 @@ public class MagicProjectileEntity extends AbstractHurtingProjectile {
       return this.target;
    }
 
-   protected MagicProjectileEntity(Level level, ArtifactBossEntity artifactBossEntity, double x, double y, double z, Player target, float damage) {
+   public MagicProjectileEntity(Level level, ArtifactBossEntity artifactBossEntity, double x, double y, double z, Player target, float damage) {
       this(ModEntities.MAGIC_PROJECTILE, level, artifactBossEntity, x, y, z, target, damage);
    }
 

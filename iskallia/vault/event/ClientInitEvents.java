@@ -26,5 +26,12 @@ public class ClientInitEvents {
          float transition = (float)(System.currentTimeMillis() % 10000L) / 10000.0F;
          return Color.getHSBColor(transition, 1.0F, 1.0F).getRGB();
       }, new net.minecraft.world.level.block.Block[]{ModBlocks.VAULT_PORTAL});
+      event.getBlockColors()
+         .register(
+            (pState, pLevel, pPos, pTintIndex) -> pLevel.getBlockEntity(pPos, ModBlocks.GRID_GATEWAY_TILE_ENTITY)
+               .map(tileEntity -> tileEntity.getTintColor(pTintIndex, tileEntity))
+               .orElse(0),
+            new net.minecraft.world.level.block.Block[]{ModBlocks.GRID_GATEWAY}
+         );
    }
 }

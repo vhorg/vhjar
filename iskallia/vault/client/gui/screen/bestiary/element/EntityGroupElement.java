@@ -13,7 +13,7 @@ import iskallia.vault.client.gui.screen.bounty.element.HeaderElement;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.data.entity.PartialEntityGroup;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.util.EntityGroupsUtils;
+import iskallia.vault.util.GroupUtils;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,10 +28,10 @@ public class EntityGroupElement extends ElasticContainerElement<EntityGroupEleme
    public EntityGroupElement(ISpatial spatial, String groupName, BestiaryScreen parent) {
       super(spatial);
       this.parent = parent;
-      Optional<EntityPredicate> groupOptional = EntityGroupsUtils.getByName(groupName);
+      Optional<EntityPredicate> groupOptional = GroupUtils.getFilterByName(groupName);
       groupOptional.ifPresent(group -> this.selectedGroup = (PartialEntityGroup)group);
       if (this.selectedGroup != null) {
-         this.groupHeader = new HeaderElement(Spatials.positionXY(0, 0).width(this.width() / 2 - 6).height(20), EntityGroupsUtils.getName(this.selectedGroup));
+         this.groupHeader = new HeaderElement(Spatials.positionXY(0, 0).width(this.width() / 2 - 6).height(20), GroupUtils.getEntityName(this.selectedGroup));
          this.groupDescription = new LabelElement(
                Spatials.positionXY(0, this.groupHeader.bottom() + 3).size(this.width() / 2 - 12, this.height()),
                ModConfigs.BESTIARY.getGroupDescription(this.selectedGroup.getId()).getComponent(),

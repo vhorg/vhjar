@@ -70,8 +70,8 @@ public class InfiniteWaterBucketItem extends BucketItem {
       BlockPos blockpos = blockhitresult.getBlockPos();
       BlockState state = pLevel.getBlockState(blockpos);
       if (!(state.getBlock() instanceof CauldronBlock) && !(state.getBlock() instanceof LayeredCauldronBlock)) {
-         super.use(pLevel, pPlayer, pHand);
-         return InteractionResultHolder.pass(new ItemStack(ModItems.INFINITE_WATER_BUCKET));
+         InteractionResultHolder<ItemStack> result = super.use(pLevel, pPlayer, pHand);
+         return new InteractionResultHolder(result.getResult(), new ItemStack(ModItems.INFINITE_WATER_BUCKET));
       } else {
          pLevel.setBlock(blockpos, (BlockState)Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 3), 3);
          if (pPlayer instanceof ServerPlayer) {
@@ -80,7 +80,7 @@ public class InfiniteWaterBucketItem extends BucketItem {
 
          pLevel.playSound(null, blockpos, this.getFluid().getAttributes().getEmptySound(), SoundSource.BLOCKS, 1.0F, 1.0F);
          pPlayer.awardStat(Stats.ITEM_USED.get(this));
-         return InteractionResultHolder.pass(new ItemStack(ModItems.INFINITE_WATER_BUCKET));
+         return InteractionResultHolder.success(new ItemStack(ModItems.INFINITE_WATER_BUCKET));
       }
    }
 

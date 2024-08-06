@@ -11,6 +11,8 @@ import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.item.gear.VaultLevelItem;
 import java.util.List;
 import java.util.Optional;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
@@ -24,8 +26,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.Item.Properties;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class AugmentItem extends Item implements VaultLevelItem, DataTransferItem {
    public AugmentItem(CreativeModeTab group, ResourceLocation id) {
@@ -33,7 +33,7 @@ public class AugmentItem extends Item implements VaultLevelItem, DataTransferIte
       this.setRegistryName(id);
    }
 
-   public void appendHoverText(@NotNull ItemStack stack, @Nullable Level world, @NotNull List<Component> tooltip, @NotNull TooltipFlag advanced) {
+   public void appendHoverText(@Nonnull ItemStack stack, @Nullable Level world, @Nonnull List<Component> tooltip, @Nonnull TooltipFlag advanced) {
       super.appendHoverText(stack, world, tooltip, advanced);
       getTheme(stack)
          .ifPresent(key -> tooltip.add(new TextComponent("Theme: ").append(new TextComponent(key.getName()).withStyle(Style.EMPTY.withColor(key.getColor())))));
@@ -74,8 +74,11 @@ public class AugmentItem extends Item implements VaultLevelItem, DataTransferIte
    }
 
    @Override
-   public void initializeVaultLoot(Vault vault, ItemStack stack, @Nullable BlockPos pos) {
-      vault.getOptional(Vault.WORLD).map(world -> world.get(WorldManager.THEME)).ifPresent(theme -> stack.getOrCreateTag().putString("pool", theme.toString()));
+   public void initializeVaultLoot(int vaultLevel, ItemStack stack, @Nullable BlockPos pos, @Nullable Vault vault) {
+      Optional.ofNullable(vault)
+         .flatMap(v -> v.getOptional(Vault.WORLD))
+         .map(world -> world.get(WorldManager.THEME))
+         .ifPresent(theme -> stack.getOrCreateTag().putString("theme", theme.toString()));
    }
 
    @Override

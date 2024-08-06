@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
@@ -91,6 +93,9 @@ public class ChampionPromoter {
 
    public static void applyChampionAttributes(LivingEntity entity) {
       entity.addTag("vault_champion");
+      ListTag templateTags = entity.getPersistentData().getList("template_tags", 8);
+      templateTags.add(StringTag.valueOf("ENTITY_CHAMPION"));
+      entity.getPersistentData().put("template_tags", templateTags);
       entity.playSound(SoundEvents.ILLUSIONER_CAST_SPELL, 1.0F, 1.0F);
       if (entity instanceof Mob mob) {
          ServerVaults.get(mob.level).ifPresent(vault -> ChampionGoal.registerProjectileGoal(vault, mob));

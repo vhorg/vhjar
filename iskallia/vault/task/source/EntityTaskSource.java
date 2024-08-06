@@ -34,11 +34,11 @@ public class EntityTaskSource extends TaskSource {
       return new EntityTaskSource(JavaRandom.ofNanoTime());
    }
 
-   public static EntityTaskSource of(RandomSource random, UUID... uuids) {
+   public static EntityTaskSource ofUuids(RandomSource random, UUID... uuids) {
       return new EntityTaskSource(random).add(uuids);
    }
 
-   public static EntityTaskSource of(RandomSource random, Entity... entities) {
+   public static TaskSource ofEntities(RandomSource random, Entity... entities) {
       return new EntityTaskSource(random).add(entities);
    }
 
@@ -47,9 +47,22 @@ public class EntityTaskSource extends TaskSource {
       return this;
    }
 
-   public EntityTaskSource add(Entity... entities) {
+   public TaskSource add(Entity... entities) {
       for (Entity entity : entities) {
          this.uuids.add(entity.getUUID());
+      }
+
+      return this;
+   }
+
+   public EntityTaskSource remove(UUID... uuids) {
+      Arrays.asList(uuids).forEach(this.uuids::remove);
+      return this;
+   }
+
+   public TaskSource remove(Entity... entities) {
+      for (Entity entity : entities) {
+         this.uuids.remove(entity.getUUID());
       }
 
       return this;
@@ -58,6 +71,14 @@ public class EntityTaskSource extends TaskSource {
    @Override
    public RandomSource getRandom() {
       return this.random;
+   }
+
+   public int getCount() {
+      return this.uuids.size();
+   }
+
+   public Set<UUID> getUuids() {
+      return this.uuids;
    }
 
    public <T extends Entity> Set<T> getEntities(Class<T> filter) {

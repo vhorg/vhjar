@@ -67,7 +67,7 @@ public class BossProtectionCatalystEntity extends Entity {
    protected double lerpY;
    protected double lerpZ;
 
-   protected BossProtectionCatalystEntity(
+   public BossProtectionCatalystEntity(
       Level pLevel, Vec3 center, float angle, BossProtectionCatalystEntity.CatalystType catalystType, float explosionDamageMultiplier
    ) {
       this(ModEntities.BOSS_PROTECTION_CATALYST, pLevel);

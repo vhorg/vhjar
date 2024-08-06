@@ -9,5 +9,7 @@ public abstract class NumberRangeGenerator<T extends Number, C extends NumberRan
 
    public abstract static class NumberRange<T extends Number> {
       public abstract T generateNumber(Random var1);
+
+      public abstract T generateMaximumNumber();
    }
 }

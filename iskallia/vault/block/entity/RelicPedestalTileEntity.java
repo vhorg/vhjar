@@ -11,6 +11,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+@Deprecated(
+   forRemoval = true
+)
 public class RelicPedestalTileEntity extends BlockEntity {
    protected ResourceLocation relicSet = VaultMod.id("none");
 

@@ -42,6 +42,7 @@ public class ChampionLogic {
    private static final String AFFIXES_TAG = "affixes";
    private final List<IChampionAffix> affixes = new ArrayList<>();
    public static final String CHAMPION_TAG = "vault_champion";
+   public static final String CHAMPION_TEMPLATE_TAG = "ENTITY_CHAMPION";
    private boolean pacified = false;
 
    public static boolean isChampion(Entity entity) {

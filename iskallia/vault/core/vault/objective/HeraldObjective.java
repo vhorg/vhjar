@@ -411,7 +411,7 @@ public class HeraldObjective extends Objective {
       boss.yHeadRot = this.get(BOSS_FACING).toYRot();
       boss.yBodyRot = this.get(BOSS_FACING).toYRot();
       boss.yBodyRotO = this.get(BOSS_FACING).toYRot();
-      boss.spawnPosition = boss.position();
+      boss.setSpawnPosition(boss.position());
       world.addFreshEntity(boss);
       this.set(BOSS_ID, boss.getUUID());
       if (vault.get(Vault.LISTENERS).get(Listeners.LOGIC) instanceof ClassicListenersLogic classic) {
@@ -585,12 +585,12 @@ public class HeraldObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       if (!this.has(BOSS_DEAD)) {
          return objective == this;
       } else {
          for (Objective child : this.get(CHILDREN)) {
-            if (child.isActive(vault, objective)) {
+            if (child.isActive(world, vault, objective)) {
                return true;
             }
          }

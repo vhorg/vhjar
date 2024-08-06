@@ -70,7 +70,7 @@ public class GearModelRollRaritiesConfig extends Config {
 
    public ResourceLocation getRandomRoll(ItemStack stack, VaultGearData data, EquipmentSlot slot, Random random) {
       return data.getRarity() == VaultGearRarity.UNIQUE
-         ? ModConfigs.UNIQUE_GEAR.getRandomEntry(stack, data.getItemLevel(), JavaRandom.ofNanoTime()).orElseThrow().getModel()
+         ? ModConfigs.UNIQUE_GEAR.getRandomEntry(null, JavaRandom.ofNanoTime()).orElseThrow().getModel()
          : MiscUtils.getRandomEntry(this.getPossibleRolls(stack, data, slot), random);
    }
 

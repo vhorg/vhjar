@@ -6,6 +6,8 @@ import iskallia.vault.entity.model.ModModelLayers;
 import iskallia.vault.entity.renderer.AggressiveCowBossRenderer;
 import iskallia.vault.entity.renderer.AncientCopperGolemRenderer;
 import iskallia.vault.entity.renderer.ArtifactBossRenderer;
+import iskallia.vault.entity.renderer.BlackWidowBossRenderer;
+import iskallia.vault.entity.renderer.BlazeBossRenderer;
 import iskallia.vault.entity.renderer.BlizzardShardRenderer;
 import iskallia.vault.entity.renderer.BlueBlazeRenderer;
 import iskallia.vault.entity.renderer.BoogiemanRenderer;
@@ -19,6 +21,9 @@ import iskallia.vault.entity.renderer.EternalSpiritRenderer;
 import iskallia.vault.entity.renderer.FallingSootRenderer;
 import iskallia.vault.entity.renderer.FighterRenderer;
 import iskallia.vault.entity.renderer.FireballRenderer;
+import iskallia.vault.entity.renderer.GolemBossRenderer;
+import iskallia.vault.entity.renderer.HealerRenderer;
+import iskallia.vault.entity.renderer.IceBoltRenderer;
 import iskallia.vault.entity.renderer.MagicProjectileRenderer;
 import iskallia.vault.entity.renderer.MonsterEyeRenderer;
 import iskallia.vault.entity.renderer.NagaRenderer;
@@ -330,6 +335,7 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.WARP_ARROW, DashWarpAbility.WarpArrowRenderer::new);
       EntityRenderers.register(ModEntities.FIREBALL, FireballRenderer::new);
       EntityRenderers.register(ModEntities.STORM_ARROW, StormArrowRenderer::new);
+      EntityRenderers.register(ModEntities.ICE_BOLT, IceBoltRenderer::new);
       EntityRenderers.register(ModEntities.STORM, StormRenderer::new);
       EntityRenderers.register(ModEntities.THUNDERSTORM_BOLT, VaultStormEntity.SmiteBoltRenderer::new);
       EntityRenderers.register(ModEntities.BLIZZARD_SHARD, BlizzardShardRenderer::new);
@@ -343,5 +349,9 @@ public class ModEntityRenderers {
       EntityRenderers.register(ModEntities.BLOOD_ORB, BloodOrbRenderer::new);
       EntityRenderers.register(ModEntities.AREA_OF_EFFECT_BOSS, NoopRenderer::new);
       EntityRenderers.register(ModEntities.ANCIENT_COPPER_GOLEM, AncientCopperGolemRenderer::new);
+      EntityRenderers.register(ModEntities.HEALER, HealerRenderer::new);
+      EntityRenderers.register(ModEntities.BLAZE_BOSS, BlazeBossRenderer::new);
+      EntityRenderers.register(ModEntities.GOLEM_BOSS, GolemBossRenderer::new);
+      EntityRenderers.register(ModEntities.BLACK_WIDOW_BOSS, BlackWidowBossRenderer::new);
    }
 }

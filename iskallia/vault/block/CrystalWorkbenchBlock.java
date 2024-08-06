@@ -2,7 +2,9 @@ package iskallia.vault.block;
 
 import iskallia.vault.block.base.FacedBlock;
 import iskallia.vault.block.entity.CrystalWorkbenchTileEntity;
+import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModBlocks;
+import java.util.Arrays;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -59,12 +61,14 @@ public class CrystalWorkbenchBlock extends FacedBlock implements EntityBlock {
 
    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
       if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof CrystalWorkbenchTileEntity entity) {
-         entity.getIngredients()
-            .getOverSizedContents()
-            .forEach(
-               overSizedStack -> overSizedStack.splitByStackSize()
-                  .forEach(splitStack -> Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), splitStack))
-            );
+         for (OverSizedInventory inventory : Arrays.asList(entity.getIngredients(), entity.getInput(), entity.getUniqueIngredients())) {
+            inventory.getOverSizedContents()
+               .forEach(
+                  overSizedStack -> overSizedStack.splitByStackSize()
+                     .forEach(splitStack -> Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), splitStack))
+               );
+         }
+
          entity.getIngredients().clearContent();
          level.updateNeighbourForOutputSignal(pos, this);
       }

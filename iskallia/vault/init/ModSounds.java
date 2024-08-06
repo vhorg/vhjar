@@ -122,6 +122,9 @@ public class ModSounds {
    public static SoundEvent ARTIFACT_BOSS_CATALYST_HIT_WRONG;
    public static SoundEvent SPARK_EXPUNGE;
    public static SoundEvent DESTROY_MONOLITH;
+   public static SoundEvent ICE_BOLT_ARROW;
+   public static SoundEvent ICE_BOLT_CHUNK;
+   public static SoundEvent BOOSTER_PACK_OPEN;
    public static ForgeSoundType VAULT_GET_SOUND_TYPE = new ForgeSoundType(
       0.25F, 1.0F, () -> VAULT_GEM_BREAK, SoundType.STONE::getStepSound, SoundType.STONE::getPlaceSound, () -> VAULT_GEM_HIT, SoundType.STONE::getFallSound
    );
@@ -247,6 +250,9 @@ public class ModSounds {
       ARTIFACT_BOSS_CATALYST_HIT = registerSound(event, "artifact_boss_catalyst_hit");
       ARTIFACT_BOSS_CATALYST_HIT_WRONG = registerSound(event, "artifact_boss_catalyst_hit_wrong");
       DESTROY_MONOLITH = registerSound(event, "destroy_monolith");
+      ICE_BOLT_ARROW = registerSound(event, "ice_bolt_arrow");
+      ICE_BOLT_CHUNK = registerSound(event, "ice_bolt_chunk");
+      BOOSTER_PACK_OPEN = registerSound(event, "booster_pack_open");
    }
 
    private static SoundEvent registerSound(Register<SoundEvent> event, String soundName) {

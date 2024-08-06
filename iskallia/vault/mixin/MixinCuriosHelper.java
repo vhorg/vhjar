@@ -1,5 +1,6 @@
 package iskallia.vault.mixin;
 
+import iskallia.vault.item.CardDeckItem;
 import iskallia.vault.item.gear.CharmItem;
 import iskallia.vault.item.gear.TrinketItem;
 import net.minecraft.world.item.ItemStack;
@@ -28,6 +29,10 @@ public class MixinCuriosHelper {
       }
 
       if (stack.getItem() instanceof CharmItem && slotContext.identifier().equals("charm")) {
+         cir.setReturnValue(true);
+      }
+
+      if (stack.getItem() instanceof CardDeckItem && slotContext.identifier().equals("deck")) {
          cir.setReturnValue(true);
       }
    }

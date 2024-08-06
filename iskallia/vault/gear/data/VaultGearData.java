@@ -1,7 +1,6 @@
 package iskallia.vault.gear.data;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Streams;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.net.BitBuffer;
@@ -12,7 +11,9 @@ import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.util.data.ObjectHolder;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
@@ -22,7 +23,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -102,15 +105,11 @@ public class VaultGearData extends AttributeGearData {
    }
 
    public <T, V> V get(VaultGearAttribute<T> attribute, VaultGearData.Type type, VaultGearAttributeTypeMerger<T, V> merger) {
-      V merged = merger.getBaseValue();
-
-      for (VaultGearAttributeInstance<?> instance : type.getAttributeSource(this)) {
-         if (instance.getAttribute().equals(attribute)) {
-            merged = merger.merge(merged, (T)instance.getValue());
-         }
-      }
-
-      return merged;
+      ObjectHolder<V> obj = new ObjectHolder<>(merger.getBaseValue());
+      type.getAttributeSource(this)
+         .filter(instance -> instance.getAttribute().equals(attribute))
+         .forEach(instance -> obj.set(merger.merge(obj.get(), (T)instance.getValue())));
+      return obj.get();
    }
 
    public <T> List<VaultGearAttributeInstance<T>> getModifiers(VaultGearAttribute<T> attribute, VaultGearData.Type type) {
@@ -129,45 +128,38 @@ public class VaultGearData extends AttributeGearData {
    }
 
    public boolean has(VaultGearAttribute<?> attribute, VaultGearData.Type type) {
-      for (VaultGearAttributeInstance<?> instance : type.getAttributeSource(this)) {
-         if (instance.getAttribute().equals(attribute)) {
-            return true;
-         }
-      }
-
-      return false;
+      return type.getAttributeSource(this).anyMatch(instance -> instance.getAttribute().equals(attribute));
    }
 
    public boolean hasModifier(ResourceLocation modifierIdentifier) {
-      for (VaultGearAttributeInstance<?> instance : VaultGearData.Type.ALL.getAttributeSource(this)) {
-         if (instance instanceof VaultGearModifier<?> modifier && modifier.getModifierIdentifier().equals(modifierIdentifier)) {
+      return VaultGearData.Type.ALL
+         .getAttributeSource(this)
+         .filter(instance -> instance instanceof VaultGearModifier)
+         .map(instance -> (VaultGearModifier)instance)
+         .anyMatch(modifier -> modifier.getModifierIdentifier().equals(modifierIdentifier));
+   }
+
+   public boolean removeModifier(VaultGearModifier<?> modifier) {
+      return !this.isModifiable()
+         ? false
+         : this.removeFromModifierList(modifier, this.attributes)
+            || this.removeFromModifierList(modifier, this.baseModifiers)
+            || this.removeFromModifierList(modifier, this.prefixes)
+            || this.removeFromModifierList(modifier, this.suffixes);
+   }
+
+   protected boolean removeFromModifierList(VaultGearModifier<?> modifier, List<? extends VaultGearAttributeInstance<?>> list) {
+      Iterator<? extends VaultGearAttributeInstance<?>> iterator = list.iterator();
+
+      while (iterator.hasNext()) {
+         VaultGearAttributeInstance<?> instance = (VaultGearAttributeInstance<?>)iterator.next();
+         if (instance.canBeModified() && instance == modifier) {
+            iterator.remove();
             return true;
          }
       }
 
       return false;
-   }
-
-   public boolean removeModifier(VaultGearModifier<?> modifier) {
-      return this.removeModifier(modifier, VaultGearData.Type.ALL);
-   }
-
-   protected boolean removeModifier(VaultGearModifier<?> modifier, VaultGearData.Type type) {
-      if (!this.isModifiable()) {
-         return false;
-      } else {
-         Iterator<? extends VaultGearAttributeInstance<?>> iterator = type.getAttributeSource(this).iterator();
-
-         while (iterator.hasNext()) {
-            VaultGearAttributeInstance<?> instance = (VaultGearAttributeInstance<?>)iterator.next();
-            if (instance == modifier) {
-               iterator.remove();
-               return true;
-            }
-         }
-
-         return false;
-      }
    }
 
    public boolean addModifierFirst(VaultGearModifier.AffixType type, VaultGearModifier<?> modifier) {
@@ -214,7 +206,7 @@ public class VaultGearData extends AttributeGearData {
       }
    }
 
-   public Iterable<? extends VaultGearAttributeInstance<?>> getAllAttributes() {
+   public Stream<? extends VaultGearAttributeInstance<?>> getAllAttributes() {
       return VaultGearData.Type.ALL_MODIFIERS.getAttributeSource(this);
    }
 
@@ -223,12 +215,21 @@ public class VaultGearData extends AttributeGearData {
    }
 
    public Set<String> getExistingModifierGroups(VaultGearData.Type type) {
-      return Streams.stream(type.getAttributeSource(this))
+      return type.getAttributeSource(this)
          .filter(instance -> instance instanceof VaultGearModifier)
          .map(instance -> (VaultGearModifier)instance)
          .map(VaultGearModifier::getModifierGroup)
          .filter(group -> !group.isEmpty())
          .collect(Collectors.toSet());
+   }
+
+   public List<VaultGearModifier<?>> getModifiersFulfilling(Predicate<VaultGearModifier<?>> condition) {
+      return VaultGearData.Type.ALL_MODIFIERS
+         .getAttributeSource(this)
+         .filter(instance -> instance instanceof VaultGearModifier)
+         .map(instance -> (VaultGearModifier)instance)
+         .filter(condition)
+         .collect(Collectors.toList());
    }
 
    @Override
@@ -343,21 +344,21 @@ public class VaultGearData extends AttributeGearData {
    }
 
    public static enum Type {
-      ATTRIBUTES(data -> data.attributes),
-      PREFIXES(data -> data.prefixes),
-      SUFFIXES(data -> data.suffixes),
-      ALL_MODIFIERS(data -> Iterables.concat(data.baseModifiers, data.prefixes, data.suffixes)),
-      IMPLICIT_MODIFIERS(data -> data.baseModifiers),
-      EXPLICIT_MODIFIERS(data -> Iterables.concat(data.prefixes, data.suffixes)),
-      ALL(data -> Iterables.concat(data.attributes, data.baseModifiers, data.prefixes, data.suffixes));
+      ATTRIBUTES(data -> data.attributes.stream()),
+      PREFIXES(data -> data.prefixes.stream()),
+      SUFFIXES(data -> data.suffixes.stream()),
+      ALL_MODIFIERS(data -> Stream.of(data.baseModifiers, data.prefixes, data.suffixes).flatMap(Collection::stream)),
+      IMPLICIT_MODIFIERS(data -> data.baseModifiers.stream()),
+      EXPLICIT_MODIFIERS(data -> Stream.of(data.prefixes, data.suffixes).flatMap(Collection::stream)),
+      ALL(data -> Stream.of(data.attributes, data.baseModifiers, data.prefixes, data.suffixes).flatMap(Collection::stream));
 
-      private final Function<VaultGearData, Iterable<? extends VaultGearAttributeInstance<?>>> attributeSource;
+      private final Function<VaultGearData, Stream<? extends VaultGearAttributeInstance<?>>> attributeSource;
 
-      private Type(Function<VaultGearData, Iterable<? extends VaultGearAttributeInstance<?>>> attributeSource) {
+      private Type(Function<VaultGearData, Stream<? extends VaultGearAttributeInstance<?>>> attributeSource) {
          this.attributeSource = attributeSource;
       }
 
-      public Iterable<? extends VaultGearAttributeInstance<?>> getAttributeSource(VaultGearData data) {
+      public Stream<? extends VaultGearAttributeInstance<?>> getAttributeSource(VaultGearData data) {
          return this.attributeSource.apply(data);
       }
    }

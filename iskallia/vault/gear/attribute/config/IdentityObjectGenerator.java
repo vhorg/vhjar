@@ -1,6 +1,8 @@
 package iskallia.vault.gear.attribute.config;
 
 import iskallia.vault.gear.reader.VaultGearModifierReader;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
@@ -28,5 +30,15 @@ public class IdentityObjectGenerator<T> extends ConfigurableAttributeGenerator<T
    @Override
    public MutableComponent getConfigDisplay(VaultGearModifierReader<T> reader, T object) {
       return new TextComponent(reader.getModifierName()).withStyle(reader.getColoredTextStyle());
+   }
+
+   @Override
+   public Optional<T> getMinimumValue(List<T> configurations) {
+      return configurations.stream().findFirst();
+   }
+
+   @Override
+   public Optional<T> getMaximumValue(List<T> configurations) {
+      return configurations.stream().findFirst();
    }
 }

@@ -11,11 +11,11 @@ import java.util.Map;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.resources.model.ModelBakery;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -81,11 +81,12 @@ public abstract class MixinModelBakery {
       method = {"processLoading"},
       at = @At(
          value = "INVOKE",
-         target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V"
+         target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V",
+         ordinal = 2
       )
    )
    private void onItemLoading(ProfilerFiller profiler, String phase) {
-      Registry.ITEM.forEach(item -> {
+      ForgeRegistries.ITEMS.forEach(item -> {
          if (item instanceof IManualModelLoading loader) {
             loader.loadModels(this::loadTopLevel);
          }

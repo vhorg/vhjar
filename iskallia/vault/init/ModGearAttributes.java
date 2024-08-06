@@ -19,6 +19,8 @@ import iskallia.vault.gear.attribute.config.EffectImmunityGenerator;
 import iskallia.vault.gear.attribute.custom.EffectAvoidanceGearAttribute;
 import iskallia.vault.gear.attribute.custom.EffectCloudAttribute;
 import iskallia.vault.gear.attribute.custom.EffectGearAttribute;
+import iskallia.vault.gear.attribute.talent.RandomVaultModifierAttribute;
+import iskallia.vault.gear.attribute.talent.TalentLevelAttribute;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
 import iskallia.vault.gear.charm.CharmEffect;
 import iskallia.vault.gear.charm.CharmEffectRegistry;
@@ -48,6 +50,13 @@ public class ModGearAttributes {
       ModGearAttributeGenerators.intRange(),
       ModGearAttributeReaders.addedIntReader("Armor", 4766456),
       VaultGearAttributeComparator.intComparator()
+   );
+   public static final VaultGearAttribute<Float> ARMOR_PERCENTILE = attr(
+      "armor_percentile",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.increasedReader("Armor", 6920416),
+      VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Integer> ARMOR_TOUGHNESS = attr(
       "armor_toughness",
@@ -103,6 +112,13 @@ public class ModGearAttributes {
       VaultGearAttributeType.floatType(),
       ModGearAttributeGenerators.floatRange(),
       ModGearAttributeReaders.addedRoundedDecimalReader("Health", 2293541),
+      VaultGearAttributeComparator.floatComparator()
+   );
+   public static final VaultGearAttribute<Float> HEALTH_PERCENTILE = attr(
+      "health_percentile",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.increasedReader("Health", 8057198),
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<Float> MANA_REGEN_ADDITIVE_PERCENTILE = attr(
@@ -660,7 +676,11 @@ public class ModGearAttributes {
       VaultGearAttributeComparator.floatComparator()
    );
    public static final VaultGearAttribute<AbilityLevelAttribute> ABILITY_LEVEL = attr(
-      "added_ability_level", AbilityLevelAttribute.type(), AbilityLevelAttribute.generator(), AbilityLevelAttribute.reader()
+      "added_ability_level",
+      AbilityLevelAttribute.type(),
+      AbilityLevelAttribute.generator(),
+      AbilityLevelAttribute.reader(),
+      AbilityLevelAttribute.comparator()
    );
    public static final VaultGearAttribute<AbilityCooldownFlatAttribute> ABILITY_COOLDOWN_FLAT = attr(
       "ability_cooldown_flat", AbilityCooldownFlatAttribute.type(), AbilityCooldownFlatAttribute.generator(), AbilityCooldownFlatAttribute.reader()
@@ -683,6 +703,16 @@ public class ModGearAttributes {
       (ConfigurableAttributeGenerator<SpecialAbilityGearAttribute<?, ?>, ?>)SpecialAbilityGearAttribute.generator(),
       SpecialAbilityGearAttribute.reader()
    );
+   public static final VaultGearAttribute<TalentLevelAttribute> TALENT_LEVEL = attr(
+      "added_talent_level", TalentLevelAttribute.type(), TalentLevelAttribute.generator(), TalentLevelAttribute.reader(), TalentLevelAttribute.comparator()
+   );
+   public static final VaultGearAttribute<RandomVaultModifierAttribute> RANDOM_VAULT_MODIFIER = attr(
+      "random_vault_modifier",
+      RandomVaultModifierAttribute.type(),
+      RandomVaultModifierAttribute.generator(),
+      RandomVaultModifierAttribute.reader(),
+      RandomVaultModifierAttribute.comparator()
+   );
    public static final VaultGearAttribute<String> CRAFTED_BY = attr(
       "crafted_by", VaultGearAttributeType.stringType(), ModGearAttributeGenerators.stringConstant(), ModGearAttributeReaders.none()
    );
@@ -701,6 +731,9 @@ public class ModGearAttributes {
    public static final VaultGearAttribute<String> GEAR_ROLL_TYPE_POOL = attr(
       "gear_roll_type_pool", VaultGearAttributeType.stringType(), ModGearAttributeGenerators.stringConstant(), ModGearAttributeReaders.none()
    );
+   public static final VaultGearAttribute<ResourceLocation> GEAR_UNIQUE_POOL = attr(
+      "gear_unique_pool", VaultGearAttributeType.identifierType(), ModGearAttributeGenerators.noneGenerator(), ModGearAttributeReaders.none()
+   );
    public static final VaultGearAttribute<Boolean> IS_LOOT = attr(
       "is_loot", VaultGearAttributeType.booleanType(), ModGearAttributeGenerators.booleanFlag(), ModGearAttributeReaders.none()
    );
@@ -709,6 +742,9 @@ public class ModGearAttributes {
    );
    public static final VaultGearAttribute<Boolean> IS_CORRUPTED = attr(
       "is_corrupted", VaultGearAttributeType.booleanType(), ModGearAttributeGenerators.booleanFlag(), ModGearAttributeReaders.none()
+   );
+   public static final VaultGearAttribute<Boolean> IS_LEGENDARY = attr(
+      "is_legendary", VaultGearAttributeType.booleanType(), ModGearAttributeGenerators.booleanFlag(), ModGearAttributeReaders.none()
    );
    public static final VaultGearAttribute<Integer> PREFIXES = attr(
       "prefixes", VaultGearAttributeType.intType(), ModGearAttributeGenerators.intRange(), ModGearAttributeReaders.none()
@@ -737,6 +773,13 @@ public class ModGearAttributes {
    public static final VaultGearAttribute<VaultGearState> STATE = attr(
       "state", VaultGearAttributeType.enumType(VaultGearState.class), ModGearAttributeGenerators.noneGenerator(), ModGearAttributeReaders.none()
    );
+   public static final VaultGearAttribute<Float> FRUIT_EFFECTIVENESS = attr(
+      "fruit_effectiveness",
+      VaultGearAttributeType.floatType(),
+      ModGearAttributeGenerators.floatRange(),
+      ModGearAttributeReaders.percentageReader("Fruity", 14561635),
+      VaultGearAttributeComparator.floatComparator()
+   );
 
    @Nullable
    public static VaultGearAttribute<?> getGearAttribute(Attribute vanillaAttribute, Operation operation) {
@@ -746,6 +789,7 @@ public class ModGearAttributes {
    public static void init(Register<VaultGearAttribute<?>> event) {
       IForgeRegistry<VaultGearAttribute<?>> registry = event.getRegistry();
       registry.register(ARMOR);
+      registry.register(ARMOR_PERCENTILE);
       registry.register(ARMOR_TOUGHNESS);
       registry.register(ATTACK_DAMAGE);
       registry.register(ATTACK_SPEED);
@@ -754,6 +798,7 @@ public class ModGearAttributes {
       registry.register(ATTACK_RANGE);
       registry.register(KNOCKBACK_RESISTANCE);
       registry.register(HEALTH);
+      registry.register(HEALTH_PERCENTILE);
       registry.register(MANA_REGEN_ADDITIVE_PERCENTILE);
       registry.register(MANA_ADDITIVE);
       registry.register(MANA_ADDITIVE_PERCENTILE);
@@ -842,15 +887,19 @@ public class ModGearAttributes {
       registry.register(ABILITY_MANACOST_FLAT);
       registry.register(ABILITY_MANACOST_PERCENT);
       registry.register(ABILITY_SPECIAL_MODIFICATION);
+      registry.register(TALENT_LEVEL);
+      registry.register(RANDOM_VAULT_MODIFIER);
       registry.register(CRAFTED_BY);
       registry.register(GEAR_MODEL);
       registry.register(GEAR_COLOR);
       registry.register(GEAR_NAME);
-      registry.register(GEAR_ROLL_TYPE_POOL);
       registry.register(GEAR_ROLL_TYPE);
+      registry.register(GEAR_ROLL_TYPE_POOL);
+      registry.register(GEAR_UNIQUE_POOL);
       registry.register(IS_LOOT);
       registry.register(IS_ABYSSAL);
       registry.register(IS_CORRUPTED);
+      registry.register(IS_LEGENDARY);
       registry.register(PREFIXES);
       registry.register(SUFFIXES);
       registry.register(ETCHING);
@@ -858,11 +907,13 @@ public class ModGearAttributes {
       registry.register(TRINKET_EFFECT);
       registry.register(CHARM_EFFECT);
       registry.register(STATE);
+      registry.register(FRUIT_EFFECTIVENESS);
    }
 
    public static void registerVanillaAssociations() {
       VANILLA_ATTRIBUTES.clear();
       VANILLA_ATTRIBUTES.put(Attributes.ARMOR, Operation.ADDITION, ARMOR);
+      VANILLA_ATTRIBUTES.put(Attributes.ARMOR, Operation.MULTIPLY_BASE, ARMOR_PERCENTILE);
       VANILLA_ATTRIBUTES.put(Attributes.ARMOR_TOUGHNESS, Operation.ADDITION, ARMOR_TOUGHNESS);
       VANILLA_ATTRIBUTES.put(Attributes.ATTACK_DAMAGE, Operation.ADDITION, ATTACK_DAMAGE);
       VANILLA_ATTRIBUTES.put(Attributes.ATTACK_SPEED, Operation.ADDITION, ATTACK_SPEED);
@@ -875,6 +926,7 @@ public class ModGearAttributes {
       VANILLA_ATTRIBUTES.put(ModAttributes.MANA_MAX, Operation.ADDITION, MANA_ADDITIVE);
       VANILLA_ATTRIBUTES.put(ModAttributes.MANA_MAX, Operation.MULTIPLY_BASE, MANA_ADDITIVE_PERCENTILE);
       VANILLA_ATTRIBUTES.put(Attributes.MOVEMENT_SPEED, Operation.MULTIPLY_BASE, MOVEMENT_SPEED);
+      VANILLA_ATTRIBUTES.put(Attributes.MAX_HEALTH, Operation.MULTIPLY_BASE, HEALTH_PERCENTILE);
    }
 
    private static <T> VaultGearAttribute<T> attr(

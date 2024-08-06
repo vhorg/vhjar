@@ -2,7 +2,7 @@ package iskallia.vault.core.vault.objective.scavenger;
 
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.vault.objective.ScavengerObjective;
+import iskallia.vault.core.vault.objective.Objective;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +33,7 @@ public class CompoundScavengerTask extends ScavengeTask {
    }
 
    @Override
-   public void initServer(VirtualWorld world, Vault vault, ScavengerObjective objective) {
+   public void initServer(VirtualWorld world, Vault vault, Objective objective) {
       for (ScavengeTask child : this.children) {
          child.initServer(world, vault, objective);
       }

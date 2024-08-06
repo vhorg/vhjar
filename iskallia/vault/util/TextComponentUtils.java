@@ -103,12 +103,13 @@ public class TextComponentUtils {
       }
    }
 
-   public static void applyStyle(Component cmp, Style style) {
+   public static Component applyStyle(Component cmp, Style style) {
       if (cmp instanceof MutableComponent mutable) {
          mutable.setStyle(style.applyTo(cmp.getStyle()));
       }
 
       cmp.getSiblings().forEach(child -> applyStyle(child, style));
+      return cmp;
    }
 
    private static MutableComponent resolveAndFlatten(CommandSourceStack sourceStack, Component cmp) {

@@ -36,9 +36,9 @@ public class TypeSupplierAdapter<T extends ISerializable<?, ?>> extends Supplier
       return this.classToType.keySet();
    }
 
-   public <A extends TypeSupplierAdapter<T>> A register(String id, Class<? extends T> type, Supplier<? extends T> supplier) {
+   public <A extends TypeSupplierAdapter<T>> A register(String id, Class<?> type, Supplier<? extends T> supplier) {
       this.typeToSupplier.put(id, supplier);
-      this.classToType.put(type, id);
+      this.classToType.put((Class<? extends T>)type, id);
       return (A)this;
    }
 

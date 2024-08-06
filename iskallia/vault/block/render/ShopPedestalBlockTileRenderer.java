@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
+import iskallia.vault.block.ShopPedestalBlock;
 import iskallia.vault.block.entity.ShopPedestalBlockTile;
 import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.event.event.ShopPedestalPriceEvent;
@@ -60,7 +61,7 @@ public class ShopPedestalBlockTileRenderer implements BlockEntityRenderer<ShopPe
    public void render(
       ShopPedestalBlockTile tile, float partialTicks, PoseStack matrixStack, MultiBufferSource buffer, int combinedLightIn, int combinedOverlayIn
    ) {
-      if (tile.isInitialized()) {
+      if (tile.isInitialized() && (Boolean)tile.getBlockState().getValue(ShopPedestalBlock.ACTIVE)) {
          ItemStack offerStack = tile.getOfferStack();
          if (!offerStack.isEmpty()) {
             Player player = Minecraft.getInstance().player;

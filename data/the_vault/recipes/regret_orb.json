@@ -2,15 +2,12 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "ccc",
-    "cec",
+    "ccc",
     "ccc"
   ],
   "key": {
     "c": {
       "item": "the_vault:regret_chunk"
-    },
-    "e": {
-      "item": "the_vault:perfect_benitoite"
     }
   },
   "result": {

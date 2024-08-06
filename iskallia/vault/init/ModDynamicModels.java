@@ -1,6 +1,7 @@
 package iskallia.vault.init;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.antique.Antique;
 import iskallia.vault.dynamodel.DynamicBakedModel;
 import iskallia.vault.dynamodel.DynamicModel;
 import iskallia.vault.dynamodel.DynamicModelProperties;
@@ -41,6 +42,7 @@ import iskallia.vault.gear.model.armor.layers.CrusaderArmorLayers;
 import iskallia.vault.gear.model.armor.layers.DankArmorLayers;
 import iskallia.vault.gear.model.armor.layers.DeerArmorLayers;
 import iskallia.vault.gear.model.armor.layers.DevilArmorLayers;
+import iskallia.vault.gear.model.armor.layers.DevilguiseArmorLayers;
 import iskallia.vault.gear.model.armor.layers.DonkeyArmorLayers;
 import iskallia.vault.gear.model.armor.layers.DruidArmorLayers;
 import iskallia.vault.gear.model.armor.layers.EmperorWolfArmorLayers;
@@ -96,6 +98,7 @@ import iskallia.vault.gear.model.armor.layers.SkallibombaArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SoulEaterArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SoulflameArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SpikyPlatemailArmorLayers;
+import iskallia.vault.gear.model.armor.layers.SpiralGuardianArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SquireArmorLayers;
 import iskallia.vault.gear.model.armor.layers.StressFlowerArmorLayers;
 import iskallia.vault.gear.model.armor.layers.SweetheartArmorLayers;
@@ -112,7 +115,9 @@ import iskallia.vault.gear.model.armor.layers.WolfArmorLayers;
 import iskallia.vault.gear.model.armor.layers.XnetArmorLayers;
 import iskallia.vault.gear.model.armor.layers.ZombieArmorLayers;
 import iskallia.vault.gear.renderer.VaultArmorRenderProperties;
+import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -161,7 +166,8 @@ public class ModDynamicModels {
          .associate(ModItems.RELIC_FRAGMENT, ModDynamicModels.Relics.FRAGMENT_REGISTRY)
          .associate(ModItems.MAGNET, ModDynamicModels.Magnets.REGISTRY_MAGNETS)
          .associate(ModItems.WAND, ModDynamicModels.Wands.REGISTRY)
-         .associate(ModItems.FOCUS, ModDynamicModels.Focus.REGISTRY);
+         .associate(ModItems.FOCUS, ModDynamicModels.Focus.REGISTRY)
+         .associate(ModItems.ANTIQUE, ModDynamicModels.Antiques.REGISTRY);
    }
 
    public static void initCauldronWashables() {
@@ -259,6 +265,31 @@ public class ModDynamicModels {
 
    public static boolean hasOverlayTexture(ResourceManager manager, ResourceLocation id) {
       return textureExists(manager, new ResourceLocation(id.getNamespace(), id.getPath() + "_overlay"));
+   }
+
+   public static class Antiques {
+      public static final DynamicModelRegistry<PlainItemModel> REGISTRY = new DynamicModelRegistry<>();
+      private static final Map<Antique, PlainItemModel> MODEL_MAPPING = new HashMap<>();
+
+      @Nullable
+      public static PlainItemModel getModel(Antique antique) {
+         return MODEL_MAPPING.get(antique);
+      }
+
+      public static ResourceLocation getItemTextureId(Antique antique) {
+         return VaultMod.id("item/antique/" + antique.getRegistryName().getPath());
+      }
+
+      private static void registerAntiqueModel(Antique antique) {
+         ResourceLocation key = antique.getRegistryName();
+         PlainItemModel model = new PlainItemModel(VaultMod.id("antique/" + key.getPath()), key.getPath());
+         REGISTRY.register(model);
+         MODEL_MAPPING.put(antique, model);
+      }
+
+      static {
+         ModAntiques.ALL_ANTIQUES.forEach(ModDynamicModels.Antiques::registerAntiqueModel);
+      }
    }
 
    public static class Armor {
@@ -1229,6 +1260,20 @@ public class ModDynamicModels {
          new ArmorModel(VaultMod.id("gear/armor/castle"), "Castle")
             .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
             .usingLayers(new CastleArmorLayers())
+            .addSlot(EquipmentSlot.CHEST)
+      );
+      public static final ArmorModel DEVILGUISE = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/devilguise"), "Devilguise")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new DevilguiseArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
+            .addSlot(EquipmentSlot.CHEST)
+      );
+      public static final ArmorModel SPIRAL_GUARDIAN = PIECE_REGISTRY.registerAll(
+         new ArmorModel(VaultMod.id("gear/armor/spiral_guardian"), "Spiral Guardian")
+            .properties(new DynamicModelProperties().allowTransmogrification().discoverOnRoll())
+            .usingLayers(new SpiralGuardianArmorLayers())
+            .addSlot(EquipmentSlot.HEAD)
             .addSlot(EquipmentSlot.CHEST)
       );
    }

@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 import com.mojang.math.Matrix4f;
+import iskallia.vault.init.ModShaders;
 import java.awt.Color;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -163,6 +164,19 @@ public class ScreenDrawHelper {
             .endVertex();
          this.buf.vertex(offset, this.offsetX + this.width, this.offsetY, this.offsetZ).color(r, g, b, a).uv(this.u + this.uWidth, this.v).endVertex();
          this.buf.vertex(offset, this.offsetX, this.offsetY, this.offsetZ).color(r, g, b, a).uv(this.u, this.v).endVertex();
+         return this;
+      }
+
+      public ScreenDrawHelper.QuadBuilder drawGrayscale(float grayscale, float brightness) {
+         ModShaders.getGrayscalePositionTexShader().withGrayscale(grayscale).withBrightness(brightness).enable();
+         Matrix4f offset = this.renderStack.last().pose();
+         this.buf.vertex(offset, this.offsetX, this.offsetY + this.height, this.offsetZ).uv(this.u, this.v + this.vWidth).endVertex();
+         this.buf
+            .vertex(offset, this.offsetX + this.width, this.offsetY + this.height, this.offsetZ)
+            .uv(this.u + this.uWidth, this.v + this.vWidth)
+            .endVertex();
+         this.buf.vertex(offset, this.offsetX + this.width, this.offsetY, this.offsetZ).uv(this.u + this.uWidth, this.v).endVertex();
+         this.buf.vertex(offset, this.offsetX, this.offsetY, this.offsetZ).uv(this.u, this.v).endVertex();
          return this;
       }
    }

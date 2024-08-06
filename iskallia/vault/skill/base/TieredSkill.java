@@ -4,16 +4,20 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.ability.AbilityLevelAttribute;
+import iskallia.vault.gear.attribute.talent.TalentLevelAttribute;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.skill.ability.effect.spi.core.Cooldown;
 import iskallia.vault.skill.ability.effect.spi.core.CooldownSkill;
 import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.MiscUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -66,22 +70,55 @@ public class TieredSkill extends LearnableSkill implements TickingSkill, Cooldow
    }
 
    public void updateBonusTier(AttributeSnapshot snapshot, SkillContext context) {
-      int additional = snapshot.getAttributeValueList(ModGearAttributes.ABILITY_LEVEL).stream().filter(attribute -> {
-         if (attribute.getAbility().equals("all_abilities") && this.hasParentOfType(AbilityTree.class)) {
-            return true;
-         } else {
-            Skill current = this;
+      int additional = 0;
 
-            while (!attribute.getAbility().equals(current.getId())) {
-               current = current.getParent();
-               if (current == null) {
-                  return false;
+      label52:
+      for (VaultGearAttribute<?> attribute : List.of(ModGearAttributes.ABILITY_LEVEL, ModGearAttributes.TALENT_LEVEL)) {
+         List<?> values = snapshot.getAttributeValueList(attribute);
+         Iterator var7 = values.iterator();
+
+         label50:
+         while (true) {
+            String target;
+            int levelChange;
+            while (true) {
+               if (!var7.hasNext()) {
+                  continue label52;
+               }
+
+               Object value = var7.next();
+               levelChange = 0;
+               if (value instanceof AbilityLevelAttribute abilityAttribute) {
+                  target = abilityAttribute.getAbility();
+                  levelChange += abilityAttribute.getLevelChange();
+                  break;
+               }
+
+               if (value instanceof TalentLevelAttribute talentAttribute) {
+                  target = talentAttribute.getTalent();
+                  levelChange += talentAttribute.getLevelChange();
+                  break;
                }
             }
 
-            return true;
+            if (target.equals("all_abilities") && this.hasParentOfType(AbilityTree.class)
+               || target.equals("all_talents") && this.hasParentOfType(TalentTree.class)) {
+               additional += levelChange;
+            } else {
+               Skill current = this;
+
+               while (!target.equals(current.getId())) {
+                  current = current.getParent();
+                  if (current == null) {
+                     continue label50;
+                  }
+               }
+
+               additional += levelChange;
+            }
          }
-      }).mapToInt(AbilityLevelAttribute::getLevelChange).sum();
+      }
+
       this.updateBonusTier(additional, context);
    }
 

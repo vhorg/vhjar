@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "the_vault:block/multilayer/card_essence_extractor",
+      "y": 180
+    },
+    "facing=north": {
+      "model": "the_vault:block/multilayer/card_essence_extractor",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "the_vault:block/multilayer/card_essence_extractor",
+      "y": 270
+    },
+    "facing=west": {
+      "model": "the_vault:block/multilayer/card_essence_extractor"
+    }
+  }
+}

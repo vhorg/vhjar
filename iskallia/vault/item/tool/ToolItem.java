@@ -534,7 +534,7 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
       }
    }
 
-   private static <T> void mergeModifier(VaultGearModifier.AffixType affix, VaultGearData targetData, VaultGearModifier<T> toAdd) {
+   public static <T> void mergeModifier(VaultGearModifier.AffixType affix, VaultGearData targetData, VaultGearModifier<T> toAdd) {
       List<VaultGearAttributeInstance<T>> matching = targetData.getModifiers(toAdd.getAttribute(), VaultGearData.Type.EXPLICIT_MODIFIERS);
       if (matching.isEmpty()) {
          targetData.addModifier(affix, new VaultGearModifier<>(toAdd.getAttribute(), toAdd.getValue()));
@@ -546,11 +546,14 @@ public class ToolItem extends TieredItem implements VaultGearItem, Vanishable, I
    private static <T> T merge(VaultGearAttributeInstance<T> attributeInstance, T toAdd) {
       VaultGearAttribute<T> attribute = attributeInstance.getAttribute();
       if (attribute.getAttributeComparator() != null) {
-         return attribute.getAttributeComparator().merge(attributeInstance.getValue(), toAdd);
-      } else {
-         VaultMod.LOGGER.error("Unsupported merging on attribute " + attribute.getRegistryName(), new UnsupportedOperationException());
-         return attributeInstance.getValue();
+         T result = attribute.getAttributeComparator().merge(attributeInstance.getValue(), toAdd).orElse(null);
+         if (result != null) {
+            return result;
+         }
       }
+
+      VaultMod.LOGGER.error("Unsupported merging on attribute " + attribute.getRegistryName(), new UnsupportedOperationException());
+      return attributeInstance.getValue();
    }
 
    @Nonnull

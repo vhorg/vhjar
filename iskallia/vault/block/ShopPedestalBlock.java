@@ -78,7 +78,9 @@ public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterB
    }
 
    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
-      if (worldIn.getBlockEntity(pos) instanceof ShopPedestalBlockTile tile && tile.isInitialized() && handIn == InteractionHand.MAIN_HAND) {
+      if (worldIn.isClientSide()) {
+         return InteractionResult.SUCCESS;
+      } else if (worldIn.getBlockEntity(pos) instanceof ShopPedestalBlockTile tile && tile.isInitialized() && handIn == InteractionHand.MAIN_HAND) {
          ItemStack offerStack = tile.getOfferStack();
          if (!offerStack.isEmpty()) {
             ShopPedestalPriceEvent event = new ShopPedestalPriceEvent(player, offerStack, tile.getCurrencyStack());
@@ -91,40 +93,29 @@ public class ShopPedestalBlock extends Block implements EntityBlock, GameMasterB
                      if (!player.isCreative()) {
                         allItems = InventoryUtil.findAllItems(player);
                         if (!this.hasEnoughCurrency(allItems, currency)) {
-                           if (worldIn.isClientSide) {
-                              player.displayClientMessage(
-                                 new TranslatableComponent("message.the_vault.shop_pedestal.fail", new Object[]{currency.getHoverName()}), true
-                              );
-                           }
-
+                           player.displayClientMessage(
+                              new TranslatableComponent("message.the_vault.shop_pedestal.fail", new Object[]{currency.getHoverName()}), true
+                           );
                            return InteractionResult.sidedSuccess(worldIn.isClientSide);
                         }
                      }
 
-                     if (!worldIn.isClientSide) {
-                        if (!player.isCreative()) {
-                           this.extractCurrency(player, allItems, currency);
-                           BlockState inactiveState = (BlockState)state.setValue(ACTIVE, false);
-                           tile.setRemoved();
-                           worldIn.setBlockAndUpdate(pos, inactiveState);
-                        }
-
-                        ItemHandlerHelper.giveItemToPlayer(player, offerStack.copy());
-                        worldIn.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_STEP, SoundSource.BLOCKS, 1.0F, 1.0F);
-                     } else {
-                        if (!player.getAbilities().instabuild) {
-                           tile.setRemoved();
-                        }
-
-                        player.displayClientMessage(
-                           new TranslatableComponent(
-                              "message.the_vault.shop_pedestal.purchase",
-                              new Object[]{offerStack.getCount(), offerStack.getHoverName(), currency.getCount(), currency.getHoverName()}
-                           ),
-                           true
-                        );
+                     if (!player.isCreative()) {
+                        this.extractCurrency(player, allItems, currency);
+                        BlockState inactiveState = (BlockState)state.setValue(ACTIVE, false);
+                        tile.setRemoved();
+                        worldIn.setBlockAndUpdate(pos, inactiveState);
                      }
 
+                     ItemHandlerHelper.giveItemToPlayer(player, offerStack.copy());
+                     worldIn.playSound(null, pos, SoundEvents.AMETHYST_BLOCK_STEP, SoundSource.BLOCKS, 1.0F, 1.0F);
+                     player.displayClientMessage(
+                        new TranslatableComponent(
+                           "message.the_vault.shop_pedestal.purchase",
+                           new Object[]{offerStack.getCount(), offerStack.getHoverName(), currency.getCount(), currency.getHoverName()}
+                        ),
+                        true
+                     );
                      return InteractionResult.sidedSuccess(worldIn.isClientSide);
                   }
                )

@@ -138,7 +138,7 @@ public class BestiaryConfig extends Config {
                return defaultList;
             } else {
                Player player = playerOptional.get();
-               float chanceMultiplier = SoulChanceHelper.getSoulChance(player);
+               float chanceMultiplier = SoulChanceHelper.getSoulChance(player, null);
                float chance = 1.0F + (chanceMultiplier - -0.3F);
                SoulShardConfig.DropRange dropRange = ModConfigs.SOUL_SHARD.getDropRange(entity);
                int amount = (int)Math.ceil(chance * dropRange.getMax());
