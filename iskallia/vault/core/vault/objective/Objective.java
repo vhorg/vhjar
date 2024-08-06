@@ -75,7 +75,7 @@ public abstract class Objective extends DataObject<Objective> implements ISuppli
       return this;
    }
 
-   public abstract boolean isActive(Vault var1, Objective var2);
+   public abstract boolean isActive(VirtualWorld var1, Vault var2, Objective var3);
 
    public static class IdList extends DataList<Objective.IdList, Integer> {
       public IdList() {

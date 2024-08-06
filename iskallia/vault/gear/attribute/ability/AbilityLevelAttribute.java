@@ -7,15 +7,20 @@ import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
 import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
+import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.util.NetcodeUtils;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
+import org.jetbrains.annotations.NotNull;
 
 public class AbilityLevelAttribute {
    public static final String ALL_ABILITIES = "all_abilities";
@@ -75,6 +80,20 @@ public class AbilityLevelAttribute {
          public AbilityLevelAttribute generateRandomValue(AbilityLevelAttribute.Config object, Random random) {
             return new AbilityLevelAttribute(object.getAbilityKey(), object.getLevelChange());
          }
+
+         @Override
+         public Optional<AbilityLevelAttribute> getMinimumValue(List<AbilityLevelAttribute.Config> configurations) {
+            return configurations.stream()
+               .min(Comparator.comparingInt(AbilityLevelAttribute.Config::getLevelChange))
+               .map(config -> new AbilityLevelAttribute(config.getAbilityKey(), config.getLevelChange()));
+         }
+
+         @Override
+         public Optional<AbilityLevelAttribute> getMaximumValue(List<AbilityLevelAttribute.Config> configurations) {
+            return configurations.stream()
+               .max(Comparator.comparingInt(AbilityLevelAttribute.Config::getLevelChange))
+               .map(config -> new AbilityLevelAttribute(config.getAbilityKey(), config.getLevelChange()));
+         }
       };
    }
 
@@ -126,6 +145,26 @@ public class AbilityLevelAttribute {
                   out.add(ability.getName());
                }
             }
+         }
+      };
+   }
+
+   public static VaultGearAttributeComparator<AbilityLevelAttribute> comparator() {
+      return new VaultGearAttributeComparator<AbilityLevelAttribute>() {
+         public Optional<AbilityLevelAttribute> merge(AbilityLevelAttribute thisValue, AbilityLevelAttribute thatValue) {
+            return !thisValue.getAbility().equals(thatValue.getAbility())
+               ? Optional.empty()
+               : Optional.of(new AbilityLevelAttribute(thisValue.getAbility(), thisValue.getLevelChange() + thatValue.getLevelChange()));
+         }
+
+         public Optional<AbilityLevelAttribute> difference(AbilityLevelAttribute thisValue, AbilityLevelAttribute thatValue) {
+            return Optional.empty();
+         }
+
+         @NotNull
+         @Override
+         public Comparator<AbilityLevelAttribute> getComparator() {
+            return Comparator.comparing(AbilityLevelAttribute::getLevelChange);
          }
       };
    }

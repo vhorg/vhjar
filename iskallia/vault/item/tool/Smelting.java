@@ -40,16 +40,30 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class Smelting {
    public static void handle(ServerLevel world, List<ItemStack> loot) {
+      List<ItemStack> extraSmelted = new ArrayList<>();
+
       for (int i = loot.size() - 1; i >= 0; i--) {
          ItemStack raw = loot.get(i);
          Optional<SmeltingRecipe> recipe = world.getRecipeManager()
             .getRecipeFor(RecipeType.SMELTING, new SimpleContainer(new ItemStack[]{raw}), world.getLevel());
          if (recipe.isPresent()) {
             ItemStack smelted = recipe.get().getResultItem().copy();
-            smelted.setCount(raw.getCount() * smelted.getCount());
-            loot.set(i, smelted);
+            int remainingCount = raw.getCount() * smelted.getCount();
+
+            while (remainingCount > 0) {
+               smelted.setCount(Math.min(smelted.getMaxStackSize(), remainingCount));
+               remainingCount -= smelted.getCount();
+               extraSmelted.add(smelted);
+               if (remainingCount > 0) {
+                  smelted = smelted.copy();
+               }
+            }
+
+            loot.remove(i);
          }
       }
+
+      loot.addAll(extraSmelted);
    }
 
    public static void register(IRecipeCategoryRegistration registration) {

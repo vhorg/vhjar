@@ -6,6 +6,12 @@
         },
         {
             "item": "the_vault:vaulterite_ingot"
+        },
+        {
+            "item": "minecraft:netherite_scrap"
+        },
+        {
+            "item": "minecraft:netherite_scrap"
         }
     ],
     "result": {

@@ -1,5 +1,6 @@
 package iskallia.vault.config.gear;
 
+import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
@@ -131,12 +132,49 @@ public class VaultGearTierConfig extends Config {
       return null;
    }
 
+   @Nullable
+   public VaultGearTierConfig.ModifierAffixTagGroup getAffixGroup(VaultGearTierConfig.ModifierTierGroup group) {
+      for (Entry<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.AttributeGroup> entry : this.modifierGroup.entrySet()) {
+         if (entry.getValue().contains(group)) {
+            return entry.getKey();
+         }
+      }
+
+      return null;
+   }
+
+   public List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> getGroupsWithModifierGroup(String group) {
+      return this.getGroupsFulfilling(tierGroup -> tierGroup.getModifierGroup().equals(group));
+   }
+
+   public List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> getGroupsWithModifierTag(String modTag) {
+      return this.getGroupsFulfilling(group -> group.getTags().contains(modTag));
+   }
+
+   public List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> getGroupsFulfilling(
+      Predicate<VaultGearTierConfig.ModifierTierGroup> filter
+   ) {
+      List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> configs = new ArrayList<>();
+
+      for (Entry<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.AttributeGroup> entry : this.modifierGroup.entrySet()) {
+         if (entry.getKey().isGenericGroup()) {
+            for (VaultGearTierConfig.ModifierTierGroup group : entry.getValue()) {
+               if (filter.test(group)) {
+                  configs.add(new Tuple(entry.getKey(), group));
+               }
+            }
+         }
+      }
+
+      return configs;
+   }
+
    @Nonnull
    public VaultGearTierConfig.ModifierConfigRange getTierConfigRange(VaultGearModifier<?> modifier, int level) {
       Object currentTierCfg = null;
       VaultGearTierConfig.ModifierTier<?> min = null;
       VaultGearTierConfig.ModifierTier<?> max = null;
-      if (modifier.getCategory() == VaultGearModifier.AffixCategory.LEGENDARY) {
+      if (modifier.hasCategory(VaultGearModifier.AffixCategory.LEGENDARY)) {
          VaultGearTierConfig.ModifierTierGroup tierGroup = this.getTierGroup(modifier.getModifierIdentifier());
          if (tierGroup != null) {
             VaultGearTierConfig.ModifierTier<?> tier = tierGroup.getModifierForTier(modifier.getRolledTier());
@@ -305,22 +343,6 @@ public class VaultGearTierConfig extends Config {
       } else {
          return Optional.empty();
       }
-   }
-
-   public List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> getModifierConfigurationsByTag(String modTag) {
-      List<Tuple<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.ModifierTierGroup>> configs = new ArrayList<>();
-
-      for (Entry<VaultGearTierConfig.ModifierAffixTagGroup, VaultGearTierConfig.AttributeGroup> entry : this.modifierGroup.entrySet()) {
-         if (entry.getKey().isGenericGroup()) {
-            for (VaultGearTierConfig.ModifierTierGroup group : entry.getValue()) {
-               if (modTag.isEmpty() || group.getTags().contains(modTag)) {
-                  configs.add(new Tuple(entry.getKey(), group));
-               }
-            }
-         }
-      }
-
-      return configs;
    }
 
    @Override

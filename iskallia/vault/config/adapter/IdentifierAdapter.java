@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import net.minecraft.resources.ResourceLocation;
 
 public class IdentifierAdapter extends TypeAdapter<ResourceLocation> {
@@ -29,8 +30,12 @@ public class IdentifierAdapter extends TypeAdapter<ResourceLocation> {
       if (in.peek() == JsonToken.NULL) {
          in.nextNull();
          return null;
-      } else {
+      } else if (in.peek() == JsonToken.STRING) {
          return new ResourceLocation(in.nextString());
+      } else if (in.peek() == JsonToken.NAME) {
+         return new ResourceLocation(in.nextName());
+      } else {
+         throw new UnsupportedEncodingException();
       }
    }
 }

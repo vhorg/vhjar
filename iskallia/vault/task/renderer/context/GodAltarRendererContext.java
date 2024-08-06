@@ -14,35 +14,29 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class GodAltarRendererContext extends RendererContext {
    public static final ResourceLocation TEXTURE = VaultMod.id("textures/gui/god_altar_hud.png");
-   private final VaultGod god;
    private final GodAltarRendererContext.Medium medium;
-   private boolean completed;
 
-   protected GodAltarRendererContext(
-      PoseStack matrices, float tickDelta, BufferSource bufferSource, Font font, VaultGod god, GodAltarRendererContext.Medium medium
-   ) {
+   protected GodAltarRendererContext(PoseStack matrices, float tickDelta, BufferSource bufferSource, Font font, GodAltarRendererContext.Medium medium) {
       super(matrices, tickDelta, bufferSource, font);
-      this.god = god;
       this.medium = medium;
    }
 
-   public static GodAltarRendererContext forHud(PoseStack matrices, float tickDelta, Font font, VaultGod god) {
+   public static GodAltarRendererContext forHud(PoseStack matrices, float tickDelta, Font font) {
       return new GodAltarRendererContext(
-         matrices, tickDelta, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()), font, god, GodAltarRendererContext.Medium.HUD
+         matrices, tickDelta, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()), font, GodAltarRendererContext.Medium.HUD
       );
    }
 
-   public static GodAltarRendererContext forWorld(PoseStack matrices, float tickDelta, Font font, VaultGod god) {
+   public static GodAltarRendererContext forWorld(PoseStack matrices, float tickDelta, Font font) {
       return new GodAltarRendererContext(
-         matrices, tickDelta, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()), font, god, GodAltarRendererContext.Medium.WORLD
+         matrices, tickDelta, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()), font, GodAltarRendererContext.Medium.WORLD
       );
-   }
-
-   public VaultGod getGod() {
-      return this.god;
    }
 
    public boolean isHud() {
@@ -51,23 +45,6 @@ public class GodAltarRendererContext extends RendererContext {
 
    public boolean isWorld() {
       return this.medium == GodAltarRendererContext.Medium.WORLD;
-   }
-
-   public boolean isCompleted() {
-      return this.completed;
-   }
-
-   public void setCompleted(boolean completed) {
-      this.completed = completed;
-   }
-
-   public int getTextColor() {
-      return this.getGod().getColor();
-   }
-
-   public int getProgressBarColor() {
-      int color = this.getGod().getColor();
-      return (color & 16579836) >> 1;
    }
 
    public void renderHeader(String description, boolean centered) {
@@ -91,7 +68,7 @@ public class GodAltarRendererContext extends RendererContext {
       this.translate(0.0, 0.0, 0.0);
    }
 
-   public void renderProgressBar(String description, double progress, String hint) {
+   public void renderProgressBar(String description, String hint) {
       int previous = this.setShaderTexture(TEXTURE);
       this.setShaderColor(16777215);
       this.push();
@@ -122,11 +99,11 @@ public class GodAltarRendererContext extends RendererContext {
       this.translate(0.0, 0.0, -0.01);
    }
 
-   public void renderTimerBar(double progress, String hint) {
+   public void renderTimerBar(VaultGod god, String hint) {
       int previous = this.setShaderTexture(TEXTURE);
       this.setShaderColor(16777215);
       this.push();
-      int width = Minecraft.getInstance().font.width(this.god.getName() + "'s Challenge | " + hint);
+      int width = Minecraft.getInstance().font.width(god.getName() + "'s Challenge | " + hint);
       if (this.isWorld()) {
          this.blit(65 - width / 2, 1, 0, 0, width, 2, 256, 256);
       } else {
@@ -137,7 +114,7 @@ public class GodAltarRendererContext extends RendererContext {
       this.setShaderTexture(previous);
       if (this.isWorld()) {
          this.renderText(
-            new TextComponent(this.god.getName() + "'s Challenge")
+            new TextComponent(god.getName() + "'s Challenge")
                .withStyle(ChatFormatting.BLACK)
                .append(new TextComponent(" | ").withStyle(Style.EMPTY.withColor(ChatFormatting.BLACK)))
                .append(new TextComponent(hint).withStyle(ChatFormatting.BLACK)),
@@ -147,8 +124,8 @@ public class GodAltarRendererContext extends RendererContext {
             true
          );
          this.renderText(
-            new TextComponent(this.god.getName() + "'s Challenge")
-               .withStyle(Style.EMPTY.withColor(this.getTextColor()))
+            new TextComponent(god.getName() + "'s Challenge")
+               .withStyle(Style.EMPTY.withColor(god.getColor()))
                .append(new TextComponent(" | ").withStyle(Style.EMPTY.withColor(6316128)))
                .append(new TextComponent(hint).withStyle(ChatFormatting.WHITE)),
             65.0F,
@@ -158,7 +135,7 @@ public class GodAltarRendererContext extends RendererContext {
          );
       } else {
          this.renderText(
-            new TextComponent(this.god.getName() + "'s Challenge")
+            new TextComponent(god.getName() + "'s Challenge")
                .withStyle(ChatFormatting.BLACK)
                .append(new TextComponent(" | ").withStyle(Style.EMPTY.withColor(ChatFormatting.BLACK)))
                .append(new TextComponent(hint).withStyle(ChatFormatting.BLACK)),
@@ -168,8 +145,8 @@ public class GodAltarRendererContext extends RendererContext {
             true
          );
          this.renderText(
-            new TextComponent(this.god.getName() + "'s Challenge")
-               .withStyle(Style.EMPTY.withColor(this.getTextColor()))
+            new TextComponent(god.getName() + "'s Challenge")
+               .withStyle(Style.EMPTY.withColor(god.getColor()))
                .append(new TextComponent(" | ").withStyle(Style.EMPTY.withColor(6316128)))
                .append(new TextComponent(hint).withStyle(ChatFormatting.WHITE)),
             11.0F,

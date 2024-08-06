@@ -114,7 +114,7 @@ public class GodAltarBlock extends FacedBlock implements EntityBlock {
       Direction facing = (Direction)stateIn.getValue(FACING);
       Direction rightDirection = facing.getClockWise();
       Direction leftDirection = rightDirection.getOpposite();
-      if (world.getBlockEntity(pos) instanceof GodAltarTileEntity godAltarTileEntity && !godAltarTileEntity.isCompleted()) {
+      if (world.getBlockEntity(pos) instanceof GodAltarTileEntity altar && !altar.isCompleted()) {
          for (int i = 0; i < 2; i++) {
             if (stateIn.getValue(GOD) == VaultGod.VELARA) {
                this.addFlameParticle(

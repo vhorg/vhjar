@@ -18,11 +18,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
 public class ResistanceHelper {
-   public static float getResistance(LivingEntity entity) {
-      return Mth.clamp(getResistanceUnlimited(entity), 0.0F, AttributeLimitHelper.getResistanceLimit(entity));
+   public static float getResistance(LivingEntity entity, LivingEntity attacker) {
+      return Mth.clamp(getResistanceUnlimited(entity, attacker), 0.0F, AttributeLimitHelper.getResistanceLimit(entity));
    }
 
-   public static float getResistanceUnlimited(LivingEntity entity) {
+   public static float getResistanceUnlimited(LivingEntity entity, LivingEntity attacker) {
       float resistancePercent = 0.0F;
       AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(entity);
       resistancePercent += snapshot.getAttributeValue(ModGearAttributes.RESISTANCE, VaultGearAttributeTypeMerger.floatSum());
@@ -46,6 +46,6 @@ public class ResistanceHelper {
          }
       }
 
-      return CommonEvents.PLAYER_STAT.invoke(PlayerStat.RESISTANCE, entity, resistancePercent).getValue();
+      return CommonEvents.PLAYER_STAT.invoke(PlayerStat.RESISTANCE, entity, resistancePercent, data -> data.setEnemy(attacker)).getValue();
    }
 }

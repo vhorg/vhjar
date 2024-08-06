@@ -1,5 +1,6 @@
 package iskallia.vault.gear;
 
+import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -111,5 +112,10 @@ public enum VaultGearRarity {
       Style style = Style.EMPTY.withColor(this.getColor());
       String name = StringUtils.capitalize(this.name().toLowerCase());
       return new TextComponent(name).withStyle(style);
+   }
+
+   @Nullable
+   public VaultGearRarity getNextTier() {
+      return this != OMEGA && this != UNIQUE ? values()[this.ordinal() + 1] : null;
    }
 }

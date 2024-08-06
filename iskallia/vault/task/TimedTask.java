@@ -2,12 +2,13 @@ package iskallia.vault.task;
 
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.task.source.TaskSource;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.event.TickEvent.Phase;
 
-public class TimedTask extends Task {
+public class TimedTask extends NodeTask implements ResettingTask {
    private long elapsed;
    private long duration;
 
@@ -28,14 +29,23 @@ public class TimedTask extends Task {
    }
 
    @Override
-   public boolean isCompleted(TaskSource source) {
+   public boolean isCompleted() {
       return this.elapsed < this.duration;
    }
 
    @Override
-   public void onTick(TaskSource source) {
-      super.onTick(source);
-      this.elapsed++;
+   public void onAttach(TaskContext context) {
+      CommonEvents.SERVER_TICK.at(Phase.END).register(this, event -> {
+         if (this.parent == null || this.parent.isCompleted()) {
+            this.elapsed = Math.min(this.elapsed + 1L, this.duration);
+         }
+      });
+      super.onAttach(context);
+   }
+
+   @Override
+   public void onReset(TaskContext context) {
+      this.elapsed = 0L;
    }
 
    @Override

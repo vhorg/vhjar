@@ -1,11 +1,13 @@
 package iskallia.vault.event;
 
+import iskallia.vault.world.data.PlayerTitlesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,7 +28,10 @@ public class PlayerTabNameEvent {
          MutableComponent display = new TextComponent("");
          MutableComponent level = new TextComponent(String.valueOf(vaultLevel)).withStyle(ChatFormatting.YELLOW);
          MutableComponent space = new TextComponent(" ");
-         MutableComponent playerName = player.getName().copy();
+         Component playerName = (Component)PlayerTitlesData.getCustomName(
+               player.getUUID(), new TextComponent(player.getName().getString()), PlayerTitlesData.Type.TAB_LIST, false
+            )
+            .orElse(new TextComponent("").append(player.getName()));
          display.append(level).append(space).append(playerName);
          if (IN_VAULT.contains(player.getUUID())) {
             display.append(new TextComponent(" (Vault)").withStyle(ChatFormatting.DARK_GRAY));

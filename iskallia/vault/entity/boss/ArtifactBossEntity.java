@@ -2,8 +2,13 @@ package iskallia.vault.entity.boss;
 
 import com.mojang.math.Vector3f;
 import iskallia.vault.client.particles.ArtifactBossImmunityParticleOptions;
+import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.entity.VaultBoss;
+import iskallia.vault.entity.boss.attack.BossMeleeAttackGoal;
+import iskallia.vault.entity.boss.attack.MeleeAttacks;
+import iskallia.vault.entity.boss.stage.BossStageManager;
+import iskallia.vault.entity.boss.stage.IBossStage;
+import iskallia.vault.entity.boss.stage.SparkStage;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
@@ -17,14 +22,11 @@ import iskallia.vault.world.data.WorldSettings;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerBossEvent;
@@ -34,7 +36,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.BossEvent.BossBarColor;
 import net.minecraft.world.BossEvent.BossBarOverlay;
 import net.minecraft.world.damagesource.DamageSource;
@@ -42,8 +43,6 @@ import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -55,7 +54,6 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.AbstractVillager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
@@ -74,40 +72,17 @@ import software.bernie.geckolib3.core.manager.AnimationFactory;
 import software.bernie.geckolib3.util.GeckoLibUtil;
 
 @EventBusSubscriber
-public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBoss {
-   public static final EntityDataSerializer<Optional<ArtifactBossEntity.AttackMove>> OPTIONAL_ATTACK_MOVE = new EntityDataSerializer<Optional<ArtifactBossEntity.AttackMove>>() {
-      public void write(FriendlyByteBuf buf, Optional<ArtifactBossEntity.AttackMove> value) {
-         if (value.isPresent()) {
-            buf.writeBoolean(true);
-            buf.writeEnum(value.get());
-         } else {
-            buf.writeBoolean(false);
-         }
-      }
-
-      public Optional<ArtifactBossEntity.AttackMove> read(FriendlyByteBuf buf) {
-         return buf.readBoolean() ? Optional.of((ArtifactBossEntity.AttackMove)buf.readEnum(ArtifactBossEntity.AttackMove.class)) : Optional.empty();
-      }
-
-      public Optional<ArtifactBossEntity.AttackMove> copy(Optional<ArtifactBossEntity.AttackMove> value) {
-         return value;
-      }
-   };
-   private static final EntityDataAccessor<Optional<ArtifactBossEntity.AttackMove>> ACTIVE_ATTACK_MOVE = SynchedEntityData.defineId(
-      ArtifactBossEntity.class, OPTIONAL_ATTACK_MOVE
-   );
+public class ArtifactBossEntity extends VaultBossBaseEntity implements IAnimatable {
    private static final EntityDataAccessor<Integer> CURRENT_STAGE_INDEX = SynchedEntityData.defineId(ArtifactBossEntity.class, EntityDataSerializers.INT);
    private static final EntityDataAccessor<Boolean> IS_STUNNED = SynchedEntityData.defineId(ArtifactBossEntity.class, EntityDataSerializers.BOOLEAN);
    private final List<IBossStage> stages = new ArrayList<>();
    private boolean stagesInitialized = false;
-   public Vec3 spawnPosition;
    private BossMeleeAttackGoal meleeAttackGoal;
-   protected static final AnimationBuilder HAMMERSMASH_ANIM = new AnimationBuilder()
+   private static final AnimationBuilder HAMMERSMASH_ANIM = new AnimationBuilder()
       .addAnimation("animation.vaultbattlemage.hammersmash", EDefaultLoopTypes.PLAY_ONCE);
-   protected static final AnimationBuilder UPPERCUT_ANIM = new AnimationBuilder()
-      .addAnimation("animation.vaultbattlemage.uppercut", EDefaultLoopTypes.PLAY_ONCE);
-   protected static final AnimationBuilder SUMMON_ANIM = new AnimationBuilder().addAnimation("animation.vaultbattlemage.summon", EDefaultLoopTypes.LOOP);
-   protected static final AnimationBuilder SUMMON_CONTINUOUS_ANIM = new AnimationBuilder()
+   private static final AnimationBuilder UPPERCUT_ANIM = new AnimationBuilder().addAnimation("animation.vaultbattlemage.uppercut", EDefaultLoopTypes.PLAY_ONCE);
+   public static final AnimationBuilder SUMMON_ANIM = new AnimationBuilder().addAnimation("animation.vaultbattlemage.summon", EDefaultLoopTypes.LOOP);
+   public static final AnimationBuilder SUMMON_CONTINUOUS_ANIM = new AnimationBuilder()
       .addAnimation("animation.vaultbattlemage.summonstart", EDefaultLoopTypes.PLAY_ONCE)
       .addAnimation("animation.vaultbattlemage.summonloop", EDefaultLoopTypes.LOOP);
    protected static final AnimationBuilder GROUNDSLAM_ANIM = new AnimationBuilder()
@@ -122,22 +97,6 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
 
    public ArtifactBossEntity(EntityType<ArtifactBossEntity> type, Level world) {
       super(type, world);
-   }
-
-   public int getPlayerAdjustedRandomCount(int minCount, int maxCount, float additionalPlayersRatio) {
-      int playerCount = this.getPlayerCount();
-      return playerCount == 0
-         ? 0
-         : this.getLevel()
-            .getRandom()
-            .nextInt(
-               (int)(minCount + (playerCount - 1) * minCount * additionalPlayersRatio),
-               (int)(maxCount + (playerCount - 1) * maxCount * additionalPlayersRatio) + 1
-            );
-   }
-
-   public Vec3 getSpawnPosition() {
-      return this.spawnPosition;
    }
 
    protected void registerGoals() {
@@ -164,22 +123,10 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
          .add(Attributes.KNOCKBACK_RESISTANCE, 1.0);
    }
 
-   @Nullable
-   public SpawnGroupData finalizeSpawn(
-      ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag
-   ) {
-      this.spawnPosition = this.position();
-      return super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
-   }
-
-   public int getPlayerCount() {
-      return this.level instanceof ServerLevel ? ServerVaults.get(this.level).map(vault -> vault.get(Vault.LISTENERS).getAll().size()).orElse(0) : 1;
-   }
-
    public void tick() {
       if (!this.level.isClientSide() && !this.stagesInitialized) {
          this.stagesInitialized = true;
-         ModConfigs.BOSS
+         ModConfigs.HERALD
             .getBossStageConfigs("artifact_boss")
             .forEach(s -> this.stages.add(BossStageManager.createStageFromAttributes(this, s.stageType(), s.attributes())));
          syncStagesToClient(this, PacketDistributor.DIMENSION.with(() -> this.level.dimension()));
@@ -308,11 +255,26 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
       }
    }
 
+   @Override
    protected void defineSynchedData() {
       super.defineSynchedData();
       this.entityData.define(CURRENT_STAGE_INDEX, -1);
-      this.entityData.define(ACTIVE_ATTACK_MOVE, Optional.empty());
       this.entityData.define(IS_STUNNED, false);
+   }
+
+   @Override
+   public WeightedList<MeleeAttacks.AttackData> getMeleeAttacks() {
+      return this.getCurrentStage().map(IBossStage::getMeleeAttacks).orElse(WeightedList.empty());
+   }
+
+   @Override
+   public WeightedList<MeleeAttacks.AttackData> getRageAttacks() {
+      return this.getCurrentStage().map(IBossStage::getRageAttacks).orElse(WeightedList.empty());
+   }
+
+   @Override
+   public double getAttackReach() {
+      return 5.0;
    }
 
    public void setStunned(boolean stunned) {
@@ -341,14 +303,7 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
       return this.stages.size() > this.getCurrentStageIndex() + 1;
    }
 
-   public void setActiveAttackMove(@Nullable ArtifactBossEntity.AttackMove attackMove) {
-      this.entityData.set(ACTIVE_ATTACK_MOVE, Optional.ofNullable(attackMove));
-   }
-
-   private Optional<ArtifactBossEntity.AttackMove> getActiveAttackMove() {
-      return (Optional<ArtifactBossEntity.AttackMove>)this.entityData.get(ACTIVE_ATTACK_MOVE);
-   }
-
+   @Override
    public void addAdditionalSaveData(CompoundTag compound) {
       super.addAdditionalSaveData(compound);
       ListTag stagesNbt1 = new ListTag();
@@ -360,21 +315,9 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
       compound.put("Stages", stagesNbt1);
       compound.putBoolean("StagesInitialized", this.stagesInitialized);
       compound.putInt("CurrentStage", this.getCurrentStageIndex());
-      compound.put("SpawnPosition", this.serializeSpawnPosition());
    }
 
-   private CompoundTag serializeSpawnPosition() {
-      if (this.spawnPosition == null) {
-         return new CompoundTag();
-      } else {
-         CompoundTag tag = new CompoundTag();
-         tag.putDouble("X", this.spawnPosition.x);
-         tag.putDouble("Y", this.spawnPosition.y);
-         tag.putDouble("Z", this.spawnPosition.z);
-         return tag;
-      }
-   }
-
+   @Override
    public void readAdditionalSaveData(CompoundTag compound) {
       super.readAdditionalSaveData(compound);
       ListTag stagesNbt = compound.getList("Stages", 10);
@@ -387,11 +330,6 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
 
       this.stagesInitialized = compound.getBoolean("StagesInitialized");
       this.setCurrentStageIndex(compound.getInt("CurrentStage"));
-      this.spawnPosition = this.deserializeSpawnPosition(compound.getCompound("SpawnPosition"));
-   }
-
-   private Vec3 deserializeSpawnPosition(CompoundTag spawnPosition) {
-      return new Vec3(spawnPosition.getDouble("X"), spawnPosition.getDouble("Y"), spawnPosition.getDouble("Z"));
    }
 
    public AABB getBoundingBoxForCulling() {
@@ -400,10 +338,6 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
 
    public int getMaxHeadYRot() {
       return 30;
-   }
-
-   public final Vec3 calculateViewVector(float adjustedYaw) {
-      return super.calculateViewVector(this.getViewXRot(1.0F), adjustedYaw);
    }
 
    public void die(DamageSource cause) {
@@ -484,6 +418,7 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
                controller.setAnimation(AOE_CLOSE);
                yield PlayState.CONTINUE;
             }
+            default -> throw new IllegalStateException("Unexpected value: " + attackMove);
          };
       }).orElseGet(() -> {
          controller.markNeedsReload();
@@ -578,14 +513,6 @@ public class ArtifactBossEntity extends Monster implements IAnimatable, VaultBos
 
    static {
       EntityDataSerializers.registerSerializer(OPTIONAL_ATTACK_MOVE);
-   }
-
-   public static enum AttackMove {
-      SUMMON,
-      HAMMERSMASH,
-      UPPERCUT,
-      GROUNDSLAM,
-      AOECLOSE;
    }
 
    private static class BossStageGoal extends Goal {

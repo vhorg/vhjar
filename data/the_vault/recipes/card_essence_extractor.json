@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "ede",
+    "bgb",
+    "bpb"
+  ],
+  "key": {
+    "e": {
+      "item": "the_vault:vault_essence"
+    },
+    "d": {
+      "item": "minecraft:dispenser"
+    },
+    "b": {
+      "item": "the_vault:vault_diamond_block"
+    },
+    "g": {
+      "item": "minecraft:glass_pane"
+    },
+    "p": {
+      "item": "minecraft:flower_pot"
+    }
+  },
+  "result": {
+    "item": "the_vault:card_essence_extractor",
+    "count": 1
+  }
+}

@@ -5,10 +5,12 @@ import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.LootPoolKey;
+import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.vault.VaultRegistry;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -47,13 +49,33 @@ public class ReferenceLootEntry implements LootEntry {
    }
 
    @Override
+   public void writeBits(BitBuffer buffer) {
+      Adapters.IDENTIFIER.asNullable().writeBits(this.reference, buffer);
+   }
+
+   @Override
+   public void readBits(BitBuffer buffer) {
+      this.reference = Adapters.IDENTIFIER.asNullable().readBits(buffer).orElse(null);
+   }
+
+   @Override
+   public Optional<Tag> writeNbt() {
+      return Adapters.IDENTIFIER.writeNbt(this.reference);
+   }
+
+   @Override
+   public void readNbt(Tag nbt) {
+      this.reference = Adapters.IDENTIFIER.readNbt(nbt).orElse(null);
+   }
+
+   @Override
    public Optional<JsonElement> writeJson() {
       return Adapters.IDENTIFIER.writeJson(this.reference);
    }
 
    @Override
    public void readJson(JsonElement json) {
-      Adapters.IDENTIFIER.readJson(json).ifPresent(value -> this.reference = value);
+      this.reference = Adapters.IDENTIFIER.readJson(json).orElse(null);
    }
 
    @Override

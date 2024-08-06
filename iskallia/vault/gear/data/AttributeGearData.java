@@ -2,6 +2,7 @@ package iskallia.vault.gear.data;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import iskallia.vault.core.card.CardDeck;
 import iskallia.vault.core.net.ArrayBitBuffer;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
@@ -12,6 +13,7 @@ import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.item.CardDeckItem;
 import iskallia.vault.item.MagnetItem;
 import iskallia.vault.item.tool.ToolItem;
 import iskallia.vault.item.tool.ToolMaterial;
@@ -55,8 +57,12 @@ public class AttributeGearData {
    }
 
    public static boolean hasData(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
-      return tag != null && tag.contains("vaultGearData", 12);
+      if (stack.getItem() instanceof CardDeckItem && CardDeckItem.getCardDeck(stack).isPresent()) {
+         return true;
+      } else {
+         CompoundTag tag = stack.getTag();
+         return tag != null && tag.contains("vaultGearData", 12);
+      }
    }
 
    @Nonnull
@@ -83,9 +89,11 @@ public class AttributeGearData {
          }
 
          return read(stack, (Function<BitBuffer, T>)(ToolGearData::new), (Supplier<T>)(ToolGearData::new));
+      } else if (stack.getItem() instanceof VaultGearItem) {
+         return read(stack, (Function<BitBuffer, T>)(VaultGearData::new), (Supplier<T>)(VaultGearData::new));
       } else {
-         return stack.getItem() instanceof VaultGearItem
-            ? read(stack, (Function<BitBuffer, T>)(VaultGearData::new), (Supplier<T>)(VaultGearData::new))
+         return stack.getItem() instanceof CardDeckItem
+            ? read(stack, buf -> (T)(new CardDeckGearData(buf, stack)), () -> (T)(new CardDeckGearData(stack)))
             : read(stack, (Function<BitBuffer, T>)(AttributeGearData::new), (Supplier<T>)(AttributeGearData::new));
       }
    }
@@ -93,6 +101,8 @@ public class AttributeGearData {
    public static Optional<UUID> readUUID(ItemStack stack) {
       if (!hasData(stack)) {
          return Optional.empty();
+      } else if (stack.getItem() instanceof CardDeckItem) {
+         return CardDeckItem.getCardDeck(stack).map(CardDeck::getUuid);
       } else {
          BitBuffer buf = ArrayBitBuffer.backing(stack.getOrCreateTag().getLongArray("vaultGearData"), 0);
          buf.readEnum(GearDataVersion.class);
@@ -107,6 +117,11 @@ public class AttributeGearData {
 
    public void write(ItemStack stack) {
       this.markChanged(stack);
+      this.writeUnchanged(stack);
+   }
+
+   @Deprecated
+   public void writeUnchanged(ItemStack stack) {
       ArrayBitBuffer buffer = ArrayBitBuffer.empty();
       this.write(buffer);
       stack.getOrCreateTag().putLongArray("vaultGearData", buffer.toLongArray());

@@ -1,7 +1,6 @@
 package iskallia.vault.entity.model.elite;
 
 import iskallia.vault.client.gui.helper.Easing;
-import iskallia.vault.entity.entity.elite.EliteSpiderEntity;
 import iskallia.vault.util.IScalablePart;
 import javax.annotation.Nonnull;
 import net.minecraft.client.model.SpiderModel;
@@ -13,8 +12,9 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.monster.Monster;
 
-public class EliteSpiderModel<T extends EliteSpiderEntity> extends SpiderModel<T> {
+public class EliteSpiderModel<T extends Monster> extends SpiderModel<T> {
    private final ModelPart body1;
    private final ModelPart egg1;
    private final ModelPart egg2;

@@ -82,7 +82,7 @@ public class ParadoxObjective extends Objective {
       CommonEvents.LOOT_GENERATION.register(this, data -> {
          if (this.get(TYPE) == ParadoxObjective.Type.BUILD) {
             if (data.getGenerator() instanceof LootTableGenerator generator) {
-               if (!(generator.source instanceof ServerPlayer player)) {
+               if (!(generator.getSource() instanceof ServerPlayer player)) {
                   return;
                }
 
@@ -264,7 +264,7 @@ public class ParadoxObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       return objective == this;
    }
 

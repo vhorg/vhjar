@@ -871,5 +871,23 @@
     "sounds": [
       "the_vault:destroy_monolith"
     ]
+  },
+  "ice_bolt_arrow": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ice_bolt_arrow"
+    ]
+  },
+  "ice_bolt_chunk": {
+    "category": "master",
+    "sounds": [
+      "the_vault:ice_bolt_chunk"
+    ]
+  },
+  "booster_pack_open": {
+    "category": "players",
+    "sounds": [
+      "the_vault:booster_pack_open"
+    ]
   }
 }

@@ -16,7 +16,7 @@ public class RegretOrbItem extends UsableItem {
 
    @Override
    protected SoundEvent getSuccessSound() {
-      return SoundEvents.PLAYER_LEVELUP;
+      return SoundEvents.AMETHYST_BLOCK_PLACE;
    }
 
    @Override

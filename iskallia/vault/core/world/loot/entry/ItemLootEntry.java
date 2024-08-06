@@ -7,6 +7,7 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
+import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.world.roll.IntRoll;
 import iskallia.vault.init.ModItems;
@@ -81,6 +82,20 @@ public class ItemLootEntry implements LootEntry {
       }
 
       return OverSizedItemStack.of(stack).copyAmount(count);
+   }
+
+   @Override
+   public void writeBits(BitBuffer buffer) {
+      Adapters.ITEM.asNullable().writeBits((IForgeRegistryEntry)this.item, buffer);
+      Adapters.COMPOUND_NBT.asNullable().writeBits(this.nbt, buffer);
+      Adapters.INT_ROLL.writeBits(this.count, buffer);
+   }
+
+   @Override
+   public void readBits(BitBuffer buffer) {
+      this.item = (Item)Adapters.ITEM.asNullable().readBits(buffer).orElse(null);
+      this.nbt = Adapters.COMPOUND_NBT.asNullable().readBits(buffer).orElse(null);
+      this.count = Adapters.INT_ROLL.readBits(buffer).orElse(null);
    }
 
    @Override

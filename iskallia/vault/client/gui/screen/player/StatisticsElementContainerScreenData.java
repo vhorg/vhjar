@@ -263,10 +263,10 @@ public class StatisticsElementContainerScreenData {
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.COPIOUSLY),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.MINING_SPEED),
             GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_INCREASE),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_ILLAGERS),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_SPIDERS),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_UNDEAD),
-            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_NETHER)
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_CHAMPION),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_ASSASSIN),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_DUNGEON),
+            GearAttributeStatLabel.ofFloat(this.player, ModGearAttributes.DAMAGE_HORDE)
          )
       );
       result.sort(StatLabelElementBuilder.COMPARATOR);

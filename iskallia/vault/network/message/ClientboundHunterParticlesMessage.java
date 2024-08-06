@@ -1,12 +1,10 @@
 package iskallia.vault.network.message;
 
-import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.render.IVaultOptions;
 import iskallia.vault.init.ModParticles;
-import iskallia.vault.skill.ability.effect.spi.HunterAbility;
-import iskallia.vault.skill.base.Skill;
 import java.awt.Color;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,41 +12,41 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkEvent.Context;
 
-public record ClientboundHunterParticlesMessage(double x, double y, double z, double r, double g, double b) {
+public record ClientboundHunterParticlesMessage(double x, double y, double z, @Nullable String type, int color) {
    public static void encode(ClientboundHunterParticlesMessage pkt, FriendlyByteBuf buffer) {
       buffer.writeDouble(pkt.x);
       buffer.writeDouble(pkt.y);
       buffer.writeDouble(pkt.z);
-      buffer.writeDouble(pkt.r);
-      buffer.writeDouble(pkt.g);
-      buffer.writeDouble(pkt.b);
+      buffer.writeBoolean(pkt.type != null);
+      if (pkt.type != null) {
+         buffer.writeUtf(pkt.type);
+      }
+
+      buffer.writeInt(pkt.color);
    }
 
    public static ClientboundHunterParticlesMessage decode(FriendlyByteBuf buffer) {
       double x = buffer.readDouble();
       double y = buffer.readDouble();
       double z = buffer.readDouble();
-      double r = buffer.readDouble();
-      double g = buffer.readDouble();
-      double b = buffer.readDouble();
-      return new ClientboundHunterParticlesMessage(x, y, z, r, g, b);
+      boolean hasType = buffer.readBoolean();
+      String type = null;
+      if (hasType) {
+         type = buffer.readUtf();
+      }
+
+      int color = buffer.readInt();
+      return new ClientboundHunterParticlesMessage(x, y, z, type, color);
    }
 
    public static void handle(ClientboundHunterParticlesMessage pkt, Supplier<Context> contextSupplier) {
-      createParticles(pkt.x, pkt.y, pkt.z, pkt.r, pkt.g, pkt.b);
+      createParticles(pkt.x, pkt.y, pkt.z, pkt.type, pkt.color);
       contextSupplier.get().setPacketHandled(true);
    }
 
    @OnlyIn(Dist.CLIENT)
-   private static void createParticles(double x, double y, double z, double r, double g, double b) {
-      Color color = new Color((float)r, (float)g, (float)b);
-      IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
-      if (options.isHunterCustomColorsEnabled()) {
-         for (HunterAbility ability : ClientAbilityData.getTree().getAll(HunterAbility.class, Skill::isUnlocked)) {
-            color = getColor(ability.getParent().getId());
-         }
-      }
-
+   private static void createParticles(double x, double y, double z, @Nullable String type, int intColor) {
+      Color color = type != null ? getColor(type) : new Color(intColor);
       Minecraft.getInstance()
          .level
          .addAlwaysVisibleParticle(
@@ -56,21 +54,21 @@ public record ClientboundHunterParticlesMessage(double x, double y, double z, do
          );
    }
 
-   private static Color getColor(String hunterSpec) {
+   public static Color getColor(String hunterSpec) {
       IVaultOptions options = (IVaultOptions)Minecraft.getInstance().options;
       switch (hunterSpec) {
-         case "Hunter_Base":
-            return options.getChestHunterSpec().getColor();
-         case "Hunter_Blocks":
+         case "blocks":
             return options.getBlockHunterSpec().getColor();
-         case "Hunter_Gilded":
+         case "gilded":
             return options.getGildedHunterSpec().getColor();
-         case "Hunter_Living":
+         case "living":
             return options.getLivingHunterSpec().getColor();
-         case "Hunter_Ornate":
+         case "ornate":
             return options.getOrnateHunterSpec().getColor();
-         case "Hunter_Coins":
+         case "coins":
             return options.getCoinsHunterSpec().getColor();
+         case "wooden":
+            return options.getChestHunterSpec().getColor();
          default:
             return Color.WHITE;
       }

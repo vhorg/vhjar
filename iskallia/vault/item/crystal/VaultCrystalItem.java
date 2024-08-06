@@ -18,8 +18,10 @@ import iskallia.vault.item.crystal.layout.HeraldCrystalLayout;
 import iskallia.vault.item.crystal.layout.ParadoxCrystalLayout;
 import iskallia.vault.item.crystal.model.RawCrystalModel;
 import iskallia.vault.item.crystal.modifiers.ParadoxCrystalModifiers;
+import iskallia.vault.item.crystal.objective.BingoCrystalObjective;
 import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
 import iskallia.vault.item.crystal.objective.HeraldCrystalObjective;
+import iskallia.vault.item.crystal.objective.OfferingBossCrystalObjective;
 import iskallia.vault.item.crystal.objective.ParadoxCrystalObjective;
 import iskallia.vault.item.crystal.properties.CapacityCrystalProperties;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
@@ -126,6 +128,14 @@ public class VaultCrystalItem extends Item implements IManualModelLoading {
             crystal.setLayout(new HeraldCrystalLayout());
             crystal.getModifiers().setRandomModifiers(false);
             crystal.setProperties(new CapacityCrystalProperties().setVolume(0).setLevel(Integer.valueOf(100)).setUnmodifiable(true));
+         }));
+         items.add(create(crystal -> {
+            crystal.setProperties(new CapacityCrystalProperties());
+            crystal.setObjective(new BingoCrystalObjective());
+         }));
+         items.add(create(crystal -> {
+            crystal.setProperties(new CapacityCrystalProperties());
+            crystal.setObjective(new OfferingBossCrystalObjective(0.5F));
          }));
       }
    }

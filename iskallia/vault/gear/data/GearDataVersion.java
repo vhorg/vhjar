@@ -6,7 +6,8 @@ public enum GearDataVersion {
    V0_1,
    V0_2,
    V0_3,
-   V0_4;
+   V0_4,
+   V0_5;
 
    public static GearDataVersion current() {
       return values()[values().length - 1];

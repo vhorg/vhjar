@@ -4,12 +4,19 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
+import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
+import iskallia.vault.core.world.data.tile.PartialBlock;
+import iskallia.vault.core.world.data.tile.PartialBlockGroup;
+import iskallia.vault.core.world.data.tile.PartialBlockProperties;
+import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
+import iskallia.vault.core.world.data.tile.TilePlacement;
 import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.gear.attribute.ability.special.HunterRangeModification;
 import iskallia.vault.gear.attribute.ability.special.base.ConfiguredModification;
 import iskallia.vault.gear.attribute.ability.special.base.SpecialAbilityModification;
 import iskallia.vault.gear.attribute.ability.special.base.template.FloatValueConfig;
+import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.network.message.ClientboundHunterParticlesMessage;
@@ -20,16 +27,19 @@ import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.ServerScheduler;
 import iskallia.vault.util.calc.AreaOfEffectHelper;
 import iskallia.vault.world.data.ServerVaults;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Map.Entry;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.function.Function;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
@@ -44,6 +54,14 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.network.NetworkDirection;
 
 public class HunterAbility extends InstantManaAbility {
+   public static final String GILDED = "gilded";
+   public static final String ORNATE = "ornate";
+   public static final String LIVING = "living";
+   public static final String COINS = "coins";
+   public static final String BLOCKS = "blocks";
+   public static final String WOODEN = "wooden";
+   private static final PartialCompoundNbt HIDDEN_TAG;
+   private static final Map<TilePlacement<?>, String> BLOCK_TYPES;
    private double searchRadius;
    private int color;
    private int durationTicks;
@@ -69,6 +87,16 @@ public class HunterAbility extends InstantManaAbility {
    }
 
    public HunterAbility() {
+   }
+
+   public static Optional<String> getHighlightType(PartialTile tile) {
+      for (Entry<TilePlacement<?>, String> entry : BLOCK_TYPES.entrySet()) {
+         if (entry.getKey().test(tile)) {
+            return Optional.of(entry.getValue());
+         }
+      }
+
+      return Optional.empty();
    }
 
    public double getUnmodifiedSearchRadius() {
@@ -100,14 +128,6 @@ public class HunterAbility extends InstantManaAbility {
       return this.durationTicks;
    }
 
-   public List<TilePredicate> getFilters() {
-      return this.filters;
-   }
-
-   public boolean shouldHighlightTile(PartialTile tile) {
-      return this.filters.stream().anyMatch(filter -> filter.test(tile));
-   }
-
    @Override
    public String getAbilityGroupName() {
       return "Hunter";
@@ -131,18 +151,14 @@ public class HunterAbility extends InstantManaAbility {
                      ServerScheduler.INSTANCE
                         .schedule(
                            delay * 5,
-                           () -> selectPositions(serverWorld, player, this.getRadius(player), new Color(this.getColor(), false), this::shouldHighlightTile)
+                           () -> selectPositions(serverWorld, player, this.getRadius(player))
                               .forEach(
                                  highlightPosition -> {
-                                    Color color = highlightPosition.color;
-
                                     for (int i = 0; i < 8; i++) {
                                        Vec3 v = MiscUtils.getRandomOffset(highlightPosition.blockPos, serverWorld.getRandom());
                                        ModNetwork.CHANNEL
                                           .sendTo(
-                                             new ClientboundHunterParticlesMessage(
-                                                v.x, v.y, v.z, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F
-                                             ),
+                                             new ClientboundHunterParticlesMessage(v.x, v.y, v.z, highlightPosition.type(), highlightPosition.color()),
                                              player.connection.getConnection(),
                                              NetworkDirection.PLAY_TO_CLIENT
                                           );
@@ -173,15 +189,15 @@ public class HunterAbility extends InstantManaAbility {
          );
    }
 
+   public static List<HunterAbility.HighlightPosition> selectPositions(ServerLevel world, ServerPlayer player, double radius) {
+      return selectPositions(world, player, radius, tile -> getHighlightType(tile).map(type -> new HunterAbility.HighlightPosition(tile.getPos(), type, -1)));
+   }
+
    public static List<HunterAbility.HighlightPosition> selectPositions(
-      ServerLevel world, ServerPlayer player, double radius, Color color, Predicate<PartialTile> shouldHighlight
+      ServerLevel world, ServerPlayer player, double radius, Function<PartialTile, Optional<HunterAbility.HighlightPosition>> getHighlightPosition
    ) {
       List<HunterAbility.HighlightPosition> result = new ArrayList<>();
-      forEachTile(world, player, radius, tile -> {
-         if (shouldHighlight.test(tile)) {
-            result.add(new HunterAbility.HighlightPosition(tile.getPos(), color));
-         }
-      });
+      forEachTile(world, player, radius, tile -> getHighlightPosition.apply(tile).ifPresent(result::add));
       return result;
    }
 
@@ -265,6 +281,34 @@ public class HunterAbility extends InstantManaAbility {
       this.filters = Arrays.stream(KEYS.readJson(json.get("filters")).orElse(new TilePredicate[0])).toList();
    }
 
-   public record HighlightPosition(BlockPos blockPos, Color color) {
+   static {
+      CompoundTag nbt = new CompoundTag();
+      nbt.putBoolean("Hidden", false);
+      HIDDEN_TAG = PartialCompoundNbt.of(nbt);
+      BLOCK_TYPES = Map.of(
+         PartialTile.of(PartialBlockState.of(ModBlocks.WOODEN_CHEST), HIDDEN_TAG),
+         "wooden",
+         PartialTile.of(PartialBlockState.of(ModBlocks.GILDED_CHEST), HIDDEN_TAG),
+         "gilded",
+         PartialTile.of(PartialBlockState.of(ModBlocks.GILDED_STRONGBOX), HIDDEN_TAG),
+         "gilded",
+         PartialTile.of(PartialBlockState.of(ModBlocks.ORNATE_CHEST), HIDDEN_TAG),
+         "ornate",
+         PartialTile.of(PartialBlockState.of(ModBlocks.ORNATE_STRONGBOX), HIDDEN_TAG),
+         "ornate",
+         PartialTile.of(PartialBlockState.of(ModBlocks.LIVING_CHEST), HIDDEN_TAG),
+         "living",
+         PartialTile.of(PartialBlockState.of(ModBlocks.LIVING_STRONGBOX), HIDDEN_TAG),
+         "living",
+         PartialTile.of(PartialBlockState.of(ModBlocks.COIN_PILE), HIDDEN_TAG),
+         "coins",
+         PartialBlockGroup.of(new ResourceLocation("the_vault:objective_blocks"), PartialBlockProperties.empty(), PartialCompoundNbt.of((Entity)null)),
+         "blocks",
+         PartialBlock.of(ModBlocks.GOD_ALTAR),
+         "blocks"
+      );
+   }
+
+   public record HighlightPosition(BlockPos blockPos, @Nullable String type, int color) {
    }
 }

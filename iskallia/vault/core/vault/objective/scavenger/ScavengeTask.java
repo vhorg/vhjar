@@ -13,7 +13,7 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.vault.objective.ScavengerObjective;
+import iskallia.vault.core.vault.objective.Objective;
 import iskallia.vault.core.world.data.item.PartialStack;
 import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.storage.VirtualWorld;
@@ -29,7 +29,7 @@ import net.minecraft.world.item.ItemStack;
 public abstract class ScavengeTask {
    public abstract Optional<ScavengerGoal> generateGoal(int var1, RandomSource var2);
 
-   public abstract void initServer(VirtualWorld var1, Vault var2, ScavengerObjective var3);
+   public abstract void initServer(VirtualWorld var1, Vault var2, Objective var3);
 
    public ItemStack createStack(Vault vault, ItemStack stack) {
       stack = stack.copy();
@@ -154,10 +154,11 @@ public abstract class ScavengeTask {
             object.addProperty("icon", chest.icon.toString());
             JsonObject entries = new JsonObject();
             chest.entries.forEach((entry, weight) -> {
-               JsonObject obj = new JsonObject();
-               obj.addProperty("weight", weight);
-               obj.addProperty("color", entry.color);
-               entries.add(PartialStack.of(entry.item).toString(), obj);
+               JsonObject objx = new JsonObject();
+               objx.addProperty("weight", weight);
+               objx.addProperty("multiplier", entry.multiplier);
+               objx.addProperty("color", entry.color);
+               entries.add(PartialStack.of(entry.item).toString(), objx);
             });
             object.add("entries", entries);
          } else if (value instanceof CoinStacksScavengerTask coin) {
@@ -166,10 +167,11 @@ public abstract class ScavengeTask {
             object.addProperty("icon", coin.icon.toString());
             JsonObject entries = new JsonObject();
             coin.entries.forEach((entry, weight) -> {
-               JsonObject obj = new JsonObject();
-               obj.addProperty("weight", weight);
-               obj.addProperty("color", entry.color);
-               entries.add(PartialStack.of(entry.item).toString(), obj);
+               JsonObject objx = new JsonObject();
+               objx.addProperty("weight", weight);
+               objx.addProperty("multiplier", entry.multiplier);
+               objx.addProperty("color", entry.color);
+               entries.add(PartialStack.of(entry.item).toString(), objx);
             });
             object.add("entries", entries);
          } else if (value instanceof OreScavengerTask ore) {
@@ -178,10 +180,11 @@ public abstract class ScavengeTask {
             object.addProperty("icon", ore.icon.toString());
             JsonObject entries = new JsonObject();
             ore.entries.forEach((entry, weight) -> {
-               JsonObject obj = new JsonObject();
-               obj.addProperty("weight", weight);
-               obj.addProperty("color", entry.color);
-               entries.add(PartialStack.of(entry.item).toString(), obj);
+               JsonObject objx = new JsonObject();
+               objx.addProperty("weight", weight);
+               objx.addProperty("multiplier", entry.multiplier);
+               objx.addProperty("color", entry.color);
+               entries.add(PartialStack.of(entry.item).toString(), objx);
             });
             object.add("entries", entries);
          } else if (value instanceof MobScavengerTask mob) {
@@ -192,9 +195,12 @@ public abstract class ScavengeTask {
             JsonObject entries = new JsonObject();
 
             for (MobScavengerTask.Entry entry : mob.entries) {
+               JsonObject obj = new JsonObject();
+               obj.addProperty("multiplier", entry.multiplier);
                JsonArray group = new JsonArray();
                entry.group.forEach(id -> group.add(id.toString()));
-               entries.add(PartialStack.of(entry.item).toString(), group);
+               obj.add("mobs", group);
+               entries.add(PartialStack.of(entry.item).toString(), obj);
             }
 
             object.add("entries", entries);

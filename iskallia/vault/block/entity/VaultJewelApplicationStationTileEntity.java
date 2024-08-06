@@ -1,9 +1,7 @@
 package iskallia.vault.block.entity;
 
-import iskallia.vault.VaultMod;
 import iskallia.vault.container.VaultJewelApplicationStationContainer;
 import iskallia.vault.container.oversized.OverSizedInventory;
-import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearModifier;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
@@ -91,7 +89,7 @@ public class VaultJewelApplicationStationTileEntity extends BlockEntity implemen
          for (VaultGearModifier<?> jewelModifier : jewelData.getModifiers(affix)) {
             if (jewelModifier.getAttribute() != ModGearAttributes.HAMMER_SIZE
                || toolData.get(ModGearAttributes.HAMMERING, VaultGearAttributeTypeMerger.anyTrue())) {
-               mergeModifier(affix, toolData, jewelModifier);
+               ToolItem.mergeModifier(affix, toolData, jewelModifier);
             }
          }
       }
@@ -103,25 +101,6 @@ public class VaultJewelApplicationStationTileEntity extends BlockEntity implemen
       toolData.setItemLevel(Math.max(toolData.getItemLevel(), jewelData.getItemLevel()));
       toolData.write(tool);
       return true;
-   }
-
-   private static <T> void mergeModifier(VaultGearModifier.AffixType affix, VaultGearData targetData, VaultGearModifier<T> toAdd) {
-      List<VaultGearAttributeInstance<T>> matching = targetData.getModifiers(toAdd.getAttribute(), VaultGearData.Type.EXPLICIT_MODIFIERS);
-      if (matching.isEmpty()) {
-         targetData.addModifier(affix, new VaultGearModifier<>(toAdd.getAttribute(), toAdd.getValue()));
-      } else {
-         matching.stream().findFirst().ifPresent(current -> current.setValue(merge((VaultGearAttributeInstance<T>)current, toAdd.getValue())));
-      }
-   }
-
-   private static <T> T merge(VaultGearAttributeInstance<T> attributeInstance, T toAdd) {
-      VaultGearAttribute<T> attribute = attributeInstance.getAttribute();
-      if (attribute.getAttributeComparator() != null) {
-         return attribute.getAttributeComparator().merge(attributeInstance.getValue(), toAdd);
-      } else {
-         VaultMod.LOGGER.error("Unsupported merging on attribute " + attribute.getRegistryName(), new UnsupportedOperationException());
-         return attributeInstance.getValue();
-      }
    }
 
    public boolean stillValid(Player player) {

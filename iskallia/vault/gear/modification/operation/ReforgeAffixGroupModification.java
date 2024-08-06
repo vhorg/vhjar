@@ -24,8 +24,8 @@ public class ReforgeAffixGroupModification extends GearModification {
    }
 
    @Override
-   public boolean doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
-      VaultGearModifierHelper.removeAllModifiersOfType(stack, this.affixType);
-      return VaultGearModifierHelper.generateModifiersOfAffix(stack, this.affixType, rand);
+   public GearModification.Result doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
+      GearModification.Result result = VaultGearModifierHelper.removeAllModifiersOfType(stack, this.affixType);
+      return !result.success() ? result : VaultGearModifierHelper.generateModifiersOfAffix(stack, this.affixType, rand);
    }
 }

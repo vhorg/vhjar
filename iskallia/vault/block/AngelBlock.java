@@ -3,6 +3,7 @@ package iskallia.vault.block;
 import iskallia.vault.block.entity.AngelBlockTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.util.BlockHelper;
+import iskallia.vault.util.DimensionPos;
 import java.util.HashSet;
 import java.util.Set;
 import net.minecraft.core.BlockPos;
@@ -28,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class AngelBlock extends BaseEntityBlock implements EntityBlock {
    private static final int ANGEL_BLOCK_RANGE = 64;
-   private final Set<AngelBlock.DimensionPos> angelBlocks = new HashSet<>();
+   private final Set<DimensionPos> angelBlocks = new HashSet<>();
    protected static final VoxelShape SHAPE = Block.box(4.0, 4.0, 4.0, 12.0, 12.0, 12.0);
 
    public AngelBlock() {
@@ -40,12 +41,12 @@ public class AngelBlock extends BaseEntityBlock implements EntityBlock {
    }
 
    public void addPlayerAngelBlock(ResourceKey<Level> dimension, BlockPos pos) {
-      this.angelBlocks.add(new AngelBlock.DimensionPos(dimension, pos));
+      this.angelBlocks.add(new DimensionPos(dimension, pos));
    }
 
    public boolean isInRange(Player player) {
-      for (AngelBlock.DimensionPos dimensionPos : this.angelBlocks) {
-         if (player.getLevel().dimension().equals(dimensionPos.dimension()) && dimensionPos.pos().closerThan(player.blockPosition(), 64.0)) {
+      for (DimensionPos dimensionPos : this.angelBlocks) {
+         if (dimensionPos.isInRange(player.getLevel().dimension(), player.blockPosition(), 64)) {
             return true;
          }
       }
@@ -75,12 +76,9 @@ public class AngelBlock extends BaseEntityBlock implements EntityBlock {
    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
       if (pState.getBlock() != pNewState.getBlock()) {
          pLevel.getBlockEntity(pPos, ModBlocks.ANGEL_BLOCK_TILE_ENTITY)
-            .ifPresent(blockEntity -> this.angelBlocks.remove(new AngelBlock.DimensionPos(pLevel.dimension(), pPos)));
+            .ifPresent(blockEntity -> this.angelBlocks.remove(new DimensionPos(pLevel.dimension(), pPos)));
       }
 
       super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
-   }
-
-   private record DimensionPos(ResourceKey<Level> dimension, BlockPos pos) {
    }
 }

@@ -5,9 +5,11 @@ import iskallia.vault.config.gear.VaultGearTagConfig;
 import iskallia.vault.config.gear.VaultGearTierConfig;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.gear.attribute.VaultGearModifier;
+import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.MiscUtils;
@@ -23,185 +25,96 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
 
 public class VaultGearModifierHelper {
-   public static void reForgeAllModifiers(ItemStack stack, Random random) {
-      removeAllModifiers(stack);
-      generateModifiers(stack, random);
+   public static GearModification.Result reForgeAllModifiers(ItemStack stack, Random random) {
+      GearModification.Result result = removeAllModifiers(stack);
+      return !result.success() ? result : generateModifiers(stack, random);
    }
 
-   public static void reForgeAllImplicits(ItemStack stack, Random random) {
-      removeAllModifiersOfType(stack, VaultGearModifier.AffixType.IMPLICIT);
-      generateImplicits(stack, random);
+   public static GearModification.Result reForgeAllImplicits(ItemStack stack, Random random) {
+      GearModification.Result result = removeAllModifiersOfType(stack, VaultGearModifier.AffixType.IMPLICIT);
+      return !result.success() ? result : generateImplicits(stack, random);
    }
 
-   public static boolean reForgeAllWithTag(VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack, Random random) {
+   public static GearModification.Result reForgeAllWithTag(VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack, Random random) {
       ItemStack emptyCopy = stack.copy();
-      removeAllModifiers(emptyCopy);
-      if (getAvailableModGroupOutcomes(modGroupTag, emptyCopy).isEmpty()) {
-         return false;
+      GearModification.Result result = removeAllModifiers(emptyCopy);
+      if (!result.success()) {
+         return result;
+      } else if (getAvailableModGroupOutcomes(modGroupTag, emptyCopy).isEmpty()) {
+         return GearModification.Result.makeActionError("no_modifiers", modGroupTag.getDisplayComponent());
       } else {
-         removeAllModifiers(stack);
-         if (!addNewModifierOfGroup(modGroupTag, stack, random)) {
-            return false;
+         result = removeAllModifiers(stack);
+         if (!result.success()) {
+            return result;
          } else {
-            generateModifiers(stack, random);
-            return true;
+            result = addNewModifierOfGroup(modGroupTag, stack, random);
+            return !result.success() ? result : generateModifiers(stack, random);
          }
       }
    }
 
-   public static boolean addNewModifierOfGroup(VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack, Random random) {
-      WeightedList<VaultGearModifierHelper.TierGroupOutcome> outcomes = getAvailableModGroupOutcomes(modGroupTag, stack);
-      Map<VaultGearTierConfig.ModifierTierGroup, Integer> highestTiers = new HashMap<>();
-
-      for (VaultGearModifierHelper.TierGroupOutcome outcome : outcomes.keySet()) {
-         int current = highestTiers.getOrDefault(outcome.tierGroup, -1);
-         highestTiers.put(outcome.tierGroup, Math.max(outcome.tier.getModifierTier(), current));
-      }
-
-      outcomes.entrySet().removeIf(entry -> entry.getKey().tier.getModifierTier() != highestTiers.get(entry.getKey().tierGroup));
-      VaultGearModifierHelper.TierGroupOutcome outcome = outcomes.getRandom(random).orElse(null);
-      if (outcome == null) {
-         return false;
+   public static GearModification.Result addNewModifierOfGroup(VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack, Random random) {
+      VaultGearData data = VaultGearData.read(stack);
+      if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
       } else {
-         VaultGearData data = VaultGearData.read(stack);
-         if (!data.isModifiable()) {
-            return false;
+         WeightedList<VaultGearModifierHelper.TierGroupOutcome> outcomes = getAvailableModGroupOutcomes(modGroupTag, stack);
+         Map<VaultGearTierConfig.ModifierTierGroup, Integer> highestTiers = new HashMap<>();
+
+         for (VaultGearModifierHelper.TierGroupOutcome outcome : outcomes.keySet()) {
+            int current = highestTiers.getOrDefault(outcome.tierGroup, -1);
+            highestTiers.put(outcome.tierGroup, Math.max(outcome.tier.getModifierTier(), current));
+         }
+
+         outcomes.entrySet().removeIf(entry -> entry.getKey().tier.getModifierTier() != highestTiers.get(entry.getKey().tierGroup));
+         VaultGearModifierHelper.TierGroupOutcome outcome = outcomes.getRandom(random).orElse(null);
+         if (outcome == null) {
+            return GearModification.Result.makeActionError("no_modifiers", modGroupTag.getDisplayComponent());
          } else {
             data.addModifier(outcome.type(), outcome.tier().makeModifier(outcome.tierGroup(), random));
             data.write(stack);
-            return true;
+            return GearModification.Result.makeSuccess();
          }
       }
    }
 
-   private static WeightedList<VaultGearModifierHelper.TierGroupOutcome> getAvailableModGroupOutcomes(
-      VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack
-   ) {
-      WeightedList<VaultGearModifierHelper.TierGroupOutcome> groupOutcomes = new WeightedList<>();
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
-      if (cfg == null) {
-         return groupOutcomes;
-      } else {
-         VaultGearData data = VaultGearData.read(stack);
-         int itemLevel = data.getItemLevel();
-         Set<String> existingGroups = data.getExistingModifierGroups(VaultGearData.Type.EXPLICIT_MODIFIERS);
-         boolean generatePrefixes = data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0) > data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
-         boolean generateSuffixes = data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0) > data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
-         if (!generatePrefixes && !generateSuffixes) {
-            return groupOutcomes;
-         } else {
-            modGroupTag.getTags()
-               .forEach(
-                  tag -> cfg.getModifierConfigurationsByTag(tag)
-                     .forEach(
-                        tpl -> {
-                           if (((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).isGenericGroup()) {
-                              if (!existingGroups.contains(((VaultGearTierConfig.ModifierTierGroup)tpl.getB()).getModifierGroup())) {
-                                 VaultGearModifier.AffixType type = ((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).getTargetAffixType();
-                                 if (type != VaultGearModifier.AffixType.PREFIX || generatePrefixes) {
-                                    if (type != VaultGearModifier.AffixType.SUFFIX || generateSuffixes) {
-                                       ((VaultGearTierConfig.ModifierTierGroup)tpl.getB())
-                                          .getModifiersForLevel(itemLevel)
-                                          .forEach(
-                                             tier -> groupOutcomes.add(
-                                                new VaultGearModifierHelper.TierGroupOutcome(
-                                                   type, (VaultGearTierConfig.ModifierTierGroup)tpl.getB(), (VaultGearTierConfig.ModifierTier<?>)tier
-                                                ),
-                                                tier.getWeight()
-                                             )
-                                          );
-                                    }
-                                 }
-                              }
-                           }
-                        }
-                     )
-               );
-            return groupOutcomes;
-         }
-      }
-   }
-
-   public static boolean reForgeTierOfRandomModifier(ItemStack stack, long worldGameTime, Random random) {
+   public static GearModification.Result reForgeOutcomeOfRandomModifier(ItemStack stack, long worldGameTime, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
-      if (cfg == null) {
-         VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
-         return false;
-      } else if (!data.isModifiable()) {
-         return false;
+      if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
       } else {
-         int itemLevel = data.getItemLevel();
-         List<Tuple<VaultGearModifier<?>, WeightedList<VaultGearTierConfig.ModifierOutcome<?>>>> modifierReplacements = new ArrayList<>();
-         data.getModifiers(VaultGearModifier.AffixType.PREFIX)
-            .forEach(
-               modifier -> {
-                  if (modifier.getCategory().isModifiableByArtisanFoci()) {
-                     if (modifier.getCategory() != VaultGearModifier.AffixCategory.CRAFTED) {
-                        VaultGearTierConfig.ModifierTierGroup group = cfg.getTierGroup(modifier.getModifierIdentifier());
-                        if (group != null) {
-                           WeightedList<VaultGearTierConfig.ModifierOutcome<?>> replacementTiers = new WeightedList<>();
-                           group.getModifiersForLevel(itemLevel)
-                              .forEach(
-                                 tier -> replacementTiers.add(
-                                    new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight()
-                                 )
-                              );
-                           modifierReplacements.add(new Tuple(modifier, replacementTiers));
-                        }
-                     }
-                  }
-               }
-            );
-         data.getModifiers(VaultGearModifier.AffixType.SUFFIX)
-            .forEach(
-               modifier -> {
-                  if (modifier.getCategory().isModifiableByArtisanFoci()) {
-                     if (modifier.getCategory() != VaultGearModifier.AffixCategory.CRAFTED) {
-                        VaultGearTierConfig.ModifierTierGroup group = cfg.getTierGroup(modifier.getModifierIdentifier());
-                        if (group != null) {
-                           WeightedList<VaultGearTierConfig.ModifierOutcome<?>> replacementTiers = new WeightedList<>();
-                           group.getModifiersForLevel(itemLevel)
-                              .forEach(
-                                 tier -> replacementTiers.add(
-                                    new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight()
-                                 )
-                              );
-                           modifierReplacements.add(new Tuple(modifier, replacementTiers));
-                        }
-                     }
-                  }
-               }
-            );
+         List<Tuple<VaultGearModifier<?>, WeightedList<VaultGearTierConfig.ModifierOutcome<?>>>> modifierReplacements = getAvailableModifierConfigurationOutcomes(
+            data, stack, true
+         );
          modifierReplacements.removeIf(tpl -> ((WeightedList)tpl.getB()).size() <= 1);
          if (modifierReplacements.isEmpty()) {
-            return false;
+            return GearModification.Result.makeActionError("no_modifiers");
          } else {
             Tuple<VaultGearModifier<?>, WeightedList<VaultGearTierConfig.ModifierOutcome<?>>> potentialReplacements = MiscUtils.getRandomEntry(
                modifierReplacements
             );
             if (potentialReplacements == null) {
-               return false;
+               return GearModification.Result.errorInternal();
             } else {
                VaultGearTierConfig.ModifierOutcome<?> replacement = (VaultGearTierConfig.ModifierOutcome<?>)((WeightedList)potentialReplacements.getB())
                   .getRandom(random)
                   .orElse(null);
                if (replacement == null) {
-                  return false;
+                  return GearModification.Result.errorInternal();
                } else {
-                  data.getAllModifierAffixes().forEach(VaultGearModifier::resetGameTimeAdded);
                   VaultGearModifier existing = (VaultGearModifier)potentialReplacements.getA();
                   VaultGearModifier newModifier = replacement.makeModifier(random);
                   VaultGearAttributeComparator comparator = existing.getAttribute().getAttributeComparator();
                   if (comparator != null && comparator.compare(existing.getValue(), newModifier.getValue()) == 0) {
-                     return reForgeTierOfRandomModifier(stack, worldGameTime, random);
+                     return reForgeOutcomeOfRandomModifier(stack, worldGameTime, random);
                   } else {
+                     data.getAllModifierAffixes().forEach(VaultGearModifier::resetGameTimeAdded);
                      existing.setValue(newModifier.getValue());
                      existing.setRolledTier(newModifier.getRolledTier());
                      existing.setGameTimeAdded(worldGameTime);
-                     existing.setCategory(VaultGearModifier.AffixCategory.NONE);
+                     existing.clearCategories();
                      data.write(stack);
-                     return true;
+                     return GearModification.Result.makeSuccess();
                   }
                }
             }
@@ -209,14 +122,94 @@ public class VaultGearModifierHelper {
       }
    }
 
-   public static boolean addNewModifier(ItemStack stack, long worldGameTime, Random random) {
+   public static GearModification.Result improveRandomModifier(ItemStack stack, long worldGameTime, Random random) {
+      VaultGearData data = VaultGearData.read(stack);
+      if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
+      } else {
+         List<Tuple<VaultGearModifier<?>, WeightedList<VaultGearTierConfig.ModifierOutcome<?>>>> modifierReplacements = getAvailableModifierConfigurationOutcomes(
+            data, stack, true
+         );
+         modifierReplacements.removeIf(
+            tpl -> {
+               VaultGearModifier<?> existingx = (VaultGearModifier<?>)tpl.getA();
+               VaultGearAttributeComparator comparatorx = existingx.getAttribute().getAttributeComparator();
+               if (comparatorx == null) {
+                  return true;
+               } else {
+                  ConfigurableAttributeGenerator generator = existingx.getAttribute().getGenerator();
+                  ((WeightedList)tpl.getB()).entrySet().removeIf(weightedOutcome -> {
+                     VaultGearTierConfig.ModifierOutcome<?> outcome = (VaultGearTierConfig.ModifierOutcome<?>)weightedOutcome.getKey();
+                     Object tierConfig = outcome.tier().getModifierConfiguration();
+                     Object maxValue = generator.getMaximumValue(List.of(tierConfig)).orElse(null);
+                     return maxValue == null ? true : comparatorx.compare(maxValue, existingx.getValue()) <= 0;
+                  });
+                  return ((WeightedList)tpl.getB()).isEmpty()
+                     ? true
+                     : ((WeightedList)tpl.getB())
+                        .entrySet()
+                        .stream()
+                        .allMatch(
+                           weightedOutcome -> {
+                              VaultGearTierConfig.ModifierOutcome<?> outcome = (VaultGearTierConfig.ModifierOutcome<?>)weightedOutcome.getKey();
+                              Object tierConfig = outcome.tier().getModifierConfiguration();
+                              Object minValue = generator.getMinimumValue(List.of(tierConfig)).orElse(null);
+                              Object maxValue = generator.getMaximumValue(List.of(tierConfig)).orElse(null);
+                              return minValue != null && maxValue != null
+                                 ? comparatorx.compare(minValue, existingx.getValue()) == 0 && comparatorx.compare(maxValue, existingx.getValue()) == 0
+                                 : true;
+                           }
+                        );
+               }
+            }
+         );
+         if (modifierReplacements.isEmpty()) {
+            return GearModification.Result.makeActionError("all_max");
+         } else {
+            Tuple<VaultGearModifier<?>, WeightedList<VaultGearTierConfig.ModifierOutcome<?>>> potentialReplacements = MiscUtils.getRandomEntry(
+               modifierReplacements
+            );
+            if (potentialReplacements == null) {
+               return GearModification.Result.errorInternal();
+            } else {
+               VaultGearTierConfig.ModifierOutcome<?> replacement = (VaultGearTierConfig.ModifierOutcome<?>)((WeightedList)potentialReplacements.getB())
+                  .getRandom(random)
+                  .orElse(null);
+               if (replacement == null) {
+                  return GearModification.Result.errorInternal();
+               } else {
+                  VaultGearModifier existing = (VaultGearModifier)potentialReplacements.getA();
+                  VaultGearAttributeComparator comparator = existing.getAttribute().getAttributeComparator();
+                  if (comparator == null) {
+                     return GearModification.Result.errorInternal();
+                  } else {
+                     VaultGearModifier newModifier;
+                     do {
+                        newModifier = replacement.makeModifier(random);
+                     } while (comparator.compare(existing.getValue(), newModifier.getValue()) >= 0);
+
+                     data.getAllModifierAffixes().forEach(VaultGearModifier::resetGameTimeAdded);
+                     existing.setValue(newModifier.getValue());
+                     existing.setRolledTier(newModifier.getRolledTier());
+                     existing.setGameTimeAdded(worldGameTime);
+                     existing.clearCategories();
+                     data.write(stack);
+                     return GearModification.Result.makeSuccess();
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   public static GearModification.Result addNewModifier(ItemStack stack, long worldGameTime, Random random) {
       VaultGearData data = VaultGearData.read(stack);
       VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
-         return false;
+         return GearModification.Result.errorUnmodifiable();
       } else if (!data.isModifiable()) {
-         return false;
+         return GearModification.Result.errorUnmodifiable();
       } else {
          int itemLevel = data.getItemLevel();
          int prefixes = data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0);
@@ -224,7 +217,7 @@ public class VaultGearModifierHelper {
          prefixes -= data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
          suffixes -= data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
          if (prefixes <= 0 && suffixes <= 0) {
-            return false;
+            return GearModification.Result.makeActionError("full");
          } else {
             List<VaultGearModifier.AffixType> types = new ArrayList<>();
             if (prefixes > 0) {
@@ -241,46 +234,28 @@ public class VaultGearModifierHelper {
                modifier.setGameTimeAdded(worldGameTime);
                data.addModifier(type, (VaultGearModifier<?>)modifier);
                data.write(stack);
-               return true;
-            }).orElse(false);
+               return GearModification.Result.makeSuccess();
+            }).orElse(GearModification.Result.makeActionError("no_modifiers"));
          }
       }
    }
 
-   public static boolean removeRandomModifier(ItemStack stack, Random random) {
+   public static GearModification.Result removeRandomModifier(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
       if (!data.isModifiable()) {
-         return false;
+         return GearModification.Result.errorUnmodifiable();
       } else {
-         int prefixes = data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
-         int suffixes = data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
-         if (prefixes <= 0 && suffixes <= 0) {
-            return false;
+         List<VaultGearModifier<?>> affixes = new ArrayList<>();
+         affixes.addAll(data.getModifiers(VaultGearModifier.AffixType.PREFIX));
+         affixes.addAll(data.getModifiers(VaultGearModifier.AffixType.SUFFIX));
+         affixes.removeIf(modifier -> !modifier.hasNoCategoryMatching(VaultGearModifier.AffixCategory::cannotBeModifiedByArtisanFoci));
+         if (affixes.isEmpty()) {
+            return GearModification.Result.makeActionError("no_modifiers");
          } else {
-            List<VaultGearModifier.AffixType> types = new ArrayList<>();
-            if (prefixes > 0) {
-               types.add(VaultGearModifier.AffixType.PREFIX);
-            }
-
-            if (suffixes > 0) {
-               types.add(VaultGearModifier.AffixType.SUFFIX);
-            }
-
-            VaultGearModifier.AffixType type = MiscUtils.getRandomEntry(types, random);
-            if (type == null) {
-               return false;
-            } else {
-               List<VaultGearModifier<?>> modifiers = new ArrayList<>(data.getModifiers(type));
-               modifiers.removeIf(modifier -> !modifier.getCategory().isModifiableByArtisanFoci());
-               if (modifiers.isEmpty()) {
-                  return false;
-               } else {
-                  VaultGearModifier<?> randomMod = MiscUtils.getRandomEntry(modifiers, random);
-                  data.removeModifier(randomMod);
-                  data.write(stack);
-                  return true;
-               }
-            }
+            VaultGearModifier<?> randomMod = MiscUtils.getRandomEntry(affixes, random);
+            data.removeModifier(randomMod);
+            data.write(stack);
+            return GearModification.Result.makeSuccess();
          }
       }
    }
@@ -306,21 +281,24 @@ public class VaultGearModifierHelper {
       return suffixes > 0;
    }
 
-   public static void removeAllModifiers(ItemStack stack) {
-      removeAllModifiersOfType(stack, VaultGearModifier.AffixType.PREFIX);
-      removeAllModifiersOfType(stack, VaultGearModifier.AffixType.SUFFIX);
+   public static GearModification.Result removeAllModifiers(ItemStack stack) {
+      GearModification.Result result = removeAllModifiersOfType(stack, VaultGearModifier.AffixType.PREFIX);
+      return !result.success() ? result : removeAllModifiersOfType(stack, VaultGearModifier.AffixType.SUFFIX);
    }
 
-   public static void removeAllModifiersOfType(ItemStack stack, VaultGearModifier.AffixType type) {
+   public static GearModification.Result removeAllModifiersOfType(ItemStack stack, VaultGearModifier.AffixType type) {
       VaultGearData data = VaultGearData.read(stack);
-      if (data.isModifiable()) {
+      if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
+      } else {
          for (VaultGearModifier<?> modifier : new ArrayList<>(data.getModifiers(type))) {
-            if (modifier.getCategory().isModifiableByArtisanFoci()) {
+            if (modifier.hasNoCategoryMatching(VaultGearModifier.AffixCategory::cannotBeModifiedByArtisanFoci)) {
                data.removeModifier(modifier);
             }
          }
 
          data.write(stack);
+         return GearModification.Result.makeSuccess();
       }
    }
 
@@ -340,11 +318,11 @@ public class VaultGearModifierHelper {
             return false;
          } else {
             VaultGearModifier<?> newModifier = modifierOpt.get();
-            newModifier.setCategory(VaultGearModifier.AffixCategory.ABILITY_ENHANCEMENT);
+            newModifier.addCategory(VaultGearModifier.AffixCategory.ABILITY_ENHANCEMENT);
             List<VaultGearModifier<?>> implicits = data.getModifiers(VaultGearTierConfig.ModifierAffixTagGroup.ABILITY_ENHANCEMENT.getTargetAffixType());
 
             for (VaultGearModifier<?> modifier : new ArrayList<>(implicits)) {
-               if (modifier.getCategory() == VaultGearModifier.AffixCategory.ABILITY_ENHANCEMENT) {
+               if (modifier.hasCategory(VaultGearModifier.AffixCategory.ABILITY_ENHANCEMENT)) {
                   data.removeModifier(modifier);
                }
             }
@@ -359,41 +337,36 @@ public class VaultGearModifierHelper {
       }
    }
 
-   public static boolean generateLegendaryModifier(ItemStack stack, Random random) {
+   public static GearModification.Result improveGearRarity(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
-      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
-      if (cfg == null) {
-         VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
-         return false;
-      } else if (!data.isModifiable()) {
-         return false;
+      if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
       } else {
-         List<Tuple<VaultGearModifier.AffixType, VaultGearModifier<?>>> modifiers = new ArrayList<>();
-         data.getModifiers(VaultGearModifier.AffixType.PREFIX).forEach(modifier -> modifiers.add(new Tuple(VaultGearModifier.AffixType.PREFIX, modifier)));
-         data.getModifiers(VaultGearModifier.AffixType.SUFFIX).forEach(modifier -> modifiers.add(new Tuple(VaultGearModifier.AffixType.SUFFIX, modifier)));
-         modifiers.removeIf(tpl -> {
-            VaultGearTierConfig.ModifierTierGroup group = cfg.getTierGroup(((VaultGearModifier)tpl.getB()).getModifierIdentifier());
-            return group == null ? false : group.size() <= 1 || group.getTags().contains("noLegendary");
-         });
-         modifiers.removeIf(tpl -> !((VaultGearModifier)tpl.getB()).getCategory().isModifiableByArtisanFoci());
-         Tuple<VaultGearModifier.AffixType, VaultGearModifier<?>> randomMod = MiscUtils.getRandomEntry(modifiers, random);
-         if (randomMod == null) {
-            return false;
+         VaultGearRarity currentRarity = data.getRarity();
+         VaultGearRarity nextRarity = currentRarity.getNextTier();
+         if (nextRarity == null) {
+            return GearModification.Result.makeActionError("max_rarity");
          } else {
-            VaultGearModifier<?> newMod = cfg.maxAndIncreaseTier(
-               (VaultGearModifier.AffixType)randomMod.getA(), (VaultGearModifier<?>)randomMod.getB(), data.getItemLevel(), 2, random
-            );
-            if (newMod == null) {
-               return false;
-            } else {
-               newMod.setCategory(VaultGearModifier.AffixCategory.LEGENDARY);
-               if (data.removeModifier((VaultGearModifier<?>)randomMod.getB())) {
-                  data.addModifierFirst((VaultGearModifier.AffixType)randomMod.getA(), newMod);
-               }
-
+            data.setRarity(nextRarity);
+            data.write(stack);
+            ItemStack copyStack = stack.copy();
+            generateAffixSlots(copyStack, random);
+            VaultGearData copyData = VaultGearData.read(copyStack);
+            int copyAffixes = getAffixSlotCount(copyData);
+            int affixes = getAffixSlotCount(data);
+            if (copyAffixes > affixes) {
+               data.updateAttribute(
+                  ModGearAttributes.PREFIXES,
+                  copyData.getFirstValue(ModGearAttributes.PREFIXES).orElse(data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0))
+               );
+               data.updateAttribute(
+                  ModGearAttributes.SUFFIXES,
+                  copyData.getFirstValue(ModGearAttributes.SUFFIXES).orElse(data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0))
+               );
                data.write(stack);
-               return true;
             }
+
+            return GearModification.Result.makeSuccess();
          }
       }
    }
@@ -426,12 +399,15 @@ public class VaultGearModifierHelper {
       data.write(stack);
    }
 
-   public static void generateImplicits(ItemStack stack, Random random) {
+   public static GearModification.Result generateImplicits(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
       VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
-      } else if (data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
+      } else if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
+      } else {
          int itemLevel = data.getItemLevel();
          cfg.generateImplicits(itemLevel, random).forEach(modifier -> {
             if (!data.hasModifier(modifier.getModifierIdentifier())) {
@@ -439,37 +415,61 @@ public class VaultGearModifierHelper {
             }
          });
          data.write(stack);
+         return GearModification.Result.makeSuccess();
       }
    }
 
-   public static boolean reRollRepairSlots(ItemStack stack, Random random) {
+   public static GearModification.Result reRollRepairSlots(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
       if (!data.isModifiable()) {
-         return false;
+         return GearModification.Result.errorUnmodifiable();
       } else {
          int repairs = 2 + random.nextInt(4);
          data.setRepairSlots(repairs);
          data.write(stack);
-         return true;
+         return GearModification.Result.makeSuccess();
       }
    }
 
-   public static boolean generateModifiersOfAffix(ItemStack stack, VaultGearModifier.AffixType affixType, Random random) {
+   public static GearModification.Result lockRandomAffix(ItemStack stack, Random random) {
+      VaultGearData data = VaultGearData.read(stack);
+      if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
+      } else {
+         List<VaultGearModifier<?>> affixes = new ArrayList<>();
+         affixes.addAll(data.getModifiers(VaultGearModifier.AffixType.PREFIX));
+         affixes.addAll(data.getModifiers(VaultGearModifier.AffixType.SUFFIX));
+         if (affixes.stream().anyMatch(modifier -> modifier.hasCategory(VaultGearModifier.AffixCategory.FROZEN))) {
+            return GearModification.Result.makeActionError("frozen");
+         } else {
+            VaultGearModifier<?> randomModifier = MiscUtils.getRandomEntry(affixes, random);
+            if (randomModifier == null) {
+               return GearModification.Result.errorInternal();
+            } else {
+               randomModifier.addCategory(VaultGearModifier.AffixCategory.FROZEN);
+               data.write(stack);
+               return GearModification.Result.makeSuccess();
+            }
+         }
+      }
+   }
+
+   public static GearModification.Result generateModifiersOfAffix(ItemStack stack, VaultGearModifier.AffixType affixType, Random random) {
       VaultGearData data = VaultGearData.read(stack);
       VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
-         return false;
+         return GearModification.Result.errorUnmodifiable();
       } else if (!data.isModifiable()) {
-         return false;
+         return GearModification.Result.errorUnmodifiable();
       } else {
          int itemLevel = data.getItemLevel();
          int maxPrefixes = data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0);
          int maxSuffixes = data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0);
          if (affixType == VaultGearModifier.AffixType.PREFIX && maxPrefixes <= 0) {
-            return false;
+            return GearModification.Result.makeActionError("no_prefixes");
          } else if (affixType == VaultGearModifier.AffixType.SUFFIX && maxSuffixes <= 0) {
-            return false;
+            return GearModification.Result.makeActionError("no_suffixes");
          } else {
             int prefixCount = data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
             int suffixCount = data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
@@ -496,17 +496,20 @@ public class VaultGearModifierHelper {
             }
 
             data.write(stack);
-            return true;
+            return GearModification.Result.makeSuccess();
          }
       }
    }
 
-   public static void generateModifiers(ItemStack stack, Random random) {
+   public static GearModification.Result generateModifiers(ItemStack stack, Random random) {
       VaultGearData data = VaultGearData.read(stack);
       VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
       if (cfg == null) {
          VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
-      } else if (data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
+      } else if (!data.isModifiable()) {
+         return GearModification.Result.errorUnmodifiable();
+      } else {
          int itemLevel = data.getItemLevel();
          int maxPrefixes = data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0) - data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
          int maxSuffixes = data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0) - data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
@@ -544,6 +547,129 @@ public class VaultGearModifierHelper {
          }
 
          data.write(stack);
+         return GearModification.Result.makeSuccess();
+      }
+   }
+
+   private static int getAffixSlotCount(VaultGearData data) {
+      return data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0) + data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0);
+   }
+
+   private static List<Tuple<VaultGearModifier<?>, WeightedList<VaultGearTierConfig.ModifierOutcome<?>>>> getAvailableModifierConfigurationOutcomes(
+      VaultGearData data, ItemStack stack, boolean includeOnlyModifiableModifiers
+   ) {
+      List<Tuple<VaultGearModifier<?>, WeightedList<VaultGearTierConfig.ModifierOutcome<?>>>> modifierReplacements = new ArrayList<>();
+      if (!data.isModifiable()) {
+         return modifierReplacements;
+      } else {
+         VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
+         if (cfg == null) {
+            VaultMod.LOGGER.error("Unknown VaultGear: " + stack);
+            return modifierReplacements;
+         } else {
+            int itemLevel = data.getItemLevel();
+            data.getModifiers(VaultGearModifier.AffixType.PREFIX)
+               .forEach(
+                  modifier -> {
+                     if (includeOnlyModifiableModifiers) {
+                        if (!modifier.hasNoCategoryMatching(VaultGearModifier.AffixCategory::cannotBeModifiedByArtisanFoci)) {
+                           return;
+                        }
+
+                        if (!modifier.hasNoCategoryMatching(VaultGearModifier.AffixCategory::cannotBeRolledByArtisanFoci)) {
+                           return;
+                        }
+                     }
+
+                     VaultGearTierConfig.ModifierTierGroup group = cfg.getTierGroup(modifier.getModifierIdentifier());
+                     if (group != null) {
+                        WeightedList<VaultGearTierConfig.ModifierOutcome<?>> replacementTiers = new WeightedList<>();
+                        group.getModifiersForLevel(itemLevel)
+                           .forEach(
+                              tier -> replacementTiers.add(
+                                 new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight()
+                              )
+                           );
+                        modifierReplacements.add(new Tuple(modifier, replacementTiers));
+                     }
+                  }
+               );
+            data.getModifiers(VaultGearModifier.AffixType.SUFFIX)
+               .forEach(
+                  modifier -> {
+                     if (includeOnlyModifiableModifiers) {
+                        if (!modifier.hasNoCategoryMatching(VaultGearModifier.AffixCategory::cannotBeModifiedByArtisanFoci)) {
+                           return;
+                        }
+
+                        if (!modifier.hasNoCategoryMatching(VaultGearModifier.AffixCategory::cannotBeRolledByArtisanFoci)) {
+                           return;
+                        }
+                     }
+
+                     VaultGearTierConfig.ModifierTierGroup group = cfg.getTierGroup(modifier.getModifierIdentifier());
+                     if (group != null) {
+                        WeightedList<VaultGearTierConfig.ModifierOutcome<?>> replacementTiers = new WeightedList<>();
+                        group.getModifiersForLevel(itemLevel)
+                           .forEach(
+                              tier -> replacementTiers.add(
+                                 new VaultGearTierConfig.ModifierOutcome<>((VaultGearTierConfig.ModifierTier<?>)tier, group), tier.getWeight()
+                              )
+                           );
+                        modifierReplacements.add(new Tuple(modifier, replacementTiers));
+                     }
+                  }
+               );
+            return modifierReplacements;
+         }
+      }
+   }
+
+   private static WeightedList<VaultGearModifierHelper.TierGroupOutcome> getAvailableModGroupOutcomes(
+      VaultGearTagConfig.ModTagGroup modGroupTag, ItemStack stack
+   ) {
+      WeightedList<VaultGearModifierHelper.TierGroupOutcome> groupOutcomes = new WeightedList<>();
+      VaultGearTierConfig cfg = VaultGearTierConfig.getConfig(stack).orElse(null);
+      if (cfg == null) {
+         return groupOutcomes;
+      } else {
+         VaultGearData data = VaultGearData.read(stack);
+         int itemLevel = data.getItemLevel();
+         Set<String> existingGroups = data.getExistingModifierGroups(VaultGearData.Type.EXPLICIT_MODIFIERS);
+         boolean generatePrefixes = data.getFirstValue(ModGearAttributes.PREFIXES).orElse(0) > data.getModifiers(VaultGearModifier.AffixType.PREFIX).size();
+         boolean generateSuffixes = data.getFirstValue(ModGearAttributes.SUFFIXES).orElse(0) > data.getModifiers(VaultGearModifier.AffixType.SUFFIX).size();
+         if (!generatePrefixes && !generateSuffixes) {
+            return groupOutcomes;
+         } else {
+            modGroupTag.getTags()
+               .forEach(
+                  tag -> cfg.getGroupsWithModifierTag(tag)
+                     .forEach(
+                        tpl -> {
+                           if (((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).isGenericGroup()) {
+                              if (!existingGroups.contains(((VaultGearTierConfig.ModifierTierGroup)tpl.getB()).getModifierGroup())) {
+                                 VaultGearModifier.AffixType type = ((VaultGearTierConfig.ModifierAffixTagGroup)tpl.getA()).getTargetAffixType();
+                                 if (type != VaultGearModifier.AffixType.PREFIX || generatePrefixes) {
+                                    if (type != VaultGearModifier.AffixType.SUFFIX || generateSuffixes) {
+                                       ((VaultGearTierConfig.ModifierTierGroup)tpl.getB())
+                                          .getModifiersForLevel(itemLevel)
+                                          .forEach(
+                                             tier -> groupOutcomes.add(
+                                                new VaultGearModifierHelper.TierGroupOutcome(
+                                                   type, (VaultGearTierConfig.ModifierTierGroup)tpl.getB(), (VaultGearTierConfig.ModifierTier<?>)tier
+                                                ),
+                                                tier.getWeight()
+                                             )
+                                          );
+                                    }
+                                 }
+                              }
+                           }
+                        }
+                     )
+               );
+            return groupOutcomes;
+         }
       }
    }
 

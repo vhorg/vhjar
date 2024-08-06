@@ -1,5 +1,11 @@
 package iskallia.vault.event;
 
+import iskallia.vault.antique.Antique;
+import iskallia.vault.antique.AntiqueRegistry;
+import iskallia.vault.antique.condition.AntiqueCondition;
+import iskallia.vault.antique.condition.AntiqueConditionRegistry;
+import iskallia.vault.antique.reward.AntiqueReward;
+import iskallia.vault.antique.reward.AntiqueRewardTypeRegistry;
 import iskallia.vault.etching.EtchingRegistry;
 import iskallia.vault.etching.EtchingSet;
 import iskallia.vault.gear.attribute.VaultGearAttribute;
@@ -11,6 +17,7 @@ import iskallia.vault.gear.modification.GearModificationRegistry;
 import iskallia.vault.gear.trinket.TrinketEffect;
 import iskallia.vault.gear.trinket.TrinketEffectRegistry;
 import iskallia.vault.init.ModAbilities;
+import iskallia.vault.init.ModAntiques;
 import iskallia.vault.init.ModArchetypes;
 import iskallia.vault.init.ModAttributes;
 import iskallia.vault.init.ModBlocks;
@@ -67,6 +74,9 @@ public class RegistryEvents {
       CharmEffectRegistry.buildRegistry(event);
       GearModificationRegistry.buildRegistry(event);
       ArchetypeRegistry.buildRegistry(event);
+      AntiqueRegistry.buildRegistry(event);
+      AntiqueConditionRegistry.buildRegistry(event);
+      AntiqueRewardTypeRegistry.buildRegistry(event);
    }
 
    @SubscribeEvent
@@ -184,5 +194,20 @@ public class RegistryEvents {
    @SubscribeEvent
    public static void onArchetypesRegistry(Register<AbstractArchetype<?>> event) {
       ModArchetypes.init(event);
+   }
+
+   @SubscribeEvent
+   public static void onAntiqueRegistry(Register<Antique> event) {
+      ModAntiques.registerAntiques(event);
+   }
+
+   @SubscribeEvent
+   public static void onAntiqueConditionProviderRegistry(Register<AntiqueCondition.Provider> event) {
+      ModAntiques.Conditions.registerAntiqueConditions(event);
+   }
+
+   @SubscribeEvent
+   public static void onAntiqueRewardProviderRegistry(Register<AntiqueReward.Provider> event) {
+      ModAntiques.Rewards.registerAntiqueRewards(event);
    }
 }

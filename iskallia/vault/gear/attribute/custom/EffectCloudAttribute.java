@@ -14,7 +14,9 @@ import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.util.NetcodeUtils;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -324,6 +326,22 @@ public class EffectCloudAttribute {
       @Nullable
       public MutableComponent getConfigDisplay(VaultGearModifierReader<EffectCloudAttribute> reader, EffectCloudAttribute.CloudConfig object) {
          return reader.getValueDisplay(new EffectCloudAttribute(EffectCloudAttribute.EffectCloud.fromConfig(object)));
+      }
+
+      @Override
+      public Optional<EffectCloudAttribute> getMinimumValue(List<EffectCloudAttribute.CloudConfig> configurations) {
+         return configurations.stream()
+            .min(Comparator.comparing(config -> config.additionalEffects.stream().mapToInt(effect -> effect.amplifier).sum()))
+            .map(EffectCloudAttribute.EffectCloud::fromConfig)
+            .map(EffectCloudAttribute::new);
+      }
+
+      @Override
+      public Optional<EffectCloudAttribute> getMaximumValue(List<EffectCloudAttribute.CloudConfig> configurations) {
+         return configurations.stream()
+            .max(Comparator.comparing(config -> config.additionalEffects.stream().mapToInt(effect -> effect.amplifier).sum()))
+            .map(EffectCloudAttribute.EffectCloud::fromConfig)
+            .map(EffectCloudAttribute::new);
       }
    }
 

@@ -6,7 +6,7 @@ import iskallia.vault.core.random.ChunkRandom;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.vault.objective.ScavengerObjective;
+import iskallia.vault.core.vault.objective.Objective;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class OreScavengerTask extends ScavengeTask {
    }
 
    @Override
-   public void initServer(VirtualWorld world, Vault vault, ScavengerObjective objective) {
+   public void initServer(VirtualWorld world, Vault vault, Objective objective) {
       CommonEvents.PLAYER_MINE.register(objective, EventPriority.LOW, data -> {
          if (data.getPlayer().level == world) {
             if (data.getState().getBlock() instanceof VaultOreBlock) {

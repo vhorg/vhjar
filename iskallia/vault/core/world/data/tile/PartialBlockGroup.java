@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.init.ModConfigs;
+import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.BlockPos;
@@ -20,6 +21,10 @@ public class PartialBlockGroup implements TilePlacement<PartialBlockGroup> {
       this.id = id;
       this.properties = properties;
       this.entity = entity;
+   }
+
+   public ResourceLocation getId() {
+      return this.id;
    }
 
    public static PartialBlockGroup of(ResourceLocation id, PartialBlockProperties properties, PartialCompoundNbt entity) {
@@ -104,5 +109,17 @@ public class PartialBlockGroup implements TilePlacement<PartialBlockGroup> {
 
    protected static boolean isCharValid(char c) {
       return c >= '0' && c <= '9' || c >= 'a' && c <= 'z' || c == '_' || c == ':' || c == '/' || c == '.' || c == '-';
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o) {
+         return true;
+      } else if (o != null && this.getClass() == o.getClass()) {
+         PartialBlockGroup that = (PartialBlockGroup)o;
+         return Objects.equals(this.id, that.id);
+      } else {
+         return false;
+      }
    }
 }

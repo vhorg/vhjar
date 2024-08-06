@@ -7,15 +7,15 @@ import javax.annotation.Nonnull;
 
 public abstract class VaultGearAttributeComparator<T> {
    public static ComparableAttributeComparator<Float> floatComparator() {
-      return new ComparableAttributeComparator<>(VaultGearAttributeTypeMerger.floatSum(), (f1, f2) -> f1 - f2);
+      return new ComparableAttributeComparator<>(VaultGearAttributeTypeMerger.floatSum(), (f1, f2) -> f1 - f2, Float::sum);
    }
 
    public static ComparableAttributeComparator<Integer> intComparator() {
-      return new ComparableAttributeComparator<>(VaultGearAttributeTypeMerger.intSum(), (f1, f2) -> f1 - f2);
+      return new ComparableAttributeComparator<>(VaultGearAttributeTypeMerger.intSum(), (f1, f2) -> f1 - f2, Integer::sum);
    }
 
    public static ComparableAttributeComparator<Double> doubleComparator() {
-      return new ComparableAttributeComparator<>(VaultGearAttributeTypeMerger.doubleSum(), (f1, f2) -> f1 - f2);
+      return new ComparableAttributeComparator<>(VaultGearAttributeTypeMerger.doubleSum(), (f1, f2) -> f1 - f2, Double::sum);
    }
 
    public static VaultGearAttributeComparator<Boolean> booleanComparator() {
@@ -33,7 +33,7 @@ public abstract class VaultGearAttributeComparator<T> {
       };
    }
 
-   public abstract T merge(T var1, T var2);
+   public abstract Optional<T> merge(T var1, T var2);
 
    @Deprecated
    public abstract Optional<T> difference(T var1, T var2);
@@ -53,8 +53,8 @@ public abstract class VaultGearAttributeComparator<T> {
       }
 
       @Override
-      public T merge(T thisValue, T thatValue) {
-         return this.merger.merge(thisValue, thatValue);
+      public Optional<T> merge(T thisValue, T thatValue) {
+         return Optional.ofNullable(this.merger.merge(thisValue, thatValue));
       }
    }
 }

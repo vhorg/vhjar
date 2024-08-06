@@ -55,29 +55,40 @@ public class WeightedListAdapter<E> extends TypeAdapter<WeightedList<E>> {
          return null;
       } else {
          WeightedList<E> collection = (WeightedList<E>)this.constructor.construct();
-         in.beginArray();
+         if (in.peek() == JsonToken.BEGIN_ARRAY) {
+            in.beginArray();
 
-         while (in.hasNext()) {
-            in.beginObject();
-            E instance = null;
-            int weight = 1;
+            while (in.hasNext()) {
+               in.beginObject();
+               E instance = null;
+               double weight = 1.0;
 
-            while (in.peek() == JsonToken.NAME) {
-               String var5 = in.nextName();
-               switch (var5) {
-                  case "value":
-                     instance = (E)this.elementTypeAdapter.read(in);
-                     break;
-                  case "weight":
-                     weight = in.nextInt();
+               while (in.peek() == JsonToken.NAME) {
+                  String var6 = in.nextName();
+                  switch (var6) {
+                     case "value":
+                        instance = (E)this.elementTypeAdapter.read(in);
+                        break;
+                     case "weight":
+                        weight = in.nextDouble();
+                  }
                }
+
+               collection.put(instance, weight);
+               in.endObject();
             }
 
-            collection.put(instance, (Number)weight);
+            in.endArray();
+         } else if (in.peek() == JsonToken.BEGIN_OBJECT) {
+            in.beginObject();
+
+            while (in.peek() == JsonToken.NAME) {
+               collection.put((E)this.elementTypeAdapter.read(in), in.nextDouble());
+            }
+
             in.endObject();
          }
 
-         in.endArray();
          return collection;
       }
    }

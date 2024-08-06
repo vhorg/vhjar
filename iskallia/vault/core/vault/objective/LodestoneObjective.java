@@ -93,7 +93,7 @@ public class LodestoneObjective extends Objective {
          if (data.getHand() != InteractionHand.MAIN_HAND) {
             data.setResult(InteractionResult.SUCCESS);
          } else if (!this.get(COMPLETED_PLAYERS).contains(data.getPlayer().getUUID())) {
-            if (vault.get(Vault.LISTENERS).get(data.getPlayer().getUUID()) instanceof Runner runner && runner.isActive(vault, this)) {
+            if (vault.get(Vault.LISTENERS).get(data.getPlayer().getUUID()) instanceof Runner runner && runner.isActive(world, vault, this)) {
                if (world.getBlockEntity(data.getPos()) instanceof LodestoneTileEntity lodestone && !lodestone.isConsumed()) {
                   if (!world.isClientSide) {
                      lodestone.setConsumed(true);
@@ -161,7 +161,7 @@ public class LodestoneObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       return objective == this;
    }
 

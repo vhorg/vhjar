@@ -13,7 +13,6 @@ import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.util.EntityHelper;
 import iskallia.vault.world.data.DiscoveredModelsData;
-import iskallia.vault.world.data.DiscoveredRelicsData;
 import iskallia.vault.world.data.DiscoveryGoalStatesData;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -78,7 +77,6 @@ public class ModelDebugCommand extends Command {
    private int discoverAll(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
       ServerPlayer player = ((CommandSourceStack)context.getSource()).getPlayerOrException();
       DiscoveredModelsData modelsData = DiscoveredModelsData.get(player.server);
-      this.givePiece(context, ModItems.SWORD, ModDynamicModels.Swords.SOULFLAME.getId());
       ModDynamicModels.REGISTRIES
          .getUniqueRegistries()
          .forEach(registry -> registry.forEach((modelId, model) -> modelsData.discoverModel(player.getUUID(), modelId)));
@@ -90,9 +88,6 @@ public class ModelDebugCommand extends Command {
       DiscoveredModelsData modelsData = DiscoveredModelsData.get(player.server);
       modelsData.reset(player.getUUID());
       modelsData.setDirty();
-      DiscoveredRelicsData relicsData = DiscoveredRelicsData.get(player.server);
-      relicsData.getDiscoveredRelics(player.getUUID()).clear();
-      relicsData.setDirty();
       DiscoveryGoalStatesData goalStatesData = DiscoveryGoalStatesData.get(player.getLevel());
       goalStatesData.getState(player).deleteCompletions();
       goalStatesData.setDirty();

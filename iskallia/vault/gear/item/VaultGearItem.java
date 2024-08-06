@@ -110,10 +110,10 @@ public interface VaultGearItem
    }
 
    @Override
-   default void initializeVaultLoot(Vault vault, ItemStack stack, @Nullable BlockPos pos) {
+   default void initializeVaultLoot(int vaultLevel, ItemStack stack, @Nullable BlockPos pos, @Nullable Vault vault) {
       VaultGearData data = VaultGearData.read(stack);
-      data.setItemLevel(vault.get(Vault.LEVEL).get());
-      data.updateAttribute(ModGearAttributes.IS_LOOT, Boolean.valueOf(true));
+      data.setItemLevel(vaultLevel);
+      data.updateAttribute(ModGearAttributes.IS_LOOT, Boolean.valueOf(vault != null));
       data.write(stack);
    }
 
@@ -161,7 +161,7 @@ public interface VaultGearItem
    }
 
    default boolean shouldCauseEquipmentCooldown(ServerPlayer sPlayer, ItemStack stack, EquipmentSlot slot) {
-      return !sPlayer.isCreative() && slot == EquipmentSlot.OFFHAND && this.getIntendedSlot(stack) == EquipmentSlot.OFFHAND;
+      return !sPlayer.isCreative();
    }
 
    @Override

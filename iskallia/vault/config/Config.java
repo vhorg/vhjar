@@ -3,6 +3,9 @@ package iskallia.vault.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import iskallia.vault.VaultMod;
+import iskallia.vault.antique.condition.AntiqueCondition;
+import iskallia.vault.antique.reward.AntiqueReward;
+import iskallia.vault.config.adapter.BingoItemAdapter;
 import iskallia.vault.config.adapter.IdentifierAdapter;
 import iskallia.vault.config.adapter.ItemStackAdapter;
 import iskallia.vault.config.adapter.PartialTileAdapter;
@@ -13,8 +16,13 @@ import iskallia.vault.config.adapter.VersionedKeyAdapter;
 import iskallia.vault.config.adapter.WeightedListAdapter;
 import iskallia.vault.config.gear.VaultGearTierConfig;
 import iskallia.vault.config.skillgate.SkillGateType;
+import iskallia.vault.core.card.Card;
+import iskallia.vault.core.card.CardCondition;
+import iskallia.vault.core.card.CardEntry;
+import iskallia.vault.core.card.CardScaler;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.VersionedKey;
+import iskallia.vault.core.vault.objective.bingo.BingoItem;
 import iskallia.vault.core.vault.objective.elixir.ElixirTask;
 import iskallia.vault.core.vault.objective.scavenger.ScavengeTask;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
@@ -36,6 +44,7 @@ import iskallia.vault.item.crystal.time.CrystalTime;
 import iskallia.vault.quest.base.Quest;
 import iskallia.vault.skill.SkillGates;
 import iskallia.vault.skill.base.Skill;
+import iskallia.vault.task.Task;
 import iskallia.vault.util.EnchantmentCost;
 import java.io.File;
 import java.io.FileReader;
@@ -44,6 +53,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Random;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -52,7 +62,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public abstract class Config {
    public static final Random rand = new Random();
-   private static final Gson GSON = new GsonBuilder()
+   public static final Gson GSON = new GsonBuilder()
       .registerTypeHierarchyAdapter(MobEffect.class, RegistryCodecAdapter.of(ForgeRegistries.MOB_EFFECTS))
       .registerTypeHierarchyAdapter(Item.class, RegistryCodecAdapter.of(ForgeRegistries.ITEMS))
       .registerTypeHierarchyAdapter(Block.class, RegistryCodecAdapter.of(ForgeRegistries.BLOCKS))
@@ -82,6 +92,7 @@ public abstract class Config {
       .registerTypeHierarchyAdapter(IntRoll.class, Adapters.INT_ROLL)
       .registerTypeHierarchyAdapter(FloatRoll.class, FloatRoll.Adapter.INSTANCE)
       .registerTypeHierarchyAdapter(Skill.class, Adapters.SKILL)
+      .registerTypeHierarchyAdapter(Task.class, Adapters.TASK)
       .registerTypeAdapter(ElixirTask.Config.class, ElixirTask.Config.Serializer.INSTANCE)
       .registerTypeHierarchyAdapter(Quest.class, Quest.Adapter.INSTANCE)
       .registerTypeAdapter(TilePredicate.class, Adapters.TILE_PREDICATE)
@@ -89,7 +100,15 @@ public abstract class Config {
       .registerTypeAdapter(ItemPredicate.class, Adapters.ITEM_PREDICATE)
       .registerTypeAdapter(SkillGateType.class, SkillGates.GATE_TYPE)
       .registerTypeAdapter(VaultAltarConfig.Interface.class, Adapters.ALTAR_INTERFACE)
+      .registerTypeAdapter(BingoItem.class, BingoItemAdapter.INSTANCE)
+      .registerTypeAdapter(Card.Config.class, Card.Config.ADAPTER)
       .registerTypeHierarchyAdapter(Processor.class, ProcessorAdapter.INSTANCE)
+      .registerTypeHierarchyAdapter(AntiqueCondition.class, AntiqueCondition.Serializer.INSTANCE)
+      .registerTypeHierarchyAdapter(AntiqueReward.class, AntiqueReward.Serializer.INSTANCE)
+      .registerTypeAdapter(CardEntry.Config.class, CardEntry.Config.ADAPTER)
+      .registerTypeAdapter(CardScaler.class, CardScaler.ADAPTER)
+      .registerTypeAdapter(CardCondition.class, CardCondition.ADAPTER)
+      .registerTypeHierarchyAdapter(Component.class, Adapters.COMPONENT)
       .excludeFieldsWithoutExposeAnnotation()
       .enableComplexMapKeySerialization()
       .setPrettyPrinting()

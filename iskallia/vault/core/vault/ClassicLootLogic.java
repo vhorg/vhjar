@@ -1,6 +1,10 @@
 package iskallia.vault.core.vault;
 
+import iskallia.vault.antique.AntiqueRegistry;
+import iskallia.vault.antique.condition.DropConditionContext;
+import iskallia.vault.antique.condition.DropConditionContextFactory;
 import iskallia.vault.block.VaultChestBlock;
+import iskallia.vault.block.entity.base.TemplateTagContainer;
 import iskallia.vault.config.ShopPedestalConfig;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.core.Version;
@@ -21,12 +25,15 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.item.AntiqueItem;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.util.calc.TrapDisarmChanceHelper;
 import iskallia.vault.world.vault.chest.MobTrapEffect;
+import java.util.List;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.network.PacketDistributor;
 
 public class ClassicLootLogic extends LootLogic {
@@ -59,6 +66,7 @@ public class ClassicLootLogic extends LootLogic {
    protected void onChestPostGenerate(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {
       this.generateCatalystFragments(data, vault);
       this.generateRunes(data, vault);
+      this.generateAntiques(data.getLoot(), data.getTileEntity(), vault);
       this.initializeLoot(vault, data.getLoot(), data.getPos(), data.getRandom());
    }
 
@@ -128,6 +136,16 @@ public class ClassicLootLogic extends LootLogic {
 
                return false;
             }
+         }
+      }
+   }
+
+   protected <T extends BlockEntity & TemplateTagContainer> void generateAntiques(List<ItemStack> loot, BlockEntity tile, Vault vault) {
+      if (tile instanceof TemplateTagContainer) {
+         if (vault.has(Vault.LEVEL)) {
+            int level = vault.get(Vault.LEVEL).get();
+            DropConditionContext ctx = DropConditionContextFactory.makeLootableContext(level, (T)tile);
+            AntiqueRegistry.getAntiquesMatchingCondition(ctx).forEach(antique -> loot.add(AntiqueItem.createStack(antique)));
          }
       }
    }

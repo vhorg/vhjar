@@ -1,9 +1,14 @@
 package iskallia.vault.item;
 
 import iskallia.vault.core.event.CommonEvents;
-import iskallia.vault.util.MathUtilities;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
+import iskallia.vault.init.ModGearAttributes;
+import iskallia.vault.init.ModItems;
+import iskallia.vault.snapshot.AttributeSnapshot;
+import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.world.data.ServerVaults;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -30,7 +36,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.food.FoodProperties.Builder;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -48,33 +53,33 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
    bus = Bus.FORGE
 )
 public class ItemVaultFruit extends Item {
+   private static final Random rand = new Random();
    public static final UUID MAX_HEALTH_REDUCTION_ATTRIBUTE_MODIFIER_UUID = UUID.fromString("94574f3d-49dc-4fc5-8ca5-74707eb1c34d");
    public static FoodProperties VAULT_FRUIT_FOOD = new Builder().saturationMod(0.0F).nutrition(0).fast().alwaysEat().build();
    protected int extraVaultTicks;
 
-   public ItemVaultFruit(CreativeModeTab group, ResourceLocation id, int extraVaultTicks) {
-      super(new Properties().tab(group).food(VAULT_FRUIT_FOOD).stacksTo(64));
+   public ItemVaultFruit(ResourceLocation id, int extraVaultTicks) {
+      super(new Properties().tab(ModItems.VAULT_MOD_GROUP).food(VAULT_FRUIT_FOOD).stacksTo(64));
       this.setRegistryName(id);
       this.extraVaultTicks = extraVaultTicks;
    }
 
    public boolean onEaten(Level level, Player player) {
-      CommonEvents.FRUIT_EATEN.invoke(this, player, this.extraVaultTicks);
+      AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(player);
+      float effectiveness = snapshot.getAttributeValue(ModGearAttributes.FRUIT_EFFECTIVENESS, VaultGearAttributeTypeMerger.floatSum());
+      int time = (int)(this.extraVaultTicks * (1.0F + effectiveness));
+      CommonEvents.FRUIT_EATEN.invoke(this, player, time);
       return true;
-   }
-
-   public int getExtraVaultTicks() {
-      return this.extraVaultTicks;
    }
 
    @ParametersAreNonnullByDefault
    @Nonnull
    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
       ItemStack itemStack = player.getItemInHand(hand);
-      if (!level.isClientSide && ServerVaults.get(level).isEmpty()) {
+      if (!level.isClientSide() && ServerVaults.get(level).isEmpty()) {
          return InteractionResultHolder.fail(itemStack);
       } else if (!this.isPlayerMaxHealthGreaterThan(player, 2)) {
-         if (player.level.isClientSide) {
+         if (player.level.isClientSide()) {
             player.displayClientMessage(new TextComponent("Your max health is too low to eat this!").withStyle(ChatFormatting.RED), true);
          }
 
@@ -87,10 +92,22 @@ public class ItemVaultFruit extends Item {
    @ParametersAreNonnullByDefault
    @OnlyIn(Dist.CLIENT)
    public void appendHoverText(ItemStack itemStack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag tooltipFlag) {
-      tooltip.add(new TextComponent(""));
-      TextComponent textComponent = new TextComponent("[!] Only edible inside a Vault");
-      textComponent.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16711680)).withItalic(true));
-      tooltip.add(textComponent);
+      int seconds = Mth.floor(this.extraVaultTicks / 20.0F);
+      String timeText = String.format("%d seconds", seconds);
+      if (seconds > 90) {
+         int minutes = seconds / 60;
+         timeText = String.format("%d minutes", minutes);
+      }
+
+      MutableComponent cmp = new TextComponent("Adds ")
+         .withStyle(ChatFormatting.GRAY)
+         .append(new TextComponent(timeText).withStyle(ChatFormatting.GREEN))
+         .append(" to the Vault timer");
+      tooltip.add(TextComponent.EMPTY);
+      tooltip.add(new TextComponent("Removes").withStyle(ChatFormatting.GRAY).append(new TextComponent(" 10% max health").withStyle(ChatFormatting.RED)));
+      tooltip.add(cmp);
+      tooltip.add(TextComponent.EMPTY);
+      tooltip.add(new TextComponent("Only edible inside a Vault").withStyle(ChatFormatting.RED));
       super.appendHoverText(itemStack, worldIn, tooltip, tooltipFlag);
    }
 
@@ -138,172 +155,37 @@ public class ItemVaultFruit extends Item {
       }
    }
 
-   public static class BitterLemon extends ItemVaultFruit {
-      public BitterLemon(CreativeModeTab group, ResourceLocation id, int extraVaultTicks) {
-         super(group, id, extraVaultTicks);
-      }
-
-      @Nonnull
-      @ParametersAreNonnullByDefault
-      public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entityLiving) {
-         if (!level.isClientSide && entityLiving instanceof ServerPlayer player) {
-            if (!this.onEaten(level, player)) {
-               return stack;
-            }
-
-            this.reducePlayerMaxHealth(player);
-            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CONDUIT_ACTIVATE, SoundSource.MASTER, 1.0F, 1.0F);
+   public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entityLiving) {
+      if (!level.isClientSide() && entityLiving instanceof ServerPlayer player) {
+         if (!this.onEaten(level, player)) {
+            return stack;
          }
 
-         return super.finishUsingItem(stack, level, entityLiving);
+         this.reducePlayerMaxHealth(player);
+         this.successEaten(level, player);
+         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CONDUIT_ACTIVATE, SoundSource.MASTER, 1.0F, 1.0F);
       }
 
-      @ParametersAreNonnullByDefault
-      @OnlyIn(Dist.CLIENT)
-      @Override
-      public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> tooltip, TooltipFlag tooltipFlag) {
-         tooltip.add(new TextComponent(""));
-         TextComponent comp = new TextComponent("A magical lemon with a bitter taste");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(12512238)).withItalic(true));
-         tooltip.add(comp);
-         comp = new TextComponent("It is grown on the gorgeous trees of Iskallia.");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(12512238)).withItalic(true));
-         tooltip.add(comp);
-         tooltip.add(new TextComponent(""));
-         comp = new TextComponent("- Removes 10% max health");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16711680)));
-         tooltip.add(comp);
-         comp = new TextComponent("- Adds 30 seconds to the Vault Timer");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(65280)));
-         tooltip.add(comp);
-         super.appendHoverText(itemStack, level, tooltip, tooltipFlag);
-      }
+      return entityLiving.eat(level, stack);
+   }
+
+   protected void successEaten(Level level, ServerPlayer sPlayer) {
    }
 
    public static class MysticPear extends ItemVaultFruit {
-      public MysticPear(CreativeModeTab group, ResourceLocation id, int extraVaultTicks) {
-         super(group, id, extraVaultTicks);
+      public MysticPear(ResourceLocation id, int extraVaultTicks) {
+         super(id, extraVaultTicks);
       }
 
-      @Nonnull
-      @ParametersAreNonnullByDefault
-      public ItemStack finishUsingItem(ItemStack stack, Level worldIn, LivingEntity entityLiving) {
-         if (!worldIn.isClientSide && entityLiving instanceof ServerPlayer player) {
-            if (!this.onEaten(worldIn, player)) {
-               return stack;
-            }
-
-            this.reducePlayerMaxHealth(player);
-            if (MathUtilities.randomFloat(0.0F, 100.0F) <= 50.0F) {
-               player.addEffect(new MobEffectInstance(MobEffects.POISON, 600));
-            } else {
-               player.addEffect(new MobEffectInstance(MobEffects.WITHER, 600));
-            }
-
-            worldIn.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CONDUIT_ACTIVATE, SoundSource.MASTER, 1.0F, 1.0F);
-         }
-
-         return super.finishUsingItem(stack, worldIn, entityLiving);
+      @Override
+      protected void successEaten(Level level, ServerPlayer sPlayer) {
+         sPlayer.addEffect(new MobEffectInstance(MobEffects.WITHER, 600));
       }
 
-      @ParametersAreNonnullByDefault
-      @OnlyIn(Dist.CLIENT)
       @Override
       public void appendHoverText(ItemStack itemStack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag tooltipFlag) {
-         tooltip.add(new TextComponent(""));
-         TextComponent comp = new TextComponent("A magical pear with a strange taste");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(12512238)).withItalic(true));
-         tooltip.add(comp);
-         comp = new TextComponent("It is grown on the gorgeous trees of Iskallia.");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(12512238)).withItalic(true));
-         tooltip.add(comp);
-         tooltip.add(new TextComponent(""));
-         comp = new TextComponent("- Removes 10% max health");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16711680)));
-         tooltip.add(comp);
-         comp = new TextComponent("- Inflicts with either Wither or Poison effect");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16711680)));
-         tooltip.add(comp);
-         comp = new TextComponent("- Adds 5 minutes to the Vault Timer");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(65280)));
-         tooltip.add(comp);
-         super.appendHoverText(itemStack, worldIn, tooltip, tooltipFlag);
-      }
-   }
-
-   public static class SourOrange extends ItemVaultFruit {
-      public SourOrange(CreativeModeTab group, ResourceLocation id, int extraVaultTicks) {
-         super(group, id, extraVaultTicks);
-      }
-
-      @Nonnull
-      @ParametersAreNonnullByDefault
-      public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entityLiving) {
-         if (!level.isClientSide && entityLiving instanceof ServerPlayer player) {
-            if (!this.onEaten(level, player)) {
-               return stack;
-            }
-
-            this.reducePlayerMaxHealth(player);
-            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CONDUIT_ACTIVATE, SoundSource.MASTER, 1.0F, 1.0F);
-         }
-
-         return super.finishUsingItem(stack, level, entityLiving);
-      }
-
-      @ParametersAreNonnullByDefault
-      @OnlyIn(Dist.CLIENT)
-      @Override
-      public void appendHoverText(ItemStack itemStack, @Nullable Level level, List<Component> tooltip, TooltipFlag tooltipFlag) {
-         tooltip.add(new TextComponent(""));
-         TextComponent comp = new TextComponent("A magical orange with a sour taste");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(12512238)).withItalic(true));
-         tooltip.add(comp);
-         comp = new TextComponent("It is grown on the gorgeous trees of Iskallia.");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(12512238)).withItalic(true));
-         tooltip.add(comp);
-         tooltip.add(new TextComponent(""));
-         comp = new TextComponent("- Removes 10% max health");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16711680)));
-         tooltip.add(comp);
-         comp = new TextComponent("- Adds 60 seconds to the Vault Timer");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(65280)));
-         tooltip.add(comp);
-         super.appendHoverText(itemStack, level, tooltip, tooltipFlag);
-      }
-   }
-
-   public static class SweetKiwi extends ItemVaultFruit {
-      public SweetKiwi(CreativeModeTab group, ResourceLocation id, int extraVaultTicks) {
-         super(group, id, extraVaultTicks);
-      }
-
-      @Nonnull
-      @ParametersAreNonnullByDefault
-      public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entityLiving) {
-         if (!level.isClientSide && entityLiving instanceof ServerPlayer player) {
-            if (!this.onEaten(level, player)) {
-               return stack;
-            }
-
-            this.reducePlayerMaxHealth(player);
-            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.CONDUIT_ACTIVATE, SoundSource.MASTER, 1.0F, 1.0F);
-         }
-
-         return super.finishUsingItem(stack, level, entityLiving);
-      }
-
-      @ParametersAreNonnullByDefault
-      @OnlyIn(Dist.CLIENT)
-      @Override
-      public void appendHoverText(ItemStack itemStack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag tooltipFlag) {
-         tooltip.add(new TextComponent(""));
-         TextComponent comp = new TextComponent("- Removes 10% max health");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(16711680)));
-         tooltip.add(comp);
-         comp = new TextComponent("- Adds 10 seconds to the Vault Timer");
-         comp.setStyle(Style.EMPTY.withColor(TextColor.fromRgb(65280)));
-         tooltip.add(comp);
+         tooltip.add(TextComponent.EMPTY);
+         tooltip.add(new TextComponent("Inflicts Wither or Poison").withStyle(ChatFormatting.RED));
          super.appendHoverText(itemStack, worldIn, tooltip, tooltipFlag);
       }
    }

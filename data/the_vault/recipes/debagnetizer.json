@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "qqq",
+    "rcr",
+    "sss"
+  ],
+  "key": {
+    "q": {
+      "item": "minecraft:quartz"
+    },
+    "r": {
+      "item": "minecraft:lightning_rod"
+    },
+    "c": {
+      "item": "minecraft:copper_block"
+    },
+    "s": {
+      "item": "the_vault:polished_vault_stone"
+    }
+  },
+  "result": {
+    "item": "the_vault:debagnetizer",
+    "count": 1
+  }
+}

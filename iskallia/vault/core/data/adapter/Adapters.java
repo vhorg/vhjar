@@ -1,9 +1,12 @@
 package iskallia.vault.core.data.adapter;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import iskallia.vault.config.VaultAltarConfig;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
+import iskallia.vault.core.data.adapter.array.BooleanArrayAdapter;
 import iskallia.vault.core.data.adapter.array.ByteArrayAdapter;
+import iskallia.vault.core.data.adapter.array.DoubleArrayAdapter;
 import iskallia.vault.core.data.adapter.array.IntArrayAdapter;
 import iskallia.vault.core.data.adapter.array.LongArrayAdapter;
 import iskallia.vault.core.data.adapter.basic.EnumAdapter;
@@ -47,6 +50,7 @@ import iskallia.vault.core.data.adapter.number.SegmentedLongAdapter;
 import iskallia.vault.core.data.adapter.number.ShortAdapter;
 import iskallia.vault.core.data.adapter.util.BlockPosAdapter;
 import iskallia.vault.core.data.adapter.util.ForgeRegistryAdapter;
+import iskallia.vault.core.data.adapter.util.GsonAdapter;
 import iskallia.vault.core.data.adapter.util.IdentifierAdapter;
 import iskallia.vault.core.data.adapter.util.ItemStackAdapter;
 import iskallia.vault.core.data.adapter.util.ResourceKeyAdapter;
@@ -61,6 +65,7 @@ import iskallia.vault.core.vault.enhancement.EnhancementTask;
 import iskallia.vault.core.vault.enhancement.KillMobsEnhancementTask;
 import iskallia.vault.core.vault.enhancement.LootChestsEnhancementTask;
 import iskallia.vault.core.vault.influence.VaultGod;
+import iskallia.vault.core.vault.objective.bingo.BingoItem;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.item.ItemPredicate;
@@ -91,7 +96,7 @@ import iskallia.vault.item.crystal.layout.preset.TemplatePreset;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.task.Task;
 import iskallia.vault.task.renderer.TaskRenderer;
-import iskallia.vault.task.source.EntityTaskSource;
+import iskallia.vault.task.renderer.Vec2d;
 import iskallia.vault.task.source.TaskSource;
 import java.nio.charset.StandardCharsets;
 import java.util.function.IntFunction;
@@ -99,16 +104,21 @@ import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Component.Serializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class Adapters {
    public static final BooleanAdapter BOOLEAN = new BooleanAdapter(false);
+   public static final BooleanArrayAdapter BOOLEAN_ARRAY = new BooleanArrayAdapter(false);
    public static final NumericAdapter NUMERIC = new NumericAdapter(false);
    public static final ByteAdapter BYTE = new ByteAdapter(false);
    public static final ByteArrayAdapter BYTE_ARRAY = new ByteArrayAdapter(BYTE, false);
@@ -126,6 +136,8 @@ public class Adapters {
    public static final SegmentedLongAdapter LONG_SEGMENTED_15 = new SegmentedLongAdapter(15, false);
    public static final LongArrayAdapter LONG_ARRAY = new LongArrayAdapter(LONG, false);
    public static final DoubleAdapter DOUBLE = new DoubleAdapter(false);
+   public static final DoubleArrayAdapter DOUBLE_ARRAY = new DoubleArrayAdapter(DOUBLE, false);
+   public static final SerializableAdapter<Vec2d, Tag, JsonElement> VEC_2D = new SerializableAdapter<>(Vec2d::new, false);
    public static final BigIntegerAdapter BIG_INTEGER = new BigIntegerAdapter(false);
    public static final BigDecimalAdapter BIG_DECIMAL = new BigDecimalAdapter(false);
    public static final VoidAdapter<?> VOID = new VoidAdapter();
@@ -173,6 +185,8 @@ public class Adapters {
    public static final SerializableAdapter<CrystalData, CompoundTag, JsonObject> CRYSTAL = new SerializableAdapter<>(CrystalData::empty, true);
    public static final Skill.Adapter SKILL = new Skill.Adapter();
    public static final BlockPosAdapter BLOCK_POS = new BlockPosAdapter(false);
+   public static final ResourceKeyAdapter<Level> DIMENSION = ofResourceKey(Registry.DIMENSION_REGISTRY);
+   public static final GsonAdapter<Component> COMPONENT = new GsonAdapter<>(Component.class, Serializer.GSON, false);
    public static final SerializableAdapter<StructurePreset, CompoundTag, JsonObject> STRUCTURE_PRESET = new SerializableAdapter<>(StructurePreset::new, true);
    public static final TypeSupplierAdapter<TemplatePreset> TEMPLATE_PRESET = new TypeSupplierAdapter<PoolTemplatePreset>("type", true)
       .<TypeSupplierAdapter<PoolKeyTemplatePreset>>register("pool", PoolTemplatePreset.class, PoolTemplatePreset::new)
@@ -199,9 +213,11 @@ public class Adapters {
       .register("value", DirectTemplateEntry.class, DirectTemplateEntry::new)
       .register("reference", IndirectTemplateEntry.class, IndirectTemplateEntry::new);
    public static Task.Adapter TASK = new Task.Adapter();
+   public static Task.NbtAdapter TASK_NBT = new Task.NbtAdapter();
+   public static BingoItem.Adapter BINGO_ITEM = new BingoItem.Adapter();
    public static TaskRenderer.Adapter TASK_RENDERER = new TaskRenderer.Adapter();
-   public static TypeSupplierAdapter<TaskSource> TASK_SOURCE = new TypeSupplierAdapter<TaskSource>("type", false)
-      .register("entity", EntityTaskSource.class, EntityTaskSource::empty);
+   public static TaskSource.Adapter TASK_SOURCE = new TaskSource.Adapter();
+   public static TaskSource.NbtAdapter TASK_SOURCE_NBT = new TaskSource.NbtAdapter();
    public static Lcg.Adapter LCG = new Lcg.Adapter(false);
    public static TypeSupplierAdapter<RandomSource> RANDOM = new TypeSupplierAdapter<RandomSource>("type", false)
       .<TypeSupplierAdapter<RandomSource>>register("lcg", LCGRandom.class, () -> LCGRandom.of(Lcg.JAVA, 0L))
@@ -245,7 +261,7 @@ public class Adapters {
       return new ResourceKeyAdapter<>(registry, false);
    }
 
-   public static <T> SerializableAdapter<T, ?, ?> of(Supplier<T> constructor, boolean nullable) {
+   public static <T, N extends Tag, J extends JsonElement> SerializableAdapter<T, N, J> of(Supplier<T> constructor, boolean nullable) {
       return new SerializableAdapter<>(constructor, nullable);
    }
 }

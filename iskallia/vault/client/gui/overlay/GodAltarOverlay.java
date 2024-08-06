@@ -18,8 +18,8 @@ public class GodAltarOverlay implements IIngameOverlay {
          matrixStack.scale(0.8F, 0.8F, 0.8F);
 
          for (GodAltarData.Entry entry : GodAltarData.CLIENT) {
-            GodAltarRendererContext context = GodAltarRendererContext.forHud(matrixStack, partialTick, gui.getFont(), entry.getGod());
-            entry.getTask().render(context);
+            GodAltarRendererContext context = GodAltarRendererContext.forHud(matrixStack, partialTick, gui.getFont());
+            entry.getTask().onRender(context);
          }
 
          matrixStack.popPose();

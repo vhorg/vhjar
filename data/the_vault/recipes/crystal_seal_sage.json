@@ -10,10 +10,10 @@
             "item": "the_vault:vault_essence"
         },
         "#": {
-            "item": "the_vault:eternal_soul"
+            "item": "minecraft:glass_bottle"
         },
         "d": {
-            "item": "the_vault:vault_diamond"
+            "item": "the_vault:perfect_alexandrite"
         },
         "s": {
             "item": "the_vault:crystal_seal_empty"

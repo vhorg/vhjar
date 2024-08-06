@@ -16,7 +16,7 @@ public class ModifierWorkbenchHelper {
          VaultGearData data = VaultGearData.read(gear);
 
          for (VaultGearModifier<?> modifier : data.getAllModifierAffixes()) {
-            if (modifier.getCategory() == VaultGearModifier.AffixCategory.CRAFTED) {
+            if (modifier.hasCategory(VaultGearModifier.AffixCategory.CRAFTED)) {
                return true;
             }
          }
@@ -32,19 +32,19 @@ public class ModifierWorkbenchHelper {
       boolean removedModifiers = false;
 
       for (VaultGearModifier<?> modifier : new ArrayList<>(data.getModifiers(VaultGearModifier.AffixType.IMPLICIT))) {
-         if (modifier.getCategory() == VaultGearModifier.AffixCategory.CRAFTED && data.removeModifier(modifier)) {
+         if (modifier.hasCategory(VaultGearModifier.AffixCategory.CRAFTED) && data.removeModifier(modifier)) {
             removedModifiers = true;
          }
       }
 
       for (VaultGearModifier<?> modifierx : new ArrayList<>(data.getModifiers(VaultGearModifier.AffixType.PREFIX))) {
-         if (modifierx.getCategory() == VaultGearModifier.AffixCategory.CRAFTED && data.removeModifier(modifierx)) {
+         if (modifierx.hasCategory(VaultGearModifier.AffixCategory.CRAFTED) && data.removeModifier(modifierx)) {
             removedModifiers = true;
          }
       }
 
       for (VaultGearModifier<?> modifierxx : new ArrayList<>(data.getModifiers(VaultGearModifier.AffixType.SUFFIX))) {
-         if (modifierxx.getCategory() == VaultGearModifier.AffixCategory.CRAFTED && data.removeModifier(modifierxx)) {
+         if (modifierxx.hasCategory(VaultGearModifier.AffixCategory.CRAFTED) && data.removeModifier(modifierxx)) {
             removedModifiers = true;
          }
       }

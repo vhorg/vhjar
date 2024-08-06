@@ -3,69 +3,52 @@ package iskallia.vault.task;
 import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.event.CommonEvents;
-import iskallia.vault.core.event.common.BlockUseEvent;
 import iskallia.vault.core.net.BitBuffer;
-import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePredicate;
-import iskallia.vault.core.world.roll.IntRoll;
+import iskallia.vault.task.counter.TaskCounter;
 import iskallia.vault.task.source.EntityTaskSource;
-import iskallia.vault.task.source.TaskSource;
-import iskallia.vault.task.util.IProgressTask;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 
-public class InteractBlockTask extends ProgressConfiguredTask<Integer, InteractBlockTask.Config> implements IProgressTask {
+public class InteractBlockTask extends ProgressConfiguredTask<Integer, InteractBlockTask.Config> {
    public InteractBlockTask() {
-      super(new InteractBlockTask.Config(), 0, Adapters.INT_SEGMENTED_7, Integer::compare);
+      super(new InteractBlockTask.Config(), TaskCounter.Adapter.INT);
    }
 
-   public InteractBlockTask(InteractBlockTask.Config config) {
-      super(config, 0, Adapters.INT_SEGMENTED_7, Integer::compare);
-   }
-
-   @Override
-   public void onPopulate(TaskSource source) {
-      this.targetCount = this.getConfig().count.get(source.getRandom());
+   public InteractBlockTask(InteractBlockTask.Config config, TaskCounter<Integer, ?> counter) {
+      super(config, counter, TaskCounter.Adapter.INT);
    }
 
    @Override
-   public void onAttach(TaskSource source) {
-      CommonEvents.BLOCK_USE.register(this, event -> {
-         if (!event.getWorld().isClientSide()) {
-            if (source instanceof EntityTaskSource entitySource) {
-               if (entitySource.matches(event.getPlayer())) {
-                  PartialTile tile = PartialTile.at(event.getWorld(), event.getPos());
-                  if (event.getPhase() != BlockUseEvent.Phase.HEAD || this.getConfig().pre.test(tile)) {
-                     if (event.getPhase() != BlockUseEvent.Phase.RETURN || this.getConfig().post.test(tile)) {
-                        Integer var5 = this.currentCount;
-                        this.currentCount = this.currentCount + 1;
+   public void onAttach(TaskContext context) {
+      CommonEvents.BLOCK_USE_MERGED.register(this, event -> {
+         if (this.parent == null || this.parent.isCompleted()) {
+            if (!event.getWorld().isClientSide()) {
+               if (context.getSource() instanceof EntityTaskSource entitySource) {
+                  if (entitySource.matches(event.getPlayer())) {
+                     if (this.getConfig().pre == null || this.getConfig().pre.test(event.getPre())) {
+                        if (this.getConfig().post == null || this.getConfig().post.test(event.getPost())) {
+                           this.counter.onAdd(1, context);
+                        }
                      }
                   }
                }
             }
          }
       });
-      super.onAttach(source);
-   }
-
-   @Override
-   public void onDetach() {
-      CommonEvents.BLOCK_USE.release(this);
-      super.onDetach();
+      super.onAttach(context);
    }
 
    public static class Config extends ConfiguredTask.Config {
       public TilePredicate pre;
       public TilePredicate post;
-      public IntRoll count;
 
       public Config() {
       }
 
-      public Config(TilePredicate pre, TilePredicate post, IntRoll count) {
+      public Config(TilePredicate pre, TilePredicate post) {
          this.pre = pre;
          this.post = post;
-         this.count = count;
       }
 
       @Override
@@ -73,15 +56,13 @@ public class InteractBlockTask extends ProgressConfiguredTask<Integer, InteractB
          super.writeBits(buffer);
          Adapters.TILE_PREDICATE.writeBits(this.pre, buffer);
          Adapters.TILE_PREDICATE.writeBits(this.post, buffer);
-         Adapters.INT_ROLL.writeBits(this.count, buffer);
       }
 
       @Override
       public void readBits(BitBuffer buffer) {
          super.readBits(buffer);
-         this.pre = Adapters.TILE_PREDICATE.readBits(buffer).orElseThrow();
-         this.post = Adapters.TILE_PREDICATE.readBits(buffer).orElseThrow();
-         this.count = Adapters.INT_ROLL.readBits(buffer).orElseThrow();
+         this.pre = Adapters.TILE_PREDICATE.readBits(buffer).orElse(null);
+         this.post = Adapters.TILE_PREDICATE.readBits(buffer).orElse(null);
       }
 
       @Override
@@ -89,7 +70,6 @@ public class InteractBlockTask extends ProgressConfiguredTask<Integer, InteractB
          return super.writeNbt().map(nbt -> {
             Adapters.TILE_PREDICATE.writeNbt(this.pre).ifPresent(value -> nbt.put("pre", value));
             Adapters.TILE_PREDICATE.writeNbt(this.post).ifPresent(value -> nbt.put("post", value));
-            Adapters.INT_ROLL.writeNbt(this.count).ifPresent(value -> nbt.put("count", value));
             return (CompoundTag)nbt;
          });
       }
@@ -97,9 +77,8 @@ public class InteractBlockTask extends ProgressConfiguredTask<Integer, InteractB
       @Override
       public void readNbt(CompoundTag nbt) {
          super.readNbt(nbt);
-         this.pre = Adapters.TILE_PREDICATE.readNbt(nbt.get("pre")).orElse(TilePredicate.TRUE);
-         this.post = Adapters.TILE_PREDICATE.readNbt(nbt.get("post")).orElse(TilePredicate.TRUE);
-         this.count = Adapters.INT_ROLL.readNbt(nbt.get("count")).orElse(IntRoll.ofConstant(0));
+         this.pre = Adapters.TILE_PREDICATE.readNbt(nbt.get("pre")).orElse(null);
+         this.post = Adapters.TILE_PREDICATE.readNbt(nbt.get("post")).orElse(null);
       }
 
       @Override
@@ -107,7 +86,6 @@ public class InteractBlockTask extends ProgressConfiguredTask<Integer, InteractB
          return super.writeJson().map(json -> {
             Adapters.TILE_PREDICATE.writeJson(this.pre).ifPresent(value -> json.add("pre", value));
             Adapters.TILE_PREDICATE.writeJson(this.post).ifPresent(value -> json.add("post", value));
-            Adapters.INT_ROLL.writeJson(this.count).ifPresent(value -> json.add("count", value));
             return (JsonObject)json;
          });
       }
@@ -115,9 +93,8 @@ public class InteractBlockTask extends ProgressConfiguredTask<Integer, InteractB
       @Override
       public void readJson(JsonObject json) {
          super.readJson(json);
-         this.pre = Adapters.TILE_PREDICATE.readJson(json.get("pre")).orElse(TilePredicate.TRUE);
-         this.post = Adapters.TILE_PREDICATE.readJson(json.get("post")).orElse(TilePredicate.TRUE);
-         this.count = Adapters.INT_ROLL.readJson(json.get("count")).orElse(IntRoll.ofConstant(0));
+         this.pre = Adapters.TILE_PREDICATE.readJson(json.get("pre")).orElse(null);
+         this.post = Adapters.TILE_PREDICATE.readJson(json.get("post")).orElse(null);
       }
    }
 }

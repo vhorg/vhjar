@@ -38,6 +38,8 @@ public class ModificationButtonElement<E extends ModificationButtonElement<E>> e
                GearModificationAction action = container.getModificationAction(modification);
                if (action == null) {
                   return Collections.emptyList();
+               } else if (!this.isVisible()) {
+                  return Collections.emptyList();
                } else {
                   ItemStack inputItem = ItemStack.EMPTY;
                   Slot inputSlot = action.getCorrespondingSlot(container);
@@ -54,9 +56,12 @@ public class ModificationButtonElement<E extends ModificationButtonElement<E>> e
                   if (hasInput && !itemData.isModifiable()) {
                      return List.of(new TranslatableComponent("the_vault.gear_modification.unmodifiable").withStyle(ChatFormatting.RED));
                   } else {
-                     if (hasInput && !inputItem.isEmpty() && !action.modification().canApply(gearStack, inputItem, container.getPlayer(), rand)) {
-                        tooltip.add(action.modification().getInvalidDescription(inputItem));
-                        failedModification = true;
+                     if (hasInput && !inputItem.isEmpty()) {
+                        GearModification.Result result = action.modification().canApply(gearStack, inputItem, container.getPlayer(), rand);
+                        if (!result.success()) {
+                           tooltip.add(result.getError(action.modification()));
+                           failedModification = true;
+                        }
                      }
 
                      if (!failedModification && hasInput) {

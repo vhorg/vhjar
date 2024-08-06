@@ -65,7 +65,7 @@ public class FindExitObjective extends Objective {
             data -> {
                Listener listener = vault.get(Vault.LISTENERS).get(data.getPlayer().getUUID());
                if (listener instanceof Runner runner) {
-                  if (listener.isActive(vault, this)) {
+                  if (listener.isActive(world, vault, this)) {
                      if (!data.getPlayer().isOnPortalCooldown()) {
                         if (vault.has(Vault.WORLD)) {
                            vault.get(Vault.WORLD)
@@ -87,7 +87,7 @@ public class FindExitObjective extends Objective {
 
    @Override
    public void tickListener(VirtualWorld world, Vault vault, Listener listener) {
-      if (listener instanceof Runner && !listener.isActive(vault, this)) {
+      if (listener instanceof Runner && !listener.isActive(world, vault, this)) {
          listener.addObjective(vault, this);
       }
 
@@ -118,7 +118,7 @@ public class FindExitObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       return objective == this;
    }
 }

@@ -4,7 +4,7 @@ import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.random.RandomSource;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.Vault;
-import iskallia.vault.core.vault.objective.ScavengerObjective;
+import iskallia.vault.core.vault.objective.Objective;
 import iskallia.vault.core.world.data.entity.PartialCompoundNbt;
 import iskallia.vault.core.world.data.tile.PartialBlockState;
 import iskallia.vault.core.world.data.tile.PartialTile;
@@ -35,7 +35,7 @@ public class ChestScavengerTask extends ScavengeTask {
    }
 
    @Override
-   public void initServer(VirtualWorld world, Vault vault, ScavengerObjective objective) {
+   public void initServer(VirtualWorld world, Vault vault, Objective objective) {
       CommonEvents.CHEST_LOOT_GENERATION.post().register(objective, data -> {
          if (data.getPlayer().level == world) {
             if (!(data.getRandom().nextDouble() >= this.probability)) {

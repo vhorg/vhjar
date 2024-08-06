@@ -6,15 +6,16 @@ import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.modifier.spi.ModifierContext;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.player.Listener;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import iskallia.vault.core.world.data.tile.TilePredicate;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.ClientboundHunterParticlesMessage;
 import iskallia.vault.skill.ability.effect.spi.HunterAbility;
 import iskallia.vault.util.MiscUtils;
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.TickEvent.Phase;
@@ -38,18 +39,14 @@ public class HunterModifier extends VaultModifier<HunterModifier.Properties> {
                         .ifPresent(
                            player -> {
                               for (HunterModifier.Properties.Entry entry : this.properties.getEntries()) {
-                                 HunterAbility.selectPositions(world, player, entry.radius, new Color(entry.color, false), entry.filter::test)
+                                 HunterAbility.selectPositions(world, player, entry.radius, tile -> getHighlightPosition(entry, tile))
                                     .forEach(
                                        highlightPosition -> {
-                                          Color color = highlightPosition.color();
-
                                           for (int i = 0; i < 8; i++) {
                                              Vec3 v = MiscUtils.getRandomOffset(highlightPosition.blockPos(), world.getRandom());
                                              ModNetwork.CHANNEL
                                                 .sendTo(
-                                                   new ClientboundHunterParticlesMessage(
-                                                      v.x, v.y, v.z, color.getRed() / 255.0F, color.getGreen() / 255.0F, color.getBlue() / 255.0F
-                                                   ),
+                                                   new ClientboundHunterParticlesMessage(v.x, v.y, v.z, null, highlightPosition.color()),
                                                    player.connection.getConnection(),
                                                    NetworkDirection.PLAY_TO_CLIENT
                                                 );
@@ -64,6 +61,12 @@ public class HunterModifier extends VaultModifier<HunterModifier.Properties> {
             }
          );
       super.initServer(world, vault, context);
+   }
+
+   private static Optional<HunterAbility.HighlightPosition> getHighlightPosition(HunterModifier.Properties.Entry entry, PartialTile tile) {
+      return entry.filter.test(tile.getState(), tile.getEntity())
+         ? Optional.of(new HunterAbility.HighlightPosition(tile.getPos(), null, entry.color))
+         : Optional.empty();
    }
 
    @Override

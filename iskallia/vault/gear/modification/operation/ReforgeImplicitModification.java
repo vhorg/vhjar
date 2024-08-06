@@ -19,8 +19,7 @@ public class ReforgeImplicitModification extends GearModification {
    }
 
    @Override
-   public boolean doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
-      VaultGearModifierHelper.reForgeAllImplicits(stack, rand);
-      return true;
+   public GearModification.Result doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
+      return VaultGearModifierHelper.reForgeAllImplicits(stack, rand);
    }
 }

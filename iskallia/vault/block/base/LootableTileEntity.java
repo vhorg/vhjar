@@ -10,6 +10,7 @@ import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.world.loot.generator.LootTableGenerator;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -32,6 +33,10 @@ public abstract class LootableTileEntity extends BlockEntity implements HunterHi
       return this.lootTable;
    }
 
+   public void setLootTable(ResourceLocation lootTable) {
+      this.lootTable = lootTable;
+   }
+
    @Override
    public boolean isHidden() {
       return this.hidden;
@@ -44,7 +49,7 @@ public abstract class LootableTileEntity extends BlockEntity implements HunterHi
       }
    }
 
-   public List<ItemStack> generateLoot(ServerPlayer player) {
+   public List<ItemStack> generateLoot(@Nullable ServerPlayer player) {
       List<ItemStack> loot = new ArrayList<>();
       LootableBlockGenerationEvent.Data data = CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT
          .invoke(
@@ -61,7 +66,7 @@ public abstract class LootableTileEntity extends BlockEntity implements HunterHi
       LootTableKey key = VaultRegistry.LOOT_TABLE.getKey(data.getLootTable());
       if (key != null) {
          LootTableGenerator generator = new LootTableGenerator(Version.latest(), key, 0.0F);
-         generator.source = player;
+         generator.setSource(player);
          generator.generate(data.getRandom());
          generator.getItems().forEachRemaining(loot::add);
       }

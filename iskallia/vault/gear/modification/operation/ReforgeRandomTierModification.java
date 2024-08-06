@@ -19,7 +19,7 @@ public class ReforgeRandomTierModification extends GearModification {
    }
 
    @Override
-   public boolean doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
-      return VaultGearModifierHelper.reForgeTierOfRandomModifier(stack, player.getLevel().getGameTime(), rand);
+   public GearModification.Result doModification(ItemStack stack, ItemStack materialStack, Player player, Random rand) {
+      return VaultGearModifierHelper.reForgeOutcomeOfRandomModifier(stack, player.getLevel().getGameTime(), rand);
    }
 }

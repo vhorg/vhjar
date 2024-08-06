@@ -5,6 +5,7 @@ import iskallia.vault.config.gear.VaultGearTierConfig;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.gear.attribute.VaultGearModifier;
+import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.crafting.VaultGearCraftingHelper;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
@@ -69,32 +70,48 @@ public class GearRollHelper {
       data.write(stack);
       VaultGearModifierHelper.reRollRepairSlots(stack, rand);
       if (data.getRarity() == VaultGearRarity.UNIQUE) {
-         JavaRandom random = JavaRandom.ofNanoTime();
-         UniqueGearConfig.Entry entry = ModConfigs.UNIQUE_GEAR.getRandomEntry(stack, data.getItemLevel(), random).orElseThrow();
-         data.updateAttribute(ModGearAttributes.GEAR_MODEL, entry.getModel());
-         data.write(stack);
-         VaultGearTierConfig.getConfig(stack).ifPresent(config -> {
-            entry.getModifierIdentifiers().forEach((affix, identifiers) -> {
-               for (ResourceLocation id : identifiers) {
-                  VaultGearTierConfig.ModifierTierGroup group = config.getTierGroup(id);
-                  generateModifiers(data, random, affix, group);
-               }
-            });
-            entry.getModifierTags().forEach((affix, tags) -> {
-               for (String tag : tags) {
-                  for (VaultGearTierConfig.ModifierTierGroup group : config.getTierGroups(tag)) {
-                     generateModifiers(data, random, affix, group);
-                  }
-               }
-            });
-         });
-         data.write(stack);
-         stack.setHoverName(new TextComponent(entry.getName()));
+         initializeUniqueGear(data, stack);
       } else {
          VaultGearCraftingHelper.reRollCraftingPotential(stack);
          VaultGearModifierHelper.generateAffixSlots(stack, rand);
          VaultGearModifierHelper.generateImplicits(stack, rand);
          VaultGearModifierHelper.generateModifiers(stack, rand);
+         if (canGenerateLegendaryModifier(player, data)) {
+            VaultGearLegendaryHelper.generateLegendaryModifier(stack, rand);
+         }
+      }
+   }
+
+   private static void initializeUniqueGear(VaultGearData data, ItemStack stack) {
+      JavaRandom random = JavaRandom.ofNanoTime();
+      UniqueGearConfig.Entry entry = ModConfigs.UNIQUE_GEAR
+         .getRandomEntry(data.getFirstValue(ModGearAttributes.GEAR_UNIQUE_POOL).orElse(null), random)
+         .orElseThrow();
+      data.updateAttribute(ModGearAttributes.GEAR_MODEL, entry.getModel());
+      data.write(stack);
+      VaultGearTierConfig.getConfig(stack).ifPresent(config -> {
+         entry.getModifierIdentifiers().forEach((affix, identifiers) -> {
+            for (ResourceLocation id : identifiers) {
+               VaultGearTierConfig.ModifierTierGroup group = config.getTierGroup(id);
+               generateModifiers(data, random, affix, group);
+            }
+         });
+         entry.getModifierTags().forEach((affix, tags) -> {
+            for (String tag : tags) {
+               for (VaultGearTierConfig.ModifierTierGroup group : config.getTierGroups(tag)) {
+                  generateModifiers(data, random, affix, group);
+               }
+            }
+         });
+      });
+      data.write(stack);
+      stack.setHoverName(new TextComponent(entry.getName()));
+   }
+
+   private static boolean canGenerateLegendaryModifier(Player player, VaultGearData data) {
+      if (data.get(ModGearAttributes.IS_LEGENDARY, VaultGearAttributeTypeMerger.anyTrue())) {
+         return true;
+      } else {
          float extraLegendaryChance = 0.0F;
          if (player instanceof ServerPlayer && player.level instanceof ServerLevel sLevel) {
             ExpertiseTree expertises = PlayerExpertisesData.get(sLevel).getExpertises(player);
@@ -104,10 +121,8 @@ public class GearRollHelper {
             }
          }
 
-         if (data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false)
-            && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance() + extraLegendaryChance) {
-            VaultGearModifierHelper.generateLegendaryModifier(stack, rand);
-         }
+         return data.getFirstValue(ModGearAttributes.IS_LOOT).orElse(false)
+            && rand.nextFloat() < ModConfigs.VAULT_GEAR_CRAFTING_CONFIG.getLegendaryModifierChance() + extraLegendaryChance;
       }
    }
 

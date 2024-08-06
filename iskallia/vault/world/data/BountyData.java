@@ -35,6 +35,8 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.Phase;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
+import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
@@ -51,13 +53,6 @@ public class BountyData extends SavedData {
    private final HashMap<UUID, BountyList> available = new HashMap<>();
    private final HashMap<UUID, BountyList> complete = new HashMap<>();
    private final HashMap<UUID, BountyList> legendary = new HashMap<>();
-
-   public BountyData() {
-      CommonEvents.ENTITY_DROPS.register(this, ItemDiscoveryTask::onLootGeneration, -1);
-      CommonEvents.CHEST_LOOT_GENERATION.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
-      CommonEvents.COIN_STACK_LOOT_GENERATION.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
-      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
-   }
 
    private Optional<Bounty> getActiveFor(UUID playerId, UUID bountyId) {
       return !this.active.containsKey(playerId) ? Optional.empty() : this.active.get(playerId).findById(bountyId);
@@ -453,6 +448,30 @@ public class BountyData extends SavedData {
       this.resetAvailableBountiesFor(uuid);
       this.setDirty();
       this.syncToClient(uuid);
+   }
+
+   @SubscribeEvent
+   public static void onServerStarted(ServerStartedEvent event) {
+      get().registerEvents();
+   }
+
+   @SubscribeEvent
+   public static void onServerStopped(ServerStoppedEvent event) {
+      get().deregisterEvents();
+   }
+
+   private void registerEvents() {
+      CommonEvents.ENTITY_DROPS.register(this, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.CHEST_LOOT_GENERATION.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.COIN_STACK_LOOT_GENERATION.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
+      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.post().register(this, ItemDiscoveryTask::onLootGeneration, -1);
+   }
+
+   private void deregisterEvents() {
+      CommonEvents.ENTITY_DROPS.release(this);
+      CommonEvents.CHEST_LOOT_GENERATION.post().release(this);
+      CommonEvents.COIN_STACK_LOOT_GENERATION.post().release(this);
+      CommonEvents.LOOTABLE_BLOCK_GENERATION_EVENT.post().release(this);
    }
 
    public static BountyData get() {

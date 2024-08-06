@@ -2,6 +2,7 @@ package iskallia.vault.mixin;
 
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.BlockUseEvent;
+import iskallia.vault.core.world.data.tile.PartialTile;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -36,12 +37,15 @@ public abstract class MixinBlockBehaviour {
    public void use(Level world, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
       BlockState state = this.asState();
       BlockPos pos = hit.getBlockPos();
+      PartialTile pre = PartialTile.at(world, pos);
       BlockUseEvent.Data data = CommonEvents.BLOCK_USE.invoke(world, state, pos, player, hand, hit, BlockUseEvent.Phase.HEAD);
       if (data.getResult() == null) {
          data.setResult(this.getBlock().use(state, world, pos, player, hand, hit));
       }
 
       CommonEvents.BLOCK_USE.invoke(world, state, pos, player, hand, hit, BlockUseEvent.Phase.RETURN);
+      PartialTile post = PartialTile.at(world, pos);
+      CommonEvents.BLOCK_USE_MERGED.invoke(world, player, hand, hit, pre, post);
       cir.setReturnValue(data.getResult());
    }
 

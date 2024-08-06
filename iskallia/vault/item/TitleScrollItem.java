@@ -58,6 +58,9 @@ public class TitleScrollItem extends BasicItem {
          if (titleId != null && affix != null) {
             PlayerTitlesData.setCustomName(player, titleId, affix);
             world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.NOTE_BLOCK_BELL, SoundSource.PLAYERS, 0.9F, 1.2F);
+            if (player instanceof ServerPlayer) {
+               ((ServerPlayer)player).refreshTabListName();
+            }
          }
 
          return InteractionResultHolder.success(stack);

@@ -25,8 +25,10 @@ import iskallia.vault.client.particles.EnderAnchorParticle;
 import iskallia.vault.client.particles.EntityLockedParticle;
 import iskallia.vault.client.particles.FireballParticle;
 import iskallia.vault.client.particles.FloatingAltarItemParticle;
+import iskallia.vault.client.particles.GridGatewayParticle;
 import iskallia.vault.client.particles.GrowingSphereParticle;
 import iskallia.vault.client.particles.HealParticle;
+import iskallia.vault.client.particles.HealSpellParticle;
 import iskallia.vault.client.particles.LuckyHitDrainParticle;
 import iskallia.vault.client.particles.LuckyHitParticle;
 import iskallia.vault.client.particles.LuckyHitSweepingParticle;
@@ -125,6 +127,7 @@ public class ModParticles {
    public static final RegistryObject<SimpleParticleType> BONK = REGISTRY.register("bonk", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> ALCHEMY_TABLE = REGISTRY.register("alchemy_table", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> CHARM = REGISTRY.register("charm", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> HEAL_SPELL = REGISTRY.register("heal_spell", () -> new SimpleParticleType(true));
    public static final RegistryObject<ParticleType<ArtifactBossImmunityParticleOptions>> ARTIFACT_BOSS_IMMUNITY = register(
       REGISTRY, "artifact_boss_immunity", ArtifactBossImmunityParticleOptions.DESERIALIZER, ArtifactBossImmunityParticleOptions::codec, true
    );
@@ -163,6 +166,7 @@ public class ModParticles {
    );
    public static final RegistryObject<SimpleParticleType> WENDARR_SPARK_EXPLODE = REGISTRY.register("wendarr_spark_explode", () -> new SimpleParticleType(true));
    public static final RegistryObject<SimpleParticleType> ASCENSION_FORGE = REGISTRY.register("ascension_forge", () -> new SimpleParticleType(true));
+   public static final RegistryObject<SimpleParticleType> GRID_GATEWAY = REGISTRY.register("grid_gateway", () -> new SimpleParticleType(true));
    public static final RegistryObject<ParticleType<SphericalParticleOptions>> BOSS_WENDARR_EXPLODE = register(
       REGISTRY, "boss_wendarr_explode", SphericalParticleOptions.DESERIALIZER, SphericalParticleOptions::codec, true
    );
@@ -217,6 +221,7 @@ public class ModParticles {
       particleManager.register((ParticleType)BONK.get(), LuckyHitDrainParticle.Provider::new);
       particleManager.register((ParticleType)ALCHEMY_TABLE.get(), AlchemyTableParticle.Provider::new);
       particleManager.register((ParticleType)CHARM.get(), CharmParticle.Provider::new);
+      particleManager.register((ParticleType)HEAL_SPELL.get(), HealSpellParticle.Provider::new);
       particleManager.register((ParticleType)ARTIFACT_BOSS_IMMUNITY.get(), ArtifactBossImmunityParticle.AltarProvider::new);
       particleManager.register((ParticleType)ARTIFACT_PROJECTOR.get(), ArtifactProjectorParticle.AltarProvider::new);
       particleManager.register(
@@ -244,6 +249,7 @@ public class ModParticles {
       particleManager.register((ParticleType)DIVINE_ALTAR_CONSUME.get(), DivineAltarConsumeParticle.AltarProvider::new);
       particleManager.register((ParticleType)WENDARR_SPARK_EXPLODE.get(), WendarrSparkExplosionParticle.Provider::new);
       particleManager.register((ParticleType)ASCENSION_FORGE.get(), AscensionForgeParticle.Provider::new);
+      particleManager.register((ParticleType)GRID_GATEWAY.get(), GridGatewayParticle.Provider::new);
       particleManager.register((ParticleType)BOSS_WENDARR_EXPLODE.get(), sprites -> new GrowingSphereParticle.SphereProvider(sprites, 1.0F, 60, 1.0F));
    }
 

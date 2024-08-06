@@ -8,7 +8,6 @@ import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.vault.time.TickClock;
-import iskallia.vault.world.data.DiscoveredRelicsData;
 import java.util.ArrayList;
 import java.util.UUID;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +31,6 @@ public class RelicExtension extends ClockModifier {
       this.set(PLAYER, player);
       this.set(INCREMENT_PER_RELIC, Integer.valueOf(incrementPerRelic));
       this.set(RELICS, new RelicExtension.Relics());
-      this.get(RELICS).addAll(DiscoveredRelicsData.getRelics(player));
    }
 
    @Override
@@ -47,7 +45,6 @@ public class RelicExtension extends ClockModifier {
 
    @Override
    protected void apply(ServerLevel world, TickClock clock) {
-      clock.set(TickClock.DISPLAY_TIME, Integer.valueOf(clock.get(TickClock.DISPLAY_TIME) + this.get(INCREMENT_PER_RELIC) * this.get(RELICS).size()));
       this.set(CONSUMED);
    }
 

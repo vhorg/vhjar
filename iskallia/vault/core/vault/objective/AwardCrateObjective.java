@@ -9,6 +9,7 @@ import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.basic.EnumAdapter;
 import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
 import iskallia.vault.core.data.adapter.vault.RegistryKeyAdapter;
+import iskallia.vault.core.data.compound.ItemStackList;
 import iskallia.vault.core.data.compound.UUIDList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.LootTableKey;
@@ -19,6 +20,7 @@ import iskallia.vault.core.event.common.CrateAwardEvent;
 import iskallia.vault.core.random.ChunkRandom;
 import iskallia.vault.core.vault.CrateLootGenerator;
 import iskallia.vault.core.vault.Vault;
+import iskallia.vault.core.vault.VaultLevel;
 import iskallia.vault.core.vault.VaultRegistry;
 import iskallia.vault.core.vault.player.Listener;
 import iskallia.vault.core.vault.player.Runner;
@@ -26,6 +28,7 @@ import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.world.loot.LootTable;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModConfigs;
+import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.NonNullList;
 import net.minecraft.util.Mth;
@@ -51,6 +54,9 @@ public class AwardCrateObjective extends Objective {
    public static final FieldKey<Void> AWARDED = FieldKey.of("awarded", Void.class).with(Version.v1_0, Adapters.ofVoid(), DISK.all()).register(FIELDS);
    public static final FieldKey<UUIDList> AWARDED_PLAYERS = FieldKey.of("awarded_players", UUIDList.class)
       .with(Version.v1_1, CompoundAdapter.of(UUIDList::create), DISK.all())
+      .register(FIELDS);
+   public static final FieldKey<ItemStackList> ADDITIONAL_ITEMS = FieldKey.of("additional_items", ItemStackList.class)
+      .with(Version.v1_28, CompoundAdapter.of(ItemStackList::create), DISK.all())
       .register(FIELDS);
 
    protected AwardCrateObjective() {
@@ -108,14 +114,20 @@ public class AwardCrateObjective extends Objective {
       super.tickListener(world, vault, listener);
    }
 
-   private void awardCrate(Vault vault, Listener listener, ChunkRandom random) {
+   protected void awardCrate(Vault vault, Listener listener, ChunkRandom random) {
       if (vault.has(Vault.STATS)) {
          StatCollector stats = vault.get(Vault.STATS).get(listener.get(Listener.ID));
          if (stats != null) {
+            int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
             float xpMul = Mth.clamp(stats.getExpMultiplier(), 0.0F, 1.0F);
             float artifactChance = this.get(ARTIFACT_CHANCE) * xpMul;
+            List<ItemStack> additional = new ArrayList<>(this.getOr(ADDITIONAL_ITEMS, ItemStackList.create()));
+            if (listener instanceof Runner runner) {
+               additional.addAll(runner.getOr(Runner.ADDITIONAL_CRATE_ITEMS, ItemStackList.create()));
+            }
+
             CrateLootGenerator crateLootGenerator = new CrateLootGenerator(
-               this.get(LOOT_TABLE), this.getOr(ITEM_QUANTITY, Float.valueOf(0.0F)), this.has(ADD_ARTIFACT), artifactChance
+               this.get(LOOT_TABLE), this.getOr(ITEM_QUANTITY, Float.valueOf(0.0F)), additional, this.has(ADD_ARTIFACT), artifactChance
             );
             VaultCrateBlock.Type crateType = this.get(TYPE);
             listener.getPlayer()
@@ -135,7 +147,7 @@ public class AwardCrateObjective extends Objective {
                      )
                );
             NonNullList<ItemStack> items = crateLootGenerator.generate(vault, listener, random);
-            ItemStack crate = VaultCrateBlock.getCrateWithLoot(crateType, items);
+            ItemStack crate = VaultCrateBlock.getCrateWithLootWithAntiques(crateType, level, items);
             listener.getPlayer()
                .ifPresent(
                   player -> CommonEvents.CRATE_AWARD_EVENT
@@ -152,7 +164,7 @@ public class AwardCrateObjective extends Objective {
    }
 
    @Override
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       return objective == this;
    }
 }

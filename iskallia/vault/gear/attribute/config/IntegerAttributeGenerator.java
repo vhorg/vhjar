@@ -2,6 +2,8 @@ package iskallia.vault.gear.attribute.config;
 
 import com.google.gson.annotations.Expose;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.MutableComponent;
@@ -35,13 +37,23 @@ public class IntegerAttributeGenerator extends NumberRangeGenerator<Integer, Int
             .append(new TextComponent(reader.getModifierName()).withStyle(reader.getColoredTextStyle()));
    }
 
+   @Override
+   public Optional<Integer> getMinimumValue(List<IntegerAttributeGenerator.Range> configurations) {
+      return configurations.stream().map(range -> range.min).min(Double::compare);
+   }
+
+   @Override
+   public Optional<Integer> getMaximumValue(List<IntegerAttributeGenerator.Range> configurations) {
+      return configurations.stream().map(IntegerAttributeGenerator.Range::generateMaximumNumber).min(Double::compare);
+   }
+
    public static class Range extends NumberRangeGenerator.NumberRange<Integer> {
       @Expose
-      private int min;
+      public int min;
       @Expose
-      private int max;
+      public int max;
       @Expose
-      private int step;
+      public int step;
 
       public Range(int min, int max, int step) {
          this.min = min;
@@ -52,6 +64,11 @@ public class IntegerAttributeGenerator extends NumberRangeGenerator<Integer, Int
       public Integer generateNumber(Random random) {
          int steps = Math.max(this.max - this.min, 0) / this.step + 1;
          return this.min + random.nextInt(steps) * this.step;
+      }
+
+      public Integer generateMaximumNumber() {
+         int steps = Math.max(this.max - this.min, 0) / this.step;
+         return this.min + steps * this.step;
       }
    }
 }

@@ -12,7 +12,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-public record GearModificationAction(int slotIndex, GearModification modification, boolean right) {
+public record GearModificationAction(
+   int slotIndex, VaultArtisanStationContainer.Tab tab, GearModification modification, VaultArtisanStationContainer.ButtonSide side
+) {
    private static final Random rand = new Random();
 
    @Nullable
@@ -36,15 +38,24 @@ public record GearModificationAction(int slotIndex, GearModification modificatio
             if (inSlot != null) {
                ItemStack input = inSlot.getItem();
                ItemStack material = input.copy();
-               input.shrink(1);
+               if (!player.isCreative()) {
+                  input.shrink(1);
+               }
+
                inSlot.set(input);
                String rollType = data.get(ModGearAttributes.GEAR_ROLL_TYPE, VaultGearAttributeTypeMerger.firstNonNull());
                GearModificationCost cost = GearModificationCost.getCost(data.getRarity(), rollType, data.getItemLevel(), potential.get(), this.modification());
                ItemStack bronze = container.getBronzeSlot().getItem();
-               bronze.shrink(cost.costBronze());
+               if (!player.isCreative()) {
+                  bronze.shrink(cost.costBronze());
+               }
+
                container.getBronzeSlot().set(bronze);
                ItemStack plating = container.getPlatingSlot().getItem();
-               plating.shrink(cost.costPlating());
+               if (!player.isCreative()) {
+                  plating.shrink(cost.costPlating());
+               }
+
                container.getPlatingSlot().set(plating);
                this.modification().apply(gear, material, player, rand);
             }
@@ -59,7 +70,7 @@ public record GearModificationAction(int slotIndex, GearModification modificatio
       } else {
          ItemStack gear = container.getGearInputSlot().getItem();
          ItemStack in = inSlot.getItem();
-         if (!in.isEmpty() && !gear.isEmpty()) {
+         if (!in.isEmpty() && !gear.isEmpty() && this.modification().getStackFilter().test(in)) {
             VaultGearData data = VaultGearData.read(gear);
             Optional<Integer> potential = data.getFirstValue(ModGearAttributes.CRAFTING_POTENTIAL);
             if (potential.isEmpty()) {
@@ -70,7 +81,7 @@ public record GearModificationAction(int slotIndex, GearModification modificatio
                ItemStack bronze = container.getBronzeSlot().getItem();
                ItemStack plating = container.getPlatingSlot().getItem();
                return bronze.getCount() >= cost.costBronze() && plating.getCount() >= cost.costPlating()
-                  ? this.modification().canApply(gear, in, player, rand)
+                  ? this.modification().canApply(gear, in, player, rand).success()
                   : false;
             }
          } else {

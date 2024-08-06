@@ -78,8 +78,8 @@ public class InscriptionItem extends Item implements VaultLevelItem, IManualMode
    }
 
    @Override
-   public void initializeVaultLoot(Vault vault, ItemStack stack, @Nullable BlockPos pos) {
-      stack.getOrCreateTag().putInt("level", vault.get(Vault.LEVEL).get());
+   public void initializeVaultLoot(int vaultLevel, ItemStack stack, @Nullable BlockPos pos, @Nullable Vault vault) {
+      stack.getOrCreateTag().putInt("level", vaultLevel);
    }
 
    @Override

@@ -72,14 +72,16 @@ public abstract class MixinManaPlayerEntity extends LivingEntity implements Mana
       Player player = this.player();
       ManaPlayer manaSource = (ManaPlayer)player;
       float manaMax = manaSource.getManaMax();
-      float clampedAmount = Mth.clamp(amount, 0.0F, manaMax);
+      float oldAmount = this.getMana();
+      float newAmount = Mth.clamp(amount, 0.0F, manaMax);
       if (player instanceof ServerPlayer serverPlayer) {
-         if (clampedAmount < manaMax) {
+         if (newAmount < manaMax) {
             ModModelDiscoveryGoals.LV50_VAULT_COMPLETED_WITHOUT_MANA_USAGE.markFailed(serverPlayer);
          }
 
-         serverPlayer.getEntityData().set(MANA, clampedAmount);
-         return clampedAmount;
+         serverPlayer.getEntityData().set(MANA, newAmount);
+         this.onModify(oldAmount, newAmount);
+         return newAmount;
       } else {
          throw new IllegalStateException("Don't call this from the client!");
       }

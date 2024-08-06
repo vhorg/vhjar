@@ -20,7 +20,7 @@ import iskallia.vault.config.BestiaryConfig;
 import iskallia.vault.config.entry.IntRangeEntry;
 import iskallia.vault.core.world.data.entity.PartialEntityGroup;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.util.EntityGroupsUtils;
+import iskallia.vault.util.GroupUtils;
 import iskallia.vault.util.TextComponentUtils;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,13 +57,13 @@ public class EntityDefinitionElement extends ElasticContainerElement<EntityDefin
       this.addElement(new NineSliceElement(Spatials.positionXY(this.width() / 2 - 50, -45).width(100).height(20), ScreenTextures.DEFAULT_WINDOW_BACKGROUND));
       this.addElement(
          new HeaderElement(
-            Spatials.positionXYZ(this.width() / 2 - 50, -45, 1).width(100).height(20), EntityGroupsUtils.getName(this.group), LabelTextStyle.center().shadow()
+            Spatials.positionXYZ(this.width() / 2 - 50, -45, 1).width(100).height(20), GroupUtils.getEntityName(this.group), LabelTextStyle.center().shadow()
          )
       );
       this.backButtonElement = new NineSliceButtonElement(
          Spatials.positionXY(-5, this.height() + 10).size(100, 20),
          ScreenTextures.BUTTON_EMPTY_TEXTURES,
-         () -> this.parent.selectGroup(EntityGroupsUtils.getName(this.group).getString())
+         () -> this.parent.selectGroup(GroupUtils.getEntityName(this.group).getString())
       );
       this.backButtonElement.label(() -> new TranslatableComponent("gui.back"));
       this.addElement(
@@ -202,7 +202,7 @@ public class EntityDefinitionElement extends ElasticContainerElement<EntityDefin
    }
 
    private EntityType<?> getNextEntity() {
-      List<EntityType<?>> types = EntityGroupsUtils.getTypes(this.group.getId());
+      List<EntityType<?>> types = GroupUtils.getEntityTypes(this.group.getId());
       if (types.isEmpty()) {
          return EntityType.BAT;
       } else {
@@ -216,7 +216,7 @@ public class EntityDefinitionElement extends ElasticContainerElement<EntityDefin
    }
 
    private EntityType<?> getPreviousEntity() {
-      List<EntityType<?>> types = EntityGroupsUtils.getTypes(this.group.getId());
+      List<EntityType<?>> types = GroupUtils.getEntityTypes(this.group.getId());
       if (types.isEmpty()) {
          return EntityType.BAT;
       } else {

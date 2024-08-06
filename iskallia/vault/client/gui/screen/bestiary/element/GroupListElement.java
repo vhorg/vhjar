@@ -10,10 +10,10 @@ import iskallia.vault.client.gui.screen.bestiary.BestiaryScreen;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.data.entity.PartialEntityGroup;
 import iskallia.vault.init.ModConfigs;
-import iskallia.vault.util.EntityGroupsUtils;
+import iskallia.vault.util.GroupUtils;
 import java.util.Optional;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
 
 public class GroupListElement extends VerticalScrollClipContainer<GroupListElement> {
    private final BestiaryScreen parentScreen;
@@ -23,14 +23,14 @@ public class GroupListElement extends VerticalScrollClipContainer<GroupListEleme
       this.parentScreen = parentScreen;
       int y = 0;
 
-      for (Component groupName : EntityGroupsUtils.getGroupNames()) {
-         Optional<EntityPredicate> byName = EntityGroupsUtils.getByName(groupName.getString());
+      for (String groupName : GroupUtils.getEntityGroupNames()) {
+         Optional<EntityPredicate> byName = GroupUtils.getFilterByName(groupName);
          if (!byName.isPresent() || !(byName.get() instanceof PartialEntityGroup group && ModConfigs.BESTIARY.getHiddenGroups().contains(group.getId()))) {
             ClickableLabelElement groupLabel = new ClickableLabelElement(
                Spatials.positionXY(0, y),
-               groupName.copy().withStyle(ChatFormatting.BLACK),
+               new TextComponent(groupName).withStyle(ChatFormatting.BLACK),
                LabelTextStyle.defaultStyle(),
-               () -> this.selectGroup(groupName.getString())
+               () -> this.selectGroup(groupName)
             );
             this.addElement(groupLabel);
             y += 14;

@@ -25,6 +25,8 @@ import iskallia.vault.skill.ability.effect.GhostWalkSpiritAbility;
 import iskallia.vault.skill.ability.effect.HealAbility;
 import iskallia.vault.skill.ability.effect.HealEffectAbility;
 import iskallia.vault.skill.ability.effect.HealGroupAbility;
+import iskallia.vault.skill.ability.effect.IceBoltArrowAbility;
+import iskallia.vault.skill.ability.effect.IceBoltChunkAbility;
 import iskallia.vault.skill.ability.effect.JavelinAbility;
 import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
 import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
@@ -653,6 +655,32 @@ public class ModAbilityLabelBindings {
             ability -> AbilityLabelFormatters.integer(ability.getMaxStacksUsedPerHit()),
             "maxStacks",
             ability -> AbilityLabelFormatters.integer(ability.getMaxStacksTotal())
+         )
+      );
+      register(
+         IceBoltArrowAbility.class,
+         Map.of(
+            "throwPower",
+            ability -> AbilityLabelFormatters.decimal(ability.getThrowPower()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
+            "amplifier",
+            ability -> AbilityLabelFormatters.integer(ability.getAmplifier())
+         )
+      );
+      register(
+         IceBoltChunkAbility.class,
+         Map.of(
+            "throwPower",
+            ability -> AbilityLabelFormatters.decimal(ability.getThrowPower()),
+            "radius",
+            ability -> AbilityLabelFormatters.decimal(ability.getUnmodifiedRadius()),
+            "duration",
+            ability -> AbilityLabelFormatters.ticks(ability.getDurationTicks()),
+            "amplifier",
+            ability -> AbilityLabelFormatters.integer(ability.getAmplifier()),
+            "glacialChance",
+            ability -> AbilityLabelFormatters.percentRounded(ability.getGlacialChance())
          )
       );
    }

@@ -1,6 +1,7 @@
 package iskallia.vault.config;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.tree.TalentTree;
 import java.util.Optional;
 
@@ -15,6 +16,10 @@ public class TalentsConfig extends Config {
 
    public Optional<TalentTree> get() {
       return Optional.of(this.tree);
+   }
+
+   public Optional<Skill> getTalentById(String name) {
+      return this.tree.getForId(name);
    }
 
    @Override

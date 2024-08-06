@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.InputConstants.Key;
 import com.mojang.blaze3d.platform.InputConstants.Type;
 import iskallia.vault.client.ClientAbilityData;
 import iskallia.vault.client.gui.screen.AbilitySelectionScreen;
+import iskallia.vault.client.gui.screen.achievements.AchievementScreen;
 import iskallia.vault.client.gui.screen.bestiary.BestiaryScreen;
 import iskallia.vault.client.gui.screen.quest.QuestOverviewElementScreen;
 import iskallia.vault.client.render.IVaultOptions;
@@ -12,6 +13,7 @@ import iskallia.vault.init.ModKeybinds;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.AbilityQuickselectMessage;
 import iskallia.vault.network.message.AngelToggleMessage;
+import iskallia.vault.network.message.OpenCardDeckMessage;
 import iskallia.vault.network.message.ServerboundAbilityKeyMessage;
 import iskallia.vault.network.message.ServerboundMagnetToggleMessage;
 import iskallia.vault.network.message.ServerboundOpenStatisticsMessage;
@@ -134,6 +136,10 @@ public class InputEvents {
                      Minecraft.getInstance().setScreen(new QuestOverviewElementScreen());
                   } else if (ModKeybinds.openBestiary.isActiveAndMatches(key)) {
                      Minecraft.getInstance().setScreen(new BestiaryScreen());
+                  } else if (ModKeybinds.openAchievements.isActiveAndMatches(key)) {
+                     Minecraft.getInstance().setScreen(new AchievementScreen());
+                  } else if (ModKeybinds.openCardDeck.isActiveAndMatches(key)) {
+                     ModNetwork.CHANNEL.sendToServer(new OpenCardDeckMessage());
                   }
                }
             }

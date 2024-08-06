@@ -1,11 +1,17 @@
 package iskallia.vault.block;
 
 import iskallia.vault.VaultMod;
+import iskallia.vault.antique.Antique;
+import iskallia.vault.antique.AntiqueRegistry;
+import iskallia.vault.antique.condition.DropConditionContext;
+import iskallia.vault.antique.condition.DropConditionContextFactory;
 import iskallia.vault.block.entity.VaultCrateTileEntity;
 import iskallia.vault.container.oversized.OverSizedItemStack;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModSounds;
+import iskallia.vault.item.AntiqueItem;
 import iskallia.vault.util.nbt.NBTHelper;
+import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
@@ -56,18 +62,18 @@ public class VaultCrateBlock extends Block implements EntityBlock {
       this.registerDefaultState((BlockState)((BlockState)this.defaultBlockState().setValue(HORIZONTAL_FACING, Direction.NORTH)).setValue(FACING, Direction.UP));
    }
 
+   public static Stream<Antique> generateCrateAntiques(VaultCrateBlock.Type type, int level) {
+      DropConditionContext ctx = DropConditionContextFactory.makeRewardCrate(level, getCrateBlock(type));
+      return AntiqueRegistry.getAntiquesMatchingCondition(ctx);
+   }
+
+   public static ItemStack getCrateWithLootWithAntiques(VaultCrateBlock.Type type, int level, NonNullList<ItemStack> items) {
+      generateCrateAntiques(type, level).forEach(antique -> items.add(AntiqueItem.createStack(antique)));
+      return getCrateWithLoot(type, items);
+   }
+
    public static ItemStack getCrateWithLoot(VaultCrateBlock.Type type, NonNullList<ItemStack> items) {
-      Block block = switch (type) {
-         case BOSS -> ModBlocks.VAULT_CRATE;
-         case SCAVENGER -> ModBlocks.VAULT_CRATE_SCAVENGER;
-         case CAKE -> ModBlocks.VAULT_CRATE_CAKE;
-         case ARENA -> ModBlocks.VAULT_CRATE_ARENA;
-         case CHAMPION -> ModBlocks.VAULT_CRATE_CHAMPION;
-         case BOUNTY -> ModBlocks.VAULT_CRATE_BOUNTY;
-         case MONOLITH -> ModBlocks.VAULT_CRATE_MONOLITH;
-         case ELIXIR -> ModBlocks.VAULT_CRATE_ELIXIR;
-         case PARADOX -> ModBlocks.VAULT_CRATE_PARADOX;
-      };
+      Block block = getCrateBlock(type);
       if (items.size() > 54) {
          VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
          items = NonNullList.of(ItemStack.EMPTY, items.stream().limit(54L).toArray(ItemStack[]::new));
@@ -83,8 +89,8 @@ public class VaultCrateBlock extends Block implements EntityBlock {
       return crate;
    }
 
-   public static ItemStack getCrateWithLootOversized(VaultCrateBlock.Type type, NonNullList<OverSizedItemStack> items) {
-      Block block = switch (type) {
+   public static Block getCrateBlock(VaultCrateBlock.Type type) {
+      return switch (type) {
          case BOSS -> ModBlocks.VAULT_CRATE;
          case SCAVENGER -> ModBlocks.VAULT_CRATE_SCAVENGER;
          case CAKE -> ModBlocks.VAULT_CRATE_CAKE;
@@ -94,7 +100,13 @@ public class VaultCrateBlock extends Block implements EntityBlock {
          case MONOLITH -> ModBlocks.VAULT_CRATE_MONOLITH;
          case ELIXIR -> ModBlocks.VAULT_CRATE_ELIXIR;
          case PARADOX -> ModBlocks.VAULT_CRATE_PARADOX;
+         case BINGO -> ModBlocks.VAULT_CRATE_BINGO;
+         case OFFERING_BOSS -> ModBlocks.VAULT_CRATE_OFFERING_BOSS;
       };
+   }
+
+   public static ItemStack getCrateWithLootOversized(VaultCrateBlock.Type type, NonNullList<OverSizedItemStack> items) {
+      Block block = getCrateBlock(type);
       if (items.size() > 54) {
          VaultMod.LOGGER.error("Attempted to get a crate with more than 54 items. Check crate loot table.");
          items = NonNullList.of(OverSizedItemStack.EMPTY, items.stream().limit(54L).toArray(OverSizedItemStack[]::new));
@@ -182,6 +194,8 @@ public class VaultCrateBlock extends Block implements EntityBlock {
       BOUNTY,
       MONOLITH,
       ELIXIR,
-      PARADOX;
+      PARADOX,
+      BINGO,
+      OFFERING_BOSS;
    }
 }

@@ -5,12 +5,17 @@ import iskallia.vault.config.CharmConfig;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.entity.boss.BossProtectionCatalystEntity;
 import iskallia.vault.item.AnimalJarItem;
+import iskallia.vault.item.AntiqueItem;
+import iskallia.vault.item.AntiqueStampCollectorBook;
 import iskallia.vault.item.ArchetypeStarItem;
 import iskallia.vault.item.AugmentItem;
 import iskallia.vault.item.BasicFuelItem;
 import iskallia.vault.item.BasicItem;
 import iskallia.vault.item.BasicMobEggItem;
 import iskallia.vault.item.BasicScavengerItem;
+import iskallia.vault.item.BoosterPackItem;
+import iskallia.vault.item.CardDeckItem;
+import iskallia.vault.item.CardItem;
 import iskallia.vault.item.CatalystInhibitorItem;
 import iskallia.vault.item.CompassItem;
 import iskallia.vault.item.ErrorItem;
@@ -37,6 +42,7 @@ import iskallia.vault.item.KeystoneItem;
 import iskallia.vault.item.LootableItem;
 import iskallia.vault.item.MagnetItem;
 import iskallia.vault.item.NeuralizerItem;
+import iskallia.vault.item.OfferingItem;
 import iskallia.vault.item.OldNotesItem;
 import iskallia.vault.item.PaxelJewelItem;
 import iskallia.vault.item.QuestBookItem;
@@ -308,10 +314,13 @@ public class ModItems {
       new Properties().tab(VAULT_MOD_GROUP),
       25
    );
-   public static ItemVaultFruit.BitterLemon BITTER_LEMON = new ItemVaultFruit.BitterLemon(VAULT_MOD_GROUP, VaultMod.id("bitter_lemon"), 600);
-   public static ItemVaultFruit.SourOrange SOUR_ORANGE = new ItemVaultFruit.SourOrange(VAULT_MOD_GROUP, VaultMod.id("sour_orange"), 1200);
-   public static ItemVaultFruit.MysticPear MYSTIC_PEAR = new ItemVaultFruit.MysticPear(VAULT_MOD_GROUP, VaultMod.id("mystic_pear"), 6000);
-   public static ItemVaultFruit.SweetKiwi SWEET_KIWI = new ItemVaultFruit.SweetKiwi(VAULT_MOD_GROUP, VaultMod.id("sweet_kiwi"), 200);
+   public static ItemVaultFruit BITTER_LEMON = new ItemVaultFruit(VaultMod.id("bitter_lemon"), 600);
+   public static ItemVaultFruit SOUR_ORANGE = new ItemVaultFruit(VaultMod.id("sour_orange"), 1200);
+   public static ItemVaultFruit.MysticPear MYSTIC_PEAR = new ItemVaultFruit.MysticPear(VaultMod.id("mystic_pear"), 6000);
+   public static ItemVaultFruit SWEET_KIWI = new ItemVaultFruit(VaultMod.id("sweet_kiwi"), 200);
+   public static ItemVaultFruit GRAPES = new ItemVaultFruit(VaultMod.id("grapes"), 400);
+   public static ItemVaultFruit MANGO = new ItemVaultFruit(VaultMod.id("mango"), 900);
+   public static ItemVaultFruit STAR_FRUIT = new ItemVaultFruit(VaultMod.id("star_fruit"), 1800);
    public static BasicItem VAULT_APPLE = new BasicItem(VaultMod.id("vault_apple"));
    public static AbsorptionAppleItem HEARTY_APPLE = new AbsorptionAppleItem(VaultMod.id("hearty_apple"));
    public static VaultBasicFoodItem VAULT_MEAT = new VaultBasicFoodItem(
@@ -325,6 +334,8 @@ public class ModItems {
    );
    public static RelicItem RELIC = new RelicItem(RELIC_GROUP, VaultMod.id("vault_relic"));
    public static RelicFragmentItem RELIC_FRAGMENT = new RelicFragmentItem(RELIC_GROUP, VaultMod.id("vault_relic_fragment"));
+   public static AntiqueItem ANTIQUE = new AntiqueItem(VaultMod.id("antique"));
+   public static AntiqueStampCollectorBook ANTIQUE_COLLECTOR_BOOK = new AntiqueStampCollectorBook(VaultMod.id("antique_collector_book"));
    public static ItemRelicBoosterPack RELIC_BOOSTER_PACK = new ItemRelicBoosterPack(VAULT_MOD_GROUP, VaultMod.id("relic_booster_pack"));
    public static ItemLegendaryTreasure LEGENDARY_TREASURE_NORMAL = new ItemLegendaryTreasure(
       VAULT_MOD_GROUP, VaultMod.id("legendary_treasure_normal"), VaultRarity.COMMON
@@ -353,9 +364,7 @@ public class ModItems {
       VaultMod.id("pandoras_box"), new Properties().tab(VAULT_MOD_GROUP), () -> ModConfigs.PANDORAS_BOX.POOL.getRandom(new Random()).generateItemStack()
    );
    public static LootableItem UNIDENTIFIED_RELIC_FRAGMENT = new LootableItem(
-      VaultMod.id("unidentified_relic_fragment"),
-      new Properties().tab(VAULT_MOD_GROUP),
-      () -> ModConfigs.UNIDENTIFIED_RELIC_FRAGMENTS.getRandomFragment(new Random())
+      VaultMod.id("unidentified_relic_fragment"), new Properties().tab(VAULT_MOD_GROUP), () -> ItemStack.EMPTY
    );
    public static GatedLootableItem MOD_BOX = new GatedLootableItem(VaultMod.id("mod_box"), new Properties().tab(VAULT_MOD_GROUP));
    public static ItemUnidentifiedVaultKey UNIDENTIFIED_TREASURE_KEY = new ItemUnidentifiedVaultKey(
@@ -403,6 +412,9 @@ public class ModItems {
    public static BottleItem BOTTLE = new BottleItem(VaultMod.id("bottle"), new Properties().stacksTo(1).tab(GEAR_GROUP));
    public static WandItem WAND = new WandItem(VaultMod.id("wand"), new Properties().stacksTo(1).tab(GEAR_GROUP));
    public static FocusItem FOCUS = new FocusItem(VaultMod.id("focus"), new Properties().stacksTo(1).tab(GEAR_GROUP));
+   public static CardItem CARD = new CardItem(VaultMod.id("card"), new Properties().stacksTo(1).tab(GEAR_GROUP));
+   public static CardDeckItem CARD_DECK = new CardDeckItem(VaultMod.id("card_deck"), new Properties().stacksTo(1).tab(GEAR_GROUP));
+   public static BoosterPackItem BOOSTER_PACK = new BoosterPackItem(VaultMod.id("booster_pack"), new Properties().stacksTo(1).tab(GEAR_GROUP));
    public static BasicItem VAULT_PLATING = new BasicItem(VaultMod.id("vault_plating"));
    public static BasicItem REPAIR_CORE = new BasicItem(VaultMod.id("repair_core"));
    public static BasicItem VAULT_ALLOY = new BasicItem(VaultMod.id("vault_alloy"));
@@ -417,6 +429,9 @@ public class ModItems {
    public static BasicItem CHAOTIC_FOCUS = new GearModificationItem(VaultMod.id("chaotic_focus"), ModGearModifications.REFORGE_RANDOM_TIER);
    public static BasicItem WAXING_FOCUS = new GearModificationItem(VaultMod.id("waxing_focus"), ModGearModifications.REFORGE_PREFIXES);
    public static BasicItem WANING_FOCUS = new GearModificationItem(VaultMod.id("waning_focus"), ModGearModifications.REFORGE_SUFFIXES);
+   public static BasicItem EMPOWERED_CHAOTIC_FOCUS = new GearModificationItem(VaultMod.id("empowered_chaotic_focus"), ModGearModifications.IMPROVE_MODIFIER);
+   public static BasicItem CRYONIC_FOCUS = new GearModificationItem(VaultMod.id("cryonic_focus"), ModGearModifications.LOCK_MODIFIER);
+   public static BasicItem PYRETIC_FOCUS = new GearModificationItem(VaultMod.id("pyretic_focus"), ModGearModifications.IMPROVE_RARITY);
    public static VaultCrystalItem VAULT_CRYSTAL = new VaultCrystalItem(VAULT_MOD_GROUP, VaultMod.id("vault_crystal"));
    public static SoulFlameItem SOUL_FLAME = new SoulFlameItem(VaultMod.id("soul_flame"));
    public static BasicItem EMBER = new BasicItem(VaultMod.id("ember"));
@@ -431,11 +446,12 @@ public class ModItems {
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_ARCHITECT = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_architect"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_HERALD = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_herald"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_RAID = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_raid"));
-   public static ItemVaultCrystalSeal CRYSTAL_SEAL_CAKE = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_cake"));
+   public static ItemVaultCrystalSeal CRYSTAL_SEAL_CAKE = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_cake"), 64);
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_SAGE = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_sage"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_SCOUT = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_scout"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_ORDINATOR_BUILD = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_ordinator_build"));
    public static ItemVaultCrystalSeal CRYSTAL_SEAL_ORDINATOR_RUN = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_ordinator_run"));
+   public static ItemVaultCrystalSeal CRYSTAL_SEAL_PROPHET = new ItemVaultCrystalSeal(VaultMod.id("crystal_seal_prophet"));
    public static VaultRuneItem RUNE = new VaultRuneItem(VAULT_MOD_GROUP, VaultMod.id("rune"));
    public static InscriptionItem INSCRIPTION = new InscriptionItem(VAULT_MOD_GROUP, VaultMod.id("inscription"));
    public static InscriptionPieceItem INSCRIPTION_PIECE = new InscriptionPieceItem(VAULT_MOD_GROUP, VaultMod.id("inscription_piece"));
@@ -501,6 +517,7 @@ public class ModItems {
    public static ItemShardPouch SHARD_POUCH = new ItemShardPouch(VaultMod.id("shard_pouch"));
    public static BasicItem UNKNOWN_ITEM = new BasicItem(VaultMod.id("unknown_item"), new Properties().tab(VAULT_MOD_GROUP).stacksTo(1));
    public static BasicItem BANISHED_SOUL = new BasicItem(VaultMod.id("banished_soul"));
+   public static BasicItem SOUL_VORTEX = new BasicItem(VaultMod.id("soul_vortex"));
    public static BasicScavengerItem SCAVENGER_CREEPER_EYE = new BasicScavengerItem("creeper_eye");
    public static BasicScavengerItem SCAVENGER_CREEPER_FOOT = new BasicScavengerItem("creeper_foot");
    public static BasicScavengerItem SCAVENGER_CREEPER_FUSE = new BasicScavengerItem("creeper_fuse");
@@ -948,6 +965,8 @@ public class ModItems {
    public static final BasicMobEggItem BOSS_EGG = new BasicMobEggItem(
       VaultMod.id("boss_egg"), () -> ModEntities.ARTIFACT_BOSS, 44975, 7969893, new Properties().tab(VAULT_MOD_GROUP)
    );
+   public static final OfferingItem OFFERING = new OfferingItem(VaultMod.id("offering"));
+   public static final Item OFFERING_TEMPLATE = new Item(new Properties().tab(null));
 
    private static CreativeModeTab createCreativeTab(String label, final Supplier<ItemStack> itemStack) {
       return new CreativeModeTab(label) {
@@ -1055,19 +1074,25 @@ public class ModItems {
       registry.register(PUFFIUM_KEY);
       registry.register(PETZANITE_KEY);
       registry.register(XENIUM_KEY);
+      registry.register(RELIC);
+      registry.register(RELIC_FRAGMENT);
+      registry.register(ANTIQUE);
+      registry.register(ANTIQUE_COLLECTOR_BOOK);
       registry.register(RELIC_BOOSTER_PACK);
       registry.register(LEGENDARY_TREASURE_NORMAL);
       registry.register(LEGENDARY_TREASURE_RARE);
       registry.register(LEGENDARY_TREASURE_EPIC);
       registry.register(LEGENDARY_TREASURE_OMEGA);
       registry.register(UNIDENTIFIED_ARTIFACT);
-      registry.register(RELIC);
-      registry.register(RELIC_FRAGMENT);
       registry.register(SKILL_ORB_FRAME);
       registry.register(SKILL_SHARD);
       registry.register(BITTER_LEMON);
       registry.register(SOUR_ORANGE);
       registry.register(MYSTIC_PEAR);
+      registry.register(SWEET_KIWI);
+      registry.register(GRAPES);
+      registry.register(MANGO);
+      registry.register(STAR_FRUIT);
       registry.register(KEY_PIECE);
       registry.register(KEY_MOULD);
       registry.register(BLANK_KEY);
@@ -1086,7 +1111,6 @@ public class ModItems {
       registry.register(VAULT_DIAMOND);
       registry.register(SKILL_ESSENCE);
       registry.register(UNIDENTIFIED_RELIC_FRAGMENT);
-      registry.register(SWEET_KIWI);
       registry.register(HUNTER_EYE);
       registry.register(BURGER_PATTY);
       registry.register(BURGER_BUN);
@@ -1142,6 +1166,9 @@ public class ModItems {
       registry.register(BOTTLE);
       registry.register(WAND);
       registry.register(FOCUS);
+      registry.register(CARD);
+      registry.register(CARD_DECK);
+      registry.register(BOOSTER_PACK);
       registry.register(INFUSED_ETERNAL_SOUL);
       registry.register(TITLE_SCROLL);
       registry.register(UNKNOWN_EGG);
@@ -1172,6 +1199,9 @@ public class ModItems {
       registry.register(CHAOTIC_FOCUS);
       registry.register(WAXING_FOCUS);
       registry.register(WANING_FOCUS);
+      registry.register(EMPOWERED_CHAOTIC_FOCUS);
+      registry.register(CRYONIC_FOCUS);
+      registry.register(PYRETIC_FOCUS);
       registry.register(VAULT_CATALYST);
       registry.register(VAULT_CATALYST_INFUSED);
       registry.register(VAULT_CATALYST_CHAOS);
@@ -1197,11 +1227,13 @@ public class ModItems {
       registry.register(CRYSTAL_SEAL_SCOUT);
       registry.register(CRYSTAL_SEAL_ORDINATOR_BUILD);
       registry.register(CRYSTAL_SEAL_ORDINATOR_RUN);
+      registry.register(CRYSTAL_SEAL_PROPHET);
       registry.register(IDENTIFICATION_TOME);
       registry.register(UNKNOWN_ITEM);
       registry.register(SOUL_SHARD);
       registry.register(SOUL_DUST);
       registry.register(BANISHED_SOUL);
+      registry.register(SOUL_VORTEX);
       registry.register(SHARD_POUCH);
       registry.register(TRINKET);
       registry.register(SMALL_CHARM);
@@ -1469,5 +1501,8 @@ public class ModItems {
       registry.register(SANDY_ROCKS);
       registry.register(LIVING_ROCK);
       registry.register(MOSSY_BONE);
+      registry.register(OFFERING);
+      OFFERING_TEMPLATE.setRegistryName(VaultMod.id("offering_template"));
+      registry.register(OFFERING_TEMPLATE);
    }
 }

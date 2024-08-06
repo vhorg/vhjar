@@ -12,7 +12,11 @@ import iskallia.vault.network.message.AlchemyArchiveDiscoverEffectMessage;
 import iskallia.vault.network.message.AlchemyTableEffectCraftMessage;
 import iskallia.vault.network.message.AngelToggleMessage;
 import iskallia.vault.network.message.AnimalPenParticleMessage;
+import iskallia.vault.network.message.BingoScrollMessage;
 import iskallia.vault.network.message.BonkParticleMessage;
+import iskallia.vault.network.message.BoosterPackSelectionMessage;
+import iskallia.vault.network.message.BoosterPackUpdateMessage;
+import iskallia.vault.network.message.CardEssenceExtractorUpgradeCardMessage;
 import iskallia.vault.network.message.ChainingParticleMessage;
 import iskallia.vault.network.message.ClientboundAlchemyParticleMessage;
 import iskallia.vault.network.message.ClientboundAlchemySecondParticleMessage;
@@ -20,9 +24,11 @@ import iskallia.vault.network.message.ClientboundArchetypeMessage;
 import iskallia.vault.network.message.ClientboundArtifactBossImmunityParticleMessage;
 import iskallia.vault.network.message.ClientboundArtifactBossWendarrExplodeMessage;
 import iskallia.vault.network.message.ClientboundBossStagesMessage;
+import iskallia.vault.network.message.ClientboundBossSyncTraitsMessage;
 import iskallia.vault.network.message.ClientboundChampionMessage;
 import iskallia.vault.network.message.ClientboundCuriosScrollMessage;
 import iskallia.vault.network.message.ClientboundFireballExplosionMessage;
+import iskallia.vault.network.message.ClientboundHealSpellParticleMessage;
 import iskallia.vault.network.message.ClientboundHunterParticlesFromJavelinMessage;
 import iskallia.vault.network.message.ClientboundHunterParticlesMessage;
 import iskallia.vault.network.message.ClientboundMobEffectRemoveMessage;
@@ -72,6 +78,7 @@ import iskallia.vault.network.message.MonolithIgniteMessage;
 import iskallia.vault.network.message.NovaParticleMessage;
 import iskallia.vault.network.message.OmegaShardGlobalTradeMessage;
 import iskallia.vault.network.message.OmegaStatueUIMessage;
+import iskallia.vault.network.message.OpenCardDeckMessage;
 import iskallia.vault.network.message.OpenVaultSnapshotMessage;
 import iskallia.vault.network.message.PartyMembersMessage;
 import iskallia.vault.network.message.PartyStatusMessage;
@@ -130,6 +137,7 @@ import iskallia.vault.network.message.TauntParticleMessage;
 import iskallia.vault.network.message.ToolMessage;
 import iskallia.vault.network.message.TrappedMobChestParticlesMessage;
 import iskallia.vault.network.message.TrinketJumpMessage;
+import iskallia.vault.network.message.UpdateAchievementDataMessage;
 import iskallia.vault.network.message.UpdateGodAltarDataMessage;
 import iskallia.vault.network.message.UpdateParadoxDataMessage;
 import iskallia.vault.network.message.UpdateTitlesDataMessage;
@@ -161,8 +169,6 @@ import iskallia.vault.network.message.quest.QuestDebugModeMessage;
 import iskallia.vault.network.message.quest.QuestProgressMessage;
 import iskallia.vault.network.message.quest.QuestRequestSyncMessage;
 import iskallia.vault.network.message.quest.QuestSyncMessage;
-import iskallia.vault.network.message.relic.RelicAssembleButtonMessage;
-import iskallia.vault.network.message.relic.SelectRelicMessage;
 import iskallia.vault.network.message.transmog.DiscoveredEntriesMessage;
 import iskallia.vault.network.message.transmog.SelectDiscoveredModelMessage;
 import iskallia.vault.network.message.transmog.TransmogButtonMessage;
@@ -433,10 +439,6 @@ public class ModNetwork {
          VaultJewelApplicationStationMessage::encode,
          VaultJewelApplicationStationMessage::decode,
          VaultJewelApplicationStationMessage::handle
-      );
-      CHANNEL.registerMessage(nextId(), SelectRelicMessage.class, SelectRelicMessage::encode, SelectRelicMessage::decode, SelectRelicMessage::handle);
-      CHANNEL.registerMessage(
-         nextId(), RelicAssembleButtonMessage.class, RelicAssembleButtonMessage::encode, RelicAssembleButtonMessage::decode, RelicAssembleButtonMessage::handle
       );
       CHANNEL.registerMessage(
          nextId(),
@@ -1006,6 +1008,46 @@ public class ModNetwork {
       );
       CHANNEL.registerMessage(
          nextId(), CrystalWorkbenchMessage.class, CrystalWorkbenchMessage::encode, CrystalWorkbenchMessage::decode, CrystalWorkbenchMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         UpdateAchievementDataMessage.class,
+         UpdateAchievementDataMessage::encode,
+         UpdateAchievementDataMessage::decode,
+         UpdateAchievementDataMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundHealSpellParticleMessage.class,
+         ClientboundHealSpellParticleMessage::encode,
+         ClientboundHealSpellParticleMessage::decode,
+         ClientboundHealSpellParticleMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), BingoScrollMessage.class, BingoScrollMessage::encode, BingoScrollMessage::decode, BingoScrollMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(),
+         ClientboundBossSyncTraitsMessage.class,
+         ClientboundBossSyncTraitsMessage::encode,
+         ClientboundBossSyncTraitsMessage::decode,
+         ClientboundBossSyncTraitsMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         BoosterPackSelectionMessage.class,
+         BoosterPackSelectionMessage::encode,
+         BoosterPackSelectionMessage::decode,
+         BoosterPackSelectionMessage::handle
+      );
+      CHANNEL.registerMessage(nextId(), OpenCardDeckMessage.class, OpenCardDeckMessage::encode, OpenCardDeckMessage::decode, OpenCardDeckMessage::handle);
+      CHANNEL.registerMessage(
+         nextId(), BoosterPackUpdateMessage.class, BoosterPackUpdateMessage::encode, BoosterPackUpdateMessage::decode, BoosterPackUpdateMessage::handle
+      );
+      CHANNEL.registerMessage(
+         nextId(),
+         CardEssenceExtractorUpgradeCardMessage.class,
+         CardEssenceExtractorUpgradeCardMessage::encode,
+         CardEssenceExtractorUpgradeCardMessage::decode,
+         CardEssenceExtractorUpgradeCardMessage::handle
       );
    }
 

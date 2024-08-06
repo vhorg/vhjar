@@ -75,13 +75,12 @@ public class GridGenerator extends VaultGenerator {
 
    @Override
    public void generate(Vault vault, ServerLevelAccessor world, ChunkPos chunkPos) {
-      BlockPos pos1 = new BlockPos(chunkPos.x * 16, Integer.MIN_VALUE, chunkPos.z * 16);
-      BlockPos pos2 = new BlockPos(chunkPos.x * 16 + 15, Integer.MAX_VALUE, chunkPos.z * 16 + 15);
-      int offsetX = Math.floorMod(pos1.getX(), this.get(CELL_X));
-      int offsetZ = Math.floorMod(pos1.getZ(), this.get(CELL_Z));
+      BlockPos min = new BlockPos(chunkPos.x * 16, Integer.MIN_VALUE, chunkPos.z * 16);
+      BlockPos max = new BlockPos(chunkPos.x * 16 + 15, Integer.MAX_VALUE, chunkPos.z * 16 + 15);
+      int x = min.getX();
 
-      for (int x = pos1.getX(); x <= pos2.getX(); x += this.get(CELL_X) - offsetX) {
-         for (int z = pos1.getZ(); z <= pos2.getZ(); z += this.get(CELL_Z) - offsetZ) {
+      while (x <= max.getX()) {
+         for (int z = min.getZ(); z <= max.getZ(); z += this.get(CELL_Z) - Math.floorMod(z, this.get(CELL_Z))) {
             RegionPos region = RegionPos.ofBlockPos(new BlockPos(x, 0, z), this.get(CELL_X), this.get(CELL_Z));
             ChunkRandom random = ChunkRandom.any();
             if (vault.get(Vault.VERSION).isOlderThan(Version.v1_7)) {
@@ -111,6 +110,8 @@ public class GridGenerator extends VaultGenerator {
                CommonEvents.TEMPLATE_GENERATION.invoke(world, template, region, chunkPos, random, TemplateGenerationEvent.Phase.POST);
             }
          }
+
+         x += this.get(CELL_X) - Math.floorMod(x, this.get(CELL_X));
       }
    }
 

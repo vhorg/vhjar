@@ -28,7 +28,7 @@ public class FlatteningIterator<T> implements Iterator<T> {
    }
 
    protected void compute() {
-      if ((this.current == null || !this.current.hasNext()) && this.children.hasNext()) {
+      while ((this.current == null || !this.current.hasNext()) && this.children.hasNext()) {
          this.current = this.children.next();
       }
    }

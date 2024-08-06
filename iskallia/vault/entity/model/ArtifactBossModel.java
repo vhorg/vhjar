@@ -1,7 +1,7 @@
 package iskallia.vault.entity.model;
 
 import iskallia.vault.entity.boss.ArtifactBossEntity;
-import iskallia.vault.entity.boss.IBossStage;
+import iskallia.vault.entity.boss.stage.IBossStage;
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib3.model.AnimatedGeoModel;
 

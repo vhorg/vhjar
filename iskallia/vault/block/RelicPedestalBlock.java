@@ -1,7 +1,6 @@
 package iskallia.vault.block;
 
 import iskallia.vault.block.base.FacedBlock;
-import iskallia.vault.container.RelicPedestalContainer;
 import iskallia.vault.dynamodel.DynamicModelItem;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
@@ -9,16 +8,8 @@ import iskallia.vault.init.ModRelics;
 import javax.annotation.Nonnull;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -31,14 +22,15 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
+@Deprecated(
+   forRemoval = true
+)
 public class RelicPedestalBlock extends FacedBlock implements EntityBlock {
    public static final ModRelics.RelicProperty RELIC = ModRelics.RelicProperty.create("relic");
    public static final VoxelShape SHAPE = Shapes.or(
@@ -66,36 +58,6 @@ public class RelicPedestalBlock extends FacedBlock implements EntityBlock {
    protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
       super.createBlockStateDefinition(builder);
       builder.add(new Property[]{RELIC});
-   }
-
-   @Nonnull
-   public InteractionResult use(
-      @Nonnull BlockState blockState,
-      @Nonnull Level world,
-      @Nonnull final BlockPos blockPos,
-      @Nonnull Player player,
-      @Nonnull InteractionHand hand,
-      @Nonnull BlockHitResult hitResult
-   ) {
-      if (world.isClientSide) {
-         return InteractionResult.SUCCESS;
-      } else {
-         if (blockState.getValue(RELIC) == ModRelics.EMPTY) {
-            NetworkHooks.openGui((ServerPlayer)player, new MenuProvider() {
-               @Nonnull
-               public Component getDisplayName() {
-                  return new TextComponent("Relic Assembly");
-               }
-
-               @Nonnull
-               public AbstractContainerMenu createMenu(int containerId, @Nonnull Inventory pInventory, @Nonnull Player playerx) {
-                  return new RelicPedestalContainer(containerId, playerx, blockPos);
-               }
-            }, byteBuffer -> byteBuffer.writeBlockPos(blockPos));
-         }
-
-         return InteractionResult.SUCCESS;
-      }
    }
 
    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {

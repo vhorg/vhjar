@@ -4,6 +4,7 @@ import iskallia.vault.core.Version;
 import iskallia.vault.core.event.Event;
 import iskallia.vault.core.random.RandomSource;
 import java.util.List;
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,7 +25,7 @@ public class LootableBlockGenerationEvent extends Event<LootableBlockGenerationE
    }
 
    public LootableBlockGenerationEvent.Data invoke(
-      ServerPlayer player,
+      @Nullable ServerPlayer player,
       BlockState state,
       BlockPos pos,
       ResourceLocation lootTable,
@@ -46,6 +47,7 @@ public class LootableBlockGenerationEvent extends Event<LootableBlockGenerationE
    }
 
    public static class Data {
+      @Nullable
       private final ServerPlayer player;
       private final BlockState state;
       private final BlockPos pos;
@@ -57,7 +59,7 @@ public class LootableBlockGenerationEvent extends Event<LootableBlockGenerationE
       private final BlockEntity tileEntity;
 
       public Data(
-         ServerPlayer player,
+         @Nullable ServerPlayer player,
          BlockState state,
          BlockPos pos,
          ResourceLocation lootTable,
@@ -78,6 +80,7 @@ public class LootableBlockGenerationEvent extends Event<LootableBlockGenerationE
          this.tileEntity = tileEntity;
       }
 
+      @Nullable
       public ServerPlayer getPlayer() {
          return this.player;
       }

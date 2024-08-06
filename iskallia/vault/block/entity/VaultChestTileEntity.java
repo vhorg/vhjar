@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.math.Vector3f;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.entity.base.HunterHiddenTileEntity;
+import iskallia.vault.block.entity.base.TemplateTagContainer;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.event.CommonEvents;
@@ -21,6 +22,7 @@ import iskallia.vault.util.VaultRarity;
 import iskallia.vault.util.calc.ItemQuantityHelper;
 import iskallia.vault.util.calc.ItemRarityHelper;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
@@ -44,7 +46,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-public class VaultChestTileEntity extends ChestBlockEntity implements HunterHiddenTileEntity {
+public class VaultChestTileEntity extends ChestBlockEntity implements HunterHiddenTileEntity, TemplateTagContainer {
    private VaultRarity rarity;
    private boolean generated;
    private float itemQuantity;
@@ -54,6 +56,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
    private boolean hidden;
    private BlockState renderState;
    private int ticksSinceSync;
+   private final List<String> templateTags = new ArrayList<>();
 
    public VaultChestTileEntity(BlockPos pos, BlockState state) {
       this(ModBlocks.VAULT_CHEST_TILE_ENTITY, pos, state);
@@ -227,13 +230,13 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       if (key != null) {
          if (this.getBlockState().is(ModBlocks.TREASURE_CHEST)) {
             LootTableGenerator generator = new LootTableGenerator(version, key, 0.0F);
-            generator.source = player;
+            generator.setSource(player);
             generator.generate(random);
             this.rarity = VaultRarity.COMMON;
             generator.getItems().forEachRemaining(loot::add);
          } else {
             TieredLootTableGenerator generator = new TieredLootTableGenerator(version, key, rarity, quantity, 54);
-            generator.source = player;
+            generator.setSource(player);
             generator.generate(random);
             this.rarity = ModConfigs.VAULT_CHEST.getRarity(generator.getCDF());
             generator.getItems().forEachRemaining(loot::add);
@@ -361,6 +364,11 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       return false;
    }
 
+   @Override
+   public List<String> getTemplateTags() {
+      return Collections.unmodifiableList(this.templateTags);
+   }
+
    public void load(@NotNull CompoundTag nbt) {
       super.load(nbt);
       if (nbt.contains("Rarity", 3)) {
@@ -372,6 +380,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       this.generated = nbt.getBoolean("Generated");
       this.generatedStacksCount = nbt.getInt("GeneratedStacksCount");
       this.hidden = nbt.getBoolean("Hidden");
+      this.templateTags.addAll(this.loadTemplateTags(nbt));
    }
 
    protected void saveAdditional(@NotNull CompoundTag nbt) {
@@ -385,6 +394,7 @@ public class VaultChestTileEntity extends ChestBlockEntity implements HunterHidd
       nbt.putBoolean("Generated", this.generated);
       nbt.putInt("GeneratedStacksCount", this.generatedStacksCount);
       nbt.putBoolean("Hidden", this.hidden);
+      this.saveTemplateTags(nbt);
    }
 
    public Component getDisplayName() {

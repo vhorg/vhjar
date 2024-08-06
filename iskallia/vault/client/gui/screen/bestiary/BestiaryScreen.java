@@ -18,7 +18,7 @@ import iskallia.vault.client.gui.screen.bestiary.element.GroupListElement;
 import iskallia.vault.client.gui.screen.bounty.element.HeaderElement;
 import iskallia.vault.core.world.data.entity.EntityPredicate;
 import iskallia.vault.core.world.data.entity.PartialEntityGroup;
-import iskallia.vault.util.EntityGroupsUtils;
+import iskallia.vault.util.GroupUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EntityType;
@@ -47,7 +47,7 @@ public class BestiaryScreen extends AbstractElementScreen {
       this.rightX = this.getGuiSpatial().width() / 2 + 5;
       this.setupBase();
       if (group != null) {
-         this.selectGroup(EntityGroupsUtils.getName(group).getString());
+         this.selectGroup(GroupUtils.getEntityName(group).getString());
       } else {
          this.initialHeader = new HeaderElement(
                Spatials.positionXY(this.leftX, this.startY).width(this.innerWidth).height(20), new TranslatableComponent("screen.the_vault.bestiary.welcome")

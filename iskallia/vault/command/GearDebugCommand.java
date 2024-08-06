@@ -10,6 +10,7 @@ import iskallia.vault.gear.VaultGearModifierHelper;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.VaultGearItem;
+import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModGearAttributes;
 import java.util.Random;
@@ -88,7 +89,8 @@ public class GearDebugCommand extends Command {
          player.sendMessage(new TextComponent("Could not add modifier of tag " + tag), Util.NIL_UUID);
          return 0;
       } else {
-         if (!VaultGearModifierHelper.reForgeAllWithTag(groupTag, gear, rand)) {
+         GearModification.Result result = VaultGearModifierHelper.reForgeAllWithTag(groupTag, gear, rand);
+         if (!result.success()) {
             player.sendMessage(new TextComponent("Could not add modifier of tag " + tag), Util.NIL_UUID);
          }
 
@@ -106,7 +108,7 @@ public class GearDebugCommand extends Command {
    private int removeModifier(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
       ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
       ItemStack gear = this.getHeldGear(player);
-      if (!VaultGearModifierHelper.removeRandomModifier(gear, rand)) {
+      if (!VaultGearModifierHelper.removeRandomModifier(gear, rand).success()) {
          player.sendMessage(new TextComponent("No modifiers remaining to remove."), Util.NIL_UUID);
       }
 
@@ -117,7 +119,7 @@ public class GearDebugCommand extends Command {
       ServerPlayer player = ((CommandSourceStack)ctx.getSource()).getPlayerOrException();
       long gameTime = player.getCommandSenderWorld().getGameTime();
       ItemStack gear = this.getHeldGear(player);
-      if (!VaultGearModifierHelper.addNewModifier(gear, gameTime, rand)) {
+      if (!VaultGearModifierHelper.addNewModifier(gear, gameTime, rand).success()) {
          player.sendMessage(new TextComponent("No empty modifier slots remaining."), Util.NIL_UUID);
       }
 

@@ -135,9 +135,9 @@ public abstract class Listener extends DataObject<Listener> implements ISupplier
       return this.get(OBJECTIVES).indexOf(objective.get(Objective.ID));
    }
 
-   public boolean isActive(Vault vault, Objective objective) {
+   public boolean isActive(VirtualWorld world, Vault vault, Objective objective) {
       for (int index : this.get(OBJECTIVES)) {
-         boolean active = vault.get(Vault.OBJECTIVES).get(index).map(other -> other.isActive(vault, objective)).orElse(false);
+         boolean active = vault.get(Vault.OBJECTIVES).get(index).map(other -> other.isActive(world, vault, objective)).orElse(false);
          if (active) {
             return true;
          }

@@ -1,11 +1,19 @@
 package iskallia.vault.util;
 
 import com.google.common.collect.Streams;
+import com.mojang.blaze3d.platform.Lighting;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import iskallia.vault.VaultMod;
 import iskallia.vault.entity.champion.ChampionLogic;
 import iskallia.vault.init.ModConfigs;
 import java.util.List;
 import java.util.function.Predicate;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
@@ -18,6 +26,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
@@ -145,5 +155,50 @@ public class EntityHelper {
       } else {
          return ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("horde"), livingEntity) ? HORDE_COUNT : 1;
       }
+   }
+
+   @OnlyIn(Dist.CLIENT)
+   public static void renderEntityInUI(LivingEntity entity, PoseStack matrices, BufferSource bufferSource, int x, int y, float scale, int mouseX, int mouseY) {
+      matrices.pushPose();
+      float lookX = (float)(-Math.atan((mouseX - x) / 40.0F));
+      float lookY = (float)(-Math.atan((mouseY - y) / 40.0F));
+      PoseStack posestack = RenderSystem.getModelViewStack();
+      posestack.pushPose();
+      posestack.translate(x, y + entity.getEyeHeight() * scale, 250.0);
+      posestack.scale(1.0F, 1.0F, -1.0F);
+      RenderSystem.applyModelViewMatrix();
+      matrices.translate(0.0, 0.0, 100.0);
+      matrices.scale(scale, scale, scale);
+      Quaternion entityRotation = Vector3f.ZP.rotationDegrees(180.0F);
+      Quaternion lookRotation = Vector3f.XP.rotationDegrees(lookY * 20.0F);
+      entityRotation.mul(lookRotation);
+      matrices.mulPose(entityRotation);
+      float yBodyRot = entity.yBodyRot;
+      float yRot = entity.getYRot();
+      float xRot = entity.getXRot();
+      float yHeadRotO = entity.yHeadRotO;
+      float yHeadRot = entity.yHeadRot;
+      entity.yBodyRot = 180.0F + lookX * 20.0F;
+      entity.setYRot(180.0F + lookX * 40.0F);
+      entity.setXRot(-lookY * 20.0F);
+      entity.yHeadRot = entity.getYRot();
+      entity.yHeadRotO = entity.getYRot();
+      Lighting.setupForEntityInInventory();
+      EntityRenderDispatcher entityrenderdispatcher = Minecraft.getInstance().getEntityRenderDispatcher();
+      lookRotation.conj();
+      entityrenderdispatcher.overrideCameraOrientation(lookRotation);
+      entityrenderdispatcher.setRenderShadow(false);
+      entityrenderdispatcher.render(entity, 0.0, 0.0, 0.0, 0.0F, 1.0F, matrices, bufferSource, 15728880);
+      bufferSource.endBatch();
+      entityrenderdispatcher.setRenderShadow(true);
+      entity.yBodyRot = yBodyRot;
+      entity.setYRot(yRot);
+      entity.setXRot(xRot);
+      entity.yHeadRotO = yHeadRotO;
+      entity.yHeadRot = yHeadRot;
+      posestack.popPose();
+      RenderSystem.applyModelViewMatrix();
+      Lighting.setupFor3DItems();
+      matrices.popPose();
    }
 }

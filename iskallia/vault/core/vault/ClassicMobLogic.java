@@ -1,5 +1,8 @@
 package iskallia.vault.core.vault;
 
+import iskallia.vault.antique.AntiqueRegistry;
+import iskallia.vault.antique.condition.DropConditionContext;
+import iskallia.vault.antique.condition.DropConditionContextFactory;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.key.FieldKey;
@@ -18,6 +21,7 @@ import iskallia.vault.init.ModConfigs;
 import iskallia.vault.init.ModEffects;
 import iskallia.vault.init.ModItems;
 import iskallia.vault.init.ModParticles;
+import iskallia.vault.item.AntiqueItem;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.calc.SoulChanceHelper;
 import java.util.ArrayList;
@@ -31,6 +35,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobType;
@@ -41,6 +46,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
@@ -146,7 +152,7 @@ public class ClassicMobLogic extends MobLogic {
          if (event.getEntity().level == world) {
             if (!(event.getEntity() instanceof Player)) {
                event.getDrops().clear();
-               Entity killed = event.getEntity();
+               LivingEntity killed = event.getEntityLiving();
                Entity killer = event.getSource().getEntity();
                if (killed.getTags().contains("soul_shards")) {
                   if (killer instanceof EternalEntity eternal) {
@@ -154,7 +160,7 @@ public class ClassicMobLogic extends MobLogic {
                   }
 
                   if (killer instanceof ServerPlayer player) {
-                     float chanceMultiplier = SoulChanceHelper.getSoulChance(player);
+                     float chanceMultiplier = SoulChanceHelper.getSoulChance(player, killed);
                      chanceMultiplier = CommonEvents.SOUL_SHARD_CHANCE.invoke(player, chanceMultiplier).getChance();
                      int shardCount = ModConfigs.SOUL_SHARD.getRandomShards(killed, 1.0F + chanceMultiplier);
                      if (shardCount > 0) {
@@ -163,6 +169,30 @@ public class ClassicMobLogic extends MobLogic {
                         item.setDefaultPickUpDelay();
                         event.getDrops().add(item);
                      }
+                  }
+               }
+            }
+         }
+      });
+      CommonEvents.ENTITY_DROPS.register(this, EventPriority.HIGH, event -> {
+         if (event.getEntity().level == world) {
+            LivingEntity killed = event.getEntityLiving();
+            if (!(killed instanceof Player)) {
+               Entity killer = event.getSource().getEntity();
+               if (killed.getTags().contains("soul_shards")) {
+                  if (killer instanceof EternalEntity eternal) {
+                     killer = (Entity)eternal.getOwner().right().orElse(null);
+                  }
+
+                  if (killer instanceof ServerPlayer) {
+                     int level = vault.getOptional(Vault.LEVEL).map(VaultLevel::get).orElse(0);
+                     DropConditionContext context = DropConditionContextFactory.makeEntityContext(level, killed);
+                     AntiqueRegistry.getAntiquesMatchingCondition(context).forEach(antique -> {
+                        ItemStack shards = AntiqueItem.createStack(antique);
+                        ItemEntity item = new ItemEntity(world, killed.getX(), killed.getY(), killed.getZ(), shards);
+                        item.setDefaultPickUpDelay();
+                        event.getDrops().add(item);
+                     });
                   }
                }
             }
@@ -209,20 +239,35 @@ public class ClassicMobLogic extends MobLogic {
       CommonEvents.PLAYER_EQUIPMENT_SWAP.register(this, event -> {
          if (event.player().level == world) {
             if (event.player() instanceof ServerPlayer sPlayer) {
-               ItemStack equipped = event.to();
-               if (!equipped.isEmpty() && equipped.getItem() instanceof VaultGearItem gearItem) {
-                  ItemStack from = event.from();
-                  if (!from.isEmpty() && from.getItem() instanceof VaultGearItem) {
-                     UUID fromId = VaultGearData.readUUID(from).orElse(Util.NIL_UUID);
-                     UUID toId = VaultGearData.readUUID(equipped).orElse(Util.NIL_UUID);
-                     if (fromId.equals(toId)) {
-                        return;
-                     }
+               if (event.slot() != EquipmentSlot.MAINHAND) {
+                  VaultGearItem swapItem = null;
+                  ItemStack to = event.to();
+                  UUID toUid = null;
+                  if (!to.isEmpty() && to.getItem() instanceof VaultGearItem gearItem) {
+                     toUid = VaultGearData.readUUID(to).orElse(Util.NIL_UUID);
+                     swapItem = gearItem;
                   }
 
-                  if (gearItem.shouldCauseEquipmentCooldown(sPlayer, equipped, event.slot())) {
-                     int cooldownTicks = ModConfigs.VAULT_GEAR_COMMON.getOffHandSwapCooldown();
-                     ModConfigs.VAULT_GEAR_COMMON.getOffHandSwapItems().forEach(item -> sPlayer.getCooldowns().addCooldown(item, cooldownTicks));
+                  ItemStack from = event.from();
+                  UUID fromUid = null;
+                  if (!from.isEmpty() && from.getItem() instanceof VaultGearItem gearItem) {
+                     fromUid = VaultGearData.readUUID(from).orElse(Util.NIL_UUID);
+                     swapItem = gearItem;
+                  }
+
+                  if (swapItem != null) {
+                     if (fromUid == null || !fromUid.equals(toUid)) {
+                        if (swapItem.shouldCauseEquipmentCooldown(sPlayer, to, event.slot())) {
+                           EquipmentSlot slot = swapItem.getIntendedSlot(to);
+                           if (slot != null) {
+                              List<Item> cooldownItems = ModConfigs.VAULT_GEAR_COMMON.getSwapItems(slot);
+                              if (!cooldownItems.isEmpty()) {
+                                 int cooldownTicks = ModConfigs.VAULT_GEAR_COMMON.getSwapCooldown();
+                                 cooldownItems.forEach(item -> sPlayer.getCooldowns().addCooldown(item, cooldownTicks));
+                              }
+                           }
+                        }
+                     }
                   }
                }
             }

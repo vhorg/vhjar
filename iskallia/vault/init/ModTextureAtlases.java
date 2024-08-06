@@ -90,6 +90,9 @@ public class ModTextureAtlases {
       icons.add(VaultMod.id("gui/quests/check"));
       return icons;
    });
+   public static final Supplier<ITextureAtlas> ACHIEVEMENTS = register(
+      VaultMod.id("textures/atlas/achievements.png"), VaultMod.id("textures/gui/achievements"), null
+   );
 
    @SubscribeEvent
    public static void on(RegisterClientReloadListenersEvent event) {

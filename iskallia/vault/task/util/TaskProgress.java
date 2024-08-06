@@ -18,6 +18,7 @@ public class TaskProgress {
    }
 
    public double getProgress() {
-      return this.getCurrent().doubleValue() / this.getTarget().doubleValue();
+      double result = this.getCurrent().doubleValue() / this.getTarget().doubleValue();
+      return Double.isFinite(result) ? result : 0.0;
    }
 }

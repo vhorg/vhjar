@@ -719,7 +719,7 @@ public abstract class SkillAltarScreen<C extends SkillAltarContainer> extends Ab
 
    private static class SkillView extends VerticalScrollClipContainer<SkillAltarScreen.SkillView> {
       private static final NineSlice.TextureRegion SKILL_ALTAR_SCROLL_BACKGROUND = NineSlice.region(
-         ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/scroll_background"), NineSlice.slice(1, 1, 1, 1), NineSlice.DrawMode.Tiled
+         ModTextureAtlases.SCREEN, VaultMod.id("gui/screen/skill_altar/scroll_background"), NineSlice.slice(1, 1, 1, 1), NineSlice.CenterDrawMode.Tiled
       );
       private static final double SCROLL_SENSITIVITY = 0.5;
       private double mouseDragY = 0.0;

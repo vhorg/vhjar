@@ -3,11 +3,10 @@ package iskallia.vault.client.gui.component.toast;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.VaultMod;
-import iskallia.vault.client.atlas.TextureAtlasRegion;
-import iskallia.vault.init.ModTextureAtlases;
 import java.awt.Color;
 import java.util.List;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.toasts.Toast;
 import net.minecraft.client.gui.components.toasts.ToastComponent;
 import net.minecraft.client.gui.components.toasts.Toast.Visibility;
@@ -23,14 +22,24 @@ import org.jetbrains.annotations.NotNull;
 @OnlyIn(Dist.CLIENT)
 public class GenericToast implements Toast {
    private static final ResourceLocation TOAST_BACKGROUND = VaultMod.id("textures/gui/screen/toast_background.png");
-   private final Component title;
-   private final List<FormattedCharSequence> message;
-   private final ResourceLocation texture;
+   protected final Component title;
+   protected final List<FormattedCharSequence> message;
+   protected final ResourceLocation texture;
 
    public GenericToast(Component title, Component message, ResourceLocation texture) {
       this.title = title;
       this.message = Minecraft.getInstance().font.split(message, 120);
-      this.texture = texture;
+      this.texture = this.parseTexture(texture);
+   }
+
+   private ResourceLocation parseTexture(ResourceLocation texture) {
+      String path = texture.getPath();
+      if (path.startsWith("textures")) {
+         return texture;
+      } else {
+         path = "textures/" + path + ".png";
+         return new ResourceLocation(texture.getNamespace(), path);
+      }
    }
 
    protected long getDisplayTime() {
@@ -45,8 +54,8 @@ public class GenericToast implements Toast {
    @NotNull
    public Visibility render(@NotNull PoseStack poseStack, @NotNull ToastComponent toastComponent, long deltaTime) {
       RenderSystem.setShader(GameRenderer::getPositionTexShader);
-      RenderSystem.setShaderTexture(0, TOAST_BACKGROUND);
       RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+      RenderSystem.setShaderTexture(0, TOAST_BACKGROUND);
       int startY = 4;
       toastComponent.blit(poseStack, 0, 0, 0, 0, this.width(), startY);
 
@@ -55,7 +64,8 @@ public class GenericToast implements Toast {
       }
 
       toastComponent.blit(poseStack, 0, this.height() - 4, 0, 30, this.width(), 4);
-      TextureAtlasRegion.of(ModTextureAtlases.QUESTS, this.texture).blit(poseStack, 10, 8, 10);
+      RenderSystem.setShaderTexture(0, this.texture);
+      GuiComponent.blit(poseStack, 10, 8, 0.0F, 0.0F, 16, 16, 16, 16);
       toastComponent.getMinecraft().font.draw(poseStack, this.title, 36.0F, 7.0F, Color.WHITE.getRGB());
       int messageY = 20;
 

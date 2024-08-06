@@ -4,7 +4,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 
@@ -52,5 +54,9 @@ public class TextUtil {
          }
       });
       return component;
+   }
+
+   public static int getLineHeight(FormattedText component, int width) {
+      return Minecraft.getInstance().font.split(component, width).size();
    }
 }

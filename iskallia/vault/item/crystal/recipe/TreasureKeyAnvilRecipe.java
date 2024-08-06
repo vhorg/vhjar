@@ -1,6 +1,7 @@
 package iskallia.vault.item.crystal.recipe;
 
 import iskallia.vault.init.ModItems;
+import iskallia.vault.world.data.ServerVaults;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,7 +19,10 @@ public class TreasureKeyAnvilRecipe extends VanillaAnvilRecipe {
    public boolean onSimpleCraft(AnvilContext context) {
       ItemStack primary = context.getInput()[0];
       ItemStack secondary = context.getInput()[1];
-      if (primary.getItem() != ModItems.BLANK_KEY) {
+      boolean vaultPresent = context.getWorld().flatMap(ServerVaults::get).isPresent();
+      if (vaultPresent) {
+         return false;
+      } else if (primary.getItem() != ModItems.BLANK_KEY) {
          return false;
       } else {
          Item key = CLUSTER_TO_KEY.get(secondary.getItem());

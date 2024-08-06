@@ -9,7 +9,9 @@ import iskallia.vault.entity.boss.BloodOrbEntity;
 import iskallia.vault.entity.boss.BossProtectionCatalystEntity;
 import iskallia.vault.entity.boss.CatalystInhibitorEntity;
 import iskallia.vault.entity.boss.ConjurationMagicProjectileEntity;
+import iskallia.vault.entity.boss.GolemBossEntity;
 import iskallia.vault.entity.boss.MagicProjectileEntity;
+import iskallia.vault.entity.boss.VaultBossEntity;
 import iskallia.vault.entity.entity.AggressiveCowBossEntity;
 import iskallia.vault.entity.entity.AggressiveCowEntity;
 import iskallia.vault.entity.entity.AncientCopperConduitItemEntity;
@@ -28,6 +30,8 @@ import iskallia.vault.entity.entity.FallingSootEntity;
 import iskallia.vault.entity.entity.FighterEntity;
 import iskallia.vault.entity.entity.FloatingGodAltarItemEntity;
 import iskallia.vault.entity.entity.FloatingItemEntity;
+import iskallia.vault.entity.entity.HealerEntity;
+import iskallia.vault.entity.entity.IceBoltEntity;
 import iskallia.vault.entity.entity.MonsterEyeEntity;
 import iskallia.vault.entity.entity.NagaEntity;
 import iskallia.vault.entity.entity.RobotEntity;
@@ -407,6 +411,7 @@ public class ModEntities {
    public static EntityType<DashWarpAbility.WarpArrow> WARP_ARROW;
    public static EntityType<VaultFireball> FIREBALL;
    public static EntityType<VaultStormArrow> STORM_ARROW;
+   public static EntityType<IceBoltEntity> ICE_BOLT;
    public static EntityType<VaultStormEntity> STORM;
    public static EntityType<VaultStormEntity.SmiteBolt> THUNDERSTORM_BOLT;
    public static EntityType<VaultBlizzardShard> BLIZZARD_SHARD;
@@ -419,6 +424,10 @@ public class ModEntities {
    public static EntityType<BloodOrbEntity> BLOOD_ORB;
    public static EntityType<AreaOfEffectBossEntity> AREA_OF_EFFECT_BOSS;
    public static EntityType<AncientCopperGolemEntity> ANCIENT_COPPER_GOLEM;
+   public static EntityType<HealerEntity> HEALER;
+   public static EntityType<VaultBossEntity> BLAZE_BOSS;
+   public static EntityType<GolemBossEntity> GOLEM_BOSS;
+   public static EntityType<VaultBossEntity> BLACK_WIDOW_BOSS;
    private static final Map<EntityType<? extends LivingEntity>, Supplier<net.minecraft.world.entity.ai.attributes.AttributeSupplier.Builder>> ATTRIBUTE_BUILDERS = new HashMap<>();
 
    public static void register(Register<EntityType<?>> event) {
@@ -1203,6 +1212,7 @@ public class ModEntities {
       STORM_ARROW = register(
          "storm_arrow", Builder.of(VaultStormArrow::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(5), event
       );
+      ICE_BOLT = register("ice_bolt", Builder.of(IceBoltEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(5), event);
       STORM = register("storm", Builder.of(VaultStormEntity::new, MobCategory.MISC).sized(0.5F, 0.5F).clientTrackingRange(4).updateInterval(5), event);
       THUNDERSTORM_BOLT = register(
          "thunderstorm_bolt", Builder.of((entityType, level) -> new VaultStormEntity.SmiteBolt(entityType, level, false, -1864448), MobCategory.MISC), event
@@ -1249,6 +1259,21 @@ public class ModEntities {
       );
       CONDUIT_ITEM = register(
          "conduit_item", Builder.of(AncientCopperConduitItemEntity::new, MobCategory.MISC).sized(0.25F, 0.25F).clientTrackingRange(6).updateInterval(20), event
+      );
+      HEALER = registerLiving(
+         "healer", Builder.of(HealerEntity::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8), HealerEntity::createAttributes, event
+      );
+      BLAZE_BOSS = registerLiving(
+         "blaze_boss",
+         Builder.of(VaultBossEntity::new, MobCategory.MONSTER).sized(0.6F, 1.95F).clientTrackingRange(8),
+         VaultBossEntity::createAttributes,
+         event
+      );
+      GOLEM_BOSS = registerLiving(
+         "golem_boss", Builder.of(GolemBossEntity::new, MobCategory.MONSTER).sized(0.9F, 3.5F).clientTrackingRange(8), VaultBossEntity::createAttributes, event
+      );
+      BLACK_WIDOW_BOSS = registerLiving(
+         "black_widow_boss", Builder.of(VaultBossEntity::new, MobCategory.MONSTER).sized(1.68F, 2.0F).clientTrackingRange(8), Spider::createAttributes, event
       );
    }
 

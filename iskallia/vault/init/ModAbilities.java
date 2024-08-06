@@ -69,6 +69,7 @@ public class ModAbilities {
    public static final String BATTLE_CRY = "Battle_Cry";
    public static final String BATTLE_CRY_SPECTRAL_STRIKE = "Battle_Cry_Spectral_Strike";
    public static final String BATTLE_CRY_LUCKY_STRIKE = "Battle_Cry_Lucky_Strike";
+   public static final String ICE_BOLT = "Ice_Bolt";
 
    public static void init() {
    }

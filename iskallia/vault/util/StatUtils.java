@@ -5,6 +5,7 @@ import iskallia.vault.client.ClientTalentData;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.init.ModGearAttributes;
 import iskallia.vault.skill.base.TieredSkill;
+import iskallia.vault.skill.talent.type.PuristTalent;
 import iskallia.vault.skill.talent.type.luckyhit.DamageLuckyHitTalent;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -34,6 +35,13 @@ public class StatUtils {
       }
 
       float dmgIncrease = snapshot.getAttributeValue(ModGearAttributes.DAMAGE_INCREASE, VaultGearAttributeTypeMerger.floatSum());
+
+      for (TieredSkill node : ClientTalentData.getLearnedTalentNodes()) {
+         if (node.getChild() instanceof PuristTalent talent) {
+            dmgIncrease += talent.getDamageIncrease() * talent.getCount(player);
+         }
+      }
+
       attackDamage *= 1.0F + dmgIncrease;
       float dynamicDmgMultiplier;
       if (player instanceof ServerPlayer) {
@@ -48,7 +56,7 @@ public class StatUtils {
 
    public static double getDefence(Player player) {
       int armor = player.getArmorValue();
-      float resistance = ResistanceHelper.getResistance(player);
+      float resistance = ResistanceHelper.getResistance(player, null);
       float blockChance = BlockChanceHelper.getBlockChance(player);
       double dmgReduction = getArmorMultiplier(armor);
       dmgReduction *= 1.0F - resistance;

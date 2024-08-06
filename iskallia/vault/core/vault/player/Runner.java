@@ -1,12 +1,15 @@
 package iskallia.vault.core.vault.player;
 
 import iskallia.vault.core.Version;
+import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.vault.CompoundAdapter;
+import iskallia.vault.core.data.compound.ItemStackList;
 import iskallia.vault.core.data.key.FieldKey;
 import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.vault.NaturalSpawner;
+import iskallia.vault.core.vault.ScheduledModifiers;
 import iskallia.vault.core.vault.Vault;
 import iskallia.vault.core.vault.influence.Influences;
 import iskallia.vault.core.vault.stat.StatCollector;
@@ -39,10 +42,17 @@ public class Runner extends Listener {
    public static final FieldKey<Influences> INFLUENCES = FieldKey.of("influences", Influences.class)
       .with(Version.v1_5, CompoundAdapter.of(Influences::new), DISK.all().or(CLIENT.all()))
       .register(FIELDS);
+   public static final FieldKey<ScheduledModifiers> SCHEDULED_MODIFIERS = FieldKey.of("scheduled_modifiers", ScheduledModifiers.class)
+      .with(Version.v1_28, Adapters.of(ScheduledModifiers::new, true), DISK.all().or(CLIENT.all()))
+      .register(FIELDS);
+   public static final FieldKey<ItemStackList> ADDITIONAL_CRATE_ITEMS = FieldKey.of("additional_crate_items", ItemStackList.class)
+      .with(Version.v1_29, CompoundAdapter.of(ItemStackList::create), DISK.all())
+      .register(FIELDS);
 
    public Runner() {
       this.set(SPAWNER, new NaturalSpawner());
       this.set(INFLUENCES, new Influences());
+      this.set(SCHEDULED_MODIFIERS, new ScheduledModifiers());
    }
 
    @Override
@@ -173,6 +183,7 @@ public class Runner extends Listener {
       });
       this.ifPresent(INFLUENCES, influences -> influences.tickServer(world, vault, this));
       this.getPlayer().flatMap(player -> BottleItem.getActive(vault, player)).ifPresent(BottleItem::onTimeTick);
+      this.getPlayer().ifPresent(player -> this.ifPresent(SCHEDULED_MODIFIERS, scheduledModifiers -> scheduledModifiers.onTick(world, vault, player)));
    }
 
    @Override
@@ -213,6 +224,7 @@ public class Runner extends Listener {
          }
 
          BottleItem.setActive(vault, player);
+         this.ifPresent(SCHEDULED_MODIFIERS, scheduledModifiers -> scheduledModifiers.onJoin(vault, player));
       });
    }
 

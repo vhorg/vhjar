@@ -28,6 +28,8 @@ import iskallia.vault.skill.ability.effect.GhostWalkSpiritAbility;
 import iskallia.vault.skill.ability.effect.HealAbility;
 import iskallia.vault.skill.ability.effect.HealEffectAbility;
 import iskallia.vault.skill.ability.effect.HealGroupAbility;
+import iskallia.vault.skill.ability.effect.IceBoltArrowAbility;
+import iskallia.vault.skill.ability.effect.IceBoltChunkAbility;
 import iskallia.vault.skill.ability.effect.JavelinAbility;
 import iskallia.vault.skill.ability.effect.JavelinPiercingAbility;
 import iskallia.vault.skill.ability.effect.JavelinScatterAbility;
@@ -84,16 +86,21 @@ import iskallia.vault.skill.expertise.type.MysticExpertise;
 import iskallia.vault.skill.expertise.type.TrinketerExpertise;
 import iskallia.vault.skill.talent.type.AlchemistTalent;
 import iskallia.vault.skill.talent.type.ConditionalDamageTalent;
+import iskallia.vault.skill.talent.type.DisciplineTalent;
 import iskallia.vault.skill.talent.type.EffectTalent;
 import iskallia.vault.skill.talent.type.GearAttributeTalent;
 import iskallia.vault.skill.talent.type.JavelinConductTalent;
 import iskallia.vault.skill.talent.type.JavelinDamageTalent;
 import iskallia.vault.skill.talent.type.JavelinFrugalTalent;
 import iskallia.vault.skill.talent.type.JavelinThrowPowerTalent;
+import iskallia.vault.skill.talent.type.PlayerStatTalent;
 import iskallia.vault.skill.talent.type.PrudentTalent;
+import iskallia.vault.skill.talent.type.PuristTalent;
+import iskallia.vault.skill.talent.type.StackingGearAttributeTalent;
 import iskallia.vault.skill.talent.type.VanillaAttributeTalent;
 import iskallia.vault.skill.talent.type.health.HighHealthGearAttributeTalent;
 import iskallia.vault.skill.talent.type.health.LowHealthDamageTalent;
+import iskallia.vault.skill.talent.type.health.LowHealthGearAttributeTalent;
 import iskallia.vault.skill.talent.type.health.LowHealthResistanceTalent;
 import iskallia.vault.skill.talent.type.luckyhit.DamageLuckyHitTalent;
 import iskallia.vault.skill.talent.type.luckyhit.HealthLeechLuckyHitTalent;
@@ -272,6 +279,7 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("vanilla_attribute", VanillaAttributeTalent.class, VanillaAttributeTalent::new);
          this.register("low_health_damage", LowHealthDamageTalent.class, LowHealthDamageTalent::new);
          this.register("low_health_resistance", LowHealthResistanceTalent.class, LowHealthResistanceTalent::new);
+         this.register("low_health_gear_attribute", LowHealthGearAttributeTalent.class, LowHealthGearAttributeTalent::new);
          this.register("high_health_gear_attribute", HighHealthGearAttributeTalent.class, HighHealthGearAttributeTalent::new);
          this.register("high_mana_gear_attribute", HighManaGearAttributeTalent.class, HighManaGearAttributeTalent::new);
          this.register("lucky_altar", LuckyAltarExpertise.class, LuckyAltarExpertise::new);
@@ -284,6 +292,7 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("shop_pedestal", BarteringExpertise.class, BarteringExpertise::new);
          this.register("effect_damage", ConditionalDamageTalent.class, ConditionalDamageTalent::new);
          this.register("gear_attribute", GearAttributeTalent.class, GearAttributeTalent::new);
+         this.register("stacking_gear_attribute", StackingGearAttributeTalent.class, StackingGearAttributeTalent::new);
          this.register("cast_on_hit", CastOnHitTalent.class, CastOnHitTalent::new);
          this.register("damage_on_hit", DamageOnHitTalent.class, DamageOnHitTalent::new);
          this.register("sweeping_on_hit", SweepingOnHitTalent.class, SweepingOnHitTalent::new);
@@ -309,6 +318,9 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("jeweler", JewelExpertise.class, JewelExpertise::new);
          this.register("marketer", BlackMarketExpertise.class, BlackMarketExpertise::new);
          this.register("fortuitous_finesse", LegendaryExpertise.class, LegendaryExpertise::new);
+         this.register("player_stat", PlayerStatTalent.class, PlayerStatTalent::new);
+         this.register("purist", PuristTalent.class, PuristTalent::new);
+         this.register("discipline", DisciplineTalent.class, DisciplineTalent::new);
          this.register("empower_speed", EmpowerAbility.class, EmpowerAbility::new);
          this.register("empower_ice_armor", EmpowerIceArmourAbility.class, EmpowerIceArmourAbility::new);
          this.register("empower_slowness_aura", EmpowerSlownessAuraAbility.class, EmpowerSlownessAuraAbility::new);
@@ -371,6 +383,8 @@ public abstract class Skill implements ISerializable<CompoundTag, JsonObject> {
          this.register("battle_cry", BonkAbility.class, BonkAbility::new);
          this.register("battle_cry_spectral_strike", BonkSpectralStrikeAbility.class, BonkSpectralStrikeAbility::new);
          this.register("battle_cry_lucky_strike", BonkLuckyStrikeAbility.class, BonkLuckyStrikeAbility::new);
+         this.register("ice_bolt_arrow", IceBoltArrowAbility.class, IceBoltArrowAbility::new);
+         this.register("ice_bolt_chunk", IceBoltChunkAbility.class, IceBoltChunkAbility::new);
          this.register("empower_porcupine", RemovedSkill.class, () -> new RemovedSkill("empower_porcupine"));
       }
 

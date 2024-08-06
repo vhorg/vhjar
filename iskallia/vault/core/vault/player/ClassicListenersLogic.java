@@ -14,7 +14,6 @@ import iskallia.vault.core.vault.modifier.spi.VaultModifier;
 import iskallia.vault.core.vault.objective.Objectives;
 import iskallia.vault.core.vault.stat.StatCollector;
 import iskallia.vault.core.vault.time.TickClock;
-import iskallia.vault.core.vault.time.modifier.RelicExtension;
 import iskallia.vault.core.vault.time.modifier.TrinketExtension;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.entity.entity.SpiritEntity;
@@ -24,8 +23,12 @@ import iskallia.vault.gear.trinket.TrinketHelper;
 import iskallia.vault.gear.trinket.effects.VaultTimeExtensionTrinket;
 import iskallia.vault.init.ModGameRules;
 import iskallia.vault.item.gear.TrinketItem;
+import iskallia.vault.skill.ability.effect.spi.core.Ability;
 import iskallia.vault.skill.base.Skill;
+import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.expertise.type.TrinketerExpertise;
+import iskallia.vault.skill.tree.AbilityTree;
+import iskallia.vault.world.data.PlayerAbilitiesData;
 import iskallia.vault.world.data.PlayerExpertisesData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import iskallia.vault.world.data.VaultPartyData;
@@ -188,7 +191,6 @@ public class ClassicListenersLogic extends ListenersLogic {
 
             vault.set(Vault.OWNER, listener.get(Listener.ID));
             if (!this.has(ADDED_BONUS_TIME) && listener instanceof Runner) {
-               vault.get(Vault.CLOCK).addModifier(new RelicExtension(listener.get(Listener.ID), 600));
                this.set(ADDED_BONUS_TIME);
             }
 
@@ -238,6 +240,13 @@ public class ClassicListenersLogic extends ListenersLogic {
       player.connection.send(subtitlePacket);
       this.printJoinMessage(world, vault, player);
       this.ifPresent(GAME_MODE, player::setGameMode);
+      PlayerAbilitiesData abilitiesData = PlayerAbilitiesData.get(player.getLevel());
+      AbilityTree abilities = abilitiesData.getAbilities(player);
+      abilities.getAll(Ability.class, Ability::isActive).forEach(ability -> {
+         ability.putOnCooldown(0, SkillContext.of(player));
+         ability.reduceCooldownBy(ability.getCooldownTicks());
+         ability.setActive(false);
+      });
       player.removeAllEffects();
    }
 

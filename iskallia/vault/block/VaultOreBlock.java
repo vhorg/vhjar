@@ -2,6 +2,7 @@ package iskallia.vault.block;
 
 import com.google.common.base.Functions;
 import iskallia.vault.block.item.VaultOreBlockItem;
+import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.tool.ToolItem;
 import iskallia.vault.util.calc.CopiousHelper;
@@ -12,6 +13,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.minecraft.advancements.critereon.EnchantmentPredicate;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds.Ints;
@@ -32,7 +34,9 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.OreBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.BlockBehaviour.Properties;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
@@ -44,7 +48,7 @@ import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.HitResult;
 
-public class VaultOreBlock extends OreBlock {
+public class VaultOreBlock extends OreBlock implements EntityBlock {
    public static final List<VaultOreBlock> ALL = new ArrayList<>();
    private static final ItemPredicate HAS_SILK_TOUCH = net.minecraft.advancements.critereon.ItemPredicate.Builder.item()
       .hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, Ints.atLeast(1)))
@@ -82,9 +86,10 @@ public class VaultOreBlock extends OreBlock {
    }
 
    public List<ItemStack> getDrops(BlockState state, net.minecraft.world.level.storage.loot.LootContext.Builder builder) {
-      List<ItemStack> drops = new ArrayList<>();
       ItemStack stack = (ItemStack)builder.getOptionalParameter(LootContextParams.TOOL);
+      List<ItemStack> drops;
       if (stack != null && HAS_SILK_TOUCH.matches(stack)) {
+         drops = new ArrayList<>();
          drops.add(VaultOreBlockItem.fromType(this, (VaultOreBlock.Type)state.getValue(TYPE)));
       } else {
          drops = super.getDrops(state, builder);
@@ -97,7 +102,7 @@ public class VaultOreBlock extends OreBlock {
             Entity player = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
             BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
             player.level.playSound(null, pos, ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.1F, 0.85F);
-            drops.addAll(copy);
+            copy.forEach(s -> drops.add(s.copy()));
             if (stack != null) {
                Item entity = stack.getItem();
                if (entity instanceof ToolItem) {
@@ -147,6 +152,11 @@ public class VaultOreBlock extends OreBlock {
       ItemStack itemStack = super.getCloneItemStack(state, target, level, pos, player);
       itemStack.getOrCreateTag().putString("type", ((VaultOreBlock.Type)state.getValue(TYPE)).getSerializedName());
       return itemStack;
+   }
+
+   @Nullable
+   public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+      return ModBlocks.VAULT_ORE_TILE_ENTITY.create(pos, state);
    }
 
    public static enum Type implements StringRepresentable {

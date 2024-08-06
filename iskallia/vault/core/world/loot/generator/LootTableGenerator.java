@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.annotation.Nullable;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
@@ -22,7 +23,7 @@ public class LootTableGenerator implements LootGenerator {
    protected final LootTable table;
    public float itemQuantity;
    public Map<ItemPredicate, Float> itemQuantityOverrides = new HashMap<>();
-   public Entity source;
+   private Entity source;
    protected final List<ItemStack> items = new ArrayList<>();
 
    public LootTableGenerator(Version version, LootTableKey table, float itemQuantity) {
@@ -37,6 +38,15 @@ public class LootTableGenerator implements LootGenerator {
 
    public LootTable getTable() {
       return this.table;
+   }
+
+   public void setSource(@Nullable Entity source) {
+      this.source = source;
+   }
+
+   @Nullable
+   public Entity getSource() {
+      return this.source;
    }
 
    @Override
@@ -65,7 +75,7 @@ public class LootTableGenerator implements LootGenerator {
    protected void generateEntry(LootTable.Entry entry, RandomSource random) {
       int roll = entry.getRoll().get(random);
       float fRoll = roll * (1.0F + this.itemQuantity);
-      roll = (int)fRoll + (random.nextFloat() < fRoll - roll ? 1 : 0);
+      roll = (int)fRoll + (random.nextFloat() < fRoll - (int)fRoll ? 1 : 0);
 
       for (int i = 0; i < roll; i++) {
          entry.getPool().getRandomFlat(this.version, random).map(e -> {

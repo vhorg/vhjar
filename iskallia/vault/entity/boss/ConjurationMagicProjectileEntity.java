@@ -4,6 +4,7 @@ import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.influence.VaultGod;
 import iskallia.vault.core.vault.stat.VaultChestType;
+import iskallia.vault.entity.boss.stage.CatalystStageAttributes;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModEntities;
 import iskallia.vault.mixin.AccessorChunkMap;
@@ -37,7 +38,7 @@ public class ConjurationMagicProjectileEntity extends MagicProjectileEntity {
    private WeightedList<CatalystStageAttributes.EffectAttributes> effects = WeightedList.empty();
    private Map<VaultChestType, ResourceLocation> chestLootTables = Collections.emptyMap();
 
-   protected ConjurationMagicProjectileEntity(
+   public ConjurationMagicProjectileEntity(
       Level level, ArtifactBossEntity boss, double x, double y, double z, Player target, CatalystStageAttributes attributes
    ) {
       super(ModEntities.CONJURATION_MAGIC_PROJECTILE, level, boss, x, y, z, target, attributes.getProjectileDamage());

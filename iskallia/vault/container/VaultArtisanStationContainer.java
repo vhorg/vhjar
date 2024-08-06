@@ -5,7 +5,7 @@ import iskallia.vault.container.oversized.OverSizedSlotContainer;
 import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.TabSlot;
 import iskallia.vault.gear.VaultGearRarity;
-import iskallia.vault.gear.data.VaultGearData;
+import iskallia.vault.gear.data.GearDataCache;
 import iskallia.vault.gear.item.VaultGearItem;
 import iskallia.vault.gear.modification.GearModification;
 import iskallia.vault.gear.modification.GearModificationAction;
@@ -19,6 +19,8 @@ import java.util.Collections;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -81,32 +83,103 @@ public class VaultArtisanStationContainer extends OverSizedSlotContainer {
             .setFilter(stack -> stack.is(ModBlocks.VAULT_BRONZE))
             .setBackground(InventoryMenu.BLOCK_ATLAS, ModSlotIcons.COINS_NO_ITEM)
       );
-      this.addModSlot(new OverSizedTabSlot(invContainer, 2, 8, 20), ModGearModifications.REFORGE_ALL_MODIFIERS, true);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 3, 8, 44), ModGearModifications.ADD_MODIFIER, true);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 4, 8, 68), ModGearModifications.REMOVE_MODIFIER, true);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 5, 8, 92), ModGearModifications.REFORGE_ALL_ADD_TAG, true);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 6, 150, 20), ModGearModifications.RESET_POTENTIAL, false);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 7, 150, 44), ModGearModifications.REFORGE_REPAIR_SLOTS, false);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 8, 150, 68), ModGearModifications.REFORGE_ALL_IMPLICITS, false);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 9, 150, 92), ModGearModifications.REFORGE_RANDOM_TIER, false);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 10, 8, 116), ModGearModifications.REFORGE_PREFIXES, true);
-      this.addModSlot(new OverSizedTabSlot(invContainer, 11, 150, 116), ModGearModifications.REFORGE_SUFFIXES, false);
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 2, 8, 20),
+         VaultArtisanStationContainer.Tab.COMMON,
+         ModGearModifications.REFORGE_ALL_MODIFIERS,
+         VaultArtisanStationContainer.ButtonSide.RIGHT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 3, 8, 44),
+         VaultArtisanStationContainer.Tab.COMMON,
+         ModGearModifications.ADD_MODIFIER,
+         VaultArtisanStationContainer.ButtonSide.RIGHT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 4, 8, 68),
+         VaultArtisanStationContainer.Tab.COMMON,
+         ModGearModifications.REMOVE_MODIFIER,
+         VaultArtisanStationContainer.ButtonSide.RIGHT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 10, 8, 92),
+         VaultArtisanStationContainer.Tab.COMMON,
+         ModGearModifications.REFORGE_PREFIXES,
+         VaultArtisanStationContainer.ButtonSide.RIGHT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 8, 150, 20),
+         VaultArtisanStationContainer.Tab.COMMON,
+         ModGearModifications.REFORGE_ALL_IMPLICITS,
+         VaultArtisanStationContainer.ButtonSide.LEFT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 9, 150, 44),
+         VaultArtisanStationContainer.Tab.COMMON,
+         ModGearModifications.REFORGE_RANDOM_TIER,
+         VaultArtisanStationContainer.ButtonSide.LEFT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 5, 150, 68),
+         VaultArtisanStationContainer.Tab.COMMON,
+         ModGearModifications.REFORGE_ALL_ADD_TAG,
+         VaultArtisanStationContainer.ButtonSide.LEFT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 11, 150, 92),
+         VaultArtisanStationContainer.Tab.COMMON,
+         ModGearModifications.REFORGE_SUFFIXES,
+         VaultArtisanStationContainer.ButtonSide.LEFT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 12, 8, 20),
+         VaultArtisanStationContainer.Tab.EXOTIC,
+         ModGearModifications.IMPROVE_MODIFIER,
+         VaultArtisanStationContainer.ButtonSide.RIGHT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 13, 8, 44),
+         VaultArtisanStationContainer.Tab.EXOTIC,
+         ModGearModifications.LOCK_MODIFIER,
+         VaultArtisanStationContainer.ButtonSide.RIGHT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 14, 8, 68),
+         VaultArtisanStationContainer.Tab.EXOTIC,
+         ModGearModifications.IMPROVE_RARITY,
+         VaultArtisanStationContainer.ButtonSide.RIGHT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 6, 150, 20),
+         VaultArtisanStationContainer.Tab.EXOTIC,
+         ModGearModifications.RESET_POTENTIAL,
+         VaultArtisanStationContainer.ButtonSide.LEFT
+      );
+      this.addModSlot(
+         new OverSizedTabSlot(invContainer, 7, 150, 44),
+         VaultArtisanStationContainer.Tab.EXOTIC,
+         ModGearModifications.REFORGE_REPAIR_SLOTS,
+         VaultArtisanStationContainer.ButtonSide.LEFT
+      );
       Container inputContainer = this.tileEntity.getGearInput();
       this.addSlot(
          new TabSlot(inputContainer, 0, 79, 72) {
             public boolean mayPlace(ItemStack stack) {
                return stack.getItem() instanceof VaultGearItem
                   && stack.getItem() != ModItems.JEWEL
-                  && VaultGearData.read(stack).getRarity() != VaultGearRarity.UNIQUE;
+                  && GearDataCache.of(stack).getRarity() != VaultGearRarity.UNIQUE;
             }
          }
       );
    }
 
-   private void addModSlot(OverSizedTabSlot slot, GearModification modification, boolean rightSide) {
+   private void addModSlot(
+      OverSizedTabSlot slot, VaultArtisanStationContainer.Tab tab, GearModification modification, VaultArtisanStationContainer.ButtonSide side
+   ) {
       this.addSlot(slot);
+      slot.setActive(false);
       slot.setFilter(modification.getStackFilter());
-      this.modificationActions.add(new GearModificationAction(slot.index, modification, rightSide));
+      this.modificationActions.add(new GearModificationAction(slot.index, tab, modification, side));
    }
 
    public GearModificationAction getModificationAction(GearModification modification) {
@@ -178,5 +251,31 @@ public class VaultArtisanStationContainer extends OverSizedSlotContainer {
 
    public boolean stillValid(Player player) {
       return this.tileEntity == null ? false : this.tileEntity.stillValid(this.player);
+   }
+
+   public static enum ButtonSide {
+      LEFT(-20),
+      RIGHT(20);
+
+      private final int xShift;
+
+      private ButtonSide(int xShift) {
+         this.xShift = xShift;
+      }
+
+      public int getXShift() {
+         return this.xShift;
+      }
+   }
+
+   public static enum Tab {
+      COMMON,
+      EXOTIC;
+
+      private final MutableComponent name = new TranslatableComponent("the_vault.gear_modification.tab." + this.name().toLowerCase());
+
+      public MutableComponent getName() {
+         return this.name;
+      }
    }
 }

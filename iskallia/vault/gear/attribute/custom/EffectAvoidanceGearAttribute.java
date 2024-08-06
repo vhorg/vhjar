@@ -11,6 +11,7 @@ import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.util.NetcodeUtils;
 import java.text.DecimalFormat;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nonnull;
@@ -20,7 +21,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -94,8 +94,10 @@ public class EffectAvoidanceGearAttribute {
    }
 
    private static class AttributeComparator extends VaultGearAttributeComparator<EffectAvoidanceGearAttribute> {
-      public EffectAvoidanceGearAttribute merge(EffectAvoidanceGearAttribute thisValue, EffectAvoidanceGearAttribute thatValue) {
-         return new EffectAvoidanceGearAttribute(thisValue.getEffect(), thisValue.getChance() + thatValue.getChance());
+      public Optional<EffectAvoidanceGearAttribute> merge(EffectAvoidanceGearAttribute thisValue, EffectAvoidanceGearAttribute thatValue) {
+         return thisValue.getEffect() != thatValue.getEffect()
+            ? Optional.empty()
+            : Optional.of(new EffectAvoidanceGearAttribute(thisValue.getEffect(), thisValue.getChance() + thatValue.getChance()));
       }
 
       @Deprecated
@@ -166,9 +168,28 @@ public class EffectAvoidanceGearAttribute {
             .append(new TextComponent(" Avoidance"));
       }
 
-      public EffectAvoidanceGearAttribute generateRandomValue(EffectAvoidanceGearAttribute.Config object, Random random) {
-         int steps = Mth.floor(Math.max(object.maxChance - object.minChance, 0.0F) / object.step) + 1;
-         return new EffectAvoidanceGearAttribute(object.getEffect(), object.minChance + random.nextInt(steps) * object.step);
+      public EffectAvoidanceGearAttribute generateRandomValue(EffectAvoidanceGearAttribute.Config config, Random random) {
+         int steps = Math.round(Math.max(config.maxChance - config.minChance, 0.0F) / config.step) + 1;
+         return new EffectAvoidanceGearAttribute(config.getEffect(), config.minChance + random.nextInt(steps) * config.step);
+      }
+
+      @Override
+      public Optional<EffectAvoidanceGearAttribute> getMinimumValue(List<EffectAvoidanceGearAttribute.Config> configurations) {
+         return configurations.stream()
+            .min(Comparator.comparing(config -> config.minChance))
+            .map(config -> new EffectAvoidanceGearAttribute(config.getEffect(), config.minChance));
+      }
+
+      private float getMaximumChance(EffectAvoidanceGearAttribute.Config config) {
+         int steps = Math.round(Math.max(config.maxChance - config.minChance, 0.0F) / config.step);
+         return config.minChance + steps * config.step;
+      }
+
+      @Override
+      public Optional<EffectAvoidanceGearAttribute> getMaximumValue(List<EffectAvoidanceGearAttribute.Config> configurations) {
+         return configurations.stream()
+            .max(Comparator.comparing(this::getMaximumChance))
+            .map(config -> new EffectAvoidanceGearAttribute(config.getEffect(), config.maxChance));
       }
    }
 

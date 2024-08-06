@@ -59,12 +59,14 @@ public class SlotsElement<E extends SlotsElement<E>> extends AbstractSpatialElem
    @Override
    public void render(IElementRenderer renderer, @NotNull PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
       for (Slot slot : this.slots) {
-         renderer.render(this.background, poseStack, slot.x + this.worldSpatial.x() - 1, slot.y + this.worldSpatial.y() - 1, this.worldSpatial.z());
-         if (slot instanceof IGhostSlot) {
-            IGhostSlot ghostSlot = (IGhostSlot)slot;
-            ItemStack ghostItemStack = ghostSlot.getGhostItemStack();
-            if (ghostItemStack != null) {
-               this.renderItemStack(ghostItemStack, slot.x + this.worldSpatial.x(), slot.y + this.worldSpatial.y(), this.worldSpatial.z() + 1);
+         if (slot.isActive()) {
+            renderer.render(this.background, poseStack, slot.x + this.worldSpatial.x() - 1, slot.y + this.worldSpatial.y() - 1, this.worldSpatial.z());
+            if (slot instanceof IGhostSlot) {
+               IGhostSlot ghostSlot = (IGhostSlot)slot;
+               ItemStack ghostItemStack = ghostSlot.getGhostItemStack();
+               if (ghostItemStack != null) {
+                  this.renderItemStack(ghostItemStack, slot.x + this.worldSpatial.x(), slot.y + this.worldSpatial.y(), this.worldSpatial.z() + 1);
+               }
             }
          }
       }

@@ -91,7 +91,7 @@ public class BooleanAdapter implements ISimpleAdapter<Boolean, Tag, JsonElement>
    public final Optional<Boolean> readJson(@Nullable JsonElement json) {
       if (json instanceof JsonArray array && array.size() == 1) {
          return this.readJson(array.get(0));
-      } else if (json instanceof JsonPrimitive primitive && !primitive.isBoolean()) {
+      } else if (json instanceof JsonPrimitive primitive && primitive.isBoolean()) {
          try {
             return Optional.of(primitive.getAsBoolean());
          } catch (NumberFormatException var5) {

@@ -18,12 +18,10 @@ import iskallia.vault.init.ModItems;
 import iskallia.vault.item.gear.DataInitializationItem;
 import iskallia.vault.item.gear.DataTransferItem;
 import iskallia.vault.item.gear.VaultLevelItem;
-import iskallia.vault.task.CompleteGodAltarTask;
-import iskallia.vault.task.FailGodAltarTask;
+import iskallia.vault.task.GodAltarTask;
 import iskallia.vault.task.KillEntityTask;
-import iskallia.vault.task.NodeTask;
 import iskallia.vault.task.Task;
-import iskallia.vault.task.TimedTask;
+import iskallia.vault.task.counter.TaskCounter;
 import iskallia.vault.task.renderer.GodAltarRenderer;
 import iskallia.vault.task.source.EntityTaskSource;
 import iskallia.vault.world.VaultDifficulty;
@@ -54,9 +52,10 @@ public class GodAltarTileEntity extends BlockEntity {
    protected Task task;
    protected ItemStack loot;
    protected Task taskPool = new KillEntityTask(
-         new KillEntityTask.Config(EntityPredicate.of("@the_vault:zombie", true).orElse(EntityPredicate.FALSE), IntRoll.ofUniform(1, 5))
+         new KillEntityTask.Config(EntityPredicate.of("@the_vault:zombie", true).orElse(EntityPredicate.FALSE)),
+         TaskCounter.ofTargetInt(IntRoll.ofUniform(1, 5))
       )
-      .add(new GodAltarRenderer.Base("Kill Zombies", "${current}/${target}"));
+      .setRenderer(new GodAltarRenderer.Child("Kill Zombies", "${current}/${target}"));
    protected ResourceLocation modifierCompletionPool = VaultMod.id("default");
    protected ResourceLocation modifierFailurePool = VaultMod.id("default");
    protected Map<VaultDifficulty, IntRoll> timePool = new HashMap<>();
@@ -127,15 +126,22 @@ public class GodAltarTileEntity extends BlockEntity {
          VaultDifficulty difficulty = WorldSettings.get(world).getPlayerDifficulty(player.getUUID());
          VaultGod god = (VaultGod)world.getBlockState(this.worldPosition).getValue(GodAltarBlock.GOD);
          this.uuid = UUID.randomUUID();
-         Task completion = new CompleteGodAltarTask(this.uuid, this.modifierCompletionPool, false).add(new GodAltarRenderer.Complete());
-         Task failure = new FailGodAltarTask(vaultUuid, player.getUUID(), this.uuid, this.modifierFailurePool);
-         Task task = new NodeTask(
-               new TimedTask(this.timePool.get(difficulty).get(random)).add(new GodAltarRenderer.Timed()),
-               new NodeTask(this.taskPool.copy(), new NodeTask(completion)),
-               new NodeTask(failure)
-            )
-            .add(new GodAltarRenderer.Node());
-         GodAltarData.add(this.uuid, task, EntityTaskSource.of(random, player), god);
+         GodAltarData.add(
+            this.uuid,
+            new GodAltarTask(
+                  this,
+                  this.uuid,
+                  vaultUuid,
+                  this.timePool.get(difficulty).get(random),
+                  this.modifierCompletionPool,
+                  this.modifierFailurePool,
+                  god,
+                  this.taskPool.copy()
+               )
+               .setRenderer(new GodAltarRenderer.Root()),
+            EntityTaskSource.ofUuids(JavaRandom.ofNanoTime(), player.getUUID()),
+            world.getServer()
+         );
          this.fetchTask();
       }
    }
@@ -144,10 +150,6 @@ public class GodAltarTileEntity extends BlockEntity {
       if (level instanceof ServerLevel world) {
          if (tile.getUuid() != null) {
             tile.fetchTask();
-         }
-
-         if (tile.isCompleted() && tile.getLoot() == null) {
-            tile.placeReward(world, pos.above(), (VaultGod)world.getBlockState(pos).getValue(GodAltarBlock.GOD));
          }
       }
    }

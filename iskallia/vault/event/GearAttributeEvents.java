@@ -20,6 +20,7 @@ import iskallia.vault.network.message.ShockedParticleMessage;
 import iskallia.vault.network.message.StunnedParticleMessage;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.talent.type.JavelinConductTalent;
+import iskallia.vault.skill.talent.type.PuristTalent;
 import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
@@ -30,6 +31,7 @@ import iskallia.vault.util.calc.BlockChanceHelper;
 import iskallia.vault.util.calc.ChainHelper;
 import iskallia.vault.util.calc.FatalStrikeHelper;
 import iskallia.vault.util.calc.GrantedEffectHelper;
+import iskallia.vault.util.calc.StunChanceHelper;
 import iskallia.vault.util.calc.ThornsHelper;
 import iskallia.vault.util.damage.AttackScaleHelper;
 import iskallia.vault.util.damage.CritHelper;
@@ -338,10 +340,9 @@ public class GearAttributeEvents {
                               }
                            }
 
-                           AttributeSnapshot snapshot = AttributeSnapshotHelper.getInstance().getSnapshot(attacker);
-                           float stunChance = snapshot.getAttributeValue(ModGearAttributes.ON_HIT_STUN, VaultGearAttributeTypeMerger.floatSum());
+                           LivingEntity attacked = event.getEntityLiving();
+                           float stunChance = StunChanceHelper.getStunChance(attacker, attacked);
                            if (Entropy.canExecute(attacker, Entropy.Stat.STUN_ATTACK_CHANCE, stunChance)) {
-                              LivingEntity attacked = event.getEntityLiving();
                               attacked.addEffect(
                                  new MobEffectInstance(ModEffects.NO_AI, 30, 1, false, false) {
                                     public boolean tick(LivingEntity livingEntity, Runnable p_19554_) {
@@ -454,6 +455,14 @@ public class GearAttributeEvents {
 
             if (ModConfigs.ENTITY_GROUPS.isInGroup(VaultMod.id("mob_type/dweller"), attacked)) {
                increasedDamage += snapshot.getAttributeValue(ModGearAttributes.DAMAGE_DWELLER, VaultGearAttributeTypeMerger.floatSum());
+            }
+
+            if (attacker instanceof Player player) {
+               PlayerTalentsData talents = PlayerTalentsData.get(attacker.getServer());
+
+               for (PuristTalent talent : talents.getTalents(player).getAll(PuristTalent.class, Skill::isUnlocked)) {
+                  increasedDamage += talent.getDamageIncrease() * talent.getCount(attacker);
+               }
             }
 
             event.setAmount(event.getAmount() * (1.0F + increasedDamage));

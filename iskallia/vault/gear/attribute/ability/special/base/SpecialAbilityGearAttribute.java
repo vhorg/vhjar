@@ -13,6 +13,8 @@ import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.util.MiscUtils;
 import iskallia.vault.util.NetcodeUtils;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -99,6 +101,16 @@ public class SpecialAbilityGearAttribute<C extends SpecialAbilityModification.Co
 
       public SpecialAbilityGearAttribute<C, T> generateRandomValue(SpecialAbilityGearAttribute.SpecialAbilityConfig<C, T> cfg, Random random) {
          return new SpecialAbilityGearAttribute<>(cfg.getAbilityKey(), cfg.getModification(), cfg.getConfig());
+      }
+
+      @Override
+      public Optional<SpecialAbilityGearAttribute<C, T>> getMinimumValue(List<SpecialAbilityGearAttribute.SpecialAbilityConfig<C, T>> configurations) {
+         return Optional.empty();
+      }
+
+      @Override
+      public Optional<SpecialAbilityGearAttribute<C, T>> getMaximumValue(List<SpecialAbilityGearAttribute.SpecialAbilityConfig<C, T>> configurations) {
+         return Optional.empty();
       }
    }
 

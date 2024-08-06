@@ -8,6 +8,9 @@ import iskallia.vault.gear.attribute.config.ConfigurableAttributeGenerator;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
 import iskallia.vault.gear.reader.VaultGearModifierReader;
 import iskallia.vault.util.NetcodeUtils;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
@@ -112,6 +115,20 @@ public class EffectGearAttribute {
          return effect == null
             ? null
             : new TextComponent(String.valueOf(object.amplifier)).withStyle(reader.getColoredTextStyle()).append(" ").append(effect.getDisplayName());
+      }
+
+      @Override
+      public Optional<EffectGearAttribute> getMinimumValue(List<EffectGearAttribute.Config> configurations) {
+         return configurations.stream()
+            .min(Comparator.comparing(config -> config.amplifier))
+            .map(config -> new EffectGearAttribute((MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(config.effectKey), config.amplifier));
+      }
+
+      @Override
+      public Optional<EffectGearAttribute> getMaximumValue(List<EffectGearAttribute.Config> configurations) {
+         return configurations.stream()
+            .max(Comparator.comparing(config -> config.amplifier))
+            .map(config -> new EffectGearAttribute((MobEffect)ForgeRegistries.MOB_EFFECTS.getValue(config.effectKey), config.amplifier));
       }
    }
 

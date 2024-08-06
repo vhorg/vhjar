@@ -2,11 +2,13 @@ package iskallia.vault.client.gui.framework.element;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import iskallia.vault.client.atlas.TextureAtlasRegion;
+import iskallia.vault.client.gui.framework.ScreenTextures;
 import iskallia.vault.client.gui.framework.element.spi.AbstractSpatialElement;
 import iskallia.vault.client.gui.framework.element.spi.IRenderedElement;
 import iskallia.vault.client.gui.framework.render.spi.IElementRenderer;
 import iskallia.vault.client.gui.framework.spatial.Spatials;
 import iskallia.vault.client.gui.framework.spatial.spi.IPosition;
+import iskallia.vault.client.gui.framework.spatial.spi.ISize;
 import java.util.function.Supplier;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Mth;
@@ -17,8 +19,16 @@ public class ProgressElement<E extends ProgressElement<E>> extends AbstractSpati
    protected final ProgressElement.ProgressTextures textures;
    protected Supplier<Float> progressSupplier;
 
+   public ProgressElement(IPosition position, TextureAtlasRegion foregroundTexture, Supplier<Float> progressSupplier) {
+      this(position, foregroundTexture.size(), new ProgressElement.ProgressTextures(ScreenTextures.BLANK, foregroundTexture), progressSupplier);
+   }
+
    public ProgressElement(IPosition position, ProgressElement.ProgressTextures textures, Supplier<Float> progressSupplier) {
-      super(Spatials.positionXYZ(position).size(textures.background().size()));
+      this(position, textures.background().size(), textures, progressSupplier);
+   }
+
+   public ProgressElement(IPosition position, ISize size, ProgressElement.ProgressTextures textures, Supplier<Float> progressSupplier) {
+      super(Spatials.positionXYZ(position).size(size));
       this.textures = textures;
       this.progressSupplier = progressSupplier;
       this.setVisible(true);
