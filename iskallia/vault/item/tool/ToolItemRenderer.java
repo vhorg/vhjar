@@ -5,14 +5,9 @@ import iskallia.vault.client.util.ClientScheduler;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeTypeMerger;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.init.ModGearAttributes;
-import java.util.function.Function;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms.TransformType;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -41,7 +36,5 @@ public class ToolItemRenderer extends SpecialItemRenderer {
       ModelResourceLocation handle = new ModelResourceLocation("the_vault:tool/%s/handle#inventory".formatted(type.getId()));
       this.renderModel(handle, 16777215, stack, transformType, matrices, buffer, light, overlay, null);
       this.renderModel(head, 16777215, stack, transformType, matrices, buffer, light, overlay, null);
-      Function<ResourceLocation, TextureAtlasSprite> atlas = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS);
-      atlas.apply(new ResourceLocation(head.getNamespace(), "item/" + head.getPath()));
    }
 }

@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.mojang.datafixers.util.Pair;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Function;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -16,9 +17,12 @@ import net.minecraft.client.renderer.MultiBufferSource.BufferSource;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.ItemTransforms.TransformType;
 import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.client.ForgeHooksClient;
 
@@ -92,6 +96,8 @@ public class SpecialItemRenderer extends BlockEntityWithoutLevelRenderer {
       }
 
       matrices.popPose();
+      Function<ResourceLocation, TextureAtlasSprite> atlas = Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS);
+      atlas.apply(new ResourceLocation(location.getNamespace(), "item/" + location.getPath()));
    }
 
    public void renderModelLists(BakedModel model, int tint, PoseStack matrices, VertexConsumer buffer, int light, int overlay) {

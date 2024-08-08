@@ -86,7 +86,8 @@ public class PlayerExpertisesData extends SavedData {
             PlayerExpertisesData data = get(player.getLevel());
             if (data.scheduledMerge.remove(player.getUUID())) {
                SkillContext context = SkillContext.of(player);
-               data.playerMap.get(player.getUUID()).mergeFrom(ModConfigs.EXPERTISES.getAll().copy(), context);
+               data.playerMap
+                  .put(player.getUUID(), (ExpertiseTree)data.playerMap.get(player.getUUID()).mergeFrom(ModConfigs.EXPERTISES.getAll().copy(), context));
                PlayerVaultStats stats = PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player);
                stats.setSkillPoints(context.getLearnPoints());
                stats.setRegretPoints(context.getRegretPoints());

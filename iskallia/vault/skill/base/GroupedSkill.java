@@ -4,13 +4,13 @@ import com.google.gson.JsonObject;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 
@@ -128,48 +128,35 @@ public class GroupedSkill extends LearnableSkill {
 
    @Override
    public Skill mergeFrom(Skill other, SkillContext context) {
-      super.mergeFrom(other, context);
-      if (!(other instanceof GroupedSkill grouped)) {
-         context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
-         return other.copy();
-      } else {
-         ArrayList copy = new ArrayList();
-         HashSet removed = new HashSet<>(this.children.stream().map(Skill::getId).filter(Objects::nonNull).toList());
+      int spentPoints = this.getSpentLearnPoints();
+      if (other instanceof GroupedSkill grouped && spentPoints <= grouped.getMaxSpentLearnPoints()) {
+         Map<String, Skill> idToSkill = new LinkedHashMap<>();
+         Map<String, Integer> idToIndex = new LinkedHashMap<>();
 
-         for (LearnableSkill child : grouped.children) {
-            removed.remove(child.getId());
-            Skill merging = this.getForId(child.getId()).orElse(null);
+         for (int index = 0; index < grouped.children.size(); index++) {
+            Skill skill = grouped.children.get(index);
+            idToSkill.put(skill.getId(), skill);
+            idToIndex.put(skill.getId(), index);
+         }
+
+         for (Skill child : this.children) {
             Skill merged;
-            if (merging != null) {
-               merged = merging.mergeFrom(child, context);
+            if (child.getId() != null && idToSkill.containsKey(child.getId())) {
+               merged = child.mergeFrom(idToSkill.get(child.getId()), context);
             } else {
-               merged = child.copy();
+               merged = child.mergeFrom(null, context);
             }
 
-            if (merged instanceof LearnableSkill) {
-               merged.setParent(this);
-               copy.add((LearnableSkill)merged);
+            if (idToIndex.containsKey(child.getId()) && merged instanceof LearnableSkill learnable) {
+               grouped.children.set(idToIndex.get(child.getId()), learnable);
             }
          }
 
-         this.children = copy;
-         int newIndex = grouped.selected;
-         this.selected = newIndex >= 0 && newIndex < copy.size() ? newIndex : 0;
-
-         for (String id : removed) {
-            this.getForId(id).ifPresent(skill -> {
-               if (skill instanceof LearnableSkill learnable) {
-                  context.setLearnPoints(context.getLearnPoints() + learnable.getLearnPointCost());
-               }
-            });
-         }
-
-         if (this.getSpentLearnPoints() > (this.maxSpentLearnPoints = grouped.maxSpentLearnPoints)) {
-            context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
-            return grouped.copy();
-         } else {
-            return this;
-         }
+         grouped.selected = this.selected;
+         return other;
+      } else {
+         context.setLearnPoints(context.getLearnPoints() + spentPoints);
+         return other;
       }
    }
 
@@ -200,7 +187,7 @@ public class GroupedSkill extends LearnableSkill {
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.children = Arrays.stream(SPECIALIZATIONS.readBits(buffer).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.children = Arrays.stream(SPECIALIZATIONS.readBits(buffer).orElseThrow()).map(skill -> (LearnableSkill)skill).collect(Collectors.toList());
       this.selected = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
       this.maxSpentLearnPoints = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
       this.children.forEach(specialization -> specialization.setParent(this));
@@ -219,7 +206,9 @@ public class GroupedSkill extends LearnableSkill {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.children = Arrays.stream(SPECIALIZATIONS.readNbt(nbt.get("children")).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.children = Arrays.stream(SPECIALIZATIONS.readNbt(nbt.get("children")).orElseThrow())
+         .map(skill -> (LearnableSkill)skill)
+         .collect(Collectors.toList());
       this.selected = Adapters.INT.readNbt(nbt.get("selected")).orElse(0);
       this.maxSpentLearnPoints = Adapters.INT.readNbt(nbt.get("maxSpentLearnPoints")).orElse(0);
       this.children.forEach(child -> child.setParent(this));
@@ -238,7 +227,9 @@ public class GroupedSkill extends LearnableSkill {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.children = Arrays.stream(SPECIALIZATIONS.readJson(json.get("children")).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.children = Arrays.stream(SPECIALIZATIONS.readJson(json.get("children")).orElseThrow())
+         .map(skill -> (LearnableSkill)skill)
+         .collect(Collectors.toList());
       this.selected = Adapters.INT.readJson(json.get("selected")).orElse(0);
       this.maxSpentLearnPoints = Adapters.INT.readJson(json.get("maxSpentLearnPoints")).orElse(0);
       this.children.forEach(child -> child.setParent(this));

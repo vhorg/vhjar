@@ -787,6 +787,7 @@
   "block.the_vault.crake_pedestal": "Crake Pedestal",
   "block.the_vault.crake_column": "Crake Column",
   "block.the_vault.pylon": "Pylon",
+  "block.the_vault.grid_gateway": "Grid Gateway",
   "block.the_vault.enhancement_altar": "Enhancement Altar",
   "block.the_vault.modifier_workbench": "Modifier Workbench",
   "block.the_vault.modifier_discovery": "Modifier Archive",

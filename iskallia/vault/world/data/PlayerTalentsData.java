@@ -89,7 +89,7 @@ public class PlayerTalentsData extends SavedData {
             if (data.scheduledMerge.remove(player.getUUID())) {
                ModConfigs.TALENTS.get().ifPresent(tree -> {
                   SkillContext context = SkillContext.of(player);
-                  data.playerMap.get(player.getUUID()).mergeFrom(tree.copy(), context);
+                  data.playerMap.put(player.getUUID(), (TalentTree)data.playerMap.get(player.getUUID()).mergeFrom(tree.copy(), context));
                   PlayerVaultStats stats = PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player);
                   stats.setSkillPoints(context.getLearnPoints());
                   stats.setRegretPoints(context.getRegretPoints());

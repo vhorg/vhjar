@@ -1,14 +1,11 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "SWS",
+        "EWE",
         "TPT",
         "ETE"
     ],
     "key": {
-        "S": {
-            "item": "the_vault:eternal_soul"
-        },
         "W": {
             "item": "minecraft:wither_skeleton_skull"
         },

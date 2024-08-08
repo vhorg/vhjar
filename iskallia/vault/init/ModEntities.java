@@ -832,7 +832,7 @@ public class ModEntities {
       );
       LEVISHROOM = registerLiving(
          "levishroom",
-         Builder.of(LevishroomEntity::new, MobCategory.MONSTER).sized(0.875F, 0.4375F).clientTrackingRange(8),
+         Builder.of(LevishroomEntity::new, MobCategory.MONSTER).sized(0.875F, 0.95F).clientTrackingRange(8),
          MushroomEntity::createAttributes,
          event
       );

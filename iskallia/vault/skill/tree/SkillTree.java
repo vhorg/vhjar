@@ -11,9 +11,11 @@ import iskallia.vault.skill.base.SpecializedSkill;
 import iskallia.vault.skill.base.TickingSkill;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import net.minecraft.nbt.CompoundTag;
 
 public class SkillTree extends LearnableSkill implements TickingSkill {
@@ -98,6 +100,38 @@ public class SkillTree extends LearnableSkill implements TickingSkill {
    }
 
    @Override
+   public Skill mergeFrom(Skill other, SkillContext context) {
+      if (!(other instanceof SkillTree tree)) {
+         context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
+         return other;
+      } else {
+         LinkedHashMap idToSkill = new LinkedHashMap();
+         LinkedHashMap idToIndex = new LinkedHashMap();
+
+         for (int index = 0; index < tree.skills.size(); index++) {
+            Skill skill = tree.skills.get(index);
+            idToSkill.put(skill.getId(), skill);
+            idToIndex.put(skill.getId(), index);
+         }
+
+         for (Skill child : this.skills) {
+            Skill merged;
+            if (child.getId() != null && idToSkill.containsKey(child.getId())) {
+               merged = child.mergeFrom((Skill)idToSkill.get(child.getId()), context);
+            } else {
+               merged = child.mergeFrom(null, context);
+            }
+
+            if (idToIndex.containsKey(child.getId())) {
+               tree.skills.set((Integer)idToIndex.get(child.getId()), merged);
+            }
+         }
+
+         return tree;
+      }
+   }
+
+   @Override
    public void writeBits(BitBuffer buffer) {
       super.writeBits(buffer);
       SKILLS.writeBits(this.skills.toArray(Skill[]::new), buffer);
@@ -106,7 +140,7 @@ public class SkillTree extends LearnableSkill implements TickingSkill {
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.skills = Arrays.stream(SKILLS.readBits(buffer).orElseThrow()).toList();
+      this.skills = Arrays.stream(SKILLS.readBits(buffer).orElseThrow()).collect(Collectors.toList());
       this.skills.forEach(skill -> skill.setParent(this));
    }
 
@@ -121,7 +155,7 @@ public class SkillTree extends LearnableSkill implements TickingSkill {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.skills = Arrays.stream(SKILLS.readNbt(nbt.get("skills")).orElseThrow()).toList();
+      this.skills = Arrays.stream(SKILLS.readNbt(nbt.get("skills")).orElseThrow()).collect(Collectors.toList());
       this.skills.forEach(skill -> skill.setParent(this));
    }
 
@@ -136,7 +170,7 @@ public class SkillTree extends LearnableSkill implements TickingSkill {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.skills = Arrays.stream(SKILLS.readJson(json.get("skills")).orElseThrow()).toList();
+      this.skills = Arrays.stream(SKILLS.readJson(json.get("skills")).orElseThrow()).collect(Collectors.toList());
       this.skills.forEach(skill -> skill.setParent(this));
    }
 }
