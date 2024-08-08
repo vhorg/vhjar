@@ -30,10 +30,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class OfferingBossObjective extends Objective {
-   public static final SupplierKey<Objective> KEY = SupplierKey.of("offering_boss", Objective.class).with(Version.v1_0, OfferingBossObjective::new);
+   public static final SupplierKey<Objective> KEY = SupplierKey.of("offering_boss", Objective.class).with(Version.v1_27, OfferingBossObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Float> OBJECTIVE_PROBABILITY = FieldKey.of("objective_probability", Float.class)
-      .with(Version.v1_6, Adapters.FLOAT, DISK.all())
+      .with(Version.v1_27, Adapters.FLOAT, DISK.all())
       .register(FIELDS);
 
    protected OfferingBossObjective() {

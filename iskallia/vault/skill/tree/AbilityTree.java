@@ -6,14 +6,10 @@ import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.AbilityKnownOnesMessage;
 import iskallia.vault.skill.ability.effect.spi.core.Ability;
-import iskallia.vault.skill.base.LearnableSkill;
 import iskallia.vault.skill.base.Skill;
 import iskallia.vault.skill.base.SkillContext;
 import iskallia.vault.skill.base.SpecializedSkill;
 import iskallia.vault.skill.base.TieredSkill;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
@@ -124,43 +120,12 @@ public class AbilityTree extends SkillTree {
 
    @Override
    public Skill mergeFrom(Skill other, SkillContext context) {
-      if (!(super.mergeFrom(other, context) instanceof AbilityTree tree)) {
-         return this;
-      } else {
-         ArrayList copy = new ArrayList();
-         HashSet removed = new HashSet<>(this.skills.stream().map(Skill::getId).filter(Objects::nonNull).toList());
-
-         for (Skill skill : tree.skills) {
-            removed.remove(skill.getId());
-            Skill merging = this.getForId(skill.getId()).orElse(null);
-            Skill merged;
-            if (merging != null) {
-               merged = merging.mergeFrom(skill, context);
-            } else {
-               merged = skill;
-            }
-
-            if (merged != null) {
-               merged.setParent(this);
-               copy.add(merged);
-            }
-         }
-
-         this.skills = copy;
-         if (this.selected != null) {
-            this.selected = (SpecializedSkill)this.getForId(this.selected.getId()).filter(skill -> skill instanceof SpecializedSkill).orElse(null);
-         }
-
-         for (String id : removed) {
-            this.getForId(id).ifPresent(skill -> {
-               if (skill instanceof LearnableSkill learnable) {
-                  context.setLearnPoints(context.getLearnPoints() + learnable.getLearnPointCost());
-               }
-            });
-         }
-
-         return this;
+      other = super.mergeFrom(other, context);
+      if (other instanceof AbilityTree tree && this.selected != null && this.selected.getId() != null) {
+         tree.selected = (SpecializedSkill)tree.getForId(this.selected.getId()).filter(skill -> skill instanceof SpecializedSkill).orElse(null);
       }
+
+      return other;
    }
 
    @Override

@@ -28,7 +28,10 @@ import iskallia.vault.gear.attribute.VaultGearAttribute;
 import iskallia.vault.gear.attribute.VaultGearAttributeInstance;
 import iskallia.vault.gear.attribute.VaultGearAttributeRegistry;
 import iskallia.vault.gear.attribute.VaultGearModifier;
+import iskallia.vault.gear.attribute.ability.AbilityLevelAttribute;
+import iskallia.vault.gear.attribute.custom.EffectAvoidanceGearAttribute;
 import iskallia.vault.gear.attribute.type.VaultGearAttributeType;
+import iskallia.vault.gear.comparator.VaultGearAttributeComparator;
 import iskallia.vault.gear.data.AttributeGearData;
 import iskallia.vault.gear.data.VaultGearData;
 import iskallia.vault.gear.item.CuriosGearItem;
@@ -49,7 +52,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -74,14 +79,30 @@ import org.jetbrains.annotations.NotNull;
 public abstract class WardrobeScreen<T extends WardrobeContainer> extends AbstractElementContainerScreen<T> {
    private static final Map<Class<?>, WardrobeScreen.AttributeTypeHandler<?>> ATTRIBUTE_TYPE_HANDLERS = Map.of(
       Integer.class,
-      new WardrobeScreen.AttributeTypeHandler<>(100, v -> v == 0, v -> v > 0, v -> -v),
+      new WardrobeScreen.AttributeTypeHandler<>(100, v -> v == 0, v -> v > 0, v -> -v, (a1, a2) -> a1.getAttribute().equals(a2.getAttribute())),
       Float.class,
-      new WardrobeScreen.AttributeTypeHandler<>(99, v -> Math.abs(v) < 1.0E-4F, v -> v > 0.0F, v -> -v),
+      new WardrobeScreen.AttributeTypeHandler<>(99, v -> Math.abs(v) < 1.0E-4F, v -> v > 0.0F, v -> -v, (a1, a2) -> a1.getAttribute().equals(a2.getAttribute())),
       Double.class,
-      new WardrobeScreen.AttributeTypeHandler<>(98, v -> Math.abs(v) < 1.0E-4, v -> v > 0.0, v -> -v)
+      new WardrobeScreen.AttributeTypeHandler<>(98, v -> Math.abs(v) < 1.0E-4, v -> v > 0.0, v -> -v, (a1, a2) -> a1.getAttribute().equals(a2.getAttribute())),
+      AbilityLevelAttribute.class,
+      new WardrobeScreen.AttributeTypeHandler<>(
+         101,
+         v -> v.getLevelChange() == 0,
+         v -> v.getLevelChange() > 0,
+         v -> new AbilityLevelAttribute(v.getAbility(), -v.getLevelChange()),
+         (a1, a2) -> a1.getAttribute().equals(a2.getAttribute()) && a1.getValue().getAbility().equals(a2.getValue().getAbility())
+      ),
+      EffectAvoidanceGearAttribute.class,
+      new WardrobeScreen.AttributeTypeHandler<>(
+         102,
+         v -> v.getChance() == 0.0F,
+         v -> v.getChance() > 0.0F,
+         v -> new EffectAvoidanceGearAttribute(v.getEffect(), -v.getChance()),
+         (a1, a2) -> a1.getAttribute().equals(a2.getAttribute()) && a1.getValue().getEffect().equals(a2.getValue().getEffect())
+      )
    );
    private static final WardrobeScreen.AttributeTypeHandler<?> DEFAULT_ATTRIBUTE_TYPE_HANDLER = new WardrobeScreen.AttributeTypeHandler<>(
-      0, v -> false, v -> false, v -> v
+      0, v -> false, v -> false, v -> v, (a1, a2) -> false
    );
    private static final Set<VaultGearAttribute<?>> EXCLUDED_ATTRIBUTES = Set.of(ModGearAttributes.DURABILITY, ModGearAttributes.SOULBOUND);
    private static final Map<VaultGearAttribute<?>, Integer> ATTRIBUTES_ORDER = new LinkedHashMap<>();
@@ -147,13 +168,21 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
       private final Predicate<T> isZero;
       private final Predicate<T> isGreaterThanZero;
       private final int sortOrder;
-      private UnaryOperator<T> invert;
+      private final UnaryOperator<T> invert;
+      private final BiPredicate<VaultGearAttributeInstance<T>, VaultGearAttributeInstance<T>> isMatchingAttribute;
 
-      private AttributeTypeHandler(int sortOrder, Predicate<T> isZero, Predicate<T> isGreaterThanZero, UnaryOperator<T> invert) {
+      private AttributeTypeHandler(
+         int sortOrder,
+         Predicate<T> isZero,
+         Predicate<T> isGreaterThanZero,
+         UnaryOperator<T> invert,
+         BiPredicate<VaultGearAttributeInstance<T>, VaultGearAttributeInstance<T>> isMatchingAttribute
+      ) {
          this.isZero = isZero;
          this.isGreaterThanZero = isGreaterThanZero;
          this.sortOrder = sortOrder;
          this.invert = invert;
+         this.isMatchingAttribute = isMatchingAttribute;
       }
 
       public T invert(T value) {
@@ -170,6 +199,23 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
 
       public int getSortOrder() {
          return this.sortOrder;
+      }
+
+      public Optional<VaultGearAttributeInstance<T>> getMatchingAttribute(
+         Map<VaultGearAttribute<?>, List<VaultGearAttributeInstance<?>>> mergeableAttributes, VaultGearAttributeInstance<T> instance
+      ) {
+         List<VaultGearAttributeInstance<?>> possibleAttributes = mergeableAttributes.get(instance.getAttribute());
+         if (possibleAttributes != null && !possibleAttributes.isEmpty()) {
+            for (VaultGearAttributeInstance<?> possibleAttribute : possibleAttributes) {
+               if (this.isMatchingAttribute.test(instance, (VaultGearAttributeInstance<T>)possibleAttribute)) {
+                  return Optional.of((VaultGearAttributeInstance<T>)possibleAttribute);
+               }
+            }
+
+            return Optional.empty();
+         } else {
+            return Optional.empty();
+         }
       }
    }
 
@@ -288,7 +334,7 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
 
             List<VaultGearAttributeInstance<?>> addingAttributeInstances = new ArrayList<>();
             List<VaultGearAttributeInstance<?>> removingAttributeInstances = new ArrayList<>();
-            Map<VaultGearAttribute<?>, VaultGearAttributeInstance<?>> mergeableAttributes = new HashMap<>();
+            Map<VaultGearAttribute<?>, List<VaultGearAttributeInstance<?>>> mergeableAttributes = new HashMap<>();
             this.addEquipmentSlotsAttributes(
                mergeableAttributes,
                removingAttributeInstances,
@@ -312,7 +358,7 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
             );
             this.addCuriosAttributes(player, mergeableAttributes, addingAttributeInstances, ((WardrobeContainer.Gear)this.getMenu()).getStoredCurios(), false);
             mergeableAttributes.values()
-               .forEach(instance -> addMergeableAttribute(addingAttributeInstances, removingAttributeInstances, (VaultGearAttributeInstance<?>)instance));
+               .forEach(instance -> addMergeableAttribute(addingAttributeInstances, removingAttributeInstances, (List<VaultGearAttributeInstance<?>>)instance));
             addingAttributeInstances.sort(WardrobeScreen.GearAttributeInstanceRegistryOrderComparator.INSTANCE);
             removingAttributeInstances.sort(WardrobeScreen.GearAttributeInstanceRegistryOrderComparator.INSTANCE);
             if (removingAttributeInstances.isEmpty() && addingAttributeInstances.isEmpty()) {
@@ -405,21 +451,35 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
       private static <T> void addMergeableAttribute(
          List<VaultGearAttributeInstance<?>> addingAttributeInstances,
          List<VaultGearAttributeInstance<?>> removingAttributeInstances,
-         VaultGearAttributeInstance<T> instance
+         List<VaultGearAttributeInstance<?>> instances
       ) {
-         WardrobeScreen.AttributeTypeHandler<T> ath = WardrobeScreen.getAttributeTypeHandler(instance.getValue());
-         if (!ath.isZero(instance.getValue())) {
-            if (ath.isGreaterThanZero(instance.getValue())) {
-               addingAttributeInstances.add(instance);
-            } else {
-               instance.setValue(ath.invert(instance.getValue()));
-               removingAttributeInstances.add(instance);
-            }
+         if (!instances.isEmpty()) {
+            Object firstInstanceValue = instances.get(0).getValue();
+            addMergeableAttribute(addingAttributeInstances, removingAttributeInstances, instances, firstInstanceValue);
          }
       }
 
+      private static <T> void addMergeableAttribute(
+         List<VaultGearAttributeInstance<?>> addingAttributeInstances,
+         List<VaultGearAttributeInstance<?>> removingAttributeInstances,
+         List<VaultGearAttributeInstance<?>> instances,
+         T firstInstanceValue
+      ) {
+         WardrobeScreen.AttributeTypeHandler<T> ath = WardrobeScreen.getAttributeTypeHandler(firstInstanceValue);
+         instances.forEach(inst -> {
+            if (!ath.isZero((T)inst.getValue())) {
+               if (ath.isGreaterThanZero((T)inst.getValue())) {
+                  addingAttributeInstances.add((VaultGearAttributeInstance<?>)inst);
+               } else {
+                  ((VaultGearAttributeInstance<T>)inst).setValue(ath.invert((T)inst.getValue()));
+                  removingAttributeInstances.add((VaultGearAttributeInstance<?>)inst);
+               }
+            }
+         });
+      }
+
       private void addEquipmentSlotsAttributes(
-         Map<VaultGearAttribute<?>, VaultGearAttributeInstance<?>> mergeableAttributes,
+         Map<VaultGearAttribute<?>, List<VaultGearAttributeInstance<?>>> mergeableAttributes,
          List<VaultGearAttributeInstance<?>> attributeInstances,
          Function<EquipmentSlot, ItemStack> getItemBySlot,
          boolean inverted
@@ -468,7 +528,7 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
       }
 
       private void addAttribute(
-         Map<VaultGearAttribute<?>, VaultGearAttributeInstance<?>> mergeableAttributes,
+         Map<VaultGearAttribute<?>, List<VaultGearAttributeInstance<?>>> mergeableAttributes,
          List<VaultGearAttributeInstance<?>> attributeInstances,
          boolean inverted,
          VaultGearAttributeInstance<?> instance
@@ -484,34 +544,35 @@ public abstract class WardrobeScreen<T extends WardrobeContainer> extends Abstra
       }
 
       private <T> void mergeAttribute(
-         Map<VaultGearAttribute<?>, VaultGearAttributeInstance<?>> mergeableAttributes,
+         Map<VaultGearAttribute<?>, List<VaultGearAttributeInstance<?>>> mergeableAttributes,
          boolean inverted,
          VaultGearAttributeInstance<T> instance,
          VaultGearAttribute<?> attribute
       ) {
-         if (mergeableAttributes.containsKey(attribute)) {
-            VaultGearAttributeInstance<T> mergeIntoInstance = (VaultGearAttributeInstance<T>)mergeableAttributes.get(attribute);
+         WardrobeScreen.AttributeTypeHandler<T> ath = WardrobeScreen.getAttributeTypeHandler(instance.getValue());
+         ath.getMatchingAttribute(mergeableAttributes, instance).ifPresentOrElse(mergeIntoInstance -> {
             T value = instance.getValue();
             if (inverted) {
-               WardrobeScreen.AttributeTypeHandler<T> ath = WardrobeScreen.getAttributeTypeHandler(value);
                value = ath.invert(value);
             }
 
-            mergeIntoInstance.setValue(mergeIntoInstance.getAttribute().getAttributeComparator().merge(mergeIntoInstance.getValue(), value).orElseThrow());
-         } else {
+            VaultGearAttributeComparator<T> attributeComparator = mergeIntoInstance.getAttribute().getAttributeComparator();
+            if (attributeComparator != null) {
+               attributeComparator.merge(mergeIntoInstance.getValue(), value).ifPresent(mergeIntoInstance::setValue);
+            }
+         }, () -> {
             T value = instance.getValue();
             if (inverted) {
-               WardrobeScreen.AttributeTypeHandler<T> ath = WardrobeScreen.getAttributeTypeHandler(value);
                instance.setValue(ath.invert(value));
             }
 
-            mergeableAttributes.put(attribute, instance);
-         }
+            mergeableAttributes.computeIfAbsent(attribute, k -> new ArrayList<>()).add(instance);
+         });
       }
 
       private void addCuriosAttributes(
          Player player,
-         Map<VaultGearAttribute<?>, VaultGearAttributeInstance<?>> mergeableAttributes,
+         Map<VaultGearAttribute<?>, List<VaultGearAttributeInstance<?>>> mergeableAttributes,
          List<VaultGearAttributeInstance<?>> attributeInstances,
          Map<String, List<Tuple<ItemStack, Integer>>> curiosItemStacks,
          boolean inverted

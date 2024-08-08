@@ -278,7 +278,8 @@ public class BingoRenderer {
       @OnlyIn(Dist.CLIENT)
       public boolean onMouseScrolled(BingoTask task, double delta, BingoRendererContext context) {
          Minecraft minecraft = Minecraft.getInstance();
-         context.setExpandedView(minecraft.screen == null && InputConstants.isKeyDown(minecraft.getWindow().getWindow(), 258));
+         int keyValue = ModKeybinds.openBingo.getKey().getValue();
+         context.setExpandedView(minecraft.screen == null && keyValue > 0 && InputConstants.isKeyDown(minecraft.getWindow().getWindow(), keyValue));
          if (context.isExpandedView()) {
             ModNetwork.CHANNEL.sendToServer(new BingoScrollMessage(delta));
             return true;

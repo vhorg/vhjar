@@ -108,7 +108,7 @@ public class PlayerAbilitiesData extends SavedData {
             if (data.scheduledMerge.remove(player.getUUID())) {
                ModConfigs.ABILITIES.get().ifPresent(tree -> {
                   SkillContext context = SkillContext.of(player);
-                  data.playerMap.get(player.getUUID()).mergeFrom(tree.copy(), context);
+                  data.playerMap.put(player.getUUID(), (AbilityTree)data.playerMap.get(player.getUUID()).mergeFrom(tree.copy(), context));
                   PlayerVaultStats stats = PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player);
                   stats.setSkillPoints(context.getLearnPoints());
                   stats.setRegretPoints(context.getRegretPoints());

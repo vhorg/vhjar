@@ -40,7 +40,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class GridGatewayObjective extends Objective {
-   public static final SupplierKey<Objective> KEY = SupplierKey.of("grid_gateway", Objective.class).with(Version.v1_13, GridGatewayObjective::new);
+   public static final SupplierKey<Objective> KEY = SupplierKey.of("grid_gateway", Objective.class).with(Version.v1_27, GridGatewayObjective::new);
    public static final FieldRegistry FIELDS = Objective.FIELDS.merge(new FieldRegistry());
    public static final FieldKey<Float> OBJECTIVE_PROBABILITY = FieldKey.of("objective_probability", Float.class)
       .with(Version.v1_27, Adapters.FLOAT, DISK.all())

@@ -15,7 +15,6 @@ import iskallia.vault.skill.tree.TalentTree;
 import iskallia.vault.snapshot.AttributeSnapshot;
 import iskallia.vault.snapshot.AttributeSnapshotHelper;
 import iskallia.vault.util.MiscUtils;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -250,45 +249,20 @@ public class TieredSkill extends LearnableSkill implements TickingSkill, Cooldow
 
    @Override
    public Skill mergeFrom(Skill other, SkillContext context) {
-      other = super.mergeFrom(other, context);
+      int spentPoints = this.getSpentLearnPoints();
       if (!(other instanceof TieredSkill tiered)) {
-         context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
+         context.setLearnPoints(context.getLearnPoints() + spentPoints);
          return other;
       } else {
-         int currentCost = this.getSpentLearnPoints();
-         int newCost = tiered.getSpentLearnPoints(this.tier);
-         if (currentCost < newCost) {
-            context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
-            return other;
-         } else {
-            context.setLearnPoints(context.getLearnPoints() + currentCost - newCost);
-            List<LearnableSkill> copy = new ArrayList<>();
+         int previousPoints = context.getLearnPoints();
+         context.setLearnPoints(spentPoints);
 
-            for (int i = 0; i < tiered.tiers.size(); i++) {
-               Skill merging = i >= this.tiers.size() ? null : this.tiers.get(i);
-               Skill merged;
-               if (merging != null) {
-                  merged = merging.mergeFrom(tiered.tiers.get(i), context);
-               } else {
-                  merged = tiered.tiers.get(i).copy();
-               }
-
-               if (merged instanceof LearnableSkill) {
-                  merged.setParent(this);
-                  copy.add((LearnableSkill)merged);
-               }
-            }
-
-            this.tier = this.tier > copy.size() ? 0 : this.tier;
-            this.tiers = copy;
-            this.maxLearnableTier = tiered.getMaxLearnableTier();
-
-            while (this.tier > this.maxLearnableTier) {
-               this.regret(context);
-            }
-
-            return this;
+         while (tiered.canLearn(context)) {
+            tiered.learn(context);
          }
+
+         context.setLearnPoints(context.getLearnPoints() + previousPoints);
+         return other;
       }
    }
 

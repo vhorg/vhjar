@@ -131,8 +131,12 @@ public class SkillAltarData extends SavedData {
             SkillAltarData data = get(player.getLevel());
             if (data.scheduledMerge.remove(player.getUUID())) {
                for (SkillAltarData.SkillTemplate template : data.playerSkillTemplates.get(player.getUUID()).values()) {
-                  ModConfigs.ABILITIES.get().ifPresent(tree -> template.abilities.mergeFrom(tree.copy(), SkillContext.empty(0, 0, 0)));
-                  ModConfigs.TALENTS.get().ifPresent(tree -> template.talents.mergeFrom(tree.copy(), SkillContext.empty(0, 0, 0)));
+                  ModConfigs.ABILITIES
+                     .get()
+                     .ifPresent(tree -> template.abilities = (AbilityTree)template.abilities.mergeFrom(tree.copy(), SkillContext.empty(0, 0, 0)));
+                  ModConfigs.TALENTS
+                     .get()
+                     .ifPresent(tree -> template.talents = (TalentTree)template.talents.mergeFrom(tree.copy(), SkillContext.empty(0, 0, 0)));
                }
             }
          }
@@ -232,8 +236,8 @@ public class SkillAltarData extends SavedData {
    }
 
    public static class SkillTemplate {
-      private final AbilityTree abilities;
-      private final TalentTree talents;
+      private AbilityTree abilities;
+      private TalentTree talents;
       private SkillAltarData.SkillIcon icon;
 
       public SkillTemplate(AbilityTree abilities, TalentTree talents, SkillAltarData.SkillIcon icon) {
@@ -331,8 +335,7 @@ public class SkillAltarData extends SavedData {
             String[] talentsString = split[1].split("\\|");
             String[] iconString = split[2].split("\\|");
             SkillContext context = new SkillContext(100, 1000, 1000, SkillSource.empty());
-            AbilityTree abilities = new AbilityTree();
-            abilities.mergeFrom(ModConfigs.ABILITIES.get().orElse(null), context);
+            AbilityTree abilities = (AbilityTree)new AbilityTree().mergeFrom(ModConfigs.ABILITIES.get().orElse(null), context);
 
             for (String abilityString : abilitiesString) {
                String[] abilitySplit = abilityString.split(":");

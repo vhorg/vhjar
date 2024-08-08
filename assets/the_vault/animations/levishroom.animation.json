@@ -2,7 +2,7 @@
 	"format_version": "1.8.0",
 	"animations": {
 		"animation.levishroom.bite": {
-			"animation_length": 0.95833,
+			"animation_length": 0.9583,
 			"bones": {
 				"body1": {
 					"rotation": {
@@ -93,7 +93,7 @@
 		},
 		"animation.levishroom.walk": {
 			"loop": true,
-			"animation_length": 1.16667,
+			"animation_length": 1.1667,
 			"bones": {
 				"body1": {
 					"rotation": {

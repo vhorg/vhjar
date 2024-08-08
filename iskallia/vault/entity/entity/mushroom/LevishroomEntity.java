@@ -20,7 +20,7 @@ import software.bernie.geckolib3.util.GeckoLibUtil;
 public class LevishroomEntity extends MushroomEntity implements IAnimatable {
    protected static final AnimationBuilder IDLE_ANIM = new AnimationBuilder().addAnimation("animation.levishroom.idle", EDefaultLoopTypes.LOOP);
    protected static final AnimationBuilder WALK_ANIM = new AnimationBuilder().addAnimation("animation.levishroom.walk", EDefaultLoopTypes.LOOP);
-   protected static final AnimationBuilder BITE_ANIM = new AnimationBuilder().addAnimation("animation.levishroom.bite", EDefaultLoopTypes.PLAY_ONCE);
+   protected static final AnimationBuilder BITE_ANIM = new AnimationBuilder().addAnimation("animation.levishroom.bite", EDefaultLoopTypes.LOOP);
    private final AnimationFactory factory = GeckoLibUtil.createFactory(this);
 
    public LevishroomEntity(EntityType<? extends Monster> type, Level world) {
@@ -37,7 +37,7 @@ public class LevishroomEntity extends MushroomEntity implements IAnimatable {
          return false;
       } else {
          if (target instanceof LivingEntity livingTarget && this.level.random.nextFloat() <= 0.4) {
-            livingTarget.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 60, 2, true, true));
+            livingTarget.addEffect(new MobEffectInstance(MobEffects.LEVITATION, 20, 1, true, true));
          }
 
          return true;
@@ -45,13 +45,28 @@ public class LevishroomEntity extends MushroomEntity implements IAnimatable {
    }
 
    public void registerControllers(AnimationData data) {
-      data.addAnimationController(new AnimationController(this, "Walking", 5.0F, this::walkAnimController));
-      data.addAnimationController(new AnimationController(this, "Idle", 5.0F, this::idleAnimController));
-      data.addAnimationController(new AnimationController(this, "Attack", 5.0F, this::attackAnimController));
+      data.addAnimationController(new AnimationController(this, "Walking", 0.0F, this::walkAnimController));
+      data.addAnimationController(new AnimationController(this, "Idle", 0.0F, this::idleAnimController));
+      data.addAnimationController(new AnimationController(this, "Attack", 0.0F, this::attackAnimController));
+   }
+
+   protected void updateSwingTime() {
+      int i = 15;
+      if (this.swinging) {
+         this.swingTime++;
+         if (this.swingTime >= i) {
+            this.swingTime = 0;
+            this.swinging = false;
+         }
+      } else {
+         this.swingTime = 0;
+      }
+
+      this.attackAnim = (float)this.swingTime / i;
    }
 
    private PlayState idleAnimController(AnimationEvent<LevishroomEntity> event) {
-      if (!event.isMoving()) {
+      if (!event.isMoving() && this.attackAnim == 0.0F) {
          event.getController().setAnimation(IDLE_ANIM);
          return PlayState.CONTINUE;
       } else {
@@ -60,7 +75,7 @@ public class LevishroomEntity extends MushroomEntity implements IAnimatable {
    }
 
    private PlayState walkAnimController(AnimationEvent<LevishroomEntity> event) {
-      if (event.isMoving()) {
+      if (event.isMoving() && this.attackAnim == 0.0F) {
          event.getController().setAnimation(WALK_ANIM);
          return PlayState.CONTINUE;
       } else {
