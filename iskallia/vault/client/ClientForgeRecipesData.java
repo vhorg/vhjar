@@ -11,7 +11,7 @@ import java.util.Map;
 public class ClientForgeRecipesData {
    private static final Map<ForgeRecipeType, List<VaultForgeRecipe>> recipes = new HashMap<>();
 
-   public static List<VaultForgeRecipe> getRecipes(ForgeRecipeType... types) {
+   public static List<VaultForgeRecipe> getRecipes(List<ForgeRecipeType> types) {
       List<VaultForgeRecipe> combinedRecipes = new ArrayList<>();
 
       for (ForgeRecipeType type : types) {

@@ -50,6 +50,7 @@ public class SweepingLuckyHitTalent extends LuckyHitTalent {
                   nearby.remove(attacked);
                   nearby.remove(attacker);
                   nearby.removeIf(mob -> mob instanceof EternalEntity);
+                  nearby.removeIf(mob -> mob.isInvulnerableTo(event.getSource()));
                   nearby.forEach(
                      mob -> {
                         Vec3 movement = mob.getDeltaMovement();

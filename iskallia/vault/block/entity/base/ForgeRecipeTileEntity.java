@@ -3,7 +3,11 @@ package iskallia.vault.block.entity.base;
 import iskallia.vault.block.base.FacedBlock;
 import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedInventory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -24,8 +28,11 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.CapabilityItemHandler;
 
-public abstract class ForgeRecipeTileEntity extends BlockEntity implements MenuProvider {
+public abstract class ForgeRecipeTileEntity extends BlockEntity implements MenuProvider, FilteredInputInventoryTileEntity {
    private final OverSizedInventory inventory;
    private final ResultContainer output = new ResultContainer() {
       public void setChanged() {
@@ -33,12 +40,13 @@ public abstract class ForgeRecipeTileEntity extends BlockEntity implements MenuP
          ForgeRecipeTileEntity.this.setChanged();
       }
    };
-   private final ForgeRecipeType[] supportedRecipeTypes;
+   private final List<ForgeRecipeType> supportedRecipeTypes;
 
    public ForgeRecipeTileEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, int inventorySize, ForgeRecipeType... supportedRecipeTypes) {
       super(type, pos, state);
-      this.inventory = new OverSizedInventory(inventorySize, this);
-      this.supportedRecipeTypes = supportedRecipeTypes;
+      this.inventory = new OverSizedInventory.FilteredInsert(inventorySize, this, this::canInsertItem);
+      this.supportedRecipeTypes = new ArrayList<>();
+      this.supportedRecipeTypes.addAll(Arrays.asList(supportedRecipeTypes));
    }
 
    public OverSizedInventory getInventory() {
@@ -51,12 +59,29 @@ public abstract class ForgeRecipeTileEntity extends BlockEntity implements MenuP
 
    protected abstract AbstractContainerMenu createMenu(int var1, Inventory var2);
 
-   public ForgeRecipeType[] getSupportedRecipeTypes() {
+   public List<ForgeRecipeType> getSupportedRecipeTypes() {
       return this.supportedRecipeTypes;
    }
 
    public boolean stillValid(Player player) {
       return this.getLevel() != null && this.getLevel().getBlockEntity(this.getBlockPos()) == this ? this.getInventory().stillValid(player) : false;
+   }
+
+   @Override
+   public boolean canInsertItem(int slot, @Nonnull ItemStack stack) {
+      return stack.isEmpty()
+         ? false
+         : this.getSupportedRecipeTypes().stream().anyMatch(type -> type.getRecipeConfig().getInputItemCache().contains(stack.getItem()));
+   }
+
+   @Override
+   public boolean isInventorySideAccessible(@Nullable Direction side) {
+      return true;
+   }
+
+   @Nonnull
+   public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+      return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.getFilteredInputCapability(this.inventory, side) : super.getCapability(cap, side);
    }
 
    public Component getDisplayName() {

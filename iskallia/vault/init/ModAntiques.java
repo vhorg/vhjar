@@ -4,7 +4,9 @@ import iskallia.vault.VaultMod;
 import iskallia.vault.antique.Antique;
 import iskallia.vault.antique.condition.AntiqueCondition;
 import iskallia.vault.antique.condition.AntiqueConditionAnd;
+import iskallia.vault.antique.condition.AntiqueConditionChance;
 import iskallia.vault.antique.condition.AntiqueConditionEntityGroup;
+import iskallia.vault.antique.condition.AntiqueConditionKey;
 import iskallia.vault.antique.condition.AntiqueConditionLevel;
 import iskallia.vault.antique.condition.AntiqueConditionNegate;
 import iskallia.vault.antique.condition.AntiqueConditionOr;
@@ -67,8 +69,8 @@ public class ModAntiques {
       public static final AntiqueCondition.Provider LEVEL = simple("level", AntiqueConditionLevel::new);
       public static final AntiqueCondition.Provider TYPE = simple("type", AntiqueConditionType::new);
       public static final AntiqueCondition.Provider TAG = simple("tag", AntiqueConditionTag::new);
-      public static final AntiqueCondition.Provider KEY = simple("key", AntiqueConditionTag::new);
-      public static final AntiqueCondition.Provider CHANCE = simple("chance", AntiqueConditionTag::new);
+      public static final AntiqueCondition.Provider KEY = simple("key", AntiqueConditionKey::new);
+      public static final AntiqueCondition.Provider CHANCE = simple("chance", AntiqueConditionChance::new);
       public static final AntiqueCondition.Provider ENTITY_GROUP = simple("entity_group", AntiqueConditionEntityGroup::new);
 
       public static void registerAntiqueConditions(Register<AntiqueCondition.Provider> event) {

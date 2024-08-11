@@ -36,6 +36,7 @@ public class SweepingOnKillTalent extends OnKillTalent {
             nearby.remove(attacked);
             nearby.remove(attacker);
             nearby.removeIf(mobx -> mobx instanceof EternalEntity);
+            nearby.removeIf(mobx -> mobx.isInvulnerableTo(event.getSource()));
             double damage = (float)attacker.getAttributeValue(Attributes.ATTACK_DAMAGE);
             float multiplier = AttackScaleHelper.getLastAttackScale(attacker);
             damage *= 0.2F + multiplier * multiplier * 0.8F;

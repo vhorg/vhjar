@@ -42,6 +42,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.levelgen.GenerationStep.Decoration;
@@ -67,6 +68,7 @@ public class VaultMod {
    public static final Logger LOGGER = LogManager.getLogger();
    public static ResourceKey<Level> ARENA_KEY = ResourceKey.create(Registry.DIMENSION_REGISTRY, id("arena"));
    public static ResourceKey<Level> OTHER_SIDE_KEY = ResourceKey.create(Registry.DIMENSION_REGISTRY, id("the_other_side"));
+   public static DamageSource DMG_VAULT_TIMER = new DamageSource("vault_timer").bypassArmor().bypassInvul().bypassMagic();
 
    public VaultMod() {
       MinecraftForge.EVENT_BUS.addListener(EventPriority.NORMAL, this::onCommandRegister);

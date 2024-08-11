@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javax.annotation.Nullable;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -26,8 +27,12 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+@EventBusSubscriber
 public class PlayerResearchesData extends SavedData {
    protected static final String DATA_NAME = "the_vault_PlayerResearches";
    private final Map<UUID, ResearchTree> playerMap = new HashMap<>();
@@ -51,6 +56,31 @@ public class PlayerResearchesData extends SavedData {
       }
 
       return this.playerMap.computeIfAbsent(uuid, id -> ResearchTree.empty());
+   }
+
+   @SubscribeEvent
+   public static void onServerTick(ServerTickEvent event) {
+      MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+      if (server.getTickCount() % 20 == 0) {
+         PlayerResearchesData data = get(server.overworld());
+         AtomicBoolean dirty = new AtomicBoolean(false);
+
+         for (Research research : ModConfigs.RESEARCHES.getAll()) {
+            if (research.getCost() == 0) {
+               data.playerMap.forEach((uuid, researchTree) -> {
+                  if (!researchTree.isResearched(research)) {
+                     researchTree.research(research);
+                     dirty.set(true);
+                  }
+               });
+            }
+         }
+
+         if (dirty.get()) {
+            data.syncAll(server);
+            data.setDirty();
+         }
+      }
    }
 
    public PlayerResearchesData research(ServerPlayer player, Research research) {

@@ -16,26 +16,38 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 public enum ForgeRecipeType {
-   GEAR(GearForgeRecipe::new, () -> ModConfigs.GEAR_RECIPES::getRecipe),
-   JEWEL(JewelForgeRecipe::new, () -> ModConfigs.JEWEL_RECIPES::getRecipe),
-   TRINKET(TrinketForgeRecipe::new, () -> ModConfigs.TRINKET_RECIPES::getRecipe),
-   TOOL(ToolForgeRecipe::new, () -> ModConfigs.TOOL_RECIPES::getRecipe),
-   INSCRIPTION(InscriptionForgeRecipe::new, () -> ModConfigs.INSCRIPTION_RECIPES::getRecipe),
-   CATALYST(CatalystForgeRecipe::new, () -> ModConfigs.CATALYST_RECIPES::getRecipe);
+   GEAR(GearForgeRecipe::new, () -> ModConfigs.GEAR_RECIPES),
+   JEWEL(JewelForgeRecipe::new, () -> ModConfigs.JEWEL_RECIPES),
+   TRINKET(TrinketForgeRecipe::new, () -> ModConfigs.TRINKET_RECIPES),
+   TOOL(ToolForgeRecipe::new, () -> ModConfigs.TOOL_RECIPES),
+   INSCRIPTION(InscriptionForgeRecipe::new, () -> ModConfigs.INSCRIPTION_RECIPES),
+   CATALYST(CatalystForgeRecipe::new, () -> ModConfigs.CATALYST_RECIPES);
 
    private final BiFunction<ResourceLocation, ItemStack, ? extends VaultForgeRecipe> recipeClassCtor;
+   private final Supplier<ForgeRecipesConfig<?, ?>> configSupplier;
    private final Supplier<Function<ResourceLocation, VaultForgeRecipe>> recipeGetter;
 
+   private ForgeRecipeType(BiFunction<ResourceLocation, ItemStack, VaultForgeRecipe> recipeClassCtor, Supplier<ForgeRecipesConfig<?, ?>> configSupplier) {
+      this(recipeClassCtor, configSupplier, () -> configSupplier.get()::getRecipe);
+   }
+
    private ForgeRecipeType(
-      BiFunction<ResourceLocation, ItemStack, VaultForgeRecipe> recipeClassCtor, Supplier<Function<ResourceLocation, VaultForgeRecipe>> recipeGetter
+      BiFunction<ResourceLocation, ItemStack, ? extends VaultForgeRecipe> recipeClassCtor,
+      Supplier<ForgeRecipesConfig<?, ?>> configSupplier,
+      Supplier<Function<ResourceLocation, VaultForgeRecipe>> recipeGetter
    ) {
       this.recipeClassCtor = recipeClassCtor;
+      this.configSupplier = configSupplier;
       this.recipeGetter = recipeGetter;
    }
 
    @Nullable
    public VaultForgeRecipe getRecipe(ResourceLocation id) {
       return this.recipeGetter.get().apply(id);
+   }
+
+   public ForgeRecipesConfig<?, ?> getRecipeConfig() {
+      return this.configSupplier.get();
    }
 
    public VaultForgeRecipe makeRecipe(ResourceLocation id, ItemStack stack) {

@@ -96,14 +96,17 @@ public class StonefallSnowAbility extends AbstractStonefallAbility {
             float percentAbilityPowerDealt = event.getDamageMultiplier();
             Level level = player.level;
             if (!(dist < 3.0F)) {
+               DamageSource srcPlayerAttack = DamageSource.playerAttack(player);
+
                for (StonefallSnowAbility ability : abilities.getAll(StonefallSnowAbility.class, Skill::isUnlocked)) {
                   float radius = ability.getRadius(player) + Mth.clamp(dist / 3.75F, 0.0F, 8.0F);
                   List<LivingEntity> nearby = EntityHelper.getNearby(level, player.blockPosition(), radius, LivingEntity.class);
                   nearby.removeIf(mob -> mob instanceof EternalEntity || mob instanceof ServerPlayer);
+                  nearby.removeIf(mob -> mob.isInvulnerableTo(srcPlayerAttack));
                   float damage = AbilityPowerHelper.getAbilityPower(player) * ability.getDamageMultiplier();
                   nearby.forEach(mob -> ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
                      EntityHelper.knockbackWithStrength(mob, player, 0.2F);
-                     mob.hurt(DamageSource.playerAttack(player), damage);
+                     mob.hurt(srcPlayerAttack, damage);
                   })));
                   event.setDamageMultiplier(Mth.clamp(1.0F - ability.getDamageReduction(), 0.0F, 1.0F));
                   ModNetwork.CHANNEL

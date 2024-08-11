@@ -23,7 +23,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -86,7 +85,7 @@ public class TotemMobDamageTileEntity extends TotemTileEntity {
    }
 
    private void hurtEntities(List<LivingEntity> entityList, Player player, float damagePercent) {
-      float damage = AbilityPowerHelper.getAbilityPower((ServerPlayer)player) * damagePercent;
+      float damage = AbilityPowerHelper.getAbilityPower(player) * damagePercent;
       ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_TOTEM_ATTACKING.runIfNotSet(() -> {
          for (LivingEntity livingEntity : entityList) {
             Vec3 movement = livingEntity.getDeltaMovement();

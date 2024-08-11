@@ -161,6 +161,11 @@ public class VaultGearHelper {
          addAttribute(builder, Attributes.ARMOR, armor, identifier);
       }
 
+      if (data.has(ModGearAttributes.ARMOR_PERCENTILE)) {
+         double incArmor = data.get(ModGearAttributes.ARMOR_PERCENTILE, VaultGearAttributeTypeMerger.floatSum()).floatValue();
+         addAttribute(builder, Attributes.ARMOR, incArmor, identifier, Operation.MULTIPLY_BASE);
+      }
+
       if (data.has(ModGearAttributes.ARMOR_TOUGHNESS)) {
          double armorToughness = data.get(ModGearAttributes.ARMOR_TOUGHNESS, VaultGearAttributeTypeMerger.intSum()).intValue();
          addAttribute(builder, Attributes.ARMOR_TOUGHNESS, armorToughness, identifier);

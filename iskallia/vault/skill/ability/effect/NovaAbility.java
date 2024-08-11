@@ -42,19 +42,21 @@ public class NovaAbility extends AbstractNovaAbility {
          DamageSource damageSource = DamageSource.playerAttack(player);
 
          for (LivingEntity entity : targetEntities) {
-            float damageModifier = this.getDamageModifier(this.getRadius(player), player.distanceTo(entity));
-            ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
-               if (entity.hurt(damageSource, attackDamage * damageModifier) && !Mth.equal(this.getKnockbackStrengthMultiplier(), 0.0F)) {
-                  double dx = pos.x - entity.getX();
-                  double dz = pos.z - entity.getZ();
-                  if (dx * dx + dz * dz < 1.0E-4) {
-                     dx = (Math.random() - Math.random()) * 0.01;
-                     dz = (Math.random() - Math.random()) * 0.01;
-                  }
+            if (!entity.isInvulnerableTo(damageSource)) {
+               float damageModifier = this.getDamageModifier(this.getRadius(player), player.distanceTo(entity));
+               ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> {
+                  if (entity.hurt(damageSource, attackDamage * damageModifier) && !Mth.equal(this.getKnockbackStrengthMultiplier(), 0.0F)) {
+                     double dx = pos.x - entity.getX();
+                     double dz = pos.z - entity.getZ();
+                     if (dx * dx + dz * dz < 1.0E-4) {
+                        dx = (Math.random() - Math.random()) * 0.01;
+                        dz = (Math.random() - Math.random()) * 0.01;
+                     }
 
-                  entity.knockback(0.4F * this.getKnockbackStrengthMultiplier(), dx, dz);
-               }
-            }));
+                     entity.knockback(0.4F * this.getKnockbackStrengthMultiplier(), dx, dz);
+                  }
+               }));
+            }
          }
 
          return Ability.ActionResult.successCooldownImmediate();

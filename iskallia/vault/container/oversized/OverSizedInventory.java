@@ -130,4 +130,22 @@ public class OverSizedInventory implements Container {
    public void clearContent() {
       this.contents.clear();
    }
+
+   public static class FilteredInsert extends OverSizedInventory {
+      private final BiPredicate<Integer, ItemStack> canInsert;
+
+      public FilteredInsert(int size, BlockEntity tile, BiPredicate<Integer, ItemStack> canInsert) {
+         super(size, tile);
+         this.canInsert = canInsert;
+      }
+
+      public FilteredInsert(int size, Runnable onChange, Predicate<Player> stillValid, BiPredicate<Integer, ItemStack> canInsert) {
+         super(size, onChange, stillValid);
+         this.canInsert = canInsert;
+      }
+
+      public boolean canPlaceItem(int slot, ItemStack stack) {
+         return this.canInsert.test(slot, stack);
+      }
+   }
 }

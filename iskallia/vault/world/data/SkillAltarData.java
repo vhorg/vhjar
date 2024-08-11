@@ -335,7 +335,7 @@ public class SkillAltarData extends SavedData {
             String[] talentsString = split[1].split("\\|");
             String[] iconString = split[2].split("\\|");
             SkillContext context = new SkillContext(100, 1000, 1000, SkillSource.empty());
-            AbilityTree abilities = (AbilityTree)new AbilityTree().mergeFrom(ModConfigs.ABILITIES.get().orElse(null), context);
+            AbilityTree abilities = ModConfigs.ABILITIES.get().map(Skill::copy).orElseGet(AbilityTree::new);
 
             for (String abilityString : abilitiesString) {
                String[] abilitySplit = abilityString.split(":");

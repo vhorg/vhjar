@@ -2,6 +2,7 @@ package iskallia.vault.core.vault.objective;
 
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
+import iskallia.vault.VaultMod;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.adapter.Adapters;
 import iskallia.vault.core.data.compound.ItemStackList;
@@ -62,7 +63,7 @@ public class DeathObjective extends Objective {
             }
 
             if (this.has(KILL_ALL) || this.has(TIMER_DEATH) && timeLeft < 0) {
-               player.kill();
+               player.hurt(VaultMod.DMG_VAULT_TIMER, Float.MAX_VALUE);
             }
 
             if (player.isDeadOrDying()) {

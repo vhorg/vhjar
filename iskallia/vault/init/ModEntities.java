@@ -832,7 +832,7 @@ public class ModEntities {
       );
       LEVISHROOM = registerLiving(
          "levishroom",
-         Builder.of(LevishroomEntity::new, MobCategory.MONSTER).sized(0.875F, 0.95F).clientTrackingRange(8),
+         Builder.of(LevishroomEntity::new, MobCategory.MONSTER).sized(0.875F, 0.99F).clientTrackingRange(8),
          MushroomEntity::createAttributes,
          event
       );
@@ -882,41 +882,31 @@ public class ModEntities {
       );
       T1_BLOOD_SKELETON = registerLiving(
          "blood_skeleton_t1",
-         Builder.of(Tier1BloodSkeletonEntity::new, MobCategory.MONSTER)
-            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
-            .clientTrackingRange(8),
+         Builder.of(Tier1BloodSkeletonEntity::new, MobCategory.MONSTER).sized(EntityType.SKELETON.getWidth(), 1.99F).clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T2_BLOOD_SKELETON = registerLiving(
          "blood_skeleton_t2",
-         Builder.of(Tier2BloodSkeletonEntity::new, MobCategory.MONSTER)
-            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
-            .clientTrackingRange(8),
+         Builder.of(Tier2BloodSkeletonEntity::new, MobCategory.MONSTER).sized(EntityType.SKELETON.getWidth(), 1.99F).clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T3_BLOOD_SKELETON = registerLiving(
          "blood_skeleton_t3",
-         Builder.of(Tier3BloodSkeletonEntity::new, MobCategory.MONSTER)
-            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight())
-            .clientTrackingRange(8),
+         Builder.of(Tier3BloodSkeletonEntity::new, MobCategory.MONSTER).sized(EntityType.SKELETON.getWidth(), 1.99F).clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T4_BLOOD_SKELETON = registerLiving(
          "blood_skeleton_t4",
-         Builder.of(Tier4BloodSkeletonEntity::new, MobCategory.MONSTER)
-            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 1.05F)
-            .clientTrackingRange(8),
+         Builder.of(Tier4BloodSkeletonEntity::new, MobCategory.MONSTER).sized(EntityType.SKELETON.getWidth(), 1.99F).clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );
       T5_BLOOD_SKELETON = registerLiving(
          "blood_skeleton_t5",
-         Builder.of(Tier5BloodSkeletonEntity::new, MobCategory.MONSTER)
-            .sized(EntityType.SKELETON.getWidth(), EntityType.SKELETON.getHeight() * 1.05F)
-            .clientTrackingRange(8),
+         Builder.of(Tier5BloodSkeletonEntity::new, MobCategory.MONSTER).sized(EntityType.SKELETON.getWidth(), 1.99F).clientTrackingRange(8),
          AbstractSkeleton::createAttributes,
          event
       );

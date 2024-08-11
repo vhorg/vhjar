@@ -151,8 +151,10 @@ public class StackingGearAttributeTalent extends GearAttributeTalent {
       CommonEvents.ENTITY_DROPS.register(StackingGearAttributeTalent.class, EventPriority.HIGHEST, event -> {
          Entity attacker = event.getSource().getEntity();
          if (attacker instanceof ServerPlayer player && !attacker.getLevel().isClientSide()) {
-            TalentTree tree = PlayerTalentsData.get(attacker.getServer()).getTalents(player);
-            tree.getAll(StackingGearAttributeTalent.class, Skill::isUnlocked).forEach(talent -> talent.onStack(player));
+            if (attacker.getLevel() == event.getEntity().getLevel()) {
+               TalentTree tree = PlayerTalentsData.get(attacker.getServer()).getTalents(player);
+               tree.getAll(StackingGearAttributeTalent.class, Skill::isUnlocked).forEach(talent -> talent.onStack(player));
+            }
          }
       });
    }

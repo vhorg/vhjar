@@ -94,6 +94,7 @@ public class SweepingOnHitTalent extends EntityFilterTalent {
                                           nearby.remove(var13);
                                           nearby.remove(attacker);
                                           nearby.removeIf(mob -> mob instanceof EternalEntity);
+                                          nearby.removeIf(mob -> mob.isInvulnerableTo(event.getSource()));
                                           nearby.forEach(
                                              mob -> {
                                                 Vec3 movement = mob.getDeltaMovement();

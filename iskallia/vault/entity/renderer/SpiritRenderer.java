@@ -19,6 +19,7 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -117,8 +118,8 @@ public class SpiritRenderer extends EntityRenderer<SpiritEntity> {
          float zTranslation = 0.0F;
          if (entity.getPose() == Pose.SLEEPING) {
             float angle;
-            if (entity.getVehicle() != null) {
-               angle = entity.getVehicle().getYHeadRot();
+            if (entity.getVehicle() != null && entity.getVehicle() instanceof LivingEntity vehicle) {
+               angle = (vehicle.yHeadRot - vehicle.yHeadRotO) * partialTicks + vehicle.yHeadRotO;
             } else {
                Vec3 movement = entity.getDeltaMovement();
                angle = (float)(Mth.atan2(movement.z(), movement.x()) * 180.0 / Math.PI - 90.0);
