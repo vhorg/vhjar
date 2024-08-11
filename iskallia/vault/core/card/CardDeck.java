@@ -89,9 +89,11 @@ public class CardDeck implements ISerializable<CompoundTag, JsonObject> {
                         Object result = comparator.merge(values.get(i), instance.getValue()).orElse(null);
                         if (result != null) {
                            values.set(i, result);
-                           break;
+                           return;
                         }
                      }
+
+                     values.add(instance.getValue());
                   } else {
                      values.add(instance.getValue());
                   }

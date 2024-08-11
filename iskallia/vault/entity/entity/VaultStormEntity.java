@@ -222,9 +222,11 @@ public class VaultStormEntity extends Entity {
             this.intervalTicks--;
          } else if (this.getOwner() instanceof Player player) {
             if (VaultStormArrow.StormType.byId((Integer)this.entityData.get(ID_TYPE)) == VaultStormArrow.StormType.BASE) {
+               DamageSource srcPlayerAttack = DamageSource.playerAttack(player);
                ArrayList<LivingEntity> result = new ArrayList<>();
                getEntitiesInRange(player.level, this.position(), this.radius, ENTITY_PREDICATE, result, 14.0F);
                result.removeIf(entity -> entity instanceof EternalEntity);
+               result.removeIf(entity -> entity.isInvulnerableTo(srcPlayerAttack));
                if (!result.isEmpty()) {
                   LivingEntity livingEntity = result.get(player.level.random.nextInt(result.size()));
                   VaultStormEntity.SmiteBolt smiteBolt = (VaultStormEntity.SmiteBolt)ModEntities.THUNDERSTORM_BOLT.create(player.level);
@@ -238,7 +240,7 @@ public class VaultStormEntity extends Entity {
                   ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> ActiveFlags.IS_SMITE_ATTACKING.runIfNotSet(() -> {
                      double damage = AbilityPowerHelper.getAbilityPower(player) * this.percentAbilityPowerDealt;
                      Vec3 delta = livingEntity.getDeltaMovement();
-                     livingEntity.hurt(DamageSource.playerAttack(player), (float)damage);
+                     livingEntity.hurt(srcPlayerAttack, (float)damage);
                      livingEntity.setDeltaMovement(delta);
                   }));
                   player.level

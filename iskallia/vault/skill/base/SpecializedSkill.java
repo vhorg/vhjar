@@ -6,13 +6,12 @@ import iskallia.vault.core.data.adapter.array.ArrayAdapter;
 import iskallia.vault.core.net.BitBuffer;
 import iskallia.vault.skill.ability.effect.spi.core.Cooldown;
 import iskallia.vault.skill.ability.effect.spi.core.CooldownSkill;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.minecraft.nbt.CompoundTag;
 
@@ -175,43 +174,41 @@ public class SpecializedSkill extends LearnableSkill implements CooldownSkill {
 
    @Override
    public Skill mergeFrom(Skill other, SkillContext context) {
-      other = super.mergeFrom(other, context);
+      int spentPoints = this.getSpentLearnPoints();
       if (!(other instanceof SpecializedSkill specialized)) {
-         context.setLearnPoints(context.getLearnPoints() + this.getSpentLearnPoints());
+         context.setLearnPoints(context.getLearnPoints() + spentPoints);
          return other;
       } else {
-         ArrayList copy = new ArrayList();
-         HashSet removed = new HashSet<>(this.specializations.stream().map(Skill::getId).filter(Objects::nonNull).toList());
+         LinkedHashMap idToSkill = new LinkedHashMap();
+         LinkedHashMap idToIndex = new LinkedHashMap();
 
-         for (LearnableSkill specialization : specialized.specializations) {
-            removed.remove(specialization.getId());
-            Skill merging = this.getForId(specialization.getId()).orElse(null);
+         for (int selected = 0; selected < specialized.specializations.size(); selected++) {
+            Skill skill = specialized.specializations.get(selected);
+            idToSkill.put(skill.getId(), skill);
+            idToIndex.put(skill.getId(), selected);
+         }
+
+         for (Skill child : this.specializations) {
             Skill merged;
-            if (merging != null) {
-               merged = merging.mergeFrom(specialization, context);
+            if (child.getId() != null && idToSkill.containsKey(child.getId())) {
+               merged = child.mergeFrom((Skill)idToSkill.get(child.getId()), context);
             } else {
-               merged = specialization.copy();
+               merged = child.mergeFrom(null, context);
             }
 
-            if (merged instanceof LearnableSkill) {
-               merged.setParent(this);
-               copy.add((LearnableSkill)merged);
+            if (idToIndex.containsKey(child.getId()) && merged instanceof LearnableSkill learnable) {
+               specialized.specializations.set((Integer)idToIndex.get(child.getId()), learnable);
             }
          }
 
-         this.specializations = copy;
-         int newIndex = specialized.indexOf(this.getSpecialization().getId());
-         this.index = newIndex >= 0 && newIndex < copy.size() ? newIndex : 0;
-
-         for (String id : removed) {
-            this.getForId(id).ifPresent(skill -> {
-               if (skill instanceof LearnableSkill learnable) {
-                  context.setLearnPoints(context.getLearnPoints() + learnable.getLearnPointCost());
-               }
-            });
+         String selected = this.specializations.get(this.index).getId();
+         if (selected != null && idToIndex.containsKey(selected)) {
+            specialized.index = (Integer)idToIndex.get(selected);
+         } else {
+            specialized.index = 0;
          }
 
-         return this;
+         return other;
       }
    }
 
@@ -263,7 +260,7 @@ public class SpecializedSkill extends LearnableSkill implements CooldownSkill {
    @Override
    public void readBits(BitBuffer buffer) {
       super.readBits(buffer);
-      this.specializations = Arrays.stream(SPECIALIZATIONS.readBits(buffer).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.specializations = Arrays.stream(SPECIALIZATIONS.readBits(buffer).orElseThrow()).map(skill -> (LearnableSkill)skill).collect(Collectors.toList());
       this.index = Adapters.INT_SEGMENTED_3.readBits(buffer).orElse(0);
       this.specializations.forEach(specialization -> specialization.setParent(this));
    }
@@ -280,7 +277,9 @@ public class SpecializedSkill extends LearnableSkill implements CooldownSkill {
    @Override
    public void readNbt(CompoundTag nbt) {
       super.readNbt(nbt);
-      this.specializations = Arrays.stream(SPECIALIZATIONS.readNbt(nbt.get("specializations")).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.specializations = Arrays.stream(SPECIALIZATIONS.readNbt(nbt.get("specializations")).orElseThrow())
+         .map(skill -> (LearnableSkill)skill)
+         .collect(Collectors.toList());
       this.index = Adapters.INT_SEGMENTED_3.readNbt(nbt.get("index")).orElse(0);
       this.specializations.forEach(specialization -> specialization.setParent(this));
    }
@@ -297,7 +296,9 @@ public class SpecializedSkill extends LearnableSkill implements CooldownSkill {
    @Override
    public void readJson(JsonObject json) {
       super.readJson(json);
-      this.specializations = Arrays.stream(SPECIALIZATIONS.readJson(json.get("specializations")).orElseThrow()).map(skill -> (LearnableSkill)skill).toList();
+      this.specializations = Arrays.stream(SPECIALIZATIONS.readJson(json.get("specializations")).orElseThrow())
+         .map(skill -> (LearnableSkill)skill)
+         .collect(Collectors.toList());
       this.index = Adapters.INT.readJson(json.get("index")).orElse(0);
       this.specializations.forEach(specialization -> specialization.setParent(this));
    }

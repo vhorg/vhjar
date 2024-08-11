@@ -2,6 +2,7 @@ package iskallia.vault.container.spi;
 
 import iskallia.vault.block.entity.base.ForgeRecipeTileEntity;
 import iskallia.vault.container.oversized.OverSizedSlotContainer;
+import iskallia.vault.container.oversized.OverSizedTabSlot;
 import iskallia.vault.container.slot.RecipeOutputSlot;
 import iskallia.vault.container.slot.TabSlot;
 import java.awt.Point;
@@ -72,16 +73,12 @@ public abstract class ForgeRecipeContainer<T extends ForgeRecipeTileEntity> exte
       Point containerOffset = this.getOffset();
       int xOffset = containerOffset.x;
       int yOffset = containerOffset.y;
-      final Container invContainer = this.tile.getInventory();
+      Container invContainer = this.tile.getInventory();
 
       for (int invSlot = 0; invSlot < invContainer.getContainerSize(); invSlot++) {
          int x = xOffset + invSlot / 3 * 18;
          int y = yOffset + invSlot % 3 * 18;
-         this.addSlot(new TabSlot(invContainer, invSlot, x, y) {
-            public int getMaxStackSize(ItemStack stack) {
-               return invContainer.getMaxStackSize();
-            }
-         });
+         this.addSlot(new OverSizedTabSlot(invContainer, invSlot, x, y));
       }
 
       int slotWidth = Mth.ceil(invContainer.getContainerSize() / 3.0F);

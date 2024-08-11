@@ -300,19 +300,21 @@ public class EntityEvents {
                if (!(rand.nextFloat() >= thornsChance)) {
                   double thornsMultiplier = attacked.getAttribute(ModAttributes.THORNS_DAMAGE).getValue();
                   if (!(thornsMultiplier <= 0.0)) {
-                     float dmg = (float)attacked.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
                      DamageSource src = ThornsReflectDamageSource.of(event.getEntityLiving());
-                     attacker.hurt(src, (float)(dmg * thornsMultiplier));
-                     event.getEntityLiving()
-                        .level
-                        .playSound(
-                           null,
-                           event.getEntityLiving().getOnPos(),
-                           SoundEvents.THORNS_HIT,
-                           SoundSource.BLOCKS,
-                           1.0F,
-                           (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F
-                        );
+                     if (!attacker.isInvulnerableTo(src)) {
+                        float dmg = (float)attacked.getAttribute(Attributes.ATTACK_DAMAGE).getValue();
+                        attacker.hurt(src, (float)(dmg * thornsMultiplier));
+                        event.getEntityLiving()
+                           .level
+                           .playSound(
+                              null,
+                              event.getEntityLiving().getOnPos(),
+                              SoundEvents.THORNS_HIT,
+                              SoundSource.BLOCKS,
+                              1.0F,
+                              (rand.nextFloat() - rand.nextFloat()) * 0.2F + 1.0F
+                           );
+                     }
                   }
                }
             }

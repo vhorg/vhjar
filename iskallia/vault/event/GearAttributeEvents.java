@@ -129,6 +129,7 @@ public class GearAttributeEvents {
                   nearby.remove(attacked);
                   nearby.remove(attacker);
                   nearby.removeIf(mob -> (attacker instanceof EternalEntity || attacker instanceof Player) && mob instanceof EternalEntity);
+                  nearby.removeIf(mob -> mob.isInvulnerableTo(event.getSource()));
                   nearby.forEach(mob -> {
                      Vec3 movement = mob.getDeltaMovement();
                      mob.hurt(event.getSource(), event.getAmount() * 0.6F);
@@ -194,6 +195,7 @@ public class GearAttributeEvents {
                                  nearby.remove(attacked);
                                  nearby.remove(attacker);
                                  nearby.removeIf(mobx -> (attacker instanceof EternalEntity || attacker instanceof Player) && mobx instanceof EternalEntity);
+                                 nearby.removeIf(mobx -> mobx.isInvulnerableTo(event.getSource()));
                                  if (!nearby.isEmpty()) {
                                     nearby.sort(Comparator.comparing(e -> e.distanceTo(attacked)));
                                     nearby = nearby.subList(0, Math.min(chainCount, nearby.size()));
@@ -604,22 +606,24 @@ public class GearAttributeEvents {
    public static void thornsReflectDamage(LivingAttackEvent event) {
       if (!(event.getSource() instanceof ThornsReflectDamageSource) && !ActiveFlags.IS_THORNS_REFLECTING.isSet()) {
          if (event.getSource().getEntity() instanceof LivingEntity attacker) {
-            withSnapshot(event, true, (attacked, snapshot) -> {
-               ActiveFlags.IS_THORNS_REFLECTING.push();
-               float reflectedDamage = 0.0F;
-               DamageSource src = ThornsReflectDamageSource.of(attacked);
-               float dmg = (float)attacked.getAttributeValue(Attributes.ATTACK_DAMAGE);
-               float thornsMultiplier = ThornsHelper.getThornsDamageMultiplier(attacked);
-               if (thornsMultiplier > 0.0F) {
-                  reflectedDamage += dmg * thornsMultiplier;
-               }
+            ThornsReflectDamageSource src = ThornsReflectDamageSource.of(event.getEntityLiving());
+            if (!attacker.isInvulnerableTo(src)) {
+               withSnapshot(event, true, (attacked, snapshot) -> {
+                  ActiveFlags.IS_THORNS_REFLECTING.push();
+                  float reflectedDamage = 0.0F;
+                  float dmg = (float)attacked.getAttributeValue(Attributes.ATTACK_DAMAGE);
+                  float thornsMultiplier = ThornsHelper.getThornsDamageMultiplier(attacked);
+                  if (thornsMultiplier > 0.0F) {
+                     reflectedDamage += dmg * thornsMultiplier;
+                  }
 
-               float additionalThornsDamage = ThornsHelper.getAdditionalThornsFlatDamage(attacked);
-               reflectedDamage += additionalThornsDamage;
-               if (reflectedDamage > 0.0F) {
-                  attacker.hurt(src, reflectedDamage);
-               }
-            });
+                  float additionalThornsDamage = ThornsHelper.getAdditionalThornsFlatDamage(attacked);
+                  reflectedDamage += additionalThornsDamage;
+                  if (reflectedDamage > 0.0F) {
+                     attacker.hurt(src, reflectedDamage);
+                  }
+               });
+            }
          }
       }
    }

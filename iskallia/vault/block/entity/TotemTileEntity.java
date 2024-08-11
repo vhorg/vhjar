@@ -160,7 +160,12 @@ public abstract class TotemTileEntity extends BlockEntity {
       this.remainingDurationTicks = tag.getInt("remainingDurationTicks");
       this.effectRadius = tag.getFloat("effectRadius");
       this.nextUpdateTick = tag.getInt("nextUpdateTick");
-      this.playerUUID = tag.getUUID("playerUUID");
+      if (tag.contains("playerUUID")) {
+         this.playerUUID = tag.getUUID("playerUUID");
+      } else {
+         this.playerUUID = null;
+      }
+
       this.updateEffectBounds();
    }
 
@@ -169,7 +174,9 @@ public abstract class TotemTileEntity extends BlockEntity {
       tag.putInt("remainingDurationTicks", this.remainingDurationTicks);
       tag.putFloat("effectRadius", this.effectRadius);
       tag.putInt("nextUpdateTick", this.nextUpdateTick);
-      tag.putUUID("playerUUID", this.playerUUID);
+      if (this.playerUUID != null) {
+         tag.putUUID("playerUUID", this.playerUUID);
+      }
    }
 
    @OnlyIn(Dist.CLIENT)

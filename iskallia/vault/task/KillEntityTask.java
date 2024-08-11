@@ -28,9 +28,11 @@ public class KillEntityTask extends ProgressConfiguredTask<Integer, KillEntityTa
             Entity attacker = event.getSource().getEntity();
             if (attacker != null && !attacker.getLevel().isClientSide()) {
                if (context.getSource() instanceof EntityTaskSource entitySource) {
-                  if (entitySource.matches(attacker)) {
-                     if (this.getConfig().filter.test(event.getEntity())) {
-                        this.counter.onAdd(1, context);
+                  if (attacker.getLevel() == event.getEntity().getLevel()) {
+                     if (entitySource.matches(attacker)) {
+                        if (this.getConfig().filter.test(event.getEntity())) {
+                           this.counter.onAdd(1, context);
+                        }
                      }
                   }
                }

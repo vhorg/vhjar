@@ -232,7 +232,9 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
       ArrayList<LivingEntity> result = new ArrayList<>();
       EntityHelper.getEntitiesInRange(player.level, player.position(), radius, ENTITY_PREDICATE, result);
       boolean applyCooldown = false;
+      DamageSource srcPlayerAttack = DamageSource.playerAttack(player);
       result.removeIf(entity -> entity instanceof EternalEntity);
+      result.removeIf(mob -> mob.isInvulnerableTo(srcPlayerAttack));
       if (result.isEmpty()) {
          setPercentRemainingInterval(player, this.getIntervalTicks());
          return false;
@@ -252,7 +254,7 @@ public abstract class AbstractSmiteAbility extends ToggleManaAbility {
 
          ActiveFlags.IS_AP_ATTACKING.runIfNotSet(() -> this.getFlag().runIfNotSet(() -> {
             double damage = AbilityPowerHelper.getAbilityPower(player) * percentAbilityPowerDealt;
-            livingEntity.hurt(DamageSource.playerAttack(player), (float)damage);
+            livingEntity.hurt(srcPlayerAttack, (float)damage);
          }));
          if (this.getFlag() == ActiveFlags.IS_SMITE_BASE_ATTACKING) {
             player.level

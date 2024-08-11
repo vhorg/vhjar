@@ -10,10 +10,11 @@ public class OverSizedTabSlot extends TabSlot {
 
    public OverSizedTabSlot(Container container, int index, int x, int y) {
       super(container, index, x, y);
+      this.setFilter(stack -> container.canPlaceItem(this.getSlotIndex(), stack));
    }
 
    public OverSizedTabSlot setFilter(Predicate<ItemStack> filter) {
-      this.filter = filter;
+      this.filter = this.filter.and(filter);
       return this;
    }
 

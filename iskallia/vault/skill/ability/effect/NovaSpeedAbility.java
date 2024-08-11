@@ -187,6 +187,11 @@ public class NovaSpeedAbility extends AbstractNovaAbility {
                return;
             }
 
+            DamageSource srcPlayerAttack = DamageSource.playerAttack(serverPlayer);
+            if (livingEntity.isInvulnerableTo(srcPlayerAttack)) {
+               return;
+            }
+
             ActiveFlags.IS_EFFECT_ATTACKING.runIfNotSet(() -> {
                Vec3 movement = livingEntity.getDeltaMovement();
                livingEntity.hurt(DamageSource.playerAttack(serverPlayer), 1.0F);

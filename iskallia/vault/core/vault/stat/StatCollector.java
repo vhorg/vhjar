@@ -96,13 +96,17 @@ public class StatCollector extends DataObject<StatCollector> {
       CommonEvents.ENTITY_DAMAGE.register(this, event -> {
          Entity source = event.getSource().getEntity();
          if (source != null && source.getUUID().equals(uuid)) {
-            this.get(MOBS).onDamageDealt(event.getEntity(), event.getAmount());
+            if (event.getEntity().getLevel() == world) {
+               this.get(MOBS).onDamageDealt(event.getEntity(), event.getAmount());
+            }
          }
       });
       CommonEvents.ENTITY_DAMAGE.register(this, event -> {
          Entity source = event.getSource().getEntity();
          if (source != null && event.getEntity().getUUID().equals(uuid)) {
-            this.get(MOBS).onDamageReceived(source, event.getAmount());
+            if (event.getEntity().getLevel() == world) {
+               this.get(MOBS).onDamageReceived(source, event.getAmount());
+            }
          }
       });
    }

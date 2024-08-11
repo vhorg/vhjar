@@ -23,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -149,8 +150,10 @@ public class ShellQuillAbility extends ShellPorcupineAbility {
    }
 
    private static void doQuill(Player player, float reflectedDamage, int quillCount) {
+      DamageSource src = ThornsReflectDamageSource.of(player);
       List<Mob> nearby = EntityHelper.getNearby(player.getLevel(), player.blockPosition(), 5.0F, Mob.class);
       nearby.removeIf(mobx -> mobx instanceof EternalEntity);
+      nearby.removeIf(mobx -> mobx.isInvulnerableTo(src));
       if (!nearby.isEmpty()) {
          nearby.sort(Comparator.comparing(e -> e.distanceTo(player)));
          nearby = nearby.subList(0, Math.min(quillCount, nearby.size()));
@@ -158,7 +161,7 @@ public class ShellQuillAbility extends ShellPorcupineAbility {
 
          for (Mob mob : nearby) {
             Vec3 movement = mob.getDeltaMovement();
-            mob.hurt(ThornsReflectDamageSource.of(player), reflectedDamage * multiplier);
+            mob.hurt(src, reflectedDamage * multiplier);
             mob.setDeltaMovement(movement);
             multiplier *= 0.5F;
          }

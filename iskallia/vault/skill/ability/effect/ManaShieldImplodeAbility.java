@@ -71,15 +71,17 @@ public class ManaShieldImplodeAbility extends InstantManaAbility {
          .map(
             player -> {
                Vec3 pos = context.getSource().getPos().orElse(player.position());
-               List<LivingEntity> targetEntities = this.getTargetEntities(player.level, player, pos);
                ManaPlayer manaPlayer = context.getSource().getMana().orElse(null);
+               List<LivingEntity> targetEntities = this.getTargetEntities(player.level, player, pos);
                DamageSource damageSource = DamageSource.playerAttack(player);
                if (manaPlayer != null) {
                   float mana = manaPlayer.getMana();
 
                   for (LivingEntity entity : targetEntities) {
-                     float damageModifier = this.getDamageModifier(this.getRadius(player), player.distanceTo(entity));
-                     ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> entity.hurt(damageSource, mana * this.getPercentManaDealt() * damageModifier));
+                     if (!entity.isInvulnerableTo(damageSource)) {
+                        float damageModifier = this.getDamageModifier(this.getRadius(player), player.distanceTo(entity));
+                        ActiveFlags.IS_AOE_ATTACKING.runIfNotSet(() -> entity.hurt(damageSource, mana * this.getPercentManaDealt() * damageModifier));
+                     }
                   }
 
                   player.getLevel()
