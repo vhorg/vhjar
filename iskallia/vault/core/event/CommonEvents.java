@@ -49,6 +49,7 @@ import iskallia.vault.core.event.common.MonolithUpdateEvent;
 import iskallia.vault.core.event.common.NoiseGenerationEvent;
 import iskallia.vault.core.event.common.ObjectivePieceGenerationEvent;
 import iskallia.vault.core.event.common.ObjectiveTargetEvent;
+import iskallia.vault.core.event.common.OreLootGenerationEvent;
 import iskallia.vault.core.event.common.PlaceholderGenerationEvent;
 import iskallia.vault.core.event.common.PlaceholderProcessingEvent;
 import iskallia.vault.core.event.common.PlayerActionEvent;
@@ -95,6 +96,7 @@ public class CommonEvents {
    public static final ChestCatalystGenerationEvent CHEST_CATALYST_GENERATION = register(new ChestCatalystGenerationEvent());
    public static final CoinStacksGenerationEvent COIN_STACK_LOOT_GENERATION = register(new CoinStacksGenerationEvent());
    public static final LootableBlockGenerationEvent LOOTABLE_BLOCK_GENERATION_EVENT = register(new LootableBlockGenerationEvent());
+   public static final OreLootGenerationEvent ORE_LOOT_GENERATION_EVENT = register(new OreLootGenerationEvent());
    public static final ChampionPromoteEvent CHAMPION_PROMOTE = register(new ChampionPromoteEvent());
    public static final CrateAwardEvent CRATE_AWARD_EVENT = register(new CrateAwardEvent());
    public static final BlockUseEvent BLOCK_USE = register(new BlockUseEvent());

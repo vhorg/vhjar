@@ -3,6 +3,7 @@ package iskallia.vault.block.entity.base;
 import iskallia.vault.block.base.FacedBlock;
 import iskallia.vault.config.recipe.ForgeRecipeType;
 import iskallia.vault.container.oversized.OverSizedInventory;
+import iskallia.vault.integration.IntegrationRefinedStorage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -81,7 +82,11 @@ public abstract class ForgeRecipeTileEntity extends BlockEntity implements MenuP
 
    @Nonnull
    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-      return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.getFilteredInputCapability(this.inventory, side) : super.getCapability(cap, side);
+      if (IntegrationRefinedStorage.shouldPreventImportingCapability(this.getLevel(), this.getBlockPos(), side)) {
+         return super.getCapability(cap, side);
+      } else {
+         return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ? this.getFilteredInputCapability(this.inventory, side) : super.getCapability(cap, side);
+      }
    }
 
    public Component getDisplayName() {

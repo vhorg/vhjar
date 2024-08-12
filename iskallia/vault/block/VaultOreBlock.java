@@ -2,6 +2,8 @@ package iskallia.vault.block;
 
 import com.google.common.base.Functions;
 import iskallia.vault.block.item.VaultOreBlockItem;
+import iskallia.vault.core.event.CommonEvents;
+import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModSounds;
 import iskallia.vault.item.tool.ToolItem;
@@ -20,6 +22,7 @@ import net.minecraft.advancements.critereon.MinMaxBounds.Ints;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
@@ -47,6 +50,7 @@ import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class VaultOreBlock extends OreBlock implements EntityBlock {
    public static final List<VaultOreBlock> ALL = new ArrayList<>();
@@ -95,24 +99,24 @@ public class VaultOreBlock extends OreBlock implements EntityBlock {
          drops = super.getDrops(state, builder);
       }
 
-      if ((Boolean)state.getValue(GENERATED)) {
+      Entity miner = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
+      Vec3 minedVec = (Vec3)builder.getParameter(LootContextParams.ORIGIN);
+      BlockPos minedPos = new BlockPos(minedVec);
+      if (miner instanceof ServerPlayer sPlayer && (Boolean)state.getValue(GENERATED)) {
          float chance = getCopiouslyChance(builder);
+         BlockPos playerPos = new BlockPos(sPlayer.getBlockX(), sPlayer.getBlockY(), sPlayer.getBlockZ());
 
          for (List<ItemStack> copy = new ArrayList<>(drops); chance > 0.0F && this.RANDOM.nextFloat() < chance; chance--) {
-            Entity player = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
-            BlockPos pos = new BlockPos(player.getBlockX(), player.getBlockY(), player.getBlockZ());
-            player.level.playSound(null, pos, ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.1F, 0.85F);
+            sPlayer.level.playSound(null, playerPos, ModSounds.VAULT_CHEST_OMEGA_OPEN, SoundSource.BLOCKS, 0.1F, 0.85F);
             copy.forEach(s -> drops.add(s.copy()));
-            if (stack != null) {
-               Item entity = stack.getItem();
-               if (entity instanceof ToolItem) {
-                  ToolItem tool = (ToolItem)entity;
-                  Entity entityx = (Entity)builder.getOptionalParameter(LootContextParams.THIS_ENTITY);
-                  if (entityx instanceof LivingEntity livingEntity) {
-                     tool.hurt(stack, builder.getLevel(), livingEntity, 6.0);
-                  }
-               }
+            if (stack != null && stack.getItem() instanceof ToolItem tool) {
+               tool.hurt(stack, builder.getLevel(), sPlayer, 6.0);
             }
+         }
+
+         BlockEntity tile = (BlockEntity)builder.getOptionalParameter(LootContextParams.BLOCK_ENTITY);
+         if (tile != null) {
+            CommonEvents.ORE_LOOT_GENERATION_EVENT.invoke(sPlayer, state, minedPos, tile, drops, JavaRandom.ofNanoTime());
          }
       }
 

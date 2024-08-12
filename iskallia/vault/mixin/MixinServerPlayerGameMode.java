@@ -166,45 +166,54 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
                this.computeHammerTiles(pos, facing, buildHeight);
             }
 
-            for (HammerTile tile : this.hammer.tiles) {
-               tile.destroyProgressStart = this.gameTicks;
-               float f = 1.0F;
-               BlockState blockstate = this.level.getBlockState(tile.destroyPos);
-               if (!blockstate.isAir()) {
-                  blockstate.attack(this.level, tile.destroyPos, this.player);
-                  f = blockstate.getDestroyProgress(this.player, this.player.level, tile.destroyPos);
-               }
+            float f1 = this.level.getBlockState(pos).getDestroyProgress(this.player, this.player.level, pos);
+            this.hammer
+               .tiles
+               .removeIf(
+                  tilex -> {
+                     tilex.destroyProgressStart = this.gameTicks;
+                     float f2 = 1.0F;
+                     BlockState blockstate = this.level.getBlockState(tilex.destroyPos);
+                     if (!blockstate.isAir()) {
+                        blockstate.attack(this.level, tilex.destroyPos, this.player);
+                        f2 = blockstate.getDestroyProgress(this.player, this.player.level, tilex.destroyPos);
+                     }
 
-               if (!blockstate.isAir() && f >= 1.0F) {
-                  this.destroyAndAck(tile.destroyPos, action, "insta mine");
-               } else {
-                  if (tile.isDestroyingBlock) {
-                     this.player
-                        .connection
-                        .send(
-                           new ClientboundBlockBreakAckPacket(
-                              tile.destroyPos,
-                              this.level.getBlockState(tile.destroyPos),
-                              Action.START_DESTROY_BLOCK,
-                              false,
-                              "abort destroying since another started (client insta mine, server disagreed)"
-                           )
-                        );
+                     if (!blockstate.isAir() && f1 >= 1.0F && f2 >= 1.0F) {
+                        this.destroyAndAck(tilex.destroyPos, action, "insta mine");
+                        return true;
+                     } else if (f1 < 1.0F) {
+                        if (tilex.isDestroyingBlock) {
+                           this.player
+                              .connection
+                              .send(
+                                 new ClientboundBlockBreakAckPacket(
+                                    tilex.destroyPos,
+                                    this.level.getBlockState(tilex.destroyPos),
+                                    Action.START_DESTROY_BLOCK,
+                                    false,
+                                    "abort destroying since another started (client insta mine, server disagreed)"
+                                 )
+                              );
+                        }
+
+                        tilex.isDestroyingBlock = true;
+                        int i = (int)(f2 * 10.0F);
+                        this.level.destroyBlockProgress(-1, tilex.destroyPos, i);
+                        this.player
+                           .connection
+                           .send(
+                              new ClientboundBlockBreakAckPacket(
+                                 tilex.destroyPos, this.level.getBlockState(tilex.destroyPos), action, true, "actual start of destroying"
+                              )
+                           );
+                        tilex.lastSentState = i;
+                        return false;
+                     } else {
+                        return true;
+                     }
                   }
-
-                  tile.isDestroyingBlock = true;
-                  int i = (int)(f * 10.0F);
-                  this.level.destroyBlockProgress(-1, tile.destroyPos, i);
-                  this.player
-                     .connection
-                     .send(
-                        new ClientboundBlockBreakAckPacket(
-                           tile.destroyPos, this.level.getBlockState(tile.destroyPos), action, true, "actual start of destroying"
-                        )
-                     );
-                  tile.lastSentState = i;
-               }
-            }
+               );
          } else if (action == Action.STOP_DESTROY_BLOCK) {
             if (pos.equals(this.destroyPos)) {
                int j = this.gameTicks - this.destroyProgressStart;
@@ -212,32 +221,38 @@ public abstract class MixinServerPlayerGameMode implements IHammer {
                if (!state2.isAir()) {
                   float f1 = state2.getDestroyProgress(this.player, this.player.level, pos) * (j + 1);
                   if (f1 >= 0.7F) {
-                     for (HammerTile tile : this.hammer.tiles) {
-                        tile.isDestroyingBlock = false;
-                        this.level.destroyBlockProgress(-1, tile.destroyPos, -1);
-                        BlockState state3 = this.level.getBlockState(tile.destroyPos);
-                        float f2 = state3.getDestroyProgress(this.player, this.player.level, tile.destroyPos)
-                           * (this.gameTicks - tile.destroyProgressStart + 1);
-                        if (f2 >= f1) {
-                           this.destroyAndAck(tile.destroyPos, action, "destroyed");
-                        }
-                     }
-
+                     this.hammer
+                        .tiles
+                        .removeIf(
+                           tilex -> {
+                              tilex.isDestroyingBlock = false;
+                              this.level.destroyBlockProgress(-1, tilex.destroyPos, -1);
+                              BlockState state3 = this.level.getBlockState(tilex.destroyPos);
+                              float f2 = state3.getDestroyProgress(this.player, this.player.level, tilex.destroyPos)
+                                 * (this.gameTicks - tilex.destroyProgressStart + 1);
+                              if (f2 >= f1) {
+                                 this.destroyAndAck(tilex.destroyPos, action, "destroyed");
+                                 return true;
+                              } else {
+                                 return false;
+                              }
+                           }
+                        );
                      return;
                   }
 
                   if (!this.hasDelayedDestroy) {
-                     for (HammerTile tilex : this.hammer.tiles) {
-                        tilex.isDestroyingBlock = false;
+                     for (HammerTile tile : this.hammer.tiles) {
+                        tile.isDestroyingBlock = false;
                      }
                   }
                }
             }
 
-            for (HammerTile tilex : this.hammer.tiles) {
+            for (HammerTile tile : this.hammer.tiles) {
                this.player
                   .connection
-                  .send(new ClientboundBlockBreakAckPacket(tilex.destroyPos, this.level.getBlockState(tilex.destroyPos), action, true, "stopped destroying"));
+                  .send(new ClientboundBlockBreakAckPacket(tile.destroyPos, this.level.getBlockState(tile.destroyPos), action, true, "stopped destroying"));
             }
          } else if (action == Action.ABORT_DESTROY_BLOCK) {
             this.hammer

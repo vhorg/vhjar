@@ -5,6 +5,7 @@ import iskallia.vault.container.VaultArtisanStationContainer;
 import iskallia.vault.container.oversized.OverSizedInventory;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModItems;
+import iskallia.vault.integration.IntegrationRefinedStorage;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -108,9 +109,13 @@ public class VaultArtisanStationTileEntity extends BlockEntity implements MenuPr
 
    @Nonnull
    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-      return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
-         ? this.getFilteredInputCapability(this.inventory, side).cast()
-         : super.getCapability(cap, side);
+      if (IntegrationRefinedStorage.shouldPreventImportingCapability(this.getLevel(), this.getBlockPos(), side)) {
+         return super.getCapability(cap, side);
+      } else {
+         return cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY
+            ? this.getFilteredInputCapability(this.inventory, side).cast()
+            : super.getCapability(cap, side);
+      }
    }
 
    @Nullable
