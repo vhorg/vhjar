@@ -147,6 +147,7 @@
     "MixinMinecraft",
     "MixinModelBakery",
     "MixinModelPart",
+    "MixinMultiPlayerGameMode",
     "MixinOptions",
     "MixinOptionsScreen",
     "MixinPlayerMenuItem",

@@ -54,7 +54,7 @@ public class AntiquesConfig extends Config {
       AntiqueConditionTag desertTag = ModAntiques.Conditions.TAG.provideCondition().cast();
       desertTag.addTag("THEME_DESERT", "THEME_SANDY");
       AntiqueConditionType desertChestTag = ModAntiques.Conditions.TYPE.provideCondition().cast();
-      desertChestTag.addType(DropConditionType.CHEST);
+      desertChestTag.addType(DropConditionType.BLOCK);
       AntiqueConditionLevel desertLevel = ModAntiques.Conditions.LEVEL.provideCondition().cast();
       desertLevel.setMinLevel(10);
       desertLevel.setMaxLevel(50);

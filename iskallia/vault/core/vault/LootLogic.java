@@ -6,7 +6,9 @@ import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.data.key.registry.ISupplierKey;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.ChestGenerationEvent;
+import iskallia.vault.core.event.common.CoinStacksGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
+import iskallia.vault.core.event.common.OreLootGenerationEvent;
 import iskallia.vault.core.event.common.ShopPedestalGenerationEvent;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.random.RandomSource;
@@ -57,6 +59,16 @@ public abstract class LootLogic extends DataObject<LootLogic> implements ISuppli
             this.onShopPedestalGenerate(world, vault, data);
          }
       });
+      CommonEvents.COIN_STACK_LOOT_GENERATION.post().register(vault, data -> {
+         if (data.getTileEntity().getLevel() == world) {
+            this.onCoinPilePostGenerate(world, vault, data);
+         }
+      });
+      CommonEvents.ORE_LOOT_GENERATION_EVENT.register(vault, data -> {
+         if (data.getTileEntity().getLevel() == world) {
+            this.onOreLootPostGenerate(world, vault, data);
+         }
+      });
    }
 
    private JavaRandom createPositionRandom(Vault vault, BlockPos at) {
@@ -85,6 +97,10 @@ public abstract class LootLogic extends DataObject<LootLogic> implements ISuppli
    protected abstract void onBlockPostGenerate(VirtualWorld var1, Vault var2, LootableBlockGenerationEvent.Data var3);
 
    protected abstract void onShopPedestalGenerate(VirtualWorld var1, Vault var2, ShopPedestalGenerationEvent.Data var3);
+
+   protected abstract void onCoinPilePostGenerate(VirtualWorld var1, Vault var2, CoinStacksGenerationEvent.Data var3);
+
+   protected abstract void onOreLootPostGenerate(VirtualWorld var1, Vault var2, OreLootGenerationEvent.Data var3);
 
    protected void initializeLoot(Vault vault, List<ItemStack> loot, BlockPos pos, RandomSource random) {
       loot.replaceAll(stack -> this.initializeLoot(vault, stack, pos, random));

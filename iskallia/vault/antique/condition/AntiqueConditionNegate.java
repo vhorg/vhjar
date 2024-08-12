@@ -3,6 +3,7 @@ package iskallia.vault.antique.condition;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
+import net.minecraft.util.GsonHelper;
 
 public class AntiqueConditionNegate extends AntiqueCondition {
    private AntiqueCondition condition = null;
@@ -14,7 +15,8 @@ public class AntiqueConditionNegate extends AntiqueCondition {
 
    @Override
    public void deserialize(JsonDeserializationContext ctx, JsonObject json) {
-      this.condition = (AntiqueCondition)ctx.deserialize(json, AntiqueCondition.class);
+      JsonObject conditionObject = GsonHelper.getAsJsonObject(json, "condition");
+      this.condition = (AntiqueCondition)ctx.deserialize(conditionObject, AntiqueCondition.class);
    }
 
    @Override

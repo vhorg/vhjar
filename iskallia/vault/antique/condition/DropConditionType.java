@@ -1,7 +1,7 @@
 package iskallia.vault.antique.condition;
 
 public enum DropConditionType {
-   CHEST,
+   BLOCK,
    ENTITY,
    REWARD_CRATE;
 

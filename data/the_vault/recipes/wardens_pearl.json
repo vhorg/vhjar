@@ -1,19 +1,16 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "sds",
+    "ddd",
     "ded",
-    "sds"
+    "ddd"
   ],
   "key": {
     "e": {
       "item": "the_vault:vault_rock"
     },
     "d": {
-      "item": "the_vault:dreamstone"
-    },
-    "s": {
-      "item": "the_vault:vault_diamond"
+      "item": "minecraft:iron_ingot"
     }
   },
   "result": {

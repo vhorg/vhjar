@@ -3,6 +3,7 @@ package iskallia.vault.core.vault;
 import iskallia.vault.antique.AntiqueRegistry;
 import iskallia.vault.antique.condition.DropConditionContext;
 import iskallia.vault.antique.condition.DropConditionContextFactory;
+import iskallia.vault.block.CoinPileBlock;
 import iskallia.vault.block.VaultChestBlock;
 import iskallia.vault.block.entity.base.TemplateTagContainer;
 import iskallia.vault.config.ShopPedestalConfig;
@@ -14,7 +15,9 @@ import iskallia.vault.core.data.key.SupplierKey;
 import iskallia.vault.core.data.key.registry.FieldRegistry;
 import iskallia.vault.core.event.CommonEvents;
 import iskallia.vault.core.event.common.ChestGenerationEvent;
+import iskallia.vault.core.event.common.CoinStacksGenerationEvent;
 import iskallia.vault.core.event.common.LootableBlockGenerationEvent;
+import iskallia.vault.core.event.common.OreLootGenerationEvent;
 import iskallia.vault.core.event.common.ShopPedestalGenerationEvent;
 import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.stat.ChestStat;
@@ -34,6 +37,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.network.PacketDistributor;
 
 public class ClassicLootLogic extends LootLogic {
@@ -91,6 +95,25 @@ public class ClassicLootLogic extends LootLogic {
       data.getTileEntity().setInitialized(true);
       data.getTileEntity().setChanged();
       world.sendBlockUpdated(data.getPos(), data.getState(), data.getState(), 3);
+   }
+
+   @Override
+   protected void onCoinPilePostGenerate(VirtualWorld world, Vault vault, CoinStacksGenerationEvent.Data data) {
+      BlockState state = data.getState();
+      if (state.is(ModBlocks.COIN_PILE)) {
+         int size = (Integer)state.getValue(CoinPileBlock.SIZE);
+         if (size == 1) {
+            this.generateAntiques(data.getLoot(), data.getTileEntity(), vault);
+         }
+      }
+
+      this.initializeLoot(vault, data.getLoot(), data.getPos(), data.getRandom());
+   }
+
+   @Override
+   protected void onOreLootPostGenerate(VirtualWorld world, Vault vault, OreLootGenerationEvent.Data data) {
+      this.generateAntiques(data.getLoot(), data.getTileEntity(), vault);
+      this.initializeLoot(vault, data.getLoot(), data.getPos(), data.getRandom());
    }
 
    protected boolean applyTrap(VirtualWorld world, Vault vault, ChestGenerationEvent.Data data) {

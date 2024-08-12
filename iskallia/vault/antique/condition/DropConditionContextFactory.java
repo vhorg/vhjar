@@ -9,7 +9,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class DropConditionContextFactory {
    public static <T extends BlockEntity & TemplateTagContainer> DropConditionContext makeLootableContext(int level, T tile) {
-      DropConditionContext context = new DropConditionContext(level, DropConditionType.CHEST, tile.getType().getRegistryName());
+      DropConditionContext context = new DropConditionContext(level, DropConditionType.BLOCK, tile.getBlockState().getBlock().getRegistryName());
       context.addTags(tile.getTemplateTags());
       return context;
    }
