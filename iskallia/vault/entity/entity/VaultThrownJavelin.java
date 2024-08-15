@@ -529,12 +529,12 @@ public class VaultThrownJavelin extends AbstractArrow {
    }
 
    protected boolean canHitEntity(Entity entity) {
-      return !(entity instanceof LivingEntity livingEntity)
-         ? false
-         : super.canHitEntity(entity)
+      return entity instanceof LivingEntity livingEntity && !entity.isInvulnerable()
+         ? super.canHitEntity(entity)
             && (this.piercingIgnoreEntityIds == null || !this.piercingIgnoreEntityIds.contains(entity.getId()))
             && !(entity instanceof Player)
-            && !(entity instanceof EternalEntity);
+            && !(entity instanceof EternalEntity)
+         : false;
    }
 
    public void onInsideBubbleColumn(boolean pDownwards) {
@@ -566,63 +566,61 @@ public class VaultThrownJavelin extends AbstractArrow {
    protected void onHitEntity(EntityHitResult pResult) {
       if (!this.maxPierced && !this.grounded) {
          Entity entity = pResult.getEntity();
-         if (!entity.isInvulnerable()) {
-            Entity entity1 = this.getThrower();
-            if (!entity.equals(entity1)) {
-               if (entity instanceof LivingEntity livingentity) {
-                  if (this.getPierceLevel() > 0) {
-                     if (this.piercingIgnoreEntityIds == null) {
-                        this.piercingIgnoreEntityIds = new IntOpenHashSet(30);
-                     }
+         Entity entity1 = this.getThrower();
+         if (!entity.equals(entity1)) {
+            if (entity instanceof LivingEntity livingentity) {
+               if (this.getPierceLevel() > 0) {
+                  if (this.piercingIgnoreEntityIds == null) {
+                     this.piercingIgnoreEntityIds = new IntOpenHashSet(30);
+                  }
 
-                     if (this.piercedAndKilledEntities == null) {
-                        this.piercedAndKilledEntities = Lists.newArrayListWithCapacity(30);
-                     }
+                  if (this.piercedAndKilledEntities == null) {
+                     this.piercedAndKilledEntities = Lists.newArrayListWithCapacity(30);
+                  }
 
-                     if (this.piercingIgnoreEntityIds.size() >= this.getPierceLevel() + 1) {
-                        this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
-                        this.maxPierced = true;
-                        return;
-                     }
-
-                     if (!this.piercingIgnoreEntityIds.contains(entity.getId())) {
-                        this.piercingIgnoreEntityIds.add(entity.getId());
-                     }
-                  } else {
+                  if (this.piercingIgnoreEntityIds.size() >= this.getPierceLevel() + 1) {
+                     this.setDeltaMovement(this.getDeltaMovement().multiply(-0.01, -0.1, -0.01));
                      this.maxPierced = true;
+                     return;
                   }
+
+                  if (!this.piercingIgnoreEntityIds.contains(entity.getId())) {
+                     this.piercingIgnoreEntityIds.add(entity.getId());
+                  }
+               } else {
+                  this.maxPierced = true;
                }
-
-               SoundEvent soundevent = SoundEvents.TRIDENT_HIT;
-               ActiveFlags.IS_JAVELIN_ATTACKING.runIfNotSet(() -> {
-                  DamageSource damagesource = DamageSource.trident(this, (Entity)(entity1 == null ? this : entity1));
-                  UUID thrower = this.getThrowerUUID();
-                  if (thrower != null) {
-                     Player player = this.level.getPlayerByUUID(thrower);
-                     if (player != null) {
-                        damagesource = DamageSource.playerAttack(player);
-                     }
-                  }
-
-                  if (entity.hurt(damagesource, this.getDamage())) {
-                     if (entity.getType() == EntityType.ENDERMAN) {
-                        return;
-                     }
-
-                     if (entity instanceof LivingEntity livingentity1) {
-                        this.doPostHurtEffects(livingentity1);
-                     }
-                  }
-               });
-               if (!entity.isAlive()
-                  && this.piercedAndKilledEntities != null
-                  && entity instanceof LivingEntity livingentityx
-                  && !this.piercedAndKilledEntities.contains(livingentityx)) {
-                  this.piercedAndKilledEntities.add(livingentityx);
-               }
-
-               this.playSound(soundevent, 1.0F, 0.75F);
             }
+
+            SoundEvent soundevent = SoundEvents.TRIDENT_HIT;
+            ActiveFlags.IS_JAVELIN_ATTACKING.runIfNotSet(() -> {
+               DamageSource damagesource = DamageSource.trident(this, (Entity)(entity1 == null ? this : entity1));
+               UUID thrower = this.getThrowerUUID();
+               if (thrower != null) {
+                  Player player = this.level.getPlayerByUUID(thrower);
+                  if (player != null) {
+                     damagesource = DamageSource.playerAttack(player);
+                  }
+               }
+
+               if (entity.hurt(damagesource, this.getDamage())) {
+                  if (entity.getType() == EntityType.ENDERMAN) {
+                     return;
+                  }
+
+                  if (entity instanceof LivingEntity livingentity1) {
+                     this.doPostHurtEffects(livingentity1);
+                  }
+               }
+            });
+            if (!entity.isAlive()
+               && this.piercedAndKilledEntities != null
+               && entity instanceof LivingEntity livingentityx
+               && !this.piercedAndKilledEntities.contains(livingentityx)) {
+               this.piercedAndKilledEntities.add(livingentityx);
+            }
+
+            this.playSound(soundevent, 1.0F, 0.75F);
          }
       }
    }
