@@ -143,6 +143,7 @@ public class ModEffects {
    public static final ThresholdEffect LUCKY_MOMENTUM = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("lucky_momentum"));
    public static final ThresholdEffect TREASURE_SEEKER = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("treasure_seeker"));
    public static final ThresholdEffect BOUNTIFUL_HARVEST = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("bountiful_harvest"));
+   public static final ThresholdEffect PRIME_AMPLIFICATION = new ThresholdEffect(Color.RED.getRGB(), VaultMod.id("prime_amplification"));
    public static final PlayerRageHelper.RageEffect RAGE = new PlayerRageHelper.RageEffect(Color.RED.getRGB(), VaultMod.id("rage"));
    public static final MobEffect RESISTANCE = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.YELLOW.getRGB(), VaultMod.id("resistance"));
    public static final MobEffect REACH = new BasicEffect(MobEffectCategory.BENEFICIAL, Color.BLUE.getRGB(), VaultMod.id("reach"))
@@ -170,6 +171,7 @@ public class ModEffects {
       LUCKY_MOMENTUM,
       TREASURE_SEEKER,
       BOUNTIFUL_HARVEST,
+      PRIME_AMPLIFICATION,
       BLEED
    );
    public static final Set<MobEffect> SYNC_TO_CLIENT_ON_MOB = Set.of(
@@ -242,6 +244,7 @@ public class ModEffects {
                LUCKY_MOMENTUM,
                TREASURE_SEEKER,
                BOUNTIFUL_HARVEST,
+               PRIME_AMPLIFICATION,
                LAST_STAND,
                VULNERABLE,
                CHILLED,

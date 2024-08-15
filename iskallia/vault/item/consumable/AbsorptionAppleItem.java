@@ -1,7 +1,6 @@
 package iskallia.vault.item.consumable;
 
 import iskallia.vault.init.ModItems;
-import iskallia.vault.util.calc.AbsorptionHelper;
 import java.util.List;
 import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
@@ -32,12 +31,7 @@ public class AbsorptionAppleItem extends Item {
 
    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity entityLiving) {
       if (entityLiving instanceof ServerPlayer sPlayer) {
-         float targetAbsorption = sPlayer.getAbsorptionAmount() + 2.0F;
-         if (targetAbsorption > AbsorptionHelper.getMaxAbsorption(sPlayer)) {
-            return stack;
-         }
-
-         sPlayer.setAbsorptionAmount(targetAbsorption);
+         sPlayer.setAbsorptionAmount(sPlayer.getAbsorptionAmount() + 2.0F);
       }
 
       return super.finishUsingItem(stack, world, entityLiving);

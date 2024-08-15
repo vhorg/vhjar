@@ -20,7 +20,7 @@ public class AntiqueConditionTag extends AntiqueCondition {
 
    @Override
    public boolean test(DropConditionContext context) {
-      return new HashSet<>(this.tags).containsAll(context.getTags());
+      return new HashSet<>(context.getTags()).containsAll(this.tags);
    }
 
    @Override

@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " sd",
+    " s ",
     "ses",
-    "ds "
+    " s "
   ],
   "key": {
     "e": {
@@ -11,9 +11,6 @@
     },
     "s": {
       "item": "the_vault:soul_shard"
-    },
-    "d": {
-      "item": "minecraft:diamond"
     }
   },
   "result": {
